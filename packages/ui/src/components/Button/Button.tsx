@@ -2,7 +2,7 @@ import { Button as BaseButton } from '@base-ui/react/button'
 import { mergeClassName } from '../../utils/className'
 import styles from './Button.module.css'
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link'
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'link' | 'contrast'
 
 type ButtonSize = 'sm' | 'md' | 'lg'
 

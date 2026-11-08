@@ -1,6 +1,7 @@
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Suspense } from 'react'
 import { Container } from '@/common/components/Container/Container'
+import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { ServicesCatalog } from './components/ServicesCatalog'
 import styles from './ServicesPage.module.css'
 
@@ -14,7 +15,7 @@ const ServicesFallback = () => (
 export const ServicesPage = () => (
   <main className={styles.page}>
     <Container>
-      <h1 className={styles.title}>Услуги</h1>
+      <PageTitle title='Услуги.' subtitle='Цены и время известны заранее.' />
     </Container>
     <Suspense fallback={<ServicesFallback />}>
       <ServicesCatalog />

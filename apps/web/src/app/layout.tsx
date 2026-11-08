@@ -1,3 +1,4 @@
+import { ToastProvider } from '@awaisa/ui/Toast'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import '@awaisa/tokens/tokens.css'
@@ -11,6 +12,7 @@ import { COMPANY } from '@/constants/company'
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
+  variable: '--font-inter',
 })
 
 export const metadata: Metadata = {
@@ -23,20 +25,22 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+    { media: '(prefers-color-scheme: light)', color: '#f2f2f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
 }
 
 const RootLayout = ({ children }: LayoutProps<'/'>) => (
-  <html lang='ru'>
-    <body className={inter.className}>
-      <div className='root'>
-        <Header />
-        {children}
-        <Footer />
-        <TabBar />
-      </div>
+  <html lang='ru' className={inter.variable}>
+    <body>
+      <ToastProvider>
+        <div className='root'>
+          <Header />
+          {children}
+          <Footer />
+          <TabBar />
+        </div>
+      </ToastProvider>
     </body>
   </html>
 )

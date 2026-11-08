@@ -1,11 +1,14 @@
 'use client'
 
+import { Avatar } from '@awaisa/ui/Avatar'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
+import { UsersThree } from '@phosphor-icons/react/ssr'
 import type { Catalog } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
+import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import styles from './BookingPage.module.css'
 import { ANY_SPECIALIST_ID } from './bookingConstants'
 import { formatDayLong, formatDuration, formatPrice, getSpecialistLabel } from './bookingUtils'
@@ -48,7 +51,7 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
     <main className={styles.page}>
       <Container className={styles.layout}>
         <div className={styles.steps}>
-          <h1 className={styles.title}>Запись</h1>
+          <PageTitle title='Запись.' subtitle='Четыре шага — около минуты.' />
 
           <BookingStep
             id='service'
@@ -60,6 +63,7 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
             onEdit={() => form.editStep('service')}
           >
             <RadioGroup
+              variant='inset'
               aria-label='Услуга'
               value={form.serviceId}
               onValueChange={(value) => form.selectService(String(value))}
@@ -69,7 +73,8 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
                   key={service.id}
                   value={service.id}
                   title={service.name}
-                  description={`${formatDuration(service.durationMinutes)} · ${formatPrice(service.price)}`}
+                  description={formatDuration(service.durationMinutes)}
+                  trailing={formatPrice(service.price)}
                 />
               ))}
             </RadioGroup>
@@ -86,6 +91,7 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
           >
             {form.service ? (
               <RadioGroup
+                variant='inset'
                 aria-label='Мастер'
                 value={form.specialistId}
                 onValueChange={(value) => form.selectSpecialist(String(value))}
@@ -94,13 +100,20 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
                   value={ANY_SPECIALIST_ID}
                   title='Любой мастер'
                   description='Подберём свободного на выбранное время'
+                  leading={
+                    <span className={styles.anyIcon}>
+                      <UsersThree weight='fill' aria-hidden />
+                    </span>
+                  }
                 />
                 {form.specialists.map((specialist) => (
                   <RadioCard
                     key={specialist.id}
                     value={specialist.id}
                     title={specialist.name}
-                    description={`${specialist.role} · ★ ${specialist.rating.toFixed(1)}`}
+                    description={specialist.role}
+                    leading={<Avatar name={specialist.name} />}
+                    trailing={`★ ${specialist.rating.toFixed(1)}`}
                   />
                 ))}
               </RadioGroup>

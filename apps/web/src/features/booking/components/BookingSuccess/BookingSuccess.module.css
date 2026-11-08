@@ -2,74 +2,64 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   max-width: 440px;
   margin: 0 auto;
-  padding: var(--space-10) 0;
+  padding: var(--space-8) 0 var(--space-10);
   text-align: center;
-}
-
-.icon {
-  width: 56px;
-  height: 56px;
-  color: var(--color-success);
 }
 
 .title {
   font-size: var(--text-3xl);
   line-height: var(--text-3xl-line-height);
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-tight);
 }
 
 .lead {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-medium);
+  max-width: 320px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
 }
 
-.details {
+.ticket {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  justify-content: center;
   width: 100%;
-  margin-top: var(--space-4);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-subtle);
+  margin-top: var(--space-5);
   text-align: left;
+  animation: print 700ms var(--ease-spring) both;
 }
 
-.details > div {
+.chips {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-4);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-}
-
-.details dt {
-  color: var(--color-muted-foreground);
-}
-
-.details dd {
-  font-weight: var(--font-weight-medium);
-  text-align: right;
-}
-
-.note {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-}
-
-.actions {
-  display: grid;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2);
-  width: 100%;
   margin-top: var(--space-4);
 }
 
-.phone {
-  white-space: nowrap;
+.chipIcon {
+  width: 17px;
+  height: 17px;
+}
+
+.primary {
+  width: 100%;
+  margin-top: var(--space-8);
+}
+
+@keyframes print {
+  from {
+    opacity: 0;
+    translate: 0 -24px;
+    scale: 0.96;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
 }

@@ -5,19 +5,23 @@
 }
 
 .label {
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+  padding-left: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
   font-weight: var(--font-weight-medium);
 }
 
 .description {
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
+  padding-left: var(--space-1);
   color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
 .error {
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
+  padding-left: var(--space-1);
   color: var(--color-danger);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }

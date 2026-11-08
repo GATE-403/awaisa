@@ -22,7 +22,7 @@ export const TabBar = () => {
             className={styles.tab}
             aria-current={isActive ? 'page' : undefined}
           >
-            <Icon className={styles.icon} strokeWidth={isActive ? 2.25 : 1.75} aria-hidden />
+            <Icon className={styles.icon} weight={isActive ? 'fill' : 'regular'} aria-hidden />
             <span>{label}</span>
           </NextLink>
         )

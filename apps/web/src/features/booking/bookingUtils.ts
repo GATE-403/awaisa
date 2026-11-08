@@ -19,7 +19,11 @@ const longDateFormatter = new Intl.DateTimeFormat('ru-RU', {
   month: 'long',
 })
 
-const formatPrice = (price: number) => `${priceFormatter.format(price)} сом`
+const CURRENCY = 'сом'
+
+const formatAmount = (price: number) => priceFormatter.format(price)
+
+const formatPrice = (price: number) => `${formatAmount(price)}\u00a0${CURRENCY}`
 
 const formatDuration = (minutes: number) => {
   const hours = Math.floor(minutes / 60)
@@ -39,6 +43,16 @@ const fromDayKey = (key: string) => {
 }
 
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
+
+const getDateParts = (key: string) => {
+  const date = fromDayKey(key)
+
+  return {
+    day: date.getDate(),
+    month: monthFormatter.format(date).replace('.', ''),
+    weekday: capitalize(new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(date)),
+  }
+}
 
 const formatDayLong = (key: string) => capitalize(longDateFormatter.format(fromDayKey(key)))
 
@@ -75,11 +89,14 @@ const getSpecialistLabel = (catalog: Catalog, id: string | null) =>
 
 export type { BookingDay }
 export {
+  CURRENCY,
   findService,
   findSpecialist,
+  formatAmount,
   formatDayLong,
   formatDuration,
   formatPrice,
+  getDateParts,
   getSpecialistLabel,
   getSpecialistsForService,
   getUpcomingDays,

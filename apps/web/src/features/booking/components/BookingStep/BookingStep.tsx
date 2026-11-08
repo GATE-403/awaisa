@@ -1,5 +1,5 @@
 import { Button } from '@awaisa/ui/Button'
-import { Check } from 'lucide-react'
+import { Check } from '@phosphor-icons/react/ssr'
 import type { ReactNode } from 'react'
 import styles from './BookingStep.module.css'
 
@@ -32,7 +32,7 @@ export const BookingStep = ({
   >
     <header className={styles.header}>
       <span className={styles.badge} aria-hidden>
-        {isComplete ? <Check className={styles.check} /> : index}
+        {isComplete ? <Check className={styles.check} weight='bold' /> : index}
       </span>
       <div className={styles.titles}>
         <h2 id={`step-${id}-title`} className={styles.title}>

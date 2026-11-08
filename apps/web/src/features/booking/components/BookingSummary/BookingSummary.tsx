@@ -94,6 +94,11 @@ export const BookingSummary = ({
         <span>Итого</span>
         <span>{service ? formatPrice(service.price) : '—'}</span>
       </div>
+      {firstIncompleteStep && (
+        <p className={styles.nextStep} aria-live='polite'>
+          {NEXT_STEP_HINTS[firstIncompleteStep]}
+        </p>
+      )}
       <Button size='lg' fullWidth onClick={onSubmit} disabled={isSubmitting}>
         {buttonLabel}
       </Button>

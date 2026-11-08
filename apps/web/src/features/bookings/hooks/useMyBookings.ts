@@ -1,3 +1,4 @@
+import { useToast } from '@awaisa/ui/Toast'
 import { useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
 import { cancelBooking, getBooking } from '@/common/api/clientApi'
@@ -14,7 +15,7 @@ const NOT_FOUND_STATUS = 404
 export const useMyBookings = () => {
   const { bookings, isReady } = useStoredBookings()
   const [cancellingId, setCancellingId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const toast = useToast()
   const idsKey = bookings.map((booking) => booking.id).join(',')
 
   useEffect(() => {
@@ -40,14 +41,36 @@ export const useMyBookings = () => {
     if (!booking) return
 
     setCancellingId(id)
-    setError(null)
 
     try {
       updateSnapshot(await cancelBooking(id, booking.token))
+      toast.show({
+        title: 'Запись отменена',
+        description: 'Будем рады видеть вас снова',
+        type: 'success',
+      })
     } catch (cancelError) {
-      setError(getErrorMessage(cancelError))
+      toast.show({
+        title: 'Не удалось отменить',
+        description: getErrorMessage(cancelError),
+        type: 'error',
+      })
     } finally {
       setCancellingId(null)
+    }
+  }
+
+  const forget = (id: string) => {
+    forgetBooking(id)
+    toast.show({ title: 'Убрано из списка' })
+  }
+
+  const copyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code)
+      toast.show({ title: 'Номер скопирован', description: code, type: 'success' })
+    } catch {
+      toast.show({ title: 'Не удалось скопировать', type: 'error' })
     }
   }
 
@@ -55,8 +78,8 @@ export const useMyBookings = () => {
     bookings: bookings.map((booking) => booking.snapshot),
     isReady,
     cancellingId,
-    error,
     cancel,
-    forget: forgetBooking,
+    forget,
+    copyCode,
   }
 }

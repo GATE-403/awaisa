@@ -5,34 +5,36 @@
   flex-shrink: 0;
   overflow: hidden;
   border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
+  background: linear-gradient(180deg, var(--system-monogram-from), var(--system-monogram-to));
+  color: var(--color-primary-foreground);
+  font-family: var(--font-display);
   font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
   user-select: none;
 }
 
 .root[data-size="sm"] {
   width: 32px;
   height: 32px;
-  font-size: var(--text-xs);
+  font-size: 13px;
 }
 
 .root[data-size="md"] {
   width: 40px;
   height: 40px;
-  font-size: var(--text-sm);
+  font-size: 16px;
 }
 
 .root[data-size="lg"] {
   width: 56px;
   height: 56px;
-  font-size: var(--text-lg);
+  font-size: 22px;
 }
 
 .root[data-size="xl"] {
   width: 80px;
   height: 80px;
-  font-size: var(--text-2xl);
+  font-size: 32px;
 }
 
 .image {

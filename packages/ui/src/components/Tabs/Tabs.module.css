@@ -6,50 +6,59 @@
 
 .list {
   position: relative;
-  display: flex;
-  gap: var(--space-1);
-  border-bottom: 1px solid var(--color-border);
+  z-index: 0;
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-subtle);
 }
 
 .tab {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  height: var(--control-height-md);
+  justify-content: center;
+  height: 32px;
   padding: 0 var(--space-4);
   border: none;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: var(--radius-full);
   background: transparent;
-  color: var(--color-muted-foreground);
+  color: var(--color-foreground);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: pointer;
-  transition:
-    color var(--duration-fast) ease,
-    background-color var(--duration-fast) ease;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 .tab[data-active] {
-  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .tab[data-disabled] {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .indicator {
   position: absolute;
-  bottom: -1px;
+  z-index: 0;
+  top: var(--active-tab-top);
   left: var(--active-tab-left);
   width: var(--active-tab-width);
-  height: 2px;
+  height: var(--active-tab-height);
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: var(--color-elevated);
+  box-shadow:
+    0 3px 8px rgb(0 0 0 / 0.12),
+    0 3px 1px rgb(0 0 0 / 0.04);
   transition:
-    left var(--duration-normal) ease,
-    width var(--duration-normal) ease;
+    left var(--duration-normal) var(--ease-spring),
+    width var(--duration-normal) var(--ease-spring);
 }
 
 .panel:focus-visible {
@@ -58,7 +67,6 @@
 
 @media (hover: hover) {
   .tab:not([data-active]):not([data-disabled]):hover {
-    color: var(--color-foreground);
-    background: var(--color-subtle);
+    opacity: 0.7;
   }
 }

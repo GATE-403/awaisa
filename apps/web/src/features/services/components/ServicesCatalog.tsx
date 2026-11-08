@@ -1,9 +1,10 @@
-import { ChevronRight } from 'lucide-react'
+import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { getCatalog } from '@/common/api/serverApi'
 import { Container } from '@/common/components/Container/Container'
 import { formatDuration, formatPrice } from '@/features/booking/bookingUtils'
 import styles from '../ServicesPage.module.css'
+import { CategoryNav } from './CategoryNav'
 
 export const ServicesCatalog = async () => {
   const { categories, services } = await getCatalog()
@@ -16,15 +17,7 @@ export const ServicesCatalog = async () => {
 
   return (
     <>
-      <nav aria-label='Категории' className={styles.categoryBar}>
-        <Container className={styles.categories}>
-          {groups.map((category) => (
-            <a key={category.id} href={`#${category.id}`} className={styles.category}>
-              {category.name}
-            </a>
-          ))}
-        </Container>
-      </nav>
+      <CategoryNav items={groups.map(({ id, name }) => ({ id, name }))} />
 
       <Container className={styles.groups}>
         {groups.map((category) => (
@@ -39,11 +32,13 @@ export const ServicesCatalog = async () => {
                     <span className={styles.rowBody}>
                       <span className={styles.name}>{service.name}</span>
                       <span className={styles.description}>{service.description}</span>
-                      <span className={styles.meta}>
-                        {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
-                      </span>
                     </span>
-                    <ChevronRight className={styles.chevron} aria-hidden />
+                    <span className={styles.meta}>
+                      <span className={styles.price}>{formatPrice(service.price)}</span>
+                      <br />
+                      {formatDuration(service.durationMinutes)}
+                    </span>
+                    <CaretRight className={styles.chevron} weight='bold' aria-hidden />
                   </NextLink>
                 </li>
               ))}
