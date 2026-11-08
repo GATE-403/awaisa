@@ -1,0 +1,61 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.days {
+  margin: 0 calc(-1 * var(--page-gutter));
+  padding: 0 var(--page-gutter);
+  scroll-padding-inline: var(--page-gutter);
+}
+
+.weekday,
+.month {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-regular);
+  opacity: 0.75;
+}
+
+.dayNumber {
+  font-size: var(--text-xl);
+  line-height: var(--text-xl-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-subtle);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.skeleton {
+  height: 220px;
+}
+
+@media (min-width: 768px) {
+  .days {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.slotsSkeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: var(--space-2);
+}
+
+.slotSkeleton {
+  height: var(--control-height-md);
+  border-radius: var(--radius-full);
+}

@@ -1,0 +1,42 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.radio[data-checked] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.radio[data-disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-foreground);
+}
+
+.indicator[data-unchecked] {
+  display: none;
+}

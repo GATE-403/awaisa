@@ -1,0 +1,30 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@awaisa/tokens": "workspace:*",
+    "expo": "~58.0.23",
+    "expo-constants": "~58.0.15",
+    "expo-status-bar": "~58.0.4",
+    "react": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-safe-area-context": "~5.11.1",
+    "react-native-webview": "14.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.3.0",
+    "typescript": "~6.0.3",
+    "@biomejs/biome": "2.4.2"
+  },
+  "scripts": {
+    "dev": "expo start",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "doctor": "expo-doctor"
+  },
+  "private": true
+}

@@ -1,0 +1,124 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6) 0 var(--section-gap);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.categoryBar {
+  position: sticky;
+  top: calc(var(--header-height) + env(safe-area-inset-top));
+  z-index: 30;
+  padding: var(--space-2) 0;
+  background: var(--surface-blur);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.categories {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-subtle);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  font-weight: var(--font-weight-medium);
+  transition: background-color var(--duration-fast) ease;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  scroll-margin-top: var(--space-12);
+}
+
+.groups section {
+  scroll-margin-top: calc(var(--header-height) + var(--space-12));
+}
+
+.groupTitle {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.list > li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 72px;
+  padding: var(--space-3) 0;
+}
+
+.row:active {
+  opacity: 0.7;
+}
+
+.rowBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-weight: var(--font-weight-medium);
+}
+
+.description {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.meta {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.chevron {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
+}
+
+@media (hover: hover) {
+  .category:hover {
+    background: var(--color-subtle-hover);
+  }
+
+  .row:hover .name {
+    color: var(--color-link);
+  }
+}

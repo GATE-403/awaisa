@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-awaisa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-awaisa}
+      POSTGRES_DB: ${POSTGRES_DB:-awaisa}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    profiles: [app]
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      DATABASE_URL: postgres://${POSTGRES_USER:-awaisa}:${POSTGRES_PASSWORD:-awaisa}@postgres:5432/${POSTGRES_DB:-awaisa}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        API_URL: http://api:4000
+    restart: unless-stopped
+    profiles: [app]
+    environment:
+      API_URL: http://api:4000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

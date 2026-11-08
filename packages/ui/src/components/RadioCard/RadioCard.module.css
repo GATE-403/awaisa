@@ -1,0 +1,66 @@
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.card:has([data-checked]) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-subtle);
+}
+
+.card:has([data-disabled]) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.card:has(:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.card :focus-visible {
+  box-shadow: none;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.description {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  color: var(--color-muted-foreground);
+}
+
+.card[data-size="lg"] .title {
+  font-size: var(--text-xl);
+  line-height: var(--text-xl-line-height);
+}
+
+.card[data-size="lg"] .description {
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+}
+
+@media (hover: hover) {
+  .card:not(:has([data-checked])):not(:has([data-disabled])):hover {
+    background: var(--color-subtle);
+  }
+}

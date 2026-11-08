@@ -1,26 +1,21 @@
 {
   "name": "awaisa",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
-  },
-  "dependencies": {
-    "next": "16.4.5",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "babel-plugin-react-compiler": "1.0.0",
-    "typescript": "^5"
+    "turbo": "^2.11.10"
   },
   "packageManager": "pnpm@11.17.0"
 }
