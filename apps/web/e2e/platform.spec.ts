@@ -20,32 +20,30 @@ test.describe('Platform: a new business goes live', () => {
     await page.getByRole('button', { name: 'Создать страницу' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/manage/${slug}\\?tab=services`))
-    await expect(
-      page.getByRole('heading', { name: 'Чтобы клиенты могли записаться' }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
 
-    await page.getByRole('button', { name: 'Добавить услугу' }).click()
+    await page.getByRole('button', { name: 'Добавить услугу' }).first().click()
     const serviceDialog = page.getByRole('dialog')
     await serviceDialog.getByLabel('Название').fill('Стрижка')
     await serviceDialog.getByLabel('Цена, сом').fill('700')
     await serviceDialog.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('button', { name: /Стрижка/ })).toBeVisible()
 
-    await page.getByRole('tab', { name: 'Мастера' }).click()
-    await page.getByRole('button', { name: 'Добавить мастера' }).click()
+    await page.getByRole('link', { name: 'Мастера' }).click()
+    await page.getByRole('button', { name: 'Добавить мастера' }).first().click()
     const masterDialog = page.getByRole('dialog')
     await masterDialog.getByLabel('Имя').fill('Азамат')
     await expect(masterDialog.getByRole('checkbox', { name: 'Стрижка' })).toBeChecked()
     await masterDialog.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByRole('heading', { name: 'Чтобы клиенты могли записаться' })).toHaveCount(
-      0,
-    )
+    await expect(page.getByRole('heading', { name: 'Запуск записи' })).toHaveCount(0)
 
     const client = await browser.newContext()
     const clientPage = await client.newPage()
     await clientPage.goto('/')
-    await clientPage.getByRole('searchbox', { name: 'Поиск' }).fill(name)
-    await clientPage.getByRole('searchbox', { name: 'Поиск' }).press('Enter')
+    await clientPage.getByRole('button', { name: 'Поиск' }).click()
+    const search = clientPage.getByRole('searchbox', { name: 'Поиск салонов и мастеров' })
+    await search.fill(name)
+    await search.press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
     await clientPage.getByRole('link', { name: 'Записаться' }).first().click()
@@ -66,7 +64,7 @@ test.describe('Platform: a new business goes live', () => {
     })
     await client.close()
 
-    await page.getByRole('tab', { name: 'Расписание' }).click()
+    await page.getByRole('link', { name: 'Расписание' }).click()
     const day = page.locator(`[data-day="${booked}"]`)
     await day.waitFor()
     await day.click()

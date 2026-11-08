@@ -64,6 +64,7 @@ export const DateTimePicker = ({
             size='card'
             aria-label={day.isClosed ? `${day.label}, выходной` : day.label}
             disabled={day.isClosed}
+            data-today={day.isToday || undefined}
           >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.dayNumber}>{day.dayOfMonth}</span>

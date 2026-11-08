@@ -65,10 +65,10 @@ const getUpcomingDays = (todayKey: string, count = BOOKING_DAYS_AHEAD): BookingD
 
     return {
       key: toDayKey(date),
-      weekday: index === 0 ? 'Сегодня' : weekdayFormatter.format(date).replace('.', ''),
+      weekday: weekdayFormatter.format(date).replace('.', ''),
       dayOfMonth: date.getDate(),
       month: monthFormatter.format(date).replace('.', ''),
-      label: capitalize(longDateFormatter.format(date)),
+      label: capitalize(`${index === 0 ? 'сегодня, ' : ''}${longDateFormatter.format(date)}`),
       isToday: index === 0,
     }
   })

@@ -1,5 +1,4 @@
 import { Button } from '@awaisa/ui/Button'
-import { Field } from '@awaisa/ui/Field'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
@@ -8,6 +7,7 @@ import type { Business, WorkingDay } from '@/common/api/types'
 import { findDay, formatClock, parseClock, WEEKDAYS_FULL } from '@/common/utils/workingHours'
 import { TIME_OPTIONS } from '../../manageUtils'
 import styles from '../manageForms.module.css'
+import { SectionHeader } from '../SectionHeader/SectionHeader'
 
 interface HoursTabProps {
   slug: string
@@ -57,61 +57,77 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
   }
 
   return (
-    <form className={styles.section} onSubmit={handleSubmit}>
-      <p className={styles.hint}>Клиенты видят только время внутри графика и без чужих записей.</p>
-      <ul className={styles.list}>
-        {days.map((day, weekday) => (
-          <li
-            key={WEEKDAYS_FULL[weekday]}
-            className={styles.row}
-            data-closed={!day.isOpen || undefined}
-          >
-            <span className={styles.rowBody}>
-              <span>{WEEKDAYS_FULL[weekday]}</span>
-              {!day.isOpen && <span className={styles.rowMeta}>Выходной</span>}
-              {invalidDay === weekday && (
-                <span className={styles.rowMeta} role='alert'>
-                  Закрытие должно быть позже открытия
+    <form className={styles.section} onSubmit={handleSubmit} aria-label='График'>
+      <SectionHeader
+        title='График'
+        description='Клиенты видят только время внутри графика и без чужих записей.'
+      />
+
+      <div className={styles.group}>
+        <h3 className={styles.groupTitle}>Часы работы</h3>
+        <ul className={styles.list}>
+          {days.map((day, weekday) => (
+            <li key={WEEKDAYS_FULL[weekday]} className={styles.hoursRow}>
+              <Switch
+                aria-label={`${WEEKDAYS_FULL[weekday]}: рабочий день`}
+                checked={day.isOpen}
+                onCheckedChange={(isOpen) => updateDay(weekday, { isOpen })}
+              />
+              <span className={styles.dayName}>{WEEKDAYS_FULL[weekday]}</span>
+              {day.isOpen ? (
+                <span className={styles.timeRange}>
+                  <Select
+                    aria-label={`${WEEKDAYS_FULL[weekday]}: открытие`}
+                    items={TIME_ITEMS}
+                    value={day.from}
+                    onValueChange={(value) => value && updateDay(weekday, { from: value })}
+                  />
+                  <span className={styles.dash} aria-hidden='true'>
+                    –
+                  </span>
+                  <Select
+                    aria-label={`${WEEKDAYS_FULL[weekday]}: закрытие`}
+                    items={TIME_ITEMS}
+                    value={day.to}
+                    onValueChange={(value) => value && updateDay(weekday, { to: value })}
+                  />
                 </span>
+              ) : (
+                <span className={styles.cellMuted}>Выходной</span>
               )}
-            </span>
-            {day.isOpen && (
-              <span className={styles.inline}>
-                <Select
-                  aria-label={`${WEEKDAYS_FULL[weekday]}: открытие`}
-                  items={TIME_ITEMS}
-                  value={day.from}
-                  onValueChange={(value) => value && updateDay(weekday, { from: value })}
-                />
-                <Select
-                  aria-label={`${WEEKDAYS_FULL[weekday]}: закрытие`}
-                  items={TIME_ITEMS}
-                  value={day.to}
-                  onValueChange={(value) => value && updateDay(weekday, { to: value })}
-                />
-              </span>
-            )}
-            <Switch
-              aria-label={`${WEEKDAYS_FULL[weekday]}: рабочий день`}
-              checked={day.isOpen}
-              onCheckedChange={(isOpen) => updateDay(weekday, { isOpen })}
-            />
-          </li>
-        ))}
-      </ul>
-      <div className={styles.card}>
-        <Field label='Шаг записи' description='Как часто начинаются слоты: 10:00, 10:30, 11:00…'>
-          <Select
-            aria-label='Шаг записи'
-            items={STEPS}
-            value={slotMinutes}
-            onValueChange={(value) => value && setSlotMinutes(value)}
-          />
-        </Field>
+            </li>
+          ))}
+        </ul>
+        {invalidDay !== -1 && (
+          <p className={styles.fieldError} role='alert'>
+            {WEEKDAYS_FULL[invalidDay]}: закрытие должно быть позже открытия
+          </p>
+        )}
       </div>
-      <Button type='submit' size='lg' disabled={isSaving || invalidDay !== -1}>
-        Сохранить график
-      </Button>
+
+      <div className={styles.group}>
+        <h3 className={styles.groupTitle}>Запись</h3>
+        <div className={styles.list}>
+          <label className={styles.settingRow}>
+            <span className={styles.rowBody}>
+              <span className={styles.rowTitle}>Шаг записи</span>
+              <span className={styles.rowMeta}>Как часто начинаются слоты: 10:00, 10:30…</span>
+            </span>
+            <Select
+              aria-label='Шаг записи'
+              items={STEPS}
+              value={slotMinutes}
+              onValueChange={(value) => value && setSlotMinutes(value)}
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className={styles.formActions}>
+        <Button type='submit' disabled={isSaving || invalidDay !== -1}>
+          Сохранить график
+        </Button>
+      </div>
     </form>
   )
 }

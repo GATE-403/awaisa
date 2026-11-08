@@ -11,6 +11,7 @@ import type { BusinessLink } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
+import { EmptyState } from './components/EmptyState/EmptyState'
 import formStyles from './components/manageForms.module.css'
 import styles from './ManagePage.module.css'
 
@@ -46,19 +47,20 @@ export const ManageIndexPage = () => {
         {(!businesses || businesses.length === 1) && <Skeleton className={styles.skeleton} />}
 
         {businesses?.length === 0 && (
-          <div className={formStyles.card}>
-            <p>У вас пока нет страницы бизнеса.</p>
-            <ButtonLink render={<NextLink href='/business/new' />} size='lg'>
-              Создать страницу
-            </ButtonLink>
-          </div>
+          <EmptyState
+            title='Пока нет страницы'
+            text='Создайте страницу бизнеса — это пять минут, и клиенты смогут записываться.'
+            action={
+              <ButtonLink render={<NextLink href='/business/new' />}>Создать страницу</ButtonLink>
+            }
+          />
         )}
 
         {businesses && businesses.length > 1 && (
           <ul className={formStyles.list}>
             {businesses.map((business) => (
               <li key={business.slug}>
-                <NextLink href={`/manage/${business.slug}`} className={formStyles.row}>
+                <NextLink href={`/manage/${business.slug}`} className={formStyles.linkRow}>
                   <span className={formStyles.rowBody}>
                     <span>{business.name}</span>
                     <span className={formStyles.rowMeta}>awaisa.kg/{business.slug}</span>

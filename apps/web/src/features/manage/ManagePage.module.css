@@ -2,18 +2,76 @@
   padding: var(--space-6) 0 var(--section-gap);
 }
 
-.content {
+.layout {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
 }
 
-.header {
+.sidebar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.eyebrow {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+
+.nameSkeleton {
+  width: 180px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  color: var(--color-link);
+  font-size: var(--text-sm);
+}
+
+.link svg {
+  width: 12px;
+  height: 12px;
+}
+
+.hidden {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-subtle);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
 }
 
 .skeleton {
@@ -21,28 +79,30 @@
   border-radius: var(--radius-2xl);
 }
 
-.link {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height-md);
-  color: var(--color-link);
+.error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.tabsScroller {
-  margin: 0 calc(-1 * var(--page-gutter));
-  padding: 0 var(--page-gutter);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
+@media (min-width: 1024px) {
+  .page {
+    padding-top: var(--space-10);
+  }
 
-.tabsScroller::-webkit-scrollbar {
-  display: none;
-}
+  .layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-12);
+  }
 
-.tabs {
-  min-width: max-content;
-}
+  .sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-6));
+  }
 
-.panel {
-  padding-top: var(--space-6);
+  .main {
+    max-width: 840px;
+  }
 }

@@ -40,6 +40,35 @@
   scale: 0.92;
 }
 
+.backdrop[data-variant="panel"] {
+  background: color-mix(in srgb, var(--color-background) 40%, transparent);
+  backdrop-filter: var(--blur-material);
+}
+
+/* A sheet that drops from the top edge, like the search panel on apple.com. */
+.popup[data-variant="panel"] {
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-height: 100dvh;
+  padding: env(safe-area-inset-top) 0 var(--space-8);
+  border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+  background: var(--color-background);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: none;
+  translate: 0 0;
+  transition:
+    opacity var(--duration-normal) var(--ease-standard),
+    translate var(--duration-normal) var(--ease-standard);
+}
+
+.popup[data-variant="panel"][data-starting-style],
+.popup[data-variant="panel"][data-ending-style] {
+  opacity: 0;
+  scale: 1;
+  translate: 0 -24px;
+}
+
 .title {
   font-size: var(--text-lg);
   line-height: var(--text-lg-line-height);

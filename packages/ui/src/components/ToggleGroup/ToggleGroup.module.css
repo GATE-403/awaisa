@@ -8,6 +8,9 @@
 }
 
 .group[data-layout="scroll"] {
+  /* Room for the toggles' shadows, which overflow clipping would otherwise cut. */
+  margin: calc(-1 * var(--space-2));
+  padding: var(--space-2);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
@@ -70,11 +73,16 @@
 .toggle[data-size="card"] {
   flex-direction: column;
   gap: 0;
-  min-width: 60px;
-  padding: var(--space-2) var(--space-3);
+  width: 60px;
+  padding: var(--space-2) 0;
   border-radius: var(--radius-lg);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
+}
+
+.toggle[data-size="card"][data-today]:not([data-pressed]) {
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
 }
 
 .toggle[data-pressed] {

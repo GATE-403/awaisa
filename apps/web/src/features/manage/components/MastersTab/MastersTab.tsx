@@ -5,7 +5,9 @@ import { useState } from 'react'
 import { createSpecialist, updateSpecialist } from '@/common/api/clientApi'
 import type { Catalog, Specialist, SpecialistInput } from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
+import { EmptyState } from '../EmptyState/EmptyState'
 import styles from '../manageForms.module.css'
+import { SectionHeader } from '../SectionHeader/SectionHeader'
 import { MasterDialog } from './MasterDialog'
 
 interface MastersTabProps {
@@ -23,32 +25,41 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
       : run(() => createSpecialist(slug, input), 'Мастер добавлен')
 
   return (
-    <div className={styles.section}>
-      <div className={styles.toolbar}>
-        <p className={styles.hint}>У каждого мастера своё расписание — записи не пересекаются.</p>
-        <Button onClick={() => setEditing('new')}>Добавить мастера</Button>
-      </div>
+    <section className={styles.section} aria-label='Мастера'>
+      <SectionHeader
+        title='Мастера'
+        description='У каждого своё расписание — записи не пересекаются.'
+        actions={
+          <Button size='sm' onClick={() => setEditing('new')}>
+            Добавить мастера
+          </Button>
+        }
+      />
 
       {catalog.specialists.length === 0 ? (
-        <p className={styles.empty}>Пока никого. Если работаете один — добавьте себя.</p>
+        <EmptyState
+          title='Пока никого'
+          text='Если работаете один — добавьте себя. Клиенты смогут выбрать мастера или любого свободного.'
+          action={<Button onClick={() => setEditing('new')}>Добавить мастера</Button>}
+        />
       ) : (
         <ul className={styles.list}>
           {catalog.specialists.map((master) => (
             <li key={master.id}>
-              <button type='button' className={styles.row} onClick={() => setEditing(master)}>
+              <button type='button' className={styles.masterRow} onClick={() => setEditing(master)}>
                 <Avatar name={master.name} />
                 <span className={styles.rowBody}>
-                  <span>{master.name}</span>
-                  <span className={styles.rowMeta}>
-                    {[
-                      master.role,
-                      pluralize(master.serviceIds.length, ['услуга', 'услуги', 'услуг']),
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')}
+                  <span className={styles.rowTitle}>
+                    {master.name}
+                    {master.isActive === false && (
+                      <span className={styles.badge}>Не принимает</span>
+                    )}
                   </span>
+                  {master.role && <span className={styles.rowMeta}>{master.role}</span>}
                 </span>
-                {master.isActive === false && <span className={styles.badge}>Не принимает</span>}
+                <span className={styles.cellMuted}>
+                  {pluralize(master.serviceIds.length, ['услуга', 'услуги', 'услуг'])}
+                </span>
                 <CaretRight className={styles.chevron} weight='bold' aria-hidden />
               </button>
             </li>
@@ -65,6 +76,6 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
           onSave={handleSave}
         />
       )}
-    </div>
+    </section>
   )
 }

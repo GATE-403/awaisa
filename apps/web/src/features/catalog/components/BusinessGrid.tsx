@@ -18,9 +18,18 @@ export const BusinessGrid = async ({ kind, query }: BusinessGridProps) => {
   return (
     <section aria-labelledby='catalog-results' className={styles.results}>
       <h2 id='catalog-results' className={styles.resultsTitle}>
-        {query ? `Найдено: ${businesses.length}` : 'Куда записаться.'}
-        {!query && <span className={styles.titleMuted}> Свободное время — онлайн.</span>}
+        {query ? `«${query}».` : 'Куда записаться.'}
+        <span className={styles.titleMuted}>
+          {query
+            ? ` ${pluralize(businesses.length, ['результат', 'результата', 'результатов'])}.`
+            : ' Свободное время — онлайн.'}
+        </span>
       </h2>
+      {query && (
+        <NextLink href={kind ? `/?kind=${kind}` : '/'} className={styles.emptyLink}>
+          Сбросить поиск
+        </NextLink>
+      )}
 
       {businesses.length === 0 ? (
         <div className={styles.empty}>

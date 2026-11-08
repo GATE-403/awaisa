@@ -1,7 +1,6 @@
 import { Button } from '@awaisa/ui/Button'
-import { Input } from '@awaisa/ui/Input'
 import { CaretRight } from '@phosphor-icons/react/ssr'
-import { type FormEvent, useState } from 'react'
+import { useState } from 'react'
 import {
   createCategory,
   createService,
@@ -10,7 +9,10 @@ import {
 } from '@/common/api/clientApi'
 import type { Catalog, Service, ServiceInput } from '@/common/api/types'
 import { formatDuration, formatPrice } from '@/features/booking/bookingUtils'
+import { EmptyState } from '../EmptyState/EmptyState'
 import styles from '../manageForms.module.css'
+import { SectionHeader } from '../SectionHeader/SectionHeader'
+import { CategoryDialog } from './CategoryDialog'
 import { ServiceDialog } from './ServiceDialog'
 
 interface ServicesTabProps {
@@ -21,85 +23,99 @@ interface ServicesTabProps {
 
 export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
   const [editing, setEditing] = useState<Service | 'new' | null>(null)
-  const [categoryName, setCategoryName] = useState('')
+  const [isAddingCategory, setIsAddingCategory] = useState(false)
+  const hasServices = catalog.services.length > 0
 
   const handleSave = (input: ServiceInput) =>
     editing && editing !== 'new'
       ? run(() => updateService(slug, editing.id, input), 'Услуга сохранена')
       : run(() => createService(slug, input), 'Услуга добавлена')
 
-  const handleAddCategory = async (event: FormEvent) => {
-    event.preventDefault()
-    if (!categoryName.trim()) return
-    if (await run(() => createCategory(slug, categoryName.trim()), 'Категория добавлена')) {
-      setCategoryName('')
-    }
-  }
-
   return (
-    <div className={styles.section}>
-      <div className={styles.toolbar}>
-        <p className={styles.hint}>Клиенты видят цену и длительность до записи.</p>
-        <Button onClick={() => setEditing('new')}>Добавить услугу</Button>
-      </div>
+    <section className={styles.section} aria-label='Услуги'>
+      <SectionHeader
+        title='Услуги'
+        description='Цена и длительность видны клиенту до записи.'
+        actions={
+          <>
+            <Button variant='secondary' size='sm' onClick={() => setIsAddingCategory(true)}>
+              Новая категория
+            </Button>
+            <Button size='sm' onClick={() => setEditing('new')}>
+              Добавить услугу
+            </Button>
+          </>
+        }
+      />
 
-      {catalog.categories.map((category) => {
-        const services = catalog.services.filter((service) => service.categoryId === category.id)
+      {!hasServices && (
+        <EmptyState
+          title='Пока нет услуг'
+          text='Добавьте первую — название, длительность и цену. Остальное можно позже.'
+          action={<Button onClick={() => setEditing('new')}>Добавить услугу</Button>}
+        />
+      )}
 
-        return (
-          <section key={category.id} className={styles.section} aria-label={category.name}>
-            <div className={styles.toolbar}>
-              <h3 className={styles.groupTitle}>{category.name}</h3>
-              {services.length === 0 && catalog.categories.length > 1 && (
-                <Button
-                  variant='link'
-                  size='sm'
-                  onClick={() => run(() => deleteCategory(slug, category.id), 'Категория удалена')}
-                >
-                  Удалить
-                </Button>
+      {hasServices &&
+        catalog.categories.map((category) => {
+          const services = catalog.services.filter((service) => service.categoryId === category.id)
+          const canDelete = services.length === 0 && catalog.categories.length > 1
+
+          return (
+            <div key={category.id} className={styles.group}>
+              <div className={styles.groupHeader}>
+                <h3 className={styles.groupTitle}>
+                  {category.name}
+                  <span className={styles.groupCount}>{services.length}</span>
+                </h3>
+                {canDelete && (
+                  <button
+                    type='button'
+                    className={styles.textButton}
+                    onClick={() =>
+                      run(() => deleteCategory(slug, category.id), 'Категория удалена')
+                    }
+                  >
+                    Удалить
+                  </button>
+                )}
+              </div>
+              {services.length === 0 ? (
+                <p className={styles.groupEmpty}>Нет услуг в этой категории.</p>
+              ) : (
+                <ul className={styles.list}>
+                  {services.map((service) => (
+                    <li key={service.id}>
+                      <button
+                        type='button'
+                        className={styles.serviceRow}
+                        onClick={() => setEditing(service)}
+                      >
+                        <span className={styles.rowBody}>
+                          <span className={styles.rowTitle}>
+                            {service.name}
+                            {service.isPopular && <span className={styles.badge}>Популярная</span>}
+                            {service.isActive === false && (
+                              <span className={styles.badge}>Скрыта</span>
+                            )}
+                          </span>
+                          {service.description && (
+                            <span className={styles.rowMeta}>{service.description}</span>
+                          )}
+                        </span>
+                        <span className={styles.cellMuted}>
+                          {formatDuration(service.durationMinutes)}
+                        </span>
+                        <span className={styles.cellStrong}>{formatPrice(service.price)}</span>
+                        <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
-            {services.length === 0 ? (
-              <p className={styles.empty}>Пока пусто — добавьте первую услугу.</p>
-            ) : (
-              <ul className={styles.list}>
-                {services.map((service) => (
-                  <li key={service.id}>
-                    <button
-                      type='button'
-                      className={styles.row}
-                      onClick={() => setEditing(service)}
-                    >
-                      <span className={styles.rowBody}>
-                        <span>{service.name}</span>
-                        <span className={styles.rowMeta}>
-                          {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
-                        </span>
-                      </span>
-                      {service.isActive === false && <span className={styles.badge}>Скрыта</span>}
-                      {service.isPopular && <span className={styles.badge}>Популярная</span>}
-                      <CaretRight className={styles.chevron} weight='bold' aria-hidden />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        )
-      })}
-
-      <form className={styles.inline} onSubmit={handleAddCategory}>
-        <Input
-          value={categoryName}
-          onValueChange={setCategoryName}
-          placeholder='Новая категория, например «Ногти»'
-          aria-label='Новая категория'
-        />
-        <Button type='submit' variant='secondary' disabled={!categoryName.trim()}>
-          Добавить
-        </Button>
-      </form>
+          )
+        })}
 
       {editing && (
         <ServiceDialog
@@ -110,6 +126,12 @@ export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
           onSave={handleSave}
         />
       )}
-    </div>
+      {isAddingCategory && (
+        <CategoryDialog
+          onClose={() => setIsAddingCategory(false)}
+          onSave={(name) => run(() => createCategory(slug, name), 'Категория добавлена')}
+        />
+      )}
+    </section>
   )
 }
