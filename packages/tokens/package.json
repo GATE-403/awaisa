@@ -1,0 +1,21 @@
+{
+  "name": "@awaisa/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "scripts": {
+    "build": "node scripts/buildCss.ts",
+    "dev": "node --watch-path=src scripts/buildCss.ts",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.2",
+    "@types/node": "^24.0.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,13 @@
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+.container[data-size="lg"] {
+  max-width: var(--layout-container-width);
+}
+
+.container[data-size="md"] {
+  max-width: 880px;
+}

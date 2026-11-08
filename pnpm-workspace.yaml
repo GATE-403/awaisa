@@ -1,3 +1,12 @@
+packages:
+  - apps/*
+  - packages/*
+
 allowBuilds:
   sharp: false
   unrs-resolver: false
+  "@nestjs/core": false
+
+minimumReleaseAgeExclude:
+  - '@nestjs/config@12.1.1'
+  - '@nestjs/typeorm@12.0.3'
