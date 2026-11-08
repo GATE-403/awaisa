@@ -1,14 +1,15 @@
-import { CalendarCheck, House, LayoutGrid, type LucideIcon } from 'lucide-react'
+import type { Icon } from '@phosphor-icons/react'
+import { CalendarCheck, House, SquaresFour } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
   label: string
-  icon: LucideIcon
+  icon: Icon
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Главная', icon: House },
-  { href: '/services', label: 'Услуги', icon: LayoutGrid },
+  { href: '/services', label: 'Услуги', icon: SquaresFour },
   { href: '/bookings', label: 'Мои записи', icon: CalendarCheck },
 ]
 

@@ -1,3 +1,4 @@
+import { useToast } from '@awaisa/ui/Toast'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
@@ -32,6 +33,7 @@ const scrollToStep = (stepId: BookingStepId, force = false) => {
 
 export const useBookingForm = (catalog: Catalog) => {
   const searchParams = useSearchParams()
+  const toast = useToast()
   const today = useToday()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
   const [serviceId, setServiceId] = useState(
@@ -140,9 +142,19 @@ export const useBookingForm = (catalog: Catalog) => {
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       setCreatedBooking(booking)
+      toast.show({
+        title: 'Запись подтверждена',
+        description: `${booking.serviceName}, ${booking.time}`,
+        type: 'success',
+      })
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
       setSubmitError(getErrorMessage(error))
+      toast.show({
+        title: 'Не получилось записаться',
+        description: getErrorMessage(error),
+        type: 'error',
+      })
       if (error instanceof ApiError && error.status === CONFLICT_STATUS) {
         setTime(null)
         availability.reload()

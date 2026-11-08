@@ -3,12 +3,20 @@ import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group'
 import { mergeClassName } from '../../utils/className'
 import styles from './Radio.module.css'
 
-interface RadioGroupProps extends BaseRadioGroup.Props {}
+type RadioGroupVariant = 'stack' | 'inset'
+
+interface RadioGroupProps extends BaseRadioGroup.Props {
+  variant?: RadioGroupVariant
+}
 
 interface RadioProps extends BaseRadio.Root.Props {}
 
-const RadioGroup = ({ className, ...props }: RadioGroupProps) => (
-  <BaseRadioGroup className={mergeClassName(styles.group, className)} {...props} />
+const RadioGroup = ({ variant = 'stack', className, ...props }: RadioGroupProps) => (
+  <BaseRadioGroup
+    data-variant={variant}
+    className={mergeClassName(styles.group, className)}
+    {...props}
+  />
 )
 
 const Radio = ({ className, ...props }: RadioProps) => (
@@ -17,5 +25,5 @@ const Radio = ({ className, ...props }: RadioProps) => (
   </BaseRadio.Root>
 )
 
-export type { RadioGroupProps, RadioProps }
+export type { RadioGroupProps, RadioGroupVariant, RadioProps }
 export { Radio, RadioGroup }

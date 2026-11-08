@@ -7,6 +7,9 @@ type Company = {
   phoneHref: string
   whatsappHref: string
   hours: string
+  opensAtMinutes: number
+  closesAtMinutes: number
+  utcOffsetMinutes: number
   rating: number
   reviewsCount: number
 }
@@ -20,6 +23,9 @@ const COMPANY: Company = {
   phoneHref: 'tel:+996555123456',
   whatsappHref: 'https://wa.me/996555123456',
   hours: 'Ежедневно 10:00–20:00',
+  opensAtMinutes: 10 * 60,
+  closesAtMinutes: 20 * 60,
+  utcOffsetMinutes: 6 * 60,
   rating: 4.9,
   reviewsCount: 312,
 }

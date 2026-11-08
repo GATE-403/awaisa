@@ -19,12 +19,14 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-md);
   line-height: var(--text-md-line-height);
+  letter-spacing: var(--tracking-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .root {
   isolation: isolate;
+  overflow-x: clip;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
@@ -36,8 +38,13 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: var(--font-display);
   font-size: inherit;
   font-weight: inherit;
+}
+
+::selection {
+  background: var(--color-primary-subtle-hover);
 }
 
 a {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
+import { ButtonLink } from '@awaisa/ui/Button'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useIsScrolled } from '@/common/hooks/useIsScrolled'
@@ -32,9 +32,9 @@ export const Header = () => {
           ))}
         </nav>
         {!isBookingPage && (
-          <Button render={<NextLink href={BOOKING_PATH} />} nativeButton={false} size='sm'>
+          <ButtonLink render={<NextLink href={BOOKING_PATH} />} size='sm'>
             Записаться
-          </Button>
+          </ButtonLink>
         )}
       </div>
     </header>

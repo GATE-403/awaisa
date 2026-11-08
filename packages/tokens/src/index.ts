@@ -1,48 +1,29 @@
 const palette = {
   white: '#ffffff',
   black: '#000000',
-  blue: {
-    50: '#eff6ff',
-    100: '#dbeafe',
-    200: '#bfdbfe',
-    300: '#93c5fd',
-    400: '#60a5fa',
-    500: '#3b82f6',
-    600: '#2563eb',
-    700: '#1d4ed8',
-    800: '#1e40af',
-    900: '#1e3a8a',
-    950: '#172554',
+  light: {
+    blue: '#007aff',
+    green: '#34c759',
+    red: '#ff3b30',
+    orange: '#ff9500',
+    gray: '#8e8e93',
+    gray2: '#aeaeb2',
+    gray3: '#c7c7cc',
+    gray4: '#d1d1d6',
+    gray5: '#e5e5ea',
+    gray6: '#f2f2f7',
   },
-  neutral: {
-    50: '#fafafa',
-    100: '#f5f5f5',
-    200: '#e5e5e5',
-    300: '#d4d4d4',
-    400: '#a3a3a3',
-    500: '#737373',
-    600: '#525252',
-    700: '#404040',
-    800: '#262626',
-    900: '#171717',
-    950: '#0a0a0a',
-  },
-  red: {
-    50: '#fef2f2',
-    500: '#ef4444',
-    600: '#dc2626',
-    700: '#b91c1c',
-    950: '#450a0a',
-  },
-  amber: {
-    400: '#fbbf24',
-    500: '#f59e0b',
-  },
-  green: {
-    50: '#f0fdf4',
-    500: '#22c55e',
-    600: '#16a34a',
-    950: '#052e16',
+  dark: {
+    blue: '#0a84ff',
+    green: '#30d158',
+    red: '#ff453a',
+    orange: '#ff9f0a',
+    gray: '#8e8e93',
+    gray2: '#636366',
+    gray3: '#48484a',
+    gray4: '#3a3a3c',
+    gray5: '#2c2c2e',
+    gray6: '#1c1c1e',
   },
 }
 
@@ -50,9 +31,11 @@ type ColorScheme = {
   background: string
   foreground: string
   surface: string
+  elevated: string
   subtle: string
   subtleHover: string
   mutedForeground: string
+  tertiaryForeground: string
   border: string
   borderStrong: string
   control: string
@@ -67,58 +50,132 @@ type ColorScheme = {
   dangerHover: string
   dangerForeground: string
   success: string
+  highlight: string
   rating: string
   overlay: string
+  material: string
+  materialBorder: string
+  contrast: string
+  contrastHover: string
+  contrastForeground: string
 }
 
 const colors: Record<'light' | 'dark', ColorScheme> = {
   light: {
-    background: palette.white,
-    foreground: palette.neutral[950],
+    background: '#f5f5f7',
+    foreground: '#1d1d1f',
     surface: palette.white,
-    subtle: palette.neutral[100],
-    subtleHover: palette.neutral[200],
-    mutedForeground: palette.neutral[500],
-    border: palette.neutral[200],
-    borderStrong: palette.neutral[400],
-    control: palette.neutral[300],
-    primary: palette.blue[600],
-    primaryHover: palette.blue[700],
+    elevated: palette.white,
+    subtle: 'rgb(118 118 128 / 0.12)',
+    subtleHover: 'rgb(118 118 128 / 0.2)',
+    mutedForeground: '#6e6e73',
+    tertiaryForeground: 'rgb(60 60 67 / 0.36)',
+    border: 'rgb(60 60 67 / 0.18)',
+    borderStrong: palette.light.gray3,
+    control: palette.light.gray5,
+    primary: '#0071e3',
+    primaryHover: '#0077ed',
     primaryForeground: palette.white,
-    primarySubtle: palette.blue[50],
-    primarySubtleHover: palette.blue[100],
-    link: palette.blue[700],
-    ring: 'rgb(59 130 246 / 0.45)',
-    danger: palette.red[600],
-    dangerHover: palette.red[700],
+    primarySubtle: 'rgb(0 122 255 / 0.12)',
+    primarySubtleHover: 'rgb(0 122 255 / 0.18)',
+    link: '#0066cc',
+    ring: 'rgb(0 122 255 / 0.4)',
+    danger: palette.light.red,
+    dangerHover: '#e0352b',
     dangerForeground: palette.white,
-    success: palette.green[600],
-    rating: palette.amber[500],
-    overlay: 'rgb(0 0 0 / 0.5)',
+    success: palette.light.green,
+    highlight: '#b64400',
+    rating: palette.light.orange,
+    overlay: 'rgb(0 0 0 / 0.32)',
+    material: 'rgb(255 255 255 / 0.8)',
+    materialBorder: 'rgb(255 255 255 / 0.6)',
+    contrast: palette.white,
+    contrastHover: '#e8e8ed',
+    contrastForeground: '#1d1d1f',
   },
   dark: {
-    background: palette.neutral[950],
-    foreground: palette.neutral[50],
-    surface: palette.neutral[900],
-    subtle: palette.neutral[800],
-    subtleHover: palette.neutral[700],
-    mutedForeground: palette.neutral[400],
-    border: palette.neutral[800],
-    borderStrong: palette.neutral[600],
-    control: palette.neutral[700],
-    primary: palette.blue[600],
-    primaryHover: palette.blue[500],
+    background: palette.black,
+    foreground: palette.white,
+    surface: palette.dark.gray6,
+    elevated: palette.dark.gray5,
+    subtle: 'rgb(118 118 128 / 0.24)',
+    subtleHover: 'rgb(118 118 128 / 0.32)',
+    mutedForeground: 'rgb(235 235 245 / 0.64)',
+    tertiaryForeground: 'rgb(235 235 245 / 0.32)',
+    border: 'rgb(84 84 88 / 0.6)',
+    borderStrong: palette.dark.gray3,
+    control: palette.dark.gray4,
+    primary: palette.dark.blue,
+    primaryHover: '#409cff',
     primaryForeground: palette.white,
-    primarySubtle: palette.blue[950],
-    primarySubtleHover: palette.blue[900],
-    link: palette.blue[400],
-    ring: 'rgb(96 165 250 / 0.5)',
-    danger: palette.red[600],
-    dangerHover: palette.red[500],
+    primarySubtle: 'rgb(10 132 255 / 0.2)',
+    primarySubtleHover: 'rgb(10 132 255 / 0.28)',
+    link: '#409cff',
+    ring: 'rgb(10 132 255 / 0.5)',
+    danger: palette.dark.red,
+    dangerHover: '#ff6961',
     dangerForeground: palette.white,
-    success: palette.green[500],
-    rating: palette.amber[400],
-    overlay: 'rgb(0 0 0 / 0.7)',
+    success: palette.dark.green,
+    highlight: palette.dark.orange,
+    rating: palette.dark.orange,
+    overlay: 'rgb(0 0 0 / 0.56)',
+    material: 'rgb(30 30 32 / 0.8)',
+    materialBorder: 'rgb(255 255 255 / 0.08)',
+    contrast: palette.white,
+    contrastHover: '#e8e8ed',
+    contrastForeground: '#1d1d1f',
+  },
+}
+
+type SystemColors = {
+  red: string
+  orange: string
+  yellow: string
+  green: string
+  mint: string
+  teal: string
+  cyan: string
+  blue: string
+  indigo: string
+  purple: string
+  pink: string
+  brown: string
+  monogramFrom: string
+  monogramTo: string
+}
+
+const systemColors: Record<'light' | 'dark', SystemColors> = {
+  light: {
+    red: '#ff3b30',
+    orange: '#ff9500',
+    yellow: '#ffcc00',
+    green: '#34c759',
+    mint: '#00c7be',
+    teal: '#30b0c7',
+    cyan: '#32ade6',
+    blue: '#007aff',
+    indigo: '#5856d6',
+    purple: '#af52de',
+    pink: '#ff2d55',
+    brown: '#a2845e',
+    monogramFrom: '#a5abb8',
+    monogramTo: '#858994',
+  },
+  dark: {
+    red: '#ff453a',
+    orange: '#ff9f0a',
+    yellow: '#ffd60a',
+    green: '#30d158',
+    mint: '#63e6e2',
+    teal: '#40c8e0',
+    cyan: '#64d2ff',
+    blue: '#0a84ff',
+    indigo: '#5e5ce6',
+    purple: '#bf5af2',
+    pink: '#ff375f',
+    brown: '#ac8e68',
+    monogramFrom: '#6c6c70',
+    monogramTo: '#48484a',
   },
 }
 
@@ -138,29 +195,32 @@ const spacing = {
 }
 
 const radius = {
-  xs: 4,
-  sm: 6,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  '2xl': 24,
+  xs: 6,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 22,
+  '2xl': 28,
   full: 9999,
 }
 
 const fontFamily = {
-  sans: "system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
+  sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
+  display:
+    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
   mono: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
 }
 
 const text = {
   xs: { size: 12, lineHeight: 16 },
-  sm: { size: 14, lineHeight: 20 },
-  md: { size: 16, lineHeight: 24 },
-  lg: { size: 18, lineHeight: 28 },
-  xl: { size: 20, lineHeight: 28 },
-  '2xl': { size: 24, lineHeight: 32 },
-  '3xl': { size: 30, lineHeight: 36 },
-  '4xl': { size: 36, lineHeight: 40 },
+  footnote: { size: 13, lineHeight: 18 },
+  sm: { size: 15, lineHeight: 20 },
+  md: { size: 17, lineHeight: 22 },
+  lg: { size: 20, lineHeight: 25 },
+  xl: { size: 22, lineHeight: 28 },
+  '2xl': { size: 28, lineHeight: 34 },
+  '3xl': { size: 34, lineHeight: 41 },
+  '4xl': { size: 48, lineHeight: 52 },
 }
 
 const fontWeight = {
@@ -170,21 +230,36 @@ const fontWeight = {
   bold: 700,
 }
 
+const letterSpacing = {
+  tight: '-0.022em',
+  title: '-0.012em',
+  normal: '-0.004em',
+}
+
 const controlHeight = {
-  sm: 32,
-  md: 40,
-  lg: 48,
+  sm: 34,
+  md: 44,
+  lg: 52,
 }
 
 const shadow = {
-  sm: '0 1px 2px rgb(0 0 0 / 0.06)',
-  md: '0 4px 12px rgb(0 0 0 / 0.08)',
-  lg: '0 16px 48px rgb(0 0 0 / 0.18)',
+  sm: '2px 4px 12px rgb(0 0 0 / 0.08)',
+  md: '2px 4px 16px rgb(0 0 0 / 0.16)',
+  lg: '0 12px 32px rgb(0 0 0 / 0.12), 0 32px 64px rgb(0 0 0 / 0.16)',
+}
+
+const blur = {
+  material: 'saturate(180%) blur(24px)',
 }
 
 const duration = {
-  fast: 120,
-  normal: 200,
+  fast: 150,
+  normal: 250,
+}
+
+const easing = {
+  standard: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+  spring: 'cubic-bezier(0.34, 1.36, 0.64, 1)',
 }
 
 const breakpoint = {
@@ -195,22 +270,26 @@ const breakpoint = {
 }
 
 const layout = {
-  containerWidth: 1200,
+  containerWidth: 1120,
   headerHeight: 64,
 }
 
-export type { ColorScheme }
+export type { ColorScheme, SystemColors }
 export {
+  blur,
   breakpoint,
   colors,
   controlHeight,
   duration,
+  easing,
   fontFamily,
   fontWeight,
   layout,
+  letterSpacing,
   palette,
   radius,
   shadow,
   spacing,
+  systemColors,
   text,
 }

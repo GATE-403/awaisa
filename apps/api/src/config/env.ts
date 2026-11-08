@@ -3,6 +3,8 @@ type Env = {
   API_PORT: number
   DATABASE_URL: string
   WEB_ORIGIN: string[]
+  RATE_LIMIT_PER_MINUTE: number
+  BOOKING_RATE_LIMIT_PER_MINUTE: number
 }
 
 const NODE_ENVS: Env['NODE_ENV'][] = ['development', 'production', 'test']
@@ -31,6 +33,14 @@ const parseDatabaseUrl = (value: unknown): string => {
   return value
 }
 
+const parsePositiveInt = (name: string, value: unknown, fallback: number): number => {
+  const parsed = Number(value ?? fallback)
+  if (!Number.isInteger(parsed) || parsed <= 0)
+    throw new Error(`${name} must be a positive integer`)
+
+  return parsed
+}
+
 const parseOrigins = (value: unknown): string[] =>
   String(value ?? 'http://localhost:3000')
     .split(',')
@@ -42,6 +52,16 @@ const validateEnv = (config: Record<string, unknown>): Env => ({
   API_PORT: parsePort(config.API_PORT ?? config.PORT),
   DATABASE_URL: parseDatabaseUrl(config.DATABASE_URL),
   WEB_ORIGIN: parseOrigins(config.WEB_ORIGIN),
+  RATE_LIMIT_PER_MINUTE: parsePositiveInt(
+    'RATE_LIMIT_PER_MINUTE',
+    config.RATE_LIMIT_PER_MINUTE,
+    120,
+  ),
+  BOOKING_RATE_LIMIT_PER_MINUTE: parsePositiveInt(
+    'BOOKING_RATE_LIMIT_PER_MINUTE',
+    config.BOOKING_RATE_LIMIT_PER_MINUTE,
+    5,
+  ),
 })
 
 export type { Env }

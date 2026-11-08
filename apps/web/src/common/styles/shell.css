@@ -1,15 +1,21 @@
 :root {
   --header-height: 56px;
-  --tabbar-height: 60px;
+  --tabbar-height: 64px;
+  --tabbar-offset: var(--space-2);
+  --tabbar-space: calc(
+    var(--tabbar-height) +
+    var(--tabbar-offset) *
+    2 +
+    env(safe-area-inset-bottom)
+  );
   --page-gutter: var(--space-4);
   --section-gap: var(--space-10);
-  --surface-blur: color-mix(in srgb, var(--color-background) 82%, transparent);
 }
 
 @media (min-width: 768px) {
   :root {
     --header-height: 64px;
-    --tabbar-height: 0px;
+    --tabbar-space: 0px;
     --page-gutter: var(--space-6);
     --section-gap: var(--space-16);
   }

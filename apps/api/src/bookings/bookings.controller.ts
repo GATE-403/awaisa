@@ -12,6 +12,7 @@ import {
   Query,
 } from '@nestjs/common'
 import { Throttle } from '@nestjs/throttler'
+import { validateEnv } from '../config/env.js'
 import {
   type AvailabilityQuery,
   availabilityQuerySchema,
@@ -22,6 +23,8 @@ import {
 import { BookingsService } from './bookings.service.js'
 
 const TOKEN_HEADER = 'x-booking-token'
+
+const getBookingRateLimit = () => validateEnv(process.env).BOOKING_RATE_LIMIT_PER_MINUTE
 
 const parseToken = (value: string | undefined) => {
   const result = bookingTokenSchema.safeParse(value)
@@ -40,7 +43,7 @@ export class BookingsController {
   }
 
   @Post('bookings')
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: getBookingRateLimit, ttl: 60_000 } })
   create(@Body({ schema: createBookingSchema }) body: CreateBookingInput) {
     return this.bookingsService.create(body)
   }

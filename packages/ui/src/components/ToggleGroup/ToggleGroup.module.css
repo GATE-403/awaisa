@@ -33,23 +33,29 @@
   justify-content: center;
   gap: var(--space-2);
   flex-shrink: 0;
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-full);
   background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
   color: var(--color-foreground);
   font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
   transition:
-    background-color var(--duration-fast) ease,
-    border-color var(--duration-fast) ease,
-    color var(--duration-fast) ease;
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.toggle:active:not([data-disabled]) {
+  scale: 0.96;
 }
 
 .toggle[data-size="sm"] {
   height: var(--control-height-sm);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-4);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
 }
@@ -57,34 +63,36 @@
 .toggle[data-size="md"] {
   height: var(--control-height-md);
   padding: 0 var(--space-4);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-}
-
-.toggle[data-pressed] {
-  border-color: var(--color-foreground);
-  background: var(--color-foreground);
-  color: var(--color-background);
-}
-
-.toggle[data-disabled] {
-  opacity: 0.4;
-  cursor: not-allowed;
-  text-decoration: line-through;
-}
-
-@media (hover: hover) {
-  .toggle:not([data-pressed]):not([data-disabled]):hover {
-    background: var(--color-subtle);
-  }
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
 }
 
 .toggle[data-size="card"] {
   flex-direction: column;
   gap: 0;
-  min-width: 56px;
+  min-width: 60px;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-lg);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
+}
+
+.toggle[data-pressed] {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.toggle[data-disabled] {
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-tertiary-foreground);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .toggle:not([data-pressed]):not([data-disabled]):hover {
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-foreground));
+  }
 }

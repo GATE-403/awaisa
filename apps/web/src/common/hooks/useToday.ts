@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { COMPANY } from '@/constants/company'
 
 type Today = {
   dayKey: string
@@ -12,11 +13,13 @@ const subscribe = (onChange: () => void) => {
   return () => window.clearInterval(interval)
 }
 
-const getSnapshot = () => {
-  const now = new Date()
-  const dayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+const pad = (value: number) => String(value).padStart(2, '0')
 
-  return `${dayKey}|${now.getHours() * 60 + now.getMinutes()}`
+const getSnapshot = () => {
+  const businessNow = new Date(Date.now() + COMPANY.utcOffsetMinutes * MINUTE_MS)
+  const dayKey = `${businessNow.getUTCFullYear()}-${pad(businessNow.getUTCMonth() + 1)}-${pad(businessNow.getUTCDate())}`
+
+  return `${dayKey}|${businessNow.getUTCHours() * 60 + businessNow.getUTCMinutes()}`
 }
 
 const getServerSnapshot = () => null

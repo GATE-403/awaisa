@@ -1,48 +1,67 @@
-import { Button } from '@awaisa/ui/Button'
-import { CircleCheck } from 'lucide-react'
+'use client'
+
+import { Button, ButtonLink } from '@awaisa/ui/Button'
+import { useToast } from '@awaisa/ui/Toast'
+import { CalendarPlus, MapPin } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { Booking } from '@/common/api/types'
+import { Ticket } from '@/common/components/Ticket/Ticket'
+import { downloadCalendarFile } from '@/common/utils/calendarFile'
 import { COMPANY } from '@/constants/company'
-import { formatDayLong, formatPrice } from '../../bookingUtils'
 import styles from './BookingSuccess.module.css'
 
 interface BookingSuccessProps {
   booking: Booking
 }
 
-export const BookingSuccess = ({ booking }: BookingSuccessProps) => (
-  <div className={styles.success}>
-    <CircleCheck className={styles.icon} aria-hidden />
-    <h1 className={styles.title}>Вы записаны</h1>
-    <p className={styles.lead}>
-      {formatDayLong(booking.date)}, {booking.time}
-    </p>
-    <dl className={styles.details}>
-      <div>
-        <dt>Услуга</dt>
-        <dd>
-          {booking.serviceName} · {formatPrice(booking.price)}
-        </dd>
+export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
+  const toast = useToast()
+
+  const handleCopyCode = async (code: string) => {
+    try {
+      await navigator.clipboard.writeText(code)
+      toast.show({ title: 'Номер скопирован', description: code, type: 'success' })
+    } catch {
+      toast.show({ title: 'Не удалось скопировать', type: 'error' })
+    }
+  }
+
+  const handleAddToCalendar = () => {
+    downloadCalendarFile(booking, { name: COMPANY.name, address: COMPANY.address })
+    toast.show({
+      title: 'Событие для календаря готово',
+      description: 'Откройте файл, чтобы добавить',
+    })
+  }
+
+  return (
+    <div className={styles.success}>
+      <h1 className={styles.title}>Вы записаны</h1>
+      <p className={styles.lead}>Покажите номер на ресепшене — или просто назовите имя.</p>
+      <div className={styles.ticket}>
+        <Ticket booking={booking} onCodeClick={handleCopyCode} />
       </div>
-      <div>
-        <dt>Мастер</dt>
-        <dd>{booking.specialistName}</dd>
+      <div className={styles.chips}>
+        <Button size='sm' variant='secondary' onClick={handleAddToCalendar}>
+          <CalendarPlus weight='bold' className={styles.chipIcon} aria-hidden />В календарь
+        </Button>
+        <ButtonLink
+          size='sm'
+          variant='secondary'
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: content comes from Button children via render
+            <a href={COMPANY.mapUrl} target='_blank' rel='noreferrer' />
+          }
+        >
+          <MapPin weight='bold' className={styles.chipIcon} aria-hidden />
+          Маршрут
+        </ButtonLink>
       </div>
-      <div>
-        <dt>Адрес</dt>
-        <dd>{COMPANY.address}</dd>
+      <div className={styles.primary}>
+        <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
+          Мои записи
+        </ButtonLink>
       </div>
-    </dl>
-    <p className={styles.note}>
-      Запись сохранена в «Мои записи» на этом устройстве — там её можно отменить.
-    </p>
-    <div className={styles.actions}>
-      <Button render={<NextLink href='/bookings' />} nativeButton={false} size='lg'>
-        Мои записи
-      </Button>
-      <Button render={<NextLink href='/' />} nativeButton={false} size='lg' variant='secondary'>
-        На главную
-      </Button>
     </div>
-  </div>
-)
+  )
+}
