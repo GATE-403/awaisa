@@ -3,7 +3,9 @@ import type { ComponentProps } from 'react'
 import { cx, mergeClassName } from '../../utils/className'
 import styles from './Dialog.module.css'
 
-interface DialogContentProps extends BaseDialog.Popup.Props {}
+interface DialogContentProps extends BaseDialog.Popup.Props {
+  variant?: 'modal' | 'panel'
+}
 
 interface DialogTitleProps extends BaseDialog.Title.Props {}
 
@@ -17,10 +19,14 @@ const DialogTrigger = BaseDialog.Trigger
 
 const DialogClose = BaseDialog.Close
 
-const DialogContent = ({ className, ...props }: DialogContentProps) => (
+const DialogContent = ({ variant = 'modal', className, ...props }: DialogContentProps) => (
   <BaseDialog.Portal>
-    <BaseDialog.Backdrop className={styles.backdrop} />
-    <BaseDialog.Popup className={mergeClassName(styles.popup, className)} {...props} />
+    <BaseDialog.Backdrop className={styles.backdrop} data-variant={variant} />
+    <BaseDialog.Popup
+      className={mergeClassName(styles.popup, className)}
+      data-variant={variant}
+      {...props}
+    />
   </BaseDialog.Portal>
 )
 

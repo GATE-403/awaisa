@@ -7,9 +7,11 @@ import { useState } from 'react'
 import { useToday } from '@/common/hooks/useToday'
 import { getUpcomingDays } from '@/features/booking/bookingUtils'
 import { useAdminSchedule } from '../hooks/useAdminSchedule'
+import { EmptyState } from './EmptyState/EmptyState'
 import { ScheduleColumn } from './ScheduleColumn/ScheduleColumn'
 import styles from './ScheduleTab.module.css'
-import { TimeOffForm } from './TimeOffForm/TimeOffForm'
+import { SectionHeader } from './SectionHeader/SectionHeader'
+import { TimeOffDialog } from './TimeOffDialog/TimeOffDialog'
 
 interface ScheduleTabProps {
   slug: string
@@ -20,6 +22,7 @@ const DAYS_SHOWN = 14
 export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
   const today = useToday()
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const [isClosingTime, setIsClosingTime] = useState(false)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
   const { schedule, error, reload, cancelBooking, addTimeOff, removeTimeOff } = useAdminSchedule(
@@ -29,18 +32,25 @@ export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
   const confirmedCount =
     schedule?.bookings.filter((booking) => booking.status === 'confirmed').length ?? 0
+  const hasMasters = (schedule?.specialists.length ?? 0) > 0
 
   return (
-    <div className={styles.content}>
-      <h2 className={styles.heading}>
-        {dayLabel}
-        {schedule && (
-          <span className={styles.muted}>
-            {' '}
-            · {confirmedCount === 0 ? 'записей нет' : `записей — ${confirmedCount}`}
-          </span>
-        )}
-      </h2>
+    <section className={styles.content} aria-label='Расписание'>
+      <SectionHeader
+        title='Расписание'
+        description={
+          schedule
+            ? `${dayLabel} · ${confirmedCount === 0 ? 'записей нет' : `записей: ${confirmedCount}`}`
+            : dayLabel
+        }
+        actions={
+          hasMasters && (
+            <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+              Закрыть время
+            </Button>
+          )
+        }
+      />
 
       <ToggleGroup
         aria-label='День'
@@ -55,6 +65,7 @@ export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
             size='card'
             aria-label={day.label}
             data-day={day.key}
+            data-today={day.isToday || undefined}
           >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.dayNumber}>{day.dayOfMonth}</span>
@@ -73,33 +84,39 @@ export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
 
       {!schedule && !error && <Skeleton className={styles.skeleton} />}
 
-      {schedule && schedule.specialists.length === 0 && (
-        <p className={styles.empty}>
-          Добавьте мастеров во вкладке «Мастера» — здесь появится их расписание.
-        </p>
+      {schedule && !hasMasters && (
+        <EmptyState
+          title='Нет мастеров'
+          text='Добавьте мастеров в разделе «Мастера» — здесь появится их расписание.'
+        />
       )}
 
-      {schedule && date && schedule.specialists.length > 0 && (
-        <div className={styles.layout}>
-          <div className={styles.columns}>
-            {schedule.specialists.map((specialist) => (
-              <ScheduleColumn
-                key={specialist.id}
-                specialist={specialist}
-                bookings={schedule.bookings.filter(
-                  (booking) => booking.specialistId === specialist.id,
-                )}
-                timeOff={schedule.timeOff.filter((item) => item.specialistId === specialist.id)}
-                onCancelBooking={cancelBooking}
-                onRemoveTimeOff={removeTimeOff}
-              />
-            ))}
-          </div>
-          <aside className={styles.aside}>
-            <TimeOffForm date={date} specialists={schedule.specialists} onSubmit={addTimeOff} />
-          </aside>
+      {schedule && hasMasters && (
+        <div className={styles.columns}>
+          {schedule.specialists.map((specialist) => (
+            <ScheduleColumn
+              key={specialist.id}
+              specialist={specialist}
+              bookings={schedule.bookings.filter(
+                (booking) => booking.specialistId === specialist.id,
+              )}
+              timeOff={schedule.timeOff.filter((item) => item.specialistId === specialist.id)}
+              onCancelBooking={cancelBooking}
+              onRemoveTimeOff={removeTimeOff}
+            />
+          ))}
         </div>
       )}
-    </div>
+
+      {isClosingTime && schedule && date && (
+        <TimeOffDialog
+          date={date}
+          dayLabel={dayLabel}
+          specialists={schedule.specialists}
+          onClose={() => setIsClosingTime(false)}
+          onSubmit={addTimeOff}
+        />
+      )}
+    </section>
   )
 }

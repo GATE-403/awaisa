@@ -38,7 +38,7 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
   <html lang='ru' className={inter.variable} suppressHydrationWarning>
     <head>
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input */}
-      <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
     </head>
     <body>
       <ToastProvider>

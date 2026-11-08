@@ -28,47 +28,6 @@
   gap: var(--space-4);
 }
 
-.search {
-  position: relative;
-  max-width: 560px;
-}
-
-.searchIcon {
-  position: absolute;
-  top: 50%;
-  left: var(--space-4);
-  width: 18px;
-  height: 18px;
-  color: var(--color-muted-foreground);
-  translate: 0 -50%;
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-  height: var(--control-height-lg);
-  padding: 0 var(--space-5) 0 calc(var(--space-4) + 18px + var(--space-3));
-  border: none;
-  border-radius: var(--radius-full);
-  outline: none;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-md);
-  transition: box-shadow var(--duration-fast) var(--ease-standard);
-}
-
-.searchInput::placeholder {
-  color: var(--color-tertiary-foreground);
-}
-
-.searchInput:focus-visible {
-  box-shadow:
-    var(--shadow-sm),
-    0 0 0 3px color-mix(in srgb, var(--color-primary) 35%, transparent);
-}
-
 .kinds {
   display: flex;
   gap: var(--space-2);

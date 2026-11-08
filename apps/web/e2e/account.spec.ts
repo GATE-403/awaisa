@@ -94,9 +94,10 @@ test.describe('Salon admin', () => {
     await expect(page.getByRole('heading', { name: 'Айгерим Садыкова' })).toBeVisible()
     await page.getByRole('group', { name: 'День' }).getByRole('button').nth(1).click()
 
-    const form = page.getByRole('form', { name: 'Закрыть время' })
-    await form.getByLabel('Причина').fill('E2E перерыв')
-    await form.getByRole('button', { name: 'Закрыть время' }).click()
+    await page.getByRole('button', { name: 'Закрыть время' }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByLabel('Причина').fill('E2E перерыв')
+    await dialog.getByRole('button', { name: 'Закрыть время' }).click()
     await expect(page.getByText('E2E перерыв')).toBeVisible()
 
     await page

@@ -37,12 +37,14 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
     try {
       toast.show({ title: await action(), type: 'success' })
       reload()
+      return true
     } catch (actionError) {
       toast.show({
         title: 'Не получилось',
         description: getErrorMessage(actionError),
         type: 'error',
       })
+      return false
     }
   }
 

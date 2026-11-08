@@ -8,6 +8,7 @@ import { useIsScrolled } from '@/common/hooks/useIsScrolled'
 import { useSession } from '@/common/hooks/useSession'
 import { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS } from '@/constants/navigation'
 import { Logo } from '../Logo/Logo'
+import { SearchPanel } from '../SearchPanel/SearchPanel'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import styles from './Header.module.css'
 
@@ -38,6 +39,7 @@ export const Header = () => {
           ))}
         </nav>
         <div className={styles.icons}>
+          <SearchPanel />
           <ThemeToggle />
           <NextLink
             href={status === 'signedIn' ? '/profile' : '/login'}

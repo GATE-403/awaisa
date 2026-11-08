@@ -6,6 +6,7 @@ import type {
   Availability,
   Booking,
   Business,
+  BusinessCard,
   BusinessLink,
   BusinessPage,
   Category,
@@ -78,6 +79,9 @@ const send = <Result>(method: 'PUT' | 'PATCH' | 'DELETE', path: string, body?: u
 
 const manage = (slug: string) => `/manage/${encodeURIComponent(slug)}`
 
+const searchBusinesses = (query: string, signal?: AbortSignal) =>
+  request<BusinessCard[]>(`/businesses?${new URLSearchParams({ q: query })}`, { signal })
+
 const getMyBusinesses = (signal?: AbortSignal) =>
   request<BusinessLink[]>('/me/businesses', { signal })
 
@@ -149,6 +153,7 @@ export {
   getMyBookings,
   getMyBusinesses,
   renameCategory,
+  searchBusinesses,
   setWorkingHours,
   updateBusiness,
   updateService,
