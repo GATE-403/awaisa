@@ -8,6 +8,7 @@ type BookingDay = {
   month: string
   label: string
   isToday: boolean
+  isClosed?: boolean
 }
 
 const priceFormatter = new Intl.NumberFormat('ru-RU')

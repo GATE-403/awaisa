@@ -1,17 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { randomUUID } from 'node:crypto'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
+import type {
+  CategoryInput,
+  ServiceInput,
+  SpecialistInput,
+} from '../businesses/businesses.schemas.js'
 import { Category } from './category.entity.js'
 import { Service } from './service.entity.js'
 import { Specialist } from './specialist.entity.js'
 
 type CatalogView = {
   categories: Pick<Category, 'id' | 'name'>[]
-  services: Pick<
+  services: (Pick<
     Service,
     'id' | 'categoryId' | 'name' | 'description' | 'durationMinutes' | 'price' | 'isPopular'
-  >[]
-  specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'rating'> & { serviceIds: string[] })[]
+  > & { isActive?: boolean })[]
+  specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'rating'> & {
+    serviceIds: string[]
+    isActive?: boolean
+  })[]
 }
 
 @Injectable()
@@ -22,22 +36,24 @@ export class CatalogService {
     @InjectRepository(Specialist) private readonly specialists: Repository<Specialist>,
   ) {}
 
-  async getCatalog(): Promise<CatalogView> {
+  // Public pages see active items only; the owner's cabinet also gets the hidden ones.
+  async getCatalog(businessId: string, { includeInactive = false } = {}): Promise<CatalogView> {
+    const activeOnly = includeInactive ? {} : { isActive: true }
     const [categories, services, specialists] = await Promise.all([
-      this.categories.find({ order: { position: 'ASC' } }),
-      this.services.find({ where: { isActive: true }, order: { position: 'ASC' } }),
+      this.categories.find({ where: { businessId }, order: { position: 'ASC' } }),
+      this.services.find({ where: { businessId, ...activeOnly }, order: { position: 'ASC' } }),
       this.specialists.find({
-        where: { isActive: true },
+        where: { businessId, ...activeOnly },
         relations: { services: true },
         order: { position: 'ASC' },
       }),
     ])
-    const activeServiceIds = new Set(services.map((service) => service.id))
+    const visibleServiceIds = new Set(services.map((service) => service.id))
 
     return {
       categories: categories.map(({ id, name }) => ({ id, name })),
       services: services.map(
-        ({ id, categoryId, name, description, durationMinutes, price, isPopular }) => ({
+        ({ id, categoryId, name, description, durationMinutes, price, isPopular, isActive }) => ({
           id,
           categoryId,
           name,
@@ -45,17 +61,21 @@ export class CatalogService {
           durationMinutes,
           price,
           isPopular,
+          ...(includeInactive ? { isActive } : {}),
         }),
       ),
-      specialists: specialists.map(({ id, name, role, rating, services: offered = [] }) => ({
-        id,
-        name,
-        role,
-        rating,
-        serviceIds: offered
-          .map((service) => service.id)
-          .filter((serviceId) => activeServiceIds.has(serviceId)),
-      })),
+      specialists: specialists.map(
+        ({ id, name, role, rating, isActive, services: offered = [] }) => ({
+          id,
+          name,
+          role,
+          rating,
+          serviceIds: offered
+            .map((service) => service.id)
+            .filter((serviceId) => visibleServiceIds.has(serviceId)),
+          ...(includeInactive ? { isActive } : {}),
+        }),
+      ),
     }
   }
 
@@ -73,6 +93,99 @@ export class CatalogService {
       .where('specialist.isActive = true')
       .orderBy('specialist.position', 'ASC')
       .getMany()
+  }
+
+  async listActiveSpecialists(businessId: string) {
+    return this.specialists.find({
+      where: { businessId, isActive: true },
+      order: { position: 'ASC' },
+    })
+  }
+
+  async specialistBelongsTo(specialistId: string, businessId: string) {
+    return this.specialists.existsBy({ id: specialistId, businessId })
+  }
+
+  async createCategory(businessId: string, input: CategoryInput) {
+    const position = (await this.categories.countBy({ businessId })) + 1
+
+    return this.categories.save(
+      this.categories.create({ id: randomUUID(), businessId, name: input.name, position }),
+    )
+  }
+
+  async updateCategory(businessId: string, id: string, input: CategoryInput) {
+    await this.findOwned(this.categories, businessId, id, 'Категория не найдена')
+    await this.categories.update({ id, businessId }, { name: input.name })
+  }
+
+  async deleteCategory(businessId: string, id: string) {
+    await this.findOwned(this.categories, businessId, id, 'Категория не найдена')
+    if (await this.services.existsBy({ categoryId: id })) {
+      throw new ConflictException('Сначала перенесите или удалите услуги из этой категории')
+    }
+    await this.categories.delete({ id, businessId })
+  }
+
+  async createService(businessId: string, input: ServiceInput) {
+    await this.findOwned(this.categories, businessId, input.categoryId, 'Категория не найдена')
+    const position = (await this.services.countBy({ businessId })) + 1
+    const service = await this.services.save(
+      this.services.create({ id: randomUUID(), businessId, position, ...input }),
+    )
+    // A first service is useless without someone to perform it: give it to every active master.
+    const specialists = await this.listActiveSpecialists(businessId)
+    if (specialists.length > 0) {
+      await this.specialists
+        .createQueryBuilder()
+        .relation(Specialist, 'services')
+        .of(specialists)
+        .add(service.id)
+    }
+
+    return service
+  }
+
+  async updateService(businessId: string, id: string, input: ServiceInput) {
+    await this.findOwned(this.services, businessId, id, 'Услуга не найдена')
+    await this.findOwned(this.categories, businessId, input.categoryId, 'Категория не найдена')
+    await this.services.update({ id, businessId }, input)
+  }
+
+  async saveSpecialist(businessId: string, input: SpecialistInput, id?: string) {
+    const services = await this.services.findBy({ businessId, id: In(input.serviceIds) })
+    if (services.length !== new Set(input.serviceIds).size) {
+      throw new BadRequestException('Услуга не найдена')
+    }
+
+    const existing = id
+      ? await this.findOwned(this.specialists, businessId, id, 'Мастер не найден')
+      : this.specialists.create({
+          id: randomUUID(),
+          businessId,
+          rating: null,
+          position: (await this.specialists.countBy({ businessId })) + 1,
+        })
+
+    return this.specialists.save({
+      ...existing,
+      name: input.name,
+      role: input.role,
+      isActive: input.isActive,
+      services,
+    })
+  }
+
+  private async findOwned<Entity extends { id: string; businessId: string }>(
+    repository: Repository<Entity>,
+    businessId: string,
+    id: string,
+    message: string,
+  ) {
+    const entity = await repository.findOneBy({ id, businessId } as never)
+    if (!entity) throw new NotFoundException(message)
+
+    return entity
   }
 }
 

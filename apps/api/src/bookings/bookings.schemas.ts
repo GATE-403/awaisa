@@ -20,14 +20,8 @@ const createBookingSchema = z.object({
   date: DATE_SCHEMA,
   time: TIME_SCHEMA,
   name: z.string().trim().min(1, 'Укажите имя').max(120),
-  phone: z
-    .string()
-    .trim()
-    .max(32)
-    .refine((value) => {
-      const digits = value.replace(/\D/g, '').length
-      return digits >= 9 && digits <= 15
-    }, 'Укажите корректный номер телефона'),
+  // Signed-in clients book with their verified number, so the field may be empty; the service checks it.
+  phone: z.string().trim().max(32).default(''),
   comment: z.string().trim().max(500).default(''),
 })
 

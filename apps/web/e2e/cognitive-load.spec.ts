@@ -29,7 +29,7 @@ test.describe('Cognitive load: booking', () => {
   test(`at most ${LIMITS.steps} steps, each named in ≤ ${LIMITS.stepTitleWords} words`, async ({
     page,
   }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const titles = await page.locator('section[id^="step-"] h2').allTextContents()
 
     expect(titles.length).toBeLessThanOrEqual(LIMITS.steps)
@@ -38,7 +38,7 @@ test.describe('Cognitive load: booking', () => {
   })
 
   test(`every decision offers ≤ ${LIMITS.choicesPerDecision} options at once`, async ({ page }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
 
     expect(await steps.service.getByRole('radio').count()).toBeLessThanOrEqual(
@@ -51,7 +51,7 @@ test.describe('Cognitive load: booking', () => {
   })
 
   test('the first choice is reachable without reading a wall of text', async ({ page }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const words = await page.evaluate(() => {
       const main = document.querySelector('main')
       const firstChoice = document.querySelector('#step-service [role="radio"]')?.closest('label')
@@ -73,7 +73,7 @@ test.describe('Cognitive load: booking', () => {
     page,
   }) => {
     await mockCreateBooking(page, succeed)
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     const steps = bookingSteps(page)
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
     await pickFirstFreeSlot(page)
@@ -92,7 +92,7 @@ test.describe('Cognitive load: booking', () => {
 
   test(`happy path takes ≤ ${LIMITS.happyPathActions} actions`, async ({ page }) => {
     await mockCreateBooking(page, succeed)
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     let actions = 0
     const act = async (action: () => Promise<unknown>) => {
@@ -123,7 +123,7 @@ test.describe('Cognitive load: booking', () => {
   })
 
   test('price and duration are visible before committing — no surprises', async ({ page }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const option = steps.service.getByRole('radio', { name: /Укладка/ })
     const card = steps.service
@@ -144,7 +144,13 @@ test.describe('Cognitive load: booking', () => {
   test(`never more than ${LIMITS.visiblePrimaryActions} primary action on screen`, async ({
     page,
   }) => {
-    for (const path of ['/', '/services', '/book']) {
+    for (const path of [
+      '/',
+      '/awaisa-studio',
+      '/awaisa-studio/services',
+      '/awaisa-studio/book',
+      '/business',
+    ]) {
       await page.goto(path)
       await page.waitForLoadState('networkidle')
       expect(await countVisiblePrimaryButtons(page), path).toBeLessThanOrEqual(
@@ -155,7 +161,7 @@ test.describe('Cognitive load: booking', () => {
 
   test('the next-step hint always tells what to do next', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Hint lives in the phone action bar')
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const hint = page.locator('[aria-live="polite"]').filter({ visible: true }).last()
 

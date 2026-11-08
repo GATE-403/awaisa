@@ -13,8 +13,12 @@ test.describe('User flow: booking', () => {
     await Promise.all(stored.map(cancelViaApi))
   })
 
-  test('home → next free slot → booking with the service preselected', async ({ page }) => {
+  test('catalog → business → next free slot → booking with the service preselected', async ({
+    page,
+  }) => {
     await page.goto('/')
+    await page.getByRole('link', { name: /Awaisa Studio/ }).click()
+    await expect(page).toHaveURL(/\/awaisa-studio$/)
     const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
 
     await expect(nextSlot.getByText(/(Сегодня|Завтра) в \d{2}:\d{2}|появятся скоро/)).toBeVisible()
@@ -27,7 +31,7 @@ test.describe('User flow: booking', () => {
   })
 
   test('full booking: service → master → time → contacts → ticket → cancel', async ({ page }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
 
     await steps.service.getByRole('radio', { name: /Мужская стрижка/ }).click()
@@ -63,7 +67,7 @@ test.describe('User flow: booking', () => {
   })
 
   test('master page link preselects the master and narrows services', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/awaisa-studio')
     await page.getByRole('link', { name: /Тимур Абдыкадыров/ }).click()
 
     await expect(page).toHaveURL(/specialist=timur/)
@@ -71,14 +75,18 @@ test.describe('User flow: booking', () => {
     await expect(steps.service.getByRole('radio')).toHaveCount(2)
     await steps.service.getByRole('radio').first().click()
     await expect(steps.specialist).toContainText('Тимур Абдыкадыров')
-    await expect(steps.datetime.getByRole('group', { name: 'Время' })).toBeVisible()
+    await expect(
+      steps.datetime
+        .getByRole('group', { name: 'Время' })
+        .or(steps.datetime.getByText('свободного времени нет')),
+    ).toBeVisible()
   })
 
   test('services catalog → book a specific service', async ({ page }) => {
-    await page.goto('/services')
+    await page.goto('/awaisa-studio/services')
     await page.getByRole('link', { name: /Педикюр/ }).click()
 
-    await expect(page).toHaveURL(/\/book\?service=pedicure/)
+    await expect(page).toHaveURL(/\/awaisa-studio\/book\?service=pedicure/)
     await expect(bookingSteps(page).service).toContainText('Педикюр')
   })
 })

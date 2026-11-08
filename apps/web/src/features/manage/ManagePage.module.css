@@ -1,0 +1,48 @@
+.page {
+  padding: var(--space-6) 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.skeleton {
+  height: 480px;
+  border-radius: var(--radius-2xl);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  color: var(--color-link);
+}
+
+.tabsScroller {
+  margin: 0 calc(-1 * var(--page-gutter));
+  padding: 0 var(--page-gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabsScroller::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs {
+  min-width: max-content;
+}
+
+.panel {
+  padding-top: var(--space-6);
+}

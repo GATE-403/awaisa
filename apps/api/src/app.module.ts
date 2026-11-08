@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
+import { ScheduleModule } from '@nestjs/schedule'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
+import { AdminModule } from './admin/admin.module.js'
+import { AuthModule } from './auth/auth.module.js'
 import { BookingsModule } from './bookings/bookings.module.js'
+import { BusinessesModule } from './businesses/businesses.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { type Env, validateEnv } from './config/env.js'
+import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
 
@@ -21,9 +26,14 @@ import { HealthController } from './health/health.controller.js'
         { ttl: 60_000, limit: config.get('RATE_LIMIT_PER_MINUTE', { infer: true }) },
       ],
     }),
+    ScheduleModule.forRoot(),
     DatabaseModule,
     CatalogModule,
+    BusinessesModule,
     BookingsModule,
+    AuthModule,
+    CustomersModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -51,7 +51,36 @@
   color: var(--color-foreground);
 }
 
+.account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  margin: 0 calc(-1 * var(--space-4));
+  border-radius: var(--radius-full);
+  color: var(--color-muted-foreground);
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.account[data-signed-in] {
+  color: var(--color-foreground);
+}
+
+.account svg {
+  width: 26px;
+  height: 26px;
+}
+
+.account:active {
+  scale: 0.97;
+}
+
 @media (hover: hover) {
+  .account:hover {
+    color: var(--color-foreground);
+  }
+
   .navLink:hover {
     color: var(--color-foreground);
   }

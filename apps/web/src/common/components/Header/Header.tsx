@@ -1,17 +1,22 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
+import { UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useIsScrolled } from '@/common/hooks/useIsScrolled'
-import { BOOKING_PATH, isActivePath, NAV_ITEMS } from '@/constants/navigation'
+import { useSession } from '@/common/hooks/useSession'
+import { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS } from '@/constants/navigation'
 import { Logo } from '../Logo/Logo'
 import styles from './Header.module.css'
 
 export const Header = () => {
   const pathname = usePathname()
   const isScrolled = useIsScrolled()
-  const isBookingPage = pathname === BOOKING_PATH
+  const { status, customer } = useSession()
+  const businessSlug = getBusinessSlug(pathname)
+  const showBookingAction = businessSlug !== null && !isBookingPath(pathname)
+  const accountLabel = customer ? `Профиль: ${customer.name || customer.phone}` : 'Войти'
 
   return (
     <header className={styles.header} data-scrolled={isScrolled || undefined}>
@@ -31,8 +36,17 @@ export const Header = () => {
             </NextLink>
           ))}
         </nav>
-        {!isBookingPage && (
-          <ButtonLink render={<NextLink href={BOOKING_PATH} />} size='sm'>
+        <NextLink
+          href={status === 'signedIn' ? '/profile' : '/login'}
+          className={styles.account}
+          aria-label={accountLabel}
+          aria-current={pathname === '/profile' ? 'page' : undefined}
+          data-signed-in={status === 'signedIn' || undefined}
+        >
+          <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
+        </NextLink>
+        {showBookingAction && (
+          <ButtonLink render={<NextLink href={`/${businessSlug}/book`} />} size='sm'>
             Записаться
           </ButtonLink>
         )}

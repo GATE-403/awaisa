@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import type { Booking } from '@/common/api/types'
-import { COMPANY } from '@/constants/company'
 import { CURRENCY, formatAmount, getDateParts } from '@/features/booking/bookingUtils'
 import { Mascot } from '../Mascot/Mascot'
 import { Barcode } from './Barcode'
@@ -25,7 +24,7 @@ export const Ticket = ({ booking, footer, onCodeClick }: TicketProps) => {
         <div className={styles.main}>
           <header className={styles.brand}>
             <Mascot className={styles.brandMark} />
-            <span>{COMPANY.name}</span>
+            <span>{booking.business.name}</span>
             <span className={styles.kind}>Электронный талон</span>
           </header>
 
@@ -39,7 +38,7 @@ export const Ticket = ({ booking, footer, onCodeClick }: TicketProps) => {
               <p className={styles.time}>{booking.time}</p>
               <p className={styles.service}>{booking.serviceName}</p>
               <p className={styles.meta}>
-                {booking.specialistName} · {COMPANY.address}
+                {[booking.specialistName, booking.business.address].filter(Boolean).join(' · ')}
               </p>
             </div>
           </div>

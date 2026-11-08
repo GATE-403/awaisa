@@ -5,6 +5,9 @@ export class Category {
   @PrimaryColumn({ type: 'varchar', length: 64 })
   id: string
 
+  @Column({ name: 'business_id', type: 'uuid' })
+  businessId: string
+
   @Column({ type: 'varchar', length: 120 })
   name: string
 

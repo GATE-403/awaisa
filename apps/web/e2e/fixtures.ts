@@ -21,6 +21,13 @@ const fakeBooking = (input: BookingPayload) => ({
   time: input.time,
   startsAt: `${input.date}T${input.time}:00+06:00`,
   customerName: input.name,
+  business: {
+    slug: 'awaisa-studio',
+    name: 'Awaisa Studio',
+    address: 'ул. Токтогула, 125',
+    phone: '+996555123456',
+    mapUrl: 'https://2gis.kg/bishkek',
+  },
   cancelToken: 'test-token',
 })
 

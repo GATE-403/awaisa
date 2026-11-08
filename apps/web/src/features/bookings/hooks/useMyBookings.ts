@@ -1,7 +1,9 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
-import { cancelBooking, getBooking } from '@/common/api/clientApi'
+import { cancelBooking, cancelMyBooking, getBooking, getMyBookings } from '@/common/api/clientApi'
+import type { Booking } from '@/common/api/types'
+import { useSession } from '@/common/hooks/useSession'
 import { useStoredBookings } from '@/common/hooks/useStoredBookings'
 import {
   forgetBooking,
@@ -13,10 +15,38 @@ import {
 const NOT_FOUND_STATUS = 404
 
 export const useMyBookings = () => {
-  const { bookings, isReady } = useStoredBookings()
+  const { bookings: stored, isReady: isStorageReady } = useStoredBookings()
+  const session = useSession()
+  const [accountBookings, setAccountBookings] = useState<Booking[] | null>(null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const toast = useToast()
-  const idsKey = bookings.map((booking) => booking.id).join(',')
+  const idsKey = stored.map((booking) => booking.id).join(',')
+  const isSignedIn = session.status === 'signedIn'
+  const accountIds = new Set(accountBookings?.map((booking) => booking.id))
+  const bookings = [
+    ...(accountBookings ?? []),
+    ...stored.filter((item) => !accountIds.has(item.id)).map((item) => item.snapshot),
+  ].sort((first, second) => second.startsAt.localeCompare(first.startsAt))
+  const isReady =
+    isStorageReady &&
+    session.status !== 'loading' &&
+    (session.status === 'guest' || accountBookings !== null)
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      setAccountBookings(null)
+      return
+    }
+
+    const controller = new AbortController()
+    getMyBookings(controller.signal)
+      .then(setAccountBookings)
+      .catch(() => {
+        if (!controller.signal.aborted) setAccountBookings([])
+      })
+
+    return () => controller.abort()
+  }, [isSignedIn])
 
   useEffect(() => {
     if (!idsKey) return
@@ -37,13 +67,19 @@ export const useMyBookings = () => {
   }, [idsKey])
 
   const cancel = async (id: string) => {
-    const booking = bookings.find((item) => item.id === id)
-    if (!booking) return
+    const local = stored.find((item) => item.id === id)
+    if (!local && !accountIds.has(id)) return
 
     setCancellingId(id)
 
     try {
-      updateSnapshot(await cancelBooking(id, booking.token))
+      const cancelled = accountIds.has(id)
+        ? await cancelMyBooking(id)
+        : await cancelBooking(id, local?.token ?? '')
+      if (local) updateSnapshot(cancelled)
+      setAccountBookings(
+        (current) => current?.map((item) => (item.id === id ? cancelled : item)) ?? null,
+      )
       toast.show({
         title: 'Запись отменена',
         description: 'Будем рады видеть вас снова',
@@ -75,8 +111,11 @@ export const useMyBookings = () => {
   }
 
   return {
-    bookings: bookings.map((booking) => booking.snapshot),
+    bookings,
     isReady,
+    isSignedIn,
+    phone: session.customer?.phone ?? null,
+    canForget: (id: string) => stored.some((item) => item.id === id),
     cancellingId,
     cancel,
     forget,

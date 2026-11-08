@@ -19,7 +19,7 @@ test.describe('UX: guidance and feedback', () => {
   test('the main action is never disabled and leads to the first unfinished step', async ({
     page,
   }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const action = primaryAction(page)
 
@@ -41,7 +41,7 @@ test.describe('UX: guidance and feedback', () => {
   test('the main action stays on screen at every step on phones', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Phones only: desktop uses a sticky summary card')
     await mockCreateBooking(page, succeed)
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const action = primaryAction(page)
 
@@ -57,7 +57,7 @@ test.describe('UX: guidance and feedback', () => {
   })
 
   test('no validation errors before the first submit attempt', async ({ page }) => {
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     const { contacts } = bookingSteps(page)
 
     await contacts.getByLabel('Имя').fill('А')
@@ -69,7 +69,7 @@ test.describe('UX: guidance and feedback', () => {
   })
 
   test('contact errors are inline, human and keep what was typed', async ({ page }) => {
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     const steps = bookingSteps(page)
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
     await pickFirstFreeSlot(page)
@@ -90,7 +90,7 @@ test.describe('UX: guidance and feedback', () => {
     page,
   }) => {
     await mockCreateBooking(page, (route) => conflict(route))
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     const steps = bookingSteps(page)
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
     const time = await pickFirstFreeSlot(page)
@@ -118,7 +118,7 @@ test.describe('UX: guidance and feedback', () => {
       }
       return route.fallback()
     })
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
       .specialist.getByRole('radio', { name: /Любой мастер/ })
       .click()
@@ -131,7 +131,7 @@ test.describe('UX: guidance and feedback', () => {
   })
 
   test('finished steps collapse to one line and can be reopened', async ({ page }) => {
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     await steps.service.getByRole('radio', { name: /Маникюр/ }).click()
 
@@ -144,7 +144,7 @@ test.describe('UX: guidance and feedback', () => {
   test('changing the service keeps a compatible master but drops the chosen time', async ({
     page,
   }) => {
-    await page.goto('/book?service=haircut-women')
+    await page.goto('/awaisa-studio/book?service=haircut-women')
     const steps = bookingSteps(page)
     await steps.specialist.getByRole('radio', { name: /Айгерим/ }).click()
     await pickFirstFreeSlot(page)
@@ -158,7 +158,7 @@ test.describe('UX: guidance and feedback', () => {
 
   test('success screen gives next steps: calendar, route, my bookings', async ({ page }) => {
     await mockCreateBooking(page, succeed)
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
       .specialist.getByRole('radio', { name: /Любой мастер/ })
       .click()
@@ -177,7 +177,14 @@ test.describe('UX: layout and ergonomics', () => {
   for (const width of [320, 375, 768, 1024]) {
     test(`no horizontal scroll at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 })
-      for (const path of ['/', '/services', '/book', '/bookings']) {
+      for (const path of [
+        '/',
+        '/awaisa-studio',
+        '/awaisa-studio/services',
+        '/awaisa-studio/book',
+        '/bookings',
+        '/business',
+      ]) {
         await page.goto(path)
         await page.waitForLoadState('networkidle')
         expect(await getHorizontalOverflow(page), path).toBeLessThanOrEqual(0)
@@ -187,7 +194,7 @@ test.describe('UX: layout and ergonomics', () => {
 
   test('booking controls are at least 44×44 on phones', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Touch targets matter on touch screens')
-    await page.goto('/book?service=styling')
+    await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
       .specialist.getByRole('radio', { name: /Любой мастер/ })
       .click()
@@ -202,7 +209,7 @@ test.describe('UX: layout and ergonomics', () => {
   test('the whole booking can be done with a keyboard', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Keyboard flow is a desktop concern')
     await mockCreateBooking(page, succeed)
-    await page.goto('/book')
+    await page.goto('/awaisa-studio/book')
 
     await page.getByRole('radio', { name: /Женская стрижка/ }).focus()
     await page.keyboard.press('Space')

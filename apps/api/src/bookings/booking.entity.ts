@@ -7,8 +7,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { Business } from '../businesses/business.entity.js'
 import { Service } from '../catalog/service.entity.js'
 import { Specialist } from '../catalog/specialist.entity.js'
+import { Customer } from '../customers/customer.entity.js'
 
 type BookingStatus = 'confirmed' | 'cancelled'
 
@@ -17,6 +19,13 @@ type BookingStatus = 'confirmed' | 'cancelled'
 export class Booking {
   @PrimaryGeneratedColumn('uuid')
   id: string
+
+  @Column({ name: 'business_id', type: 'uuid' })
+  businessId: string
+
+  @ManyToOne(() => Business, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'business_id' })
+  business?: Business
 
   @Column({ name: 'service_id', type: 'varchar', length: 64 })
   serviceId: string
@@ -52,6 +61,16 @@ export class Booking {
 
   @Column({ name: 'cancel_token_hash', type: 'varchar', length: 64 })
   cancelTokenHash: string
+
+  @Column({ name: 'customer_id', type: 'uuid', nullable: true })
+  customerId: string | null
+
+  @ManyToOne(() => Customer, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'customer_id' })
+  customer?: Customer
+
+  @Column({ name: 'reminder_sent_at', type: 'timestamptz', nullable: true })
+  reminderSentAt: Date | null
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date

@@ -1,5 +1,5 @@
 import type { Icon } from '@phosphor-icons/react'
-import { CalendarCheck, House, SquaresFour } from '@phosphor-icons/react/ssr'
+import { CalendarCheck, MagnifyingGlass, Storefront } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
@@ -8,15 +8,25 @@ type NavItem = {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Главная', icon: House },
-  { href: '/services', label: 'Услуги', icon: SquaresFour },
+  { href: '/', label: 'Каталог', icon: MagnifyingGlass },
   { href: '/bookings', label: 'Мои записи', icon: CalendarCheck },
+  { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
-const BOOKING_PATH = '/book'
+// First path segments that belong to the app; anything else is a business slug.
+const APP_SEGMENTS = new Set(['bookings', 'business', 'login', 'manage', 'profile', 'ui', 'api'])
 
-const isActivePath = (pathname: string, href: string) =>
-  href === '/' ? pathname === '/' : pathname.startsWith(href)
+const getBusinessSlug = (pathname: string) => {
+  const [segment] = pathname.split('/').filter(Boolean)
+  return segment && !APP_SEGMENTS.has(segment) ? segment : null
+}
+
+const isBookingPath = (pathname: string) => /^\/[^/]+\/book$/.test(pathname)
+
+const isActivePath = (pathname: string, href: string) => {
+  if (href === '/') return pathname === '/' || getBusinessSlug(pathname) !== null
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
 
 export type { NavItem }
-export { BOOKING_PATH, isActivePath, NAV_ITEMS }
+export { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS }

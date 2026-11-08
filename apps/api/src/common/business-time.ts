@@ -23,6 +23,12 @@ const businessDateTimeToUtc = (dateKey: string, minutes: number) => {
 const addDays = (dateKey: string, days: number) =>
   toBusinessParts(businessDateTimeToUtc(dateKey, 12 * 60 + days * DAY_MINUTES)).dateKey
 
+// 0 = Monday … 6 = Sunday, matching working_hours.weekday.
+const weekdayOf = (dateKey: string) => {
+  const [year = 0, month = 1, day = 1] = dateKey.split('-').map(Number)
+  return (new Date(Date.UTC(year, month - 1, day)).getUTCDay() + 6) % 7
+}
+
 const formatMinutes = (minutes: number) => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`
 
 const parseTime = (time: string) => {
@@ -37,4 +43,5 @@ export {
   formatMinutes,
   parseTime,
   toBusinessParts,
+  weekdayOf,
 }

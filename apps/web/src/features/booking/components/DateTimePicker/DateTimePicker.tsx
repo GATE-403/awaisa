@@ -58,7 +58,13 @@ export const DateTimePicker = ({
         onValueChange={(values) => toSingleValue(values, onDayChange)}
       >
         {days.map((day) => (
-          <Toggle key={day.key} value={day.key} size='card' aria-label={day.label}>
+          <Toggle
+            key={day.key}
+            value={day.key}
+            size='card'
+            aria-label={day.isClosed ? `${day.label}, выходной` : day.label}
+            disabled={day.isClosed}
+          >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.dayNumber}>{day.dayOfMonth}</span>
             <span className={styles.month}>{day.month}</span>

@@ -1,13 +1,15 @@
 import { ToastProvider } from '@awaisa/ui/Toast'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
 import '@/common/styles/shell.css'
 import { Footer } from '@/common/components/Footer/Footer'
 import { Header } from '@/common/components/Header/Header'
+import { HeaderFallback } from '@/common/components/Header/HeaderFallback'
 import { TabBar } from '@/common/components/TabBar/TabBar'
-import { COMPANY } from '@/constants/company'
+import { PLATFORM } from '@/constants/platform'
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -16,8 +18,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: { default: `${COMPANY.name} — онлайн-запись`, template: `%s · ${COMPANY.name}` },
-  description: COMPANY.tagline,
+  title: { default: `${PLATFORM.name} — онлайн-запись`, template: `%s · ${PLATFORM.name}` },
+  description: PLATFORM.tagline,
 }
 
 export const viewport: Viewport = {
@@ -35,10 +37,14 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
     <body>
       <ToastProvider>
         <div className='root'>
-          <Header />
+          <Suspense fallback={<HeaderFallback />}>
+            <Header />
+          </Suspense>
           {children}
           <Footer />
-          <TabBar />
+          <Suspense>
+            <TabBar />
+          </Suspense>
         </div>
       </ToastProvider>
     </body>
