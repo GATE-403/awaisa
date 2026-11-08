@@ -25,8 +25,12 @@ export const CreateBusinessPage = () => {
 
   return (
     <main className={styles.page}>
-      <Container size='md' className={styles.content}>
-        <PageTitle title='Новая страница.' subtitle='Остальное настроите потом в кабинете.' />
+      <Container size='sm' className={styles.content}>
+        <PageTitle
+          size='sm'
+          title='Новая страница.'
+          subtitle='Остальное настроите потом в кабинете.'
+        />
 
         {!session.customer && <Skeleton className={styles.skeleton} />}
 

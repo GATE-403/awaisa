@@ -1,0 +1,30 @@
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.toggle svg {
+  width: 22px;
+  height: 22px;
+}
+
+.toggle:active {
+  scale: 0.97;
+}
+
+@media (hover: hover) {
+  .toggle:hover {
+    color: var(--color-foreground);
+  }
+}

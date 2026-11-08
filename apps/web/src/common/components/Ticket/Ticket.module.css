@@ -215,41 +215,44 @@ button.code {
   opacity: 0.85;
 }
 
-.stamp {
-  position: absolute;
-  top: 38%;
-  left: 50%;
-  padding: var(--space-1) var(--space-4);
-  border: 3px solid var(--system-red);
-  border-radius: var(--radius-sm);
-  color: var(--system-red);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: 0.12em;
+.status {
+  margin-left: auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+  color: var(--color-danger);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  opacity: 0.85;
-  translate: -50% -50%;
-  rotate: -12deg;
-  mix-blend-mode: multiply;
-  pointer-events: none;
 }
 
-.wrap[data-status="cancelled"] .main,
-.wrap[data-status="cancelled"] .stub {
-  opacity: 0.55;
+.wrap[data-status="cancelled"] .leaf {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.wrap[data-status="cancelled"] .time,
+.wrap[data-status="cancelled"] .amount {
+  color: var(--color-tertiary-foreground);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.wrap[data-status="cancelled"] .service,
+.wrap[data-status="cancelled"] .weekday {
+  color: var(--color-muted-foreground);
+}
+
+.wrap[data-status="cancelled"] .barcode {
+  opacity: 0.2;
 }
 
 .footer {
   display: flex;
   justify-content: center;
   gap: var(--space-2);
-}
-
-@media (prefers-color-scheme: dark) {
-  .stamp {
-    mix-blend-mode: normal;
-  }
 }
 
 @media (max-width: 359px) {

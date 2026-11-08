@@ -9,6 +9,7 @@ import { Footer } from '@/common/components/Footer/Footer'
 import { Header } from '@/common/components/Header/Header'
 import { HeaderFallback } from '@/common/components/Header/HeaderFallback'
 import { TabBar } from '@/common/components/TabBar/TabBar'
+import { THEME_BOOT_SCRIPT } from '@/common/utils/theme'
 import { PLATFORM } from '@/constants/platform'
 
 const inter = Inter({
@@ -27,13 +28,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f2f2f7' },
+    { media: '(prefers-color-scheme: light)', color: '#f5f5f7' },
     { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
 }
 
 const RootLayout = ({ children }: LayoutProps<'/'>) => (
-  <html lang='ru' className={inter.variable}>
+  // The boot script sets data-theme before hydration, so React must not compare that attribute.
+  <html lang='ru' className={inter.variable} suppressHydrationWarning>
+    <head>
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input */}
+      <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+    </head>
     <body>
       <ToastProvider>
         <div className='root'>

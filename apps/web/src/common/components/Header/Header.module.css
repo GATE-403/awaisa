@@ -51,13 +51,18 @@
   color: var(--color-foreground);
 }
 
+.icons {
+  display: flex;
+  align-items: center;
+  margin: 0 calc(-1 * var(--space-3));
+}
+
 .account {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--control-height-md);
   height: var(--control-height-md);
-  margin: 0 calc(-1 * var(--space-4));
   border-radius: var(--radius-full);
   color: var(--color-muted-foreground);
   transition: color var(--duration-fast) var(--ease-standard);
