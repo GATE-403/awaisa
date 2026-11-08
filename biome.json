@@ -76,7 +76,8 @@
         "**/src/app/**/error.tsx",
         "**/src/app/**/loading.tsx",
         "**/*.config.ts",
-        "**/*.d.ts"
+        "**/*.d.ts",
+        "**/e2e/globalTeardown.ts"
       ],
       "linter": {
         "rules": {

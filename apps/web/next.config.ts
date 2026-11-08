@@ -3,6 +3,12 @@ import type { NextConfig } from 'next'
 import { API_URL, CLIENT_API_PREFIX } from './src/config/api'
 
 const nextConfig: NextConfig = {
+  // Links from before the platform (bookmarks, old SMS) pointed at the single salon.
+  redirects: async () => [
+    { source: '/book', destination: '/awaisa-studio/book', permanent: false },
+    { source: '/services', destination: '/awaisa-studio/services', permanent: false },
+    { source: '/admin', destination: '/manage', permanent: false },
+  ],
   rewrites: async () => [
     { source: `${CLIENT_API_PREFIX}/:path*`, destination: `${API_URL}/:path*` },
   ],

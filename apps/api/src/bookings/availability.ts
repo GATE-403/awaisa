@@ -1,5 +1,5 @@
 import { businessDateTimeToUtc, formatMinutes } from '../common/business-time.js'
-import { MIN_LEAD_MINUTES, WORK_DAY } from './booking-rules.js'
+import { MIN_LEAD_MINUTES } from './booking-rules.js'
 
 type BusyInterval = {
   specialistId: string
@@ -13,8 +13,15 @@ type Slot = {
   specialistId: string | null
 }
 
+type OpeningWindow = {
+  opensMinutes: number
+  closesMinutes: number
+}
+
 type BuildSlotsParams = {
   dateKey: string
+  window: OpeningWindow | null
+  slotMinutes: number
   now: Date
   durationMinutes: number
   specialistIds: string[]
@@ -26,14 +33,23 @@ const MINUTE_MS = 60_000
 const overlaps = (startsAt: Date, endsAt: Date, interval: BusyInterval) =>
   startsAt < interval.endsAt && interval.startsAt < endsAt
 
-const buildSlots = ({ dateKey, now, durationMinutes, specialistIds, busy }: BuildSlotsParams) => {
+const buildSlots = ({
+  dateKey,
+  window,
+  slotMinutes,
+  now,
+  durationMinutes,
+  specialistIds,
+  busy,
+}: BuildSlotsParams) => {
   const earliestStart = now.getTime() + MIN_LEAD_MINUTES * MINUTE_MS
   const slots: Slot[] = []
+  if (!window) return slots
 
   for (
-    let minutes = WORK_DAY.startMinutes;
-    minutes + durationMinutes <= WORK_DAY.endMinutes;
-    minutes += WORK_DAY.slotMinutes
+    let minutes = window.opensMinutes;
+    minutes + durationMinutes <= window.closesMinutes;
+    minutes += slotMinutes
   ) {
     const startsAt = businessDateTimeToUtc(dateKey, minutes)
     const endsAt = new Date(startsAt.getTime() + durationMinutes * MINUTE_MS)
@@ -57,5 +73,5 @@ const buildSlots = ({ dateKey, now, durationMinutes, specialistIds, busy }: Buil
   return slots
 }
 
-export type { BusyInterval, Slot }
+export type { BusyInterval, OpeningWindow, Slot }
 export { buildSlots }

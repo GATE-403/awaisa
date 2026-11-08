@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { COMPANY } from '@/constants/company'
+import { PLATFORM } from '@/constants/platform'
 
 type Today = {
   dayKey: string
@@ -16,7 +16,7 @@ const subscribe = (onChange: () => void) => {
 const pad = (value: number) => String(value).padStart(2, '0')
 
 const getSnapshot = () => {
-  const businessNow = new Date(Date.now() + COMPANY.utcOffsetMinutes * MINUTE_MS)
+  const businessNow = new Date(Date.now() + PLATFORM.utcOffsetMinutes * MINUTE_MS)
   const dayKey = `${businessNow.getUTCFullYear()}-${pad(businessNow.getUTCMonth() + 1)}-${pad(businessNow.getUTCDate())}`
 
   return `${dayKey}|${businessNow.getUTCHours() * 60 + businessNow.getUTCMinutes()}`

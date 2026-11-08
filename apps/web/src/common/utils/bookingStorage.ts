@@ -17,6 +17,20 @@ const readRaw = () => {
   }
 }
 
+// Bookings saved before the platform went multi-business all belong to Awaisa Studio.
+const LEGACY_BUSINESS: Booking['business'] = {
+  slug: 'awaisa-studio',
+  name: 'Awaisa Studio',
+  address: 'ул. Токтогула, 125',
+  phone: '',
+  mapUrl: '',
+}
+
+const withBusiness = (booking: StoredBooking): StoredBooking =>
+  booking.snapshot.business
+    ? booking
+    : { ...booking, snapshot: { ...booking.snapshot, business: LEGACY_BUSINESS } }
+
 const isStoredBooking = (value: unknown): value is StoredBooking =>
   typeof value === 'object' &&
   value !== null &&
@@ -31,7 +45,7 @@ const parseBookings = (raw: string | null): StoredBooking[] => {
 
   try {
     const value: unknown = JSON.parse(raw)
-    return Array.isArray(value) ? value.filter(isStoredBooking) : []
+    return Array.isArray(value) ? value.filter(isStoredBooking).map(withBusiness) : []
   } catch {
     return []
   }

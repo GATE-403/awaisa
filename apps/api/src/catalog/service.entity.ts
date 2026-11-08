@@ -6,6 +6,9 @@ export class Service {
   @PrimaryColumn({ type: 'varchar', length: 64 })
   id: string
 
+  @Column({ name: 'business_id', type: 'uuid' })
+  businessId: string
+
   @Column({ name: 'category_id', type: 'varchar', length: 64 })
   categoryId: string
 

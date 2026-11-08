@@ -36,9 +36,13 @@
     background-color var(--duration-fast) var(--ease-standard);
 }
 
+.tab[aria-current="page"] .icon {
+  color: var(--color-link);
+}
+
 .tab[aria-current="page"] {
   background: var(--color-subtle);
-  color: var(--color-link);
+  color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
 }
 

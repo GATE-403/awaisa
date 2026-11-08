@@ -30,6 +30,18 @@
   gap: var(--space-4);
 }
 
+.accountPhone {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.phone {
+  color: var(--color-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .anyIcon {
   display: inline-flex;
   align-items: center;

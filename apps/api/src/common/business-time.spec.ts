@@ -4,6 +4,7 @@ import {
   formatMinutes,
   parseTime,
   toBusinessParts,
+  weekdayOf,
 } from './business-time.js'
 
 describe('business time (UTC+6)', () => {
@@ -28,5 +29,12 @@ describe('business time (UTC+6)', () => {
   it('formats and parses HH:MM', () => {
     expect(formatMinutes(9 * 60 + 5)).toBe('09:05')
     expect(parseTime('14:30')).toBe(14 * 60 + 30)
+  })
+})
+
+describe('weekdayOf', () => {
+  it('counts from Monday', () => {
+    expect(weekdayOf('2026-11-09')).toBe(0)
+    expect(weekdayOf('2026-11-15')).toBe(6)
   })
 })

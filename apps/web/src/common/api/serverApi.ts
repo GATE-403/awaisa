@@ -1,14 +1,30 @@
 import 'server-only'
+import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { API_URL } from '@/config/api'
 import { toApiError } from './apiError'
-import type { Catalog } from './types'
+import type { BusinessCard, BusinessKind, BusinessPage } from './types'
 
-const getCatalog = cache(async (): Promise<Catalog> => {
-  const response = await fetch(`${API_URL}/catalog`)
+const NOT_FOUND = 404
+
+const getBusiness = cache(async (slug: string): Promise<BusinessPage> => {
+  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}`)
+  if (response.status === NOT_FOUND) notFound()
   if (!response.ok) throw await toApiError(response)
 
   return response.json()
 })
 
-export { getCatalog }
+const listBusinesses = cache(
+  async (kind: BusinessKind | undefined, query: string | undefined): Promise<BusinessCard[]> => {
+    const params = new URLSearchParams()
+    if (kind) params.set('kind', kind)
+    if (query) params.set('q', query)
+    const response = await fetch(`${API_URL}/businesses?${params}`)
+    if (!response.ok) throw await toApiError(response)
+
+    return response.json()
+  },
+)
+
+export { getBusiness, listBusinesses }

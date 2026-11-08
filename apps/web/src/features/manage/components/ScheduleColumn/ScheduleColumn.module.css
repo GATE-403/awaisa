@@ -1,0 +1,136 @@
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.header {
+  padding: 0 var(--space-1);
+}
+
+.name {
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.meta,
+.empty {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.empty {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.item {
+  display: grid;
+  grid-template-areas:
+    "time action"
+    "body body";
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.item[data-kind="time-off"] {
+  background: var(--color-subtle);
+  box-shadow: none;
+}
+
+.item[data-cancelled] {
+  opacity: 0.6;
+}
+
+.item[data-cancelled] .title {
+  text-decoration: line-through;
+}
+
+.time {
+  grid-area: time;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  grid-area: body;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.detail,
+.comment,
+.status {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.status {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.phone {
+  color: var(--color-link);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.remove,
+.action {
+  grid-area: action;
+}
+
+.remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) calc(-1 * var(--space-2)) 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.remove svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (hover: hover) {
+  .remove:hover {
+    background: var(--color-subtle-hover);
+    color: var(--color-foreground);
+  }
+}

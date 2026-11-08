@@ -9,6 +9,7 @@ process.env.E2E_API_URL = API_URL
 
 export default defineConfig({
   testDir: './e2e',
+  globalTeardown: './e2e/globalTeardown.ts',
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
@@ -40,6 +41,10 @@ export default defineConfig({
             API_PORT: String(API_PORT),
             RATE_LIMIT_PER_MINUTE: '10000',
             BOOKING_RATE_LIMIT_PER_MINUTE: '100',
+            AUTH_RATE_LIMIT_PER_MINUTE: '1000',
+            SMS_DRIVER: 'console',
+            OTP_TEST_CODE: '111111',
+            ADMIN_PHONES: '+996700000001,+996700000002',
           },
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

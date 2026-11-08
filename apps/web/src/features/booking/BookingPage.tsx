@@ -6,9 +6,10 @@ import { Input } from '@awaisa/ui/Input'
 import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
 import { UsersThree } from '@phosphor-icons/react/ssr'
-import type { Catalog } from '@/common/api/types'
+import type { Business, Catalog } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
+import { formatPhone } from '@/common/utils/formatPhone'
 import styles from './BookingPage.module.css'
 import { ANY_SPECIALIST_ID } from './bookingConstants'
 import { formatDayLong, formatDuration, formatPrice, getSpecialistLabel } from './bookingUtils'
@@ -19,11 +20,12 @@ import { DateTimePicker } from './components/DateTimePicker/DateTimePicker'
 import { useBookingForm } from './hooks/useBookingForm'
 
 interface BookingPageProps {
+  business: Business
   catalog: Catalog
 }
 
-export const BookingPage = ({ catalog }: BookingPageProps) => {
-  const form = useBookingForm(catalog)
+export const BookingPage = ({ business, catalog }: BookingPageProps) => {
+  const form = useBookingForm(business, catalog)
   const specialistLabel = getSpecialistLabel(catalog, form.specialistId)
 
   if (form.createdBooking) {
@@ -51,7 +53,7 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
     <main className={styles.page}>
       <Container className={styles.layout}>
         <div className={styles.steps}>
-          <PageTitle title='Запись.' subtitle='Четыре шага — около минуты.' />
+          <PageTitle title='Запись.' subtitle={`${business.name}: четыре шага — около минуты.`} />
 
           <BookingStep
             id='service'
@@ -113,7 +115,9 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
                     title={specialist.name}
                     description={specialist.role}
                     leading={<Avatar name={specialist.name} />}
-                    trailing={`★ ${specialist.rating.toFixed(1)}`}
+                    trailing={
+                      specialist.rating === null ? undefined : `★ ${specialist.rating.toFixed(1)}`
+                    }
                   />
                 ))}
               </RadioGroup>
@@ -162,20 +166,27 @@ export const BookingPage = ({ catalog }: BookingPageProps) => {
                   placeholder='Как к вам обращаться'
                 />
               </Field>
-              <Field
-                label='Телефон'
-                description='Пришлём подтверждение и напоминание'
-                error={form.errors.phone}
-              >
-                <Input
-                  type='tel'
-                  inputMode='tel'
-                  autoComplete='tel'
-                  value={form.phone}
-                  onValueChange={form.setPhone}
-                  placeholder='+996 555 123 456'
-                />
-              </Field>
+              {form.accountPhone ? (
+                <p className={styles.accountPhone}>
+                  Подтверждение и напоминание придут SMS на{' '}
+                  <span className={styles.phone}>{formatPhone(form.accountPhone)}</span>
+                </p>
+              ) : (
+                <Field
+                  label='Телефон'
+                  description='Пришлём подтверждение и напоминание'
+                  error={form.errors.phone}
+                >
+                  <Input
+                    type='tel'
+                    inputMode='tel'
+                    autoComplete='tel'
+                    value={form.phone}
+                    onValueChange={form.setPhone}
+                    placeholder='+996 555 123 456'
+                  />
+                </Field>
+              )}
               <Field label='Комментарий'>
                 <Input
                   value={form.comment}

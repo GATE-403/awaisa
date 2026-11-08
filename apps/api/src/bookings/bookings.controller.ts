@@ -10,9 +10,12 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common'
 import { Throttle } from '@nestjs/throttler'
+import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import { validateEnv } from '../config/env.js'
+import type { Customer } from '../customers/customer.entity.js'
 import {
   type AvailabilityQuery,
   availabilityQuerySchema,
@@ -44,8 +47,12 @@ export class BookingsController {
 
   @Post('bookings')
   @Throttle({ default: { limit: getBookingRateLimit, ttl: 60_000 } })
-  create(@Body({ schema: createBookingSchema }) body: CreateBookingInput) {
-    return this.bookingsService.create(body)
+  @UseGuards(OptionalAuthGuard)
+  create(
+    @Body({ schema: createBookingSchema }) body: CreateBookingInput,
+    @CurrentCustomer() customer: Customer | null,
+  ) {
+    return this.bookingsService.create(body, customer)
   }
 
   @Get('bookings/:id')

@@ -3,9 +3,11 @@ import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
 import { createBooking } from '@/common/api/clientApi'
-import type { Booking, Catalog } from '@/common/api/types'
+import type { Booking, Business, Catalog } from '@/common/api/types'
+import { useSession } from '@/common/hooks/useSession'
 import { useToday } from '@/common/hooks/useToday'
 import { saveBooking } from '@/common/utils/bookingStorage'
+import { findDay, weekdayOf } from '@/common/utils/workingHours'
 import { ANY_SPECIALIST_ID } from '../bookingConstants'
 import {
   findService,
@@ -31,10 +33,11 @@ const scrollToStep = (stepId: BookingStepId, force = false) => {
   })
 }
 
-export const useBookingForm = (catalog: Catalog) => {
+export const useBookingForm = (business: Business, catalog: Catalog) => {
   const searchParams = useSearchParams()
   const toast = useToast()
   const today = useToday()
+  const session = useSession()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
   const [serviceId, setServiceId] = useState(
     findService(catalog, searchParams.get('service'))?.id ?? null,
@@ -42,7 +45,7 @@ export const useBookingForm = (catalog: Catalog) => {
   const [specialistId, setSpecialistId] = useState(presetSpecialist?.id ?? null)
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null)
   const [time, setTime] = useState<string | null>(null)
-  const [name, setName] = useState('')
+  const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
   const [comment, setComment] = useState('')
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
@@ -55,16 +58,20 @@ export const useBookingForm = (catalog: Catalog) => {
     ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
     : catalog.services
   const specialists = getSpecialistsForService(catalog, serviceId)
-  const days = today ? getUpcomingDays(today.dayKey) : []
-  const dayKey = selectedDayKey ?? today?.dayKey ?? null
+  const days = (today ? getUpcomingDays(today.dayKey) : []).map((day) => ({
+    ...day,
+    isClosed: !findDay(business.hours, weekdayOf(day.key)),
+  }))
+  const dayKey = selectedDayKey ?? days.find((day) => !day.isClosed)?.key ?? null
   const availability = useAvailability(serviceId, specialistId, dayKey)
+  const accountPhone = session.customer?.phone ?? null
+  const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
+  const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
   const errors = {
     name: hasTriedSubmit && !name.trim() ? 'Укажите имя' : undefined,
     phone:
-      hasTriedSubmit && phoneDigits.length < MIN_PHONE_DIGITS
-        ? 'Укажите номер, чтобы мы подтвердили запись'
-        : undefined,
+      hasTriedSubmit && !isPhoneValid ? 'Укажите номер, чтобы мы подтвердили запись' : undefined,
   }
   const firstIncompleteStep: BookingStepId | null = !service
     ? 'service'
@@ -72,7 +79,7 @@ export const useBookingForm = (catalog: Catalog) => {
       ? 'specialist'
       : !time
         ? 'datetime'
-        : !name.trim() || phoneDigits.length < MIN_PHONE_DIGITS
+        : !name.trim() || !isPhoneValid
           ? 'contacts'
           : null
   const completedSteps: Record<BookingStepId, boolean> = {
@@ -137,7 +144,7 @@ export const useBookingForm = (catalog: Catalog) => {
         date: dayKey,
         time,
         name: name.trim(),
-        phone: phone.trim(),
+        phone: accountPhone ? '' : phone.trim(),
         comment: comment.trim(),
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
@@ -177,6 +184,7 @@ export const useBookingForm = (catalog: Catalog) => {
     time,
     name,
     phone,
+    accountPhone,
     comment,
     errors,
     submitError,

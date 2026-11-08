@@ -2,8 +2,8 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm'
 import { Service } from './service.entity.js'
 
 const ratingTransformer = {
-  to: (value: number) => value,
-  from: (value: string | null) => (value === null ? 0 : Number(value)),
+  to: (value: number | null) => value,
+  from: (value: string | null) => (value === null ? null : Number(value)),
 }
 
 @Entity({ name: 'specialists' })
@@ -11,14 +11,23 @@ export class Specialist {
   @PrimaryColumn({ type: 'varchar', length: 64 })
   id: string
 
+  @Column({ name: 'business_id', type: 'uuid' })
+  businessId: string
+
   @Column({ type: 'varchar', length: 160 })
   name: string
 
   @Column({ type: 'varchar', length: 120 })
   role: string
 
-  @Column({ type: 'numeric', precision: 2, scale: 1, default: 5, transformer: ratingTransformer })
-  rating: number
+  @Column({
+    type: 'numeric',
+    precision: 2,
+    scale: 1,
+    nullable: true,
+    transformer: ratingTransformer,
+  })
+  rating: number | null
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean

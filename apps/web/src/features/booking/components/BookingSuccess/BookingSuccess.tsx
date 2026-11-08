@@ -7,7 +7,6 @@ import NextLink from 'next/link'
 import type { Booking } from '@/common/api/types'
 import { Ticket } from '@/common/components/Ticket/Ticket'
 import { downloadCalendarFile } from '@/common/utils/calendarFile'
-import { COMPANY } from '@/constants/company'
 import styles from './BookingSuccess.module.css'
 
 interface BookingSuccessProps {
@@ -27,7 +26,7 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   }
 
   const handleAddToCalendar = () => {
-    downloadCalendarFile(booking, { name: COMPANY.name, address: COMPANY.address })
+    downloadCalendarFile(booking, booking.business)
     toast.show({
       title: 'Событие для календаря готово',
       description: 'Откройте файл, чтобы добавить',
@@ -45,17 +44,19 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
         <Button size='sm' variant='secondary' onClick={handleAddToCalendar}>
           <CalendarPlus weight='bold' className={styles.chipIcon} aria-hidden />В календарь
         </Button>
-        <ButtonLink
-          size='sm'
-          variant='secondary'
-          render={
-            // biome-ignore lint/a11y/useAnchorContent: content comes from Button children via render
-            <a href={COMPANY.mapUrl} target='_blank' rel='noreferrer' />
-          }
-        >
-          <MapPin weight='bold' className={styles.chipIcon} aria-hidden />
-          Маршрут
-        </ButtonLink>
+        {booking.business.mapUrl && (
+          <ButtonLink
+            size='sm'
+            variant='secondary'
+            render={
+              // biome-ignore lint/a11y/useAnchorContent: content comes from Button children via render
+              <a href={booking.business.mapUrl} target='_blank' rel='noreferrer' />
+            }
+          >
+            <MapPin weight='bold' className={styles.chipIcon} aria-hidden />
+            Маршрут
+          </ButtonLink>
+        )}
       </div>
       <div className={styles.primary}>
         <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
