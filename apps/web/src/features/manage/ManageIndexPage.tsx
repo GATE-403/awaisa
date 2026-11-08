@@ -40,8 +40,8 @@ export const ManageIndexPage = () => {
 
   return (
     <main className={styles.page}>
-      <Container size='md' className={styles.content}>
-        <PageTitle title='Мои бизнесы.' subtitle='Выберите, чем управлять.' />
+      <Container size='sm' className={styles.content}>
+        <PageTitle size='sm' title='Мои бизнесы.' subtitle='Выберите, чем управлять.' />
 
         {(!businesses || businesses.length === 1) && <Skeleton className={styles.skeleton} />}
 

@@ -25,7 +25,11 @@ export const Ticket = ({ booking, footer, onCodeClick }: TicketProps) => {
           <header className={styles.brand}>
             <Mascot className={styles.brandMark} />
             <span>{booking.business.name}</span>
-            <span className={styles.kind}>Электронный талон</span>
+            {isCancelled ? (
+              <span className={styles.status}>Отменена</span>
+            ) : (
+              <span className={styles.kind}>Электронный талон</span>
+            )}
           </header>
 
           <div className={styles.body}>
@@ -56,15 +60,13 @@ export const Ticket = ({ booking, footer, onCodeClick }: TicketProps) => {
             )}
           </div>
           <div className={styles.stubInfo}>
-            <span className={styles.stubLabel}>К оплате</span>
+            <span className={styles.stubLabel}>{isCancelled ? 'Оплата не нужна' : 'К оплате'}</span>
             <span className={styles.amount}>
               {formatAmount(booking.price)} <small>{CURRENCY}</small>
             </span>
           </div>
           <Barcode value={booking.id} />
         </div>
-
-        {isCancelled && <span className={styles.stamp}>Отменена</span>}
       </div>
       {footer && <div className={styles.footer}>{footer}</div>}
     </article>

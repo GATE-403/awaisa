@@ -11,3 +11,7 @@
 .container[data-size="md"] {
   max-width: 880px;
 }
+
+.container[data-size="sm"] {
+  max-width: calc(480px + 2 * var(--page-gutter));
+}

@@ -1,5 +1,4 @@
-import { Button } from '@awaisa/ui/Button'
-import { Input } from '@awaisa/ui/Input'
+import { MagnifyingGlass } from '@phosphor-icons/react/ssr'
 import Form from 'next/form'
 import NextLink from 'next/link'
 import type { BusinessKind } from '@/common/api/types'
@@ -24,15 +23,16 @@ export const CatalogSearch = ({ kind, query }: CatalogSearchProps) => (
   <div className={styles.filters}>
     <Form action='/' className={styles.search} role='search'>
       {kind && <input type='hidden' name='kind' value={kind} />}
-      <Input
+      <MagnifyingGlass className={styles.searchIcon} weight='bold' aria-hidden />
+      <input
         name='q'
         type='search'
         defaultValue={query}
         placeholder='Салон, услуга или улица'
         aria-label='Поиск'
+        enterKeyHint='search'
         className={styles.searchInput}
       />
-      <Button type='submit'>Найти</Button>
     </Form>
     <nav aria-label='Виды бизнеса' className={styles.kinds}>
       <NextLink

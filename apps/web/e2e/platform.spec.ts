@@ -45,7 +45,7 @@ test.describe('Platform: a new business goes live', () => {
     const clientPage = await client.newPage()
     await clientPage.goto('/')
     await clientPage.getByRole('searchbox', { name: 'Поиск' }).fill(name)
-    await clientPage.getByRole('button', { name: 'Найти' }).click()
+    await clientPage.getByRole('searchbox', { name: 'Поиск' }).press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
     await clientPage.getByRole('link', { name: 'Записаться' }).first().click()

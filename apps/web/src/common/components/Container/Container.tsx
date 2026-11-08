@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import styles from './Container.module.css'
 
 interface ContainerProps extends ComponentProps<'div'> {
-  size?: 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg'
 }
 
 export const Container = ({ size = 'lg', className, ...props }: ContainerProps) => (

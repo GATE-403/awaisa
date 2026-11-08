@@ -53,8 +53,8 @@ export const ProfilePage = () => {
 
   return (
     <main className={styles.page}>
-      <Container size='md' className={styles.content}>
-        <PageTitle title='Профиль.' subtitle='Записи и контакты в одном месте.' />
+      <Container size='sm' className={styles.content}>
+        <PageTitle size='sm' title='Профиль.' subtitle='Записи и контакты в одном месте.' />
 
         {!customer && <Skeleton className={styles.skeleton} />}
 

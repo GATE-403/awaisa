@@ -8,6 +8,7 @@ import { useIsScrolled } from '@/common/hooks/useIsScrolled'
 import { useSession } from '@/common/hooks/useSession'
 import { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS } from '@/constants/navigation'
 import { Logo } from '../Logo/Logo'
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import styles from './Header.module.css'
 
 export const Header = () => {
@@ -36,15 +37,18 @@ export const Header = () => {
             </NextLink>
           ))}
         </nav>
-        <NextLink
-          href={status === 'signedIn' ? '/profile' : '/login'}
-          className={styles.account}
-          aria-label={accountLabel}
-          aria-current={pathname === '/profile' ? 'page' : undefined}
-          data-signed-in={status === 'signedIn' || undefined}
-        >
-          <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
-        </NextLink>
+        <div className={styles.icons}>
+          <ThemeToggle />
+          <NextLink
+            href={status === 'signedIn' ? '/profile' : '/login'}
+            className={styles.account}
+            aria-label={accountLabel}
+            aria-current={pathname === '/profile' ? 'page' : undefined}
+            data-signed-in={status === 'signedIn' || undefined}
+          >
+            <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
+          </NextLink>
+        </div>
         {showBookingAction && (
           <ButtonLink render={<NextLink href={`/${businessSlug}/book`} />} size='sm'>
             Записаться

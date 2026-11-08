@@ -20,3 +20,10 @@
     line-height: 1.08;
   }
 }
+
+@media (min-width: 768px) {
+  .title[data-size="sm"] {
+    font-size: var(--text-3xl);
+    line-height: 1.12;
+  }
+}
