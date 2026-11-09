@@ -2,16 +2,16 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
+import { Plus } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getMyBusinesses } from '@/common/api/clientApi'
 import type { BusinessLink } from '@/common/api/types'
-import { BusinessTile } from '@/common/components/BusinessTile/BusinessTile'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
+import { BusinessPickerCard } from './components/BusinessPickerCard/BusinessPickerCard'
 import { EmptyState } from './components/EmptyState/EmptyState'
 import styles from './ManageIndexPage.module.css'
 
@@ -41,7 +41,7 @@ export const ManageIndexPage = () => {
 
   return (
     <main className={styles.page}>
-      <Container size='sm' className={styles.content}>
+      <Container size='md' className={styles.content}>
         <PageTitle size='sm' title='Мои бизнесы.' subtitle='Выберите, чем управлять.' />
 
         {(!businesses || businesses.length === 1) && <Skeleton className={styles.skeleton} />}
@@ -57,28 +57,19 @@ export const ManageIndexPage = () => {
         )}
 
         {businesses && businesses.length > 1 && (
-          <ul className={styles.list}>
+          <ul className={styles.grid}>
             {businesses.map((business) => (
               <li key={business.slug}>
-                <NextLink href={`/manage/${business.slug}`} className={styles.row}>
-                  <BusinessTile name={business.name} />
-                  <span className={styles.body}>
-                    <span className={styles.name}>{business.name}</span>
-                    <span className={styles.meta}>awaisa.kg/{business.slug}</span>
-                  </span>
-                  <span className={styles.status} data-hidden={!business.isPublished || undefined}>
-                    {business.isPublished ? 'Открыта' : 'Скрыта'}
-                  </span>
-                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
-                </NextLink>
+                <BusinessPickerCard business={business} />
               </li>
             ))}
             <li>
-              <NextLink href='/business/new' className={styles.row}>
+              <NextLink href='/business/new' className={styles.addCard}>
                 <span className={styles.addTile} aria-hidden='true'>
                   <Plus weight='bold' />
                 </span>
-                <span className={styles.add}>Создать страницу</span>
+                <span className={styles.addTitle}>Новая страница</span>
+                <span className={styles.addText}>Ещё один салон или своё дело — пять минут.</span>
               </NextLink>
             </li>
           </ul>

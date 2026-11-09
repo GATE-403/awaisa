@@ -3,10 +3,16 @@
 }
 
 .content {
+  /* One column for tickets and history, so their edges line up. */
+  --ticket-max-width: none;
+
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-  max-width: calc(560px + 2 * var(--page-gutter));
+}
+
+.content[data-size] {
+  max-width: calc(640px + 2 * var(--page-gutter));
 }
 
 .header {

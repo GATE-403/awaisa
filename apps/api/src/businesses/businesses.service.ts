@@ -9,7 +9,13 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Category } from '../catalog/category.entity.js'
 import { Service } from '../catalog/service.entity.js'
-import { weekdayOf } from '../common/business-time.js'
+import {
+  addDays,
+  businessDateTimeToUtc,
+  formatMinutes,
+  toBusinessParts,
+  weekdayOf,
+} from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { Branch, type BranchView, toBranchView } from './branch.entity.js'
@@ -356,19 +362,58 @@ export class BusinessesService {
   }
 
   async listForCustomer(customer: Customer, isPlatformAdmin: boolean) {
+    const memberships = await this.members.find({
+      where: { customerId: customer.id },
+      relations: { business: true },
+      order: { createdAt: 'ASC' },
+    })
+    const roles = new Map(memberships.map((member) => [member.businessId, member.role]))
     const businesses = isPlatformAdmin
       ? await this.businesses.find({ order: { createdAt: 'ASC' } })
-      : (
-          await this.members.find({
-            where: { customerId: customer.id },
-            relations: { business: true },
-            order: { createdAt: 'ASC' },
-          })
-        )
+      : memberships
           .map((member) => member.business)
           .filter((business): business is Business => Boolean(business))
+    if (businesses.length === 0) return []
 
-    return businesses.map(({ slug, name, isPublished }) => ({ slug, name, isPublished }))
+    // Today at a glance for each business: how many visits and who is next.
+    const now = new Date()
+    const today = toBusinessParts(now).dateKey
+    const stats = (await this.dataSource.query(
+      `
+      SELECT b."id",
+        COUNT(bk."id") FILTER (WHERE bk."starts_at" >= $2 AND bk."starts_at" < $3)::int AS "todayCount",
+        MIN(bk."starts_at") FILTER (WHERE bk."starts_at" >= $4) AS "nextStartsAt"
+      FROM "businesses" b
+      LEFT JOIN "bookings" bk ON bk."business_id" = b."id" AND bk."status" = 'confirmed'
+      WHERE b."id" = ANY($1)
+      GROUP BY b."id"
+      `,
+      [
+        businesses.map(({ id }) => id),
+        businessDateTimeToUtc(today, 0),
+        businessDateTimeToUtc(addDays(today, 1), 0),
+        now,
+      ],
+    )) as { id: string; todayCount: number; nextStartsAt: Date | null }[]
+    const statsById = new Map(stats.map((row) => [row.id, row]))
+
+    return businesses.map(({ id, slug, name, kind, isPublished, coverUrl }) => {
+      const next = statsById.get(id)?.nextStartsAt
+      const nextParts = next ? toBusinessParts(new Date(next)) : null
+
+      return {
+        slug,
+        name,
+        kind,
+        isPublished,
+        coverUrl,
+        role: roles.get(id) ?? 'admin',
+        todayCount: statsById.get(id)?.todayCount ?? 0,
+        next: nextParts
+          ? { date: nextParts.dateKey, time: formatMinutes(nextParts.minutes) }
+          : null,
+      }
+    })
   }
 }
 

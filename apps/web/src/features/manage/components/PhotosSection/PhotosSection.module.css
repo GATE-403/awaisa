@@ -1,9 +1,4 @@
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
+/* A Settings-style group: the cover is a row with a thumbnail, work photos a strip of small tiles. */
 .group {
   display: flex;
   flex-direction: column;
@@ -23,25 +18,54 @@
   text-transform: uppercase;
 }
 
-.cover {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 16 / 10;
+.list {
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--tint) 22%, transparent),
-      transparent
-    ),
-    color-mix(in srgb, var(--tint) 8%, var(--color-surface));
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
 
-.cover[data-busy] .image {
+.coverRow,
+.photosRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.photosRow {
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.photosRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.coverThumb {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--tint) 14%, var(--color-surface));
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  cursor: pointer;
+}
+
+.coverRow[data-busy] .image {
   opacity: 0.5;
 }
 
@@ -54,90 +78,101 @@
   transition: opacity var(--duration-normal) var(--ease-standard);
 }
 
-.coverActions {
-  position: absolute;
-  right: var(--space-3);
-  bottom: var(--space-3);
+.rowText {
   display: flex;
-  gap: var(--space-2);
+  flex: 1;
+  flex-direction: column;
+  min-width: 160px;
 }
 
-.pill {
+.rowTitle {
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+}
+
+.rowHint {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.rowActions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.textButton {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-height: 36px;
-  padding: 0 var(--space-3);
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-2);
   border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
-  box-shadow:
-    inset 0 0 0 0.5px var(--color-material-border),
-    var(--shadow-xs);
-  color: var(--color-foreground);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-link);
   font: inherit;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--text-sm);
   cursor: pointer;
 }
 
-.pill::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
+.textButton[data-danger] {
+  color: var(--color-danger-text);
 }
 
-.pill {
-  position: relative;
-}
-
-.pill:disabled {
-  opacity: 0.6;
+.textButton:disabled {
+  opacity: 0.5;
   cursor: default;
 }
 
-.pill svg {
-  width: 14px;
-  height: 14px;
+.textButton svg {
+  width: 16px;
+  height: 16px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+.strip {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.tile {
+.tile,
+.add {
   position: relative;
-  aspect-ratio: 1;
+  width: 64px;
+  height: 64px;
   overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: var(--color-subtle);
+  border-radius: var(--radius-sm);
 }
 
+.tile {
+  background: var(--color-fill);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+}
+
+/* The × sits in the corner but keeps a 44px hit area over the tile. */
 .remove {
   position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
   width: 44px;
   height: 44px;
-  padding: 0;
+  padding: 4px;
   border: none;
   background: transparent;
   cursor: pointer;
 }
 
 .remove svg {
-  width: 26px;
-  height: 26px;
-  padding: 6px;
+  width: 20px;
+  height: 20px;
+  padding: 4px;
   border-radius: var(--radius-full);
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
@@ -146,29 +181,23 @@
 
 .add {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
-  width: 100%;
-  aspect-ratio: 1;
+  padding: 0;
   border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
   background: transparent;
   color: var(--color-link);
-  font: inherit;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
 .add svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 @media (hover: hover) {
+  .textButton:not(:disabled):hover,
   .add:not(:disabled):hover {
-    background: var(--color-subtle);
+    background: var(--color-fill);
   }
 }
