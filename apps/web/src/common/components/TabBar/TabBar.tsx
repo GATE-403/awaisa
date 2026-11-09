@@ -2,13 +2,13 @@
 
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import { isActivePath, isBookingPath, NAV_ITEMS } from '@/constants/navigation'
+import { isActivePath, isBookingPath, isCabinetPath, NAV_ITEMS } from '@/constants/navigation'
 import styles from './TabBar.module.css'
 
 export const TabBar = () => {
   const pathname = usePathname()
 
-  if (isBookingPath(pathname)) return null
+  if (isBookingPath(pathname) || isCabinetPath(pathname)) return null
 
   return (
     <nav aria-label='Нижнее меню' className={styles.tabBar}>

@@ -1,11 +1,8 @@
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  gap: var(--space-2);
+  padding: 0 var(--space-1);
 }
 
 .top {

@@ -2,7 +2,6 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import { useState } from 'react'
 import type { AdminBooking, Business } from '@/common/api/types'
 import { useToday } from '@/common/hooks/useToday'
@@ -11,6 +10,7 @@ import { formatPrice, getUpcomingDays } from '@/features/booking/bookingUtils'
 import { useAdminSchedule } from '../hooks/useAdminSchedule'
 import { BookingDetailsDialog } from './BookingDetailsDialog/BookingDetailsDialog'
 import { DayCalendar } from './DayCalendar/DayCalendar'
+import { DayStrip } from './DayStrip/DayStrip'
 import { EmptyState } from './EmptyState/EmptyState'
 import styles from './ScheduleTab.module.css'
 import { SectionHeader } from './SectionHeader/SectionHeader'
@@ -62,27 +62,6 @@ export const ScheduleTab = ({ slug, business }: ScheduleTabProps) => {
         }
       />
 
-      <ToggleGroup
-        aria-label='День'
-        layout='scroll'
-        value={date ? [date] : []}
-        onValueChange={([value]) => value && setSelectedDay(value)}
-      >
-        {days.map((day) => (
-          <Toggle
-            key={day.key}
-            value={day.key}
-            size='card'
-            aria-label={day.label}
-            data-day={day.key}
-            data-today={day.isToday || undefined}
-          >
-            <span className={styles.weekday}>{day.weekday}</span>
-            <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-          </Toggle>
-        ))}
-      </ToggleGroup>
-
       {error && (
         <div className={styles.error} role='alert'>
           <p>{error}</p>
@@ -92,26 +71,29 @@ export const ScheduleTab = ({ slug, business }: ScheduleTabProps) => {
         </div>
       )}
 
-      {!schedule && !error && <Skeleton className={styles.skeleton} />}
+      <div className={styles.panel}>
+        <DayStrip days={days} value={date} onChange={setSelectedDay} />
+        {!schedule && !error && <Skeleton className={styles.skeleton} />}
 
-      {schedule && !hasMasters && (
-        <EmptyState
-          title='Нет мастеров'
-          text='Добавьте мастеров в разделе «Мастера» — здесь появится их расписание.'
-        />
-      )}
+        {schedule && !hasMasters && (
+          <EmptyState
+            title='Нет мастеров'
+            text='Добавьте мастеров в разделе «Мастера» — здесь появится их расписание.'
+          />
+        )}
 
-      {schedule && hasMasters && (
-        <DayCalendar
-          specialists={schedule.specialists}
-          bookings={schedule.bookings}
-          timeOff={schedule.timeOff}
-          hours={dayHours}
-          nowMinutes={today && date === today.dayKey ? today.minutes : null}
-          onSelectBooking={setSelected}
-          onRemoveTimeOff={removeTimeOff}
-        />
-      )}
+        {schedule && hasMasters && (
+          <DayCalendar
+            specialists={schedule.specialists}
+            bookings={schedule.bookings}
+            timeOff={schedule.timeOff}
+            hours={dayHours}
+            nowMinutes={today && date === today.dayKey ? today.minutes : null}
+            onSelectBooking={setSelected}
+            onRemoveTimeOff={removeTimeOff}
+          />
+        )}
+      </div>
 
       {selected && (
         <BookingDetailsDialog

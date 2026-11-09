@@ -4,20 +4,21 @@
   gap: var(--space-6);
 }
 
-.weekday {
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
+.panel {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
-.dayNumber {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-semibold);
+.panel > :global(*) + :global(*) {
+  border-top: none;
 }
 
 .skeleton {
   height: 360px;
-  border-radius: var(--radius-2xl);
+  margin: var(--space-4);
+  border-radius: var(--radius-md);
 }
 
 .error {
