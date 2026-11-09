@@ -1,8 +1,9 @@
 'use client'
 
+import { Avatar } from '@awaisa/ui/Avatar'
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -12,8 +13,7 @@ import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
 import { EmptyState } from './components/EmptyState/EmptyState'
-import formStyles from './components/manageForms.module.css'
-import styles from './ManagePage.module.css'
+import styles from './ManageIndexPage.module.css'
 
 export const ManageIndexPage = () => {
   const session = useRequireSession()
@@ -57,25 +57,32 @@ export const ManageIndexPage = () => {
         )}
 
         {businesses && businesses.length > 1 && (
-          <ul className={formStyles.list}>
+          <ul className={styles.list}>
             {businesses.map((business) => (
               <li key={business.slug}>
-                <NextLink href={`/manage/${business.slug}`} className={formStyles.linkRow}>
-                  <span className={formStyles.rowBody}>
-                    <span>{business.name}</span>
-                    <span className={formStyles.rowMeta}>awaisa.kg/{business.slug}</span>
+                <NextLink href={`/manage/${business.slug}`} className={styles.row}>
+                  <Avatar name={business.name} className={styles.tile} />
+                  <span className={styles.body}>
+                    <span className={styles.name}>{business.name}</span>
+                    <span className={styles.meta}>awaisa.kg/{business.slug}</span>
                   </span>
-                  {!business.isPublished && <span className={formStyles.badge}>Скрыта</span>}
-                  <CaretRight className={formStyles.chevron} weight='bold' aria-hidden />
+                  <span className={styles.status} data-hidden={!business.isPublished || undefined}>
+                    {business.isPublished ? 'Открыта' : 'Скрыта'}
+                  </span>
+                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
                 </NextLink>
               </li>
             ))}
+            <li>
+              <NextLink href='/business/new' className={styles.row}>
+                <span className={styles.addTile} aria-hidden='true'>
+                  <Plus weight='bold' />
+                </span>
+                <span className={styles.add}>Создать страницу</span>
+              </NextLink>
+            </li>
           </ul>
         )}
-
-        <NextLink href='/business/new' className={styles.link}>
-          Создать ещё одну страницу ›
-        </NextLink>
       </Container>
     </main>
   )

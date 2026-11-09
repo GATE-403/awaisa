@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { formatPhone, randomClientPhone, signInViaApi } from './account'
+import { randomClientPhone, signInViaApi } from './account'
 import { bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
 
 test.describe('Platform: a new business goes live', () => {
@@ -68,12 +68,10 @@ test.describe('Platform: a new business goes live', () => {
     const day = page.locator(`[data-day="${booked}"]`)
     await day.waitFor()
     await day.click()
-    const entry = page
-      .getByRole('listitem')
-      .filter({ hasText: formatPhone(clientPhone).replace(/ /g, '') })
+    const phonePattern = clientPhone.replace('+', '\\+')
     await expect(
-      entry.or(page.getByRole('listitem').filter({ hasText: clientPhone })),
-    ).toContainText(time)
+      page.getByRole('button', { name: new RegExp(`^${time}.*${phonePattern}`) }),
+    ).toBeVisible()
   })
 
   test('reserved and taken page addresses are refused before submitting', async ({ page }) => {
