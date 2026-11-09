@@ -3,6 +3,7 @@ import NextLink from 'next/link'
 import { PLATFORM } from '@/constants/platform'
 import { Container } from '../Container/Container'
 import { LanguageSwitcher } from '../LanguageSwitcher/LanguageSwitcher'
+import { ThemeSwitcher } from '../ThemeSwitcher/ThemeSwitcher'
 import styles from './Footer.module.css'
 
 export const Footer = () => (
@@ -15,7 +16,10 @@ export const Footer = () => (
           Для бизнеса
         </Link>
       </div>
-      <LanguageSwitcher />
+      <div className={styles.settings}>
+        <LanguageSwitcher />
+        <ThemeSwitcher />
+      </div>
     </Container>
   </footer>
 )

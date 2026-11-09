@@ -52,7 +52,8 @@ The web app is a booking platform: any business registers and gets its own page 
 ## App shell and responsive rules
 
 - Layout variables live in `src/common/styles/shell.css`: `--header-height` (56/64), `--tabbar-height` (60 on phones, 0 from 768px), `--page-gutter` (16/24/32), `--section-gap`.
-- Header is sticky and translucent (blur); it gets a hairline once the page scrolls. Primary nav is in the header from 768px and in the bottom `TabBar` on phones.
+- Header is sticky and translucent (blur); it gets a hairline once the page scrolls. From 768px it is a three-column bar like apple.com's global nav: logo, centred small text links (no backgrounds; the current page is darker and semibold), icons (search, theme, account). On phones it shows only the logo, search and account; primary nav lives in the bottom `TabBar` and the theme choice in the footer (`ThemeSwitcher`). Business pages add a compact «Записаться» pill (28px, with a 44px hit area) at the end of the bar.
+- Catalog kinds are underlined text tabs on a hairline, not pills.
 - `/book` hides the tab bar and shows its own fixed action bar (phones/tablets) or a sticky summary card (≥1024px). The action button always moves the client to the first unfinished step instead of being disabled.
 - Completed booking steps collapse to one line with "Изменить". Anything fixed to the bottom pads for `env(safe-area-inset-bottom)`; the viewport uses `viewport-fit: cover`.
 - Never read the current time during render on the server: use `useToday()` (server snapshot is `null`, the client fills it in).

@@ -1,6 +1,5 @@
 'use client'
 
-import { ButtonLink } from '@awaisa/ui/Button'
 import { UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,9 +37,11 @@ export const Header = () => {
             </NextLink>
           ))}
         </nav>
-        <div className={styles.icons}>
+        <div className={styles.actions}>
           <SearchPanel />
-          <ThemeToggle />
+          <span className={styles.theme}>
+            <ThemeToggle />
+          </span>
           <NextLink
             href={status === 'signedIn' ? '/profile' : '/login'}
             className={styles.account}
@@ -50,12 +51,12 @@ export const Header = () => {
           >
             <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
           </NextLink>
+          {showBookingAction && (
+            <NextLink href={`/${businessSlug}/book`} className={styles.cta}>
+              Записаться
+            </NextLink>
+          )}
         </div>
-        {showBookingAction && (
-          <ButtonLink render={<NextLink href={`/${businessSlug}/book`} />} size='sm'>
-            Записаться
-          </ButtonLink>
-        )}
       </div>
     </header>
   )

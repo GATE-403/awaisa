@@ -19,6 +19,13 @@
   gap: var(--space-1);
 }
 
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+}
+
 .name {
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
@@ -29,5 +36,10 @@
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-between;
+  }
+
+  .settings {
+    align-items: flex-end;
+    margin: 0 calc(-1 * var(--space-2)) 0 0;
   }
 }

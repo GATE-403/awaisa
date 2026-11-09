@@ -11,5 +11,5 @@ export const useTheme = () => {
     saveTheme(next)
   }
 
-  return { theme, cycleTheme }
+  return { theme, cycleTheme, setTheme: saveTheme }
 }
