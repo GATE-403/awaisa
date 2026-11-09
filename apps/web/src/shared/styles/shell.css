@@ -1,6 +1,6 @@
 :root {
-  /* Two rows: logo + account, then the search field. */
-  --header-height: 112px;
+  /* Three rows on phones: logo and actions, the search field, category chips. */
+  --header-height: 152px;
   --tabbar-height: 64px;
   --tabbar-offset: var(--space-2);
   --tabbar-space: calc(
@@ -9,6 +9,7 @@
     2 +
     env(safe-area-inset-bottom)
   );
+  --business-bar-height: 48px;
   --page-gutter: var(--space-4);
   --section-gap: var(--space-10);
 }
@@ -18,6 +19,7 @@
     /* Search row (64) + categories (40). */
     --header-height: 105px;
     --tabbar-space: 0px;
+    --business-bar-height: 52px;
     --page-gutter: var(--space-6);
     --section-gap: var(--space-16);
   }

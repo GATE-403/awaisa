@@ -1,0 +1,166 @@
+.bar {
+  position: sticky;
+  top: var(--header-height);
+  z-index: 35;
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow: 0 0.5px 0 var(--color-border);
+}
+
+/* Phones: one 48pt row — the business, its sections (scrolling), the booking button. */
+.inner {
+  display: grid;
+  grid-template-areas: "identity sections cta";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--layout-container-width);
+  height: 48px;
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+.identity {
+  display: flex;
+  grid-area: identity;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.crumb {
+  display: none;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.separator {
+  display: none;
+  width: 10px;
+  height: 10px;
+  color: var(--color-tertiary-foreground);
+}
+
+.business {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 40px;
+  color: var(--color-foreground);
+}
+
+.name {
+  max-width: 28vw;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  display: none;
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.status[data-open]::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  vertical-align: 1px;
+}
+
+.sections {
+  display: flex;
+  grid-area: sections;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.sections::-webkit-scrollbar {
+  display: none;
+}
+
+/* Underlined text tabs, the same as the catalog's and the cabinet's. */
+.section {
+  display: inline-flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.section[aria-current="page"] {
+  border-bottom-color: var(--color-foreground);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.cta {
+  display: inline-flex;
+  grid-area: cta;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .section:hover,
+  .crumb:hover {
+    color: var(--color-foreground);
+  }
+
+  .cta:hover {
+    background: var(--color-primary-hover);
+  }
+}
+
+@media (min-width: 768px) {
+  .inner {
+    grid-template-areas: "identity sections cta";
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-6);
+    height: 52px;
+  }
+
+  .crumb,
+  .separator,
+  .status {
+    display: inline-flex;
+  }
+
+  .name {
+    max-width: none;
+  }
+
+  .sections {
+    justify-content: flex-end;
+  }
+
+  .section {
+    height: 52px;
+  }
+}

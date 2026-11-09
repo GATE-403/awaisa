@@ -1,0 +1,22 @@
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) 0 var(--space-4);
+  text-align: center;
+}
+
+.ticket {
+  --ticket-max-width: 520px;
+
+  width: 100%;
+  padding: var(--space-2);
+}
+
+.hint {
+  max-width: 32ch;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}

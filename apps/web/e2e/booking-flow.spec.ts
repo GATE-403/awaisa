@@ -60,6 +60,13 @@ test.describe('User flow: booking', () => {
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
     await expect(ticket).toContainText('Мужская стрижка')
 
+    // The ticket alone, large, with a way to save it — like showing it at the door.
+    await ticket.getByRole('button', { name: 'Показать талон' }).click()
+    const ticketSheet = page.getByRole('dialog', { name: 'Талон' })
+    await expect(ticketSheet.getByRole('article', { name: /^Запись / })).toBeVisible()
+    await expect(ticketSheet.getByRole('button', { name: 'Скачать картинкой' })).toBeEnabled()
+    await ticketSheet.getByRole('button', { name: 'Закрыть' }).click()
+
     // Cancelling is immediate; «Вернуть» in the toast undoes it.
     await ticket.getByRole('button', { name: 'Отменить запись' }).click()
     await expect(ticket.getByText('Отменена')).toBeVisible()

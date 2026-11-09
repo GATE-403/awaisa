@@ -43,7 +43,7 @@ export const CabinetBar = ({ slug, title, isPublished }: CabinetBarProps) => {
           <span className={styles.group}>
             <ThemeToggle />
             <NextLink
-              href='/profile'
+              href='/bookings'
               className={styles.account}
               aria-label={customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль'}
             >

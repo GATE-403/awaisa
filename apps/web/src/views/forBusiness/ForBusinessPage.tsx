@@ -1,25 +1,36 @@
 import { ButtonLink } from '@awaisa/ui/Button'
-import { ArrowRight, CaretDown } from '@phosphor-icons/react/ssr'
+import { ArrowRight, Bell, CalendarCheck, CaretDown, Columns } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import type { CSSProperties } from 'react'
 import styles from './ForBusinessPage.module.css'
 import { FAQ, STATS, STEPS } from './forBusinessContent'
 import { DragVisual, ReminderVisual, SlotsVisual } from './ui/FeatureVisuals'
 import { OrbitScene } from './ui/OrbitScene'
 import { ProductShowcase } from './ui/ProductShowcase'
+import { TiltCard } from './ui/TiltCard'
 import { TrustRow } from './ui/TrustRow'
 
 const BLOCKS = [
   {
+    id: 'booking',
+    icon: CalendarCheck,
+    tint: 'var(--system-blue)',
     title: 'Онлайн-запись',
     text: 'Только свободные окна с учётом графика и длительности. Двойная запись невозможна.',
     visual: <SlotsVisual />,
   },
   {
+    id: 'reminders',
+    icon: Bell,
+    tint: 'var(--system-orange)',
     title: 'Напоминания',
     text: 'Подтверждение сразу и напоминание за два часа — меньше пустых кресел.',
     visual: <ReminderVisual />,
   },
   {
+    id: 'schedule',
+    icon: Columns,
+    tint: 'var(--system-green)',
     title: 'Расписание',
     text: 'Колонка на мастера. Перенос перетаскиванием, запись с улицы — нажатием на время.',
     visual: <DragVisual />,
@@ -71,12 +82,17 @@ export const ForBusinessPage = () => (
       </h2>
       <ProductShowcase />
       <div className={styles.bento}>
-        {BLOCKS.map((block) => (
-          <article key={block.title} className={styles.bentoItem}>
-            <h3 className={styles.bentoTitle}>{block.title}</h3>
-            <p className={styles.bentoText}>{block.text}</p>
-            {block.visual}
-          </article>
+        {BLOCKS.map(({ id, icon: Icon, tint, title, text, visual }) => (
+          <TiltCard key={id} className={styles.bentoItem}>
+            <div className={styles.bentoCopy} style={{ '--tint': tint } as CSSProperties}>
+              <span className={styles.bentoIcon} aria-hidden='true'>
+                <Icon weight='fill' />
+              </span>
+              <h3 className={styles.bentoTitle}>{title}</h3>
+              <p className={styles.bentoText}>{text}</p>
+            </div>
+            {visual}
+          </TiltCard>
         ))}
       </div>
     </section>
