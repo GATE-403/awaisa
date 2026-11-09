@@ -4,25 +4,30 @@ import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import { useState } from 'react'
+import type { AdminBooking, Business } from '@/common/api/types'
 import { useToday } from '@/common/hooks/useToday'
-import { getUpcomingDays } from '@/features/booking/bookingUtils'
+import { findDay, weekdayOf } from '@/common/utils/workingHours'
+import { formatPrice, getUpcomingDays } from '@/features/booking/bookingUtils'
 import { useAdminSchedule } from '../hooks/useAdminSchedule'
+import { BookingDetailsDialog } from './BookingDetailsDialog/BookingDetailsDialog'
+import { DayCalendar } from './DayCalendar/DayCalendar'
 import { EmptyState } from './EmptyState/EmptyState'
-import { ScheduleColumn } from './ScheduleColumn/ScheduleColumn'
 import styles from './ScheduleTab.module.css'
 import { SectionHeader } from './SectionHeader/SectionHeader'
 import { TimeOffDialog } from './TimeOffDialog/TimeOffDialog'
 
 interface ScheduleTabProps {
   slug: string
+  business: Business
 }
 
 const DAYS_SHOWN = 14
 
-export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
+export const ScheduleTab = ({ slug, business }: ScheduleTabProps) => {
   const today = useToday()
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [isClosingTime, setIsClosingTime] = useState(false)
+  const [selected, setSelected] = useState<AdminBooking | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
   const { schedule, error, reload, cancelBooking, addTimeOff, removeTimeOff } = useAdminSchedule(
@@ -30,19 +35,24 @@ export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
     date,
   )
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
-  const confirmedCount =
-    schedule?.bookings.filter((booking) => booking.status === 'confirmed').length ?? 0
+  const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
+  const revenue = confirmed.reduce((sum, booking) => sum + booking.price, 0)
+  const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
+  const summary = [
+    dayLabel,
+    !dayHours && 'выходной',
+    confirmed.length === 0 ? 'записей нет' : `записей: ${confirmed.length}`,
+    revenue > 0 && formatPrice(revenue),
+  ]
+    .filter(Boolean)
+    .join(' · ')
   const hasMasters = (schedule?.specialists.length ?? 0) > 0
 
   return (
     <section className={styles.content} aria-label='Расписание'>
       <SectionHeader
         title='Расписание'
-        description={
-          schedule
-            ? `${dayLabel} · ${confirmedCount === 0 ? 'записей нет' : `записей: ${confirmedCount}`}`
-            : dayLabel
-        }
+        description={schedule ? summary : dayLabel}
         actions={
           hasMasters && (
             <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
@@ -92,20 +102,24 @@ export const ScheduleTab = ({ slug }: ScheduleTabProps) => {
       )}
 
       {schedule && hasMasters && (
-        <div className={styles.columns}>
-          {schedule.specialists.map((specialist) => (
-            <ScheduleColumn
-              key={specialist.id}
-              specialist={specialist}
-              bookings={schedule.bookings.filter(
-                (booking) => booking.specialistId === specialist.id,
-              )}
-              timeOff={schedule.timeOff.filter((item) => item.specialistId === specialist.id)}
-              onCancelBooking={cancelBooking}
-              onRemoveTimeOff={removeTimeOff}
-            />
-          ))}
-        </div>
+        <DayCalendar
+          specialists={schedule.specialists}
+          bookings={schedule.bookings}
+          timeOff={schedule.timeOff}
+          hours={dayHours}
+          nowMinutes={today && date === today.dayKey ? today.minutes : null}
+          onSelectBooking={setSelected}
+          onRemoveTimeOff={removeTimeOff}
+        />
+      )}
+
+      {selected && (
+        <BookingDetailsDialog
+          key={selected.id}
+          booking={selected}
+          onClose={() => setSelected(null)}
+          onCancel={cancelBooking}
+        />
       )}
 
       {isClosingTime && schedule && date && (

@@ -1,0 +1,236 @@
+.scroller {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 56px repeat(var(--columns), minmax(180px, 1fr));
+  min-width: min-content;
+}
+
+.corner,
+.columnHead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 56px;
+  border-bottom: 0.5px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.corner {
+  left: 0;
+  z-index: 3;
+}
+
+.columnHead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-left: 0.5px solid var(--color-border);
+}
+
+.master {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.axis {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-surface);
+}
+
+.hour {
+  position: absolute;
+  right: var(--space-2);
+  color: var(--color-tertiary-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  translate: 0 -50%;
+}
+
+.hour:first-child {
+  translate: 0 2px;
+}
+
+.hour:last-child {
+  translate: 0 -100%;
+}
+
+.column {
+  position: relative;
+  border-left: 0.5px solid var(--color-border);
+}
+
+.line {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.closed {
+  position: absolute;
+  right: 0;
+  left: 0;
+  background: repeating-linear-gradient(135deg, var(--color-subtle) 0 1px, transparent 1px 8px);
+}
+
+.booking,
+.timeOff {
+  position: absolute;
+  right: 4px;
+  left: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  padding: 4px 8px 4px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  text-align: left;
+}
+
+.booking {
+  z-index: 1;
+  background: var(--color-primary-subtle);
+  box-shadow: inset 3px 0 0 var(--color-primary);
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.booking[data-cancelled] {
+  z-index: 0;
+  background: var(--color-subtle);
+  box-shadow: inset 3px 0 0 var(--color-tertiary-foreground);
+  color: var(--color-muted-foreground);
+}
+
+.booking[data-cancelled] .blockTitle {
+  text-decoration: line-through;
+}
+
+.timeOff {
+  padding-right: 32px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-subtle) 0 6px,
+    color-mix(in srgb, var(--color-subtle) 40%, transparent) 6px 12px
+  );
+  color: var(--color-muted-foreground);
+}
+
+.blockTime {
+  color: var(--color-link);
+  font-size: var(--text-xs);
+  line-height: 16px;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.booking[data-cancelled] .blockTime,
+.timeOff .blockTime {
+  color: inherit;
+}
+
+.blockTitle {
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  line-height: 18px;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blockMeta {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.now {
+  position: absolute;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  height: 2px;
+  background: var(--color-danger);
+  pointer-events: none;
+}
+
+.now::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+}
+
+.booking[data-compact] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--space-2);
+}
+
+.booking[data-compact] .blockMeta {
+  flex-basis: 100%;
+}
+
+@media (hover: hover) {
+  .booking:not([data-cancelled]):hover {
+    background: var(--color-primary-subtle-hover);
+  }
+
+  .remove:hover {
+    color: var(--color-foreground);
+  }
+}

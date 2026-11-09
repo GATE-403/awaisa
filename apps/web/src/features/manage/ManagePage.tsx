@@ -80,7 +80,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
 
         <div className={styles.main}>
           {!data && <Skeleton className={styles.skeleton} />}
-          {data && tab === 'schedule' && <ScheduleTab slug={slug} />}
+          {data && tab === 'schedule' && <ScheduleTab slug={slug} business={data.business} />}
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />
           )}

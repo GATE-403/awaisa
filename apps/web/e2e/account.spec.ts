@@ -32,9 +32,7 @@ test.describe('Account: sign in by SMS', () => {
     await page.getByRole('button', { name: 'Готово' }).click()
 
     await expect(page).toHaveURL(/\/bookings$/)
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      `Все записи на номер ${formatPhone(phone)}`,
-    )
+    await expect(page.getByText(`Записи на номер ${formatPhone(phone)}`)).toBeVisible()
   })
 
   test('a wrong code explains how many attempts are left', async ({ page }) => {
@@ -91,7 +89,7 @@ test.describe('Salon admin', () => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto('/manage/awaisa-studio')
 
-    await expect(page.getByRole('heading', { name: 'Айгерим Садыкова' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Айгерим Садыкова' })).toBeVisible()
     await page.getByRole('group', { name: 'День' }).getByRole('button').nth(1).click()
 
     await page.getByRole('button', { name: 'Закрыть время' }).click()
@@ -138,10 +136,13 @@ test.describe('Salon admin', () => {
     )
     if (dayIndex > 0) await dayButtons.nth(dayIndex).click()
 
-    const entry = page.getByRole('listitem').filter({ hasText: clientPhone })
-    await entry.getByRole('button', { name: 'Отменить' }).click()
+    const phonePattern = clientPhone.replace('+', '\\+')
+    await page.getByRole('button', { name: new RegExp(phonePattern) }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Отменить запись' }).click()
     await page.getByRole('alertdialog').getByRole('button', { name: 'Отменить запись' }).click()
-    await expect(entry).toContainText('Отменена')
+    await expect(
+      page.getByRole('button', { name: new RegExp(`${phonePattern}, отменена`) }),
+    ).toBeVisible()
 
     await clientPage.goto('/bookings')
     await expect(clientPage.getByRole('article', { name: /^Запись / }).first()).toContainText(

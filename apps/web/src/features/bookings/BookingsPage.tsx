@@ -1,19 +1,21 @@
 'use client'
 
-import { Button, ButtonLink } from '@awaisa/ui/Button'
+import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import NextLink from 'next/link'
-import type { Booking } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
 import { Mascot } from '@/common/components/Mascot/Mascot'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
-import { Ticket } from '@/common/components/Ticket/Ticket'
+import { useToday } from '@/common/hooks/useToday'
 import { formatPhone } from '@/common/utils/formatPhone'
 import styles from './BookingsPage.module.css'
-import { CancelBookingButton } from './components/CancelBookingButton/CancelBookingButton'
+import { getCountdown, isUpcoming } from './bookingsUtils'
+import { BookingHistory } from './components/BookingHistory/BookingHistory'
+import { UpcomingBooking } from './components/UpcomingBooking/UpcomingBooking'
 import { useMyBookings } from './hooks/useMyBookings'
 
 export const BookingsPage = () => {
+  const today = useToday()
   const {
     bookings,
     isReady,
@@ -25,39 +27,29 @@ export const BookingsPage = () => {
     forget,
     copyCode,
   } = useMyBookings()
-  const renderFooter = (booking: Booking) => {
-    if (booking.status !== 'cancelled') {
-      return (
-        <CancelBookingButton
-          booking={booking}
-          isCancelling={cancellingId === booking.id}
-          onConfirm={() => cancel(booking.id)}
-        />
-      )
-    }
-    if (!canForget(booking.id)) return null
-
-    return (
-      <Button variant='ghost' size='sm' onClick={() => forget(booking.id)}>
-        Убрать из списка
-      </Button>
-    )
-  }
-  const subtitle = isSignedIn
-    ? `Все записи на номер ${formatPhone(phone ?? '')}.`
-    : 'Билеты хранятся на этом устройстве.'
+  const upcoming = bookings
+    .filter((booking) => isUpcoming(booking, today))
+    .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
+  const history = bookings.filter((booking) => !isUpcoming(booking, today))
 
   return (
     <main className={styles.page}>
       <Container size='md' className={styles.content}>
-        <PageTitle title='Мои записи.' subtitle={subtitle} />
-
-        {isReady && !isSignedIn && (
-          <p className={styles.signIn}>
-            <NextLink href='/login?next=/bookings'>Войдите по номеру телефона</NextLink>, чтобы
-            видеть записи на любом устройстве и получать SMS.
-          </p>
-        )}
+        <header className={styles.header}>
+          <PageTitle title='Мои записи.' subtitle='Ближайшие визиты и история.' />
+          {isReady && isSignedIn && phone && (
+            <p className={styles.note}>
+              Записи на номер {formatPhone(phone)} — на любом устройстве.
+            </p>
+          )}
+          {isReady && !isSignedIn && (
+            <p className={styles.note}>
+              Записи хранятся на этом устройстве.{' '}
+              <NextLink href='/login?next=/bookings'>Войдите по номеру</NextLink>, чтобы видеть их
+              везде и получать SMS.
+            </p>
+          )}
+        </header>
 
         {!isReady && <Skeleton className={styles.skeleton} />}
 
@@ -65,21 +57,42 @@ export const BookingsPage = () => {
           <div className={styles.empty}>
             <Mascot className={styles.mascot} />
             <p className={styles.emptyTitle}>Записей пока нет</p>
-            <p className={styles.emptyText}>Выберите услугу и удобное время — это займёт минуту</p>
+            <p className={styles.emptyText}>Выберите салон и удобное время — это займёт минуту</p>
             <ButtonLink render={<NextLink href='/' />} size='lg'>
               Найти, куда записаться
             </ButtonLink>
           </div>
         )}
 
-        {bookings.length > 0 && (
-          <ul className={styles.list}>
-            {bookings.map((booking) => (
-              <li key={booking.id} className={styles.item}>
-                <Ticket booking={booking} onCodeClick={copyCode} footer={renderFooter(booking)} />
-              </li>
-            ))}
-          </ul>
+        {upcoming.length > 0 && (
+          <section className={styles.section} aria-labelledby='upcoming-title'>
+            <h2 id='upcoming-title' className={styles.sectionTitle}>
+              Предстоящие
+              <span className={styles.count}>{upcoming.length}</span>
+            </h2>
+            <div className={styles.upcoming}>
+              {upcoming.map((booking) => (
+                <UpcomingBooking
+                  key={booking.id}
+                  booking={booking}
+                  countdown={getCountdown(booking, today)}
+                  isCancelling={cancellingId === booking.id}
+                  onCancel={() => cancel(booking.id)}
+                  onCodeClick={copyCode}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {history.length > 0 && (
+          <section className={styles.section} aria-labelledby='history-title'>
+            <h2 id='history-title' className={styles.sectionTitle}>
+              История
+              <span className={styles.count}>{history.length}</span>
+            </h2>
+            <BookingHistory bookings={history} canForget={canForget} onForget={forget} />
+          </section>
         )}
       </Container>
     </main>
