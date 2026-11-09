@@ -1,5 +1,5 @@
 .page {
-  padding: var(--space-6) 0 var(--section-gap);
+  padding: var(--space-4) 0 var(--section-gap);
 }
 
 .layout {
@@ -9,62 +9,93 @@
 }
 
 .sidebar {
+  min-width: 0;
+}
+
+.panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .identity {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-1);
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
-.eyebrow {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.businessTile {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+}
+
+.identityText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .name {
+  overflow: hidden;
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl-line-height);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-title);
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nameSkeleton {
-  width: 180px;
-  height: 34px;
-  border-radius: var(--radius-sm);
+  width: 140px;
+  height: 24px;
+  border-radius: var(--radius-xs);
 }
 
-.link {
+.pageLink {
   display: inline-flex;
   align-items: center;
+  white-space: nowrap;
   gap: var(--space-1);
-  min-height: 32px;
   color: var(--color-link);
-  font-size: var(--text-sm);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
-.link svg {
-  width: 12px;
-  height: 12px;
+.pageLink svg {
+  width: 11px;
+  height: 11px;
 }
 
-.hidden {
-  padding: 2px var(--space-2);
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
   border-radius: var(--radius-full);
-  background: var(--color-subtle);
   color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
+}
+
+.switch svg {
+  width: 16px;
+  height: 16px;
+}
+
+.progress {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.progress:empty {
+  display: none;
 }
 
 .main {
@@ -76,7 +107,14 @@
 
 .skeleton {
   height: 480px;
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  color: var(--color-link);
 }
 
 .error {
@@ -85,16 +123,24 @@
   gap: var(--space-4);
 }
 
+@media (hover: hover) {
+  .switch:hover {
+    background: var(--color-subtle);
+    color: var(--color-foreground);
+  }
+}
+
+/* App-like two-pane layout: a white sidebar panel next to the content, like System Settings. */
 @media (min-width: 1024px) {
   .page {
-    padding-top: var(--space-10);
+    padding-top: var(--space-8);
   }
 
   .layout {
     display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: 260px minmax(0, 1fr);
     align-items: start;
-    gap: var(--space-12);
+    gap: var(--space-8);
   }
 
   .sidebar {
@@ -102,7 +148,26 @@
     top: calc(var(--header-height) + var(--space-6));
   }
 
-  .main {
-    max-width: 840px;
+  .panel {
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .identity {
+    padding: var(--space-1) var(--space-1) var(--space-3);
+    border-bottom: 0.5px solid var(--color-border);
+    margin-bottom: var(--space-1);
+  }
+
+  .progress {
+    margin-top: var(--space-2);
+    padding: var(--space-3) 0 var(--space-1);
+    border-top: 0.5px solid var(--color-border);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 }

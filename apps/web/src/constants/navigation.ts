@@ -21,6 +21,9 @@ const getBusinessSlug = (pathname: string) => {
   return segment && !APP_SEGMENTS.has(segment) ? segment : null
 }
 
+// The owner cabinet is a self-contained app: no client tab bar or marketing footer there.
+const isCabinetPath = (pathname: string) => pathname.startsWith('/manage/')
+
 const isBookingPath = (pathname: string) => /^\/[^/]+\/book$/.test(pathname)
 
 const isActivePath = (pathname: string, href: string) => {
@@ -29,4 +32,4 @@ const isActivePath = (pathname: string, href: string) => {
 }
 
 export type { NavItem }
-export { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS }
+export { getBusinessSlug, isActivePath, isBookingPath, isCabinetPath, NAV_ITEMS }

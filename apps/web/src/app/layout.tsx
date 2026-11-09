@@ -6,6 +6,7 @@ import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
 import '@/common/styles/shell.css'
 import { Footer } from '@/common/components/Footer/Footer'
+import { FooterGate } from '@/common/components/Footer/FooterGate'
 import { Header } from '@/common/components/Header/Header'
 import { HeaderFallback } from '@/common/components/Header/HeaderFallback'
 import { TabBar } from '@/common/components/TabBar/TabBar'
@@ -47,7 +48,11 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
             <Header />
           </Suspense>
           {children}
-          <Footer />
+          <Suspense>
+            <FooterGate>
+              <Footer />
+            </FooterGate>
+          </Suspense>
           <Suspense>
             <TabBar />
           </Suspense>

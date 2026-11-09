@@ -1,7 +1,8 @@
 'use client'
 
+import { Avatar } from '@awaisa/ui/Avatar'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { ArrowUpRight } from '@phosphor-icons/react/ssr'
+import { ArrowUpRight, CaretUpDown } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Container } from '@/common/components/Container/Container'
@@ -53,29 +54,41 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
     <main className={styles.page}>
       <Container className={styles.layout}>
         <aside className={styles.sidebar}>
-          <div className={styles.identity}>
-            <p className={styles.eyebrow}>Кабинет</p>
-            {data ? (
-              <h1 className={styles.name}>{data.business.name}</h1>
-            ) : (
-              <Skeleton className={styles.nameSkeleton} />
-            )}
-            {data && (
-              <NextLink href={`/${data.business.slug}`} target='_blank' className={styles.link}>
-                awaisa.kg/{data.business.slug}
-                <ArrowUpRight weight='bold' aria-hidden />
+          <div className={styles.panel}>
+            <div className={styles.identity}>
+              {data ? (
+                <Avatar name={data.business.name} className={styles.businessTile} />
+              ) : (
+                <Skeleton className={styles.businessTile} />
+              )}
+              <div className={styles.identityText}>
+                {data ? (
+                  <h1 className={styles.name}>{data.business.name}</h1>
+                ) : (
+                  <Skeleton className={styles.nameSkeleton} />
+                )}
+                {data && (
+                  <NextLink
+                    href={`/${data.business.slug}`}
+                    target='_blank'
+                    className={styles.pageLink}
+                  >
+                    {data.business.isPublished ? 'Открыть страницу' : 'Страница скрыта'}
+                    <ArrowUpRight weight='bold' aria-hidden />
+                  </NextLink>
+                )}
+              </div>
+              <NextLink href='/manage' className={styles.switch} aria-label='Другие бизнесы'>
+                <CaretUpDown weight='bold' aria-hidden />
               </NextLink>
-            )}
-            {data && !data.business.isPublished && (
-              <span className={styles.hidden}>Страница скрыта</span>
+            </div>
+            <ManageNav slug={slug} active={tab} />
+            {data && (
+              <div className={styles.progress}>
+                <SetupProgress business={data.business} catalog={data.catalog} />
+              </div>
             )}
           </div>
-          <ManageNav slug={slug} active={tab} />
-          {data && (
-            <div className={styles.progress}>
-              <SetupProgress business={data.business} catalog={data.catalog} />
-            </div>
-          )}
         </aside>
 
         <div className={styles.main}>

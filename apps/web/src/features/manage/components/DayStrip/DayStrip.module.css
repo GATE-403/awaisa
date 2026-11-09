@@ -1,0 +1,104 @@
+.strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.days {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  border: none;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.days::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS Calendar week row: weekday letters over numbers, the chosen day in a filled circle. */
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 2px;
+  width: 44px;
+  padding: var(--space-1) 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.weekday {
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  line-height: 13px;
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+}
+
+.number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.day[data-today] .number {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-semibold);
+}
+
+.day[aria-pressed="true"] .number {
+  background: var(--color-foreground);
+  color: var(--color-background);
+  font-weight: var(--font-weight-semibold);
+}
+
+.day[aria-pressed="true"][data-today] .number {
+  background: var(--color-danger);
+  color: var(--color-primary-foreground);
+}
+
+.today {
+  flex-shrink: 0;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-subtle);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.today:disabled {
+  color: var(--color-tertiary-foreground);
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .day[aria-pressed="false"]:hover .number {
+    background: var(--color-subtle);
+  }
+}

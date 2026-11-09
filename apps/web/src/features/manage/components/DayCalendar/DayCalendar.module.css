@@ -1,8 +1,5 @@
 .scroller {
   overflow-x: auto;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .grid {
