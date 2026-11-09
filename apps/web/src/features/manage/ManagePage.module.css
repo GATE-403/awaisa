@@ -27,9 +27,9 @@
 
 .businessTile {
   flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
 }
 
 .identityText {
@@ -56,22 +56,13 @@
   border-radius: var(--radius-xs);
 }
 
-.pageLink {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  gap: var(--space-1);
-  color: var(--color-link);
+.caption {
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
 
-.pageLink svg {
-  width: 11px;
-  height: 11px;
-}
-
-.switch {
+.identityAction {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -79,12 +70,35 @@
   width: var(--control-height-md);
   height: var(--control-height-md);
   border-radius: var(--radius-full);
-  color: var(--color-muted-foreground);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-link);
 }
 
-.switch svg {
+.identityAction svg {
   width: 16px;
   height: 16px;
+}
+
+.extraLinks {
+  display: none;
+}
+
+.extraLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+}
+
+.extraLink svg {
+  width: 26px;
+  height: 15px;
+  flex-shrink: 0;
 }
 
 .progress {
@@ -124,7 +138,7 @@
 }
 
 @media (hover: hover) {
-  .switch:hover {
+  .extraLink:hover {
     background: var(--color-subtle);
     color: var(--color-foreground);
   }
@@ -160,6 +174,19 @@
     padding: var(--space-1) var(--space-1) var(--space-3);
     border-bottom: 0.5px solid var(--color-border);
     margin-bottom: var(--space-1);
+  }
+
+  .identityAction {
+    display: none;
+  }
+
+  .extraLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: var(--space-1);
+    padding-top: var(--space-2);
+    border-top: 0.5px solid var(--color-border);
   }
 
   .progress {

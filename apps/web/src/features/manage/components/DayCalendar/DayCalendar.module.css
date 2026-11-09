@@ -33,6 +33,9 @@
 }
 
 .master {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   overflow: hidden;
   font-size: var(--text-sm);
   font-weight: var(--font-weight-semibold);
@@ -40,7 +43,17 @@
   white-space: nowrap;
 }
 
+.master::before {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--tint);
+}
+
 .role {
+  padding-left: calc(8px + var(--space-2));
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
@@ -110,8 +123,11 @@
 
 .booking {
   z-index: 1;
-  background: var(--color-primary-subtle);
-  box-shadow: inset 3px 0 0 var(--color-primary);
+  margin-top: 1px;
+  background: color-mix(in srgb, var(--tint) 16%, var(--color-surface));
+  box-shadow:
+    inset 3px 0 0 var(--tint),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 30%, transparent);
   color: var(--color-foreground);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard);
@@ -119,8 +135,15 @@
 
 .booking[data-cancelled] {
   z-index: 0;
-  background: var(--color-subtle);
-  box-shadow: inset 3px 0 0 var(--color-tertiary-foreground);
+  background-color: var(--color-surface);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--color-subtle) 0 6px,
+    transparent 6px 12px
+  );
+  box-shadow:
+    inset 3px 0 0 var(--color-tertiary-foreground),
+    inset 0 0 0 0.5px var(--color-border);
   color: var(--color-muted-foreground);
 }
 
@@ -130,7 +153,8 @@
 
 .timeOff {
   padding-right: 32px;
-  background: repeating-linear-gradient(
+  background-color: var(--color-surface);
+  background-image: repeating-linear-gradient(
     135deg,
     var(--color-subtle) 0 6px,
     color-mix(in srgb, var(--color-subtle) 40%, transparent) 6px 12px
@@ -139,7 +163,7 @@
 }
 
 .blockTime {
-  color: var(--color-link);
+  color: color-mix(in srgb, var(--tint) 75%, var(--color-foreground));
   font-size: var(--text-xs);
   line-height: 16px;
   font-weight: var(--font-weight-semibold);
@@ -161,12 +185,43 @@
 }
 
 .blockMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.commentIcon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.blockFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  white-space: nowrap;
+  margin-top: auto;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.blockFooter > :first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockPrice {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
 .remove {
@@ -211,20 +266,20 @@
   background: var(--color-danger);
 }
 
-.booking[data-compact] {
+.booking[data-size="compact"] {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: var(--space-2);
 }
 
-.booking[data-compact] .blockMeta {
+.booking[data-size="compact"] .blockMeta {
   flex-basis: 100%;
 }
 
 @media (hover: hover) {
   .booking:not([data-cancelled]):hover {
-    background: var(--color-primary-subtle-hover);
+    background: color-mix(in srgb, var(--tint) 24%, var(--color-surface));
   }
 
   .remove:hover {

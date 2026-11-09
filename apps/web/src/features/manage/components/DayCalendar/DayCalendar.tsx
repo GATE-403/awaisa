@@ -1,9 +1,18 @@
-import { X } from '@phosphor-icons/react/ssr'
+import { ChatText, X } from '@phosphor-icons/react/ssr'
 import type { CSSProperties } from 'react'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/common/api/types'
+import { formatPhone } from '@/common/utils/formatPhone'
 import { formatClock, parseClock } from '@/common/utils/workingHours'
+import { formatPrice } from '@/features/booking/bookingUtils'
 import { addMinutes } from '../../manageUtils'
-import { COMPACT_BLOCK_PX, getDayRange, HOUR, toPx } from './calendarLayout'
+import {
+  COMPACT_BLOCK_PX,
+  getDayRange,
+  getMasterTint,
+  HOUR,
+  TALL_BLOCK_PX,
+  toPx,
+} from './calendarLayout'
 import styles from './DayCalendar.module.css'
 
 interface DayCalendarProps {
@@ -18,7 +27,7 @@ interface DayCalendarProps {
 
 const position = (from: number, to: number, start: number): CSSProperties => ({
   top: toPx(from - start),
-  height: Math.max(toPx(to - from), 28),
+  height: Math.max(toPx(to - from) - 2, 28),
 })
 
 export const DayCalendar = ({
@@ -43,8 +52,12 @@ export const DayCalendar = ({
     <div className={styles.scroller}>
       <div className={styles.grid} style={gridStyle}>
         <div className={styles.corner} />
-        {specialists.map((specialist) => (
-          <div key={specialist.id} className={styles.columnHead}>
+        {specialists.map((specialist, index) => (
+          <div
+            key={specialist.id}
+            className={styles.columnHead}
+            style={{ '--tint': getMasterTint(index) } as CSSProperties}
+          >
             <span className={styles.master}>{specialist.name}</span>
             {specialist.role && <span className={styles.role}>{specialist.role}</span>}
           </div>
@@ -62,11 +75,11 @@ export const DayCalendar = ({
           ))}
         </div>
 
-        {specialists.map((specialist) => (
+        {specialists.map((specialist, index) => (
           <section
             key={specialist.id}
             className={styles.column}
-            style={{ height }}
+            style={{ height, '--tint': getMasterTint(index) } as CSSProperties}
             aria-label={specialist.name}
           >
             {hourMarks.slice(1, -1).map((minutes) => (
@@ -125,6 +138,13 @@ export const DayCalendar = ({
                 const from = parseClock(booking.time)
                 const to = from + booking.durationMinutes
                 const end = addMinutes(booking.time, booking.durationMinutes)
+                const blockHeight = toPx(to - from)
+                const size =
+                  blockHeight < COMPACT_BLOCK_PX
+                    ? 'compact'
+                    : blockHeight >= TALL_BLOCK_PX
+                      ? 'tall'
+                      : 'normal'
 
                 return (
                   <button
@@ -132,7 +152,7 @@ export const DayCalendar = ({
                     type='button'
                     className={styles.booking}
                     data-cancelled={booking.status === 'cancelled' || undefined}
-                    data-compact={toPx(to - from) < COMPACT_BLOCK_PX || undefined}
+                    data-size={size}
                     style={position(from, to, range.start)}
                     onClick={() => onSelectBooking(booking)}
                     aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}`}
@@ -141,7 +161,16 @@ export const DayCalendar = ({
                       {booking.time}–{end}
                     </span>
                     <span className={styles.blockTitle}>{booking.serviceName}</span>
-                    <span className={styles.blockMeta}>{booking.customerName}</span>
+                    <span className={styles.blockMeta}>
+                      {booking.customerName}
+                      {booking.comment && <ChatText className={styles.commentIcon} aria-hidden />}
+                    </span>
+                    {size === 'tall' && (
+                      <span className={styles.blockFooter}>
+                        <span>{formatPhone(booking.customerPhone)}</span>
+                        <span className={styles.blockPrice}>{formatPrice(booking.price)}</span>
+                      </span>
+                    )}
                   </button>
                 )
               })}

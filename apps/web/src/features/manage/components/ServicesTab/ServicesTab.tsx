@@ -1,5 +1,5 @@
 import { Button } from '@awaisa/ui/Button'
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { CaretRight, Plus, Star } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import {
   createCategory,
@@ -39,9 +39,11 @@ export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
         actions={
           <>
             <Button variant='secondary' size='sm' onClick={() => setIsAddingCategory(true)}>
+              <Plus weight='bold' aria-hidden />
               Новая категория
             </Button>
             <Button size='sm' onClick={() => setEditing('new')}>
+              <Plus weight='bold' aria-hidden />
               Добавить услугу
             </Button>
           </>
@@ -89,24 +91,27 @@ export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
                       <button
                         type='button'
                         className={styles.serviceRow}
+                        data-hidden={service.isActive === false || undefined}
                         onClick={() => setEditing(service)}
                       >
                         <span className={styles.rowBody}>
                           <span className={styles.rowTitle}>
-                            {service.name}
-                            {service.isPopular && <span className={styles.badge}>Популярная</span>}
-                            {service.isActive === false && (
-                              <span className={styles.badge}>Скрыта</span>
+                            {service.isPopular && (
+                              <Star className={styles.star} weight='fill' aria-label='Популярная' />
                             )}
+                            {service.name}
                           </span>
-                          {service.description && (
-                            <span className={styles.rowMeta}>{service.description}</span>
-                          )}
+                          <span className={styles.rowMeta}>
+                            {[
+                              service.isActive === false && 'Скрыта',
+                              formatDuration(service.durationMinutes),
+                              service.description,
+                            ]
+                              .filter(Boolean)
+                              .join(' · ')}
+                          </span>
                         </span>
-                        <span className={styles.cellMuted}>
-                          {formatDuration(service.durationMinutes)}
-                        </span>
-                        <span className={styles.cellStrong}>{formatPrice(service.price)}</span>
+                        <span className={styles.cellValue}>{formatPrice(service.price)}</span>
                         <CaretRight className={styles.chevron} weight='bold' aria-hidden />
                       </button>
                     </li>

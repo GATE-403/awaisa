@@ -33,8 +33,8 @@
 }
 
 .link[aria-current="page"] {
-  background: var(--color-primary);
-  color: var(--color-primary-foreground);
+  background: var(--color-foreground);
+  color: var(--color-background);
 }
 
 .tile {
@@ -69,7 +69,7 @@
 
   .link {
     gap: var(--space-3);
-    min-height: 40px;
+    min-height: 36px;
     padding: 0 var(--space-2);
     border-radius: var(--radius-sm);
     background: transparent;
@@ -78,8 +78,22 @@
     font-weight: var(--font-weight-regular);
   }
 
+  /* iPadOS sidebar: the selected row is a quiet grey pill, not an accent fill. */
+  .link[aria-current="page"] {
+    background: var(--color-subtle);
+    color: var(--color-foreground);
+    font-weight: var(--font-weight-semibold);
+  }
+
   .tile {
-    border-radius: 7px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+
+  .tile svg {
+    width: 15px;
+    height: 15px;
   }
 }
 

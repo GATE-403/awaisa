@@ -51,12 +51,12 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
     <label key={key} className={styles.fieldRow}>
       <span className={styles.fieldLabel}>{label}</span>
       <Input
+        variant='plain'
         type={type}
         inputMode={type === 'tel' ? 'tel' : undefined}
         value={values[key]}
-        placeholder={placeholder}
+        placeholder={placeholder ?? 'Не указано'}
         onValueChange={(value) => change({ [key]: value })}
-        className={styles.fieldInput}
       />
     </label>
   )
@@ -72,11 +72,11 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
           <div className={styles.fieldRow}>
             <span className={styles.fieldLabel}>Чем занимаетесь</span>
             <Select
+              variant='plain'
               aria-label='Чем занимаетесь'
               items={BUSINESS_KINDS}
               value={values.kind}
               onValueChange={(value) => value && change({ kind: value as BusinessKind })}
-              className={styles.fieldInput}
             />
           </div>
         </div>
@@ -103,16 +103,17 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
         </div>
       </div>
 
-      <div className={styles.formActions}>
-        {hasChanges && (
-          <Button type='button' variant='secondary' onClick={() => setDraft({})}>
+      {hasChanges && (
+        <section className={styles.saveBar} aria-label='Несохранённые изменения'>
+          <span className={styles.saveText}>Есть несохранённые изменения</span>
+          <Button type='button' variant='secondary' size='sm' onClick={() => setDraft({})}>
             Отменить
           </Button>
-        )}
-        <Button type='submit' disabled={!hasChanges || isSaving}>
-          Сохранить
-        </Button>
-      </div>
+          <Button type='submit' size='sm' disabled={isSaving}>
+            Сохранить
+          </Button>
+        </section>
+      )}
     </form>
   )
 }
