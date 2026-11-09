@@ -7,6 +7,7 @@ import type { FormEvent } from 'react'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { formatPhone } from '@/common/utils/formatPhone'
+import { maskPhoneInput } from '@/common/utils/inputMasks'
 import { CODE_LENGTH, useLoginForm } from './hooks/useLoginForm'
 import styles from './LoginPage.module.css'
 
@@ -33,7 +34,7 @@ export const LoginPage = () => {
                   autoComplete='tel'
                   placeholder='+996 555 123 456'
                   value={form.phone}
-                  onValueChange={form.setPhone}
+                  onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
                   autoFocus
                 />
               </Field>

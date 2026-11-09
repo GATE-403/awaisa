@@ -11,6 +11,8 @@ type ToastOptions = {
   description?: ReactNode
   type?: ToastType
   timeout?: number
+  /** A reversible action, e.g. «Вернуть» after a cancellation. */
+  action?: { label: string; onClick: () => void }
 }
 
 interface ToastProviderProps {
@@ -81,6 +83,7 @@ const ToastList = () => {
           <BaseToast.Title className={styles.title} />
           <BaseToast.Description className={styles.description} />
         </span>
+        {toast.actionProps && <BaseToast.Action className={styles.action} />}
       </BaseToast.Root>
     )
   })
@@ -101,8 +104,23 @@ const useToast = () => {
   const manager = BaseToast.useToastManager()
 
   return {
-    show: ({ title, description, type = 'info', timeout }: ToastOptions) =>
-      manager.add({ title, description, type, timeout }),
+    show: ({ title, description, type = 'info', timeout, action }: ToastOptions) => {
+      const id: string = manager.add({
+        title,
+        description,
+        type,
+        timeout,
+        actionProps: action && {
+          children: action.label,
+          onClick: () => {
+            manager.close(id)
+            action.onClick()
+          },
+        },
+      })
+
+      return id
+    },
     close: manager.close,
   }
 }

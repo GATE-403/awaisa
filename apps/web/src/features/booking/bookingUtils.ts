@@ -43,6 +43,11 @@ const fromDayKey = (key: string) => {
   return new Date(year ?? 0, (month ?? 1) - 1, day ?? 1)
 }
 
+const addDayKey = (key: string, days: number) => {
+  const date = fromDayKey(key)
+  return toDayKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() + days))
+}
+
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
 
 const getDateParts = (key: string) => {
@@ -90,6 +95,7 @@ const getSpecialistLabel = (catalog: Catalog, id: string | null) =>
 
 export type { BookingDay }
 export {
+  addDayKey,
   CURRENCY,
   findService,
   findSpecialist,

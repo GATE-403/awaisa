@@ -4,6 +4,7 @@ import { type FormEvent, useState } from 'react'
 import type { Catalog, CreateBookingInput, Specialist } from '@/common/api/types'
 import { Sheet } from '@/common/components/Sheet/Sheet'
 import sheet from '@/common/components/Sheet/Sheet.module.css'
+import { maskPhoneInput } from '@/common/utils/inputMasks'
 import { formatDuration, formatPrice } from '@/features/booking/bookingUtils'
 import { useAvailability } from '@/features/booking/hooks/useAvailability'
 
@@ -173,9 +174,9 @@ export const NewBookingDialog = ({
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  placeholder='0555 123 456'
+                  placeholder='+996 555 123 456'
                   value={phone}
-                  onValueChange={setPhone}
+                  onValueChange={(value) => setPhone(maskPhoneInput(value))}
                   maxLength={32}
                   autoComplete='off'
                 />

@@ -59,11 +59,16 @@ test.describe('User flow: booking', () => {
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
     await expect(ticket).toContainText('Мужская стрижка')
 
+    // Cancelling is immediate; «Вернуть» in the toast undoes it.
     await ticket.getByRole('button', { name: 'Отменить запись' }).click()
-    const confirm = page.getByRole('alertdialog')
-    await expect(confirm).toBeVisible()
-    await confirm.getByRole('button', { name: 'Отменить запись' }).click()
+    await expect(ticket.getByText('Отменена')).toBeVisible()
+    await page.getByRole('button', { name: 'Вернуть' }).click()
+    await expect(ticket.getByText('Отменена')).toHaveCount(0)
+    await expect(page.getByRole('region', { name: /Notifications/ })).toContainText(
+      'Запись возвращена',
+    )
 
+    await ticket.getByRole('button', { name: 'Отменить запись' }).click()
     await expect(ticket.getByText('Отменена')).toBeVisible()
     await expect(ticket.getByRole('button', { name: 'Убрать из списка' })).toBeVisible()
   })

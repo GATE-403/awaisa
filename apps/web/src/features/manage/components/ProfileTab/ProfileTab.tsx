@@ -5,6 +5,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
 import { updateBusiness } from '@/common/api/clientApi'
 import type { Business, BusinessKind, UpdateBusinessInput } from '@/common/api/types'
+import { maskPhoneInput } from '@/common/utils/inputMasks'
 import { BUSINESS_KINDS } from '@/constants/platform'
 import styles from '../manageForms.module.css'
 import { SectionHeader } from '../SectionHeader/SectionHeader'
@@ -56,7 +57,7 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
         inputMode={type === 'tel' ? 'tel' : undefined}
         value={values[key]}
         placeholder={placeholder ?? 'Не указано'}
-        onValueChange={(value) => change({ [key]: value })}
+        onValueChange={(value) => change({ [key]: type === 'tel' ? maskPhoneInput(value) : value })}
       />
     </label>
   )

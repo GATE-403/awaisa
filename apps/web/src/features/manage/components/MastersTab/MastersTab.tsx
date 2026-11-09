@@ -38,7 +38,7 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
 
       {catalog.specialists.length === 0 ? (
         <EmptyState
-          title='Пока никого'
+          title='Добавьте мастера'
           text='Если работаете один — добавьте себя. Клиенты смогут выбрать мастера или любого свободного.'
           action={<Button onClick={() => setEditing('new')}>Добавить мастера</Button>}
         />

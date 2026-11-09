@@ -7,8 +7,8 @@
   border-radius: var(--radius-xl);
   background: linear-gradient(
     150deg,
-    color-mix(in srgb, var(--tint) 26%, var(--color-surface)),
-    color-mix(in srgb, var(--tint) 12%, var(--color-surface))
+    color-mix(in srgb, var(--tint) 26%, var(--color-sheet-surface)),
+    color-mix(in srgb, var(--tint) 12%, var(--color-sheet-surface))
   );
   box-shadow:
     inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 35%, transparent),
@@ -16,7 +16,7 @@
 }
 
 .hero[data-cancelled] {
-  background: var(--color-surface);
+  background: var(--color-sheet-surface);
 }
 
 .heroDay {
@@ -104,7 +104,7 @@
   gap: var(--space-1);
   padding: var(--space-3) var(--space-2);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-sheet-surface);
   box-shadow: var(--shadow-xs);
   color: var(--color-link);
   font-size: var(--text-xs);
@@ -133,6 +133,6 @@
 .comment {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-sheet-surface);
   line-height: var(--text-md-line-height);
 }

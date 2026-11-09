@@ -7,6 +7,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -59,6 +60,12 @@ export class MeController {
   @Get('bookings')
   listBookings(@CurrentCustomer() customer: Customer) {
     return this.bookings.listForCustomer(customer)
+  }
+
+  @Post('bookings/:id/restore')
+  @HttpCode(200)
+  restoreBooking(@CurrentCustomer() customer: Customer, @Param('id', ParseUUIDPipe) id: string) {
+    return this.bookings.restoreForCustomer(id, customer)
   }
 
   @Delete('bookings/:id')

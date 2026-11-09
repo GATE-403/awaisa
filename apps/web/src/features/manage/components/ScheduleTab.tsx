@@ -15,6 +15,7 @@ import { DayCalendar } from './DayCalendar/DayCalendar'
 import { DayStrip } from './DayStrip/DayStrip'
 import { EmptyState } from './EmptyState/EmptyState'
 import { NewBookingDialog } from './NewBookingDialog/NewBookingDialog'
+import { NowBar } from './NowBar/NowBar'
 import styles from './ScheduleTab.module.css'
 import { SectionHeader } from './SectionHeader/SectionHeader'
 import { TimeOffDialog } from './TimeOffDialog/TimeOffDialog'
@@ -23,13 +24,15 @@ interface ScheduleTabProps {
   slug: string
   business: Business
   catalog: Catalog
+  /** Bumped when a new booking arrives, so the open day reloads. */
+  refreshKey: number
 }
 
 type Draft = { specialistId: string; time: string | null }
 
 const DAYS_SHOWN = 14
 
-export const ScheduleTab = ({ slug, business, catalog }: ScheduleTabProps) => {
+export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const today = useToday()
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [isClosingTime, setIsClosingTime] = useState(false)
@@ -37,8 +40,16 @@ export const ScheduleTab = ({ slug, business, catalog }: ScheduleTabProps) => {
   const [draft, setDraft] = useState<Draft | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
-  const { schedule, error, reload, addBooking, cancelBooking, addTimeOff, removeTimeOff } =
-    useAdminSchedule(slug, date)
+  const {
+    schedule,
+    error,
+    reload,
+    addBooking,
+    moveBooking,
+    cancelBooking,
+    addTimeOff,
+    removeTimeOff,
+  } = useAdminSchedule(slug, date, refreshKey)
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
   const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
   const revenue = confirmed.reduce((sum, booking) => sum + booking.price, 0)
@@ -90,12 +101,15 @@ export const ScheduleTab = ({ slug, business, catalog }: ScheduleTabProps) => {
 
       <div className={styles.panel}>
         <DayStrip days={days} value={date} onChange={setSelectedDay} />
+        {schedule && hasMasters && today && date === today.dayKey && (
+          <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} />
+        )}
         {!schedule && !error && <Skeleton className={styles.skeleton} />}
 
         {schedule && !hasMasters && (
           <EmptyState
-            title='Нет мастеров'
-            text='Добавьте мастеров в разделе «Мастера» — здесь появится их расписание.'
+            title='Добавьте мастеров'
+            text='Откройте раздел «Мастера» и добавьте хотя бы себя — здесь появится расписание.'
           />
         )}
 
@@ -110,6 +124,7 @@ export const ScheduleTab = ({ slug, business, catalog }: ScheduleTabProps) => {
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={(specialistId, time) => setDraft({ specialistId, time })}
+            onMoveBooking={moveBooking}
           />
         )}
       </div>

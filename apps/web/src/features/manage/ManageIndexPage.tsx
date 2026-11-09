@@ -48,7 +48,7 @@ export const ManageIndexPage = () => {
 
         {businesses?.length === 0 && (
           <EmptyState
-            title='Пока нет страницы'
+            title='Создайте первую страницу'
             text='Создайте страницу бизнеса — это пять минут, и клиенты смогут записываться.'
             action={
               <ButtonLink render={<NextLink href='/business/new' />}>Создать страницу</ButtonLink>

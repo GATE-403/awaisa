@@ -6,9 +6,16 @@ import { checkSlug, createBusiness } from '@/common/api/clientApi'
 import type { BusinessKind, SlugCheck } from '@/common/api/types'
 import { useSession } from '@/common/hooks/useSession'
 import { slugify } from '@/common/utils/slugify'
+import { SERVICE_TEMPLATES } from '@/constants/serviceTemplates'
 
 const SLUG_CHECK_DELAY_MS = 350
 const MIN_SLUG_LENGTH = 3
+
+const STEPS = ['name', 'kind', 'contacts'] as const
+
+type CreateStep = (typeof STEPS)[number]
+
+type TemplateEdit = { isChecked: boolean; price: string }
 
 export const useCreateBusinessForm = () => {
   const router = useRouter()
@@ -16,7 +23,9 @@ export const useCreateBusinessForm = () => {
   const { customer } = useSession()
   const [name, setName] = useState('')
   const [slugInput, setSlug] = useState<string | null>(null)
+  const [step, setStep] = useState<CreateStep>('name')
   const [kind, setKind] = useState<BusinessKind>('beauty')
+  const [edits, setEdits] = useState<Record<string, TemplateEdit>>({})
   const [city, setCity] = useState('Бишкек')
   const [address, setAddress] = useState('')
   const [phoneInput, setPhone] = useState<string | null>(null)
@@ -26,6 +35,16 @@ export const useCreateBusinessForm = () => {
   const slug = slugInput ?? slugify(name)
   const phone = phoneInput ?? customer?.phone ?? ''
   const currentCheck = slugCheck?.slug === slug ? slugCheck : null
+  const templates = SERVICE_TEMPLATES[kind].map((template) => {
+    const edit = edits[`${kind}:${template.name}`]
+
+    return {
+      ...template,
+      isChecked: edit?.isChecked ?? true,
+      price: edit?.price ?? String(template.price),
+    }
+  })
+  const isNameValid = name.trim().length >= 2 && !(currentCheck && !currentCheck.available)
   const errors = {
     name: hasTriedSubmit && name.trim().length < 2 ? 'Укажите название' : undefined,
     slug: currentCheck && !currentCheck.available ? currentCheck.reason : undefined,
@@ -49,19 +68,71 @@ export const useCreateBusinessForm = () => {
 
   const changeSlug = (value: string) => setSlug(slugify(value))
 
+  const editTemplate = (templateName: string, edit: Partial<TemplateEdit>) => {
+    const key = `${kind}:${templateName}`
+    const current = templates.find((item) => item.name === templateName)
+    if (!current) return
+
+    setEdits((all) => ({
+      ...all,
+      [key]: { isChecked: current.isChecked, price: current.price, ...edit },
+    }))
+  }
+
+  const goBack = () => {
+    const index = STEPS.indexOf(step)
+    setStep(STEPS[Math.max(0, index - 1)] ?? 'name')
+  }
+
+  // One question per screen, like Setup Assistant: «Далее» validates only the current step.
+  const next = () => {
+    if (step === 'name') {
+      setHasTriedSubmit(true)
+      if (isNameValid) setStep('kind')
+      return
+    }
+    if (step === 'kind') {
+      setStep('contacts')
+      return
+    }
+    void submit()
+  }
+
   const submit = async () => {
     setHasTriedSubmit(true)
-    if (name.trim().length < 2 || (currentCheck && !currentCheck.available)) return
+    if (!isNameValid) {
+      setStep('name')
+      return
+    }
 
     setIsSubmitting(true)
     try {
-      const business = await createBusiness({ name: name.trim(), slug, kind, city, address, phone })
+      const services = templates
+        .filter((item) => item.isChecked)
+        .map((item) => ({
+          name: item.name,
+          durationMinutes: item.durationMinutes,
+          price: Number(item.price) || 0,
+          isPopular: item.isPopular ?? false,
+        }))
+      const business = await createBusiness({
+        name: name.trim(),
+        slug,
+        kind,
+        city,
+        address,
+        phone,
+        services,
+      })
       toast.show({
         title: 'Страница создана',
-        description: 'Добавьте услуги и мастеров — и можно принимать записи',
+        description:
+          services.length > 0
+            ? 'Осталось добавить мастеров — и можно принимать записи'
+            : 'Добавьте услуги и мастеров — и можно принимать записи',
         type: 'success',
       })
-      router.replace(`/manage/${business.slug}?tab=services`)
+      router.replace(`/manage/${business.slug}?tab=${services.length > 0 ? 'masters' : 'services'}`)
     } catch (error) {
       toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
       setIsSubmitting(false)
@@ -69,6 +140,10 @@ export const useCreateBusinessForm = () => {
   }
 
   return {
+    step,
+    stepNumber: STEPS.indexOf(step) + 1,
+    stepCount: STEPS.length,
+    templates,
     name,
     slug,
     kind,
@@ -84,6 +159,8 @@ export const useCreateBusinessForm = () => {
     setCity,
     setAddress,
     setPhone,
-    submit,
+    editTemplate,
+    goBack,
+    next,
   }
 }

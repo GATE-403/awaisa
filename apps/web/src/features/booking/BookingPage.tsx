@@ -10,6 +10,7 @@ import type { Business, Catalog } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { formatPhone } from '@/common/utils/formatPhone'
+import { maskPhoneInput } from '@/common/utils/inputMasks'
 import styles from './BookingPage.module.css'
 import { ANY_SPECIALIST_ID } from './bookingConstants'
 import { formatDayLong, formatDuration, formatPrice, getSpecialistLabel } from './bookingUtils'
@@ -182,7 +183,7 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                     inputMode='tel'
                     autoComplete='tel'
                     value={form.phone}
-                    onValueChange={form.setPhone}
+                    onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
                     placeholder='+996 555 123 456'
                   />
                 </Field>

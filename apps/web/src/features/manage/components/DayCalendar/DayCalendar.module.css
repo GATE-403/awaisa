@@ -104,6 +104,8 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .slotTarget:focus-visible {
@@ -377,5 +379,42 @@
 
   .remove:hover {
     color: var(--color-foreground);
+  }
+}
+
+.scroller[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.booking[data-dragging] {
+  opacity: 0.35;
+}
+
+/* Where the dragged booking will land: the block itself, lifted. */
+.dropPreview {
+  position: absolute;
+  right: var(--space-1);
+  left: var(--space-1);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--tint);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-primary-foreground);
+  pointer-events: none;
+  scale: 1.02;
+}
+
+.dropPreview .blockTime {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dropPreview {
+    scale: 1;
   }
 }

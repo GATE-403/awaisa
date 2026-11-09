@@ -16,7 +16,10 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  MovedBooking,
+  NextFree,
   OtpRequest,
+  RecentBooking,
   ServiceInput,
   SlugCheck,
   SpecialistInput,
@@ -50,6 +53,9 @@ const getAvailability = (
   signal?: AbortSignal,
 ) => request<Availability>(`/availability?${new URLSearchParams(params)}`, { signal })
 
+const getNextFree = (slugs: string[], signal?: AbortSignal) =>
+  request<NextFree>(`/next-free?${new URLSearchParams({ slugs: slugs.join(',') })}`, { signal })
+
 const createBooking = (input: CreateBookingInput) => post<CreatedBooking>('/bookings', input)
 
 const getBooking = (id: string, token: string, signal?: AbortSignal) =>
@@ -57,6 +63,12 @@ const getBooking = (id: string, token: string, signal?: AbortSignal) =>
 
 const cancelBooking = (id: string, token: string) =>
   request<Booking>(`/bookings/${id}`, { method: 'DELETE', headers: { [TOKEN_HEADER]: token } })
+
+const restoreBooking = (id: string, token: string) =>
+  request<Booking>(`/bookings/${id}/restore`, {
+    method: 'POST',
+    headers: { [TOKEN_HEADER]: token },
+  })
 
 const requestOtp = (phone: string, channel: 'auto' | 'sms' = 'auto') =>
   post<OtpRequest>('/auth/otp', { phone, channel })
@@ -73,6 +85,9 @@ const updateMe = (name: string) =>
 const getMyBookings = (signal?: AbortSignal) => request<Booking[]>('/me/bookings', { signal })
 
 const cancelMyBooking = (id: string) => request<Booking>(`/me/bookings/${id}`, { method: 'DELETE' })
+
+const restoreMyBooking = (id: string) =>
+  request<Booking>(`/me/bookings/${id}/restore`, { method: 'POST' })
 
 const send = <Result>(method: 'PUT' | 'PATCH' | 'DELETE', path: string, body?: unknown) =>
   request<Result>(path, { method, body: body === undefined ? undefined : JSON.stringify(body) })
@@ -129,6 +144,20 @@ const createStaffBooking = (slug: string, input: CreateBookingInput) =>
 const cancelBookingAsSalon = (slug: string, id: string) =>
   post<AdminBooking>(`${manage(slug)}/bookings/${id}/cancel`)
 
+const getRecentBookings = (slug: string, since: string, signal?: AbortSignal) =>
+  request<RecentBooking[]>(`${manage(slug)}/bookings/recent?${new URLSearchParams({ since })}`, {
+    signal,
+  })
+
+const moveBookingAsSalon = (
+  slug: string,
+  id: string,
+  input: { date: string; time: string; specialistId: string },
+) => send<MovedBooking>('PATCH', `${manage(slug)}/bookings/${id}`, input)
+
+const restoreBookingAsSalon = (slug: string, id: string) =>
+  post<AdminBooking>(`${manage(slug)}/bookings/${id}/restore`)
+
 const createTimeOff = (slug: string, input: CreateTimeOffInput) =>
   post<CreatedTimeOff>(`${manage(slug)}/time-off`, input)
 
@@ -156,7 +185,13 @@ export {
   getMe,
   getMyBookings,
   getMyBusinesses,
+  getNextFree,
+  getRecentBookings,
+  moveBookingAsSalon,
   renameCategory,
+  restoreBooking,
+  restoreBookingAsSalon,
+  restoreMyBooking,
   searchBusinesses,
   setWorkingHours,
   updateBusiness,

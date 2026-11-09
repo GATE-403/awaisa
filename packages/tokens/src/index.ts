@@ -32,6 +32,8 @@ type ColorScheme = {
   foreground: string
   surface: string
   elevated: string
+  sheet: string
+  sheetSurface: string
   subtle: string
   subtleHover: string
   mutedForeground: string
@@ -68,6 +70,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     foreground: '#1d1d1f',
     surface: palette.white,
     elevated: palette.white,
+    sheet: palette.light.gray6,
+    sheetSurface: palette.white,
     subtle: 'rgb(0 0 0 / 0.08)',
     subtleHover: 'rgb(0 0 0 / 0.1)',
     mutedForeground: '#6e6e73',
@@ -100,6 +104,9 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     foreground: palette.white,
     surface: palette.dark.gray6,
     elevated: palette.dark.gray5,
+    // Each layer up is lighter in the dark: page #000 → card #1C1C1E → sheet rows #2C2C2E.
+    sheet: palette.dark.gray6,
+    sheetSurface: palette.dark.gray5,
     subtle: 'rgb(255 255 255 / 0.1)',
     subtleHover: 'rgb(255 255 255 / 0.14)',
     mutedForeground: 'rgb(255 255 255 / 0.62)',

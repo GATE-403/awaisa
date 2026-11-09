@@ -8,6 +8,7 @@ import {
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
 import { Category } from '../catalog/category.entity.js'
+import { Service } from '../catalog/service.entity.js'
 import { weekdayOf } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Customer } from '../customers/customer.entity.js'
@@ -44,6 +45,8 @@ type BusinessCard = Pick<
 > & {
   servicesCount: number
   minPrice: number
+  coverUrl: string | null
+  hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
 const MAX_CATALOG_ITEMS = 60
@@ -87,7 +90,14 @@ export class BusinessesService {
     const rows = (await this.dataSource.query(
       `
       SELECT b."slug", b."name", b."kind", b."description", b."city", b."address",
-        COUNT(s."id")::int AS "servicesCount", MIN(s."price")::int AS "minPrice"
+        b."cover_url" AS "coverUrl",
+        COUNT(s."id")::int AS "servicesCount", MIN(s."price")::int AS "minPrice",
+        (
+          SELECT COALESCE(json_agg(json_build_object(
+            'weekday', h."weekday", 'opensMinutes', h."opens_minutes", 'closesMinutes', h."closes_minutes"
+          ) ORDER BY h."weekday"), '[]')
+          FROM "working_hours" h WHERE h."business_id" = b."id"
+        ) AS "hours"
       FROM "businesses" b
       JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
       WHERE b."is_published"
@@ -165,7 +175,7 @@ export class BusinessesService {
           manager.create(WorkingHours, { businessId: business.id, weekday, ...DEFAULT_HOURS }),
         ),
       )
-      await manager.save(
+      const category = await manager.save(
         manager.create(Category, {
           id: randomUUID(),
           businessId: business.id,
@@ -173,6 +183,20 @@ export class BusinessesService {
           position: 1,
         }),
       )
+      if (input.services.length > 0) {
+        await manager.save(
+          input.services.map((service, index) =>
+            manager.create(Service, {
+              id: randomUUID(),
+              businessId: business.id,
+              categoryId: category.id,
+              description: '',
+              position: index + 1,
+              ...service,
+            }),
+          ),
+        )
+      }
 
       return toBusinessView(
         await manager.findOneOrFail(Business, {

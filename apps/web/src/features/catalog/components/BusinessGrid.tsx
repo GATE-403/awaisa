@@ -3,9 +3,9 @@ import { listBusinesses } from '@/common/api/serverApi'
 import type { BusinessKind } from '@/common/api/types'
 import { StoreCard } from '@/common/components/StoreCard/StoreCard'
 import { pluralize } from '@/common/utils/plural'
-import { getKindLabel } from '@/constants/platform'
-import { formatPrice } from '@/features/booking/bookingUtils'
 import styles from '../CatalogPage.module.css'
+import { BusinessCard } from './BusinessCard/BusinessCard'
+import { NextFreeProvider } from './BusinessCard/NextFreeProvider'
 
 interface BusinessGridProps {
   kind: BusinessKind | undefined
@@ -40,32 +40,15 @@ export const BusinessGrid = async ({ kind, query }: BusinessGridProps) => {
           </NextLink>
         </div>
       ) : (
-        <ul className={styles.grid}>
-          {businesses.map((business) => (
-            <li key={business.slug}>
-              <StoreCard
-                href={`/${business.slug}`}
-                eyebrow={getKindLabel(business.kind)}
-                title={business.name}
-                description={business.description || business.address}
-                height='sm'
-                footer={
-                  <>
-                    <span className={styles.price}>от {formatPrice(business.minPrice)}</span>
-                    <span className={styles.muted}>
-                      {[
-                        pluralize(business.servicesCount, ['услуга', 'услуги', 'услуг']),
-                        business.address,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                  </>
-                }
-              />
-            </li>
-          ))}
-        </ul>
+        <NextFreeProvider slugs={businesses.map((business) => business.slug)}>
+          <ul className={styles.grid}>
+            {businesses.map((business) => (
+              <li key={business.slug}>
+                <BusinessCard business={business} />
+              </li>
+            ))}
+          </ul>
+        </NextFreeProvider>
       )}
 
       <StoreCard

@@ -17,6 +17,14 @@ test.describe('Platform: a new business goes live', () => {
     await page.getByLabel('Название').fill(name)
     await expect(page.getByLabel('Адрес страницы')).toHaveValue(slug)
     await expect(page.getByText(`Свободен: awaisa.kg/${slug}`)).toBeVisible()
+    await page.getByRole('button', { name: 'Далее' }).click()
+
+    // Kind: a barbershop gets a starter menu; this test builds its own, so it picks «Другое».
+    await page.getByRole('radio', { name: 'Барбершопы' }).click()
+    await expect(page.getByRole('checkbox', { name: 'Мужская стрижка' })).toBeChecked()
+    await page.getByRole('radio', { name: 'Другое' }).click()
+    await expect(page.getByRole('checkbox')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Далее' }).click()
     await page.getByRole('button', { name: 'Создать страницу' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/manage/${slug}\\?tab=services`))
