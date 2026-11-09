@@ -1,7 +1,3 @@
-.page {
-  --map-height: calc(100dvh - var(--header-height) - var(--tabbar-height));
-}
-
 .layout {
   display: flex;
   flex-direction: column-reverse;
@@ -26,7 +22,7 @@
   flex-direction: column;
   gap: var(--space-4);
   margin-top: calc(-1 * var(--space-6));
-  padding: var(--space-5) var(--page-gutter) calc(var(--space-8) + var(--tabbar-height));
+  padding: var(--space-5) var(--page-gutter) calc(var(--space-8) + var(--tabbar-space));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--color-background);
   box-shadow: var(--shadow-md);
@@ -114,7 +110,7 @@
 }
 
 .row[data-selected] {
-  background: var(--color-primary-subtle);
+  background: var(--color-fill);
 }
 
 .rowMain {
@@ -219,25 +215,81 @@
   }
 }
 
-/* Side by side from tablets: the list on the left, the map filling the rest, like Maps on a Mac. */
+/* From tablets: a full-bleed map with a floating sidebar over it, like a macOS 26 window. */
 @media (min-width: 900px) {
   .layout {
-    display: grid;
-    grid-template-columns: minmax(360px, 420px) 1fr;
-    height: var(--map-height);
+    position: relative;
+    display: block;
+    height: calc(100dvh - var(--header-height));
   }
 
   .mapArea {
-    position: relative;
-    top: 0;
-    height: 100%;
+    position: absolute;
+    inset: 0;
+    height: auto;
   }
 
+  /* Sidebar from the kit: inset 12pt, 20pt corners, glass material, rows that highlight in place. */
   .panel {
+    position: absolute;
+    top: var(--space-3);
+    bottom: var(--space-3);
+    left: var(--space-3);
+    width: 380px;
     margin-top: 0;
     overflow-y: auto;
-    padding-bottom: var(--space-8);
+    padding: var(--space-5) var(--space-2) var(--space-4);
+    border-radius: 20px;
+    background: var(--color-material);
+    backdrop-filter: var(--blur-material);
+    box-shadow:
+      inset 0 0 0 0.5px var(--color-material-border),
+      var(--shadow-lg);
+    overscroll-behavior: contain;
+  }
+
+  .header {
+    padding: 0 var(--space-3);
+  }
+
+  .title {
+    font-size: var(--text-xl);
+    line-height: var(--text-xl-line-height);
+  }
+
+  .list {
     border-radius: 0;
+    background: transparent;
     box-shadow: none;
+  }
+
+  .row {
+    border-radius: var(--radius-sm);
+  }
+
+  .row + .row::before {
+    display: none;
+  }
+
+  .rowMain {
+    min-height: 64px;
+    padding-left: var(--space-2);
+  }
+
+  .rowTitle {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line-height);
+  }
+
+  .thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+  }
+
+  .skeleton,
+  .empty,
+  .hint {
+    margin: 0 var(--space-3);
   }
 }

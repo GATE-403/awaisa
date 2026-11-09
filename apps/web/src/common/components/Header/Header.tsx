@@ -38,19 +38,22 @@ export const Header = () => {
           ))}
         </nav>
         <div className={styles.actions}>
-          <SearchPanel />
-          <span className={styles.theme}>
-            <ThemeToggle />
+          {/* macOS 26 toolbar button group: one glass capsule from 768px. */}
+          <span className={styles.group}>
+            <SearchPanel />
+            <span className={styles.theme}>
+              <ThemeToggle />
+            </span>
+            <NextLink
+              href={status === 'signedIn' ? '/profile' : '/login'}
+              className={styles.account}
+              aria-label={accountLabel}
+              aria-current={pathname === '/profile' ? 'page' : undefined}
+              data-signed-in={status === 'signedIn' || undefined}
+            >
+              <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
+            </NextLink>
           </span>
-          <NextLink
-            href={status === 'signedIn' ? '/profile' : '/login'}
-            className={styles.account}
-            aria-label={accountLabel}
-            aria-current={pathname === '/profile' ? 'page' : undefined}
-            data-signed-in={status === 'signedIn' || undefined}
-          >
-            <UserCircle weight={status === 'signedIn' ? 'fill' : 'regular'} aria-hidden />
-          </NextLink>
           {showBookingAction && (
             <NextLink href={`/${businessSlug}/book`} className={styles.cta}>
               Записаться
