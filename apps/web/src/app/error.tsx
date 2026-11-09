@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { Container } from '@/common/components/Container/Container'
-import { Mascot } from '@/common/components/Mascot/Mascot'
+import { Container } from '@/shared/ui/Container/Container'
+import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import styles from './error.module.css'
 
 interface ErrorPageProps {

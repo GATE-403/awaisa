@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { MapPage } from '@/features/map/MapPage'
+import { MapPage } from '@/views/map'
 
 export const metadata: Metadata = {
   title: 'Карта',

@@ -71,7 +71,6 @@ test.describe('Platform: a new business goes live', () => {
     const client = await browser.newContext()
     const clientPage = await client.newPage()
     await clientPage.goto('/')
-    await clientPage.getByRole('button', { name: 'Поиск' }).click()
     const search = clientPage.getByRole('searchbox', { name: 'Поиск салонов и мастеров' })
     await search.fill(name)
     await search.press('Enter')

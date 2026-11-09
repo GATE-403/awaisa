@@ -1,7 +1,7 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import NextLink from 'next/link'
-import { Container } from '@/common/components/Container/Container'
-import { PageTitle } from '@/common/components/PageTitle/PageTitle'
+import { Container } from '@/shared/ui/Container/Container'
+import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import styles from './error.module.css'
 
 const NotFound = () => (

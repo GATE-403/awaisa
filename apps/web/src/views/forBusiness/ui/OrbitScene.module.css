@@ -1,0 +1,175 @@
+.scene {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --spin: 0deg;
+  --glare-x: 50%;
+  --glare-y: 30%;
+
+  position: relative;
+  width: min(100%, 520px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  perspective: 1100px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.scene:active {
+  cursor: grabbing;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(calc(12deg + var(--tilt-x))) rotateY(var(--tilt-y));
+}
+
+.rays {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--color-border-strong);
+  transform: translateZ(-140px) scale(1.15);
+}
+
+.rays line {
+  stroke: currentColor;
+  stroke-width: 0.7;
+}
+
+/* The ring of chips spins around the vertical axis, passing in front of and behind the tile. */
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transform: rotateY(var(--spin));
+}
+
+.chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-md);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  backface-visibility: hidden;
+  transform: translate(-50%, -50%) rotateY(var(--angle)) translateZ(230px) translateY(var(--lift));
+}
+
+/* Colour lives in a dot, so the label keeps full contrast on the glass. */
+.chip[data-tone="free"]::before,
+.chip[data-tone="rating"]::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  vertical-align: 1px;
+}
+
+.chip[data-tone="rating"]::before {
+  background: var(--color-rating);
+}
+
+.chip[data-tone="accent"] {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+/* The app icon as a thick tile: stacked layers make the edge, the face carries the glare. */
+.tile {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36%;
+  aspect-ratio: 1;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) rotateY(calc(var(--tilt-y) * 0.6)) translateZ(30px);
+}
+
+.edge,
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 23%;
+}
+
+.edge {
+  background: color-mix(in srgb, var(--color-primary) 55%, var(--color-sheet));
+  transform: translateZ(var(--depth));
+}
+
+.face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-surface), var(--color-sheet));
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-lg);
+  transform: translateZ(1px);
+}
+
+.mascot {
+  width: 52%;
+  height: auto;
+  color: var(--color-primary);
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--glare-x) var(--glare-y),
+    color-mix(in srgb, var(--color-primary-foreground) 45%, transparent),
+    transparent 55%
+  );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 23%;
+  box-shadow: 0 0 0 2px var(--color-primary);
+  opacity: 0;
+  transform: translateZ(2px);
+}
+
+.pulse[data-active] {
+  animation: pulse 900ms var(--ease-standard);
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.9;
+    scale: 1;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse[data-active] {
+    animation: none;
+  }
+}

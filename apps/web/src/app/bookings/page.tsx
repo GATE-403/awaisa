@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { BookingsPage } from '@/features/bookings/BookingsPage'
+import { BookingsPage } from '@/views/bookings'
 
 export const metadata: Metadata = {
   title: 'Мои записи',

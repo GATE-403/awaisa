@@ -66,6 +66,8 @@ const MAX_MAP_ITEMS = 200
 
 const MAX_POPULAR_SERVICES = 12
 
+const MAX_OFFERS = 60
+
 const toBusinessView = (business: Business): BusinessView => ({
   id: business.id,
   slug: business.slug,
@@ -131,6 +133,31 @@ export class BusinessesService {
       `,
       [kind ?? null, q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null],
     )) as BusinessCard[]
+
+    return rows
+  }
+
+  /** The catalog feed: one card per service in a place, like products on a marketplace. */
+  async listOffers({ kind, q }: CatalogQuery) {
+    const rows = (await this.dataSource.query(
+      `
+      SELECT s."id", s."name", s."price"::int AS "price", s."duration_minutes"::int AS "durationMinutes",
+        s."is_popular" AS "isPopular",
+        b."slug", b."name" AS "businessName", b."kind", b."cover_url" AS "coverUrl",
+        (SELECT ROUND(AVG(sp."rating")::numeric, 1)::float8 FROM "specialists" sp
+          WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
+        (SELECT br."address" FROM "branches" br
+          WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address"
+      FROM "services" s
+      JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
+      WHERE s."is_active"
+        AND ($1::text IS NULL OR b."kind" = $1)
+        AND ($2::text IS NULL OR s."name" ILIKE $2 OR b."name" ILIKE $2)
+      ORDER BY s."is_popular" DESC, s."position" ASC, b."created_at" ASC
+      LIMIT ${MAX_OFFERS}
+      `,
+      [kind ?? null, q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null],
+    )) as Record<string, unknown>[]
 
     return rows
   }

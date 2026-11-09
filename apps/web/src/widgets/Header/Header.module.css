@@ -1,0 +1,233 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: env(safe-area-inset-top);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow: 0 0.5px 0 transparent;
+  transition: box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.header[data-scrolled] {
+  box-shadow: 0 0.5px 0 var(--color-border);
+}
+
+/* Phones: logo and account on top, the search field full width below. */
+.inner {
+  display: grid;
+  grid-template-areas:
+    "home actions cta"
+    "search search search";
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  width: 100%;
+  max-width: var(--layout-container-width);
+  margin: 0 auto;
+  padding: var(--space-2) var(--page-gutter);
+}
+
+.home {
+  display: flex;
+  grid-area: home;
+  justify-self: start;
+  border-radius: var(--radius-sm);
+}
+
+.catalog {
+  display: none;
+}
+
+.search {
+  grid-area: search;
+  display: flex;
+  min-width: 0;
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+}
+
+.action {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  line-height: 13px;
+  white-space: nowrap;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.action[data-account] {
+  display: flex;
+}
+
+.action[data-account] span {
+  display: none;
+}
+
+.action svg {
+  width: 24px;
+  height: 24px;
+}
+
+.action[aria-current="page"] {
+  color: var(--color-link);
+}
+
+.cta {
+  position: relative;
+  display: inline-flex;
+  grid-area: cta;
+  align-items: center;
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: -6px -4px;
+}
+
+.categories {
+  display: none;
+}
+
+@media (hover: hover) {
+  .action:hover {
+    color: var(--color-foreground);
+  }
+
+  .cta:hover {
+    background: var(--color-primary-hover);
+  }
+
+  .category:hover,
+  .city:hover {
+    color: var(--color-foreground);
+  }
+}
+
+/* From tablets: one row like a marketplace — logo, «Каталог», search, labelled actions. */
+@media (min-width: 768px) {
+  .inner {
+    grid-template-areas: "home catalog search actions cta";
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    gap: var(--space-4);
+    height: 64px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .catalog {
+    display: inline-flex;
+    grid-area: catalog;
+    align-items: center;
+    gap: var(--space-2);
+    height: 44px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .catalog svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .action {
+    display: flex;
+  }
+
+  .action[data-account] span {
+    display: inline;
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cta {
+    height: 36px;
+    padding: 0 var(--space-4);
+  }
+
+  /* Second row: categories with glyphs, the city on the right. */
+  .categories {
+    display: block;
+    border-top: 0.5px solid var(--color-border);
+  }
+
+  .categoriesInner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: var(--layout-container-width);
+    height: 40px;
+    margin: 0 auto;
+    padding: 0 var(--page-gutter);
+  }
+
+  .categoryList {
+    display: flex;
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    scrollbar-width: none;
+  }
+
+  .category,
+  .city {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 40px;
+    color: var(--color-muted-foreground);
+    font-size: var(--text-footnote);
+    white-space: nowrap;
+  }
+
+  .category svg,
+  .city svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .category[aria-current="page"] {
+    color: var(--color-foreground);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .cityLink {
+    color: var(--color-link);
+  }
+}
+
+@media (max-width: 1023px) {
+  .action:not([data-account]) span {
+    display: none;
+  }
+}

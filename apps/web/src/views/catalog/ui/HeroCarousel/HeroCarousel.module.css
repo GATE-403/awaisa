@@ -1,0 +1,253 @@
+.carousel {
+  position: relative;
+}
+
+.slide {
+  position: relative;
+  display: grid;
+  gap: var(--space-5);
+  min-height: 300px;
+  overflow: hidden;
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  /* Two scrims behind the copy keep white text AA on any system colour. */
+  background:
+    linear-gradient(90deg, var(--color-overlay), transparent 75%),
+    linear-gradient(90deg, var(--color-overlay), transparent 95%),
+    radial-gradient(
+      70% 90% at 90% 10%,
+      color-mix(in srgb, var(--from) 40%, var(--color-primary-foreground)) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      60% 80% at 0% 100%,
+      color-mix(in srgb, var(--to) 80%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(135deg, var(--from), var(--to));
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary-foreground);
+  animation: slide-in 450ms var(--ease-standard);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0.4;
+    translate: 12px 0;
+  }
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.eyebrow {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary-foreground) 22%, transparent);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: 1.05;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.text {
+  max-width: 34ch;
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+  opacity: 0.92;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-contrast);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-contrast-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.action svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Real offers inside the banner, like product tiles on a sale banner. */
+.picks {
+  display: grid;
+  grid-auto-columns: minmax(150px, 1fr);
+  grid-auto-flow: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.pick {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: var(--space-1);
+  height: 100%;
+  min-height: 190px;
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  color: var(--color-foreground);
+  transition: translate var(--duration-normal) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .pick:hover {
+    translate: 0 -3px;
+  }
+}
+
+.pickPrice {
+  justify-self: start;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-strong);
+  color: var(--color-primary-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-bold);
+}
+
+.pickName {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-medium);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.pickMedia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.pickMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pickPlace {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.controls {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary-foreground) 22%, transparent);
+  backdrop-filter: var(--blur-material);
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-primary-foreground);
+  cursor: pointer;
+}
+
+.arrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dots {
+  display: flex;
+  gap: 2px;
+}
+
+.dot {
+  width: 20px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dot::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin: 0 auto;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-foreground);
+  opacity: 0.45;
+  transition:
+    width var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard);
+}
+
+.dot[aria-current]::before {
+  width: 16px;
+  opacity: 1;
+}
+
+@media (min-width: 900px) {
+  .slide {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    align-items: center;
+    min-height: 340px;
+    padding: var(--space-10);
+  }
+
+  .title {
+    font-size: var(--text-4xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide {
+    animation: none;
+  }
+}

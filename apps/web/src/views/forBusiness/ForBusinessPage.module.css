@@ -1,0 +1,655 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  width: 100%;
+  max-width: var(--layout-container-width);
+  margin: 0 auto;
+  padding: var(--space-10) var(--page-gutter) var(--section-gap);
+}
+
+/* Hero in three columns, like a developer-tool landing: words, the icon, the pitch. */
+.hero {
+  display: grid;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.heroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.title {
+  max-width: 12ch;
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  line-height: 1.02;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.03em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.page .pill {
+  border-radius: var(--radius-full);
+}
+
+.pill svg {
+  width: 18px;
+  height: 18px;
+}
+
+.heroAside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.news {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: 4px var(--space-3) 4px 4px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 0.5px var(--color-border-strong);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.news svg {
+  width: 12px;
+  height: 12px;
+}
+
+.newsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.newsBadge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+}
+
+.lead {
+  max-width: 34ch;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-lg);
+  line-height: 1.45;
+}
+
+.titleMuted {
+  color: var(--color-muted-foreground);
+}
+
+/* «Trusted by»: a monospaced caption and a slow marquee of real places. */
+.trust {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.trustCaption {
+  color: var(--color-muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--text-footnote);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.marquee {
+  width: 100%;
+  max-width: 760px;
+  overflow: hidden;
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-foreground) 12%,
+    var(--color-foreground) 88%,
+    transparent
+  );
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: var(--space-3);
+  width: max-content;
+  margin: 0;
+  padding: var(--space-2) 0;
+  list-style: none;
+  animation: marquee 40s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    translate: -33.333% 0;
+  }
+}
+
+/* A large rounded panel with the product and its building blocks. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-5);
+  border-radius: 32px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+}
+
+.panelTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.bento {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.bentoItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-background);
+}
+
+.bentoTitle {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bentoText {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.bentoItem .visual {
+  margin-top: auto;
+  padding: var(--space-4) 0 0;
+  background: transparent;
+}
+
+/* Showcase: a cabinet window with a client ticket and a booking alert floating over it. */
+.showcase {
+  position: relative;
+  padding-bottom: var(--space-16);
+}
+
+.window {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-lg);
+}
+
+.windowBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-bottom: 0.5px solid var(--color-border);
+  background: var(--color-material);
+}
+
+.lights {
+  position: absolute;
+  left: var(--space-4);
+  display: flex;
+  gap: 8px;
+}
+
+.lights span {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--system-red);
+}
+
+.lights span:nth-child(2) {
+  background: var(--system-yellow);
+}
+
+.lights span:nth-child(3) {
+  background: var(--system-green);
+}
+
+.windowTitle {
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.schedule {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 300px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.column + .column {
+  border-left: 0.5px solid var(--color-border);
+}
+
+.master {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 0.5px solid var(--color-border);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.master::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--tint);
+}
+
+.track {
+  position: relative;
+  flex: 1;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 59px,
+    var(--color-border) 59px 60px
+  );
+}
+
+.block {
+  position: absolute;
+  right: 4px;
+  left: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tint) 16%, var(--color-surface));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 32%, transparent);
+  font-size: var(--text-xs);
+  line-height: 15px;
+}
+
+.blockTime {
+  color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+}
+
+.blockTitle {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--tint) 62%, var(--color-foreground));
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blockClient {
+  color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+}
+
+.ticket {
+  position: absolute;
+  right: var(--space-4);
+  bottom: 0;
+  width: min(380px, 78%);
+  rotate: 2deg;
+}
+
+.toast {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(340px, 86%);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-lg);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  translate: -50% 0;
+}
+
+.toastIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-weight: var(--font-weight-bold);
+}
+
+.toastText {
+  display: block;
+  color: var(--color-muted-foreground);
+}
+
+/* Stats: big numbers with a short line, like apple.com's «by the numbers». */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8) var(--space-6);
+}
+
+.stat {
+  padding-top: var(--space-4);
+  border-top: 0.5px solid var(--color-border);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-foreground);
+}
+
+.statLabel {
+  margin-top: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-background);
+}
+
+.visualLabel {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-fill);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.slot[data-picked] {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.bubble {
+  align-self: flex-start;
+  max-width: 34ch;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px 18px 18px 6px;
+  background: var(--color-fill-hover);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.bubbleMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.dragDemo {
+  position: relative;
+  height: 140px;
+  border-radius: var(--radius-sm);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 34px,
+    var(--color-border) 34px 35px
+  );
+}
+
+.dragFrom,
+.dragTo {
+  position: absolute;
+  right: var(--space-2);
+  left: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: 8px;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dragFrom {
+  top: 8px;
+  border: 1px dashed color-mix(in srgb, var(--system-blue) 50%, transparent);
+  color: var(--color-muted-foreground);
+}
+
+.dragTo {
+  top: 78px;
+  background: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-primary-foreground);
+  rotate: -1.5deg;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.steps,
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.stepList {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.stepNumber {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl-line-height);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-muted-foreground);
+}
+
+.stepTitle {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stepText {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.faqList {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.faqItem + .faqItem {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding: 0 var(--space-5);
+  font-weight: var(--font-weight-medium);
+  list-style: none;
+  cursor: pointer;
+}
+
+.faqQuestion::-webkit-details-marker {
+  display: none;
+}
+
+.faqCaret {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted-foreground);
+  transition: rotate var(--duration-fast) var(--ease-standard);
+}
+
+.faqItem[open] .faqCaret {
+  rotate: 180deg;
+}
+
+.faqAnswer {
+  max-width: 64ch;
+  padding: 0 var(--space-5) var(--space-5);
+  color: var(--color-muted-foreground);
+  line-height: var(--text-md-line-height);
+}
+
+.closing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-12) var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--color-foreground);
+  color: var(--color-background);
+  text-align: center;
+}
+
+.closingTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: var(--text-display);
+    line-height: 1.02;
+  }
+
+  .panel {
+    padding: var(--space-12) var(--space-10);
+  }
+
+  .bento {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .stepList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+
+  .schedule {
+    height: 360px;
+  }
+
+  .ticket {
+    right: calc(-1 * var(--space-4));
+  }
+
+  .toast {
+    left: auto;
+    right: var(--space-10);
+    translate: 0 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 0.9fr);
+    min-height: 520px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marqueeTrack {
+    animation: none;
+  }
+}

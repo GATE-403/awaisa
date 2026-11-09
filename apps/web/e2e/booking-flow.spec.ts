@@ -17,7 +17,8 @@ test.describe('User flow: booking', () => {
     page,
   }) => {
     await page.goto('/')
-    await page.getByRole('link', { name: /Awaisa Studio/ }).click()
+    // The business card (not an offer inside the banner) leads to the business page.
+    await page.locator('a[href="/awaisa-studio"]').first().click()
     await expect(page).toHaveURL(/\/awaisa-studio$/)
     const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
 
