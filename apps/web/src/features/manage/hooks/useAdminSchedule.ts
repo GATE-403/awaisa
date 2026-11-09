@@ -16,6 +16,7 @@ import type {
   CreateBookingInput,
   CreateTimeOffInput,
 } from '@/common/api/types'
+import { haptic } from '@/common/utils/nativeBridge'
 import { pluralize } from '@/common/utils/plural'
 import { markOwnBooking } from './useNewBookingAlerts'
 
@@ -48,6 +49,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const runAction = async (action: () => Promise<string>) => {
     try {
       toast.show({ title: await action(), type: 'success' })
+      haptic('success')
       reload()
       return true
     } catch (actionError) {
@@ -108,6 +110,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     if (!date) return
     try {
       const moved = await moveBookingAsSalon(slug, booking.id, { date, time, specialistId })
+      haptic('success')
       toast.show({
         title: `Перенесено на ${moved.time}`,
         description: `${moved.customerName} · ${moved.specialistName}. Клиенту уйдёт SMS через 15 секунд`,

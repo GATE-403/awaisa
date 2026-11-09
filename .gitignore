@@ -30,3 +30,6 @@ npm-debug.log*
 # playwright
 apps/web/e2e-report/
 apps/web/e2e-results/
+
+# uploaded photos (STORAGE_DRIVER=local)
+uploads/

@@ -115,7 +115,9 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                     value={specialist.id}
                     title={specialist.name}
                     description={specialist.role}
-                    leading={<Avatar name={specialist.name} />}
+                    leading={
+                      <Avatar name={specialist.name} src={specialist.photoUrl ?? undefined} />
+                    }
                     trailing={
                       specialist.rating === null ? undefined : `★ ${specialist.rating.toFixed(1)}`
                     }

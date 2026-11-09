@@ -19,6 +19,7 @@ type Specialist = {
   name: string
   role: string
   rating: number | null
+  photoUrl?: string | null
   serviceIds: string[]
   isActive?: boolean
 }
@@ -43,6 +44,8 @@ type Business = {
   whatsapp: string
   mapUrl: string
   slotMinutes: number
+  coverUrl: string | null
+  photos: string[]
   isPublished: boolean
   hours: WorkingDay[]
 }

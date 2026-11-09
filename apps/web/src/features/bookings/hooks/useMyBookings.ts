@@ -18,6 +18,7 @@ import {
   readRaw,
   updateSnapshot,
 } from '@/common/utils/bookingStorage'
+import { haptic } from '@/common/utils/nativeBridge'
 
 const NOT_FOUND_STATUS = 404
 
@@ -90,6 +91,7 @@ export const useMyBookings = () => {
       setAccountBookings(
         (current) => current?.map((item) => (item.id === id ? cancelled : item)) ?? null,
       )
+      haptic('warning')
       toast.show({
         title: 'Запись отменена',
         description: 'Время освободилось для других',

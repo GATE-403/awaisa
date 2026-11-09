@@ -78,7 +78,29 @@
   }
 }
 
+.cover {
+  width: calc(100% - 2 * var(--page-gutter));
+  max-width: calc(var(--layout-container-width) - 2 * var(--page-gutter));
+  aspect-ratio: 4 / 3;
+  margin: 0 auto var(--space-6);
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background: var(--color-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (min-width: 768px) {
+  .cover {
+    aspect-ratio: 21 / 9;
+    margin-bottom: var(--space-10);
+  }
+
   .hero {
     flex-direction: row;
     align-items: flex-end;

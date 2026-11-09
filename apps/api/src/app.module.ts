@@ -12,6 +12,8 @@ import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
+import { MediaModule } from './media/media.module.js'
+import { WalletModule } from './wallet/wallet.module.js'
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { HealthController } from './health/health.controller.js'
     AuthModule,
     CustomersModule,
     AdminModule,
+    MediaModule,
+    WalletModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

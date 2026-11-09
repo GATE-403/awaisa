@@ -1,12 +1,19 @@
-type NativeMessage = { type: 'openExternal'; url: string }
+type HapticStyle = 'success' | 'warning' | 'error' | 'selection' | 'impact'
 
-const isNativeMessage = (value: unknown): value is NativeMessage =>
-  typeof value === 'object' &&
-  value !== null &&
-  'type' in value &&
-  value.type === 'openExternal' &&
-  'url' in value &&
-  typeof value.url === 'string'
+type NativeMessage = { type: 'openExternal'; url: string } | { type: 'haptic'; style: HapticStyle }
+
+const HAPTIC_STYLES: HapticStyle[] = ['success', 'warning', 'error', 'selection', 'impact']
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isNativeMessage = (value: unknown): value is NativeMessage => {
+  if (!isRecord(value)) return false
+  if (value.type === 'openExternal') return typeof value.url === 'string'
+  if (value.type === 'haptic') return HAPTIC_STYLES.includes(value.style as HapticStyle)
+
+  return false
+}
 
 const parseNativeMessage = (data: string): NativeMessage | null => {
   try {
@@ -17,5 +24,5 @@ const parseNativeMessage = (data: string): NativeMessage | null => {
   }
 }
 
-export type { NativeMessage }
+export type { HapticStyle, NativeMessage }
 export { parseNativeMessage }

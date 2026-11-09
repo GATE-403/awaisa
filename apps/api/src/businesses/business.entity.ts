@@ -42,6 +42,12 @@ export class Business {
   @Column({ name: 'map_url', type: 'varchar', length: 500, default: '' })
   mapUrl: string
 
+  @Column({ name: 'cover_url', type: 'varchar', length: 512, nullable: true })
+  coverUrl: string | null
+
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  photos: string[]
+
   @Column({ name: 'slot_minutes', type: 'int', default: 30 })
   slotMinutes: number
 

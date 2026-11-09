@@ -1,7 +1,8 @@
+import { Avatar } from '@awaisa/ui/Avatar'
 import { Input } from '@awaisa/ui/Input'
 import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
-import { type FormEvent, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
 import type { Service, Specialist, SpecialistInput } from '@/common/api/types'
 import { Sheet } from '@/common/components/Sheet/Sheet'
 import sheet from '@/common/components/Sheet/Sheet.module.css'
@@ -11,11 +12,22 @@ interface MasterDialogProps {
   services: Service[]
   onClose: () => void
   onSave: (input: SpecialistInput) => Promise<boolean>
+  /** Only for saved masters: uploads happen at once, like changing a contact photo. */
+  onPhotoChange?: (file: File | null) => Promise<boolean>
 }
 
 const FORM_ID = 'master-form'
 
-export const MasterDialog = ({ master, services, onClose, onSave }: MasterDialogProps) => {
+export const MasterDialog = ({
+  master,
+  services,
+  onClose,
+  onSave,
+  onPhotoChange,
+}: MasterDialogProps) => {
+  const fileInput = useRef<HTMLInputElement>(null)
+  const [photoUrl, setPhotoUrl] = useState(master?.photoUrl ?? null)
+  const [isUploading, setIsUploading] = useState(false)
   const [name, setName] = useState(master?.name ?? '')
   const [role, setRole] = useState(master?.role ?? '')
   const [serviceIds, setServiceIds] = useState<string[]>(
@@ -29,6 +41,22 @@ export const MasterDialog = ({ master, services, onClose, onSave }: MasterDialog
     setServiceIds((current) => (checked ? [...current, id] : current.filter((item) => item !== id)))
 
   const toggleAll = () => setServiceIds(allSelected ? [] : services.map((service) => service.id))
+
+  const changePhoto = async (file: File | null) => {
+    if (!onPhotoChange) return
+    setIsUploading(true)
+    if (file) setPhotoUrl(URL.createObjectURL(file))
+    const saved = await onPhotoChange(file)
+    if (saved && !file) setPhotoUrl(null)
+    if (!saved) setPhotoUrl(master?.photoUrl ?? null)
+    setIsUploading(false)
+  }
+
+  const handleFile = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (file) void changePhoto(file)
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -47,6 +75,40 @@ export const MasterDialog = ({ master, services, onClose, onSave }: MasterDialog
       action={{ label: 'Сохранить', form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
+        <div className={sheet.photoHeader}>
+          <Avatar name={name || '?'} src={photoUrl ?? undefined} size='xl' />
+          {onPhotoChange ? (
+            <span className={sheet.photoActions}>
+              <button
+                type='button'
+                className={sheet.photoButton}
+                onClick={() => fileInput.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? 'Загружаем…' : photoUrl ? 'Изменить фото' : 'Добавить фото'}
+              </button>
+              {photoUrl && !isUploading && (
+                <button
+                  type='button'
+                  className={sheet.photoButton}
+                  onClick={() => void changePhoto(null)}
+                >
+                  Удалить
+                </button>
+              )}
+              <input
+                ref={fileInput}
+                type='file'
+                accept='image/jpeg,image/png,image/webp,image/heic,image/heif'
+                hidden
+                onChange={handleFile}
+                aria-label='Фото мастера'
+              />
+            </span>
+          ) : (
+            <span className={sheet.photoHint}>Фото добавите после сохранения</span>
+          )}
+        </div>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input

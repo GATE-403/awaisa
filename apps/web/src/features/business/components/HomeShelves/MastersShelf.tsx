@@ -28,7 +28,14 @@ export const MastersShelf = ({ business, specialists }: MastersShelfProps) => {
             eyebrow={specialist.role}
             title={specialist.name}
             height='sm'
-            media={<Avatar name={specialist.name} size='xl' className={styles.avatar} />}
+            media={
+              <Avatar
+                name={specialist.name}
+                src={specialist.photoUrl ?? undefined}
+                size='xl'
+                className={styles.avatar}
+              />
+            }
             footer={
               <>
                 {specialist.rating !== null && (

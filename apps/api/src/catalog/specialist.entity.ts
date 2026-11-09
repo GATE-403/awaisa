@@ -29,6 +29,9 @@ export class Specialist {
   })
   rating: number | null
 
+  @Column({ name: 'photo_url', type: 'varchar', length: 512, nullable: true })
+  photoUrl: string | null
+
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean
 

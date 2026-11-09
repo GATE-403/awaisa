@@ -41,3 +41,18 @@ body {
     scroll-behavior: auto;
   }
 }
+
+/* Page changes cross-fade; named elements (catalog card → business cover) morph. */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced motion must override the browser's view transition */
+    animation: none !important;
+  }
+}

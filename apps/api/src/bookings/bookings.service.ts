@@ -269,6 +269,15 @@ export class BookingsService {
     return this.getView(id)
   }
 
+  async findForCustomer(id: string, customer: Customer) {
+    const booking = await this.bookings.findOneBy({ id })
+    const isOwner =
+      booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
+    if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
+
+    return this.getView(id)
+  }
+
   async restoreForCustomer(id: string, customer: Customer) {
     const booking = await this.bookings.findOneBy({ id })
     const isOwner =

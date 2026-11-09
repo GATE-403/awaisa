@@ -2,7 +2,12 @@ import { Avatar } from '@awaisa/ui/Avatar'
 import { Button } from '@awaisa/ui/Button'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { createSpecialist, updateSpecialist } from '@/common/api/clientApi'
+import {
+  createSpecialist,
+  removeSpecialistPhoto,
+  updateSpecialist,
+  uploadSpecialistPhoto,
+} from '@/common/api/clientApi'
 import type { Catalog, Specialist, SpecialistInput } from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
 import { EmptyState } from '../EmptyState/EmptyState'
@@ -47,7 +52,7 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
           {catalog.specialists.map((master) => (
             <li key={master.id}>
               <button type='button' className={styles.masterRow} onClick={() => setEditing(master)}>
-                <Avatar name={master.name} />
+                <Avatar name={master.name} src={master.photoUrl ?? undefined} />
                 <span className={styles.rowBody}>
                   <span className={styles.rowTitle}>
                     {master.name}
@@ -74,6 +79,18 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
           services={catalog.services}
           onClose={() => setEditing(null)}
           onSave={handleSave}
+          onPhotoChange={
+            editing === 'new'
+              ? undefined
+              : (file) =>
+                  run(
+                    () =>
+                      file
+                        ? uploadSpecialistPhoto(slug, editing.id, file)
+                        : removeSpecialistPhoto(slug, editing.id),
+                    file ? 'Фото обновлено' : 'Фото удалено',
+                  )
+          }
         />
       )}
     </section>

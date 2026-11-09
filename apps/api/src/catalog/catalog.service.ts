@@ -65,11 +65,12 @@ export class CatalogService {
         }),
       ),
       specialists: specialists.map(
-        ({ id, name, role, rating, isActive, services: offered = [] }) => ({
+        ({ id, name, role, rating, photoUrl, isActive, services: offered = [] }) => ({
           id,
           name,
           role,
           rating,
+          photoUrl,
           serviceIds: offered
             .map((service) => service.id)
             .filter((serviceId) => visibleServiceIds.has(serviceId)),

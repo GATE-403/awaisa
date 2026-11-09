@@ -36,6 +36,8 @@ type BusinessView = {
   mapUrl: string
   slotMinutes: number
   isPublished: boolean
+  coverUrl: string | null
+  photos: string[]
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
@@ -64,6 +66,8 @@ const toBusinessView = (business: Business): BusinessView => ({
   mapUrl: business.mapUrl,
   slotMinutes: business.slotMinutes,
   isPublished: business.isPublished,
+  coverUrl: business.coverUrl,
+  photos: business.photos ?? [],
   hours: (business.hours ?? [])
     .map(({ weekday, opensMinutes, closesMinutes }) => ({ weekday, opensMinutes, closesMinutes }))
     .sort((first, second) => first.weekday - second.weekday),

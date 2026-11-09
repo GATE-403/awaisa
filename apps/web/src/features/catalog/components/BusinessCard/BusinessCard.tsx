@@ -1,6 +1,6 @@
 import { Plus } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import type { CSSProperties } from 'react'
+import { type CSSProperties, ViewTransition } from 'react'
 import type { BusinessCard as BusinessCardData } from '@/common/api/types'
 import { BusinessTile, pickTint } from '@/common/components/BusinessTile/BusinessTile'
 import { getKindLabel } from '@/constants/platform'
@@ -17,27 +17,25 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
   <NextLink
     href={`/${business.slug}`}
     className={styles.card}
-    style={
-      {
-        '--tint': pickTint(business.name),
-        viewTransitionName: `business-${business.slug}`,
-      } as CSSProperties
-    }
+    style={{ '--tint': pickTint(business.name) } as CSSProperties}
   >
-    <span className={styles.media}>
-      {business.coverUrl ? (
-        // biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API
-        <img
-          src={business.coverUrl}
-          alt=''
-          loading='lazy'
-          decoding='async'
-          className={styles.cover}
-        />
-      ) : (
-        <BusinessTile name={business.name} size='lg' className={styles.tile} />
-      )}
-    </span>
+    {/* Shares its name with the business page cover: the card grows into it on navigation. */}
+    <ViewTransition name={`business-${business.slug}`}>
+      <span className={styles.media}>
+        {business.coverUrl ? (
+          // biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API
+          <img
+            src={business.coverUrl}
+            alt=''
+            loading='lazy'
+            decoding='async'
+            className={styles.cover}
+          />
+        ) : (
+          <BusinessTile name={business.name} size='lg' className={styles.tile} />
+        )}
+      </span>
+    </ViewTransition>
     <span className={styles.body}>
       <span className={styles.eyebrow}>{getKindLabel(business.kind)}</span>
       <span className={styles.title}>{business.name}</span>

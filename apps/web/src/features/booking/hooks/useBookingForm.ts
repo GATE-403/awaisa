@@ -7,6 +7,7 @@ import type { Booking, Business, Catalog } from '@/common/api/types'
 import { useSession } from '@/common/hooks/useSession'
 import { useToday } from '@/common/hooks/useToday'
 import { saveBooking } from '@/common/utils/bookingStorage'
+import { haptic } from '@/common/utils/nativeBridge'
 import { findDay, weekdayOf } from '@/common/utils/workingHours'
 import { ANY_SPECIALIST_ID } from '../bookingConstants'
 import {
@@ -177,6 +178,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       setCreatedBooking(booking)
+      haptic('success')
       toast.show({
         title: 'Запись подтверждена',
         description: `${booking.serviceName}, ${booking.time}`,
@@ -185,6 +187,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (error) {
       setSubmitError(getErrorMessage(error))
+      haptic('error')
       toast.show({
         title: 'Не получилось записаться',
         description: getErrorMessage(error),
