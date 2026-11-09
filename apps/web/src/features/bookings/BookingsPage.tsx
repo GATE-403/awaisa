@@ -56,8 +56,10 @@ export const BookingsPage = () => {
         {isReady && bookings.length === 0 && (
           <div className={styles.empty}>
             <Mascot className={styles.mascot} />
-            <p className={styles.emptyTitle}>Записей пока нет</p>
-            <p className={styles.emptyText}>Выберите салон и удобное время — это займёт минуту</p>
+            <p className={styles.emptyTitle}>Запишитесь к мастеру</p>
+            <p className={styles.emptyText}>
+              Найдите салон и выберите время — запись появится здесь
+            </p>
             <ButtonLink render={<NextLink href='/' />} size='lg'>
               Найти, куда записаться
             </ButtonLink>

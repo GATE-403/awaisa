@@ -22,6 +22,8 @@ import {
   bookingTokenSchema,
   type CreateBookingInput,
   createBookingSchema,
+  type NextFreeQuery,
+  nextFreeQuerySchema,
 } from './bookings.schemas.js'
 import { BookingsService } from './bookings.service.js'
 
@@ -45,6 +47,11 @@ export class BookingsController {
     return this.bookingsService.getAvailability(query)
   }
 
+  @Get('next-free')
+  getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery) {
+    return this.bookingsService.findNextFree(query.slugs)
+  }
+
   @Post('bookings')
   @Throttle({ default: { limit: getBookingRateLimit, ttl: 60_000 } })
   @UseGuards(OptionalAuthGuard)
@@ -61,6 +68,15 @@ export class BookingsController {
     @Headers(TOKEN_HEADER) token: string | undefined,
   ) {
     return this.bookingsService.findByToken(id, parseToken(token))
+  }
+
+  @Post('bookings/:id/restore')
+  @HttpCode(200)
+  restore(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+  ) {
+    return this.bookingsService.restoreByToken(id, parseToken(token))
   }
 
   @Delete('bookings/:id')

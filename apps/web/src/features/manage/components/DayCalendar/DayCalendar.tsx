@@ -1,5 +1,5 @@
 import { ChatText, X } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, type MouseEvent, useState } from 'react'
+import { type CSSProperties, type MouseEvent, useRef, useState } from 'react'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/common/api/types'
 import { formatPhone } from '@/common/utils/formatPhone'
 import { formatClock, parseClock } from '@/common/utils/workingHours'
@@ -14,6 +14,7 @@ import {
   toPx,
 } from './calendarLayout'
 import styles from './DayCalendar.module.css'
+import { useBookingDrag } from './useBookingDrag'
 
 interface DayCalendarProps {
   specialists: Pick<Specialist, 'id' | 'name' | 'role'>[]
@@ -26,6 +27,7 @@ interface DayCalendarProps {
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
   onCreateBooking: (specialistId: string, time: string | null) => void
+  onMoveBooking: (booking: AdminBooking, specialistId: string, time: string) => void
 }
 
 type Hover = { specialistId: string; minutes: number }
@@ -45,8 +47,10 @@ export const DayCalendar = ({
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
+  onMoveBooking,
 }: DayCalendarProps) => {
   const [hover, setHover] = useState<Hover | null>(null)
+  const scrollerRef = useRef<HTMLDivElement>(null)
   const range = getDayRange(hours, bookings, timeOff)
   const height = toPx(range.end - range.start)
   const hourMarks = Array.from(
@@ -55,6 +59,7 @@ export const DayCalendar = ({
   )
   const showNow = nowMinutes !== null && nowMinutes >= range.start && nowMinutes <= range.end
   const gridStyle = { '--columns': specialists.length } as CSSProperties
+  const drag = useBookingDrag({ scrollerRef, range, slotMinutes, onMove: onMoveBooking })
 
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
     const offset = event.clientY - event.currentTarget.getBoundingClientRect().top
@@ -70,7 +75,11 @@ export const DayCalendar = ({
   }
 
   return (
-    <div className={styles.scroller}>
+    <div
+      className={styles.scroller}
+      ref={scrollerRef}
+      data-dragging={drag.dragged ? true : undefined}
+    >
       <div className={styles.grid} style={gridStyle}>
         <div className={styles.corner} />
         {specialists.map((specialist, index) => (
@@ -102,6 +111,7 @@ export const DayCalendar = ({
             className={styles.column}
             style={{ height, '--tint': getMasterTint(index) } as CSSProperties}
             aria-label={specialist.name}
+            data-specialist-id={specialist.id}
             onPointerLeave={() => setHover(null)}
           >
             <button
@@ -110,14 +120,14 @@ export const DayCalendar = ({
               aria-label={`Новая запись к мастеру ${specialist.name}`}
               onClick={(event) => handleCreate(event, specialist.id)}
               onPointerMove={(event) => {
-                if (event.pointerType !== 'mouse') return
+                if (event.pointerType !== 'mouse' || drag.dragged) return
                 const minutes = minutesAt(event)
                 if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
                   setHover({ specialistId: specialist.id, minutes })
                 }
               }}
             />
-            {hover?.specialistId === specialist.id && (
+            {!drag.dragged && hover?.specialistId === specialist.id && (
               <span
                 className={styles.ghost}
                 style={position(hover.minutes, hover.minutes + slotMinutes, range.start)}
@@ -197,8 +207,12 @@ export const DayCalendar = ({
                     className={styles.booking}
                     data-cancelled={booking.status === 'cancelled' || undefined}
                     data-size={size}
+                    data-dragging={drag.dragged?.id === booking.id || undefined}
                     style={position(from, to, range.start)}
-                    onClick={() => onSelectBooking(booking)}
+                    onPointerDown={(event) => drag.handlePointerDown(event, booking)}
+                    onClick={() => {
+                      if (!drag.consumeClick()) onSelectBooking(booking)
+                    }}
                     aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}`}
                   >
                     <span className={styles.blockTime}>
@@ -226,6 +240,24 @@ export const DayCalendar = ({
                   </button>
                 )
               })}
+
+            {drag.dragged && drag.target?.specialistId === specialist.id && (
+              <span
+                className={styles.dropPreview}
+                style={position(
+                  drag.target.minutes,
+                  drag.target.minutes + drag.dragged.durationMinutes,
+                  range.start,
+                )}
+                aria-hidden='true'
+              >
+                <span className={styles.blockTime}>
+                  {formatClock(drag.target.minutes)}–
+                  {formatClock(drag.target.minutes + drag.dragged.durationMinutes)}
+                </span>
+                <span className={styles.blockTitle}>{drag.dragged.customerName}</span>
+              </span>
+            )}
 
             {showNow && nowMinutes !== null && (
               <span

@@ -7,11 +7,22 @@ import {
   createTimeOff,
   deleteTimeOff,
   getAdminSchedule,
+  moveBookingAsSalon,
+  restoreBookingAsSalon,
 } from '@/common/api/clientApi'
-import type { AdminSchedule, CreateBookingInput, CreateTimeOffInput } from '@/common/api/types'
+import type {
+  AdminBooking,
+  AdminSchedule,
+  CreateBookingInput,
+  CreateTimeOffInput,
+} from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
+import { markOwnBooking } from './useNewBookingAlerts'
 
-export const useAdminSchedule = (slug: string, date: string | null) => {
+// Slightly shorter than the API's 15-second undo window.
+const UNDO_TIMEOUT_MS = 12_000
+
+export const useAdminSchedule = (slug: string, date: string | null, refreshKey = 0) => {
   const toast = useToast()
   const [schedule, setSchedule] = useState<AdminSchedule | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -30,7 +41,7 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
       })
 
     return () => controller.abort()
-  }, [slug, date, version])
+  }, [slug, date, version, refreshKey])
 
   const reload = useCallback(() => setVersion((value) => value + 1), [])
 
@@ -49,17 +60,73 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
     }
   }
 
-  const cancelBooking = (id: string) =>
-    runAction(async () => {
+  const restore = async (id: string) => {
+    try {
+      await restoreBookingAsSalon(slug, id)
+      toast.show({ title: 'Запись возвращена', type: 'success' })
+    } catch (restoreError) {
+      toast.show({
+        title: 'Не получилось',
+        description: getErrorMessage(restoreError),
+        type: 'error',
+      })
+    }
+    reload()
+  }
+
+  // Cancelling is immediate and reversible: the toast offers «Вернуть» before the client is texted.
+  const cancelBooking = async (id: string) => {
+    try {
       await cancelBookingAsSalon(slug, id)
-      return 'Запись отменена, клиенту ушло SMS'
-    })
+      toast.show({
+        title: 'Запись отменена',
+        description: 'Клиенту уйдёт SMS через 15 секунд',
+        type: 'success',
+        timeout: UNDO_TIMEOUT_MS,
+        action: { label: 'Вернуть', onClick: () => void restore(id) },
+      })
+      reload()
+      return true
+    } catch (cancelError) {
+      toast.show({
+        title: 'Не получилось',
+        description: getErrorMessage(cancelError),
+        type: 'error',
+      })
+      return false
+    }
+  }
 
   const addBooking = (input: CreateBookingInput) =>
     runAction(async () => {
       const booking = await createStaffBooking(slug, input)
+      markOwnBooking(booking.id)
       return `${booking.customerName} записан(а) на ${booking.time}, клиенту ушло SMS`
     })
+
+  const moveBooking = async (booking: AdminBooking, specialistId: string, time: string) => {
+    if (!date) return
+    try {
+      const moved = await moveBookingAsSalon(slug, booking.id, { date, time, specialistId })
+      toast.show({
+        title: `Перенесено на ${moved.time}`,
+        description: `${moved.customerName} · ${moved.specialistName}. Клиенту уйдёт SMS через 15 секунд`,
+        type: 'success',
+        timeout: UNDO_TIMEOUT_MS,
+        action: {
+          label: 'Вернуть',
+          onClick: () =>
+            void runAction(async () => {
+              await moveBookingAsSalon(slug, booking.id, moved.previous)
+              return 'Запись на прежнем месте'
+            }),
+        },
+      })
+    } catch (moveError) {
+      toast.show({ title: 'Не получилось', description: getErrorMessage(moveError), type: 'error' })
+    }
+    reload()
+  }
 
   const addTimeOff = (input: CreateTimeOffInput) =>
     runAction(async () => {
@@ -75,5 +142,14 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
       return 'Время снова открыто'
     })
 
-  return { schedule, error, reload, addBooking, cancelBooking, addTimeOff, removeTimeOff }
+  return {
+    schedule,
+    error,
+    reload,
+    addBooking,
+    moveBooking,
+    cancelBooking,
+    addTimeOff,
+    removeTimeOff,
+  }
 }

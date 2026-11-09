@@ -49,7 +49,7 @@ export const UpcomingBooking = ({
             </ButtonLink>
           )}
           <span className={styles.spacer} />
-          <CancelBookingButton booking={booking} isCancelling={isCancelling} onConfirm={onCancel} />
+          <CancelBookingButton isCancelling={isCancelling} onConfirm={onCancel} />
         </div>
       }
     />

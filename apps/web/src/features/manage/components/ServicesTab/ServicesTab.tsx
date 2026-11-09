@@ -52,7 +52,7 @@ export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
 
       {!hasServices && (
         <EmptyState
-          title='Пока нет услуг'
+          title='Добавьте первую услугу'
           text='Добавьте первую — название, длительность и цену. Остальное можно позже.'
           action={<Button onClick={() => setEditing('new')}>Добавить услугу</Button>}
         />

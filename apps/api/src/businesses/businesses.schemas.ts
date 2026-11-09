@@ -12,6 +12,22 @@ const createBusinessSchema = z.object({
   city: z.string().trim().min(1).max(80).default('Бишкек'),
   address: optionalText(200),
   phone: optionalText(32),
+  // Services picked from the kind's starter template during registration.
+  services: z
+    .array(
+      z.object({
+        name: z.string().trim().min(1).max(160),
+        durationMinutes: z
+          .number()
+          .int()
+          .min(5)
+          .max(12 * 60),
+        price: z.number().int().min(0).max(10_000_000),
+        isPopular: z.boolean().default(false),
+      }),
+    )
+    .max(20)
+    .default([]),
 })
 
 const updateBusinessSchema = z.object({

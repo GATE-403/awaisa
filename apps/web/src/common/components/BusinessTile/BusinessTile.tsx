@@ -26,7 +26,7 @@ const getInitials = (name: string) =>
     .join('')
 
 // The same name always gets the same colour, so a business is recognisable at a glance.
-const pickTint = (name: string) => {
+export const pickTint = (name: string) => {
   const hash = [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7)
   return TINTS[hash % TINTS.length] ?? TINTS[0]
 }

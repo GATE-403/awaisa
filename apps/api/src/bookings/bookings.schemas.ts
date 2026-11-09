@@ -25,11 +25,20 @@ const createBookingSchema = z.object({
   comment: z.string().trim().max(500).default(''),
 })
 
+const nextFreeQuerySchema = z.object({
+  slugs: z
+    .string()
+    .transform((value) => [...new Set(value.split(',').map((slug) => slug.trim()))].filter(Boolean))
+    .pipe(z.array(z.string().max(64)).min(1).max(60)),
+})
+
 const bookingTokenSchema = z.string().trim().min(16).max(128)
 
 type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>
 
 type CreateBookingInput = z.infer<typeof createBookingSchema>
 
-export type { AvailabilityQuery, CreateBookingInput }
-export { availabilityQuerySchema, bookingTokenSchema, createBookingSchema }
+type NextFreeQuery = z.output<typeof nextFreeQuerySchema>
+
+export type { AvailabilityQuery, CreateBookingInput, NextFreeQuery }
+export { availabilityQuerySchema, bookingTokenSchema, createBookingSchema, nextFreeQuerySchema }

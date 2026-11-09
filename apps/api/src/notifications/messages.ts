@@ -40,5 +40,14 @@ const reminderMessage = (booking: BookingMessageInput) =>
 const salonCancellationMessage = (booking: BookingMessageInput, webUrl: string) =>
   `${booking.business.name}: к сожалению, запись на ${formatDate(booking.date)} в ${booking.time} отменена. Выберите другое время: ${webUrl}/${booking.business.slug}/book`
 
+const rescheduleMessage = (booking: BookingMessageInput, webUrl: string) =>
+  `${booking.business.name}: запись перенесена — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Подробнее: ${webUrl}/bookings`
+
 export type { BookingMessageInput }
-export { confirmationMessage, otpMessage, reminderMessage, salonCancellationMessage }
+export {
+  confirmationMessage,
+  otpMessage,
+  reminderMessage,
+  rescheduleMessage,
+  salonCancellationMessage,
+}

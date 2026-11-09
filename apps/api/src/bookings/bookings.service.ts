@@ -26,7 +26,12 @@ import { confirmationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
-import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, REMINDER_LEAD_MINUTES } from './booking-rules.js'
+import {
+  ANY_SPECIALIST_ID,
+  BOOKING_DAYS_AHEAD,
+  REMINDER_LEAD_MINUTES,
+  UNDO_WINDOW_SECONDS,
+} from './booking-rules.js'
 import type { AvailabilityQuery, CreateBookingInput } from './bookings.schemas.js'
 
 type BookingView = {
@@ -59,6 +64,8 @@ type AdminBookingView = BookingView & {
 const EXCLUSION_VIOLATION = '23P01'
 
 const MAX_CUSTOMER_BOOKINGS = 50
+
+const MAX_RECENT_BOOKINGS = 20
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
@@ -110,6 +117,45 @@ export class BookingsService {
     const slots = await this.buildSlotsFor(request, date, now)
 
     return { date, slots: slots.map(({ time, isAvailable }) => ({ time, isAvailable })) }
+  }
+
+  /**
+   * The first free time today or tomorrow for each business, for live catalog cards.
+   * Uses the business's quickest service with any master — the earliest anyone could come in.
+   */
+  async findNextFree(slugs: string[]) {
+    const rows = (await this.bookings.manager.query(
+      `
+      SELECT DISTINCT ON (b."slug") b."slug", s."id" AS "serviceId"
+      FROM "businesses" b
+      JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
+      WHERE b."is_published" AND b."slug" = ANY($1)
+      ORDER BY b."slug", s."duration_minutes", s."price"
+      `,
+      [slugs],
+    )) as { slug: string; serviceId: string }[]
+    const today = toBusinessParts(new Date()).dateKey
+    const entries = await Promise.all(
+      rows.map(async ({ slug, serviceId }) => {
+        for (const date of [today, addDays(today, 1)]) {
+          try {
+            const { slots } = await this.getAvailability({
+              serviceId,
+              specialistId: ANY_SPECIALIST_ID,
+              date,
+            })
+            const free = slots.find((slot) => slot.isAvailable)
+            if (free) return [slug, { date, time: free.time }] as const
+          } catch {
+            // A service without masters has no slots; the card just shows no time.
+          }
+        }
+
+        return [slug, null] as const
+      }),
+    )
+
+    return Object.fromEntries(entries)
   }
 
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
@@ -184,11 +230,13 @@ export class BookingsService {
 
   async cancel(id: string, token: string) {
     const booking = await this.verifyToken(id, token)
-    if (booking.status !== 'cancelled') {
-      await this.bookings.update({ id }, { status: 'cancelled' })
-    }
+    if (booking.status !== 'cancelled') await this.markCancelled(id)
 
     return this.getView(id)
+  }
+
+  async restoreByToken(id: string, token: string) {
+    return this.restore(await this.verifyToken(id, token))
   }
 
   async listForCustomer(customer: Customer) {
@@ -216,11 +264,30 @@ export class BookingsService {
     const isOwner =
       booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
     if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
-    if (booking.status !== 'cancelled') {
-      await this.bookings.update({ id }, { status: 'cancelled' })
-    }
+    if (booking.status !== 'cancelled') await this.markCancelled(id)
 
     return this.getView(id)
+  }
+
+  async restoreForCustomer(id: string, customer: Customer) {
+    const booking = await this.bookings.findOneBy({ id })
+    const isOwner =
+      booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
+    if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
+
+    return this.restore(booking)
+  }
+
+  async restoreBySalon(businessId: string, id: string) {
+    const booking = await this.bookings.findOneBy({ id, businessId })
+    if (!booking) throw new NotFoundException('Запись не найдена')
+
+    return this.restore(booking)
+  }
+
+  /** True while the booking is still cancelled, e.g. once the undo window has passed. */
+  async isCancelled(id: string) {
+    return (await this.bookings.findOneBy({ id }))?.status === 'cancelled'
   }
 
   async getAdminViews(
@@ -244,14 +311,118 @@ export class BookingsService {
     }))
   }
 
+  /** Bookings clients made after `since`, for the cabinet's new-booking alerts. */
+  async listCreatedSince(businessId: string, since: Date) {
+    const bookings = await this.bookings
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.service', 'service')
+      .leftJoinAndSelect('booking.specialist', 'specialist')
+      .leftJoinAndSelect('booking.business', 'business')
+      .where('booking.businessId = :businessId', { businessId })
+      .andWhere('booking.createdAt > :since', { since })
+      .andWhere("booking.status = 'confirmed'")
+      .orderBy('booking.createdAt', 'ASC')
+      .limit(MAX_RECENT_BOOKINGS)
+      .getMany()
+
+    return bookings.map((booking) => ({
+      ...toView(booking),
+      customerPhone: booking.customerPhone,
+      comment: booking.comment,
+      createdAt: booking.createdAt.toISOString(),
+    }))
+  }
+
+  /** Staff drag a booking to another time or master. Hours are not enforced: staff may stay late. */
+  async moveBySalon(
+    businessId: string,
+    id: string,
+    target: { date: string; time: string; specialistId: string },
+  ) {
+    const booking = await this.bookings.findOne({
+      where: { id, businessId },
+      relations: { service: true },
+    })
+    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+
+    const offering = await this.catalogService.getSpecialistsForService(booking.serviceId)
+    if (!offering.some((specialist) => specialist.id === target.specialistId)) {
+      throw new BadRequestException('Этот мастер не выполняет эту услугу')
+    }
+    const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
+    const endsAt = new Date(startsAt.getTime() + (booking.service?.durationMinutes ?? 0) * 60_000)
+    const blocked = await this.timeOff
+      .createQueryBuilder('timeOff')
+      .where('timeOff.specialistId = :specialistId', { specialistId: target.specialistId })
+      .andWhere('timeOff.startsAt < :endsAt AND timeOff.endsAt > :startsAt', { startsAt, endsAt })
+      .getExists()
+    if (blocked) throw new ConflictException('У мастера закрыто это время')
+
+    const before = toBusinessParts(booking.startsAt)
+    const previous = {
+      date: before.dateKey,
+      time: formatMinutes(before.minutes),
+      specialistId: booking.specialistId,
+    }
+    try {
+      await this.bookings.update(
+        { id },
+        {
+          specialistId: target.specialistId,
+          startsAt,
+          endsAt,
+          // A new time needs its own reminder.
+          reminderSentAt:
+            startsAt.getTime() - Date.now() <= REMINDER_LEAD_MINUTES * 60_000 ? new Date() : null,
+        },
+      )
+    } catch (error) {
+      if (isOverlapError(error)) throw new ConflictException('Это время у мастера занято')
+      throw error
+    }
+
+    return {
+      view: await this.getView(id),
+      previous,
+      customerPhone: booking.customerPhone,
+    }
+  }
+
+  async getStartsAt(id: string) {
+    return (await this.bookings.findOneBy({ id }))?.startsAt ?? null
+  }
+
   async cancelBySalon(businessId: string, id: string) {
     const booking = await this.bookings.findOneBy({ id, businessId })
     if (!booking) throw new NotFoundException('Запись не найдена')
 
     const wasConfirmed = booking.status === 'confirmed'
-    if (wasConfirmed) await this.bookings.update({ id }, { status: 'cancelled' })
+    if (wasConfirmed) await this.markCancelled(id)
 
     return { view: await this.getView(id), customerPhone: booking.customerPhone, wasConfirmed }
+  }
+
+  private markCancelled(id: string) {
+    return this.bookings.update({ id }, { status: 'cancelled', cancelledAt: new Date() })
+  }
+
+  // Undo for a cancellation made moments ago: the slot is taken back unless someone booked it.
+  private async restore(booking: Booking) {
+    if (booking.status === 'cancelled') {
+      const elapsed = booking.cancelledAt ? Date.now() - booking.cancelledAt.getTime() : Infinity
+      if (elapsed > UNDO_WINDOW_SECONDS * 1000) {
+        throw new BadRequestException('Вернуть уже нельзя — запишитесь заново')
+      }
+      try {
+        await this.bookings.update({ id: booking.id }, { status: 'confirmed', cancelledAt: null })
+      } catch (error) {
+        if (isOverlapError(error)) throw new ConflictException('Это время уже заняли')
+        throw error
+      }
+    }
+
+    return this.getView(booking.id)
   }
 
   private webUrl() {

@@ -81,7 +81,7 @@ test.describe('UX: guidance and feedback', () => {
     await expect(
       steps.contacts.getByText('Укажите номер, чтобы мы подтвердили запись'),
     ).toBeVisible()
-    await expect(steps.contacts.getByLabel('Телефон')).toHaveValue('555')
+    await expect(steps.contacts.getByLabel('Телефон')).toHaveValue('+996 555')
     await expect(steps.contacts.getByLabel('Имя')).toHaveAttribute('aria-invalid', 'true')
     await expect(steps.contacts).toBeInViewport()
   })

@@ -17,6 +17,7 @@ import { ScheduleTab } from './components/ScheduleTab'
 import { ServicesTab } from './components/ServicesTab/ServicesTab'
 import { SetupProgress } from './components/SetupProgress/SetupProgress'
 import { useManagedBusiness } from './hooks/useManagedBusiness'
+import { useNewBookingAlerts } from './hooks/useNewBookingAlerts'
 import styles from './ManagePage.module.css'
 import { MANAGE_TABS, toManageTab } from './manageTabs'
 
@@ -31,6 +32,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
   const searchParams = useSearchParams()
   const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn')
   const tab = toManageTab(searchParams.get('tab'))
+  const alertsVersion = useNewBookingAlerts(slug, data !== null)
 
   if (error) {
     return (
@@ -101,7 +103,12 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
         <div className={styles.main} data-wide={tab === 'schedule' || undefined}>
           {!data && <Skeleton className={styles.skeleton} />}
           {data && tab === 'schedule' && (
-            <ScheduleTab slug={slug} business={data.business} catalog={data.catalog} />
+            <ScheduleTab
+              slug={slug}
+              business={data.business}
+              catalog={data.catalog}
+              refreshKey={alertsVersion}
+            />
           )}
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />

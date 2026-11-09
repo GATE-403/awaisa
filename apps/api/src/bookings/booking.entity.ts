@@ -69,6 +69,9 @@ export class Booking {
   @JoinColumn({ name: 'customer_id' })
   customer?: Customer
 
+  @Column({ name: 'cancelled_at', type: 'timestamptz', nullable: true })
+  cancelledAt: Date | null
+
   @Column({ name: 'reminder_sent_at', type: 'timestamptz', nullable: true })
   reminderSentAt: Date | null
 

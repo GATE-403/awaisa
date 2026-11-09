@@ -1,7 +1,14 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
-import { cancelBooking, cancelMyBooking, getBooking, getMyBookings } from '@/common/api/clientApi'
+import {
+  cancelBooking,
+  cancelMyBooking,
+  getBooking,
+  getMyBookings,
+  restoreBooking,
+  restoreMyBooking,
+} from '@/common/api/clientApi'
 import type { Booking } from '@/common/api/types'
 import { useSession } from '@/common/hooks/useSession'
 import { useStoredBookings } from '@/common/hooks/useStoredBookings'
@@ -13,6 +20,9 @@ import {
 } from '@/common/utils/bookingStorage'
 
 const NOT_FOUND_STATUS = 404
+
+// Slightly shorter than the API's 15-second undo window.
+const UNDO_TIMEOUT_MS = 12_000
 
 export const useMyBookings = () => {
   const { bookings: stored, isReady: isStorageReady } = useStoredBookings()
@@ -82,8 +92,10 @@ export const useMyBookings = () => {
       )
       toast.show({
         title: 'Запись отменена',
-        description: 'Будем рады видеть вас снова',
+        description: 'Время освободилось для других',
         type: 'success',
+        timeout: UNDO_TIMEOUT_MS,
+        action: { label: 'Вернуть', onClick: () => void restore(id) },
       })
     } catch (cancelError) {
       toast.show({
@@ -93,6 +105,27 @@ export const useMyBookings = () => {
       })
     } finally {
       setCancellingId(null)
+    }
+  }
+
+  const restore = async (id: string) => {
+    const local = stored.find((item) => item.id === id)
+
+    try {
+      const restored = accountIds.has(id)
+        ? await restoreMyBooking(id)
+        : await restoreBooking(id, local?.token ?? '')
+      if (local) updateSnapshot(restored)
+      setAccountBookings(
+        (current) => current?.map((item) => (item.id === id ? restored : item)) ?? null,
+      )
+      toast.show({ title: 'Запись возвращена', type: 'success' })
+    } catch (restoreError) {
+      toast.show({
+        title: 'Не удалось вернуть',
+        description: getErrorMessage(restoreError),
+        type: 'error',
+      })
     }
   }
 

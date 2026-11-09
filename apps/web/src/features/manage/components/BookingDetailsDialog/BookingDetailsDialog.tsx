@@ -1,12 +1,4 @@
 import { Avatar } from '@awaisa/ui/Avatar'
-import { Button } from '@awaisa/ui/Button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from '@awaisa/ui/Dialog'
 import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
 import type { AdminBooking } from '@/common/api/types'
@@ -32,7 +24,6 @@ export const BookingDetailsDialog = ({
   onClose,
   onCancel,
 }: BookingDetailsDialogProps) => {
-  const [isConfirming, setIsConfirming] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
   const isCancelled = booking.status === 'cancelled'
   const digits = booking.customerPhone.replace(/\D/g, '')
@@ -46,28 +37,6 @@ export const BookingDetailsDialog = ({
     setIsCancelling(true)
     if (await onCancel(booking.id)) onClose()
     setIsCancelling(false)
-  }
-
-  if (isConfirming) {
-    return (
-      <Dialog open onOpenChange={(open) => !open && onClose()}>
-        <DialogContent role='alertdialog'>
-          <DialogTitle>Отменить запись?</DialogTitle>
-          <DialogDescription>
-            {booking.customerName}, {booking.serviceName} в {booking.time}. Клиент получит SMS об
-            отмене.
-          </DialogDescription>
-          <DialogFooter>
-            <Button variant='secondary' onClick={() => setIsConfirming(false)}>
-              Оставить
-            </Button>
-            <Button variant='danger' onClick={handleCancel} disabled={isCancelling}>
-              Отменить запись
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    )
   }
 
   return (
@@ -138,7 +107,12 @@ export const BookingDetailsDialog = ({
 
       {!isCancelled && (
         <div className={sheet.list}>
-          <button type='button' className={sheet.danger} onClick={() => setIsConfirming(true)}>
+          <button
+            type='button'
+            className={sheet.danger}
+            onClick={handleCancel}
+            disabled={isCancelling}
+          >
             Отменить запись
           </button>
         </div>

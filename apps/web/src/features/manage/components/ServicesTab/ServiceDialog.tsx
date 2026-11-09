@@ -5,6 +5,7 @@ import { type FormEvent, useState } from 'react'
 import type { Category, Service, ServiceInput } from '@/common/api/types'
 import { Sheet } from '@/common/components/Sheet/Sheet'
 import sheet from '@/common/components/Sheet/Sheet.module.css'
+import { maskAmountInput } from '@/common/utils/inputMasks'
 import { formatDuration } from '@/features/booking/bookingUtils'
 
 interface ServiceDialogProps {
@@ -104,7 +105,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
                   aria-label='Цена, сом'
                   inputMode='numeric'
                   placeholder='0'
-                  value={price}
+                  value={maskAmountInput(price)}
                   onValueChange={(value) => setPrice(value.replace(/\D/g, ''))}
                 />
                 <span className={sheet.suffix}>сом</span>

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
+import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -12,9 +13,9 @@ import {
   toBusinessParts,
 } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
-import { salonCancellationMessage } from '../notifications/messages.js'
+import { rescheduleMessage, salonCancellationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
-import type { CreateTimeOffInput, StaffBookingInput } from './admin.schemas.js'
+import type { CreateTimeOffInput, MoveBookingInput, StaffBookingInput } from './admin.schemas.js'
 import { TimeOff } from './time-off.entity.js'
 
 const toTimeOffView = (timeOff: TimeOff) => {
@@ -80,11 +81,33 @@ export class AdminService {
     return view
   }
 
+  async moveBooking(business: Business, id: string, input: MoveBookingInput) {
+    const { view, previous, customerPhone } = await this.bookings.moveBySalon(
+      business.id,
+      id,
+      input,
+    )
+    const movedTo = (await this.bookings.getStartsAt(id))?.getTime()
+    // Like cancelling, the text waits for the undo window: a drag that is put back says nothing.
+    setTimeout(async () => {
+      if ((await this.bookings.getStartsAt(id))?.getTime() !== movedTo) return
+      if (await this.bookings.isCancelled(id)) return
+      const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
+      void this.sms.sendSafely(customerPhone, rescheduleMessage(view, webUrl))
+    }, UNDO_WINDOW_SECONDS * 1000).unref()
+
+    return { ...view, previous }
+  }
+
   async cancelBooking(business: Business, id: string) {
     const { view, customerPhone, wasConfirmed } = await this.bookings.cancelBySalon(business.id, id)
     if (wasConfirmed) {
-      const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
-      void this.sms.sendSafely(customerPhone, salonCancellationMessage(view, webUrl))
+      // The text waits out the undo window, so a mis-tap that is undone never reaches the client.
+      setTimeout(async () => {
+        if (!(await this.bookings.isCancelled(id))) return
+        const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
+        void this.sms.sendSafely(customerPhone, salonCancellationMessage(view, webUrl))
+      }, UNDO_WINDOW_SECONDS * 1000).unref()
     }
 
     return view

@@ -53,7 +53,11 @@ type BusinessCard = Pick<
 > & {
   servicesCount: number
   minPrice: number
+  coverUrl: string | null
+  hours: WorkingDay[]
 }
+
+type NextFree = Record<string, { date: string; time: string } | null>
 
 type BusinessPage = {
   business: Business
@@ -120,6 +124,12 @@ type AdminBooking = Booking & {
   comment: string
 }
 
+type RecentBooking = AdminBooking & { createdAt: string }
+
+type MovedBooking = Booking & {
+  previous: { date: string; time: string; specialistId: string }
+}
+
 type TimeOff = {
   id: string
   specialistId: string
@@ -143,7 +153,12 @@ type CreatedTimeOff = {
   conflictingBookingIds: string[]
 }
 
-type CreateBusinessInput = Pick<Business, 'name' | 'slug' | 'kind' | 'city' | 'address' | 'phone'>
+type CreateBusinessInput = Pick<
+  Business,
+  'name' | 'slug' | 'kind' | 'city' | 'address' | 'phone'
+> & {
+  services: { name: string; durationMinutes: number; price: number; isPopular: boolean }[]
+}
 
 type UpdateBusinessInput = Partial<
   Pick<
@@ -182,6 +197,9 @@ type CreateBookingInput = {
 
 export type {
   AdminBooking,
+  MovedBooking,
+  NextFree,
+  RecentBooking,
   BookingBusiness,
   Business,
   BusinessCard,
