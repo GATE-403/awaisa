@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { getBusiness } from '@/common/api/serverApi'
-import { PageSkeleton } from '@/common/components/PageSkeleton/PageSkeleton'
-import { BookingPage } from '@/features/booking/BookingPage'
+import { getBusiness } from '@/shared/api/serverApi'
+import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
+import { BookingPage } from '@/views/booking'
 
 export const generateMetadata = async ({
   params,

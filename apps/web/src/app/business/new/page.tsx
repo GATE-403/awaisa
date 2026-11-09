@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { CreateBusinessPage } from '@/features/forBusiness/CreateBusinessPage'
+import { CreateBusinessPage } from '@/views/forBusiness'
 
 export const metadata: Metadata = {
   title: 'Новая страница бизнеса',

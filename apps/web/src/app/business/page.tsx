@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ForBusinessPage } from '@/features/forBusiness/ForBusinessPage'
+import { ForBusinessPage } from '@/views/forBusiness'
 
 export const metadata: Metadata = {
   title: 'Онлайн-запись для бизнеса',

@@ -27,6 +27,12 @@ export class BusinessesController {
     return this.businesses.listCatalog(query)
   }
 
+  @Get('offers')
+  @SkipThrottle()
+  offers(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
+    return this.businesses.listOffers(query)
+  }
+
   @Get('popular-services')
   @SkipThrottle()
   popularServices(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {

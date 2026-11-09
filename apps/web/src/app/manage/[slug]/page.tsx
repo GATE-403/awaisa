@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { PageSkeleton } from '@/common/components/PageSkeleton/PageSkeleton'
-import { ManagePage } from '@/features/manage/ManagePage'
+import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
+import { ManagePage } from '@/views/manage'
 
 export const metadata: Metadata = {
   title: 'Кабинет',

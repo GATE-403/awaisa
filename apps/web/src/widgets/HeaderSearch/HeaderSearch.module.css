@@ -1,0 +1,206 @@
+.root {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+/* The search field from the macOS 26 kit, sized for the header: a 44pt capsule with the accent button. */
+.form {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 4px 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.form:focus-within {
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-primary),
+    var(--shadow-sm);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-muted-foreground);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-3);
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-md);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clear,
+.submit {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.clear {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  color: var(--color-muted-foreground);
+}
+
+.clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.submit {
+  width: 52px;
+  height: 36px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.submit svg {
+  width: 18px;
+  height: 18px;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-xl);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-lg);
+  animation: drop 180ms var(--ease-standard);
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+}
+
+.heading {
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.place,
+.all {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--control-height-md);
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.placeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.placeName {
+  font-weight: var(--font-weight-medium);
+}
+
+.placeMeta {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.all {
+  color: var(--color-link);
+  font-size: var(--text-sm);
+}
+
+.all svg {
+  width: 16px;
+  height: 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-2) var(--space-2);
+}
+
+.chip {
+  height: var(--control-height-sm);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .place:hover,
+  .all:hover {
+    background: var(--color-fill);
+  }
+
+  .chip:hover {
+    background: var(--color-fill-hover);
+  }
+}

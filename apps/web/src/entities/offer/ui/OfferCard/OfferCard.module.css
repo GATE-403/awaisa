@@ -1,0 +1,168 @@
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow var(--duration-normal) var(--ease-standard),
+    translate var(--duration-normal) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    translate: 0 -2px;
+  }
+}
+
+.media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      110% 90% at 30% 0%,
+      color-mix(in srgb, var(--tint) 30%, transparent),
+      transparent
+    ),
+    color-mix(in srgb, var(--tint) 10%, var(--color-surface));
+}
+
+.cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: scale var(--duration-normal) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .card:hover .cover {
+    scale: 1.03;
+  }
+}
+
+.badge {
+  position: absolute;
+  bottom: var(--space-2);
+  left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-danger-strong);
+  color: var(--color-primary-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-bold);
+}
+
+.action {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.duration {
+  color: var(--color-muted-foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+.name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  font-weight: var(--font-weight-medium);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.nameLink {
+  color: var(--color-foreground);
+}
+
+.place {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.rating {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.rating svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-rating);
+}
+
+.business {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+}
+
+.slot[data-today] {
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
+}
+
+.book {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--control-height-sm);
+  margin-top: var(--space-2);
+  /* Bordered Secondary from the kit: many cards, so no competing solid buttons. */
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .book:hover {
+    background: var(--color-primary-subtle-hover);
+  }
+}

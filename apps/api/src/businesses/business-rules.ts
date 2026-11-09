@@ -16,6 +16,8 @@ const RESERVED_SLUGS = new Set([
   'logout',
   'manage',
   'map',
+  'offers',
+  'popular-services',
   'me',
   'new',
   'profile',

@@ -1,4 +1,4 @@
-import { CatalogPage } from '@/features/catalog/CatalogPage'
+import { CatalogPage } from '@/views/catalog'
 
 const HomeRoute = ({ searchParams }: PageProps<'/'>) => <CatalogPage searchParams={searchParams} />
 

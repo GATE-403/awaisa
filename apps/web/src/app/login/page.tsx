@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { LoginPage } from '@/features/auth/LoginPage'
+import { LoginPage } from '@/views/auth'
 
 export const metadata: Metadata = {
   title: 'Вход',

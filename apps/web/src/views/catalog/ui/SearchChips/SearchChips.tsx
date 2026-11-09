@@ -1,0 +1,29 @@
+import NextLink from 'next/link'
+import type { BusinessKind, PopularService } from '@/shared/api/types'
+import styles from './SearchChips.module.css'
+
+interface SearchChipsProps {
+  kind: BusinessKind | undefined
+  services: PopularService[]
+}
+
+// «Часто ищут»: one-tap searches built from what places actually offer.
+export const SearchChips = ({ kind, services }: SearchChipsProps) => {
+  if (services.length === 0) return null
+
+  return (
+    <nav className={styles.row} aria-label='Часто ищут'>
+      <span className={styles.label}>Часто ищут</span>
+      {services.map((service) => (
+        <NextLink
+          key={service.name}
+          href={`/?${new URLSearchParams({ q: service.name, ...(kind ? { kind } : {}) })}`}
+          className={styles.chip}
+        >
+          {service.name}
+          <span className={styles.count}>{service.places}</span>
+        </NextLink>
+      ))}
+    </nav>
+  )
+}

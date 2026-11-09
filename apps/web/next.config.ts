@@ -1,6 +1,6 @@
 import path from 'node:path'
 import type { NextConfig } from 'next'
-import { API_URL, CLIENT_API_PREFIX } from './src/config/api'
+import { API_URL, CLIENT_API_PREFIX } from './src/shared/config/api'
 
 const nextConfig: NextConfig = {
   // Links from before the platform (bookmarks, old SMS) pointed at the single salon.
