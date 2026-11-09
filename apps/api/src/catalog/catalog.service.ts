@@ -65,12 +65,13 @@ export class CatalogService {
         }),
       ),
       specialists: specialists.map(
-        ({ id, name, role, rating, photoUrl, isActive, services: offered = [] }) => ({
+        ({ id, name, role, rating, photoUrl, branchId, isActive, services: offered = [] }) => ({
           id,
           name,
           role,
           rating,
           photoUrl,
+          branchId,
           serviceIds: offered
             .map((service) => service.id)
             .filter((serviceId) => visibleServiceIds.has(serviceId)),
@@ -168,11 +169,20 @@ export class CatalogService {
           position: (await this.specialists.countBy({ businessId })) + 1,
         })
 
+    if (input.branchId) {
+      const [branch] = (await this.specialists.manager.query(
+        'SELECT 1 FROM "branches" WHERE "id" = $1 AND "business_id" = $2',
+        [input.branchId, businessId],
+      )) as unknown[]
+      if (!branch) throw new BadRequestException('Филиал не найден')
+    }
+
     return this.specialists.save({
       ...existing,
       name: input.name,
       role: input.role,
       isActive: input.isActive,
+      branchId: input.branchId,
       services,
     })
   }

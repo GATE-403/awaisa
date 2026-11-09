@@ -1,5 +1,5 @@
 import type { Icon } from '@phosphor-icons/react'
-import { CalendarCheck, MagnifyingGlass, Storefront } from '@phosphor-icons/react/ssr'
+import { CalendarCheck, MagnifyingGlass, MapTrifold, Storefront } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
@@ -9,12 +9,22 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: MagnifyingGlass },
+  { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/bookings', label: 'Мои записи', icon: CalendarCheck },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.
-const APP_SEGMENTS = new Set(['bookings', 'business', 'login', 'manage', 'profile', 'ui', 'api'])
+const APP_SEGMENTS = new Set([
+  'bookings',
+  'business',
+  'login',
+  'manage',
+  'map',
+  'profile',
+  'ui',
+  'api',
+])
 
 const getBusinessSlug = (pathname: string) => {
   const [segment] = pathname.split('/').filter(Boolean)

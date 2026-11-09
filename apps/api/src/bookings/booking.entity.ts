@@ -7,6 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { Branch } from '../businesses/branch.entity.js'
 import { Business } from '../businesses/business.entity.js'
 import { Service } from '../catalog/service.entity.js'
 import { Specialist } from '../catalog/specialist.entity.js'
@@ -68,6 +69,13 @@ export class Booking {
   @ManyToOne(() => Customer, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'customer_id' })
   customer?: Customer
+
+  @Column({ name: 'branch_id', type: 'uuid', nullable: true })
+  branchId: string | null
+
+  @ManyToOne(() => Branch, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'branch_id' })
+  branch?: Branch | null
 
   @Column({ name: 'cancelled_at', type: 'timestamptz', nullable: true })
   cancelledAt: Date | null

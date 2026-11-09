@@ -5,6 +5,7 @@ import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
+import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import { UsersThree } from '@phosphor-icons/react/ssr'
 import type { Business, Catalog } from '@/common/api/types'
 import { Container } from '@/common/components/Container/Container'
@@ -55,6 +56,29 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
       <Container className={styles.layout}>
         <div className={styles.steps}>
           <PageTitle title='Запись.' subtitle={`${business.name}: четыре шага — около минуты.`} />
+
+          {form.branches.length > 1 && (
+            <section className={styles.branches} aria-label='Филиал'>
+              <ToggleGroup
+                aria-label='Филиал'
+                layout='scroll'
+                value={form.branchId ? [form.branchId] : []}
+                onValueChange={(values) => {
+                  const next = values.at(-1)
+                  if (typeof next === 'string') form.selectBranch(next)
+                }}
+              >
+                {form.branches.map((branch) => (
+                  <Toggle key={branch.id} value={branch.id} size='sm'>
+                    {branch.name}
+                  </Toggle>
+                ))}
+              </ToggleGroup>
+              <p className={styles.branchAddress}>
+                {form.branches.find((branch) => branch.id === form.branchId)?.address}
+              </p>
+            </section>
+          )}
 
           <BookingStep
             id='service'

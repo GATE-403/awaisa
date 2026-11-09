@@ -38,7 +38,7 @@ export class BusinessesController {
     const business = await this.businesses.findBySlug(slug)
 
     return {
-      business: this.businesses.toView(business),
+      business: await this.businesses.toFullView(business),
       catalog: await this.catalog.getCatalog(business.id),
     }
   }

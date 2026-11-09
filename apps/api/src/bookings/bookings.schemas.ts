@@ -12,6 +12,8 @@ const availabilityQuerySchema = z.object({
   serviceId: ID_SCHEMA,
   specialistId: ID_SCHEMA,
   date: DATE_SCHEMA,
+  // With «any master», only masters of this branch (or of every branch) are considered.
+  branchId: z.uuid().optional(),
 })
 
 const createBookingSchema = z.object({
@@ -23,6 +25,7 @@ const createBookingSchema = z.object({
   // Signed-in clients book with their verified number, so the field may be empty; the service checks it.
   phone: z.string().trim().max(32).default(''),
   comment: z.string().trim().max(500).default(''),
+  branchId: z.uuid().optional(),
 })
 
 const nextFreeQuerySchema = z.object({

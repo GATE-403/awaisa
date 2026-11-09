@@ -29,6 +29,10 @@ export class Specialist {
   })
   rating: number | null
 
+  /** null = works at every branch. */
+  @Column({ name: 'branch_id', type: 'uuid', nullable: true })
+  branchId: string | null
+
   @Column({ name: 'photo_url', type: 'varchar', length: 512, nullable: true })
   photoUrl: string | null
 

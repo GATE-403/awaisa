@@ -48,5 +48,5 @@
 
 .input[data-variant="plain"][data-invalid] {
   box-shadow: none;
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }

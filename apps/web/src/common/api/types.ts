@@ -20,8 +20,36 @@ type Specialist = {
   role: string
   rating: number | null
   photoUrl?: string | null
+  /** null = works at every branch. */
+  branchId?: string | null
   serviceIds: string[]
   isActive?: boolean
+}
+
+type Branch = {
+  id: string
+  name: string
+  address: string
+  phone: string
+  latitude: number | null
+  longitude: number | null
+  isActive?: boolean
+}
+
+type BranchInput = Omit<Branch, 'id' | 'isActive'> & { isActive: boolean }
+
+type MapPlace = {
+  branchId: string
+  branchName: string
+  address: string
+  latitude: number
+  longitude: number
+  slug: string
+  name: string
+  kind: BusinessKind
+  coverUrl: string | null
+  minPrice: number
+  distanceKm: number | null
 }
 
 type BusinessKind = 'beauty' | 'barber' | 'nails' | 'spa' | 'health' | 'other'
@@ -46,6 +74,7 @@ type Business = {
   slotMinutes: number
   coverUrl: string | null
   photos: string[]
+  branches: Branch[]
   isPublished: boolean
   hours: WorkingDay[]
 }
@@ -144,7 +173,7 @@ type TimeOff = {
 
 type AdminSchedule = {
   date: string
-  specialists: Pick<Specialist, 'id' | 'name' | 'role'>[]
+  specialists: Pick<Specialist, 'id' | 'name' | 'role' | 'branchId'>[]
   bookings: AdminBooking[]
   timeOff: TimeOff[]
 }
@@ -184,7 +213,10 @@ type ServiceInput = Pick<
   'categoryId' | 'name' | 'description' | 'durationMinutes' | 'price' | 'isPopular'
 > & { isActive: boolean }
 
-type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & { isActive: boolean }
+type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
+  isActive: boolean
+  branchId: string | null
+}
 
 type SlugCheck = { available: boolean; reason?: string }
 
@@ -196,10 +228,14 @@ type CreateBookingInput = {
   name: string
   phone: string
   comment: string
+  branchId?: string
 }
 
 export type {
   AdminBooking,
+  Branch,
+  BranchInput,
+  MapPlace,
   MovedBooking,
   NextFree,
   RecentBooking,

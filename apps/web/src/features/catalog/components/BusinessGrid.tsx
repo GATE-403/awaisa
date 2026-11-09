@@ -25,11 +25,16 @@ export const BusinessGrid = async ({ kind, query }: BusinessGridProps) => {
             : ' Свободное время — онлайн.'}
         </span>
       </h2>
-      {query && (
-        <NextLink href={kind ? `/?kind=${kind}` : '/'} className={styles.emptyLink}>
-          Сбросить поиск
+      <span className={styles.resultsLinks}>
+        <NextLink href={kind ? `/map?kind=${kind}` : '/map'} className={styles.emptyLink}>
+          Показать на карте ›
         </NextLink>
-      )}
+        {query && (
+          <NextLink href={kind ? `/?kind=${kind}` : '/'} className={styles.emptyLink}>
+            Сбросить поиск
+          </NextLink>
+        )}
+      </span>
 
       {businesses.length === 0 ? (
         <div className={styles.empty}>

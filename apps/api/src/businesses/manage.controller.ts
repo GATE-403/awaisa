@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Put,
@@ -14,6 +15,8 @@ import { CatalogService } from '../catalog/catalog.service.js'
 import type { Business } from './business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from './business-access.guard.js'
 import {
+  type BranchInput,
+  branchSchema,
   type CategoryInput,
   categorySchema,
   type HoursInput,
@@ -38,9 +41,32 @@ export class ManageController {
   @Get()
   async get(@CurrentBusiness() business: Business) {
     return {
-      business: this.businesses.toView(business),
+      business: await this.businesses.toFullView(business, { includeInactive: true }),
       catalog: await this.catalog.getCatalog(business.id, { includeInactive: true }),
     }
+  }
+
+  @Post('branches')
+  createBranch(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: branchSchema }) body: BranchInput,
+  ) {
+    return this.businesses.saveBranch(business, body)
+  }
+
+  @Put('branches/:id')
+  updateBranch(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: branchSchema }) body: BranchInput,
+  ) {
+    return this.businesses.saveBranch(business, body, id)
+  }
+
+  @Delete('branches/:id')
+  @HttpCode(204)
+  deleteBranch(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+    return this.businesses.deleteBranch(business, id)
   }
 
   @Patch()

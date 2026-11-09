@@ -8,6 +8,7 @@ const PAGES = [
   '/awaisa-studio/book',
   '/bookings',
   '/business',
+  '/map',
 ]
 
 for (const path of PAGES) {

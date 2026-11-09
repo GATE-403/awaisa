@@ -20,20 +20,23 @@ export const useAvailability = (
   serviceId: string | null,
   specialistId: string | null,
   date: string | null,
+  branchId?: string,
 ): UseAvailabilityReturn => {
   const [reloadCount, setReloadCount] = useState(0)
   const [result, setResult] = useState<AvailabilityResult | null>(null)
   const key =
-    serviceId && specialistId && date ? `${serviceId}|${specialistId}|${date}|${reloadCount}` : null
+    serviceId && specialistId && date
+      ? `${serviceId}|${specialistId}|${date}|${branchId}|${reloadCount}`
+      : null
   const isCurrent = key !== null && result?.key === key
 
   useEffect(() => {
     if (!serviceId || !specialistId || !date) return
 
-    const requestKey = `${serviceId}|${specialistId}|${date}|${reloadCount}`
+    const requestKey = `${serviceId}|${specialistId}|${date}|${branchId}|${reloadCount}`
     const controller = new AbortController()
 
-    getAvailability({ serviceId, specialistId, date }, controller.signal)
+    getAvailability({ serviceId, specialistId, date, branchId }, controller.signal)
       .then(({ slots }) => setResult({ key: requestKey, slots, error: null }))
       .catch((error: unknown) => {
         if (controller.signal.aborted) return
@@ -41,7 +44,7 @@ export const useAvailability = (
       })
 
     return () => controller.abort()
-  }, [serviceId, specialistId, date, reloadCount])
+  }, [serviceId, specialistId, date, branchId, reloadCount])
 
   return {
     slots: isCurrent ? result.slots : [],

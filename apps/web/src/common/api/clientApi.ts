@@ -5,6 +5,8 @@ import type {
   AdminSchedule,
   Availability,
   Booking,
+  Branch,
+  BranchInput,
   Business,
   BusinessCard,
   BusinessLink,
@@ -16,6 +18,7 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  MapPlace,
   MovedBooking,
   NextFree,
   OtpRequest,
@@ -51,9 +54,28 @@ const post = <Result>(path: string, body?: unknown) =>
   })
 
 const getAvailability = (
-  params: { serviceId: string; specialistId: string; date: string },
+  {
+    branchId,
+    ...params
+  }: { serviceId: string; specialistId: string; date: string; branchId?: string },
   signal?: AbortSignal,
-) => request<Availability>(`/availability?${new URLSearchParams(params)}`, { signal })
+) =>
+  request<Availability>(
+    `/availability?${new URLSearchParams(branchId ? { ...params, branchId } : params)}`,
+    { signal },
+  )
+
+const getMapPlaces = (
+  params: { lat?: number; lng?: number; kind?: string },
+  signal?: AbortSignal,
+) => {
+  const query = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined) query.set(key, String(value))
+  }
+
+  return request<MapPlace[]>(`/map?${query}`, { signal })
+}
 
 const getNextFree = (slugs: string[], signal?: AbortSignal) =>
   request<NextFree>(`/next-free?${new URLSearchParams({ slugs: slugs.join(',') })}`, { signal })
@@ -193,6 +215,15 @@ const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
 const removeSpecialistPhoto = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/specialists/${id}/photo`)
 
+const createBranch = (slug: string, input: BranchInput) =>
+  post<Branch>(`${manage(slug)}/branches`, input)
+
+const updateBranch = (slug: string, id: string, input: BranchInput) =>
+  send<Branch>('PUT', `${manage(slug)}/branches/${id}`, input)
+
+const deleteBranch = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/branches/${id}`)
+
 const restoreBookingAsSalon = (slug: string, id: string) =>
   post<AdminBooking>(`${manage(slug)}/bookings/${id}/restore`)
 
@@ -203,6 +234,10 @@ const deleteTimeOff = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/time-off/${id}`)
 
 export {
+  createBranch,
+  deleteBranch,
+  getMapPlaces,
+  updateBranch,
   addPhoto,
   cancelBooking,
   cancelBookingAsSalon,

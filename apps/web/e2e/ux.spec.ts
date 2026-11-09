@@ -184,6 +184,7 @@ test.describe('UX: layout and ergonomics', () => {
         '/awaisa-studio/book',
         '/bookings',
         '/business',
+        '/map',
       ]) {
         await page.goto(path)
         await page.waitForLoadState('networkidle')

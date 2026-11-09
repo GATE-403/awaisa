@@ -12,13 +12,16 @@ import { Service } from '../catalog/service.entity.js'
 import { weekdayOf } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { Branch, type BranchView, toBranchView } from './branch.entity.js'
 import { Business } from './business.entity.js'
 import { BusinessMember } from './business-member.entity.js'
 import { DEFAULT_HOURS, getSlugProblem } from './business-rules.js'
 import type {
+  BranchInput,
   CatalogQuery,
   CreateBusinessInput,
   HoursInput,
+  MapQuery,
   UpdateBusinessInput,
 } from './businesses.schemas.js'
 import { WorkingHours } from './working-hours.entity.js'
@@ -52,6 +55,8 @@ type BusinessCard = Pick<
 }
 
 const MAX_CATALOG_ITEMS = 60
+
+const MAX_MAP_ITEMS = 200
 
 const toBusinessView = (business: Business): BusinessView => ({
   id: business.id,
@@ -87,6 +92,7 @@ export class BusinessesService {
     @InjectRepository(Business) private readonly businesses: Repository<Business>,
     @InjectRepository(BusinessMember) private readonly members: Repository<BusinessMember>,
     @InjectRepository(WorkingHours) private readonly hours: Repository<WorkingHours>,
+    @InjectRepository(Branch) private readonly branches: Repository<Branch>,
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
@@ -135,6 +141,104 @@ export class BusinessesService {
     return toBusinessView(business)
   }
 
+  /** The business view with its branches: active ones for clients, all of them for the cabinet. */
+  async toFullView(business: Business, { includeInactive = false } = {}) {
+    return {
+      ...toBusinessView(business),
+      branches: await this.listBranches(business.id, includeInactive),
+    }
+  }
+
+  async listBranches(businessId: string, includeInactive = false): Promise<BranchView[]> {
+    const branches = await this.branches.find({
+      where: includeInactive ? { businessId } : { businessId, isActive: true },
+      order: { position: 'ASC', createdAt: 'ASC' },
+    })
+
+    return branches.map((branch) => toBranchView(branch, includeInactive))
+  }
+
+  async saveBranch(business: Business, input: BranchInput, id?: string) {
+    const existing = id
+      ? await this.branches.findOneBy({ id, businessId: business.id })
+      : this.branches.create({
+          businessId: business.id,
+          position: (await this.branches.countBy({ businessId: business.id })) + 1,
+        })
+    if (!existing) throw new NotFoundException('Филиал не найден')
+    if (id && !input.isActive && (await this.countActiveBranches(business.id, id)) === 0) {
+      throw new BadRequestException('Нужен хотя бы один открытый филиал')
+    }
+
+    const saved = await this.branches.save({
+      ...existing,
+      ...input,
+      phone: normalizeOptionalPhone(input.phone) ?? '',
+    })
+
+    return toBranchView(saved, true)
+  }
+
+  async deleteBranch(business: Business, id: string) {
+    const branch = await this.branches.findOneBy({ id, businessId: business.id })
+    if (!branch) throw new NotFoundException('Филиал не найден')
+    if ((await this.countActiveBranches(business.id, id)) === 0) {
+      throw new BadRequestException('Нельзя удалить единственный филиал')
+    }
+    // Masters and past bookings keep working: their branch_id becomes null (every branch).
+    await this.branches.delete({ id })
+  }
+
+  /** Branches with a pin, nearest first when the client shared a location. */
+  async listMap({ lat, lng, kind, q }: MapQuery) {
+    const hasPoint = lat !== undefined && lng !== undefined
+    const rows = (await this.dataSource.query(
+      `
+      SELECT br."id" AS "branchId", br."name" AS "branchName", br."address",
+        br."latitude", br."longitude",
+        b."slug", b."name", b."kind", b."cover_url" AS "coverUrl",
+        MIN(s."price")::int AS "minPrice",
+        CASE WHEN $1::float8 IS NULL THEN NULL ELSE
+          6371 * 2 * ASIN(SQRT(
+            POWER(SIN(RADIANS(br."latitude" - $1) / 2), 2) +
+            COS(RADIANS($1)) * COS(RADIANS(br."latitude")) * POWER(SIN(RADIANS(br."longitude" - $2) / 2), 2)
+          ))
+        END AS "distanceKm"
+      FROM "branches" br
+      JOIN "businesses" b ON b."id" = br."business_id" AND b."is_published"
+      JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
+      WHERE br."is_active" AND br."latitude" IS NOT NULL AND br."longitude" IS NOT NULL
+        AND ($3::text IS NULL OR b."kind" = $3)
+        AND ($4::text IS NULL OR b."name" ILIKE $4 OR br."address" ILIKE $4)
+      GROUP BY br."id", b."id"
+      ORDER BY "distanceKm" ASC NULLS LAST, b."name" ASC
+      LIMIT ${MAX_MAP_ITEMS}
+      `,
+      [
+        hasPoint ? lat : null,
+        hasPoint ? lng : null,
+        kind ?? null,
+        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+      ],
+    )) as (Record<string, unknown> & { distanceKm: number | null })[]
+
+    return rows.map((row) => ({
+      ...row,
+      latitude: Number(row.latitude),
+      longitude: Number(row.longitude),
+      distanceKm: row.distanceKm === null ? null : Math.round(Number(row.distanceKm) * 10) / 10,
+    }))
+  }
+
+  private async countActiveBranches(businessId: string, exceptId: string) {
+    return this.branches
+      .createQueryBuilder('branch')
+      .where('branch.businessId = :businessId', { businessId })
+      .andWhere('branch.isActive = true')
+      .andWhere('branch.id != :exceptId', { exceptId })
+      .getCount()
+  }
+
   async getOpeningWindow(businessId: string, dateKey: string) {
     const day = await this.hours.findOneBy({ businessId, weekday: weekdayOf(dateKey) })
 
@@ -178,6 +282,17 @@ export class BusinessesService {
         Array.from({ length: 7 }, (_, weekday) =>
           manager.create(WorkingHours, { businessId: business.id, weekday, ...DEFAULT_HOURS }),
         ),
+      )
+      await manager.save(
+        manager.create(Branch, {
+          businessId: business.id,
+          name: 'Основной',
+          address: input.address,
+          phone,
+          latitude: input.latitude ?? null,
+          longitude: input.longitude ?? null,
+          position: 1,
+        }),
       )
       const category = await manager.save(
         manager.create(Category, {

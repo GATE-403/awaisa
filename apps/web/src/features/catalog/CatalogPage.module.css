@@ -110,11 +110,20 @@
 
 @media (min-width: 1024px) {
   .title {
-    font-size: 80px;
-    letter-spacing: -0.015em;
+    max-width: 22ch;
+    font-size: var(--text-display);
+    line-height: var(--text-display-line-height);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.005em;
   }
 
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+.resultsLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
 }

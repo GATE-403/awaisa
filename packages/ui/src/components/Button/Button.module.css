@@ -5,8 +5,8 @@
   gap: var(--space-2);
   flex-shrink: 0;
   border: none;
-  border-radius: var(--radius-full);
-  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-medium);
   letter-spacing: var(--tracking-normal);
   white-space: nowrap;
   text-decoration: none;
@@ -34,16 +34,17 @@
 
 .button[data-size="sm"] {
   height: var(--control-height-sm);
-  padding: 0 var(--space-4);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
 .button[data-size="md"] {
   height: var(--control-height-md);
-  padding: 0 var(--space-5);
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  padding: 0 var(--space-4);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
 }
 
 .button[data-size="lg"] {
@@ -53,44 +54,34 @@
   line-height: var(--text-md-line-height);
 }
 
+/* Push buttons from the macOS 26 kit: flat fills, no gradients or borders. */
 .button[data-variant="primary"] {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-primary) 90%, var(--color-primary-foreground)),
-    var(--color-primary)
-  );
-  box-shadow: var(--shadow-bevel), var(--shadow-xs);
+  background: var(--color-primary);
   color: var(--color-primary-foreground);
 }
 
-/* macOS bordered button: a light raised surface with a hairline, not a flat grey pill. */
+/* Bordered Neutral: a 5% fill and a dark label. */
 .button[data-variant="secondary"] {
-  background: var(--color-surface);
-  box-shadow:
-    inset 0 0 0 0.5px var(--color-border-strong),
-    var(--shadow-xs);
+  background: var(--color-fill);
   color: var(--color-foreground);
 }
 
+/* Bordered Secondary: the accent at 10% with an accent label. */
 .button[data-variant="outline"] {
-  background: var(--color-surface);
-  color: var(--color-foreground);
-  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
 }
 
+/* Borderless. */
 .button[data-variant="ghost"] {
   background: transparent;
   color: var(--color-link);
 }
 
+/* Bordered Destructive: neutral fill, red label. */
 .button[data-variant="danger"] {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--color-danger) 90%, var(--color-danger-foreground)),
-    var(--color-danger)
-  );
-  box-shadow: var(--shadow-bevel), var(--shadow-xs);
-  color: var(--color-danger-foreground);
+  background: var(--color-fill);
+  color: var(--color-danger-text);
 }
 
 .button[data-variant="contrast"] {
@@ -111,8 +102,9 @@
     background: var(--color-primary-hover);
   }
 
-  .button[data-variant="secondary"]:not([data-disabled]):hover {
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-foreground));
+  .button[data-variant="secondary"]:not([data-disabled]):hover,
+  .button[data-variant="danger"]:not([data-disabled]):hover {
+    background: var(--color-fill-hover);
   }
 
   .button[data-variant="ghost"]:not([data-disabled]):hover {
@@ -120,15 +112,11 @@
   }
 
   .button[data-variant="outline"]:not([data-disabled]):hover {
-    background: var(--color-subtle);
+    background: var(--color-primary-subtle-hover);
   }
 
   .button[data-variant="contrast"]:not([data-disabled]):hover {
     background: var(--color-contrast-hover);
-  }
-
-  .button[data-variant="danger"]:not([data-disabled]):hover {
-    background: var(--color-danger-hover);
   }
 
   .button[data-variant="link"]:not([data-disabled]):hover {

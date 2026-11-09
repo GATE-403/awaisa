@@ -12,6 +12,8 @@ const createBusinessSchema = z.object({
   city: z.string().trim().min(1).max(80).default('Бишкек'),
   address: optionalText(200),
   phone: optionalText(32),
+  latitude: z.number().min(-90).max(90).nullable().optional(),
+  longitude: z.number().min(-180).max(180).nullable().optional(),
   // Services picked from the kind's starter template during registration.
   services: z
     .array(
@@ -102,6 +104,24 @@ const specialistSchema = z.object({
   role: optionalText(120),
   serviceIds: z.array(z.string().trim().min(1).max(64)).max(200).default([]),
   isActive: z.boolean().default(true),
+  // null = the master works at every branch.
+  branchId: z.uuid().nullable().default(null),
+})
+
+const branchSchema = z.object({
+  name: z.string().trim().min(1, 'Укажите название').max(120),
+  address: z.string().trim().max(200).default(''),
+  phone: z.string().trim().max(32).default(''),
+  latitude: z.number().min(-90).max(90).nullable().default(null),
+  longitude: z.number().min(-180).max(180).nullable().default(null),
+  isActive: z.boolean().default(true),
+})
+
+const mapQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90).optional(),
+  lng: z.coerce.number().min(-180).max(180).optional(),
+  kind: z.string().trim().max(32).optional(),
+  q: z.string().trim().max(80).optional(),
 })
 
 type CreateBusinessInput = z.infer<typeof createBusinessSchema>
@@ -112,9 +132,13 @@ type SlugQuery = z.infer<typeof slugQuerySchema>
 type CategoryInput = z.infer<typeof categorySchema>
 type ServiceInput = z.infer<typeof serviceSchema>
 type SpecialistInput = z.infer<typeof specialistSchema>
+type BranchInput = z.infer<typeof branchSchema>
+type MapQuery = z.infer<typeof mapQuerySchema>
 
 export type {
+  BranchInput,
   CatalogQuery,
+  MapQuery,
   CategoryInput,
   CreateBusinessInput,
   HoursInput,
@@ -124,6 +148,8 @@ export type {
   UpdateBusinessInput,
 }
 export {
+  branchSchema,
+  mapQuerySchema,
   catalogQuerySchema,
   categorySchema,
   createBusinessSchema,

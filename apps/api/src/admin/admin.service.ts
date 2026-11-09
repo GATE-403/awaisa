@@ -64,7 +64,12 @@ export class AdminService {
 
     return {
       date,
-      specialists: specialists.map(({ id, name, role }) => ({ id, name, role })),
+      specialists: specialists.map(({ id, name, role, branchId }) => ({
+        id,
+        name,
+        role,
+        branchId,
+      })),
       bookings,
       timeOff: timeOff.map(toTimeOffView),
     }

@@ -49,6 +49,16 @@ test.describe('Platform: a new business goes live', () => {
     await masterDialog.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('heading', { name: 'Запуск записи' })).toHaveCount(0)
 
+    // A second address: the booking page then asks where.
+    await page.getByRole('link', { name: 'Филиалы' }).click()
+    await expect(page.getByRole('button', { name: /Основной/ })).toBeVisible()
+    await page.getByRole('button', { name: 'Добавить филиал' }).click()
+    const branchDialog = page.getByRole('dialog', { name: 'Новый филиал' })
+    await branchDialog.getByLabel('Название').fill('Джал')
+    await branchDialog.getByLabel('Адрес').fill('мкр. Джал, 15')
+    await branchDialog.getByRole('button', { name: 'Сохранить' }).click()
+    await expect(page.getByRole('button', { name: /Джал.*Нет метки/ })).toBeVisible()
+
     // A cover photo: uploaded, compressed by the API and shown on the catalog card.
     await page.getByRole('link', { name: 'Профиль', exact: true }).click()
     await page.getByLabel('Файл обложки').setInputFiles({
@@ -69,6 +79,7 @@ test.describe('Platform: a new business goes live', () => {
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
     await clientPage.getByRole('link', { name: 'Записаться' }).first().click()
 
+    await expect(clientPage.getByRole('group', { name: 'Филиал' })).toBeVisible()
     const steps = bookingSteps(clientPage)
     await steps.service.getByRole('radio', { name: /Стрижка/ }).click()
     // The only master is chosen for the client: the step is already filled in.

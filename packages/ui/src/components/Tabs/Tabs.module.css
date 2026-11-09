@@ -11,8 +11,8 @@
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
   padding: 2px;
-  border-radius: var(--radius-full);
-  background: var(--color-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--color-fill);
 }
 
 .tab {
@@ -24,7 +24,7 @@
   height: 32px;
   padding: 0 var(--space-4);
   border: none;
-  border-radius: var(--radius-full);
+  border-radius: 6px;
   background: transparent;
   color: var(--color-foreground);
   font-size: var(--text-sm);
@@ -35,8 +35,21 @@
   transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
+/* macOS 26 segmented control: the selected segment is filled with the accent. */
 .tab[data-active] {
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary-foreground);
+}
+
+/* Hairline dividers between unselected segments, as in the kit. */
+.tab:not([data-active]) + .tab:not([data-active])::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--color-border);
+  translate: 0 -50%;
 }
 
 .tab[data-disabled] {
@@ -51,11 +64,8 @@
   left: var(--active-tab-left);
   width: var(--active-tab-width);
   height: var(--active-tab-height);
-  border-radius: var(--radius-full);
-  background: var(--color-elevated);
-  box-shadow:
-    0 3px 8px rgb(0 0 0 / 0.12),
-    0 3px 1px rgb(0 0 0 / 0.04);
+  border-radius: 6px;
+  background: var(--color-primary);
   transition:
     left var(--duration-normal) var(--ease-spring),
     width var(--duration-normal) var(--ease-spring);

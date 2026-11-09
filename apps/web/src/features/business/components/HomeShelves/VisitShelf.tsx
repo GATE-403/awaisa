@@ -1,12 +1,14 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
+import NextLink from 'next/link'
 import type { Business } from '@/common/api/types'
 import { StoreCard } from '@/common/components/StoreCard/StoreCard'
 import { StoreShelf } from '@/common/components/StoreShelf/StoreShelf'
 import { useToday } from '@/common/hooks/useToday'
 import { formatPhone } from '@/common/utils/formatPhone'
 import { formatWeekSchedule, getOpeningStatus } from '@/common/utils/workingHours'
+import { BranchesMap } from './BranchesMap'
 import styles from './HomeShelves.module.css'
 
 interface VisitShelfProps {
@@ -20,35 +22,60 @@ export const VisitShelf = ({ business }: VisitShelfProps) => {
   const schedule = formatWeekSchedule(business.hours)
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes) : null
   const hasContacts = Boolean(business.phone || business.whatsapp)
+  const branches = business.branches ?? []
+  const pinned = branches.filter((branch) => branch.latitude !== null && branch.longitude !== null)
 
   return (
     <StoreShelf id='visit' title='Как нас найти.' subtitle={schedule} label='Контакты' size='wide'>
-      <li>
-        <StoreCard
-          tone='dark'
-          height='sm'
-          eyebrow={status?.label ?? schedule}
-          isHighlighted={status?.isOpen === false}
-          title={[business.city, business.address].filter(Boolean).join(', ')}
-          description={business.name}
-          footer={
-            business.mapUrl && (
-              <span className={styles.actions}>
-                <ButtonLink
-                  variant='primary'
-                  size='sm'
-                  render={
-                    // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-                    <a href={business.mapUrl} target='_blank' rel='noreferrer' />
-                  }
-                >
-                  Маршрут
-                </ButtonLink>
-              </span>
-            )
-          }
-        />
-      </li>
+      {pinned.length > 0 && (
+        <li className={styles.mapCard}>
+          <BranchesMap business={business} />
+        </li>
+      )}
+      {branches.map((branch) => {
+        const directions =
+          branch.latitude !== null && branch.longitude !== null
+            ? `https://www.google.com/maps/dir/?api=1&destination=${branch.latitude},${branch.longitude}`
+            : business.mapUrl
+
+        return (
+          <li key={branch.id}>
+            <StoreCard
+              tone='dark'
+              height='sm'
+              eyebrow={status?.label ?? schedule}
+              isHighlighted={status?.isOpen === false}
+              title={[business.city, branch.address || business.address].filter(Boolean).join(', ')}
+              description={branches.length > 1 ? `Филиал «${branch.name}»` : business.name}
+              footer={
+                <span className={styles.actions}>
+                  {directions && (
+                    <ButtonLink
+                      variant='primary'
+                      size='sm'
+                      render={
+                        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                        <a href={directions} target='_blank' rel='noreferrer' />
+                      }
+                    >
+                      Маршрут
+                    </ButtonLink>
+                  )}
+                  {branches.length > 1 && (
+                    <ButtonLink
+                      variant='secondary'
+                      size='sm'
+                      render={<NextLink href={`/${business.slug}/book?branch=${branch.id}`} />}
+                    >
+                      Записаться сюда
+                    </ButtonLink>
+                  )}
+                </span>
+              }
+            />
+          </li>
+        )
+      })}
       {hasContacts && (
         <li>
           <StoreCard
