@@ -161,10 +161,18 @@ export const DayCalendar = ({
                       {booking.time}–{end}
                     </span>
                     <span className={styles.blockTitle}>{booking.serviceName}</span>
-                    <span className={styles.blockMeta}>
-                      {booking.customerName}
-                      {booking.comment && <ChatText className={styles.commentIcon} aria-hidden />}
+                    <span className={styles.blockClient}>
+                      <span className={styles.mini} aria-hidden='true'>
+                        {booking.customerName.trim().charAt(0).toUpperCase()}
+                      </span>
+                      <span className={styles.blockClientName}>{booking.customerName}</span>
+                      {booking.comment && size !== 'tall' && (
+                        <ChatText className={styles.commentIcon} aria-hidden />
+                      )}
                     </span>
+                    {size === 'tall' && booking.comment && (
+                      <span className={styles.blockComment}>«{booking.comment}»</span>
+                    )}
                     {size === 'tall' && (
                       <span className={styles.blockFooter}>
                         <span>{formatPhone(booking.customerPhone)}</span>

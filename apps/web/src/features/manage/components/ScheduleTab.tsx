@@ -2,6 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { CalendarX } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import type { AdminBooking, Business } from '@/common/api/types'
 import { useToday } from '@/common/hooks/useToday'
@@ -9,6 +10,7 @@ import { findDay, weekdayOf } from '@/common/utils/workingHours'
 import { formatPrice, getUpcomingDays } from '@/features/booking/bookingUtils'
 import { useAdminSchedule } from '../hooks/useAdminSchedule'
 import { BookingDetailsDialog } from './BookingDetailsDialog/BookingDetailsDialog'
+import { getMasterTint } from './DayCalendar/calendarLayout'
 import { DayCalendar } from './DayCalendar/DayCalendar'
 import { DayStrip } from './DayStrip/DayStrip'
 import { EmptyState } from './EmptyState/EmptyState'
@@ -56,6 +58,7 @@ export const ScheduleTab = ({ slug, business }: ScheduleTabProps) => {
         actions={
           hasMasters && (
             <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+              <CalendarX weight='bold' aria-hidden />
               Закрыть время
             </Button>
           )
@@ -99,6 +102,13 @@ export const ScheduleTab = ({ slug, business }: ScheduleTabProps) => {
         <BookingDetailsDialog
           key={selected.id}
           booking={selected}
+          dayLabel={dayLabel}
+          tint={getMasterTint(
+            Math.max(
+              0,
+              (schedule?.specialists ?? []).findIndex(({ id }) => id === selected.specialistId),
+            ),
+          )}
           onClose={() => setSelected(null)}
           onCancel={cancelBooking}
         />

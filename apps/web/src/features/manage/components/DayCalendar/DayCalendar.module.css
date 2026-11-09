@@ -123,11 +123,19 @@
 
 .booking {
   z-index: 1;
+  gap: 3px;
   margin-top: 1px;
-  background: color-mix(in srgb, var(--tint) 16%, var(--color-surface));
+  padding: 6px 8px 6px 12px;
+  border-radius: 10px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--tint) 22%, var(--color-surface)),
+    color-mix(in srgb, var(--tint) 13%, var(--color-surface))
+  );
   box-shadow:
-    inset 3px 0 0 var(--tint),
-    inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 30%, transparent);
+    inset 4px 0 0 var(--tint),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 35%, transparent),
+    var(--shadow-xs);
   color: var(--color-foreground);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-standard);
@@ -177,9 +185,10 @@
 
 .blockTitle {
   overflow: hidden;
-  font-size: var(--text-footnote);
-  line-height: 18px;
+  font-size: var(--text-sm);
+  line-height: 19px;
   font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -194,6 +203,50 @@
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.blockClient {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 16px;
+}
+
+.blockClientName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--tint) 70%, var(--color-foreground));
+  color: var(--color-primary-foreground);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.booking[data-cancelled] .mini {
+  background: var(--color-tertiary-foreground);
+}
+
+.blockComment {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 16px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .commentIcon {
@@ -220,7 +273,10 @@
 }
 
 .blockPrice {
-  color: var(--color-foreground);
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--tint) 22%, var(--color-surface));
+  color: color-mix(in srgb, var(--tint) 60%, var(--color-foreground));
   font-weight: var(--font-weight-semibold);
 }
 
@@ -273,13 +329,13 @@
   column-gap: var(--space-2);
 }
 
-.booking[data-size="compact"] .blockMeta {
+.booking[data-size="compact"] .blockClient {
   flex-basis: 100%;
 }
 
 @media (hover: hover) {
   .booking:not([data-cancelled]):hover {
-    background: color-mix(in srgb, var(--tint) 24%, var(--color-surface));
+    background: color-mix(in srgb, var(--tint) 26%, var(--color-surface));
   }
 
   .remove:hover {

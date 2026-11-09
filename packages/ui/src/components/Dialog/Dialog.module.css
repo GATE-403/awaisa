@@ -69,6 +69,42 @@
   translate: 0 -24px;
 }
 
+/* iOS form sheet: grouped grey background, header bar inside; slides up from the bottom on phones. */
+.popup[data-variant="sheet"] {
+  gap: 0;
+  width: min(540px, calc(100vw - var(--space-8)));
+  max-height: min(760px, calc(100dvh - var(--space-12)));
+  overflow: hidden;
+  padding: 0;
+  border-radius: var(--radius-2xl);
+  background: var(--color-background);
+  backdrop-filter: none;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 639px) {
+  .popup[data-variant="sheet"] {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 92dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    translate: 0 0;
+    transition:
+      opacity var(--duration-normal) var(--ease-standard),
+      translate var(--duration-normal) var(--ease-standard);
+  }
+
+  .popup[data-variant="sheet"][data-starting-style],
+  .popup[data-variant="sheet"][data-ending-style] {
+    opacity: 1;
+    scale: 1;
+    translate: 0 100%;
+  }
+}
+
 .title {
   font-size: var(--text-lg);
   line-height: var(--text-lg-line-height);

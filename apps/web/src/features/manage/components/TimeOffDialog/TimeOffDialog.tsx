@@ -1,19 +1,10 @@
-import { Button } from '@awaisa/ui/Button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogTitle,
-} from '@awaisa/ui/Dialog'
-import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
 import type { CreateTimeOffInput, Specialist } from '@/common/api/types'
+import { Sheet } from '@/common/components/Sheet/Sheet'
+import sheet from '@/common/components/Sheet/Sheet.module.css'
 import { TIME_OPTIONS } from '../../manageUtils'
-import styles from '../manageForms.module.css'
 
 interface TimeOffDialogProps {
   date: string
@@ -22,6 +13,8 @@ interface TimeOffDialogProps {
   onClose: () => void
   onSubmit: (input: CreateTimeOffInput) => Promise<boolean>
 }
+
+const FORM_ID = 'time-off-form'
 
 const toItems = (values: string[]) => values.map((value) => ({ value, label: value }))
 
@@ -50,55 +43,71 @@ export const TimeOffDialog = ({
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
-        <DialogTitle>Закрыть время</DialogTitle>
-        <DialogDescription>
-          {dayLabel}. Перерыв, обучение или выходной — клиенты не смогут записаться.
-        </DialogDescription>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <Field label='Мастер'>
-            <Select
-              aria-label='Мастер'
-              items={specialists.map(({ id, name }) => ({ value: id, label: name }))}
-              value={specialistId}
-              onValueChange={(value) => value && setSpecialistId(value)}
-            />
-          </Field>
-          <div className={styles.pair}>
-            <Field label='С'>
-              <Select
-                aria-label='С'
-                items={toItems(TIME_OPTIONS.slice(0, -1))}
-                value={from}
-                onValueChange={(value) => value && setFrom(value)}
-              />
-            </Field>
-            <Field label='До' error={isRangeValid ? undefined : 'Позже начала'}>
-              <Select
-                aria-label='До'
-                items={toItems(TIME_OPTIONS.slice(1))}
-                value={to}
-                onValueChange={(value) => value && setTo(value)}
-              />
-            </Field>
+    <Sheet
+      title='Закрыть время'
+      onClose={onClose}
+      action={{ label: 'Готово', form: FORM_ID, disabled: isSubmitting || !isRangeValid }}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
+        <section className={sheet.group} aria-label='Время'>
+          <h3 className={sheet.groupTitle}>{dayLabel}</h3>
+          <div className={sheet.list}>
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Мастер</span>
+              <span className={sheet.rowControl}>
+                <Select
+                  variant='plain'
+                  aria-label='Мастер'
+                  items={specialists.map(({ id, name }) => ({ value: id, label: name }))}
+                  value={specialistId}
+                  onValueChange={(value) => value && setSpecialistId(value)}
+                />
+              </span>
+            </div>
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Начало</span>
+              <span className={sheet.rowControl}>
+                <Select
+                  variant='plain'
+                  aria-label='С'
+                  items={toItems(TIME_OPTIONS.slice(0, -1))}
+                  value={from}
+                  onValueChange={(value) => value && setFrom(value)}
+                />
+              </span>
+            </div>
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Конец</span>
+              <span className={sheet.rowControl}>
+                <Select
+                  variant='plain'
+                  aria-label='До'
+                  items={toItems(TIME_OPTIONS.slice(1))}
+                  value={to}
+                  onValueChange={(value) => value && setTo(value)}
+                />
+              </span>
+            </div>
           </div>
-          <Field label='Причина'>
+          <p className={sheet.groupFooter}>
+            {isRangeValid
+              ? 'Перерыв, обучение или выходной — клиенты не смогут записаться на это время.'
+              : 'Конец должен быть позже начала.'}
+          </p>
+        </section>
+        <div className={sheet.list}>
+          <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
+              variant='plain'
+              aria-label='Причина'
+              placeholder='Причина — необязательно'
               value={reason}
               onValueChange={setReason}
-              placeholder='Необязательно'
               maxLength={160}
             />
-          </Field>
-          <DialogFooter>
-            <DialogClose render={<Button variant='secondary' />}>Отмена</DialogClose>
-            <Button type='submit' disabled={isSubmitting || !isRangeValid}>
-              Закрыть время
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </div>
+        </div>
+      </form>
+    </Sheet>
   )
 }

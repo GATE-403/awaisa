@@ -1,6 +1,5 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
@@ -9,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getMyBusinesses } from '@/common/api/clientApi'
 import type { BusinessLink } from '@/common/api/types'
+import { BusinessTile } from '@/common/components/BusinessTile/BusinessTile'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
@@ -61,7 +61,7 @@ export const ManageIndexPage = () => {
             {businesses.map((business) => (
               <li key={business.slug}>
                 <NextLink href={`/manage/${business.slug}`} className={styles.row}>
-                  <Avatar name={business.name} className={styles.tile} />
+                  <BusinessTile name={business.name} />
                   <span className={styles.body}>
                     <span className={styles.name}>{business.name}</span>
                     <span className={styles.meta}>awaisa.kg/{business.slug}</span>

@@ -1,0 +1,38 @@
+/* App-icon look: a rounded square with a vivid gradient, a top highlight and a soft drop shadow. */
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tint) 78%, var(--color-primary-foreground)),
+    color-mix(in srgb, var(--tint) 82%, var(--color-foreground))
+  );
+  box-shadow: var(--shadow-bevel), var(--shadow-xs);
+  color: var(--color-primary-foreground);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+}
+
+.tile[data-size="sm"] {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-size: var(--text-xs);
+}
+
+.tile[data-size="md"] {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  font-size: var(--text-sm);
+}
+
+.tile[data-size="lg"] {
+  width: 64px;
+  height: 64px;
+  border-radius: 15px;
+  font-size: var(--text-lg);
+}

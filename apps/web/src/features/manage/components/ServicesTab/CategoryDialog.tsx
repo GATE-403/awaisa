@@ -1,14 +1,14 @@
-import { Button } from '@awaisa/ui/Button'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogTitle } from '@awaisa/ui/Dialog'
-import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { type FormEvent, useState } from 'react'
-import styles from '../manageForms.module.css'
+import { Sheet } from '@/common/components/Sheet/Sheet'
+import sheet from '@/common/components/Sheet/Sheet.module.css'
 
 interface CategoryDialogProps {
   onClose: () => void
   onSave: (name: string) => Promise<boolean>
 }
+
+const FORM_ID = 'category-form'
 
 export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
   const [name, setName] = useState('')
@@ -25,21 +25,28 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
-        <DialogTitle>Новая категория</DialogTitle>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <Field label='Название'>
-            <Input value={name} onValueChange={setName} placeholder='Например, «Ногти»' autoFocus />
-          </Field>
-          <DialogFooter>
-            <DialogClose render={<Button variant='secondary' />}>Отмена</DialogClose>
-            <Button type='submit' disabled={!name.trim() || isSaving}>
-              Добавить
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <Sheet
+      title='Новая категория'
+      onClose={onClose}
+      action={{ label: 'Добавить', form: FORM_ID, disabled: !name.trim() || isSaving }}
+    >
+      <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
+        <section className={sheet.group} aria-label='Категория'>
+          <div className={sheet.list}>
+            <div className={`${sheet.row} ${sheet.textRow}`}>
+              <Input
+                variant='plain'
+                aria-label='Название'
+                placeholder='Например, «Ногти»'
+                value={name}
+                onValueChange={setName}
+                autoFocus
+              />
+            </div>
+          </div>
+          <p className={sheet.groupFooter}>Категории группируют услуги на странице бизнеса.</p>
+        </section>
+      </form>
+    </Sheet>
   )
 }
