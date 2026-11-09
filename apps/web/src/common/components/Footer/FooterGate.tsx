@@ -11,5 +11,6 @@ interface FooterGateProps {
 export const FooterGate = ({ children }: FooterGateProps) => {
   const pathname = usePathname()
 
-  return isCabinetPath(pathname) ? null : children
+  // The map is a full-window app view, like the cabinet.
+  return isCabinetPath(pathname) || pathname === '/map' ? null : children
 }

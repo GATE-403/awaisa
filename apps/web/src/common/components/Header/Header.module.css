@@ -57,6 +57,11 @@
   margin-right: calc(-1 * var(--space-3));
 }
 
+.group {
+  display: flex;
+  align-items: center;
+}
+
 .theme {
   display: none;
 }
@@ -114,6 +119,10 @@
 }
 
 @media (hover: hover) {
+  .group :is(button, a):hover {
+    background: var(--color-fill);
+  }
+
   .account:hover,
   .navLink:hover {
     color: var(--color-foreground);
@@ -143,6 +152,38 @@
 
   .actions {
     justify-self: end;
+    margin-right: 0;
+  }
+
+  /* Window/Button Group from the macOS 26 kit: a 36pt Liquid Glass capsule of icon buttons. */
+  .group {
+    gap: 2px;
+    height: 36px;
+    padding: 0 2px;
+    border-radius: var(--radius-full);
+    background: var(--color-material);
+    backdrop-filter: var(--blur-material);
+    box-shadow:
+      inset 0 0 0 0.5px var(--color-material-border),
+      var(--shadow-sm);
+  }
+
+  .group :is(button, a) {
+    width: 34px;
+    height: 32px;
+    border-radius: var(--radius-full);
+  }
+
+  .group svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .cta {
+    height: 36px;
+    margin-right: 0;
+    padding: 0 var(--space-4);
+    font-size: var(--text-footnote);
   }
 
   .theme {

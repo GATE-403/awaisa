@@ -57,7 +57,7 @@ export const MapPage = () => {
   }
 
   return (
-    <main className={styles.page}>
+    <main>
       <div className={styles.layout}>
         <section className={styles.panel} aria-labelledby='map-title'>
           <header className={styles.header}>
