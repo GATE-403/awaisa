@@ -47,7 +47,7 @@ export const BookingHistory = ({ bookings, canForget, onForget }: BookingHistory
                 </button>
               )}
               <NextLink
-                href={`/${booking.business.slug}/book?service=${booking.serviceId}`}
+                href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
                 className={styles.again}
               >
                 Снова

@@ -1,6 +1,6 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/common/api/apiError'
 import { createBooking } from '@/common/api/clientApi'
 import type { Booking, Business, Catalog } from '@/common/api/types'
@@ -23,6 +23,9 @@ const MIN_PHONE_DIGITS = 9
 
 const CONFLICT_STATUS = 409
 
+// How many open days the form looks ahead for a free slot before showing an empty day.
+const MAX_AUTO_DAY_SKIPS = 6
+
 const scrollToStep = (stepId: BookingStepId, force = false) => {
   requestAnimationFrame(() => {
     const element = document.getElementById(`step-${stepId}`)
@@ -39,11 +42,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const today = useToday()
   const session = useSession()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
-  const [serviceId, setServiceId] = useState(
-    findService(catalog, searchParams.get('service'))?.id ?? null,
+  const presetService = findService(catalog, searchParams.get('service'))
+  const [serviceId, setServiceId] = useState(presetService?.id ?? null)
+  const [chosenSpecialistId, setSpecialistId] = useState(
+    presetSpecialist && (!presetService || presetSpecialist.serviceIds.includes(presetService.id))
+      ? presetSpecialist.id
+      : null,
   )
-  const [specialistId, setSpecialistId] = useState(presetSpecialist?.id ?? null)
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null)
+  const [autoDay, setAutoDay] = useState({ key: '', skips: 0 })
   const [time, setTime] = useState<string | null>(null)
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
@@ -58,12 +65,26 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
     : catalog.services
   const specialists = getSpecialistsForService(catalog, serviceId)
+  // One master for the service: nothing to choose, so the step is filled in.
+  const specialistId =
+    chosenSpecialistId ?? (specialists.length === 1 ? (specialists[0]?.id ?? null) : null)
   const days = (today ? getUpcomingDays(today.dayKey) : []).map((day) => ({
     ...day,
     isClosed: !findDay(business.hours, weekdayOf(day.key)),
   }))
-  const dayKey = selectedDayKey ?? days.find((day) => !day.isClosed)?.key ?? null
+  const openDays = days.filter((day) => !day.isClosed)
+  const autoDayKey = `${serviceId}|${specialistId}`
+  const skips = autoDay.key === autoDayKey ? autoDay.skips : 0
+  const dayKey = selectedDayKey ?? openDays[skips]?.key ?? openDays[0]?.key ?? null
   const availability = useAvailability(serviceId, specialistId, dayKey)
+  const isAutoDayFull =
+    selectedDayKey === null &&
+    !availability.isLoading &&
+    !availability.error &&
+    serviceId !== null &&
+    specialistId !== null &&
+    skips < Math.min(MAX_AUTO_DAY_SKIPS, openDays.length - 1) &&
+    !availability.slots.some((slot) => slot.isAvailable)
   const accountPhone = session.customer?.phone ?? null
   const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
@@ -89,21 +110,28 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     contacts: firstIncompleteStep === null,
   }
 
+  // The first suggested day has no free time (today is over, or fully booked): open the next one.
+  useEffect(() => {
+    if (isAutoDayFull) setAutoDay({ key: autoDayKey, skips: skips + 1 })
+  }, [isAutoDayFull, autoDayKey, skips])
+
   const isStepCollapsed = (step: BookingStepId) =>
     step !== 'contacts' && completedSteps[step] && editingStep !== step
 
   const editStep = (step: BookingStepId) => setEditingStep(step)
 
   const selectService = (id: string) => {
+    const nextSpecialists = getSpecialistsForService(catalog, id)
     const keepsSpecialist =
-      specialistId === ANY_SPECIALIST_ID ||
-      getSpecialistsForService(catalog, id).some((item) => item.id === specialistId)
+      chosenSpecialistId === ANY_SPECIALIST_ID ||
+      nextSpecialists.some((item) => item.id === chosenSpecialistId)
+    const hasSpecialist = (keepsSpecialist && chosenSpecialistId) || nextSpecialists.length === 1
     setServiceId(id)
     setTime(null)
     setSubmitError(null)
     if (!keepsSpecialist) setSpecialistId(null)
     setEditingStep(null)
-    scrollToStep(keepsSpecialist && specialistId ? 'datetime' : 'specialist', true)
+    scrollToStep(hasSpecialist ? 'datetime' : 'specialist', true)
   }
 
   const selectSpecialist = (id: string) => {

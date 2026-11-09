@@ -123,6 +123,9 @@ const updateSpecialist = (slug: string, id: string, input: SpecialistInput) =>
 const getAdminSchedule = (slug: string, date: string, signal?: AbortSignal) =>
   request<AdminSchedule>(`${manage(slug)}/schedule?${new URLSearchParams({ date })}`, { signal })
 
+const createStaffBooking = (slug: string, input: CreateBookingInput) =>
+  post<AdminBooking>(`${manage(slug)}/bookings`, input)
+
 const cancelBookingAsSalon = (slug: string, id: string) =>
   post<AdminBooking>(`${manage(slug)}/bookings/${id}/cancel`)
 
@@ -142,6 +145,7 @@ export {
   createCategory,
   createService,
   createSpecialist,
+  createStaffBooking,
   createTimeOff,
   deleteCategory,
   deleteTimeOff,

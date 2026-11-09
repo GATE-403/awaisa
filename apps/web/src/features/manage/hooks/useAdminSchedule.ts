@@ -3,11 +3,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { getErrorMessage } from '@/common/api/apiError'
 import {
   cancelBookingAsSalon,
+  createStaffBooking,
   createTimeOff,
   deleteTimeOff,
   getAdminSchedule,
 } from '@/common/api/clientApi'
-import type { AdminSchedule, CreateTimeOffInput } from '@/common/api/types'
+import type { AdminSchedule, CreateBookingInput, CreateTimeOffInput } from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
 
 export const useAdminSchedule = (slug: string, date: string | null) => {
@@ -54,6 +55,12 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
       return 'Запись отменена, клиенту ушло SMS'
     })
 
+  const addBooking = (input: CreateBookingInput) =>
+    runAction(async () => {
+      const booking = await createStaffBooking(slug, input)
+      return `${booking.customerName} записан(а) на ${booking.time}, клиенту ушло SMS`
+    })
+
   const addTimeOff = (input: CreateTimeOffInput) =>
     runAction(async () => {
       const { conflictingBookingIds } = await createTimeOff(slug, input)
@@ -68,5 +75,5 @@ export const useAdminSchedule = (slug: string, date: string | null) => {
       return 'Время снова открыто'
     })
 
-  return { schedule, error, reload, cancelBooking, addTimeOff, removeTimeOff }
+  return { schedule, error, reload, addBooking, cancelBooking, addTimeOff, removeTimeOff }
 }

@@ -90,6 +90,43 @@
   border-left: 0.5px solid var(--color-border);
 }
 
+.line,
+.closed {
+  pointer-events: none;
+}
+
+/* The empty column is one big button: a click books the slot under the pointer. */
+.slotTarget {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slotTarget:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+}
+
+/* Apple Calendar-style preview of the slot a click would create. */
+.ghost {
+  position: absolute;
+  right: var(--space-1);
+  left: var(--space-1);
+  padding: 2px var(--space-2);
+  border: 1px dashed color-mix(in srgb, var(--tint) 60%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--tint) 8%, transparent);
+  color: color-mix(in srgb, var(--tint) 80%, var(--color-foreground));
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
 .line {
   position: absolute;
   right: 0;

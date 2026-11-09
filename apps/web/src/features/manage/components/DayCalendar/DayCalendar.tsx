@@ -1,5 +1,5 @@
 import { ChatText, X } from '@phosphor-icons/react/ssr'
-import type { CSSProperties } from 'react'
+import { type CSSProperties, type MouseEvent, useState } from 'react'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/common/api/types'
 import { formatPhone } from '@/common/utils/formatPhone'
 import { formatClock, parseClock } from '@/common/utils/workingHours'
@@ -21,9 +21,14 @@ interface DayCalendarProps {
   timeOff: TimeOff[]
   hours: WorkingDay | null
   nowMinutes: number | null
+  slotMinutes: number
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
+  /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
+  onCreateBooking: (specialistId: string, time: string | null) => void
 }
+
+type Hover = { specialistId: string; minutes: number }
 
 const position = (from: number, to: number, start: number): CSSProperties => ({
   top: toPx(from - start),
@@ -36,9 +41,12 @@ export const DayCalendar = ({
   timeOff,
   hours,
   nowMinutes,
+  slotMinutes,
   onSelectBooking,
   onRemoveTimeOff,
+  onCreateBooking,
 }: DayCalendarProps) => {
+  const [hover, setHover] = useState<Hover | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
   const height = toPx(range.end - range.start)
   const hourMarks = Array.from(
@@ -47,6 +55,19 @@ export const DayCalendar = ({
   )
   const showNow = nowMinutes !== null && nowMinutes >= range.start && nowMinutes <= range.end
   const gridStyle = { '--columns': specialists.length } as CSSProperties
+
+  const minutesAt = (event: MouseEvent<HTMLElement>) => {
+    const offset = event.clientY - event.currentTarget.getBoundingClientRect().top
+    const minutes = range.start + offset / toPx(1)
+    const snapped = Math.floor(minutes / slotMinutes) * slotMinutes
+
+    return Math.min(Math.max(snapped, range.start), range.end - slotMinutes)
+  }
+
+  const handleCreate = (event: MouseEvent<HTMLElement>, specialistId: string) => {
+    // detail is 0 for a click from the keyboard: there is no pointer position to read.
+    onCreateBooking(specialistId, event.detail === 0 ? null : formatClock(minutesAt(event)))
+  }
 
   return (
     <div className={styles.scroller}>
@@ -81,7 +102,30 @@ export const DayCalendar = ({
             className={styles.column}
             style={{ height, '--tint': getMasterTint(index) } as CSSProperties}
             aria-label={specialist.name}
+            onPointerLeave={() => setHover(null)}
           >
+            <button
+              type='button'
+              className={styles.slotTarget}
+              aria-label={`Новая запись к мастеру ${specialist.name}`}
+              onClick={(event) => handleCreate(event, specialist.id)}
+              onPointerMove={(event) => {
+                if (event.pointerType !== 'mouse') return
+                const minutes = minutesAt(event)
+                if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
+                  setHover({ specialistId: specialist.id, minutes })
+                }
+              }}
+            />
+            {hover?.specialistId === specialist.id && (
+              <span
+                className={styles.ghost}
+                style={position(hover.minutes, hover.minutes + slotMinutes, range.start)}
+                aria-hidden='true'
+              >
+                {formatClock(hover.minutes)}
+              </span>
+            )}
             {hourMarks.slice(1, -1).map((minutes) => (
               <span
                 key={minutes}
