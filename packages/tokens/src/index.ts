@@ -243,6 +243,10 @@ const controlHeight = {
 }
 
 const shadow = {
+  // Control depth, like macOS push buttons: a crisp contact shadow plus a soft spread.
+  xs: '0 0.5px 1px rgb(0 0 0 / 0.16), 0 1px 3px rgb(0 0 0 / 0.08)',
+  // Top-edge highlight on filled controls.
+  bevel: 'inset 0 1px 0 rgb(255 255 255 / 0.2)',
   sm: '2px 4px 12px rgb(0 0 0 / 0.08)',
   md: '2px 4px 16px rgb(0 0 0 / 0.16)',
   lg: '0 12px 32px rgb(0 0 0 / 0.12), 0 32px 64px rgb(0 0 0 / 0.16)',

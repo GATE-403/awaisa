@@ -1,10 +1,10 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { ArrowUpRight, SquaresFour } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { BusinessTile } from '@/common/components/BusinessTile/BusinessTile'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
@@ -57,7 +57,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
           <div className={styles.panel}>
             <div className={styles.identity}>
               {data ? (
-                <Avatar name={data.business.name} className={styles.businessTile} />
+                <BusinessTile name={data.business.name} />
               ) : (
                 <Skeleton className={styles.businessTile} />
               )}

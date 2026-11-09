@@ -1,0 +1,209 @@
+.bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 0.5px solid var(--color-border);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+}
+
+.barTitle {
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.barButton,
+.barAction {
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.barButton {
+  justify-self: start;
+}
+
+.barAction {
+  justify-self: end;
+  font-weight: var(--font-weight-semibold);
+}
+
+.barAction:disabled {
+  color: var(--color-tertiary-foreground);
+  cursor: default;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  overflow-y: auto;
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+/* Inset grouped section used inside sheets. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.groupHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+}
+
+.groupHeader .groupTitle {
+  padding: 0;
+}
+
+.groupLink {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.groupTitle,
+.groupFooter {
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.groupTitle {
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.list {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.list > * {
+  position: relative;
+}
+
+.list > * + *::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 48px;
+  padding: 0 var(--space-4);
+}
+
+.rowLabel {
+  flex-shrink: 0;
+}
+
+.rowHint {
+  display: block;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.rowControl {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.suffix {
+  color: var(--color-muted-foreground);
+}
+
+/* A full-width text field without a label, like the first section of a Contacts card. */
+.textRow :global(input[data-variant="plain"]) {
+  text-align: left;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  cursor: pointer;
+}
+
+.checkRow input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.check {
+  width: 18px;
+  height: 18px;
+  color: var(--color-link);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.checkRow input:checked ~ .check {
+  opacity: 1;
+}
+
+.checkRow input:focus-visible ~ .check {
+  opacity: 1;
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.danger {
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  color: var(--color-danger);
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .checkRow:hover,
+  .danger:hover {
+    background: color-mix(in srgb, var(--color-surface) 95%, var(--color-foreground));
+  }
+}

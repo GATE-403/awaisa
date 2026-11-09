@@ -95,7 +95,7 @@ test.describe('Salon admin', () => {
     await page.getByRole('button', { name: 'Закрыть время' }).click()
     const dialog = page.getByRole('dialog')
     await dialog.getByLabel('Причина').fill('E2E перерыв')
-    await dialog.getByRole('button', { name: 'Закрыть время' }).click()
+    await dialog.getByRole('button', { name: 'Готово' }).click()
     await expect(page.getByText('E2E перерыв')).toBeVisible()
 
     await page

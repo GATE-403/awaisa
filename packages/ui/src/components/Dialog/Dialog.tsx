@@ -4,7 +4,7 @@ import { cx, mergeClassName } from '../../utils/className'
 import styles from './Dialog.module.css'
 
 interface DialogContentProps extends BaseDialog.Popup.Props {
-  variant?: 'modal' | 'panel'
+  variant?: 'modal' | 'panel' | 'sheet'
 }
 
 interface DialogTitleProps extends BaseDialog.Title.Props {}
