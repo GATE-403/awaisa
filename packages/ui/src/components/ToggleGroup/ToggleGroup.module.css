@@ -37,9 +37,9 @@
   gap: var(--space-2);
   flex-shrink: 0;
   border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  /* Bordered Neutral push buttons from the macOS 26 kit; pressed = accent fill. */
+  border-radius: var(--radius-sm);
+  background: var(--color-fill);
   color: var(--color-foreground);
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
@@ -66,8 +66,8 @@
 .toggle[data-size="md"] {
   height: var(--control-height-md);
   padding: 0 var(--space-4);
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
 }
 
 .toggle[data-size="card"] {
@@ -101,6 +101,6 @@
 
 @media (hover: hover) {
   .toggle:not([data-pressed]):not([data-disabled]):hover {
-    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-foreground));
+    background: var(--color-fill-hover);
   }
 }

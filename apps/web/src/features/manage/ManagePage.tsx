@@ -10,6 +10,7 @@ import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { TextTabs } from '@/common/components/TextTabs/TextTabs'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
+import { BranchesTab } from './components/BranchesTab/BranchesTab'
 import { HoursTab } from './components/HoursTab/HoursTab'
 import { MastersTab } from './components/MastersTab/MastersTab'
 import { ProfileTab } from './components/ProfileTab/ProfileTab'
@@ -113,7 +114,17 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />
           )}
-          {data && tab === 'masters' && <MastersTab slug={slug} catalog={data.catalog} run={run} />}
+          {data && tab === 'masters' && (
+            <MastersTab
+              slug={slug}
+              catalog={data.catalog}
+              branches={data.business.branches}
+              run={run}
+            />
+          )}
+          {data && tab === 'branches' && (
+            <BranchesTab slug={slug} branches={data.business.branches} run={run} />
+          )}
           {data && tab === 'hours' && (
             <HoursTab
               key={JSON.stringify([data.business.hours, data.business.slotMinutes])}

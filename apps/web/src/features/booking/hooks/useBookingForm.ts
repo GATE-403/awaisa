@@ -50,6 +50,13 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       ? presetSpecialist.id
       : null,
   )
+  // Pages cached before branches existed have none: treat them as single-branch.
+  const branches = business.branches ?? []
+  const [chosenBranchId, setBranchId] = useState(searchParams.get('branch'))
+  const branchId =
+    branches.length > 1
+      ? (branches.find((branch) => branch.id === chosenBranchId) ?? branches[0])?.id
+      : undefined
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null)
   const [autoDay, setAutoDay] = useState({ key: '', skips: 0 })
   const [time, setTime] = useState<string | null>(null)
@@ -65,7 +72,10 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const services = presetSpecialist
     ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
     : catalog.services
-  const specialists = getSpecialistsForService(catalog, serviceId)
+  // Masters of the chosen branch, plus those who work at every branch.
+  const specialists = getSpecialistsForService(catalog, serviceId).filter(
+    (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
+  )
   // One master for the service: nothing to choose, so the step is filled in.
   const specialistId =
     chosenSpecialistId ?? (specialists.length === 1 ? (specialists[0]?.id ?? null) : null)
@@ -77,7 +87,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const autoDayKey = `${serviceId}|${specialistId}`
   const skips = autoDay.key === autoDayKey ? autoDay.skips : 0
   const dayKey = selectedDayKey ?? openDays[skips]?.key ?? openDays[0]?.key ?? null
-  const availability = useAvailability(serviceId, specialistId, dayKey)
+  const availability = useAvailability(serviceId, specialistId, dayKey, branchId)
   const isAutoDayFull =
     selectedDayKey === null &&
     !availability.isLoading &&
@@ -122,7 +132,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const editStep = (step: BookingStepId) => setEditingStep(step)
 
   const selectService = (id: string) => {
-    const nextSpecialists = getSpecialistsForService(catalog, id)
+    const nextSpecialists = getSpecialistsForService(catalog, id).filter(
+      (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
+    )
     const keepsSpecialist =
       chosenSpecialistId === ANY_SPECIALIST_ID ||
       nextSpecialists.some((item) => item.id === chosenSpecialistId)
@@ -141,6 +153,18 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setSubmitError(null)
     setEditingStep(null)
     scrollToStep('datetime', true)
+  }
+
+  const selectBranch = (id: string) => {
+    setBranchId(id)
+    setTime(null)
+    setSubmitError(null)
+    const keepsSpecialist =
+      chosenSpecialistId === ANY_SPECIALIST_ID ||
+      catalog.specialists.some(
+        (item) => item.id === chosenSpecialistId && (!item.branchId || item.branchId === id),
+      )
+    if (!keepsSpecialist) setSpecialistId(null)
   }
 
   const selectDay = (key: string) => {
@@ -175,6 +199,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         name: name.trim(),
         phone: accountPhone ? '' : phone.trim(),
         comment: comment.trim(),
+        branchId,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       setCreatedBooking(booking)
@@ -204,6 +229,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   return {
+    branches,
+    branchId,
+    selectBranch,
     service,
     services,
     serviceId,

@@ -8,7 +8,7 @@ import {
   updateSpecialist,
   uploadSpecialistPhoto,
 } from '@/common/api/clientApi'
-import type { Catalog, Specialist, SpecialistInput } from '@/common/api/types'
+import type { Branch, Catalog, Specialist, SpecialistInput } from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
 import { EmptyState } from '../EmptyState/EmptyState'
 import styles from '../manageForms.module.css'
@@ -18,10 +18,11 @@ import { MasterDialog } from './MasterDialog'
 interface MastersTabProps {
   slug: string
   catalog: Catalog
+  branches: Branch[]
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
 }
 
-export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
+export const MastersTab = ({ slug, catalog, branches, run }: MastersTabProps) => {
   const [editing, setEditing] = useState<Specialist | 'new' | null>(null)
 
   const handleSave = (input: SpecialistInput) =>
@@ -60,7 +61,13 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
                       <span className={styles.badge}>Не принимает</span>
                     )}
                   </span>
-                  {master.role && <span className={styles.rowMeta}>{master.role}</span>}
+                  {(master.role || (branches.length > 1 && master.branchId)) && (
+                    <span className={styles.rowMeta}>
+                      {[master.role, branches.find(({ id }) => id === master.branchId)?.name]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  )}
                 </span>
                 <span className={styles.cellMuted}>
                   {pluralize(master.serviceIds.length, ['услуга', 'услуги', 'услуг'])}
@@ -77,6 +84,7 @@ export const MastersTab = ({ slug, catalog, run }: MastersTabProps) => {
           key={editing === 'new' ? 'new' : editing.id}
           master={editing === 'new' ? null : editing}
           services={catalog.services}
+          branches={branches}
           onClose={() => setEditing(null)}
           onSave={handleSave}
           onPhotoChange={

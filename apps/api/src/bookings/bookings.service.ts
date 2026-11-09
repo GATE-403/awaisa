@@ -92,8 +92,9 @@ const toView = (booking: Booking): BookingView => {
     business: {
       slug: booking.business?.slug ?? '',
       name: booking.business?.name ?? '',
-      address: booking.business?.address ?? '',
-      phone: booking.business?.phone ?? '',
+      // The visit happens at the branch: its address and phone win over the business's.
+      address: booking.branch?.address || booking.business?.address || '',
+      phone: booking.branch?.phone || booking.business?.phone || '',
       mapUrl: booking.business?.mapUrl ?? '',
     },
   }
@@ -111,9 +112,9 @@ export class BookingsService {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
-  async getAvailability({ serviceId, specialistId, date }: AvailabilityQuery) {
+  async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
     const now = new Date()
-    const request = await this.resolveRequest(serviceId, specialistId, date, now)
+    const request = await this.resolveRequest(serviceId, specialistId, date, now, null, branchId)
     const slots = await this.buildSlotsFor(request, date, now)
 
     return { date, slots: slots.map(({ time, isAvailable }) => ({ time, isAvailable })) }
@@ -173,8 +174,9 @@ export class BookingsService {
       input.date,
       now,
       staffBusinessId,
+      input.branchId,
     )
-    const { service, specialistIds } = request
+    const { service, specialistIds, branchOf } = request
     const minutes = parseTime(input.time)
     const slot = (await this.buildSlotsFor(request, input.date, now)).find(
       (item) => item.time === formatMinutes(minutes),
@@ -203,6 +205,10 @@ export class BookingsService {
             status: 'confirmed',
             cancelTokenHash: hashToken(cancelToken),
             customerId: customer?.id ?? null,
+            branchId:
+              branchOf(candidateId) ??
+              input.branchId ??
+              (await this.defaultBranchId(service.businessId)),
             // Booked inside the reminder window: the confirmation already does the reminder's job.
             reminderSentAt:
               startsAt.getTime() - now.getTime() <= REMINDER_LEAD_MINUTES * 60_000 ? now : null,
@@ -245,6 +251,7 @@ export class BookingsService {
       .leftJoinAndSelect('booking.service', 'service')
       .leftJoinAndSelect('booking.specialist', 'specialist')
       .leftJoinAndSelect('booking.business', 'business')
+      .leftJoinAndSelect('booking.branch', 'branch')
       .where(
         new Brackets((query) =>
           query
@@ -308,6 +315,7 @@ export class BookingsService {
       .leftJoinAndSelect('booking.service', 'service')
       .leftJoinAndSelect('booking.specialist', 'specialist')
       .leftJoinAndSelect('booking.business', 'business')
+      .leftJoinAndSelect('booking.branch', 'branch')
       .where('booking.businessId = :businessId', { businessId })
       .andWhere('booking.startsAt < :dayEnd AND booking.endsAt > :dayStart', where)
       .orderBy('booking.startsAt', 'ASC')
@@ -327,6 +335,7 @@ export class BookingsService {
       .leftJoinAndSelect('booking.service', 'service')
       .leftJoinAndSelect('booking.specialist', 'specialist')
       .leftJoinAndSelect('booking.business', 'business')
+      .leftJoinAndSelect('booking.branch', 'branch')
       .where('booking.businessId = :businessId', { businessId })
       .andWhere('booking.createdAt > :since', { since })
       .andWhere("booking.status = 'confirmed'")
@@ -412,6 +421,16 @@ export class BookingsService {
     return { view: await this.getView(id), customerPhone: booking.customerPhone, wasConfirmed }
   }
 
+  // A single-branch business: the booking belongs to that branch.
+  private async defaultBranchId(businessId: string) {
+    const [branch] = (await this.bookings.manager.query(
+      'SELECT "id" FROM "branches" WHERE "business_id" = $1 AND "is_active" ORDER BY "position" LIMIT 1',
+      [businessId],
+    )) as { id: string }[]
+
+    return branch?.id ?? null
+  }
+
   private markCancelled(id: string) {
     return this.bookings.update({ id }, { status: 'cancelled', cancelledAt: new Date() })
   }
@@ -444,6 +463,7 @@ export class BookingsService {
     date: string,
     now: Date,
     staffBusinessId: string | null = null,
+    branchId?: string,
   ) {
     const today = toBusinessParts(now).dateKey
     if (date < today || date > addDays(today, BOOKING_DAYS_AHEAD - 1)) {
@@ -459,16 +479,26 @@ export class BookingsService {
     if (!business.isPublished && staffBusinessId === null) {
       throw new BadRequestException('Запись временно недоступна')
     }
-    const offering = (await this.catalogService.getSpecialistsForService(serviceId)).map(
-      (specialist) => specialist.id,
+    const offering = await this.catalogService.getSpecialistsForService(serviceId)
+    const inBranch = offering.filter(
+      (specialist) => !branchId || specialist.branchId === null || specialist.branchId === branchId,
     )
-    const specialistIds =
-      specialistId === ANY_SPECIALIST_ID ? offering : offering.filter((id) => id === specialistId)
+    const specialistIds = (
+      specialistId === ANY_SPECIALIST_ID
+        ? inBranch
+        : offering.filter((specialist) => specialist.id === specialistId)
+    ).map((specialist) => specialist.id)
     if (specialistIds.length === 0) {
-      throw new BadRequestException('Этот мастер не выполняет выбранную услугу')
+      throw new BadRequestException(
+        specialistId === ANY_SPECIALIST_ID
+          ? 'В этом филиале нет мастеров на эту услугу'
+          : 'Этот мастер не выполняет выбранную услугу',
+      )
     }
+    const branchOf = (id: string) =>
+      offering.find((specialist) => specialist.id === id)?.branchId ?? null
 
-    return { service, specialistIds, slotMinutes: business.slotMinutes }
+    return { service, specialistIds, branchOf, slotMinutes: business.slotMinutes }
   }
 
   private async buildSlotsFor(
@@ -520,7 +550,7 @@ export class BookingsService {
   async getView(id: string): Promise<BookingView> {
     const booking = await this.bookings.findOneOrFail({
       where: { id },
-      relations: { service: true, specialist: true, business: true },
+      relations: { service: true, specialist: true, business: true, branch: true },
     })
 
     return toView(booking)

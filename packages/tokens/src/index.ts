@@ -36,6 +36,8 @@ type ColorScheme = {
   sheetSurface: string
   subtle: string
   subtleHover: string
+  fill: string
+  fillHover: string
   mutedForeground: string
   tertiaryForeground: string
   border: string
@@ -51,6 +53,7 @@ type ColorScheme = {
   danger: string
   dangerHover: string
   dangerForeground: string
+  dangerText: string
   success: string
   highlight: string
   rating: string
@@ -74,13 +77,17 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     sheetSurface: palette.white,
     subtle: 'rgb(0 0 0 / 0.08)',
     subtleHover: 'rgb(0 0 0 / 0.1)',
+    // Bordered Neutral controls (buttons, segmented track) in the macOS 26 kit.
+    fill: 'rgb(0 0 0 / 0.05)',
+    fillHover: 'rgb(0 0 0 / 0.08)',
     mutedForeground: '#6e6e73',
     tertiaryForeground: 'rgb(0 0 0 / 0.25)',
     border: 'rgb(60 60 67 / 0.18)',
     borderStrong: palette.light.gray3,
     control: palette.light.gray5,
-    primary: '#0071e3',
-    primaryHover: '#0077ed',
+    // macOS 26 accent (#0D6FFF), a hair deeper so white labels pass AA.
+    primary: '#0a6cf0',
+    primaryHover: '#0d6fff',
     primaryForeground: palette.white,
     primarySubtle: 'rgb(0 136 255 / 0.12)',
     primarySubtleHover: 'rgb(0 136 255 / 0.18)',
@@ -89,6 +96,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     danger: palette.light.red,
     dangerHover: '#f52f32',
     dangerForeground: palette.white,
+    // Red label on light fills: the accessible variant of system red.
+    dangerText: '#d70015',
     success: palette.light.green,
     highlight: '#b64400',
     rating: palette.light.orange,
@@ -109,6 +118,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     sheetSurface: palette.dark.gray5,
     subtle: 'rgb(255 255 255 / 0.1)',
     subtleHover: 'rgb(255 255 255 / 0.14)',
+    fill: 'rgb(255 255 255 / 0.1)',
+    fillHover: 'rgb(255 255 255 / 0.14)',
     mutedForeground: 'rgb(255 255 255 / 0.62)',
     tertiaryForeground: 'rgb(255 255 255 / 0.3)',
     border: 'rgb(84 84 88 / 0.6)',
@@ -125,6 +136,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     danger: palette.dark.red,
     dangerHover: '#ff4747',
     dangerForeground: palette.white,
+    dangerText: '#ff6961',
     success: palette.dark.green,
     highlight: palette.dark.orange,
     rating: palette.dark.orange,
@@ -231,11 +243,14 @@ const text = {
   '2xl': { size: 28, lineHeight: 34 },
   '3xl': { size: 34, lineHeight: 41 },
   '4xl': { size: 48, lineHeight: 52 },
+  // macOS 26 page header.
+  display: { size: 56, lineHeight: 60 },
 }
 
 const fontWeight = {
   regular: 400,
-  medium: 500,
+  // macOS 26 control labels use 510.
+  medium: 510,
   // SF Pro's "emphasized" weight in macOS 26 text styles.
   semibold: 590,
   bold: 700,

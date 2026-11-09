@@ -1,15 +1,17 @@
 import { Avatar } from '@awaisa/ui/Avatar'
 import { Input } from '@awaisa/ui/Input'
+import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
-import type { Service, Specialist, SpecialistInput } from '@/common/api/types'
+import type { Branch, Service, Specialist, SpecialistInput } from '@/common/api/types'
 import { Sheet } from '@/common/components/Sheet/Sheet'
 import sheet from '@/common/components/Sheet/Sheet.module.css'
 
 interface MasterDialogProps {
   master: Specialist | null
   services: Service[]
+  branches: Branch[]
   onClose: () => void
   onSave: (input: SpecialistInput) => Promise<boolean>
   /** Only for saved masters: uploads happen at once, like changing a contact photo. */
@@ -21,10 +23,12 @@ const FORM_ID = 'master-form'
 export const MasterDialog = ({
   master,
   services,
+  branches,
   onClose,
   onSave,
   onPhotoChange,
 }: MasterDialogProps) => {
+  const [branchId, setBranchId] = useState<string | null>(master?.branchId ?? null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [photoUrl, setPhotoUrl] = useState(master?.photoUrl ?? null)
   const [isUploading, setIsUploading] = useState(false)
@@ -63,7 +67,13 @@ export const MasterDialog = ({
     if (!name.trim()) return
 
     setIsSaving(true)
-    const saved = await onSave({ name: name.trim(), role: role.trim(), serviceIds, isActive })
+    const saved = await onSave({
+      name: name.trim(),
+      role: role.trim(),
+      serviceIds,
+      isActive,
+      branchId,
+    })
     setIsSaving(false)
     if (saved) onClose()
   }
@@ -129,6 +139,23 @@ export const MasterDialog = ({
               onValueChange={setRole}
             />
           </div>
+          {branches.length > 1 && (
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Филиал</span>
+              <span className={sheet.rowControl}>
+                <Select
+                  variant='plain'
+                  aria-label='Филиал'
+                  items={[
+                    { value: 'all', label: 'Все филиалы' },
+                    ...branches.map(({ id, name: label }) => ({ value: id, label })),
+                  ]}
+                  value={branchId ?? 'all'}
+                  onValueChange={(value) => setBranchId(!value || value === 'all' ? null : value)}
+                />
+              </span>
+            </div>
+          )}
         </div>
 
         {services.length > 0 && (

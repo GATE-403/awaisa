@@ -268,7 +268,7 @@
 
 .fieldError {
   padding: 0 var(--space-4);
-  color: var(--color-danger);
+  color: var(--color-danger-text);
   font-size: var(--text-footnote);
 }
 
@@ -370,4 +370,34 @@
   .saveText {
     display: none;
   }
+}
+
+/* Leading glyph in a row, like the coloured icons in Settings. */
+.rowIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--system-red);
+  color: var(--color-primary-foreground);
+}
+
+.rowIcon[data-missing] {
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+}
+
+.rowIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.listFooter {
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
