@@ -20,23 +20,25 @@ const kindHref = (kind: BusinessKind | undefined, query: string) => {
 export const CatalogSearch = ({ kind, query }: CatalogSearchProps) => (
   <div className={styles.filters}>
     <nav aria-label='Виды бизнеса' className={styles.kinds}>
-      <NextLink
-        href={kindHref(undefined, query)}
-        className={styles.kind}
-        aria-current={kind ? undefined : 'page'}
-      >
-        Все
-      </NextLink>
-      {BUSINESS_KINDS.map((item) => (
+      <div className={styles.kindList}>
         <NextLink
-          key={item.value}
-          href={kindHref(item.value, query)}
+          href={kindHref(undefined, query)}
           className={styles.kind}
-          aria-current={kind === item.value ? 'page' : undefined}
+          aria-current={kind ? undefined : 'page'}
         >
-          {item.label}
+          Все
         </NextLink>
-      ))}
+        {BUSINESS_KINDS.map((item) => (
+          <NextLink
+            key={item.value}
+            href={kindHref(item.value, query)}
+            className={styles.kind}
+            aria-current={kind === item.value ? 'page' : undefined}
+          >
+            {item.label}
+          </NextLink>
+        ))}
+      </div>
     </nav>
   </div>
 )
