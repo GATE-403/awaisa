@@ -28,64 +28,6 @@
   gap: var(--space-4);
 }
 
-.kinds {
-  margin: 0 calc(-1 * var(--page-gutter));
-  padding: 0 var(--page-gutter);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.kinds::-webkit-scrollbar {
-  display: none;
-}
-
-.kindList {
-  display: flex;
-  gap: var(--space-6);
-  min-width: max-content;
-  box-shadow: inset 0 -0.5px 0 var(--color-border);
-}
-
-.kind {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--control-height-md);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-  white-space: nowrap;
-  transition: color var(--duration-fast) var(--ease-standard);
-}
-
-.kind::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
-  border-radius: 1px;
-  background: currentcolor;
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-standard);
-}
-
-.kind[aria-current="page"] {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-}
-
-.kind[aria-current="page"]::after {
-  opacity: 1;
-}
-
-@media (hover: hover) {
-  .kind:hover {
-    color: var(--color-foreground);
-  }
-}
-
 .results {
   display: flex;
   flex-direction: column;
