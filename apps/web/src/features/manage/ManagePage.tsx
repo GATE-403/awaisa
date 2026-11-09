@@ -1,15 +1,16 @@
 'use client'
 
+import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { ArrowUpRight, SquaresFour } from '@phosphor-icons/react/ssr'
+import { ArrowUpRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { BusinessTile } from '@/common/components/BusinessTile/BusinessTile'
 import { Container } from '@/common/components/Container/Container'
 import { PageTitle } from '@/common/components/PageTitle/PageTitle'
+import { TextTabs } from '@/common/components/TextTabs/TextTabs'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
 import { HoursTab } from './components/HoursTab/HoursTab'
-import { ManageNav } from './components/ManageNav/ManageNav'
 import { MastersTab } from './components/MastersTab/MastersTab'
 import { ProfileTab } from './components/ProfileTab/ProfileTab'
 import { ScheduleTab } from './components/ScheduleTab'
@@ -17,7 +18,7 @@ import { ServicesTab } from './components/ServicesTab/ServicesTab'
 import { SetupProgress } from './components/SetupProgress/SetupProgress'
 import { useManagedBusiness } from './hooks/useManagedBusiness'
 import styles from './ManagePage.module.css'
-import { toManageTab } from './manageTabs'
+import { MANAGE_TABS, toManageTab } from './manageTabs'
 
 interface ManagePageProps {
   slug: string
@@ -52,58 +53,52 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
 
   return (
     <main className={styles.page}>
-      <Container className={styles.layout}>
-        <aside className={styles.sidebar}>
-          <div className={styles.panel}>
-            <div className={styles.identity}>
-              {data ? (
-                <BusinessTile name={data.business.name} />
-              ) : (
-                <Skeleton className={styles.businessTile} />
-              )}
-              <div className={styles.identityText}>
-                {data ? (
-                  <h1 className={styles.name}>{data.business.name}</h1>
-                ) : (
-                  <Skeleton className={styles.nameSkeleton} />
-                )}
-                <p className={styles.caption}>
-                  {data && !data.business.isPublished ? 'Кабинет · страница скрыта' : 'Кабинет'}
-                </p>
-              </div>
-              <NextLink
-                href={`/${slug}`}
-                target='_blank'
-                className={styles.identityAction}
-                aria-label='Открыть страницу'
-              >
-                <ArrowUpRight weight='bold' aria-hidden />
-              </NextLink>
-            </div>
-            <ManageNav slug={slug} active={tab} />
-            <ul className={styles.extraLinks}>
-              <li>
-                <NextLink href={`/${slug}`} target='_blank' className={styles.extraLink}>
-                  <ArrowUpRight weight='bold' aria-hidden />
-                  Открыть страницу
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href='/manage' className={styles.extraLink}>
-                  <SquaresFour weight='bold' aria-hidden />
-                  Все бизнесы
-                </NextLink>
-              </li>
-            </ul>
-            {data && (
-              <div className={styles.progress}>
-                <SetupProgress business={data.business} catalog={data.catalog} />
-              </div>
+      <Container className={styles.content}>
+        <header className={styles.header}>
+          <div className={styles.identity}>
+            {data ? (
+              <BusinessTile name={data.business.name} size='lg' />
+            ) : (
+              <Skeleton className={styles.tileSkeleton} />
+            )}
+            {data ? (
+              <h1 className={styles.title}>
+                {data.business.name}.
+                <span className={styles.titleMuted}>
+                  {data.business.isPublished ? ' Кабинет' : ' Кабинет · страница скрыта'}
+                </span>
+              </h1>
+            ) : (
+              <Skeleton className={styles.titleSkeleton} />
             )}
           </div>
-        </aside>
+          <div className={styles.actions}>
+            <NextLink href='/manage' className={styles.link}>
+              Все бизнесы
+            </NextLink>
+            <ButtonLink
+              variant='secondary'
+              size='sm'
+              render={<NextLink href={`/${slug}`} target='_blank' />}
+            >
+              Открыть страницу
+              <ArrowUpRight weight='bold' aria-hidden />
+            </ButtonLink>
+          </div>
+        </header>
 
-        <div className={styles.main}>
+        <TextTabs
+          label='Разделы кабинета'
+          items={MANAGE_TABS.map(({ value, label }) => ({
+            href: `/manage/${slug}?tab=${value}`,
+            label,
+            isActive: tab === value,
+          }))}
+        />
+
+        {data && <SetupProgress business={data.business} catalog={data.catalog} />}
+
+        <div className={styles.main} data-wide={tab === 'schedule' || undefined}>
           {!data && <Skeleton className={styles.skeleton} />}
           {data && tab === 'schedule' && <ScheduleTab slug={slug} business={data.business} />}
           {data && tab === 'services' && (

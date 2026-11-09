@@ -1,5 +1,5 @@
-import NextLink from 'next/link'
 import type { BusinessKind } from '@/common/api/types'
+import { TextTabs } from '@/common/components/TextTabs/TextTabs'
 import { BUSINESS_KINDS } from '@/constants/platform'
 import styles from '../CatalogPage.module.css'
 
@@ -19,26 +19,16 @@ const kindHref = (kind: BusinessKind | undefined, query: string) => {
 
 export const CatalogSearch = ({ kind, query }: CatalogSearchProps) => (
   <div className={styles.filters}>
-    <nav aria-label='Виды бизнеса' className={styles.kinds}>
-      <div className={styles.kindList}>
-        <NextLink
-          href={kindHref(undefined, query)}
-          className={styles.kind}
-          aria-current={kind ? undefined : 'page'}
-        >
-          Все
-        </NextLink>
-        {BUSINESS_KINDS.map((item) => (
-          <NextLink
-            key={item.value}
-            href={kindHref(item.value, query)}
-            className={styles.kind}
-            aria-current={kind === item.value ? 'page' : undefined}
-          >
-            {item.label}
-          </NextLink>
-        ))}
-      </div>
-    </nav>
+    <TextTabs
+      label='Виды бизнеса'
+      items={[
+        { href: kindHref(undefined, query), label: 'Все', isActive: !kind },
+        ...BUSINESS_KINDS.map((item) => ({
+          href: kindHref(item.value, query),
+          label: item.label,
+          isActive: kind === item.value,
+        })),
+      ]}
+    />
   </div>
 )
