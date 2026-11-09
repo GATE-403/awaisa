@@ -8,6 +8,7 @@ import { ErrorView } from './common/components/ErrorView/ErrorView'
 import { LoadingView } from './common/components/LoadingView/LoadingView'
 import { useAndroidBackHandler } from './common/hooks/useAndroidBackHandler'
 import { useThemeColors } from './common/hooks/useThemeColors'
+import { playHaptic } from './common/utils/haptics'
 import { parseNativeMessage } from './common/utils/nativeBridge'
 import { NATIVE_APP_SCRIPT, WEB_ORIGIN, WEB_URL } from './constants/webApp'
 
@@ -28,6 +29,7 @@ export const App = () => {
   const handleMessage = (event: WebViewMessageEvent) => {
     const message = parseNativeMessage(event.nativeEvent.data)
     if (message?.type === 'openExternal') void Linking.openURL(message.url)
+    if (message?.type === 'haptic') void playHaptic(message.style)
   }
 
   const handleNavigationStateChange = (navigation: WebViewNavigation) => {

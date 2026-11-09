@@ -18,7 +18,25 @@ type Env = {
   TWILIO_MESSAGING_SERVICE_SID?: string
   OTP_TEST_CODE?: string
   TELEGRAM_GATEWAY_TOKEN?: string
+  STORAGE_DRIVER: StorageDriver
+  UPLOAD_DIR: string
+  S3_BUCKET?: string
+  S3_ENDPOINT?: string
+  S3_REGION: string
+  S3_ACCESS_KEY_ID?: string
+  S3_SECRET_ACCESS_KEY?: string
+  S3_PUBLIC_URL?: string
+  WALLET_PASS_TYPE_ID?: string
+  WALLET_TEAM_ID?: string
+  WALLET_CERT_PEM?: string
+  WALLET_KEY_PEM?: string
+  WALLET_KEY_PASSPHRASE?: string
+  WALLET_WWDR_PEM?: string
+  GOOGLE_WALLET_ISSUER_ID?: string
+  GOOGLE_WALLET_SERVICE_ACCOUNT?: string
 }
+
+type StorageDriver = 'local' | 's3'
 
 type SmsDriver = 'console' | 'twilio'
 
@@ -119,6 +137,59 @@ const parseTestCode = (value: unknown, nodeEnv: Env['NODE_ENV']) => {
   return code
 }
 
+// Photos go to S3-compatible storage (Cloudflare R2, AWS S3) when configured, otherwise to disk.
+const parseStorage = (config: Record<string, unknown>) => {
+  const s3 = {
+    S3_BUCKET: optionalString(config.S3_BUCKET),
+    S3_ENDPOINT: optionalString(config.S3_ENDPOINT),
+    S3_REGION: optionalString(config.S3_REGION) ?? 'auto',
+    S3_ACCESS_KEY_ID: optionalString(config.S3_ACCESS_KEY_ID),
+    S3_SECRET_ACCESS_KEY: optionalString(config.S3_SECRET_ACCESS_KEY),
+    S3_PUBLIC_URL: optionalString(config.S3_PUBLIC_URL)?.replace(/\/$/, ''),
+  }
+  const requested = optionalString(config.STORAGE_DRIVER)
+  if (requested && requested !== 'local' && requested !== 's3') {
+    throw new Error('STORAGE_DRIVER must be local or s3')
+  }
+  const driver: StorageDriver =
+    (requested as StorageDriver | undefined) ?? (s3.S3_BUCKET ? 's3' : 'local')
+  if (
+    driver === 's3' &&
+    !(s3.S3_BUCKET && s3.S3_ACCESS_KEY_ID && s3.S3_SECRET_ACCESS_KEY && s3.S3_PUBLIC_URL)
+  ) {
+    throw new Error(
+      'STORAGE_DRIVER=s3 needs S3_BUCKET, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY and S3_PUBLIC_URL',
+    )
+  }
+
+  return {
+    STORAGE_DRIVER: driver,
+    UPLOAD_DIR: optionalString(config.UPLOAD_DIR) ?? 'uploads',
+    ...s3,
+  }
+}
+
+// PEM and JSON secrets may be given as-is (with \\n escapes) or base64-encoded, whichever fits the host.
+const decodeSecret = (value: unknown) => {
+  const raw = optionalString(value)
+  if (!raw) return undefined
+  if (raw.startsWith('{')) return raw
+  if (raw.includes('-----BEGIN')) return raw.replace(/\\n/g, '\n')
+
+  return Buffer.from(raw, 'base64').toString('utf8')
+}
+
+const parseWallet = (config: Record<string, unknown>) => ({
+  WALLET_PASS_TYPE_ID: optionalString(config.WALLET_PASS_TYPE_ID),
+  WALLET_TEAM_ID: optionalString(config.WALLET_TEAM_ID),
+  WALLET_CERT_PEM: decodeSecret(config.WALLET_CERT_PEM),
+  WALLET_KEY_PEM: decodeSecret(config.WALLET_KEY_PEM),
+  WALLET_KEY_PASSPHRASE: optionalString(config.WALLET_KEY_PASSPHRASE),
+  WALLET_WWDR_PEM: decodeSecret(config.WALLET_WWDR_PEM),
+  GOOGLE_WALLET_ISSUER_ID: optionalString(config.GOOGLE_WALLET_ISSUER_ID),
+  GOOGLE_WALLET_SERVICE_ACCOUNT: decodeSecret(config.GOOGLE_WALLET_SERVICE_ACCOUNT),
+})
+
 const validateEnv = (config: Record<string, unknown>): Env => {
   const nodeEnv = parseNodeEnv(config.NODE_ENV)
   const webOrigins = parseOrigins(config.WEB_ORIGIN)
@@ -154,8 +225,10 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),
+    ...parseStorage(config),
+    ...parseWallet(config),
   }
 }
 
-export type { Env, SmsDriver }
+export type { Env, SmsDriver, StorageDriver }
 export { validateEnv }

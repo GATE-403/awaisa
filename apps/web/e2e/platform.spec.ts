@@ -2,6 +2,10 @@ import { expect, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
 import { bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
 
+// 16×10 px PNG; the API re-encodes it as WebP.
+const TINY_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAIAAAAy3EnLAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAFUlEQVQYlWNgKHxMGmIY1fB4KIYSAN5g1IFgp8jzAAAAAElFTkSuQmCC'
+
 test.describe('Platform: a new business goes live', () => {
   test('owner registers, adds a service and a master; a client books; owner sees it', async ({
     page,
@@ -44,6 +48,15 @@ test.describe('Platform: a new business goes live', () => {
     await expect(masterDialog.getByRole('checkbox', { name: 'Стрижка' })).toBeChecked()
     await masterDialog.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('heading', { name: 'Запуск записи' })).toHaveCount(0)
+
+    // A cover photo: uploaded, compressed by the API and shown on the catalog card.
+    await page.getByRole('link', { name: 'Профиль', exact: true }).click()
+    await page.getByLabel('Файл обложки').setInputFiles({
+      name: 'cover.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(TINY_PNG, 'base64'),
+    })
+    await expect(page.getByRole('img', { name: 'Обложка' })).toBeVisible()
 
     const client = await browser.newContext()
     const clientPage = await client.newPage()
@@ -92,7 +105,23 @@ test.describe('Platform: a new business goes live', () => {
     await sheet.getByLabel('Телефон').fill(randomClientPhone())
     await sheet.getByRole('button', { name: 'Добавить' }).click()
     await expect(sheet).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /E2E Гость/ })).toBeVisible()
+    const walkIn = page.getByRole('button', { name: /E2E Гость/ })
+    await expect(walkIn).toBeVisible()
+
+    // Direct manipulation on desktop: drag the booking an hour later, then undo from the toast.
+    if (!test.info().project.name.includes('mobile')) {
+      const box = await walkIn.boundingBox()
+      if (box) {
+        await page.mouse.move(box.x + box.width / 2, box.y + 10)
+        await page.mouse.down()
+        await page.mouse.move(box.x + box.width / 2, box.y + 60, { steps: 4 })
+        await page.mouse.move(box.x + box.width / 2, box.y + 106, { steps: 4 })
+        await page.mouse.up()
+        await expect(page.getByText(/Перенесено на/)).toBeVisible()
+        await page.getByRole('button', { name: 'Вернуть' }).click()
+        await expect(page.getByText('Запись на прежнем месте')).toBeVisible()
+      }
+    }
   })
 
   test('reserved and taken page addresses are refused before submitting', async ({ page }) => {

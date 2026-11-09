@@ -4,6 +4,7 @@ import type { Booking } from '@/common/api/types'
 import { Ticket } from '@/common/components/Ticket/Ticket'
 import { downloadCalendarFile } from '@/common/utils/calendarFile'
 import { CancelBookingButton } from '../CancelBookingButton/CancelBookingButton'
+import { WalletButton } from '../WalletButton/WalletButton'
 import styles from './UpcomingBooking.module.css'
 
 interface UpcomingBookingProps {
@@ -28,6 +29,7 @@ export const UpcomingBooking = ({
       onCodeClick={onCodeClick}
       footer={
         <div className={styles.actions}>
+          <WalletButton bookingId={booking.id} />
           <Button
             variant='secondary'
             size='sm'

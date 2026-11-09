@@ -1,4 +1,6 @@
-type NativeMessage = { type: 'openExternal'; url: string }
+type HapticStyle = 'success' | 'warning' | 'error' | 'selection' | 'impact'
+
+type NativeMessage = { type: 'openExternal'; url: string } | { type: 'haptic'; style: HapticStyle }
 
 type NativeApp = {
   platform: 'ios' | 'android'
@@ -25,5 +27,10 @@ const postToNative = (message: NativeMessage): boolean => {
   return true
 }
 
-export type { NativeApp, NativeMessage }
-export { getNativeApp, postToNative }
+// Taptic feedback in the app; the web has no equivalent worth faking, so it is a no-op there.
+const haptic = (style: HapticStyle) => {
+  postToNative({ type: 'haptic', style })
+}
+
+export type { HapticStyle, NativeApp, NativeMessage }
+export { getNativeApp, haptic, postToNative }

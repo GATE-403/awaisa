@@ -8,6 +8,7 @@ import type { Business, BusinessKind, UpdateBusinessInput } from '@/common/api/t
 import { maskPhoneInput } from '@/common/utils/inputMasks'
 import { BUSINESS_KINDS } from '@/constants/platform'
 import styles from '../manageForms.module.css'
+import { PhotosSection } from '../PhotosSection/PhotosSection'
 import { SectionHeader } from '../SectionHeader/SectionHeader'
 
 interface ProfileTabProps {
@@ -65,6 +66,8 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
   return (
     <form className={styles.section} onSubmit={handleSubmit} aria-label='Профиль'>
       <SectionHeader title='Профиль' description='Так бизнес выглядит в каталоге и на странице.' />
+
+      <PhotosSection slug={slug} business={business} run={run} />
 
       <div className={styles.group}>
         <h3 className={styles.groupTitle}>О бизнесе</h3>

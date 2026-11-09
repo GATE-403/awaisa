@@ -32,9 +32,11 @@ const TOKEN_HEADER = 'x-booking-token'
 const NO_CONTENT = 204
 
 const request = async <Result>(path: string, init?: RequestInit): Promise<Result> => {
+  // FormData sets its own multipart boundary.
+  const isForm = init?.body instanceof FormData
   const response = await fetch(`${CLIENT_API_PREFIX}${path}`, {
     ...init,
-    headers: { 'content-type': 'application/json', ...init?.headers },
+    headers: isForm ? init?.headers : { 'content-type': 'application/json', ...init?.headers },
   })
   if (!response.ok) throw await toApiError(response)
   if (response.status === NO_CONTENT) return undefined as Result
@@ -69,6 +71,18 @@ const restoreBooking = (id: string, token: string) =>
     method: 'POST',
     headers: { [TOKEN_HEADER]: token },
   })
+
+type WalletLinks = { apple: string | null; google: string | null }
+
+const getWalletConfig = () => request<{ apple: boolean; google: boolean }>('/wallet/config')
+
+const getWalletLinks = (id: string, token: string | null) =>
+  token
+    ? request<WalletLinks>(`/bookings/${id}/wallet`, {
+        method: 'POST',
+        headers: { [TOKEN_HEADER]: token },
+      })
+    : request<WalletLinks>(`/me/bookings/${id}/wallet`, { method: 'POST' })
 
 const requestOtp = (phone: string, channel: 'auto' | 'sms' = 'auto') =>
   post<OtpRequest>('/auth/otp', { phone, channel })
@@ -155,6 +169,30 @@ const moveBookingAsSalon = (
   input: { date: string; time: string; specialistId: string },
 ) => send<MovedBooking>('PATCH', `${manage(slug)}/bookings/${id}`, input)
 
+const upload = <Result>(path: string, file: File) => {
+  const body = new FormData()
+  body.append('file', file)
+
+  return request<Result>(path, { method: 'POST', body })
+}
+
+const uploadCover = (slug: string, file: File) =>
+  upload<{ coverUrl: string }>(`${manage(slug)}/cover`, file)
+
+const removeCover = (slug: string) => send<void>('DELETE', `${manage(slug)}/cover`)
+
+const addPhoto = (slug: string, file: File) =>
+  upload<{ photos: string[] }>(`${manage(slug)}/photos`, file)
+
+const removePhoto = (slug: string, url: string) =>
+  send<{ photos: string[] }>('DELETE', `${manage(slug)}/photos?${new URLSearchParams({ url })}`)
+
+const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
+  upload<{ photoUrl: string }>(`${manage(slug)}/specialists/${id}/photo`, file)
+
+const removeSpecialistPhoto = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/specialists/${id}/photo`)
+
 const restoreBookingAsSalon = (slug: string, id: string) =>
   post<AdminBooking>(`${manage(slug)}/bookings/${id}/restore`)
 
@@ -165,6 +203,7 @@ const deleteTimeOff = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/time-off/${id}`)
 
 export {
+  addPhoto,
   cancelBooking,
   cancelBookingAsSalon,
   cancelMyBooking,
@@ -187,7 +226,12 @@ export {
   getMyBusinesses,
   getNextFree,
   getRecentBookings,
+  getWalletConfig,
+  getWalletLinks,
   moveBookingAsSalon,
+  removeCover,
+  removePhoto,
+  removeSpecialistPhoto,
   renameCategory,
   restoreBooking,
   restoreBookingAsSalon,
@@ -197,6 +241,8 @@ export {
   updateBusiness,
   updateService,
   updateSpecialist,
+  uploadCover,
+  uploadSpecialistPhoto,
   logout,
   requestOtp,
   updateMe,

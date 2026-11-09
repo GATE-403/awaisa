@@ -6,6 +6,7 @@ import {
   useState,
 } from 'react'
 import type { AdminBooking } from '@/common/api/types'
+import { haptic } from '@/common/utils/nativeBridge'
 import { formatClock, parseClock } from '@/common/utils/workingHours'
 import { type Range, toPx } from './calendarLayout'
 
@@ -84,6 +85,7 @@ export const useBookingDrag = ({
 
   const startDrag = (pending: Pending) => {
     pending.isDragging = true
+    haptic('impact')
     setDragged(pending.booking)
     setTarget({
       specialistId: pending.booking.specialistId,

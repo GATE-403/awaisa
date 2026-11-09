@@ -5,6 +5,7 @@ import { MastersShelf } from './components/HomeShelves/MastersShelf'
 import { PerksShelf } from './components/HomeShelves/PerksShelf'
 import { PopularShelf } from './components/HomeShelves/PopularShelf'
 import { VisitShelf } from './components/HomeShelves/VisitShelf'
+import { WorkShelf } from './components/HomeShelves/WorkShelf'
 import { StoreHero } from './components/StoreHero/StoreHero'
 
 interface BusinessHomePageProps {
@@ -20,6 +21,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
       <CategoryLinks business={business} catalog={catalog} />
       <div className={styles.shelves}>
         <PopularShelf business={business} catalog={catalog} />
+        <WorkShelf business={business} />
         <MastersShelf business={business} specialists={catalog.specialists} />
         <PerksShelf />
         <VisitShelf business={business} />
