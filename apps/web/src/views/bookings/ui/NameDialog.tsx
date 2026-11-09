@@ -7,7 +7,7 @@ import { type FormEvent, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { updateMe } from '@/shared/api/clientApi'
 import type { Customer } from '@/shared/api/types'
-import styles from '@/views/profile/ProfilePage.module.css'
+import styles from './NameDialog.module.css'
 
 interface NameDialogProps {
   name: string

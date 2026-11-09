@@ -68,11 +68,13 @@
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
-.action[data-account] {
+.action[data-account],
+.action[data-mobile] {
   display: flex;
 }
 
-.action[data-account] span {
+.action[data-account] span,
+.action[data-mobile] span {
   display: none;
 }
 
@@ -106,7 +108,61 @@
   inset: -6px -4px;
 }
 
+/* Phones: categories as a chip row under the search; it folds away once the page scrolls. */
 .categories {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows var(--duration-normal) var(--ease-standard);
+}
+
+.header[data-scrolled] .categories {
+  grid-template-rows: 0fr;
+}
+
+.categoriesInner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.categoryList {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 var(--page-gutter) var(--space-2);
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.categoryList::-webkit-scrollbar {
+  display: none;
+}
+
+.category {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.category svg {
+  width: 16px;
+  height: 16px;
+}
+
+.category[aria-current="page"] {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.city {
   display: none;
 }
 
@@ -159,6 +215,10 @@
     display: flex;
   }
 
+  .action[data-mobile] span {
+    display: inline;
+  }
+
   .action[data-account] span {
     display: inline;
     max-width: 72px;
@@ -177,6 +237,14 @@
     border-top: 0.5px solid var(--color-border);
   }
 
+  .header[data-scrolled] .categories {
+    display: block;
+  }
+
+  .categoriesInner {
+    overflow: visible;
+  }
+
   .categoriesInner {
     display: flex;
     align-items: center;
@@ -190,13 +258,8 @@
   }
 
   .categoryList {
-    display: flex;
     gap: var(--space-5);
-    margin: 0;
     padding: 0;
-    overflow-x: auto;
-    list-style: none;
-    scrollbar-width: none;
   }
 
   .category,
@@ -205,8 +268,12 @@
     align-items: center;
     gap: var(--space-1);
     height: 40px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
     color: var(--color-muted-foreground);
     font-size: var(--text-footnote);
+    font-weight: var(--font-weight-regular);
     white-space: nowrap;
   }
 
@@ -217,6 +284,7 @@
   }
 
   .category[aria-current="page"] {
+    background: transparent;
     color: var(--color-foreground);
     font-weight: var(--font-weight-semibold);
   }

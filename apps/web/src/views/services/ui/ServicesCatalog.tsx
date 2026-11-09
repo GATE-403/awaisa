@@ -1,9 +1,10 @@
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { Avatar } from '@awaisa/ui/Avatar'
 import NextLink from 'next/link'
 import { formatDuration, formatPrice } from '@/entities/booking'
 import type { Business, Catalog } from '@/shared/api/types'
+import { pluralize } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
-import styles from '@/views/services/ServicesPage.module.css'
+import styles from '../ServicesPage.module.css'
 import { CategoryNav } from './CategoryNav'
 
 interface ServicesCatalogProps {
@@ -11,14 +12,14 @@ interface ServicesCatalogProps {
   catalog: Catalog
 }
 
-export const ServicesCatalog = ({
-  business,
-  catalog: { categories, services },
-}: ServicesCatalogProps) => {
-  const groups = categories
+const MAX_AVATARS = 3
+
+// Services as cards you can act on: what it is, how long, who does it, the price, one tap to book.
+export const ServicesCatalog = ({ business, catalog }: ServicesCatalogProps) => {
+  const groups = catalog.categories
     .map((category) => ({
       ...category,
-      services: services.filter((service) => service.categoryId === category.id),
+      services: catalog.services.filter((service) => service.categoryId === category.id),
     }))
     .filter((category) => category.services.length > 0)
 
@@ -31,27 +32,56 @@ export const ServicesCatalog = ({
           <section key={category.id} id={category.id} aria-labelledby={`${category.id}-title`}>
             <h2 id={`${category.id}-title`} className={styles.groupTitle}>
               {category.name}
+              <span className={styles.groupCount}>{category.services.length}</span>
             </h2>
-            <ul className={styles.list}>
-              {category.services.map((service) => (
-                <li key={service.id}>
-                  <NextLink
-                    href={`/${business.slug}/book?service=${service.id}`}
-                    className={styles.row}
-                  >
-                    <span className={styles.rowBody}>
-                      <span className={styles.name}>{service.name}</span>
-                      <span className={styles.description}>{service.description}</span>
-                    </span>
-                    <span className={styles.meta}>
-                      <span className={styles.price}>{formatPrice(service.price)}</span>
-                      <br />
-                      {formatDuration(service.durationMinutes)}
-                    </span>
-                    <CaretRight className={styles.chevron} weight='bold' aria-hidden />
-                  </NextLink>
-                </li>
-              ))}
+            <ul className={styles.cards}>
+              {category.services.map((service) => {
+                const masters = catalog.specialists.filter((specialist) =>
+                  specialist.serviceIds.includes(service.id),
+                )
+
+                return (
+                  <li key={service.id}>
+                    <NextLink
+                      href={`/${business.slug}/book?service=${service.id}`}
+                      className={styles.card}
+                    >
+                      <span className={styles.cardTop}>
+                        <span className={styles.name}>{service.name}</span>
+                        {service.isPopular && <span className={styles.hit}>Хит</span>}
+                      </span>
+                      {service.description && (
+                        <span className={styles.description}>{service.description}</span>
+                      )}
+                      <span className={styles.details}>
+                        <span className={styles.chip}>
+                          {formatDuration(service.durationMinutes)}
+                        </span>
+                        {masters.length > 0 && (
+                          <span className={styles.masters}>
+                            <span className={styles.avatars} aria-hidden='true'>
+                              {masters.slice(0, MAX_AVATARS).map((master) => (
+                                <Avatar
+                                  key={master.id}
+                                  name={master.name}
+                                  src={master.photoUrl ?? undefined}
+                                  size='sm'
+                                  className={styles.avatar}
+                                />
+                              ))}
+                            </span>
+                            {pluralize(masters.length, ['мастер', 'мастера', 'мастеров'])}
+                          </span>
+                        )}
+                      </span>
+                      <span className={styles.cardBottom}>
+                        <span className={styles.price}>{formatPrice(service.price)}</span>
+                        <span className={styles.book}>Записаться</span>
+                      </span>
+                    </NextLink>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         ))}

@@ -15,6 +15,7 @@
     "@awaisa/tokens": "workspace:*",
     "@awaisa/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",
+    "html-to-image": "^1.11.13",
     "leaflet": "^1.9.4",
     "next": "16.4.5",
     "react": "19.3.0",

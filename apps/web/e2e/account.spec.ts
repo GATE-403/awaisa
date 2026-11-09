@@ -32,7 +32,7 @@ test.describe('Account: sign in by SMS', () => {
     await page.getByRole('button', { name: 'Готово' }).click()
 
     await expect(page).toHaveURL(/\/bookings$/)
-    await expect(page.getByText(`Записи на номер ${formatPhone(phone)}`)).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Аккаунт' })).toContainText(formatPhone(phone))
   })
 
   test('a wrong code explains how many attempts are left', async ({ page }) => {
@@ -45,9 +45,13 @@ test.describe('Account: sign in by SMS', () => {
     await expect(page.getByRole('button', { name: /Отправить снова через \d+ с/ })).toBeDisabled()
   })
 
-  test('profile is private: guests are sent to sign in', async ({ page }) => {
+  test('profile and bookings are one page: guests see their device bookings and a sign-in card', async ({
+    page,
+  }) => {
     await page.goto('/profile')
-    await expect(page).toHaveURL(/\/login\?next=%2Fprofile/)
+    await expect(page).toHaveURL(/\/bookings$/)
+    await page.getByRole('region', { name: 'Аккаунт' }).getByRole('link', { name: 'Войти' }).click()
+    await expect(page).toHaveURL(/\/login\?next=(%2F|\/)bookings/)
   })
 
   test('signed-in client books without typing a phone and sees it on any device', async ({

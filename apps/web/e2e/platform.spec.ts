@@ -76,7 +76,11 @@ test.describe('Platform: a new business goes live', () => {
     await search.press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
-    await clientPage.getByRole('link', { name: 'Записаться' }).first().click()
+    await clientPage
+      .getByRole('navigation', { name: /Страница бизнеса/ })
+      .getByRole('link', { name: 'Записаться' })
+      .click()
+    await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book$`))
 
     await expect(clientPage.getByRole('group', { name: 'Филиал' })).toBeVisible()
     const steps = bookingSteps(clientPage)

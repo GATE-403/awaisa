@@ -12,7 +12,6 @@ const COLUMNS = [
     links: [
       { href: '/', label: 'Каталог' },
       { href: '/map', label: 'Рядом на карте' },
-      { href: '/bookings', label: 'Мои записи' },
     ],
   },
   {
@@ -26,7 +25,7 @@ const COLUMNS = [
   {
     title: 'Аккаунт',
     links: [
-      { href: '/profile', label: 'Профиль' },
+      { href: '/bookings', label: 'Профиль и записи' },
       { href: '/login', label: 'Войти по номеру' },
     ],
   },

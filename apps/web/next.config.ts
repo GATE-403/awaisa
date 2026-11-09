@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
     { source: '/book', destination: '/awaisa-studio/book', permanent: false },
     { source: '/services', destination: '/awaisa-studio/services', permanent: false },
     { source: '/admin', destination: '/manage', permanent: false },
+    // Profile and bookings are one page now.
+    { source: '/profile', destination: '/bookings', permanent: false },
   ],
   rewrites: async () => [
     { source: `${CLIENT_API_PREFIX}/:path*`, destination: `${API_URL}/:path*` },

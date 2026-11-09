@@ -3,30 +3,20 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import NextLink from 'next/link'
-import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
-import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { useMyBookings } from '@/views/bookings/model/useMyBookings'
 import { BookingHistory } from '@/views/bookings/ui/BookingHistory/BookingHistory'
 import { UpcomingBooking } from '@/views/bookings/ui/UpcomingBooking/UpcomingBooking'
 import styles from './BookingsPage.module.css'
 import { getCountdown, isUpcoming } from './bookingsUtils'
+import { AccountCard } from './ui/AccountCard/AccountCard'
+import { AccountSettings } from './ui/AccountSettings/AccountSettings'
 
 export const BookingsPage = () => {
   const today = useToday()
-  const {
-    bookings,
-    isReady,
-    isSignedIn,
-    phone,
-    canForget,
-    cancellingId,
-    cancel,
-    forget,
-    copyCode,
-  } = useMyBookings()
+  const { bookings, isReady, canForget, cancellingId, cancel, forget, copyCode } = useMyBookings()
   const upcoming = bookings
     .filter((booking) => isUpcoming(booking, today))
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
@@ -35,21 +25,7 @@ export const BookingsPage = () => {
   return (
     <main className={styles.page}>
       <Container size='md' className={styles.content}>
-        <header className={styles.header}>
-          <PageTitle title='Мои записи.' subtitle='Ближайшие визиты и история.' />
-          {isReady && isSignedIn && phone && (
-            <p className={styles.note}>
-              Записи на номер {formatPhone(phone)} — на любом устройстве.
-            </p>
-          )}
-          {isReady && !isSignedIn && (
-            <p className={styles.note}>
-              Записи хранятся на этом устройстве.{' '}
-              <NextLink href='/login?next=/bookings'>Войдите по номеру</NextLink>, чтобы видеть их
-              везде и получать SMS.
-            </p>
-          )}
-        </header>
+        <AccountCard />
 
         {!isReady && <Skeleton className={styles.skeleton} />}
 
@@ -96,6 +72,8 @@ export const BookingsPage = () => {
             <BookingHistory bookings={history} canForget={canForget} onForget={forget} />
           </section>
         )}
+
+        <AccountSettings />
       </Container>
     </main>
   )

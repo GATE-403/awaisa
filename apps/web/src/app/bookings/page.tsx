@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { BookingsPage } from '@/views/bookings'
 
 export const metadata: Metadata = {
-  title: 'Мои записи',
+  title: 'Профиль и записи',
 }
 
 const BookingsRoute = () => <BookingsPage />

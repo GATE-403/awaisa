@@ -7,6 +7,8 @@ import styles from '../ForBusinessPage.module.css'
 
 type Place = { slug: string; name: string }
 
+const MIN_MARQUEE = 6
+
 // Fetched in the browser: the page itself stays fully static (SSG) and never waits for the API.
 export const TrustRow = () => {
   const [places, setPlaces] = useState<Place[]>([])
@@ -21,20 +23,22 @@ export const TrustRow = () => {
     return () => controller.abort()
   }, [])
 
-  // Repeated so the marquee loops without a gap.
-  const loop = places.length > 0 ? [...places, ...places, ...places] : []
+  // A marquee only makes sense with enough places; a few are shown as a calm row.
+  const isMarquee = places.length >= MIN_MARQUEE
+  const items = isMarquee ? [...places, ...places, ...places] : places
 
   return (
     <section className={styles.trust} aria-label='Уже на Awaisa'>
       <p className={styles.trustCaption}>
         Салоны, барбершопы и студии Бишкека. Уже на Awaisa{places.length > 0 ? ':' : '.'}
       </p>
-      {loop.length > 0 && (
-        <div className={styles.marquee}>
+      {items.length > 0 && (
+        <div className={styles.marquee} data-static={!isMarquee || undefined}>
           <ul className={styles.marqueeTrack}>
-            {loop.map((place, index) => (
-              <li key={`${place.slug}-${index}`} title={place.name}>
-                <BusinessTile name={place.name} size='md' />
+            {items.map((place, index) => (
+              <li key={`${place.slug}-${index}`} className={styles.place}>
+                <BusinessTile name={place.name} size='sm' />
+                {place.name}
               </li>
             ))}
           </ul>

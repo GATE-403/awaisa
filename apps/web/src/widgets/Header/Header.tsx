@@ -1,23 +1,12 @@
 'use client'
 
-import {
-  CalendarCheck,
-  MapPin,
-  MapTrifold,
-  SquaresFour,
-  Storefront,
-  UserCircle,
-} from '@phosphor-icons/react/ssr'
+import { MapPin, MapTrifold, SquaresFour, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { useEffect, useRef } from 'react'
 import { useSession } from '@/entities/session'
 import { KIND_ICONS } from '@/shared/config/kindStyles'
-import {
-  getBusinessSlug,
-  isActivePath,
-  isBookingPath,
-  isCabinetPath,
-} from '@/shared/config/navigation'
+import { isActivePath, isCabinetPath } from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { Logo } from '@/shared/ui/Logo/Logo'
@@ -26,7 +15,6 @@ import styles from './Header.module.css'
 
 const ACTIONS = [
   { href: '/map', label: 'Карта', icon: MapTrifold },
-  { href: '/bookings', label: 'Мои записи', icon: CalendarCheck },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
@@ -36,17 +24,35 @@ export const Header = () => {
   const searchParams = useSearchParams()
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
-  const businessSlug = getBusinessSlug(pathname)
-  const showBookingAction = businessSlug !== null && !isBookingPath(pathname)
   const isSignedIn = status === 'signedIn'
-  const accountLabel = customer ? `Профиль: ${customer.name || customer.phone}` : 'Войти'
+  const accountLabel = customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль и записи'
   const currentKind = pathname === '/' ? searchParams.get('kind') : null
+  const headerRef = useRef<HTMLElement>(null)
+  const isCabinet = isCabinetPath(pathname)
+
+  // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
+  // real height is published as --header-height.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the header element mounts again after leaving the cabinet
+  useEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty('--header-height', `${header.offsetHeight}px`)
+    })
+    observer.observe(header)
+
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--header-height')
+    }
+  }, [isCabinet])
 
   // The cabinet is a work tool with its own toolbar; the site navigation would only distract.
-  if (isCabinetPath(pathname)) return null
+  if (isCabinet) return null
 
   return (
-    <header className={styles.header} data-scrolled={isScrolled || undefined}>
+    <header ref={headerRef} className={styles.header} data-scrolled={isScrolled || undefined}>
       <div className={styles.inner}>
         <NextLink href='/' className={styles.home} aria-label='На главную'>
           <Logo />
@@ -68,6 +74,8 @@ export const Header = () => {
               key={href}
               href={href}
               className={styles.action}
+              data-mobile={href === '/map' || undefined}
+              aria-label={label}
               aria-current={isActivePath(pathname, href) ? 'page' : undefined}
             >
               <Icon weight={isActivePath(pathname, href) ? 'fill' : 'regular'} aria-hidden />
@@ -75,21 +83,16 @@ export const Header = () => {
             </NextLink>
           ))}
           <NextLink
-            href={isSignedIn ? '/profile' : '/login'}
+            href='/bookings'
             className={styles.action}
             data-account
             aria-label={accountLabel}
-            aria-current={pathname === '/profile' ? 'page' : undefined}
+            aria-current={pathname === '/bookings' ? 'page' : undefined}
           >
             <UserCircle weight={isSignedIn ? 'fill' : 'regular'} aria-hidden />
-            <span aria-hidden='true'>{isSignedIn ? customer?.name || 'Профиль' : 'Войти'}</span>
+            <span aria-hidden='true'>{customer?.name || 'Профиль'}</span>
           </NextLink>
         </nav>
-        {showBookingAction && (
-          <NextLink href={`/${businessSlug}/book`} className={styles.cta}>
-            Записаться
-          </NextLink>
-        )}
       </div>
 
       <nav className={styles.categories} aria-label='Категории'>

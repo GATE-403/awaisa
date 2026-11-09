@@ -1,5 +1,5 @@
 import type { Icon } from '@phosphor-icons/react'
-import { CalendarCheck, MagnifyingGlass, MapTrifold, Storefront } from '@phosphor-icons/react/ssr'
+import { MagnifyingGlass, MapTrifold, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
@@ -10,7 +10,8 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: MagnifyingGlass },
   { href: '/map', label: 'Карта', icon: MapTrifold },
-  { href: '/bookings', label: 'Мои записи', icon: CalendarCheck },
+  // Profile and bookings are one page.
+  { href: '/bookings', label: 'Профиль', icon: UserCircle },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 

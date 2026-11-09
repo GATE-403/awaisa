@@ -3,6 +3,7 @@ import { CalendarPlus, MapPin } from '@phosphor-icons/react/ssr'
 import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { WalletButton } from '@/features/addToWallet'
 import { CancelBookingButton } from '@/features/cancelBooking'
+import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import styles from './UpcomingBooking.module.css'
 
@@ -28,6 +29,7 @@ export const UpcomingBooking = ({
       onCodeClick={onCodeClick}
       footer={
         <div className={styles.actions}>
+          <TicketViewer booking={booking} />
           <WalletButton bookingId={booking.id} />
           <Button
             variant='secondary'

@@ -1,44 +1,7 @@
-.page {
-  padding: var(--space-10) 0 var(--section-gap);
-}
-
-.content {
+.settings {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
-}
-
-.skeleton {
-  height: 360px;
-  border-radius: var(--radius-2xl);
-}
-
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  text-align: center;
-}
-
-.avatar {
-  width: 96px;
-  height: 96px;
-  margin-bottom: var(--space-3);
-  font-size: 36px;
-}
-
-.name {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-title);
-}
-
-.phone {
-  color: var(--color-muted-foreground);
-  font-variant-numeric: tabular-nums;
+  gap: var(--space-6);
 }
 
 .group {
@@ -59,9 +22,12 @@
 
 .list {
   overflow: hidden;
+  margin: 0;
+  padding: 0;
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
+  list-style: none;
 }
 
 .list > li {
@@ -85,11 +51,7 @@
   gap: var(--space-3);
   min-height: 52px;
   padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-a.row:active {
-  background: var(--color-subtle);
+  color: var(--color-foreground);
 }
 
 .chevron {
@@ -108,16 +70,9 @@ a.row:active {
   cursor: pointer;
 }
 
-.dialogForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
-}
-
 @media (hover: hover) {
   a.row:hover,
   .signOut:hover {
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-foreground));
+    background: var(--color-fill);
   }
 }
