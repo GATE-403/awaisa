@@ -162,22 +162,22 @@
 
 .booking {
   z-index: 1;
-  gap: 3px;
+  gap: 2px;
   margin-top: 1px;
-  padding: 6px 8px 6px 12px;
+  padding: 6px 10px;
+  /* Calendar on iOS 26: a soft tinted fill, coloured title, a hairline in the master's colour. */
   border-radius: 10px;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--tint) 22%, var(--color-surface)),
-    color-mix(in srgb, var(--tint) 13%, var(--color-surface))
-  );
-  box-shadow:
-    inset 4px 0 0 var(--tint),
-    inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 35%, transparent),
-    var(--shadow-xs);
+  background: color-mix(in srgb, var(--tint) 16%, var(--color-surface));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 32%, transparent);
   color: var(--color-foreground);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.booking:active:not([data-cancelled]) {
+  scale: 0.98;
 }
 
 .booking[data-cancelled] {
@@ -185,12 +185,10 @@
   background-color: var(--color-surface);
   background-image: repeating-linear-gradient(
     135deg,
-    var(--color-subtle) 0 6px,
+    var(--color-fill) 0 6px,
     transparent 6px 12px
   );
-  box-shadow:
-    inset 3px 0 0 var(--color-tertiary-foreground),
-    inset 0 0 0 0.5px var(--color-border);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
   color: var(--color-muted-foreground);
 }
 
@@ -210,20 +208,22 @@
 }
 
 .blockTime {
-  color: color-mix(in srgb, var(--tint) 75%, var(--color-foreground));
+  color: color-mix(in srgb, var(--tint) 60%, var(--color-muted-foreground));
   font-size: var(--text-xs);
   line-height: 16px;
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
 .booking[data-cancelled] .blockTime,
+.booking[data-cancelled] .blockTitle,
 .timeOff .blockTime {
   color: inherit;
 }
 
 .blockTitle {
   overflow: hidden;
+  color: color-mix(in srgb, var(--tint) 62%, var(--color-foreground));
   font-size: var(--text-sm);
   line-height: 19px;
   font-weight: var(--font-weight-semibold);
@@ -312,10 +312,7 @@
 }
 
 .blockPrice {
-  padding: 1px 8px;
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--tint) 22%, var(--color-surface));
-  color: color-mix(in srgb, var(--tint) 60%, var(--color-foreground));
+  color: color-mix(in srgb, var(--tint) 62%, var(--color-foreground));
   font-weight: var(--font-weight-semibold);
 }
 
@@ -374,7 +371,7 @@
 
 @media (hover: hover) {
   .booking:not([data-cancelled]):hover {
-    background: color-mix(in srgb, var(--tint) 26%, var(--color-surface));
+    background: color-mix(in srgb, var(--tint) 22%, var(--color-surface));
   }
 
   .remove:hover {

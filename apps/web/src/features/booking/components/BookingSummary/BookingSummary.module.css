@@ -19,6 +19,11 @@
     var(--shadow-md);
 }
 
+/* Concentric with the capsule bar: the button is a capsule too, as in Liquid Glass toolbars. */
+.bar .barButton {
+  border-radius: var(--radius-full);
+}
+
 .barInfo {
   display: flex;
   flex-direction: column;

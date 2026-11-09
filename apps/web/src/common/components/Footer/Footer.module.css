@@ -1,29 +1,79 @@
 .footer {
   margin-top: auto;
-  padding: var(--space-8) 0 calc(var(--space-8) + var(--tabbar-space));
-  border-top: 0.5px solid var(--color-border);
+  padding: var(--space-6) 0 calc(var(--space-6) + var(--tabbar-space));
+  background: var(--color-background);
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
 }
 
 .inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
 }
 
-.info {
+.fine {
+  padding-bottom: var(--space-4);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.columns {
+  display: flex;
+  flex-direction: column;
+}
+
+/* On phones each column is a disclosure row with a hairline, as on apple.com. */
+.column {
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.columnTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--control-height-md);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  list-style: none;
+  cursor: pointer;
+}
+
+.columnTitle::-webkit-details-marker {
+  display: none;
+}
+
+.caret {
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+  transition: rotate var(--duration-fast) var(--ease-standard);
+}
+
+.column:not([open]) .caret {
+  rotate: -90deg;
+}
+
+.links {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  margin: 0;
+  padding: 0 0 var(--space-3);
+  list-style: none;
 }
 
-.settings {
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: var(--color-muted-foreground);
+}
+
+.bottom {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin-left: calc(-1 * var(--space-2));
+  gap: var(--space-3);
+  padding-top: var(--space-4);
 }
 
 .name {
@@ -31,15 +81,69 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-left: calc(-1 * var(--space-2));
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
 @media (min-width: 768px) {
-  .inner {
+  .footer {
+    padding-top: var(--space-8);
+  }
+
+  .columns {
     flex-direction: row;
-    align-items: flex-start;
+    gap: var(--space-16);
+    padding: var(--space-6) 0;
+    border-bottom: 0.5px solid var(--color-border);
+  }
+
+  .column {
+    border-bottom: none;
+  }
+
+  /* Columns are always open on wide screens. */
+  .columnTitle {
+    min-height: 0;
+    margin-bottom: var(--space-2);
+    pointer-events: none;
+  }
+
+  .caret {
+    display: none;
+  }
+
+  .links {
+    padding: 0;
+  }
+
+  .link {
+    min-height: 24px;
+  }
+
+  .bottom {
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
   }
 
   .settings {
-    align-items: flex-end;
     margin: 0 calc(-1 * var(--space-2)) 0 0;
   }
+}
+
+/* Language and theme read as part of the fine print, not as separate controls. */
+.settings :is(button, a) {
+  font-size: var(--text-xs);
 }

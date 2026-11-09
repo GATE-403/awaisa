@@ -96,7 +96,11 @@ type BusinessPage = {
   catalog: Catalog
 }
 
-type BusinessLink = Pick<Business, 'slug' | 'name' | 'isPublished'>
+type BusinessLink = Pick<Business, 'slug' | 'name' | 'kind' | 'isPublished' | 'coverUrl'> & {
+  role: 'owner' | 'staff' | 'admin'
+  todayCount: number
+  next: { date: string; time: string } | null
+}
 
 type BookingBusiness = Pick<Business, 'slug' | 'name' | 'address' | 'phone' | 'mapUrl'>
 

@@ -6,7 +6,7 @@
   flex-direction: column;
   gap: var(--space-2);
   width: 100%;
-  max-width: 560px;
+  max-width: var(--ticket-max-width, 560px);
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.04)) drop-shadow(0 10px 24px rgb(0 0 0 / 0.1));
 }
 

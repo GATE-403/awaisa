@@ -60,7 +60,7 @@ export const BookingSummary = ({
             {errorMessage ?? hint}
           </span>
         </div>
-        <Button size='lg' onClick={onSubmit} disabled={isSubmitting}>
+        <Button size='lg' className={styles.barButton} onClick={onSubmit} disabled={isSubmitting}>
           {buttonLabel}
         </Button>
       </div>
