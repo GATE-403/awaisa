@@ -1,0 +1,69 @@
+.banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  min-height: 220px;
+  overflow: hidden;
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  background:
+    radial-gradient(
+      90% 120% at 100% 0%,
+      color-mix(in srgb, var(--tint) 55%, var(--color-primary-foreground)) 0%,
+      transparent 60%
+    ),
+    linear-gradient(160deg, var(--tint), color-mix(in srgb, var(--tint) 75%, var(--system-indigo)));
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary-foreground);
+  transition: scale var(--duration-normal) var(--ease-standard);
+}
+
+.banner:active {
+  scale: 0.99;
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.title {
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.text {
+  max-width: 32ch;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  opacity: 0.9;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary-foreground) 22%, transparent);
+  backdrop-filter: var(--blur-material);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.action svg {
+  width: 14px;
+  height: 14px;
+}

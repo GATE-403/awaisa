@@ -208,7 +208,7 @@
 }
 
 .blockTime {
-  color: color-mix(in srgb, var(--tint) 60%, var(--color-muted-foreground));
+  color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
   font-size: var(--text-xs);
   line-height: 16px;
   font-weight: var(--font-weight-medium);

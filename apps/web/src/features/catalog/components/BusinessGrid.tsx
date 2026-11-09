@@ -1,70 +1,46 @@
 import NextLink from 'next/link'
-import { listBusinesses } from '@/common/api/serverApi'
-import type { BusinessKind } from '@/common/api/types'
-import { StoreCard } from '@/common/components/StoreCard/StoreCard'
+import type { BusinessCard, BusinessKind } from '@/common/api/types'
 import { pluralize } from '@/common/utils/plural'
+import { getKindLabel } from '@/constants/platform'
 import styles from '../CatalogPage.module.css'
-import { BusinessCard } from './BusinessCard/BusinessCard'
 import { NextFreeProvider } from './BusinessCard/NextFreeProvider'
+import { type CatalogSort, SortedGrid } from './SortedGrid/SortedGrid'
 
 interface BusinessGridProps {
   kind: BusinessKind | undefined
   query: string
+  sort: CatalogSort
+  businesses: BusinessCard[]
 }
 
-export const BusinessGrid = async ({ kind, query }: BusinessGridProps) => {
-  const businesses = await listBusinesses(kind, query || undefined)
-
-  return (
-    <section aria-labelledby='catalog-results' className={styles.results}>
+export const BusinessGrid = ({ kind, query, sort, businesses }: BusinessGridProps) => (
+  <section aria-labelledby='catalog-results' className={styles.results}>
+    <div className={styles.resultsHeader}>
       <h2 id='catalog-results' className={styles.resultsTitle}>
-        {query ? `«${query}».` : 'Куда записаться.'}
-        <span className={styles.titleMuted}>
-          {query
-            ? ` ${pluralize(businesses.length, ['результат', 'результата', 'результатов'])}.`
-            : ' Свободное время — онлайн.'}
+        {query ? `«${query}»` : kind ? getKindLabel(kind) : 'Все места'}
+        <span className={styles.count}>
+          {pluralize(businesses.length, ['место', 'места', 'мест'])}
         </span>
       </h2>
-      <span className={styles.resultsLinks}>
-        <NextLink href={kind ? `/map?kind=${kind}` : '/map'} className={styles.emptyLink}>
-          Показать на карте ›
+      {(query || kind) && (
+        <NextLink href='/' className={styles.reset}>
+          Сбросить
         </NextLink>
-        {query && (
-          <NextLink href={kind ? `/?kind=${kind}` : '/'} className={styles.emptyLink}>
-            Сбросить поиск
-          </NextLink>
-        )}
-      </span>
-
-      {businesses.length === 0 ? (
-        <div className={styles.empty}>
-          <p className={styles.emptyTitle}>Ничего не нашли</p>
-          <p className={styles.emptyText}>Попробуйте другое слово или уберите фильтр.</p>
-          <NextLink href='/' className={styles.emptyLink}>
-            Показать все
-          </NextLink>
-        </div>
-      ) : (
-        <NextFreeProvider slugs={businesses.map((business) => business.slug)}>
-          <ul className={styles.grid}>
-            {businesses.map((business) => (
-              <li key={business.slug}>
-                <BusinessCard business={business} />
-              </li>
-            ))}
-          </ul>
-        </NextFreeProvider>
       )}
+    </div>
 
-      <StoreCard
-        href='/business'
-        tone='dark'
-        height='auto'
-        eyebrow='Для бизнеса'
-        title='Принимайте записи онлайн.'
-        description='Страница с услугами, мастерами и графиком за пять минут. Клиенты записываются сами — вы получаете расписание.'
-        className={styles.promo}
-      />
-    </section>
-  )
-}
+    {businesses.length === 0 ? (
+      <div className={styles.empty}>
+        <p className={styles.emptyTitle}>Ничего не нашли</p>
+        <p className={styles.emptyText}>Попробуйте другую услугу или уберите фильтр.</p>
+        <NextLink href='/' className={styles.emptyLink}>
+          Показать все места
+        </NextLink>
+      </div>
+    ) : (
+      <NextFreeProvider slugs={businesses.map((business) => business.slug)}>
+        <SortedGrid businesses={businesses} initialSort={sort} />
+      </NextFreeProvider>
+    )}
+  </section>
+)

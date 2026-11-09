@@ -54,6 +54,7 @@ type ColorScheme = {
   dangerHover: string
   dangerForeground: string
   dangerText: string
+  dangerStrong: string
   success: string
   highlight: string
   rating: string
@@ -98,6 +99,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     dangerForeground: palette.white,
     // Red label on light fills: the accessible variant of system red.
     dangerText: '#d70015',
+    // A red fill that carries white text (calendar leaf), the same in both themes.
+    dangerStrong: '#d70015',
     success: palette.light.green,
     highlight: '#b64400',
     rating: palette.light.orange,
@@ -137,6 +140,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     dangerHover: '#ff4747',
     dangerForeground: palette.white,
     dangerText: '#ff6961',
+    dangerStrong: '#d70015',
     success: palette.dark.green,
     highlight: palette.dark.orange,
     rating: palette.dark.orange,
@@ -228,8 +232,9 @@ const radius = {
 
 const fontFamily = {
   sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
+  // Headings use Onest everywhere (loaded by the web app), falling back to the system display face.
   display:
-    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
+    "var(--font-onest, 'Onest'), -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, sans-serif",
   mono: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
 }
 

@@ -89,7 +89,7 @@
 .leafMonth {
   width: 100%;
   padding: 3px 0;
-  background: var(--system-red);
+  background: var(--color-danger-strong);
   color: var(--color-primary-foreground);
   font-size: var(--text-xs);
   line-height: var(--text-xs-line-height);
