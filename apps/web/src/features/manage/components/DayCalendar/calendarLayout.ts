@@ -34,7 +34,22 @@ const getDayRange = (
 const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 
 export type { Range }
-// Below this height a block shows time and title on one line.
+// Below this height a block shows time and title on one line; from TALL_BLOCK_PX it also shows contact details.
 const COMPACT_BLOCK_PX = 72
+const TALL_BLOCK_PX = 128
 
-export { COMPACT_BLOCK_PX, getDayRange, HOUR, toPx }
+// Each master keeps one colour, like calendars in Apple Calendar.
+const MASTER_TINTS = [
+  'var(--system-blue)',
+  'var(--system-green)',
+  'var(--system-orange)',
+  'var(--system-purple)',
+  'var(--system-pink)',
+  'var(--system-teal)',
+  'var(--system-indigo)',
+]
+
+const getMasterTint = (index: number) =>
+  MASTER_TINTS[index % MASTER_TINTS.length] ?? MASTER_TINTS[0]
+
+export { COMPACT_BLOCK_PX, getDayRange, getMasterTint, HOUR, TALL_BLOCK_PX, toPx }

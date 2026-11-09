@@ -15,6 +15,7 @@ interface SelectProps<Value>
   placeholder?: ReactNode
   className?: string
   'aria-label'?: string
+  variant?: 'default' | 'plain'
 }
 
 const ChevronsIcon = () => (
@@ -46,10 +47,15 @@ const Select = <Value,>({
   placeholder,
   className,
   'aria-label': ariaLabel,
+  variant = 'default',
   ...props
 }: SelectProps<Value>) => (
   <BaseSelect.Root items={items} {...props}>
-    <BaseSelect.Trigger className={cx(styles.trigger, className)} aria-label={ariaLabel}>
+    <BaseSelect.Trigger
+      className={cx(styles.trigger, className)}
+      aria-label={ariaLabel}
+      data-variant={variant}
+    >
       <BaseSelect.Value className={styles.value} placeholder={placeholder} />
       <BaseSelect.Icon className={styles.triggerIcon}>
         <ChevronsIcon />

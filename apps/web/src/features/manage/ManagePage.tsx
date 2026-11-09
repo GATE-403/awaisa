@@ -2,7 +2,7 @@
 
 import { Avatar } from '@awaisa/ui/Avatar'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { ArrowUpRight, CaretUpDown } from '@phosphor-icons/react/ssr'
+import { ArrowUpRight, SquaresFour } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Container } from '@/common/components/Container/Container'
@@ -67,22 +67,34 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
                 ) : (
                   <Skeleton className={styles.nameSkeleton} />
                 )}
-                {data && (
-                  <NextLink
-                    href={`/${data.business.slug}`}
-                    target='_blank'
-                    className={styles.pageLink}
-                  >
-                    {data.business.isPublished ? 'Открыть страницу' : 'Страница скрыта'}
-                    <ArrowUpRight weight='bold' aria-hidden />
-                  </NextLink>
-                )}
+                <p className={styles.caption}>
+                  {data && !data.business.isPublished ? 'Кабинет · страница скрыта' : 'Кабинет'}
+                </p>
               </div>
-              <NextLink href='/manage' className={styles.switch} aria-label='Другие бизнесы'>
-                <CaretUpDown weight='bold' aria-hidden />
+              <NextLink
+                href={`/${slug}`}
+                target='_blank'
+                className={styles.identityAction}
+                aria-label='Открыть страницу'
+              >
+                <ArrowUpRight weight='bold' aria-hidden />
               </NextLink>
             </div>
             <ManageNav slug={slug} active={tab} />
+            <ul className={styles.extraLinks}>
+              <li>
+                <NextLink href={`/${slug}`} target='_blank' className={styles.extraLink}>
+                  <ArrowUpRight weight='bold' aria-hidden />
+                  Открыть страницу
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href='/manage' className={styles.extraLink}>
+                  <SquaresFour weight='bold' aria-hidden />
+                  Все бизнесы
+                </NextLink>
+              </li>
+            </ul>
             {data && (
               <div className={styles.progress}>
                 <SetupProgress business={data.business} catalog={data.catalog} />

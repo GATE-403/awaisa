@@ -105,3 +105,18 @@
 .itemIndicator {
   display: flex;
 }
+
+/* Settings-row value: right-aligned text and chevrons, no box. */
+.trigger[data-variant="plain"] {
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-muted-foreground);
+}
+
+.trigger[data-variant="plain"][data-popup-open] {
+  box-shadow: none;
+  color: var(--color-foreground);
+}

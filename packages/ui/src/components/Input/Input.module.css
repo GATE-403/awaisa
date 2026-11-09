@@ -29,3 +29,24 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Settings-row value: no box, right-aligned, the caret is the only focus cue (as in iOS Settings). */
+.input[data-variant="plain"] {
+  height: auto;
+  min-height: var(--control-height-md);
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-foreground);
+  text-align: right;
+}
+
+.input[data-variant="plain"]:focus-visible {
+  box-shadow: none;
+}
+
+.input[data-variant="plain"][data-invalid] {
+  box-shadow: none;
+  color: var(--color-danger);
+}

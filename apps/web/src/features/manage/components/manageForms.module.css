@@ -104,7 +104,7 @@
 }
 
 .serviceRow {
-  grid-template-columns: minmax(0, 1fr) 72px 96px 16px;
+  grid-template-columns: minmax(0, 1fr) auto 14px;
   cursor: pointer;
 }
 
@@ -122,8 +122,11 @@
 }
 
 .fieldRow {
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-2);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  min-height: 48px;
+  padding-block: 0;
+  cursor: text;
 }
 
 .serviceRow:active,
@@ -142,7 +145,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1) var(--space-2);
 }
 
 .rowMeta {
@@ -168,6 +171,23 @@
 
 .cellStrong {
   font-weight: var(--font-weight-semibold);
+}
+
+.cellValue {
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.star {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-rating);
+}
+
+.serviceRow[data-hidden] .rowTitle {
+  color: var(--color-muted-foreground);
 }
 
 .badge {
@@ -210,8 +230,36 @@
 }
 
 .fieldLabel {
+  color: var(--color-foreground);
+  white-space: nowrap;
+}
+
+.fieldRow:focus-within {
+  background: color-mix(in srgb, var(--color-surface) 96%, var(--color-foreground));
+}
+
+/* Floating save bar like iOS: appears only while there is something to save. */
+.saveBar {
+  position: sticky;
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-end;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-md);
+}
+
+.saveText {
+  margin-right: var(--space-2);
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
+  font-size: var(--text-footnote);
 }
 
 .fieldInput {
@@ -300,14 +348,6 @@
 }
 
 @media (max-width: 639px) {
-  .serviceRow {
-    grid-template-columns: minmax(0, 1fr) auto 16px;
-  }
-
-  .serviceRow > .cellMuted {
-    display: none;
-  }
-
   .hoursRow {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -326,9 +366,8 @@
   }
 }
 
-@media (min-width: 640px) {
-  .fieldRow {
-    grid-template-columns: 180px minmax(0, 1fr);
-    gap: var(--space-4);
+@media (max-width: 479px) {
+  .saveText {
+    display: none;
   }
 }
