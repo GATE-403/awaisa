@@ -16,7 +16,9 @@ import {
   type CreateTimeOffInput,
   createTimeOffSchema,
   type ScheduleQuery,
+  type StaffBookingInput,
   scheduleQuerySchema,
+  staffBookingSchema,
 } from './admin.schemas.js'
 import { AdminService } from './admin.service.js'
 
@@ -31,6 +33,14 @@ export class AdminController {
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
   ) {
     return this.admin.getSchedule(business, query.date)
+  }
+
+  @Post('bookings')
+  createBooking(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: staffBookingSchema }) body: StaffBookingInput,
+  ) {
+    return this.admin.createBooking(business, body)
   }
 
   @Post('bookings/:id/cancel')

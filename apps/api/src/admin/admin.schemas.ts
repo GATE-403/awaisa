@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { createBookingSchema } from '../bookings/bookings.schemas.js'
 
 const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD')
 
@@ -21,9 +22,16 @@ const createTimeOffSchema = z
     path: ['to'],
   })
 
+// A booking made by staff for a client: the phone is the client's, so it is required.
+const staffBookingSchema = createBookingSchema.extend({
+  phone: z.string().trim().min(1, 'Укажите телефон клиента').max(32),
+})
+
+type StaffBookingInput = z.infer<typeof staffBookingSchema>
+
 type ScheduleQuery = z.infer<typeof scheduleQuerySchema>
 
 type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
-export type { CreateTimeOffInput, ScheduleQuery }
-export { createTimeOffSchema, scheduleQuerySchema }
+export type { CreateTimeOffInput, ScheduleQuery, StaffBookingInput }
+export { createTimeOffSchema, scheduleQuerySchema, staffBookingSchema }

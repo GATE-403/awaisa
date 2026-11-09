@@ -14,7 +14,7 @@ import {
 import type { Env } from '../config/env.js'
 import { salonCancellationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
-import type { CreateTimeOffInput } from './admin.schemas.js'
+import type { CreateTimeOffInput, StaffBookingInput } from './admin.schemas.js'
 import { TimeOff } from './time-off.entity.js'
 
 const toTimeOffView = (timeOff: TimeOff) => {
@@ -67,6 +67,17 @@ export class AdminService {
       bookings,
       timeOff: timeOff.map(toTimeOffView),
     }
+  }
+
+  async createBooking(business: Business, input: StaffBookingInput) {
+    // The client's cancel token is for their own device; staff cancel from the schedule.
+    const { cancelToken: _cancelToken, ...view } = await this.bookings.create(
+      input,
+      null,
+      business.id,
+    )
+
+    return view
   }
 
   async cancelBooking(business: Business, id: string) {

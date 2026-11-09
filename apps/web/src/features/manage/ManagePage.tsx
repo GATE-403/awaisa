@@ -100,7 +100,9 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
 
         <div className={styles.main} data-wide={tab === 'schedule' || undefined}>
           {!data && <Skeleton className={styles.skeleton} />}
-          {data && tab === 'schedule' && <ScheduleTab slug={slug} business={data.business} />}
+          {data && tab === 'schedule' && (
+            <ScheduleTab slug={slug} business={data.business} catalog={data.catalog} />
+          )}
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />
           )}

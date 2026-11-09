@@ -50,7 +50,8 @@ test.describe('Platform: a new business goes live', () => {
 
     const steps = bookingSteps(clientPage)
     await steps.service.getByRole('radio', { name: /Стрижка/ }).click()
-    await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    // The only master is chosen for the client: the step is already filled in.
+    await expect(steps.specialist).toContainText('Азамат')
     const time = await pickFirstFreeSlot(clientPage)
     const clientPhone = randomClientPhone()
     await steps.contacts.getByLabel('Имя').fill('E2E Клиент')
@@ -72,6 +73,18 @@ test.describe('Platform: a new business goes live', () => {
     await expect(
       page.getByRole('button', { name: new RegExp(`^${time}.*${phonePattern}`) }),
     ).toBeVisible()
+
+    // A walk-in: the owner taps an empty slot and books the client in.
+    await page
+      .getByRole('button', { name: 'Новая запись к мастеру Азамат' })
+      .click({ position: { x: 24, y: 320 } })
+    const sheet = page.getByRole('dialog', { name: 'Новая запись' })
+    await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
+    await sheet.getByLabel('Имя').fill('E2E Гость')
+    await sheet.getByLabel('Телефон').fill(randomClientPhone())
+    await sheet.getByRole('button', { name: 'Добавить' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /E2E Гость/ })).toBeVisible()
   })
 
   test('reserved and taken page addresses are refused before submitting', async ({ page }) => {

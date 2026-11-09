@@ -37,7 +37,9 @@ test.describe('User flow: booking', () => {
     await steps.service.getByRole('radio', { name: /Мужская стрижка/ }).click()
     await expect(steps.service).toContainText('Мужская стрижка')
 
-    await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    // A service with a single master skips the choice; otherwise take anyone free.
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    if (await anyMaster.isVisible()) await anyMaster.click()
     const time = await pickFirstFreeSlot(page)
 
     await expect(steps.datetime).toContainText(time)

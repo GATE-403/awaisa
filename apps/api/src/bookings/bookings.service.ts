@@ -112,11 +112,22 @@ export class BookingsService {
     return { date, slots: slots.map(({ time, isAvailable }) => ({ time, isAvailable })) }
   }
 
-  async create(input: CreateBookingInput, customer: Customer | null = null) {
+  /** `staffBusinessId` is set when a member books a client in from the cabinet. */
+  async create(
+    input: CreateBookingInput,
+    customer: Customer | null = null,
+    staffBusinessId: string | null = null,
+  ) {
     const now = new Date()
     const phone = customer?.phone ?? normalizePhone(input.phone)
     if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
-    const request = await this.resolveRequest(input.serviceId, input.specialistId, input.date, now)
+    const request = await this.resolveRequest(
+      input.serviceId,
+      input.specialistId,
+      input.date,
+      now,
+      staffBusinessId,
+    )
     const { service, specialistIds } = request
     const minutes = parseTime(input.time)
     const slot = (await this.buildSlotsFor(request, input.date, now)).find(
@@ -157,7 +168,7 @@ export class BookingsService {
         }
         void this.sms.sendSafely(phone, confirmationMessage(view, this.webUrl()))
 
-        return { ...view, cancelToken }
+        return { ...view, cancelToken, customerPhone: phone, comment: input.comment }
       } catch (error) {
         if (!isOverlapError(error)) throw error
       }
@@ -247,15 +258,27 @@ export class BookingsService {
     return this.config.get('PUBLIC_WEB_URL', { infer: true })
   }
 
-  private async resolveRequest(serviceId: string, specialistId: string, date: string, now: Date) {
+  private async resolveRequest(
+    serviceId: string,
+    specialistId: string,
+    date: string,
+    now: Date,
+    staffBusinessId: string | null = null,
+  ) {
     const today = toBusinessParts(now).dateKey
     if (date < today || date > addDays(today, BOOKING_DAYS_AHEAD - 1)) {
       throw new BadRequestException(`Запись доступна на ${BOOKING_DAYS_AHEAD} дней вперёд`)
     }
 
     const service = await this.catalogService.getActiveService(serviceId)
+    if (staffBusinessId !== null && service.businessId !== staffBusinessId) {
+      throw new NotFoundException('Услуга не найдена')
+    }
     const business = await this.businesses.findById(service.businessId)
-    if (!business.isPublished) throw new BadRequestException('Запись временно недоступна')
+    // Staff can book clients in before the page is published.
+    if (!business.isPublished && staffBusinessId === null) {
+      throw new BadRequestException('Запись временно недоступна')
+    }
     const offering = (await this.catalogService.getSpecialistsForService(serviceId)).map(
       (specialist) => specialist.id,
     )
