@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import { API_URL } from '@/config/api'
 import { toApiError } from './apiError'
-import type { BusinessCard, BusinessKind, BusinessPage } from './types'
+import type { BusinessCard, BusinessKind, BusinessPage, PopularService } from './types'
 
 const NOT_FOUND = 404
 
@@ -27,4 +27,14 @@ const listBusinesses = cache(
   },
 )
 
-export { getBusiness, listBusinesses }
+const listPopularServices = cache(
+  async (kind: BusinessKind | undefined): Promise<PopularService[]> => {
+    const params = new URLSearchParams(kind ? { kind } : {})
+    const response = await fetch(`${API_URL}/businesses/popular-services?${params}`)
+    if (!response.ok) throw await toApiError(response)
+
+    return response.json()
+  },
+)
+
+export { getBusiness, listBusinesses, listPopularServices }

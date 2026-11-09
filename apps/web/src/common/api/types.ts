@@ -89,6 +89,13 @@ type BusinessCard = Pick<
   hours: WorkingDay[]
 }
 
+type PopularService = {
+  name: string
+  places: number
+  minPrice: number
+  durationMinutes: number
+}
+
 type NextFree = Record<string, { date: string; time: string } | null>
 
 type BusinessPage = {
@@ -237,6 +244,7 @@ type CreateBookingInput = {
 
 export type {
   AdminBooking,
+  PopularService,
   Branch,
   BranchInput,
   MapPlace,

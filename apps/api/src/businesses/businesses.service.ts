@@ -64,6 +64,8 @@ const MAX_CATALOG_ITEMS = 60
 
 const MAX_MAP_ITEMS = 200
 
+const MAX_POPULAR_SERVICES = 12
+
 const toBusinessView = (business: Business): BusinessView => ({
   id: business.id,
   slug: business.slug,
@@ -118,13 +120,36 @@ export class BusinessesService {
       JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
       WHERE b."is_published"
         AND ($1::text IS NULL OR b."kind" = $1)
-        AND ($2::text IS NULL OR b."name" ILIKE $2 OR b."address" ILIKE $2 OR b."description" ILIKE $2)
+        AND ($2::text IS NULL OR b."name" ILIKE $2 OR b."address" ILIKE $2 OR b."description" ILIKE $2
+          OR EXISTS (
+            SELECT 1 FROM "services" sq
+            WHERE sq."business_id" = b."id" AND sq."is_active" AND sq."name" ILIKE $2
+          ))
       GROUP BY b."id"
       ORDER BY b."created_at" ASC
       LIMIT ${MAX_CATALOG_ITEMS}
       `,
       [kind ?? null, q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null],
     )) as BusinessCard[]
+
+    return rows
+  }
+
+  /** Services offered by most places, for the catalog's «Популярные услуги» shelf. */
+  async listPopularServices(kind?: string) {
+    const rows = (await this.dataSource.query(
+      `
+      SELECT MIN(s."name") AS "name", COUNT(DISTINCT b."id")::int AS "places",
+        MIN(s."price")::int AS "minPrice", MIN(s."duration_minutes")::int AS "durationMinutes"
+      FROM "services" s
+      JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
+      WHERE s."is_active" AND ($1::text IS NULL OR b."kind" = $1)
+      GROUP BY LOWER(TRIM(s."name"))
+      ORDER BY "places" DESC, COUNT(*) DESC, "name" ASC
+      LIMIT ${MAX_POPULAR_SERVICES}
+      `,
+      [kind ?? null],
+    )) as { name: string; places: number; minPrice: number; durationMinutes: number }[]
 
     return rows
   }

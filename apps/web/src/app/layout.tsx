@@ -1,6 +1,6 @@
 import { ToastProvider } from '@awaisa/ui/Toast'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Onest } from 'next/font/google'
 import { Suspense } from 'react'
 import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
@@ -17,6 +17,13 @@ const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
   variable: '--font-inter',
+})
+
+// Headings: Onest reads well in Cyrillic and Latin and has a calm, geometric character.
+const onest = Onest({
+  subsets: ['latin', 'cyrillic'],
+  display: 'swap',
+  variable: '--font-onest',
 })
 
 export const metadata: Metadata = {
@@ -36,7 +43,7 @@ export const viewport: Viewport = {
 
 const RootLayout = ({ children }: LayoutProps<'/'>) => (
   // The boot script sets data-theme before hydration, so React must not compare that attribute.
-  <html lang='ru' className={inter.variable} suppressHydrationWarning>
+  <html lang='ru' className={`${inter.variable} ${onest.variable}`} suppressHydrationWarning>
     <head>
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input */}
       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />

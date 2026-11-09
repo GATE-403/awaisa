@@ -1,8 +1,6 @@
 'use client'
 
-import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { ArrowUpRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { BusinessTile } from '@/common/components/BusinessTile/BusinessTile'
@@ -11,6 +9,7 @@ import { PageTitle } from '@/common/components/PageTitle/PageTitle'
 import { TextTabs } from '@/common/components/TextTabs/TextTabs'
 import { useRequireSession } from '@/common/hooks/useRequireSession'
 import { BranchesTab } from './components/BranchesTab/BranchesTab'
+import { CabinetBar } from './components/CabinetBar/CabinetBar'
 import { HoursTab } from './components/HoursTab/HoursTab'
 import { MastersTab } from './components/MastersTab/MastersTab'
 import { ProfileTab } from './components/ProfileTab/ProfileTab'
@@ -38,6 +37,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
   if (error) {
     return (
       <main className={styles.page}>
+        <CabinetBar slug={slug} title={null} isPublished />
         <Container size='sm' className={styles.error}>
           <PageTitle
             size='sm'
@@ -56,6 +56,11 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
 
   return (
     <main className={styles.page}>
+      <CabinetBar
+        slug={slug}
+        title={data?.business.name ?? null}
+        isPublished={data?.business.isPublished ?? true}
+      />
       <Container className={styles.content}>
         <header className={styles.header}>
           <div className={styles.identity}>
@@ -74,19 +79,6 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
             ) : (
               <Skeleton className={styles.titleSkeleton} />
             )}
-          </div>
-          <div className={styles.actions}>
-            <NextLink href='/manage' className={styles.link}>
-              Все бизнесы
-            </NextLink>
-            <ButtonLink
-              variant='secondary'
-              size='sm'
-              render={<NextLink href={`/${slug}`} target='_blank' />}
-            >
-              Открыть страницу
-              <ArrowUpRight weight='bold' aria-hidden />
-            </ButtonLink>
           </div>
         </header>
 

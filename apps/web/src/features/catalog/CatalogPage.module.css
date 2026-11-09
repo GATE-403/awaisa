@@ -1,11 +1,19 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-10);
+  padding: var(--space-6) 0 var(--section-gap);
+}
+
+/* Shelves run full-bleed; everything else sits in the page container. */
+.contained {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
   width: 100%;
   max-width: var(--layout-container-width);
   margin: 0 auto;
-  padding: var(--space-10) var(--page-gutter) var(--section-gap);
+  padding: 0 var(--page-gutter);
 }
 
 .title {
@@ -95,7 +103,7 @@
 
 @media (min-width: 768px) {
   .page {
-    padding-top: var(--space-16);
+    padding-top: var(--space-10);
   }
 
   .title {
@@ -126,4 +134,25 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-5);
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.count {
+  margin-left: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.reset {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  color: var(--color-link);
+  font-size: var(--text-sm);
 }

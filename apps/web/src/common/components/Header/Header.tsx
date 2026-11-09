@@ -5,7 +5,13 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useIsScrolled } from '@/common/hooks/useIsScrolled'
 import { useSession } from '@/common/hooks/useSession'
-import { getBusinessSlug, isActivePath, isBookingPath, NAV_ITEMS } from '@/constants/navigation'
+import {
+  getBusinessSlug,
+  isActivePath,
+  isBookingPath,
+  isCabinetPath,
+  NAV_ITEMS,
+} from '@/constants/navigation'
 import { Logo } from '../Logo/Logo'
 import { SearchPanel } from '../SearchPanel/SearchPanel'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
@@ -18,6 +24,9 @@ export const Header = () => {
   const businessSlug = getBusinessSlug(pathname)
   const showBookingAction = businessSlug !== null && !isBookingPath(pathname)
   const accountLabel = customer ? `Профиль: ${customer.name || customer.phone}` : 'Войти'
+
+  // The cabinet is a work tool with its own toolbar; the site navigation would only distract.
+  if (isCabinetPath(pathname)) return null
 
   return (
     <header className={styles.header} data-scrolled={isScrolled || undefined}>
