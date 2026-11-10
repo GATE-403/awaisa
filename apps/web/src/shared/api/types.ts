@@ -24,6 +24,8 @@ type Specialist = {
   branchId?: string | null
   serviceIds: string[]
   isActive?: boolean
+  /** Cabinet only: the master's sign-in number. */
+  phone?: string
 }
 
 type Branch = {
@@ -343,6 +345,25 @@ type ServiceInput = Pick<
 type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
   isActive: boolean
   branchId: string | null
+  /** The number the master signs in with for «Мой день»; empty = no access. */
+  phone: string
+}
+
+type MasterPlace = {
+  slug: string
+  businessName: string
+  specialistId: string
+  name: string
+  role: string
+}
+
+type MasterDay = {
+  date: string
+  business: { slug: string; name: string }
+  master: { id: string; name: string; role: string }
+  hours: { opensMinutes: number; closesMinutes: number } | null
+  leaveReason: string | null
+  bookings: AdminBooking[]
 }
 
 type SlugCheck = { available: boolean; reason?: string }
@@ -404,6 +425,8 @@ type AnalyticsReport = {
 
 export type {
   AdminBooking,
+  MasterDay,
+  MasterPlace,
   MasterSchedule,
   ClientCard,
   ClientListItem,

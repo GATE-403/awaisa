@@ -41,3 +41,9 @@
   height: 14px;
   color: var(--color-tertiary-foreground);
 }
+
+.rowHint {
+  margin-left: auto;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+}

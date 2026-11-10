@@ -12,6 +12,7 @@ import type {
   ServiceInput,
   SpecialistInput,
 } from '../businesses/businesses.schemas.js'
+import { normalizePhone } from '../common/phone.js'
 import { Category } from './category.entity.js'
 import { Service } from './service.entity.js'
 import { Specialist } from './specialist.entity.js'
@@ -65,7 +66,17 @@ export class CatalogService {
         }),
       ),
       specialists: specialists.map(
-        ({ id, name, role, rating, photoUrl, branchId, isActive, services: offered = [] }) => ({
+        ({
+          id,
+          name,
+          role,
+          rating,
+          photoUrl,
+          branchId,
+          isActive,
+          phone,
+          services: offered = [],
+        }) => ({
           id,
           name,
           role,
@@ -75,7 +86,8 @@ export class CatalogService {
           serviceIds: offered
             .map((service) => service.id)
             .filter((serviceId) => visibleServiceIds.has(serviceId)),
-          ...(includeInactive ? { isActive } : {}),
+          // Only the cabinet sees how a master signs in.
+          ...(includeInactive ? { isActive, phone: phone ?? '' } : {}),
         }),
       ),
     }
@@ -169,6 +181,9 @@ export class CatalogService {
           position: (await this.specialists.countBy({ businessId })) + 1,
         })
 
+    if (input.phone && !normalizePhone(input.phone)) {
+      throw new BadRequestException('Проверьте номер мастера')
+    }
     if (input.branchId) {
       const [branch] = (await this.specialists.manager.query(
         'SELECT 1 FROM "branches" WHERE "id" = $1 AND "business_id" = $2',
@@ -183,6 +198,7 @@ export class CatalogService {
       role: input.role,
       isActive: input.isActive,
       branchId: input.branchId,
+      phone: input.phone ? normalizePhone(input.phone) : null,
       services,
     })
   }

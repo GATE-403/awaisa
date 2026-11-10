@@ -106,6 +106,8 @@ const specialistSchema = z.object({
   isActive: z.boolean().default(true),
   // null = the master works at every branch.
   branchId: z.uuid().nullable().default(null),
+  // The master's own number for «Мой день»; empty = no access.
+  phone: z.string().trim().max(32).default(''),
 })
 
 const branchSchema = z.object({

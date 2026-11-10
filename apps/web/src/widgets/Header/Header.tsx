@@ -34,7 +34,8 @@ export const Header = () => {
     pathname === '/bookings' ||
     pathname === '/business' ||
     pathname.startsWith('/business/') ||
-    pathname.startsWith('/review/')
+    pathname.startsWith('/review/') ||
+    pathname.startsWith('/master')
 
   // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
   // real height is published as --header-height.
