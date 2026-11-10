@@ -20,9 +20,13 @@ const withDb = async <T>(run: (client: pg.Client) => Promise<T>) => {
 }
 
 // A real booking moved into the past, as if the visit already happened.
-const createPastVisit = async (name = 'E2E Отзыв Тестов', phone = randomClientPhone()) => {
+const createPastVisit = async (
+  name = 'E2E Отзыв Тестов',
+  phone = randomClientPhone(),
+  specialistIndex = 0,
+) => {
   const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
-  const specialist = business.catalog.specialists[0]
+  const specialist = business.catalog.specialists[specialistIndex]
   const serviceId = specialist.serviceIds[0]
   for (let offset = 1; offset <= 14; offset += 1) {
     const date = new Date(Date.now() + offset * 86_400_000 + 6 * 3_600_000)
@@ -51,14 +55,16 @@ const createPastVisit = async (name = 'E2E Отзыв Тестов', phone = ran
     const booking = await response.json()
     // Far back, with a random minute: no overlap with any real visit of that master.
     const days = 400 + Math.floor(Math.random() * 300)
-    await withDb((client) =>
-      client.query(
+    const pastDate = await withDb(async (client) => {
+      const { rows } = await client.query(
         `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),
-           "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1`,
+           "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1
+         RETURNING to_char("starts_at" AT TIME ZONE 'UTC' + interval '6 hours', 'YYYY-MM-DD') AS "date"`,
         [booking.id, days, Math.floor(Math.random() * 50)],
-      ),
-    )
-    return { booking, specialist }
+      )
+      return rows[0]?.date as string
+    })
+    return { booking, specialist, date: pastDate }
   }
   throw new Error('No free slot to create a visit')
 }

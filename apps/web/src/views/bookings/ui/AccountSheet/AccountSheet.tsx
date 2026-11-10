@@ -4,9 +4,11 @@ import { Avatar } from '@awaisa/ui/Avatar'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { AppearancePicker } from '@/features/theme'
-import type { Customer } from '@/shared/api/types'
+import { getMasterPlaces } from '@/shared/api/clientApi'
+import type { Customer, MasterPlace } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -22,6 +24,16 @@ interface AccountSheetProps {
 export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProps) => {
   const session = useSession()
   const router = useRouter()
+  const [places, setPlaces] = useState<MasterPlace[]>([])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getMasterPlaces(controller.signal)
+      .then(setPlaces)
+      .catch(() => undefined)
+
+    return () => controller.abort()
+  }, [])
 
   const handleSignOut = async () => {
     await session.signOut()
@@ -54,6 +66,15 @@ export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProp
       <section className={sheet.group} aria-label='Бизнес'>
         <h3 className={sheet.groupTitle}>Бизнес</h3>
         <div className={sheet.list}>
+          {places.length > 0 && (
+            <NextLink href='/master' className={sheet.row} onClick={onClose}>
+              <span className={sheet.rowLabel}>Мой день</span>
+              <span className={styles.rowHint}>
+                {places.length === 1 ? places[0]?.businessName : `${places.length} места`}
+              </span>
+              <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+            </NextLink>
+          )}
           <NextLink href='/manage' className={sheet.row} onClick={onClose}>
             <span className={sheet.rowLabel}>Мои бизнесы</span>
             <CaretRight className={styles.chevron} weight='bold' aria-hidden />

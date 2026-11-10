@@ -21,6 +21,7 @@ const APP_SEGMENTS = new Set([
   'business',
   'login',
   'manage',
+  'master',
   'map',
   'profile',
   'review',

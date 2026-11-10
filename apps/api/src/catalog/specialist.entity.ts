@@ -36,6 +36,10 @@ export class Specialist {
   @Column({ name: 'photo_url', type: 'varchar', length: 512, nullable: true })
   photoUrl: string | null
 
+  /** E.164; the master signs in with it to see their own day (`/master/<slug>`). */
+  @Column({ type: 'varchar', length: 32, nullable: true })
+  phone: string | null
+
   /** false = works the business hours; true = `specialist_hours` rows (no row = day off). */
   @Column({ name: 'has_own_hours', type: 'boolean', default: false })
   hasOwnHours: boolean

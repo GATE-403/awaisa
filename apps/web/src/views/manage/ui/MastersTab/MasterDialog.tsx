@@ -5,6 +5,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
+import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -37,6 +38,7 @@ export const MasterDialog = ({
   const [isUploading, setIsUploading] = useState(false)
   const [name, setName] = useState(master?.name ?? '')
   const [role, setRole] = useState(master?.role ?? '')
+  const [phone, setPhone] = useState(master?.phone ? maskPhoneInput(master.phone) : '')
   const [serviceIds, setServiceIds] = useState<string[]>(
     master?.serviceIds ?? services.map((service) => service.id),
   )
@@ -76,6 +78,7 @@ export const MasterDialog = ({
       serviceIds,
       isActive,
       branchId,
+      phone: phone.trim(),
     })
     setIsSaving(false)
     if (saved) onClose()
@@ -142,6 +145,18 @@ export const MasterDialog = ({
               onValueChange={setRole}
             />
           </div>
+          <label className={sheet.row}>
+            <span className={sheet.rowLabel}>Телефон для входа</span>
+            <Input
+              variant='plain'
+              type='tel'
+              inputMode='tel'
+              aria-label='Телефон для входа'
+              placeholder='+996 …'
+              value={phone}
+              onValueChange={(value) => setPhone(maskPhoneInput(value))}
+            />
+          </label>
           {branches.length > 1 && (
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Филиал</span>

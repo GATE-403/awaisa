@@ -24,6 +24,8 @@ import type {
   Customer,
   ManagedReview,
   MapPlace,
+  MasterDay,
+  MasterPlace,
   MasterSchedule,
   MovedBooking,
   NextFree,
@@ -213,6 +215,16 @@ const addMasterLeave = (
 const removeMasterLeave = (slug: string, id: string, leaveId: string) =>
   send<void>('DELETE', `${manage(slug)}/specialists/${id}/leaves/${leaveId}`)
 
+const getMasterPlaces = (signal?: AbortSignal) => request<MasterPlace[]>('/me/master', { signal })
+
+const getMasterDay = (slug: string, date: string, signal?: AbortSignal) =>
+  request<MasterDay>(`/master/${encodeURIComponent(slug)}/day?${new URLSearchParams({ date })}`, {
+    signal,
+  })
+
+const setMasterOutcome = (slug: string, id: string, input: OutcomeInput) =>
+  send<AdminBooking>('PATCH', `/master/${encodeURIComponent(slug)}/bookings/${id}/outcome`, input)
+
 const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
   request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
 
@@ -354,6 +366,9 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  getMasterPlaces,
+  getMasterDay,
+  setMasterOutcome,
   getMasterSchedule,
   setMasterHours,
   addMasterLeave,
