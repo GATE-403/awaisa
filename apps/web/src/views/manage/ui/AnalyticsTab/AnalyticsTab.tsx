@@ -9,6 +9,7 @@ import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAnalytics } from '@/views/manage/model/useAnalytics'
+import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -93,6 +94,7 @@ const toCsv = (report: AnalyticsReport) => {
 
 export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
   const [days, setDays] = useState<AnalyticsDays>(30)
+  const [openPhone, setOpenPhone] = useState<string | null>(null)
   const { report, error, isLoading } = useAnalytics(slug, days)
 
   const totals = report?.totals
@@ -159,6 +161,7 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
               </span>
             </div>
             <RevenueChart buckets={toBuckets(report.daily, report.period.days)} />
+            <PaymentsLine payments={totals.payments} />
             {totals.upcomingVisits > 0 && (
               <p className={styles.heroFooter}>
                 Впереди {visits(totals.upcomingVisits)} на{' '}
@@ -182,7 +185,11 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
               <ClientsSplit newClients={totals.newClients} returning={totals.returningClients} />
             </Stat>
             <Stat label='Отмены' value={`${totals.cancellationRate}%`}>
-              <span className={styles.deltaNone}>от всех записей</span>
+              <span className={styles.deltaNone}>
+                {totals.noShows > 0
+                  ? `и неявки ${totals.noShowRate}% · ${totals.noShows}`
+                  : 'от всех записей'}
+              </span>
             </Stat>
           </div>
 
@@ -249,18 +256,24 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             ) : (
               <ul className={forms.list}>
                 {report.clients.map((client) => (
-                  <li key={client.phone} className={styles.clientRow}>
-                    <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>
-                        {client.name || formatPhone(client.phone)}
-                        {client.isNew && <span className={styles.badge}>Новый</span>}
+                  <li key={client.phone}>
+                    <button
+                      type='button'
+                      className={styles.clientRow}
+                      onClick={() => setOpenPhone(client.phone)}
+                    >
+                      <span className={styles.rowText}>
+                        <span className={styles.rowTitle}>
+                          {client.name || formatPhone(client.phone)}
+                          {client.isNew && <span className={styles.badge}>Новый</span>}
+                        </span>
+                        <span className={styles.rowMeta}>
+                          {formatPhone(client.phone)} · {visits(client.visits)} · был{' '}
+                          {formatDay(client.lastVisit)}
+                        </span>
                       </span>
-                      <span className={styles.rowMeta}>
-                        {formatPhone(client.phone)} · {visits(client.visits)} · был{' '}
-                        {formatDay(client.lastVisit)}
-                      </span>
-                    </span>
-                    <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
+                      <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -268,7 +281,36 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
           </div>
         </div>
       )}
+      {openPhone && (
+        <ClientSheet slug={slug} phone={openPhone} onClose={() => setOpenPhone(null)} />
+      )}
     </section>
+  )
+}
+
+interface PaymentsLineProps {
+  payments: AnalyticsReport['totals']['payments']
+}
+
+// Where the money came in, as staff marked it; the rest is counted at the price list.
+const PaymentsLine = ({ payments }: PaymentsLineProps) => {
+  const parts = [
+    { label: 'Наличные', value: payments.cash },
+    { label: 'Карта', value: payments.card },
+    { label: 'Перевод', value: payments.transfer },
+    { label: 'Не отмечено', value: payments.unmarked },
+  ].filter((part) => part.value > 0)
+  if (parts.length === 0) return null
+
+  return (
+    <dl className={styles.payments}>
+      {parts.map((part) => (
+        <div key={part.label} className={styles.payment}>
+          <dt>{part.label}</dt>
+          <dd>{formatMoney(part.value)}</dd>
+        </div>
+      ))}
+    </dl>
   )
 }
 

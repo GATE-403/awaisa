@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatText, X } from '@phosphor-icons/react/ssr'
+import { ChatText, Check, X } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type MouseEvent, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
@@ -207,6 +207,7 @@ export const DayCalendar = ({
                     type='button'
                     className={styles.booking}
                     data-cancelled={booking.status === 'cancelled' || undefined}
+                    data-outcome={booking.outcome ?? undefined}
                     data-size={size}
                     data-dragging={drag.dragged?.id === booking.id || undefined}
                     style={position(from, to, range.start)}
@@ -214,10 +215,14 @@ export const DayCalendar = ({
                     onClick={() => {
                       if (!drag.consumeClick()) onSelectBooking(booking)
                     }}
-                    aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}`}
+                    aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
                   >
                     <span className={styles.blockTime}>
+                      {booking.outcome === 'arrived' && (
+                        <Check weight='bold' aria-hidden className={styles.outcomeIcon} />
+                      )}
                       {booking.time}–{end}
+                      {booking.outcome === 'no_show' && ' · не пришёл'}
                     </span>
                     <span className={styles.blockTitle}>{booking.serviceName}</span>
                     <span className={styles.blockClient}>

@@ -14,6 +14,8 @@ import type {
   BusinessLink,
   BusinessPage,
   Category,
+  ClientCard,
+  ClientListItem,
   CreateBookingInput,
   CreateBusinessInput,
   CreatedBooking,
@@ -25,6 +27,7 @@ import type {
   MovedBooking,
   NextFree,
   OtpRequest,
+  OutcomeInput,
   RecentBooking,
   Review,
   ReviewAccess,
@@ -164,6 +167,28 @@ const getManagedReviews = (slug: string, signal?: AbortSignal) =>
 
 const replyToReview = (slug: string, id: string, text: string) =>
   send<{ id: string; reply: string | null }>('PUT', `${manage(slug)}/reviews/${id}/reply`, { text })
+
+const setBookingOutcome = (slug: string, id: string, input: OutcomeInput) =>
+  send<AdminBooking>('PATCH', `${manage(slug)}/bookings/${id}/outcome`, input)
+
+const getClients = (slug: string, query: string, signal?: AbortSignal) =>
+  request<ClientListItem[]>(`${manage(slug)}/clients?${new URLSearchParams({ q: query })}`, {
+    signal,
+  })
+
+const getClient = (slug: string, phone: string, signal?: AbortSignal) =>
+  request<ClientCard>(`${manage(slug)}/clients/${encodeURIComponent(phone)}`, { signal })
+
+const updateClient = (
+  slug: string,
+  phone: string,
+  input: { note: string; birthday: string | null },
+) =>
+  send<{ phone: string; note: string; birthday: string | null }>(
+    'PUT',
+    `${manage(slug)}/clients/${encodeURIComponent(phone)}`,
+    input,
+  )
 
 const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
   request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
@@ -306,6 +331,10 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  setBookingOutcome,
+  getClients,
+  getClient,
+  updateClient,
   getVisitReview,
   createReview,
   getManagedReviews,

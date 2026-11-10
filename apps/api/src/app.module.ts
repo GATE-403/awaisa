@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js'
 import { BookingsModule } from './bookings/bookings.module.js'
 import { BusinessesModule } from './businesses/businesses.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
+import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
@@ -42,6 +43,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     WalletModule,
     ReviewsModule,
     TelegramModule,
+    ClientsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

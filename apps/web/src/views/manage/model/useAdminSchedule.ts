@@ -10,12 +10,14 @@ import {
   getAdminSchedule,
   moveBookingAsSalon,
   restoreBookingAsSalon,
+  setBookingOutcome,
 } from '@/shared/api/clientApi'
 import type {
   AdminBooking,
   AdminSchedule,
   CreateBookingInput,
   CreateTimeOffInput,
+  OutcomeInput,
 } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { pluralize } from '@/shared/lib/plural'
@@ -139,6 +141,30 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return `Время закрыто. В нём ${pluralize(conflictingBookingIds.length, ['запись', 'записи', 'записей'])} — отмените или перенесите`
     })
 
+  // Marking a visit is quiet (a tick, no toast): staff do it many times a day.
+  const markOutcome = async (id: string, input: OutcomeInput) => {
+    try {
+      const updated = await setBookingOutcome(slug, id, input)
+      haptic('selection')
+      setSchedule((current) =>
+        current
+          ? {
+              ...current,
+              bookings: current.bookings.map((item) => (item.id === id ? updated : item)),
+            }
+          : current,
+      )
+      return updated
+    } catch (outcomeError) {
+      toast.show({
+        title: 'Не получилось',
+        description: getErrorMessage(outcomeError),
+        type: 'error',
+      })
+      return null
+    }
+  }
+
   const removeTimeOff = (id: string) =>
     runAction(async () => {
       await deleteTimeOff(slug, id)
@@ -152,6 +178,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     addBooking,
     moveBooking,
     cancelBooking,
+    markOutcome,
     addTimeOff,
     removeTimeOff,
   }

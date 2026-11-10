@@ -197,6 +197,24 @@
   text-decoration: line-through;
 }
 
+/* A no-show keeps its place but fades: a tinted outline instead of the fill. */
+.booking[data-outcome="no_show"] {
+  background-color: var(--color-surface);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 45%, transparent);
+  opacity: 0.7;
+}
+
+.booking[data-outcome="no_show"] .blockTitle {
+  color: var(--color-muted-foreground);
+}
+
+.outcomeIcon {
+  width: 11px;
+  height: 11px;
+  margin-right: 3px;
+  vertical-align: -1px;
+}
+
 .timeOff {
   padding-right: 32px;
   background-color: var(--color-surface);

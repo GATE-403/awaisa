@@ -13,6 +13,7 @@ import { useManagedBusiness } from '@/views/manage/model/useManagedBusiness'
 import { AnalyticsTab } from '@/views/manage/ui/AnalyticsTab/AnalyticsTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
+import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
 import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
 import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
 import { ProfileTab } from '@/views/manage/ui/ProfileTab/ProfileTab'
@@ -106,6 +107,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
             />
           )}
           {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
+          {data && tab === 'clients' && <ClientsTab slug={slug} />}
           {data && tab === 'reviews' && (
             <ReviewsTab slug={slug} businessName={data.business.name} />
           )}

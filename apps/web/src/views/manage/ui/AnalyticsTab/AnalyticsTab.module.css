@@ -270,6 +270,22 @@
 }
 
 /* Rows in the inset lists: title and meta left, value right, a share meter under them. */
+.clientRow {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .clientRow:hover {
+    background: var(--color-fill);
+  }
+}
+
 .row,
 .clientRow {
   display: grid;
@@ -506,4 +522,31 @@
   .report {
     transition: none;
   }
+}
+
+.payments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 0.5px solid var(--color-border);
+}
+
+.payment {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment dt {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caption);
+}
+
+.payment dd {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }

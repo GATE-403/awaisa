@@ -90,6 +90,18 @@ export class Booking {
   @Column({ name: 'reminder_sent_at', type: 'timestamptz', nullable: true })
   reminderSentAt: Date | null
 
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  outcome: 'arrived' | 'no_show' | null
+
+  @Column({ name: 'paid_amount', type: 'int', nullable: true })
+  paidAmount: number | null
+
+  @Column({ name: 'payment_method', type: 'varchar', length: 16, nullable: true })
+  paymentMethod: 'cash' | 'card' | 'transfer' | null
+
+  @Column({ name: 'outcome_at', type: 'timestamptz', nullable: true })
+  outcomeAt: Date | null
+
   /** Filled by the view query (left join), not a column. */
   review?: { rating: number; comment: string; reply: string | null }
 

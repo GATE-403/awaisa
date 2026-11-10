@@ -35,6 +35,14 @@ const moveBookingSchema = z.object({
 
 type MoveBookingInput = z.infer<typeof moveBookingSchema>
 
+const outcomeSchema = z.object({
+  outcome: z.enum(['arrived', 'no_show']).nullable(),
+  paidAmount: z.number().int().min(0).max(10_000_000).nullable().optional(),
+  paymentMethod: z.enum(['cash', 'card', 'transfer']).nullable().optional(),
+})
+
+type OutcomeBody = z.infer<typeof outcomeSchema>
+
 const analyticsQuerySchema = z.object({
   days: z.coerce
     .number()
@@ -57,6 +65,7 @@ type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
 export type {
   AnalyticsQuery,
+  OutcomeBody,
   CreateTimeOffInput,
   MoveBookingInput,
   RecentBookingsQuery,
@@ -65,6 +74,7 @@ export type {
 }
 export {
   analyticsQuerySchema,
+  outcomeSchema,
   createTimeOffSchema,
   moveBookingSchema,
   recentBookingsQuerySchema,
