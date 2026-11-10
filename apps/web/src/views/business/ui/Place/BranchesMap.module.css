@@ -1,0 +1,38 @@
+/* A static picture of the map inside the address card: tapping opens the full map. */
+.mapWrap {
+  position: relative;
+  height: 180px;
+  margin-top: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.map,
+.mapPlaceholder {
+  height: 100%;
+  min-height: 0;
+}
+
+.mapPlaceholder {
+  background: var(--color-fill);
+}
+
+.mapLink {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-sm);
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}

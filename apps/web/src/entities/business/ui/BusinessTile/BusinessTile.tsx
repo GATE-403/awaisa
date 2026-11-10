@@ -3,7 +3,7 @@ import styles from './BusinessTile.module.css'
 
 interface BusinessTileProps {
   name: string
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
 }
 

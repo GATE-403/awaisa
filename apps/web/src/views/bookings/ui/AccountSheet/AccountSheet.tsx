@@ -5,11 +5,9 @@ import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from '@/entities/session'
+import { AppearancePicker } from '@/features/theme'
 import type { Customer } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import { useTheme } from '@/shared/lib/hooks/useTheme'
-import type { Theme } from '@/shared/lib/theme'
-import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './AccountSheet.module.css'
@@ -20,17 +18,10 @@ interface AccountSheetProps {
   onClose: () => void
 }
 
-const THEME_OPTIONS: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'Авто' },
-  { value: 'light', label: 'Светлая' },
-  { value: 'dark', label: 'Тёмная' },
-]
-
 // Everything about the account in one Settings-style sheet, so the page itself is only bookings.
 export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProps) => {
   const session = useSession()
   const router = useRouter()
-  const { theme, setTheme } = useTheme()
 
   const handleSignOut = async () => {
     await session.signOut()
@@ -56,15 +47,7 @@ export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProp
       <section className={sheet.group} aria-label='Оформление'>
         <h3 className={sheet.groupTitle}>Оформление</h3>
         <div className={sheet.list}>
-          <div className={sheet.row}>
-            <span className={sheet.rowLabel}>Тема</span>
-            <SegmentedControl
-              label='Тема'
-              value={theme}
-              items={THEME_OPTIONS}
-              onChange={setTheme}
-            />
-          </div>
+          <AppearancePicker />
         </div>
       </section>
 

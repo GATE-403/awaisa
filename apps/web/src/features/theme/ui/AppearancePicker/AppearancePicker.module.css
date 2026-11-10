@@ -1,0 +1,145 @@
+.picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+  border: none;
+}
+
+.legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A tiny window in each look; «Авто» is split down the middle. */
+.preview {
+  --preview-page: #f2f2f7;
+  --preview-card: #ffffff;
+  --preview-ink: rgb(0 0 0 / 0.18);
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  max-width: 96px;
+  aspect-ratio: 3 / 4;
+  padding: 18% 14% 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--preview-page);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-xs);
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.preview[data-look="dark"] {
+  --preview-page: #000000;
+  --preview-card: #2c2c2e;
+  --preview-ink: rgb(255 255 255 / 0.28);
+}
+
+.preview[data-look="system"] {
+  background: linear-gradient(90deg, #f2f2f7 50%, #000000 50%);
+}
+
+.window {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 12% 12% 0;
+  border-radius: 8px 8px 0 0;
+  background: var(--preview-card);
+}
+
+.preview[data-look="system"] .window {
+  background: linear-gradient(90deg, #ffffff 50%, #2c2c2e 50%);
+}
+
+.line {
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--preview-ink);
+}
+
+.preview[data-look="system"] .line {
+  background: rgb(128 128 128 / 0.45);
+}
+
+.line[data-short] {
+  width: 60%;
+}
+
+.pill {
+  width: 45%;
+  height: 9px;
+  margin-top: auto;
+  margin-bottom: 14%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+
+.option:active .preview {
+  scale: 0.97;
+}
+
+.option:has(:checked) .preview {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-primary);
+}
+
+.option:has(:focus-visible) .preview {
+  box-shadow: var(--focus-ring);
+}
+
+.label {
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+}
+
+/* The iOS check under the chosen look: an empty ring for the others. */
+.check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1.5px var(--color-tertiary-foreground);
+  color: transparent;
+}
+
+.check svg {
+  width: 13px;
+  height: 13px;
+}
+
+.option:has(:checked) .check {
+  background: var(--color-primary);
+  box-shadow: none;
+  color: var(--color-primary-foreground);
+}

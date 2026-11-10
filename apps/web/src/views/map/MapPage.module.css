@@ -22,7 +22,8 @@
   flex-direction: column;
   gap: var(--space-4);
   margin-top: calc(-1 * var(--space-6));
-  padding: var(--space-5) var(--page-gutter) calc(var(--space-8) + var(--tabbar-space));
+  padding: var(--space-5) var(--page-gutter)
+    calc(var(--space-8) + var(--tabbar-space) + var(--resume-space));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--color-background);
   box-shadow: var(--shadow-md);

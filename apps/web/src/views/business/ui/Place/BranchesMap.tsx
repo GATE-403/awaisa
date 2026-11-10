@@ -5,7 +5,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pickTint } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
-import styles from './HomeShelves.module.css'
+import styles from './BranchesMap.module.css'
 
 const MapView = dynamic(
   () => import('@/shared/ui/MapView/MapView').then((module) => module.MapView),

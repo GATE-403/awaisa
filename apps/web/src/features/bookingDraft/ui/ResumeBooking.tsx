@@ -37,7 +37,7 @@ export const ResumeBooking = () => {
   if (!draft || isBookingPath(pathname) || isCabinetPath(pathname)) return null
 
   return (
-    <aside className={styles.resume} aria-label='Незаконченная запись'>
+    <aside className={styles.resume} aria-label='Незаконченная запись' data-resume-booking=''>
       <NextLink href={draftHref(draft)} className={styles.link}>
         <span className={styles.text}>
           <span className={styles.title}>Продолжить запись</span>
