@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, In, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm'
-import type { BusyInterval, OpeningWindow } from '../bookings/availability.js'
+import type { OpeningWindow } from '../bookings/availability.js'
 import { businessDateTimeToUtc, toBusinessParts, weekdayOf } from '../common/business-time.js'
 import { type MasterDay, offHoursAsBusy } from './master-hours.js'
 import { Specialist } from './specialist.entity.js'
