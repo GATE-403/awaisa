@@ -1,6 +1,7 @@
 type ManageTab =
   | 'schedule'
   | 'analytics'
+  | 'clients'
   | 'reviews'
   | 'services'
   | 'masters'
@@ -11,6 +12,7 @@ type ManageTab =
 const MANAGE_TABS: { value: ManageTab; label: string }[] = [
   { value: 'schedule', label: 'Расписание' },
   { value: 'analytics', label: 'Аналитика' },
+  { value: 'clients', label: 'Клиенты' },
   { value: 'reviews', label: 'Отзывы' },
   { value: 'services', label: 'Услуги' },
   { value: 'masters', label: 'Мастера' },

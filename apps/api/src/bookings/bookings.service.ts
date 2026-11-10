@@ -59,6 +59,15 @@ type BookingView = {
 type AdminBookingView = BookingView & {
   customerPhone: string
   comment: string
+  outcome: Booking['outcome']
+  paidAmount: number | null
+  paymentMethod: Booking['paymentMethod']
+}
+
+type OutcomeInput = {
+  outcome: 'arrived' | 'no_show' | null
+  paidAmount?: number | null
+  paymentMethod?: Booking['paymentMethod']
 }
 
 const EXCLUSION_VIOLATION = '23P01'
@@ -72,6 +81,15 @@ const hashToken = (token: string) => createHash('sha256').update(token).digest('
 const isOverlapError = (error: unknown) =>
   error instanceof QueryFailedError &&
   (error.driverError as { code?: string } | undefined)?.code === EXCLUSION_VIOLATION
+
+const toAdminView = (booking: Booking): AdminBookingView => ({
+  ...toView(booking),
+  customerPhone: booking.customerPhone,
+  comment: booking.comment,
+  outcome: booking.outcome,
+  paidAmount: booking.paidAmount,
+  paymentMethod: booking.paymentMethod,
+})
 
 const toView = (booking: Booking): BookingView => {
   const { dateKey, minutes } = toBusinessParts(booking.startsAt)
@@ -360,11 +378,32 @@ export class BookingsService {
       .orderBy('booking.startsAt', 'ASC')
       .getMany()
 
-    return bookings.map((booking) => ({
-      ...toView(booking),
-      customerPhone: booking.customerPhone,
-      comment: booking.comment,
-    }))
+    return bookings.map(toAdminView)
+  }
+
+  // Marked by staff once the time has come: arrived (with what was paid) or did not show up.
+  async setOutcome(businessId: string, id: string, input: OutcomeInput) {
+    const booking = await this.viewQuery()
+      .where('booking.id = :id AND booking.businessId = :businessId', { id, businessId })
+      .getOne()
+    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    const todayEnd = businessDateTimeToUtc(addDays(toBusinessParts(new Date()).dateKey, 1), 0)
+    if (input.outcome && booking.startsAt >= todayEnd) {
+      throw new BadRequestException('Отметить визит можно в его день или позже')
+    }
+    const isArrived = input.outcome === 'arrived'
+    await this.bookings.update(
+      { id },
+      {
+        outcome: input.outcome,
+        paidAmount: isArrived ? (input.paidAmount ?? booking.service?.price ?? null) : null,
+        paymentMethod: isArrived ? (input.paymentMethod ?? 'cash') : null,
+        outcomeAt: input.outcome ? new Date() : null,
+      },
+    )
+
+    return toAdminView(await this.viewQuery().where('booking.id = :id', { id }).getOneOrFail())
   }
 
   /** Bookings clients made after `since`, for the cabinet's new-booking alerts. */
@@ -621,4 +660,4 @@ export class BookingsService {
   }
 }
 
-export type { AdminBookingView, BookingView }
+export type { AdminBookingView, BookingView, OutcomeInput }

@@ -1,17 +1,12 @@
 import { createHmac } from 'node:crypto'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { expect, test } from '@playwright/test'
-import pg from 'pg'
-import { adminPhone, randomClientPhone, signInViaApi } from './account'
+import { adminPhone, signInViaApi } from './account'
 import { API_URL } from './helpers'
+import { createPastVisit, withDb } from './visits'
 
-const ROOT_ENV = join(__dirname, '../../../.env')
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 const WEBHOOK_SECRET = 'e2e-webhook-secret'
 const SLUG = 'awaisa-studio'
-
-if (existsSync(ROOT_ENV)) process.loadEnvFile(ROOT_ENV)
 
 // The same link the «как прошёл визит?» SMS carries.
 const reviewLink = (bookingId: string) => {
@@ -20,60 +15,6 @@ const reviewLink = (bookingId: string) => {
     .digest('base64url')
     .slice(0, 22)
   return `/review/${bookingId}?s=${signature}`
-}
-
-const withDb = async <T>(run: (client: pg.Client) => Promise<T>) => {
-  const client = new pg.Client({ connectionString: process.env.DATABASE_URL })
-  await client.connect()
-  try {
-    return await run(client)
-  } finally {
-    await client.end()
-  }
-}
-
-// A real booking moved into the past, as if the visit already happened.
-const createPastVisit = async () => {
-  const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
-  const specialist = business.catalog.specialists[0]
-  const serviceId = specialist.serviceIds[0]
-  for (let offset = 1; offset <= 14; offset += 1) {
-    const date = new Date(Date.now() + offset * 86_400_000 + 6 * 3_600_000)
-      .toISOString()
-      .slice(0, 10)
-    const availability = await (
-      await fetch(
-        `${API_URL}/availability?serviceId=${serviceId}&specialistId=${specialist.id}&date=${date}`,
-      )
-    ).json()
-    const slot = availability.slots.find((item: { isAvailable: boolean }) => item.isAvailable)
-    if (!slot) continue
-    const response = await fetch(`${API_URL}/bookings`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        serviceId,
-        specialistId: specialist.id,
-        date,
-        time: slot.time,
-        name: 'E2E Отзыв Тестов',
-        phone: randomClientPhone(),
-        smsConfirmation: false,
-      }),
-    })
-    const booking = await response.json()
-    // Far back, with a random minute: no overlap with any real visit of that master.
-    const days = 400 + Math.floor(Math.random() * 300)
-    await withDb((client) =>
-      client.query(
-        `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),
-           "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1`,
-        [booking.id, days, Math.floor(Math.random() * 50)],
-      ),
-    )
-    return { booking, specialist }
-  }
-  throw new Error('No free slot to create a visit')
 }
 
 test.describe('Reviews after a visit', () => {

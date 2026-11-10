@@ -210,9 +210,66 @@ type OtpRequest = {
   resendAfterSeconds: number
 }
 
+type VisitOutcome = 'arrived' | 'no_show'
+
+type PaymentMethod = 'cash' | 'card' | 'transfer'
+
 type AdminBooking = Booking & {
   customerPhone: string
   comment: string
+  outcome?: VisitOutcome | null
+  paidAmount?: number | null
+  paymentMethod?: PaymentMethod | null
+}
+
+type OutcomeInput = {
+  outcome: VisitOutcome | null
+  paidAmount?: number | null
+  paymentMethod?: PaymentMethod | null
+}
+
+type ClientListItem = {
+  phone: string
+  name: string
+  visits: number
+  noShows: number
+  spent: number
+  lastVisit: string | null
+  nextVisit: string | null
+  hasNote: boolean
+}
+
+type ClientCard = {
+  phone: string
+  name: string
+  note: string
+  birthday: string | null
+  stats: {
+    visits: number
+    noShows: number
+    cancellations: number
+    spent: number
+    averageCheck: number
+    firstVisit: string | null
+    lastVisit: string | null
+    nextVisit: string | null
+    favoriteService: string | null
+    favoriteMaster: string | null
+  }
+  history: {
+    id: string
+    date: string
+    time: string
+    status: string
+    outcome: VisitOutcome | null
+    paidAmount: number | null
+    paymentMethod: PaymentMethod | null
+    price: number
+    serviceName: string
+    specialistName: string
+    rating: number | null
+    reviewComment: string | null
+  }[]
 }
 
 type RecentBooking = AdminBooking & { createdAt: string }
@@ -307,6 +364,9 @@ type AnalyticsReport = {
     newClients: number
     returningClients: number
     cancellationRate: number
+    noShows: number
+    noShowRate: number
+    payments: { cash: number; card: number; transfer: number; unmarked: number }
     upcomingVisits: number
     upcomingRevenue: number
   }
@@ -333,6 +393,11 @@ type AnalyticsReport = {
 
 export type {
   AdminBooking,
+  ClientCard,
+  ClientListItem,
+  OutcomeInput,
+  PaymentMethod,
+  VisitOutcome,
   ManagedReview,
   Review,
   ReviewAccess,

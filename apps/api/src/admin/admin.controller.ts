@@ -21,6 +21,8 @@ import {
   createTimeOffSchema,
   type MoveBookingInput,
   moveBookingSchema,
+  type OutcomeBody,
+  outcomeSchema,
   type RecentBookingsQuery,
   recentBookingsQuerySchema,
   type ScheduleQuery,
@@ -39,6 +41,15 @@ export class AdminController {
     private readonly bookings: BookingsService,
     private readonly analytics: AnalyticsService,
   ) {}
+
+  @Patch('bookings/:id/outcome')
+  setOutcome(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: outcomeSchema }) body: OutcomeBody,
+  ) {
+    return this.bookings.setOutcome(business.id, id, body)
+  }
 
   @Get('analytics')
   getAnalytics(

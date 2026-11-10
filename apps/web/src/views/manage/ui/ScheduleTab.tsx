@@ -10,6 +10,7 @@ import type { AdminBooking, Business, Catalog } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
+import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { DayStrip } from '@/views/manage/ui/DayStrip/DayStrip'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import { NewBookingDialog } from '@/views/manage/ui/NewBookingDialog/NewBookingDialog'
@@ -37,6 +38,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const [isClosingTime, setIsClosingTime] = useState(false)
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [clientPhone, setClientPhone] = useState<string | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
   const {
@@ -46,12 +48,18 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     addBooking,
     moveBooking,
     cancelBooking,
+    markOutcome,
     addTimeOff,
     removeTimeOff,
   } = useAdminSchedule(slug, date, refreshKey)
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
   const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
-  const revenue = confirmed.reduce((sum, booking) => sum + booking.price, 0)
+  // What the day brings: paid amounts once marked, prices otherwise; no-shows bring nothing.
+  const revenue = confirmed.reduce(
+    (sum, booking) =>
+      booking.outcome === 'no_show' ? sum : sum + (booking.paidAmount ?? booking.price),
+    0,
+  )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
   const summary = [
     dayLabel,
@@ -141,7 +149,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           )}
           onClose={() => setSelected(null)}
           onCancel={cancelBooking}
+          onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
+          onOpenClient={(phone) => {
+            setSelected(null)
+            setClientPhone(phone)
+          }}
         />
+      )}
+
+      {clientPhone && (
+        <ClientSheet slug={slug} phone={clientPhone} onClose={() => setClientPhone(null)} />
       )}
 
       {draft && schedule && date && (

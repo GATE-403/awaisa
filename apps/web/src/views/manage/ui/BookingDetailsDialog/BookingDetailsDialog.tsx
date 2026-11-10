@@ -3,11 +3,12 @@ import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
 import { formatDuration, formatPrice } from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
-import type { AdminBooking } from '@/shared/api/types'
+import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './BookingDetailsDialog.module.css'
+import { VisitOutcomeSection } from './VisitOutcomeSection'
 
 interface BookingDetailsDialogProps {
   booking: AdminBooking
@@ -15,6 +16,9 @@ interface BookingDetailsDialogProps {
   dayLabel: string
   onClose: () => void
   onCancel: (id: string) => Promise<boolean>
+  /** Set once the visit's day has come: staff can mark it. */
+  onOutcome?: (id: string, input: OutcomeInput) => Promise<AdminBooking | null>
+  onOpenClient: (phone: string) => void
 }
 
 export const BookingDetailsDialog = ({
@@ -23,6 +27,8 @@ export const BookingDetailsDialog = ({
   dayLabel,
   onClose,
   onCancel,
+  onOutcome,
+  onOpenClient,
 }: BookingDetailsDialogProps) => {
   const [isCancelling, setIsCancelling] = useState(false)
   const isCancelled = booking.status === 'cancelled'
@@ -69,6 +75,13 @@ export const BookingDetailsDialog = ({
         <div className={styles.clientText}>
           <p className={styles.clientName}>{booking.customerName}</p>
           <p className={styles.clientPhone}>{formatPhone(booking.customerPhone)}</p>
+          <button
+            type='button'
+            className={styles.clientLink}
+            onClick={() => onOpenClient(booking.customerPhone)}
+          >
+            Карточка клиента ›
+          </button>
         </div>
       </section>
       <div className={styles.actions}>
@@ -92,11 +105,11 @@ export const BookingDetailsDialog = ({
           <span className={sheet.rowLabel}>Стоимость</span>
           <span className={styles.value}>{formatPrice(booking.price)}</span>
         </div>
-        <div className={sheet.row}>
-          <span className={sheet.rowLabel}>Оплата</span>
-          <span className={styles.muted}>В салоне</span>
-        </div>
       </div>
+
+      {!isCancelled && onOutcome && (
+        <VisitOutcomeSection booking={booking} onChange={(input) => onOutcome(booking.id, input)} />
+      )}
 
       {booking.comment && (
         <section className={sheet.group} aria-label='Комментарий'>
