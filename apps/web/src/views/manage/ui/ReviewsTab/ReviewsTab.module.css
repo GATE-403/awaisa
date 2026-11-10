@@ -1,0 +1,126 @@
+.skeleton {
+  height: 320px;
+  border-radius: var(--radius-xl);
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-sm);
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stars {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--color-rating);
+}
+
+.stars svg {
+  width: 15px;
+  height: 15px;
+}
+
+.date,
+.meta,
+.hint {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.author {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+}
+
+.phone {
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+.comment {
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.reply {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.replyTitle {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.replyButton {
+  align-self: flex-start;
+  min-height: 36px;
+  margin-top: var(--space-1);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quote {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  font-style: italic;
+}
+
+.textarea {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-sheet-surface);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-md);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

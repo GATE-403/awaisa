@@ -45,6 +45,10 @@ export default defineConfig({
             SMS_DRIVER: 'console',
             OTP_TEST_CODE: '111111',
             ADMIN_PHONES: '+996700000001,+996700000002',
+            // The owners' bot without a token: messages are logged, the webhook is driven by tests.
+            TELEGRAM_BOT_USERNAME: 'awaisa_e2e_bot',
+            TELEGRAM_WEBHOOK_SECRET: 'e2e-webhook-secret',
+            TELEGRAM_BOT_TOKEN: '',
           },
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

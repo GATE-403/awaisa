@@ -31,7 +31,10 @@ export const Header = () => {
   const isCabinet = isCabinetPath(pathname)
   // Profile and the business landing are about the person, not shopping: no search, no categories.
   const isSlim =
-    pathname === '/bookings' || pathname === '/business' || pathname.startsWith('/business/')
+    pathname === '/bookings' ||
+    pathname === '/business' ||
+    pathname.startsWith('/business/') ||
+    pathname.startsWith('/review/')
 
   // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
   // real height is published as --header-height.
@@ -41,7 +44,8 @@ export const Header = () => {
     if (!header) return
     const root = document.documentElement
     const observer = new ResizeObserver(() => {
-      root.style.setProperty('--header-height', `${header.offsetHeight}px`)
+      // Fractional, not offsetHeight: a rounded value leaves a sub-pixel gap under the header.
+      root.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`)
     })
     observer.observe(header)
 

@@ -43,11 +43,16 @@ const salonCancellationMessage = (booking: BookingMessageInput, webUrl: string) 
 const rescheduleMessage = (booking: BookingMessageInput, webUrl: string) =>
   `${booking.business.name}: запись перенесена — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Подробнее: ${webUrl}/bookings`
 
+// Asked once, two hours after the visit; the link opens the rating without signing in.
+const reviewRequestMessage = (businessName: string, link: string) =>
+  `${businessName}: как прошёл визит? Оцените мастера — это 10 секунд: ${link}`
+
 export type { BookingMessageInput }
 export {
   confirmationMessage,
   otpMessage,
   reminderMessage,
   rescheduleMessage,
+  reviewRequestMessage,
   salonCancellationMessage,
 }

@@ -16,6 +16,7 @@ import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
 import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
 import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
 import { ProfileTab } from '@/views/manage/ui/ProfileTab/ProfileTab'
+import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
 import { ServicesTab } from '@/views/manage/ui/ServicesTab/ServicesTab'
 import { SetupProgress } from '@/views/manage/ui/SetupProgress/SetupProgress'
@@ -105,6 +106,9 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
             />
           )}
           {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
+          {data && tab === 'reviews' && (
+            <ReviewsTab slug={slug} businessName={data.business.name} />
+          )}
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />
           )}

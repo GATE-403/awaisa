@@ -74,10 +74,12 @@ const css = [
   `@media (prefers-reduced-transparency: reduce) {\n${block(A11Y_ROOT, [
     '  --blur-material: none;',
     '  --color-material: var(--color-sheet);',
+    '  --color-chrome: var(--color-sheet);',
   ])}\n}`,
   `@media (prefers-contrast: more) {\n${block(A11Y_ROOT, [
     '  --blur-material: none;',
     '  --color-material: var(--color-sheet);',
+    '  --color-chrome: var(--color-sheet);',
     '  --color-material-border: var(--color-border-strong);',
     '  --color-border: var(--color-border-strong);',
     '  --color-muted-foreground: color-mix(in srgb, var(--color-foreground) 82%, transparent);',

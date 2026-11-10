@@ -1,10 +1,10 @@
 .bar {
   position: sticky;
   /* Under the header and the business bar. */
-  top: calc(var(--header-height) + var(--business-bar-height));
+  top: calc(var(--header-height) + var(--business-bar-height) - 2px);
   z-index: 30;
   padding: var(--space-2) 0;
-  background: var(--color-material);
+  background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
   box-shadow: 0 0.5px 0 var(--color-border);
 }

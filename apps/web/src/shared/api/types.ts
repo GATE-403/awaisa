@@ -155,8 +155,42 @@ type Booking = {
   date: string
   time: string
   startsAt: string
+  /** Missing in bookings saved on the device before reviews existed. */
+  endsAt?: string
   customerName: string
+  review?: { rating: number; comment: string; reply: string | null } | null
   business: BookingBusiness
+}
+
+type Review = {
+  id: string
+  rating: number
+  comment: string
+  authorName: string
+  reply: string | null
+  repliedAt: string | null
+  createdAt: string
+  specialistName: string
+  serviceName: string
+}
+
+type ManagedReview = Review & { customerPhone: string; visitDate: string | null }
+
+type ReviewSummary<Item = Review> = {
+  count: number
+  average: number
+  distribution: { stars: number; count: number }[]
+  items: Item[]
+}
+
+type VisitReview = { visit: Booking; canReview: boolean }
+
+type ReviewAccess = { token?: string | null; signature?: string | null }
+
+type TelegramStatus = {
+  isAvailable: boolean
+  botUsername: string | null
+  chats: { id: string; username: string; createdAt: string }[]
 }
 
 type CreatedBooking = Booking & { cancelToken: string }
@@ -299,6 +333,12 @@ type AnalyticsReport = {
 
 export type {
   AdminBooking,
+  ManagedReview,
+  Review,
+  ReviewAccess,
+  ReviewSummary,
+  TelegramStatus,
+  VisitReview,
   AnalyticsDays,
   AnalyticsReport,
   Offer,

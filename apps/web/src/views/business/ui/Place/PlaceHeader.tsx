@@ -2,7 +2,7 @@ import { Star } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, ViewTransition } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
-import type { Business, Catalog } from '@/shared/api/types'
+import type { Business, Catalog, ReviewSummary } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
 import { pluralize } from '@/shared/lib/plural'
 import { OpenStatus } from './OpenStatus'
@@ -12,17 +12,21 @@ import { PlaceActions } from './PlaceActions'
 interface PlaceHeaderProps {
   business: Business
   catalog: Catalog
+  reviews: ReviewSummary
 }
 
 // A place card like Maps: the picture, who and where, what you can do, and the facts that
 // decide a visit (rating, prices, masters) in one strip.
-export const PlaceHeader = ({ business, catalog }: PlaceHeaderProps) => {
+export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) => {
   const services = catalog.services
   const rated = catalog.specialists.filter((specialist) => specialist.rating !== null)
+  // Real reviews once there are any; until then the masters' ratings.
   const rating =
-    rated.length > 0
-      ? rated.reduce((sum, specialist) => sum + (specialist.rating ?? 0), 0) / rated.length
-      : null
+    reviews.count > 0
+      ? reviews.average
+      : rated.length > 0
+        ? rated.reduce((sum, specialist) => sum + (specialist.rating ?? 0), 0) / rated.length
+        : null
   const minPrice =
     services.length > 0 ? Math.min(...services.map((service) => service.price)) : null
   const address = [business.city, business.address].filter(Boolean).join(', ')
@@ -35,7 +39,10 @@ export const PlaceHeader = ({ business, catalog }: PlaceHeaderProps) => {
           <Star weight='fill' aria-hidden className={styles.factStar} />
         </>
       ),
-      hint: 'по мастерам',
+      hint:
+        reviews.count > 0
+          ? pluralize(reviews.count, ['отзыв', 'отзыва', 'отзывов'])
+          : 'по мастерам',
     },
     minPrice !== null && { label: 'Цены', value: `от ${formatPrice(minPrice)}`, hint: 'за услугу' },
     {

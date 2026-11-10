@@ -11,6 +11,7 @@ const RESERVED_SLUGS = new Set([
   'book',
   'bookings',
   'business',
+  'review',
   'businesses',
   'login',
   'logout',

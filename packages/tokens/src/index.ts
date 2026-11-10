@@ -62,6 +62,7 @@ type ColorScheme = {
   material: string
   materialBorder: string
   materialHighlight: string
+  chrome: string
   scrollEdge: string
   contrast: string
   contrastHover: string
@@ -111,6 +112,9 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     materialBorder: 'rgb(255 255 255 / 0.6)',
     // The lit top edge of a material pane: light falls from above.
     materialHighlight: 'rgb(255 255 255 / 0.75)',
+    // Sticky bars (header, business bar, section chips): one nearly solid material, so stacked
+    // bars read as one sheet instead of glass over glass in different tones.
+    chrome: 'rgb(250 250 252 / 0.94)',
     // Content dims as it slides under a bar (scroll edge effect) instead of a hard hairline.
     scrollEdge: 'rgb(0 0 0 / 0.07)',
     contrast: palette.white,
@@ -154,6 +158,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     material: 'rgb(30 30 32 / 0.8)',
     materialBorder: 'rgb(255 255 255 / 0.08)',
     materialHighlight: 'rgb(255 255 255 / 0.1)',
+    chrome: 'rgb(24 24 26 / 0.95)',
     scrollEdge: 'rgb(0 0 0 / 0.5)',
     contrast: palette.white,
     contrastHover: '#e8e8ed',
