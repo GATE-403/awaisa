@@ -12,11 +12,14 @@ import {
 } from '@/entities/booking'
 import { findDay, weekdayOf } from '@/entities/business'
 import { useSession } from '@/entities/session'
+import { clearDraft, saveDraft } from '@/features/bookingDraft'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
+
+type ReminderChoice = 60 | 120 | 1440 | null
 
 type BookingStepId = 'service' | 'specialist' | 'datetime' | 'contacts'
 
@@ -63,11 +66,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
   const [comment, setComment] = useState('')
+  const [smsConfirmation, setSmsConfirmation] = useState(true)
+  const [reminderMinutes, setReminderMinutes] = useState<ReminderChoice>(120)
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [createdBooking, setCreatedBooking] = useState<Booking | null>(null)
   const [editingStep, setEditingStep] = useState<BookingStepId | null>(null)
+  // Steps the client folded or unfolded by hand win over the automatic behaviour.
+  const [folded, setFolded] = useState<Partial<Record<BookingStepId, boolean>>>({})
   const service = findService(catalog, serviceId)
   const services = presetSpecialist
     ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
@@ -121,17 +128,40 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     contacts: firstIncompleteStep === null,
   }
 
+  // Keep the half-made booking on the device, so leaving the page never loses it.
+  useEffect(() => {
+    if (!service || createdBooking) return
+    saveDraft({
+      slug: business.slug,
+      businessName: business.name,
+      serviceId: service.id,
+      serviceName: service.name,
+      specialistId: chosenSpecialistId,
+      branchId: branchId ?? null,
+    })
+  }, [service, chosenSpecialistId, branchId, business.slug, business.name, createdBooking])
+
   // The first suggested day has no free time (today is over, or fully booked): open the next one.
   useEffect(() => {
     if (isAutoDayFull) setAutoDay({ key: autoDayKey, skips: skips + 1 })
   }, [isAutoDayFull, autoDayKey, skips])
 
   const isStepCollapsed = (step: BookingStepId) =>
-    step !== 'contacts' && completedSteps[step] && editingStep !== step
+    folded[step] ?? (step !== 'contacts' && completedSteps[step] && editingStep !== step)
 
-  const editStep = (step: BookingStepId) => setEditingStep(step)
+  const toggleStep = (step: BookingStepId) => {
+    const isCollapsed = isStepCollapsed(step)
+    setFolded((current) => ({ ...current, [step]: !isCollapsed }))
+    if (isCollapsed) setEditingStep(step)
+  }
+
+  const editStep = (step: BookingStepId) => {
+    setFolded((current) => ({ ...current, [step]: false }))
+    setEditingStep(step)
+  }
 
   const selectService = (id: string) => {
+    setFolded((current) => ({ ...current, service: undefined }))
     const nextSpecialists = getSpecialistsForService(catalog, id).filter(
       (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
     )
@@ -148,6 +178,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   const selectSpecialist = (id: string) => {
+    setFolded((current) => ({ ...current, specialist: undefined }))
     setSpecialistId(id)
     setTime(null)
     setSubmitError(null)
@@ -173,6 +204,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   const selectTime = (value: string) => {
+    setFolded((current) => ({ ...current, datetime: undefined }))
     setTime(value)
     setSubmitError(null)
     setEditingStep(null)
@@ -200,9 +232,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         phone: accountPhone ? '' : phone.trim(),
         comment: comment.trim(),
         branchId,
+        smsConfirmation,
+        reminderMinutes,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       setCreatedBooking(booking)
+      clearDraft()
       haptic('success')
       toast.show({
         title: 'Запись подтверждена',
@@ -252,10 +287,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     completedSteps,
     createdBooking,
     isStepCollapsed,
+    toggleStep,
     editStep,
     setName,
     setPhone,
     setComment,
+    smsConfirmation,
+    setSmsConfirmation,
+    reminderMinutes,
+    setReminderMinutes,
     selectService,
     selectSpecialist,
     selectDay,
@@ -264,4 +304,4 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 }
 
-export type { BookingStepId }
+export type { BookingStepId, ReminderChoice }

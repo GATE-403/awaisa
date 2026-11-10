@@ -1,15 +1,13 @@
 import { Suspense } from 'react'
-import { BusinessCard, NextFreeProvider } from '@/entities/business'
+import { NextFreeProvider } from '@/entities/business'
 import { listBusinesses, listOffers, listPopularServices } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { StoreShelf } from '@/shared/ui/StoreShelf/StoreShelf'
 import styles from './CatalogPage.module.css'
-import { BusinessGrid } from './ui/BusinessGrid'
-import { CategoryTiles } from './ui/CategoryTiles/CategoryTiles'
+import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import { HeroCarousel } from './ui/HeroCarousel/HeroCarousel'
-import { type FeedSort, OffersFeed } from './ui/OffersFeed/OffersFeed'
+import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
 
 interface CatalogPageProps {
@@ -31,43 +29,34 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   const kind = toKind(params.kind)
   const query = toQuery(params.q)
   const isBrowsing = !query
-  const [all, businesses, offers, popular] = await Promise.all([
-    listBusinesses(undefined, query || undefined),
+  const [businesses, offers, popular] = await Promise.all([
     listBusinesses(kind, query || undefined),
     listOffers(kind, query || undefined),
     isBrowsing ? listPopularServices(kind) : Promise.resolve([]),
   ])
   const slugs = [...new Set([...businesses, ...offers].map((item) => item.slug))]
+  // A search for a place's name shows places first; a search for a service shows services.
+  const needle = query.toLocaleLowerCase('ru')
+  const matchesPlace = businesses.some((business) =>
+    business.name.toLocaleLowerCase('ru').includes(needle),
+  )
   const kindLabel = BUSINESS_KINDS.find((item) => item.value === kind)?.label
 
   return (
     <NextFreeProvider slugs={slugs}>
       <div className={styles.contained}>
-        <CategoryTiles kind={kind} query={query} all={all} />
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
         {isBrowsing && !kind && <HeroCarousel offers={offers} />}
-        {offers.length > 0 && (
-          <OffersFeed
-            title={query ? `«${query}»` : (kindLabel ?? 'Услуги для вас')}
-            offers={offers}
-            initialSort={toSort(params.sort)}
-          />
-        )}
+        <CatalogResults
+          key={`${kind ?? ''}|${query}`}
+          title={query ? `«${query}»` : (kindLabel ?? 'Куда записаться')}
+          businesses={businesses}
+          offers={offers}
+          initialView={!query || matchesPlace ? 'places' : 'services'}
+          initialSort={toSort(params.sort)}
+          canReset={Boolean(query || kind)}
+        />
       </div>
-
-      {isBrowsing && businesses.length > 0 ? (
-        <StoreShelf title='Места.' subtitle='Салоны и мастера с онлайн-записью.' label='Места'>
-          {businesses.map((business) => (
-            <li key={business.slug}>
-              <BusinessCard business={business} />
-            </li>
-          ))}
-        </StoreShelf>
-      ) : (
-        <div className={styles.contained}>
-          <BusinessGrid kind={kind} query={query} businesses={businesses} />
-        </div>
-      )}
     </NextFreeProvider>
   )
 }

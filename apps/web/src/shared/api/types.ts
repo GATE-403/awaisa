@@ -254,6 +254,8 @@ type CreateBookingInput = {
   phone: string
   comment: string
   branchId?: string
+  smsConfirmation?: boolean
+  reminderMinutes?: 60 | 120 | 1440 | null
 }
 
 export type {

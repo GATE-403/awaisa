@@ -27,6 +27,8 @@ interface MapViewProps {
   fitKey?: string
   label: string
   className?: string
+  /** A picture of a place inside a page: no dragging or zooming, so the page scrolls freely. */
+  isStatic?: boolean
 }
 
 const escapeHtml = (value: string) =>
@@ -43,6 +45,7 @@ export const MapView = ({
   fitKey,
   label,
   className,
+  isStatic = false,
 }: MapViewProps) => {
   const { theme } = useTheme()
   const containerRef = useRef<HTMLElement>(null)
@@ -55,6 +58,7 @@ export const MapView = ({
     onSelectRef.current = onSelect
   }, [onSelect])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the map is created once; isStatic is fixed per instance
   useEffect(() => {
     let isActive = true
     void loadLeaflet().then((L) => {
@@ -64,8 +68,14 @@ export const MapView = ({
         zoom: DEFAULT_ZOOM,
         zoomControl: false,
         attributionControl: true,
+        dragging: !isStatic,
+        scrollWheelZoom: !isStatic,
+        touchZoom: !isStatic,
+        doubleClickZoom: !isStatic,
+        boxZoom: !isStatic,
+        keyboard: !isStatic,
       })
-      L.control.zoom({ position: 'bottomright' }).addTo(map)
+      if (!isStatic) L.control.zoom({ position: 'bottomright' }).addTo(map)
       layerRef.current = L.layerGroup().addTo(map)
       mapRef.current = map
       // Draw markers and tiles now that the map exists.

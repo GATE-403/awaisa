@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pickTint } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
@@ -33,14 +34,20 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
   )
 
   return (
-    <MapView
-      markers={markers}
-      fitKey={business.slug}
-      label={`${business.name} на карте`}
-      className={styles.map}
-      onSelect={(id) =>
-        business.branches.length > 1 && router.push(`/${business.slug}/book?branch=${id}`)
-      }
-    />
+    <div className={styles.mapWrap}>
+      <MapView
+        markers={markers}
+        fitKey={business.slug}
+        label={`${business.name} на карте`}
+        className={styles.map}
+        isStatic
+        onSelect={(id) =>
+          business.branches.length > 1 && router.push(`/${business.slug}/book?branch=${id}`)
+        }
+      />
+      <NextLink href='/map' className={styles.mapLink}>
+        Открыть на карте
+      </NextLink>
+    </div>
   )
 }

@@ -1,7 +1,5 @@
 'use client'
 
-import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
-import { useState } from 'react'
 import { useNextFree } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { FavoriteButton } from '@/features/favorites'
@@ -11,22 +9,20 @@ import styles from './OffersFeed.module.css'
 type FeedSort = 'popular' | 'soon' | 'price'
 
 interface OffersFeedProps {
-  title: string
   offers: Offer[]
-  initialSort: FeedSort
+  sort: FeedSort
 }
 
-const SORTS: { value: FeedSort; label: string }[] = [
+const FEED_SORTS: { value: FeedSort; label: string }[] = [
   { value: 'popular', label: 'Популярные' },
-  { value: 'soon', label: 'Раньше свободно' },
+  { value: 'soon', label: 'Ближе по времени' },
   { value: 'price', label: 'Дешевле' },
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
 
 // The main feed, like products on a marketplace: every service in every place, sortable.
-export const OffersFeed = ({ title, offers, initialSort }: OffersFeedProps) => {
-  const [sort, setSort] = useState(initialSort)
+export const OffersFeed = ({ offers, sort }: OffersFeedProps) => {
   const nextFree = useNextFree()
   const sorted =
     sort === 'price'
@@ -42,28 +38,7 @@ export const OffersFeed = ({ title, offers, initialSort }: OffersFeedProps) => {
         : offers
 
   return (
-    <section className={styles.feed} aria-labelledby='offers-title'>
-      <div className={styles.header}>
-        <h2 id='offers-title' className={styles.title}>
-          {title}
-          <span className={styles.count}>{offers.length}</span>
-        </h2>
-        <ToggleGroup
-          aria-label='Сортировка'
-          layout='scroll'
-          value={[sort]}
-          onValueChange={(values) => {
-            const next = values.at(-1)
-            if (next) setSort(next as FeedSort)
-          }}
-        >
-          {SORTS.map((item) => (
-            <Toggle key={item.value} value={item.value} size='sm'>
-              {item.label}
-            </Toggle>
-          ))}
-        </ToggleGroup>
-      </div>
+    <div className={styles.feed}>
       <ul className={styles.grid}>
         {sorted.map((offer) => (
           <li key={offer.id}>
@@ -71,8 +46,9 @@ export const OffersFeed = ({ title, offers, initialSort }: OffersFeedProps) => {
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   )
 }
 
 export type { FeedSort }
+export { FEED_SORTS }

@@ -44,3 +44,10 @@
     background: var(--color-fill-hover);
   }
 }
+
+/* Phones already have category chips in the header; this row is for wide screens. */
+@media (max-width: 767px) {
+  .row {
+    display: none;
+  }
+}

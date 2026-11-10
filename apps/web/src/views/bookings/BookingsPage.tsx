@@ -12,7 +12,6 @@ import { UpcomingBooking } from '@/views/bookings/ui/UpcomingBooking/UpcomingBoo
 import styles from './BookingsPage.module.css'
 import { getCountdown, isUpcoming } from './bookingsUtils'
 import { AccountCard } from './ui/AccountCard/AccountCard'
-import { AccountSettings } from './ui/AccountSettings/AccountSettings'
 
 export const BookingsPage = () => {
   const today = useToday()
@@ -72,8 +71,6 @@ export const BookingsPage = () => {
             <BookingHistory bookings={history} canForget={canForget} onForget={forget} />
           </section>
         )}
-
-        <AccountSettings />
       </Container>
     </main>
   )

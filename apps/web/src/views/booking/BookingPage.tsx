@@ -6,7 +6,13 @@ import { Input } from '@awaisa/ui/Input'
 import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
-import { UsersThree } from '@phosphor-icons/react/ssr'
+import {
+  CalendarBlank,
+  ChatCircleText,
+  Scissors,
+  User,
+  UsersThree,
+} from '@phosphor-icons/react/ssr'
 import {
   ANY_SPECIALIST_ID,
   formatDayLong,
@@ -24,6 +30,7 @@ import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
 import { DateTimePicker } from '@/views/booking/ui/DateTimePicker/DateTimePicker'
+import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
 import styles from './BookingPage.module.css'
 
 interface BookingPageProps {
@@ -87,12 +94,12 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
           <BookingStep
             id='service'
-            index={1}
+            icon={Scissors}
             title='Услуга'
             summary={form.service?.name}
             isComplete={form.completedSteps.service}
             isCollapsed={form.isStepCollapsed('service')}
-            onEdit={() => form.editStep('service')}
+            onToggle={() => form.toggleStep('service')}
           >
             <RadioGroup
               variant='inset'
@@ -114,12 +121,12 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
           <BookingStep
             id='specialist'
-            index={2}
+            icon={User}
             title='Мастер'
             summary={specialistLabel || undefined}
             isComplete={form.completedSteps.specialist}
             isCollapsed={form.isStepCollapsed('specialist')}
-            onEdit={() => form.editStep('specialist')}
+            onToggle={() => form.toggleStep('specialist')}
           >
             {form.service ? (
               <RadioGroup
@@ -160,14 +167,14 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
           <BookingStep
             id='datetime'
-            index={3}
+            icon={CalendarBlank}
             title='Дата и время'
             summary={
               form.dayKey && form.time ? `${formatDayLong(form.dayKey)}, ${form.time}` : undefined
             }
             isComplete={form.completedSteps.datetime}
             isCollapsed={form.isStepCollapsed('datetime')}
-            onEdit={() => form.editStep('datetime')}
+            onToggle={() => form.toggleStep('datetime')}
           >
             <DateTimePicker
               days={form.days}
@@ -185,7 +192,9 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
           <BookingStep
             id='contacts'
-            index={4}
+            icon={ChatCircleText}
+            isCollapsed={form.isStepCollapsed('contacts')}
+            onToggle={() => form.toggleStep('contacts')}
             title='Контакты'
             isComplete={form.completedSteps.contacts}
           >
@@ -198,17 +207,8 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                   placeholder='Как к вам обращаться'
                 />
               </Field>
-              {form.accountPhone ? (
-                <p className={styles.accountPhone}>
-                  Подтверждение и напоминание придут SMS на{' '}
-                  <span className={styles.phone}>{formatPhone(form.accountPhone)}</span>
-                </p>
-              ) : (
-                <Field
-                  label='Телефон'
-                  description='Пришлём подтверждение и напоминание'
-                  error={form.errors.phone}
-                >
+              {form.accountPhone ? null : (
+                <Field label='Телефон' error={form.errors.phone}>
                   <Input
                     type='tel'
                     inputMode='tel'
@@ -227,6 +227,13 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                 />
               </Field>
             </div>
+            <NotifyOptions
+              phone={form.accountPhone ?? (form.phone.trim() || null)}
+              smsConfirmation={form.smsConfirmation}
+              onSmsConfirmationChange={form.setSmsConfirmation}
+              reminderMinutes={form.reminderMinutes}
+              onReminderChange={form.setReminderMinutes}
+            />
           </BookingStep>
         </div>
 

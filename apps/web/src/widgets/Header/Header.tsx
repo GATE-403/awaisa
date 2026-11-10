@@ -29,6 +29,9 @@ export const Header = () => {
   const currentKind = pathname === '/' ? searchParams.get('kind') : null
   const headerRef = useRef<HTMLElement>(null)
   const isCabinet = isCabinetPath(pathname)
+  // Profile and the business landing are about the person, not shopping: no search, no categories.
+  const isSlim =
+    pathname === '/bookings' || pathname === '/business' || pathname.startsWith('/business/')
 
   // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
   // real height is published as --header-height.
@@ -52,7 +55,12 @@ export const Header = () => {
   if (isCabinet) return null
 
   return (
-    <header ref={headerRef} className={styles.header} data-scrolled={isScrolled || undefined}>
+    <header
+      ref={headerRef}
+      className={styles.header}
+      data-scrolled={isScrolled || undefined}
+      data-slim={isSlim || undefined}
+    >
       <div className={styles.inner}>
         <NextLink href='/' className={styles.home} aria-label='На главную'>
           <Logo />
@@ -65,9 +73,11 @@ export const Header = () => {
           <SquaresFour weight='fill' aria-hidden />
           Каталог
         </NextLink>
-        <div className={styles.search}>
-          <HeaderSearch />
-        </div>
+        {!isSlim && (
+          <div className={styles.search}>
+            <HeaderSearch />
+          </div>
+        )}
         <nav className={styles.actions} aria-label='Основное меню'>
           {ACTIONS.map(({ href, label, icon: Icon }) => (
             <NextLink
@@ -95,31 +105,43 @@ export const Header = () => {
         </nav>
       </div>
 
-      <nav className={styles.categories} aria-label='Категории'>
-        <div className={styles.categoriesInner}>
-          <ul className={styles.categoryList}>
-            {BUSINESS_KINDS.map((kind) => {
-              const Icon = KIND_ICONS[kind.value]
-              return (
-                <li key={kind.value}>
-                  <NextLink
-                    href={`/?kind=${kind.value}`}
-                    className={styles.category}
-                    aria-current={currentKind === kind.value ? 'page' : undefined}
-                  >
-                    <Icon weight='duotone' aria-hidden />
-                    {kind.label}
-                  </NextLink>
-                </li>
-              )
-            })}
-          </ul>
-          <NextLink href='/map' className={styles.city}>
-            <MapPin weight='fill' aria-hidden />
-            Бишкек · <span className={styles.cityLink}>рядом на карте</span>
-          </NextLink>
-        </div>
-      </nav>
+      {!isSlim && (
+        <nav className={styles.categories} aria-label='Категории'>
+          <div className={styles.categoriesInner}>
+            <ul className={styles.categoryList}>
+              <li>
+                <NextLink
+                  href='/'
+                  className={styles.category}
+                  aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
+                >
+                  <SquaresFour weight='duotone' aria-hidden />
+                  Все
+                </NextLink>
+              </li>
+              {BUSINESS_KINDS.map((kind) => {
+                const Icon = KIND_ICONS[kind.value]
+                return (
+                  <li key={kind.value}>
+                    <NextLink
+                      href={`/?kind=${kind.value}`}
+                      className={styles.category}
+                      aria-current={currentKind === kind.value ? 'page' : undefined}
+                    >
+                      <Icon weight='duotone' aria-hidden />
+                      {kind.label}
+                    </NextLink>
+                  </li>
+                )
+              })}
+            </ul>
+            <NextLink href='/map' className={styles.city}>
+              <MapPin weight='fill' aria-hidden />
+              Бишкек · <span className={styles.cityLink}>рядом на карте</span>
+            </NextLink>
+          </div>
+        </nav>
+      )}
     </header>
   )
 }

@@ -134,3 +134,20 @@
     min-height: 280px;
   }
 }
+
+/* Compact: a short card for secondary shelves (perks, contacts). */
+.card[data-height="compact"] {
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-xl);
+}
+
+.card[data-height="compact"] .title {
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+}
+
+.card[data-height="compact"] .description {
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}

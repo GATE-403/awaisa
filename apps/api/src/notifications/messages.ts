@@ -34,8 +34,8 @@ const otpMessage = (code: string) =>
 const confirmationMessage = (booking: BookingMessageInput, webUrl: string) =>
   `${booking.business.name}: вы записаны — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Отменить: ${webUrl}/bookings`
 
-const reminderMessage = (booking: BookingMessageInput) =>
-  `${booking.business.name}: напоминаем — сегодня в ${booking.time} ${booking.serviceName}, мастер ${booking.specialistName}. Ждём вас!`
+const reminderMessage = (booking: BookingMessageInput, isToday = true) =>
+  `${booking.business.name}: напоминаем — ${isToday ? 'сегодня' : 'завтра'} в ${booking.time} ${booking.serviceName}, мастер ${booking.specialistName}. Ждём вас!`
 
 const salonCancellationMessage = (booking: BookingMessageInput, webUrl: string) =>
   `${booking.business.name}: к сожалению, запись на ${formatDate(booking.date)} в ${booking.time} отменена. Выберите другое время: ${webUrl}/${booking.business.slug}/book`

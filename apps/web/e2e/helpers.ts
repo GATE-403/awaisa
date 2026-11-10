@@ -58,7 +58,8 @@ const findSmallTapTargets = (page: Page, scope = 'main') =>
       const root = document.querySelector(selector)
       if (!root) return []
       const controls = root.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), a[href], [role="radio"], input:not([type="hidden"]), textarea, select',
+        // Native mirrors that Base UI keeps for forms (aria-hidden, not focusable) are not controls.
+        'button:not([disabled]), a[href], [role="radio"], input:not([type="hidden"]):not([aria-hidden="true"]):not([tabindex="-1"]), textarea, select',
       )
 
       return [...controls]

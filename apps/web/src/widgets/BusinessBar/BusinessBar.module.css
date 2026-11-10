@@ -7,11 +7,11 @@
   box-shadow: 0 0.5px 0 var(--color-border);
 }
 
-/* Phones: one 48pt row — the business, its sections (scrolling), the booking button. */
+/* Phones: one 48pt row — the business and its sections, scrolling freely (booking is on the page). */
 .inner {
   display: grid;
-  grid-template-areas: "identity sections cta";
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "identity sections";
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   width: 100%;
@@ -114,7 +114,7 @@
 }
 
 .cta {
-  display: inline-flex;
+  display: none;
   grid-area: cta;
   align-items: center;
   height: 32px;
@@ -148,7 +148,8 @@
 
   .crumb,
   .separator,
-  .status {
+  .status,
+  .cta {
     display: inline-flex;
   }
 

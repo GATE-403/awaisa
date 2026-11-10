@@ -38,7 +38,7 @@ export const PerksShelf = () => (
           eyebrow={perk.eyebrow}
           title={perk.title}
           description={perk.description}
-          height='sm'
+          height='compact'
         />
       </li>
     ))}

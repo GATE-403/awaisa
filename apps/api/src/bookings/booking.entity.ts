@@ -80,6 +80,13 @@ export class Booking {
   @Column({ name: 'cancelled_at', type: 'timestamptz', nullable: true })
   cancelledAt: Date | null
 
+  @Column({ name: 'sms_confirmation', type: 'boolean', default: true })
+  smsConfirmation: boolean
+
+  /** null = the client asked not to be reminded. */
+  @Column({ name: 'reminder_minutes', type: 'int', nullable: true, default: 120 })
+  reminderMinutes: number | null
+
   @Column({ name: 'reminder_sent_at', type: 'timestamptz', nullable: true })
   reminderSentAt: Date | null
 

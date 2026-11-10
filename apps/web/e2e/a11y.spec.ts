@@ -14,7 +14,8 @@ const PAGES = [
 for (const path of PAGES) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {
     await page.goto(path)
-    await page.waitForLoadState('networkidle')
+    // Map tiles keep the network busy; a short wait is enough for the page itself.
+    await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => undefined)
     const { violations } = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
       .analyze()

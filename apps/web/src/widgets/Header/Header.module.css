@@ -13,13 +13,12 @@
   box-shadow: 0 0.5px 0 var(--color-border);
 }
 
-/* Phones: logo and account on top, the search field full width below. */
+/* Phones: one row — the mascot and the search field, like a store app. */
 .inner {
   display: grid;
-  grid-template-areas:
-    "home actions cta"
-    "search search search";
-  grid-template-columns: 1fr auto auto;
+  grid-template-areas: "home search actions";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 56px;
   align-items: center;
   gap: var(--space-2) var(--space-3);
   width: 100%;
@@ -33,6 +32,11 @@
   grid-area: home;
   justify-self: start;
   border-radius: var(--radius-sm);
+}
+
+/* The wordmark is the logo's second glyph; phones show only the mascot next to the search. */
+.header:not([data-slim]) .home svg + svg {
+  display: none;
 }
 
 .catalog {
@@ -68,15 +72,7 @@
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
-.action[data-account],
-.action[data-mobile] {
-  display: flex;
-}
-
-.action[data-account] span,
-.action[data-mobile] span {
-  display: none;
-}
+/* Phones: map and profile live in the tab bar, so the header keeps only the logo and search. */
 
 .action svg {
   width: 24px;
@@ -141,20 +137,24 @@
 .category {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  height: 32px;
+  gap: 6px;
+  height: 30px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-full);
   background: var(--color-fill);
   color: var(--color-foreground);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
 .category svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted-foreground);
+}
+
+.category[aria-current="page"] svg {
+  color: inherit;
 }
 
 .category[aria-current="page"] {
@@ -183,6 +183,10 @@
 
 /* From tablets: one row like a marketplace — logo, «Каталог», search, labelled actions. */
 @media (min-width: 768px) {
+  .header:not([data-slim]) .home svg + svg {
+    display: block;
+  }
+
   .inner {
     grid-template-areas: "home catalog search actions cta";
     grid-template-columns: auto auto minmax(0, 1fr) auto auto;

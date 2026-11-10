@@ -26,96 +26,101 @@ export const VisitShelf = ({ business }: VisitShelfProps) => {
   const pinned = branches.filter((branch) => branch.latitude !== null && branch.longitude !== null)
 
   return (
-    <StoreShelf id='visit' title='Как нас найти.' subtitle={schedule} label='Контакты' size='wide'>
-      {pinned.length > 0 && (
-        <li className={styles.mapCard}>
-          <BranchesMap business={business} />
-        </li>
-      )}
-      {branches.map((branch) => {
-        const directions =
-          branch.latitude !== null && branch.longitude !== null
-            ? `https://www.google.com/maps/dir/?api=1&destination=${branch.latitude},${branch.longitude}`
-            : business.mapUrl
+    <section id='visit' className={styles.visit} aria-label='Как нас найти'>
+      <StoreShelf title='Как нас найти.' subtitle={schedule} label='Контакты' size='sm'>
+        {branches.map((branch) => {
+          const directions =
+            branch.latitude !== null && branch.longitude !== null
+              ? `https://www.google.com/maps/dir/?api=1&destination=${branch.latitude},${branch.longitude}`
+              : business.mapUrl
 
-        return (
-          <li key={branch.id}>
+          return (
+            <li key={branch.id}>
+              <StoreCard
+                tone='dark'
+                height='compact'
+                eyebrow={status?.label ?? schedule}
+                isHighlighted={status?.isOpen === false}
+                title={[business.city, branch.address || business.address]
+                  .filter(Boolean)
+                  .join(', ')}
+                description={branches.length > 1 ? `Филиал «${branch.name}»` : business.name}
+                footer={
+                  <span className={styles.actions}>
+                    {directions && (
+                      <ButtonLink
+                        variant='primary'
+                        size='sm'
+                        render={
+                          // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                          <a href={directions} target='_blank' rel='noreferrer' />
+                        }
+                      >
+                        Маршрут
+                      </ButtonLink>
+                    )}
+                    {branches.length > 1 && (
+                      <ButtonLink
+                        variant='secondary'
+                        size='sm'
+                        render={<NextLink href={`/${business.slug}/book?branch=${branch.id}`} />}
+                      >
+                        Записаться сюда
+                      </ButtonLink>
+                    )}
+                  </span>
+                }
+              />
+            </li>
+          )
+        })}
+        {hasContacts && (
+          <li>
             <StoreCard
-              tone='dark'
-              height='sm'
-              eyebrow={status?.label ?? schedule}
-              isHighlighted={status?.isOpen === false}
-              title={[business.city, branch.address || business.address].filter(Boolean).join(', ')}
-              description={branches.length > 1 ? `Филиал «${branch.name}»` : business.name}
+              height='compact'
+              eyebrow='Связь'
+              title='Остались вопросы?'
+              description='Напишите или позвоните — ответим в рабочее время.'
               footer={
                 <span className={styles.actions}>
-                  {directions && (
-                    <ButtonLink
-                      variant='primary'
-                      size='sm'
-                      render={
-                        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-                        <a href={directions} target='_blank' rel='noreferrer' />
-                      }
-                    >
-                      Маршрут
-                    </ButtonLink>
-                  )}
-                  {branches.length > 1 && (
+                  {business.whatsapp && (
                     <ButtonLink
                       variant='secondary'
                       size='sm'
-                      render={<NextLink href={`/${business.slug}/book?branch=${branch.id}`} />}
+                      render={
+                        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                        <a
+                          href={toWhatsappHref(business.whatsapp)}
+                          target='_blank'
+                          rel='noreferrer'
+                        />
+                      }
                     >
-                      Записаться сюда
+                      WhatsApp
+                    </ButtonLink>
+                  )}
+                  {business.phone && (
+                    <ButtonLink
+                      variant='ghost'
+                      size='sm'
+                      // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                      render={<a href={`tel:${business.phone}`} />}
+                    >
+                      {formatPhone(business.phone)}
                     </ButtonLink>
                   )}
                 </span>
               }
             />
           </li>
-        )
-      })}
-      {hasContacts && (
-        <li>
-          <StoreCard
-            height='sm'
-            eyebrow='Связь'
-            title='Остались вопросы?'
-            description='Напишите или позвоните — ответим в рабочее время.'
-            footer={
-              <span className={styles.actions}>
-                {business.whatsapp && (
-                  <ButtonLink
-                    variant='secondary'
-                    size='sm'
-                    render={
-                      // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-                      <a
-                        href={toWhatsappHref(business.whatsapp)}
-                        target='_blank'
-                        rel='noreferrer'
-                      />
-                    }
-                  >
-                    WhatsApp
-                  </ButtonLink>
-                )}
-                {business.phone && (
-                  <ButtonLink
-                    variant='ghost'
-                    size='sm'
-                    // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-                    render={<a href={`tel:${business.phone}`} />}
-                  >
-                    {formatPhone(business.phone)}
-                  </ButtonLink>
-                )}
-              </span>
-            }
-          />
-        </li>
+        )}
+      </StoreShelf>
+      {/* Outside the shelf: a map inside a swipeable row would steal the swipe on phones. */}
+      {pinned.length > 0 && (
+        <div className={styles.mapBlock}>
+          <BranchesMap business={business} />
+        </div>
       )}
-    </StoreShelf>
+    </section>
   )
 }

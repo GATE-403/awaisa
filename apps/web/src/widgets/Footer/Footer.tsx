@@ -5,6 +5,7 @@ import { ThemeSwitcher } from '@/features/theme'
 import { PLATFORM } from '@/shared/config/platform'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './Footer.module.css'
+import { FooterColumn } from './FooterColumn'
 
 const COLUMNS = [
   {
@@ -42,7 +43,7 @@ export const Footer = () => (
 
       <nav className={styles.columns} aria-label='Карта сайта'>
         {COLUMNS.map((column) => (
-          <details key={column.title} className={styles.column} open>
+          <FooterColumn key={column.title} className={styles.column}>
             <summary className={styles.columnTitle}>
               {column.title}
               <CaretDown className={styles.caret} weight='bold' aria-hidden />
@@ -56,7 +57,7 @@ export const Footer = () => (
                 </li>
               ))}
             </ul>
-          </details>
+          </FooterColumn>
         ))}
       </nav>
 
