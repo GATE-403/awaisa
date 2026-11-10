@@ -1,0 +1,509 @@
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.report[data-loading] {
+  opacity: 0.55;
+}
+
+.skeleton {
+  height: 420px;
+  border-radius: var(--radius-xl);
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-sm);
+}
+
+.muted {
+  color: var(--color-muted-foreground);
+}
+
+/* The hero card: the one number the tab leads with, then its chart. */
+.hero,
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.heroHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.heroValue {
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-display);
+}
+
+.heroMeta {
+  font-size: var(--text-footnote);
+}
+
+.heroFooter {
+  padding-top: var(--space-3);
+  border-top: 0.5px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.heroFooter strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.statLabel {
+  letter-spacing: var(--tracking-caption);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-medium);
+}
+
+.statValue {
+  overflow: hidden;
+  font-size: var(--text-xl);
+  line-height: var(--text-xl-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.deltaIcon {
+  width: 14px;
+  height: 14px;
+}
+
+.delta[data-direction="up"] .deltaIcon {
+  color: var(--color-success);
+}
+
+.delta[data-direction="down"] .deltaIcon {
+  color: var(--color-danger);
+}
+
+.deltaNone {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+/* Column chart: hairline grid, thin columns rounded at the data end, square at the baseline. */
+.chart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 180px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  translate: 0 -0.5em;
+}
+
+.plot {
+  position: relative;
+  min-width: 0;
+}
+
+.grid {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 180px;
+  pointer-events: none;
+}
+
+.grid span {
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.columns {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+
+.column {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: default;
+}
+
+.column:focus-visible {
+  outline: none;
+}
+
+.column:focus-visible .bar {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.track {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 180px;
+}
+
+.bar {
+  width: min(100%, 24px);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--color-primary);
+  transition:
+    height var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+.columns:has([data-active]) .bar {
+  opacity: 0.4;
+}
+
+.columns .column[data-active] .bar {
+  opacity: 1;
+}
+
+.bar[data-empty] {
+  background: var(--color-fill-hover);
+}
+
+.columnLabel {
+  letter-spacing: var(--tracking-caption);
+  height: var(--text-xs-line-height);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  white-space: nowrap;
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  pointer-events: none;
+  translate: -50% calc(-100% - var(--space-2));
+}
+
+.tooltipTitle,
+.tooltipMeta {
+  color: var(--color-muted-foreground);
+}
+
+.tooltipValue {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Rows in the inset lists: title and meta left, value right, a share meter under them. */
+.row,
+.clientRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  letter-spacing: var(--tracking-caption);
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowValue {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meter {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.groupFooter {
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.cardHint {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* New vs returning: a thin segmented bar, fully rounded, 2px surface gap between parts. */
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.splitBar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+}
+
+.splitBar span {
+  min-width: 6px;
+  border-radius: var(--radius-full);
+}
+
+.split [data-part="new"] {
+  background: var(--color-primary);
+}
+
+.split [data-part="returning"] {
+  background: var(--system-teal);
+}
+
+.splitLegend {
+  letter-spacing: var(--tracking-caption);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+}
+
+.splitLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.splitLegend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Heatmap: one hue in five steps, from the neutral fill to the full accent. */
+.heatmapWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.heatmapScroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.heatmap {
+  width: 100%;
+  min-width: calc(var(--heatmap-columns) * 22px + 32px);
+  border-collapse: separate;
+  border-spacing: 2px;
+  table-layout: fixed;
+}
+
+.heatmapHour,
+.heatmapDay {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-regular);
+  font-variant-numeric: tabular-nums;
+}
+
+.heatmapHour {
+  text-align: left;
+}
+
+.heatmapDay {
+  width: 28px;
+  text-align: left;
+}
+
+.heatmapCell {
+  height: 22px;
+  border-radius: 4px;
+  background: var(--color-fill);
+}
+
+.heatmapCell[data-level="1"] {
+  background: color-mix(in oklab, var(--color-primary) 25%, var(--color-surface));
+}
+
+.heatmapCell[data-level="2"] {
+  background: color-mix(in oklab, var(--color-primary) 50%, var(--color-surface));
+}
+
+.heatmapCell[data-level="3"] {
+  background: color-mix(in oklab, var(--color-primary) 75%, var(--color-surface));
+}
+
+.heatmapCell[data-level="4"] {
+  background: var(--color-primary);
+}
+
+.scale {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.scale .heatmapCell {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.scale > span:first-child {
+  margin-right: var(--space-1);
+}
+
+.scale > span:last-child {
+  margin-left: var(--space-1);
+}
+
+@media (forced-colors: active) {
+  .bar,
+  .meter span,
+  .split [data-part],
+  .heatmapCell:not([data-level="0"]) {
+    background: CanvasText;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .report {
+    transition: none;
+  }
+}

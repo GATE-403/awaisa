@@ -3,6 +3,8 @@ import { toApiError } from './apiError'
 import type {
   AdminBooking,
   AdminSchedule,
+  AnalyticsDays,
+  AnalyticsReport,
   Availability,
   Booking,
   Branch,
@@ -130,6 +132,14 @@ const send = <Result>(method: 'PUT' | 'PATCH' | 'DELETE', path: string, body?: u
 
 const manage = (slug: string) => `/manage/${encodeURIComponent(slug)}`
 
+const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
+  request<AnalyticsReport>(
+    `${manage(slug)}/analytics?${new URLSearchParams({ days: String(days) })}`,
+    {
+      signal,
+    },
+  )
+
 const searchBusinesses = (query: string, signal?: AbortSignal) =>
   request<BusinessCard[]>(`/businesses?${new URLSearchParams({ q: query })}`, { signal })
 
@@ -253,6 +263,7 @@ export {
   deleteCategory,
   deleteTimeOff,
   getAdminSchedule,
+  getAnalytics,
   getAvailability,
   getBooking,
   getManagedBusiness,

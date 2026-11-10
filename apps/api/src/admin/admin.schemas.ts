@@ -35,6 +35,16 @@ const moveBookingSchema = z.object({
 
 type MoveBookingInput = z.infer<typeof moveBookingSchema>
 
+const analyticsQuerySchema = z.object({
+  days: z.coerce
+    .number()
+    .int()
+    .refine((value) => [7, 30, 90, 365].includes(value), 'Период: 7, 30, 90 или 365 дней')
+    .default(30),
+})
+
+type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>
+
 const recentBookingsQuerySchema = z.object({ since: z.iso.datetime({ offset: true }) })
 
 type RecentBookingsQuery = z.infer<typeof recentBookingsQuerySchema>
@@ -46,6 +56,7 @@ type ScheduleQuery = z.infer<typeof scheduleQuerySchema>
 type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
 export type {
+  AnalyticsQuery,
   CreateTimeOffInput,
   MoveBookingInput,
   RecentBookingsQuery,
@@ -53,6 +64,7 @@ export type {
   StaffBookingInput,
 }
 export {
+  analyticsQuerySchema,
   createTimeOffSchema,
   moveBookingSchema,
   recentBookingsQuerySchema,

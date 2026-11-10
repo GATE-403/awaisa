@@ -10,6 +10,7 @@ import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useManagedBusiness } from '@/views/manage/model/useManagedBusiness'
+import { AnalyticsTab } from '@/views/manage/ui/AnalyticsTab/AnalyticsTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
 import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
@@ -103,6 +104,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
               refreshKey={alertsVersion}
             />
           )}
+          {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
           {data && tab === 'services' && (
             <ServicesTab slug={slug} catalog={data.catalog} run={run} />
           )}

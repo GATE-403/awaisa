@@ -126,6 +126,6 @@
     font-size: var(--text-display);
     line-height: var(--text-display-line-height);
     font-weight: var(--font-weight-bold);
-    letter-spacing: -0.005em;
+    letter-spacing: var(--tracking-display);
   }
 }

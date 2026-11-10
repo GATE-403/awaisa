@@ -15,6 +15,8 @@ import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
 import {
+  type AnalyticsQuery,
+  analyticsQuerySchema,
   type CreateTimeOffInput,
   createTimeOffSchema,
   type MoveBookingInput,
@@ -27,6 +29,7 @@ import {
   staffBookingSchema,
 } from './admin.schemas.js'
 import { AdminService } from './admin.service.js'
+import { AnalyticsService } from './analytics.service.js'
 
 @Controller('manage/:slug')
 @UseGuards(BusinessAccessGuard)
@@ -34,7 +37,16 @@ export class AdminController {
   constructor(
     private readonly admin: AdminService,
     private readonly bookings: BookingsService,
+    private readonly analytics: AnalyticsService,
   ) {}
+
+  @Get('analytics')
+  getAnalytics(
+    @CurrentBusiness() business: Business,
+    @Query({ schema: analyticsQuerySchema }) query: AnalyticsQuery,
+  ) {
+    return this.analytics.getReport(business, query.days)
+  }
 
   @Get('schedule')
   getSchedule(

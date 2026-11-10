@@ -258,8 +258,49 @@ type CreateBookingInput = {
   reminderMinutes?: 60 | 120 | 1440 | null
 }
 
+type AnalyticsDays = 7 | 30 | 90 | 365
+
+type AnalyticsReport = {
+  period: { days: AnalyticsDays; from: string; to: string }
+  totals: {
+    revenue: number
+    revenueChange: number | null
+    visits: number
+    visitsChange: number | null
+    averageCheck: number
+    averageCheckChange: number | null
+    clients: number
+    newClients: number
+    returningClients: number
+    cancellationRate: number
+    upcomingVisits: number
+    upcomingRevenue: number
+  }
+  daily: { date: string; visits: number; revenue: number; cancelled: number }[]
+  services: { id: string; name: string; visits: number; revenue: number }[]
+  masters: {
+    id: string
+    name: string
+    role: string
+    visits: number
+    revenue: number
+    load: number
+  }[]
+  clients: {
+    phone: string
+    name: string
+    visits: number
+    revenue: number
+    lastVisit: string
+    isNew: boolean
+  }[]
+  heatmap: { weekday: number; hour: number; visits: number }[]
+}
+
 export type {
   AdminBooking,
+  AnalyticsDays,
+  AnalyticsReport,
   Offer,
   PopularService,
   Branch,

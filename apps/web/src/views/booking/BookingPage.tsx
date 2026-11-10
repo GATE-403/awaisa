@@ -21,7 +21,6 @@ import {
   getSpecialistLabel,
 } from '@/entities/booking'
 import type { Business, Catalog } from '@/shared/api/types'
-import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'

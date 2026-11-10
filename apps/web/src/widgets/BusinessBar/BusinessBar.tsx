@@ -27,7 +27,11 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
   ]
 
   return (
-    <nav className={styles.bar} aria-label={`Страница бизнеса ${business.name}`}>
+    <nav
+      className={styles.bar}
+      data-business-bar=''
+      aria-label={`Страница бизнеса ${business.name}`}
+    >
       <div className={styles.inner}>
         <div className={styles.identity}>
           <NextLink href='/' className={styles.crumb}>
