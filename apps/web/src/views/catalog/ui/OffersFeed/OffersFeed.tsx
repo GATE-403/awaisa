@@ -37,12 +37,25 @@ export const OffersFeed = ({ offers, sort }: OffersFeedProps) => {
           })
         : offers
 
+  // One «Хит» per place: its most booked service (offers arrive popular-first per place).
+  const hits = new Set<string>()
+  const seenPlaces = new Set<string>()
+  for (const offer of offers) {
+    if (seenPlaces.has(offer.slug)) continue
+    seenPlaces.add(offer.slug)
+    if (offer.isPopular) hits.add(offer.id)
+  }
+
   return (
     <div className={styles.feed}>
       <ul className={styles.grid}>
         {sorted.map((offer) => (
           <li key={offer.id}>
-            <OfferCard offer={offer} action={<FavoriteButton id={offer.id} label={offer.name} />} />
+            <OfferCard
+              offer={offer}
+              isHit={hits.has(offer.id)}
+              action={<FavoriteButton id={offer.id} label={offer.name} />}
+            />
           </li>
         ))}
       </ul>

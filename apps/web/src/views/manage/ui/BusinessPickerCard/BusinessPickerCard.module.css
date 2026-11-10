@@ -1,123 +1,162 @@
-.card {
+.row {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  align-items: stretch;
 }
 
-.media {
-  position: relative;
+.main {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto 12px;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 80px;
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+  color: inherit;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.main:active {
+  background: var(--color-fill);
+}
+
+@media (hover: hover) {
+  .main:hover {
+    background: var(--color-fill);
+  }
+}
+
+.main:focus-visible,
+.page:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.thumb {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 16 / 7;
+  width: 56px;
+  height: 56px;
   overflow: hidden;
-  background:
-    radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--tint) 24%, transparent),
-      transparent
-    ),
-    color-mix(in srgb, var(--tint) 9%, var(--color-surface));
+  border-radius: var(--radius-md);
 }
 
 .cover {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.status {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
-  color: var(--color-foreground);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
   font-weight: var(--font-weight-semibold);
+}
+
+.status {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 .status::before {
   content: "";
-  display: inline-block;
   width: 6px;
   height: 6px;
-  margin-right: var(--space-1);
   border-radius: var(--radius-full);
   background: var(--color-success);
-  vertical-align: 1px;
 }
 
 .status[data-hidden]::before {
   background: var(--color-tertiary-foreground);
 }
 
-.body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-}
-
-.eyebrow {
+.meta,
+.next {
+  overflow: hidden;
   color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.title {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  line-height: var(--text-xl-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
-}
-
-.titleLink {
+.next {
   color: var(--color-foreground);
 }
 
 .today {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  min-width: 48px;
+}
+
+.todayCount {
+  font-size: var(--text-2xl);
+  line-height: 1;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.todayLabel {
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caption);
 }
 
-.today strong {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
+.chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
 }
 
-.actions {
+/* «Страница ↗» as a trailing accessory with its own hairline, like a detail button. */
+.page {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: auto;
-  padding-top: var(--space-3);
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  color: var(--color-link);
 }
 
-.actions svg {
-  width: 14px;
-  height: 14px;
+.page::before {
+  content: "";
+  position: absolute;
+  top: var(--space-4);
+  bottom: var(--space-4);
+  left: 0;
+  width: 0.5px;
+  background: var(--color-border);
+}
+
+.page svg {
+  width: 18px;
+  height: 18px;
 }
 
 @media (hover: hover) {
-  .titleLink:hover {
-    color: var(--color-link);
+  .page:hover {
+    background: var(--color-fill);
   }
 }

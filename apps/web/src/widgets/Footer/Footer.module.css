@@ -1,6 +1,6 @@
 .footer {
   margin-top: auto;
-  padding: var(--space-6) 0 calc(var(--space-6) + var(--tabbar-space));
+  padding: var(--space-6) 0 calc(var(--space-6) + var(--tabbar-space) + var(--resume-space));
   background: var(--color-background);
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);

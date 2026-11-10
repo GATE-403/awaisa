@@ -1,12 +1,11 @@
 import { getBusiness } from '@/shared/api/serverApi'
-import { CategoryLinks } from '@/views/business/ui/CategoryLinks/CategoryLinks'
-import { MastersShelf } from '@/views/business/ui/HomeShelves/MastersShelf'
-import { PerksShelf } from '@/views/business/ui/HomeShelves/PerksShelf'
-import { PopularShelf } from '@/views/business/ui/HomeShelves/PopularShelf'
-import { VisitShelf } from '@/views/business/ui/HomeShelves/VisitShelf'
-import { WorkShelf } from '@/views/business/ui/HomeShelves/WorkShelf'
-import { StoreHero } from '@/views/business/ui/StoreHero/StoreHero'
-import styles from './BusinessHomePage.module.css'
+import { MastersSection } from '@/views/business/ui/Place/MastersSection'
+import { NextSlotCard } from '@/views/business/ui/Place/NextSlotCard'
+import { PhotosSection } from '@/views/business/ui/Place/PhotosSection'
+import styles from '@/views/business/ui/Place/Place.module.css'
+import { PlaceHeader } from '@/views/business/ui/Place/PlaceHeader'
+import { ServicesSection } from '@/views/business/ui/Place/ServicesSection'
+import { VisitSection } from '@/views/business/ui/Place/VisitSection'
 
 interface BusinessHomePageProps {
   slug: string
@@ -14,17 +13,21 @@ interface BusinessHomePageProps {
 
 export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
   const { business, catalog } = await getBusiness(slug)
+  const quickest = catalog.services.find((service) => service.isPopular) ?? catalog.services[0]
 
   return (
     <main className={styles.page}>
-      <StoreHero business={business} services={catalog.services} />
-      <CategoryLinks business={business} catalog={catalog} />
-      <div className={styles.shelves}>
-        <PopularShelf business={business} catalog={catalog} />
-        <WorkShelf business={business} />
-        <MastersShelf business={business} specialists={catalog.specialists} />
-        <PerksShelf />
-        <VisitShelf business={business} />
+      <PlaceHeader business={business} catalog={catalog} />
+      <div className={styles.body}>
+        <div className={styles.main}>
+          <ServicesSection business={business} catalog={catalog} />
+          <MastersSection business={business} specialists={catalog.specialists} />
+          <PhotosSection business={business} />
+        </div>
+        <div className={styles.aside}>
+          {quickest && <NextSlotCard business={business} service={quickest} />}
+          <VisitSection business={business} />
+        </div>
       </div>
     </main>
   )

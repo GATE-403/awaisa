@@ -57,19 +57,18 @@ export const ManageIndexPage = () => {
         )}
 
         {businesses && businesses.length > 1 && (
-          <ul className={styles.grid}>
+          <ul className={styles.list}>
             {businesses.map((business) => (
               <li key={business.slug}>
                 <BusinessPickerCard business={business} />
               </li>
             ))}
             <li>
-              <NextLink href='/business/new' className={styles.addCard}>
+              <NextLink href='/business/new' className={styles.addRow}>
                 <span className={styles.addTile} aria-hidden='true'>
                   <Plus weight='bold' />
                 </span>
-                <span className={styles.addTitle}>Новая страница</span>
-                <span className={styles.addText}>Ещё один салон или своё дело — пять минут.</span>
+                Новая страница
               </NextLink>
             </li>
           </ul>

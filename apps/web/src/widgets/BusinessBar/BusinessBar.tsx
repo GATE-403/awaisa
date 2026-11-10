@@ -18,6 +18,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
   const today = useToday()
   const base = `/${business.slug}`
   const isBooking = pathname === `${base}/book`
+  // The overview has its own big «Записаться», so the bar does not repeat it.
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes) : null
   const sections = [
     { href: base, label: 'Обзор', isActive: pathname === base },
@@ -65,7 +66,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
             </li>
           ))}
         </ul>
-        {!isBooking && (
+        {!isBooking && pathname !== base && (
           <NextLink href={`${base}/book`} className={styles.cta}>
             Записаться
           </NextLink>

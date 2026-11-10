@@ -10,6 +10,8 @@
     env(safe-area-inset-bottom)
   );
   --business-bar-height: 48px;
+  /* Room for the floating «Продолжить запись» pill while it is on screen. */
+  --resume-space: 0px;
   --page-gutter: var(--space-4);
   --section-gap: var(--space-10);
 }
@@ -29,6 +31,10 @@
   :root {
     --page-gutter: var(--space-8);
   }
+}
+
+:root:has([data-resume-booking]) {
+  --resume-space: 72px;
 }
 
 html {
