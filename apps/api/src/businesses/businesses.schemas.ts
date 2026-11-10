@@ -127,6 +127,24 @@ const mapQuerySchema = z.object({
 type CreateBusinessInput = z.infer<typeof createBusinessSchema>
 type UpdateBusinessInput = z.infer<typeof updateBusinessSchema>
 type HoursInput = z.infer<typeof hoursSchema>
+
+const masterHoursSchema = z.object({
+  hasOwnHours: z.boolean(),
+  days: hoursSchema,
+})
+
+const LEAVE_DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата в формате YYYY-MM-DD')
+
+const leaveSchema = z
+  .object({
+    startsOn: LEAVE_DATE,
+    endsOn: LEAVE_DATE,
+    reason: z.string().trim().max(160).default(''),
+  })
+  .refine((leave) => leave.endsOn >= leave.startsOn, 'Конец отпуска раньше начала')
+
+type MasterHoursInput = z.infer<typeof masterHoursSchema>
+type LeaveBody = z.infer<typeof leaveSchema>
 type CatalogQuery = z.infer<typeof catalogQuerySchema>
 type SlugQuery = z.infer<typeof slugQuerySchema>
 type CategoryInput = z.infer<typeof categorySchema>
@@ -137,6 +155,8 @@ type MapQuery = z.infer<typeof mapQuerySchema>
 
 export type {
   BranchInput,
+  LeaveBody,
+  MasterHoursInput,
   CatalogQuery,
   MapQuery,
   CategoryInput,
@@ -154,6 +174,8 @@ export {
   categorySchema,
   createBusinessSchema,
   hoursSchema,
+  leaveSchema,
+  masterHoursSchema,
   serviceSchema,
   slugQuerySchema,
   specialistSchema,

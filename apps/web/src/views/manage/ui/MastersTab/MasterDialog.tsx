@@ -16,6 +16,8 @@ interface MasterDialogProps {
   onSave: (input: SpecialistInput) => Promise<boolean>
   /** Only for saved masters: uploads happen at once, like changing a contact photo. */
   onPhotoChange?: (file: File | null) => Promise<boolean>
+  /** Only for saved masters: opens their week and days away. */
+  onOpenSchedule?: () => void
 }
 
 const FORM_ID = 'master-form'
@@ -27,6 +29,7 @@ export const MasterDialog = ({
   onClose,
   onSave,
   onPhotoChange,
+  onOpenSchedule,
 }: MasterDialogProps) => {
   const [branchId, setBranchId] = useState<string | null>(master?.branchId ?? null)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -187,6 +190,12 @@ export const MasterDialog = ({
         )}
 
         <div className={sheet.list}>
+          {onOpenSchedule && (
+            <button type='button' className={sheet.row} onClick={onOpenSchedule}>
+              <span className={sheet.rowLabel}>График и отпуск</span>
+              <span className={sheet.suffix}>›</span>
+            </button>
+          )}
           <label className={sheet.row}>
             <span className={sheet.rowLabel}>Принимает записи</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />

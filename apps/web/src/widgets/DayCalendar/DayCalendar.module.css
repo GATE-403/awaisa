@@ -61,6 +61,11 @@
   white-space: nowrap;
 }
 
+.role[data-off] {
+  color: var(--color-highlight);
+  font-weight: var(--font-weight-semibold);
+}
+
 /* Above the blocks: columns scroll sideways under the hour labels, never over them. */
 .axis {
   position: sticky;

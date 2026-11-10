@@ -5,7 +5,10 @@ import { In, Repository } from 'typeorm'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
+import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
+import { clampToWindow } from '../catalog/master-hours.js'
+import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import {
   businessDateTimeToUtc,
   formatMinutes,
@@ -43,6 +46,8 @@ export class AdminService {
     @InjectRepository(TimeOff) private readonly timeOff: Repository<TimeOff>,
     private readonly bookings: BookingsService,
     private readonly catalog: CatalogService,
+    private readonly masterSchedule: MasterScheduleService,
+    private readonly businesses: BusinessesService,
     private readonly sms: SmsService,
     private readonly config: ConfigService<Env, true>,
   ) {}
@@ -62,14 +67,28 @@ export class AdminService {
             .getMany(),
     ])
 
+    const window = await this.businesses.getOpeningWindow(business.id, date)
+    const ids = specialists.map(({ id }) => id)
+    const [days, leaves] = await Promise.all([
+      this.masterSchedule.daysFor(ids, date, window),
+      this.masterSchedule.leavesOn(ids, date),
+    ])
+
     return {
       date,
-      specialists: specialists.map(({ id, name, role, branchId }) => ({
-        id,
-        name,
-        role,
-        branchId,
-      })),
+      specialists: specialists.map(({ id, name, role, branchId }) => {
+        const day = window ? clampToWindow(days.get(id) ?? null, window) : null
+        return {
+          id,
+          name,
+          role,
+          branchId,
+          // The master's own day inside the business hours; null = not working.
+          hours: day,
+          leaveReason: leaves.find((leave) => leave.specialistId === id)?.reason ?? null,
+          isOnLeave: leaves.some((leave) => leave.specialistId === id),
+        }
+      }),
       bookings,
       timeOff: timeOff.map(toTimeOffView),
     }

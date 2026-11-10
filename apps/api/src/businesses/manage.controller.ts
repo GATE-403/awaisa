@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CatalogService } from '../catalog/catalog.service.js'
+import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Business } from './business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from './business-access.guard.js'
 import {
@@ -21,6 +22,10 @@ import {
   categorySchema,
   type HoursInput,
   hoursSchema,
+  type LeaveBody,
+  leaveSchema,
+  type MasterHoursInput,
+  masterHoursSchema,
   type ServiceInput,
   type SpecialistInput,
   serviceSchema,
@@ -36,6 +41,7 @@ export class ManageController {
   constructor(
     private readonly businesses: BusinessesService,
     private readonly catalog: CatalogService,
+    private readonly masterSchedule: MasterScheduleService,
   ) {}
 
   @Get()
@@ -141,5 +147,38 @@ export class ManageController {
     @Body({ schema: specialistSchema }) body: SpecialistInput,
   ) {
     await this.catalog.saveSpecialist(business.id, body, id)
+  }
+
+  @Get('specialists/:id/schedule')
+  getMasterSchedule(@CurrentBusiness() business: Business, @Param('id') id: string) {
+    return this.masterSchedule.getSchedule(business.id, id)
+  }
+
+  @Put('specialists/:id/hours')
+  setMasterHours(
+    @CurrentBusiness() business: Business,
+    @Param('id') id: string,
+    @Body({ schema: masterHoursSchema }) body: MasterHoursInput,
+  ) {
+    return this.masterSchedule.setHours(business.id, id, body)
+  }
+
+  @Post('specialists/:id/leaves')
+  addLeave(
+    @CurrentBusiness() business: Business,
+    @Param('id') id: string,
+    @Body({ schema: leaveSchema }) body: LeaveBody,
+  ) {
+    return this.masterSchedule.addLeave(business.id, id, body)
+  }
+
+  @Delete('specialists/:id/leaves/:leaveId')
+  @HttpCode(204)
+  async removeLeave(
+    @CurrentBusiness() business: Business,
+    @Param('id') id: string,
+    @Param('leaveId', ParseUUIDPipe) leaveId: string,
+  ) {
+    await this.masterSchedule.removeLeave(business.id, id, leaveId)
   }
 }

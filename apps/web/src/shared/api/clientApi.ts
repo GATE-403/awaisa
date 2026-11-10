@@ -24,6 +24,7 @@ import type {
   Customer,
   ManagedReview,
   MapPlace,
+  MasterSchedule,
   MovedBooking,
   NextFree,
   OtpRequest,
@@ -190,6 +191,28 @@ const updateClient = (
     input,
   )
 
+const getMasterSchedule = (slug: string, id: string, signal?: AbortSignal) =>
+  request<MasterSchedule>(`${manage(slug)}/specialists/${id}/schedule`, { signal })
+
+const setMasterHours = (
+  slug: string,
+  id: string,
+  input: { hasOwnHours: boolean; days: WorkingDay[] },
+) => send<MasterSchedule>('PUT', `${manage(slug)}/specialists/${id}/hours`, input)
+
+const addMasterLeave = (
+  slug: string,
+  id: string,
+  input: { startsOn: string; endsOn: string; reason: string },
+) =>
+  post<{ leave: MasterSchedule['leaves'][number]; conflictingBookings: number }>(
+    `${manage(slug)}/specialists/${id}/leaves`,
+    input,
+  )
+
+const removeMasterLeave = (slug: string, id: string, leaveId: string) =>
+  send<void>('DELETE', `${manage(slug)}/specialists/${id}/leaves/${leaveId}`)
+
 const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
   request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
 
@@ -331,6 +354,10 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  getMasterSchedule,
+  setMasterHours,
+  addMasterLeave,
+  removeMasterLeave,
   setBookingOutcome,
   getClients,
   getClient,
