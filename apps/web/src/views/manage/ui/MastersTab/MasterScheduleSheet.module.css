@@ -1,0 +1,110 @@
+.skeleton {
+  height: 360px;
+  border-radius: var(--radius-xl);
+}
+
+.dayRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.dayName {
+  flex: 1 0 96px;
+  font-size: var(--text-md);
+}
+
+/* On narrow sheets the times wrap under the day instead of squeezing its name away. */
+.range {
+  display: inline-flex;
+  margin-left: auto;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+}
+
+.off {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+}
+
+.leave {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.leaveText {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaveDates {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-medium);
+}
+
+.leaveReason {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+.leaveForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.dateField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.dateField input {
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-md);
+}
+
+.dateField input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.reason,
+.addLeave {
+  grid-column: 1 / -1;
+}

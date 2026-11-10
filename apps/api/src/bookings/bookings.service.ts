@@ -11,6 +11,7 @@ import { Brackets, In, QueryFailedError, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
+import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Service } from '../catalog/service.entity.js'
 import {
   addDays,
@@ -133,6 +134,7 @@ export class BookingsService {
     @InjectRepository(TimeOff) private readonly timeOff: Repository<TimeOff>,
     @InjectRepository(Customer) private readonly customers: Repository<Customer>,
     private readonly catalogService: CatalogService,
+    private readonly masterSchedule: MasterScheduleService,
     private readonly businesses: BusinessesService,
     private readonly sms: SmsService,
     private readonly telegram: TelegramBotService,
@@ -454,6 +456,16 @@ export class BookingsService {
       .andWhere('timeOff.startsAt < :endsAt AND timeOff.endsAt > :startsAt', { startsAt, endsAt })
       .getExists()
     if (blocked) throw new ConflictException('У мастера закрыто это время')
+    // Staff may not drop a visit into the master's day off or outside their hours.
+    const window = await this.businesses.getOpeningWindow(businessId, target.date)
+    const offHours = await this.masterSchedule.offHoursBusy(
+      [target.specialistId],
+      target.date,
+      window,
+    )
+    if (offHours.some((interval) => startsAt < interval.endsAt && interval.startsAt < endsAt)) {
+      throw new ConflictException('Мастер в это время не работает')
+    }
 
     const before = toBusinessParts(booking.startsAt)
     const previous = {
@@ -621,14 +633,17 @@ export class BookingsService {
       .andWhere('timeOff.startsAt < :dayEnd AND timeOff.endsAt > :dayStart', { dayStart, dayEnd })
       .getMany()
 
+    const window = await this.businesses.getOpeningWindow(service.businessId, date)
+    const offHours = await this.masterSchedule.offHoursBusy(specialistIds, date, window)
+
     return buildSlots({
       dateKey: date,
-      window: await this.businesses.getOpeningWindow(service.businessId, date),
+      window,
       slotMinutes,
       now,
       durationMinutes: service.durationMinutes,
       specialistIds,
-      busy: [...busy, ...blocked],
+      busy: [...busy, ...blocked, ...offHours],
     })
   }
 

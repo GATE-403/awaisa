@@ -187,6 +187,12 @@ type VisitReview = { visit: Booking; canReview: boolean }
 
 type ReviewAccess = { token?: string | null; signature?: string | null }
 
+type MasterSchedule = {
+  hasOwnHours: boolean
+  hours: WorkingDay[]
+  leaves: { id: string; startsOn: string; endsOn: string; reason: string }[]
+}
+
 type TelegramStatus = {
   isAvailable: boolean
   botUsername: string | null
@@ -289,7 +295,12 @@ type TimeOff = {
 
 type AdminSchedule = {
   date: string
-  specialists: Pick<Specialist, 'id' | 'name' | 'role' | 'branchId'>[]
+  specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'branchId'> & {
+    /** The master's working time that day inside the business hours; null = not working. */
+    hours?: { opensMinutes: number; closesMinutes: number } | null
+    isOnLeave?: boolean
+    leaveReason?: string | null
+  })[]
   bookings: AdminBooking[]
   timeOff: TimeOff[]
 }
@@ -393,6 +404,7 @@ type AnalyticsReport = {
 
 export type {
   AdminBooking,
+  MasterSchedule,
   ClientCard,
   ClientListItem,
   OutcomeInput,

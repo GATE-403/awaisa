@@ -119,6 +119,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
               slug={slug}
               catalog={data.catalog}
               branches={data.business.branches}
+              businessHours={data.business.hours}
               run={run}
             />
           )}

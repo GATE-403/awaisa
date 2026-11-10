@@ -8,22 +8,25 @@ import {
   updateSpecialist,
   uploadSpecialistPhoto,
 } from '@/shared/api/clientApi'
-import type { Branch, Catalog, Specialist, SpecialistInput } from '@/shared/api/types'
+import type { Branch, Catalog, Specialist, SpecialistInput, WorkingDay } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { MasterDialog } from './MasterDialog'
+import { MasterScheduleSheet } from './MasterScheduleSheet'
 
 interface MastersTabProps {
   slug: string
   catalog: Catalog
   branches: Branch[]
+  businessHours: WorkingDay[]
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
 }
 
-export const MastersTab = ({ slug, catalog, branches, run }: MastersTabProps) => {
+export const MastersTab = ({ slug, catalog, branches, businessHours, run }: MastersTabProps) => {
   const [editing, setEditing] = useState<Specialist | 'new' | null>(null)
+  const [scheduling, setScheduling] = useState<Specialist | null>(null)
 
   const handleSave = (input: SpecialistInput) =>
     editing && editing !== 'new'
@@ -99,6 +102,23 @@ export const MastersTab = ({ slug, catalog, branches, run }: MastersTabProps) =>
                     file ? 'Фото обновлено' : 'Фото удалено',
                   )
           }
+          onOpenSchedule={
+            editing === 'new'
+              ? undefined
+              : () => {
+                  setScheduling(editing)
+                  setEditing(null)
+                }
+          }
+        />
+      )}
+
+      {scheduling && (
+        <MasterScheduleSheet
+          slug={slug}
+          master={scheduling}
+          businessHours={businessHours}
+          onClose={() => setScheduling(null)}
         />
       )}
     </section>

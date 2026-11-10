@@ -36,6 +36,10 @@ export class Specialist {
   @Column({ name: 'photo_url', type: 'varchar', length: 512, nullable: true })
   photoUrl: string | null
 
+  /** false = works the business hours; true = `specialist_hours` rows (no row = day off). */
+  @Column({ name: 'has_own_hours', type: 'boolean', default: false })
+  hasOwnHours: boolean
+
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean
 

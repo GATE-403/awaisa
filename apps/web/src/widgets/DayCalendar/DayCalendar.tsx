@@ -18,7 +18,11 @@ import styles from './DayCalendar.module.css'
 import { useBookingDrag } from './useBookingDrag'
 
 interface DayCalendarProps {
-  specialists: Pick<Specialist, 'id' | 'name' | 'role'>[]
+  specialists: (Pick<Specialist, 'id' | 'name' | 'role'> & {
+    hours?: { opensMinutes: number; closesMinutes: number } | null
+    isOnLeave?: boolean
+    leaveReason?: string | null
+  })[]
   bookings: AdminBooking[]
   timeOff: TimeOff[]
   hours: WorkingDay | null
@@ -37,6 +41,34 @@ const position = (from: number, to: number, start: number): CSSProperties => ({
   top: toPx(from - start),
   height: Math.max(toPx(to - from) - 2, 28),
 })
+
+interface OffHoursProps {
+  day: { opensMinutes: number; closesMinutes: number } | null
+  range: { start: number; end: number }
+  height: number
+}
+
+// Each master's own day: hatched before and after it, or all day when they are off.
+const OffHours = ({ day, range, height }: OffHoursProps) => {
+  if (!day) return <span className={styles.closed} style={{ top: 0, height }} />
+
+  return (
+    <>
+      {day.opensMinutes > range.start && (
+        <span
+          className={styles.closed}
+          style={position(range.start, day.opensMinutes, range.start)}
+        />
+      )}
+      {day.closesMinutes < range.end && (
+        <span
+          className={styles.closed}
+          style={position(day.closesMinutes, range.end, range.start)}
+        />
+      )}
+    </>
+  )
+}
 
 export const DayCalendar = ({
   specialists,
@@ -60,6 +92,22 @@ export const DayCalendar = ({
   )
   const showNow = nowMinutes !== null && nowMinutes >= range.start && nowMinutes <= range.end
   const gridStyle = { '--columns': specialists.length } as CSSProperties
+  // Masters without their own day (older API) follow the business hours.
+  const dayOf = (specialist: DayCalendarProps['specialists'][number]) =>
+    specialist.hours === undefined ? hours : specialist.hours
+  const headNote = (specialist: DayCalendarProps['specialists'][number]) => {
+    if (specialist.isOnLeave) return specialist.leaveReason || 'Отпуск'
+    const day = dayOf(specialist)
+    if (!day) return 'Выходной'
+    if (
+      hours &&
+      day.opensMinutes === hours.opensMinutes &&
+      day.closesMinutes === hours.closesMinutes
+    ) {
+      return null
+    }
+    return `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
+  }
   const drag = useBookingDrag({ scrollerRef, range, slotMinutes, onMove: onMoveBooking })
 
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
@@ -90,7 +138,9 @@ export const DayCalendar = ({
             style={{ '--tint': getMasterTint(index) } as CSSProperties}
           >
             <span className={styles.master}>{specialist.name}</span>
-            {specialist.role && <span className={styles.role}>{specialist.role}</span>}
+            <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
+              {headNote(specialist) ?? specialist.role}
+            </span>
           </div>
         ))}
 
@@ -145,19 +195,7 @@ export const DayCalendar = ({
                 aria-hidden='true'
               />
             ))}
-            {!hours && <span className={styles.closed} style={{ top: 0, height }} />}
-            {hours && hours.opensMinutes > range.start && (
-              <span
-                className={styles.closed}
-                style={position(range.start, hours.opensMinutes, range.start)}
-              />
-            )}
-            {hours && hours.closesMinutes < range.end && (
-              <span
-                className={styles.closed}
-                style={position(hours.closesMinutes, range.end, range.start)}
-              />
-            )}
+            <OffHours day={dayOf(specialist)} range={range} height={height} />
 
             {timeOff
               .filter((item) => item.specialistId === specialist.id)
