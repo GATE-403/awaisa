@@ -1,23 +1,17 @@
 .bar {
   position: sticky;
-  top: var(--header-height);
+  /* Tucked 1px under the header, so no sliver of the page shows between them. */
+  top: calc(var(--header-height) - 1px);
   z-index: 35;
-  background: var(--color-material);
+  background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
+  box-shadow: 0 0.5px 0 var(--color-border);
 }
 
-/* Scroll edge effect: content softly dims under the bar instead of meeting a hard hairline. */
-.bar::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  right: 0;
-  left: 0;
-  height: 14px;
-  background: linear-gradient(var(--color-scroll-edge), transparent);
-  pointer-events: none;
+/* With section chips below, the hairline goes under them: one line under the whole stack. */
+:global(:root:has([data-category-nav])) .bar {
+  box-shadow: none;
 }
-
 /* Phones: one 48pt row — the business and its sections, scrolling freely (booking is on the page). */
 .inner {
   display: grid;

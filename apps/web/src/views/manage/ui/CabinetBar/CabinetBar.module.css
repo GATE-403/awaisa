@@ -3,7 +3,7 @@
   top: 0;
   z-index: 40;
   padding-top: env(safe-area-inset-top);
-  background: var(--color-material);
+  background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
   box-shadow: var(--shadow-material);
 }

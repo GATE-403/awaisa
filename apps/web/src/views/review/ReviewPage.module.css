@@ -1,0 +1,74 @@
+.page {
+  padding: var(--space-8) 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton {
+  height: 420px;
+  border-radius: var(--radius-2xl);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.visit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.text {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.link {
+  color: var(--color-link);
+  text-align: center;
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.doneStars {
+  display: flex;
+  gap: var(--space-1);
+  color: var(--color-rating);
+}
+
+.doneStars svg {
+  width: 32px;
+  height: 32px;
+}
+
+.doneTitle {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+}

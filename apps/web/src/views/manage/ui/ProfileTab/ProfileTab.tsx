@@ -10,6 +10,7 @@ import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { PhotosSection } from '@/views/manage/ui/PhotosSection/PhotosSection'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
+import { TelegramSection } from '@/views/manage/ui/TelegramSection/TelegramSection'
 
 interface ProfileTabProps {
   slug: string
@@ -90,6 +91,8 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
         <h3 className={styles.groupTitle}>Контакты</h3>
         <div className={styles.list}>{CONTACTS.map(renderField)}</div>
       </div>
+
+      <TelegramSection slug={slug} />
 
       <div className={styles.group}>
         <h3 className={styles.groupTitle}>Публикация</h3>

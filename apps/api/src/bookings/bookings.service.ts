@@ -24,6 +24,9 @@ import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
 import { confirmationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
+import { Review } from '../reviews/review.entity.js'
+import { TelegramBotService } from '../telegram/telegram-bot.service.js'
+import { cancelledText, newBookingText } from '../telegram/telegram-messages.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
 import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, UNDO_WINDOW_SECONDS } from './booking-rules.js'
@@ -41,7 +44,9 @@ type BookingView = {
   date: string
   time: string
   startsAt: string
+  endsAt: string
   customerName: string
+  review: { rating: number; comment: string; reply: string | null } | null
   business: {
     slug: string
     name: string
@@ -83,7 +88,15 @@ const toView = (booking: Booking): BookingView => {
     date: dateKey,
     time: formatMinutes(minutes),
     startsAt: booking.startsAt.toISOString(),
+    endsAt: booking.endsAt.toISOString(),
     customerName: booking.customerName,
+    review: booking.review
+      ? {
+          rating: booking.review.rating,
+          comment: booking.review.comment,
+          reply: booking.review.reply,
+        }
+      : null,
     business: {
       slug: booking.business?.slug ?? '',
       name: booking.business?.name ?? '',
@@ -104,6 +117,7 @@ export class BookingsService {
     private readonly catalogService: CatalogService,
     private readonly businesses: BusinessesService,
     private readonly sms: SmsService,
+    private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -221,6 +235,13 @@ export class BookingsService {
         if (input.smsConfirmation) {
           void this.sms.sendSafely(phone, confirmationMessage(view, this.webUrl()))
         }
+        // Staff who book a client in already know; the owner's chat hears about the rest.
+        if (!staffBusinessId) {
+          void this.telegram.notifyBusiness(
+            service.businessId,
+            newBookingText(view.business.name, view.date, { ...view, customerPhone: phone }),
+          )
+        }
 
         return { ...view, cancelToken, customerPhone: phone, comment: input.comment }
       } catch (error) {
@@ -238,9 +259,30 @@ export class BookingsService {
 
   async cancel(id: string, token: string) {
     const booking = await this.verifyToken(id, token)
-    if (booking.status !== 'cancelled') await this.markCancelled(id)
+    if (booking.status !== 'cancelled') await this.cancelByClient(booking)
 
     return this.getView(id)
+  }
+
+  findById(id: string) {
+    return this.bookings.findOneBy({ id })
+  }
+
+  /** The booking reachable with its token, a signed-in owner of it, or null. */
+  async findAccessible(id: string, token: string | null, customer: Customer | null) {
+    const booking = await this.bookings.findOneBy({ id })
+    if (!booking) return null
+    if (
+      customer &&
+      (booking.customerId === customer.id || booking.customerPhone === customer.phone)
+    ) {
+      return booking
+    }
+    if (!token) return null
+    const expected = Buffer.from(booking.cancelTokenHash, 'hex')
+    const actual = Buffer.from(hashToken(token), 'hex')
+
+    return expected.length === actual.length && timingSafeEqual(expected, actual) ? booking : null
   }
 
   async restoreByToken(id: string, token: string) {
@@ -248,12 +290,7 @@ export class BookingsService {
   }
 
   async listForCustomer(customer: Customer) {
-    const bookings = await this.bookings
-      .createQueryBuilder('booking')
-      .leftJoinAndSelect('booking.service', 'service')
-      .leftJoinAndSelect('booking.specialist', 'specialist')
-      .leftJoinAndSelect('booking.business', 'business')
-      .leftJoinAndSelect('booking.branch', 'branch')
+    const bookings = await this.viewQuery()
       .where(
         new Brackets((query) =>
           query
@@ -273,7 +310,7 @@ export class BookingsService {
     const isOwner =
       booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
     if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
-    if (booking.status !== 'cancelled') await this.markCancelled(id)
+    if (booking.status !== 'cancelled') await this.cancelByClient(booking)
 
     return this.getView(id)
   }
@@ -436,6 +473,21 @@ export class BookingsService {
     return branch?.id ?? null
   }
 
+  // The owner hears about it only once the client can no longer undo it.
+  private async cancelByClient(booking: Booking) {
+    await this.markCancelled(booking.id)
+    setTimeout(() => {
+      void (async () => {
+        if (!(await this.isCancelled(booking.id))) return
+        const view = await this.getView(booking.id)
+        await this.telegram.notifyBusiness(
+          booking.businessId,
+          cancelledText(view.business.name, view.date, view),
+        )
+      })().catch(() => undefined)
+    }, UNDO_WINDOW_SECONDS * 1000).unref()
+  }
+
   private markCancelled(id: string) {
     return this.bookings.update({ id }, { status: 'cancelled', cancelledAt: new Date() })
   }
@@ -541,6 +593,16 @@ export class BookingsService {
     })
   }
 
+  private viewQuery() {
+    return this.bookings
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.service', 'service')
+      .leftJoinAndSelect('booking.specialist', 'specialist')
+      .leftJoinAndSelect('booking.business', 'business')
+      .leftJoinAndSelect('booking.branch', 'branch')
+      .leftJoinAndMapOne('booking.review', Review, 'review', 'review.bookingId = booking.id')
+  }
+
   private async verifyToken(id: string, token: string) {
     const booking = await this.bookings.findOneBy({ id })
     const expected = Buffer.from(booking?.cancelTokenHash ?? '', 'hex')
@@ -553,10 +615,7 @@ export class BookingsService {
   }
 
   async getView(id: string): Promise<BookingView> {
-    const booking = await this.bookings.findOneOrFail({
-      where: { id },
-      relations: { service: true, specialist: true, business: true, branch: true },
-    })
+    const booking = await this.viewQuery().where('booking.id = :id', { id }).getOneOrFail()
 
     return toView(booking)
   }

@@ -18,6 +18,10 @@ type Env = {
   TWILIO_MESSAGING_SERVICE_SID?: string
   OTP_TEST_CODE?: string
   TELEGRAM_GATEWAY_TOKEN?: string
+  TELEGRAM_BOT_TOKEN?: string
+  TELEGRAM_BOT_USERNAME?: string
+  TELEGRAM_WEBHOOK_SECRET?: string
+  TELEGRAM_WEBHOOK_URL?: string
   STORAGE_DRIVER: StorageDriver
   UPLOAD_DIR: string
   S3_BUCKET?: string
@@ -225,6 +229,11 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),
+    // The owners' bot (BotFather): a separate token from the Gateway that sends sign-in codes.
+    TELEGRAM_BOT_TOKEN: optionalString(config.TELEGRAM_BOT_TOKEN),
+    TELEGRAM_BOT_USERNAME: optionalString(config.TELEGRAM_BOT_USERNAME)?.replace(/^@/, ''),
+    TELEGRAM_WEBHOOK_SECRET: optionalString(config.TELEGRAM_WEBHOOK_SECRET),
+    TELEGRAM_WEBHOOK_URL: optionalString(config.TELEGRAM_WEBHOOK_URL),
     ...parseStorage(config),
     ...parseWallet(config),
   }

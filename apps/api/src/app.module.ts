@@ -13,6 +13,8 @@ import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
 import { MediaModule } from './media/media.module.js'
+import { ReviewsModule } from './reviews/reviews.module.js'
+import { TelegramModule } from './telegram/telegram.module.js'
 import { WalletModule } from './wallet/wallet.module.js'
 
 @Module({
@@ -38,6 +40,8 @@ import { WalletModule } from './wallet/wallet.module.js'
     AdminModule,
     MediaModule,
     WalletModule,
+    ReviewsModule,
+    TelegramModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

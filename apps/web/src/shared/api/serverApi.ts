@@ -4,7 +4,14 @@ import { notFound } from 'next/navigation'
 import { API_URL } from '@/shared/config/api'
 import { toApiError } from './apiError'
 import { BUSINESSES_TAG, businessTag } from './cacheTags'
-import type { BusinessCard, BusinessKind, BusinessPage, Offer, PopularService } from './types'
+import type {
+  BusinessCard,
+  BusinessKind,
+  BusinessPage,
+  Offer,
+  PopularService,
+  ReviewSummary,
+} from './types'
 
 const NOT_FOUND = 404
 
@@ -75,4 +82,16 @@ const listOffers = async (
   return response.json()
 }
 
-export { getBusiness, listBusinesses, listOffers, listPopularServices }
+// Refreshed with the business: a new review calls refreshBusiness(slug).
+const listReviews = async (slug: string): Promise<ReviewSummary> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(businessTag(slug))
+
+  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}/reviews?limit=6`)
+  if (!response.ok) return { count: 0, average: 0, distribution: [], items: [] }
+
+  return response.json()
+}
+
+export { getBusiness, listBusinesses, listOffers, listPopularServices, listReviews }

@@ -90,6 +90,12 @@ export class Booking {
   @Column({ name: 'reminder_sent_at', type: 'timestamptz', nullable: true })
   reminderSentAt: Date | null
 
+  /** Filled by the view query (left join), not a column. */
+  review?: { rating: number; comment: string; reply: string | null }
+
+  @Column({ name: 'review_requested_at', type: 'timestamptz', nullable: true })
+  reviewRequestedAt: Date | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

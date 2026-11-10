@@ -109,3 +109,36 @@
 .again {
   color: var(--color-link);
 }
+
+.rate {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.rate:active {
+  scale: 0.96;
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.stars svg {
+  width: 13px;
+  height: 13px;
+  color: var(--color-rating);
+}

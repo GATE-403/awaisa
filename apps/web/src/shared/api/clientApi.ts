@@ -20,19 +20,27 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  ManagedReview,
   MapPlace,
   MovedBooking,
   NextFree,
   OtpRequest,
   RecentBooking,
+  Review,
+  ReviewAccess,
+  ReviewSummary,
   ServiceInput,
   SlugCheck,
   SpecialistInput,
+  TelegramStatus,
   UpdateBusinessInput,
+  VisitReview,
   WorkingDay,
 } from './types'
 
 const TOKEN_HEADER = 'x-booking-token'
+
+const SIGNATURE_HEADER = 'x-review-signature'
 
 const NO_CONTENT = 204
 
@@ -131,6 +139,40 @@ const send = <Result>(method: 'PUT' | 'PATCH' | 'DELETE', path: string, body?: u
   request<Result>(path, { method, body: body === undefined ? undefined : JSON.stringify(body) })
 
 const manage = (slug: string) => `/manage/${encodeURIComponent(slug)}`
+
+const accessHeaders = ({ token, signature }: ReviewAccess): Record<string, string> => ({
+  ...(token ? { [TOKEN_HEADER]: token } : {}),
+  ...(signature ? { [SIGNATURE_HEADER]: signature } : {}),
+})
+
+const getVisitReview = (id: string, access: ReviewAccess, signal?: AbortSignal) =>
+  request<VisitReview>(`/bookings/${id}/review`, { headers: accessHeaders(access), signal })
+
+const createReview = (
+  id: string,
+  access: ReviewAccess,
+  input: { rating: number; comment: string },
+) =>
+  request<Review & { slug: string }>(`/bookings/${id}/review`, {
+    method: 'POST',
+    headers: accessHeaders(access),
+    body: JSON.stringify(input),
+  })
+
+const getManagedReviews = (slug: string, signal?: AbortSignal) =>
+  request<ReviewSummary<ManagedReview>>(`${manage(slug)}/reviews`, { signal })
+
+const replyToReview = (slug: string, id: string, text: string) =>
+  send<{ id: string; reply: string | null }>('PUT', `${manage(slug)}/reviews/${id}/reply`, { text })
+
+const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
+  request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
+
+const createTelegramLink = (slug: string) =>
+  post<{ url: string; code: string }>(`${manage(slug)}/telegram/link`)
+
+const removeTelegramChat = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/telegram/${id}`)
 
 const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<AnalyticsReport>(
@@ -264,6 +306,13 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  getVisitReview,
+  createReview,
+  getManagedReviews,
+  replyToReview,
+  getTelegramStatus,
+  createTelegramLink,
+  removeTelegramChat,
   getAvailability,
   getBooking,
   getManagedBusiness,

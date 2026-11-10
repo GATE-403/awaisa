@@ -1,0 +1,52 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.question {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-title);
+  text-align: center;
+}
+
+.label {
+  margin-top: var(--space-3);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.optional {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.comment {
+  width: 100%;
+  min-height: 104px;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-md);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.comment:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-footnote);
+}
+
+.submit {
+  margin-top: var(--space-2);
+}

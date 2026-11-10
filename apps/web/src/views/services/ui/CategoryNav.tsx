@@ -45,7 +45,7 @@ export const CategoryNav = ({ items }: CategoryNavProps) => {
   }, [activeId])
 
   return (
-    <nav aria-label='Категории' className={styles.bar}>
+    <nav aria-label='Категории' className={styles.bar} data-category-nav=''>
       <Container className={styles.list}>
         {items.map((item) => (
           <a

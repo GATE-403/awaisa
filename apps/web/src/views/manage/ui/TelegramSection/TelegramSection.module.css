@@ -1,0 +1,85 @@
+.row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--system-blue);
+  color: var(--color-primary-foreground);
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  font-size: var(--text-md);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.remove,
+.connect {
+  border: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.remove {
+  min-height: 44px;
+  color: var(--color-danger-text);
+  font-size: var(--text-sm);
+}
+
+.connect {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  color: var(--color-link);
+  font-size: var(--text-md);
+  text-align: left;
+}
+
+.connect[data-waiting] {
+  color: var(--color-muted-foreground);
+  cursor: progress;
+}
+
+@media (hover: hover) {
+  .connect:not([data-waiting]):hover {
+    background: var(--color-fill);
+  }
+}
+
+.footer {
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
