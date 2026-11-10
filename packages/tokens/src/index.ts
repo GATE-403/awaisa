@@ -61,6 +61,8 @@ type ColorScheme = {
   overlay: string
   material: string
   materialBorder: string
+  materialHighlight: string
+  scrollEdge: string
   contrast: string
   contrastHover: string
   contrastForeground: string
@@ -107,6 +109,10 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     overlay: 'rgb(0 0 0 / 0.32)',
     material: 'rgb(246 246 246 / 0.72)',
     materialBorder: 'rgb(255 255 255 / 0.6)',
+    // The lit top edge of a material pane: light falls from above.
+    materialHighlight: 'rgb(255 255 255 / 0.75)',
+    // Content dims as it slides under a bar (scroll edge effect) instead of a hard hairline.
+    scrollEdge: 'rgb(0 0 0 / 0.07)',
     contrast: palette.white,
     contrastHover: '#e8e8ed',
     contrastForeground: '#1d1d1f',
@@ -147,6 +153,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     overlay: 'rgb(0 0 0 / 0.56)',
     material: 'rgb(30 30 32 / 0.8)',
     materialBorder: 'rgb(255 255 255 / 0.08)',
+    materialHighlight: 'rgb(255 255 255 / 0.1)',
+    scrollEdge: 'rgb(0 0 0 / 0.5)',
     contrast: palette.white,
     contrastHover: '#e8e8ed',
     contrastForeground: '#1d1d1f',
@@ -261,10 +269,13 @@ const fontWeight = {
   bold: 700,
 }
 
+// Tracking is size-specific, like SF Pro: large type pulls in, small type opens up.
 const letterSpacing = {
+  display: '-0.02em',
   tight: '-0.022em',
   title: '-0.012em',
   normal: '-0.004em',
+  caption: '0.006em',
 }
 
 const controlHeight = {
@@ -278,9 +289,12 @@ const shadow = {
   xs: '0 0.5px 1px rgb(0 0 0 / 0.16), 0 1px 3px rgb(0 0 0 / 0.08)',
   // Top-edge highlight on filled controls.
   bevel: 'inset 0 1px 0 rgb(255 255 255 / 0.2)',
-  sm: '2px 4px 12px rgb(0 0 0 / 0.08)',
-  md: '2px 4px 16px rgb(0 0 0 / 0.16)',
-  lg: '0 12px 32px rgb(0 0 0 / 0.12), 0 32px 64px rgb(0 0 0 / 0.16)',
+  // Layered like real light: a tight contact shadow plus a wide ambient one, so cards rest on the page.
+  sm: '0 0.5px 1px rgb(0 0 0 / 0.05), 0 2px 6px rgb(0 0 0 / 0.04), 0 8px 24px rgb(0 0 0 / 0.05)',
+  md: '0 1px 2px rgb(0 0 0 / 0.08), 0 6px 16px rgb(0 0 0 / 0.08), 0 18px 40px rgb(0 0 0 / 0.1)',
+  lg: '0 2px 6px rgb(0 0 0 / 0.08), 0 12px 32px rgb(0 0 0 / 0.12), 0 32px 64px rgb(0 0 0 / 0.16)',
+  // Material panes: the lit top edge, then a soft lift. Heavier panes get md/lg on top.
+  material: 'inset 0 0.5px 0 var(--color-material-highlight)',
 }
 
 const blur = {

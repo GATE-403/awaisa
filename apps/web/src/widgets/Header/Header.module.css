@@ -5,12 +5,30 @@
   padding-top: env(safe-area-inset-top);
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
-  box-shadow: 0 0.5px 0 transparent;
-  transition: box-shadow var(--duration-normal) var(--ease-standard);
+  box-shadow: var(--shadow-material);
 }
 
-.header[data-scrolled] {
-  box-shadow: 0 0.5px 0 var(--color-border);
+/* Scroll edge effect: content softly dims under the bar instead of meeting a hard hairline. */
+.header::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 14px;
+  background: linear-gradient(var(--color-scroll-edge), transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.header[data-scrolled]::after {
+  opacity: 1;
+}
+
+/* On business pages the business bar below carries the edge. */
+:global(:root:has([data-business-bar])) .header::after {
+  display: none;
 }
 
 /* Phones: one row — the mascot and the search field, like a store app. */

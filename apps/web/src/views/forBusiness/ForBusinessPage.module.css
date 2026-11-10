@@ -668,6 +668,7 @@
   .title {
     font-size: var(--text-display);
     line-height: 1.02;
+    letter-spacing: var(--tracking-display);
   }
 
   .panel {

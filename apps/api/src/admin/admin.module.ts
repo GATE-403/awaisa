@@ -7,6 +7,7 @@ import { CatalogModule } from '../catalog/catalog.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { AdminController } from './admin.controller.js'
 import { AdminService } from './admin.service.js'
+import { AnalyticsService } from './analytics.service.js'
 import { TimeOff } from './time-off.entity.js'
 
 @Module({
@@ -19,6 +20,6 @@ import { TimeOff } from './time-off.entity.js'
     NotificationsModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, AnalyticsService],
 })
 export class AdminModule {}

@@ -38,6 +38,9 @@ const toColorVariables = (scheme: ColorScheme) => toVariables('color', scheme)
 
 const block = (selector: string, lines: string[]) => `${selector} {\n${lines.join('\n')}\n}`
 
+// As specific as the theme blocks, and later, so it wins in either theme.
+const A11Y_ROOT = ":root, :root[data-theme], :root:not([data-theme='light'])"
+
 const css = [
   block(':root', [
     '  color-scheme: light;',
@@ -67,6 +70,18 @@ const css = [
     ...toColorVariables(colors.dark),
     ...toVariables('system', systemColors.dark),
   ]),
+  // Accessibility settings: solid panes instead of glass, stronger edges and secondary text.
+  `@media (prefers-reduced-transparency: reduce) {\n${block(A11Y_ROOT, [
+    '  --blur-material: none;',
+    '  --color-material: var(--color-sheet);',
+  ])}\n}`,
+  `@media (prefers-contrast: more) {\n${block(A11Y_ROOT, [
+    '  --blur-material: none;',
+    '  --color-material: var(--color-sheet);',
+    '  --color-material-border: var(--color-border-strong);',
+    '  --color-border: var(--color-border-strong);',
+    '  --color-muted-foreground: color-mix(in srgb, var(--color-foreground) 82%, transparent);',
+  ])}\n}`,
 ].join('\n\n')
 
 mkdirSync(dirname(OUTPUT_FILE), { recursive: true })
