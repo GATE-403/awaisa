@@ -1,15 +1,32 @@
 .carousel {
   position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+}
+
+/* Native horizontal scroll with snap: swipe on phones, equal-height slides in one row. */
+.track {
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
 }
 
 .slide {
   position: relative;
   display: grid;
-  gap: var(--space-5);
-  min-height: 300px;
+  flex: 0 0 100%;
+  align-content: start;
+  gap: var(--space-4);
+  min-height: 260px;
   overflow: hidden;
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
+  padding: var(--space-5) var(--space-5) var(--space-12);
+  scroll-snap-align: start;
   /* Two scrims behind the copy keep white text AA on any system colour. */
   background:
     linear-gradient(90deg, var(--color-overlay), transparent 75%),
@@ -25,16 +42,7 @@
       transparent 70%
     ),
     linear-gradient(135deg, var(--from), var(--to));
-  box-shadow: var(--shadow-sm);
   color: var(--color-primary-foreground);
-  animation: slide-in 450ms var(--ease-standard);
-}
-
-@keyframes slide-in {
-  from {
-    opacity: 0.4;
-    translate: 12px 0;
-  }
 }
 
 .copy {
@@ -58,7 +66,7 @@
 .title {
   max-width: 14ch;
   font-family: var(--font-display);
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   line-height: 1.05;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-tight);
@@ -66,8 +74,8 @@
 
 .text {
   max-width: 34ch;
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
   opacity: 0.92;
 }
 
@@ -75,9 +83,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: var(--control-height-md);
-  margin-top: var(--space-2);
-  padding: 0 var(--space-5);
+  min-height: 40px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-4);
   border-radius: var(--radius-full);
   background: var(--color-contrast);
   box-shadow: var(--shadow-sm);
@@ -90,67 +98,36 @@
   height: 16px;
 }
 
-/* Real offers inside the banner, like product tiles on a sale banner. */
+/* Real offers inside the banner; a fixed grid, so it never fights the swipe. */
 .picks {
   display: grid;
-  grid-auto-columns: minmax(150px, 1fr);
-  grid-auto-flow: column;
-  gap: var(--space-3);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
   margin: 0;
   padding: 0;
-  overflow-x: auto;
   list-style: none;
-  scrollbar-width: none;
 }
 
 .pick {
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  gap: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   height: 100%;
-  min-height: 190px;
-  padding: var(--space-3);
-  border-radius: var(--radius-xl);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   color: var(--color-foreground);
-  transition: translate var(--duration-normal) var(--ease-standard);
-}
-
-@media (hover: hover) {
-  .pick:hover {
-    translate: 0 -3px;
-  }
-}
-
-.pickPrice {
-  justify-self: start;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--color-danger-strong);
-  color: var(--color-primary-foreground);
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-bold);
-}
-
-.pickName {
-  display: -webkit-box;
-  overflow: hidden;
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-  font-weight: var(--font-weight-medium);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .pickMedia {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 72px;
+  aspect-ratio: 4 / 3;
+  margin-bottom: var(--space-1);
   overflow: hidden;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: var(--color-fill);
 }
 
@@ -160,10 +137,16 @@
   object-fit: cover;
 }
 
-.pickPlace {
+.pickPrice {
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-bold);
+}
+
+.pickName {
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -235,19 +218,23 @@
 
 @media (min-width: 900px) {
   .slide {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-content: center;
     align-items: center;
-    min-height: 340px;
+    min-height: 300px;
     padding: var(--space-10);
   }
 
   .title {
-    font-size: var(--text-4xl);
+    font-size: var(--text-3xl);
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .slide {
-    animation: none;
+  .text {
+    font-size: var(--text-md);
+    line-height: var(--text-md-line-height);
+  }
+
+  .pick {
+    padding: var(--space-3);
   }
 }

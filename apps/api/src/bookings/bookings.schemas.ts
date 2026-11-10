@@ -26,6 +26,12 @@ const createBookingSchema = z.object({
   phone: z.string().trim().max(32).default(''),
   comment: z.string().trim().max(500).default(''),
   branchId: z.uuid().optional(),
+  // What the client wants to receive: a confirmation SMS, and a reminder 1 h, 2 h or a day before.
+  smsConfirmation: z.boolean().default(true),
+  reminderMinutes: z
+    .union([z.literal(60), z.literal(120), z.literal(1440)])
+    .nullable()
+    .default(120),
 })
 
 const nextFreeQuerySchema = z.object({

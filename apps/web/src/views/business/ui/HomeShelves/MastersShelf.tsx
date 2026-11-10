@@ -1,7 +1,8 @@
 import { Avatar } from '@awaisa/ui/Avatar'
+import { Star } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
 import type { Business, Specialist } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
-import { StoreCard } from '@/shared/ui/StoreCard/StoreCard'
 import { StoreShelf } from '@/shared/ui/StoreShelf/StoreShelf'
 import styles from './HomeShelves.module.css'
 
@@ -10,6 +11,7 @@ interface MastersShelfProps {
   specialists: Specialist[]
 }
 
+// Masters as contact rows (photo, name, role, rating) — compact, like a Contacts card.
 export const MastersShelf = ({ business, specialists }: MastersShelfProps) => {
   if (specialists.length === 0) return null
 
@@ -23,30 +25,30 @@ export const MastersShelf = ({ business, specialists }: MastersShelfProps) => {
     >
       {specialists.map((specialist) => (
         <li key={specialist.id}>
-          <StoreCard
+          <NextLink
             href={`/${business.slug}/book?specialist=${specialist.id}`}
-            eyebrow={specialist.role}
-            title={specialist.name}
-            height='sm'
-            media={
-              <Avatar
-                name={specialist.name}
-                src={specialist.photoUrl ?? undefined}
-                size='xl'
-                className={styles.avatar}
-              />
-            }
-            footer={
-              <>
+            className={styles.master}
+          >
+            <Avatar
+              name={specialist.name}
+              src={specialist.photoUrl ?? undefined}
+              size='lg'
+              className={styles.masterAvatar}
+            />
+            <span className={styles.masterText}>
+              <span className={styles.masterName}>{specialist.name}</span>
+              <span className={styles.masterRole}>{specialist.role || 'Мастер'}</span>
+              <span className={styles.masterMeta}>
                 {specialist.rating !== null && (
-                  <span className={styles.price}>★ {specialist.rating.toFixed(1)}</span>
+                  <span className={styles.masterRating}>
+                    <Star weight='fill' aria-hidden />
+                    {specialist.rating.toFixed(1)}
+                  </span>
                 )}
-                <span className={styles.muted}>
-                  {pluralize(specialist.serviceIds.length, ['услуга', 'услуги', 'услуг'])}
-                </span>
-              </>
-            }
-          />
+                {pluralize(specialist.serviceIds.length, ['услуга', 'услуги', 'услуг'])}
+              </span>
+            </span>
+          </NextLink>
         </li>
       ))}
     </StoreShelf>

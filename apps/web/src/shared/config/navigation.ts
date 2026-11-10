@@ -10,9 +10,9 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: MagnifyingGlass },
   { href: '/map', label: 'Карта', icon: MapTrifold },
+  { href: '/business', label: 'Бизнес', icon: Storefront },
   // Profile and bookings are one page.
   { href: '/bookings', label: 'Профиль', icon: UserCircle },
-  { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.

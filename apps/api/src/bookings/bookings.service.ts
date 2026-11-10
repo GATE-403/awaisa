@@ -26,12 +26,7 @@ import { confirmationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
-import {
-  ANY_SPECIALIST_ID,
-  BOOKING_DAYS_AHEAD,
-  REMINDER_LEAD_MINUTES,
-  UNDO_WINDOW_SECONDS,
-} from './booking-rules.js'
+import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, UNDO_WINDOW_SECONDS } from './booking-rules.js'
 import type { AvailabilityQuery, CreateBookingInput } from './bookings.schemas.js'
 
 type BookingView = {
@@ -209,16 +204,23 @@ export class BookingsService {
               branchOf(candidateId) ??
               input.branchId ??
               (await this.defaultBranchId(service.businessId)),
+            smsConfirmation: input.smsConfirmation,
+            reminderMinutes: input.reminderMinutes,
             // Booked inside the reminder window: the confirmation already does the reminder's job.
             reminderSentAt:
-              startsAt.getTime() - now.getTime() <= REMINDER_LEAD_MINUTES * 60_000 ? now : null,
+              input.reminderMinutes !== null &&
+              startsAt.getTime() - now.getTime() <= input.reminderMinutes * 60_000
+                ? now
+                : null,
           }),
         )
         const view = await this.getView(saved.id)
         if (customer && !customer.name) {
           await this.customers.update({ id: customer.id }, { name: input.name })
         }
-        void this.sms.sendSafely(phone, confirmationMessage(view, this.webUrl()))
+        if (input.smsConfirmation) {
+          void this.sms.sendSafely(phone, confirmationMessage(view, this.webUrl()))
+        }
 
         return { ...view, cancelToken, customerPhone: phone, comment: input.comment }
       } catch (error) {
@@ -392,7 +394,10 @@ export class BookingsService {
           endsAt,
           // A new time needs its own reminder.
           reminderSentAt:
-            startsAt.getTime() - Date.now() <= REMINDER_LEAD_MINUTES * 60_000 ? new Date() : null,
+            booking.reminderMinutes !== null &&
+            startsAt.getTime() - Date.now() <= booking.reminderMinutes * 60_000
+              ? new Date()
+              : null,
         },
       )
     } catch (error) {

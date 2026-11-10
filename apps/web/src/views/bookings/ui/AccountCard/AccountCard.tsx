@@ -2,33 +2,31 @@
 
 import { Avatar } from '@awaisa/ui/Avatar'
 import { ButtonLink } from '@awaisa/ui/Button'
-import { UserCircle } from '@phosphor-icons/react/ssr'
+import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useState } from 'react'
 import { useSession } from '@/entities/session'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { AccountSheet } from '../AccountSheet/AccountSheet'
 import { NameDialog } from '../NameDialog'
 import styles from './AccountCard.module.css'
 
-// The top of the profile: who you are, or one tap to sign in and keep bookings on every device.
+// The account as one row, like the Apple ID row in Settings; everything else opens in a sheet.
 export const AccountCard = () => {
   const session = useSession()
-  const [isEditingName, setIsEditingName] = useState(false)
+  const [panel, setPanel] = useState<'account' | 'name' | null>(null)
   const customer = session.customer
 
   if (session.status === 'loading') return <div className={styles.placeholder} />
 
   if (!customer) {
     return (
-      <section className={styles.card} aria-label='Аккаунт'>
-        <span className={styles.guestIcon} aria-hidden='true'>
-          <UserCircle weight='fill' />
-        </span>
+      <section className={styles.guest} aria-label='Аккаунт'>
         <div className={styles.text}>
-          <h1 className={styles.name}>Профиль</h1>
+          <h1 className={styles.title}>Ваши записи</h1>
           <p className={styles.meta}>
-            Записи ниже хранятся на этом устройстве. Войдите по номеру — они будут везде, а SMS
-            напомнят о визите.
+            Сохранены на этом устройстве. Войдите по номеру — они будут на любом, а SMS напомнит о
+            визите.
           </p>
         </div>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
@@ -39,24 +37,28 @@ export const AccountCard = () => {
   }
 
   return (
-    <section className={styles.card} aria-label='Аккаунт'>
-      <Avatar
-        name={customer.name || customer.phone.slice(-2)}
-        size='xl'
-        className={styles.avatar}
-      />
-      <div className={styles.text}>
-        <h1 className={styles.name}>{customer.name || 'Без имени'}</h1>
-        <p className={styles.meta}>{formatPhone(customer.phone)} · записи на любом устройстве</p>
-      </div>
-      <button type='button' className={styles.edit} onClick={() => setIsEditingName(true)}>
-        {customer.name ? 'Изменить' : 'Указать имя'}
+    <section aria-label='Аккаунт'>
+      <h1 className={styles.srOnly}>Профиль</h1>
+      <button type='button' className={styles.row} onClick={() => setPanel('account')}>
+        <Avatar name={customer.name || customer.phone.slice(-2)} size='lg' />
+        <span className={styles.text}>
+          <span className={styles.name}>{customer.name || 'Без имени'}</span>
+          <span className={styles.meta}>{formatPhone(customer.phone)} · тема, бизнес, выход</span>
+        </span>
+        <CaretRight className={styles.chevron} weight='bold' aria-hidden />
       </button>
 
-      {isEditingName && (
+      {panel === 'account' && (
+        <AccountSheet
+          customer={customer}
+          onEditName={() => setPanel('name')}
+          onClose={() => setPanel(null)}
+        />
+      )}
+      {panel === 'name' && (
         <NameDialog
           name={customer.name}
-          onClose={() => setIsEditingName(false)}
+          onClose={() => setPanel('account')}
           onSaved={session.setCustomer}
         />
       )}

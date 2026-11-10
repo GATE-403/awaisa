@@ -1,6 +1,6 @@
 :root {
-  /* Three rows on phones: logo and actions, the search field, category chips. */
-  --header-height: 152px;
+  /* Phones: the mascot with the search field, then category chips. */
+  --header-height: 96px;
   --tabbar-height: 64px;
   --tabbar-offset: var(--space-2);
   --tabbar-space: calc(

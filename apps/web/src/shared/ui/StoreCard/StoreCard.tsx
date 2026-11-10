@@ -12,7 +12,7 @@ interface StoreCardProps {
   footer?: ReactNode
   media?: ReactNode
   tone?: 'light' | 'dark'
-  height?: 'md' | 'sm' | 'auto'
+  height?: 'md' | 'sm' | 'auto' | 'compact'
   className?: string
 }
 

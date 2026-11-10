@@ -1,4 +1,7 @@
 .bar {
+  position: relative;
+  touch-action: none;
+  cursor: grab;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -8,6 +11,18 @@
   border-bottom: 0.5px solid var(--color-border);
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
+}
+
+/* iOS grabber: shows the sheet can be pulled down. */
+.grabber {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
+  translate: -50% 0;
 }
 
 .barTitle {

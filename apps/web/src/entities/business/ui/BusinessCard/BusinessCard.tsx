@@ -1,4 +1,3 @@
-import { Plus } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
 import { formatPrice } from '@/entities/booking'
@@ -32,7 +31,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
             className={styles.cover}
           />
         ) : (
-          <BusinessTile name={business.name} size='lg' className={styles.tile} />
+          <BusinessTile name={business.name} size='md' className={styles.tile} />
         )}
       </span>
     </ViewTransition>
@@ -43,9 +42,6 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
       <span className={styles.footer}>
         <span className={styles.price}>от {formatPrice(business.minPrice)}</span>
         <span className={styles.address}>{business.address}</span>
-        <span className={styles.plus} aria-hidden='true'>
-          <Plus weight='bold' />
-        </span>
       </span>
     </span>
   </NextLink>

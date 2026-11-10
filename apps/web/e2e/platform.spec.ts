@@ -11,6 +11,8 @@ test.describe('Platform: a new business goes live', () => {
     page,
     browser,
   }) => {
+    // The longest journey in the suite: registration, setup, a client booking, the schedule.
+    test.setTimeout(90_000)
     const suffix = Math.random().toString(36).slice(2, 7)
     const name = `E2E Барбер ${suffix}`
     const slug = `e2e-barber-${suffix}`
@@ -76,15 +78,17 @@ test.describe('Platform: a new business goes live', () => {
     await search.press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
+    // «Ближайшее окно» is the booking entry on every screen size (the bar's button is desktop-only).
     await clientPage
-      .getByRole('navigation', { name: /Страница бизнеса/ })
+      .getByRole('complementary', { name: 'Ближайшее окно' })
       .getByRole('link', { name: 'Записаться' })
       .click()
-    await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book$`))
+    await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book\\?service=`))
 
     await expect(clientPage.getByRole('group', { name: 'Филиал' })).toBeVisible()
     const steps = bookingSteps(clientPage)
-    await steps.service.getByRole('radio', { name: /Стрижка/ }).click()
+    // The next-slot link preselects the service.
+    await expect(steps.service).toContainText('Стрижка')
     // The only master is chosen for the client: the step is already filled in.
     await expect(steps.specialist).toContainText('Азамат')
     const time = await pickFirstFreeSlot(clientPage)

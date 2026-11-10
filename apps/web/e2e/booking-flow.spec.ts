@@ -66,6 +66,17 @@ test.describe('User flow: booking', () => {
     await expect(ticketSheet.getByRole('article', { name: /^Запись / })).toBeVisible()
     await expect(ticketSheet.getByRole('button', { name: 'Скачать картинкой' })).toBeEnabled()
     await ticketSheet.getByRole('button', { name: 'Закрыть' }).click()
+    // Sheets also close by pulling the top bar down.
+    await ticket.getByRole('button', { name: 'Показать талон' }).click()
+    const title = ticketSheet.getByRole('heading', { name: 'Талон' })
+    const box = await title.boundingBox()
+    if (box) {
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+      await page.mouse.down()
+      await page.mouse.move(box.x + box.width / 2, box.y + 220, { steps: 6 })
+      await page.mouse.up()
+    }
+    await expect(ticketSheet).toHaveCount(0)
 
     // Cancelling is immediate; «Вернуть» in the toast undoes it.
     await ticket.getByRole('button', { name: 'Отменить запись' }).click()
@@ -103,5 +114,19 @@ test.describe('User flow: booking', () => {
 
     await expect(page).toHaveURL(/\/awaisa-studio\/book\?service=pedicure/)
     await expect(bookingSteps(page).service).toContainText('Педикюр')
+  })
+
+  test('a booking left half-way can be continued from any page', async ({ page }) => {
+    await page.goto('/awaisa-studio/book')
+    await bookingSteps(page)
+      .service.getByRole('radio', { name: /Укладка/ })
+      .click()
+    await page.goto('/')
+
+    const resume = page.getByRole('complementary', { name: 'Незаконченная запись' })
+    await expect(resume).toContainText('Укладка')
+    await resume.getByRole('link', { name: /Продолжить запись/ }).click()
+    await expect(page).toHaveURL(/\/awaisa-studio\/book\?service=styling/)
+    await expect(bookingSteps(page).service).toContainText('Укладка')
   })
 })

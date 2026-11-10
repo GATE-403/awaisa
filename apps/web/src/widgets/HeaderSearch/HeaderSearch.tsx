@@ -49,6 +49,17 @@ export const HeaderSearch = () => {
 
   const close = () => setIsOpen(false)
 
+  // A tap anywhere outside closes the suggestions (blur alone misses taps on non-focusable areas).
+  useEffect(() => {
+    if (!isOpen) return
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [isOpen])
+
   const search = (value: string) => {
     close()
     setDraft(null)
@@ -66,7 +77,7 @@ export const HeaderSearch = () => {
       ref={rootRef}
       className={styles.root}
       onBlur={(event) => {
-        if (!rootRef.current?.contains(event.relatedTarget)) close()
+        if (event.relatedTarget && !rootRef.current?.contains(event.relatedTarget)) close()
       }}
       onKeyDown={(event) => {
         if (event.key === 'Escape') close()

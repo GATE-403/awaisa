@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
 import '@/shared/styles/shell.css'
+import { ResumeBooking } from '@/features/bookingDraft'
 import { PLATFORM } from '@/shared/config/platform'
 import { THEME_BOOT_SCRIPT } from '@/shared/lib/theme'
 import { Footer, FooterGate } from '@/widgets/Footer'
@@ -60,6 +61,7 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
           </Suspense>
           <Suspense>
             <TabBar />
+            <ResumeBooking />
           </Suspense>
         </div>
       </ToastProvider>

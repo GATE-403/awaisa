@@ -204,3 +204,19 @@
     background: var(--color-fill-hover);
   }
 }
+
+/* Phones: a lighter field; Enter searches, so the blue button is not needed. */
+@media (max-width: 767px) {
+  .form {
+    height: 40px;
+    padding-right: var(--space-1);
+  }
+
+  .submit {
+    display: none;
+  }
+
+  .input {
+    font-size: var(--text-md);
+  }
+}

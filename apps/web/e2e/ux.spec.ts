@@ -187,7 +187,8 @@ test.describe('UX: layout and ergonomics', () => {
         '/map',
       ]) {
         await page.goto(path)
-        await page.waitForLoadState('networkidle')
+        // Map tiles keep the network busy; a short wait is enough for the page itself.
+        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => undefined)
         expect(await getHorizontalOverflow(page), path).toBeLessThanOrEqual(0)
       }
     })

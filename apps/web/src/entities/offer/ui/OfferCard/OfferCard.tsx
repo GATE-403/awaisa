@@ -32,48 +32,42 @@ export const OfferCard = ({ offer, action }: OfferCardProps) => {
 
   return (
     <article className={styles.card} aria-label={`${offer.name}, ${offer.businessName}`}>
-      <NextLink
-        href={href}
+      <div
         className={styles.media}
         style={{ '--tint': pickTint(offer.businessName) } as CSSProperties}
-        tabIndex={-1}
-        aria-hidden='true'
       >
         {offer.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: already resized WebP from our API
           <img src={offer.coverUrl} alt='' className={styles.cover} loading='lazy' />
         ) : (
-          <BusinessTile name={offer.businessName} size='lg' />
+          <BusinessTile name={offer.businessName} size='md' />
         )}
         {offer.isPopular && <span className={styles.badge}>Хит</span>}
-      </NextLink>
+      </div>
       {action && <span className={styles.action}>{action}</span>}
 
       <div className={styles.body}>
-        <p className={styles.price}>
-          {formatPrice(offer.price)}
-          <span className={styles.duration}> · {formatDuration(offer.durationMinutes)}</span>
-        </p>
+        <p className={styles.price}>{formatPrice(offer.price)}</p>
         <h3 className={styles.name}>
+          {/* The whole card opens the booking through this link (stretched over the card). */}
           <NextLink href={href} className={styles.nameLink}>
             {offer.name}
           </NextLink>
         </h3>
-        <p className={styles.place}>
+        <p className={styles.meta}>
+          {formatDuration(offer.durationMinutes)} · {offer.businessName}
+        </p>
+        <p className={styles.footer}>
           {offer.rating !== null && (
             <span className={styles.rating}>
               <Star weight='fill' aria-hidden />
               {offer.rating.toFixed(1)}
             </span>
           )}
-          <span className={styles.business}>{offer.businessName}</span>
+          <span className={styles.slot} data-today={when === 'Сегодня' || undefined}>
+            {slot && when ? `${when} с ${slot.time}` : nextFree ? 'Нет окон рядом' : '\u00a0'}
+          </span>
         </p>
-        <p className={styles.slot} data-today={when === 'Сегодня' || undefined}>
-          {slot && when ? `${when} с ${slot.time}` : nextFree ? 'Ближайшие дни заняты' : ' '}
-        </p>
-        <NextLink href={href} className={styles.book}>
-          Записаться
-        </NextLink>
       </div>
     </article>
   )
