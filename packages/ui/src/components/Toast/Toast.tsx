@@ -13,7 +13,11 @@ type ToastOptions = {
   timeout?: number
   /** A reversible action, e.g. «Вернуть» after a cancellation. */
   action?: { label: string; onClick: () => void }
+  /** Tapping the toast itself opens what it is about, like a notification on iOS. */
+  onOpen?: () => void
 }
+
+type ToastData = { onOpen?: () => void }
 
 interface ToastProviderProps {
   children: ReactNode
@@ -69,13 +73,31 @@ const isToastType = (value: unknown): value is ToastType =>
   value === 'success' || value === 'error' || value === 'info'
 
 const ToastList = () => {
-  const { toasts } = BaseToast.useToastManager()
+  const { toasts, close } = BaseToast.useToastManager()
 
   return toasts.map((toast) => {
     const Icon = TOAST_ICONS[isToastType(toast.type) ? toast.type : 'info']
+    const onOpen = (toast.data as ToastData | undefined)?.onOpen
 
     return (
-      <BaseToast.Root key={toast.id} toast={toast} swipeDirection='up' className={styles.toast}>
+      <BaseToast.Root
+        key={toast.id}
+        toast={toast}
+        swipeDirection='up'
+        className={styles.toast}
+        data-openable={onOpen ? '' : undefined}
+      >
+        {onOpen && (
+          <button
+            type='button'
+            className={styles.open}
+            aria-label='Открыть'
+            onClick={() => {
+              close(toast.id)
+              onOpen()
+            }}
+          />
+        )}
         <span className={styles.icon}>
           <Icon />
         </span>
@@ -104,12 +126,13 @@ const useToast = () => {
   const manager = BaseToast.useToastManager()
 
   return {
-    show: ({ title, description, type = 'info', timeout, action }: ToastOptions) => {
+    show: ({ title, description, type = 'info', timeout, action, onOpen }: ToastOptions) => {
       const id: string = manager.add({
         title,
         description,
         type,
         timeout,
+        data: { onOpen } satisfies ToastData,
         actionProps: action && {
           children: action.label,
           onClick: () => {
