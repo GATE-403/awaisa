@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import { ArrowRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatDayLong, getUpcomingDays, useAvailability } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -22,6 +23,12 @@ interface RescheduleSheetProps {
 }
 
 const DAYS_SHOWN = 14
+
+const PARTS = [
+  { label: 'Утро', test: (time: string) => time < '12:00' },
+  { label: 'День', test: (time: string) => time >= '12:00' && time < '17:00' },
+  { label: 'Вечер', test: (time: string) => time >= '17:00' },
+]
 
 // Same master, same service, another time: a day row and the free times of that master.
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
@@ -64,11 +71,25 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
 
   return (
     <Sheet title='Перенести запись' onClose={onClose}>
-      <p className={styles.lead}>
-        {booking.serviceName} · {booking.specialistName}
-        <br />
-        Сейчас: {formatDayLong(booking.date)}, {booking.time}
-      </p>
+      {/* Before and after side by side, so the change reads at a glance. */}
+      <div className={styles.change}>
+        <p className={styles.service}>
+          {booking.serviceName} · {booking.specialistName}
+        </p>
+        <div className={styles.compare}>
+          <span className={styles.was}>
+            <span className={styles.caption}>Сейчас</span>
+            <span className={styles.wasTime}>{booking.time}</span>
+            <span className={styles.date}>{formatDayLong(booking.date)}</span>
+          </span>
+          <ArrowRight weight='bold' aria-hidden className={styles.arrow} />
+          <span className={styles.will} data-empty={!time || undefined}>
+            <span className={styles.caption}>Станет</span>
+            <span className={styles.willTime}>{time ?? '—:—'}</span>
+            <span className={styles.date}>{formatDayLong(date)}</span>
+          </span>
+        </div>
+      </div>
 
       <fieldset className={styles.days}>
         <legend className={styles.legend}>День</legend>
@@ -79,6 +100,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
             className={styles.day}
             aria-pressed={day.key === date}
             aria-label={day.label}
+            data-today={day.key === today?.dayKey || undefined}
             onClick={() => {
               setDate(day.key)
               setTime(null)
@@ -92,24 +114,33 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
 
       {isLoading && <Skeleton className={styles.skeleton} />}
       {!isLoading && free.length === 0 && (
-        <p className={styles.empty}>
-          У мастера нет свободного времени в этот день — выберите другой.
-        </p>
+        <p className={styles.empty}>Свободного времени нет — выберите другой день.</p>
       )}
       {!isLoading && free.length > 0 && (
         <fieldset className={styles.times}>
           <legend className={styles.legend}>Время</legend>
-          {free.map((slot) => (
-            <button
-              key={slot.time}
-              type='button'
-              className={styles.time}
-              aria-pressed={slot.time === time}
-              onClick={() => setTime(slot.time)}
-            >
-              {slot.time}
-            </button>
-          ))}
+          {PARTS.map((part) => {
+            const items = free.filter((slot) => part.test(slot.time))
+            if (items.length === 0) return null
+            return (
+              <div key={part.label} className={styles.part}>
+                <p className={styles.partTitle}>{part.label}</p>
+                <div className={styles.partGrid}>
+                  {items.map((slot) => (
+                    <button
+                      key={slot.time}
+                      type='button'
+                      className={styles.time}
+                      aria-pressed={slot.time === time}
+                      onClick={() => setTime(slot.time)}
+                    >
+                      {slot.time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </fieldset>
       )}
 

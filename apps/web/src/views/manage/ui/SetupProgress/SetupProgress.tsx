@@ -1,3 +1,4 @@
+import { Check } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { Business, Catalog } from '@/shared/api/types'
 import type { ManageTab } from '@/views/manage/manageTabs'
@@ -29,28 +30,60 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   if (!next) return null
 
   return (
+    // A checklist, not just a bar: what is done, and the one step to do now.
     <section className={styles.card} aria-labelledby='setup-title'>
       <div className={styles.top}>
-        <h2 id='setup-title' className={styles.title}>
-          Запуск записи
-        </h2>
-        <span className={styles.count}>
-          {doneCount} из {steps.length}
+        <div>
+          <h2 id='setup-title' className={styles.title}>
+            Запуск записи
+          </h2>
+          <p className={styles.subtitle}>
+            Ещё {steps.length - doneCount} — и клиенты смогут записываться
+          </p>
+        </div>
+        <span
+          className={styles.count}
+          role='img'
+          aria-label={`Готово ${doneCount} из ${steps.length}`}
+        >
+          <svg viewBox='0 0 36 36' className={styles.ring} aria-hidden='true'>
+            <circle cx='18' cy='18' r='15' className={styles.ringTrack} />
+            <circle
+              cx='18'
+              cy='18'
+              r='15'
+              className={styles.ringValue}
+              pathLength={steps.length}
+              strokeDasharray={`${doneCount} ${steps.length}`}
+            />
+          </svg>
+          <span className={styles.countText}>
+            {doneCount}/{steps.length}
+          </span>
         </span>
       </div>
-      <progress
-        className={styles.bar}
-        value={doneCount}
-        max={steps.length}
-        aria-label='Готовность'
-      />
-      <NextLink
-        href={`/manage/${business.slug}?tab=${next.tab}`}
-        scroll={false}
-        className={styles.next}
-      >
-        Дальше: {next.label.toLowerCase()} ›
-      </NextLink>
+      <ol className={styles.steps}>
+        {steps.map((step, index) => {
+          const state = step.isDone ? 'done' : step === next ? 'next' : 'todo'
+          return (
+            <li key={step.tab}>
+              <NextLink
+                href={`/manage/${business.slug}?tab=${step.tab}`}
+                scroll={false}
+                className={styles.step}
+                data-state={state}
+                aria-current={state === 'next' ? 'step' : undefined}
+              >
+                <span className={styles.mark} aria-hidden>
+                  {step.isDone ? <Check weight='bold' /> : index + 1}
+                </span>
+                <span className={styles.stepLabel}>{step.label}</span>
+                {state === 'next' && <span className={styles.go}>Начать ›</span>}
+              </NextLink>
+            </li>
+          )
+        })}
+      </ol>
     </section>
   )
 }

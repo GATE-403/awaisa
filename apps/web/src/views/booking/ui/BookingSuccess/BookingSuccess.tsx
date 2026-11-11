@@ -4,8 +4,10 @@ import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, MapPin } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { useState } from 'react'
 import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
+import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import styles from './BookingSuccess.module.css'
 
@@ -16,15 +18,7 @@ interface BookingSuccessProps {
 export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const toast = useToast()
   const session = useSession()
-
-  const handleCopyCode = async (code: string) => {
-    try {
-      await navigator.clipboard.writeText(code)
-      toast.show({ title: 'Номер скопирован', description: code, type: 'success' })
-    } catch {
-      toast.show({ title: 'Не удалось скопировать', type: 'error' })
-    }
-  }
+  const [isTicketOpen, setIsTicketOpen] = useState(false)
 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
@@ -37,10 +31,16 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   return (
     <div className={styles.success}>
       <h1 className={styles.title}>Вы записаны</h1>
-      <p className={styles.lead}>Покажите номер на ресепшене — или просто назовите имя.</p>
-      <div className={styles.ticket}>
-        <Ticket booking={booking} onCodeClick={handleCopyCode} />
-      </div>
+      <p className={styles.lead}>Нажмите на талон, чтобы увидеть всё о визите.</p>
+      {/* The ticket itself opens the full one: details, place, download. */}
+      <button
+        type='button'
+        className={styles.ticket}
+        onClick={() => setIsTicketOpen(true)}
+        aria-label='Показать талон'
+      >
+        <Ticket booking={booking} />
+      </button>
       <div className={styles.chips}>
         <Button size='sm' variant='secondary' onClick={handleAddToCalendar}>
           <CalendarPlus weight='bold' className={styles.chipIcon} aria-hidden />В календарь
@@ -74,6 +74,7 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           , чтобы видеть записи на любом устройстве.
         </p>
       )}
+      {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}
     </div>
   )
 }

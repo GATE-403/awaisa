@@ -2,7 +2,7 @@
 
 import { useToast } from '@awaisa/ui/Toast'
 import { MapPin, Phone } from '@phosphor-icons/react/ssr'
-import { useRef, useState } from 'react'
+import { type ReactNode, useRef, useState } from 'react'
 import { formatDayLong, formatDuration, formatPrice, Ticket } from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
@@ -15,6 +15,8 @@ import styles from './TicketViewer.module.css'
 interface TicketViewerProps {
   booking: Booking
   onClose: () => void
+  /** Slot under the ticket, e.g. «Добавить в Wallet» (features don't import features). */
+  extra?: ReactNode
 }
 
 const toFileName = (booking: Booking) =>
@@ -23,7 +25,7 @@ const toFileName = (booking: Booking) =>
 // Like showing a ticket at the door: only the ticket, large and bright, and a way to keep it.
 const getBookingCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
-export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
+export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => {
   const code = getBookingCode(booking.id)
   const toast = useToast()
   const ticketRef = useRef<HTMLDivElement>(null)
@@ -78,6 +80,7 @@ export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
           <Ticket booking={booking} />
         </div>
         <p className={styles.hint}>Покажите на ресепшене. «Скачать» сохранит картинкой.</p>
+        {extra}
       </div>
 
       {/* Everything about the visit, not just what fits on the ticket. */}

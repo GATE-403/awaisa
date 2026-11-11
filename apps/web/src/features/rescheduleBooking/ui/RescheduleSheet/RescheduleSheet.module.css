@@ -1,7 +1,75 @@
-.lead {
+.change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-sheet-surface);
+}
+
+.service {
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: 1.45;
+  font-size: var(--text-footnote);
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.was,
+.will {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.caption {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+
+.wasTime,
+.willTime {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.wasTime {
+  color: var(--color-tertiary-foreground);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.willTime {
+  color: var(--color-link);
+}
+
+.will[data-empty] .willTime {
+  color: var(--color-tertiary-foreground);
+}
+
+.date {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arrow {
+  width: 16px;
+  height: 16px;
+  color: var(--color-tertiary-foreground);
 }
 
 .legend {
@@ -13,14 +81,23 @@
   white-space: nowrap;
 }
 
+/* iOS Calendar week row in one panel: it scrolls inside, never the sheet. A fieldset is
+   min-content wide by default, which pushed the whole sheet sideways. */
 .days {
   display: flex;
-  gap: var(--space-1);
+  gap: 2px;
+  min-width: 0;
   margin: 0;
-  padding: 0;
+  padding: var(--space-2);
   overflow-x: auto;
   border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-sheet-surface);
   scrollbar-width: none;
+}
+
+.days::-webkit-scrollbar {
+  display: none;
 }
 
 .day {
@@ -28,42 +105,72 @@
   flex-direction: column;
   flex-shrink: 0;
   align-items: center;
-  gap: 2px;
-  width: 48px;
-  padding: var(--space-2) 0;
+  gap: 4px;
+  width: 44px;
+  padding: var(--space-1) 0;
   border: none;
-  border-radius: var(--radius-md);
-  background: var(--color-sheet-surface);
+  background: transparent;
   color: var(--color-foreground);
   font: inherit;
   cursor: pointer;
 }
 
-.day[aria-pressed="true"] {
+.weekday {
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.day[data-today] .number {
+  color: var(--color-danger);
+}
+
+.day[aria-pressed="true"] .number {
   background: var(--color-primary);
   color: var(--color-primary-foreground);
 }
 
-.weekday {
-  font-size: 11px;
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.number {
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
 .times {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  gap: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: none;
+}
+
+.part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.partTitle {
+  padding: 0 var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.partGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: var(--space-2);
 }
 
 .time {
@@ -76,11 +183,13 @@
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .time[aria-pressed="true"] {
   background: var(--color-primary);
   color: var(--color-primary-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
 .day:focus-visible,
@@ -100,8 +209,12 @@
 }
 
 .empty {
+  padding: var(--space-6) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-sheet-surface);
   color: var(--color-muted-foreground);
   font-size: var(--text-sm);
+  text-align: center;
 }
 
 .submit {

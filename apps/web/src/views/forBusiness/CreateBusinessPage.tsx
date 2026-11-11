@@ -7,11 +7,13 @@ import { Input } from '@awaisa/ui/Input'
 import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import type { FormEvent } from 'react'
+import type { CSSProperties, FormEvent } from 'react'
 import { formatDuration } from '@/entities/booking'
 import { useRequireSession } from '@/entities/session'
 import type { BusinessKind } from '@/shared/api/types'
+import { KIND_ICONS, KIND_TINTS } from '@/shared/config/kindStyles'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -94,9 +96,31 @@ export const CreateBusinessPage = () => {
                   onValueChange={(value) => form.setKind(value as BusinessKind)}
                   className={styles.kinds}
                 >
-                  {BUSINESS_KINDS.map((kind) => (
-                    <RadioCard key={kind.value} value={kind.value} title={kind.label} />
-                  ))}
+                  {BUSINESS_KINDS.map((kind) => {
+                    const Glyph = KIND_ICONS[kind.value]
+                    const examples = SERVICE_TEMPLATES[kind.value]
+                      .slice(0, 2)
+                      .map((item) => item.name.toLowerCase())
+                    return (
+                      <RadioCard
+                        key={kind.value}
+                        value={kind.value}
+                        title={kind.label}
+                        description={
+                          examples.length > 0 ? `${examples.join(', ')}…` : 'Своё меню услуг'
+                        }
+                        leading={
+                          <span
+                            className={styles.kindTile}
+                            style={{ '--tint': KIND_TINTS[kind.value] } as CSSProperties}
+                            aria-hidden
+                          >
+                            <Glyph weight='fill' />
+                          </span>
+                        }
+                      />
+                    )
+                  })}
                 </RadioGroup>
 
                 {form.templates.length > 0 ? (

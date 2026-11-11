@@ -60,10 +60,7 @@ test.describe('Client flow from outside the site', () => {
     await expect(ticket).toContainText(booking.serviceName)
 
     await ticket.getByRole('button', { name: 'Ещё' }).click()
-    await page
-      .getByRole('dialog', { name: 'Запись' })
-      .getByRole('button', { name: 'Отменить запись' })
-      .click()
+    await page.getByRole('menuitem', { name: 'Отменить запись' }).click()
     await expect(ticket.getByText('Отменена')).toBeVisible()
   })
 

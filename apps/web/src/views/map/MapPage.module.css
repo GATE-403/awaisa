@@ -27,7 +27,10 @@
   gap: var(--space-3);
   min-height: 0;
   margin-top: calc(-1 * var(--space-5));
+  /* The list scrolls by touch, wheel and trackpad; a visible bar only crowds the narrow sheet. */
+  overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: none;
   overscroll-behavior: contain;
   padding: var(--space-4) var(--page-gutter) calc(var(--space-6) + var(--resume-space));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
@@ -261,6 +264,7 @@
     left: var(--space-3);
     width: 380px;
     margin-top: 0;
+    overflow-x: hidden;
     overflow-y: auto;
     padding: var(--space-5) var(--space-2) var(--space-4);
     border-radius: 20px;
@@ -322,4 +326,8 @@
   .hint {
     margin: 0 var(--space-3);
   }
+}
+
+.panel::-webkit-scrollbar {
+  display: none;
 }
