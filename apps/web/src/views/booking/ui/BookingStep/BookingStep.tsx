@@ -43,7 +43,8 @@ export const BookingStep = ({
         </h2>
         {summary && <p className={styles.summary}>{summary}</p>}
       </div>
-      {onToggle && (
+      {/* The step in progress needs no «Свернуть»; done and later steps offer to open. */}
+      {onToggle && (isCollapsed || isComplete) && (
         <button
           type='button'
           className={styles.toggle}

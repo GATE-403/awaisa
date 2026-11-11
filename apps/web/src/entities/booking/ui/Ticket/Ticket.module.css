@@ -301,3 +301,44 @@ button.code {
     filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.05)) drop-shadow(0 14px 32px rgb(0 0 0 / 0.14));
   }
 }
+
+/* Narrow phones: one-line brand row, a smaller leaf and time so nothing wraps awkwardly. */
+@media (max-width: 420px) {
+  .brand > span:first-of-type {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kind {
+    flex-shrink: 0;
+    font-size: 10px;
+  }
+
+  .body {
+    gap: var(--space-3);
+  }
+
+  .leaf {
+    width: 56px;
+  }
+
+  .leafDay {
+    font-size: 28px;
+  }
+
+  .time {
+    font-size: var(--text-2xl);
+    line-height: var(--text-2xl-line-height);
+  }
+
+  .service {
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-line-height);
+  }
+
+  .meta {
+    font-size: var(--text-xs);
+  }
+}

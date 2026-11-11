@@ -5,7 +5,10 @@
   padding-top: env(safe-area-inset-top);
   background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
-  box-shadow: var(--shadow-material);
+  /* A hairline under the chrome: in light mode the bar and the gray page are too close to part. */
+  box-shadow:
+    var(--shadow-material),
+    0 0.5px 0 var(--color-border);
 }
 
 /* Scroll edge effect: content softly dims under the bar instead of meeting a hard hairline. */
@@ -148,6 +151,7 @@
   display: none;
 }
 
+/* Phones: quiet text chips, only the chosen one sits on a light fill — the search stays the focus. */
 .category {
   display: inline-flex;
   align-items: center;
@@ -155,8 +159,8 @@
   height: 30px;
   padding: 0 var(--space-3);
   border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-foreground);
+  background: transparent;
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   white-space: nowrap;
 }
@@ -172,8 +176,20 @@
 }
 
 .category[aria-current="page"] {
-  background: var(--color-foreground);
-  color: var(--color-background);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (max-width: 767px) {
+  .category svg {
+    display: none;
+  }
+
+  .categoryList {
+    gap: 0;
+    padding-left: calc(var(--page-gutter) - var(--space-3));
+  }
 }
 
 .city {

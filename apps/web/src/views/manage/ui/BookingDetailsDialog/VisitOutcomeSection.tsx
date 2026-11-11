@@ -50,16 +50,17 @@ export const VisitOutcomeSection = ({ booking, onChange }: VisitOutcomeSectionPr
   return (
     <section className={sheet.group} aria-label='Итог визита'>
       <h3 className={sheet.groupTitle}>Итог визита</h3>
-      <div className={sheet.list}>
-        <div className={styles.outcomeRow}>
-          <SegmentedControl
-            label='Итог визита'
-            value={choice}
-            items={OUTCOMES}
-            onChange={(value) => void save({ outcome: value === 'pending' ? null : value })}
-          />
-        </div>
-        {current.outcome === 'arrived' && (
+      {/* The control stands on its own, like a macOS segmented control in a form. */}
+      <div className={styles.outcomeRow}>
+        <SegmentedControl
+          label='Итог визита'
+          value={choice}
+          items={OUTCOMES}
+          onChange={(value) => void save({ outcome: value === 'pending' ? null : value })}
+        />
+      </div>
+      {current.outcome === 'arrived' && (
+        <div className={sheet.list}>
           <>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>Оплачено, сом</span>
@@ -87,8 +88,8 @@ export const VisitOutcomeSection = ({ booking, onChange }: VisitOutcomeSectionPr
               />
             </div>
           </>
-        )}
-      </div>
+        </div>
+      )}
       {current.outcome === 'no_show' && (
         <p className={sheet.groupFooter}>Неявка видна в карточке клиента и в аналитике.</p>
       )}

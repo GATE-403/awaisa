@@ -96,3 +96,20 @@
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
+
+.more[open] .moreSummary {
+  display: none;
+}
+
+.moreSummary {
+  width: fit-content;
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  list-style: none;
+  cursor: pointer;
+}
+
+.moreSummary::-webkit-details-marker {
+  display: none;
+}

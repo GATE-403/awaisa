@@ -1,4 +1,5 @@
 import { Avatar } from '@awaisa/ui/Avatar'
+import { Fire } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { formatDuration, formatPrice } from '@/entities/booking'
 import type { Business, Catalog } from '@/shared/api/types'
@@ -48,7 +49,11 @@ export const ServicesCatalog = ({ business, catalog }: ServicesCatalogProps) => 
                     >
                       <span className={styles.cardTop}>
                         <span className={styles.name}>{service.name}</span>
-                        {service.isPopular && <span className={styles.hit}>Хит</span>}
+                        {service.isPopular && (
+                          <span className={styles.hit} role='img' aria-label='Хит' title='Хит'>
+                            <Fire weight='fill' aria-hidden />
+                          </span>
+                        )}
                       </span>
                       {service.description && (
                         <span className={styles.description}>{service.description}</span>

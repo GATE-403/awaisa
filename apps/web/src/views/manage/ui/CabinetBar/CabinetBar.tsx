@@ -1,7 +1,6 @@
 'use client'
 
-import { ButtonLink } from '@awaisa/ui/Button'
-import { ArrowUpRight, CaretLeft, UserCircle } from '@phosphor-icons/react/ssr'
+import { ArrowSquareOut, CaretLeft, UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
@@ -31,20 +30,20 @@ export const CabinetBar = ({ slug, title, isPublished }: CabinetBarProps) => {
           {!isPublished && <span className={styles.hidden}> · скрыта</span>}
         </p>
         <div className={styles.tools}>
-          <ButtonLink
-            variant='secondary'
-            size='sm'
-            className={styles.open}
-            render={<NextLink href={`/${slug}`} target='_blank' />}
-          >
-            Страница
-            <ArrowUpRight weight='bold' aria-hidden />
-          </ButtonLink>
           <span className={styles.group}>
+            <NextLink
+              href={`/${slug}`}
+              target='_blank'
+              className={styles.icon}
+              aria-label='Открыть страницу бизнеса'
+              title='Открыть страницу бизнеса'
+            >
+              <ArrowSquareOut aria-hidden />
+            </NextLink>
             <ThemeToggle />
             <NextLink
               href='/bookings'
-              className={styles.account}
+              className={styles.icon}
               aria-label={customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль'}
             >
               <UserCircle weight='fill' aria-hidden />

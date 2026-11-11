@@ -36,11 +36,6 @@ const COLUMNS = [
 export const Footer = () => (
   <footer className={styles.footer}>
     <Container className={styles.inner}>
-      <p className={styles.fine}>
-        Время записи — по Бишкеку (UTC+6). Оплата — в салоне, после визита. Отменить или перенести
-        запись можно в «Моих записях» — время сразу освободится для других.
-      </p>
-
       <nav className={styles.columns} aria-label='Карта сайта'>
         {COLUMNS.map((column) => (
           <FooterColumn key={column.title} className={styles.column}>

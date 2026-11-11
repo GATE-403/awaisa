@@ -29,11 +29,25 @@ export const NotifyOptions = ({
   reminderMinutes,
   onReminderChange,
 }: NotifyOptionsProps) => (
-  <section className={styles.group} aria-label='Уведомления'>
-    <h3 className={styles.title}>Уведомления</h3>
+  // Folded into one line: the defaults suit most people, the rest opens on demand.
+  <details className={styles.group}>
+    <summary className={styles.summary}>
+      <span>
+        {smsConfirmation ? 'SMS-подтверждение' : 'Без SMS'}
+        {' · '}
+        {reminderMinutes === null
+          ? 'без напоминания'
+          : `напомним ${REMINDERS.find((item) => item.value === String(reminderMinutes))?.label.toLowerCase()}`}
+      </span>
+      <span className={styles.change}>Изменить</span>
+    </summary>
     <div className={styles.list}>
       <label className={styles.row}>
-        <span className={styles.label}>SMS с подтверждением</span>
+        <span className={styles.labelText}>
+          <span className={styles.label}>SMS с подтверждением</span>
+          {/* Inside the row, not a footnote under the group: it says where that SMS goes. */}
+          {phone && <span className={styles.sublabel}>на {formatPhone(phone)}</span>}
+        </span>
         <Switch checked={smsConfirmation} onCheckedChange={onSmsConfirmationChange} />
       </label>
       <div className={styles.row}>
@@ -49,10 +63,5 @@ export const NotifyOptions = ({
         />
       </div>
     </div>
-    <p className={styles.footer}>
-      {phone
-        ? `Придут SMS на ${formatPhone(phone)}. Отменить запись можно в профиле.`
-        : 'Придут SMS на номер, который вы укажете выше.'}
-    </p>
-  </section>
+  </details>
 )

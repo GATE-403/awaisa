@@ -24,10 +24,7 @@ export const AccountCard = () => {
       <section className={styles.guest} aria-label='Аккаунт'>
         <div className={styles.text}>
           <h1 className={styles.title}>Ваши записи</h1>
-          <p className={styles.meta}>
-            Сохранены на этом устройстве. Войдите по номеру — они будут на любом, а SMS напомнит о
-            визите.
-          </p>
+          <p className={styles.meta}>Только на этом телефоне. Войдите — будут везде.</p>
         </div>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
           Войти

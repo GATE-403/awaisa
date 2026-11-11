@@ -79,7 +79,7 @@ test.describe('User flow: booking', () => {
     await ticket.getByRole('button', { name: 'Показать талон' }).click()
     const ticketSheet = page.getByRole('dialog', { name: 'Талон' })
     await expect(ticketSheet.getByRole('article', { name: /^Запись / })).toBeVisible()
-    await expect(ticketSheet.getByRole('button', { name: 'Скачать картинкой' })).toBeEnabled()
+    await expect(ticketSheet.getByRole('button', { name: 'Скачать', exact: true })).toBeEnabled()
     await ticketSheet.getByRole('button', { name: 'Закрыть' }).click()
     // Sheets also close by pulling the top bar down.
     await ticket.getByRole('button', { name: 'Показать талон' }).click()

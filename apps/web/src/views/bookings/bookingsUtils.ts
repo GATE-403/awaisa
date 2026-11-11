@@ -20,8 +20,9 @@ const isUpcoming = (booking: Booking, today: Today | null) => {
 const getCountdown = (booking: Booking, today: Today | null) => {
   if (!today) return booking.time
   const days = daysBetween(today.dayKey, booking.date)
-  if (days === 0) return `Сегодня в ${booking.time}`
-  if (days === 1) return `Завтра в ${booking.time}`
+  // The card shows the time already; the countdown only says which day.
+  if (days === 0) return 'Сегодня'
+  if (days === 1) return 'Завтра'
 
   return `Через ${pluralize(days, ['день', 'дня', 'дней'])}`
 }

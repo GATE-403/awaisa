@@ -21,9 +21,22 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
   )
 
   return (
-    <section id='visit' className={styles.visit} aria-label='Как нас найти'>
-      <div className={styles.card}>
-        <p className={styles.cardEyebrow}>Часы работы</p>
+    <section id='visit' className={`${styles.card} ${styles.visit}`} aria-label='Как нас найти'>
+      {/* Today is what matters; the week opens on demand. */}
+      <details>
+        <summary className={styles.hoursSummary}>
+          <span className={styles.hoursLabel}>Часы</span>
+          <span className={styles.hoursToday}>
+            {todayWeekday === null
+              ? ' '
+              : (() => {
+                  const day = findDay(business.hours, todayWeekday)
+                  return day
+                    ? `Сегодня ${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
+                    : 'Сегодня выходной'
+                })()}
+          </span>
+        </summary>
         <ul className={styles.hours}>
           {WEEKDAYS_FULL.map((dayName, weekday) => {
             const day = findDay(business.hours, weekday)
@@ -43,9 +56,9 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
             )
           })}
         </ul>
-      </div>
+      </details>
 
-      <div className={styles.card}>
+      <div>
         <p className={styles.cardEyebrow}>
           {business.branches.length > 1 ? `Филиалы · ${business.branches.length}` : 'Адрес'}
         </p>

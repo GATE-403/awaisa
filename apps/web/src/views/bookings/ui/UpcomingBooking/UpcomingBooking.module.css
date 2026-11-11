@@ -1,7 +1,6 @@
 .item {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
 }
 
 .countdown {
@@ -123,4 +122,146 @@
 .quickButton:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
+}
+
+.card[data-status="cancelled"] {
+  opacity: 0.6;
+}
+
+.open {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.open:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.card:has(.open:active) {
+  background: var(--color-fill);
+}
+
+/* The tear-off calendar leaf from the ticket, small. */
+.leaf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  width: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  pointer-events: none;
+}
+
+.leafMonth {
+  width: 100%;
+  padding: 1px 0;
+  background: var(--color-danger-strong);
+  color: var(--color-primary-foreground);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.leafDay {
+  padding: 2px 0 4px;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.when {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--text-xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+  font-variant-numeric: tabular-nums;
+}
+
+.when .countdown {
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: normal;
+}
+
+.service,
+.meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.meta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.card .more {
+  position: relative;
+  z-index: 1;
+  align-self: start;
+}
+
+.links {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  grid-column: 2 / -1;
+  gap: var(--space-4);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.link svg {
+  width: 14px;
+  height: 14px;
 }

@@ -38,6 +38,8 @@ export const Header = () => {
     pathname.startsWith('/business/') ||
     pathname.startsWith('/review/') ||
     pathname.startsWith('/master')
+  // The map filters by kind inside its own panel; catalog chips would leave the map.
+  const hasCategories = !isSlim && pathname !== '/map'
 
   // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
   // real height is published as --header-height.
@@ -122,7 +124,7 @@ export const Header = () => {
         </nav>
       </div>
 
-      {!isSlim && (
+      {hasCategories && (
         <nav className={styles.categories} aria-label='Категории'>
           <div className={styles.categoriesInner}>
             <ul className={styles.categoryList}>

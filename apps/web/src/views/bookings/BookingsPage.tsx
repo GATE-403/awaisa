@@ -15,8 +15,7 @@ import { AccountCard } from './ui/AccountCard/AccountCard'
 
 export const BookingsPage = () => {
   const today = useToday()
-  const { bookings, isReady, canForget, cancellingId, cancel, replace, forget, copyCode } =
-    useMyBookings()
+  const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } = useMyBookings()
   const upcoming = bookings
     .filter((booking) => isUpcoming(booking, today))
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
@@ -57,7 +56,6 @@ export const BookingsPage = () => {
                   isCancelling={cancellingId === booking.id}
                   onCancel={() => cancel(booking.id)}
                   onMoved={replace}
-                  onCodeClick={copyCode}
                 />
               ))}
             </div>

@@ -1,8 +1,7 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { DownloadSimple, MapPin, Phone } from '@phosphor-icons/react/ssr'
+import { MapPin, Phone } from '@phosphor-icons/react/ssr'
 import { useRef, useState } from 'react'
 import { formatDayLong, formatDuration, formatPrice, Ticket } from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
@@ -78,7 +77,7 @@ export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
         <div ref={ticketRef} className={styles.ticket}>
           <Ticket booking={booking} />
         </div>
-        <p className={styles.hint}>Покажите талон администратору или сохраните картинкой.</p>
+        <p className={styles.hint}>Покажите на ресепшене. «Скачать» сохранит картинкой.</p>
       </div>
 
       {/* Everything about the visit, not just what fits on the ticket. */}
@@ -151,13 +150,6 @@ export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
           )}
         </div>
       </section>
-
-      <div className={styles.stage}>
-        <Button variant='outline' onClick={download} disabled={isSaving}>
-          <DownloadSimple weight='bold' aria-hidden />
-          {isSaving ? 'Сохраняем…' : 'Скачать картинкой'}
-        </Button>
-      </div>
     </Sheet>
   )
 }

@@ -154,18 +154,16 @@ export const HeaderSearch = () => {
           ) : (
             <section aria-label='Часто ищут'>
               <p className={styles.heading}>Часто ищут</p>
-              <div className={styles.chips}>
+              <ul className={styles.list}>
                 {QUICK_SEARCHES.map((item) => (
-                  <button
-                    key={item}
-                    type='button'
-                    className={styles.chip}
-                    onClick={() => search(item)}
-                  >
-                    {item}
-                  </button>
+                  <li key={item}>
+                    <button type='button' className={styles.quick} onClick={() => search(item)}>
+                      <MagnifyingGlass className={styles.quickIcon} aria-hidden />
+                      {item}
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </section>
           )}
         </div>
