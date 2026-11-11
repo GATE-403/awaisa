@@ -150,6 +150,46 @@ export class WaitlistService {
   }
 
   /**
+   * The owner's view: who waits for which day, still waiting or texted. Anyone who has since
+   * booked that day at this business drops off — they are no longer waiting.
+   */
+  async listForBusiness(businessId: string) {
+    const today = toBusinessParts(new Date()).dateKey
+    const rows = await this.entries
+      .createQueryBuilder('entry')
+      .where('entry.businessId = :businessId', { businessId })
+      .andWhere('entry.date >= :today', { today })
+      .andWhere("entry.status IN ('waiting', 'notified')")
+      .andWhere(
+        `NOT EXISTS (
+          SELECT 1 FROM "bookings" b
+          WHERE b."business_id" = entry."business_id" AND b."customer_phone" = entry."customer_phone"
+            AND b."status" = 'confirmed'
+            AND (b."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date = entry."date"
+        )`,
+      )
+      .orderBy('entry.date', 'ASC')
+      .addOrderBy('entry.createdAt', 'ASC')
+      .getMany()
+
+    return Promise.all(
+      rows.map(async (entry) => ({
+        ...(await this.toView(entry)),
+        customerName: entry.customerName,
+        customerPhone: entry.customerPhone,
+        createdAt: entry.createdAt.toISOString(),
+      })),
+    )
+  }
+
+  async removeForBusiness(businessId: string, id: string) {
+    const entry = await this.entries.findOneBy({ id, businessId })
+    if (!entry) throw new NotFoundException('Не найдено')
+    entry.status = 'cancelled'
+    await this.entries.save(entry)
+  }
+
+  /**
    * Every minute: entries for past days expire; for each waiting group (service, master, day) the
    * availability is checked and, when a time is free, everyone in the group gets one SMS.
    * A cancellation still inside its undo window is not counted yet — it may come back.

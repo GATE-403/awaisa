@@ -440,6 +440,13 @@ type WaitlistEntry = {
   business: { name: string; slug: string }
 }
 
+// The cabinet's view of an entry: who waits, with their number.
+type ManagedWaitlistEntry = WaitlistEntry & {
+  customerName: string
+  customerPhone: string
+  createdAt: string
+}
+
 type JoinWaitlistInput = {
   serviceId: string
   specialistId: string
@@ -505,5 +512,6 @@ export type {
   TimeOff,
   TimeSlot,
   JoinWaitlistInput,
+  ManagedWaitlistEntry,
   WaitlistEntry,
 }

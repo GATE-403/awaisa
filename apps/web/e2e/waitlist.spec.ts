@@ -82,6 +82,17 @@ test.describe('Waitlist', () => {
         ).json()
       expect((await read()).status).toBe('waiting')
 
+      // The owner sees who waits for that day and can book them in from the cabinet.
+      await page.goto(`/manage/${SLUG}?tab=schedule&date=${date}`)
+      await page.getByRole('button', { name: /^Ждут окна: \d+/ }).click()
+      const waiting = page.getByRole('dialog', { name: 'Ждут окна' })
+      await expect(waiting.getByText('E2E Ожидание')).toBeVisible()
+      await waiting.getByRole('button', { name: 'Записать' }).first().click()
+      await expect(page.getByRole('dialog', { name: 'Новая запись' }).getByLabel('Имя')).toHaveValue(
+        'E2E Ожидание',
+      )
+      await page.keyboard.press('Escape')
+
       // The salon frees the day: the minute cron texts the client and marks the entry.
       await page.request.delete(`${leaves}/${leave.id}`)
       await expect

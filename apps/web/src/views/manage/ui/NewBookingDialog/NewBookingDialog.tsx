@@ -16,6 +16,8 @@ interface NewBookingDialogProps {
   catalog: Catalog
   onClose: () => void
   onSubmit: (input: CreateBookingInput) => Promise<boolean>
+  /** Prefill, e.g. a client from the waitlist. */
+  initial?: { serviceId: string; name: string; phone: string }
 }
 
 const FORM_ID = 'new-booking-form'
@@ -31,12 +33,13 @@ export const NewBookingDialog = ({
   catalog,
   onClose,
   onSubmit,
+  initial,
 }: NewBookingDialogProps) => {
   const [specialistId, setSpecialistId] = useState(initialSpecialistId)
-  const [chosenServiceId, setServiceId] = useState<string | null>(null)
+  const [chosenServiceId, setServiceId] = useState<string | null>(initial?.serviceId ?? null)
   const [chosenTime, setTime] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
+  const [name, setName] = useState(initial?.name ?? '')
+  const [phone, setPhone] = useState(initial ? maskPhoneInput(initial.phone) : '')
   const [comment, setComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const offered = catalog.services.filter(
