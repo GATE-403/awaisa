@@ -69,30 +69,6 @@ export const UpcomingBooking = ({
             <WalletButton bookingId={booking.id} />
           </div>
           <div className={sheet.list}>
-            <button
-              type='button'
-              className={sheet.row}
-              onClick={() => {
-                setIsMenuOpen(false)
-                setIsMoving(true)
-              }}
-            >
-              <span className={styles.rowLabel}>
-                <ArrowsClockwise weight='regular' aria-hidden />
-                Перенести
-              </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
-            </button>
-            <button
-              type='button'
-              className={sheet.row}
-              onClick={() => downloadCalendarFile(booking, booking.business)}
-            >
-              <span className={styles.rowLabel}>
-                <CalendarPlus weight='regular' aria-hidden />В календарь
-              </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
-            </button>
             {booking.business.mapUrl && (
               <a
                 href={booking.business.mapUrl}
@@ -119,6 +95,21 @@ export const UpcomingBooking = ({
             </button>
           </div>
         </Sheet>
+      )}
+      {booking.status === 'confirmed' && (
+        <div className={styles.quick}>
+          <button type='button' className={styles.quickButton} onClick={() => setIsMoving(true)}>
+            <ArrowsClockwise weight='bold' aria-hidden />
+            Перенести
+          </button>
+          <button
+            type='button'
+            className={styles.quickButton}
+            onClick={() => downloadCalendarFile(booking, booking.business)}
+          >
+            <CalendarPlus weight='bold' aria-hidden />В календарь
+          </button>
+        </div>
       )}
       {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}
       {isMoving && (

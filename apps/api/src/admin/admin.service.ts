@@ -110,6 +110,35 @@ export class AdminService {
     return { total: rows.reduce((sum, row) => sum + row.count, 0), days: rows }
   }
 
+  // «Все пришли»: every ended visit of the day without an outcome counts as arrived, paid the
+  // price in cash. The ids come back so the toast can undo exactly these.
+  async closeDay(business: Business, date: string) {
+    const rows = (await this.timeOff.manager.query(
+      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = s."price",
+         "payment_method" = 'cash', "outcome_at" = now()
+       FROM "services" AS s
+       WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'
+         AND b."outcome" IS NULL AND b."ends_at" < now()
+         AND b."starts_at" >= $2 AND b."starts_at" < $3
+       RETURNING b."id"`,
+      [business.id, ...Object.values(dayBounds(date))],
+    )) as unknown
+    const list = (Array.isArray(rows) && Array.isArray(rows[0]) ? rows[0] : rows) as {
+      id: string
+    }[]
+
+    return { ids: list.map((row) => row.id) }
+  }
+
+  async reopen(business: Business, ids: string[]) {
+    await this.timeOff.manager.query(
+      `UPDATE "bookings" SET "outcome" = NULL, "paid_amount" = NULL, "payment_method" = NULL,
+         "outcome_at" = NULL
+       WHERE "business_id" = $1 AND "id" = ANY($2::uuid[])`,
+      [business.id, ids],
+    )
+  }
+
   async createBooking(business: Business, input: StaffBookingInput) {
     // The client's cancel token is for their own device; staff cancel from the schedule.
     const { cancelToken: _cancelToken, ...view } = await this.bookings.create(

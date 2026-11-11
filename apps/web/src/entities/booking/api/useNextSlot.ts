@@ -8,6 +8,8 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 
 type NextSlot = {
   dayLabel: string
+  /** YYYY-MM-DD, so links can open the booking on that very time. */
+  date: string
   time: string
 }
 
@@ -32,7 +34,7 @@ export const useNextSlot = (serviceId: string) => {
           controller.signal,
         )
         const free = slots.find((item) => item.isAvailable)
-        if (free) return { dayLabel: DAY_LABELS[index] ?? day.key, time: free.time }
+        if (free) return { dayLabel: DAY_LABELS[index] ?? day.key, date: day.key, time: free.time }
       }
 
       return null

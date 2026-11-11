@@ -43,6 +43,13 @@ const outcomeSchema = z.object({
 
 type OutcomeBody = z.infer<typeof outcomeSchema>
 
+const closeDaySchema = z.object({ date: DATE_SCHEMA })
+
+const reopenSchema = z.object({ ids: z.array(z.uuid()).min(1).max(200) })
+
+type CloseDayInput = z.infer<typeof closeDaySchema>
+type ReopenInput = z.infer<typeof reopenSchema>
+
 const analyticsQuerySchema = z.object({
   days: z.coerce
     .number()
@@ -65,6 +72,8 @@ type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
 export type {
   AnalyticsQuery,
+  CloseDayInput,
+  ReopenInput,
   OutcomeBody,
   CreateTimeOffInput,
   MoveBookingInput,
@@ -74,6 +83,8 @@ export type {
 }
 export {
   analyticsQuerySchema,
+  closeDaySchema,
+  reopenSchema,
   outcomeSchema,
   createTimeOffSchema,
   moveBookingSchema,

@@ -97,6 +97,9 @@ const dayText = (business: string, date: string, bookings: BookingLine[], title 
 const linkedText = (business: string) =>
   `✅ Готово! Сюда будут приходить новые записи, отмены и отзывы «${escapeHtml(business)}», а каждое утро — расписание на день.\n\n/today — записи на сегодня\n/stop — отключить уведомления`
 
+const unclosedText = (count: number) =>
+  `📋 Сегодня не отмечено визитов: <b>${count}</b>. Откройте расписание и отметьте, кто пришёл — так выручка будет точной.`
+
 const HELP_TEXT =
   'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today — записи на сегодня\n/stop — отключить уведомления'
 
@@ -110,4 +113,5 @@ export {
   movedByClientText,
   newBookingText,
   reviewText,
+  unclosedText,
 }

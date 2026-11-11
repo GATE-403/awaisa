@@ -34,7 +34,15 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
       <ButtonLink
         variant='secondary'
         className={styles.cardButton}
-        render={<NextLink href={`/${business.slug}/book?service=${service.id}`} />}
+        render={
+          <NextLink
+            href={
+              slot
+                ? `/${business.slug}/book?service=${service.id}&specialist=any&date=${slot.date}&time=${slot.time}`
+                : `/${business.slug}/book?service=${service.id}`
+            }
+          />
+        }
       >
         Записаться
       </ButtonLink>

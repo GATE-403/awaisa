@@ -94,7 +94,7 @@ test.describe('Reviews after a visit', () => {
 test.describe('Telegram for owners', () => {
   test('the owner links a chat through the bot and can unlink it', async ({ page }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
-    await page.goto(`/manage/${SLUG}?tab=profile`)
+    await page.goto(`/manage/${SLUG}?tab=notifications`)
 
     const connect = page.getByRole('link', { name: /Подключить (Telegram|ещё один чат)/ })
     await expect(connect).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=/)

@@ -30,7 +30,8 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
           ? 'Завтра'
           : null
       : null
-  const href = `/${offer.slug}/book?service=${offer.id}`
+  // The place's first free time (any service): open that day, the client picks the time.
+  const href = `/${offer.slug}/book?service=${offer.id}${slot && when ? `&date=${slot.date}` : ''}`
 
   return (
     <article className={styles.card} aria-label={`${offer.name}, ${offer.businessName}`}>
@@ -74,7 +75,7 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
             className={styles.slot}
             data-state={slot && when ? (when === 'Сегодня' ? 'today' : 'soon') : 'none'}
           >
-            {slot && when ? `${when}, ${slot.time}` : nextFree ? 'Нет окон рядом' : '\u00a0'}
+            {slot && when ? `${when} с ${slot.time}` : nextFree ? 'Нет окон рядом' : '\u00a0'}
           </span>
         </div>
       </div>

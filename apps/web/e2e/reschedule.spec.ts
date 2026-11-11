@@ -54,11 +54,9 @@ test.describe('Client reschedules a visit', () => {
 
     await page.goto('/bookings')
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
-    await ticket.getByRole('button', { name: 'Ещё' }).click()
-    await page
-      .getByRole('dialog', { name: 'Запись' })
-      .getByRole('button', { name: 'Перенести' })
-      .click()
+    await expect(ticket).toBeVisible()
+    // «Перенести» sits in plain sight under the ticket.
+    await page.getByRole('button', { name: 'Перенести', exact: true }).first().click()
 
     const sheet = page.getByRole('dialog', { name: 'Перенести запись' })
     await expect(sheet).toContainText(`Сейчас:`)

@@ -12,6 +12,8 @@ import styles from './TelegramSection.module.css'
 
 interface TelegramSectionProps {
   slug: string
+  /** Shown once it is known that the platform has no bot configured. */
+  fallback?: React.ReactNode
 }
 
 const POLL_MS = 3_000
@@ -21,7 +23,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 
 
 // New bookings, cancellations, reviews and the morning schedule in the owner's Telegram.
 // Linking is one tap: the bot opens with a one-time code, the cabinet notices the new chat.
-export const TelegramSection = ({ slug }: TelegramSectionProps) => {
+export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps) => {
   const toast = useToast()
   const [status, setStatus] = useState<TelegramStatus | null>(null)
   const [isWaiting, setIsWaiting] = useState(false)
@@ -50,7 +52,8 @@ export const TelegramSection = ({ slug }: TelegramSectionProps) => {
     }
   }, [slug])
 
-  if (!status?.isAvailable) return null
+  if (!status) return null
+  if (!status.isAvailable) return <>{fallback}</>
 
   const waitForChat = (known: number) => {
     let attempts = 0

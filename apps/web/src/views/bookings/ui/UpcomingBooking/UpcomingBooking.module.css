@@ -86,3 +86,41 @@
   margin-left: auto;
   color: var(--color-tertiary-foreground);
 }
+
+/* The two things people do before a visit, in plain sight; the rest lives behind «⋯». */
+.quick {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.quickButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-height: var(--control-height-md);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.quickButton svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-link);
+}
+
+.quickButton:active {
+  scale: 0.97;
+}
+
+.quickButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

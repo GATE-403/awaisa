@@ -3,7 +3,6 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatCircleText, NavigationArrow, Phone, ShareNetwork } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import type { ComponentType } from 'react'
 import type { Business } from '@/shared/api/types'
 import styles from './Place.module.css'
@@ -65,12 +64,14 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
 
   return (
     <div className={styles.actions}>
+      {/* One way in: choose the service first — the menu right below does the rest. */}
       <ButtonLink
         size='lg'
         className={styles.bookButton}
-        render={<NextLink href={`/${business.slug}/book`} />}
+        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+        render={<a href='#services' />}
       >
-        Записаться
+        Выбрать услугу
       </ButtonLink>
       <ul className={styles.quickActions}>
         {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) => (
