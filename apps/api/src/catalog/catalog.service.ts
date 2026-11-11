@@ -75,6 +75,7 @@ export class CatalogService {
           branchId,
           isActive,
           phone,
+          commissionPercent,
           services: offered = [],
         }) => ({
           id,
@@ -87,7 +88,7 @@ export class CatalogService {
             .map((service) => service.id)
             .filter((serviceId) => visibleServiceIds.has(serviceId)),
           // Only the cabinet sees how a master signs in.
-          ...(includeInactive ? { isActive, phone: phone ?? '' } : {}),
+          ...(includeInactive ? { isActive, phone: phone ?? '', commissionPercent } : {}),
         }),
       ),
     }
@@ -199,6 +200,7 @@ export class CatalogService {
       isActive: input.isActive,
       branchId: input.branchId,
       phone: input.phone ? normalizePhone(input.phone) : null,
+      commissionPercent: input.commissionPercent,
       services,
     })
   }

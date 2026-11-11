@@ -39,6 +39,11 @@ export const MasterDialog = ({
   const [name, setName] = useState(master?.name ?? '')
   const [role, setRole] = useState(master?.role ?? '')
   const [phone, setPhone] = useState(master?.phone ? maskPhoneInput(master.phone) : '')
+  const [percent, setPercent] = useState(
+    master?.commissionPercent === null || master?.commissionPercent === undefined
+      ? ''
+      : String(master.commissionPercent),
+  )
   const [serviceIds, setServiceIds] = useState<string[]>(
     master?.serviceIds ?? services.map((service) => service.id),
   )
@@ -79,6 +84,7 @@ export const MasterDialog = ({
       isActive,
       branchId,
       phone: phone.trim(),
+      commissionPercent: percent === '' ? null : Math.min(100, Number(percent)),
     })
     setIsSaving(false)
     if (saved) onClose()
@@ -145,6 +151,20 @@ export const MasterDialog = ({
               onValueChange={setRole}
             />
           </div>
+          <label className={sheet.row}>
+            <span className={sheet.rowLabel}>Процент мастера</span>
+            <span className={sheet.rowControl}>
+              <Input
+                variant='plain'
+                inputMode='numeric'
+                aria-label='Процент мастера'
+                placeholder='Не задан'
+                value={percent}
+                onValueChange={(value) => setPercent(value.replace(/\D/g, '').slice(0, 3))}
+              />
+              {percent !== '' && <span className={sheet.suffix}>%</span>}
+            </span>
+          </label>
           <label className={sheet.row}>
             <span className={sheet.rowLabel}>Телефон для входа</span>
             <Input

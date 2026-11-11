@@ -71,7 +71,12 @@ export class MasterController {
     return {
       date: query.date,
       business: { slug: business.slug, name: business.name },
-      master: { id: master.id, name: master.name, role: master.role },
+      master: {
+        id: master.id,
+        name: master.name,
+        role: master.role,
+        commissionPercent: master.commissionPercent,
+      },
       hours: window ? clampToWindow(days.get(master.id) ?? null, window) : null,
       leaveReason: leaves[0] ? leaves[0].reason || 'Отпуск' : null,
       bookings: bookings.filter((booking) => booking.specialistId === master.id),

@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -22,6 +23,8 @@ import {
   bookingTokenSchema,
   type CreateBookingInput,
   createBookingSchema,
+  type MoveByClientInput,
+  moveBookingSchema,
   type NextFreeQuery,
   nextFreeQuerySchema,
 } from './bookings.schemas.js'
@@ -68,6 +71,18 @@ export class BookingsController {
     @Headers(TOKEN_HEADER) token: string | undefined,
   ) {
     return this.bookingsService.findByToken(id, parseToken(token))
+  }
+
+  // The client moves their own visit: the device token or the signed-in owner of the booking.
+  @Patch('bookings/:id')
+  @UseGuards(OptionalAuthGuard)
+  move(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+    @CurrentCustomer() customer: Customer | null,
+    @Body({ schema: moveBookingSchema }) body: MoveByClientInput,
+  ) {
+    return this.bookingsService.moveByClient(id, { token: token ?? null, customer }, body)
   }
 
   @Post('bookings/:id/restore')

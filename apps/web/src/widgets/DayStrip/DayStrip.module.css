@@ -102,3 +102,20 @@
     background: var(--color-subtle);
   }
 }
+
+/* A dot under the number, like Calendar marks days with events. */
+.day {
+  position: relative;
+}
+
+.day[data-marked]::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-rating);
+  translate: -50% 0;
+}

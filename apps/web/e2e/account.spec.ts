@@ -94,7 +94,8 @@ test.describe('Salon admin', () => {
     await page.goto('/manage/awaisa-studio')
 
     await expect(page.getByRole('region', { name: 'Айгерим Садыкова' })).toBeVisible()
-    await page.getByRole('group', { name: 'День' }).getByRole('button').nth(1).click()
+    // Tomorrow: the strip also holds past days, which can't be closed.
+    await page.getByRole('group', { name: 'День' }).locator('[data-today] + button').click()
 
     await page.getByRole('button', { name: 'Закрыть время' }).click()
     const dialog = page.getByRole('dialog')

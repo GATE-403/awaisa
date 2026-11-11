@@ -108,6 +108,7 @@ const specialistSchema = z.object({
   branchId: z.uuid().nullable().default(null),
   // The master's own number for «Мой день»; empty = no access.
   phone: z.string().trim().max(32).default(''),
+  commissionPercent: z.number().int().min(0).max(100).nullable().default(null),
 })
 
 const branchSchema = z.object({

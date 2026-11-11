@@ -67,7 +67,7 @@ export class AnalyticsService {
           [id, from, now],
         ),
         this.query(
-          `SELECT sp."id", sp."name", sp."role",
+          `SELECT sp."id", sp."name", sp."role", sp."commission_percent" AS "percent",
              COUNT(b."id") FILTER (WHERE ${DONE})::int AS "visits",
              COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
              COALESCE(SUM(s."duration_minutes") FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes"
@@ -175,6 +175,12 @@ export class AnalyticsService {
         role: String(row.role ?? ''),
         visits: toNumber(row.visits),
         revenue: toNumber(row.revenue),
+        percent: row.percent === null ? null : toNumber(row.percent),
+        // What the master is owed for the period: their share of what their visits earned.
+        payout:
+          row.percent === null
+            ? null
+            : Math.round((toNumber(row.revenue) * toNumber(row.percent)) / 100),
         load:
           openMinutes === 0
             ? 0

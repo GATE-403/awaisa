@@ -26,6 +26,8 @@ type Specialist = {
   isActive?: boolean
   /** Cabinet only: the master's sign-in number. */
   phone?: string
+  /** Cabinet only: the master's share of their visits' revenue, %. */
+  commissionPercent?: number | null
 }
 
 type Branch = {
@@ -347,6 +349,7 @@ type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
   branchId: string | null
   /** The number the master signs in with for «Мой день»; empty = no access. */
   phone: string
+  commissionPercent: number | null
 }
 
 type MasterPlace = {
@@ -360,7 +363,7 @@ type MasterPlace = {
 type MasterDay = {
   date: string
   business: { slug: string; name: string }
-  master: { id: string; name: string; role: string }
+  master: { id: string; name: string; role: string; commissionPercent: number | null }
   hours: { opensMinutes: number; closesMinutes: number } | null
   leaveReason: string | null
   bookings: AdminBooking[]
@@ -411,6 +414,8 @@ type AnalyticsReport = {
     visits: number
     revenue: number
     load: number
+    percent: number | null
+    payout: number | null
   }[]
   clients: {
     phone: string

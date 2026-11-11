@@ -79,6 +79,15 @@ const toCsv = (report: AnalyticsReport) => {
     ['Дата', 'Выручка', 'Визиты', 'Отмены'],
     ...report.daily.map((day) => [day.date, day.revenue, day.visits, day.cancelled]),
     [],
+    ['Мастер', 'Визиты', 'Выручка', 'Процент', 'К выплате'],
+    ...report.masters.map((master) => [
+      master.name,
+      master.visits,
+      master.revenue,
+      master.percent ?? '',
+      master.payout ?? '',
+    ]),
+    [],
     ['Клиент', 'Телефон', 'Визиты', 'Потратил', 'Последний визит', 'Новый'],
     ...report.clients.map((client) => [
       client.name,
@@ -240,6 +249,8 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             <p className={styles.groupFooter}>Загрузка — доля рабочих часов, занятых визитами.</p>
           </div>
 
+          <PayrollGroup masters={report.masters} />
+
           <div className={forms.group}>
             <h3 className={forms.groupTitle}>Загрузка по часам</h3>
             <div className={styles.card}>
@@ -285,6 +296,49 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
         <ClientSheet slug={slug} phone={openPhone} onClose={() => setOpenPhone(null)} />
       )}
     </section>
+  )
+}
+
+interface PayrollGroupProps {
+  masters: AnalyticsReport['masters']
+}
+
+// Who is owed what for the period: the master's percent of what their visits earned.
+const PayrollGroup = ({ masters }: PayrollGroupProps) => {
+  const paid = masters.filter((master) => master.payout !== null && master.revenue > 0)
+  const total = paid.reduce((sum, master) => sum + (master.payout ?? 0), 0)
+  const missing = masters.some((master) => master.percent === null)
+
+  return (
+    <div className={forms.group}>
+      <h3 className={forms.groupTitle}>Зарплата мастерам</h3>
+      {paid.length === 0 ? (
+        <p className={forms.groupEmpty}>
+          Укажите процент мастера в его карточке (Мастера) — здесь появится, сколько кому выплатить.
+        </p>
+      ) : (
+        <ul className={forms.list}>
+          {paid.map((master) => (
+            <li key={master.id} className={styles.row}>
+              <span className={styles.rowText}>
+                <span className={styles.rowTitle}>{master.name}</span>
+                <span className={styles.rowMeta}>
+                  {master.percent}% от {formatMoney(master.revenue)}
+                </span>
+              </span>
+              <span className={styles.rowValue}>{formatMoney(master.payout ?? 0)}</span>
+            </li>
+          ))}
+          <li className={styles.row}>
+            <span className={styles.rowTitle}>Итого к выплате</span>
+            <span className={styles.rowValue}>{formatMoney(total)}</span>
+          </li>
+        </ul>
+      )}
+      {paid.length > 0 && missing && (
+        <p className={styles.groupFooter}>У части мастеров процент не задан — их здесь нет.</p>
+      )}
+    </div>
   )
 }
 

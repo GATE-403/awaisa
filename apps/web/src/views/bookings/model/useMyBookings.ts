@@ -131,6 +131,14 @@ export const useMyBookings = () => {
     }
   }
 
+  // After the client moved a visit: the new time replaces the old one everywhere.
+  const replace = (moved: Booking) => {
+    if (stored.some((item) => item.id === moved.id)) updateSnapshot(moved)
+    setAccountBookings(
+      (current) => current?.map((item) => (item.id === moved.id ? moved : item)) ?? null,
+    )
+  }
+
   const forget = (id: string) => {
     forgetBooking(id)
     toast.show({ title: 'Убрано из списка' })
@@ -153,6 +161,7 @@ export const useMyBookings = () => {
     canForget: (id: string) => stored.some((item) => item.id === id),
     cancellingId,
     cancel,
+    replace,
     forget,
     copyCode,
   }

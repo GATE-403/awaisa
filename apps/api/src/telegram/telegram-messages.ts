@@ -48,6 +48,20 @@ const cancelledText = (business: string, date: string, booking: BookingLine) =>
     'Время снова свободно для записи.',
   ].join('\n')
 
+const movedByClientText = (
+  business: string,
+  date: string,
+  booking: BookingLine & { previous: string },
+) => {
+  const [previousDate = '', previousTime = ''] = booking.previous.split(' ')
+  return [
+    `🔁 <b>Клиент перенёс запись</b> · ${escapeHtml(business)}`,
+    `Было: ${formatDate(previousDate)}, ${previousTime}`,
+    `Стало: ${formatDate(date)}, <b>${booking.time}</b> — ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
+    `Клиент: ${escapeHtml(booking.customerName)}`,
+  ].join('\n')
+}
+
 const reviewText = (
   business: string,
   review: { rating: number; comment: string; authorName: string; specialistName: string },
@@ -87,4 +101,13 @@ const HELP_TEXT =
   'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today — записи на сегодня\n/stop — отключить уведомления'
 
 export type { BookingLine }
-export { cancelledText, dayText, escapeHtml, HELP_TEXT, linkedText, newBookingText, reviewText }
+export {
+  cancelledText,
+  dayText,
+  escapeHtml,
+  HELP_TEXT,
+  linkedText,
+  movedByClientText,
+  newBookingText,
+  reviewText,
+}

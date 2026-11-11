@@ -2,12 +2,15 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { useToast } from '@awaisa/ui/Toast'
 import { CalendarX, Plus } from '@phosphor-icons/react/ssr'
-import { useState } from 'react'
-import { formatPrice, getUpcomingDays } from '@/entities/booking'
+import { useEffect, useState } from 'react'
+import { formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, weekdayOf } from '@/entities/business'
+import { getUnclosedVisits } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
+import { pluralize } from '@/shared/lib/plural'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
@@ -31,16 +34,27 @@ interface ScheduleTabProps {
 type Draft = { specialistId: string; time: string | null }
 
 const DAYS_SHOWN = 14
+// Two weeks back: enough to close yesterday's and last week's visits.
+const PAST_DAYS = 14
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const today = useToday()
+  const toast = useToast()
+  const [unclosed, setUnclosed] = useState<{
+    total: number
+    days: { date: string; count: number }[]
+  }>({
+    total: 0,
+    days: [],
+  })
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [isClosingTime, setIsClosingTime] = useState(false)
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [clientPhone, setClientPhone] = useState<string | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
-  const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
+  const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
+  const isPast = date !== null && today !== null && date < today.dayKey
   const {
     schedule,
     error,
@@ -70,6 +84,27 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     .filter(Boolean)
     .join(' · ')
   const hasMasters = (schedule?.specialists.length ?? 0) > 0
+  const marks = new Set(unclosed.days.map((day) => day.date))
+  const firstUnclosed = unclosed.days.find((day) => day.date !== date)
+
+  // Re-read after every schedule change: marking a visit may close a day.
+  useEffect(() => {
+    if (!schedule) return
+    const controller = new AbortController()
+    getUnclosedVisits(slug, controller.signal)
+      .then(setUnclosed)
+      .catch(() => undefined)
+
+    return () => controller.abort()
+  }, [slug, schedule])
+
+  const handleCreate = (specialistId: string, time: string | null) => {
+    if (isPast) {
+      toast.show({ title: 'Записать в прошедший день нельзя', type: 'info' })
+      return
+    }
+    setDraft({ specialistId, time })
+  }
 
   return (
     <section className={styles.content} aria-label='Расписание'>
@@ -79,19 +114,34 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
-              <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
-                <CalendarX weight='bold' aria-hidden />
-                Закрыть время
-              </Button>
-              <Button
-                size='sm'
-                onClick={() =>
-                  setDraft({ specialistId: schedule?.specialists[0]?.id ?? '', time: null })
-                }
-              >
-                <Plus weight='bold' aria-hidden />
-                Новая запись
-              </Button>
+              {/* In the toolbar, not above the calendar: it loads late and must not shift the grid. */}
+              {unclosed.total > 0 && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
+                  title='Отметьте, кто пришёл: так выручка в аналитике будет точной'
+                >
+                  Не закрыто: {pluralize(unclosed.total, ['визит', 'визита', 'визитов'])}
+                </Button>
+              )}
+              {!isPast && (
+                <>
+                  <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+                    <CalendarX weight='bold' aria-hidden />
+                    Закрыть время
+                  </Button>
+                  <Button
+                    size='sm'
+                    onClick={() =>
+                      setDraft({ specialistId: schedule?.specialists[0]?.id ?? '', time: null })
+                    }
+                  >
+                    <Plus weight='bold' aria-hidden />
+                    Новая запись
+                  </Button>
+                </>
+              )}
             </>
           )
         }
@@ -107,7 +157,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       )}
 
       <div className={styles.panel}>
-        <DayStrip days={days} value={date} onChange={setSelectedDay} />
+        <DayStrip days={days} value={date} onChange={setSelectedDay} marks={marks} />
         {schedule && hasMasters && today && date === today.dayKey && (
           <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} />
         )}
@@ -130,7 +180,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             slotMinutes={business.slotMinutes}
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
-            onCreateBooking={(specialistId, time) => setDraft({ specialistId, time })}
+            onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
           />
         )}

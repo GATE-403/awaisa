@@ -24,6 +24,8 @@ const createPastVisit = async (
   name = 'E2E Отзыв Тестов',
   phone = randomClientPhone(),
   specialistIndex = 0,
+  /** How far back to move the visit; far by default so it never meets a real one. */
+  daysBack?: number,
 ) => {
   const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
   const specialist = business.catalog.specialists[specialistIndex]
@@ -54,15 +56,25 @@ const createPastVisit = async (
     })
     const booking = await response.json()
     // Far back, with a random minute: no overlap with any real visit of that master.
-    const days = 400 + Math.floor(Math.random() * 300)
+    const days = daysBack === undefined ? 400 + Math.floor(Math.random() * 300) : daysBack
+    // The booking was made `offset` days ahead; moving it back by offset + days lands `days` ago.
+    // A real visit may sit at that hour: try other hours until one is free.
     const pastDate = await withDb(async (client) => {
-      const { rows } = await client.query(
-        `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),
-           "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1
-         RETURNING to_char("starts_at" AT TIME ZONE 'UTC' + interval '6 hours', 'YYYY-MM-DD') AS "date"`,
-        [booking.id, days, Math.floor(Math.random() * 50)],
-      )
-      return rows[0]?.date as string
+      for (let attempt = 0; attempt < 12; attempt += 1) {
+        const minutes = daysBack === undefined ? Math.floor(Math.random() * 50) : -attempt * 30
+        try {
+          const { rows } = await client.query(
+            `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),
+               "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1
+             RETURNING to_char("starts_at" AT TIME ZONE 'UTC' + interval '6 hours', 'YYYY-MM-DD') AS "date"`,
+            [booking.id, daysBack === undefined ? days : days + offset, minutes],
+          )
+          return rows[0]?.date as string
+        } catch (error) {
+          if ((error as { code?: string }).code !== '23P01') throw error
+        }
+      }
+      throw new Error('No free past slot for the visit')
     })
     return { booking, specialist, date: pastDate }
   }
@@ -72,13 +84,23 @@ const createPastVisit = async (
 // A real booking a few days ahead (for checks that the future cannot be marked).
 const createFutureVisit = async (name: string, phone: string) => {
   const visit = await createPastVisit(name, phone)
-  await withDb((client) =>
-    client.query(
-      `UPDATE "bookings" SET "starts_at" = now() + interval '20 days' + make_interval(mins => $2),
-         "ends_at" = now() + interval '20 days' + make_interval(mins => $2 + 45) WHERE "id" = $1`,
-      [visit.booking.id, Math.floor(Math.random() * 600)],
-    ),
-  )
+  await withDb(async (client) => {
+    // Another run's visit may already sit there: try other minutes until the slot is free.
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const minutes = Math.floor(Math.random() * 600)
+      try {
+        await client.query(
+          `UPDATE "bookings" SET "starts_at" = now() + interval '20 days' + make_interval(mins => $2),
+             "ends_at" = now() + interval '20 days' + make_interval(mins => $2 + 45) WHERE "id" = $1`,
+          [visit.booking.id, minutes],
+        )
+        return
+      } catch (error) {
+        if ((error as { code?: string }).code !== '23P01') throw error
+      }
+    }
+    throw new Error('No free future slot for the visit')
+  })
   return visit
 }
 
