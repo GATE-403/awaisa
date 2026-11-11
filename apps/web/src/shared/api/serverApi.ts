@@ -8,6 +8,7 @@ import type {
   BusinessCard,
   BusinessKind,
   BusinessPage,
+  MapPlace,
   Offer,
   PopularService,
   ReviewSummary,
@@ -94,4 +95,17 @@ const listReviews = async (slug: string): Promise<ReviewSummary> => {
   return response.json()
 }
 
-export { getBusiness, listBusinesses, listOffers, listPopularServices, listReviews }
+// The map's first list (no location yet): the same for everyone, so it is cached like the catalog.
+const listMapPlaces = async (kind: BusinessKind | undefined): Promise<MapPlace[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(BUSINESSES_TAG)
+
+  const params = new URLSearchParams(kind ? { kind } : {})
+  const response = await fetch(`${API_URL}/map?${params}`)
+  if (!response.ok) throw await toApiError(response)
+
+  return response.json()
+}
+
+export { listMapPlaces, getBusiness, listBusinesses, listOffers, listPopularServices, listReviews }

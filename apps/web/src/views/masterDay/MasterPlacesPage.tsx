@@ -14,14 +14,19 @@ import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import styles from './MasterDayPage.module.css'
 
 // Where the signed-in number works as a master; one place opens its day straight away.
-export const MasterPlacesPage = () => {
+interface MasterPlacesPageProps {
+  /** Where this number works, read on the server (null: load in the browser). */
+  initialPlaces?: MasterPlace[] | null
+}
+
+export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps) => {
   const session = useRequireSession()
   const router = useRouter()
-  const [places, setPlaces] = useState<MasterPlace[] | null>(null)
+  const [places, setPlaces] = useState<MasterPlace[] | null>(initialPlaces)
   const isSignedIn = session.status === 'signedIn'
 
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!isSignedIn || initialPlaces) return
     const controller = new AbortController()
     getMasterPlaces(controller.signal)
       .then((loaded) => {
@@ -32,7 +37,7 @@ export const MasterPlacesPage = () => {
       .catch(() => setPlaces([]))
 
     return () => controller.abort()
-  }, [isSignedIn, router])
+  }, [isSignedIn, router, initialPlaces])
 
   return (
     <main className={styles.page}>

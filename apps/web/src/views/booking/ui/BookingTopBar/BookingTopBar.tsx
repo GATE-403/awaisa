@@ -8,8 +8,8 @@ interface BookingTopBarProps {
   business: Business
 }
 
-// Booking opens like a page inside Telegram's in-app browser: its own bar with the place and a
-// close button, no site header or catalog around it — all attention on the form.
+// Booking opens like a page in Telegram's in-app browser: a sheet over the dimmed site, its own
+// bar with the place and a close button — all attention on the form.
 export const BookingTopBar = ({ business }: BookingTopBarProps) => (
   <header className={styles.bar}>
     <div className={styles.inner}>
@@ -26,4 +26,9 @@ export const BookingTopBar = ({ business }: BookingTopBarProps) => (
       <span className={styles.spacer} aria-hidden />
     </div>
   </header>
+)
+
+// The site stays visible above the sheet, dimmed and blurred; tapping it closes the booking.
+export const BookingScrim = ({ slug }: { slug: string }) => (
+  <NextLink href={`/${slug}`} className={styles.scrim} aria-hidden='true' tabIndex={-1} />
 )

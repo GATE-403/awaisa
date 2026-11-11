@@ -1,6 +1,8 @@
 .backdrop {
   position: fixed;
   inset: 0;
+  /* Above page-level layers such as the booking screen (60). */
+  z-index: 80;
   background: var(--color-overlay);
   transition: opacity var(--duration-normal) var(--ease-standard);
 }
@@ -15,6 +17,7 @@
   top: 50%;
   left: 50%;
   display: flex;
+  z-index: 81;
   flex-direction: column;
   gap: var(--space-2);
   width: min(420px, calc(100vw - var(--space-8)));

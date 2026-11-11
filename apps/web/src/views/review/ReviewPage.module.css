@@ -7,11 +7,6 @@
   flex-direction: column;
 }
 
-.skeleton {
-  height: 420px;
-  border-radius: var(--radius-2xl);
-}
-
 .card {
   display: flex;
   flex-direction: column;

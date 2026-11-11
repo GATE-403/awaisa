@@ -1,6 +1,6 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
+import { createContext, useContext, useSyncExternalStore } from 'react'
 import { getMe, logout as logoutRequest } from '@/shared/api/clientApi'
 import type { Customer } from '@/shared/api/types'
 
@@ -35,6 +35,18 @@ const refreshSession = () => {
   return request
 }
 
+// The server read the session for this page: its answer seeds the store, so the page renders
+// signed-in (or as a guest) straight away and skips the browser's /api/me round trip.
+const InitialSession = createContext<SessionState | null>(null)
+
+const toState = (customer: Customer | null): SessionState =>
+  customer ? { status: 'signedIn', customer } : GUEST
+
+// Browser only: on the server this module is shared by every request.
+const seedSession = (initial: SessionState) => {
+  if (typeof window !== 'undefined' && state.status === 'loading') state = initial
+}
+
 const subscribe = (listener: () => void) => {
   listeners.add(listener)
   if (state.status === 'loading') void refreshSession()
@@ -47,12 +59,17 @@ const signOut = async () => {
   setCustomer(null)
 }
 
-export const useSession = () => {
+const useSession = () => {
+  const initial = useContext(InitialSession)
+  if (initial) seedSession(initial)
   const session = useSyncExternalStore(
     subscribe,
     () => state,
-    () => LOADING,
+    () => initial ?? LOADING,
   )
 
   return { ...session, setCustomer, refreshSession, signOut }
 }
+
+export { InitialSession, toState, useSession }
+export type { SessionState }

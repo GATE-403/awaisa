@@ -1,42 +1,28 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
-import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Star } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { formatDayLong } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import { RateVisitForm } from '@/features/rateVisit'
-import { getErrorMessage } from '@/shared/api/apiError'
-import { getVisitReview } from '@/shared/api/clientApi'
 import type { VisitReview } from '@/shared/api/types'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './ReviewPage.module.css'
 
 interface ReviewPageProps {
   bookingId: string
+  signature: string | null
+  /** The visit read on the server from the signed SMS link. */
+  data: VisitReview | null
+  error: string | null
 }
 
 // Opened from the «как прошёл визит?» SMS: the visit, five stars, a comment — nothing else.
-export const ReviewPage = ({ bookingId }: ReviewPageProps) => {
-  const searchParams = useSearchParams()
-  const signature = searchParams.get('s')
-  const [data, setData] = useState<VisitReview | null>(null)
-  const [error, setError] = useState<string | null>(null)
+// The visit arrives rendered from the server; only the rating form is interactive.
+export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProps) => {
   const [rated, setRated] = useState<number | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-    getVisitReview(bookingId, { signature }, controller.signal)
-      .then(setData)
-      .catch((loadError: unknown) => {
-        if (!controller.signal.aborted) setError(getErrorMessage(loadError))
-      })
-
-    return () => controller.abort()
-  }, [bookingId, signature])
 
   const visit = data?.visit
   const stars = rated ?? visit?.review?.rating ?? null
@@ -53,7 +39,6 @@ export const ReviewPage = ({ bookingId }: ReviewPageProps) => {
             </NextLink>
           </div>
         )}
-        {!data && !error && <Skeleton className={styles.skeleton} />}
 
         {visit && (
           <div className={styles.card}>

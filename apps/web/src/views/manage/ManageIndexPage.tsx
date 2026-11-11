@@ -15,15 +15,20 @@ import { BusinessPickerCard } from '@/views/manage/ui/BusinessPickerCard/Busines
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from './ManageIndexPage.module.css'
 
-export const ManageIndexPage = () => {
+interface ManageIndexPageProps {
+  /** The account's businesses, read on the server (null: load in the browser). */
+  initialBusinesses?: BusinessLink[] | null
+}
+
+export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPageProps) => {
   const session = useRequireSession()
   const router = useRouter()
-  const [businesses, setBusinesses] = useState<BusinessLink[] | null>(null)
+  const [businesses, setBusinesses] = useState<BusinessLink[] | null>(initialBusinesses)
   const isSignedIn = session.status === 'signedIn'
   const [only] = businesses ?? []
 
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!isSignedIn || initialBusinesses) return
 
     const controller = new AbortController()
     getMyBusinesses(controller.signal)
@@ -33,7 +38,7 @@ export const ManageIndexPage = () => {
       })
 
     return () => controller.abort()
-  }, [isSignedIn])
+  }, [isSignedIn, initialBusinesses])
 
   useEffect(() => {
     if (businesses?.length === 1 && only) router.replace(`/manage/${only.slug}`)

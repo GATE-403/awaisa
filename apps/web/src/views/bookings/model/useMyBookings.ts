@@ -1,5 +1,5 @@
 import { useToast } from '@awaisa/ui/Toast'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   forgetBooking,
   parseBookings,
@@ -25,10 +25,12 @@ const NOT_FOUND_STATUS = 404
 // Slightly shorter than the API's 15-second undo window.
 const UNDO_TIMEOUT_MS = 12_000
 
-export const useMyBookings = () => {
+// `initial` is what the server already read for this account; the first fetch is skipped then.
+export const useMyBookings = (initial: Booking[] | null = null) => {
   const { bookings: stored, isReady: isStorageReady } = useStoredBookings()
   const session = useSession()
-  const [accountBookings, setAccountBookings] = useState<Booking[] | null>(null)
+  const [accountBookings, setAccountBookings] = useState<Booking[] | null>(initial)
+  const hasInitial = useRef(initial !== null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const toast = useToast()
   const idsKey = stored.map((booking) => booking.id).join(',')
@@ -46,6 +48,10 @@ export const useMyBookings = () => {
   useEffect(() => {
     if (!isSignedIn) {
       setAccountBookings(null)
+      return
+    }
+    if (hasInitial.current) {
+      hasInitial.current = false
       return
     }
 

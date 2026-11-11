@@ -1,5 +1,5 @@
 import { useToast } from '@awaisa/ui/Toast'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { getManagedBusiness } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
@@ -7,15 +7,25 @@ import type { BusinessPage } from '@/shared/api/types'
 
 type LoadError = { status: number | null; message: string }
 
-export const useManagedBusiness = (slug: string, isEnabled: boolean) => {
+export const useManagedBusiness = (
+  slug: string,
+  isEnabled: boolean,
+  initial: BusinessPage | null = null,
+) => {
   const toast = useToast()
-  const [data, setData] = useState<BusinessPage | null>(null)
+  const [data, setData] = useState<BusinessPage | null>(initial)
+  // Rendered from the server's read: the first load is already here.
+  const hasInitial = useRef(initial !== null)
   const [error, setError] = useState<LoadError | null>(null)
   const [version, setVersion] = useState(0)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: `version` is the reload trigger
   useEffect(() => {
     if (!isEnabled) return
+    if (hasInitial.current) {
+      hasInitial.current = false
+      return
+    }
 
     const controller = new AbortController()
     getManagedBusiness(slug, controller.signal)

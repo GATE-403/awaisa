@@ -5,9 +5,9 @@ import { Skeleton } from '@awaisa/ui/Skeleton'
 import { NavigationArrow } from '@phosphor-icons/react/ssr'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
+import type { BusinessKind, MapPlace } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { pluralize } from '@/shared/lib/plural'
 import type { Point } from '@/shared/ui/MapView/MapView'
@@ -25,13 +25,20 @@ const MapView = dynamic(
 type LocationState = 'idle' | 'locating' | 'denied'
 
 // Like Apple Maps' search results: the list and the map show the same places, nearest first.
-export const MapPage = () => {
-  const searchParams = useSearchParams()
-  const kind = BUSINESS_KINDS.find((item) => item.value === searchParams.get('kind'))?.value
+interface MapPageProps {
+  /** The kind from the URL, read by the route. */
+  kind?: BusinessKind
+  /** The list for that kind, rendered on the server before any location is known. */
+  initialPlaces?: MapPlace[] | null
+  /** The prerendered shell while the server reads the list: nothing is fetched from here. */
+  isPending?: boolean
+}
+
+export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPageProps) => {
   const [location, setLocation] = useState<Point | null>(null)
   const [locationState, setLocationState] = useState<LocationState>('idle')
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const { places, isLoading, error } = useMapPlaces(location, kind)
+  const { places, isLoading, error } = useMapPlaces(location, kind, initialPlaces, !isPending)
   const markers = toMarkers(places)
   const slugs = [...new Set(places.map((place) => place.slug))]
 

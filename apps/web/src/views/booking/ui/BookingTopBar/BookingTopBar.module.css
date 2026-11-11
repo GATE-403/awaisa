@@ -2,7 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  padding-top: env(safe-area-inset-top);
+  border-radius: inherit;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
   background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
   box-shadow:
@@ -88,5 +90,20 @@
 @media (min-width: 768px) {
   .inner {
     padding: 0 var(--page-gutter);
+  }
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgb(0 0 0 / 0.32);
+  backdrop-filter: blur(6px);
+  animation: dim var(--duration-normal) var(--ease-standard);
+}
+
+@keyframes dim {
+  from {
+    opacity: 0;
   }
 }
