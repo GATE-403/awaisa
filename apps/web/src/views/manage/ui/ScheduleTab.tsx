@@ -4,6 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import { CalendarX, Plus } from '@phosphor-icons/react/ssr'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, weekdayOf } from '@/entities/business'
@@ -48,7 +49,11 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     total: 0,
     days: [],
   })
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const linkedDate = searchParams.get('date')
+  const linkedBookingId = searchParams.get('booking')
+  const [selectedDay, setSelectedDay] = useState<string | null>(linkedDate)
   const [isClosingTime, setIsClosingTime] = useState(false)
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
@@ -90,6 +95,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
 
   // Re-read after every schedule change: marking a visit may close a day.
+  // Arrived from a «Новая запись» toast or notification: show that day and open the booking once.
+  useEffect(() => {
+    if (linkedDate) setSelectedDay(linkedDate)
+  }, [linkedDate])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: router is stable
+  useEffect(() => {
+    if (!linkedBookingId || !schedule) return
+    const booking = schedule.bookings.find((item) => item.id === linkedBookingId)
+    if (!booking) return
+    setSelected(booking)
+    router.replace(`/manage/${slug}?tab=schedule`, { scroll: false })
+  }, [linkedBookingId, schedule, slug])
+
   useEffect(() => {
     if (!schedule) return
     const controller = new AbortController()

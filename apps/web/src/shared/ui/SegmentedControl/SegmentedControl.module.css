@@ -50,11 +50,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 28px;
+  /* 42 + the 2px track on each side = 46pt: an easy thumb target on phones. */
+  height: 42px;
   padding: 0 var(--space-4);
   border-radius: var(--radius-full);
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
+  font-size: var(--text-sm);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   cursor: pointer;

@@ -1,6 +1,7 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
+import { CalendarCheck } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
 import type { Business, Service } from '@/shared/api/types'
@@ -13,7 +14,7 @@ interface NextSlotCardProps {
 
 const getSlotText = (slot: ReturnType<typeof useNextSlot>) => {
   if (slot === undefined) return 'Ищем ближайшее окно…'
-  if (slot === null) return 'Свободные окна появятся скоро'
+  if (slot === null) return 'Окна появятся скоро'
 
   return `${slot.dayLabel} в ${slot.time}`
 }
@@ -25,6 +26,9 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   return (
     // One compact row: when, for what, and the way in on the right.
     <aside className={`${styles.card} ${styles.slotCard}`} aria-label='Ближайшее окно'>
+      <span className={styles.slotGlyph} aria-hidden>
+        <CalendarCheck weight='fill' />
+      </span>
       <div className={styles.slotText}>
         <p className={styles.cardEyebrow}>Ближайшее окно</p>
         <p
@@ -39,7 +43,7 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
         </p>
       </div>
       <ButtonLink
-        variant='secondary'
+        variant='outline'
         size='sm'
         className={styles.cardButton}
         render={

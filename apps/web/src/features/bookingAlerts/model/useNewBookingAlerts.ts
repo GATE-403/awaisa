@@ -1,6 +1,7 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { formatDayLong } from '@/entities/booking'
 import { getRecentBookings } from '@/shared/api/clientApi'
@@ -21,10 +22,11 @@ const describe = (booking: AdminBooking) =>
 // in the background and the owner allowed it — a system notification.
 export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
   const toast = useToast()
+  const router = useRouter()
   const sinceRef = useRef<string | null>(null)
   const [version, setVersion] = useState(0)
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the toast manager is stable
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the toast manager and router are stable
   useEffect(() => {
     if (!isEnabled) return
 
@@ -43,13 +45,31 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
         playChime()
         setVersion((value) => value + 1)
         for (const booking of foreign) {
-          toast.show({ title: 'Новая запись', description: describe(booking), type: 'info' })
+          // Toast or system notification: a tap opens that day with the booking's card.
+          const open = () =>
+            router.push(`/manage/${slug}?tab=schedule&date=${booking.date}&booking=${booking.id}`, {
+              scroll: false,
+            })
+          toast.show({
+            title: 'Новая запись',
+            description: describe(booking),
+            type: 'info',
+            onOpen: open,
+          })
           if (
             document.hidden &&
             'Notification' in window &&
             Notification.permission === 'granted'
           ) {
-            new Notification('Новая запись', { body: describe(booking), tag: booking.id })
+            const notification = new Notification('Новая запись', {
+              body: describe(booking),
+              tag: booking.id,
+            })
+            notification.onclick = () => {
+              window.focus()
+              open()
+              notification.close()
+            }
           }
         }
       } catch {

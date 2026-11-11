@@ -604,7 +604,25 @@
   padding: var(--space-4);
 }
 
+.slotGlyph {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.slotGlyph svg {
+  width: 24px;
+  height: 24px;
+}
+
 .slotText {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -612,8 +630,9 @@
 }
 
 .slot {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
+  font-size: var(--text-md);
+  line-height: var(--text-md-line-height);
+  white-space: nowrap;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
 }
@@ -1273,4 +1292,53 @@ details[open] > .hoursSummary .hoursToday::after {
     box-shadow: none;
     opacity: 0.8;
   }
+}
+
+/* iOS Settings-style rows: a small coloured glyph tile, then the fact. */
+.glyph {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: var(--color-primary-foreground);
+}
+
+.glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.glyph[data-tone="orange"] {
+  background: var(--color-rating);
+}
+
+.glyph[data-tone="blue"] {
+  background: var(--color-primary);
+}
+
+.glyph[data-tone="green"] {
+  background: var(--color-success);
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  color: inherit;
+}
+
+.hoursSummary .hoursLabel {
+  flex: 1;
+}
+
+.hoursSummary {
+  justify-content: flex-start;
+}
+
+.hours {
+  padding-left: calc(28px + var(--space-3));
 }

@@ -122,3 +122,29 @@
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
 }
+
+/* An openable toast is one big tap target over the whole capsule; the action stays above it. */
+.open {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 0;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.open:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.toast[data-openable]:active {
+  scale: 0.98;
+}
+
+.toast[data-openable] .action {
+  position: relative;
+  z-index: 1;
+}

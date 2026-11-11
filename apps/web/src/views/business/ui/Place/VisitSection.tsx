@@ -1,5 +1,6 @@
 'use client'
 
+import { Clock, MapPin, Phone } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { findDay, formatClock, WEEKDAYS_FULL, weekdayOf } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
@@ -25,6 +26,9 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
       {/* Today is what matters; the week opens on demand. */}
       <details>
         <summary className={styles.hoursSummary}>
+          <span className={styles.glyph} data-tone='orange' aria-hidden>
+            <Clock weight='fill' />
+          </span>
           <span className={styles.hoursLabel}>Часы</span>
           <span className={styles.hoursToday}>
             {todayWeekday === null
@@ -59,30 +63,38 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
       </details>
 
       <div>
-        <p className={styles.cardEyebrow}>
-          {business.branches.length > 1 ? `Филиалы · ${business.branches.length}` : 'Адрес'}
-        </p>
         <ul className={styles.branches}>
-          {business.branches.map((branch) => (
-            <li key={branch.id} className={styles.branch}>
-              <span className={styles.branchAddress}>
-                {[business.city, branch.address || business.address].filter(Boolean).join(', ')}
-              </span>
-              {business.branches.length > 1 && (
-                <NextLink
-                  href={`/${business.slug}/book?branch=${branch.id}`}
-                  className={styles.sectionLink}
-                >
-                  Записаться сюда
-                </NextLink>
-              )}
-              {(branch.phone || business.phone) && (
-                <a href={`tel:${branch.phone || business.phone}`} className={styles.branchPhone}>
-                  {formatPhone(branch.phone || business.phone)}
-                </a>
-              )}
-            </li>
-          ))}
+          {business.branches.map((branch) => {
+            const phone = branch.phone || business.phone
+            return (
+              <li key={branch.id} className={styles.branch}>
+                <span className={styles.infoRow}>
+                  <span className={styles.glyph} data-tone='blue' aria-hidden>
+                    <MapPin weight='fill' />
+                  </span>
+                  <span className={styles.branchAddress}>
+                    {[business.city, branch.address || business.address].filter(Boolean).join(', ')}
+                  </span>
+                  {business.branches.length > 1 && (
+                    <NextLink
+                      href={`/${business.slug}/book?branch=${branch.id}`}
+                      className={styles.sectionLink}
+                    >
+                      Записаться сюда
+                    </NextLink>
+                  )}
+                </span>
+                {phone && (
+                  <a href={`tel:${phone}`} className={styles.infoRow}>
+                    <span className={styles.glyph} data-tone='green' aria-hidden>
+                      <Phone weight='fill' />
+                    </span>
+                    <span className={styles.branchPhone}>{formatPhone(phone)}</span>
+                  </a>
+                )}
+              </li>
+            )
+          })}
         </ul>
         {pinned && <BranchesMap business={business} />}
       </div>
