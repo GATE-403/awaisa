@@ -225,6 +225,19 @@ const getMasterDay = (slug: string, date: string, signal?: AbortSignal) =>
 const setMasterOutcome = (slug: string, id: string, input: OutcomeInput) =>
   send<AdminBooking>('PATCH', `/master/${encodeURIComponent(slug)}/bookings/${id}/outcome`, input)
 
+const moveMyBooking = (id: string, token: string | null, input: { date: string; time: string }) =>
+  request<Booking>(`/bookings/${id}`, {
+    method: 'PATCH',
+    headers: token ? { [TOKEN_HEADER]: token } : {},
+    body: JSON.stringify(input),
+  })
+
+const getUnclosedVisits = (slug: string, signal?: AbortSignal) =>
+  request<{ total: number; days: { date: string; count: number }[] }>(
+    `${manage(slug)}/bookings/unclosed`,
+    { signal },
+  )
+
 const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
   request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
 
@@ -366,6 +379,8 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  moveMyBooking,
+  getUnclosedVisits,
   getMasterPlaces,
   getMasterDay,
   setMasterOutcome,

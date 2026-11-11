@@ -128,6 +128,10 @@ test.describe('Platform: a new business goes live', () => {
 
     // Direct manipulation on desktop: drag the booking an hour later, then undo from the toast.
     if (!test.info().project.name.includes('mobile')) {
+      // The walk-in lands on the next free time, low in the day after noon: centre it first.
+      await walkIn.evaluate((element) =>
+        element.scrollIntoView({ block: 'center', behavior: 'instant' }),
+      )
       const box = await walkIn.boundingBox()
       if (box) {
         await page.mouse.move(box.x + box.width / 2, box.y + 10)

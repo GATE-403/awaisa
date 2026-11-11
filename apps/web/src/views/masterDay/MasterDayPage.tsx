@@ -5,7 +5,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { ChatText, Phone } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
-import { formatPrice, getUpcomingDays } from '@/entities/booking'
+import { formatPrice, getDaysAround } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -28,6 +28,7 @@ interface MasterDayPageProps {
 type Choice = 'pending' | VisitOutcome
 
 const DAYS_SHOWN = 14
+const PAST_DAYS = 7
 const FORBIDDEN = 403
 const OUTCOMES: { value: Choice; label: string }[] = [
   { value: 'pending', label: 'Ждём' },
@@ -52,7 +53,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
   const [day, setDay] = useState<MasterDay | null>(null)
   const [error, setError] = useState<{ message: string; isForbidden: boolean } | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
-  const days = today ? getUpcomingDays(today.dayKey, DAYS_SHOWN) : []
+  const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
   const isSignedIn = session.status === 'signedIn'
 
   useEffect(() => {
@@ -160,8 +161,18 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 </span>
               </div>
               <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>{formatPrice(total)}</span>
-                <span className={styles.summaryLabel}>за день</span>
+                <span className={styles.summaryValue}>
+                  {formatPrice(
+                    day.master.commissionPercent === null
+                      ? total
+                      : Math.round((total * day.master.commissionPercent) / 100),
+                  )}
+                </span>
+                <span className={styles.summaryLabel}>
+                  {day.master.commissionPercent === null
+                    ? 'за день'
+                    : `ваши ${day.master.commissionPercent}%`}
+                </span>
               </div>
               <div className={styles.summaryItem}>
                 <span className={styles.summaryValue} data-small=''>

@@ -42,6 +42,11 @@ export class AdminController {
     private readonly analytics: AnalyticsService,
   ) {}
 
+  @Get('bookings/unclosed')
+  listUnclosed(@CurrentBusiness() business: Business) {
+    return this.admin.listUnclosed(business)
+  }
+
   @Patch('bookings/:id/outcome')
   setOutcome(
     @CurrentBusiness() business: Business,

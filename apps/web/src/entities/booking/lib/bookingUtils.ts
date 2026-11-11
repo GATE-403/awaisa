@@ -62,22 +62,27 @@ const getDateParts = (key: string) => {
 
 const formatDayLong = (key: string) => capitalize(longDateFormatter.format(fromDayKey(key)))
 
-const getUpcomingDays = (todayKey: string, count = BOOKING_DAYS_AHEAD): BookingDay[] => {
+// Days from `before` days ago to `after - 1` days ahead; the schedule needs the past to close visits.
+const getDaysAround = (todayKey: string, before: number, after: number): BookingDay[] => {
   const today = fromDayKey(todayKey)
 
-  return Array.from({ length: count }, (_, index) => {
-    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + index)
+  return Array.from({ length: before + after }, (_, index) => {
+    const offset = index - before
+    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset)
 
     return {
       key: toDayKey(date),
       weekday: weekdayFormatter.format(date).replace('.', ''),
       dayOfMonth: date.getDate(),
       month: monthFormatter.format(date).replace('.', ''),
-      label: capitalize(`${index === 0 ? 'сегодня, ' : ''}${longDateFormatter.format(date)}`),
-      isToday: index === 0,
+      label: capitalize(`${offset === 0 ? 'сегодня, ' : ''}${longDateFormatter.format(date)}`),
+      isToday: offset === 0,
     }
   })
 }
+
+const getUpcomingDays = (todayKey: string, count = BOOKING_DAYS_AHEAD): BookingDay[] =>
+  getDaysAround(todayKey, 0, count)
 
 const findService = (catalog: Catalog, id: string | null) =>
   catalog.services.find((service) => service.id === id)
@@ -106,6 +111,7 @@ export {
   getDateParts,
   getSpecialistLabel,
   getSpecialistsForService,
+  getDaysAround,
   getUpcomingDays,
   toDayKey,
 }

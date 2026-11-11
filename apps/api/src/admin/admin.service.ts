@@ -94,6 +94,22 @@ export class AdminService {
     }
   }
 
+  // Visits that have ended without «пришёл / не пришёл» in the last 30 days, per day: without
+  // them the money in analytics is a guess.
+  async listUnclosed(business: Business) {
+    const rows = (await this.timeOff.manager.query(
+      `SELECT to_char(("starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date, 'YYYY-MM-DD') AS "date",
+         COUNT(*)::int AS "count"
+       FROM "bookings"
+       WHERE "business_id" = $1 AND "status" = 'confirmed' AND "outcome" IS NULL
+         AND "ends_at" < now() AND "starts_at" > now() - interval '30 days'
+       GROUP BY 1 ORDER BY 1`,
+      [business.id],
+    )) as { date: string; count: number }[]
+
+    return { total: rows.reduce((sum, row) => sum + row.count, 0), days: rows }
+  }
+
   async createBooking(business: Business, input: StaffBookingInput) {
     // The client's cancel token is for their own device; staff cancel from the schedule.
     const { cancelToken: _cancelToken, ...view } = await this.bookings.create(

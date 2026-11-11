@@ -40,6 +40,10 @@ export class Specialist {
   @Column({ type: 'varchar', length: 32, nullable: true })
   phone: string | null
 
+  /** The master's share of what their visits earn, %; null = not set. */
+  @Column({ name: 'commission_percent', type: 'smallint', nullable: true })
+  commissionPercent: number | null
+
   /** false = works the business hours; true = `specialist_hours` rows (no row = day off). */
   @Column({ name: 'has_own_hours', type: 'boolean', default: false })
   hasOwnHours: boolean

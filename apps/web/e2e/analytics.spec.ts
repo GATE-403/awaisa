@@ -44,4 +44,36 @@ test.describe('Cabinet analytics', () => {
     const response = await page.request.get('/api/manage/awaisa-studio/analytics?days=12')
     expect(response.status()).toBe(400)
   })
+
+  test("a master's percent turns their revenue into a payout", async ({ page }, testInfo) => {
+    await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
+    const managed = await (await page.request.get('/api/manage/awaisa-studio')).json()
+    const master = managed.catalog.specialists[0]
+    const save = (commissionPercent: number | null) =>
+      page.request.put(`/api/manage/awaisa-studio/specialists/${master.id}`, {
+        data: {
+          name: master.name,
+          role: master.role,
+          serviceIds: master.serviceIds,
+          isActive: master.isActive,
+          branchId: master.branchId,
+          phone: master.phone ?? '',
+          commissionPercent,
+        },
+      })
+    try {
+      await save(40)
+      const report = await (
+        await page.request.get('/api/manage/awaisa-studio/analytics?days=365')
+      ).json()
+      const row = report.masters.find((item: { id: string }) => item.id === master.id)
+      expect(row.percent).toBe(40)
+      expect(row.payout).toBe(Math.round(row.revenue * 0.4))
+
+      await page.goto('/manage/awaisa-studio?tab=analytics')
+      await expect(page.getByText('Зарплата мастерам')).toBeVisible()
+    } finally {
+      await save(master.commissionPercent ?? null)
+    }
+  })
 })

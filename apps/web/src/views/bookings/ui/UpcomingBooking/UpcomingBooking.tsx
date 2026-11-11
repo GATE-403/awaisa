@@ -1,9 +1,16 @@
 'use client'
 
-import { CalendarPlus, CaretRight, DotsThree, MapPin } from '@phosphor-icons/react/ssr'
+import {
+  ArrowsClockwise,
+  CalendarPlus,
+  CaretRight,
+  DotsThree,
+  MapPin,
+} from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { downloadCalendarFile, Ticket } from '@/entities/booking'
+import { downloadCalendarFile, parseBookings, readRaw, Ticket } from '@/entities/booking'
 import { WalletButton } from '@/features/addToWallet'
+import { RescheduleSheet } from '@/features/rescheduleBooking'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -15,6 +22,7 @@ interface UpcomingBookingProps {
   countdown: string
   isCancelling: boolean
   onCancel: () => void
+  onMoved: (booking: Booking) => void
   onCodeClick: (code: string) => void
 }
 
@@ -25,9 +33,11 @@ export const UpcomingBooking = ({
   countdown,
   isCancelling,
   onCancel,
+  onMoved,
   onCodeClick,
 }: UpcomingBookingProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMoving, setIsMoving] = useState(false)
 
   const handleCancel = () => {
     setIsMenuOpen(false)
@@ -60,6 +70,20 @@ export const UpcomingBooking = ({
             <WalletButton bookingId={booking.id} />
           </div>
           <div className={sheet.list}>
+            <button
+              type='button'
+              className={sheet.row}
+              onClick={() => {
+                setIsMenuOpen(false)
+                setIsMoving(true)
+              }}
+            >
+              <span className={styles.rowLabel}>
+                <ArrowsClockwise weight='regular' aria-hidden />
+                Перенести
+              </span>
+              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+            </button>
             <button
               type='button'
               className={sheet.row}
@@ -96,6 +120,14 @@ export const UpcomingBooking = ({
             </button>
           </div>
         </Sheet>
+      )}
+      {isMoving && (
+        <RescheduleSheet
+          booking={booking}
+          token={parseBookings(readRaw()).find((item) => item.id === booking.id)?.token ?? null}
+          onMoved={onMoved}
+          onClose={() => setIsMoving(false)}
+        />
       )}
     </div>
   )

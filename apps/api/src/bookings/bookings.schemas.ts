@@ -41,6 +41,10 @@ const nextFreeQuerySchema = z.object({
     .pipe(z.array(z.string().max(64)).min(1).max(60)),
 })
 
+const moveBookingSchema = z.object({ date: DATE_SCHEMA, time: TIME_SCHEMA })
+
+type MoveByClientInput = z.infer<typeof moveBookingSchema>
+
 const bookingTokenSchema = z.string().trim().min(16).max(128)
 
 type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>
@@ -49,5 +53,11 @@ type CreateBookingInput = z.infer<typeof createBookingSchema>
 
 type NextFreeQuery = z.output<typeof nextFreeQuerySchema>
 
-export type { AvailabilityQuery, CreateBookingInput, NextFreeQuery }
-export { availabilityQuerySchema, bookingTokenSchema, createBookingSchema, nextFreeQuerySchema }
+export type { AvailabilityQuery, CreateBookingInput, MoveByClientInput, NextFreeQuery }
+export {
+  availabilityQuerySchema,
+  bookingTokenSchema,
+  createBookingSchema,
+  moveBookingSchema,
+  nextFreeQuerySchema,
+}

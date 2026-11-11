@@ -23,11 +23,11 @@ import {
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
-import { confirmationMessage } from '../notifications/messages.js'
+import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { Review } from '../reviews/review.entity.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
-import { cancelledText, newBookingText } from '../telegram/telegram-messages.js'
+import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
 import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, UNDO_WINDOW_SECONDS } from './booking-rules.js'
@@ -284,6 +284,68 @@ export class BookingsService {
     return this.getView(id)
   }
 
+  // The client picks another time with the same master and service; same slot rules as booking.
+  async moveByClient(
+    id: string,
+    access: { token: string | null; customer: Customer | null },
+    target: { date: string; time: string },
+  ) {
+    const booking = await this.findAccessible(id, access.token, access.customer)
+    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    const now = new Date()
+    if (booking.startsAt <= now)
+      throw new BadRequestException('Визит уже начался — перенести нельзя')
+
+    const request = await this.resolveRequest(
+      booking.serviceId,
+      booking.specialistId,
+      target.date,
+      now,
+      null,
+      booking.branchId ?? undefined,
+    )
+    const slot = (await this.buildSlotsFor(request, target.date, now, id)).find(
+      (item) => item.time === target.time,
+    )
+    if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
+
+    const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
+    const endsAt = new Date(startsAt.getTime() + request.service.durationMinutes * 60_000)
+    try {
+      await this.bookings.update(
+        { id },
+        {
+          startsAt,
+          endsAt,
+          reminderSentAt:
+            booking.reminderMinutes !== null &&
+            startsAt.getTime() - now.getTime() <= booking.reminderMinutes * 60_000
+              ? now
+              : null,
+        },
+      )
+    } catch (error) {
+      if (isOverlapError(error)) throw new ConflictException('Это время только что заняли')
+      throw error
+    }
+
+    const view = await this.getView(id)
+    if (booking.smsConfirmation) {
+      void this.sms.sendSafely(booking.customerPhone, rescheduleMessage(view, this.webUrl()))
+    }
+    const before = toBusinessParts(booking.startsAt)
+    void this.telegram.notifyBusiness(
+      booking.businessId,
+      movedByClientText(view.business.name, view.date, {
+        ...view,
+        previous: `${before.dateKey} ${formatMinutes(before.minutes)}`,
+      }),
+    )
+
+    return view
+  }
+
   findById(id: string) {
     return this.bookings.findOneBy({ id })
   }
@@ -450,6 +512,7 @@ export class BookingsService {
     }
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
     const endsAt = new Date(startsAt.getTime() + (booking.service?.durationMinutes ?? 0) * 60_000)
+    if (startsAt.getTime() < Date.now()) throw new BadRequestException('Нельзя перенести в прошлое')
     const blocked = await this.timeOff
       .createQueryBuilder('timeOff')
       .where('timeOff.specialistId = :specialistId', { specialistId: target.specialistId })
@@ -617,6 +680,8 @@ export class BookingsService {
     }: { service: Service; specialistIds: string[]; slotMinutes: number },
     date: string,
     now: Date,
+    /** A booking being moved does not block its own new time. */
+    excludeBookingId?: string,
   ) {
     const dayStart = businessDateTimeToUtc(date, 0)
     const dayEnd = businessDateTimeToUtc(date, 24 * 60)
@@ -625,6 +690,7 @@ export class BookingsService {
       .select(['booking.specialistId', 'booking.startsAt', 'booking.endsAt'])
       .where({ specialistId: In(specialistIds), status: 'confirmed' })
       .andWhere('booking.startsAt < :dayEnd AND booking.endsAt > :dayStart', { dayStart, dayEnd })
+      .andWhere(excludeBookingId ? 'booking.id != :excludeBookingId' : '1=1', { excludeBookingId })
       .getMany()
     const blocked = await this.timeOff
       .createQueryBuilder('timeOff')
