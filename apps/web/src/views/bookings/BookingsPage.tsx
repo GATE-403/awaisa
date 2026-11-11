@@ -3,6 +3,7 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import NextLink from 'next/link'
+import type { Booking } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
@@ -13,9 +14,15 @@ import styles from './BookingsPage.module.css'
 import { getCountdown, isUpcoming } from './bookingsUtils'
 import { AccountCard } from './ui/AccountCard/AccountCard'
 
-export const BookingsPage = () => {
+interface BookingsPageProps {
+  /** The signed-in account's bookings, read on the server for this request. */
+  initialAccountBookings?: Booking[] | null
+}
+
+export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
   const today = useToday()
-  const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } = useMyBookings()
+  const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } =
+    useMyBookings(initialAccountBookings)
   const upcoming = bookings
     .filter((booking) => isUpcoming(booking, today))
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))

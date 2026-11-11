@@ -45,7 +45,8 @@ test.describe('UX: guidance and feedback', () => {
     const steps = bookingSteps(page)
     const action = primaryAction(page)
 
-    expect(await isInViewport(action)).toBe(true)
+    // The booking screen slides up as a sheet; the bar is on screen once it has settled.
+    await expect.poll(() => isInViewport(action)).toBe(true)
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
     expect(await isInViewport(action)).toBe(true)
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()

@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@awaisa/ui/Dialog'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import styles from './Sheet.module.css'
 import { useSheetDrag } from './useSheetDrag'
 
@@ -24,9 +24,20 @@ interface SheetProps {
 // Pull the top bar down to dismiss it, like an iOS sheet.
 export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', children }: SheetProps) => {
   const dragHandlers = useSheetDrag(onClose)
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Callers mount the sheet already «open»; opening it a frame later lets it slide up, and
+  // closing waits for the slide down before the caller unmounts it.
+  useEffect(() => {
+    setIsOpen(true)
+  }, [])
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => !open && setIsOpen(false)}
+      onOpenChangeComplete={(open) => !open && onClose()}
+    >
       <DialogContent variant='sheet'>
         <header className={styles.bar} {...dragHandlers}>
           <span className={styles.grabber} aria-hidden='true' />

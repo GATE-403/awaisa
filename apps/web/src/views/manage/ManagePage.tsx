@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { BusinessTile } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { useNewBookingAlerts } from '@/features/bookingAlerts'
+import type { BusinessPage } from '@/shared/api/types'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -27,14 +28,16 @@ import { isSettingsTab, MAIN_TABS, SETTINGS_TABS, toManageTab } from './manageTa
 
 interface ManagePageProps {
   slug: string
+  /** The cabinet's data read on the server for this request (null: load in the browser). */
+  initialData?: BusinessPage | null
 }
 
 const FORBIDDEN = 403
 
-export const ManagePage = ({ slug }: ManagePageProps) => {
+export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const session = useRequireSession()
   const searchParams = useSearchParams()
-  const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn')
+  const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn', initialData)
   const tab = toManageTab(searchParams.get('tab'))
   const alertsVersion = useNewBookingAlerts(slug, data !== null)
 

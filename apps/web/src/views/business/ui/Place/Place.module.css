@@ -204,7 +204,7 @@
 
 .quickActions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -215,29 +215,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 2px;
   width: 100%;
-  padding: 0;
+  height: 56px;
+  padding: 0 var(--space-1);
   border: none;
-  background: transparent;
-  color: var(--color-muted-foreground);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-link);
   font: inherit;
   font-size: var(--text-xs);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
   cursor: pointer;
-  transition: scale var(--duration-fast) var(--ease-standard);
+  transition:
+    scale var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
 }
 
-/* Maps-style: a round glyph over a short word, no card around it. */
+/* Apple Maps place card: equal tiles, a glyph over a short word, all in the accent. */
 .quickIcon {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-link);
 }
 
 .quickAction svg {
@@ -247,13 +247,11 @@
 
 .quickAction:active {
   scale: 0.97;
+  background: var(--color-fill);
 }
 
 .quickAction:focus-visible {
   outline: none;
-}
-
-.quickAction:focus-visible .quickIcon {
   box-shadow: var(--focus-ring);
 }
 
@@ -1169,6 +1167,32 @@ details[open] > .hoursSummary .hoursToday::after {
 .where > * + * {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.address {
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Tapped: the whole street on its own line under the status. */
+.where:has(.address[aria-expanded="true"]) {
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+.address[aria-expanded="true"] {
+  flex-basis: 100%;
+  overflow: visible;
+}
+
+.address[aria-expanded="true"]::before {
+  display: none;
 }
 
 .where > * + *::before {

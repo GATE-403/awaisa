@@ -3,6 +3,7 @@ import { type CSSProperties, ViewTransition } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { Business, Catalog, ReviewSummary } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { AddressLine } from './AddressLine'
 import { OpenStatus } from './OpenStatus'
 import styles from './Place.module.css'
 import { PlaceActions } from './PlaceActions'
@@ -62,7 +63,7 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
           </p>
           <p className={styles.where}>
             <OpenStatus hours={business.hours} />
-            {address && <span className={styles.address}>{address}</span>}
+            {address && <AddressLine address={address} />}
           </p>
         </div>
       </div>

@@ -6,11 +6,24 @@ import type { Point } from '@/shared/ui/MapView/MapView'
 
 type Result = { key: string; places: MapPlace[]; error: string | null }
 
-export const useMapPlaces = (location: Point | null, kind: BusinessKind | undefined) => {
-  const [result, setResult] = useState<Result | null>(null)
-  const key = `${location?.latitude}|${location?.longitude}|${kind}`
+const toKey = (location: Point | null, kind: BusinessKind | undefined) =>
+  `${location?.latitude}|${location?.longitude}|${kind}`
+
+// `initial` is the list the server rendered for this kind (no location yet); it is not fetched again.
+export const useMapPlaces = (
+  location: Point | null,
+  kind: BusinessKind | undefined,
+  initial: MapPlace[] | null = null,
+  isEnabled = true,
+) => {
+  const [result, setResult] = useState<Result | null>(
+    initial ? { key: toKey(null, kind), places: initial, error: null } : null,
+  )
+  const key = toKey(location, kind)
+  const hasResult = result?.key === key
 
   useEffect(() => {
+    if (hasResult || !isEnabled) return
     const controller = new AbortController()
     getMapPlaces({ lat: location?.latitude, lng: location?.longitude, kind }, controller.signal)
       .then((places) => setResult({ key, places, error: null }))
@@ -20,7 +33,7 @@ export const useMapPlaces = (location: Point | null, kind: BusinessKind | undefi
       })
 
     return () => controller.abort()
-  }, [key, location, kind])
+  }, [key, location, kind, hasResult, isEnabled])
 
   return {
     // Keep the previous list while a new one loads, so the map does not flash empty.
