@@ -27,6 +27,9 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
     { href: `${base}#visit`, label: 'Контакты', isActive: false },
   ]
 
+  // The booking form is its own focused screen with its own bar.
+  if (isBooking) return null
+
   return (
     <nav
       className={styles.bar}

@@ -41,7 +41,7 @@
   background: transparent;
   color: var(--color-foreground);
   font: inherit;
-  font-size: var(--text-md);
+  font-size: var(--text-input);
   outline: none;
 }
 
@@ -192,7 +192,7 @@
   background: transparent;
   color: var(--color-foreground);
   font: inherit;
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   text-align: left;
   cursor: pointer;
 }
@@ -224,6 +224,6 @@
   }
 
   .input {
-    font-size: var(--text-md);
+    font-size: var(--text-input);
   }
 }

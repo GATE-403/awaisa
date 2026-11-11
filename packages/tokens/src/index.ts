@@ -251,9 +251,9 @@ const radius = {
 
 const fontFamily = {
   sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, 'Noto Sans', sans-serif",
-  // Headings use Onest everywhere (loaded by the web app), falling back to the system display face.
+  // Headings in SF Pro Display like iOS (narrow, tight); Inter where SF is not available.
   display:
-    "var(--font-onest, 'Onest'), -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, sans-serif",
+    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-inter, 'Inter'), 'Segoe UI', Roboto, sans-serif",
   mono: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
 }
 
@@ -261,6 +261,14 @@ const text = {
   xs: { size: 12, lineHeight: 16 },
   footnote: { size: 13, lineHeight: 18 },
   sm: { size: 15, lineHeight: 20 },
+  // Heading scale (iOS): page title → section → group/card title. Each level is a clear step down.
+  title1: { size: 28, lineHeight: 34 },
+  title2: { size: 22, lineHeight: 28 },
+  title3: { size: 17, lineHeight: 22 },
+  // Body text everywhere (rows, sheets, forms, lists) — one size across the app.
+  body: { size: 15, lineHeight: 20 },
+  // Text fields: 16px is the smallest size iOS does not zoom into on focus.
+  input: { size: 16, lineHeight: 21 },
   md: { size: 17, lineHeight: 22 },
   lg: { size: 20, lineHeight: 25 },
   xl: { size: 22, lineHeight: 28 },

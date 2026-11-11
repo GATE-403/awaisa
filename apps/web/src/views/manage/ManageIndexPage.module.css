@@ -44,7 +44,7 @@
   min-height: 64px;
   padding: var(--space-2) var(--space-4);
   color: var(--color-link);
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-medium);
 }
 

@@ -90,9 +90,9 @@
 }
 
 .title {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-title);
 }
 

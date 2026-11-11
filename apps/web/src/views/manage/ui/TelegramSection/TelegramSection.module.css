@@ -31,7 +31,7 @@
 
 .title {
   overflow: hidden;
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -62,7 +62,7 @@
   min-height: 52px;
   padding: 0 var(--space-4);
   color: var(--color-link);
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   text-align: left;
 }
 

@@ -27,8 +27,8 @@
 }
 
 .barTitle {
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
   font-weight: var(--font-weight-semibold);
   text-align: center;
 }
@@ -41,7 +41,7 @@
   background: transparent;
   color: var(--color-link);
   font: inherit;
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   cursor: pointer;
 }
 

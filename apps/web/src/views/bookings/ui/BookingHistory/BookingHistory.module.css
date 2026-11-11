@@ -52,7 +52,7 @@
 }
 
 .leafDay {
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   line-height: 26px;
   font-weight: var(--font-weight-semibold);
 }

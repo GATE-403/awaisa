@@ -17,8 +17,8 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
   letter-spacing: var(--tracking-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

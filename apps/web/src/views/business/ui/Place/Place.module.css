@@ -293,8 +293,8 @@
 
 .sectionTitle {
   font-family: var(--font-display);
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
 }
@@ -407,8 +407,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
   font-weight: var(--font-weight-medium);
 }
 
@@ -423,7 +423,7 @@
 }
 
 .rowPrice {
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -630,8 +630,8 @@
 }
 
 .slot {
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
   white-space: nowrap;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
@@ -929,8 +929,8 @@
 }
 
 .popularName {
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -950,7 +950,7 @@
 }
 
 .popularPrice {
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
 }
@@ -1092,8 +1092,8 @@
   }
 
   .popularName {
-    font-size: var(--text-md);
-    line-height: var(--text-md-line-height);
+    font-size: var(--text-body);
+    line-height: var(--text-body-line-height);
   }
 }
 

@@ -116,7 +116,7 @@
   background: transparent;
   color: var(--color-foreground);
   font: inherit;
-  font-size: var(--text-md);
+  font-size: var(--text-input);
   line-height: 1.4;
   resize: vertical;
 }

@@ -206,7 +206,7 @@
 }
 
 .dayName {
-  font-size: var(--text-md);
+  font-size: var(--text-body);
 }
 
 .timeRange {

@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { useSession } from '@/entities/session'
 import { KIND_ICONS } from '@/shared/config/kindStyles'
-import { isActivePath, isCabinetPath } from '@/shared/config/navigation'
+import { isActivePath, isBookingPath, isCabinetPath } from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { Logo } from '@/shared/ui/Logo/Logo'
@@ -71,7 +71,8 @@ export const Header = () => {
   }, [isCabinet])
 
   // The cabinet is a work tool with its own toolbar; the site navigation would only distract.
-  if (isCabinet) return null
+  // The cabinet and the booking form bring their own bars.
+  if (isCabinet || isBookingPath(pathname)) return null
 
   return (
     <header
