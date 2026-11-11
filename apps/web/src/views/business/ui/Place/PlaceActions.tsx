@@ -31,7 +31,7 @@ const directionsOf = (business: Business) => {
   return business.mapUrl || null
 }
 
-// One primary action (book) and the Maps-style row of quick ones under it.
+// One primary action (book) and quiet secondary ones beside it.
 export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const toast = useToast()
   const directions = directionsOf(business)
@@ -63,8 +63,8 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   ].filter((action) => action !== null)
 
   return (
+    // One primary capsule, then secondary capsules of the same height: icon and a short verb.
     <div className={styles.actions}>
-      {/* One way in: choose the service first — the menu right below does the rest. */}
       <ButtonLink
         size='lg'
         className={styles.bookButton}
@@ -82,17 +82,13 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
                 className={styles.quickAction}
                 {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
               >
-                <span className={styles.quickIcon}>
-                  <ActionIcon weight='fill' aria-hidden />
-                </span>
-                {label}
+                <ActionIcon weight='fill' aria-hidden />
+                <span>{label}</span>
               </a>
             ) : (
               <button type='button' className={styles.quickAction} onClick={onClick}>
-                <span className={styles.quickIcon}>
-                  <ActionIcon weight='fill' aria-hidden />
-                </span>
-                {label}
+                <ActionIcon weight='fill' aria-hidden />
+                <span>{label}</span>
               </button>
             )}
           </li>

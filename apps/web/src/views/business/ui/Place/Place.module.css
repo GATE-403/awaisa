@@ -1,4 +1,8 @@
-/* Layout: the place card on top, then the content column and a sticky aside from 1024px. */
+/* Business page — one system: title1 name, title2 sections, uppercase captions, body rows.
+   Cards are white surfaces on the grey page; every one-line control is a capsule. */
+
+/* ---------- Layout ---------- */
+
 .page {
   width: 100%;
   max-width: var(--layout-container-width);
@@ -9,30 +13,38 @@
 .body {
   display: grid;
   gap: var(--space-10);
-  margin-top: var(--space-8);
+  margin-top: var(--space-10);
 }
 
-.main,
-.aside {
+.main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-10);
+  gap: var(--space-12);
   min-width: 0;
 }
 
 .aside {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
   .body {
     grid-template-columns: minmax(0, 1fr) 340px;
-    gap: var(--space-8);
+    gap: var(--space-10);
     align-items: start;
+  }
+
+  .aside {
+    position: sticky;
+    top: calc(var(--header-height) + var(--business-bar-height, 0px) + var(--space-6));
   }
 }
 
-/* Place card */
+/* ---------- Place card ---------- */
+
 .header {
   display: flex;
   flex-direction: column;
@@ -45,33 +57,19 @@
   margin: 0;
   overflow: hidden;
   border-radius: var(--radius-2xl);
-  background:
-    radial-gradient(
-      120% 120% at 20% 0%,
-      color-mix(in srgb, var(--tint) 45%, transparent),
-      transparent 65%
-    ),
-    radial-gradient(
-      90% 90% at 100% 100%,
-      color-mix(in srgb, var(--tint) 25%, transparent),
-      transparent 70%
-    ),
-    var(--color-surface);
+  background: var(--color-fill);
   box-shadow: var(--shadow-sm);
 }
 
+/* No photo: no banner at all — the tile and the name lead. */
 .cover[data-empty] {
-  aspect-ratio: 16 / 5;
+  display: none;
 }
 
 @media (min-width: 768px) {
   .cover {
-    aspect-ratio: 21 / 6;
-    max-height: 300px;
-  }
-
-  .cover[data-empty] {
-    aspect-ratio: 21 / 5;
+    aspect-ratio: 21 / 7;
+    max-height: 320px;
   }
 }
 
@@ -85,35 +83,48 @@
 
 .identity {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-4);
+}
+
+/* With a cover only the icon rests on its edge, ringed in the page colour, like an app on a
+   banner; the name stays on the page beside it. */
+.cover:not([data-empty]) + .identity {
+  align-items: flex-start;
   padding: 0 var(--space-4);
 }
 
-/* Only the icon overlaps the cover; the text stays on the page. */
-.identity > :first-child {
+.cover:not([data-empty]) + .identity .tile {
   margin-top: calc(var(--space-10) * -1);
 }
 
-/* The icon sits on the cover's edge with a ring of the page colour, like an app icon on a banner. */
+.cover:not([data-empty]) + .identity .identityText {
+  padding-top: var(--space-1);
+}
+
 .tile {
   position: relative;
   z-index: 1;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-md);
+}
+
+.cover:not([data-empty]) + .identity .tile {
   box-shadow:
     0 0 0 4px var(--color-background),
     var(--shadow-md);
 }
 
 @media (min-width: 768px) {
-  .identity {
-    padding: 0 var(--space-6);
+  .tile[data-size="lg"] {
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    font-size: var(--text-2xl);
   }
 
-  .tile[data-size="lg"] {
-    width: 88px;
-    height: 88px;
-    border-radius: 20px;
-    font-size: var(--text-2xl);
+  .cover:not([data-empty]) + .identity {
+    padding: 0 var(--space-6);
   }
 }
 
@@ -122,21 +133,13 @@
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  padding-top: var(--space-2);
-}
-
-.kind {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: var(--tracking-caption);
 }
 
 .name {
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl-line-height);
+  font-size: var(--text-title1);
+  line-height: var(--text-title1-line-height);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-tight);
   text-overflow: ellipsis;
@@ -150,52 +153,130 @@
   }
 }
 
+/* «★ 4.4 (206) · Барбершопы» — one quiet line. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.facts > * + *::before {
+  content: "·";
+  margin-right: var(--space-2);
+}
+
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.factStar {
+  width: 14px;
+  height: 14px;
+  color: var(--color-rating);
+}
+
+.muted {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Status · street: the street is cut on one line and shows whole on tap (AddressLine). */
 .where {
   display: flex;
   gap: var(--space-2);
   min-width: 0;
-  white-space: nowrap;
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  white-space: nowrap;
+}
+
+.where > * + * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.where > * + *::before {
+  content: "·";
+  margin-right: var(--space-2);
 }
 
 .status {
-  color: var(--color-highlight);
+  flex-shrink: 0;
+  color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
 }
 
-.status[data-open] {
-  color: var(--color-foreground);
-}
-
-.status[data-open]::before {
+.status::before {
   content: "";
   display: inline-block;
   width: 7px;
   height: 7px;
   margin-right: 6px;
   border-radius: var(--radius-full);
-  background: var(--color-success);
+  background: var(--color-highlight);
   vertical-align: 1px;
 }
 
-.description {
-  display: -webkit-box;
-  max-width: 64ch;
-  overflow: hidden;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+.status[data-open]::before {
+  background: var(--color-success);
 }
 
-/* One primary capsule, then quick actions as Maps-style tiles: glyph over a label. */
+.address {
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.where:has(.address[aria-expanded="true"]) {
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+.address[aria-expanded="true"] {
+  flex-basis: 100%;
+  overflow: visible;
+}
+
+.address[aria-expanded="true"]::before {
+  display: none;
+}
+
+.description {
+  display: none;
+  max-width: 64ch;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .description {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Actions: one primary capsule, then secondary capsules of the same height. */
 .actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .bookButton {
@@ -204,7 +285,8 @@
 
 .quickActions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -212,21 +294,20 @@
 }
 
 .quickAction {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: var(--space-2);
   width: 100%;
-  height: 56px;
-  padding: 0 var(--space-1);
+  height: var(--control-height-md);
+  padding: 0 var(--space-3);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
   color: var(--color-link);
   font: inherit;
-  font-size: var(--text-xs);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-semibold);
   white-space: nowrap;
   cursor: pointer;
@@ -235,19 +316,14 @@
     background-color var(--duration-fast) var(--ease-standard);
 }
 
-/* Apple Maps place card: equal tiles, a glyph over a short word, all in the accent. */
-.quickIcon {
-  display: flex;
-}
-
 .quickAction svg {
-  width: 20px;
-  height: 20px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
 }
 
 .quickAction:active {
   scale: 0.97;
-  background: var(--color-fill);
 }
 
 .quickAction:focus-visible {
@@ -255,38 +331,62 @@
   box-shadow: var(--focus-ring);
 }
 
+/* Phones: icons over short words so four fit; from 768px one row with the primary. */
+@media (max-width: 767px) {
+  .quickAction {
+    flex-direction: column;
+    gap: 2px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    font-size: var(--text-xs);
+  }
+}
+
 @media (min-width: 768px) {
   .actions {
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
+    gap: var(--space-3);
   }
 
   .bookButton {
     width: auto;
-    min-width: 200px;
-    height: auto;
-    min-height: 60px;
+    min-width: 220px;
   }
 
   .quickActions {
-    flex: 1;
-    grid-template-columns: repeat(4, minmax(0, 120px));
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .quickAction {
+    width: auto;
+    height: var(--control-height-lg);
+    padding: 0 var(--space-5);
   }
 }
 
-/* Sections */
+@media (hover: hover) {
+  .quickAction:hover {
+    background: var(--color-elevated);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ---------- Sections ---------- */
+
 .section {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  scroll-margin-top: calc(var(--header-height) + var(--business-bar-height) + var(--space-4));
+  scroll-margin-top: calc(var(--header-height) + var(--business-bar-height, 0px) + var(--space-4));
 }
 
+/* Title and its count read as one phrase: «Услуги и цены  6». */
 .sectionHead {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .sectionTitle {
@@ -297,26 +397,104 @@
   letter-spacing: var(--tracking-title);
 }
 
-@media (min-width: 768px) {
-  .sectionTitle {
-    font-size: var(--text-2xl);
-    line-height: var(--text-2xl-line-height);
-    letter-spacing: var(--tracking-tight);
-  }
+.sectionCount {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  font-variant-numeric: tabular-nums;
 }
 
-.sectionLink {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-link);
-  font-size: var(--text-sm);
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.sectionLink svg {
-  width: 12px;
-  height: 12px;
+/* ---------- Menu ---------- */
+
+.menuHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.chips {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  border: none;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex-shrink: 0;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.search {
+  position: relative;
+  display: flex;
+  flex: 1 1 220px;
+  align-items: center;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-4);
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted-foreground);
+  pointer-events: none;
+}
+
+.search input.searchInput {
+  width: 100%;
+  height: var(--control-height-sm);
+  padding-left: calc(var(--space-4) + 24px);
+  border: none;
+  background: var(--color-fill);
+  box-shadow: none;
 }
 
 .group {
@@ -325,28 +503,17 @@
   gap: var(--space-2);
 }
 
+.group + .group {
+  margin-top: var(--space-4);
+}
+
 .groupTitle {
-  padding: 0 var(--space-1);
+  padding: 0 var(--space-4);
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-regular);
   letter-spacing: var(--tracking-caption);
   text-transform: uppercase;
-}
-
-/* The menu splits in two clear parts: «Часто выбирают» and «Все услуги» (filters, then categories). */
-.subTitle {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
-}
-
-.menuHead {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
 }
 
 .list {
@@ -377,8 +544,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-3);
-  min-height: 64px;
+  gap: var(--space-4);
+  min-height: 60px;
   padding: var(--space-3) var(--space-4);
   color: inherit;
   transition: background-color var(--duration-fast) var(--ease-standard);
@@ -388,36 +555,31 @@
   background: var(--color-fill);
 }
 
-@media (hover: hover) {
-  .serviceRow:hover {
-    background: var(--color-fill);
-  }
-}
-
-.rowText {
+.rowText,
+.rowSide {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
 
+.rowSide {
+  align-items: flex-end;
+}
+
 .rowTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
   font-size: var(--text-body);
   line-height: var(--text-body-line-height);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
 }
 
 .rowMeta {
-  display: -webkit-box;
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rowPrice {
@@ -427,33 +589,46 @@
   white-space: nowrap;
 }
 
-.chevron {
-  width: 12px;
-  height: 12px;
-  color: var(--color-tertiary-foreground);
+.popularSlot {
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
-.hit {
-  flex-shrink: 0;
-  padding: 1px var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-highlight);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  font-weight: var(--font-weight-semibold);
+.nothing {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  text-align: center;
 }
 
-/* Masters */
+@media (hover: hover) {
+  .serviceRow:hover {
+    background: var(--color-fill);
+  }
+}
+
+/* ---------- Masters: a row of faces, like favourites in Contacts ---------- */
+
 .masters {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 360px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--space-3);
+  display: flex;
+  gap: var(--space-5);
   margin: 0;
   padding: 0;
+  overflow-x: auto;
   list-style: none;
+  scrollbar-width: none;
+}
+
+.masters::-webkit-scrollbar {
+  display: none;
+}
+
+.masters > li {
+  flex-shrink: 0;
 }
 
 .master {
@@ -461,67 +636,138 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  height: 100%;
-  padding: var(--space-5) var(--space-3) var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  width: 80px;
   color: inherit;
   text-align: center;
-  transition:
-    scale var(--duration-fast) var(--ease-standard),
-    box-shadow var(--duration-normal) var(--ease-standard);
+  transition: scale var(--duration-fast) var(--ease-standard);
 }
 
 .master:active {
   scale: 0.97;
 }
 
-@media (hover: hover) {
-  .master:hover {
-    box-shadow: var(--shadow-md);
-  }
-}
-
 .masterAvatar {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .masterName {
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-  font-weight: var(--font-weight-semibold);
-}
-
-.masterRole,
-.masterMeta {
-  color: var(--color-muted-foreground);
+  overflow: hidden;
+  max-width: 100%;
   font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-}
-
-.masterMeta {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .masterRating {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
 }
 
 .masterRating svg {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   color: var(--color-rating);
 }
 
-/* Photos: a mosaic with the first picture large. */
+/* ---------- Reviews: one inset list ---------- */
+
+.reviews {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  list-style: none;
+}
+
+.review {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
+.review + .review::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+@media (max-width: 767px) {
+  .review:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+.reviewHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.reviewAuthor {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.reviewDate {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.reviewStars {
+  display: inline-flex;
+  gap: 1px;
+  color: var(--color-rating);
+}
+
+.reviewStars svg {
+  width: 12px;
+  height: 12px;
+}
+
+.reviewText {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: 1.45;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.reviewReply {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  box-shadow: inset 2px 0 0 var(--color-border);
+}
+
+.reviewReply .reviewText {
+  color: var(--color-muted-foreground);
+}
+
+.reviewReplyTitle {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ---------- Work photos ---------- */
+
 .photos {
   content-visibility: auto;
   contain-intrinsic-size: auto 320px;
@@ -534,33 +780,23 @@
   list-style: none;
 }
 
+@media (min-width: 768px) {
+  .photos {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 160px;
+  }
+}
+
 .photo {
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: var(--color-fill);
 }
 
+.photos:not([data-count="1"]) .photo:first-child,
 .photos[data-count="1"] .photo {
   grid-column: span 2;
   grid-row: span 2;
-}
-
-.photos:not([data-count="1"]) .photo:first-child {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-@media (min-width: 768px) {
-  .photos {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: 150px;
-  }
-
-  .photos[data-count="2"] .photo:first-child,
-  .photos[data-count="2"] .photo {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
 }
 
 .photoImage {
@@ -576,61 +812,34 @@
   }
 }
 
-/* Aside cards */
+/* ---------- Aside ---------- */
+
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-5);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
 
-.cardEyebrow {
+.cardCaption {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
 }
 
 .slotCard {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4);
-}
-
-.slotGlyph {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--color-primary);
-  color: var(--color-primary-foreground);
-}
-
-.slotGlyph svg {
-  width: 24px;
-  height: 24px;
-}
-
-.slotText {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   gap: 2px;
-  min-width: 0;
 }
 
 .slot {
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-  white-space: nowrap;
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
 }
@@ -640,688 +849,104 @@
 }
 
 .slotMeta {
+  overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-}
-
-.slotMeta {
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Hours and address share one card, split by a hairline: small facts, small box. */
+.slotButton {
+  margin-top: var(--space-4);
+}
+
+/* Facts as Settings rows: coloured glyph, small label over the value, an accessory on the right. */
 .visit {
   gap: 0;
-  padding: var(--space-4);
-  scroll-margin-top: calc(var(--header-height) + var(--business-bar-height) + var(--space-4));
+  padding: var(--space-2) var(--space-4);
 }
 
-.hours,
-.branches {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.hoursRow {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: 6px 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-}
-
-.hoursRow[data-today] {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-}
-
+.hoursBlock,
 .branch {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-2) 0;
-}
-
-.branch + .branch {
-  border-top: 0.5px solid var(--color-border);
-}
-
-.branchAddress {
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-  font-weight: var(--font-weight-medium);
-}
-
-.branchPhone {
-  color: var(--color-link);
-  font-size: var(--text-sm);
-}
-
-/* Reviews: the score like the App Store, then cards. */
-.reviewSummary {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.reviewScore {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.reviewAverage {
-  font-size: var(--text-4xl);
-  line-height: 1;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-display);
-}
-
-.reviewOutOf {
-  margin-top: var(--space-1);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-}
-
-.reviewBars {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.reviewBar {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.reviewBarStars {
-  color: var(--color-muted-foreground);
-  font-size: 9px;
-  letter-spacing: 1px;
-  text-align: right;
-}
-
-.reviewTrack {
-  height: 4px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-}
-
-.reviewTrack span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--color-foreground);
-}
-
-.reviewCount {
-  align-self: flex-end;
-  margin-top: var(--space-1);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.reviews {
-  display: grid;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 768px) {
-  .reviews {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.review {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.reviewHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.reviewStars {
-  display: inline-flex;
-  gap: 1px;
-  color: var(--color-rating);
-}
-
-.reviewStars svg {
-  width: 14px;
-  height: 14px;
-}
-
-.reviewDate,
-.reviewMeta {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-regular);
-}
-
-.reviewAuthor {
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.reviewText {
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  white-space: pre-line;
-}
-
-/* The owner's answer reads as a quiet aside under the review, like a developer reply in the App Store. */
-.reviewReply {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: var(--space-1);
-  padding-left: var(--space-3);
-  box-shadow: inset 2px 0 0 var(--color-border);
-}
-
-.reviewReply .reviewText {
-  color: var(--color-muted-foreground);
-}
-
-.reviewReplyTitle {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-}
-
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.sectionCount {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-}
-
-/* Popular services: three tall cards that lead the menu, each with the first free time. */
-.popular {
-  display: grid;
-  grid-auto-columns: minmax(168px, 1fr);
-  grid-auto-flow: column;
-  gap: var(--space-3);
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  list-style: none;
-  scrollbar-width: none;
-}
-
-.popularCard {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  height: 100%;
-  padding: var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: inherit;
-  transition:
-    scale var(--duration-fast) var(--ease-standard),
-    box-shadow var(--duration-normal) var(--ease-standard);
-}
-
-.popularCard:active {
-  scale: 0.98;
-}
-
-@media (hover: hover) {
-  .popularCard:hover {
-    box-shadow: var(--shadow-md);
-  }
-}
-
-.popularEyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: var(--space-1);
-  color: var(--color-highlight);
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.popularEyebrow svg {
-  width: 12px;
-  height: 12px;
-}
-
-.popularName {
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-  font-weight: var(--font-weight-semibold);
-}
-
-.popularMeta {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.popularFooter {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-top: auto;
-  padding-top: var(--space-3);
-}
-
-.popularPrice {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
-
-.popularSlot {
-  color: var(--color-link);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-}
-
-.popularSlot[data-loading] {
-  color: var(--color-muted-foreground);
-}
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.chips {
-  margin: 0;
-  padding: 0;
-  border: none;
-  display: flex;
-  flex: 1 1 auto;
-  gap: var(--space-2);
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.chip {
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 var(--space-4);
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
-}
-
-.chip[aria-pressed="true"] {
-  background: var(--color-foreground);
-  color: var(--color-background);
-}
-
-.chip:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-.search {
   position: relative;
-  display: flex;
-  flex: 0 1 260px;
-  align-items: center;
 }
 
-.searchIcon {
+.hoursBlock + .branch::before,
+.branch + .branch::before,
+.branch > .info + .info::before {
+  content: "";
   position: absolute;
-  left: var(--space-3);
-  z-index: 1;
-  width: 16px;
-  height: 16px;
-  color: var(--color-muted-foreground);
-  pointer-events: none;
+  top: 0;
+  right: 0;
+  left: calc(28px + var(--space-3));
+  height: 0.5px;
+  background: var(--color-border);
 }
 
-.search input.searchInput {
-  width: 100%;
-  padding-left: calc(var(--space-3) + 24px);
+.branch > .info + .info {
+  position: relative;
 }
 
-.nothing {
-  padding: var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  color: var(--color-muted-foreground);
-  text-align: center;
-}
-
-.rowSide {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-}
-
-/* The row's action, spelled out: the whole row books, the pill says so. */
-.bookPill {
-  padding: 3px var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-}
-
-@media (max-width: 639px) {
-  .search {
-    flex-basis: 100%;
-  }
-}
-
-/* Phones: fewer words and tighter type — the facts fit one row, rows keep to one line of meta. */
-@media (max-width: 639px) {
-  .name {
-    font-size: var(--text-xl);
-    line-height: var(--text-xl-line-height);
-  }
-
-  .rowTitle {
-    font-size: var(--text-sm);
-    line-height: var(--text-sm-line-height);
-  }
-
-  .rowMeta {
-    font-size: var(--text-xs);
-    line-height: var(--text-xs-line-height);
-    -webkit-line-clamp: 1;
-  }
-
-  .rowPrice {
-    font-size: var(--text-sm);
-  }
-
-  .serviceRow {
-    min-height: 56px;
-  }
-
-  .popularName {
-    font-size: var(--text-body);
-    line-height: var(--text-body-line-height);
-  }
-}
-
-.visit > * + * {
-  margin-top: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 0.5px solid var(--color-border);
-}
-
-.hoursSummary {
-  display: flex;
+.info {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  min-height: 32px;
+  min-height: 56px;
+  padding: var(--space-2) 0;
+  color: inherit;
   list-style: none;
   cursor: pointer;
 }
 
-.hoursSummary::-webkit-details-marker {
+.info::-webkit-details-marker {
   display: none;
 }
 
-.hoursLabel {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
+div.info {
+  cursor: default;
 }
 
-.hoursToday {
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.hoursToday::after {
-  content: " ›";
-  color: var(--color-tertiary-foreground);
-}
-
-details[open] > .hoursSummary .hoursToday::after {
-  content: "";
-}
-
-@media (max-width: 639px) {
-  /* No photo yet: the tile and the name lead, no empty banner above them. */
-  .cover[data-empty] {
-    display: none;
-  }
-
-  .cover[data-empty] + .identity > :first-child,
-  .identity:first-child > :first-child {
-    margin-top: 0;
-  }
-}
-
-@media (max-width: 639px) {
-  /* Three latest reviews are enough to judge; the score above sums up the rest. */
-  .review:nth-child(n + 4) {
-    display: none;
-  }
-}
-
-/* One line of facts under the name: rating, kind, price — text, not boxes. */
-.facts {
+.infoText {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-2);
+  flex-direction: column;
+  min-width: 0;
+}
+
+.infoLabel {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
 
-.where > * + * {
+.infoValue {
   overflow: hidden;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-medium);
   text-overflow: ellipsis;
 }
 
-.address {
-  min-width: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-/* Tapped: the whole street on its own line under the status. */
-.where:has(.address[aria-expanded="true"]) {
-  flex-wrap: wrap;
-  white-space: normal;
-}
-
-.address[aria-expanded="true"] {
-  flex-basis: 100%;
-  overflow: visible;
-}
-
-.address[aria-expanded="true"]::before {
-  display: none;
-}
-
-.where > * + *::before {
-  content: "·";
-  margin-right: var(--space-2);
-}
-
-.facts > * + *::before {
-  content: "·";
-  margin-right: var(--space-2);
-}
-
-.rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-foreground);
+.infoAction {
+  color: var(--color-link);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-semibold);
-}
-
-.factStar {
-  width: 13px;
-  height: 13px;
-  color: var(--color-rating);
-}
-
-.muted {
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
-}
-
-@media (max-width: 639px) {
-  .description {
-    display: none;
-  }
-}
-
-/* Reviews as one list of short notes — no cards, no bars; the score sits in the heading. */
-.reviews {
-  gap: 0;
-  overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-@media (min-width: 768px) {
-  .reviews {
-    grid-template-columns: 1fr;
-  }
-}
-
-.review {
-  position: relative;
-  gap: var(--space-1);
-  padding: var(--space-4);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.review .reviewStars svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* Hairlines inset 16px, as in iOS grouped lists. */
-.review + .review::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: var(--space-4);
-  height: 0.5px;
-  background: var(--color-border);
-}
-
-.reviewText {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-/* Masters as a row of faces, like favourites in Contacts. */
-.masters {
-  display: flex;
-  gap: var(--space-4);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.masters > li {
-  flex-shrink: 0;
-}
-
-.master {
-  gap: 2px;
-  width: 76px;
-  height: auto;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.masterAvatar {
-  margin-bottom: var(--space-1);
-}
-
-.masterName {
-  overflow: hidden;
-  max-width: 100%;
-  font-size: var(--text-footnote);
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-@media (hover: hover) {
-  .master:hover {
-    box-shadow: none;
-    opacity: 0.8;
-  }
+.infoChevron {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
+  transition: rotate var(--duration-fast) var(--ease-standard);
 }
 
-/* iOS Settings-style rows: a small coloured glyph tile, then the fact. */
+details[open] > .info .infoChevron {
+  rotate: 90deg;
+}
+
 .glyph {
   display: inline-flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 28px;
@@ -1347,22 +972,44 @@ details[open] > .hoursSummary .hoursToday::after {
   background: var(--color-success);
 }
 
-.infoRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 36px;
-  color: inherit;
-}
-
-.hoursSummary .hoursLabel {
-  flex: 1;
-}
-
-.hoursSummary {
-  justify-content: flex-start;
-}
-
 .hours {
-  padding-left: calc(28px + var(--space-3));
+  margin: 0 0 var(--space-2);
+  padding: 0 0 0 calc(28px + var(--space-3));
+  list-style: none;
+}
+
+.hoursRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 5px 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.hoursRow[data-today] {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.visitMap {
+  margin: var(--space-2) 0 var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+@media (hover: hover) {
+  .infoAction:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quickAction,
+  .master,
+  .photoImage,
+  .serviceRow {
+    transition: none;
+  }
 }
