@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
+import { visitLink } from '../common/visit-link.js'
+import type { Env } from '../config/env.js'
 import { reminderMessage } from './messages.js'
 import { SmsService } from './sms.service.js'
 
 type DueReminder = {
+  id: string
   customer_phone: string
   starts_at: Date
   service_name: string
@@ -22,6 +26,7 @@ export class RemindersService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly sms: SmsService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   @Cron(CronExpression.EVERY_5_MINUTES)
@@ -35,7 +40,7 @@ export class RemindersService {
         AND b."status" = 'confirmed' AND b."reminder_sent_at" IS NULL
         AND b."reminder_minutes" IS NOT NULL
         AND b."starts_at" > now() AND b."starts_at" <= now() + make_interval(mins => b."reminder_minutes")
-      RETURNING b."customer_phone", b."starts_at", s."name" AS service_name, sp."name" AS specialist_name,
+      RETURNING b."id", b."customer_phone", b."starts_at", s."name" AS service_name, sp."name" AS specialist_name,
         bz."name" AS business_name, bz."slug" AS business_slug
       `,
     )
@@ -59,6 +64,11 @@ export class RemindersService {
             time: formatMinutes(minutes),
           },
           isToday,
+          visitLink(
+            this.config.get('PUBLIC_WEB_URL', { infer: true }),
+            row.id,
+            this.config.get('AUTH_SECRET', { infer: true }),
+          ),
         )
 
         return this.sms.sendSafely(row.customer_phone, message)

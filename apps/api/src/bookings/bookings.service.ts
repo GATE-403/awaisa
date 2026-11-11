@@ -21,6 +21,7 @@ import {
   toBusinessParts,
 } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { isSignedToken, visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
@@ -253,7 +254,7 @@ export class BookingsService {
           await this.customers.update({ id: customer.id }, { name: input.name })
         }
         if (input.smsConfirmation) {
-          void this.sms.sendSafely(phone, confirmationMessage(view, this.webUrl()))
+          void this.sms.sendSafely(phone, confirmationMessage(view, this.linkTo(view.id)))
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
         if (!staffBusinessId) {
@@ -332,7 +333,7 @@ export class BookingsService {
 
     const view = await this.getView(id)
     if (booking.smsConfirmation) {
-      void this.sms.sendSafely(booking.customerPhone, rescheduleMessage(view, this.webUrl()))
+      void this.sms.sendSafely(booking.customerPhone, rescheduleMessage(view, this.linkTo(view.id)))
     }
     const before = toBusinessParts(booking.startsAt)
     void this.telegram.notifyBusiness(
@@ -361,6 +362,7 @@ export class BookingsService {
       return booking
     }
     if (!token) return null
+    if (isSignedToken(id, token, this.secret())) return booking
     const expected = Buffer.from(booking.cancelTokenHash, 'hex')
     const actual = Buffer.from(hashToken(token), 'hex')
 
@@ -624,6 +626,15 @@ export class BookingsService {
     return this.getView(booking.id)
   }
 
+  /** The SMS link that opens this visit without signing in. */
+  linkTo(id: string) {
+    return visitLink(this.webUrl(), id, this.secret())
+  }
+
+  private secret() {
+    return this.config.get('AUTH_SECRET', { infer: true })
+  }
+
   private webUrl() {
     return this.config.get('PUBLIC_WEB_URL', { infer: true })
   }
@@ -725,6 +736,7 @@ export class BookingsService {
 
   private async verifyToken(id: string, token: string) {
     const booking = await this.bookings.findOneBy({ id })
+    if (booking && isSignedToken(id, token, this.secret())) return booking
     const expected = Buffer.from(booking?.cancelTokenHash ?? '', 'hex')
     const actual = Buffer.from(hashToken(token), 'hex')
     if (!booking || expected.length !== actual.length || !timingSafeEqual(expected, actual)) {

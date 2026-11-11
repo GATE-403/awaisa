@@ -1,0 +1,18 @@
+.page {
+  padding: var(--space-8) 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.skeleton {
+  height: 260px;
+  border-radius: var(--radius-xl);
+}
+
+.link {
+  color: var(--color-link);
+}

@@ -31,17 +31,18 @@ const formatDate = (dateKey: string) => {
 const otpMessage = (code: string) =>
   `${code} — код для входа в ${PLATFORM_NAME}. Никому его не сообщайте.`
 
-const confirmationMessage = (booking: BookingMessageInput, webUrl: string) =>
-  `${booking.business.name}: вы записаны — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Отменить: ${webUrl}/bookings`
+// `link` opens the visit without signing in (common/visit-link.ts): move or cancel from there.
+const confirmationMessage = (booking: BookingMessageInput, link: string) =>
+  `${booking.business.name}: вы записаны — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Перенести или отменить: ${link}`
 
-const reminderMessage = (booking: BookingMessageInput, isToday = true) =>
-  `${booking.business.name}: напоминаем — ${isToday ? 'сегодня' : 'завтра'} в ${booking.time} ${booking.serviceName}, мастер ${booking.specialistName}. Ждём вас!`
+const reminderMessage = (booking: BookingMessageInput, isToday = true, link?: string) =>
+  `${booking.business.name}: напоминаем — ${isToday ? 'сегодня' : 'завтра'} в ${booking.time} ${booking.serviceName}, мастер ${booking.specialistName}. Ждём вас!${link ? ` Перенести: ${link}` : ''}`
 
 const salonCancellationMessage = (booking: BookingMessageInput, webUrl: string) =>
   `${booking.business.name}: к сожалению, запись на ${formatDate(booking.date)} в ${booking.time} отменена. Выберите другое время: ${webUrl}/${booking.business.slug}/book`
 
-const rescheduleMessage = (booking: BookingMessageInput, webUrl: string) =>
-  `${booking.business.name}: запись перенесена — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Подробнее: ${webUrl}/bookings`
+const rescheduleMessage = (booking: BookingMessageInput, link: string) =>
+  `${booking.business.name}: запись перенесена — ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Подробнее: ${link}`
 
 // Asked once, two hours after the visit; the link opens the rating without signing in.
 const reviewRequestMessage = (businessName: string, link: string) =>

@@ -1,0 +1,65 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-4);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-md);
+}
+
+.url {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.copy:active {
+  scale: 0.96;
+}
+
+.copy:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.footer {
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}

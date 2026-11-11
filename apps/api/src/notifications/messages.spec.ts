@@ -14,8 +14,8 @@ describe('SMS messages', () => {
   })
 
   it('confirmation has the date, time, master and a cancel link', () => {
-    expect(confirmationMessage(booking, 'https://awaisa.kg')).toBe(
-      'Awaisa Studio: вы записаны — Женская стрижка, 12 ноября в 14:30, мастер Айгерим Садыкова. Отменить: https://awaisa.kg/bookings',
+    expect(confirmationMessage(booking, 'https://awaisa.kg/v/1?s=x')).toBe(
+      'Awaisa Studio: вы записаны — Женская стрижка, 12 ноября в 14:30, мастер Айгерим Садыкова. Перенести или отменить: https://awaisa.kg/v/1?s=x',
     )
   })
 

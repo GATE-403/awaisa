@@ -25,6 +25,8 @@ const APP_SEGMENTS = new Set([
   'map',
   'profile',
   'review',
+  // Signed SMS links to a visit.
+  'v',
   'ui',
   'api',
 ])
