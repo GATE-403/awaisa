@@ -7,7 +7,8 @@
   gap: var(--space-2);
   width: 100%;
   max-width: var(--ticket-max-width, 560px);
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.04)) drop-shadow(0 10px 24px rgb(0 0 0 / 0.1));
+  /* One drop-shadow (the mask cuts box-shadow off the notches); two doubled the raster cost. */
+  filter: drop-shadow(0 8px 20px rgb(0 0 0 / 0.1));
 }
 
 .ticket {

@@ -58,6 +58,18 @@ body {
   animation-timing-function: var(--ease-standard);
 }
 
+/* Android: the morph animates full-page snapshots, too heavy for mid-range GPUs — switch at once. */
+@supports not (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      /* biome-ignore lint/complexity/noImportantStyles: overrides the browser's view transition */
+      animation: none !important;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),

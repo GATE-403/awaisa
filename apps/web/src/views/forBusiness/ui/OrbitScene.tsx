@@ -64,7 +64,12 @@ export const OrbitScene = () => {
     if (reduced) return
 
     let frame = 0
+    let isVisible = true
     const tick = () => {
+      if (!isVisible) {
+        frame = 0
+        return
+      }
       const s = state.current
       s.tiltX += (s.targetX - s.tiltX) * EASE
       s.tiltY += (s.targetY - s.tiltY) * EASE
@@ -79,8 +84,17 @@ export const OrbitScene = () => {
       frame = window.requestAnimationFrame(tick)
     }
     frame = window.requestAnimationFrame(tick)
+    // Off screen or in a background tab the scene stops, instead of restyling it 60 times a second.
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = Boolean(entry?.isIntersecting) && document.visibilityState === 'visible'
+      if (isVisible && frame === 0) frame = window.requestAnimationFrame(tick)
+    })
+    observer.observe(scene)
 
-    return () => window.cancelAnimationFrame(frame)
+    return () => {
+      observer.disconnect()
+      window.cancelAnimationFrame(frame)
+    }
   }, [])
 
   const handleMove = (event: PointerEvent<HTMLDivElement>) => {

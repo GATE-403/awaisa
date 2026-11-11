@@ -2,12 +2,15 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { DownloadSimple } from '@phosphor-icons/react/ssr'
+import { DownloadSimple, MapPin, Phone } from '@phosphor-icons/react/ssr'
 import { useRef, useState } from 'react'
-import { Ticket } from '@/entities/booking'
+import { formatDayLong, formatDuration, formatPrice, Ticket } from '@/entities/booking'
+import { addMinutes } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
+import { formatPhone } from '@/shared/lib/formatPhone'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
+import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './TicketViewer.module.css'
 
 interface TicketViewerProps {
@@ -19,7 +22,10 @@ const toFileName = (booking: Booking) =>
   `talon-${booking.business.slug}-${booking.date}-${booking.time.replace(':', '')}.png`
 
 // Like showing a ticket at the door: only the ticket, large and bright, and a way to keep it.
+const getBookingCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
+
 export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
+  const code = getBookingCode(booking.id)
   const toast = useToast()
   const ticketRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -73,6 +79,80 @@ export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
           <Ticket booking={booking} />
         </div>
         <p className={styles.hint}>Покажите талон администратору или сохраните картинкой.</p>
+      </div>
+
+      {/* Everything about the visit, not just what fits on the ticket. */}
+      <section className={sheet.group} aria-label='О визите'>
+        <h3 className={sheet.groupTitle}>О визите</h3>
+        <dl className={`${sheet.list} ${styles.details}`}>
+          <div className={styles.detail}>
+            <dt>Когда</dt>
+            <dd>
+              {formatDayLong(booking.date)}, {booking.time}–
+              {addMinutes(booking.time, booking.durationMinutes)}
+            </dd>
+          </div>
+          <div className={styles.detail}>
+            <dt>Услуга</dt>
+            <dd>
+              {booking.serviceName} · {formatDuration(booking.durationMinutes)}
+            </dd>
+          </div>
+          <div className={styles.detail}>
+            <dt>Мастер</dt>
+            <dd>{booking.specialistName}</dd>
+          </div>
+          <div className={styles.detail}>
+            <dt>Стоимость</dt>
+            <dd>
+              {formatPrice(booking.price)}
+              <span className={styles.note}>оплата в салоне — наличными или картой</span>
+            </dd>
+          </div>
+          <div className={styles.detail}>
+            <dt>Номер</dt>
+            <dd className={styles.code}>{code}</dd>
+          </div>
+          <div className={styles.detail}>
+            <dt>Статус</dt>
+            <dd>{booking.status === 'cancelled' ? 'Отменена' : 'Подтверждена'}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className={sheet.group} aria-label='Где'>
+        <h3 className={sheet.groupTitle}>{booking.business.name}</h3>
+        <div className={sheet.list}>
+          {booking.business.address && (
+            <a
+              className={sheet.row}
+              href={
+                booking.business.mapUrl ||
+                `https://2gis.kg/bishkek/search/${encodeURIComponent(booking.business.address)}`
+              }
+              target='_blank'
+              rel='noreferrer'
+            >
+              <span className={styles.rowLabel}>
+                <MapPin weight='regular' aria-hidden />
+                {booking.business.address}
+              </span>
+              <span className={styles.rowAction}>Маршрут</span>
+            </a>
+          )}
+          {booking.business.phone && (
+            <a className={sheet.row} href={`tel:${booking.business.phone}`}>
+              <span className={styles.rowLabel}>
+                <Phone weight='regular' aria-hidden />
+                {formatPhone(booking.business.phone)}
+              </span>
+              <span className={styles.rowAction}>Позвонить</span>
+            </a>
+          )}
+        </div>
+      </section>
+
+      <div className={styles.stage}>
         <Button variant='outline' onClick={download} disabled={isSaving}>
           <DownloadSimple weight='bold' aria-hidden />
           {isSaving ? 'Сохраняем…' : 'Скачать картинкой'}

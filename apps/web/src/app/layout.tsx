@@ -42,7 +42,13 @@ export const viewport: Viewport = {
 
 const RootLayout = ({ children }: LayoutProps<'/'>) => (
   // The boot script sets data-theme before hydration, so React must not compare that attribute.
-  <html lang='ru' className={`${inter.variable} ${onest.variable}`} suppressHydrationWarning>
+  <html
+    lang='ru'
+    className={`${inter.variable} ${onest.variable}`}
+    // Next turns smooth scrolling off while navigating, so a new page starts at the top at once.
+    data-scroll-behavior='smooth'
+    suppressHydrationWarning
+  >
     <head>
       {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input */}
       <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />

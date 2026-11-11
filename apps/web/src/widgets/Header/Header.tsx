@@ -46,13 +46,23 @@ export const Header = () => {
     const header = headerRef.current
     if (!header) return
     const root = document.documentElement
+    let frame = 0
+    let published = ''
+    // Writing a variable on <html> restyles the whole page: at most once a frame, only on change.
     const observer = new ResizeObserver(() => {
-      // Fractional, not offsetHeight: a rounded value leaves a sub-pixel gap under the header.
-      root.style.setProperty('--header-height', `${header.getBoundingClientRect().height}px`)
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        // Fractional, not offsetHeight: a rounded value leaves a sub-pixel gap under the header.
+        const height = `${header.getBoundingClientRect().height}px`
+        if (height === published) return
+        published = height
+        root.style.setProperty('--header-height', height)
+      })
     })
     observer.observe(header)
 
     return () => {
+      cancelAnimationFrame(frame)
       observer.disconnect()
       root.style.removeProperty('--header-height')
     }

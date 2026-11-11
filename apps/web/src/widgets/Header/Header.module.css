@@ -122,15 +122,11 @@
   inset: -6px -4px;
 }
 
-/* Phones: categories as a chip row under the search; it folds away once the page scrolls. */
+/* Phones: categories as a chip row under the search. It stays put on scroll: animating the
+   header's height re-laid out every sticky element on each frame and stuttered on Android. */
 .categories {
   display: grid;
   grid-template-rows: 1fr;
-  transition: grid-template-rows var(--duration-normal) var(--ease-standard);
-}
-
-.header[data-scrolled] .categories {
-  grid-template-rows: 0fr;
 }
 
 .categoriesInner {
