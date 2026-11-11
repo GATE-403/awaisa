@@ -392,7 +392,24 @@ const getManagedWaitlist = (slug: string, signal?: AbortSignal) =>
 const removeManagedWaitlist = (slug: string, id: string) =>
   request<void>(`${manage(slug)}/waitlist/${id}`, { method: 'DELETE' })
 
+const getPaymentConfig = (signal?: AbortSignal) =>
+  request<{ isAvailable: boolean; driver: string }>('/payments/config', { signal })
+
+const completeTestPayment = (id: string, signature: string) =>
+  request<{ bookingId: string; paymentStatus: string | null }>(
+    `/payments/${id}/test-complete?${new URLSearchParams({ s: signature })}`,
+    { method: 'POST' },
+  )
+
+const getCheckoutUrl = (id: string, token: string | null) =>
+  request<{ url: string }>(`/bookings/${id}/checkout`, {
+    headers: token ? { [TOKEN_HEADER]: token } : {},
+  })
+
 export {
+  completeTestPayment,
+  getCheckoutUrl,
+  getPaymentConfig,
   getManagedWaitlist,
   removeManagedWaitlist,
   getMyWaitlist,

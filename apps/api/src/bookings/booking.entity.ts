@@ -108,6 +108,23 @@ export class Booking {
   @Column({ name: 'review_requested_at', type: 'timestamptz', nullable: true })
   reviewRequestedAt: Date | null
 
+  /** The deposit asked for when booked online (сом); null = none. */
+  @Column({ name: 'deposit_amount', type: 'int', nullable: true })
+  depositAmount: number | null
+
+  /**
+   * pending: the slot is held while the client pays · paid · refunded (cancelled early or by the
+   * salon) · kept (cancelled late) · expired (never paid, the booking was released).
+   */
+  @Column({ name: 'payment_status', type: 'varchar', length: 16, nullable: true })
+  paymentStatus: 'pending' | 'paid' | 'refunded' | 'kept' | 'expired' | null
+
+  @Column({ name: 'payment_due_at', type: 'timestamptz', nullable: true })
+  paymentDueAt: Date | null
+
+  @Column({ name: 'cancelled_by', type: 'varchar', length: 8, nullable: true })
+  cancelledBy: 'client' | 'salon' | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

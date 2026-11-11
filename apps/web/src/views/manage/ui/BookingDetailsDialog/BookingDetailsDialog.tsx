@@ -1,7 +1,7 @@
 import { Avatar } from '@awaisa/ui/Avatar'
 import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
-import { formatDuration, formatPrice } from '@/entities/booking'
+import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -105,6 +105,14 @@ export const BookingDetailsDialog = ({
           <span className={sheet.rowLabel}>Стоимость</span>
           <span className={styles.value}>{formatPrice(booking.price)}</span>
         </div>
+        {booking.payment && (
+          <div className={sheet.row}>
+            <span className={sheet.rowLabel}>Предоплата</span>
+            <span className={styles.value}>
+              {formatPrice(booking.payment.amount)} · {PAYMENT_STATUS_TEXT[booking.payment.status]}
+            </span>
+          </div>
+        )}
       </div>
 
       {!isCancelled && onOutcome && (

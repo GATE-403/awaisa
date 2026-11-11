@@ -1,18 +1,28 @@
 'use client'
 
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { useToast } from '@awaisa/ui/Toast'
 import {
   ArrowsClockwise,
   CalendarPlus,
+  CreditCard,
   DotsThree,
   MapPin,
   XCircle,
 } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { downloadCalendarFile, getDateParts, parseBookings, readRaw } from '@/entities/booking'
+import {
+  downloadCalendarFile,
+  formatPrice,
+  getDateParts,
+  parseBookings,
+  readRaw,
+} from '@/entities/booking'
 import { WalletButton } from '@/features/addToWallet'
 import { RescheduleSheet } from '@/features/rescheduleBooking'
 import { TicketViewer } from '@/features/ticketView'
+import { getErrorMessage } from '@/shared/api/apiError'
+import { getCheckoutUrl } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
 import styles from './UpcomingBooking.module.css'
 
@@ -37,6 +47,19 @@ export const UpcomingBooking = ({
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const { day, month } = getDateParts(booking.date)
   const code = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase()
+  const isAwaitingPayment = booking.status === 'confirmed' && booking.payment?.status === 'pending'
+  const toast = useToast()
+
+  // The slot is held until the deposit is paid: back to the same checkout.
+  const handlePay = async () => {
+    try {
+      const token = parseBookings(readRaw()).find((item) => item.id === booking.id)?.token ?? null
+      const { url } = await getCheckoutUrl(booking.id, token)
+      window.location.assign(url)
+    } catch (payError) {
+      toast.show({ title: 'Не получилось', description: getErrorMessage(payError), type: 'error' })
+    }
+  }
 
   return (
     <div className={styles.item}>
@@ -55,8 +78,12 @@ export const UpcomingBooking = ({
         <span className={styles.body}>
           <span className={styles.when}>
             {booking.time}
-            <span className={styles.countdown}>
-              {booking.status === 'cancelled' ? 'Отменена' : countdown}
+            <span className={styles.countdown} data-pending={isAwaitingPayment || undefined}>
+              {booking.status === 'cancelled'
+                ? 'Отменена'
+                : isAwaitingPayment
+                  ? 'Ждёт оплаты'
+                  : countdown}
             </span>
           </span>
           <span className={styles.service}>{booking.serviceName}</span>
@@ -86,17 +113,27 @@ export const UpcomingBooking = ({
         </Menu>
         {booking.status === 'confirmed' && (
           <span className={styles.links}>
-            <button type='button' className={styles.link} onClick={() => setIsMoving(true)}>
-              <ArrowsClockwise weight='bold' aria-hidden />
-              Перенести
-            </button>
-            <button
-              type='button'
-              className={styles.link}
-              onClick={() => downloadCalendarFile(booking, booking.business)}
-            >
-              <CalendarPlus weight='bold' aria-hidden />В календарь
-            </button>
+            {/* Unpaid: the one thing to do is pay; moving and the calendar wait for it. */}
+            {isAwaitingPayment ? (
+              <button type='button' className={styles.link} onClick={() => void handlePay()}>
+                <CreditCard weight='bold' aria-hidden />
+                Оплатить {formatPrice(booking.payment?.amount ?? 0)}
+              </button>
+            ) : (
+              <>
+                <button type='button' className={styles.link} onClick={() => setIsMoving(true)}>
+                  <ArrowsClockwise weight='bold' aria-hidden />
+                  Перенести
+                </button>
+                <button
+                  type='button'
+                  className={styles.link}
+                  onClick={() => downloadCalendarFile(booking, booking.business)}
+                >
+                  <CalendarPlus weight='bold' aria-hidden />В календарь
+                </button>
+              </>
+            )}
           </span>
         )}
       </article>

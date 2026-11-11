@@ -10,18 +10,21 @@ import { TelegramModule } from '../telegram/telegram.module.js'
 import { Booking } from './booking.entity.js'
 import { BookingsController } from './bookings.controller.js'
 import { BookingsService } from './bookings.service.js'
+import { Payment } from './payment.entity.js'
+import { PaymentsController } from './payments.controller.js'
+import { PaymentsService } from './payments.service.js'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Booking, TimeOff, Customer]),
+    TypeOrmModule.forFeature([Booking, TimeOff, Customer, Payment]),
     CatalogModule,
     AuthModule,
     BusinessesModule,
     NotificationsModule,
     TelegramModule,
   ],
-  controllers: [BookingsController],
-  providers: [BookingsService],
-  exports: [BookingsService],
+  controllers: [BookingsController, PaymentsController],
+  providers: [BookingsService, PaymentsService],
+  exports: [BookingsService, PaymentsService],
 })
 export class BookingsModule {}

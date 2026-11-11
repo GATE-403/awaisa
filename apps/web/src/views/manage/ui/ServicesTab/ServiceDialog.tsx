@@ -1,8 +1,9 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
-import { type FormEvent, useState } from 'react'
-import { formatDuration } from '@/entities/booking'
+import { type FormEvent, useEffect, useState } from 'react'
+import { formatDuration, formatPrice } from '@/entities/booking'
+import { getPaymentConfig } from '@/shared/api/clientApi'
 import type { Category, Service, ServiceInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -29,11 +30,25 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
   const [categoryId, setCategoryId] = useState(service?.categoryId ?? categories[0]?.id ?? '')
   const [durationMinutes, setDuration] = useState(service?.durationMinutes ?? 60)
   const [price, setPrice] = useState(service ? String(service.price) : '')
+  const [deposit, setDeposit] = useState(service?.deposit ? String(service.deposit) : '')
+  const [canTakeDeposits, setCanTakeDeposits] = useState(false)
   const [description, setDescription] = useState(service?.description ?? '')
   const [isPopular, setIsPopular] = useState(service?.isPopular ?? false)
   const [isActive, setIsActive] = useState(service?.isActive ?? true)
   const [isSaving, setIsSaving] = useState(false)
-  const isValid = name.trim() !== '' && categoryId !== '' && price.trim() !== ''
+  const depositAmount = Number(deposit) || 0
+  const isDepositValid =
+    depositAmount === 0 || price.trim() === '' || depositAmount <= Number(price)
+  const isValid = name.trim() !== '' && categoryId !== '' && price.trim() !== '' && isDepositValid
+
+  // The deposit field appears only when the platform has an acquirer to take the money.
+  useEffect(() => {
+    const controller = new AbortController()
+    getPaymentConfig(controller.signal)
+      .then((config) => setCanTakeDeposits(config.isAvailable))
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -45,6 +60,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
       categoryId,
       durationMinutes,
       price: Number(price),
+      deposit: depositAmount > 0 ? depositAmount : null,
       description: description.trim(),
       isPopular,
       isActive,
@@ -128,6 +144,35 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
           </div>
           <p className={sheet.groupFooter}>Клиент видит цену и длительность до записи.</p>
         </section>
+
+        {canTakeDeposits && (
+          <section className={sheet.group} aria-label='Предоплата'>
+            <h3 className={sheet.groupTitle}>Предоплата</h3>
+            <div className={sheet.list}>
+              <label className={sheet.row}>
+                <span className={sheet.rowLabel}>При записи онлайн</span>
+                <span className={sheet.rowControl}>
+                  <Input
+                    variant='plain'
+                    aria-label='Предоплата, сом'
+                    inputMode='numeric'
+                    placeholder='нет'
+                    value={maskAmountInput(deposit)}
+                    onValueChange={(value) => setDeposit(value.replace(/\D/g, ''))}
+                  />
+                  <span className={sheet.suffix}>сом</span>
+                </span>
+              </label>
+            </div>
+            <p className={sheet.groupFooter}>
+              {!isDepositValid
+                ? 'Предоплата не может быть больше цены.'
+                : depositAmount > 0
+                  ? `Клиент оплатит ${formatPrice(depositAmount)} картой, иначе через 15 минут время освободится. Вернём, если отменит за сутки; при поздней отмене останется у вас.`
+                  : 'Защищает от неявок на долгие услуги: клиент платит часть при записи.'}
+            </p>
+          </section>
+        )}
 
         <section className={sheet.group} aria-label='Показ'>
           <div className={sheet.list}>

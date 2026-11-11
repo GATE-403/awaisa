@@ -3,7 +3,13 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { MapPin, Phone } from '@phosphor-icons/react/ssr'
 import { type ReactNode, useRef, useState } from 'react'
-import { formatDayLong, formatDuration, formatPrice, Ticket } from '@/entities/booking'
+import {
+  describeDeposit,
+  formatDayLong,
+  formatDuration,
+  formatPrice,
+  Ticket,
+} from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -108,7 +114,11 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
             <dt>Стоимость</dt>
             <dd>
               {formatPrice(booking.price)}
-              <span className={styles.note}>оплата в салоне — наличными или картой</span>
+              <span className={styles.note}>
+                {booking.payment
+                  ? `${describeDeposit(booking.payment)}${booking.payment.status === 'paid' ? ', остальное в салоне' : ''}`
+                  : 'оплата в салоне — наличными или картой'}
+              </span>
             </dd>
           </div>
           <div className={styles.detail}>

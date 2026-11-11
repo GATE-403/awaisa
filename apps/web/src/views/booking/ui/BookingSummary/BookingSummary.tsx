@@ -58,9 +58,16 @@ export const BookingSummary = ({
     { label: 'Когда', value: whenLabel },
     { label: 'Длительность', value: service ? formatDuration(service.durationMinutes) : null },
     { label: 'Итого', value: service ? formatPrice(service.price) : null },
+    ...(service?.deposit
+      ? [{ label: 'Предоплата', value: `${formatPrice(service.deposit)} картой при записи` }]
+      : []),
   ]
   const buttonLabel = getButtonLabel(firstIncompleteStep, isSubmitting)
-  const hint = firstIncompleteStep ? NEXT_STEP_HINTS[firstIncompleteStep] : whenLabel
+  const hint = firstIncompleteStep
+    ? NEXT_STEP_HINTS[firstIncompleteStep]
+    : service?.deposit
+      ? `${whenLabel} · предоплата ${formatPrice(service.deposit)}`
+      : whenLabel
 
   if (variant === 'bar') {
     return (
@@ -152,6 +159,13 @@ export const BookingSummary = ({
         <span>Итого</span>
         <span>{service ? formatPrice(service.price) : '—'}</span>
       </div>
+      {/* Said before the click: the deposit is paid right after, the rest at the salon. */}
+      {service?.deposit ? (
+        <p className={styles.deposit}>
+          Предоплата {formatPrice(service.deposit)} — картой сразу после записи, остальное в салоне.
+          Вернём при отмене за сутки.
+        </p>
+      ) : null}
       {firstIncompleteStep === 'contacts' && (
         <p className={styles.nextStep} aria-live='polite'>
           {NEXT_STEP_HINTS.contacts}

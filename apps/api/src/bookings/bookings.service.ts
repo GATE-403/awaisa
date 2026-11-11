@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Brackets, In, QueryFailedError, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
@@ -31,8 +32,15 @@ import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
-import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, UNDO_WINDOW_SECONDS } from './booking-rules.js'
+import {
+  ANY_SPECIALIST_ID,
+  BOOKING_DAYS_AHEAD,
+  DEPOSIT_REFUND_HOURS,
+  PAYMENT_HOLD_MINUTES,
+  UNDO_WINDOW_SECONDS,
+} from './booking-rules.js'
 import type { AvailabilityQuery, CreateBookingInput } from './bookings.schemas.js'
+import { PaymentsService } from './payments.service.js'
 
 type BookingView = {
   id: string
@@ -48,6 +56,12 @@ type BookingView = {
   startsAt: string
   endsAt: string
   customerName: string
+  /** A deposit asked when booked online; null when the service has none. */
+  payment: {
+    status: NonNullable<Booking['paymentStatus']>
+    amount: number
+    dueAt: string | null
+  } | null
   review: { rating: number; comment: string; reply: string | null } | null
   business: {
     slug: string
@@ -110,6 +124,14 @@ const toView = (booking: Booking): BookingView => {
     startsAt: booking.startsAt.toISOString(),
     endsAt: booking.endsAt.toISOString(),
     customerName: booking.customerName,
+    payment:
+      booking.depositAmount && booking.paymentStatus
+        ? {
+            status: booking.paymentStatus,
+            amount: booking.depositAmount,
+            dueAt: booking.paymentDueAt?.toISOString() ?? null,
+          }
+        : null,
     review: booking.review
       ? {
           rating: booking.review.rating,
@@ -140,6 +162,7 @@ export class BookingsService {
     private readonly sms: SmsService,
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
+    private readonly payments: PaymentsService,
   ) {}
 
   async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
@@ -216,6 +239,9 @@ export class BookingsService {
     const startsAt = businessDateTimeToUtc(input.date, minutes)
     const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000)
     const cancelToken = randomBytes(24).toString('base64url')
+    // Online bookings of a service with a deposit hold the slot until the client pays.
+    const deposit =
+      !staffBusinessId && service.deposit && this.payments.isAvailable ? service.deposit : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
@@ -241,6 +267,9 @@ export class BookingsService {
               (await this.defaultBranchId(service.businessId)),
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
+            depositAmount: deposit,
+            paymentStatus: deposit ? 'pending' : null,
+            paymentDueAt: deposit ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
             // Booked inside the reminder window: the confirmation already does the reminder's job.
             reminderSentAt:
               input.reminderMinutes !== null &&
@@ -252,6 +281,17 @@ export class BookingsService {
         const view = await this.getView(saved.id)
         if (customer && !customer.name) {
           await this.customers.update({ id: customer.id }, { name: input.name })
+        }
+        // A deposit first: the confirmation and the owner's message wait for the payment.
+        if (deposit) {
+          const checkout = await this.payments.createCheckout(saved.id, deposit)
+          return {
+            ...view,
+            cancelToken,
+            customerPhone: phone,
+            comment: input.comment,
+            checkoutUrl: checkout.url,
+          }
         }
         if (input.smsConfirmation) {
           void this.sms.sendSafely(phone, confirmationMessage(view, this.linkTo(view.id)))
@@ -574,7 +614,7 @@ export class BookingsService {
     if (!booking) throw new NotFoundException('Запись не найдена')
 
     const wasConfirmed = booking.status === 'confirmed'
-    if (wasConfirmed) await this.markCancelled(id)
+    if (wasConfirmed) await this.markCancelled(id, 'salon')
 
     return { view: await this.getView(id), customerPhone: booking.customerPhone, wasConfirmed }
   }
@@ -591,7 +631,7 @@ export class BookingsService {
 
   // The owner hears about it only once the client can no longer undo it.
   private async cancelByClient(booking: Booking) {
-    await this.markCancelled(booking.id)
+    await this.markCancelled(booking.id, 'client')
     setTimeout(() => {
       void (async () => {
         if (!(await this.isCancelled(booking.id))) return
@@ -604,19 +644,28 @@ export class BookingsService {
     }, UNDO_WINDOW_SECONDS * 1000).unref()
   }
 
-  private markCancelled(id: string) {
-    return this.bookings.update({ id }, { status: 'cancelled', cancelledAt: new Date() })
+  private markCancelled(id: string, by: 'client' | 'salon') {
+    return this.bookings.update(
+      { id },
+      { status: 'cancelled', cancelledAt: new Date(), cancelledBy: by },
+    )
   }
 
   // Undo for a cancellation made moments ago: the slot is taken back unless someone booked it.
   private async restore(booking: Booking) {
+    if (booking.paymentStatus === 'expired') {
+      throw new BadRequestException('Время на оплату вышло — запишитесь заново')
+    }
     if (booking.status === 'cancelled') {
       const elapsed = booking.cancelledAt ? Date.now() - booking.cancelledAt.getTime() : Infinity
       if (elapsed > UNDO_WINDOW_SECONDS * 1000) {
         throw new BadRequestException('Вернуть уже нельзя — запишитесь заново')
       }
       try {
-        await this.bookings.update({ id: booking.id }, { status: 'confirmed', cancelledAt: null })
+        await this.bookings.update(
+          { id: booking.id },
+          { status: 'confirmed', cancelledAt: null, cancelledBy: null },
+        )
       } catch (error) {
         if (isOverlapError(error)) throw new ConflictException('Это время уже заняли')
         throw error
@@ -624,6 +673,91 @@ export class BookingsService {
     }
 
     return this.getView(booking.id)
+  }
+
+  /** The pay page for a booking still waiting for its deposit (to pay again from the ticket). */
+  async checkoutUrl(id: string, token: string | null, customer: Customer | null) {
+    const booking = await this.findAccessible(id, token, customer)
+    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (booking.paymentStatus !== 'pending') throw new BadRequestException('Оплата не нужна')
+    const url = await this.payments.checkoutFor(id)
+    if (!url) throw new NotFoundException('Платёж не найден')
+
+    return { url }
+  }
+
+  /**
+   * The deposit went through: the booking is final — confirmation SMS and the owner's message
+   * now. Paid after the hold ran out (the slot was released): the money goes straight back.
+   */
+  async onPaid(bookingId: string) {
+    const result = await this.bookings.update(
+      { id: bookingId, paymentStatus: 'pending' },
+      { paymentStatus: 'paid', paymentDueAt: null },
+    )
+    if (!result.affected) {
+      const booking = await this.bookings.findOneBy({ id: bookingId })
+      if (booking?.paymentStatus === 'expired') {
+        await this.payments.refund(bookingId)
+        await this.bookings.update({ id: bookingId }, { paymentStatus: 'refunded' })
+      }
+      return this.getView(bookingId)
+    }
+
+    const booking = await this.bookings.findOneByOrFail({ id: bookingId })
+    const view = await this.getView(bookingId)
+    if (booking.smsConfirmation) {
+      void this.sms.sendSafely(
+        booking.customerPhone,
+        confirmationMessage(view, this.linkTo(view.id)),
+      )
+    }
+    void this.telegram.notifyBusiness(
+      booking.businessId,
+      newBookingText(view.business.name, view.date, {
+        ...view,
+        customerPhone: booking.customerPhone,
+      }),
+    )
+
+    return view
+  }
+
+  /**
+   * Every minute: unpaid holds past their time are released; deposits of cancelled visits are
+   * settled once the undo window has passed — returned when the salon cancelled or the client
+   * did it early enough, kept otherwise. Claimed with UPDATE … RETURNING, safe on several instances.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async settlePayments() {
+    const expired = await this.claim(
+      `UPDATE "bookings" SET "status" = 'cancelled', "cancelled_at" = now(), "payment_status" = 'expired'
+       WHERE "payment_status" = 'pending' AND "payment_due_at" < now() AND "status" = 'confirmed'
+       RETURNING "id"`,
+    )
+    await this.payments.failPending(expired.map((row) => row.id))
+
+    const settled = await this.claim(
+      `UPDATE "bookings" SET "payment_status" = CASE
+         WHEN "cancelled_by" = 'salon'
+           OR "starts_at" - "cancelled_at" >= make_interval(hours => ${DEPOSIT_REFUND_HOURS})
+         THEN 'refunded' ELSE 'kept' END
+       WHERE "status" = 'cancelled' AND "payment_status" = 'paid'
+         AND "cancelled_at" < now() - make_interval(secs => ${UNDO_WINDOW_SECONDS})
+       RETURNING "id", "payment_status"`,
+    )
+    for (const row of settled) {
+      if (row.payment_status === 'refunded') await this.payments.refund(row.id)
+    }
+  }
+
+  private async claim(sql: string) {
+    const result: unknown = await this.bookings.manager.query(sql)
+    // TypeORM returns [rows, affected] for UPDATE … RETURNING on Postgres.
+    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
+      id: string
+      payment_status?: string
+    }[]
   }
 
   /** The SMS link that opens this visit without signing in. */

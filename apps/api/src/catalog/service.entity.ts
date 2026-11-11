@@ -28,6 +28,10 @@ export class Service {
   @Column({ type: 'int' })
   price: number
 
+  /** Asked when booked online (сом); null = no prepayment. */
+  @Column({ type: 'int', nullable: true })
+  deposit: number | null
+
   @Column({ name: 'is_popular', type: 'boolean', default: false })
   isPopular: boolean
 

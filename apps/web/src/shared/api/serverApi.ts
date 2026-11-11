@@ -10,6 +10,7 @@ import type {
   BusinessPage,
   MapPlace,
   Offer,
+  PaymentPage,
   PopularService,
   ReviewSummary,
 } from './types'
@@ -108,4 +109,23 @@ const listMapPlaces = async (kind: BusinessKind | undefined): Promise<MapPlace[]
   return response.json()
 }
 
-export { listMapPlaces, getBusiness, listBusinesses, listOffers, listPopularServices, listReviews }
+// The pay page reads its payment by the signed link: never cached, it changes as the client pays.
+const getPaymentPage = async (id: string, signature: string): Promise<PaymentPage | null> => {
+  const response = await fetch(
+    `${API_URL}/payments/${encodeURIComponent(id)}?${new URLSearchParams({ s: signature })}`,
+    { cache: 'no-store' },
+  )
+  if (!response.ok) return null
+
+  return response.json()
+}
+
+export {
+  getPaymentPage,
+  listMapPlaces,
+  getBusiness,
+  listBusinesses,
+  listOffers,
+  listPopularServices,
+  listReviews,
+}
