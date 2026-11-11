@@ -30,6 +30,7 @@ const booking: BookingView = {
   startsAt: '2026-11-10T08:30:00.000Z',
   endsAt: '2026-11-10T09:15:00.000Z',
   review: null,
+  payment: null,
   customerName: 'Данияр',
   business: {
     slug: 'awaisa-studio',

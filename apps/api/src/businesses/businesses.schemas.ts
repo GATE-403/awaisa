@@ -95,6 +95,15 @@ const serviceSchema = z.object({
     .min(5)
     .max(12 * 60),
   price: z.number().int().min(0).max(10_000_000),
+  // Prepayment for online bookings, сом; null or 0 = none.
+  deposit: z
+    .number()
+    .int()
+    .min(0)
+    .max(10_000_000)
+    .nullable()
+    .default(null)
+    .transform((value) => (value ? value : null)),
   isPopular: z.boolean().default(false),
   isActive: z.boolean().default(true),
 })

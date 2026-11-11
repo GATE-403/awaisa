@@ -218,6 +218,7 @@
 }
 
 .link {
+  white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -235,4 +236,9 @@
 .link svg {
   width: 14px;
   height: 14px;
+}
+
+.countdown[data-pending] {
+  color: var(--color-highlight);
+  font-weight: var(--font-weight-semibold);
 }

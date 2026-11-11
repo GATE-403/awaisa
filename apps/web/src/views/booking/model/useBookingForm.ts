@@ -273,7 +273,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setSubmitError(null)
 
     try {
-      const { cancelToken, ...booking } = await createBooking({
+      const { cancelToken, checkoutUrl, ...booking } = await createBooking({
         serviceId,
         specialistId,
         date: dayKey,
@@ -287,8 +287,13 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       if (!accountPhone) saveContact({ name: name.trim(), phone: phone.trim() })
-      setCreatedBooking(booking)
       clearDraft()
+      // A deposit: the slot is held, the client pays at the checkout and comes back to the ticket.
+      if (checkoutUrl) {
+        window.location.assign(checkoutUrl)
+        return
+      }
+      setCreatedBooking(booking)
       haptic('success')
       toast.show({
         title: 'Запись подтверждена',

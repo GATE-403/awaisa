@@ -21,7 +21,14 @@ type CatalogView = {
   categories: Pick<Category, 'id' | 'name'>[]
   services: (Pick<
     Service,
-    'id' | 'categoryId' | 'name' | 'description' | 'durationMinutes' | 'price' | 'isPopular'
+    | 'id'
+    | 'categoryId'
+    | 'name'
+    | 'description'
+    | 'durationMinutes'
+    | 'price'
+    | 'deposit'
+    | 'isPopular'
   > & { isActive?: boolean })[]
   specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'rating'> & {
     serviceIds: string[]
@@ -54,13 +61,24 @@ export class CatalogService {
     return {
       categories: categories.map(({ id, name }) => ({ id, name })),
       services: services.map(
-        ({ id, categoryId, name, description, durationMinutes, price, isPopular, isActive }) => ({
+        ({
           id,
           categoryId,
           name,
           description,
           durationMinutes,
           price,
+          deposit,
+          isPopular,
+          isActive,
+        }) => ({
+          id,
+          categoryId,
+          name,
+          description,
+          durationMinutes,
+          price,
+          deposit,
           isPopular,
           ...(includeInactive ? { isActive } : {}),
         }),

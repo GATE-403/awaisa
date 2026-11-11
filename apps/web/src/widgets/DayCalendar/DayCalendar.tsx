@@ -261,6 +261,9 @@ export const DayCalendar = ({
                       )}
                       {booking.time}–{end}
                       {booking.outcome === 'no_show' && ' · не пришёл'}
+                      {booking.status === 'confirmed' &&
+                        booking.payment?.status === 'pending' &&
+                        ' · ждёт оплату'}
                     </span>
                     <span className={styles.blockTitle}>{booking.serviceName}</span>
                     <span className={styles.blockClient}>

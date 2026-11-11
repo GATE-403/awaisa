@@ -10,6 +10,8 @@ type Service = {
   description: string
   durationMinutes: number
   price: number
+  /** Prepayment asked for online bookings (сом); null = none. */
+  deposit?: number | null
   isPopular: boolean
   isActive?: boolean
 }
@@ -162,8 +164,35 @@ type Booking = {
   /** Missing in bookings saved on the device before reviews existed. */
   endsAt?: string
   customerName: string
+  /** A deposit for online booking; pending = the slot is held until it is paid. */
+  payment?: BookingPayment | null
   review?: { rating: number; comment: string; reply: string | null } | null
   business: BookingBusiness
+}
+
+type BookingPayment = {
+  status: 'pending' | 'paid' | 'refunded' | 'kept' | 'expired'
+  amount: number
+  dueAt: string | null
+}
+
+// The pay page (`GET /payments/:id?s=`).
+type PaymentPage = {
+  id: string
+  amount: number
+  status: 'pending' | 'succeeded' | 'failed' | 'refunded'
+  driver: 'none' | 'test'
+  booking: {
+    id: string
+    serviceName: string
+    specialistName: string
+    date: string
+    time: string
+    price: number
+    paymentStatus: BookingPayment['status'] | null
+    dueAt: string | null
+    business: { name: string; slug: string }
+  }
 }
 
 type Review = {
@@ -203,7 +232,8 @@ type TelegramStatus = {
   chats: { id: string; username: string; createdAt: string }[]
 }
 
-type CreatedBooking = Booking & { cancelToken: string }
+// With a deposit the response carries the checkout to send the client to.
+type CreatedBooking = Booking & { cancelToken: string; checkoutUrl?: string }
 
 type Customer = {
   id: string
@@ -342,7 +372,7 @@ type UpdateBusinessInput = Partial<
 type ServiceInput = Pick<
   Service,
   'categoryId' | 'name' | 'description' | 'durationMinutes' | 'price' | 'isPopular'
-> & { isActive: boolean }
+> & { isActive: boolean; deposit: number | null }
 
 type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
   isActive: boolean
@@ -501,6 +531,7 @@ export type {
   Catalog,
   Category,
   CreateBookingInput,
+  BookingPayment,
   CreatedBooking,
   CreatedTimeOff,
   CreateTimeOffInput,
@@ -513,5 +544,6 @@ export type {
   TimeSlot,
   JoinWaitlistInput,
   ManagedWaitlistEntry,
+  PaymentPage,
   WaitlistEntry,
 }

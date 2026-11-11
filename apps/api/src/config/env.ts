@@ -38,11 +38,16 @@ type Env = {
   WALLET_WWDR_PEM?: string
   GOOGLE_WALLET_ISSUER_ID?: string
   GOOGLE_WALLET_SERVICE_ACCOUNT?: string
+  PAYMENT_DRIVER: PaymentDriver
 }
 
 type StorageDriver = 'local' | 's3'
 
 type SmsDriver = 'console' | 'twilio'
+
+// Prepayments: `test` is a built-in checkout for development and e2e; `none` turns deposits off.
+// A real acquirer (Freedom Pay, MBANK, O!Деньги…) becomes one more driver.
+type PaymentDriver = 'none' | 'test'
 
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 const MIN_SECRET_LENGTH = 32
@@ -130,6 +135,17 @@ const parseTwilio = (config: Record<string, unknown>, driver: SmsDriver) => {
   }
 
   return twilio
+}
+
+const parsePaymentDriver = (value: unknown, nodeEnv: Env['NODE_ENV']): PaymentDriver => {
+  const driver = optionalString(value)
+  if (!driver) return nodeEnv === 'production' ? 'none' : 'test'
+  if (driver !== 'none' && driver !== 'test') throw new Error('PAYMENT_DRIVER must be none or test')
+  if (driver === 'test' && nodeEnv === 'production') {
+    throw new Error('PAYMENT_DRIVER=test must not be used in production')
+  }
+
+  return driver
 }
 
 const parseTestCode = (value: unknown, nodeEnv: Env['NODE_ENV']) => {
@@ -226,6 +242,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     AUTH_SECRET: parseAuthSecret(config.AUTH_SECRET, nodeEnv),
     ADMIN_PHONES: parseAdminPhones(config.ADMIN_PHONES),
     SMS_DRIVER: smsDriver,
+    PAYMENT_DRIVER: parsePaymentDriver(config.PAYMENT_DRIVER, nodeEnv),
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),
@@ -239,5 +256,5 @@ const validateEnv = (config: Record<string, unknown>): Env => {
   }
 }
 
-export type { Env, SmsDriver, StorageDriver }
+export type { Env, PaymentDriver, SmsDriver, StorageDriver }
 export { validateEnv }

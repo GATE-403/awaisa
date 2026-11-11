@@ -2,7 +2,10 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { useToast } from '@awaisa/ui/Toast'
 import NextLink from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { WaitlistList } from '@/features/waitlist'
 import type { Booking } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
@@ -24,10 +27,25 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   const today = useToday()
   const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } =
     useMyBookings(initialAccountBookings)
+  const router = useRouter()
+  const toast = useToast()
   const upcoming = bookings
     .filter((booking) => isUpcoming(booking, today))
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
   const history = bookings.filter((booking) => !isUpcoming(booking, today))
+
+  // Back from the deposit checkout (`?paid=<booking>`): say it worked, once. Read from the URL in
+  // an effect — this page is also the prerendered shell, where search params do not exist.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once on arrival
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('paid')) return
+    toast.show({
+      title: 'Предоплата внесена',
+      description: 'Вы записаны — ждём вас',
+      type: 'success',
+    })
+    router.replace('/bookings', { scroll: false })
+  }, [])
 
   return (
     <main className={styles.page}>

@@ -1,0 +1,118 @@
+.page {
+  padding: var(--space-8) 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.place {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.placeName {
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.placeMeta,
+.text,
+.amountNote {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-fill);
+  text-align: center;
+}
+
+.amountLabel {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+
+.amountValue {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.state button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.stateIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.stateIcon[data-tone="success"] {
+  color: var(--color-success);
+}
+
+.stateIcon[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.stateTitle,
+.title {
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.testBadge {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-body);
+}
+
+.link {
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
+}
