@@ -38,6 +38,7 @@ export const UpcomingBooking = ({
 }: UpcomingBookingProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMoving, setIsMoving] = useState(false)
+  const [isTicketOpen, setIsTicketOpen] = useState(false)
 
   const handleCancel = () => {
     setIsMenuOpen(false)
@@ -50,18 +51,16 @@ export const UpcomingBooking = ({
       <Ticket
         booking={booking}
         onCodeClick={onCodeClick}
-        footer={
-          <div className={styles.actions}>
-            <TicketViewer booking={booking} />
-            <button
-              type='button'
-              className={styles.more}
-              aria-label='Ещё'
-              onClick={() => setIsMenuOpen(true)}
-            >
-              <DotsThree weight='bold' aria-hidden />
-            </button>
-          </div>
+        onOpen={() => setIsTicketOpen(true)}
+        headerAction={
+          <button
+            type='button'
+            className={styles.more}
+            aria-label='Ещё'
+            onClick={() => setIsMenuOpen(true)}
+          >
+            <DotsThree weight='bold' aria-hidden />
+          </button>
         }
       />
       {isMenuOpen && (
@@ -121,6 +120,7 @@ export const UpcomingBooking = ({
           </div>
         </Sheet>
       )}
+      {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}
       {isMoving && (
         <RescheduleSheet
           booking={booking}

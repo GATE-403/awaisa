@@ -1,9 +1,9 @@
 .picker {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-2);
   margin: 0;
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: none;
 }
 
@@ -20,7 +20,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   cursor: pointer;
 }
 
@@ -40,9 +40,9 @@
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  max-width: 96px;
-  aspect-ratio: 3 / 4;
-  padding: 18% 14% 0;
+  max-width: 88px;
+  aspect-ratio: 16 / 10;
+  padding: 12% 12% 0;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--preview-page);
@@ -67,11 +67,11 @@
 .window {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   height: 100%;
-  padding: 12% 12% 0;
-  border-radius: 8px 8px 0 0;
+  padding: 10% 12% 0;
+  border-radius: 6px 6px 0 0;
   background: var(--preview-card);
 }
 
@@ -80,7 +80,7 @@
 }
 
 .line {
-  height: 5px;
+  height: 4px;
   border-radius: var(--radius-full);
   background: var(--preview-ink);
 }
@@ -94,8 +94,8 @@
 }
 
 .pill {
-  width: 45%;
-  height: 9px;
+  width: 40%;
+  height: 7px;
   margin-top: auto;
   margin-bottom: 14%;
   border-radius: var(--radius-full);
@@ -108,7 +108,7 @@
 
 .option:has(:checked) .preview {
   box-shadow:
-    0 0 0 2px var(--color-surface),
+    0 0 0 2px var(--color-sheet-surface),
     0 0 0 4px var(--color-primary);
 }
 
@@ -117,29 +117,12 @@
 }
 
 .label {
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-medium);
 }
 
-/* The iOS check under the chosen look: an empty ring for the others. */
-.check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
-  box-shadow: inset 0 0 0 1.5px var(--color-tertiary-foreground);
-  color: transparent;
-}
-
-.check svg {
-  width: 13px;
-  height: 13px;
-}
-
-.option:has(:checked) .check {
-  background: var(--color-primary);
-  box-shadow: none;
-  color: var(--color-primary-foreground);
+.option:has(:checked) .label {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }

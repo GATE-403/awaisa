@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { type CSSProperties, useId } from 'react'
 import styles from './SegmentedControl.module.css'
 
 type Segment<Value extends string> = { value: Value; label: string }
@@ -12,8 +12,8 @@ interface SegmentedControlProps<Value extends string> {
   onChange: (value: Value) => void
 }
 
-// The macOS 26 segmented control: a 5% track, the chosen segment filled with the accent.
-// Native radios underneath give arrow keys and focus for free.
+// The macOS 26 segmented control: a capsule track, equal segments and a raised knob that slides
+// to the chosen one. Native radios underneath give arrow keys and focus for free.
 export const SegmentedControl = <Value extends string>({
   label,
   value,
@@ -21,10 +21,18 @@ export const SegmentedControl = <Value extends string>({
   onChange,
 }: SegmentedControlProps<Value>) => {
   const name = useId()
+  const index = Math.max(
+    0,
+    items.findIndex((item) => item.value === value),
+  )
 
   return (
-    <fieldset className={styles.control}>
+    <fieldset
+      className={styles.control}
+      style={{ '--count': items.length, '--index': index } as CSSProperties}
+    >
       <legend className={styles.legend}>{label}</legend>
+      <span className={styles.knob} aria-hidden='true' />
       {items.map((item) => (
         <label key={item.value} className={styles.segment}>
           <input
