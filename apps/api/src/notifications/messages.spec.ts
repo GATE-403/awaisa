@@ -1,4 +1,9 @@
-import { confirmationMessage, otpMessage, reminderMessage } from './messages.js'
+import {
+  confirmationMessage,
+  otpMessage,
+  reminderMessage,
+  waitlistFreedMessage,
+} from './messages.js'
 
 const booking = {
   business: { name: 'Awaisa Studio', slug: 'awaisa-studio' },
@@ -21,5 +26,19 @@ describe('SMS messages', () => {
 
   it('reminder fits in two SMS segments', () => {
     expect(reminderMessage(booking).length).toBeLessThanOrEqual(134)
+  })
+
+  it('waitlist SMS names the freed time and links to it', () => {
+    expect(
+      waitlistFreedMessage(
+        'Awaisa Studio',
+        'Женская стрижка',
+        '2026-11-12',
+        '15:30',
+        'https://a.kg/x',
+      ),
+    ).toBe(
+      'Awaisa Studio: освободилось время — Женская стрижка, 12 ноября в 15:30. Успейте записаться: https://a.kg/x',
+    )
   })
 })

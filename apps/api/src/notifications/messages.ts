@@ -52,12 +52,23 @@ const reviewRequestMessage = (businessName: string, link: string) =>
 const masterInviteMessage = (businessName: string, link: string) =>
   `${businessName}: вам открыт «Мой день» — ваши записи и клиенты. Войдите по этому номеру: ${link}`
 
+// The waitlist: a time opened up on the day the client wanted; the link opens it in the form.
+const waitlistFreedMessage = (
+  businessName: string,
+  serviceName: string,
+  date: string,
+  time: string,
+  link: string,
+) =>
+  `${businessName}: освободилось время — ${serviceName}, ${formatDate(date)} в ${time}. Успейте записаться: ${link}`
+
 export type { BookingMessageInput }
 export {
   confirmationMessage,
   masterInviteMessage,
   otpMessage,
   reminderMessage,
+  waitlistFreedMessage,
   rescheduleMessage,
   reviewRequestMessage,
   salonCancellationMessage,

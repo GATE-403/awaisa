@@ -3,6 +3,7 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import NextLink from 'next/link'
+import { WaitlistList } from '@/features/waitlist'
 import type { Booking } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
@@ -34,6 +35,9 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
         <AccountCard />
 
         {!isReady && <Skeleton className={styles.skeleton} />}
+
+        {/* Waiting for a time comes before the empty state, after real visits otherwise. */}
+        {isReady && bookings.length === 0 && <WaitlistList />}
 
         {isReady && bookings.length === 0 && (
           <div className={styles.empty}>
@@ -68,6 +72,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
             </div>
           </section>
         )}
+
+        {bookings.length > 0 && <WaitlistList />}
 
         {history.length > 0 && (
           <section className={styles.section} aria-labelledby='history-title'>

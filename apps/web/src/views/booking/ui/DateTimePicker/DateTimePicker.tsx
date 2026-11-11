@@ -1,6 +1,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
+import type { ReactNode } from 'react'
 import type { BookingDay } from '@/entities/booking'
 import type { TimeSlot } from '@/shared/api/types'
 import styles from './DateTimePicker.module.css'
@@ -16,6 +17,8 @@ interface DateTimePickerProps {
   onRetry: () => void
   onDayChange: (dayKey: string) => void
   onTimeChange: (time: string) => void
+  /** Offered on a full day, e.g. «Сообщить, когда освободится» (views pass features in). */
+  fullDayAction?: ReactNode
 }
 
 const toSingleValue = (values: string[], onChange: (value: string) => void) => {
@@ -43,6 +46,7 @@ export const DateTimePicker = ({
   onRetry,
   onDayChange,
   onTimeChange,
+  fullDayAction,
 }: DateTimePickerProps) => {
   const availableCount = slots.filter((slot) => slot.isAvailable).length
 
@@ -84,7 +88,10 @@ export const DateTimePicker = ({
         </div>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount === 0 && (
-        <p className={styles.hint}>На этот день свободного времени нет — выберите другой</p>
+        <div className={styles.full}>
+          <p className={styles.hint}>На этот день свободного времени нет — выберите другой</p>
+          {fullDayAction}
+        </div>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup

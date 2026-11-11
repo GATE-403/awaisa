@@ -20,6 +20,7 @@ import {
   formatPrice,
   getSpecialistLabel,
 } from '@/entities/booking'
+import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
@@ -197,6 +198,17 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                 isSpecialistSelected={Boolean(form.specialistId)}
                 onDayChange={form.selectDay}
                 onTimeChange={form.selectTime}
+                fullDayAction={
+                  form.serviceId && form.specialistId && form.dayKey ? (
+                    <WaitlistJoin
+                      serviceId={form.serviceId}
+                      specialistId={form.specialistId}
+                      branchId={form.branchId ?? undefined}
+                      date={form.dayKey}
+                      dayLabel={formatDayLong(form.dayKey)}
+                    />
+                  ) : null
+                }
               />
             </BookingStep>
 
