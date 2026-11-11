@@ -93,13 +93,10 @@ test.describe('User flow: booking', () => {
     }
     await expect(ticketSheet).toHaveCount(0)
 
-    // Cancelling is immediate (from the ticket's «Ещё» sheet); «Вернуть» in the toast undoes it.
+    // Cancelling is immediate (from the pass's «⋯» menu); «Вернуть» in the toast undoes it.
     const cancelFromMenu = async () => {
       await ticket.getByRole('button', { name: 'Ещё' }).click()
-      await page
-        .getByRole('dialog', { name: 'Запись' })
-        .getByRole('button', { name: 'Отменить запись' })
-        .click()
+      await page.getByRole('menuitem', { name: 'Отменить запись' }).click()
     }
     await cancelFromMenu()
     await expect(ticket.getByText('Отменена')).toBeVisible()

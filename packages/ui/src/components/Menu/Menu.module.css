@@ -1,0 +1,75 @@
+.positioner {
+  z-index: 70;
+  outline: none;
+}
+
+/* Solid and lifted: a menu over busy content must stay readable. */
+.popup {
+  min-width: 220px;
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-lg);
+  outline: none;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    scale var(--duration-normal) var(--ease-spring);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  scale: 0.9;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--color-foreground);
+  font-size: var(--text-md);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.item[data-variant="danger"] {
+  color: var(--color-danger-text);
+}
+
+.item[data-highlighted] {
+  background: var(--color-fill);
+}
+
+.item[data-disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.icon {
+  display: inline-flex;
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.separator {
+  height: 0.5px;
+  margin: 4px var(--space-3);
+  background: var(--color-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup {
+    transition: none;
+  }
+}

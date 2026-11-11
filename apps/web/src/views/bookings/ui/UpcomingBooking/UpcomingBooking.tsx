@@ -1,11 +1,12 @@
 'use client'
 
+import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import {
   ArrowsClockwise,
   CalendarPlus,
-  CaretRight,
   DotsThree,
   MapPin,
+  XCircle,
 } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { downloadCalendarFile, getDateParts, parseBookings, readRaw } from '@/entities/booking'
@@ -13,8 +14,6 @@ import { WalletButton } from '@/features/addToWallet'
 import { RescheduleSheet } from '@/features/rescheduleBooking'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
-import { Sheet } from '@/shared/ui/Sheet/Sheet'
-import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './UpcomingBooking.module.css'
 
 interface UpcomingBookingProps {
@@ -26,7 +25,7 @@ interface UpcomingBookingProps {
 }
 
 // Upcoming visits as compact passes, not full tickets: the list stays short; the ticket with
-// every detail opens on tap, rarer actions wait behind «Ещё».
+// every detail opens on tap, rarer actions wait in the «⋯» pull-down menu.
 export const UpcomingBooking = ({
   booking,
   countdown,
@@ -34,16 +33,10 @@ export const UpcomingBooking = ({
   onCancel,
   onMoved,
 }: UpcomingBookingProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isMoving, setIsMoving] = useState(false)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const { day, month } = getDateParts(booking.date)
   const code = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase()
-
-  const handleCancel = () => {
-    setIsMenuOpen(false)
-    onCancel()
-  }
 
   return (
     <div className={styles.item}>
@@ -71,14 +64,26 @@ export const UpcomingBooking = ({
             {booking.specialistName} · {booking.business.name}
           </span>
         </span>
-        <button
-          type='button'
-          className={styles.more}
-          aria-label='Ещё'
-          onClick={() => setIsMenuOpen(true)}
-        >
-          <DotsThree weight='bold' aria-hidden />
-        </button>
+        <Menu label='Ещё' className={styles.more} trigger={<DotsThree weight='bold' aria-hidden />}>
+          {booking.business.mapUrl && (
+            <MenuItem
+              icon={<MapPin aria-hidden />}
+              onClick={() => window.open(booking.business.mapUrl ?? '', '_blank', 'noreferrer')}
+            >
+              Маршрут
+            </MenuItem>
+          )}
+          {booking.status === 'confirmed' && (
+            <MenuItem
+              variant='danger'
+              icon={<XCircle aria-hidden />}
+              disabled={isCancelling}
+              onClick={onCancel}
+            >
+              {isCancelling ? 'Отменяем…' : 'Отменить запись'}
+            </MenuItem>
+          )}
+        </Menu>
         {booking.status === 'confirmed' && (
           <span className={styles.links}>
             <button type='button' className={styles.link} onClick={() => setIsMoving(true)}>
@@ -95,40 +100,13 @@ export const UpcomingBooking = ({
           </span>
         )}
       </article>
-      {isMenuOpen && (
-        <Sheet title='Запись' cancelLabel='Готово' onClose={() => setIsMenuOpen(false)}>
-          <div className={styles.wallet}>
-            <WalletButton bookingId={booking.id} />
-          </div>
-          <div className={sheet.list}>
-            {booking.business.mapUrl && (
-              <a
-                href={booking.business.mapUrl}
-                target='_blank'
-                rel='noreferrer'
-                className={sheet.row}
-              >
-                <span className={styles.rowLabel}>
-                  <MapPin weight='regular' aria-hidden />
-                  Маршрут
-                </span>
-                <CaretRight weight='bold' aria-hidden className={styles.chevron} />
-              </a>
-            )}
-          </div>
-          <div className={sheet.list}>
-            <button
-              type='button'
-              className={sheet.danger}
-              disabled={isCancelling}
-              onClick={handleCancel}
-            >
-              {isCancelling ? 'Отменяем…' : 'Отменить запись'}
-            </button>
-          </div>
-        </Sheet>
+      {isTicketOpen && (
+        <TicketViewer
+          booking={booking}
+          onClose={() => setIsTicketOpen(false)}
+          extra={<WalletButton bookingId={booking.id} />}
+        />
       )}
-      {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}
       {isMoving && (
         <RescheduleSheet
           booking={booking}

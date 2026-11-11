@@ -59,7 +59,7 @@ test.describe('Client reschedules a visit', () => {
     await page.getByRole('button', { name: 'Перенести', exact: true }).first().click()
 
     const sheet = page.getByRole('dialog', { name: 'Перенести запись' })
-    await expect(sheet).toContainText(`Сейчас:`)
+    await expect(sheet).toContainText('Сейчас')
     const time = sheet.getByRole('group', { name: 'Время' }).getByRole('button').first()
     await time.click()
     const newTime = (await time.textContent())?.trim() ?? ''
