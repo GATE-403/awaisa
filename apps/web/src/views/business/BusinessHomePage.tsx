@@ -5,7 +5,7 @@ import { PhotosSection } from '@/views/business/ui/Place/PhotosSection'
 import styles from '@/views/business/ui/Place/Place.module.css'
 import { PlaceHeader } from '@/views/business/ui/Place/PlaceHeader'
 import { ReviewsSection } from '@/views/business/ui/Place/ReviewsSection'
-import { ServicesSection } from '@/views/business/ui/Place/ServicesSection'
+import { ServicesBrowser } from '@/views/business/ui/Place/ServicesBrowser'
 import { VisitSection } from '@/views/business/ui/Place/VisitSection'
 
 interface BusinessHomePageProps {
@@ -21,7 +21,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
       <PlaceHeader business={business} catalog={catalog} reviews={reviews} />
       <div className={styles.body}>
         <div className={styles.main}>
-          <ServicesSection business={business} catalog={catalog} />
+          <ServicesBrowser business={business} catalog={catalog} />
           <MastersSection business={business} specialists={catalog.specialists} />
           <ReviewsSection business={business} reviews={reviews} />
           <PhotosSection business={business} />

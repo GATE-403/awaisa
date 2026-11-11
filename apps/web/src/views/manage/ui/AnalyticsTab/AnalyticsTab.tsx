@@ -31,7 +31,40 @@ interface StatProps {
   label: string
   value: string
   delta?: number | null
+  /** The same measure per day: a sparkline under the value. */
+  trend?: number[]
   children?: React.ReactNode
+}
+
+interface SparklineProps {
+  values: number[]
+}
+
+// One series, no axis: the shape of the period under a number (the number carries the value).
+const Sparkline = ({ values }: SparklineProps) => {
+  if (values.length < 2) return null
+  const max = Math.max(...values, 1)
+  const points = values.map((value, index) => [
+    (index / (values.length - 1)) * 100,
+    26 - (value / max) * 22,
+  ])
+  const last = points.at(-1) ?? [0, 0]
+
+  return (
+    <svg
+      className={styles.sparkline}
+      viewBox='0 0 100 30'
+      preserveAspectRatio='none'
+      aria-hidden='true'
+    >
+      <polyline
+        points={points.map(([x, y]) => `${x},${y}`).join(' ')}
+        fill='none'
+        vectorEffect='non-scaling-stroke'
+      />
+      <circle cx={last[0]} cy={last[1]} r='3' vectorEffect='non-scaling-stroke' />
+    </svg>
+  )
 }
 
 const PERIODS: { value: `${AnalyticsDays}`; label: string }[] = [
@@ -56,7 +89,7 @@ const Delta = ({ value }: DeltaProps) => {
   const Icon = value >= 0 ? ArrowUpRight : ArrowDownRight
 
   return (
-    <span className={styles.delta} data-direction={value >= 0 ? 'up' : 'down'}>
+    <span className={styles.delta} data-direction={value > 0 ? 'up' : value < 0 ? 'down' : 'flat'}>
       <Icon weight='bold' aria-hidden='true' className={styles.deltaIcon} />
       {value > 0 ? '+' : value < 0 ? '−' : ''}
       {Math.abs(value)}%
@@ -64,11 +97,14 @@ const Delta = ({ value }: DeltaProps) => {
   )
 }
 
-const Stat = ({ label, value, delta, children }: StatProps) => (
+const Stat = ({ label, value, delta, trend, children }: StatProps) => (
   <div className={styles.stat}>
-    <span className={styles.statLabel}>{label}</span>
+    <span className={styles.statHead}>
+      <span className={styles.statLabel}>{label}</span>
+      {delta !== undefined && delta !== null && <Delta value={delta} />}
+    </span>
     <span className={styles.statValue}>{value}</span>
-    {delta !== undefined && delta !== null && <Delta value={delta} />}
+    {trend && <Sparkline values={trend} />}
     {children}
   </div>
 )
@@ -159,24 +195,29 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
       {report && totals && !isEmpty && (
         <div className={styles.report} data-loading={isLoading || undefined} aria-busy={isLoading}>
           <article className={styles.hero}>
-            <div className={styles.heroHead}>
-              <span className={styles.statLabel}>Выручка</span>
-              <span className={styles.heroValue}>{formatMoney(totals.revenue)}</span>
-              <span className={styles.heroMeta}>
-                <Delta value={totals.revenueChange} />
-                {totals.revenueChange !== null && (
-                  <span className={styles.muted}> к {PREVIOUS[report.period.days]}</span>
+            <div className={styles.heroTop}>
+              <div className={styles.heroHead}>
+                <span className={styles.heroLabel}>Выручка</span>
+                <span className={styles.heroValue}>{formatMoney(totals.revenue)}</span>
+                <span className={styles.heroMeta}>
+                  <Delta value={totals.revenueChange} />
+                  {totals.revenueChange !== null && (
+                    <span className={styles.muted}>к {PREVIOUS[report.period.days]}</span>
+                  )}
+                </span>
+              </div>
+              <div className={styles.heroSide}>
+                {totals.upcomingVisits > 0 && (
+                  <div className={styles.ahead}>
+                    <span className={styles.heroLabel}>Впереди</span>
+                    <span className={styles.aheadValue}>{formatMoney(totals.upcomingRevenue)}</span>
+                    <span className={styles.muted}>{visits(totals.upcomingVisits)} записано</span>
+                  </div>
                 )}
-              </span>
+                <PaymentsLine payments={totals.payments} />
+              </div>
             </div>
             <RevenueChart buckets={toBuckets(report.daily, report.period.days)} />
-            <PaymentsLine payments={totals.payments} />
-            {totals.upcomingVisits > 0 && (
-              <p className={styles.heroFooter}>
-                Впереди {visits(totals.upcomingVisits)} на{' '}
-                <strong>{formatMoney(totals.upcomingRevenue)}</strong>
-              </p>
-            )}
           </article>
 
           <div className={styles.stats}>
@@ -184,11 +225,13 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
               label='Визиты'
               value={numberFormatter.format(totals.visits)}
               delta={totals.visitsChange}
+              trend={report.daily.map((day) => day.visits)}
             />
             <Stat
               label='Средний чек'
               value={formatMoney(totals.averageCheck)}
               delta={totals.averageCheckChange}
+              trend={report.daily.map((day) => (day.visits === 0 ? 0 : day.revenue / day.visits))}
             />
             <Stat label='Клиенты' value={numberFormatter.format(totals.clients)}>
               <ClientsSplit newClients={totals.newClients} returning={totals.returningClients} />
@@ -202,54 +245,54 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             </Stat>
           </div>
 
-          <div className={forms.group}>
-            <h3 className={forms.groupTitle}>Услуги</h3>
-            {report.services.length === 0 ? (
-              <p className={forms.groupEmpty}>
-                Здесь появятся услуги, которые приносят больше всего.
-              </p>
-            ) : (
-              <ol className={forms.list}>
-                {report.services.map((service) => (
-                  <li key={service.id} className={styles.row}>
+          <div className={styles.pairs}>
+            <div className={forms.group}>
+              <h3 className={forms.groupTitle}>Услуги</h3>
+              {report.services.length === 0 ? (
+                <p className={forms.groupEmpty}>
+                  Здесь появятся услуги, которые приносят больше всего.
+                </p>
+              ) : (
+                <ol className={forms.list}>
+                  {report.services.map((service) => (
+                    <li key={service.id} className={styles.row}>
+                      <span className={styles.rowText}>
+                        <span className={styles.rowTitle}>{service.name}</span>
+                        <span className={styles.rowMeta}>{visits(service.visits)}</span>
+                      </span>
+                      <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
+                      <span className={styles.meter} aria-hidden='true'>
+                        <span style={{ width: `${(service.revenue / servicesRevenue) * 100}%` }} />
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+
+            <div className={forms.group}>
+              <h3 className={forms.groupTitle}>Мастера</h3>
+              <ul className={forms.list}>
+                {report.masters.map((master) => (
+                  <li key={master.id} className={styles.row}>
                     <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>{service.name}</span>
-                      <span className={styles.rowMeta}>{visits(service.visits)}</span>
+                      <span className={styles.rowTitle}>{master.name}</span>
+                      <span className={styles.rowMeta}>
+                        {visits(master.visits)} · {formatMoney(master.revenue)}
+                      </span>
                     </span>
-                    <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
-                    <span className={styles.meter} aria-hidden='true'>
-                      <span style={{ width: `${(service.revenue / servicesRevenue) * 100}%` }} />
+                    <span className={styles.rowValue}>
+                      {master.load}%<span className={styles.srOnly}> загрузки</span>
+                    </span>
+                    <span className={styles.meter} data-tone='load' aria-hidden='true'>
+                      <span style={{ width: `${master.load}%` }} />
                     </span>
                   </li>
                 ))}
-              </ol>
-            )}
+              </ul>
+              <p className={styles.groupFooter}>Загрузка — доля рабочих часов, занятых визитами.</p>
+            </div>
           </div>
-
-          <div className={forms.group}>
-            <h3 className={forms.groupTitle}>Мастера</h3>
-            <ul className={forms.list}>
-              {report.masters.map((master) => (
-                <li key={master.id} className={styles.row}>
-                  <span className={styles.rowText}>
-                    <span className={styles.rowTitle}>{master.name}</span>
-                    <span className={styles.rowMeta}>
-                      {visits(master.visits)} · {formatMoney(master.revenue)}
-                    </span>
-                  </span>
-                  <span className={styles.rowValue}>
-                    {master.load}%<span className={styles.srOnly}> загрузки</span>
-                  </span>
-                  <span className={styles.meter} data-tone='load' aria-hidden='true'>
-                    <span style={{ width: `${master.load}%` }} />
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className={styles.groupFooter}>Загрузка — доля рабочих часов, занятых визитами.</p>
-          </div>
-
-          <PayrollGroup masters={report.masters} />
 
           <div className={forms.group}>
             <h3 className={forms.groupTitle}>Загрузка по часам</h3>
@@ -258,37 +301,42 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             </div>
           </div>
 
-          <div className={forms.group}>
-            <h3 className={forms.groupTitle}>
-              Клиенты <span className={forms.groupCount}>{report.clients.length}</span>
-            </h3>
-            {report.clients.length === 0 ? (
-              <p className={forms.groupEmpty}>Здесь появятся клиенты, которые пришли за период.</p>
-            ) : (
-              <ul className={forms.list}>
-                {report.clients.map((client) => (
-                  <li key={client.phone}>
-                    <button
-                      type='button'
-                      className={styles.clientRow}
-                      onClick={() => setOpenPhone(client.phone)}
-                    >
-                      <span className={styles.rowText}>
-                        <span className={styles.rowTitle}>
-                          {client.name || formatPhone(client.phone)}
-                          {client.isNew && <span className={styles.badge}>Новый</span>}
+          <div className={styles.pairs}>
+            <PayrollGroup masters={report.masters} />
+            <div className={forms.group}>
+              <h3 className={forms.groupTitle}>
+                Клиенты <span className={forms.groupCount}>{report.clients.length}</span>
+              </h3>
+              {report.clients.length === 0 ? (
+                <p className={forms.groupEmpty}>
+                  Здесь появятся клиенты, которые пришли за период.
+                </p>
+              ) : (
+                <ul className={forms.list}>
+                  {report.clients.map((client) => (
+                    <li key={client.phone}>
+                      <button
+                        type='button'
+                        className={styles.clientRow}
+                        onClick={() => setOpenPhone(client.phone)}
+                      >
+                        <span className={styles.rowText}>
+                          <span className={styles.rowTitle}>
+                            {client.name || formatPhone(client.phone)}
+                            {client.isNew && <span className={styles.badge}>Новый</span>}
+                          </span>
+                          <span className={styles.rowMeta}>
+                            {formatPhone(client.phone)} · {visits(client.visits)} · был{' '}
+                            {formatDay(client.lastVisit)}
+                          </span>
                         </span>
-                        <span className={styles.rowMeta}>
-                          {formatPhone(client.phone)} · {visits(client.visits)} · был{' '}
-                          {formatDay(client.lastVisit)}
-                        </span>
-                      </span>
-                      <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                        <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -355,16 +403,23 @@ const PaymentsLine = ({ payments }: PaymentsLineProps) => {
     { label: 'Не отмечено', value: payments.unmarked },
   ].filter((part) => part.value > 0)
   if (parts.length === 0) return null
+  const total = parts.reduce((sum, part) => sum + part.value, 0)
 
   return (
-    <dl className={styles.payments}>
-      {parts.map((part) => (
-        <div key={part.label} className={styles.payment}>
-          <dt>{part.label}</dt>
-          <dd>{formatMoney(part.value)}</dd>
-        </div>
-      ))}
-    </dl>
+    <div className={styles.payments}>
+      <span className={styles.heroLabel}>Как платили</span>
+      <dl className={styles.paymentList}>
+        {parts.map((part) => (
+          <div key={part.label} className={styles.payment}>
+            <dt>{part.label}</dt>
+            <dd>{formatMoney(part.value)}</dd>
+            <span className={styles.paymentMeter} aria-hidden='true'>
+              <span style={{ width: `${(part.value / total) * 100}%` }} />
+            </span>
+          </div>
+        ))}
+      </dl>
+    </div>
   )
 }
 

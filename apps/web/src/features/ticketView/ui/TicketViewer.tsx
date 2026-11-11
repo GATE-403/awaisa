@@ -2,7 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { DownloadSimple, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
+import { DownloadSimple } from '@phosphor-icons/react/ssr'
 import { useRef, useState } from 'react'
 import { Ticket } from '@/entities/booking'
 import type { Booking } from '@/shared/api/types'
@@ -12,16 +12,16 @@ import styles from './TicketViewer.module.css'
 
 interface TicketViewerProps {
   booking: Booking
+  onClose: () => void
 }
 
 const toFileName = (booking: Booking) =>
   `talon-${booking.business.slug}-${booking.date}-${booking.time.replace(':', '')}.png`
 
 // Like showing a ticket at the door: only the ticket, large and bright, and a way to keep it.
-export const TicketViewer = ({ booking }: TicketViewerProps) => {
+export const TicketViewer = ({ booking, onClose }: TicketViewerProps) => {
   const toast = useToast()
   const ticketRef = useRef<HTMLDivElement>(null)
-  const [isOpen, setIsOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   const download = async () => {
@@ -58,34 +58,26 @@ export const TicketViewer = ({ booking }: TicketViewerProps) => {
   }
 
   return (
-    <>
-      <Button variant='secondary' size='sm' onClick={() => setIsOpen(true)}>
-        <TicketIcon weight='bold' aria-hidden />
-        Показать талон
-      </Button>
-      {isOpen && (
-        <Sheet
-          title='Талон'
-          cancelLabel='Закрыть'
-          onClose={() => setIsOpen(false)}
-          action={{
-            label: isSaving ? 'Сохраняем…' : 'Скачать',
-            onClick: download,
-            disabled: isSaving,
-          }}
-        >
-          <div className={styles.stage}>
-            <div ref={ticketRef} className={styles.ticket}>
-              <Ticket booking={booking} />
-            </div>
-            <p className={styles.hint}>Покажите талон администратору или сохраните картинкой.</p>
-            <Button variant='outline' onClick={download} disabled={isSaving}>
-              <DownloadSimple weight='bold' aria-hidden />
-              {isSaving ? 'Сохраняем…' : 'Скачать картинкой'}
-            </Button>
-          </div>
-        </Sheet>
-      )}
-    </>
+    <Sheet
+      title='Талон'
+      cancelLabel='Закрыть'
+      onClose={onClose}
+      action={{
+        label: isSaving ? 'Сохраняем…' : 'Скачать',
+        onClick: download,
+        disabled: isSaving,
+      }}
+    >
+      <div className={styles.stage}>
+        <div ref={ticketRef} className={styles.ticket}>
+          <Ticket booking={booking} />
+        </div>
+        <p className={styles.hint}>Покажите талон администратору или сохраните картинкой.</p>
+        <Button variant='outline' onClick={download} disabled={isSaving}>
+          <DownloadSimple weight='bold' aria-hidden />
+          {isSaving ? 'Сохраняем…' : 'Скачать картинкой'}
+        </Button>
+      </div>
+    </Sheet>
   )
 }

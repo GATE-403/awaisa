@@ -261,3 +261,42 @@ button.code {
     display: none;
   }
 }
+
+.open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.open:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+/* The ticket's own controls stay above the stretched button. */
+.code,
+.headerAction {
+  position: relative;
+  z-index: 2;
+}
+
+.headerAction {
+  margin-left: auto;
+}
+
+.wrap[data-interactive] {
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.wrap[data-interactive]:has(.open:active) {
+  scale: 0.985;
+}
+
+@media (hover: hover) {
+  .wrap[data-interactive]:has(.open:hover) {
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.05)) drop-shadow(0 14px 32px rgb(0 0 0 / 0.14));
+  }
+}

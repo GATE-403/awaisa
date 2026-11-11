@@ -61,10 +61,17 @@
 
 .body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: var(--space-6);
+  min-height: 0;
   overflow-y: auto;
   padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+/* Groups keep their height and the body scrolls; otherwise clipped lists squeeze their rows. */
+.body > * {
+  flex-shrink: 0;
 }
 
 /* Inset grouped section used inside sheets. */
@@ -144,6 +151,23 @@
   padding: 0 var(--space-4);
 }
 
+/* Rows that are buttons or links look like the rest: no native button chrome. */
+.row:is(button, a) {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.row:is(button, a):focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
 .rowLabel {
   flex-shrink: 0;
 }
@@ -219,6 +243,7 @@
 
 @media (hover: hover) {
   .checkRow:hover,
+  .row:is(button, a):hover,
   .danger:hover {
     background: color-mix(in srgb, var(--color-sheet-surface) 95%, var(--color-foreground));
   }

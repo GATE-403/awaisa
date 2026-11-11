@@ -1,6 +1,5 @@
 'use client'
 
-import { Check } from '@phosphor-icons/react/ssr'
 import { useId } from 'react'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
 import type { Theme } from '@/shared/lib/theme'
@@ -12,7 +11,7 @@ const OPTIONS: { value: Theme; label: string }[] = [
   { value: 'system', label: 'Авто' },
 ]
 
-// iOS Settings › Display: a little picture of each look with a check under the chosen one.
+// iOS Settings › Display, compact: a small picture of each look, the chosen one ringed in the accent.
 // Native radios underneath give arrow keys and focus.
 export const AppearancePicker = () => {
   const { theme, setTheme } = useTheme()
@@ -39,9 +38,6 @@ export const AppearancePicker = () => {
             </span>
           </span>
           <span className={styles.label}>{label}</span>
-          <span className={styles.check} aria-hidden='true'>
-            <Check weight='bold' />
-          </span>
         </label>
       ))}
     </fieldset>

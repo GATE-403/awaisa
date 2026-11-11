@@ -24,7 +24,6 @@
 }
 
 /* The hero card: the one number the tab leads with, then its chart. */
-.hero,
 .card {
   display: flex;
   flex-direction: column;
@@ -524,29 +523,190 @@
   }
 }
 
-.payments {
+/* Weight: the hero leads with a display-size figure, a tinted change pill and a side column. */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.heroTop {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .heroTop {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+
+.heroLabel {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.heroValue {
+  font-family: var(--font-display);
+}
+
+@media (min-width: 768px) {
+  .heroValue {
+    font-size: var(--text-display);
+    line-height: var(--text-display-line-height);
+  }
+}
+
+.heroMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-6);
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.heroSide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-fill);
+}
+
+.ahead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--text-footnote);
+}
+
+.aheadValue {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.payments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.paymentList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   margin: 0;
-  padding-top: var(--space-3);
-  border-top: 0.5px solid var(--color-border);
 }
 
 .payment {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px var(--space-2);
+  font-size: var(--text-footnote);
 }
 
 .payment dt {
   color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-caption);
 }
 
 .payment dd {
   margin: 0;
-  font-size: var(--text-sm);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
+}
+
+.paymentMeter {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+}
+
+.paymentMeter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
+/* The change as a tinted capsule: arrow, sign and number, never colour alone. */
+.delta {
+  padding: 2px var(--space-2) 2px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.delta[data-direction="up"] {
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+}
+
+.delta[data-direction="down"] {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.stat {
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+}
+
+.statHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.sparkline {
+  width: 100%;
+  height: 30px;
+  overflow: visible;
+}
+
+.sparkline polyline {
+  stroke: var(--color-primary);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkline circle {
+  fill: var(--color-primary);
+  stroke: var(--color-surface);
+  stroke-width: 2px;
+}
+
+/* Pairs of sections side by side on wide screens. */
+.pairs {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .pairs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

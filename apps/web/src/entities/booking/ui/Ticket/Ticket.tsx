@@ -9,24 +9,44 @@ interface TicketProps {
   booking: Booking
   footer?: ReactNode
   onCodeClick?: (code: string) => void
+  /** Makes the whole ticket a button (e.g. show it full screen). */
+  onOpen?: () => void
+  /** A control in the top-right corner instead of the «Электронный талон» label. */
+  headerAction?: ReactNode
 }
 
 const getBookingCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
-export const Ticket = ({ booking, footer, onCodeClick }: TicketProps) => {
+export const Ticket = ({ booking, footer, onCodeClick, onOpen, headerAction }: TicketProps) => {
   const { day, month, weekday } = getDateParts(booking.date)
   const code = getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
 
   return (
-    <article className={styles.wrap} data-status={booking.status} aria-label={`Запись ${code}`}>
+    <article
+      className={styles.wrap}
+      data-status={booking.status}
+      data-interactive={onOpen ? '' : undefined}
+      aria-label={`Запись ${code}`}
+    >
       <div className={styles.ticket}>
+        {onOpen && (
+          // Stretched under the ticket's own controls: tapping anywhere else opens it.
+          <button
+            type='button'
+            className={styles.open}
+            onClick={onOpen}
+            aria-label='Показать талон'
+          />
+        )}
         <div className={styles.main}>
           <header className={styles.brand}>
             <Mascot className={styles.brandMark} />
             <span>{booking.business.name}</span>
             {isCancelled ? (
               <span className={styles.status}>Отменена</span>
+            ) : headerAction ? (
+              <span className={styles.headerAction}>{headerAction}</span>
             ) : (
               <span className={styles.kind}>Электронный талон</span>
             )}
