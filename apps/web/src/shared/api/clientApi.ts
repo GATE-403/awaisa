@@ -24,6 +24,7 @@ import type {
   Customer,
   JoinWaitlistInput,
   ManagedReview,
+  ManagedWaitlistEntry,
   MapPlace,
   MasterDay,
   MasterPlace,
@@ -385,7 +386,15 @@ const getMyWaitlist = (signal?: AbortSignal) => request<WaitlistEntry[]>('/me/wa
 const leaveMyWaitlist = (id: string) =>
   request<WaitlistEntry>(`/me/waitlist/${id}`, { method: 'DELETE' })
 
+const getManagedWaitlist = (slug: string, signal?: AbortSignal) =>
+  request<ManagedWaitlistEntry[]>(`${manage(slug)}/waitlist`, { signal })
+
+const removeManagedWaitlist = (slug: string, id: string) =>
+  request<void>(`${manage(slug)}/waitlist/${id}`, { method: 'DELETE' })
+
 export {
+  getManagedWaitlist,
+  removeManagedWaitlist,
   getMyWaitlist,
   getWaitlistEntry,
   joinWaitlist,

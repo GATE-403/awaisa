@@ -7,6 +7,7 @@ import { CatalogModule } from '../catalog/catalog.module.js'
 import { Service } from '../catalog/service.entity.js'
 import { Specialist } from '../catalog/specialist.entity.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
+import { ManageWaitlistController } from './manage-waitlist.controller.js'
 import { WaitlistController } from './waitlist.controller.js'
 import { WaitlistService } from './waitlist.service.js'
 import { WaitlistEntry } from './waitlist-entry.entity.js'
@@ -20,7 +21,7 @@ import { WaitlistEntry } from './waitlist-entry.entity.js'
     CatalogModule,
     NotificationsModule,
   ],
-  controllers: [WaitlistController],
+  controllers: [WaitlistController, ManageWaitlistController],
   providers: [WaitlistService],
 })
 export class WaitlistModule {}
