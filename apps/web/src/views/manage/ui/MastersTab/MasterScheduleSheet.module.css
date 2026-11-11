@@ -14,7 +14,7 @@
 
 .dayName {
   flex: 1 0 96px;
-  font-size: var(--text-md);
+  font-size: var(--text-body);
 }
 
 /* On narrow sheets the times wrap under the day instead of squeezing its name away. */
@@ -46,7 +46,7 @@
 }
 
 .leaveDates {
-  font-size: var(--text-md);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-medium);
 }
 
@@ -96,7 +96,7 @@
   background: var(--color-fill);
   color: var(--color-foreground);
   font: inherit;
-  font-size: var(--text-md);
+  font-size: var(--text-input);
 }
 
 .dateField input:focus-visible {

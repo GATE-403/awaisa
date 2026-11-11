@@ -22,8 +22,8 @@
 }
 
 .lead {
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
 }
 
 .phone {

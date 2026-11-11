@@ -1,6 +1,6 @@
 import { ToastProvider } from '@awaisa/ui/Toast'
 import type { Metadata, Viewport } from 'next'
-import { Inter, Onest } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import { Suspense } from 'react'
 import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
@@ -16,13 +16,6 @@ const inter = Inter({
   subsets: ['latin', 'cyrillic'],
   display: 'swap',
   variable: '--font-inter',
-})
-
-// Headings: Onest reads well in Cyrillic and Latin and has a calm, geometric character.
-const onest = Onest({
-  subsets: ['latin', 'cyrillic'],
-  display: 'swap',
-  variable: '--font-onest',
 })
 
 export const metadata: Metadata = {
@@ -44,7 +37,7 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
   // The boot script sets data-theme before hydration, so React must not compare that attribute.
   <html
     lang='ru'
-    className={`${inter.variable} ${onest.variable}`}
+    className={inter.variable}
     // Next turns smooth scrolling off while navigating, so a new page starts at the top at once.
     data-scroll-behavior='smooth'
     suppressHydrationWarning

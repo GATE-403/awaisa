@@ -23,11 +23,11 @@ import {
 import type { Business, Catalog } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
-import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
+import { BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
 import { DateTimePicker } from '@/views/booking/ui/DateTimePicker/DateTimePicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
 import styles from './BookingPage.module.css'
@@ -44,6 +44,7 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
   if (form.createdBooking) {
     return (
       <main>
+        <BookingTopBar business={business} />
         <Container size='md'>
           <BookingSuccess booking={form.createdBooking} />
         </Container>
@@ -70,10 +71,9 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
   return (
     <main className={styles.page}>
+      <BookingTopBar business={business} />
       <Container className={styles.layout}>
         <div className={styles.steps}>
-          <PageTitle title='Запись.' subtitle={business.name} />
-
           {form.branches.length > 1 && (
             <section className={styles.branches} aria-label='Филиал'>
               <ToggleGroup
