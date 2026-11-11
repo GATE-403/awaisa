@@ -161,8 +161,10 @@ export class AdminService {
     setTimeout(async () => {
       if ((await this.bookings.getStartsAt(id))?.getTime() !== movedTo) return
       if (await this.bookings.isCancelled(id)) return
-      const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
-      void this.sms.sendSafely(customerPhone, rescheduleMessage(view, webUrl))
+      void this.sms.sendSafely(
+        customerPhone,
+        rescheduleMessage(view, this.bookings.linkTo(view.id)),
+      )
     }, UNDO_WINDOW_SECONDS * 1000).unref()
 
     return { ...view, previous }

@@ -6,6 +6,7 @@ import type { Branch, BranchInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
+import { BookingLinks } from './BookingLinks'
 import { BranchDialog } from './BranchDialog'
 
 interface BranchesTabProps {
@@ -63,6 +64,8 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
       <p className={styles.listFooter}>
         Без метки филиал не виден на карте. Мастера без филиала принимают во всех.
       </p>
+
+      <BookingLinks slug={slug} branches={branches} />
 
       {editing && (
         <BranchDialog

@@ -53,7 +53,7 @@ test.describe('Platform: a new business goes live', () => {
 
     // A second address: the booking page then asks where.
     await page.getByRole('link', { name: 'Филиалы' }).click()
-    await expect(page.getByRole('button', { name: /Основной/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Основной/ })).toBeVisible()
     await page.getByRole('button', { name: 'Добавить филиал' }).click()
     const branchDialog = page.getByRole('dialog', { name: 'Новый филиал' })
     await branchDialog.getByLabel('Название').fill('Джал')

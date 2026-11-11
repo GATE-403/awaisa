@@ -7,7 +7,9 @@ import {
   findSpecialist,
   getSpecialistsForService,
   getUpcomingDays,
+  readContact,
   saveBooking,
+  saveContact,
   useAvailability,
 } from '@/entities/booking'
 import { findDay, weekdayOf } from '@/entities/business'
@@ -144,6 +146,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     contacts: firstIncompleteStep === null,
   }
 
+  // A returning guest: their name and number from last time, editable as usual.
+  useEffect(() => {
+    if (session.status !== 'guest') return
+    const stored = readContact()
+    if (!stored) return
+    setName((current) => current ?? stored.name)
+    setPhone((current) => current || stored.phone)
+  }, [session.status])
+
   // The shown time may be gone by now: say so and let the client pick another one.
   useEffect(() => {
     if (isPresetChecked || availability.isLoading || dayKey !== presetDate) return
@@ -263,6 +274,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         reminderMinutes,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
+      if (!accountPhone) saveContact({ name: name.trim(), phone: phone.trim() })
       setCreatedBooking(booking)
       clearDraft()
       haptic('success')
