@@ -19,6 +19,10 @@ export class Payment {
   @Column({ name: 'provider_ref', type: 'varchar', length: 128, nullable: true })
   providerRef: string | null
 
+  /** The acquirer's payment page (Freedom Pay), to return to it from our /pay page. */
+  @Column({ name: 'checkout_url', type: 'text', nullable: true })
+  checkoutUrl: string | null
+
   @Column({ type: 'varchar', length: 16, default: 'pending' })
   status: 'pending' | 'succeeded' | 'failed' | 'refunded'
 

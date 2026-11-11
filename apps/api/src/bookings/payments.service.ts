@@ -1,16 +1,31 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import type { Env } from '../config/env.js'
+import { PAYMENT_HOLD_MINUTES } from './booking-rules.js'
+import {
+  type FreedomPayParams,
+  freedomPayReply,
+  isFreedomPaySignature,
+  parseFreedomPayXml,
+  salt,
+  signFreedomPay,
+} from './freedompay.js'
 import { Payment } from './payment.entity.js'
 import { isPaymentSignature, paymentSignature } from './payment-signature.js'
 
 type Checkout = { paymentId: string; url: string }
 
-// Deposits go through one acquirer at a time (PAYMENT_DRIVER). `test` is built in: its checkout
-// is our own /pay page with a «pay» button, so the whole flow runs locally and in e2e.
-// A real acquirer adds a driver here: create its checkout, take its webhook, call its refund.
+type CheckoutDetails = { description: string; phone: string }
+
+// Freedom Pay calls this script with the result; its name takes part in the signatures.
+const RESULT_SCRIPT = 'result'
+
+// Deposits go through one acquirer at a time (PAYMENT_DRIVER):
+// · test — built in: the checkout is our own /pay page with a «pay» button (dev, e2e);
+// · freedompay — cards through Freedom Pay (init_payment.php → their page → result URL;
+//   the status is always confirmed with get_status3.php; refunds via revoke.php).
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name)
@@ -28,26 +43,62 @@ export class PaymentsService {
     return this.driver !== 'none'
   }
 
-  async createCheckout(bookingId: string, amount: number): Promise<Checkout> {
+  async createCheckout(
+    bookingId: string,
+    amount: number,
+    details: CheckoutDetails,
+  ): Promise<Checkout> {
     const payment = await this.payments.save(
       this.payments.create({ bookingId, amount, provider: this.driver }),
     )
+    if (this.driver !== 'freedompay')
+      return { paymentId: payment.id, url: this.payPagePath(payment.id) }
 
-    return { paymentId: payment.id, url: this.checkoutUrl(payment.id) }
+    const web = this.config.get('PUBLIC_WEB_URL', { infer: true })
+    const back = `${web}${this.payPagePath(payment.id)}`
+    const response = await this.callFreedomPay('init_payment.php', {
+      pg_order_id: payment.id,
+      pg_amount: String(amount),
+      pg_currency: this.config.get('FREEDOMPAY_CURRENCY', { infer: true }),
+      pg_description: details.description.slice(0, 1000),
+      pg_lifetime: String(PAYMENT_HOLD_MINUTES * 60),
+      pg_result_url: `${web}/api/payments/freedompay/${RESULT_SCRIPT}`,
+      pg_request_method: 'POST',
+      pg_success_url: back,
+      pg_failure_url: back,
+      pg_user_phone: details.phone.replace(/\D/g, ''),
+      pg_language: 'ru',
+      ...(this.config.get('FREEDOMPAY_TESTING_MODE', { infer: true })
+        ? { pg_testing_mode: '1' }
+        : {}),
+    })
+    if (response.pg_status !== 'ok' || !response.pg_redirect_url) {
+      this.logger.error(`Freedom Pay init failed: ${response.pg_error_description ?? 'no answer'}`)
+      payment.status = 'failed'
+      await this.payments.save(payment)
+      throw new ServiceUnavailableException('Оплата сейчас недоступна — попробуйте позже')
+    }
+    payment.providerRef = response.pg_payment_id ?? null
+    payment.checkoutUrl = response.pg_redirect_url
+    await this.payments.save(payment)
+
+    return { paymentId: payment.id, url: response.pg_redirect_url }
   }
 
-  /** The pay page for the latest attempt of a booking (to pay again from the ticket). */
+  /** The checkout of the latest attempt of a booking (to pay again from the ticket). */
   async checkoutFor(bookingId: string) {
     const payment = await this.payments.findOne({
       where: { bookingId, status: 'pending' },
       order: { createdAt: 'DESC' },
     })
-    return payment ? this.checkoutUrl(payment.id) : null
+    // Freedom Pay's page link is not kept; our /pay page sends the client on from there.
+    return payment ? this.payPagePath(payment.id) : null
   }
 
   async findSigned(id: string, signature: string) {
-    if (!isPaymentSignature(id, signature, this.secret()))
+    if (!isPaymentSignature(id, signature, this.secret())) {
       throw new NotFoundException('Платёж не найден')
+    }
     const payment = await this.payments.findOneBy({ id })
     if (!payment) throw new NotFoundException('Платёж не найден')
 
@@ -58,12 +109,54 @@ export class PaymentsService {
   async completeTest(id: string, signature: string) {
     if (this.driver !== 'test') throw new NotFoundException('Платёж не найден')
     const payment = await this.findSigned(id, signature)
-    if (payment.status !== 'pending') return { payment, isNew: false }
-    payment.status = 'succeeded'
-    payment.paidAt = new Date()
-    await this.payments.save(payment)
 
-    return { payment, isNew: true }
+    return this.markSucceeded(payment)
+  }
+
+  /**
+   * Asks the acquirer how a payment stands (the client is back on /pay, or a notification came)
+   * and records a success. The acquirer's own status is the truth, not what the browser says.
+   */
+  async sync(payment: Payment) {
+    if (payment.status !== 'pending' || payment.provider !== 'freedompay') {
+      return { payment, isNew: false }
+    }
+    const status = await this.callFreedomPay('get_status3.php', { pg_order_id: payment.id })
+    if (status.pg_status !== 'ok') return { payment, isNew: false }
+    if (status.pg_payment_status === 'success') {
+      payment.providerRef = status.pg_payment_id ?? payment.providerRef
+      return this.markSucceeded(payment)
+    }
+    if (status.pg_payment_status === 'error' || status.pg_payment_status === 'failed') {
+      payment.status = 'failed'
+      await this.payments.save(payment)
+    }
+
+    return { payment, isNew: false }
+  }
+
+  /**
+   * Freedom Pay's result notification. A forged one changes nothing: its signature is checked and
+   * the status is confirmed with get_status3.php before anything is marked paid.
+   */
+  async handleFreedomPayResult(params: FreedomPayParams) {
+    const secret = this.freedomPaySecret()
+    if (!isFreedomPaySignature(RESULT_SCRIPT, params, secret)) {
+      this.logger.warn('Freedom Pay result with a bad signature')
+      return { reply: freedomPayReply(RESULT_SCRIPT, 'error', 'Bad signature', secret), paid: null }
+    }
+    const payment = params.pg_order_id
+      ? await this.payments.findOneBy({ id: params.pg_order_id })
+      : null
+    if (!payment) {
+      return { reply: freedomPayReply(RESULT_SCRIPT, 'error', 'Unknown order', secret), paid: null }
+    }
+    const { isNew } = await this.sync(payment)
+
+    return {
+      reply: freedomPayReply(RESULT_SCRIPT, 'ok', 'Принято', secret),
+      paid: isNew ? payment : null,
+    }
   }
 
   async failPending(bookingIds: string[]) {
@@ -76,19 +169,67 @@ export class PaymentsService {
       .execute()
   }
 
-  /** Returns the deposit to the client's card (the test acquirer just records it). */
+  /** Returns the deposit to the client's card. */
   async refund(bookingId: string) {
     const payment = await this.payments.findOneBy({ bookingId, status: 'succeeded' })
     if (!payment) return
+    if (payment.provider === 'freedompay') {
+      const result = await this.callFreedomPay('revoke.php', {
+        pg_payment_id: payment.providerRef ?? '',
+        pg_refund_amount: String(payment.amount),
+      })
+      if (result.pg_status !== 'ok') {
+        // Left as succeeded: the next settle run does not retry, so it shows up in the log.
+        this.logger.error(
+          `Freedom Pay refund failed for ${payment.id}: ${result.pg_error_description ?? 'no answer'}`,
+        )
+        return
+      }
+    }
     payment.status = 'refunded'
     payment.refundedAt = new Date()
     await this.payments.save(payment)
-    this.logger.log(`Refunded ${payment.amount} сом for booking ${bookingId} (${payment.provider})`)
+    this.logger.log(`Refunded ${payment.amount} for booking ${bookingId} (${payment.provider})`)
   }
 
-  // The test acquirer is our own page on the same site, so its link is a path: it works on
-  // whichever origin the client booked from (localhost, a preview, the app's WebView).
-  private checkoutUrl(paymentId: string) {
+  private async markSucceeded(payment: Payment) {
+    if (payment.status !== 'pending') return { payment, isNew: false }
+    payment.status = 'succeeded'
+    payment.paidAt = new Date()
+    await this.payments.save(payment)
+
+    return { payment, isNew: true }
+  }
+
+  private async callFreedomPay(script: string, fields: FreedomPayParams) {
+    const params: FreedomPayParams = {
+      ...fields,
+      pg_merchant_id: this.config.get('FREEDOMPAY_MERCHANT_ID', { infer: true }) ?? '',
+      pg_salt: salt(),
+    }
+    params.pg_sig = signFreedomPay(script, params, this.freedomPaySecret())
+    try {
+      const response = await fetch(
+        `${this.config.get('FREEDOMPAY_API_URL', { infer: true })}/${script}`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(params),
+          signal: AbortSignal.timeout(15_000),
+        },
+      )
+      return parseFreedomPayXml(await response.text())
+    } catch (error) {
+      this.logger.error(`Freedom Pay ${script} unreachable: ${(error as Error).message}`)
+      return {} as FreedomPayParams
+    }
+  }
+
+  private freedomPaySecret() {
+    return this.config.get('FREEDOMPAY_SECRET_KEY', { infer: true }) ?? ''
+  }
+
+  private payPagePath(paymentId: string) {
     return `/pay/${paymentId}?s=${paymentSignature(paymentId, this.secret())}`
   }
 

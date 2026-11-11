@@ -401,6 +401,12 @@ const completeTestPayment = (id: string, signature: string) =>
     { method: 'POST' },
   )
 
+const syncPayment = (id: string, signature: string) =>
+  request<{ bookingId: string; status: string; paymentStatus: string | null }>(
+    `/payments/${id}/sync?${new URLSearchParams({ s: signature })}`,
+    { method: 'POST' },
+  )
+
 const getCheckoutUrl = (id: string, token: string | null) =>
   request<{ url: string }>(`/bookings/${id}/checkout`, {
     headers: token ? { [TOKEN_HEADER]: token } : {},
@@ -408,6 +414,7 @@ const getCheckoutUrl = (id: string, token: string | null) =>
 
 export {
   completeTestPayment,
+  syncPayment,
   getCheckoutUrl,
   getPaymentConfig,
   getManagedWaitlist,

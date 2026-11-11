@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
+  Header,
   Headers,
   HttpCode,
   Param,
@@ -46,6 +48,8 @@ export class PaymentsController {
       amount: payment.amount,
       status: payment.status,
       driver: this.payments.driver,
+      // Freedom Pay's page for this payment; the test driver pays right on /pay.
+      checkoutUrl: payment.checkoutUrl,
       booking: {
         id: view.id,
         serviceName: view.serviceName,
@@ -71,6 +75,38 @@ export class PaymentsController {
     const view = await this.bookings.onPaid(payment.bookingId)
 
     return { bookingId: view.id, paymentStatus: view.payment?.status ?? null }
+  }
+
+  // Back from the acquirer's page: ask it how the payment stands, confirm the booking if paid.
+  @Post('payments/:id/sync')
+  @HttpCode(200)
+  async sync(@Param('id', ParseUUIDPipe) id: string, @Query('s') signature: string | undefined) {
+    const payment = await this.payments.findSigned(id, requireSignature(signature))
+    await this.payments.sync(payment)
+    const view =
+      payment.status === 'succeeded'
+        ? await this.bookings.onPaid(payment.bookingId)
+        : await this.bookings.getView(payment.bookingId)
+
+    return {
+      bookingId: view.id,
+      status: payment.status,
+      paymentStatus: view.payment?.status ?? null,
+    }
+  }
+
+  // Freedom Pay's result URL (form POST): answered with signed XML, retried by them on failure.
+  @Post('payments/freedompay/result')
+  @HttpCode(200)
+  @Header('Content-Type', 'application/xml; charset=utf-8')
+  async freedomPayResult(@Body() body: Record<string, unknown>) {
+    const params = Object.fromEntries(
+      Object.entries(body ?? {}).map(([key, value]) => [key, String(value ?? '')]),
+    )
+    const { reply, paid } = await this.payments.handleFreedomPayResult(params)
+    if (paid) await this.bookings.onPaid(paid.bookingId)
+
+    return reply
   }
 
   // «Оплатить» on a ticket that still waits for its deposit: the current checkout link.
