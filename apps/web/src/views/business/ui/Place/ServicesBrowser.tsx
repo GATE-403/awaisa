@@ -43,12 +43,16 @@ const PopularRow = ({ business, service }: PopularCardProps) => {
       >
         <span className={styles.rowText}>
           <span className={styles.rowTitle}>{service.name}</span>
-          <span className={styles.rowMeta}>
-            {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
-          </span>
+          <span className={styles.rowMeta}>{formatDuration(service.durationMinutes)}</span>
         </span>
-        <span className={styles.popularSlot} data-loading={slot === undefined || undefined}>
-          {slot === undefined ? '…' : slot === null ? 'Скоро' : `${slot.dayLabel}, ${slot.time}`}
+        {/* Same column as the menu's prices; the first free time sits under it when there is one. */}
+        <span className={styles.rowSide}>
+          <span className={styles.rowPrice}>{formatPrice(service.price)}</span>
+          {slot && (
+            <span className={styles.popularSlot}>
+              {slot.dayLabel}, {slot.time}
+            </span>
+          )}
         </span>
       </NextLink>
     </li>
@@ -76,6 +80,7 @@ export const ServicesBrowser = ({ business, catalog }: ServicesBrowserProps) => 
     }))
     .filter((group) => group.services.length > 0)
   const isBrowsing = category === ALL && !needle
+  const hasPopular = isBrowsing && popular.length > 0
 
   return (
     <section id='services' className={styles.section} aria-labelledby='place-services'>
@@ -122,7 +127,7 @@ export const ServicesBrowser = ({ business, catalog }: ServicesBrowserProps) => 
         </div>
       </div>
 
-      {isBrowsing && popular.length > 0 && (
+      {hasPopular && (
         <div className={styles.group}>
           <h3 className={styles.groupTitle}>Часто выбирают</h3>
           <ul className={styles.list}>
@@ -139,8 +144,11 @@ export const ServicesBrowser = ({ business, catalog }: ServicesBrowserProps) => 
       )}
       {groups.map(({ category: group, services }) => (
         <div key={group.id} className={styles.group}>
-          {(catalog.categories.length > 1 || needle) && (
-            <h3 className={styles.groupTitle}>{group.name}</h3>
+          {/* With «Часто выбирают» above, the rest always gets a heading so the two lists read apart. */}
+          {(catalog.categories.length > 1 || needle || hasPopular) && (
+            <h3 className={styles.groupTitle}>
+              {catalog.categories.length > 1 ? group.name : 'Все услуги'}
+            </h3>
           )}
           <ul className={styles.list}>
             {services.map((service) => (

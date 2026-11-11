@@ -1,7 +1,6 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
-import { CalendarCheck } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
 import type { Business, Service } from '@/shared/api/types'
@@ -24,28 +23,19 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   const slot = useNextSlot(service.id)
 
   return (
-    // One compact row: when, for what, and the way in on the right.
+    // The quickest way in, stacked so nothing competes: when, for what, one button.
     <aside className={`${styles.card} ${styles.slotCard}`} aria-label='Ближайшее окно'>
-      <span className={styles.slotGlyph} aria-hidden>
-        <CalendarCheck weight='fill' />
-      </span>
-      <div className={styles.slotText}>
-        <p className={styles.cardEyebrow}>Ближайшее окно</p>
-        <p
-          className={styles.slot}
-          aria-live='polite'
-          data-loading={slot === undefined || undefined}
-        >
-          {getSlotText(slot)}
-        </p>
-        <p className={styles.slotMeta}>
-          {service.name} · {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
-        </p>
-      </div>
+      <p className={styles.cardCaption}>Ближайшее окно</p>
+      <p className={styles.slot} aria-live='polite' data-loading={slot === undefined || undefined}>
+        {getSlotText(slot)}
+      </p>
+      <p className={styles.slotMeta}>
+        {service.name} · {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
+      </p>
       <ButtonLink
         variant='outline'
-        size='sm'
-        className={styles.cardButton}
+        fullWidth
+        className={styles.slotButton}
         render={
           <NextLink
             href={

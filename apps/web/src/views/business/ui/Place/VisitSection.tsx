@@ -1,9 +1,9 @@
 'use client'
 
-import { Clock, MapPin, Phone } from '@phosphor-icons/react/ssr'
+import { CaretRight, Clock, MapPin, Phone } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { findDay, formatClock, WEEKDAYS_FULL, weekdayOf } from '@/entities/business'
-import type { Business } from '@/shared/api/types'
+import type { Business, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { BranchesMap } from './BranchesMap'
@@ -13,10 +13,21 @@ interface VisitSectionProps {
   business: Business
 }
 
-// Hours with today picked out, where to go and how to reach the place.
+const hoursOf = (hours: WorkingDay[], weekday: number) => {
+  const day = findDay(hours, weekday)
+  return day ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}` : 'Выходной'
+}
+
+const routeOf = (business: Business, latitude: number | null, longitude: number | null) =>
+  latitude !== null && longitude !== null
+    ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
+    : business.mapUrl || null
+
+// Settings-style facts: a coloured glyph, a small label, the value — hours, address, phone.
 export const VisitSection = ({ business }: VisitSectionProps) => {
   const today = useToday()
   const todayWeekday = today ? weekdayOf(today.dayKey) : null
+  const isSeveral = business.branches.length > 1
   const pinned = business.branches.some(
     (branch) => branch.latitude !== null && branch.longitude !== null,
   )
@@ -24,80 +35,88 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
   return (
     <section id='visit' className={`${styles.card} ${styles.visit}`} aria-label='Как нас найти'>
       {/* Today is what matters; the week opens on demand. */}
-      <details>
-        <summary className={styles.hoursSummary}>
+      <details className={styles.hoursBlock}>
+        <summary className={styles.info}>
           <span className={styles.glyph} data-tone='orange' aria-hidden>
             <Clock weight='fill' />
           </span>
-          <span className={styles.hoursLabel}>Часы</span>
-          <span className={styles.hoursToday}>
-            {todayWeekday === null
-              ? ' '
-              : (() => {
-                  const day = findDay(business.hours, todayWeekday)
-                  return day
-                    ? `Сегодня ${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
-                    : 'Сегодня выходной'
-                })()}
+          <span className={styles.infoText}>
+            <span className={styles.infoLabel}>Часы</span>
+            <span className={styles.infoValue}>
+              {todayWeekday === null
+                ? ' '
+                : `Сегодня ${hoursOf(business.hours, todayWeekday).toLowerCase()}`}
+            </span>
           </span>
+          <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
         </summary>
         <ul className={styles.hours}>
-          {WEEKDAYS_FULL.map((dayName, weekday) => {
-            const day = findDay(business.hours, weekday)
-            return (
-              <li
-                key={dayName}
-                className={styles.hoursRow}
-                data-today={weekday === todayWeekday || undefined}
-              >
-                <span>{dayName}</span>
-                <span>
-                  {day
-                    ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
-                    : 'Выходной'}
-                </span>
-              </li>
-            )
-          })}
+          {WEEKDAYS_FULL.map((dayName, weekday) => (
+            <li
+              key={dayName}
+              className={styles.hoursRow}
+              data-today={weekday === todayWeekday || undefined}
+            >
+              <span>{dayName}</span>
+              <span>{hoursOf(business.hours, weekday)}</span>
+            </li>
+          ))}
         </ul>
       </details>
 
-      <div>
-        <ul className={styles.branches}>
-          {business.branches.map((branch) => {
-            const phone = branch.phone || business.phone
-            return (
-              <li key={branch.id} className={styles.branch}>
-                <span className={styles.infoRow}>
-                  <span className={styles.glyph} data-tone='blue' aria-hidden>
-                    <MapPin weight='fill' />
-                  </span>
-                  <span className={styles.branchAddress}>
-                    {[business.city, branch.address || business.address].filter(Boolean).join(', ')}
-                  </span>
-                  {business.branches.length > 1 && (
-                    <NextLink
-                      href={`/${business.slug}/book?branch=${branch.id}`}
-                      className={styles.sectionLink}
-                    >
-                      Записаться сюда
-                    </NextLink>
-                  )}
-                </span>
-                {phone && (
-                  <a href={`tel:${phone}`} className={styles.infoRow}>
-                    <span className={styles.glyph} data-tone='green' aria-hidden>
-                      <Phone weight='fill' />
-                    </span>
-                    <span className={styles.branchPhone}>{formatPhone(phone)}</span>
+      {business.branches.map((branch) => {
+        const phone = branch.phone || business.phone
+        const address = [business.city, branch.address || business.address]
+          .filter(Boolean)
+          .join(', ')
+        const route = routeOf(business, branch.latitude, branch.longitude)
+
+        return (
+          <div key={branch.id} className={styles.branch}>
+            <div className={styles.info}>
+              <span className={styles.glyph} data-tone='blue' aria-hidden>
+                <MapPin weight='fill' />
+              </span>
+              <span className={styles.infoText}>
+                <span className={styles.infoLabel}>{isSeveral ? branch.name : 'Адрес'}</span>
+                <span className={styles.infoValue}>{address}</span>
+              </span>
+              {isSeveral ? (
+                <NextLink
+                  href={`/${business.slug}/book?branch=${branch.id}`}
+                  className={styles.infoAction}
+                >
+                  Записаться
+                </NextLink>
+              ) : (
+                route && (
+                  <a href={route} target='_blank' rel='noreferrer' className={styles.infoAction}>
+                    Маршрут
                   </a>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-        {pinned && <BranchesMap business={business} />}
-      </div>
+                )
+              )}
+            </div>
+            {phone && (
+              <a href={`tel:${phone}`} className={styles.info}>
+                <span className={styles.glyph} data-tone='green' aria-hidden>
+                  <Phone weight='fill' />
+                </span>
+                <span className={styles.infoText}>
+                  <span className={styles.infoLabel}>Телефон</span>
+                  <span className={styles.infoValue}>{formatPhone(phone)}</span>
+                </span>
+                <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
+              </a>
+            )}
+          </div>
+        )
+      })}
+
+      {pinned && (
+        <div className={styles.visitMap}>
+          <BranchesMap business={business} />
+        </div>
+      )}
     </section>
   )
 }
