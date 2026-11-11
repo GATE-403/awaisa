@@ -22,6 +22,7 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  JoinWaitlistInput,
   ManagedReview,
   MapPlace,
   MasterDay,
@@ -41,6 +42,7 @@ import type {
   TelegramStatus,
   UpdateBusinessInput,
   VisitReview,
+  WaitlistEntry,
   WorkingDay,
 } from './types'
 
@@ -364,7 +366,31 @@ const createTimeOff = (slug: string, input: CreateTimeOffInput) =>
 const deleteTimeOff = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/time-off/${id}`)
 
+const WAITLIST_TOKEN_HEADER = 'x-waitlist-token'
+
+const joinWaitlist = (input: JoinWaitlistInput) =>
+  post<WaitlistEntry & { token: string }>('/waitlist', input)
+
+const getWaitlistEntry = (id: string, token: string, signal?: AbortSignal) =>
+  request<WaitlistEntry>(`/waitlist/${id}`, { headers: { [WAITLIST_TOKEN_HEADER]: token }, signal })
+
+const leaveWaitlist = (id: string, token: string) =>
+  request<WaitlistEntry>(`/waitlist/${id}`, {
+    method: 'DELETE',
+    headers: { [WAITLIST_TOKEN_HEADER]: token },
+  })
+
+const getMyWaitlist = (signal?: AbortSignal) => request<WaitlistEntry[]>('/me/waitlist', { signal })
+
+const leaveMyWaitlist = (id: string) =>
+  request<WaitlistEntry>(`/me/waitlist/${id}`, { method: 'DELETE' })
+
 export {
+  getMyWaitlist,
+  getWaitlistEntry,
+  joinWaitlist,
+  leaveMyWaitlist,
+  leaveWaitlist,
   createBranch,
   deleteBranch,
   getMapPlaces,

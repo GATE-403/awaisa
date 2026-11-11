@@ -1,0 +1,41 @@
+.button {
+  align-self: flex-start;
+}
+
+.button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.joined {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.joined svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-success);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.lead,
+.phone {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: 1.45;
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-body);
+}

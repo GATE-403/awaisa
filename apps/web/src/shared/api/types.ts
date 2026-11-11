@@ -428,6 +428,27 @@ type AnalyticsReport = {
   heatmap: { weekday: number; hour: number; visits: number }[]
 }
 
+// «Сообщить, когда освободится»: a client waits for a full day (see apps/api/src/waitlist).
+type WaitlistEntry = {
+  id: string
+  status: 'waiting' | 'notified' | 'cancelled' | 'expired'
+  date: string
+  /** The free time the SMS named, once it went out. */
+  notifiedTime: string | null
+  service: { id: string; name: string }
+  specialist: { id: string; name: string } | null
+  business: { name: string; slug: string }
+}
+
+type JoinWaitlistInput = {
+  serviceId: string
+  specialistId: string
+  branchId?: string
+  date: string
+  name: string
+  phone: string
+}
+
 export type {
   AdminBooking,
   MasterDay,
@@ -483,4 +504,6 @@ export type {
   Specialist,
   TimeOff,
   TimeSlot,
+  JoinWaitlistInput,
+  WaitlistEntry,
 }

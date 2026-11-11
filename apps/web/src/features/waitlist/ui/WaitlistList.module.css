@@ -1,0 +1,121 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+}
+
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-4) + 28px + var(--space-3));
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+}
+
+.glyph[data-free] {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.meta,
+.waiting {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.free {
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.leave {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-tertiary-foreground);
+  cursor: pointer;
+}
+
+.leave svg {
+  width: 14px;
+  height: 14px;
+}
+
+.leave:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .leave:hover {
+    background: var(--color-fill);
+    color: var(--color-foreground);
+  }
+}
