@@ -5,6 +5,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, MapPin } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { downloadCalendarFile, Ticket } from '@/entities/booking'
+import { useSession } from '@/entities/session'
 import type { Booking } from '@/shared/api/types'
 import styles from './BookingSuccess.module.css'
 
@@ -14,6 +15,7 @@ interface BookingSuccessProps {
 
 export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const toast = useToast()
+  const session = useSession()
 
   const handleCopyCode = async (code: string) => {
     try {
@@ -62,6 +64,16 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           Мои записи
         </ButtonLink>
       </div>
+      {/* Guests keep bookings on this device only: say so at the moment it matters. */}
+      {session.status === 'guest' && (
+        <p className={styles.keep}>
+          Запись сохранена на этом телефоне.{' '}
+          <NextLink href='/login?next=/bookings' className={styles.keepLink}>
+            Войдите по номеру
+          </NextLink>
+          , чтобы видеть записи на любом устройстве.
+        </p>
+      )}
     </div>
   )
 }

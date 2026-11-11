@@ -50,6 +50,20 @@
   margin-top: var(--space-8);
 }
 
+.keep {
+  max-width: 34ch;
+  margin-top: var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-align: center;
+}
+
+.keepLink {
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
+}
+
 @keyframes print {
   from {
     opacity: 0;

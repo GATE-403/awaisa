@@ -193,7 +193,8 @@ export class CatalogService {
       if (!branch) throw new BadRequestException('Филиал не найден')
     }
 
-    return this.specialists.save({
+    const previousPhone = existing.phone ?? null
+    const saved = await this.specialists.save({
       ...existing,
       name: input.name,
       role: input.role,
@@ -203,6 +204,9 @@ export class CatalogService {
       commissionPercent: input.commissionPercent,
       services,
     })
+
+    // A number given now (or changed) means the master has not heard about «Мой день» yet.
+    return { ...saved, isNewLogin: Boolean(saved.phone) && saved.phone !== previousPhone }
   }
 
   private async findOwned<Entity extends { id: string; businessId: string }>(

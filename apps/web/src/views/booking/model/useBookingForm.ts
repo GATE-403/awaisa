@@ -47,11 +47,22 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const session = useSession()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
   const presetService = findService(catalog, searchParams.get('service'))
+  // A time shown on a card («Сегодня, 14:30») opens the form on that time, not on a blank day.
+  const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') ?? '')
+    ? searchParams.get('date')
+    : null
+  const presetTime =
+    presetDate && /^\d{2}:\d{2}$/.test(searchParams.get('time') ?? '')
+      ? searchParams.get('time')
+      : null
   const [serviceId, setServiceId] = useState(presetService?.id ?? null)
   const [chosenSpecialistId, setSpecialistId] = useState(
-    presetSpecialist && (!presetService || presetSpecialist.serviceIds.includes(presetService.id))
-      ? presetSpecialist.id
-      : null,
+    searchParams.get('specialist') === ANY_SPECIALIST_ID && presetService
+      ? ANY_SPECIALIST_ID
+      : presetSpecialist &&
+          (!presetService || presetSpecialist.serviceIds.includes(presetService.id))
+        ? presetSpecialist.id
+        : null,
   )
   // Pages cached before branches existed have none: treat them as single-branch.
   const branches = business.branches ?? []
@@ -60,9 +71,10 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     branches.length > 1
       ? (branches.find((branch) => branch.id === chosenBranchId) ?? branches[0])?.id
       : undefined
-  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(null)
+  const [selectedDayKey, setSelectedDayKey] = useState<string | null>(presetDate)
   const [autoDay, setAutoDay] = useState({ key: '', skips: 0 })
-  const [time, setTime] = useState<string | null>(null)
+  const [time, setTime] = useState<string | null>(presetTime)
+  const [isPresetChecked, setIsPresetChecked] = useState(presetTime === null)
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
   const [comment, setComment] = useState('')
@@ -84,8 +96,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
   )
   // One master for the service: nothing to choose, so the step is filled in.
+  // «Any master» from a link means that very master when the service has only one.
   const specialistId =
-    chosenSpecialistId ?? (specialists.length === 1 ? (specialists[0]?.id ?? null) : null)
+    specialists.length === 1 &&
+    (chosenSpecialistId === null || chosenSpecialistId === ANY_SPECIALIST_ID)
+      ? (specialists[0]?.id ?? null)
+      : chosenSpecialistId
   const days = (today ? getUpcomingDays(today.dayKey) : []).map((day) => ({
     ...day,
     isClosed: !findDay(business.hours, weekdayOf(day.key)),
@@ -127,6 +143,17 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     datetime: Boolean(time),
     contacts: firstIncompleteStep === null,
   }
+
+  // The shown time may be gone by now: say so and let the client pick another one.
+  useEffect(() => {
+    if (isPresetChecked || availability.isLoading || dayKey !== presetDate) return
+    setIsPresetChecked(true)
+    if (availability.error) return
+    if (!availability.slots.some((slot) => slot.isAvailable && slot.time === presetTime)) {
+      setTime(null)
+      toast.show({ title: `${presetTime} уже заняли — выберите другое время`, type: 'info' })
+    }
+  }, [isPresetChecked, availability, dayKey, presetDate, presetTime, toast])
 
   // Keep the half-made booking on the device, so leaving the page never loses it.
   useEffect(() => {

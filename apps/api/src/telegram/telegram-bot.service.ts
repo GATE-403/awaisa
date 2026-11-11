@@ -13,7 +13,13 @@ import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common
 import type { Env } from '../config/env.js'
 import { TelegramChat } from './telegram-chat.entity.js'
 import { TelegramLinkCode } from './telegram-link-code.entity.js'
-import { type BookingLine, dayText, HELP_TEXT, linkedText } from './telegram-messages.js'
+import {
+  type BookingLine,
+  dayText,
+  HELP_TEXT,
+  linkedText,
+  unclosedText,
+} from './telegram-messages.js'
 
 type Update = {
   update_id: number
@@ -138,6 +144,24 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     for (const businessId of businessIds) {
       const digest = await this.dayDigest(businessId)
       if (digest) await this.notifyBusiness(businessId, digest)
+    }
+  }
+
+  // 20:00 Bishkek (14:00 UTC): a nudge to close today's visits, only where some are still open.
+  @Cron('0 14 * * *')
+  async sendUnclosedReminder() {
+    const today = toBusinessParts(new Date()).dateKey
+    const rows = (await this.dataSource.query(
+      `SELECT b."business_id" AS "businessId", COUNT(*)::int AS "count"
+       FROM "bookings" b
+       WHERE b."status" = 'confirmed' AND b."outcome" IS NULL AND b."ends_at" < now()
+         AND b."starts_at" >= $1 AND b."starts_at" < $2
+         AND EXISTS (SELECT 1 FROM "telegram_chats" c WHERE c."business_id" = b."business_id")
+       GROUP BY 1`,
+      [businessDateTimeToUtc(today, 0), businessDateTimeToUtc(today, 24 * 60)],
+    )) as { businessId: string; count: number }[]
+    for (const row of rows) {
+      await this.notifyBusiness(row.businessId, unclosedText(row.count))
     }
   }
 

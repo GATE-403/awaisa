@@ -232,6 +232,12 @@ const moveMyBooking = (id: string, token: string | null, input: { date: string; 
     body: JSON.stringify(input),
   })
 
+const closeDay = (slug: string, date: string) =>
+  post<{ ids: string[] }>(`${manage(slug)}/bookings/close-day`, { date })
+
+const reopenVisits = (slug: string, ids: string[]) =>
+  post<void>(`${manage(slug)}/bookings/reopen`, { ids })
+
 const getUnclosedVisits = (slug: string, signal?: AbortSignal) =>
   request<{ total: number; days: { date: string; count: number }[] }>(
     `${manage(slug)}/bookings/unclosed`,
@@ -379,6 +385,8 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  closeDay,
+  reopenVisits,
   moveMyBooking,
   getUnclosedVisits,
   getMasterPlaces,

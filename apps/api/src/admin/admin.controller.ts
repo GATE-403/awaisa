@@ -17,14 +17,18 @@ import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-acc
 import {
   type AnalyticsQuery,
   analyticsQuerySchema,
+  type CloseDayInput,
   type CreateTimeOffInput,
+  closeDaySchema,
   createTimeOffSchema,
   type MoveBookingInput,
   moveBookingSchema,
   type OutcomeBody,
   outcomeSchema,
   type RecentBookingsQuery,
+  type ReopenInput,
   recentBookingsQuerySchema,
+  reopenSchema,
   type ScheduleQuery,
   type StaffBookingInput,
   scheduleQuerySchema,
@@ -41,6 +45,24 @@ export class AdminController {
     private readonly bookings: BookingsService,
     private readonly analytics: AnalyticsService,
   ) {}
+
+  @Post('bookings/close-day')
+  @HttpCode(200)
+  closeDay(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: closeDaySchema }) body: CloseDayInput,
+  ) {
+    return this.admin.closeDay(business, body.date)
+  }
+
+  @Post('bookings/reopen')
+  @HttpCode(204)
+  async reopen(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: reopenSchema }) body: ReopenInput,
+  ) {
+    await this.admin.reopen(business, body.ids)
+  }
 
   @Get('bookings/unclosed')
   listUnclosed(@CurrentBusiness() business: Business) {

@@ -7,7 +7,8 @@ import { CalendarX, Plus } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, weekdayOf } from '@/entities/business'
-import { getUnclosedVisits } from '@/shared/api/clientApi'
+import { getErrorMessage } from '@/shared/api/apiError'
+import { closeDay, getUnclosedVisits, reopenVisits } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize } from '@/shared/lib/plural'
@@ -86,6 +87,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const hasMasters = (schedule?.specialists.length ?? 0) > 0
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
+  const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
 
   // Re-read after every schedule change: marking a visit may close a day.
   useEffect(() => {
@@ -97,6 +99,30 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
     return () => controller.abort()
   }, [slug, schedule])
+
+  // Most visits happen as booked: close the whole day in one tap, undo from the toast.
+  const handleCloseDay = async () => {
+    if (!date) return
+    try {
+      const { ids } = await closeDay(slug, date)
+      reload()
+      toast.show({
+        title: `Отмечено: ${pluralize(ids.length, ['визит', 'визита', 'визитов'])}`,
+        description: 'Все пришли, оплата по прайсу наличными — поправьте, где было иначе',
+        type: 'success',
+        action: {
+          label: 'Вернуть',
+          onClick: () => void reopenVisits(slug, ids).then(reload),
+        },
+      })
+    } catch (closeError) {
+      toast.show({
+        title: 'Не получилось',
+        description: getErrorMessage(closeError),
+        type: 'error',
+      })
+    }
+  }
 
   const handleCreate = (specialistId: string, time: string | null) => {
     if (isPast) {
@@ -114,15 +140,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
+              {openHere > 0 && (
+                <Button variant='secondary' size='sm' onClick={handleCloseDay}>
+                  Все пришли ({openHere})
+                </Button>
+              )}
               {/* In the toolbar, not above the calendar: it loads late and must not shift the grid. */}
-              {unclosed.total > 0 && (
+              {unclosed.total > openHere && (
                 <Button
                   variant='outline'
                   size='sm'
                   onClick={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
                   title='Отметьте, кто пришёл: так выручка в аналитике будет точной'
                 >
-                  Не закрыто: {pluralize(unclosed.total, ['визит', 'визита', 'визитов'])}
+                  Не закрыто: {pluralize(unclosed.total - openHere, ['визит', 'визита', 'визитов'])}
                 </Button>
               )}
               {!isPast && (

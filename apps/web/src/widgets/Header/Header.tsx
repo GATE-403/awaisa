@@ -25,7 +25,9 @@ export const Header = () => {
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
   const isSignedIn = status === 'signedIn'
-  const accountLabel = customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль и записи'
+  const accountLabel = customer
+    ? `Записи и профиль: ${customer.name || customer.phone}`
+    : 'Записи и профиль'
   const currentKind = pathname === '/' ? searchParams.get('kind') : null
   const headerRef = useRef<HTMLElement>(null)
   const isCabinet = isCabinetPath(pathname)
@@ -105,7 +107,7 @@ export const Header = () => {
             aria-current={pathname === '/bookings' ? 'page' : undefined}
           >
             <UserCircle weight={isSignedIn ? 'fill' : 'regular'} aria-hidden />
-            <span aria-hidden='true'>{customer?.name || 'Профиль'}</span>
+            <span aria-hidden='true'>{customer?.name || 'Записи'}</span>
           </NextLink>
         </nav>
       </div>

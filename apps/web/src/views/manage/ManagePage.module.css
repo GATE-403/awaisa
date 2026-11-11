@@ -104,3 +104,36 @@
     font-size: var(--text-4xl);
   }
 }
+
+/* Settings sections: a second, quieter row of capsules under the main tabs. */
+.subnav {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: calc(var(--space-2) * -1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.subtab {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.subtab[aria-current="page"] {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.subtab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

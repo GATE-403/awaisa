@@ -11,8 +11,12 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
+import type { Env } from '../config/env.js'
+import { masterInviteMessage } from '../notifications/messages.js'
+import { SmsService } from '../notifications/sms.service.js'
 import type { Business } from './business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from './business-access.guard.js'
 import {
@@ -42,6 +46,8 @@ export class ManageController {
     private readonly businesses: BusinessesService,
     private readonly catalog: CatalogService,
     private readonly masterSchedule: MasterScheduleService,
+    private readonly sms: SmsService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   @Get()
@@ -135,8 +141,9 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @Body({ schema: specialistSchema }) body: SpecialistInput,
   ) {
-    const { id } = await this.catalog.saveSpecialist(business.id, body)
-    return { id }
+    const saved = await this.catalog.saveSpecialist(business.id, body)
+    this.inviteMaster(business, saved)
+    return { id: saved.id }
   }
 
   @Put('specialists/:id')
@@ -146,7 +153,13 @@ export class ManageController {
     @Param('id') id: string,
     @Body({ schema: specialistSchema }) body: SpecialistInput,
   ) {
-    await this.catalog.saveSpecialist(business.id, body, id)
+    this.inviteMaster(business, await this.catalog.saveSpecialist(business.id, body, id))
+  }
+
+  private inviteMaster(business: Business, master: { phone: string | null; isNewLogin: boolean }) {
+    if (!master.isNewLogin || !master.phone) return
+    const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/master`
+    void this.sms.sendSafely(master.phone, masterInviteMessage(business.name, link))
   }
 
   @Get('specialists/:id/schedule')

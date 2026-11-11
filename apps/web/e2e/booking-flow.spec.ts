@@ -31,6 +31,21 @@ test.describe('User flow: booking', () => {
     await expect(primaryAction(page)).toHaveText('Далее')
   })
 
+  test('a time shown on the business page is the time the booking opens with', async ({ page }) => {
+    await page.goto('/awaisa-studio')
+    const card = page.getByRole('link', { name: /Часто выбирают/ }).first()
+    // The card links to its time once the first free slot is known.
+    await expect(card).toHaveAttribute('href', /time=\d{2}:\d{2}/)
+    const href = (await card.getAttribute('href')) ?? ''
+    const time = new URL(href, 'http://local').searchParams.get('time') ?? ''
+    await card.click()
+
+    await expect(page).toHaveURL(/\/book\?service=.*time=/)
+    const steps = bookingSteps(page)
+    await expect(steps.datetime).toContainText(time)
+    await expect(steps.contacts.getByLabel('Имя')).toBeVisible()
+  })
+
   test('full booking: service → master → time → contacts → ticket → cancel', async ({ page }) => {
     await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)

@@ -20,6 +20,11 @@ const primaryAction = (page: Page) =>
   page.getByRole('button', { name: /^(Далее|Записаться|Записываем…)$/ }).filter({ visible: true })
 
 const pickFirstFreeSlot = async (page: Page) => {
+  // A link with a time (e.g. «Ближайшее окно») already chose it: that is the slot.
+  const preset = new URL(page.url()).searchParams.get('time')
+  if (preset && (await page.locator('#step-datetime').textContent())?.includes(preset))
+    return preset
+
   const days = page.getByRole('group', { name: 'День' }).getByRole('button')
   const dayCount = await days.count()
 

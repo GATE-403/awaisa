@@ -47,9 +47,14 @@ const rescheduleMessage = (booking: BookingMessageInput, webUrl: string) =>
 const reviewRequestMessage = (businessName: string, link: string) =>
   `${businessName}: как прошёл визит? Оцените мастера — это 10 секунд: ${link}`
 
+// The owner gave a master their number: tell the master where their day lives.
+const masterInviteMessage = (businessName: string, link: string) =>
+  `${businessName}: вам открыт «Мой день» — ваши записи и клиенты. Войдите по этому номеру: ${link}`
+
 export type { BookingMessageInput }
 export {
   confirmationMessage,
+  masterInviteMessage,
   otpMessage,
   reminderMessage,
   rescheduleMessage,

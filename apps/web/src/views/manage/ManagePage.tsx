@@ -16,13 +16,14 @@ import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
 import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
 import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
+import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
 import { ProfileTab } from '@/views/manage/ui/ProfileTab/ProfileTab'
 import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
 import { ServicesTab } from '@/views/manage/ui/ServicesTab/ServicesTab'
 import { SetupProgress } from '@/views/manage/ui/SetupProgress/SetupProgress'
 import styles from './ManagePage.module.css'
-import { MANAGE_TABS, toManageTab } from './manageTabs'
+import { isSettingsTab, MAIN_TABS, SETTINGS_TABS, toManageTab } from './manageTabs'
 
 interface ManagePageProps {
   slug: string
@@ -87,12 +88,34 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
 
         <TextTabs
           label='Разделы кабинета'
-          items={MANAGE_TABS.map(({ value, label }) => ({
-            href: `/manage/${slug}?tab=${value}`,
-            label,
-            isActive: tab === value,
-          }))}
+          items={[
+            ...MAIN_TABS.map(({ value, label }) => ({
+              href: `/manage/${slug}?tab=${value}`,
+              label,
+              isActive: tab === value,
+            })),
+            {
+              href: `/manage/${slug}?tab=services`,
+              label: 'Настройки',
+              isActive: isSettingsTab(tab),
+            },
+          ]}
         />
+        {isSettingsTab(tab) && (
+          <nav aria-label='Настройки' className={styles.subnav}>
+            {SETTINGS_TABS.map(({ value, label }) => (
+              <NextLink
+                key={value}
+                href={`/manage/${slug}?tab=${value}`}
+                scroll={false}
+                className={styles.subtab}
+                aria-current={tab === value ? 'page' : undefined}
+              >
+                {label}
+              </NextLink>
+            ))}
+          </nav>
+        )}
 
         {data && <SetupProgress business={data.business} catalog={data.catalog} />}
 
@@ -137,6 +160,7 @@ export const ManagePage = ({ slug }: ManagePageProps) => {
               run={run}
             />
           )}
+          {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
           {data && tab === 'profile' && (
             <ProfileTab slug={slug} business={data.business} run={run} />
           )}

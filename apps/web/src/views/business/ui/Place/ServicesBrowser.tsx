@@ -32,7 +32,14 @@ const PopularCard = ({ business, service }: PopularCardProps) => {
 
   return (
     <li>
-      <NextLink href={bookHref(business, service)} className={styles.popularCard}>
+      <NextLink
+        href={
+          slot
+            ? `${bookHref(business, service)}&specialist=any&date=${slot.date}&time=${slot.time}`
+            : bookHref(business, service)
+        }
+        className={styles.popularCard}
+      >
         <span className={styles.popularEyebrow}>
           <Star weight='fill' aria-hidden />
           Часто выбирают
