@@ -284,7 +284,19 @@ export class BookingsService {
         }
         // A deposit first: the confirmation and the owner's message wait for the payment.
         if (deposit) {
-          const checkout = await this.payments.createCheckout(saved.id, deposit)
+          // The acquirer may be down: then the hold is dropped at once, the slot is free again.
+          const checkout = await this.payments
+            .createCheckout(saved.id, deposit, {
+              description: `${view.serviceName}, ${view.business.name}`,
+              phone,
+            })
+            .catch(async (error: unknown) => {
+              await this.bookings.update(
+                { id: saved.id },
+                { status: 'cancelled', cancelledAt: new Date(), paymentStatus: 'expired' },
+              )
+              throw error
+            })
           return {
             ...view,
             cancelToken,

@@ -4,11 +4,11 @@ import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { CheckCircle, LockSimple, WarningCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { formatDayLong, formatPrice } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { completeTestPayment } from '@/shared/api/clientApi'
+import { completeTestPayment, syncPayment } from '@/shared/api/clientApi'
 import type { PaymentPage } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { Container } from '@/shared/ui/Container/Container'
@@ -25,6 +25,21 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
   const router = useRouter()
   const [isPaying, setIsPaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isChecking, setIsChecking] = useState(
+    payment?.driver === 'freedompay' && payment.status === 'pending',
+  )
+
+  // Back from Freedom Pay's page: ask how the payment went before showing «pay» again.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once per visit
+  useEffect(() => {
+    if (!payment || payment.driver !== 'freedompay' || payment.status !== 'pending') return
+    syncPayment(payment.id, signature)
+      .then((result) => {
+        if (result.status === 'succeeded') router.replace(`/bookings?paid=${result.bookingId}`)
+        else setIsChecking(false)
+      })
+      .catch(() => setIsChecking(false))
+  }, [])
 
   if (!payment) {
     return (
@@ -125,10 +140,25 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               {payment.driver === 'test' && (
                 <p className={styles.testBadge}>Тестовый режим — деньги не списываются</p>
               )}
-              <Button size='lg' fullWidth onClick={handlePay} disabled={isPaying}>
-                <LockSimple weight='fill' aria-hidden />
-                {isPaying ? 'Оплачиваем…' : `Оплатить ${formatPrice(payment.amount)}`}
-              </Button>
+              {payment.driver === 'freedompay' && payment.checkoutUrl ? (
+                <ButtonLink
+                  size='lg'
+                  fullWidth
+                  // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                  render={<a href={payment.checkoutUrl} />}
+                >
+                  <LockSimple weight='fill' aria-hidden />
+                  {isChecking ? 'Проверяем оплату…' : `Оплатить ${formatPrice(payment.amount)}`}
+                </ButtonLink>
+              ) : (
+                <Button size='lg' fullWidth onClick={handlePay} disabled={isPaying}>
+                  <LockSimple weight='fill' aria-hidden />
+                  {isPaying ? 'Оплачиваем…' : `Оплатить ${formatPrice(payment.amount)}`}
+                </Button>
+              )}
+              {payment.driver === 'freedompay' && (
+                <p className={styles.text}>Оплата картой через Freedom Pay.</p>
+              )}
               {booking.dueAt && (
                 <p className={styles.text}>
                   Время держим до{' '}

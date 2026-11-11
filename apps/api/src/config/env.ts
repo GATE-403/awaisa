@@ -39,15 +39,20 @@ type Env = {
   GOOGLE_WALLET_ISSUER_ID?: string
   GOOGLE_WALLET_SERVICE_ACCOUNT?: string
   PAYMENT_DRIVER: PaymentDriver
+  FREEDOMPAY_MERCHANT_ID?: string
+  FREEDOMPAY_SECRET_KEY?: string
+  FREEDOMPAY_API_URL: string
+  FREEDOMPAY_CURRENCY: string
+  FREEDOMPAY_TESTING_MODE: boolean
 }
 
 type StorageDriver = 'local' | 's3'
 
 type SmsDriver = 'console' | 'twilio'
 
-// Prepayments: `test` is a built-in checkout for development and e2e; `none` turns deposits off.
-// A real acquirer (Freedom Pay, MBANK, O!Деньги…) becomes one more driver.
-type PaymentDriver = 'none' | 'test'
+// Prepayments: `test` is a built-in checkout for development and e2e; `none` turns deposits off;
+// `freedompay` takes real cards through Freedom Pay (Kyrgyzstan).
+type PaymentDriver = 'none' | 'test' | 'freedompay'
 
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 const MIN_SECRET_LENGTH = 32
@@ -137,10 +142,23 @@ const parseTwilio = (config: Record<string, unknown>, driver: SmsDriver) => {
   return twilio
 }
 
-const parsePaymentDriver = (value: unknown, nodeEnv: Env['NODE_ENV']): PaymentDriver => {
-  const driver = optionalString(value)
+const parsePaymentDriver = (
+  config: Record<string, unknown>,
+  nodeEnv: Env['NODE_ENV'],
+): PaymentDriver => {
+  const driver = optionalString(config.PAYMENT_DRIVER)
   if (!driver) return nodeEnv === 'production' ? 'none' : 'test'
-  if (driver !== 'none' && driver !== 'test') throw new Error('PAYMENT_DRIVER must be none or test')
+  if (driver !== 'none' && driver !== 'test' && driver !== 'freedompay') {
+    throw new Error('PAYMENT_DRIVER must be none, test or freedompay')
+  }
+  if (
+    driver === 'freedompay' &&
+    !(optionalString(config.FREEDOMPAY_MERCHANT_ID) && optionalString(config.FREEDOMPAY_SECRET_KEY))
+  ) {
+    throw new Error(
+      'PAYMENT_DRIVER=freedompay needs FREEDOMPAY_MERCHANT_ID and FREEDOMPAY_SECRET_KEY',
+    )
+  }
   if (driver === 'test' && nodeEnv === 'production') {
     throw new Error('PAYMENT_DRIVER=test must not be used in production')
   }
@@ -242,7 +260,13 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     AUTH_SECRET: parseAuthSecret(config.AUTH_SECRET, nodeEnv),
     ADMIN_PHONES: parseAdminPhones(config.ADMIN_PHONES),
     SMS_DRIVER: smsDriver,
-    PAYMENT_DRIVER: parsePaymentDriver(config.PAYMENT_DRIVER, nodeEnv),
+    PAYMENT_DRIVER: parsePaymentDriver(config, nodeEnv),
+    FREEDOMPAY_MERCHANT_ID: optionalString(config.FREEDOMPAY_MERCHANT_ID),
+    FREEDOMPAY_SECRET_KEY: optionalString(config.FREEDOMPAY_SECRET_KEY),
+    FREEDOMPAY_API_URL: optionalString(config.FREEDOMPAY_API_URL) ?? 'https://api.freedompay.kg',
+    FREEDOMPAY_CURRENCY: optionalString(config.FREEDOMPAY_CURRENCY) ?? 'KGS',
+    // Test payments on Freedom Pay's side (their test cards), still through the real API.
+    FREEDOMPAY_TESTING_MODE: optionalString(config.FREEDOMPAY_TESTING_MODE) === 'true',
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),

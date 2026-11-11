@@ -181,7 +181,9 @@ type PaymentPage = {
   id: string
   amount: number
   status: 'pending' | 'succeeded' | 'failed' | 'refunded'
-  driver: 'none' | 'test'
+  driver: 'none' | 'test' | 'freedompay'
+  /** The acquirer's own page (Freedom Pay); null for the test driver, which pays here. */
+  checkoutUrl: string | null
   booking: {
     id: string
     serviceName: string
