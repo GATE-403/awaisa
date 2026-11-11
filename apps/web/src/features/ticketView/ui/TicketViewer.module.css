@@ -20,3 +20,57 @@
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
+
+.details {
+  margin: 0;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-md);
+  text-align: left;
+}
+
+.detail dt {
+  color: var(--color-muted-foreground);
+}
+
+.detail dd {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.note {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.code {
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+.rowLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.rowLabel svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-link);
+}
+
+.rowAction {
+  flex-shrink: 0;
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-semibold);
+}

@@ -17,7 +17,8 @@
     "typeorm": "typeorm -d dist/database/data-source.js",
     "migration:generate": "pnpm build && typeorm -d dist/database/data-source.js migration:generate src/database/migrations/Migration",
     "migration:run": "typeorm -d dist/database/data-source.js migration:run",
-    "migration:revert": "typeorm -d dist/database/data-source.js migration:revert"
+    "migration:revert": "typeorm -d dist/database/data-source.js migration:revert",
+    "seed:demo": "node scripts/seed-demo.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1164.0",

@@ -70,6 +70,13 @@ const css = [
     ...toColorVariables(colors.dark),
     ...toVariables('system', systemColors.dark),
   ]),
+  // Touch devices that are not iOS (Android): live blur under sticky bars is recomputed on every
+  // scrolled frame and stutters on mid-range phones, so panes there are solid. iOS keeps glass.
+  `@supports not (-webkit-touch-callout: none) {\n@media (pointer: coarse) {\n${block(A11Y_ROOT, [
+    '  --blur-material: none;',
+    '  --color-material: var(--color-sheet);',
+    '  --color-chrome: var(--color-sheet);',
+  ])}\n}\n}`,
   // Accessibility settings: solid panes instead of glass, stronger edges and secondary text.
   `@media (prefers-reduced-transparency: reduce) {\n${block(A11Y_ROOT, [
     '  --blur-material: none;',

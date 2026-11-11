@@ -1,4 +1,7 @@
 .footer {
+  /* Below the fold on every page: skip its rendering until it is about to scroll in. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 480px;
   margin-top: auto;
   padding: var(--space-6) 0 calc(var(--space-6) + var(--tabbar-space) + var(--resume-space));
   background: var(--color-background);
