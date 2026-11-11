@@ -25,6 +25,8 @@ type ReminderChoice = 60 | 120 | 1440 | null
 
 type BookingStepId = 'service' | 'specialist' | 'datetime' | 'contacts'
 
+const STEP_ORDER: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
+
 const MIN_PHONE_DIGITS = 9
 
 const CONFLICT_STATUS = 409
@@ -184,8 +186,18 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (isAutoDayFull) setAutoDay({ key: autoDayKey, skips: skips + 1 })
   }, [isAutoDayFull, autoDayKey, skips])
 
-  const isStepCollapsed = (step: BookingStepId) =>
-    folded[step] ?? (step !== 'contacts' && completedSteps[step] && editingStep !== step)
+  // One step at a time: done steps fold to their summary, steps not reached yet show only a title.
+  const isStepCollapsed = (step: BookingStepId) => {
+    const handFolded = folded[step]
+    if (handFolded !== undefined) return handFolded
+    if (editingStep === step) return false
+    // Contacts stay open: people type their name whenever they like, and it must stay in view.
+    const isAhead =
+      step !== 'contacts' &&
+      firstIncompleteStep !== null &&
+      STEP_ORDER.indexOf(step) > STEP_ORDER.indexOf(firstIncompleteStep)
+    return isAhead || (step !== 'contacts' && completedSteps[step])
+  }
 
   const toggleStep = (step: BookingStepId) => {
     const isCollapsed = isStepCollapsed(step)

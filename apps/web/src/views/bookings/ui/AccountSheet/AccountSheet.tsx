@@ -1,18 +1,26 @@
 'use client'
 
 import { Avatar } from '@awaisa/ui/Avatar'
+import { Select } from '@awaisa/ui/Select'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
-import { AppearancePicker } from '@/features/theme'
 import { getMasterPlaces } from '@/shared/api/clientApi'
 import type { Customer, MasterPlace } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { useTheme } from '@/shared/lib/hooks/useTheme'
+import type { Theme } from '@/shared/lib/theme'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './AccountSheet.module.css'
+
+const THEMES: { value: Theme; label: string }[] = [
+  { value: 'system', label: 'Как в системе' },
+  { value: 'light', label: 'Светлое' },
+  { value: 'dark', label: 'Тёмное' },
+]
 
 interface AccountSheetProps {
   customer: Customer
@@ -24,6 +32,7 @@ interface AccountSheetProps {
 export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProps) => {
   const session = useSession()
   const router = useRouter()
+  const { theme, setTheme } = useTheme()
   const [places, setPlaces] = useState<MasterPlace[]>([])
 
   useEffect(() => {
@@ -56,12 +65,18 @@ export const AccountSheet = ({ customer, onEditName, onClose }: AccountSheetProp
         </button>
       </div>
 
-      <section className={sheet.group} aria-label='Оформление'>
-        <h3 className={sheet.groupTitle}>Оформление</h3>
-        <div className={sheet.list}>
-          <AppearancePicker />
+      <div className={sheet.list}>
+        <div className={sheet.row}>
+          <span className={sheet.rowLabel}>Оформление</span>
+          <Select
+            variant='plain'
+            aria-label='Оформление'
+            items={THEMES}
+            value={theme}
+            onValueChange={(value) => value && setTheme(value as Theme)}
+          />
         </div>
-      </section>
+      </div>
 
       <section className={sheet.group} aria-label='Бизнес'>
         <h3 className={sheet.groupTitle}>Бизнес</h3>

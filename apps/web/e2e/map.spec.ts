@@ -7,7 +7,8 @@ test.describe('Map: places nearby', () => {
     await expect(studio).toBeVisible()
     await expect(page.getByRole('region', { name: 'Карта салонов и мастеров' })).toBeVisible()
 
-    await studio.getByRole('link', { name: 'Записаться' }).click()
+    // The whole row books at that branch.
+    await studio.getByRole('link', { name: /Awaisa Studio/ }).click()
     await expect(page).toHaveURL(/\/awaisa-studio\/book\?branch=/)
   })
 

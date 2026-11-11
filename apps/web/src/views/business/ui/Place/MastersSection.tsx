@@ -2,7 +2,6 @@ import { Avatar } from '@awaisa/ui/Avatar'
 import { Star } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { Business, Specialist } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
 import styles from './Place.module.css'
 
 interface MastersSectionProps {
@@ -26,25 +25,23 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
           <li key={specialist.id}>
             <NextLink
               href={`/${business.slug}/book?specialist=${specialist.id}`}
+              aria-label={`${specialist.name}, ${specialist.role || 'мастер'}`}
               className={styles.master}
             >
               <Avatar
                 name={specialist.name}
                 src={specialist.photoUrl ?? undefined}
-                size='xl'
+                size='lg'
                 className={styles.masterAvatar}
               />
-              <span className={styles.masterName}>{specialist.name}</span>
-              <span className={styles.masterRole}>{specialist.role || 'Мастер'}</span>
-              <span className={styles.masterMeta}>
-                {specialist.rating !== null && (
-                  <span className={styles.masterRating}>
-                    <Star weight='fill' aria-hidden />
-                    {specialist.rating.toFixed(1)}
-                  </span>
-                )}
-                {pluralize(specialist.serviceIds.length, ['услуга', 'услуги', 'услуг'])}
-              </span>
+              {/* First name and rating: enough to pick; the role is in the booking form. */}
+              <span className={styles.masterName}>{specialist.name.split(' ')[0]}</span>
+              {specialist.rating !== null && (
+                <span className={styles.masterRating}>
+                  <Star weight='fill' aria-hidden />
+                  {specialist.rating.toFixed(1)}
+                </span>
+              )}
             </NextLink>
           </li>
         ))}

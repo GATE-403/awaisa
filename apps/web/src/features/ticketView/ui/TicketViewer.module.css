@@ -9,9 +9,13 @@
 
 .ticket {
   --ticket-max-width: 520px;
+  /* On the sheet the ticket is one layer up, so it never melts into the background. */
+  --color-surface: var(--color-sheet-surface);
 
   width: 100%;
   padding: var(--space-2);
+  /* The stage centres its caption; the ticket keeps its own left-aligned layout. */
+  text-align: left;
 }
 
 .hint {

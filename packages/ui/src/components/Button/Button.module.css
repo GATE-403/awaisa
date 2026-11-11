@@ -5,7 +5,7 @@
   gap: var(--space-2);
   flex-shrink: 0;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   font-weight: var(--font-weight-medium);
   letter-spacing: var(--tracking-normal);
   white-space: nowrap;
@@ -35,7 +35,6 @@
 .button[data-size="sm"] {
   height: var(--control-height-sm);
   padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }

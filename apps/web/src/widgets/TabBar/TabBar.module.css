@@ -42,7 +42,7 @@
 }
 
 .tab[aria-current="page"] {
-  background: var(--color-subtle);
+  background: var(--color-fill);
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
 }

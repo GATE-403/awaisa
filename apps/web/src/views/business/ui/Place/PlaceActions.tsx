@@ -82,12 +82,16 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
                 className={styles.quickAction}
                 {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
               >
-                <ActionIcon weight='fill' aria-hidden />
+                <span className={styles.quickIcon}>
+                  <ActionIcon weight='fill' aria-hidden />
+                </span>
                 {label}
               </a>
             ) : (
               <button type='button' className={styles.quickAction} onClick={onClick}>
-                <ActionIcon weight='fill' aria-hidden />
+                <span className={styles.quickIcon}>
+                  <ActionIcon weight='fill' aria-hidden />
+                </span>
                 {label}
               </button>
             )}

@@ -6,7 +6,6 @@ import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
-import { HeroCarousel } from './ui/HeroCarousel/HeroCarousel'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
 
@@ -46,7 +45,6 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
     <NextFreeProvider slugs={slugs}>
       <div className={styles.contained}>
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
-        {isBrowsing && !kind && <HeroCarousel offers={offers} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}
           title={query ? `«${query}»` : (kindLabel ?? 'Куда записаться')}

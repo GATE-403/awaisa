@@ -139,7 +139,6 @@
 
 .outcomeRow {
   display: flex;
-  padding: var(--space-2) var(--space-3);
 }
 
 .outcomeRow > fieldset {

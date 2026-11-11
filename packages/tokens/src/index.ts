@@ -63,6 +63,7 @@ type ColorScheme = {
   materialBorder: string
   materialHighlight: string
   chrome: string
+  segmentKnob: string
   scrollEdge: string
   contrast: string
   contrastHover: string
@@ -115,6 +116,8 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     // Sticky bars (header, business bar, section chips): one nearly solid material, so stacked
     // bars read as one sheet instead of glass over glass in different tones.
     chrome: 'rgb(250 250 252 / 0.94)',
+    // The raised knob of a segmented control: white on light, a lighter gray on dark (macOS 26).
+    segmentKnob: palette.white,
     // Content dims as it slides under a bar (scroll edge effect) instead of a hard hairline.
     scrollEdge: 'rgb(0 0 0 / 0.07)',
     contrast: palette.white,
@@ -159,6 +162,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     materialBorder: 'rgb(255 255 255 / 0.08)',
     materialHighlight: 'rgb(255 255 255 / 0.1)',
     chrome: 'rgb(24 24 26 / 0.95)',
+    segmentKnob: '#636366',
     scrollEdge: 'rgb(0 0 0 / 0.5)',
     contrast: palette.white,
     contrastHover: '#e8e8ed',
@@ -241,6 +245,8 @@ const radius = {
   xl: 22,
   '2xl': 28,
   full: 9999,
+  // Every one-line control (buttons, fields, selects, search) is a capsule; only containers are rounded rects.
+  control: 9999,
 }
 
 const fontFamily = {

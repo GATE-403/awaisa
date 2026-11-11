@@ -1,13 +1,16 @@
+/* Phones: the map stays on screen and the list scrolls inside its own sheet below it —
+   the page itself does not scroll, so the map is never pushed away. */
 .layout {
   display: flex;
   flex-direction: column-reverse;
+  height: calc(100dvh - var(--header-height) - var(--tabbar-space));
+  overflow: hidden;
 }
 
 .mapArea {
-  position: sticky;
-  top: var(--header-height);
+  position: relative;
   z-index: 0;
-  height: 46dvh;
+  flex: 0 0 42%;
 }
 
 .mapPlaceholder {
@@ -19,14 +22,22 @@
   position: relative;
   z-index: 1;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: var(--space-4);
-  margin-top: calc(-1 * var(--space-6));
-  padding: var(--space-5) var(--page-gutter)
-    calc(var(--space-8) + var(--tabbar-space) + var(--resume-space));
+  gap: var(--space-3);
+  min-height: 0;
+  margin-top: calc(-1 * var(--space-5));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4) var(--page-gutter) calc(var(--space-6) + var(--resume-space));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--color-background);
   box-shadow: var(--shadow-md);
+}
+
+/* Children keep their height so the panel scrolls; a clipped list would shrink to fit instead. */
+.panel > * {
+  flex-shrink: 0;
 }
 
 .header {
@@ -35,7 +46,27 @@
   gap: var(--space-3);
 }
 
+/* Phones: kinds and «Рядом со мной» stay pinned at the top of the sheet while places scroll under. */
+@media (max-width: 899px) {
+  .panel > .header {
+    position: sticky;
+    top: calc(-1 * var(--space-4));
+    z-index: 2;
+    margin: calc(-1 * var(--space-4)) calc(-1 * var(--page-gutter)) 0;
+    padding: var(--space-4) var(--page-gutter) var(--space-3);
+    background: var(--color-background);
+    box-shadow: 0 0.5px 0 var(--color-border);
+  }
+}
+
+/* The tabs and the list say what this is; on phones the heading is for screen readers only. */
 .title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   line-height: var(--text-2xl-line-height);
@@ -95,7 +126,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding-right: var(--space-3);
   scroll-margin: var(--space-20);
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
@@ -120,14 +150,20 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
-  min-height: 76px;
-  padding: var(--space-3) 0 var(--space-3) var(--space-4);
-  border: none;
-  background: transparent;
+  min-height: 64px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
   color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+}
+
+.rowMain:active {
+  background: var(--color-fill);
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
 }
 
 .thumb {
@@ -148,8 +184,8 @@
 
 .rowTitle {
   overflow: hidden;
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
   font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -158,8 +194,8 @@
 .rowMeta {
   overflow: hidden;
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -193,26 +229,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-.book {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  min-height: var(--control-height-sm);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-sm);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
-}
-
 @media (hover: hover) {
   .rowMain:hover {
     opacity: 0.85;
-  }
-
-  .book:hover {
-    background: var(--color-primary-subtle-hover);
   }
 }
 
@@ -228,6 +247,10 @@
     position: absolute;
     inset: 0;
     height: auto;
+  }
+
+  .rowMain:active {
+    background: transparent;
   }
 
   /* Sidebar from the kit: inset 12pt, 20pt corners, glass material, rows that highlight in place. */
@@ -254,6 +277,12 @@
   }
 
   .title {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
     font-size: var(--text-xl);
     line-height: var(--text-xl-line-height);
   }

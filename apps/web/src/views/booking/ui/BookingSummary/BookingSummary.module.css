@@ -27,10 +27,15 @@
 .barInfo {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   min-width: 0;
+  min-height: var(--control-height-md);
 }
 
 .barPrice {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
@@ -66,27 +71,78 @@
   letter-spacing: var(--tracking-title);
 }
 
-.list {
+/* Settings-style rows: each one reopens its step, the first unfinished one reads as the action. */
+.rows {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  margin: 0 calc(var(--space-3) * -1);
+  padding: 0;
+  list-style: none;
 }
 
-.item {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-4);
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--control-height-md);
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
+  text-align: left;
+  cursor: pointer;
 }
 
-.item dt {
+.rowLabel {
   color: var(--color-muted-foreground);
 }
 
-.item dd {
-  font-weight: var(--font-weight-medium);
+.rowValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  font-weight: var(--font-weight-semibold);
   text-align: right;
+}
+
+.rowExtra {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+.rowAction {
+  color: var(--color-link);
+}
+
+.rowEmpty {
+  color: var(--color-tertiary-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.rowChevron {
+  width: 12px;
+  height: 12px;
+  align-self: center;
+  color: var(--color-tertiary-foreground);
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .row:hover {
+    background: var(--color-fill);
+  }
 }
 
 .total {
@@ -119,4 +175,27 @@
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
   text-align: center;
+}
+
+.barInfo {
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.barCaret {
+  width: 12px;
+  height: 12px;
+  margin-left: 4px;
+  color: var(--color-muted-foreground);
+  vertical-align: 1px;
+}
+
+.detailValue {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  text-align: right;
 }

@@ -22,7 +22,7 @@ export const LoginPage = () => {
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
-        <PageTitle size='sm' title='Вход.' subtitle='Номер телефона и код из SMS — без паролей.' />
+        <PageTitle size='sm' title='Вход.' subtitle='По номеру телефона.' />
 
         <section className={styles.card} aria-live='polite'>
           {form.step === 'phone' && (

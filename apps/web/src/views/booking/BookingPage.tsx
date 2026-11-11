@@ -24,7 +24,7 @@ import type { Business, Catalog } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
-import { useBookingForm } from '@/views/booking/model/useBookingForm'
+import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
@@ -60,13 +60,19 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
     onSubmit: form.submit,
+    onStepOpen: (step: BookingStepId) => {
+      form.editStep(step)
+      document
+        .getElementById(`step-${step}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
   }
 
   return (
     <main className={styles.page}>
       <Container className={styles.layout}>
         <div className={styles.steps}>
-          <PageTitle title='Запись.' subtitle={`${business.name}: четыре шага — около минуты.`} />
+          <PageTitle title='Запись.' subtitle={business.name} />
 
           {form.branches.length > 1 && (
             <section className={styles.branches} aria-label='Филиал'>
@@ -218,13 +224,17 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                   />
                 </Field>
               )}
-              <Field label='Комментарий'>
-                <Input
-                  value={form.comment}
-                  onValueChange={form.setComment}
-                  placeholder='Необязательно'
-                />
-              </Field>
+              {/* Most visits need no note: the field waits behind a link. */}
+              <details className={styles.more} open={form.comment !== '' || undefined}>
+                <summary className={styles.moreSummary}>Добавить комментарий</summary>
+                <Field label='Комментарий'>
+                  <Input
+                    value={form.comment}
+                    onValueChange={form.setComment}
+                    placeholder='Например, «нужна парковка»'
+                  />
+                </Field>
+              </details>
             </div>
             <NotifyOptions
               phone={form.accountPhone ?? (form.phone.trim() || null)}

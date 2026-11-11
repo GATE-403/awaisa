@@ -3,7 +3,6 @@ import { type CSSProperties, ViewTransition } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business/ui/BusinessTile/BusinessTile'
 import type { BusinessCard as BusinessCardData } from '@/shared/api/types'
-import { getKindLabel } from '@/shared/config/platform'
 import styles from './BusinessCard.module.css'
 import { LiveStatus } from './LiveStatus'
 
@@ -36,9 +35,8 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
       </span>
     </ViewTransition>
     <span className={styles.body}>
-      <span className={styles.eyebrow}>{getKindLabel(business.kind)}</span>
       <span className={styles.title}>{business.name}</span>
-      <LiveStatus slug={business.slug} hours={business.hours} />
+      <LiveStatus slug={business.slug} />
       <span className={styles.footer}>
         <span className={styles.price}>от {formatPrice(business.minPrice)}</span>
         <span className={styles.address}>{business.address}</span>

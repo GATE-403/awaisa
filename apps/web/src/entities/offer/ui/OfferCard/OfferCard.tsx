@@ -1,6 +1,6 @@
 'use client'
 
-import { Star } from '@phosphor-icons/react/ssr'
+import { Fire, Star } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
 import { addDayKey, formatDuration, formatPrice } from '@/entities/booking'
@@ -45,7 +45,11 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
         ) : (
           <BusinessTile name={offer.businessName} size='md' />
         )}
-        {isHit && <span className={styles.badge}>Хит</span>}
+        {isHit && (
+          <span className={styles.badge} role='img' aria-label='Хит' title='Хит'>
+            <Fire weight='fill' aria-hidden />
+          </span>
+        )}
       </div>
       {action && <span className={styles.action}>{action}</span>}
 
@@ -57,7 +61,6 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
           </NextLink>
         </h3>
         <p className={styles.place}>
-          <BusinessTile name={offer.businessName} size='xs' />
           <span className={styles.placeName}>{offer.businessName}</span>
           {offer.rating !== null && (
             <span className={styles.rating}>
@@ -69,7 +72,7 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
         <div className={styles.footer}>
           <p className={styles.price}>
             {formatPrice(offer.price)}
-            <span className={styles.duration}>{formatDuration(offer.durationMinutes)}</span>
+            <span className={styles.duration}> · {formatDuration(offer.durationMinutes)}</span>
           </p>
           <span
             className={styles.slot}

@@ -39,7 +39,8 @@ export const CatalogResults = ({
   return (
     <section className={styles.results} aria-labelledby='results-title'>
       <div className={styles.header}>
-        <h2 id='results-title' className={styles.title}>
+        {/* Browsing everything, the tabs say it all; a search or a kind keeps its heading. */}
+        <h2 id='results-title' className={styles.title} data-quiet={!canReset || undefined}>
           {title}
         </h2>
         {canReset && (

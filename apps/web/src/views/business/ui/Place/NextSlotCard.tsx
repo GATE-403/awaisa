@@ -23,16 +23,24 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   const slot = useNextSlot(service.id)
 
   return (
-    <aside className={styles.card} aria-label='Ближайшее окно'>
-      <p className={styles.cardEyebrow}>Ближайшее свободное время</p>
-      <p className={styles.slot} aria-live='polite' data-loading={slot === undefined || undefined}>
-        {getSlotText(slot)}
-      </p>
-      <p className={styles.slotMeta}>
-        {service.name} · {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
-      </p>
+    // One compact row: when, for what, and the way in on the right.
+    <aside className={`${styles.card} ${styles.slotCard}`} aria-label='Ближайшее окно'>
+      <div className={styles.slotText}>
+        <p className={styles.cardEyebrow}>Ближайшее окно</p>
+        <p
+          className={styles.slot}
+          aria-live='polite'
+          data-loading={slot === undefined || undefined}
+        >
+          {getSlotText(slot)}
+        </p>
+        <p className={styles.slotMeta}>
+          {service.name} · {formatDuration(service.durationMinutes)} · {formatPrice(service.price)}
+        </p>
+      </div>
       <ButtonLink
         variant='secondary'
+        size='sm'
         className={styles.cardButton}
         render={
           <NextLink

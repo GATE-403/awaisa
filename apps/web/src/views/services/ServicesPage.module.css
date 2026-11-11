@@ -110,13 +110,14 @@
 }
 
 .hit {
+  display: inline-flex;
   flex-shrink: 0;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-danger-strong);
-  color: var(--color-primary-foreground);
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-bold);
+  color: var(--color-highlight);
+}
+
+.hit svg {
+  width: 18px;
+  height: 18px;
 }
 
 .description {

@@ -67,7 +67,12 @@ const createPastVisit = async (
             `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),
                "ends_at" = "ends_at" - make_interval(days => $2, mins => $3) WHERE "id" = $1
              RETURNING to_char("starts_at" AT TIME ZONE 'UTC' + interval '6 hours', 'YYYY-MM-DD') AS "date"`,
-            [booking.id, daysBack === undefined ? days : days + offset, minutes],
+            [
+              booking.id,
+              // Far back mode also walks to other days when a slot is taken.
+              daysBack === undefined ? days + attempt * 3 : days + offset,
+              minutes,
+            ],
           )
           return rows[0]?.date as string
         } catch (error) {

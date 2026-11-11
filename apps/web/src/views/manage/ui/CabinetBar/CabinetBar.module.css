@@ -82,14 +82,13 @@
   gap: var(--space-2);
 }
 
-.open svg {
-  width: 14px;
-  height: 14px;
-}
-
+/* One Liquid Glass capsule of glyph buttons, like a macOS 26 window toolbar group. */
 .group {
   display: flex;
   align-items: center;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
 }
 
 .group :is(button, a) {
@@ -98,27 +97,21 @@
   border-radius: var(--radius-full);
 }
 
-.account {
+.icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--color-muted-foreground);
 }
 
-.account svg {
-  width: 22px;
-  height: 22px;
+.icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 @media (hover: hover) {
   .group :is(button, a):hover {
-    background: var(--color-fill);
+    background: var(--color-fill-hover);
     color: var(--color-foreground);
-  }
-}
-
-@media (max-width: 639px) {
-  .open {
-    display: none;
   }
 }
