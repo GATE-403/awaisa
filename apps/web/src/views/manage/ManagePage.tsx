@@ -16,6 +16,7 @@ import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
 import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
+import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
 import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
 import { ProfileTab } from '@/views/manage/ui/ProfileTab/ProfileTab'
@@ -166,6 +167,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
           )}
           {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
           {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}
+          {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
           {data && tab === 'profile' && (
             <ProfileTab slug={slug} business={data.business} run={run} />
           )}

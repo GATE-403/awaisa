@@ -296,6 +296,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
       {selected && (
         <BookingDetailsDialog
+          slug={slug}
           key={selected.id}
           booking={selected}
           dayLabel={dayLabel}

@@ -1,0 +1,64 @@
+'use client'
+
+import { Gift } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
+import { useEffect, useState } from 'react'
+import { formatPrice } from '@/entities/booking'
+import { BusinessTile } from '@/entities/business'
+import { useSession } from '@/entities/session'
+import { getMyLoyalty } from '@/shared/api/clientApi'
+import type { MyLoyalty } from '@/shared/api/types'
+import { pluralize } from '@/shared/lib/plural'
+import styles from './LoyaltyCard.module.css'
+
+// «Бонусы и абонементы»: what the signed-in client has to spend, per place.
+export const LoyaltyCard = () => {
+  const session = useSession()
+  const [places, setPlaces] = useState<MyLoyalty>([])
+  const isSignedIn = session.status === 'signedIn'
+
+  useEffect(() => {
+    if (!isSignedIn) return
+    const controller = new AbortController()
+    getMyLoyalty(controller.signal)
+      .then(setPlaces)
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [isSignedIn])
+
+  if (places.length === 0) return null
+
+  return (
+    <section className={styles.section} aria-labelledby='loyalty-title'>
+      <h2 id='loyalty-title' className={styles.title}>
+        Бонусы и абонементы
+      </h2>
+      <ul className={styles.list}>
+        {places.map((place) => (
+          <li key={place.slug}>
+            <NextLink href={`/${place.slug}/book`} className={styles.row}>
+              <BusinessTile name={place.name} size='sm' />
+              <span className={styles.text}>
+                <span className={styles.name}>{place.name}</span>
+                <span className={styles.meta}>
+                  {[
+                    ...place.subscriptions.map(
+                      (item) =>
+                        `${item.title}: ${pluralize(item.visitsLeft, ['визит', 'визита', 'визитов'])}`,
+                    ),
+                  ].join(' · ') || 'Потратьте на следующем визите'}
+                </span>
+              </span>
+              {place.bonusBalance > 0 && (
+                <span className={styles.balance}>
+                  <Gift weight='fill' aria-hidden />
+                  {formatPrice(place.bonusBalance)}
+                </span>
+              )}
+            </NextLink>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

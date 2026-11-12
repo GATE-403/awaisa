@@ -97,7 +97,7 @@ export class Booking {
   paidAmount: number | null
 
   @Column({ name: 'payment_method', type: 'varchar', length: 16, nullable: true })
-  paymentMethod: 'cash' | 'card' | 'transfer' | null
+  paymentMethod: 'cash' | 'card' | 'transfer' | 'subscription' | 'certificate' | null
 
   @Column({ name: 'outcome_at', type: 'timestamptz', nullable: true })
   outcomeAt: Date | null

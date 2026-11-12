@@ -12,6 +12,7 @@ import type { ClientCard } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { ClientLoyaltySection } from './ClientLoyaltySection'
 import styles from './ClientSheet.module.css'
 
 interface ClientSheetProps {
@@ -175,6 +176,8 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps)
               </div>
             )}
           </div>
+
+          <ClientLoyaltySection slug={slug} phone={card.phone} />
 
           <section className={sheet.group} aria-label='Заметки'>
             <h3 className={sheet.groupTitle}>Только для вас</h3>

@@ -25,6 +25,7 @@ import { normalizePhone } from '../common/phone.js'
 import { isSignedToken, visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
+import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { PromotionsService } from '../promotions/promotions.service.js'
@@ -87,6 +88,10 @@ type OutcomeInput = {
   outcome: 'arrived' | 'no_show' | null
   paidAmount?: number | null
   paymentMethod?: Booking['paymentMethod']
+  subscriptionId?: string | null
+  certificateCode?: string | null
+  certificateAmount?: number | null
+  bonusAmount?: number | null
 }
 
 const EXCLUSION_VIOLATION = '23P01'
@@ -171,6 +176,7 @@ export class BookingsService {
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
     private readonly promotions: PromotionsService,
+    private readonly loyalty: LoyaltyService,
   ) {}
 
   async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
@@ -533,19 +539,45 @@ export class BookingsService {
       throw new BadRequestException('Отметить визит можно в его день или позже')
     }
     const isArrived = input.outcome === 'arrived'
+    const due = booking.service ? booking.service.price - (booking.discountAmount ?? 0) : 0
+    // Subscriptions, certificates and bonuses pay part or all of it; money pays the rest.
+    let covered = 0
+    let coveredBy: 'subscription' | 'certificate' | null = null
+    if (isArrived) {
+      const settled = await this.loyalty.applyToVisit(
+        {
+          id,
+          businessId,
+          phone: booking.customerPhone,
+          serviceId: booking.serviceId,
+          due,
+        },
+        input,
+      )
+      covered = settled.covered
+      coveredBy = settled.method
+    } else {
+      await this.loyalty.revertVisits([id])
+    }
+    const paidAmount = isArrived ? (input.paidAmount ?? Math.max(due - covered, 0)) : null
     await this.bookings.update(
       { id },
       {
         outcome: input.outcome,
-        // Unmarked amounts default to what the visit costs after its discount.
-        paidAmount: isArrived
-          ? (input.paidAmount ??
-            (booking.service ? booking.service.price - (booking.discountAmount ?? 0) : null))
+        paidAmount,
+        paymentMethod: isArrived
+          ? paidAmount === 0 && coveredBy
+            ? coveredBy
+            : input.paymentMethod &&
+                input.paymentMethod !== 'subscription' &&
+                input.paymentMethod !== 'certificate'
+              ? input.paymentMethod
+              : 'cash'
           : null,
-        paymentMethod: isArrived ? (input.paymentMethod ?? 'cash') : null,
         outcomeAt: input.outcome ? new Date() : null,
       },
     )
+    if (isArrived) await this.loyalty.earnForVisits([id])
 
     return toAdminView(await this.viewQuery().where('booking.id = :id', { id }).getOneOrFail())
   }

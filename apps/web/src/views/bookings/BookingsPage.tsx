@@ -17,6 +17,7 @@ import { UpcomingBooking } from '@/views/bookings/ui/UpcomingBooking/UpcomingBoo
 import styles from './BookingsPage.module.css'
 import { getCountdown, isUpcoming } from './bookingsUtils'
 import { AccountCard } from './ui/AccountCard/AccountCard'
+import { LoyaltyCard } from './ui/LoyaltyCard/LoyaltyCard'
 
 interface BookingsPageProps {
   /** The signed-in account's bookings, read on the server for this request. */
@@ -92,6 +93,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
         )}
 
         {bookings.length > 0 && <WaitlistList />}
+
+        <LoyaltyCard />
 
         {history.length > 0 && (
           <section className={styles.section} aria-labelledby='history-title'>

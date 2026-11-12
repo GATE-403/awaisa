@@ -11,6 +11,8 @@ import styles from './BookingDetailsDialog.module.css'
 import { VisitOutcomeSection } from './VisitOutcomeSection'
 
 interface BookingDetailsDialogProps {
+  /** The business, for the client's loyalty in «Итог визита». */
+  slug: string
   booking: AdminBooking
   tint: string
   dayLabel: string
@@ -22,6 +24,7 @@ interface BookingDetailsDialogProps {
 }
 
 export const BookingDetailsDialog = ({
+  slug,
   booking,
   tint,
   dayLabel,
@@ -126,7 +129,11 @@ export const BookingDetailsDialog = ({
       </div>
 
       {!isCancelled && onOutcome && (
-        <VisitOutcomeSection booking={booking} onChange={(input) => onOutcome(booking.id, input)} />
+        <VisitOutcomeSection
+          slug={slug}
+          booking={booking}
+          onChange={(input) => onOutcome(booking.id, input)}
+        />
       )}
 
       {booking.comment && (
