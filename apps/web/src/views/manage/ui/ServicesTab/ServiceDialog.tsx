@@ -18,6 +18,16 @@ interface ServiceDialogProps {
 
 const FORM_ID = 'service-form'
 
+const REBOOK_OPTIONS = [
+  { value: 0, label: 'Не напоминать' },
+  { value: 14, label: 'Через 2 недели' },
+  { value: 21, label: 'Через 3 недели' },
+  { value: 28, label: 'Через 4 недели' },
+  { value: 42, label: 'Через 6 недель' },
+  { value: 56, label: 'Через 8 недель' },
+  { value: 90, label: 'Через 3 месяца' },
+]
+
 const DURATIONS = [
   ...Array.from({ length: 16 }, (_, index) => (index + 1) * 15),
   300,
@@ -30,6 +40,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
   const [categoryId, setCategoryId] = useState(service?.categoryId ?? categories[0]?.id ?? '')
   const [durationMinutes, setDuration] = useState(service?.durationMinutes ?? 60)
   const [price, setPrice] = useState(service ? String(service.price) : '')
+  const [rebookDays, setRebookDays] = useState<number | null>(service?.rebookDays ?? null)
   const [deposit, setDeposit] = useState(service?.deposit ? String(service.deposit) : '')
   const [canTakeDeposits, setCanTakeDeposits] = useState(false)
   const [description, setDescription] = useState(service?.description ?? '')
@@ -61,6 +72,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
       durationMinutes,
       price: Number(price),
       deposit: depositAmount > 0 ? depositAmount : null,
+      rebookDays,
       description: description.trim(),
       isPopular,
       isActive,
@@ -143,6 +155,29 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
             )}
           </div>
           <p className={sheet.groupFooter}>Клиент видит цену и длительность до записи.</p>
+        </section>
+
+        <section className={sheet.group} aria-label='Пора прийти снова'>
+          <h3 className={sheet.groupTitle}>Пора прийти снова</h3>
+          <div className={sheet.list}>
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Напомнить по SMS</span>
+              <span className={sheet.rowControl}>
+                <Select
+                  variant='plain'
+                  aria-label='Напомнить прийти снова'
+                  items={REBOOK_OPTIONS}
+                  value={rebookDays ?? 0}
+                  onValueChange={(value) => setRebookDays(value ? value : null)}
+                />
+              </span>
+            </div>
+          </div>
+          <p className={sheet.groupFooter}>
+            {rebookDays
+              ? 'Клиенту придёт одно SMS со ссылкой к тому же мастеру, если он ещё не записался сам.'
+              : 'Напомним клиенту записаться снова — к тому же мастеру.'}
+          </p>
         </section>
 
         {canTakeDeposits && (

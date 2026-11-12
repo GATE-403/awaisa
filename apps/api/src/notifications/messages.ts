@@ -62,12 +62,22 @@ const waitlistFreedMessage = (
 ) =>
   `${businessName}: освободилось время — ${serviceName}, ${formatDate(date)} в ${time}. Успейте записаться: ${link}`
 
+// «Пора прийти снова»: one nudge N days after the visit, with a link to the same master.
+const returnVisitMessage = (
+  businessName: string,
+  serviceName: string,
+  masterName: string,
+  link: string,
+) =>
+  `${businessName}: пора снова на «${serviceName}»? ${masterName.split(' ')[0]} ждёт вас — запишитесь: ${link}`
+
 export type { BookingMessageInput }
 export {
   confirmationMessage,
   masterInviteMessage,
   otpMessage,
   reminderMessage,
+  returnVisitMessage,
   waitlistFreedMessage,
   rescheduleMessage,
   reviewRequestMessage,

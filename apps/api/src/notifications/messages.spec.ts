@@ -2,6 +2,7 @@ import {
   confirmationMessage,
   otpMessage,
   reminderMessage,
+  returnVisitMessage,
   waitlistFreedMessage,
 } from './messages.js'
 
@@ -39,6 +40,12 @@ describe('SMS messages', () => {
       ),
     ).toBe(
       'Awaisa Studio: освободилось время — Женская стрижка, 12 ноября в 15:30. Успейте записаться: https://a.kg/x',
+    )
+  })
+
+  it('return-visit SMS names the service and the master by first name', () => {
+    expect(returnVisitMessage('Kings', 'Мужская стрижка', 'Эрлан Сыдыков', 'https://a.kg/b')).toBe(
+      'Kings: пора снова на «Мужская стрижка»? Эрлан ждёт вас — запишитесь: https://a.kg/b',
     )
   })
 })

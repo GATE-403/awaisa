@@ -12,6 +12,8 @@ type Service = {
   price: number
   /** Prepayment asked for online bookings (сом); null = none. */
   deposit?: number | null
+  /** «Пора прийти снова» after this many days; null = no reminder. */
+  rebookDays?: number | null
   isPopular: boolean
   isActive?: boolean
 }
@@ -374,7 +376,7 @@ type UpdateBusinessInput = Partial<
 type ServiceInput = Pick<
   Service,
   'categoryId' | 'name' | 'description' | 'durationMinutes' | 'price' | 'isPopular'
-> & { isActive: boolean; deposit: number | null }
+> & { isActive: boolean; deposit: number | null; rebookDays: number | null }
 
 type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
   isActive: boolean

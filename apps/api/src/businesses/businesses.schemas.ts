@@ -104,6 +104,8 @@ const serviceSchema = z.object({
     .nullable()
     .default(null)
     .transform((value) => (value ? value : null)),
+  // «Пора прийти снова» after this many days; null = no reminder.
+  rebookDays: z.number().int().min(1).max(365).nullable().default(null),
   isPopular: z.boolean().default(false),
   isActive: z.boolean().default(true),
 })

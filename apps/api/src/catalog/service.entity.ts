@@ -28,6 +28,10 @@ export class Service {
   @Column({ type: 'int' })
   price: number
 
+  /** Days after a visit to remind the client to come again; null = never. */
+  @Column({ name: 'rebook_days', type: 'smallint', nullable: true })
+  rebookDays: number | null
+
   /** Asked when booked online (сом); null = no prepayment. */
   @Column({ type: 'int', nullable: true })
   deposit: number | null
