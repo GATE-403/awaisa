@@ -12,6 +12,7 @@ import { getClients } from '@/shared/api/clientApi'
 import type { ClientListItem } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
+import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
@@ -30,6 +31,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 
 // The client base, like Contacts: search by name or number, newest visits first.
 export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
   const [isMailing, setIsMailing] = useState(false)
+  const canSeeMoney = useCanSeeMoney()
   const [query, setQuery] = useState('')
   const [clients, setClients] = useState<ClientListItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -63,10 +65,12 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
             : 'Все, кто записывался: визиты, траты, неявки и ваши заметки.'
         }
         actions={
-          <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
-            <PaperPlaneTilt weight='bold' aria-hidden />
-            Рассылка
-          </Button>
+          canSeeMoney && (
+            <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
+              <PaperPlaneTilt weight='bold' aria-hidden />
+              Рассылка
+            </Button>
+          )
         }
       />
       {isMailing && (
@@ -123,7 +127,7 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
                   </span>
                 </span>
                 <span className={styles.spent}>
-                  {client.spent > 0 ? formatPrice(client.spent) : ''}
+                  {canSeeMoney && client.spent > 0 ? formatPrice(client.spent) : ''}
                 </span>
                 <CaretRight weight='bold' aria-hidden className={styles.chevron} />
               </button>

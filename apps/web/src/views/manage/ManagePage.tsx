@@ -25,8 +25,10 @@ import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
 import { ServicesTab } from '@/views/manage/ui/ServicesTab/ServicesTab'
 import { SetupProgress } from '@/views/manage/ui/SetupProgress/SetupProgress'
+import { TeamTab } from '@/views/manage/ui/TeamTab/TeamTab'
 import styles from './ManagePage.module.css'
-import { isSettingsTab, MAIN_TABS, SETTINGS_TABS, toManageTab } from './manageTabs'
+import { isSettingsTab, isTabAllowed, MAIN_TABS, SETTINGS_TABS, toManageTab } from './manageTabs'
+import { ManageRoleContext } from './model/useManageRole'
 
 interface ManagePageProps {
   slug: string
@@ -40,7 +42,9 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const session = useRequireSession()
   const searchParams = useSearchParams()
   const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn', initialData)
-  const tab = toManageTab(searchParams.get('tab'))
+  const role = data?.role ?? 'owner'
+  const requested = toManageTab(searchParams.get('tab'))
+  const tab = isTabAllowed(requested, role) ? requested : 'schedule'
   const alertsVersion = useNewBookingAlerts(slug, data !== null)
 
   if (error) {
@@ -64,117 +68,128 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   }
 
   return (
-    <main className={styles.page}>
-      <CabinetBar
-        slug={slug}
-        title={data?.business.name ?? null}
-        isPublished={data?.business.isPublished ?? true}
-      />
-      <Container className={styles.content}>
-        <header className={styles.header}>
-          <div className={styles.identity}>
-            {data ? (
-              <BusinessTile name={data.business.name} size='md' />
-            ) : (
-              <Skeleton className={styles.tileSkeleton} />
+    <ManageRoleContext value={role}>
+      <main className={styles.page}>
+        <CabinetBar
+          slug={slug}
+          title={data?.business.name ?? null}
+          isPublished={data?.business.isPublished ?? true}
+        />
+        <Container className={styles.content}>
+          <header className={styles.header}>
+            <div className={styles.identity}>
+              {data ? (
+                <BusinessTile name={data.business.name} size='md' />
+              ) : (
+                <Skeleton className={styles.tileSkeleton} />
+              )}
+              {data ? (
+                <h1 className={styles.title}>
+                  {data.business.name}.
+                  <span className={styles.titleMuted}>
+                    {data.business.isPublished ? ' Кабинет' : ' Кабинет · страница скрыта'}
+                  </span>
+                </h1>
+              ) : (
+                <Skeleton className={styles.titleSkeleton} />
+              )}
+            </div>
+          </header>
+
+          <TextTabs
+            label='Разделы кабинета'
+            items={[
+              ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
+                ({ value, label }) => ({
+                  href: `/manage/${slug}?tab=${value}`,
+                  label,
+                  isActive: tab === value,
+                }),
+              ),
+              ...(role === 'owner'
+                ? [
+                    {
+                      href: `/manage/${slug}?tab=services`,
+                      label: 'Настройки',
+                      isActive: isSettingsTab(tab),
+                    },
+                  ]
+                : []),
+            ]}
+          />
+          {isSettingsTab(tab) && (
+            <nav aria-label='Настройки' className={styles.subnav}>
+              {SETTINGS_TABS.map(({ value, label }) => (
+                <NextLink
+                  key={value}
+                  href={`/manage/${slug}?tab=${value}`}
+                  scroll={false}
+                  className={styles.subtab}
+                  aria-current={tab === value ? 'page' : undefined}
+                >
+                  {label}
+                </NextLink>
+              ))}
+            </nav>
+          )}
+
+          {data && role === 'owner' && (
+            <SetupProgress business={data.business} catalog={data.catalog} />
+          )}
+
+          <div
+            className={styles.main}
+            data-wide={tab === 'schedule' || tab === 'analytics' || undefined}
+          >
+            {!data && <Skeleton className={styles.skeleton} />}
+            {data && tab === 'schedule' && (
+              <ScheduleTab
+                slug={slug}
+                business={data.business}
+                catalog={data.catalog}
+                refreshKey={alertsVersion}
+              />
             )}
-            {data ? (
-              <h1 className={styles.title}>
-                {data.business.name}.
-                <span className={styles.titleMuted}>
-                  {data.business.isPublished ? ' Кабинет' : ' Кабинет · страница скрыта'}
-                </span>
-              </h1>
-            ) : (
-              <Skeleton className={styles.titleSkeleton} />
+            {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
+            {data && tab === 'clients' && (
+              <ClientsTab slug={slug} businessName={data.business.name} />
+            )}
+            {data && tab === 'reviews' && (
+              <ReviewsTab slug={slug} businessName={data.business.name} />
+            )}
+            {data && tab === 'services' && (
+              <ServicesTab slug={slug} catalog={data.catalog} run={run} />
+            )}
+            {data && tab === 'masters' && (
+              <MastersTab
+                slug={slug}
+                catalog={data.catalog}
+                branches={data.business.branches}
+                businessHours={data.business.hours}
+                run={run}
+              />
+            )}
+            {data && tab === 'branches' && (
+              <BranchesTab slug={slug} branches={data.business.branches} run={run} />
+            )}
+            {data && tab === 'hours' && (
+              <HoursTab
+                key={JSON.stringify([data.business.hours, data.business.slotMinutes])}
+                slug={slug}
+                business={data.business}
+                run={run}
+              />
+            )}
+            {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
+            {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}
+            {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
+            {data && tab === 'team' && <TeamTab slug={slug} />}
+            {data && tab === 'profile' && (
+              <ProfileTab slug={slug} business={data.business} run={run} />
             )}
           </div>
-        </header>
-
-        <TextTabs
-          label='Разделы кабинета'
-          items={[
-            ...MAIN_TABS.map(({ value, label }) => ({
-              href: `/manage/${slug}?tab=${value}`,
-              label,
-              isActive: tab === value,
-            })),
-            {
-              href: `/manage/${slug}?tab=services`,
-              label: 'Настройки',
-              isActive: isSettingsTab(tab),
-            },
-          ]}
-        />
-        {isSettingsTab(tab) && (
-          <nav aria-label='Настройки' className={styles.subnav}>
-            {SETTINGS_TABS.map(({ value, label }) => (
-              <NextLink
-                key={value}
-                href={`/manage/${slug}?tab=${value}`}
-                scroll={false}
-                className={styles.subtab}
-                aria-current={tab === value ? 'page' : undefined}
-              >
-                {label}
-              </NextLink>
-            ))}
-          </nav>
-        )}
-
-        {data && <SetupProgress business={data.business} catalog={data.catalog} />}
-
-        <div
-          className={styles.main}
-          data-wide={tab === 'schedule' || tab === 'analytics' || undefined}
-        >
-          {!data && <Skeleton className={styles.skeleton} />}
-          {data && tab === 'schedule' && (
-            <ScheduleTab
-              slug={slug}
-              business={data.business}
-              catalog={data.catalog}
-              refreshKey={alertsVersion}
-            />
-          )}
-          {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
-          {data && tab === 'clients' && (
-            <ClientsTab slug={slug} businessName={data.business.name} />
-          )}
-          {data && tab === 'reviews' && (
-            <ReviewsTab slug={slug} businessName={data.business.name} />
-          )}
-          {data && tab === 'services' && (
-            <ServicesTab slug={slug} catalog={data.catalog} run={run} />
-          )}
-          {data && tab === 'masters' && (
-            <MastersTab
-              slug={slug}
-              catalog={data.catalog}
-              branches={data.business.branches}
-              businessHours={data.business.hours}
-              run={run}
-            />
-          )}
-          {data && tab === 'branches' && (
-            <BranchesTab slug={slug} branches={data.business.branches} run={run} />
-          )}
-          {data && tab === 'hours' && (
-            <HoursTab
-              key={JSON.stringify([data.business.hours, data.business.slotMinutes])}
-              slug={slug}
-              business={data.business}
-              run={run}
-            />
-          )}
-          {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
-          {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}
-          {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
-          {data && tab === 'profile' && (
-            <ProfileTab slug={slug} business={data.business} run={run} />
-          )}
-        </div>
-      </Container>
-    </main>
+        </Container>
+      </main>
+    </ManageRoleContext>
   )
 }

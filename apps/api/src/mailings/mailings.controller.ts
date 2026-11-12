@@ -1,6 +1,10 @@
 import { Body, Controller, Get, Post, Put, Query, UseGuards } from '@nestjs/common'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import {
   type BirthdayGreetingInput,
   birthdayGreetingSchema,
@@ -12,6 +16,7 @@ import {
 import { MailingsService } from './mailings.service.js'
 
 @Controller('manage/:slug/mailings')
+@OwnerOnly()
 @UseGuards(BusinessAccessGuard)
 export class MailingsController {
   constructor(private readonly mailings: MailingsService) {}

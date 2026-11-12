@@ -20,6 +20,7 @@ import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/sh
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize } from '@/shared/lib/plural'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
+import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
@@ -52,6 +53,7 @@ const PAST_DAYS = 14
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const today = useToday()
+  const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
   const [unclosed, setUnclosed] = useState<{
     total: number
@@ -98,7 +100,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     dayLabel,
     !dayHours && 'выходной',
     confirmed.length === 0 ? 'записей нет' : `записей: ${confirmed.length}`,
-    revenue > 0 && formatPrice(revenue),
+    canSeeMoney && revenue > 0 && formatPrice(revenue),
   ]
     .filter(Boolean)
     .join(' · ')

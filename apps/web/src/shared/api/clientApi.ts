@@ -51,6 +51,7 @@ import type {
   SpecialistInput,
   SubscriptionPlan,
   SubscriptionPlanInput,
+  TeamMember,
   TelegramStatus,
   UpdateBusinessInput,
   VisitReview,
@@ -498,7 +499,19 @@ const sendMailing = (
 const setBirthdayGreeting = (slug: string, text: string | null) =>
   send<{ text: string | null }>('PUT', `${manage(slug)}/mailings/birthday`, { text })
 
+const getTeam = (slug: string, signal?: AbortSignal) =>
+  request<TeamMember[]>(`${manage(slug)}/members`, { signal })
+
+const addTeamMember = (slug: string, phone: string) =>
+  post<TeamMember[]>(`${manage(slug)}/members`, { phone })
+
+const removeTeamMember = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/members/${id}`)
+
 export {
+  addTeamMember,
+  getTeam,
+  removeTeamMember,
   getMailings,
   previewMailing,
   sendMailing,

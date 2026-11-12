@@ -18,7 +18,13 @@ import type { Env } from '../config/env.js'
 import { masterInviteMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import type { Business } from './business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from './business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  CurrentRole,
+  OwnerOnly,
+} from './business-access.guard.js'
+import type { MemberRole } from './business-member.entity.js'
 import {
   type BranchInput,
   branchSchema,
@@ -51,13 +57,16 @@ export class ManageController {
   ) {}
 
   @Get()
-  async get(@CurrentBusiness() business: Business) {
+  async get(@CurrentBusiness() business: Business, @CurrentRole() role: MemberRole) {
     return {
+      // The cabinet hides money and setup from administrators; the API refuses them too.
+      role,
       business: await this.businesses.toFullView(business, { includeInactive: true }),
       catalog: await this.catalog.getCatalog(business.id, { includeInactive: true }),
     }
   }
 
+  @OwnerOnly()
   @Post('branches')
   createBranch(
     @CurrentBusiness() business: Business,
@@ -66,6 +75,7 @@ export class ManageController {
     return this.businesses.saveBranch(business, body)
   }
 
+  @OwnerOnly()
   @Put('branches/:id')
   updateBranch(
     @CurrentBusiness() business: Business,
@@ -75,12 +85,14 @@ export class ManageController {
     return this.businesses.saveBranch(business, body, id)
   }
 
+  @OwnerOnly()
   @Delete('branches/:id')
   @HttpCode(204)
   deleteBranch(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
     return this.businesses.deleteBranch(business, id)
   }
 
+  @OwnerOnly()
   @Patch()
   update(
     @CurrentBusiness() business: Business,
@@ -89,11 +101,13 @@ export class ManageController {
     return this.businesses.update(business, body)
   }
 
+  @OwnerOnly()
   @Put('hours')
   setHours(@CurrentBusiness() business: Business, @Body({ schema: hoursSchema }) body: HoursInput) {
     return this.businesses.setHours(business, body)
   }
 
+  @OwnerOnly()
   @Post('categories')
   createCategory(
     @CurrentBusiness() business: Business,
@@ -102,6 +116,7 @@ export class ManageController {
     return this.catalog.createCategory(business.id, body)
   }
 
+  @OwnerOnly()
   @Patch('categories/:id')
   @HttpCode(204)
   updateCategory(
@@ -112,12 +127,14 @@ export class ManageController {
     return this.catalog.updateCategory(business.id, id, body)
   }
 
+  @OwnerOnly()
   @Delete('categories/:id')
   @HttpCode(204)
   deleteCategory(@CurrentBusiness() business: Business, @Param('id') id: string) {
     return this.catalog.deleteCategory(business.id, id)
   }
 
+  @OwnerOnly()
   @Post('services')
   createService(
     @CurrentBusiness() business: Business,
@@ -126,6 +143,7 @@ export class ManageController {
     return this.catalog.createService(business.id, body)
   }
 
+  @OwnerOnly()
   @Put('services/:id')
   @HttpCode(204)
   updateService(
@@ -136,6 +154,7 @@ export class ManageController {
     return this.catalog.updateService(business.id, id, body)
   }
 
+  @OwnerOnly()
   @Post('specialists')
   async createSpecialist(
     @CurrentBusiness() business: Business,
@@ -146,6 +165,7 @@ export class ManageController {
     return { id: saved.id }
   }
 
+  @OwnerOnly()
   @Put('specialists/:id')
   @HttpCode(204)
   async updateSpecialist(
@@ -167,6 +187,7 @@ export class ManageController {
     return this.masterSchedule.getSchedule(business.id, id)
   }
 
+  @OwnerOnly()
   @Put('specialists/:id/hours')
   setMasterHours(
     @CurrentBusiness() business: Business,

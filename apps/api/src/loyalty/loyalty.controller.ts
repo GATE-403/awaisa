@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
   type CertificateInput,
@@ -41,6 +45,7 @@ export class ManageLoyaltyController {
     return { ...settings, plans, certificates }
   }
 
+  @OwnerOnly()
   @Put('settings')
   setSettings(
     @CurrentBusiness() business: Business,
@@ -49,11 +54,13 @@ export class ManageLoyaltyController {
     return this.loyalty.setBonusPercent(business.id, body.bonusPercent)
   }
 
+  @OwnerOnly()
   @Post('plans')
   createPlan(@CurrentBusiness() business: Business, @Body({ schema: planSchema }) body: PlanInput) {
     return this.loyalty.savePlan(business.id, body)
   }
 
+  @OwnerOnly()
   @Put('plans/:id')
   updatePlan(
     @CurrentBusiness() business: Business,
@@ -63,12 +70,14 @@ export class ManageLoyaltyController {
     return this.loyalty.savePlan(business.id, body, id)
   }
 
+  @OwnerOnly()
   @Delete('plans/:id')
   @HttpCode(204)
   deletePlan(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
     return this.loyalty.deletePlan(business.id, id)
   }
 
+  @OwnerOnly()
   @Post('certificates')
   issueCertificate(
     @CurrentBusiness() business: Business,

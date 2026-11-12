@@ -125,7 +125,11 @@ type NextFree = Record<string, { date: string; time: string } | null>
 type BusinessPage = {
   business: Business
   catalog: Catalog
+  /** Cabinet only: the viewer's role; staff (administrators) see no money or setup. */
+  role?: 'owner' | 'staff'
 }
+
+type TeamMember = { id: string; phone: string; name: string; role: 'owner' | 'admin' }
 
 type BusinessLink = Pick<Business, 'slug' | 'name' | 'kind' | 'isPublished' | 'coverUrl'> & {
   role: 'owner' | 'staff' | 'admin'
@@ -635,6 +639,7 @@ export type {
   OutcomeInput,
   SubscriptionPlan,
   SubscriptionPlanInput,
+  TeamMember,
   PaymentMethod,
   VisitOutcome,
   ManagedReview,

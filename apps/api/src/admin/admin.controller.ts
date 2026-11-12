@@ -13,7 +13,11 @@ import {
 } from '@nestjs/common'
 import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import {
   type AnalyticsQuery,
   analyticsQuerySchema,
@@ -78,6 +82,7 @@ export class AdminController {
     return this.bookings.setOutcome(business.id, id, body)
   }
 
+  @OwnerOnly()
   @Get('analytics')
   getAnalytics(
     @CurrentBusiness() business: Business,
