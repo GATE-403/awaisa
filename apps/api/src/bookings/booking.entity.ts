@@ -108,6 +108,10 @@ export class Booking {
   @Column({ name: 'review_requested_at', type: 'timestamptz', nullable: true })
   reviewRequestedAt: Date | null
 
+  /** When «пора прийти снова» went out for this visit. */
+  @Column({ name: 'rebook_reminded_at', type: 'timestamptz', nullable: true })
+  rebookRemindedAt: Date | null
+
   /** The deposit asked for when booked online (сом); null = none. */
   @Column({ name: 'deposit_amount', type: 'int', nullable: true })
   depositAmount: number | null

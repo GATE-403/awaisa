@@ -4,6 +4,7 @@ import { listBusinesses, listOffers, listPopularServices } from '@/shared/api/se
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
+import { AgainShelf } from '@/views/catalog/ui/AgainShelf/AgainShelf'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
@@ -44,6 +45,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   return (
     <NextFreeProvider slugs={slugs}>
       <div className={styles.contained}>
+        {isBrowsing && !kind && <AgainShelf />}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}

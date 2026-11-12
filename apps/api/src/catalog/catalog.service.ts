@@ -28,6 +28,7 @@ type CatalogView = {
     | 'durationMinutes'
     | 'price'
     | 'deposit'
+    | 'rebookDays'
     | 'isPopular'
   > & { isActive?: boolean })[]
   specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'rating'> & {
@@ -69,6 +70,7 @@ export class CatalogService {
           durationMinutes,
           price,
           deposit,
+          rebookDays,
           isPopular,
           isActive,
         }) => ({
@@ -79,6 +81,7 @@ export class CatalogService {
           durationMinutes,
           price,
           deposit,
+          rebookDays,
           isPopular,
           ...(includeInactive ? { isActive } : {}),
         }),
