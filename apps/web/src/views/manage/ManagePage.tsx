@@ -138,7 +138,9 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             />
           )}
           {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
-          {data && tab === 'clients' && <ClientsTab slug={slug} />}
+          {data && tab === 'clients' && (
+            <ClientsTab slug={slug} businessName={data.business.name} />
+          )}
           {data && tab === 'reviews' && (
             <ReviewsTab slug={slug} businessName={data.business.name} />
           )}

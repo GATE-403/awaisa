@@ -26,6 +26,8 @@ import type {
   GiftCertificate,
   JoinWaitlistInput,
   LoyaltyOverview,
+  MailingSegment,
+  MailingsOverview,
   ManagedReview,
   ManagedWaitlistEntry,
   MapPlace,
@@ -474,7 +476,33 @@ const sellSubscription = (slug: string, phone: string, planId: string) =>
 
 const getMyLoyalty = (signal?: AbortSignal) => request<MyLoyalty>('/me/loyalty', { signal })
 
+const getMailings = (slug: string, signal?: AbortSignal) =>
+  request<MailingsOverview>(`${manage(slug)}/mailings`, { signal })
+
+const previewMailing = (
+  slug: string,
+  segment: MailingSegment,
+  days: number,
+  signal?: AbortSignal,
+) =>
+  request<{ count: number; names: string[] }>(
+    `${manage(slug)}/mailings/preview?${new URLSearchParams({ segment, days: String(days) })}`,
+    { signal },
+  )
+
+const sendMailing = (
+  slug: string,
+  input: { segment: MailingSegment; days: number; text: string },
+) => post<{ recipients: number }>(`${manage(slug)}/mailings`, input)
+
+const setBirthdayGreeting = (slug: string, text: string | null) =>
+  send<{ text: string | null }>('PUT', `${manage(slug)}/mailings/birthday`, { text })
+
 export {
+  getMailings,
+  previewMailing,
+  sendMailing,
+  setBirthdayGreeting,
   deleteSubscriptionPlan,
   getClientLoyalty,
   getLoyalty,

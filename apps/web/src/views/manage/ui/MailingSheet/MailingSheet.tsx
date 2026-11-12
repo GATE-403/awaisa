@@ -1,0 +1,214 @@
+'use client'
+
+import { Select } from '@awaisa/ui/Select'
+import { Switch } from '@awaisa/ui/Switch'
+import { useToast } from '@awaisa/ui/Toast'
+import { type FormEvent, useEffect, useState } from 'react'
+import { getErrorMessage } from '@/shared/api/apiError'
+import {
+  getMailings,
+  previewMailing,
+  sendMailing,
+  setBirthdayGreeting,
+} from '@/shared/api/clientApi'
+import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
+import { pluralize } from '@/shared/lib/plural'
+import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
+import { Sheet } from '@/shared/ui/Sheet/Sheet'
+import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import styles from './MailingSheet.module.css'
+
+interface MailingSheetProps {
+  slug: string
+  businessName: string
+  onClose: () => void
+}
+
+const FORM_ID = 'mailing-form'
+
+const SEGMENTS: { value: MailingSegment; label: string }[] = [
+  { value: 'lapsed', label: 'Давно не были' },
+  { value: 'birthday', label: 'День рождения' },
+  { value: 'all', label: 'Все' },
+]
+
+const LAPSED_DAYS = [30, 60, 90, 180].map((days) => ({ value: days, label: `${days} дней` }))
+
+const templates = (name: string): Record<MailingSegment, string> => ({
+  lapsed: `{имя}, давно вас не видели в ${name}! Запишитесь, когда удобно: {ссылка}`,
+  birthday: `{имя}, скоро ваш день рождения! ${name} дарит −10% на визит в эти дни: {ссылка}`,
+  all: `{имя}, новости ${name}: {ссылка}`,
+})
+
+/** Cyrillic SMS: 70 characters in one part, 67 per part when longer. */
+const smsParts = (text: string) => (text.length <= 70 ? 1 : Math.ceil(text.length / 67))
+
+// A mailing in three choices: whom, what, send. The count is known before sending.
+export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps) => {
+  const toast = useToast()
+  const [segment, setSegment] = useState<MailingSegment>('lapsed')
+  const [days, setDays] = useState(60)
+  const [text, setText] = useState(templates(businessName).lapsed)
+  const [preview, setPreview] = useState<{ count: number; names: string[] } | null>(null)
+  const [overview, setOverview] = useState<MailingsOverview | null>(null)
+  const [isSending, setIsSending] = useState(false)
+  // The link and the name take room: count with a typical length.
+  const sample = text
+    .replaceAll('{имя}', 'Айгерим')
+    .replaceAll('{ссылка}', 'https://awaisa.kg/x/book')
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getMailings(slug, controller.signal)
+      .then(setOverview)
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [slug])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setPreview(null)
+    previewMailing(slug, segment, days, controller.signal)
+      .then(setPreview)
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [slug, segment, days])
+
+  const changeSegment = (next: MailingSegment) => {
+    const defaults = templates(businessName)
+    if (text === defaults[segment]) setText(defaults[next])
+    setSegment(next)
+  }
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!preview?.count) return
+    setIsSending(true)
+    try {
+      const result = await sendMailing(slug, { segment, days, text })
+      toast.show({
+        title: `Отправлено: ${pluralize(result.recipients, ['клиенту', 'клиентам', 'клиентам'])}`,
+        type: 'success',
+      })
+      onClose()
+    } catch (error) {
+      toast.show({ title: 'Не отправилось', description: getErrorMessage(error), type: 'error' })
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  const toggleBirthday = async (isOn: boolean) => {
+    try {
+      const greeting = isOn ? `{имя}, с днём рождения! ${businessName} ждёт вас: {ссылка}` : null
+      await setBirthdayGreeting(slug, greeting)
+      setOverview((current) => (current ? { ...current, birthdayGreeting: greeting } : current))
+      toast.show({ title: isOn ? 'Будем поздравлять' : 'Поздравления выключены', type: 'success' })
+    } catch (error) {
+      toast.show({ title: 'Не сохранилось', description: getErrorMessage(error), type: 'error' })
+    }
+  }
+
+  return (
+    <Sheet
+      title='Рассылка'
+      onClose={onClose}
+      action={{
+        label: isSending ? 'Отправляем…' : 'Отправить',
+        form: FORM_ID,
+        disabled: !preview?.count || isSending || text.trim().length < 10,
+      }}
+    >
+      <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
+        <SegmentedControl label='Кому' value={segment} items={SEGMENTS} onChange={changeSegment} />
+
+        <section className={sheet.group} aria-label='Кому'>
+          <div className={sheet.list}>
+            {segment === 'lapsed' && (
+              <div className={sheet.row}>
+                <span className={sheet.rowLabel}>Не были</span>
+                <span className={sheet.rowControl}>
+                  <Select
+                    variant='plain'
+                    aria-label='Не были дольше'
+                    items={LAPSED_DAYS}
+                    value={days}
+                    onValueChange={(value) => value && setDays(value)}
+                  />
+                </span>
+              </div>
+            )}
+            <div className={sheet.row}>
+              <span className={sheet.rowLabel}>Получат</span>
+              <span className={styles.count} aria-live='polite'>
+                {preview === null
+                  ? '…'
+                  : pluralize(preview.count, ['клиент', 'клиента', 'клиентов'])}
+              </span>
+            </div>
+          </div>
+          <p className={sheet.groupFooter}>
+            {preview && preview.names.length > 0
+              ? `${preview.names.join(', ')}${preview.count > preview.names.length ? ' и другие' : ''}. Только те, кто не отключал SMS.`
+              : segment === 'birthday'
+                ? 'Дни рождения в ближайшую неделю — из карточек клиентов.'
+                : 'Только клиенты, которые не отключали SMS.'}
+          </p>
+        </section>
+
+        <section className={sheet.group} aria-label='Текст'>
+          <h3 className={sheet.groupTitle}>Текст</h3>
+          <div className={sheet.list}>
+            <textarea
+              aria-label='Текст рассылки'
+              className={styles.text}
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              maxLength={400}
+              rows={4}
+            />
+          </div>
+          <p className={sheet.groupFooter}>
+            {'{имя}'} — имя клиента, {'{ссылка}'} — запись к вам. ≈ {sample.length} символов,{' '}
+            {pluralize(smsParts(sample), ['SMS', 'SMS', 'SMS'])} на клиента.
+          </p>
+        </section>
+
+        <section className={sheet.group} aria-label='Поздравления'>
+          <div className={sheet.list}>
+            <label className={sheet.row}>
+              <span className={sheet.rowLabel}>Поздравлять с днём рождения</span>
+              <Switch
+                checked={Boolean(overview?.birthdayGreeting)}
+                onCheckedChange={(checked) => void toggleBirthday(checked)}
+              />
+            </label>
+          </div>
+          <p className={sheet.groupFooter}>
+            Каждый год в 11:00 в день рождения — одно SMS клиенту, у которого он указан в карточке.
+          </p>
+        </section>
+
+        {overview && overview.history.length > 0 && (
+          <section className={sheet.group} aria-label='Отправленные'>
+            <h3 className={sheet.groupTitle}>Отправленные</h3>
+            <div className={sheet.list}>
+              {overview.history.slice(0, 5).map((item) => (
+                <div key={item.id} className={sheet.row}>
+                  <span className={sheet.rowLabel}>
+                    {SEGMENTS.find((option) => option.value === item.segment)?.label} ·{' '}
+                    {new Date(item.createdAt).toLocaleDateString('ru-RU', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}
+                  </span>
+                  <span>{pluralize(item.recipients, ['клиент', 'клиента', 'клиентов'])}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+      </form>
+    </Sheet>
+  )
+}
