@@ -16,6 +16,7 @@ import {
   toBusinessParts,
 } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
+import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { rescheduleMessage, salonCancellationMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
@@ -52,6 +53,7 @@ export class AdminService {
     private readonly sms: SmsService,
     private readonly config: ConfigService<Env, true>,
     private readonly loyalty: LoyaltyService,
+    private readonly inventory: InventoryService,
   ) {}
 
   async getSchedule(business: Business, date: string) {
@@ -131,6 +133,7 @@ export class AdminService {
 
     const ids = list.map((row) => row.id)
     await this.loyalty.earnForVisits(ids)
+    await this.inventory.useForVisits(ids)
 
     return { ids }
   }
@@ -143,6 +146,7 @@ export class AdminService {
       [business.id, ids],
     )
     await this.loyalty.revertVisits(ids)
+    await this.inventory.revertVisits(ids)
   }
 
   async createBooking(business: Business, input: StaffBookingInput) {

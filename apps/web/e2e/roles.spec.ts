@@ -26,7 +26,9 @@ test.describe('Staff roles', () => {
       await signInViaApi(staff, phone, 'E2E Админ Салона')
       const cabinet = await (await staff.request.get(`/api/manage/${SLUG}`)).json()
       expect(cabinet.role).toBe('staff')
-      expect((await staff.request.get(`/api/manage/${SLUG}/schedule?date=${today}`)).status()).toBe(200)
+      expect((await staff.request.get(`/api/manage/${SLUG}/schedule?date=${today}`)).status()).toBe(
+        200,
+      )
       expect((await staff.request.get(`/api/manage/${SLUG}/analytics?days=7`)).status()).toBe(403)
       expect(
         (await staff.request.put(`/api/manage/${SLUG}/hours`, { data: { days: [] } })).status(),
@@ -46,7 +48,9 @@ test.describe('Staff roles', () => {
         .last()
         .click()
       await expect(page.getByText('Доступ закрыт')).toBeVisible()
-      expect((await staff.request.get(`/api/manage/${SLUG}/schedule?date=${today}`)).status()).toBe(403)
+      expect((await staff.request.get(`/api/manage/${SLUG}/schedule?date=${today}`)).status()).toBe(
+        403,
+      )
     } finally {
       await staffContext.close()
     }

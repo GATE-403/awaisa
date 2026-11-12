@@ -49,6 +49,8 @@ import type {
   ServiceInput,
   SlugCheck,
   SpecialistInput,
+  StockItem,
+  StockItemInput,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
@@ -467,6 +469,23 @@ const issueCertificate = (
 const getClientLoyalty = (slug: string, phone: string, signal?: AbortSignal) =>
   request<ClientLoyalty>(`${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}`, { signal })
 
+const getStock = (slug: string, signal?: AbortSignal) =>
+  request<StockItem[]>(`${manage(slug)}/stock`, { signal })
+
+const saveStockItem = (slug: string, input: StockItemInput, id?: string) =>
+  id
+    ? send<StockItem[]>('PUT', `${manage(slug)}/stock/${id}`, input)
+    : post<StockItem[]>(`${manage(slug)}/stock`, input)
+
+const deleteStockItem = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/stock/${id}`)
+
+const receiveStock = (slug: string, id: string, quantity: number, unitCost?: number) =>
+  post<StockItem[]>(`${manage(slug)}/stock/${id}/receive`, { quantity, unitCost })
+
+const adjustStock = (slug: string, id: string, quantity: number) =>
+  post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
+
 const sellSubscription = (slug: string, phone: string, planId: string) =>
   post<ClientLoyalty>(
     `${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}/subscriptions`,
@@ -523,6 +542,11 @@ export {
   issueCertificate,
   saveSubscriptionPlan,
   sellSubscription,
+  getStock,
+  saveStockItem,
+  deleteStockItem,
+  receiveStock,
+  adjustStock,
   setBonusPercent,
   createPromotion,
   deletePromotion,
