@@ -556,6 +556,13 @@ type StockItemInput = {
   materials: { serviceId: string; amount: number }[]
 }
 
+/** Rows count from 1 without the header line. */
+type ImportReport = {
+  imported: number
+  skippedCount: number
+  skipped: { row: number; reason: string }[]
+}
+
 type AnalyticsDays = 7 | 30 | 90 | 365
 
 type AnalyticsReport = {
@@ -718,6 +725,7 @@ export type {
   PromotionInput,
   PromotionKind,
   PublicPromotion,
+  ImportReport,
   StockItem,
   StockItemInput,
   WaitlistEntry,

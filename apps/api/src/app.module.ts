@@ -13,6 +13,7 @@ import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
+import { ImportModule } from './import/import.module.js'
 import { InventoryModule } from './inventory/inventory.module.js'
 import { LoyaltyModule } from './loyalty/loyalty.module.js'
 import { MailingsModule } from './mailings/mailings.module.js'
@@ -53,6 +54,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     LoyaltyModule,
     MailingsModule,
     InventoryModule,
+    ImportModule,
     TelegramModule,
     ClientsModule,
     MasterModule,

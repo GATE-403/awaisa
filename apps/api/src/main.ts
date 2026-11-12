@@ -14,6 +14,8 @@ const bootstrap = async () => {
   app.set('trust proxy', 'loopback, linklocal, uniquelocal')
   app.use(helmet())
   app.use(cookieParser())
+  // Imports from other booking systems send a few thousand rows at once.
+  app.useBodyParser('json', { limit: '2mb' })
   app.enableCors({ origin: config.get('WEB_ORIGIN', { infer: true }), credentials: true })
   app.useGlobalPipes(new StandardSchemaValidationPipe({ transform: true }))
   app.enableShutdownHooks()

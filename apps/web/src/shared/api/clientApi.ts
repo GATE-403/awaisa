@@ -24,6 +24,7 @@ import type {
   CreateTimeOffInput,
   Customer,
   GiftCertificate,
+  ImportReport,
   JoinWaitlistInput,
   LoyaltyOverview,
   MailingSegment,
@@ -486,6 +487,12 @@ const receiveStock = (slug: string, id: string, quantity: number, unitCost?: num
 const adjustStock = (slug: string, id: string, quantity: number) =>
   post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
 
+const importClients = (slug: string, clients: Record<string, string>[]) =>
+  post<ImportReport>(`${manage(slug)}/import/clients`, { clients })
+
+const importBookings = (slug: string, bookings: Record<string, string>[], remind: boolean) =>
+  post<ImportReport>(`${manage(slug)}/import/bookings`, { bookings, remind })
+
 const sellSubscription = (slug: string, phone: string, planId: string) =>
   post<ClientLoyalty>(
     `${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}/subscriptions`,
@@ -542,6 +549,8 @@ export {
   issueCertificate,
   saveSubscriptionPlan,
   sellSubscription,
+  importClients,
+  importBookings,
   getStock,
   saveStockItem,
   deleteStockItem,
