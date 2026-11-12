@@ -1,0 +1,176 @@
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { InjectDataSource } from '@nestjs/typeorm'
+import { DataSource } from 'typeorm'
+import type { StockItemInput } from './inventory.schemas.js'
+
+type Row = Record<string, unknown>
+
+const toNumber = (value: unknown) => Number(value ?? 0)
+
+/**
+ * The shelf: items with a quantity and a unit cost. Services name what one visit uses; an
+ * «arrived» visit writes off exactly that (once per visit and item) and the cost lands in
+ * analytics. Undoing the visit puts it back.
+ */
+@Injectable()
+export class InventoryService {
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+
+  async list(businessId: string) {
+    const items = await this.query(
+      `SELECT i."id", i."name", i."unit", i."quantity", i."unit_cost" AS "unitCost",
+         i."min_quantity" AS "minQuantity",
+         COALESCE((SELECT json_agg(json_build_object('serviceId', m."service_id", 'amount', m."amount"))
+           FROM "service_materials" m WHERE m."item_id" = i."id"), '[]') AS "materials"
+       FROM "stock_items" i WHERE i."business_id" = $1 ORDER BY i."name"`,
+      [businessId],
+    )
+    return items.map((row) => {
+      const quantity = toNumber(row.quantity)
+      const minQuantity = row.minQuantity === null ? null : toNumber(row.minQuantity)
+      return {
+        id: String(row.id),
+        name: String(row.name),
+        unit: String(row.unit),
+        quantity,
+        unitCost: toNumber(row.unitCost),
+        minQuantity,
+        isLow: minQuantity !== null && quantity <= minQuantity,
+        materials: ((row.materials ?? []) as { serviceId: string; amount: number }[]).map(
+          (item) => ({
+            serviceId: item.serviceId,
+            amount: toNumber(item.amount),
+          }),
+        ),
+      }
+    })
+  }
+
+  async create(businessId: string, input: StockItemInput) {
+    const [item] = await this.query(
+      `INSERT INTO "stock_items" ("business_id", "name", "unit", "unit_cost", "min_quantity")
+       VALUES ($1, $2, $3, $4, $5) RETURNING "id"`,
+      [businessId, input.name, input.unit, input.unitCost, input.minQuantity],
+    )
+    await this.setMaterials(businessId, String(item.id), input.materials)
+    return this.list(businessId)
+  }
+
+  async update(businessId: string, id: string, input: StockItemInput) {
+    const rows = await this.query(
+      `UPDATE "stock_items" SET "name" = $3, "unit" = $4, "unit_cost" = $5, "min_quantity" = $6
+       WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
+      [id, businessId, input.name, input.unit, input.unitCost, input.minQuantity],
+    )
+    if (this.rows(rows).length === 0) throw new NotFoundException('Позиция не найдена')
+    await this.setMaterials(businessId, id, input.materials)
+    return this.list(businessId)
+  }
+
+  async remove(businessId: string, id: string) {
+    await this.query('DELETE FROM "stock_items" WHERE "id" = $1 AND "business_id" = $2', [
+      id,
+      businessId,
+    ])
+  }
+
+  /** A delivery: the quantity grows, the unit cost may change. */
+  async receive(businessId: string, id: string, quantity: number, unitCost?: number) {
+    const rows = await this.query(
+      `UPDATE "stock_items" SET "quantity" = "quantity" + $3,
+         "unit_cost" = COALESCE($4, "unit_cost")
+       WHERE "id" = $1 AND "business_id" = $2 RETURNING "unit_cost"`,
+      [id, businessId, quantity, unitCost ?? null],
+    )
+    const [item] = this.rows(rows)
+    if (!item) throw new NotFoundException('Позиция не найдена')
+    await this.query(
+      `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "cost")
+       VALUES ($1, $2, $3, 'receive', $4)`,
+      [businessId, id, quantity, quantity * toNumber(item.unit_cost)],
+    )
+    return this.list(businessId)
+  }
+
+  /** A stocktake: the counted quantity replaces the computed one. */
+  async adjust(businessId: string, id: string, quantity: number) {
+    const rows = await this.query(
+      `WITH old AS (SELECT "quantity" FROM "stock_items" WHERE "id" = $1 AND "business_id" = $2)
+       UPDATE "stock_items" SET "quantity" = $3 WHERE "id" = $1 AND "business_id" = $2
+       RETURNING $3 - (SELECT "quantity" FROM old) AS "delta"`,
+      [id, businessId, quantity],
+    )
+    const [moved] = this.rows(rows)
+    if (!moved) throw new NotFoundException('Позиция не найдена')
+    if (toNumber(moved.delta) !== 0) {
+      await this.query(
+        `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind") VALUES ($1, $2, $3, 'adjust')`,
+        [businessId, id, moved.delta],
+      )
+    }
+    return this.list(businessId)
+  }
+
+  /** What one visit of each service uses of this item; only the business's own services. */
+  private async setMaterials(
+    businessId: string,
+    id: string,
+    materials: StockItemInput['materials'],
+  ) {
+    await this.query('DELETE FROM "service_materials" WHERE "item_id" = $1', [id])
+    for (const material of materials.filter((entry) => entry.amount > 0)) {
+      await this.query(
+        `INSERT INTO "service_materials" ("service_id", "item_id", "amount")
+         SELECT s."id", $2, $3 FROM "services" s WHERE s."id" = $1 AND s."business_id" = $4`,
+        [material.serviceId, id, material.amount, businessId],
+      )
+    }
+  }
+
+  /** Arrived visits write off their service's materials, once per visit and item. */
+  async useForVisits(bookingIds: string[]) {
+    if (bookingIds.length === 0) return
+    const used = await this.query(
+      `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "booking_id", "cost")
+       SELECT b."business_id", m."item_id", -m."amount", 'use', b."id", m."amount" * i."unit_cost"
+       FROM "bookings" b
+       JOIN "service_materials" m ON m."service_id" = b."service_id"
+       JOIN "stock_items" i ON i."id" = m."item_id"
+       WHERE b."id" = ANY($1) AND b."outcome" = 'arrived'
+       ON CONFLICT ("booking_id", "item_id") WHERE "kind" = 'use' DO NOTHING
+       RETURNING "item_id", "delta"`,
+      [bookingIds],
+    )
+    for (const row of this.rows(used)) {
+      await this.query('UPDATE "stock_items" SET "quantity" = "quantity" + $2 WHERE "id" = $1', [
+        row.item_id,
+        row.delta,
+      ])
+    }
+  }
+
+  /** The visit is not «arrived» any more: what it used goes back on the shelf. */
+  async revertVisits(bookingIds: string[]) {
+    if (bookingIds.length === 0) return
+    const removed = await this.query(
+      `DELETE FROM "stock_movements" WHERE "booking_id" = ANY($1) AND "kind" = 'use'
+       RETURNING "item_id", "delta"`,
+      [bookingIds],
+    )
+    for (const row of this.rows(removed)) {
+      await this.query('UPDATE "stock_items" SET "quantity" = "quantity" - $2 WHERE "id" = $1', [
+        row.item_id,
+        row.delta,
+      ])
+    }
+  }
+
+  // DELETE/UPDATE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
+  private rows(result: unknown) {
+    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
+  }
+
+  private query(sql: string, params: unknown[]) {
+    return this.dataSource.query(sql, params) as Promise<Row[]>
+  }
+}

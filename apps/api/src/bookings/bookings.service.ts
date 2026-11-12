@@ -25,6 +25,7 @@ import { normalizePhone } from '../common/phone.js'
 import { isSignedToken, visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
+import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
@@ -177,6 +178,7 @@ export class BookingsService {
     private readonly payments: PaymentsService,
     private readonly promotions: PromotionsService,
     private readonly loyalty: LoyaltyService,
+    private readonly inventory: InventoryService,
   ) {}
 
   async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
@@ -558,6 +560,7 @@ export class BookingsService {
       coveredBy = settled.method
     } else {
       await this.loyalty.revertVisits([id])
+      await this.inventory.revertVisits([id])
     }
     const paidAmount = isArrived ? (input.paidAmount ?? Math.max(due - covered, 0)) : null
     await this.bookings.update(
@@ -577,7 +580,10 @@ export class BookingsService {
         outcomeAt: input.outcome ? new Date() : null,
       },
     )
-    if (isArrived) await this.loyalty.earnForVisits([id])
+    if (isArrived) {
+      await this.loyalty.earnForVisits([id])
+      await this.inventory.useForVisits([id])
+    }
 
     return toAdminView(await this.viewQuery().where('booking.id = :id', { id }).getOneOrFail())
   }

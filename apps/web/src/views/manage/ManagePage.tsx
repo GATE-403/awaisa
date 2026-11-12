@@ -25,6 +25,7 @@ import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
 import { ServicesTab } from '@/views/manage/ui/ServicesTab/ServicesTab'
 import { SetupProgress } from '@/views/manage/ui/SetupProgress/SetupProgress'
+import { StockTab } from '@/views/manage/ui/StockTab/StockTab'
 import { TeamTab } from '@/views/manage/ui/TeamTab/TeamTab'
 import styles from './ManagePage.module.css'
 import { isSettingsTab, isTabAllowed, MAIN_TABS, SETTINGS_TABS, toManageTab } from './manageTabs'
@@ -183,6 +184,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
             {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}
             {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
+            {data && tab === 'stock' && <StockTab slug={slug} catalog={data.catalog} />}
             {data && tab === 'team' && <TeamTab slug={slug} />}
             {data && tab === 'profile' && (
               <ProfileTab slug={slug} business={data.business} run={run} />

@@ -536,6 +536,26 @@ type PriceQuote = {
   total: number
 }
 
+type StockItem = {
+  id: string
+  name: string
+  unit: string
+  quantity: number
+  unitCost: number
+  minQuantity: number | null
+  isLow: boolean
+  /** How much one visit of a service uses. */
+  materials: { serviceId: string; amount: number }[]
+}
+
+type StockItemInput = {
+  name: string
+  unit: string
+  unitCost: number
+  minQuantity: number | null
+  materials: { serviceId: string; amount: number }[]
+}
+
 type AnalyticsDays = 7 | 30 | 90 | 365
 
 type AnalyticsReport = {
@@ -556,9 +576,11 @@ type AnalyticsReport = {
     payments: { cash: number; card: number; transfer: number; unmarked: number }
     upcomingVisits: number
     upcomingRevenue: number
+    materialsCost: number
+    margin: number
   }
   daily: { date: string; visits: number; revenue: number; cancelled: number }[]
-  services: { id: string; name: string; visits: number; revenue: number }[]
+  services: { id: string; name: string; visits: number; revenue: number; materialsCost: number }[]
   masters: {
     id: string
     name: string
@@ -696,5 +718,7 @@ export type {
   PromotionInput,
   PromotionKind,
   PublicPromotion,
+  StockItem,
+  StockItemInput,
   WaitlistEntry,
 }

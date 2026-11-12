@@ -215,6 +215,15 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                   </div>
                 )}
                 <PaymentsLine payments={totals.payments} />
+                {totals.materialsCost > 0 && (
+                  <div className={styles.ahead}>
+                    <span className={styles.heroLabel}>Без материалов</span>
+                    <span className={styles.aheadValue}>{formatMoney(totals.margin)}</span>
+                    <span className={styles.muted}>
+                      расходники {formatMoney(totals.materialsCost)}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <RevenueChart buckets={toBuckets(report.daily, report.period.days)} />
@@ -258,7 +267,11 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                     <li key={service.id} className={styles.row}>
                       <span className={styles.rowText}>
                         <span className={styles.rowTitle}>{service.name}</span>
-                        <span className={styles.rowMeta}>{visits(service.visits)}</span>
+                        <span className={styles.rowMeta}>
+                          {visits(service.visits)}
+                          {service.materialsCost > 0 &&
+                            ` · материалы ${formatMoney(service.materialsCost)}`}
+                        </span>
                       </span>
                       <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
                       <span className={styles.meter} aria-hidden='true'>

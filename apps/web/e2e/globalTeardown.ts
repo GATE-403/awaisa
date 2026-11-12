@@ -10,6 +10,7 @@ const CLEANUP_SQL = `
   DELETE FROM "client_records" WHERE "note" LIKE 'E2E %';
   DELETE FROM "waitlist_entries" WHERE "customer_name" LIKE 'E2E %';
   DELETE FROM "bookings" WHERE "customer_name" LIKE 'E2E %';
+  DELETE FROM "stock_items" WHERE "name" LIKE 'E2E %';
   DELETE FROM "promotions" WHERE "title" LIKE 'E2E %';
   DELETE FROM "mailings" WHERE "text" LIKE 'E2E %';
   DELETE FROM "gift_certificates" WHERE "recipient" LIKE 'E2E %';

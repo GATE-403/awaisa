@@ -401,3 +401,8 @@
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
+
+.cellValue[data-tone="danger"] {
+  color: var(--color-danger-text);
+  font-weight: var(--font-weight-semibold);
+}

@@ -15,6 +15,7 @@ type Totals = {
   cancelled: number
   clients: number
   noShows: number
+  materialsCost: number
   payments: { cash: number; card: number; transfer: number; unmarked: number }
 }
 
@@ -24,6 +25,10 @@ const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show
 // The price minus the discount the visit was booked with.
 const PRICE = `(s."price" - COALESCE(b."discount_amount", 0))`
 const EARNED = `COALESCE(b."paid_amount", ${PRICE})`
+
+// What the visit used from the stock, at the unit cost of the day it was written off.
+const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
+  WHERE m."booking_id" = b."id" AND m."kind" = 'use')`
 
 // Local business time (fixed UTC+6, see business-time.ts) for grouping by day and hour.
 const LOCAL = `("b"."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')`
@@ -61,7 +66,8 @@ export class AnalyticsService {
           [id, from, now],
         ),
         this.query(
-          `SELECT s."id", s."name", COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue"
+          `SELECT s."id", s."name", COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue",
+             COALESCE(SUM(${MATERIALS}), 0)::int AS "materialsCost"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
            WHERE b."business_id" = $1 AND ${DONE}
              AND b."starts_at" >= $2 AND b."starts_at" < $3
@@ -161,6 +167,9 @@ export class AnalyticsService {
             ? 0
             : Math.round((current.noShows / (current.visits + current.noShows)) * 100),
         payments: current.payments,
+        // What the visits used from the stock (written off when marked «Пришёл»).
+        materialsCost: current.materialsCost,
+        margin: current.revenue - current.materialsCost,
         upcomingVisits: toNumber(upcoming[0]?.visits),
         upcomingRevenue: toNumber(upcoming[0]?.revenue),
       },
@@ -170,6 +179,7 @@ export class AnalyticsService {
         name: String(row.name),
         visits: toNumber(row.visits),
         revenue: toNumber(row.revenue),
+        materialsCost: toNumber(row.materialsCost),
       })),
       masters: masters.map((row) => ({
         id: String(row.id),
@@ -207,7 +217,8 @@ export class AnalyticsService {
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'cash'), 0)::int AS "cash",
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'card'), 0)::int AS "card",
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'transfer'), 0)::int AS "transfer",
-         COALESCE(SUM(${PRICE}) FILTER (WHERE ${DONE} AND b."outcome" IS NULL), 0)::int AS "unmarked"
+         COALESCE(SUM(${PRICE}) FILTER (WHERE ${DONE} AND b."outcome" IS NULL), 0)::int AS "unmarked",
+         COALESCE(SUM(${MATERIALS}) FILTER (WHERE ${DONE}), 0)::int AS "materialsCost"
        FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
        WHERE b."business_id" = $1 AND b."starts_at" >= $2 AND b."starts_at" < $3`,
       [businessId, from, to],
@@ -219,6 +230,7 @@ export class AnalyticsService {
       cancelled: toNumber(row?.cancelled),
       clients: toNumber(row?.clients),
       noShows: toNumber(row?.noShows),
+      materialsCost: toNumber(row?.materialsCost),
       payments: {
         cash: toNumber(row?.cash),
         card: toNumber(row?.card),
