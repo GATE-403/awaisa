@@ -38,7 +38,8 @@ export class ClientsService {
          COALESCE(SUM(${EARNED}) FILTER (WHERE ${VISIT}), 0)::int AS "spent",
          MAX(b."starts_at") FILTER (WHERE ${VISIT}) AS "lastVisit",
          MIN(b."starts_at") FILTER (WHERE b."status" = 'confirmed' AND b."starts_at" > now()) AS "nextVisit",
-         BOOL_OR(cr."note" <> '') AS "hasNote"
+         BOOL_OR(cr."note" <> '') AS "hasNote",
+         MAX(b."starts_at") AS "sortAt"
        FROM "bookings" b
        JOIN "services" s ON s."id" = b."service_id"
        LEFT JOIN "client_records" cr ON cr."business_id" = b."business_id" AND cr."phone" = b."customer_phone"
@@ -46,7 +47,15 @@ export class ClientsService {
        GROUP BY b."customer_phone"
        HAVING $2 = '%%' OR b."customer_phone" ILIKE $2
          OR (ARRAY_AGG(b."customer_name" ORDER BY b."starts_at" DESC))[1] ILIKE $2
-       ORDER BY MAX(b."starts_at") DESC
+       UNION ALL
+       -- Imported clients who have not booked here yet.
+       SELECT cr."phone", cr."name", 0, 0, 0, NULL, NULL, cr."note" <> '', NULL
+       FROM "client_records" cr
+       WHERE cr."business_id" = $1 AND cr."name" IS NOT NULL
+         AND NOT EXISTS (SELECT 1 FROM "bookings" x
+           WHERE x."business_id" = cr."business_id" AND x."customer_phone" = cr."phone")
+         AND ($2 = '%%' OR cr."phone" ILIKE $2 OR cr."name" ILIKE $2)
+       ORDER BY "sortAt" DESC NULLS LAST, "name"
        LIMIT ${LIST_LIMIT}`,
       [business.id, search],
     )) as Row[]
@@ -80,9 +89,8 @@ export class ClientsService {
        LIMIT ${HISTORY_LIMIT}`,
       [business.id, phone],
     )) as Row[]
-    if (history.length === 0) throw new NotFoundException('Клиент не найден')
-
     const record = await this.records.findOneBy({ businessId: business.id, phone })
+    if (history.length === 0 && !record?.name) throw new NotFoundException('Клиент не найден')
     const now = Date.now()
     const isVisit = (row: Row) =>
       row.status === 'confirmed' &&
@@ -104,7 +112,7 @@ export class ClientsService {
 
     return {
       phone,
-      name: String(history[0]?.name ?? ''),
+      name: String(history[0]?.name ?? record?.name ?? ''),
       note: record?.note ?? '',
       birthday: record?.birthday ?? null,
       stats: {

@@ -11,6 +11,10 @@ export class ClientRecord {
   @Column({ type: 'varchar', length: 32 })
   phone: string
 
+  /** Set by an import; clients who booked here take their name from the latest booking. */
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  name: string | null
+
   @Column({ type: 'text', default: '' })
   note: string
 

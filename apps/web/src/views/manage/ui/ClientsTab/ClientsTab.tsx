@@ -4,7 +4,13 @@ import { Avatar } from '@awaisa/ui/Avatar'
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { CaretRight, MagnifyingGlass, NotePencil, PaperPlaneTilt } from '@phosphor-icons/react/ssr'
+import {
+  CaretRight,
+  DownloadSimple,
+  MagnifyingGlass,
+  NotePencil,
+  PaperPlaneTilt,
+} from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -15,6 +21,7 @@ import { pluralize } from '@/shared/lib/plural'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
+import { ImportSheet } from '@/views/manage/ui/ImportSheet/ImportSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -31,6 +38,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 
 // The client base, like Contacts: search by name or number, newest visits first.
 export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
   const [isMailing, setIsMailing] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
   const canSeeMoney = useCanSeeMoney()
   const [query, setQuery] = useState('')
   const [clients, setClients] = useState<ClientListItem[] | null>(null)
@@ -66,13 +74,26 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
         }
         actions={
           canSeeMoney && (
-            <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
-              <PaperPlaneTilt weight='bold' aria-hidden />
-              Рассылка
-            </Button>
+            <>
+              <Button size='sm' variant='secondary' onClick={() => setIsImporting(true)}>
+                <DownloadSimple weight='bold' aria-hidden />
+                Импорт
+              </Button>
+              <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
+                <PaperPlaneTilt weight='bold' aria-hidden />
+                Рассылка
+              </Button>
+            </>
           )
         }
       />
+      {isImporting && (
+        <ImportSheet
+          slug={slug}
+          onClose={() => setIsImporting(false)}
+          onImported={() => setVersion((current) => current + 1)}
+        />
+      )}
       {isMailing && (
         <MailingSheet slug={slug} businessName={businessName} onClose={() => setIsMailing(false)} />
       )}
@@ -93,7 +114,11 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
       {clients?.length === 0 && (
         <EmptyState
           title={query ? 'Никого не нашли' : 'Клиентов пока нет'}
-          text={query ? 'Проверьте имя или номер.' : 'Они появятся с первой записью.'}
+          text={
+            query
+              ? 'Проверьте имя или номер.'
+              : 'Они появятся с первой записью — или загрузите базу через «Импорт».'
+          }
         />
       )}
       {clients && clients.length > 0 && (

@@ -7,7 +7,7 @@ const ROOT_ENV = join(__dirname, '../../../.env')
 // Every record the suite creates is named "E2E …"; real clients and bookings are never matched.
 const CLEANUP_SQL = `
   DELETE FROM "telegram_chats" WHERE "username" LIKE 'e2e%';
-  DELETE FROM "client_records" WHERE "note" LIKE 'E2E %';
+  DELETE FROM "client_records" WHERE "note" LIKE 'E2E %' OR "name" LIKE 'E2E %';
   DELETE FROM "waitlist_entries" WHERE "customer_name" LIKE 'E2E %';
   DELETE FROM "bookings" WHERE "customer_name" LIKE 'E2E %';
   DELETE FROM "stock_items" WHERE "name" LIKE 'E2E %';
