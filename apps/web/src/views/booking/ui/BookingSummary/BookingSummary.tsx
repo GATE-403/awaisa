@@ -4,7 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { CaretRight, CaretUp } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatDayLong, formatDuration, formatPrice } from '@/entities/booking'
-import type { Service } from '@/shared/api/types'
+import type { PriceQuote, Service } from '@/shared/api/types'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import type { BookingStepId } from '@/views/booking/model/useBookingForm'
@@ -20,6 +20,8 @@ interface BookingSummaryProps {
   isSubmitting: boolean
   errorMessage: string | null
   onSubmit: () => void
+  /** The price after the best promotion, once service, day and time are known. */
+  quote?: PriceQuote | null
   /** Opens a step from the summary, so a choice is changed where it was made. */
   onStepOpen?: (step: BookingStepId) => void
 }
@@ -49,7 +51,10 @@ export const BookingSummary = ({
   errorMessage,
   onSubmit,
   onStepOpen,
+  quote = null,
 }: BookingSummaryProps) => {
+  const total = quote?.total ?? service?.price ?? null
+  const discount = quote?.discount ?? null
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const whenLabel = dayKey && time ? `${formatDayLong(dayKey)}, ${time}` : null
   const details = [
@@ -57,7 +62,10 @@ export const BookingSummary = ({
     { label: 'Мастер', value: specialistLabel },
     { label: 'Когда', value: whenLabel },
     { label: 'Длительность', value: service ? formatDuration(service.durationMinutes) : null },
-    { label: 'Итого', value: service ? formatPrice(service.price) : null },
+    ...(discount
+      ? [{ label: `Скидка «${discount.title}»`, value: `−${formatPrice(discount.amount)}` }]
+      : []),
+    { label: 'Итого', value: total !== null ? formatPrice(total) : null },
     ...(service?.deposit
       ? [{ label: 'Предоплата', value: `${formatPrice(service.deposit)} картой при записи` }]
       : []),
@@ -80,7 +88,7 @@ export const BookingSummary = ({
           aria-label='Показать, что выбрано'
         >
           <span className={styles.barPrice}>
-            {service ? formatPrice(service.price) : 'Онлайн-запись'}
+            {total !== null ? formatPrice(total) : 'Онлайн-запись'}
             <CaretUp weight='bold' aria-hidden className={styles.barCaret} />
           </span>
           <span
@@ -155,9 +163,20 @@ export const BookingSummary = ({
           )
         })}
       </ul>
+      {discount && service && (
+        <div className={styles.discount}>
+          <span>
+            {discount.title} · −{discount.percent}%
+          </span>
+          <span>−{formatPrice(discount.amount)}</span>
+        </div>
+      )}
       <div className={styles.total}>
         <span>Итого</span>
-        <span>{service ? formatPrice(service.price) : '—'}</span>
+        <span>
+          {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
+          {total !== null ? formatPrice(total) : '—'}
+        </span>
       </div>
       {/* Said before the click: the deposit is paid right after, the rest at the salon. */}
       {service?.deposit ? (

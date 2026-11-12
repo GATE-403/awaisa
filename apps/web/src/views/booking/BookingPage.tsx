@@ -32,6 +32,7 @@ import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary
 import { BookingScrim, BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
 import { DateTimePicker } from '@/views/booking/ui/DateTimePicker/DateTimePicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
+import { PromoCodeField } from '@/views/booking/ui/PromoCodeField/PromoCodeField'
 import styles from './BookingPage.module.css'
 
 interface BookingPageProps {
@@ -67,6 +68,7 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
     onSubmit: form.submit,
+    quote: form.quote,
     onStepOpen: (step: BookingStepId) => {
       form.editStep(step)
       document
@@ -254,6 +256,14 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                     />
                   </Field>
                 </details>
+                <PromoCodeField
+                  code={form.promoCode}
+                  error={form.promoCodeError}
+                  quote={form.quote}
+                  isWaitingForTime={!form.time}
+                  onApply={form.applyPromoCode}
+                  onClear={form.clearPromoCode}
+                />
               </div>
               <NotifyOptions
                 phone={form.accountPhone ?? (form.phone.trim() || null)}

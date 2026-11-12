@@ -31,14 +31,15 @@ const METHODS: { value: PaymentMethod; label: string }[] = [
 // of paying can be corrected right there. Each change is saved at once.
 export const VisitOutcomeSection = ({ booking, onChange }: VisitOutcomeSectionProps) => {
   const [current, setCurrent] = useState(booking)
-  const [amount, setAmount] = useState(String(booking.paidAmount ?? booking.price))
+  const due = booking.price - (booking.discount?.amount ?? 0)
+  const [amount, setAmount] = useState(String(booking.paidAmount ?? due))
   const choice: OutcomeChoice = current.outcome ?? 'pending'
 
   const save = async (input: OutcomeInput) => {
     const updated = await onChange(input)
     if (!updated) return
     setCurrent(updated)
-    setAmount(String(updated.paidAmount ?? updated.price))
+    setAmount(String(updated.paidAmount ?? updated.price - (updated.discount?.amount ?? 0)))
   }
 
   const handleAmountBlur = () => {

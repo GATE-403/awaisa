@@ -108,6 +108,16 @@ export class Booking {
   @Column({ name: 'review_requested_at', type: 'timestamptz', nullable: true })
   reviewRequestedAt: Date | null
 
+  /** The promotion the visit was booked with; the amount and title are kept as they were. */
+  @Column({ name: 'promotion_id', type: 'uuid', nullable: true })
+  promotionId: string | null
+
+  @Column({ name: 'discount_amount', type: 'int', nullable: true })
+  discountAmount: number | null
+
+  @Column({ name: 'discount_title', type: 'varchar', length: 80, nullable: true })
+  discountTitle: string | null
+
   /** When «пора прийти снова» went out for this visit. */
   @Column({ name: 'rebook_reminded_at', type: 'timestamptz', nullable: true })
   rebookRemindedAt: Date | null

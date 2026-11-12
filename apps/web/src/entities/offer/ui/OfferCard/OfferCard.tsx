@@ -45,6 +45,9 @@ export const OfferCard = ({ offer, isHit = false, action }: OfferCardProps) => {
         ) : (
           <BusinessTile name={offer.businessName} size='md' />
         )}
+        {offer.discountPercent ? (
+          <span className={styles.discountBadge}>−{offer.discountPercent}%</span>
+        ) : null}
         {isHit && (
           <span className={styles.badge} role='img' aria-label='Хит' title='Хит'>
             <Fire weight='fill' aria-hidden />

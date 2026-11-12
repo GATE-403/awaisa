@@ -32,6 +32,7 @@ const createBookingSchema = z.object({
     .union([z.literal(60), z.literal(120), z.literal(1440)])
     .nullable()
     .default(120),
+  promoCode: z.string().trim().max(40).optional(),
 })
 
 const nextFreeQuerySchema = z.object({

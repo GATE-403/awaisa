@@ -103,8 +103,18 @@ export const BookingDetailsDialog = ({
       <div className={sheet.list}>
         <div className={sheet.row}>
           <span className={sheet.rowLabel}>Стоимость</span>
-          <span className={styles.value}>{formatPrice(booking.price)}</span>
+          <span className={styles.value}>
+            {formatPrice(booking.price - (booking.discount?.amount ?? 0))}
+          </span>
         </div>
+        {booking.discount && (
+          <div className={sheet.row}>
+            <span className={sheet.rowLabel}>Скидка</span>
+            <span className={styles.value}>
+              {booking.discount.title} · −{formatPrice(booking.discount.amount)}
+            </span>
+          </div>
+        )}
         {booking.payment && (
           <div className={sheet.row}>
             <span className={sheet.rowLabel}>Предоплата</span>

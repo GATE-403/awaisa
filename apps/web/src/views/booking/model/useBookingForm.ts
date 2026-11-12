@@ -20,6 +20,7 @@ import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { usePriceQuote } from './usePriceQuote'
 
 type ReminderChoice = 60 | 120 | 1440 | null
 
@@ -82,6 +83,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
   const [comment, setComment] = useState('')
+  const [promoCode, setPromoCode] = useState<string | null>(null)
   const [smsConfirmation, setSmsConfirmation] = useState(true)
   const [reminderMinutes, setReminderMinutes] = useState<ReminderChoice>(120)
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
@@ -124,6 +126,13 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     skips < Math.min(MAX_AUTO_DAY_SKIPS, openDays.length - 1) &&
     !availability.slots.some((slot) => slot.isAvailable)
   const accountPhone = session.customer?.phone ?? null
+  const { quote, codeError } = usePriceQuote({
+    serviceId,
+    date: dayKey,
+    time,
+    code: promoCode,
+    phone: accountPhone ?? phone,
+  })
   const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
@@ -284,6 +293,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         branchId,
         smsConfirmation,
         reminderMinutes,
+        promoCode: promoCode && !codeError ? promoCode : undefined,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       if (!accountPhone) saveContact({ name: name.trim(), phone: phone.trim() })
@@ -352,6 +362,11 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setSmsConfirmation,
     reminderMinutes,
     setReminderMinutes,
+    quote,
+    promoCode,
+    promoCodeError: codeError,
+    applyPromoCode: (code: string) => setPromoCode(code.trim().toUpperCase() || null),
+    clearPromoCode: () => setPromoCode(null),
     selectService,
     selectSpecialist,
     selectDay,

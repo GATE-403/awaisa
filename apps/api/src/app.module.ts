@@ -15,6 +15,7 @@ import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
 import { MasterModule } from './master/master.module.js'
 import { MediaModule } from './media/media.module.js'
+import { PromotionsModule } from './promotions/promotions.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
 import { WaitlistModule } from './waitlist/waitlist.module.js'
@@ -45,6 +46,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     WalletModule,
     ReviewsModule,
     WaitlistModule,
+    PromotionsModule,
     TelegramModule,
     ClientsModule,
     MasterModule,

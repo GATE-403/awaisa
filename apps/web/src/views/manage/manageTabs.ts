@@ -4,6 +4,7 @@ type ManageTab =
   | 'analytics'
   | 'reviews'
   | 'services'
+  | 'promotions'
   | 'masters'
   | 'branches'
   | 'hours'
@@ -15,6 +16,7 @@ type TabItem = { value: ManageTab; label: string }
 // Everyday work on top; setting the business up lives under one «Настройки» with its own row.
 const SETTINGS_TABS: TabItem[] = [
   { value: 'services', label: 'Услуги' },
+  { value: 'promotions', label: 'Акции' },
   { value: 'masters', label: 'Мастера' },
   { value: 'branches', label: 'Филиалы' },
   { value: 'hours', label: 'График' },

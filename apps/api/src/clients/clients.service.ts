@@ -15,7 +15,7 @@ const HISTORY_LIMIT = 50
 // A visit is a confirmed booking that has started and was not a no-show; it earns what was paid
 // (or the price, when nobody marked the payment).
 const VISIT = `b."status" = 'confirmed' AND b."starts_at" <= now() AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = 'COALESCE(b."paid_amount", s."price")'
+const EARNED = 'COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))'
 
 const toNumber = (value: unknown) => Number(value ?? 0)
 const toDate = (value: unknown) => (value ? new Date(value as string).toISOString() : null)
@@ -68,7 +68,8 @@ export class ClientsService {
     const history = (await this.dataSource.query(
       `SELECT b."id", b."starts_at" AS "startsAt", b."status", b."outcome", b."paid_amount" AS "paidAmount",
          b."payment_method" AS "paymentMethod", b."customer_name" AS "name",
-         s."name" AS "serviceName", s."price", sp."name" AS "specialistName",
+         s."name" AS "serviceName", (s."price" - COALESCE(b."discount_amount", 0)) AS "price",
+         sp."name" AS "specialistName",
          r."rating", r."comment" AS "reviewComment"
        FROM "bookings" b
        JOIN "services" s ON s."id" = b."service_id"

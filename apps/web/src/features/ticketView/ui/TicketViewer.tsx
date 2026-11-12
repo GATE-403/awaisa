@@ -113,7 +113,12 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
           <div className={styles.detail}>
             <dt>Стоимость</dt>
             <dd>
-              {formatPrice(booking.price)}
+              {formatPrice(booking.price - (booking.discount?.amount ?? 0))}
+              {booking.discount && (
+                <span className={styles.note}>
+                  со скидкой «{booking.discount.title}» −{formatPrice(booking.discount.amount)}
+                </span>
+              )}
               <span className={styles.note}>
                 {booking.payment
                   ? `${describeDeposit(booking.payment)}${booking.payment.status === 'paid' ? ', остальное в салоне' : ''}`

@@ -12,6 +12,7 @@ import type {
   Offer,
   PaymentPage,
   PopularService,
+  PublicPromotion,
   ReviewSummary,
 } from './types'
 
@@ -120,7 +121,20 @@ const getPaymentPage = async (id: string, signature: string): Promise<PaymentPag
   return response.json()
 }
 
+// Open promotions for the business page; refreshed with the business when the owner saves.
+const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(businessTag(slug))
+
+  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}/promotions`)
+  if (!response.ok) return []
+
+  return response.json()
+}
+
 export {
+  listPromotions,
   getPaymentPage,
   listMapPlaces,
   getBusiness,

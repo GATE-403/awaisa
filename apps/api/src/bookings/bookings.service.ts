@@ -27,6 +27,7 @@ import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
+import { PromotionsService } from '../promotions/promotions.service.js'
 import { Review } from '../reviews/review.entity.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
@@ -56,6 +57,8 @@ type BookingView = {
   startsAt: string
   endsAt: string
   customerName: string
+  /** The promotion this visit got; the client pays `price - discount.amount`. */
+  discount: { title: string; amount: number } | null
   /** A deposit asked when booked online; null when the service has none. */
   payment: {
     status: NonNullable<Booking['paymentStatus']>
@@ -124,6 +127,10 @@ const toView = (booking: Booking): BookingView => {
     startsAt: booking.startsAt.toISOString(),
     endsAt: booking.endsAt.toISOString(),
     customerName: booking.customerName,
+    discount:
+      booking.discountAmount && booking.discountTitle
+        ? { title: booking.discountTitle, amount: booking.discountAmount }
+        : null,
     payment:
       booking.depositAmount && booking.paymentStatus
         ? {
@@ -163,6 +170,7 @@ export class BookingsService {
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
+    private readonly promotions: PromotionsService,
   ) {}
 
   async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
@@ -239,9 +247,20 @@ export class BookingsService {
     const startsAt = businessDateTimeToUtc(input.date, minutes)
     const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000)
     const cancelToken = randomBytes(24).toString('base64url')
+    const discount = await this.promotions.discountFor({
+      businessId: service.businessId,
+      serviceId: service.id,
+      price: service.price,
+      date: input.date,
+      minutes,
+      phone,
+      code: input.promoCode ?? null,
+    })
     // Online bookings of a service with a deposit hold the slot until the client pays.
     const deposit =
-      !staffBusinessId && service.deposit && this.payments.isAvailable ? service.deposit : null
+      !staffBusinessId && service.deposit && this.payments.isAvailable
+        ? Math.min(service.deposit, service.price - (discount?.amount ?? 0)) || null
+        : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
@@ -268,6 +287,9 @@ export class BookingsService {
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
             depositAmount: deposit,
+            promotionId: discount?.promotionId ?? null,
+            discountAmount: discount?.amount ?? null,
+            discountTitle: discount?.title ?? null,
             paymentStatus: deposit ? 'pending' : null,
             paymentDueAt: deposit ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
             // Booked inside the reminder window: the confirmation already does the reminder's job.
@@ -515,7 +537,11 @@ export class BookingsService {
       { id },
       {
         outcome: input.outcome,
-        paidAmount: isArrived ? (input.paidAmount ?? booking.service?.price ?? null) : null,
+        // Unmarked amounts default to what the visit costs after its discount.
+        paidAmount: isArrived
+          ? (input.paidAmount ??
+            (booking.service ? booking.service.price - (booking.discountAmount ?? 0) : null))
+          : null,
         paymentMethod: isArrived ? (input.paymentMethod ?? 'cash') : null,
         outcomeAt: input.outcome ? new Date() : null,
       },

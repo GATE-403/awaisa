@@ -6,6 +6,7 @@ import { BusinessesModule } from '../businesses/businesses.module.js'
 import { CatalogModule } from '../catalog/catalog.module.js'
 import { Customer } from '../customers/customer.entity.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
+import { PromotionsModule } from '../promotions/promotions.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { Booking } from './booking.entity.js'
 import { BookingsController } from './bookings.controller.js'
@@ -21,6 +22,7 @@ import { PaymentsService } from './payments.service.js'
     AuthModule,
     BusinessesModule,
     NotificationsModule,
+    PromotionsModule,
     TelegramModule,
   ],
   controllers: [BookingsController, PaymentsController],
