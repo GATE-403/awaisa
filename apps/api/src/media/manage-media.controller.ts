@@ -16,7 +16,11 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import { Specialist } from '../catalog/specialist.entity.js'
 import { type ImageKind, processImage } from './images.js'
 import { StorageService } from './storage.service.js'
@@ -33,6 +37,7 @@ const imageUpload = FileInterceptor('file', {
 
 @Controller('manage/:slug')
 @UseGuards(BusinessAccessGuard)
+@OwnerOnly()
 export class ManageMediaController {
   constructor(
     @InjectRepository(Business) private readonly businesses: Repository<Business>,

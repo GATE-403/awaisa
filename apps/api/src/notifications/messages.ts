@@ -71,8 +71,13 @@ const returnVisitMessage = (
 ) =>
   `${businessName}: пора снова на «${serviceName}»? ${masterName.split(' ')[0]} ждёт вас — запишитесь: ${link}`
 
+// The owner added this number as an administrator: where the cabinet is.
+const adminInviteMessage = (businessName: string, link: string) =>
+  `${businessName}: вас добавили администратором — расписание и клиенты. Войдите по этому номеру: ${link}`
+
 export type { BookingMessageInput }
 export {
+  adminInviteMessage,
   confirmationMessage,
   masterInviteMessage,
   otpMessage,

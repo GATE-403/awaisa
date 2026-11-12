@@ -12,6 +12,7 @@ import type { ClientCard } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { ClientLoyaltySection } from './ClientLoyaltySection'
 import styles from './ClientSheet.module.css'
 
@@ -52,6 +53,7 @@ const visitStatus = (item: ClientCard['history'][number]) => {
 // Everything the business knows about one client: what they come for, how reliable they are,
 // private notes. Contacts are one tap away.
 export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps) => {
+  const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
   const noteId = useId()
   const birthdayId = useId()
@@ -139,14 +141,18 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps)
               <dt>Визиты</dt>
               <dd>{card.stats.visits}</dd>
             </div>
-            <div className={styles.stat}>
-              <dt>Потратил</dt>
-              <dd>{formatPrice(card.stats.spent)}</dd>
-            </div>
-            <div className={styles.stat}>
-              <dt>Средний чек</dt>
-              <dd>{formatPrice(card.stats.averageCheck)}</dd>
-            </div>
+            {canSeeMoney && (
+              <>
+                <div className={styles.stat}>
+                  <dt>Потратил</dt>
+                  <dd>{formatPrice(card.stats.spent)}</dd>
+                </div>
+                <div className={styles.stat}>
+                  <dt>Средний чек</dt>
+                  <dd>{formatPrice(card.stats.averageCheck)}</dd>
+                </div>
+              </>
+            )}
             <div className={styles.stat}>
               <dt>Неявки</dt>
               <dd>{card.stats.noShows}</dd>

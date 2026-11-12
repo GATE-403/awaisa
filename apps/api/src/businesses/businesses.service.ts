@@ -420,6 +420,10 @@ export class BusinessesService {
     return this.members.existsBy({ businessId, customerId })
   }
 
+  async memberRole(businessId: string, customerId: string) {
+    return (await this.members.findOneBy({ businessId, customerId }))?.role ?? null
+  }
+
   async listForCustomer(customer: Customer, isPlatformAdmin: boolean) {
     const memberships = await this.members.find({
       where: { customerId: customer.id },

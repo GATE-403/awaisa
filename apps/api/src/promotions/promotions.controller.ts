@@ -13,7 +13,11 @@ import {
 } from '@nestjs/common'
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
   type PromotionInput,
@@ -45,6 +49,7 @@ export class PromotionsController {
 }
 
 @Controller('manage/:slug/promotions')
+@OwnerOnly()
 @UseGuards(BusinessAccessGuard)
 export class ManagePromotionsController {
   constructor(private readonly promotions: PromotionsService) {}

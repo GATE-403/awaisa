@@ -15,7 +15,11 @@ import { ConfigService } from '@nestjs/config'
 import { SkipThrottle } from '@nestjs/throttler'
 import { CurrentCustomer } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  OwnerOnly,
+} from '../businesses/business-access.guard.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { TelegramBotService } from './telegram-bot.service.js'
@@ -39,6 +43,7 @@ export class TelegramController {
 
   @Post('manage/:slug/telegram/link')
   @UseGuards(BusinessAccessGuard)
+  @OwnerOnly()
   createLink(@CurrentBusiness() business: Business, @CurrentCustomer() customer: Customer | null) {
     if (!this.bot.isAvailable) throw new ForbiddenException('Telegram-бот не настроен')
     return this.bot.createLink(business.id, customer?.id ?? null)
@@ -46,6 +51,7 @@ export class TelegramController {
 
   @Delete('manage/:slug/telegram/:id')
   @UseGuards(BusinessAccessGuard)
+  @OwnerOnly()
   @HttpCode(204)
   async remove(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
     await this.bot.removeChat(business.id, id)

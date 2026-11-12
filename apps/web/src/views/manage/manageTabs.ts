@@ -6,6 +6,7 @@ type ManageTab =
   | 'services'
   | 'promotions'
   | 'loyalty'
+  | 'team'
   | 'masters'
   | 'branches'
   | 'hours'
@@ -24,6 +25,7 @@ const SETTINGS_TABS: TabItem[] = [
   { value: 'hours', label: 'График' },
   { value: 'profile', label: 'Профиль' },
   { value: 'notifications', label: 'Уведомления' },
+  { value: 'team', label: 'Сотрудники' },
 ]
 
 const MAIN_TABS: TabItem[] = [
@@ -40,5 +42,11 @@ const toManageTab = (value: string | null): ManageTab =>
 
 const isSettingsTab = (tab: ManageTab) => SETTINGS_TABS.some((item) => item.value === tab)
 
+// What an administrator («staff») may open: the day's work, not money or setup.
+const STAFF_TABS: ManageTab[] = ['schedule', 'clients', 'reviews']
+
+const isTabAllowed = (tab: ManageTab, role: 'owner' | 'staff') =>
+  role === 'owner' || STAFF_TABS.includes(tab)
+
 export type { ManageTab }
-export { isSettingsTab, MAIN_TABS, SETTINGS_TABS, toManageTab }
+export { isSettingsTab, isTabAllowed, MAIN_TABS, SETTINGS_TABS, toManageTab }
