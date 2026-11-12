@@ -604,6 +604,20 @@ type JoinWaitlistInput = {
   phone: string
 }
 
+type MailingSegment = 'lapsed' | 'birthday' | 'all'
+
+type MailingsOverview = {
+  history: {
+    id: string
+    segment: MailingSegment
+    lapsedDays: number | null
+    text: string
+    recipients: number
+    createdAt: string
+  }[]
+  birthdayGreeting: string | null
+}
+
 export type {
   AdminBooking,
   MasterDay,
@@ -615,6 +629,8 @@ export type {
   ClientSubscription,
   GiftCertificate,
   LoyaltyOverview,
+  MailingSegment,
+  MailingsOverview,
   MyLoyalty,
   OutcomeInput,
   SubscriptionPlan,

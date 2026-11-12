@@ -1,9 +1,10 @@
 'use client'
 
 import { Avatar } from '@awaisa/ui/Avatar'
+import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { CaretRight, MagnifyingGlass, NotePencil } from '@phosphor-icons/react/ssr'
+import { CaretRight, MagnifyingGlass, NotePencil, PaperPlaneTilt } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -13,19 +14,22 @@ import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
+import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import styles from './ClientsTab.module.css'
 
 interface ClientsTabProps {
   slug: string
+  businessName: string
 }
 
 const SEARCH_DELAY_MS = 250
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' })
 
 // The client base, like Contacts: search by name or number, newest visits first.
-export const ClientsTab = ({ slug }: ClientsTabProps) => {
+export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
+  const [isMailing, setIsMailing] = useState(false)
   const [query, setQuery] = useState('')
   const [clients, setClients] = useState<ClientListItem[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +62,16 @@ export const ClientsTab = ({ slug }: ClientsTabProps) => {
             ? `${pluralize(clients.length, ['клиент', 'клиента', 'клиентов'])} — все, кто записывался`
             : 'Все, кто записывался: визиты, траты, неявки и ваши заметки.'
         }
+        actions={
+          <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
+            <PaperPlaneTilt weight='bold' aria-hidden />
+            Рассылка
+          </Button>
+        }
       />
+      {isMailing && (
+        <MailingSheet slug={slug} businessName={businessName} onClose={() => setIsMailing(false)} />
+      )}
       <label className={styles.search}>
         <MagnifyingGlass weight='bold' aria-hidden className={styles.searchIcon} />
         <Input
