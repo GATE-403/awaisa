@@ -109,6 +109,8 @@ type Offer = {
   coverUrl: string | null
   rating: number | null
   address: string | null
+  /** The biggest open promotion on this service, percent; null = none. */
+  discountPercent?: number | null
 }
 
 type PopularService = {
@@ -166,6 +168,8 @@ type Booking = {
   /** Missing in bookings saved on the device before reviews existed. */
   endsAt?: string
   customerName: string
+  /** The promotion the visit got; the client pays price − discount.amount. */
+  discount?: { title: string; amount: number } | null
   /** A deposit for online booking; pending = the slot is held until it is paid. */
   payment?: BookingPayment | null
   review?: { rating: number; comment: string; reply: string | null } | null
@@ -416,6 +420,49 @@ type CreateBookingInput = {
   branchId?: string
   smsConfirmation?: boolean
   reminderMinutes?: 60 | 120 | 1440 | null
+  promoCode?: string
+}
+
+type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
+
+// A business's promotion as the cabinet edits it.
+type Promotion = {
+  id: string
+  title: string
+  kind: PromotionKind
+  percent: number
+  code: string | null
+  /** happy_hours: 0 = Monday; null = every day. */
+  weekdays: number[] | null
+  fromMinutes: number | null
+  toMinutes: number | null
+  /** null = every service. */
+  serviceIds: string[] | null
+  startsOn: string | null
+  endsOn: string | null
+  isActive: boolean
+}
+
+type PromotionInput = Omit<Promotion, 'id'>
+
+// What a client may see on the business page (no codes).
+type PublicPromotion = Pick<
+  Promotion,
+  | 'id'
+  | 'title'
+  | 'kind'
+  | 'percent'
+  | 'weekdays'
+  | 'fromMinutes'
+  | 'toMinutes'
+  | 'serviceIds'
+  | 'endsOn'
+>
+
+type PriceQuote = {
+  price: number
+  discount: { promotionId: string; title: string; percent: number; amount: number } | null
+  total: number
 }
 
 type AnalyticsDays = 7 | 30 | 90 | 365
@@ -549,5 +596,10 @@ export type {
   JoinWaitlistInput,
   ManagedWaitlistEntry,
   PaymentPage,
+  PriceQuote,
+  Promotion,
+  PromotionInput,
+  PromotionKind,
+  PublicPromotion,
   WaitlistEntry,
 }

@@ -33,6 +33,9 @@ import type {
   NextFree,
   OtpRequest,
   OutcomeInput,
+  PriceQuote,
+  Promotion,
+  PromotionInput,
   RecentBooking,
   Review,
   ReviewAccess,
@@ -412,7 +415,33 @@ const getCheckoutUrl = (id: string, token: string | null) =>
     headers: token ? { [TOKEN_HEADER]: token } : {},
   })
 
+const getPriceQuote = (
+  params: { serviceId: string; date: string; time: string; code?: string; phone?: string },
+  signal?: AbortSignal,
+) => {
+  const query = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) if (value) query.set(key, value)
+  return request<PriceQuote>(`/promotions/quote?${query}`, { signal })
+}
+
+const getManagedPromotions = (slug: string, signal?: AbortSignal) =>
+  request<Promotion[]>(`${manage(slug)}/promotions`, { signal })
+
+const createPromotion = (slug: string, input: PromotionInput) =>
+  post<Promotion>(`${manage(slug)}/promotions`, input)
+
+const updatePromotion = (slug: string, id: string, input: PromotionInput) =>
+  send<Promotion>('PUT', `${manage(slug)}/promotions/${id}`, input)
+
+const deletePromotion = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/promotions/${id}`)
+
 export {
+  createPromotion,
+  deletePromotion,
+  getManagedPromotions,
+  getPriceQuote,
+  updatePromotion,
   completeTestPayment,
   syncPayment,
   getCheckoutUrl,

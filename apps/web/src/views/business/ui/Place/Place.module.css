@@ -1013,3 +1013,38 @@ details[open] > .info .infoChevron {
     transition: none;
   }
 }
+
+/* ---------- Promotions under the place card ---------- */
+
+.promotions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.promotion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-body);
+}
+
+.promotion svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-danger);
+}
+
+.promotionTitle {
+  font-weight: var(--font-weight-semibold);
+}
+
+.promotionText {
+  color: var(--color-muted-foreground);
+}

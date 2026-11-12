@@ -21,7 +21,9 @@ type Totals = {
 // A visit counts unless the client did not show up; it earns what was paid, or the price
 // when nobody marked the payment.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = `COALESCE(b."paid_amount", s."price")`
+// The price minus the discount the visit was booked with.
+const PRICE = `(s."price" - COALESCE(b."discount_amount", 0))`
+const EARNED = `COALESCE(b."paid_amount", ${PRICE})`
 
 // Local business time (fixed UTC+6, see business-time.ts) for grouping by day and hour.
 const LOCAL = `("b"."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')`
@@ -104,7 +106,7 @@ export class AnalyticsService {
           [id, from, now],
         ),
         this.query(
-          `SELECT COUNT(*)::int AS "visits", COALESCE(SUM(s."price"), 0)::int AS "revenue"
+          `SELECT COUNT(*)::int AS "visits", COALESCE(SUM(${PRICE}), 0)::int AS "revenue"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
            WHERE b."business_id" = $1 AND b."status" = 'confirmed'
              AND b."starts_at" >= $2 AND b."starts_at" < $3`,
@@ -205,7 +207,7 @@ export class AnalyticsService {
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'cash'), 0)::int AS "cash",
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'card'), 0)::int AS "card",
          COALESCE(SUM(b."paid_amount") FILTER (WHERE b."payment_method" = 'transfer'), 0)::int AS "transfer",
-         COALESCE(SUM(s."price") FILTER (WHERE ${DONE} AND b."outcome" IS NULL), 0)::int AS "unmarked"
+         COALESCE(SUM(${PRICE}) FILTER (WHERE ${DONE} AND b."outcome" IS NULL), 0)::int AS "unmarked"
        FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
        WHERE b."business_id" = $1 AND b."starts_at" >= $2 AND b."starts_at" < $3`,
       [businessId, from, to],

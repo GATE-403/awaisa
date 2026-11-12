@@ -114,7 +114,7 @@ export class AdminService {
   // price in cash. The ids come back so the toast can undo exactly these.
   async closeDay(business: Business, date: string) {
     const rows = (await this.timeOff.manager.query(
-      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = s."price",
+      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = s."price" - COALESCE(b."discount_amount", 0),
          "payment_method" = 'cash', "outcome_at" = now()
        FROM "services" AS s
        WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'

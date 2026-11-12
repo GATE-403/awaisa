@@ -196,3 +196,17 @@
     line-height: var(--text-sm-line-height);
   }
 }
+
+/* An open promotion on this service: the one red mark on the card. */
+.discountBadge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  color: var(--color-primary-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}

@@ -147,7 +147,14 @@ export class BusinessesService {
         (SELECT ROUND(AVG(sp."rating")::numeric, 1)::float8 FROM "specialists" sp
           WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
         (SELECT br."address" FROM "branches" br
-          WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address"
+          WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address",
+        -- The biggest open promotion on this service (not codes): «−20%» on the catalog card.
+        (SELECT MAX(p."percent")::int FROM "promotions" p
+          WHERE p."business_id" = b."id" AND p."is_active" AND p."kind" <> 'promo_code'
+            AND (p."service_ids" IS NULL OR s."id" = ANY(p."service_ids"))
+            AND (p."ends_on" IS NULL OR p."ends_on" >= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
+            AND (p."starts_on" IS NULL OR p."starts_on" <= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
+        ) AS "discountPercent"
       FROM "services" s
       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
       WHERE s."is_active"
