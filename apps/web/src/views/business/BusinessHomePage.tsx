@@ -1,4 +1,6 @@
 import { getBusiness, listReviews } from '@/shared/api/serverApi'
+import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
+import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { MastersSection } from '@/views/business/ui/Place/MastersSection'
 import { NextSlotCard } from '@/views/business/ui/Place/NextSlotCard'
 import { PhotosSection } from '@/views/business/ui/Place/PhotosSection'
@@ -18,6 +20,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
 
   return (
     <main className={styles.page}>
+      <JsonLd data={buildBusinessJsonLd({ business, catalog }, reviews)} />
       <PlaceHeader business={business} catalog={catalog} reviews={reviews} />
       <div className={styles.body}>
         <div className={styles.main}>

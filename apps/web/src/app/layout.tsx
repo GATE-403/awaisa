@@ -7,6 +7,8 @@ import '@awaisa/ui/styles.css'
 import '@/shared/styles/shell.css'
 import { ResumeBooking } from '@/features/bookingDraft'
 import { PLATFORM } from '@/shared/config/platform'
+import { BASE_OPEN_GRAPH } from '@/shared/lib/seo/businessMetadata'
+import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 import { THEME_BOOT_SCRIPT } from '@/shared/lib/theme'
 import { Footer, FooterGate } from '@/widgets/Footer'
 import { Header, HeaderFallback } from '@/widgets/Header'
@@ -21,6 +23,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: { default: `${PLATFORM.name} — онлайн-запись`, template: `%s · ${PLATFORM.name}` },
   description: PLATFORM.tagline,
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    ...BASE_OPEN_GRAPH,
+    title: `${PLATFORM.name} — онлайн-запись`,
+    description: PLATFORM.tagline,
+  },
+  twitter: { card: 'summary_large_image' },
 }
 
 export const viewport: Viewport = {
