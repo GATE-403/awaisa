@@ -9,7 +9,7 @@
 }
 
 /* With section chips below, the hairline goes under them: one line under the whole stack. */
-:global(:root:has([data-category-nav])) .bar {
+:global(:root[data-category-nav]) .bar {
   box-shadow: none;
 }
 /* Phones: one 48pt row — the business and its sections, scrolling freely (booking is on the page). */

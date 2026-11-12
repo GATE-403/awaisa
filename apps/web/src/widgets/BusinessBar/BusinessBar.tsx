@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { BusinessTile, getOpeningStatus } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
+import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import styles from './BusinessBar.module.css'
 
@@ -18,6 +19,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
   const today = useToday()
   const base = `/${business.slug}`
   const isBooking = pathname === `${base}/book`
+  useRootFlag(isBooking ? null : 'business-bar')
   // The overview has its own big «Записаться», so the bar does not repeat it.
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes) : null
   const sections = [

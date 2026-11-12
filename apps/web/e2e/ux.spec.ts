@@ -238,4 +238,22 @@ test.describe('UX: layout and ergonomics', () => {
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
   })
+
+  // Next keeps visited routes in the DOM (hidden): the booking sheet's scroll lock must not
+  // outlive it, or every page after it stops scrolling.
+  test('closing the booking screen gives the page its scroll back', async ({ page }) => {
+    await page.goto('/awaisa-studio')
+    await page.locator('a[href*="/book?service="]').first().click()
+    await page.waitForURL(/\/book\?/)
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.style.overflow))
+      .toBe('hidden')
+    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.waitForURL(/awaisa-studio$/)
+    await expect
+      .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).overflow))
+      .not.toBe('hidden')
+    await page.mouse.wheel(0, 600)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
 })

@@ -22,6 +22,7 @@ import {
 } from '@/entities/booking'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
+import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
@@ -40,6 +41,7 @@ interface BookingPageProps {
 
 export const BookingPage = ({ business, catalog }: BookingPageProps) => {
   const form = useBookingForm(business, catalog)
+  usePageScrollLock()
   const specialistLabel = getSpecialistLabel(catalog, form.specialistId)
 
   if (form.createdBooking) {
