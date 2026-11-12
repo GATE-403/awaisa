@@ -1,0 +1,109 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
+import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
+import type { Business } from '../businesses/business.entity.js'
+import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import type { Customer } from '../customers/customer.entity.js'
+import {
+  type CertificateInput,
+  certificateSchema,
+  type LoyaltySettingsInput,
+  loyaltySettingsSchema,
+  type PlanInput,
+  planSchema,
+  type SellSubscriptionInput,
+  sellSubscriptionSchema,
+} from './loyalty.schemas.js'
+import { LoyaltyService } from './loyalty.service.js'
+
+@Controller('manage/:slug/loyalty')
+@UseGuards(BusinessAccessGuard)
+export class ManageLoyaltyController {
+  constructor(private readonly loyalty: LoyaltyService) {}
+
+  @Get()
+  async overview(@CurrentBusiness() business: Business) {
+    const [settings, plans, certificates] = await Promise.all([
+      this.loyalty.getSettings(business.id),
+      this.loyalty.listPlans(business.id),
+      this.loyalty.listCertificates(business.id),
+    ])
+    return { ...settings, plans, certificates }
+  }
+
+  @Put('settings')
+  setSettings(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: loyaltySettingsSchema }) body: LoyaltySettingsInput,
+  ) {
+    return this.loyalty.setBonusPercent(business.id, body.bonusPercent)
+  }
+
+  @Post('plans')
+  createPlan(@CurrentBusiness() business: Business, @Body({ schema: planSchema }) body: PlanInput) {
+    return this.loyalty.savePlan(business.id, body)
+  }
+
+  @Put('plans/:id')
+  updatePlan(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: planSchema }) body: PlanInput,
+  ) {
+    return this.loyalty.savePlan(business.id, body, id)
+  }
+
+  @Delete('plans/:id')
+  @HttpCode(204)
+  deletePlan(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+    return this.loyalty.deletePlan(business.id, id)
+  }
+
+  @Post('certificates')
+  issueCertificate(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: certificateSchema }) body: CertificateInput,
+  ) {
+    return this.loyalty.issueCertificate(business.id, body)
+  }
+
+  @Get('certificates/:code')
+  findCertificate(@CurrentBusiness() business: Business, @Param('code') code: string) {
+    return this.loyalty.findCertificate(business.id, code)
+  }
+
+  @Get('clients/:phone')
+  forClient(@CurrentBusiness() business: Business, @Param('phone') phone: string) {
+    return this.loyalty.forClient(business.id, phone)
+  }
+
+  @Post('clients/:phone/subscriptions')
+  sellSubscription(
+    @CurrentBusiness() business: Business,
+    @Param('phone') phone: string,
+    @Body({ schema: sellSubscriptionSchema }) body: SellSubscriptionInput,
+  ) {
+    return this.loyalty.sellSubscription(business.id, phone, body.planId)
+  }
+}
+
+@Controller('me/loyalty')
+@UseGuards(AuthGuard)
+export class MyLoyaltyController {
+  constructor(private readonly loyalty: LoyaltyService) {}
+
+  @Get()
+  mine(@CurrentCustomer() customer: Customer) {
+    return this.loyalty.forCustomer(customer.phone)
+  }
+}

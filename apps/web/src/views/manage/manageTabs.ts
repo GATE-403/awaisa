@@ -5,6 +5,7 @@ type ManageTab =
   | 'reviews'
   | 'services'
   | 'promotions'
+  | 'loyalty'
   | 'masters'
   | 'branches'
   | 'hours'
@@ -17,6 +18,7 @@ type TabItem = { value: ManageTab; label: string }
 const SETTINGS_TABS: TabItem[] = [
   { value: 'services', label: 'Услуги' },
   { value: 'promotions', label: 'Акции' },
+  { value: 'loyalty', label: 'Лояльность' },
   { value: 'masters', label: 'Мастера' },
   { value: 'branches', label: 'Филиалы' },
   { value: 'hours', label: 'График' },

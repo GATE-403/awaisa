@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module.js'
 import { BusinessesModule } from '../businesses/businesses.module.js'
 import { CatalogModule } from '../catalog/catalog.module.js'
 import { Customer } from '../customers/customer.entity.js'
+import { LoyaltyModule } from '../loyalty/loyalty.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { PromotionsModule } from '../promotions/promotions.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
@@ -23,6 +24,7 @@ import { PaymentsService } from './payments.service.js'
     BusinessesModule,
     NotificationsModule,
     PromotionsModule,
+    LoyaltyModule,
     TelegramModule,
   ],
   controllers: [BookingsController, PaymentsController],

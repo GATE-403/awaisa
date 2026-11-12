@@ -38,7 +38,15 @@ type MoveBookingInput = z.infer<typeof moveBookingSchema>
 const outcomeSchema = z.object({
   outcome: z.enum(['arrived', 'no_show']).nullable(),
   paidAmount: z.number().int().min(0).max(10_000_000).nullable().optional(),
-  paymentMethod: z.enum(['cash', 'card', 'transfer']).nullable().optional(),
+  paymentMethod: z
+    .enum(['cash', 'card', 'transfer', 'subscription', 'certificate'])
+    .nullable()
+    .optional(),
+  // Loyalty drawn on for an «arrived» visit: each is used at most once per visit.
+  subscriptionId: z.uuid().nullable().optional(),
+  certificateCode: z.string().trim().max(12).nullable().optional(),
+  certificateAmount: z.number().int().min(1).max(10_000_000).nullable().optional(),
+  bonusAmount: z.number().int().min(1).max(10_000_000).nullable().optional(),
 })
 
 type OutcomeBody = z.infer<typeof outcomeSchema>

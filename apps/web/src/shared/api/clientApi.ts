@@ -16,13 +16,16 @@ import type {
   Category,
   ClientCard,
   ClientListItem,
+  ClientLoyalty,
   CreateBookingInput,
   CreateBusinessInput,
   CreatedBooking,
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  GiftCertificate,
   JoinWaitlistInput,
+  LoyaltyOverview,
   ManagedReview,
   ManagedWaitlistEntry,
   MapPlace,
@@ -30,6 +33,7 @@ import type {
   MasterPlace,
   MasterSchedule,
   MovedBooking,
+  MyLoyalty,
   NextFree,
   OtpRequest,
   OutcomeInput,
@@ -43,6 +47,8 @@ import type {
   ServiceInput,
   SlugCheck,
   SpecialistInput,
+  SubscriptionPlan,
+  SubscriptionPlanInput,
   TelegramStatus,
   UpdateBusinessInput,
   VisitReview,
@@ -436,7 +442,47 @@ const updatePromotion = (slug: string, id: string, input: PromotionInput) =>
 const deletePromotion = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/promotions/${id}`)
 
+const getLoyalty = (slug: string, signal?: AbortSignal) =>
+  request<LoyaltyOverview>(`${manage(slug)}/loyalty`, { signal })
+
+const setBonusPercent = (slug: string, bonusPercent: number | null) =>
+  send<{ bonusPercent: number | null }>('PUT', `${manage(slug)}/loyalty/settings`, { bonusPercent })
+
+const saveSubscriptionPlan = (slug: string, input: SubscriptionPlanInput, id?: string) =>
+  id
+    ? send<SubscriptionPlan[]>('PUT', `${manage(slug)}/loyalty/plans/${id}`, input)
+    : post<SubscriptionPlan[]>(`${manage(slug)}/loyalty/plans`, input)
+
+const deleteSubscriptionPlan = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/loyalty/plans/${id}`)
+
+const issueCertificate = (
+  slug: string,
+  input: { amount: number; recipient: string; phone: string; expiresOn: string | null },
+) => post<GiftCertificate>(`${manage(slug)}/loyalty/certificates`, input)
+
+const getClientLoyalty = (slug: string, phone: string, signal?: AbortSignal) =>
+  request<ClientLoyalty>(`${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}`, { signal })
+
+const sellSubscription = (slug: string, phone: string, planId: string) =>
+  post<ClientLoyalty>(
+    `${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}/subscriptions`,
+    {
+      planId,
+    },
+  )
+
+const getMyLoyalty = (signal?: AbortSignal) => request<MyLoyalty>('/me/loyalty', { signal })
+
 export {
+  deleteSubscriptionPlan,
+  getClientLoyalty,
+  getLoyalty,
+  getMyLoyalty,
+  issueCertificate,
+  saveSubscriptionPlan,
+  sellSubscription,
+  setBonusPercent,
   createPromotion,
   deletePromotion,
   getManagedPromotions,

@@ -13,6 +13,7 @@ import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
 import { HealthController } from './health/health.controller.js'
+import { LoyaltyModule } from './loyalty/loyalty.module.js'
 import { MasterModule } from './master/master.module.js'
 import { MediaModule } from './media/media.module.js'
 import { PromotionsModule } from './promotions/promotions.module.js'
@@ -47,6 +48,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     ReviewsModule,
     WaitlistModule,
     PromotionsModule,
+    LoyaltyModule,
     TelegramModule,
     ClientsModule,
     MasterModule,

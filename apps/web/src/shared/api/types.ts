@@ -260,7 +260,7 @@ type OtpRequest = {
 
 type VisitOutcome = 'arrived' | 'no_show'
 
-type PaymentMethod = 'cash' | 'card' | 'transfer'
+type PaymentMethod = 'cash' | 'card' | 'transfer' | 'subscription' | 'certificate'
 
 type AdminBooking = Booking & {
   customerPhone: string
@@ -268,12 +268,79 @@ type AdminBooking = Booking & {
   outcome?: VisitOutcome | null
   paidAmount?: number | null
   paymentMethod?: PaymentMethod | null
+  subscriptionId?: string | null
+  certificateCode?: string | null
+  certificateAmount?: number | null
+  bonusAmount?: number | null
 }
+
+type GiftCertificate = {
+  id: string
+  code: string
+  amount: number
+  balance: number
+  recipient: string
+  phone: string | null
+  expiresOn: string | null
+  createdAt: string
+}
+
+type SubscriptionPlan = {
+  id: string
+  title: string
+  /** null = any service. */
+  serviceId: string | null
+  serviceName: string | null
+  visits: number
+  price: number
+  validDays: number
+  isActive: boolean
+}
+
+type SubscriptionPlanInput = Omit<SubscriptionPlan, 'id' | 'serviceName'>
+
+type ClientSubscription = {
+  id: string
+  title: string
+  serviceId: string | null
+  serviceName: string | null
+  visitsTotal: number
+  visitsLeft: number
+  expiresOn: string
+}
+
+// The cabinet's «Лояльность» tab.
+type LoyaltyOverview = {
+  bonusPercent: number | null
+  plans: SubscriptionPlan[]
+  certificates: GiftCertificate[]
+}
+
+// A client's card in the cabinet.
+type ClientLoyalty = {
+  bonusPercent: number | null
+  bonusBalance: number
+  subscriptions: ClientSubscription[]
+  certificates: GiftCertificate[]
+}
+
+// A signed-in client's bonuses and subscriptions per place.
+type MyLoyalty = {
+  slug: string
+  name: string
+  bonusBalance: number
+  subscriptions: { title: string; visitsLeft: number; visitsTotal: number; expiresOn: string }[]
+}[]
 
 type OutcomeInput = {
   outcome: VisitOutcome | null
   paidAmount?: number | null
   paymentMethod?: PaymentMethod | null
+  /** Loyalty drawn on for an «arrived» visit; each is used at most once per visit. */
+  subscriptionId?: string | null
+  certificateCode?: string | null
+  certificateAmount?: number | null
+  bonusAmount?: number | null
 }
 
 type ClientListItem = {
@@ -544,7 +611,14 @@ export type {
   MasterSchedule,
   ClientCard,
   ClientListItem,
+  ClientLoyalty,
+  ClientSubscription,
+  GiftCertificate,
+  LoyaltyOverview,
+  MyLoyalty,
   OutcomeInput,
+  SubscriptionPlan,
+  SubscriptionPlanInput,
   PaymentMethod,
   VisitOutcome,
   ManagedReview,
