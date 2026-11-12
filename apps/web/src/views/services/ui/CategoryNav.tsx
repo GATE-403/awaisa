@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './CategoryNav.module.css'
 
@@ -17,6 +18,7 @@ const ACTIVE_ZONE = '-35% 0px -55% 0px'
 
 export const CategoryNav = ({ items }: CategoryNavProps) => {
   const [activeId, setActiveId] = useState(items[0]?.id ?? null)
+  useRootFlag('category-nav')
   const idsKey = items.map((item) => item.id).join(',')
 
   useEffect(() => {

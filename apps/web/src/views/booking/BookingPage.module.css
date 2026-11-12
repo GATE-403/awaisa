@@ -23,10 +23,6 @@
   }
 }
 
-:global(html:has([data-booking-screen])) {
-  overflow: hidden;
-}
-
 @media (min-width: 768px) {
   .page {
     inset: var(--space-6) 0 0;

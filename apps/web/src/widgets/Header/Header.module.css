@@ -30,7 +30,7 @@
 }
 
 /* On business pages the business bar below carries the edge. */
-:global(:root:has([data-business-bar])) .header::after {
+:global(:root[data-business-bar]) .header::after {
   display: none;
 }
 
