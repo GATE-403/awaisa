@@ -1,3 +1,4 @@
+import NextLink from 'next/link'
 import type { Business } from '@/shared/api/types'
 import styles from './Place.module.css'
 
@@ -15,6 +16,9 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
         <h2 id='place-work' className={styles.sectionTitle}>
           Работы
         </h2>
+        <NextLink href={`/feed?business=${business.slug}`} className={styles.sectionLink}>
+          Смотреть с ценами ›
+        </NextLink>
       </div>
       <ul className={styles.photos} data-count={Math.min(business.photos.length, 5)}>
         {business.photos.slice(0, 5).map((url, index) => (

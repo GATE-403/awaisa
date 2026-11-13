@@ -16,13 +16,19 @@ type NextSlot = {
 const DAYS_TO_CHECK = 2
 const DAY_LABELS = ['Сегодня', 'Завтра']
 
-export const useNextSlot = (serviceId: string) => {
+export const useNextSlot = (
+  serviceId: string | null,
+  {
+    specialistId = ANY_SPECIALIST_ID,
+    isEnabled = true,
+  }: { specialistId?: string; isEnabled?: boolean } = {},
+) => {
   const today = useToday()
   const [slot, setSlot] = useState<NextSlot | null | undefined>(undefined)
   const todayKey = today?.dayKey
 
   useEffect(() => {
-    if (!todayKey) return
+    if (!todayKey || !serviceId || !isEnabled) return
 
     const controller = new AbortController()
     const days = getUpcomingDays(todayKey, DAYS_TO_CHECK)
@@ -30,7 +36,7 @@ export const useNextSlot = (serviceId: string) => {
     const findSlot = async () => {
       for (const [index, day] of days.entries()) {
         const { slots } = await getAvailability(
-          { serviceId, specialistId: ANY_SPECIALIST_ID, date: day.key },
+          { serviceId, specialistId, date: day.key },
           controller.signal,
         )
         const free = slots.find((item) => item.isAvailable)
@@ -47,7 +53,7 @@ export const useNextSlot = (serviceId: string) => {
       })
 
     return () => controller.abort()
-  }, [todayKey, serviceId])
+  }, [todayKey, serviceId, specialistId, isEnabled])
 
   return slot
 }

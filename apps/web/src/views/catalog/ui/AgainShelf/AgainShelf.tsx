@@ -1,13 +1,11 @@
 'use client'
 
-import { ArrowClockwise } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 import { useStoredBookings } from '@/entities/booking'
-import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getMyBookings } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
+import { AgainCard } from './AgainCard'
 import styles from './AgainShelf.module.css'
 
 const MAX_ITEMS = 3
@@ -64,32 +62,16 @@ export const AgainShelf = () => {
 
   return (
     <section className={styles.section} aria-labelledby='again-title'>
-      <h2 id='again-title' className={styles.title}>
-        Снова к мастеру
-      </h2>
+      <div className={styles.head}>
+        <h2 id='again-title' className={styles.title}>
+          Снова к мастеру
+        </h2>
+        <p className={styles.subtitle}>Туда же и к тому же мастеру — в один тап</p>
+      </div>
       <ul className={styles.list}>
         {items.map((booking) => (
           <li key={booking.id}>
-            <NextLink
-              href={`/${booking.business.slug}/book?${new URLSearchParams({
-                service: booking.serviceId,
-                specialist: booking.specialistId,
-              })}`}
-              className={styles.row}
-              aria-label={`Снова: ${booking.serviceName}, ${booking.specialistName}, ${booking.business.name}`}
-            >
-              <BusinessTile name={booking.business.name} size='sm' />
-              <span className={styles.text}>
-                <span className={styles.service}>{booking.serviceName}</span>
-                <span className={styles.meta}>
-                  {booking.specialistName.split(' ')[0]} · {booking.business.name}
-                </span>
-              </span>
-              <span className={styles.again}>
-                <ArrowClockwise weight='bold' aria-hidden />
-                Снова
-              </span>
-            </NextLink>
+            <AgainCard booking={booking} />
           </li>
         ))}
       </ul>

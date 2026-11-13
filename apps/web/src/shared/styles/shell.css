@@ -34,7 +34,13 @@
 }
 
 :root:has([data-resume-booking]) {
-  --resume-space: 72px;
+  --resume-space: 52px;
+}
+
+@media (min-width: 768px) {
+  :root:has([data-resume-booking]) {
+    --resume-space: 88px;
+  }
 }
 
 html {

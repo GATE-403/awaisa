@@ -45,9 +45,6 @@ export class Business {
   @Column({ name: 'cover_url', type: 'varchar', length: 512, nullable: true })
   coverUrl: string | null
 
-  @Column({ type: 'jsonb', default: () => "'[]'" })
-  photos: string[]
-
   @Column({ name: 'slot_minutes', type: 'int', default: 30 })
   slotMinutes: number
 

@@ -9,6 +9,7 @@ const PAGES = [
   '/bookings',
   '/business',
   '/map',
+  '/feed',
 ]
 
 for (const path of PAGES) {

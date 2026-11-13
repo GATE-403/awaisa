@@ -6,6 +6,7 @@ import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: absoluteUrl('/'), changeFrequency: 'daily', priority: 1 },
   { url: absoluteUrl('/map'), changeFrequency: 'daily', priority: 0.7 },
+  { url: absoluteUrl('/feed'), changeFrequency: 'daily', priority: 0.7 },
   { url: absoluteUrl('/business'), changeFrequency: 'monthly', priority: 0.5 },
 ]
 

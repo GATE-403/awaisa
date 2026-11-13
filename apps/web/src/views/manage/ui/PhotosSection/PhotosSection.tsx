@@ -1,25 +1,46 @@
-import { Camera, Plus, X } from '@phosphor-icons/react/ssr'
-import { type ChangeEvent, type CSSProperties, useRef, useState } from 'react'
+import { Camera, EyeSlash, Plus } from '@phosphor-icons/react/ssr'
+import { type ChangeEvent, type CSSProperties, useEffect, useRef, useState } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business'
-import { addPhoto, removeCover, removePhoto, uploadCover } from '@/shared/api/clientApi'
-import type { Business } from '@/shared/api/types'
+import {
+  addPhoto,
+  getWorkPhotos,
+  removeCover,
+  removePhoto,
+  updateWorkPhoto,
+  uploadCover,
+} from '@/shared/api/clientApi'
+import type { Business, Catalog, WorkPhoto } from '@/shared/api/types'
 import styles from './PhotosSection.module.css'
+import { WorkPhotoSheet } from './WorkPhotoSheet'
 
 interface PhotosSectionProps {
   slug: string
   business: Business
+  catalog: Catalog
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
 }
 
-const MAX_PHOTOS = 6
+const MAX_PHOTOS = 30
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
-// Pictures lead, like on apple.com: a cover for the catalog card and up to six photos of the work.
-export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
+// Pictures lead, like on apple.com: a cover for the catalog card and photos of the work — each
+// tagged with its service and master, so the «Работы» feed books exactly that from the photo.
+export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionProps) => {
   const coverInput = useRef<HTMLInputElement>(null)
   const photoInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState<'cover' | 'photo' | null>(null)
+  const [photos, setPhotos] = useState<WorkPhoto[]>([])
+  const [openId, setOpenId] = useState<string | null>(null)
+  const open = photos.find((photo) => photo.id === openId) ?? null
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getWorkPhotos(slug, controller.signal)
+      .then(setPhotos)
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [slug])
 
   const pick = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] ?? null
@@ -39,8 +60,15 @@ export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
     const file = pick(event)
     if (!file) return
     setBusy('photo')
-    await run(() => addPhoto(slug, file), 'Фото добавлено')
+    let added: WorkPhoto | null = null
+    await run(async () => {
+      const next = await addPhoto(slug, file)
+      added = next.find((photo) => !photos.some((known) => known.id === photo.id)) ?? null
+      setPhotos(next)
+    }, 'Фото добавлено')
     setBusy(null)
+    // Right away: what is on it, like tagging a photo after taking it.
+    if (added) setOpenId((added as WorkPhoto).id)
   }
 
   return (
@@ -99,25 +127,31 @@ export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
             <span className={styles.rowHint}>
               {busy === 'photo'
                 ? 'Загружаем…'
-                : `${business.photos.length} из ${MAX_PHOTOS} · полка «Работы» на странице`}
+                : `${photos.length} из ${MAX_PHOTOS} · лента «Работы» и полка на странице`}
             </span>
           </span>
           <ul className={styles.strip}>
-            {business.photos.map((url, index) => (
-              <li key={url} className={styles.tile}>
-                {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-                <img src={url} alt={`Фото ${index + 1}`} className={styles.image} loading='lazy' />
+            {photos.map((photo, index) => (
+              <li key={photo.id} className={styles.tile} data-hidden={photo.isHidden || undefined}>
                 <button
                   type='button'
-                  className={styles.remove}
-                  aria-label={`Удалить фото ${index + 1}`}
-                  onClick={() => run(() => removePhoto(slug, url), 'Фото удалено')}
+                  className={styles.tileButton}
+                  aria-label={`Фото ${index + 1}: ${photo.serviceName ?? 'услуга не указана'}${photo.isHidden ? ', скрыто' : ''}`}
+                  onClick={() => setOpenId(photo.id)}
                 >
-                  <X weight='bold' aria-hidden />
+                  {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
+                  <img src={photo.url} alt='' className={styles.image} loading='lazy' />
+                  {photo.isHidden ? (
+                    <span className={styles.badge}>
+                      <EyeSlash weight='bold' aria-hidden />
+                    </span>
+                  ) : (
+                    !photo.serviceId && <span className={styles.badge}>?</span>
+                  )}
                 </button>
               </li>
             ))}
-            {business.photos.length < MAX_PHOTOS && (
+            {photos.length < MAX_PHOTOS && (
               <li>
                 <button
                   type='button'
@@ -134,7 +168,8 @@ export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
         </div>
       </div>
       <p className={styles.groupFooter}>
-        Горизонтальное фото зала или работы, без текста. JPG, PNG или HEIC до 10 МБ.
+        Фото работ — крупно и без текста. Нажмите на фото, чтобы указать услугу и мастера: так оно
+        попадёт в ленту «Работы» с кнопкой записи. JPG, PNG или HEIC до 10 МБ.
       </p>
       <input
         ref={coverInput}
@@ -152,6 +187,21 @@ export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
         onChange={handlePhoto}
         aria-label='Файл фото'
       />
+      {open && (
+        <WorkPhotoSheet
+          key={open.id}
+          photo={open}
+          services={catalog.services}
+          specialists={catalog.specialists}
+          onClose={() => setOpenId(null)}
+          onSave={(input) =>
+            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), 'Сохранено')
+          }
+          onDelete={() =>
+            void run(async () => setPhotos(await removePhoto(slug, open.id)), 'Фото удалено')
+          }
+        />
+      )}
     </section>
   )
 }

@@ -1,13 +1,16 @@
 import { randomUUID } from 'node:crypto'
 import {
   BadRequestException,
+  Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   NotFoundException,
   Param,
+  ParseUUIDPipe,
+  Patch,
   Post,
-  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -24,11 +27,12 @@ import {
 import { Specialist } from '../catalog/specialist.entity.js'
 import { type ImageKind, processImage } from './images.js'
 import { StorageService } from './storage.service.js'
+import { type UpdateWorkPhotoInput, updateWorkPhotoSchema } from './work-photos.schemas.js'
+import { WorkPhotosService } from './work-photos.service.js'
 
 type UploadedImage = { buffer: Buffer; mimetype: string }
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-const MAX_PHOTOS = 6
 
 const imageUpload = FileInterceptor('file', {
   limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
@@ -43,6 +47,7 @@ export class ManageMediaController {
     @InjectRepository(Business) private readonly businesses: Repository<Business>,
     @InjectRepository(Specialist) private readonly specialists: Repository<Specialist>,
     private readonly storage: StorageService,
+    private readonly workPhotos: WorkPhotosService,
   ) {}
 
   @Post('cover')
@@ -65,30 +70,43 @@ export class ManageMediaController {
     await this.businesses.update({ id: business.id }, { coverUrl: null })
   }
 
+  /** A photo of a work, optionally tagged with the service and master (multipart fields). */
   @Post('photos')
   @UseInterceptors(imageUpload)
   async addPhoto(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
+    @Body() body: { serviceId?: string; specialistId?: string },
   ) {
-    if (business.photos.length >= MAX_PHOTOS) {
-      throw new BadRequestException(`Можно до ${MAX_PHOTOS} фото — удалите одно`)
-    }
+    await this.workPhotos.assertRoom(business.id)
     const url = await this.save(business, file, 'photo')
-    const photos = [...business.photos, url]
-    await this.businesses.update({ id: business.id }, { photos })
+    await this.workPhotos.add(business.id, url, {
+      serviceId: body?.serviceId || null,
+      specialistId: body?.specialistId || null,
+    })
 
-    return { photos }
+    return this.workPhotos.listForBusiness(business.id)
   }
 
-  @Delete('photos')
-  async removePhoto(@CurrentBusiness() business: Business, @Query('url') url: string) {
-    if (!business.photos.includes(url)) throw new NotFoundException('Фото не найдено')
-    const photos = business.photos.filter((photo) => photo !== url)
-    await this.businesses.update({ id: business.id }, { photos })
-    await this.storage.remove(url)
+  @Get('work-photos')
+  listPhotos(@CurrentBusiness() business: Business) {
+    return this.workPhotos.listForBusiness(business.id)
+  }
 
-    return { photos }
+  @Patch('work-photos/:id')
+  async updatePhoto(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: updateWorkPhotoSchema }) body: UpdateWorkPhotoInput,
+  ) {
+    await this.workPhotos.update(business.id, id, body)
+    return this.workPhotos.listForBusiness(business.id)
+  }
+
+  @Delete('work-photos/:id')
+  async removePhoto(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+    await this.storage.remove(await this.workPhotos.remove(business.id, id))
+    return this.workPhotos.listForBusiness(business.id)
   }
 
   @Post('specialists/:id/photo')

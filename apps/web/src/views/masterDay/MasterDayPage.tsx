@@ -20,6 +20,7 @@ import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './MasterDayPage.module.css'
+import { VisitPhotoButton } from './ui/VisitPhotoButton'
 
 interface MasterDayPageProps {
   slug: string
@@ -247,6 +248,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                               onChange={(choice) => void handleOutcome(booking, choice)}
                             />
                           </span>
+                        )}
+                        {booking.outcome === 'arrived' && (
+                          <VisitPhotoButton slug={slug} bookingId={booking.id} />
                         )}
                       </span>
                       {!isCancelled && (

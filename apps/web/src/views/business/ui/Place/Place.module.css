@@ -403,6 +403,18 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sectionLink {
+  margin-left: auto;
+  color: var(--color-link);
+  font-size: var(--text-body);
+}
+
+.sectionLink:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
 .srOnly {
   position: absolute;
   width: 1px;

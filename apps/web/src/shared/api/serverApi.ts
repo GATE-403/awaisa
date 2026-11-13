@@ -8,6 +8,7 @@ import type {
   BusinessCard,
   BusinessKind,
   BusinessPage,
+  FeedPage,
   MapPlace,
   Offer,
   PaymentPage,
@@ -133,7 +134,28 @@ const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   return response.json()
 }
 
+// The first page of «Работы»; the feed loads the rest on the client as it scrolls.
+const listFeed = async (
+  kind: BusinessKind | undefined,
+  business: string | undefined,
+  start: string | undefined,
+): Promise<FeedPage> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(BUSINESSES_TAG)
+
+  const params = new URLSearchParams()
+  if (kind) params.set('kind', kind)
+  if (business) params.set('business', business)
+  if (start) params.set('start', start)
+  const response = await fetch(`${API_URL}/feed?${params}`)
+  if (!response.ok) throw await toApiError(response)
+
+  return response.json()
+}
+
 export {
+  listFeed,
   listPromotions,
   getPaymentPage,
   listMapPlaces,

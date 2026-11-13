@@ -1,7 +1,13 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-4);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .title {
@@ -12,36 +18,86 @@
   letter-spacing: var(--tracking-title);
 }
 
+.subtitle {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+/* Phones: a row of cards that scrolls sideways; from 768px up to three side by side. */
 .list {
-  display: grid;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--space-1) var(--page-gutter) var(--space-3);
+  overflow-x: auto;
+  scroll-padding-inline: var(--page-gutter);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
   list-style: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.list > li {
+  flex: 0 0 min(300px, 82%);
+  scroll-snap-align: start;
+}
+
+.list > li:only-child {
+  flex-basis: 100%;
 }
 
 @media (min-width: 768px) {
   .list {
+    display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: visible;
   }
 }
 
-.row {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  min-height: 64px;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-xl);
+  height: 100%;
+  padding: var(--space-4);
+  border-radius: var(--radius-2xl);
   background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: inherit;
-  transition: scale var(--duration-fast) var(--ease-standard);
+  box-shadow: var(--shadow-md);
+  transition:
+    scale var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
-.row:active {
+.card:has(.link:active) {
   scale: 0.98;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The master's face with the place as a small app-icon badge, like a contact with an app. */
+.face {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: flex;
+  border-radius: 7px;
+  box-shadow: 0 0 0 2px var(--color-surface);
 }
 
 .text {
@@ -52,11 +108,14 @@
 }
 
 .service {
+  display: -webkit-box;
   overflow: hidden;
-  font-size: var(--text-body);
+  font-size: var(--text-title3);
   font-weight: var(--font-weight-semibold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  letter-spacing: var(--tracking-tight);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .meta {
@@ -67,22 +126,66 @@
   white-space: nowrap;
 }
 
-.again {
+/* One quiet line under a hairline: when they were, and the master's next free time. */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 0.5px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.next {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 4px;
   color: var(--color-link);
-  font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
 }
 
-.again svg {
-  width: 14px;
-  height: 14px;
+.next[data-free] {
+  color: var(--color-success);
+}
+
+.next svg {
+  width: 13px;
+  height: 13px;
+}
+
+.chevron {
+  color: var(--color-tertiary-foreground);
+}
+
+.link {
+  color: inherit;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-2xl);
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.link:focus-visible::after {
+  box-shadow: var(--focus-ring);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .row {
+  .card {
     transition: none;
   }
 }

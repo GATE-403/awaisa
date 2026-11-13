@@ -28,3 +28,37 @@
   gap: var(--space-2);
   color: var(--color-danger-text);
 }
+
+/* Day states inside the hint line: quiet tinted text, not more capsules beside the actions. */
+.statusLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  margin-left: var(--space-3);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-highlight);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.statusLink svg {
+  width: 14px;
+  height: 14px;
+}
+
+.statusLink:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-rating);
+}
