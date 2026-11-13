@@ -163,32 +163,6 @@
   box-shadow: inset 0 0 0 0.5px var(--color-border);
 }
 
-/* The × sits in the corner but keeps a 44px hit area over the tile. */
-.remove {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  width: 44px;
-  height: 44px;
-  padding: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-
-.remove svg {
-  width: 20px;
-  height: 20px;
-  padding: 4px;
-  border-radius: var(--radius-full);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
-  color: var(--color-foreground);
-}
-
 .add {
   display: flex;
   align-items: center;
@@ -210,4 +184,53 @@
   .add:not(:disabled):hover {
     background: var(--color-fill);
   }
+}
+
+.tileButton {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.tileButton:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+.tile[data-hidden] .image {
+  opacity: 0.4;
+}
+
+/* Untagged or hidden: a small mark in the corner, like a badge on an app icon. */
+.badge {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-material);
+  backdrop-filter: var(--blur-material);
+  color: var(--color-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.badge svg {
+  width: 12px;
+  height: 12px;
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  background: var(--color-fill);
 }

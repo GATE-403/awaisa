@@ -4,7 +4,7 @@ import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
 import { updateBusiness } from '@/shared/api/clientApi'
-import type { Business, BusinessKind, UpdateBusinessInput } from '@/shared/api/types'
+import type { Business, BusinessKind, Catalog, UpdateBusinessInput } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -14,6 +14,7 @@ import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 interface ProfileTabProps {
   slug: string
   business: Business
+  catalog: Catalog
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
 }
 
@@ -34,7 +35,7 @@ const CONTACTS: FieldConfig[] = [
   { key: 'mapUrl', label: 'Ссылка на карту', placeholder: 'https://2gis.kg/…' },
 ]
 
-export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
+export const ProfileTab = ({ slug, business, catalog, run }: ProfileTabProps) => {
   const [draft, setDraft] = useState<UpdateBusinessInput>({})
   const [isSaving, setIsSaving] = useState(false)
   const values = { ...business, ...draft }
@@ -67,7 +68,7 @@ export const ProfileTab = ({ slug, business, run }: ProfileTabProps) => {
     <form className={styles.section} onSubmit={handleSubmit} aria-label='Профиль'>
       <SectionHeader title='Профиль' description='Так бизнес выглядит в каталоге и на странице.' />
 
-      <PhotosSection slug={slug} business={business} run={run} />
+      <PhotosSection slug={slug} business={business} catalog={catalog} run={run} />
 
       <div className={styles.group}>
         <h3 className={styles.groupTitle}>О бизнесе</h3>

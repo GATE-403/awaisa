@@ -23,6 +23,7 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  FeedPage,
   GiftCertificate,
   ImportReport,
   JoinWaitlistInput,
@@ -60,6 +61,8 @@ import type {
   VisitReview,
   WaitlistEntry,
   WorkingDay,
+  WorkPhoto,
+  WorkPhotoInput,
 } from './types'
 
 const TOKEN_HEADER = 'x-booking-token'
@@ -340,9 +343,10 @@ const moveBookingAsSalon = (
   input: { date: string; time: string; specialistId: string },
 ) => send<MovedBooking>('PATCH', `${manage(slug)}/bookings/${id}`, input)
 
-const upload = <Result>(path: string, file: File) => {
+const upload = <Result>(path: string, file: File, fields: Record<string, string> = {}) => {
   const body = new FormData()
   body.append('file', file)
+  for (const [key, value] of Object.entries(fields)) body.append(key, value)
 
   return request<Result>(path, { method: 'POST', body })
 }
@@ -352,11 +356,47 @@ const uploadCover = (slug: string, file: File) =>
 
 const removeCover = (slug: string) => send<void>('DELETE', `${manage(slug)}/cover`)
 
-const addPhoto = (slug: string, file: File) =>
-  upload<{ photos: string[] }>(`${manage(slug)}/photos`, file)
+const addPhoto = (
+  slug: string,
+  file: File,
+  tags: { serviceId?: string | null; specialistId?: string | null } = {},
+) =>
+  upload<WorkPhoto[]>(`${manage(slug)}/photos`, file, {
+    ...(tags.serviceId ? { serviceId: tags.serviceId } : {}),
+    ...(tags.specialistId ? { specialistId: tags.specialistId } : {}),
+  })
 
-const removePhoto = (slug: string, url: string) =>
-  send<{ photos: string[] }>('DELETE', `${manage(slug)}/photos?${new URLSearchParams({ url })}`)
+const getWorkPhotos = (slug: string, signal?: AbortSignal) =>
+  request<WorkPhoto[]>(`${manage(slug)}/work-photos`, { signal })
+
+const updateWorkPhoto = (slug: string, id: string, input: WorkPhotoInput) =>
+  send<WorkPhoto[]>('PATCH', `${manage(slug)}/work-photos/${id}`, input)
+
+const removePhoto = (slug: string, id: string) =>
+  send<WorkPhoto[]>('DELETE', `${manage(slug)}/work-photos/${id}`)
+
+const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
+  upload<{ url: string }>(`/master/${slug}/photos`, file, { bookingId })
+
+const getFeed = (
+  query: {
+    kind?: string
+    business?: string
+    start?: string
+    lat?: number
+    lng?: number
+    offset?: number
+  },
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  return request<FeedPage>(`/feed?${params}`, { signal })
+}
+
+const reportFeedItem = (id: string) => post<void>(`/feed/${id}/report`, {})
 
 const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
   upload<{ photoUrl: string }>(`${manage(slug)}/specialists/${id}/photo`, file)
@@ -550,6 +590,11 @@ export {
   saveSubscriptionPlan,
   sellSubscription,
   importClients,
+  getWorkPhotos,
+  updateWorkPhoto,
+  addVisitPhoto,
+  getFeed,
+  reportFeedItem,
   importBookings,
   getStock,
   saveStockItem,

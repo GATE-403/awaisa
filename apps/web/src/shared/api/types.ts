@@ -563,6 +563,33 @@ type ImportReport = {
   skipped: { row: number; reason: string }[]
 }
 
+/** A photo of finished work in the cabinet: what it shows and whether the feed may show it. */
+type WorkPhoto = {
+  id: string
+  url: string
+  serviceId: string | null
+  serviceName: string | null
+  specialistId: string | null
+  specialistName: string | null
+  isHidden: boolean
+  reports: number
+  createdAt: string
+}
+
+type WorkPhotoInput = Pick<WorkPhoto, 'serviceId' | 'specialistId' | 'isHidden'>
+
+type FeedItem = {
+  id: string
+  url: string
+  createdAt: string
+  business: { slug: string; name: string; kind: BusinessKind; address: string }
+  service: { id: string; name: string; price: number; durationMinutes: number } | null
+  specialist: { id: string; name: string; photoUrl: string | null } | null
+  distanceKm: number | null
+}
+
+type FeedPage = { items: FeedItem[]; nextOffset: number | null }
+
 type AnalyticsDays = 7 | 30 | 90 | 365
 
 type AnalyticsReport = {
@@ -726,6 +753,10 @@ export type {
   PromotionKind,
   PublicPromotion,
   ImportReport,
+  FeedItem,
+  FeedPage,
+  WorkPhoto,
+  WorkPhotoInput,
   StockItem,
   StockItemInput,
   WaitlistEntry,

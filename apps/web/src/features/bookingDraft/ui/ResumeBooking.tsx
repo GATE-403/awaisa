@@ -3,7 +3,8 @@
 import { ArrowRight, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import { BusinessTile } from '@/entities/business'
 import { isBookingPath, isCabinetPath } from '@/shared/config/navigation'
 import {
   type BookingDraft,
@@ -33,19 +34,58 @@ const getSnapshot = () => {
 export const ResumeBooking = () => {
   const pathname = usePathname()
   const draft = useSyncExternalStore(subscribeToDraft, getSnapshot, () => null)
+  const [isTucked, setIsTucked] = useState(false)
 
-  if (!draft || isBookingPath(pathname) || isCabinetPath(pathname)) return null
+  // Like a mini player over a tab bar: it steps aside while the page scrolls down and comes back
+  // on the way up, so it never sits on what the client is reading.
+  useEffect(() => {
+    let last = window.scrollY
+    let frame = 0
+    const handleScroll = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const y = window.scrollY
+        if (Math.abs(y - last) < 8) return
+        setIsTucked(y > last && y > 120)
+        last = y
+      })
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  if (!draft || isBookingPath(pathname) || isCabinetPath(pathname) || pathname === '/feed')
+    return null
 
   return (
-    <aside className={styles.resume} aria-label='Незаконченная запись' data-resume-booking=''>
-      <NextLink href={draftHref(draft)} className={styles.link}>
+    <aside
+      className={styles.resume}
+      aria-label='Незаконченная запись'
+      data-resume-booking=''
+      data-tucked={isTucked || undefined}
+    >
+      <NextLink
+        href={draftHref(draft)}
+        className={styles.link}
+        aria-label={`Продолжить запись: ${draft.serviceName}, ${draft.businessName}`}
+      >
+        <BusinessTile name={draft.businessName} size='xs' />
         <span className={styles.text}>
-          <span className={styles.title}>Продолжить запись</span>
+          <span className={styles.title}>
+            <span className={styles.prefix}>Продолжить: </span>
+            {draft.serviceName}
+          </span>
           <span className={styles.meta}>
-            {draft.serviceName} · {draft.businessName}
+            <span className={styles.status}>Не закончена</span> · {draft.businessName}
           </span>
         </span>
-        <ArrowRight className={styles.arrow} weight='bold' aria-hidden />
+        <span className={styles.go} aria-hidden>
+          <span className={styles.goLabel}>Продолжить</span>
+          <ArrowRight weight='bold' />
+        </span>
       </NextLink>
       <button
         type='button'

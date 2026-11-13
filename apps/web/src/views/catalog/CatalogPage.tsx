@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { NextFreeProvider } from '@/entities/business'
-import { listBusinesses, listOffers, listPopularServices } from '@/shared/api/serverApi'
+import { listBusinesses, listFeed, listOffers, listPopularServices } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
@@ -9,6 +9,7 @@ import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
+import { WorkShelf } from './ui/WorkShelf/WorkShelf'
 
 interface CatalogPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -29,10 +30,12 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   const kind = toKind(params.kind)
   const query = toQuery(params.q)
   const isBrowsing = !query
-  const [businesses, offers, popular] = await Promise.all([
+  const [businesses, offers, popular, works] = await Promise.all([
     listBusinesses(kind, query || undefined),
     listOffers(kind, query || undefined),
     isBrowsing ? listPopularServices(kind) : Promise.resolve([]),
+    // The shelf is a nice-to-have: the catalog renders without it.
+    isBrowsing ? listFeed(kind, undefined, undefined).catch(() => null) : Promise.resolve(null),
   ])
   const slugs = [...new Set([...businesses, ...offers].map((item) => item.slug))]
   // A search for a place's name shows places first; a search for a service shows services.
@@ -47,6 +50,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
       <div className={styles.contained}>
         {isBrowsing && !kind && <AgainShelf />}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
+        {isBrowsing && works && <WorkShelf items={works.items} kind={kind} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}
           title={query ? `«${query}»` : (kindLabel ?? 'Куда записаться')}

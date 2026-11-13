@@ -46,7 +46,6 @@ type BusinessView = {
   slotMinutes: number
   isPublished: boolean
   coverUrl: string | null
-  photos: string[]
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
@@ -82,7 +81,6 @@ const toBusinessView = (business: Business): BusinessView => ({
   slotMinutes: business.slotMinutes,
   isPublished: business.isPublished,
   coverUrl: business.coverUrl,
-  photos: business.photos ?? [],
   hours: (business.hours ?? [])
     .map(({ weekday, opensMinutes, closesMinutes }) => ({ weekday, opensMinutes, closesMinutes }))
     .sort((first, second) => first.weekday - second.weekday),
@@ -208,9 +206,19 @@ export class BusinessesService {
 
   /** The business view with its branches: active ones for clients, all of them for the cabinet. */
   async toFullView(business: Business, { includeInactive = false } = {}) {
+    const [branches, photos] = await Promise.all([
+      this.listBranches(business.id, includeInactive),
+      this.businesses.manager.query(
+        `SELECT "url" FROM "work_photos" WHERE "business_id" = $1 AND NOT "is_hidden"
+         ORDER BY "created_at" DESC LIMIT 30`,
+        [business.id],
+      ) as Promise<{ url: string }[]>,
+    ])
     return {
       ...toBusinessView(business),
-      branches: await this.listBranches(business.id, includeInactive),
+      branches,
+      // Newest work first; the cabinet edits them through /manage/:slug/work-photos.
+      photos: photos.map((photo) => photo.url),
     }
   }
 

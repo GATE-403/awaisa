@@ -209,30 +209,40 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     <section className={styles.content} aria-label='Расписание'>
       <SectionHeader
         title='Расписание'
-        description={schedule ? summary : dayLabel}
+        description={
+          <>
+            {schedule ? summary : dayLabel}
+            {/* Day states read as part of the hint, not as more buttons beside the actions.
+                Here, not above the calendar: they load late and must not shift the grid. */}
+            {unclosed.total > openHere && (
+              <button
+                type='button'
+                className={styles.statusLink}
+                onClick={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
+                title='Отметьте, кто пришёл: так выручка в аналитике будет точной'
+              >
+                <span className={styles.statusDot} aria-hidden />
+                Не закрыто: {pluralize(unclosed.total - openHere, ['визит', 'визита', 'визитов'])} ›
+              </button>
+            )}
+            {!isPast && dayWaitlist.length > 0 && (
+              <button
+                type='button'
+                className={styles.statusLink}
+                onClick={() => setIsWaitlistOpen(true)}
+              >
+                <BellRinging weight='fill' aria-hidden />
+                Ждут окна: {dayWaitlist.length} ›
+              </button>
+            )}
+          </>
+        }
         actions={
           hasMasters && (
             <>
               {openHere > 0 && (
                 <Button variant='secondary' size='sm' onClick={handleCloseDay}>
                   Все пришли ({openHere})
-                </Button>
-              )}
-              {/* In the toolbar, not above the calendar: it loads late and must not shift the grid. */}
-              {unclosed.total > openHere && (
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
-                  title='Отметьте, кто пришёл: так выручка в аналитике будет точной'
-                >
-                  Не закрыто: {pluralize(unclosed.total - openHere, ['визит', 'визита', 'визитов'])}
-                </Button>
-              )}
-              {!isPast && dayWaitlist.length > 0 && (
-                <Button variant='outline' size='sm' onClick={() => setIsWaitlistOpen(true)}>
-                  <BellRinging weight='fill' aria-hidden />
-                  Ждут окна: {dayWaitlist.length}
                 </Button>
               )}
               {!isPast && (

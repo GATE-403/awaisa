@@ -1,6 +1,13 @@
 'use client'
 
-import { MapPin, MapTrifold, SquaresFour, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
+import {
+  Images,
+  MapPin,
+  MapTrifold,
+  SquaresFour,
+  Storefront,
+  UserCircle,
+} from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
@@ -14,6 +21,7 @@ import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
 
 const ACTIONS = [
+  { href: '/feed', label: 'Работы', icon: Images },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
@@ -38,8 +46,8 @@ export const Header = () => {
     pathname.startsWith('/business/') ||
     pathname.startsWith('/review/') ||
     pathname.startsWith('/master')
-  // The map filters by kind inside its own panel; catalog chips would leave the map.
-  const hasCategories = !isSlim && pathname !== '/map'
+  // The map and the feed filter by kind themselves; catalog chips would leave them.
+  const hasCategories = !isSlim && pathname !== '/map' && pathname !== '/feed'
 
   // Sticky elements below sit under the header; its height changes (rows fold on phones), so the
   // real height is published as --header-height.
@@ -79,6 +87,7 @@ export const Header = () => {
       className={styles.header}
       data-scrolled={isScrolled || undefined}
       data-slim={isSlim || undefined}
+      data-feed={pathname === '/feed' || undefined}
     >
       <div className={styles.inner}>
         <NextLink href='/' className={styles.home} aria-label='На главную'>

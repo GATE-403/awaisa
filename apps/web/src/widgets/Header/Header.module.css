@@ -332,3 +332,10 @@
     display: none;
   }
 }
+
+/* «Работы» is full screen on phones, like Shorts: only the tab bar stays. */
+@media (max-width: 767px) {
+  .header[data-feed] {
+    display: none;
+  }
+}

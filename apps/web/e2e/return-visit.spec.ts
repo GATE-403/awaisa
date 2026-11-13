@@ -90,11 +90,14 @@ test.describe('Return visits', () => {
     )
     await page.goto('/')
     const again = page.getByRole('region', { name: 'Снова к мастеру' })
-    const link = again.getByRole('link', { name: new RegExp(`^Снова: ${service.name}`) })
+    const link = again.getByRole('link', {
+      name: new RegExp(`^Записаться снова: ${service.name}`),
+    })
     await expect(link).toBeVisible()
+    // The master's own nearest free time rides along when there is one.
     await expect(link).toHaveAttribute(
       'href',
-      `/${SLUG}/book?service=${service.id}&specialist=${master.id}`,
+      new RegExp(`^/${SLUG}/book\\?service=${service.id}&specialist=${master.id}`),
     )
   })
 })

@@ -203,7 +203,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
               {data && tab === 'stock' && <StockTab slug={slug} catalog={data.catalog} />}
               {data && tab === 'team' && <TeamTab slug={slug} />}
               {data && tab === 'profile' && (
-                <ProfileTab slug={slug} business={data.business} run={run} />
+                <ProfileTab slug={slug} business={data.business} catalog={data.catalog} run={run} />
               )}
             </div>
           </div>

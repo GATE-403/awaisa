@@ -1,5 +1,11 @@
 import type { Icon } from '@phosphor-icons/react'
-import { CalendarCheck, MagnifyingGlass, MapTrifold, Storefront } from '@phosphor-icons/react/ssr'
+import {
+  CalendarCheck,
+  Images,
+  MagnifyingGlass,
+  MapTrifold,
+  Storefront,
+} from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
@@ -9,6 +15,8 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: MagnifyingGlass },
+  // Finished work as a vertical feed, each photo one tap from booking it.
+  { href: '/feed', label: 'Работы', icon: Images },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/business', label: 'Бизнес', icon: Storefront },
   // Profile and bookings are one page.
@@ -23,6 +31,7 @@ const APP_SEGMENTS = new Set([
   'manage',
   'master',
   'map',
+  'feed',
   'profile',
   'review',
   // Signed checkout links for deposits.
