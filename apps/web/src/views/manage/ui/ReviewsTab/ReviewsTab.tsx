@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { Star } from '@phosphor-icons/react/ssr'
+import { PencilSimple, Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getManagedReviews, replyToReview } from '@/shared/api/clientApi'
@@ -118,10 +118,20 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
               </p>
               {review.comment && <p className={styles.comment}>{review.comment}</p>}
               {review.reply ? (
-                <button type='button' className={styles.reply} onClick={() => openReply(review)}>
-                  <span className={styles.replyTitle}>Ваш ответ · изменить</span>
+                <div className={styles.reply}>
+                  <span className={styles.replyHead}>
+                    <span className={styles.replyTitle}>Ваш ответ</span>
+                    <button
+                      type='button'
+                      className={styles.replyEdit}
+                      onClick={() => openReply(review)}
+                    >
+                      <PencilSimple weight='bold' aria-hidden />
+                      Изменить
+                    </button>
+                  </span>
                   <span className={styles.comment}>{review.reply}</span>
-                </button>
+                </div>
               ) : (
                 <button
                   type='button'

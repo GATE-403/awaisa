@@ -98,7 +98,17 @@
 
 .rowActions {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-1);
+}
+
+/* Under the cover's text: the buttons line up with it (their own padding pulled back). */
+.coverRow .rowActions {
+  margin-left: calc(var(--space-2) * -1);
+}
+
+.coverRow .rowText {
+  min-width: 0;
 }
 
 .textButton {

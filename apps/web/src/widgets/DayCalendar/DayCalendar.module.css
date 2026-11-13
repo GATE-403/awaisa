@@ -1,5 +1,9 @@
 .scroller {
-  overflow-x: auto;
+  /* The day scrolls inside the panel, under the sticky masters row and beside the sticky hours,
+     so the page (and the day strip above) stays put. */
+  max-height: max(420px, calc(100dvh - 180px));
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .grid {

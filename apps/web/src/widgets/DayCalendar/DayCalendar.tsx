@@ -1,7 +1,7 @@
 'use client'
 
 import { ChatText, Check, X } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, type MouseEvent, useRef, useState } from 'react'
+import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
@@ -84,6 +84,7 @@ export const DayCalendar = ({
 }: DayCalendarProps) => {
   const [hover, setHover] = useState<Hover | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const scrolledToNow = useRef(false)
   const range = getDayRange(hours, bookings, timeOff)
   const height = toPx(range.end - range.start)
   const hourMarks = Array.from(
@@ -109,6 +110,31 @@ export const DayCalendar = ({
     return `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
   }
   const drag = useBookingDrag({ scrollerRef, range, slotMinutes, onMove: onMoveBooking })
+  const nowOffset = showNow ? toPx(nowMinutes - range.start) : null
+
+  // The box ends at the bottom of the window, so the page itself does not scroll for the day.
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    const fit = () => {
+      const top = scroller.getBoundingClientRect().top + window.scrollY
+      // Whatever sits below the box (panel padding, page gutter) still has to fit on screen.
+      const below = document.documentElement.scrollHeight - (top + scroller.offsetHeight)
+      scroller.style.maxHeight = `${Math.max(420, window.innerHeight - top - below)}px`
+    }
+    fit()
+    window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [])
+
+  // The day scrolls inside its own box; on today it opens with the red line a third of the way
+  // down, once — the minute ticks after that must not pull the view back.
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller || nowOffset === null || scrolledToNow.current) return
+    scrolledToNow.current = true
+    scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
+  }, [nowOffset])
 
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
     const offset = event.clientY - event.currentTarget.getBoundingClientRect().top
