@@ -11,6 +11,9 @@ export class Customer {
   @Column({ type: 'varchar', length: 120, default: '' })
   name: string
 
+  @Column({ name: 'avatar_url', type: 'varchar', length: 512, nullable: true })
+  avatarUrl: string | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

@@ -5,7 +5,15 @@ import type { LayerGroup, Map as LeafletMap, TileLayer } from 'leaflet'
 import { useEffect, useRef } from 'react'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
 import styles from './MapView.module.css'
-import { DEFAULT_CENTER, DEFAULT_ZOOM, isDarkTheme, TILE_OPTIONS, TILE_URL } from './mapTiles'
+import {
+  DARK_TILE_OPTIONS,
+  DARK_TILE_URL,
+  DEFAULT_CENTER,
+  DEFAULT_ZOOM,
+  isDarkTheme,
+  TILE_OPTIONS,
+  TILE_URL,
+} from './mapTiles'
 
 type MapMarker = {
   id: string
@@ -52,6 +60,7 @@ export const MapView = ({
   const mapRef = useRef<LeafletMap | null>(null)
   const tilesRef = useRef<TileLayer | null>(null)
   const layerRef = useRef<LayerGroup | null>(null)
+  const tileKindRef = useRef<'light' | 'dark' | null>(null)
   const onSelectRef = useRef(onSelect)
 
   useEffect(() => {
@@ -78,6 +87,18 @@ export const MapView = ({
       if (!isStatic) L.control.zoom({ position: 'bottomright' }).addTo(map)
       layerRef.current = L.layerGroup().addTo(map)
       mapRef.current = map
+      // The box changes size (the /map sheet's heights, rotation): tell Leaflet once a frame, or
+      // tiles stay grey where the map grew.
+      let frame = 0
+      const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(frame)
+        frame = requestAnimationFrame(() => map.invalidateSize({ pan: false }))
+      })
+      observer.observe(containerRef.current)
+      map.once('unload', () => {
+        cancelAnimationFrame(frame)
+        observer.disconnect()
+      })
       // Draw markers and tiles now that the map exists.
       containerRef.current.dispatchEvent(new Event('map-ready'))
     })
@@ -98,9 +119,22 @@ export const MapView = ({
         const layer = layerRef.current
         if (!map || !layer) return
 
-        tilesRef.current ??= L.tileLayer(TILE_URL, TILE_OPTIONS).addTo(map)
-        // One light tile set; the dark theme dims it with a filter (see MapView.module.css).
-        map.getContainer().dataset.dark = String(isDarkTheme(theme))
+        // Light tiles, or real dark ones in the dark theme; only a provider without a dark set
+        // falls back to the filter (MapView.module.css), which is slow to pan on phones.
+        const isDark = isDarkTheme(theme)
+        const useDarkTiles = isDark && DARK_TILE_URL !== null
+        const wanted = useDarkTiles ? 'dark' : 'light'
+        if (tilesRef.current && tileKindRef.current !== wanted) {
+          tilesRef.current.remove()
+          tilesRef.current = null
+        }
+        tilesRef.current ??= (
+          useDarkTiles && DARK_TILE_URL
+            ? L.tileLayer(DARK_TILE_URL, DARK_TILE_OPTIONS)
+            : L.tileLayer(TILE_URL, TILE_OPTIONS)
+        ).addTo(map)
+        tileKindRef.current = wanted
+        map.getContainer().dataset.dark = String(isDark && !useDarkTiles)
 
         layer.clearLayers()
         for (const marker of markers) {

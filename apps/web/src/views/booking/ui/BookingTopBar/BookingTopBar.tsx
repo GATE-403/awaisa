@@ -16,13 +16,14 @@ export const BookingTopBar = ({ business }: BookingTopBarProps) => (
       <NextLink href={`/${business.slug}`} className={styles.close} aria-label='Закрыть запись'>
         <X weight='bold' aria-hidden />
       </NextLink>
-      <div className={styles.title}>
-        <BusinessTile name={business.name} size='xs' />
+      {/* The place is a big tap target back to its page, like a chat header in Telegram. */}
+      <NextLink href={`/${business.slug}`} className={styles.title}>
+        <BusinessTile name={business.name} size='sm' />
         <span className={styles.text}>
           <h1 className={styles.heading}>Запись</h1>
           <span className={styles.place}>{business.name}</span>
         </span>
-      </div>
+      </NextLink>
       <span className={styles.spacer} aria-hidden />
     </div>
   </header>

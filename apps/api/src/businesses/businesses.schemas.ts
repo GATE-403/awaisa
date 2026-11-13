@@ -76,9 +76,27 @@ const hoursSchema = z
     'Каждый день недели — один раз',
   )
 
+// Pages for the catalog's endless scroll: `offset` and `limit` (≤ 60); `sort=price` orders the
+// services feed by price on the server, so later pages continue the same order.
 const catalogQuerySchema = z.object({
   kind: kindSchema.optional(),
   q: z.string().trim().max(80).optional(),
+  offset: z.coerce.number().int().min(0).max(10_000).default(0),
+  limit: z.coerce.number().int().min(1).max(60).default(60),
+  sort: z.enum(['popular', 'price']).default('popular'),
+  // Favourites kept on a device: these services only (comma-separated ids, ≤ 60).
+  ids: z
+    .string()
+    .trim()
+    .max(4000)
+    .transform((value) =>
+      value
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+        .slice(0, 60),
+    )
+    .optional(),
 })
 
 const slugQuerySchema = z.object({ slug: z.string().trim().toLowerCase().max(64) })

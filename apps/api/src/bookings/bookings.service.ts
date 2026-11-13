@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Brackets, In, QueryFailedError, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
+import { CacheService } from '../cache/cache.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Service } from '../catalog/service.entity.js'
@@ -179,6 +180,7 @@ export class BookingsService {
     private readonly promotions: PromotionsService,
     private readonly loyalty: LoyaltyService,
     private readonly inventory: InventoryService,
+    private readonly cache: CacheService,
   ) {}
 
   async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
@@ -812,6 +814,8 @@ export class BookingsService {
        RETURNING "id"`,
     )
     await this.payments.failPending(expired.map((row) => row.id))
+    // Released holds free their slots: cached free time must not keep them busy.
+    if (expired.length > 0) await this.cache.bump(['availability'])
 
     const settled = await this.claim(
       `UPDATE "bookings" SET "payment_status" = CASE

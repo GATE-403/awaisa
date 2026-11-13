@@ -44,8 +44,7 @@
   padding: 0 var(--space-4);
   border: none;
   border-radius: var(--radius-full);
-  background: rgb(0 0 0 / 0.35);
-  backdrop-filter: var(--blur-material);
+  background: rgb(0 0 0 / 0.5);
   box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.18);
   color: #fff;
   font: inherit;
@@ -149,63 +148,17 @@
   color: #fff;
 }
 
-.place {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: var(--space-2);
-  max-width: 100%;
-  min-height: 32px;
-  color: #fff;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-}
-
-.placeName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.placeMeta {
-  flex-shrink: 0;
-  color: rgb(255 255 255 / 0.7);
-  font-weight: var(--font-weight-regular);
-}
-
 .service {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   font-family: var(--font-display);
   font-size: var(--text-title2);
   font-weight: var(--font-weight-bold);
   line-height: 1.15;
   letter-spacing: var(--tracking-title);
   text-wrap: balance;
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0 var(--space-1);
-  color: rgb(255 255 255 / 0.85);
-  font-size: var(--text-body);
-}
-
-.meta strong {
-  color: #fff;
-  font-weight: var(--font-weight-semibold);
-}
-
-.master {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.master > :first-child {
-  width: 20px;
-  height: 20px;
-  font-size: 9px;
 }
 
 .cta {
@@ -311,11 +264,10 @@
     justify-content: center;
   }
 
+  /* Flat fills like the catalog chips: shadows under a row of capsules read as stray lines. */
   .chip {
-    background: var(--color-material);
-    box-shadow:
-      inset 0 0 0 0.5px var(--color-material-border),
-      var(--shadow-sm);
+    background: var(--color-fill);
+    box-shadow: none;
     color: var(--color-foreground);
   }
 
@@ -380,4 +332,32 @@
   .card[data-active] .photo {
     animation: none;
   }
+}
+
+/* Facts in one line under the title: price strong, the rest quiet, the place a link at the end. */
+.meta {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta strong {
+  color: #fff;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.metaDot {
+  margin: 0 5px;
+  color: rgb(255 255 255 / 0.5);
+}
+
+.place {
+  color: #fff;
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 255 255 / 0.35);
+  text-underline-offset: 3px;
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { CheckCircle } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
@@ -8,6 +7,8 @@ import type { PriceQuote } from '@/shared/api/types'
 import styles from './PromoCodeField.module.css'
 
 interface PromoCodeFieldProps {
+  /** The row style of the group it sits in (label | field | action). */
+  className?: string
   code: string | null
   error: string | null
   quote: PriceQuote | null
@@ -17,8 +18,10 @@ interface PromoCodeFieldProps {
   onClear: () => void
 }
 
-// Behind a link like the comment: most clients have no code, those who do find it in one tap.
+// A Settings row like the name and number: «Промокод» on the left, the code typed on the right,
+// «Применить» as text once something is typed; applied, the discount and «Убрать».
 export const PromoCodeField = ({
+  className,
   code,
   error,
   quote,
@@ -32,43 +35,61 @@ export const PromoCodeField = ({
 
   if (isApplied && code) {
     return (
-      <p className={styles.applied}>
-        <CheckCircle weight='fill' aria-hidden />
-        <span>
-          Промокод {code}
-          {isWaitingForTime
-            ? ' — проверим, когда выберете время'
-            : percent
-              ? ` · −${percent}%`
-              : ' · на это время скидка не действует'}
+      <div className={className} data-action=''>
+        <span className={styles.label}>Промокод</span>
+        <span className={styles.applied}>
+          <CheckCircle weight='fill' aria-hidden />
+          {code}
+          <span className={styles.note}>
+            {isWaitingForTime
+              ? 'проверим со временем'
+              : percent
+                ? `−${percent}%`
+                : 'не на это время'}
+          </span>
         </span>
-        <button type='button' className={styles.remove} onClick={onClear}>
+        <button
+          type='button'
+          className={styles.action}
+          onClick={() => {
+            setDraft('')
+            onClear()
+          }}
+        >
           Убрать
         </button>
-      </p>
+      </div>
     )
   }
 
   return (
-    <details className={styles.more} open={Boolean(error) || undefined}>
-      <summary className={styles.summary}>Есть промокод?</summary>
-      <div className={styles.row}>
+    <>
+      <div className={className} data-action=''>
+        <span className={styles.label}>Промокод</span>
         <Input
+          variant='plain'
           aria-label='Промокод'
-          placeholder='Промокод'
+          placeholder='Ввести'
           autoCapitalize='characters'
           value={draft}
           onValueChange={(value) => setDraft(value.toUpperCase().replace(/\s/g, ''))}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && draft) onApply(draft)
+          }}
         />
-        <Button variant='secondary' onClick={() => draft && onApply(draft)} disabled={!draft}>
-          Применить
-        </Button>
+        {draft ? (
+          <button type='button' className={styles.action} onClick={() => onApply(draft)}>
+            Применить
+          </button>
+        ) : (
+          <span />
+        )}
       </div>
       {error && (
         <p className={styles.error} role='alert'>
           {error}
         </p>
       )}
-    </details>
+    </>
   )
 }

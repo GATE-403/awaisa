@@ -10,7 +10,60 @@
 .mapArea {
   position: relative;
   z-index: 0;
-  flex: 0 0 42%;
+  flex: 0 0 var(--map-size, 42%);
+}
+
+.layout[data-detent="peek"] {
+  --map-size: 72%;
+}
+
+.layout[data-detent="full"] {
+  --map-size: 0%;
+}
+
+/* The map follows the sheet down to nothing (its own 240px floor is for maps in content). */
+.layout .mapArea > * {
+  min-height: 0;
+}
+
+/* Under the finger the sheet follows at once; the spring is only for settling. */
+/* The sheet's grabber: a pill to drag, the whole top strip to tap (steps through the heights). */
+.grabber {
+  position: relative;
+  align-self: stretch;
+  height: 44px;
+  margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.grabber::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
+  translate: -50% -50%;
+}
+
+.grabber:focus-visible {
+  outline: none;
+}
+
+.grabber:focus-visible::before {
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapArea {
+    transition: none;
+  }
 }
 
 .mapPlaceholder {
@@ -59,6 +112,9 @@
     padding: var(--space-4) var(--page-gutter) var(--space-3);
     background: var(--color-background);
     box-shadow: 0 0.5px 0 var(--color-border);
+    /* Vertical moves on the head resize the sheet; sideways ones still scroll the kind tabs. */
+    touch-action: pan-x;
+    user-select: none;
   }
 }
 
@@ -173,7 +229,7 @@
   flex-shrink: 0;
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   object-fit: cover;
 }
 
@@ -256,6 +312,10 @@
     background: transparent;
   }
 
+  .grabber {
+    display: none;
+  }
+
   /* Sidebar from the kit: inset 12pt, 20pt corners, glass material, rows that highlight in place. */
   .panel {
     position: absolute;
@@ -318,7 +378,7 @@
   .thumb {
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-full);
   }
 
   .skeleton,

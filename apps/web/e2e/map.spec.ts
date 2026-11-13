@@ -30,4 +30,26 @@ test.describe('Map: places nearby', () => {
     await page.goto('/map?kind=barber')
     await expect(page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' })).toHaveCount(0)
   })
+
+  test('on phones the list sheet changes height by its grabber', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Desktop has a floating sidebar instead')
+    await page.goto('/map')
+    const map = page.getByRole('region', { name: 'Карта салонов и мастеров' })
+    await expect(map).toBeVisible()
+    const half = (await map.boundingBox())?.height ?? 0
+    // A tap steps through the heights: half → full screen → compact.
+    await page.getByRole('button', { name: /Список наполовину/ }).click()
+    await expect(page.getByRole('button', { name: /Список на весь экран/ })).toBeVisible()
+    await expect.poll(async () => (await map.boundingBox())?.height ?? 0).toBeLessThan(10)
+    // Dragging down settles on the nearest height: the list folds and the map grows.
+    const grabber = page.getByRole('button', { name: /Список на весь экран/ })
+    const box = await grabber.boundingBox()
+    if (!box) throw new Error('no grabber')
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2, box.y + 500, { steps: 12 })
+    await page.mouse.up()
+    await expect(page.getByRole('button', { name: /Список свёрнут/ })).toBeVisible()
+    await expect.poll(async () => (await map.boundingBox())?.height ?? 0).toBeGreaterThan(half)
+  })
 })

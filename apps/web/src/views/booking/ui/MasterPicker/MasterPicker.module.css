@@ -1,0 +1,162 @@
+/* A sideways row of faces on a card; wraps into a grid on wide screens. */
+.row {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--space-3) var(--page-gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.row::-webkit-scrollbar {
+  display: none;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  flex: 0 0 84px;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .option:hover {
+    background: var(--color-fill);
+  }
+}
+
+/* The native radio covers the whole option, invisible: clicks, keyboard and tests all hit it. */
+.input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.face {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 2px transparent;
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-spring);
+}
+
+.anyIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(160deg, var(--color-primary-subtle), var(--color-fill));
+  color: var(--color-link);
+}
+
+.anyIcon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.check {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  padding: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-background);
+  color: var(--color-primary-foreground);
+  opacity: 0;
+  scale: 0.6;
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-spring);
+}
+
+.option:has(.input:checked) .face {
+  box-shadow:
+    0 0 0 2px var(--color-background),
+    0 0 0 4px var(--color-primary);
+}
+
+.option:has(.input:checked) .check {
+  opacity: 1;
+  scale: 1;
+}
+
+.option:has(.input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.option:active .face {
+  scale: 0.95;
+}
+
+.name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option:has(.input:checked) .name {
+  color: var(--color-link);
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.star {
+  width: 11px;
+  height: 11px;
+  color: var(--color-rating);
+}
+
+@media (min-width: 768px) {
+  .row {
+    flex-wrap: wrap;
+    margin: 0;
+    padding: var(--space-2);
+    overflow: visible;
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .option {
+    flex-basis: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .face,
+  .check {
+    transition: none;
+  }
+}

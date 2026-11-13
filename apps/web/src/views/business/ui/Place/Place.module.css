@@ -3,17 +3,21 @@
 
 /* ---------- Layout ---------- */
 
+.shell {
+  width: 100%;
+}
+
 .page {
   width: 100%;
   max-width: var(--layout-container-width);
   margin: 0 auto;
-  padding: var(--space-4) var(--page-gutter) var(--section-gap);
+  padding: 0 var(--page-gutter) var(--section-gap);
 }
 
 .body {
   display: grid;
-  gap: var(--space-10);
-  margin-top: var(--space-10);
+  gap: var(--space-8);
+  margin-top: var(--space-8);
 }
 
 .main {
@@ -45,32 +49,42 @@
 
 /* ---------- Place card ---------- */
 
+/* A profile head like a social app's, in our materials: a full-width cover with square edges,
+   the round logo on its edge with the actions across from it, then name, handle, counts. */
 .header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+}
+
+.headerBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--layout-container-width);
+  margin: 0 auto;
+  padding: var(--space-4) var(--page-gutter) 0;
 }
 
 .cover {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 1.2;
+  max-height: 340px;
+  width: 100%;
   margin: 0;
   overflow: hidden;
-  border-radius: var(--radius-2xl);
   background: var(--color-fill);
-  box-shadow: var(--shadow-sm);
-}
-
-/* No photo: no banner at all — the tile and the name lead. */
-.cover[data-empty] {
-  display: none;
 }
 
 @media (min-width: 768px) {
   .cover {
-    aspect-ratio: 21 / 7;
-    max-height: 320px;
+    aspect-ratio: 4 / 1;
   }
+}
+
+/* No photo: no banner at all — the logo and the name lead. */
+.cover[data-empty] {
+  display: none;
 }
 
 .coverImage {
@@ -81,57 +95,88 @@
   object-fit: cover;
 }
 
-.identity {
+.topRow {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-/* With a cover only the icon rests on its edge, ringed in the page colour, like an app on a
-   banner; the name stays on the page beside it. */
-.cover:not([data-empty]) + .identity {
-  align-items: flex-start;
-  padding: 0 var(--space-4);
-}
-
-.cover:not([data-empty]) + .identity .tile {
-  margin-top: calc(var(--space-10) * -1);
-}
-
-.cover:not([data-empty]) + .identity .identityText {
-  padding-top: var(--space-1);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .tile {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  box-shadow: var(--shadow-md);
 }
 
-.cover:not([data-empty]) + .identity .tile {
+/* The place's mark as an app icon: a full gradient of its colour with white initials in the
+   display face — confident on the cover's edge, not a pale wash. */
+.topRow .tile[data-size] {
+  width: 80px;
+  height: 80px;
+  background:
+    radial-gradient(120% 90% at 30% 15%, rgb(255 255 255 / 0.28), transparent 55%),
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--tint) 92%, white),
+      color-mix(in srgb, var(--tint) 70%, black)
+    );
+  box-shadow:
+    inset 0 0 0 0.5px rgb(255 255 255 / 0.25),
+    var(--shadow-sm);
+  color: #fff;
+  font-size: var(--text-title2);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+}
+
+/* With a cover the logo rests half over its edge, ringed in the page colour; the actions sit on
+   the same line, so there is no empty row under the photo. */
+.cover:not([data-empty]) + .headerBody {
+  padding-top: 0;
+}
+
+.cover:not([data-empty]) + .headerBody .topRow {
+  align-items: flex-start;
+  margin-top: -40px;
+}
+
+/* The buttons sit below the photo's edge, never on it. */
+.cover:not([data-empty]) + .headerBody .actions {
+  margin-top: calc(40px + var(--space-3));
+  padding-bottom: 0;
+}
+
+.cover:not([data-empty]) + .headerBody .tile {
   box-shadow:
     0 0 0 4px var(--color-background),
     var(--shadow-md);
 }
 
 @media (min-width: 768px) {
-  .tile[data-size="lg"] {
-    width: 96px;
-    height: 96px;
-    border-radius: 22px;
-    font-size: var(--text-2xl);
+  .topRow .tile[data-size] {
+    width: 120px;
+    height: 120px;
+    font-size: 40px;
   }
 
-  .cover:not([data-empty]) + .identity {
-    padding: 0 var(--space-6);
+  .cover:not([data-empty]) + .headerBody .topRow {
+    margin-top: -60px;
+  }
+
+  .cover:not([data-empty]) + .headerBody .actions {
+    margin-top: calc(60px + var(--space-4));
+  }
+
+  .headerBody {
+    padding-top: var(--space-6);
   }
 }
 
 .identityText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
   min-width: 0;
 }
 
@@ -139,7 +184,7 @@
   overflow: hidden;
   font-family: var(--font-display);
   font-size: var(--text-title1);
-  line-height: var(--text-title1-line-height);
+  line-height: 1.15;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-tight);
   text-overflow: ellipsis;
@@ -153,28 +198,63 @@
   }
 }
 
-/* «★ 4.4 (206) · Барбершопы» — one quiet line. */
-.facts {
+/* «SPA и массаж · ул. Ахунбаева, 98» — the quiet line under the name, like a handle. */
+.handle {
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  white-space: nowrap;
+}
+
+.handle > * + * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.handle > * + *::before {
+  content: "·";
+  margin-right: var(--space-2);
+}
+
+.handle:has(.address[aria-expanded="true"]) {
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+/* «★ 4.5 · 189 отзывов   40 услуг   4 мастера»: bold numbers, muted words. */
+.stats {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0 var(--space-2);
+  gap: var(--space-1) var(--space-4);
   color: var(--color-muted-foreground);
   font-size: var(--text-body);
   line-height: var(--text-body-line-height);
 }
 
-.facts > * + *::before {
-  content: "·";
-  margin-right: var(--space-2);
+.stats strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
-.rating {
+.stat {
+  color: inherit;
+}
+
+.statRating {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
+  white-space: pre;
+}
+
+@media (hover: hover) {
+  .stat:hover {
+    text-decoration: underline;
+  }
 }
 
 .factStar {
@@ -188,7 +268,6 @@
   font-weight: var(--font-weight-regular);
 }
 
-/* Status · street: the street is cut on one line and shows whole on tap (AddressLine). */
 .where {
   display: flex;
   gap: var(--space-2);
@@ -197,16 +276,6 @@
   font-size: var(--text-body);
   line-height: var(--text-body-line-height);
   white-space: nowrap;
-}
-
-.where > * + * {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.where > * + *::before {
-  content: "·";
-  margin-right: var(--space-2);
 }
 
 .status {
@@ -241,11 +310,6 @@
   cursor: pointer;
 }
 
-.where:has(.address[aria-expanded="true"]) {
-  flex-wrap: wrap;
-  white-space: normal;
-}
-
 .address[aria-expanded="true"] {
   flex-basis: 100%;
   overflow: visible;
@@ -256,123 +320,33 @@
 }
 
 .description {
-  display: none;
+  display: -webkit-box;
   max-width: 64ch;
-  color: var(--color-muted-foreground);
+  overflow: hidden;
+  color: var(--color-foreground);
   font-size: var(--text-body);
-  line-height: 1.5;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
-@media (min-width: 640px) {
-  .description {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-}
-
-/* Actions: one primary capsule, then secondary capsules of the same height. */
+/* Across from the tile: round glyph buttons, then the one primary capsule. */
 .actions {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+  padding-bottom: var(--space-1);
 }
 
 .bookButton {
-  width: 100%;
-}
-
-.quickActions {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.quickAction {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  height: var(--control-height-md);
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-control);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-link);
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    scale var(--duration-fast) var(--ease-standard),
-    background-color var(--duration-fast) var(--ease-standard);
-}
-
-.quickAction svg {
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  height: var(--control-height-md);
+  padding-inline: var(--space-5);
 }
 
-.quickAction:active {
-  scale: 0.97;
-}
-
-.quickAction:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-/* Phones: icons over short words so four fit; from 768px one row with the primary. */
-@media (max-width: 767px) {
-  .quickAction {
-    flex-direction: column;
-    gap: 2px;
-    height: 56px;
-    border-radius: var(--radius-lg);
-    font-size: var(--text-xs);
-  }
-}
-
-@media (min-width: 768px) {
-  .actions {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .bookButton {
-    width: auto;
-    min-width: 220px;
-  }
-
-  .quickActions {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .quickAction {
-    width: auto;
-    height: var(--control-height-lg);
-    padding: 0 var(--space-5);
-  }
-}
-
-@media (hover: hover) {
-  .quickAction:hover {
-    background: var(--color-elevated);
-    box-shadow: var(--shadow-md);
-  }
-}
-
+/* Phones: slimmer round buttons; when four and the capsule would crowd the tile, the last ones
+   (share, then directions) give way — the place's card below still has the address and phone. */
 /* ---------- Sections ---------- */
 
 .section {
@@ -426,10 +400,29 @@
 
 /* ---------- Menu ---------- */
 
+/* Search and categories stay pinned under the business bar while the menu scrolls, on the
+   page colour with a soft edge under them. */
 .menuHead {
+  position: sticky;
+  /* A pixel under the bar, in the bar's own material: the two read as one toolbar, one hairline
+     under both (the bar drops its own through `useRootFlag('category-nav')`). */
+  top: calc(var(--header-height) + var(--business-bar-height, 0px) - 1px);
+  z-index: 34;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--space-2) var(--page-gutter);
+  background: var(--color-chrome);
+  backdrop-filter: var(--blur-material);
+  box-shadow: 0 0.5px 0 var(--color-border);
+}
+
+@media (min-width: 768px) {
+  .menuHead {
+    margin: 0 calc(var(--space-4) * -1);
+    padding-inline: var(--space-4);
+  }
 }
 
 .filters {
@@ -455,39 +448,38 @@
   display: none;
 }
 
-.chip {
-  flex-shrink: 0;
-  height: var(--control-height-sm);
-  padding: 0 var(--space-4);
+/* The count beside each category: a small badge that inverts with the chosen chip. */
+.searchClear {
+  position: absolute;
+  right: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   border: none;
-  border-radius: var(--radius-control);
-  background: var(--color-fill);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
-}
-
-.chip[aria-pressed="true"] {
-  background: var(--color-foreground);
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
   color: var(--color-background);
+  cursor: pointer;
 }
 
-.chip:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+.searchClear svg {
+  width: 12px;
+  height: 12px;
 }
 
+.found {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+/* A full-width search field first (like Settings' search), the category chips under it. */
 .search {
   position: relative;
   display: flex;
-  flex: 1 1 220px;
+  flex: 1 1 100%;
   align-items: center;
-  max-width: 320px;
 }
 
 .searchIcon {
@@ -502,7 +494,7 @@
 
 .search input.searchInput {
   width: 100%;
-  height: var(--control-height-sm);
+  height: var(--control-height-md);
   padding-left: calc(var(--space-4) + 24px);
   border: none;
   background: var(--color-fill);
@@ -608,6 +600,22 @@
   white-space: nowrap;
 }
 
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .serviceGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
 .nothing {
   padding: var(--space-6);
   border-radius: var(--radius-xl);
@@ -625,119 +633,81 @@
 
 /* ---------- Masters: a row of faces, like favourites in Contacts ---------- */
 
-.masters {
-  display: flex;
-  gap: var(--space-5);
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  list-style: none;
-  scrollbar-width: none;
-}
+/* ---------- Reviews: a thread, like comments in a social app ---------- */
 
-.masters::-webkit-scrollbar {
-  display: none;
-}
-
-.masters > li {
-  flex-shrink: 0;
-}
-
-.master {
-  display: flex;
-  flex-direction: column;
+/* The score card: the average at display size with stars and the count, bars by stars. */
+.reviewSummary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: 2px;
-  width: 80px;
-  color: inherit;
-  text-align: center;
-  transition: scale var(--duration-fast) var(--ease-standard);
-}
-
-.master:active {
-  scale: 0.97;
-}
-
-.masterAvatar {
-  margin-bottom: var(--space-1);
-}
-
-.masterName {
-  overflow: hidden;
-  max-width: 100%;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.masterRating {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.masterRating svg {
-  width: 11px;
-  height: 11px;
-  color: var(--color-rating);
-}
-
-/* ---------- Reviews: one inset list ---------- */
-
-.reviews {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+  gap: var(--space-6);
+  padding: var(--space-5);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
-  list-style: none;
 }
 
-.review {
-  position: relative;
+.reviewScore {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-1);
-  padding: var(--space-4);
+  min-width: 96px;
 }
 
-.review + .review::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: var(--space-4);
-  height: 0.5px;
-  background: var(--color-border);
+.reviewAverage {
+  font-family: var(--font-display);
+  font-size: 48px;
+  line-height: 1;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 767px) {
-  .review:nth-child(n + 4) {
-    display: none;
-  }
-}
-
-.reviewHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.reviewAuthor {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-}
-
-.reviewDate {
+.reviewTotal {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
 }
 
+.reviewBars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewBar {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+
+.reviewBarTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.reviewBarFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-rating);
+}
+
+.reviewBarCount {
+  text-align: right;
+}
+
+/* «Показать ещё»: the last shown review fades into the page and the button floats on the fade. */
+/* The thread line: from the author's face down to the reply's. */
 .reviewStars {
   display: inline-flex;
   gap: 1px;
@@ -747,35 +717,6 @@
 .reviewStars svg {
   width: 12px;
   height: 12px;
-}
-
-.reviewText {
-  display: -webkit-box;
-  overflow: hidden;
-  font-size: var(--text-body);
-  line-height: 1.45;
-  white-space: pre-line;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-.reviewReply {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: var(--space-2);
-  padding-left: var(--space-3);
-  box-shadow: inset 2px 0 0 var(--color-border);
-}
-
-.reviewReply .reviewText {
-  color: var(--color-muted-foreground);
-}
-
-.reviewReplyTitle {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
 }
 
 /* ---------- Work photos ---------- */
@@ -841,10 +782,6 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-caption);
   text-transform: uppercase;
-}
-
-.slotCard {
-  gap: 2px;
 }
 
 .slot {
@@ -1005,10 +942,189 @@ details[open] > .info .infoChevron {
   font-weight: var(--font-weight-semibold);
 }
 
+.card.visit {
+  padding-top: 0;
+}
+
 .visitMap {
-  margin: var(--space-2) 0 var(--space-2);
+  margin: 0 calc(-1 * var(--space-4)) var(--space-1);
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+/* The map's own frame (margin, rounded corners) gives way to the card's edge. */
+.card .visitMap > * {
+  margin-top: 0;
+  border-radius: 0;
+}
+
+.infoMuted {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.visit {
+  overflow: hidden;
+}
+
+/* Hours below the address: a hairline between, like the rows inside a branch. */
+.branch + .hoursBlock,
+.branch + .branch {
+  border-top: 0.5px solid var(--color-border);
+}
+
+/* ---------- «Ближайшее окно»: the same floating pill as «Продолжить запись» ---------- */
+
+/* One slim capsule over the tab bar in the place's colour (darkened for white text), the whole of
+   it a link: the time over the service, a round white arrow. It tucks away while the page scrolls
+   down. From 768px a compact card bottom-right, like the resume card. Only one floating pill
+   shows at a time (see `NextSlotCard` and `ResumeBooking`). */
+.slotCard {
+  position: fixed;
+  right: var(--space-4);
+  bottom: calc(var(--tabbar-space) + var(--space-1));
+  left: var(--space-4);
+  z-index: 45;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--tint) 66%, black),
+    color-mix(in srgb, var(--tint) 46%, black)
+  );
+  box-shadow: var(--shadow-lg);
+  color: #fff;
+  transition:
+    translate var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard);
+  animation: slotRise 300ms var(--ease-spring);
+}
+
+.slotCard[data-tucked] {
+  translate: 0 calc(100% + var(--space-4));
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes slotRise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.slotLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 4px 4px 4px var(--space-4);
+  border-radius: inherit;
+  color: inherit;
+}
+
+.slotLink:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.slotText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.slotWhen {
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  line-height: 1.25;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotWhen[data-loading] {
+  color: rgb(255 255 255 / 0.75);
+}
+
+.slotMeta {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotArrow {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  color: color-mix(in srgb, var(--tint) 70%, black);
+}
+
+.slotArrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.slotLink:active .slotArrow {
+  scale: 0.94;
+}
+
+/* Room at the page's foot so the pill never covers the last of it. */
+.shell {
+  padding-bottom: 64px;
+}
+
+@media (min-width: 768px) {
+  .slotCard {
+    right: var(--space-6);
+    bottom: var(--space-6);
+    left: auto;
+    width: 340px;
+    border-radius: var(--radius-xl);
+  }
+
+  .slotCard[data-tucked] {
+    translate: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .slotLink {
+    min-height: 60px;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  }
+
+  .slotWhen {
+    font-size: var(--text-body);
+  }
+
+  .slotMeta {
+    font-size: var(--text-footnote);
+  }
+
+  .slotArrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .shell {
+    padding-bottom: 96px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slotCard {
+    transition: none;
+    animation: none;
+  }
 }
 
 @media (hover: hover) {
@@ -1059,4 +1175,327 @@ details[open] > .info .infoChevron {
 
 .promotionText {
   color: var(--color-muted-foreground);
+}
+
+/* «Похожие места»: a band of its own under the place — a lighter layer edge to edge with a
+   hairline on top — holding the catalog's place cards in one row that scrolls sideways. */
+.similar {
+  padding: var(--space-8) 0 var(--space-10);
+  border-top: 0.5px solid var(--color-border);
+  background: var(--color-surface);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 380px;
+}
+
+.similarInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--layout-container-width);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+.similarMuted {
+  color: var(--color-muted-foreground);
+}
+
+@media (max-width: 639px) {
+  .similarMuted {
+    display: none;
+  }
+}
+
+.similarTrack {
+  display: grid;
+  grid-auto-columns: minmax(160px, 44%);
+  grid-auto-flow: column;
+  gap: 8px;
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: 2px var(--page-gutter) var(--space-1);
+  overflow-x: auto;
+  scroll-padding-inline: var(--page-gutter);
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  --edge-fade: 48px;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.similarTrack > li {
+  scroll-snap-align: start;
+}
+
+.similarTrack::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .similarTrack {
+    grid-auto-columns: minmax(200px, 23%);
+  }
+}
+
+/* ---------- Masters: picture cards like the catalog's ---------- */
+
+.masters {
+  display: grid;
+  grid-auto-columns: 132px;
+  grid-auto-flow: column;
+  gap: 8px;
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: 2px var(--page-gutter) var(--space-1);
+  overflow-x: auto;
+  scroll-padding-inline: var(--page-gutter);
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  --edge-fade: 48px;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.masters::-webkit-scrollbar {
+  display: none;
+}
+
+.masters > li {
+  scroll-snap-align: start;
+}
+
+.master {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tint) 62%, white),
+    color-mix(in srgb, var(--tint) 88%, black)
+  );
+  box-shadow: var(--shadow-sm);
+  color: #fff;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.master::after {
+  content: "";
+  position: absolute;
+  inset: 40% 0 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.75));
+}
+
+.master:active {
+  scale: 0.97;
+}
+
+.masterPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.masterInitials {
+  position: absolute;
+  inset: 0 0 30%;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(255 255 255 / 0.92);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
+}
+
+.masterCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--space-3);
+}
+
+.masterName {
+  overflow: hidden;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.masterRole {
+  display: flex;
+  gap: 6px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.masterRating {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  color: #fff;
+  font-weight: var(--font-weight-semibold);
+}
+
+.masterRating svg {
+  width: 11px;
+  height: 11px;
+  color: #ffcc4d;
+}
+
+@media (min-width: 768px) {
+  .masters {
+    grid-auto-columns: 156px;
+    margin: 0;
+    padding-inline: 0;
+  }
+}
+
+/* ---------- The head ends here: a hairline parts it from the menu ---------- */
+
+/* A hairline as wide as the content (not the gutters) under the head. */
+.headerBody::after {
+  content: "";
+  height: 0.5px;
+  margin-top: var(--space-3);
+  background: var(--color-border);
+}
+
+/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
+   repainted every frame, so touch screens scroll them plain. */
+@media (hover: hover) and (pointer: fine) {
+  .similarTrack {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
+
+  .masters {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
+}
+
+/* The quick actions as one button group, like a macOS toolbar group: a single surface capsule
+   holding the glyphs with hairlines between them — one object beside «Записаться», not a row of
+   loose circles. */
+.quickActions {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  list-style: none;
+}
+
+.quickActions > li {
+  position: relative;
+  display: flex;
+}
+
+.quickActions > li + li::before {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 0;
+  width: 0.5px;
+  background: var(--color-border);
+}
+
+.quickAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-link);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.quickAction svg {
+  width: 19px;
+  height: 19px;
+}
+
+.quickAction:active {
+  scale: 0.92;
+  background: var(--color-fill);
+}
+
+.quickAction:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .quickAction:hover {
+    background: var(--color-fill);
+  }
+}
+
+/* Phones keep three glyphs in the group, narrow ones two (share and directions go last), so the
+   logo, the group and «Записаться» fit one line. */
+@media (max-width: 429px) {
+  .quickActions > li:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .quickAction {
+    width: 38px;
+  }
+}
+
+@media (max-width: 359px) {
+  .quickActions > li:nth-child(n + 3) {
+    display: none;
+  }
+}
+
+/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+   short swipe feel stuck on phones. */
+@media (hover: none) {
+  .similarTrack {
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+  }
+
+  .masters {
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+  }
 }

@@ -63,16 +63,8 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   ].filter((action) => action !== null)
 
   return (
-    // One primary capsule, then secondary capsules of the same height: icon and a short verb.
+    // Across from the tile, like a profile's buttons: round glyph buttons, then one primary capsule.
     <div className={styles.actions}>
-      <ButtonLink
-        size='lg'
-        className={styles.bookButton}
-        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-        render={<a href='#services' />}
-      >
-        Выбрать услугу
-      </ButtonLink>
       <ul className={styles.quickActions}>
         {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) => (
           <li key={label}>
@@ -80,20 +72,34 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
               <a
                 href={href}
                 className={styles.quickAction}
+                aria-label={label}
+                title={label}
                 {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
               >
                 <ActionIcon weight='fill' aria-hidden />
-                <span>{label}</span>
               </a>
             ) : (
-              <button type='button' className={styles.quickAction} onClick={onClick}>
+              <button
+                type='button'
+                className={styles.quickAction}
+                aria-label={label}
+                title={label}
+                onClick={onClick}
+              >
                 <ActionIcon weight='fill' aria-hidden />
-                <span>{label}</span>
               </button>
             )}
           </li>
         ))}
       </ul>
+      <ButtonLink
+        size='md'
+        className={styles.bookButton}
+        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+        render={<a href='#services' />}
+      >
+        Записаться
+      </ButtonLink>
     </div>
   )
 }

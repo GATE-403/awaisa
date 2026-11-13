@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { mockCreateBooking, succeed } from './fixtures'
-import { bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
+import { bookingSteps, pickFirstFreeSlot, primaryAction, submitBooking } from './helpers'
 
 const LIMITS = {
   steps: 4,
@@ -86,7 +86,7 @@ test.describe('Cognitive load: booking', () => {
 
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
-    await primaryAction(page).click()
+    await submitBooking(page)
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
   })
 
@@ -116,7 +116,11 @@ test.describe('Cognitive load: booking', () => {
 
     await act(() => steps.contacts.getByLabel('Имя').fill('E2E Тест'))
     await act(() => steps.contacts.getByLabel('Телефон').fill('+996 555 000 111'))
+    // Check, then book: two presses.
     await act(() => primaryAction(page).click())
+    await act(() =>
+      page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).click(),
+    )
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     expect(actions).toBeLessThanOrEqual(LIMITS.happyPathActions)

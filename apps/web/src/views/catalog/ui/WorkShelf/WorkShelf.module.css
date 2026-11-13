@@ -1,24 +1,42 @@
 .shelf {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-1);
 }
 
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  /* Every shelf head is one 44pt line, with or without a link on the right, so titles sit the
+     same distance above their cards. */
+  min-height: var(--control-height-md);
 }
 
+/* Two-tone shelf title like apple.com/store. */
 .title {
+  line-height: 1.25;
   font-size: var(--text-title3);
   font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-tight);
 }
 
+.titleMuted {
+  color: var(--color-muted-foreground);
+}
+
+/* Phones: the name alone, so the title and «Смотреть все» share one line. */
+@media (max-width: 639px) {
+  .titleMuted {
+    display: none;
+  }
+}
+
 .all {
   display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
   align-items: center;
   gap: 2px;
   min-height: var(--control-height-md);
@@ -33,12 +51,14 @@
 
 .track {
   display: flex;
-  gap: var(--space-3);
+  gap: 6px;
   margin: 0 calc(var(--page-gutter) * -1);
-  padding: 0 var(--page-gutter) var(--space-2);
+  padding: 2px var(--page-gutter) var(--space-1);
   overflow-x: auto;
   scroll-padding-inline: var(--page-gutter);
-  scroll-snap-type: x mandatory;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  --edge-fade: 48px;
   scrollbar-width: none;
   list-style: none;
 }
@@ -54,12 +74,11 @@
 .card {
   position: relative;
   display: block;
-  width: 128px;
+  width: 108px;
   aspect-ratio: 9 / 16;
   overflow: hidden;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   background: var(--color-fill);
-  box-shadow: var(--shadow-sm);
   color: #fff;
   transition: scale var(--duration-fast) var(--ease-standard);
 }
@@ -76,8 +95,8 @@
 .card::after {
   content: "";
   position: absolute;
-  inset: 50% 0 0;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.7));
+  inset: 40% 0 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.78));
 }
 
 .image {
@@ -106,19 +125,78 @@
   -webkit-line-clamp: 2;
 }
 
-.meta {
-  color: rgb(255 255 255 / 0.8);
+/* A play mark in the corner: these open as a vertical feed, like Shorts. */
+.play {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.5);
+}
+
+.play svg {
+  width: 12px;
+  height: 12px;
+}
+
+.price {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.place {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  margin-top: 4px;
+}
+
+.placeName {
+  margin-top: 2px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.85);
   font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .card {
-    width: 156px;
+    width: 136px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .card {
     transition: none;
+  }
+}
+
+/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
+   repainted every frame, so touch screens scroll them plain. */
+@media (hover: hover) and (pointer: fine) {
+  .track {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
+}
+
+/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+   short swipe feel stuck on phones. */
+@media (hover: none) {
+  .track {
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
   }
 }

@@ -7,6 +7,7 @@ import { AdminModule } from './admin/admin.module.js'
 import { AuthModule } from './auth/auth.module.js'
 import { BookingsModule } from './bookings/bookings.module.js'
 import { BusinessesModule } from './businesses/businesses.module.js'
+import { CacheModule } from './cache/cache.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
@@ -20,6 +21,7 @@ import { MailingsModule } from './mailings/mailings.module.js'
 import { MasterModule } from './master/master.module.js'
 import { MediaModule } from './media/media.module.js'
 import { PromotionsModule } from './promotions/promotions.module.js'
+import { RecommendationsModule } from './recommendations/recommendations.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
 import { WaitlistModule } from './waitlist/waitlist.module.js'
@@ -27,6 +29,7 @@ import { WalletModule } from './wallet/wallet.module.js'
 
 @Module({
   imports: [
+    CacheModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
@@ -55,6 +58,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     MailingsModule,
     InventoryModule,
     ImportModule,
+    RecommendationsModule,
     TelegramModule,
     ClientsModule,
     MasterModule,

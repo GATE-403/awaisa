@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
-import { API_URL, bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
+import { API_URL, bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
 import { withDb } from './visits'
 
 const SLUG = 'awaisa-studio'
@@ -67,7 +67,7 @@ test.describe('Prepayment', () => {
       await pickFirstFreeSlot(guestPage)
       await steps.contacts.getByLabel('Имя').fill('E2E Предоплата')
       await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
-      await primaryAction(guestPage).click()
+      await submitBooking(guestPage)
       await expect(guestPage).toHaveURL(/\/pay\/[0-9a-f-]+\?s=/)
       // The first visit compiles the route in dev: give the checkout a moment.
       await expect(guestPage.getByText('Тестовый режим')).toBeVisible({ timeout: 20_000 })

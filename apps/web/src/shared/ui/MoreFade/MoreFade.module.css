@@ -1,0 +1,78 @@
+.wrap {
+  position: relative;
+}
+
+/* Closed: the last item melts into what is under the list, above the rows' own links. */
+.wrap[data-closed]::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  height: 150px;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  background: linear-gradient(to bottom, transparent, var(--color-background) 72%);
+  pointer-events: none;
+}
+
+.wrap[data-surface="card"][data-closed]::after {
+  background: linear-gradient(to bottom, transparent, var(--color-surface) 72%);
+}
+
+.more,
+.less {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.more {
+  position: absolute;
+  bottom: var(--space-3);
+  left: 50%;
+  z-index: 4;
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-lg);
+  color: var(--color-foreground);
+  translate: -50% 0;
+}
+
+/* Open: a quiet capsule under the list, centred. */
+.less {
+  display: flex;
+  margin: var(--space-3) auto 0;
+  background: var(--color-fill);
+  color: var(--color-foreground);
+}
+
+.more svg,
+.less svg {
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted-foreground);
+}
+
+.more:active,
+.less:active {
+  scale: 0.97;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .more,
+  .less {
+    transition: none;
+  }
+}

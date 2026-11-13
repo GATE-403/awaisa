@@ -1,9 +1,9 @@
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
+import { PersonAvatar } from '@/entities/business'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -98,7 +98,7 @@ export const MasterDialog = ({
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.photoHeader}>
-          <Avatar name={name || '?'} src={photoUrl ?? undefined} size='xl' />
+          <PersonAvatar name={name || '?'} src={photoUrl ?? undefined} size='xl' />
           {onPhotoChange ? (
             <span className={sheet.photoActions}>
               <button

@@ -62,3 +62,14 @@
     display: none;
   }
 }
+
+/* The person's face in place of the profile glyph: glyph-sized, ringed when this is the page. */
+.avatar[data-size] {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+[aria-current="page"] > .avatar {
+  box-shadow: 0 0 0 2px var(--color-link);
+}

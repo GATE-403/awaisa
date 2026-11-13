@@ -29,20 +29,46 @@
   color: var(--color-danger-text);
 }
 
-/* Day states inside the hint line: quiet tinted text, not more capsules beside the actions. */
+/* The day as a title over its numbers; day states follow as small tinted capsules. */
+.dayTitle {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--color-foreground);
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.dayStats strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
 .statusLink {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 32px;
+  min-height: 28px;
   margin-left: var(--space-3);
-  padding: 0;
+  padding: 0 var(--space-3);
   border: none;
-  background: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-highlight) 14%, transparent);
   color: var(--color-highlight);
   font: inherit;
+  font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
+}
+
+.statusLink:active {
+  scale: 0.97;
+}
+
+/* «Закрыть время» as a round glyph button beside the labelled ones. */
+.iconAction {
+  width: 32px;
+  padding: 0;
 }
 
 .statusLink svg {

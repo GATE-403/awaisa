@@ -17,8 +17,8 @@
   height: 30px;
   padding: 7px;
   border-radius: var(--radius-full);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
+  /* Solid, not blurred: one per card, a live blur on each costs every scrolled frame. */
+  background: var(--color-sheet);
   box-shadow: var(--shadow-xs);
   transition: scale var(--duration-fast) var(--ease-spring);
 }

@@ -3,6 +3,7 @@ import { type CSSProperties, ViewTransition } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business/ui/BusinessTile/BusinessTile'
 import type { BusinessCard as BusinessCardData } from '@/shared/api/types'
+import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from './BusinessCard.module.css'
 import { LiveStatus } from './LiveStatus'
 
@@ -23,14 +24,14 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
         {business.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API
           <img
-            src={business.coverUrl}
+            {...sizedImage(business.coverUrl, 420)}
             alt=''
             loading='lazy'
             decoding='async'
             className={styles.cover}
           />
         ) : (
-          <BusinessTile name={business.name} size='md' className={styles.tile} />
+          <BusinessTile name={business.name} size='lg' className={styles.tile} />
         )}
       </span>
     </ViewTransition>

@@ -42,7 +42,7 @@
 .tileSkeleton {
   width: 64px;
   height: 64px;
-  border-radius: 15px;
+  border-radius: var(--radius-full);
 }
 
 .titleSkeleton {

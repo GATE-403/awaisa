@@ -34,35 +34,12 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
 
   return (
     <section id='visit' className={`${styles.card} ${styles.visit}`} aria-label='Как нас найти'>
-      {/* Today is what matters; the week opens on demand. */}
-      <details className={styles.hoursBlock}>
-        <summary className={styles.info}>
-          <span className={styles.glyph} data-tone='orange' aria-hidden>
-            <Clock weight='fill' />
-          </span>
-          <span className={styles.infoText}>
-            <span className={styles.infoLabel}>Часы</span>
-            <span className={styles.infoValue}>
-              {todayWeekday === null
-                ? ' '
-                : `Сегодня ${hoursOf(business.hours, todayWeekday).toLowerCase()}`}
-            </span>
-          </span>
-          <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
-        </summary>
-        <ul className={styles.hours}>
-          {WEEKDAYS_FULL.map((dayName, weekday) => (
-            <li
-              key={dayName}
-              className={styles.hoursRow}
-              data-today={weekday === todayWeekday || undefined}
-            >
-              <span>{dayName}</span>
-              <span>{hoursOf(business.hours, weekday)}</span>
-            </li>
-          ))}
-        </ul>
-      </details>
+      {/* The map leads, edge to edge at the card's top, like a place card in Maps. */}
+      {pinned && (
+        <div className={styles.visitMap}>
+          <BranchesMap business={business} />
+        </div>
+      )}
 
       {business.branches.map((branch) => {
         const phone = branch.phone || business.phone
@@ -105,18 +82,41 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
                   <span className={styles.infoLabel}>Телефон</span>
                   <span className={styles.infoValue}>{formatPhone(phone)}</span>
                 </span>
-                <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
+                <span className={styles.infoAction}>Позвонить</span>
               </a>
             )}
           </div>
         )
       })}
-
-      {pinned && (
-        <div className={styles.visitMap}>
-          <BranchesMap business={business} />
-        </div>
-      )}
+      {/* Today is what matters; the week opens on demand. */}
+      <details className={styles.hoursBlock}>
+        <summary className={styles.info}>
+          <span className={styles.glyph} data-tone='orange' aria-hidden>
+            <Clock weight='fill' />
+          </span>
+          <span className={styles.infoText}>
+            <span className={styles.infoLabel}>Часы</span>
+            <span className={styles.infoValue}>
+              {todayWeekday === null
+                ? ' '
+                : `Сегодня ${hoursOf(business.hours, todayWeekday).toLowerCase()}`}
+            </span>
+          </span>
+          <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
+        </summary>
+        <ul className={styles.hours}>
+          {WEEKDAYS_FULL.map((dayName, weekday) => (
+            <li
+              key={dayName}
+              className={styles.hoursRow}
+              data-today={weekday === todayWeekday || undefined}
+            >
+              <span>{dayName}</span>
+              <span>{hoursOf(business.hours, weekday)}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
     </section>
   )
 }

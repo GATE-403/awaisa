@@ -333,9 +333,20 @@
   }
 }
 
-/* «Работы» is full screen on phones, like Shorts: only the tab bar stays. */
+/* «Работы» (like Shorts) and the profile are full screen on phones: only the tab bar stays. */
 @media (max-width: 767px) {
-  .header[data-feed] {
+  .header[data-phone-hidden] {
     display: none;
   }
+}
+
+/* The person's face in place of the profile glyph: glyph-sized, ringed when this is the page. */
+.accountAvatar[data-size] {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+[aria-current="page"] > .accountAvatar {
+  box-shadow: 0 0 0 2px var(--color-link);
 }

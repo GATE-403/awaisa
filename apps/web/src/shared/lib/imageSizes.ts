@@ -1,0 +1,40 @@
+// Pictures hotlinked from an image CDN (the demo photos come from Unsplash) can be asked for at
+// the size they are shown: a 170px card should not decode a 1600px cover on a phone.
+const RESIZABLE_HOSTS = ['images.unsplash.com']
+
+const resize = (url: string, width: number) => {
+  try {
+    const parsed = new URL(url)
+    if (!RESIZABLE_HOSTS.includes(parsed.hostname)) return url
+    const originalWidth = Number(parsed.searchParams.get('w'))
+    const originalHeight = Number(parsed.searchParams.get('h'))
+    parsed.searchParams.set('w', String(width))
+    if (originalWidth && originalHeight) {
+      parsed.searchParams.set('h', String(Math.round((originalHeight / originalWidth) * width)))
+    }
+    return parsed.toString()
+  } catch {
+    // Our own relative /api/media URLs are already resized when uploaded.
+    return url
+  }
+}
+
+/** `src` and a 1x/2x `srcSet` for a picture shown `width` CSS pixels wide. */
+const sizedImage = (url: string, width: number) => {
+  const small = resize(url, width)
+  if (small === url) return { src: url }
+  return { src: small, srcSet: `${small} 1x, ${resize(url, width * 2)} 2x` }
+}
+
+/** A full-width picture: candidates by width so a phone takes ~800px, a desktop 1600px. */
+const fluidImage = (url: string, widths = [640, 960, 1280, 1600]) => {
+  const first = resize(url, widths[0] ?? 640)
+  if (first === url) return { src: url }
+  return {
+    src: resize(url, widths.at(-1) ?? 1600),
+    srcSet: widths.map((width) => `${resize(url, width)} ${width}w`).join(', '),
+    sizes: '100vw',
+  }
+}
+
+export { fluidImage, sizedImage }

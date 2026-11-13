@@ -5,6 +5,7 @@ import { BusinessTile, useNextFree } from '@/entities/business'
 import type { MapPlace } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
 import { useToday } from '@/shared/lib/hooks/useToday'
+import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from '@/views/map/MapPage.module.css'
 import { formatDistance } from '@/views/map/mapUtils'
 
@@ -42,7 +43,13 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
       >
         {place.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: already resized WebP from our API
-          <img src={place.coverUrl} alt='' className={styles.thumb} loading='lazy' />
+          <img
+            {...sizedImage(place.coverUrl, 44)}
+            alt=''
+            className={styles.thumb}
+            loading='lazy'
+            decoding='async'
+          />
         ) : (
           <BusinessTile name={place.name} size='md' />
         )}

@@ -1,6 +1,6 @@
 import { formatPrice } from '@/entities/booking'
-import { getBusiness } from '@/shared/api/serverApi'
-import { pluralize } from '@/shared/lib/plural'
+import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
+import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './ServicesPage.module.css'
 import { ServicesCatalog } from './ui/ServicesCatalog'
@@ -10,7 +10,10 @@ interface ServicesPageProps {
 }
 
 export const ServicesPage = async ({ slug }: ServicesPageProps) => {
-  const { business, catalog } = await getBusiness(slug)
+  const [{ business, catalog }, servicePhotos] = await Promise.all([
+    getBusiness(slug),
+    listServicePhotos(slug),
+  ])
   const minPrice = Math.min(...catalog.services.map((service) => service.price))
 
   return (
@@ -19,14 +22,24 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
         <h1 className={styles.title}>
           Услуги и цены<span className={styles.titleMuted}> в {business.name}</span>
         </h1>
-        <ul className={styles.facts}>
-          <li>{pluralize(catalog.services.length, ['услуга', 'услуги', 'услуг'])}</li>
-          {Number.isFinite(minPrice) && <li>от {formatPrice(minPrice)}</li>}
-          <li>{pluralize(catalog.specialists.length, ['мастер', 'мастера', 'мастеров'])}</li>
-          <li>цена и время известны заранее</li>
-        </ul>
+        {/* The facts that decide, bold numbers in one quiet line — like the place's head. */}
+        <p className={styles.facts}>
+          <span>
+            <strong>{catalog.services.length}</strong>{' '}
+            {pluralWord(catalog.services.length, ['услуга', 'услуги', 'услуг'])}
+          </span>
+          {Number.isFinite(minPrice) && (
+            <span>
+              от <strong>{formatPrice(minPrice)}</strong>
+            </span>
+          )}
+          <span>
+            <strong>{catalog.specialists.length}</strong>{' '}
+            {pluralWord(catalog.specialists.length, ['мастер', 'мастера', 'мастеров'])}
+          </span>
+        </p>
       </Container>
-      <ServicesCatalog business={business} catalog={catalog} />
+      <ServicesCatalog business={business} catalog={catalog} servicePhotos={servicePhotos} />
     </main>
   )
 }

@@ -1,10 +1,10 @@
 import type { Icon } from '@phosphor-icons/react'
 import {
-  CalendarCheck,
-  Images,
-  MagnifyingGlass,
   MapTrifold,
+  PlayCircle,
+  SquaresFour,
   Storefront,
+  UserCircle,
 } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
@@ -14,13 +14,13 @@ type NavItem = {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Каталог', icon: MagnifyingGlass },
+  { href: '/', label: 'Каталог', icon: SquaresFour },
   // Finished work as a vertical feed, each photo one tap from booking it.
-  { href: '/feed', label: 'Работы', icon: Images },
+  { href: '/feed', label: 'Работы', icon: PlayCircle },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/business', label: 'Бизнес', icon: Storefront },
   // Profile and bookings are one page.
-  { href: '/bookings', label: 'Записи', icon: CalendarCheck },
+  { href: '/bookings', label: 'Профиль', icon: UserCircle },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.
@@ -48,7 +48,9 @@ const getBusinessSlug = (pathname: string) => {
 }
 
 // The owner cabinet is a self-contained app: no client tab bar or marketing footer there.
-const isCabinetPath = (pathname: string) => pathname.startsWith('/manage/')
+// The owner's side is its own app: the list of businesses and each cabinet.
+const isCabinetPath = (pathname: string) =>
+  pathname === '/manage' || pathname.startsWith('/manage/')
 
 const isBookingPath = (pathname: string) => /^\/[^/]+\/book$/.test(pathname)
 

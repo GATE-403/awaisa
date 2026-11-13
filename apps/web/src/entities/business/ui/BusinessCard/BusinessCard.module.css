@@ -1,12 +1,17 @@
+/* The picture is the card: name, free time and price sit on a dark scrim at its foot,
+   like App Store "Today" cards. Places without a cover get their own vivid tint instead. */
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  justify-content: flex-end;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
   box-shadow: var(--shadow-sm);
-  color: var(--color-foreground);
+  color: #fff;
   transition:
     box-shadow var(--duration-normal) var(--ease-standard),
     scale var(--duration-normal) var(--ease-standard);
@@ -16,10 +21,14 @@
   .card:hover {
     box-shadow: var(--shadow-md);
   }
+
+  .card:hover .cover {
+    scale: 1.03;
+  }
 }
 
 .card:active {
-  scale: 0.99;
+  scale: 0.98;
 }
 
 .card:focus-visible {
@@ -28,36 +37,49 @@
 }
 
 .media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  aspect-ratio: 4 / 3;
+  padding-top: 22%;
   overflow: hidden;
-  background:
-    radial-gradient(
-      120% 90% at 50% 0%,
-      color-mix(in srgb, var(--tint) 10%, transparent),
-      transparent
-    ),
-    color-mix(in srgb, var(--tint) 8%, var(--color-surface));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tint) 62%, white),
+    color-mix(in srgb, var(--tint) 88%, black)
+  );
+}
+
+/* The scrim: clear at the top, dark under the text. */
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 25% 0 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5) 45%, rgb(0 0 0 / 0.88));
 }
 
 .cover {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: scale var(--duration-slow, 400ms) var(--ease-standard);
 }
 
 .tile {
-  box-shadow: var(--shadow-md);
+  background: rgb(255 255 255 / 0.22);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.4);
+  color: #fff;
 }
 
 .body {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--space-2) var(--space-3) var(--space-3);
+  gap: 1px;
+  padding: var(--space-3);
 }
 
 .eyebrow {
@@ -71,7 +93,7 @@
 
 .title {
   overflow: hidden;
-  font-size: var(--text-sm);
+  font-size: var(--text-body);
   line-height: var(--text-sm-line-height);
   font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
@@ -81,13 +103,12 @@
 .live {
   display: flex;
   flex-direction: column;
-  min-height: calc(2 * var(--text-xs-line-height));
   font-size: var(--text-xs);
   line-height: var(--text-xs-line-height);
 }
 
 .free {
-  color: var(--color-foreground);
+  color: #fff;
   font-weight: var(--font-weight-semibold);
 }
 
@@ -104,15 +125,14 @@
 
 .busy,
 .opening {
-  color: var(--color-muted-foreground);
+  color: rgb(255 255 255 / 0.75);
 }
 
 .footer {
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
-  margin-top: auto;
-  padding-top: var(--space-1);
+  padding-top: 2px;
 }
 
 .price {
@@ -125,8 +145,15 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: var(--color-muted-foreground);
+  color: rgb(255 255 255 / 0.72);
   font-size: var(--text-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Phones: the address would be cut anyway — name, free time and price are enough. */
+@media (max-width: 639px) {
+  .address {
+    display: none;
+  }
 }

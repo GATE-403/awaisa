@@ -5,12 +5,10 @@ import { useStoredBookings } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getMyBookings } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
-import { AgainCard } from './AgainCard'
-import styles from './AgainShelf.module.css'
 
 const MAX_ITEMS = 3
 
-// The masters this client has been to, newest first: one tap books the same service again.
+// The masters this client has been to, newest first, one per place, service and master.
 const pickRecent = (bookings: Booking[], now: number) => {
   const seen = new Set<string>()
   const recent: Booking[] = []
@@ -32,8 +30,8 @@ const pickRecent = (bookings: Booking[], now: number) => {
   return recent
 }
 
-// «Снова к мастеру» on the catalog: for returning clients only — nothing renders for new ones.
-export const AgainShelf = () => {
+/** Recent visits from this device and the account; empty for new clients. */
+export const useRecentVisits = (isEnabled = true) => {
   const { bookings: stored } = useStoredBookings()
   const session = useSession()
   const [account, setAccount] = useState<Booking[]>([])
@@ -45,36 +43,17 @@ export const AgainShelf = () => {
   }, [])
 
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!isSignedIn || !isEnabled) return
     const controller = new AbortController()
     getMyBookings(controller.signal)
       .then(setAccount)
       .catch(() => undefined)
     return () => controller.abort()
-  }, [isSignedIn])
+  }, [isSignedIn, isEnabled])
 
-  if (now === null) return null
+  if (now === null) return []
   const byId = new Map<string, Booking>()
   for (const booking of account) byId.set(booking.id, booking)
   for (const { snapshot } of stored) if (!byId.has(snapshot.id)) byId.set(snapshot.id, snapshot)
-  const items = pickRecent([...byId.values()], now)
-  if (items.length === 0) return null
-
-  return (
-    <section className={styles.section} aria-labelledby='again-title'>
-      <div className={styles.head}>
-        <h2 id='again-title' className={styles.title}>
-          Снова к мастеру
-        </h2>
-        <p className={styles.subtitle}>Туда же и к тому же мастеру — в один тап</p>
-      </div>
-      <ul className={styles.list}>
-        {items.map((booking) => (
-          <li key={booking.id}>
-            <AgainCard booking={booking} />
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
+  return pickRecent([...byId.values()], now)
 }

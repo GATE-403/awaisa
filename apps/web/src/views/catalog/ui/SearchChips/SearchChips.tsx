@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
 import type { BusinessKind, PopularService } from '@/shared/api/types'
+import chip from '@/shared/ui/Chip/Chip.module.css'
 import styles from './SearchChips.module.css'
 
 interface SearchChipsProps {
@@ -18,7 +19,7 @@ export const SearchChips = ({ kind, services }: SearchChipsProps) => {
         <NextLink
           key={service.name}
           href={`/?${new URLSearchParams({ q: service.name, ...(kind ? { kind } : {}) })}`}
-          className={styles.chip}
+          className={chip.chip}
         >
           {service.name}
           <span className={styles.count}>{service.places}</span>

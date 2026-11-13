@@ -113,6 +113,9 @@ type Offer = {
   discountPercent?: number | null
 }
 
+/** A service picked for this client, with why («Пора снова», «Вы любите маникюр»). */
+type Recommendation = Offer & { reason: string }
+
 type PopularService = {
   name: string
   places: number
@@ -252,6 +255,10 @@ type Customer = {
   phone: string
   name: string
   isAdmin: boolean
+  avatarUrl?: string | null
+  /** From `GET /me`: places this account runs (cabinet shortcut) and where it is a master. */
+  businesses?: { slug: string; name: string; role: 'owner' | 'staff' }[]
+  masterOf?: { slug: string; name: string }[]
 }
 
 type OtpChannel = 'telegram' | 'sms'
@@ -753,6 +760,7 @@ export type {
   PromotionKind,
   PublicPromotion,
   ImportReport,
+  Recommendation,
   FeedItem,
   FeedPage,
   WorkPhoto,

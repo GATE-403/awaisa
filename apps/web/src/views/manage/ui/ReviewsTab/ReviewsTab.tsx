@@ -2,8 +2,9 @@
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { PencilSimple, Star } from '@phosphor-icons/react/ssr'
+import { PencilSimple } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
+import { ReviewItem } from '@/entities/review'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getManagedReviews, replyToReview } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
@@ -21,7 +22,7 @@ interface ReviewsTabProps {
   businessName: string
 }
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const _dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
 const REPLY_FORM = 'review-reply'
 
 // What clients said after their visits; a public reply is one tap away.
@@ -90,58 +91,40 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
         />
       )}
       {data && data.count > 0 && (
-        <ul className={forms.list}>
+        // The same thread as on the business page, with the phone and visit under the name and
+        // the reply action in the thread.
+        <ul className={styles.thread}>
           {data.items.map((review) => (
-            <li key={review.id} className={styles.review}>
-              <div className={styles.head}>
-                <span className={styles.stars} role='img' aria-label={`${review.rating} из 5`}>
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <Star
-                      key={value}
-                      weight={value <= review.rating ? 'fill' : 'regular'}
-                      aria-hidden
-                    />
-                  ))}
-                </span>
-                <span className={styles.date}>
-                  {dateFormatter.format(new Date(review.createdAt))}
-                </span>
-              </div>
-              <p className={styles.author}>
-                {review.authorName}
-                <a href={`tel:${review.customerPhone}`} className={styles.phone}>
-                  {formatPhone(review.customerPhone)}
-                </a>
-              </p>
-              <p className={styles.meta}>
-                {review.serviceName} · мастер {review.specialistName}
-              </p>
-              {review.comment && <p className={styles.comment}>{review.comment}</p>}
-              {review.reply ? (
-                <div className={styles.reply}>
-                  <span className={styles.replyHead}>
-                    <span className={styles.replyTitle}>Ваш ответ</span>
-                    <button
-                      type='button'
-                      className={styles.replyEdit}
-                      onClick={() => openReply(review)}
-                    >
-                      <PencilSimple weight='bold' aria-hidden />
-                      Изменить
-                    </button>
-                  </span>
-                  <span className={styles.comment}>{review.reply}</span>
-                </div>
-              ) : (
+            <ReviewItem
+              key={review.id}
+              review={review}
+              businessName={businessName}
+              meta={
+                <>
+                  <a href={`tel:${review.customerPhone}`} className={styles.phone}>
+                    {formatPhone(review.customerPhone)}
+                  </a>
+                  {' · '}
+                  {review.serviceName} · мастер {review.specialistName}
+                </>
+              }
+              replyAction={
                 <button
                   type='button'
-                  className={styles.replyButton}
+                  className={review.reply ? styles.replyEdit : styles.replyButton}
                   onClick={() => openReply(review)}
                 >
-                  Ответить
+                  {review.reply ? (
+                    <>
+                      <PencilSimple weight='bold' aria-hidden />
+                      Изменить
+                    </>
+                  ) : (
+                    'Ответить'
+                  )}
                 </button>
-              )}
-            </li>
+              }
+            />
           ))}
         </ul>
       )}

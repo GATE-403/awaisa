@@ -8,22 +8,23 @@ import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import styles from './CabinetBar.module.css'
 
 interface CabinetBarProps {
-  slug: string
+  /** Inside a cabinet; without it the bar is the list's («‹ Профиль», no page link). */
+  slug?: string
   title: string | null
-  isPublished: boolean
+  isPublished?: boolean
 }
 
 // The cabinet's own window toolbar (macOS 26): back to the list, the business once scrolled, tools.
-export const CabinetBar = ({ slug, title, isPublished }: CabinetBarProps) => {
+export const CabinetBar = ({ slug, title, isPublished = true }: CabinetBarProps) => {
   const isScrolled = useIsScrolled()
   const { customer } = useSession()
 
   return (
     <div className={styles.bar} data-scrolled={isScrolled || undefined}>
       <div className={styles.inner}>
-        <NextLink href='/manage' className={styles.back}>
+        <NextLink href={slug ? '/manage' : '/bookings'} className={styles.back}>
           <CaretLeft weight='bold' aria-hidden />
-          Все бизнесы
+          {slug ? 'Все бизнесы' : 'Профиль'}
         </NextLink>
         <p className={styles.title} aria-hidden={!isScrolled}>
           {title}
@@ -31,15 +32,17 @@ export const CabinetBar = ({ slug, title, isPublished }: CabinetBarProps) => {
         </p>
         <div className={styles.tools}>
           <span className={styles.group}>
-            <NextLink
-              href={`/${slug}`}
-              target='_blank'
-              className={styles.icon}
-              aria-label='Открыть страницу бизнеса'
-              title='Открыть страницу бизнеса'
-            >
-              <ArrowSquareOut aria-hidden />
-            </NextLink>
+            {slug && (
+              <NextLink
+                href={`/${slug}`}
+                target='_blank'
+                className={styles.icon}
+                aria-label='Открыть страницу бизнеса'
+                title='Открыть страницу бизнеса'
+              >
+                <ArrowSquareOut aria-hidden />
+              </NextLink>
+            )}
             <ThemeToggle />
             <NextLink
               href='/bookings'

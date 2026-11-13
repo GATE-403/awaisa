@@ -18,7 +18,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
-import { pluralize } from '@/shared/lib/plural'
+import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
@@ -96,14 +96,30 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     0,
   )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
-  const summary = [
-    dayLabel,
-    !dayHours && 'выходной',
-    confirmed.length === 0 ? 'записей нет' : `записей: ${confirmed.length}`,
-    canSeeMoney && revenue > 0 && formatPrice(revenue),
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  // The day as a title, its numbers in one line under it with the figures in bold.
+  const summary = (
+    <>
+      <span className={styles.dayTitle}>{dayLabel}</span>
+      <span className={styles.dayStats}>
+        {!dayHours ? (
+          'Выходной'
+        ) : confirmed.length === 0 ? (
+          'Записей нет'
+        ) : (
+          <>
+            <strong>{confirmed.length}</strong>{' '}
+            {pluralWord(confirmed.length, ['запись', 'записи', 'записей'])}
+          </>
+        )}
+        {canSeeMoney && revenue > 0 && (
+          <>
+            {' · '}
+            <strong>{formatPrice(revenue)}</strong>
+          </>
+        )}
+      </span>
+    </>
+  )
   const hasMasters = (schedule?.specialists.length ?? 0) > 0
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
@@ -211,7 +227,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         title='Расписание'
         description={
           <>
-            {schedule ? summary : dayLabel}
+            {schedule ? summary : <span className={styles.dayTitle}>{dayLabel}</span>}
             {/* Day states read as part of the hint, not as more buttons beside the actions.
                 Here, not above the calendar: they load late and must not shift the grid. */}
             {unclosed.total > openHere && (
@@ -247,9 +263,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               )}
               {!isPast && (
                 <>
-                  <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+                  {/* A rarer action: a glyph with a name for screen readers and a tooltip. */}
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    onClick={() => setIsClosingTime(true)}
+                    aria-label='Закрыть время'
+                    title='Закрыть время: перерыв, отгул'
+                    className={styles.iconAction}
+                  >
                     <CalendarX weight='bold' aria-hidden />
-                    Закрыть время
                   </Button>
                   <Button
                     size='sm'
@@ -279,7 +302,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       <div className={styles.panel}>
         <DayStrip days={days} value={date} onChange={setSelectedDay} marks={marks} />
         {schedule && hasMasters && today && date === today.dayKey && (
-          <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} />
+          <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
         )}
         {!schedule && !error && <Skeleton className={styles.skeleton} />}
 

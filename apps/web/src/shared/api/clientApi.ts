@@ -39,12 +39,14 @@ import type {
   MovedBooking,
   MyLoyalty,
   NextFree,
+  Offer,
   OtpRequest,
   OutcomeInput,
   PriceQuote,
   Promotion,
   PromotionInput,
   RecentBooking,
+  Recommendation,
   Review,
   ReviewAccess,
   ReviewSummary,
@@ -83,6 +85,33 @@ const request = async <Result>(path: string, init?: RequestInit): Promise<Result
 
   return response.json()
 }
+
+// A page of the catalog's services feed (endless scroll); same order as the server's first page.
+const listOffersPage = (
+  query: {
+    kind?: string
+    q?: string
+    offset: number
+    limit: number
+    sort: 'popular' | 'price'
+  },
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams({
+    offset: String(query.offset),
+    limit: String(query.limit),
+    sort: query.sort,
+  })
+  if (query.kind) params.set('kind', query.kind)
+  if (query.q) params.set('q', query.q)
+  return request<Offer[]>(`/businesses/offers?${params}`, { signal })
+}
+
+// Favourite services by id (they live on the device), in the catalog's card shape.
+const listOffersByIds = (ids: string[], signal?: AbortSignal) =>
+  request<Offer[]>(`/businesses/offers?ids=${encodeURIComponent(ids.join(','))}&limit=60`, {
+    signal,
+  })
 
 const post = <Result>(path: string, body?: unknown) =>
   request<Result>(path, {
@@ -396,6 +425,24 @@ const getFeed = (
   return request<FeedPage>(`/feed?${params}`, { signal })
 }
 
+const getRecommendations = (
+  query: {
+    interests?: string
+    gender?: string
+    budget?: number
+    visits?: string
+    lat?: number
+    lng?: number
+  },
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  return request<Recommendation[]>(`/recommendations?${params}`, { signal })
+}
+
 const reportFeedItem = (id: string) => post<void>(`/feed/${id}/report`, {})
 
 const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
@@ -527,6 +574,10 @@ const receiveStock = (slug: string, id: string, quantity: number, unitCost?: num
 const adjustStock = (slug: string, id: string, quantity: number) =>
   post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
 
+const uploadAvatar = (file: File) => upload<{ avatarUrl: string }>('/me/avatar', file)
+
+const removeAvatar = () => send<void>('DELETE', '/me/avatar')
+
 const importClients = (slug: string, clients: Record<string, string>[]) =>
   post<ImportReport>(`${manage(slug)}/import/clients`, { clients })
 
@@ -575,6 +626,8 @@ const removeTeamMember = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/members/${id}`)
 
 export {
+  listOffersByIds,
+  listOffersPage,
   addTeamMember,
   getTeam,
   removeTeamMember,
@@ -590,11 +643,14 @@ export {
   saveSubscriptionPlan,
   sellSubscription,
   importClients,
+  uploadAvatar,
+  removeAvatar,
   getWorkPhotos,
   updateWorkPhoto,
   addVisitPhoto,
   getFeed,
   reportFeedItem,
+  getRecommendations,
   importBookings,
   getStock,
   saveStockItem,

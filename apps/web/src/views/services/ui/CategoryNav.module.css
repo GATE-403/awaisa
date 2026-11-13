@@ -19,32 +19,3 @@
 .list::-webkit-scrollbar {
   display: none;
 }
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  height: 36px;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-full);
-  background: var(--color-subtle);
-  color: var(--color-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-  font-weight: var(--font-weight-medium);
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
-}
-
-.chip[aria-current="true"] {
-  background: var(--color-foreground);
-  color: var(--color-background);
-  font-weight: var(--font-weight-semibold);
-}
-
-@media (hover: hover) {
-  .chip:not([aria-current="true"]):hover {
-    background: var(--color-subtle-hover);
-  }
-}

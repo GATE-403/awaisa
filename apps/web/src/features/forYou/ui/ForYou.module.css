@@ -1,0 +1,305 @@
+/* One quiet row inviting the three questions (nothing known about the client yet). */
+.prompt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prompt:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.promptIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-link);
+}
+
+.promptText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.promptTitle {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.promptMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  /* Every shelf head is one 44pt line, with or without a link on the right, so titles sit the
+     same distance above their cards. */
+  min-height: var(--control-height-md);
+}
+
+.title {
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  letter-spacing: var(--tracking-tight);
+}
+
+.tune {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.tune svg {
+  width: 15px;
+  height: 15px;
+}
+
+.shelf[data-inline] .track {
+  margin: 0;
+  padding: 0 0 var(--space-1);
+  scroll-padding-inline: 0;
+}
+
+.track {
+  display: flex;
+  gap: 6px;
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: 0 var(--page-gutter) var(--space-1);
+  overflow-x: auto;
+  scroll-padding-inline: var(--page-gutter);
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  --edge-fade: 48px;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.track li {
+  scroll-snap-align: start;
+}
+
+/* The picture with why it is here on top and what and how much at its foot. */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 144px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    160deg,
+    var(--color-primary),
+    color-mix(in srgb, var(--color-primary) 60%, black)
+  );
+  color: #fff;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 35% 0 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.8));
+}
+
+.card:active {
+  scale: 0.98;
+}
+
+.card:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reason {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  left: var(--space-2);
+  width: fit-content;
+  max-width: calc(100% - var(--space-4));
+  overflow: hidden;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.55);
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2);
+}
+
+.name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.meta {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta strong {
+  color: #fff;
+}
+
+@media (min-width: 768px) {
+  .card {
+    width: 172px;
+  }
+}
+
+/* The questionnaire's interests: separate tiles two a row, like picking topics — a chosen one
+   is tinted in the accent with a check, so no hairlines to line up. */
+.interestGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.interestCell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-3) 0 var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-sheet-surface);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  font-size: var(--text-body);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.interestCell:active {
+  scale: 0.97;
+}
+
+/* An odd last choice takes the whole row. */
+.interestCell:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.interestCell:has(input:checked) {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-sheet-surface));
+  box-shadow: inset 0 0 0 1.5px var(--color-primary);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.interestCell input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.interestCell input:checked ~ svg {
+  opacity: 1;
+}
+
+.interestCell:has(input:focus-visible) {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .interestCell:not(:has(input:checked)):hover {
+    background: color-mix(in srgb, var(--color-sheet-surface) 94%, var(--color-foreground));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interestCell {
+    transition: none;
+  }
+}
+
+/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
+   repainted every frame, so touch screens scroll them plain. */
+@media (hover: hover) and (pointer: fine) {
+  .track {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
+}
+
+/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+   short swipe feel stuck on phones. */
+@media (hover: none) {
+  .track {
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+  }
+}

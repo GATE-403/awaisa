@@ -2,14 +2,22 @@
 
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
-import { useState } from 'react'
+import { Fragment, type ReactNode, useState } from 'react'
 import { BusinessCard } from '@/entities/business'
-import type { BusinessCard as BusinessCardData, Offer } from '@/shared/api/types'
+import type { BusinessCard as BusinessCardData, BusinessKind, Offer } from '@/shared/api/types'
+import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { pluralize } from '@/shared/lib/plural'
+import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
+import { useOfferPages } from '../../model/useOfferPages'
 import { FEED_SORTS, type FeedSort, OffersFeed } from '../OffersFeed/OffersFeed'
 import styles from './CatalogResults.module.css'
 
 type ResultsView = 'places' | 'services'
+
+/** Two rows on phones; CSS moves the shelf below two rows on wider grids too. */
+const INTERLUDE_AFTER = 4
+/** Places are drawn a screenful at a time as the list scrolls. */
+const PLACES_STEP = 24
 
 interface CatalogResultsProps {
   title: string
@@ -18,6 +26,10 @@ interface CatalogResultsProps {
   initialView: ResultsView
   initialSort: FeedSort
   canReset: boolean
+  /** A shelf set into the grid after the first rows, like Shorts in a video feed. */
+  interlude?: ReactNode
+  kind?: BusinessKind
+  query?: string
 }
 
 // First choose where (places), then what (services) — one switch instead of two long sections.
@@ -28,12 +40,34 @@ export const CatalogResults = ({
   initialView,
   initialSort,
   canReset,
+  interlude,
+  kind,
+  query,
 }: CatalogResultsProps) => {
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
+  const [placesShown, setPlacesShown] = useState(PLACES_STEP)
+  // The services feed pages from the server; «Ближе по времени» re-sorts what is loaded.
+  const feed = useOfferPages({
+    initial: offers,
+    initialSort: initialSort === 'price' ? 'price' : 'popular',
+    sort: sort === 'price' ? 'price' : 'popular',
+    kind,
+    query,
+  })
+  const placesEnd = useEndReached(
+    () => setPlacesShown((count) => count + PLACES_STEP),
+    view === 'places' && placesShown < businesses.length,
+  )
+  const shownPlaces = businesses.slice(0, placesShown)
   const views = [
     { value: 'places' as const, label: 'Места', count: businesses.length },
-    { value: 'services' as const, label: 'Услуги', count: offers.length },
+    // While more pages wait, the count says «24+» rather than a total it does not know yet.
+    {
+      value: 'services' as const,
+      label: 'Услуги',
+      count: feed.hasMore ? `${feed.offers.length}+` : feed.offers.length,
+    },
   ]
 
   return (
@@ -51,21 +85,16 @@ export const CatalogResults = ({
       </div>
       <div className={styles.toolbar}>
         {/* Two big text tabs, like «Shop by» on apple.com: first where, then what. */}
-        <div className={styles.views} role='tablist' aria-label='Что показать'>
-          {views.map((item) => (
-            <button
-              key={item.value}
-              type='button'
-              role='tab'
-              aria-selected={view === item.value}
-              className={styles.view}
-              onClick={() => setView(item.value)}
-            >
-              {item.label}
-              <span className={styles.viewCount}>{item.count}</span>
-            </button>
-          ))}
-        </div>
+        <TextTabs
+          label='Что показать'
+          size='lg'
+          items={views.map((item) => ({
+            label: item.label,
+            count: item.count,
+            isActive: view === item.value,
+            onSelect: () => setView(item.value),
+          }))}
+        />
         {view === 'services' && offers.length > 1 && (
           <Select
             variant='plain'
@@ -86,19 +115,37 @@ export const CatalogResults = ({
             className={styles.places}
             aria-label={pluralize(businesses.length, ['место', 'места', 'мест'])}
           >
-            {businesses.map((business) => (
-              <li key={business.slug}>
-                <BusinessCard business={business} />
-              </li>
+            {shownPlaces.map((business, index) => (
+              <Fragment key={business.slug}>
+                {index === INTERLUDE_AFTER && interlude && (
+                  <li className={styles.interlude}>{interlude}</li>
+                )}
+                <li>
+                  <BusinessCard business={business} />
+                </li>
+              </Fragment>
             ))}
+            {businesses.length <= INTERLUDE_AFTER && interlude && (
+              <li className={styles.interlude}>{interlude}</li>
+            )}
           </ul>
         ))}
+      {view === 'places' && placesShown < businesses.length && (
+        <div ref={placesEnd} className={styles.sentinel} aria-hidden />
+      )}
 
       {view === 'services' &&
-        (offers.length === 0 ? (
+        (feed.offers.length === 0 ? (
           <p className={styles.empty}>Услуг не нашли — попробуйте другое слово.</p>
         ) : (
-          <OffersFeed offers={offers} sort={sort} />
+          <OffersFeed
+            offers={feed.offers}
+            sort={sort}
+            interlude={interlude}
+            hasMore={feed.hasMore}
+            isLoading={feed.isLoading}
+            onEndReached={feed.loadMore}
+          />
         ))}
     </section>
   )

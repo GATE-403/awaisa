@@ -13,6 +13,7 @@ import {
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import { Cached } from '../cache/cached.decorator.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
   type CreateReviewInput,
@@ -63,6 +64,7 @@ export class ReviewsController {
     )
   }
 
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/reviews')
   listPublic(
     @Param('slug') slug: string,

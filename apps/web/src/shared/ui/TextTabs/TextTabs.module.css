@@ -55,3 +55,32 @@
     color: var(--color-foreground);
   }
 }
+
+/* The same tabs as buttons (local view state instead of a URL). */
+button.tab {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+button.tab:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+.count {
+  margin-left: 4px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+/* The page's main switch: body size, semibold labels. */
+.tabs[data-size="lg"] .tab {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}

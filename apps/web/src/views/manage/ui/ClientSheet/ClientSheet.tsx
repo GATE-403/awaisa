@@ -1,11 +1,11 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatCircle, Phone, Star, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { useEffect, useId, useState } from 'react'
 import { formatDayLong, formatPrice } from '@/entities/booking'
+import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClient, updateClient } from '@/shared/api/clientApi'
 import type { ClientCard } from '@/shared/api/types'
@@ -113,7 +113,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps)
       {card && (
         <>
           <div className={styles.identity}>
-            <Avatar name={card.name || card.phone.slice(-2)} size='xl' />
+            <PersonAvatar name={card.name || card.phone.slice(-2)} size='xl' />
             <p className={styles.name}>{card.name || 'Без имени'}</p>
             <p className={styles.phone}>{formatPhone(card.phone)}</p>
             {card.stats.noShows > 0 && (

@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
-import { bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
+import { bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
 
 // 16×10 px PNG; the API re-encodes it as WebP.
 const TINY_PNG =
@@ -103,7 +103,7 @@ test.describe('Platform: a new business goes live', () => {
     const clientPhone = randomClientPhone()
     await steps.contacts.getByLabel('Имя').fill('E2E Клиент')
     await steps.contacts.getByLabel('Телефон').fill(clientPhone)
-    await primaryAction(clientPage).click()
+    await submitBooking(clientPage)
     await expect(clientPage.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     await expect(clientPage.getByRole('article', { name: /^Запись / })).toContainText(name)
     const booked = await clientPage.evaluate(() => {
@@ -121,10 +121,28 @@ test.describe('Platform: a new business goes live', () => {
       page.getByRole('button', { name: new RegExp(`^${time}.*${phonePattern}`) }),
     ).toBeVisible()
 
+    // A walk-in on the next day: late in the afternoon today has no room left to drag it an hour.
+    const nextDay = new Date(`${booked}T00:00:00Z`)
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1)
+    await page.locator(`[data-day="${nextDay.toISOString().slice(0, 10)}"]`).click()
     // A walk-in: the owner taps an empty slot and books the client in.
-    await page
-      .getByRole('button', { name: 'Новая запись к мастеру Азамат' })
-      .click({ position: { x: 24, y: 320 } })
+    // Below the master's last booking, wherever the day has it: a fixed spot meets the client's
+    // booking after noon. The day scrolls in its own box, so bring that spot into view first.
+    const column = page.getByRole('button', { name: 'Новая запись к мастеру Азамат' })
+    const freeY = await column.evaluate((element) => {
+      const box = element.getBoundingClientRect()
+      const bottoms = [
+        ...(element.parentElement?.querySelectorAll('[class*="booking"]') ?? []),
+      ].map((block) => block.getBoundingClientRect().bottom - box.top)
+      const y = Math.min(box.height - 30, Math.max(60, ...bottoms) + 40)
+      const scroller = element.closest<HTMLElement>('[class*="scroller"]')
+      if (scroller) {
+        const view = scroller.getBoundingClientRect()
+        scroller.scrollTop += box.top + y - view.top - scroller.clientHeight / 2
+      }
+      return y
+    })
+    await column.click({ position: { x: 24, y: freeY } })
     const sheet = page.getByRole('dialog', { name: 'Новая запись' })
     await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
     await sheet.getByLabel('Имя').fill('E2E Гость')
@@ -141,11 +159,15 @@ test.describe('Platform: a new business goes live', () => {
         element.scrollIntoView({ block: 'center', behavior: 'instant' }),
       )
       const box = await walkIn.boundingBox()
+      // An hour later, or an hour earlier when the walk-in sits at the end of the day (the day
+      // shown is tomorrow, so earlier is never in the past). 1.6 px a minute: an hour is 96px.
+      const startHour = Number(((await walkIn.getAttribute('aria-label')) ?? '').slice(0, 2))
+      const shift = startHour >= 18 ? -96 : 96
       if (box) {
         await page.mouse.move(box.x + box.width / 2, box.y + 10)
         await page.mouse.down()
-        await page.mouse.move(box.x + box.width / 2, box.y + 60, { steps: 4 })
-        await page.mouse.move(box.x + box.width / 2, box.y + 106, { steps: 4 })
+        await page.mouse.move(box.x + box.width / 2, box.y + 10 + shift / 2, { steps: 4 })
+        await page.mouse.move(box.x + box.width / 2, box.y + 10 + shift, { steps: 4 })
         await page.mouse.up()
         await expect(page.getByText(/Перенесено на/)).toBeVisible()
         await page.getByRole('button', { name: 'Вернуть' }).click()

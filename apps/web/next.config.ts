@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   experimental: {
     agentFeedback: true,
+    // Icons and the UI kit are imported per name: only those modules are compiled and shipped
+    // (faster dev starts on a phone, smaller bundles).
+    optimizePackageImports: ['@phosphor-icons/react', '@base-ui/react'],
   },
   cacheComponents: true,
   partialPrefetching: true,

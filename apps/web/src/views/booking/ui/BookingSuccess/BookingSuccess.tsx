@@ -1,12 +1,13 @@
 'use client'
 
-import { Button, ButtonLink } from '@awaisa/ui/Button'
+import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { CalendarPlus, MapPin } from '@phosphor-icons/react/ssr'
+import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useState } from 'react'
-import { downloadCalendarFile, Ticket } from '@/entities/booking'
+import { downloadCalendarFile, formatDayLong, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
+import { ForYouShelf } from '@/features/forYou'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import styles from './BookingSuccess.module.css'
@@ -30,8 +31,15 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
 
   return (
     <div className={styles.success}>
+      {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
+          matters — when. */}
+      <span className={styles.check} aria-hidden>
+        <Check weight='bold' />
+      </span>
       <h1 className={styles.title}>Вы записаны</h1>
-      <p className={styles.lead}>Нажмите на талон, чтобы увидеть всё о визите.</p>
+      <p className={styles.lead}>
+        {formatDayLong(booking.date)} в {booking.time} · {booking.business.name}
+      </p>
       {/* The ticket itself opens the full one: details, place, download. */}
       <button
         type='button'
@@ -41,23 +49,26 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
       >
         <Ticket booking={booking} />
       </button>
-      <div className={styles.chips}>
-        <Button size='sm' variant='secondary' onClick={handleAddToCalendar}>
-          <CalendarPlus weight='bold' className={styles.chipIcon} aria-hidden />В календарь
-        </Button>
-        {booking.business.mapUrl && (
-          <ButtonLink
-            size='sm'
-            variant='secondary'
-            render={
-              // biome-ignore lint/a11y/useAnchorContent: content comes from Button children via render
-              <a href={booking.business.mapUrl} target='_blank' rel='noreferrer' />
-            }
+      {/* Next steps as three equal tiles, icon over word, like a share sheet's row. */}
+      <div className={styles.tiles}>
+        <button type='button' className={styles.tile} onClick={handleAddToCalendar}>
+          <CalendarPlus weight='bold' aria-hidden />В календарь
+        </button>
+        {booking.business.mapUrl ? (
+          <a
+            href={booking.business.mapUrl}
+            target='_blank'
+            rel='noreferrer'
+            className={styles.tile}
           >
-            <MapPin weight='bold' className={styles.chipIcon} aria-hidden />
+            <MapPin weight='bold' aria-hidden />
             Маршрут
-          </ButtonLink>
-        )}
+          </a>
+        ) : null}
+        <button type='button' className={styles.tile} onClick={() => setIsTicketOpen(true)}>
+          <TicketIcon weight='bold' aria-hidden />
+          Талон
+        </button>
       </div>
       <div className={styles.primary}>
         <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
@@ -74,6 +85,19 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           , чтобы видеть записи на любом устройстве.
         </p>
       )}
+      {/* What to look at next, chosen from this visit and the client's answers — a reason to
+          keep browsing rather than a push back to the catalog. */}
+      <div className={styles.next}>
+        <ForYouShelf
+          title='Вам может понравиться'
+          seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
+          excludeServiceId={booking.serviceId}
+          isInline
+        />
+        <NextLink href='/' className={styles.catalogLink}>
+          Все места и услуги ›
+        </NextLink>
+      </div>
       {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}
     </div>
   )

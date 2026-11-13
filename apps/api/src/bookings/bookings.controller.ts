@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common'
 import { Throttle } from '@nestjs/throttler'
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
+import { Cached } from '../cache/cached.decorator.js'
 import { validateEnv } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
@@ -45,11 +46,13 @@ const parseToken = (value: string | undefined) => {
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
+  @Cached({ ttl: 15, tags: ['availability'] })
   @Get('availability')
   getAvailability(@Query({ schema: availabilityQuerySchema }) query: AvailabilityQuery) {
     return this.bookingsService.getAvailability(query)
   }
 
+  @Cached({ ttl: 20, tags: ['availability'], maxAge: 10 })
   @Get('next-free')
   getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery) {
     return this.bookingsService.findNextFree(query.slugs)

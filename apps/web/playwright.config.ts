@@ -43,6 +43,8 @@ export default defineConfig({
             BOOKING_RATE_LIMIT_PER_MINUTE: '100',
             AUTH_RATE_LIMIT_PER_MINUTE: '1000',
             SMS_DRIVER: 'console',
+            // The cache under test is the real one: Redis when it runs (pnpm db:up), else memory.
+            REDIS_URL: process.env.E2E_REDIS_URL ?? 'redis://localhost:6379',
             OTP_TEST_CODE: '111111',
             ADMIN_PHONES: '+996700000001,+996700000002',
             // The owners' bot without a token: messages are logged, the webhook is driven by tests.

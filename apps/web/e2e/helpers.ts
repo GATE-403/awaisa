@@ -17,7 +17,16 @@ const bookingSteps = (page: Page) => ({
 })
 
 const primaryAction = (page: Page) =>
-  page.getByRole('button', { name: /^(Далее|Записаться|Записываем…)$/ }).filter({ visible: true })
+  page
+    .getByRole('button', { name: /^(Далее|Проверить запись|Записаться|Записываем…)$/ })
+    .filter({ visible: true })
+
+// Everything filled: the first press opens «Проверьте запись», the second books.
+const submitBooking = async (page: Page) => {
+  await primaryAction(page).click()
+  await page.getByRole('heading', { name: 'Проверьте запись' }).waitFor()
+  await page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).click()
+}
 
 const pickFirstFreeSlot = async (page: Page) => {
   // A link with a time (e.g. «Ближайшее окно») already chose it: that is the slot.
@@ -103,4 +112,5 @@ export {
   pickFirstFreeSlot,
   primaryAction,
   readStoredBookings,
+  submitBooking,
 }

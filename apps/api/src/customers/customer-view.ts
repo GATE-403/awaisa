@@ -5,6 +5,7 @@ type CustomerView = {
   phone: string
   name: string
   isAdmin: boolean
+  avatarUrl: string | null
 }
 
 const toCustomerView = (customer: Customer, adminPhones: string[]): CustomerView => ({
@@ -12,6 +13,7 @@ const toCustomerView = (customer: Customer, adminPhones: string[]): CustomerView
   phone: customer.phone,
   name: customer.name,
   isAdmin: adminPhones.includes(customer.phone),
+  avatarUrl: customer.avatarUrl ?? null,
 })
 
 export type { CustomerView }

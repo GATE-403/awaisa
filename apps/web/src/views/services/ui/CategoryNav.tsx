@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
+import chip from '@/shared/ui/Chip/Chip.module.css'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './CategoryNav.module.css'
 
@@ -55,7 +56,7 @@ export const CategoryNav = ({ items }: CategoryNavProps) => {
             href={`#${item.id}`}
             data-category-link={item.id}
             aria-current={item.id === activeId ? 'true' : undefined}
-            className={styles.chip}
+            className={chip.chip}
             onClick={() => setActiveId(item.id)}
           >
             {item.name}
