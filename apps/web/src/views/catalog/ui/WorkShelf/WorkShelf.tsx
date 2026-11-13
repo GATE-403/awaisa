@@ -1,7 +1,8 @@
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { CaretRight, Play } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { formatPrice } from '@/entities/booking'
 import type { BusinessKind, FeedItem } from '@/shared/api/types'
+import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from './WorkShelf.module.css'
 
 interface WorkShelfProps {
@@ -38,12 +39,25 @@ export const WorkShelf = ({ items, kind }: WorkShelfProps) => {
           <li key={item.id}>
             <NextLink href={feedHref(item.id)} className={styles.card}>
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-              <img src={item.url} alt='' className={styles.image} loading='lazy' decoding='async' />
+              <img
+                {...sizedImage(item.url, 160)}
+                alt=''
+                className={styles.image}
+                loading='lazy'
+                decoding='async'
+              />
+              <span className={styles.play} aria-hidden>
+                <Play weight='fill' />
+              </span>
               <span className={styles.caption}>
                 <span className={styles.name}>{item.service?.name ?? item.business.name}</span>
-                {item.service && (
-                  <span className={styles.meta}>{formatPrice(item.service.price)}</span>
-                )}
+                <span className={styles.placeName}>
+                  {item.service ? (
+                    <span className={styles.price}>{formatPrice(item.service.price)}</span>
+                  ) : (
+                    item.business.name
+                  )}
+                </span>
               </span>
             </NextLink>
           </li>

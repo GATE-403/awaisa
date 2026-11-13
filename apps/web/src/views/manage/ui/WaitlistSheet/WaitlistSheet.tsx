@@ -1,8 +1,8 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Button } from '@awaisa/ui/Button'
 import { Phone, X } from '@phosphor-icons/react/ssr'
+import { PersonAvatar } from '@/entities/business'
 import type { ManagedWaitlistEntry } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -37,7 +37,7 @@ export const WaitlistSheet = ({
     <ul className={styles.list}>
       {entries.map((entry) => (
         <li key={entry.id} className={styles.row}>
-          <Avatar name={entry.customerName} size='md' />
+          <PersonAvatar name={entry.customerName} size='md' />
           <div className={styles.text}>
             <p className={styles.name}>{entry.customerName}</p>
             <p className={styles.meta}>

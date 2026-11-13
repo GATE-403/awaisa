@@ -1,8 +1,7 @@
-import { Avatar } from '@awaisa/ui/Avatar'
 import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
 import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
-import { addMinutes } from '@/entities/business'
+import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -74,7 +73,7 @@ export const BookingDetailsDialog = ({
       </div>
 
       <section className={styles.client} aria-label='Клиент'>
-        <Avatar name={booking.customerName} size='lg' />
+        <PersonAvatar name={booking.customerName} size='lg' />
         <div className={styles.clientText}>
           <p className={styles.clientName}>{booking.customerName}</p>
           <p className={styles.clientPhone}>{formatPhone(booking.customerPhone)}</p>

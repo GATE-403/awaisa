@@ -1,16 +1,13 @@
-/* App-icon look: a rounded square with a vivid gradient, a top highlight and a soft drop shadow. */
+/* A see-through tinted circle (logos and faces are round): the place's colour as a wash and its initials in that colour,
+   quiet beside text and photos (like tinted icons in iOS 18). */
 .tile {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--tint) 78%, var(--color-primary-foreground)),
-    color-mix(in srgb, var(--tint) 82%, var(--color-foreground))
-  );
-  box-shadow: var(--shadow-bevel), var(--shadow-xs);
-  color: var(--color-primary-foreground);
+  background: color-mix(in srgb, var(--tint) 16%, transparent);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 35%, transparent);
+  color: color-mix(in srgb, var(--tint) 45%, var(--color-foreground));
   font-family: var(--font-display);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.01em;
@@ -19,27 +16,27 @@
 .tile[data-size="xs"] {
   width: 20px;
   height: 20px;
-  border-radius: 6px;
+  border-radius: var(--radius-full);
   font-size: 9px;
 }
 
 .tile[data-size="sm"] {
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: var(--radius-full);
   font-size: var(--text-xs);
 }
 
 .tile[data-size="md"] {
   width: 44px;
   height: 44px;
-  border-radius: 11px;
+  border-radius: var(--radius-full);
   font-size: var(--text-sm);
 }
 
 .tile[data-size="lg"] {
   width: 64px;
   height: 64px;
-  border-radius: 15px;
+  border-radius: var(--radius-full);
   font-size: var(--text-lg);
 }

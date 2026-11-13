@@ -1,7 +1,7 @@
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Button } from '@awaisa/ui/Button'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
+import { PersonAvatar } from '@/entities/business'
 import {
   createSpecialist,
   removeSpecialistPhoto,
@@ -56,7 +56,7 @@ export const MastersTab = ({ slug, catalog, branches, businessHours, run }: Mast
           {catalog.specialists.map((master) => (
             <li key={master.id}>
               <button type='button' className={styles.masterRow} onClick={() => setEditing(master)}>
-                <Avatar name={master.name} src={master.photoUrl ?? undefined} />
+                <PersonAvatar name={master.name} src={master.photoUrl ?? undefined} />
                 <span className={styles.rowBody}>
                   <span className={styles.rowTitle}>
                     {master.name}

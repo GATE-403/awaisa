@@ -1,89 +1,239 @@
 .placeholder {
-  height: 76px;
-  border-radius: var(--radius-lg);
+  height: 220px;
+  border-radius: var(--radius-xl);
   background: var(--color-fill);
 }
 
-.srOnly {
+/* Apple Account: the face in the middle, name and number under it, then an inset group. */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.faceButton {
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+}
+
+.faceButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.face {
+  position: relative;
+  display: inline-flex;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-full);
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.face[data-busy] {
+  opacity: 0.5;
+}
+
+/* A small camera badge says the photo can be changed, like the edit badge on a contact. */
+.camera {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-link);
+}
+
+.camera svg {
+  width: 15px;
+  height: 15px;
+}
+
+.name {
+  max-width: 100%;
   overflow: hidden;
-  clip-path: inset(50%);
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Settings' Apple ID row: avatar, name, a quiet summary, chevron. */
+.handle {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+.stats {
+  margin-top: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.stats strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  color: var(--color-tertiary-foreground);
+}
+
+.header > a {
+  margin-top: var(--space-3);
+}
+
+/* Settings-style inset group: glyph tile, label, value, chevron; hairlines past the glyph. */
+.list {
+  width: 100%;
+  margin-top: var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+}
+
+.list li + li .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-4) + 32px + var(--space-3));
+  height: 0.5px;
+  background: var(--color-border);
+}
+
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  padding: var(--space-3) var(--space-4);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
   border: none;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  background: none;
   color: var(--color-foreground);
   font: inherit;
+  font-size: var(--text-body);
   text-align: left;
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-.row:active {
-  scale: 0.99;
+.row:hover {
+  background: var(--color-fill);
 }
 
-@media (hover: hover) {
-  .row:hover {
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-foreground));
-  }
+.row:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
 }
 
-.text {
-  display: flex;
+.glyph {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--color-primary-foreground);
+}
+
+.glyph svg {
+  width: 18px;
+  height: 18px;
+}
+
+.glyph[data-tone="blue"] {
+  background: var(--color-primary);
+}
+
+.glyph[data-tone="green"] {
+  background: var(--color-success);
+}
+
+.glyph[data-tone="gray"] {
+  background: var(--color-muted-foreground);
+}
+
+.rowLabel {
+  flex-shrink: 0;
+}
+
+.rowValue {
   flex: 1;
-  flex-direction: column;
-  gap: 2px;
   min-width: 0;
-}
-
-.name {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-}
-
-.title {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  line-height: var(--text-xl-line-height);
-  font-weight: var(--font-weight-bold);
-}
-
-.meta {
+  overflow: hidden;
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chevron {
-  width: 14px;
-  height: 14px;
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
   color: var(--color-tertiary-foreground);
 }
 
-.guest {
+/* Work shortcuts under the name: one row of capsules. */
+.shortcuts {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3) var(--space-4);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
-.guest .text {
-  min-width: 220px;
+.shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.shortcut:active {
+  scale: 0.97;
+}
+
+.shortcutIcon {
+  width: 22px;
+  height: 22px;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.shortcutValue {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.shortcutChevron {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
 }

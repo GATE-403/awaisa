@@ -10,7 +10,7 @@
     "format": "biome format --write .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "db:up": "docker compose up -d postgres",
+    "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "test:e2e": "pnpm --filter web test:e2e",
     "db:seed": "pnpm --filter api seed:demo"

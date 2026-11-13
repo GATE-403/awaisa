@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { BusinessTile } from '@/entities/business'
+import { RecentVisits } from '@/features/rebook'
 import { searchBusinesses } from '@/shared/api/clientApi'
 import type { BusinessCard } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
@@ -49,6 +50,23 @@ export const HeaderSearch = () => {
 
   const close = () => setIsOpen(false)
 
+  // Phones: open, the suggestions are a full screen of their own, so the page under them stays put.
+  useEffect(() => {
+    if (!isOpen || !window.matchMedia('(max-width: 767px)').matches) return
+    const root = document.documentElement
+    const previous = root.style.overflow
+    root.style.overflow = 'hidden'
+    return () => {
+      root.style.overflow = previous
+    }
+  }, [isOpen])
+
+  const cancel = () => {
+    close()
+    setDraft('')
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+  }
+
   // A tap anywhere outside closes the suggestions (blur alone misses taps on non-focusable areas).
   useEffect(() => {
     if (!isOpen) return
@@ -83,7 +101,7 @@ export const HeaderSearch = () => {
         if (event.key === 'Escape') close()
       }}
     >
-      <search>
+      <search className={styles.search} data-open={isOpen || undefined}>
         <form className={styles.form} onSubmit={handleSubmit} data-open={isOpen || undefined}>
           <MagnifyingGlass className={styles.icon} weight='bold' aria-hidden />
           <input
@@ -118,6 +136,12 @@ export const HeaderSearch = () => {
             <MagnifyingGlass weight='bold' aria-hidden />
           </button>
         </form>
+        {/* Phones, like iOS search: «Отмена» beside the field while the suggestions are open. */}
+        {isOpen && (
+          <button type='button' className={styles.cancel} onClick={cancel}>
+            Отмена
+          </button>
+        )}
       </search>
 
       {isOpen && (
@@ -152,19 +176,22 @@ export const HeaderSearch = () => {
               </ul>
             </section>
           ) : (
-            <section aria-label='Часто ищут'>
-              <p className={styles.heading}>Часто ищут</p>
-              <ul className={styles.list}>
-                {QUICK_SEARCHES.map((item) => (
-                  <li key={item}>
-                    <button type='button' className={styles.quick} onClick={() => search(item)}>
-                      <MagnifyingGlass className={styles.quickIcon} aria-hidden />
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <>
+              <RecentVisits onSelect={close} />
+              <section aria-label='Часто ищут'>
+                <p className={styles.heading}>Часто ищут</p>
+                <ul className={styles.list}>
+                  {QUICK_SEARCHES.map((item) => (
+                    <li key={item}>
+                      <button type='button' className={styles.quick} onClick={() => search(item)}>
+                        <MagnifyingGlass className={styles.quickIcon} aria-hidden />
+                        {item}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
           )}
         </div>
       )}

@@ -19,6 +19,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import type { Business } from '../businesses/business.entity.js'
 import { CurrentBusiness } from '../businesses/business-access.guard.js'
+import { Cached } from '../cache/cached.decorator.js'
 import type { Specialist } from '../catalog/specialist.entity.js'
 import { CurrentMaster, MasterGuard } from '../master/master.guard.js'
 import { processImage } from './images.js'
@@ -40,6 +41,7 @@ export class FeedController {
   ) {}
 
   /** «Работы»: a vertical feed of finished work, each photo one tap from booking it. */
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('feed')
   feed(@Query({ schema: feedQuerySchema }) query: FeedQuery) {
     return this.workPhotos.feed(query)

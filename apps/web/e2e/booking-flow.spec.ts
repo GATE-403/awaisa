@@ -5,6 +5,7 @@ import {
   pickFirstFreeSlot,
   primaryAction,
   readStoredBookings,
+  submitBooking,
 } from './helpers'
 
 test.describe('User flow: booking', () => {
@@ -22,8 +23,8 @@ test.describe('User flow: booking', () => {
     await expect(page).toHaveURL(/\/awaisa-studio$/)
     const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
 
-    await expect(nextSlot.getByText(/(Сегодня|Завтра) в \d{2}:\d{2}|появятся скоро/)).toBeVisible()
-    await nextSlot.getByRole('link', { name: 'Записаться' }).click()
+    await expect(nextSlot.getByText(/^(Сегодня|Завтра), \d{2}:\d{2}$|появятся скоро/)).toBeVisible()
+    await nextSlot.getByRole('link', { name: /^Записаться/ }).click()
 
     await expect(page).toHaveURL(/\/book\?service=/)
     const steps = bookingSteps(page)
@@ -33,7 +34,9 @@ test.describe('User flow: booking', () => {
 
   test('a time shown on the business page is the time the booking opens with', async ({ page }) => {
     await page.goto('/awaisa-studio')
-    const card = page.getByRole('link', { name: /Часто выбирают/ }).first()
+    const card = page
+      .getByRole('complementary', { name: 'Ближайшее окно' })
+      .getByRole('link', { name: /^Записаться на/ })
     // The card links to its time once the first free slot is known.
     await expect(card).toHaveAttribute('href', /time=\d{2}:\d{2}/)
     const href = (await card.getAttribute('href')) ?? ''
@@ -62,7 +65,7 @@ test.describe('User flow: booking', () => {
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
     await expect(primaryAction(page)).toHaveText('Записаться')
-    await primaryAction(page).click()
+    await submitBooking(page)
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     await expect(page.getByRole('region', { name: /Notifications/ })).toContainText(

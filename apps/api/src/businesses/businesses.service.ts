@@ -104,7 +104,12 @@ export class BusinessesService {
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
-  async listCatalog({ kind, q }: CatalogQuery): Promise<BusinessCard[]> {
+  async listCatalog({
+    kind,
+    q,
+    offset = 0,
+    limit = MAX_CATALOG_ITEMS,
+  }: CatalogQuery): Promise<BusinessCard[]> {
     const rows = (await this.dataSource.query(
       `
       SELECT b."slug", b."name", b."kind", b."description", b."city", b."address",
@@ -126,17 +131,29 @@ export class BusinessesService {
             WHERE sq."business_id" = b."id" AND sq."is_active" AND sq."name" ILIKE $2
           ))
       GROUP BY b."id"
-      ORDER BY b."created_at" ASC
-      LIMIT ${MAX_CATALOG_ITEMS}
+      ORDER BY b."created_at" ASC, b."id" ASC
+      LIMIT $3 OFFSET $4
       `,
-      [kind ?? null, q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null],
+      [
+        kind ?? null,
+        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+        Math.min(limit, MAX_CATALOG_ITEMS),
+        offset,
+      ],
     )) as BusinessCard[]
 
     return rows
   }
 
   /** The catalog feed: one card per service in a place, like products on a marketplace. */
-  async listOffers({ kind, q }: CatalogQuery) {
+  async listOffers({
+    kind,
+    q,
+    offset = 0,
+    limit = MAX_OFFERS,
+    sort = 'popular',
+    ids,
+  }: CatalogQuery) {
     const rows = (await this.dataSource.query(
       `
       SELECT s."id", s."name", s."price"::int AS "price", s."duration_minutes"::int AS "durationMinutes",
@@ -158,10 +175,21 @@ export class BusinessesService {
       WHERE s."is_active"
         AND ($1::text IS NULL OR b."kind" = $1)
         AND ($2::text IS NULL OR s."name" ILIKE $2 OR b."name" ILIKE $2)
-      ORDER BY s."is_popular" DESC, s."position" ASC, b."created_at" ASC
-      LIMIT ${MAX_OFFERS}
+        AND ($5::text[] IS NULL OR s."id"::text = ANY($5::text[]))
+      ORDER BY ${
+        sort === 'price'
+          ? 's."price" ASC, s."id" ASC'
+          : 's."is_popular" DESC, s."position" ASC, b."created_at" ASC, s."id" ASC'
+      }
+      LIMIT $3 OFFSET $4
       `,
-      [kind ?? null, q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null],
+      [
+        kind ?? null,
+        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+        Math.min(limit, MAX_OFFERS),
+        offset,
+        ids && ids.length > 0 ? ids : null,
+      ],
     )) as Record<string, unknown>[]
 
     return rows
@@ -430,6 +458,25 @@ export class BusinessesService {
 
   async memberRole(businessId: string, customerId: string) {
     return (await this.members.findOneBy({ businessId, customerId }))?.role ?? null
+  }
+
+  /** Businesses the account runs and places where it is a master, for profile shortcuts. */
+  async shortcutsFor(customer: Customer) {
+    const [businesses, masterOf] = await Promise.all([
+      this.dataSource.query(
+        `SELECT b."slug", b."name", m."role" FROM "business_members" m
+         JOIN "businesses" b ON b."id" = m."business_id"
+         WHERE m."customer_id" = $1 ORDER BY m."created_at"`,
+        [customer.id],
+      ) as Promise<{ slug: string; name: string; role: 'owner' | 'staff' }[]>,
+      this.dataSource.query(
+        `SELECT DISTINCT b."slug", b."name" FROM "specialists" s
+         JOIN "businesses" b ON b."id" = s."business_id"
+         WHERE s."phone" = $1 AND s."is_active" ORDER BY b."name"`,
+        [customer.phone],
+      ) as Promise<{ slug: string; name: string }[]>,
+    ])
+    return { businesses, masterOf }
   }
 
   async listForCustomer(customer: Customer, isPlatformAdmin: boolean) {

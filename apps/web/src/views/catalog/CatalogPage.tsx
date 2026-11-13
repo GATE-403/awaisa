@@ -1,10 +1,10 @@
 import { Suspense } from 'react'
 import { NextFreeProvider } from '@/entities/business'
+import { ForYouShelf } from '@/features/forYou'
 import { listBusinesses, listFeed, listOffers, listPopularServices } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { AgainShelf } from '@/views/catalog/ui/AgainShelf/AgainShelf'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
@@ -32,7 +32,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   const isBrowsing = !query
   const [businesses, offers, popular, works] = await Promise.all([
     listBusinesses(kind, query || undefined),
-    listOffers(kind, query || undefined),
+    listOffers(kind, query || undefined, params.sort === 'price' ? 'price' : 'popular'),
     isBrowsing ? listPopularServices(kind) : Promise.resolve([]),
     // The shelf is a nice-to-have: the catalog renders without it.
     isBrowsing ? listFeed(kind, undefined, undefined).catch(() => null) : Promise.resolve(null),
@@ -48,17 +48,27 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   return (
     <NextFreeProvider slugs={slugs}>
       <div className={styles.contained}>
-        {isBrowsing && !kind && <AgainShelf />}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
-        {isBrowsing && works && <WorkShelf items={works.items} kind={kind} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}
+          kind={kind}
+          query={query || undefined}
           title={query ? `«${query}»` : (kindLabel ?? 'Куда записаться')}
           businesses={businesses}
           offers={offers}
           initialView={!query || matchesPlace ? 'places' : 'services'}
           initialSort={toSort(params.sort)}
           canReset={Boolean(query || kind)}
+          interlude={
+            isBrowsing ? (
+              // Set into the grid after two rows, like Shorts in a feed: the masters' work, then
+              // services picked for this client (or, with nothing known, popular and free soon).
+              <div className={styles.interludes}>
+                {works && <WorkShelf items={works.items} kind={kind} />}
+                {!kind && <ForYouShelf isForEveryone />}
+              </div>
+            ) : undefined
+          }
         />
       </div>
     </NextFreeProvider>

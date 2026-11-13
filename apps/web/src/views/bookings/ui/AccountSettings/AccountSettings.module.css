@@ -1,0 +1,163 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
+  min-height: var(--control-height-md);
+  padding-top: var(--space-3);
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.groupTitle {
+  margin-top: var(--space-3);
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+
+/* Settings-style inset group: rows with hairlines inset 16px. */
+.list {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.list + .list {
+  margin-top: var(--space-4);
+}
+
+.list > * {
+  position: relative;
+}
+
+.list > * + *::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-4) + 29px + var(--space-3));
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+div.row {
+  cursor: default;
+}
+
+.label {
+  flex: 1;
+}
+
+.value {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  color: var(--color-tertiary-foreground);
+}
+
+.danger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: 0 var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-danger-text);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* A coloured glyph tile per row, like iOS Settings; the hairlines start after it. */
+.glyph {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  color: #fff;
+}
+
+.glyph svg {
+  width: 17px;
+  height: 17px;
+}
+
+.glyph[data-tone="gray"] {
+  background: var(--color-muted-foreground);
+}
+
+.glyph[data-tone="green"] {
+  background: var(--color-success);
+}
+
+.glyph[data-tone="blue"] {
+  background: var(--color-primary);
+}
+
+.glyph[data-tone="orange"] {
+  background: var(--color-rating);
+}
+
+.glyph[data-tone="red"] {
+  background: var(--color-danger);
+}
+
+.footnote {
+  padding: var(--space-2) var(--space-4) 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: 1.4;
+}
+
+@media (hover: hover) {
+  .row:is(button, a):hover,
+  .danger:hover {
+    background: var(--color-fill);
+  }
+}
+
+.title[data-hidden] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

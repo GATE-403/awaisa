@@ -1,6 +1,5 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
@@ -8,7 +7,6 @@ import { DotsThree, Flag, ShareFat } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useState } from 'react'
 import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
-import { BusinessTile } from '@/entities/business'
 import { reportFeedItem } from '@/shared/api/clientApi'
 import type { FeedItem } from '@/shared/api/types'
 import styles from '../FeedPage.module.css'
@@ -112,39 +110,29 @@ export const FeedCard = ({ item, index, isActive, isNear }: FeedCardProps) => {
       </div>
 
       <div className={styles.info}>
-        <NextLink href={`/${business.slug}`} className={styles.place}>
-          <BusinessTile name={business.name} size='xs' />
-          <span className={styles.placeName}>{business.name}</span>
-          {item.distanceKm !== null && (
-            <span className={styles.placeMeta}>
-              {item.distanceKm < 1
-                ? `${Math.round(item.distanceKm * 1000)} м`
-                : `${item.distanceKm} км`}
-            </span>
-          )}
-        </NextLink>
-        {service && (
-          <>
-            <h2 className={styles.service}>{service.name}</h2>
-            <p className={styles.meta}>
-              <strong>{formatPrice(service.price)}</strong> ·{' '}
+        {service && <h2 className={styles.service}>{service.name}</h2>}
+        {/* One line of facts, the place last as a link: price leads, nothing wraps. */}
+        <p className={styles.meta}>
+          {service && (
+            <>
+              <strong>{formatPrice(service.price)}</strong>
+              <span className={styles.metaDot}>·</span>
               {formatDuration(service.durationMinutes)}
-              {specialist && (
-                <>
-                  {' · '}
-                  <span className={styles.master}>
-                    <Avatar
-                      name={specialist.name}
-                      src={specialist.photoUrl ?? undefined}
-                      size='sm'
-                    />
-                    {specialist.name}
-                  </span>
-                </>
-              )}
-            </p>
-          </>
-        )}
+              <span className={styles.metaDot}>·</span>
+            </>
+          )}
+          {specialist && (
+            <>
+              {specialist.name.split(' ')[0]}
+              <span className={styles.metaDot}>·</span>
+            </>
+          )}
+          <NextLink href={`/${business.slug}`} className={styles.place}>
+            {business.name}
+            {item.distanceKm !== null &&
+              ` · ${item.distanceKm < 1 ? `${Math.round(item.distanceKm * 1000)} м` : `${item.distanceKm} км`}`}
+          </NextLink>
+        </p>
         <div className={styles.cta}>
           <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
             {service ? 'Записаться' : 'Выбрать услугу'}

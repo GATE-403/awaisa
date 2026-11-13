@@ -28,7 +28,8 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  /* Tight like a photo grid: the pictures carry the cards, gutters stay thin. */
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -36,7 +37,7 @@
 
 @media (min-width: 640px) {
   .grid {
-    gap: var(--space-4);
+    gap: 8px;
   }
 }
 
@@ -57,6 +58,69 @@
 @media (min-width: 1100px) {
   .grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-5);
+    gap: 10px;
   }
+}
+
+/* The shelf set into the grid spans it, after two rows at every width: cards that belong in the
+   second row on wider grids are pulled before it with order. */
+.interlude {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: var(--space-4) 0;
+  order: 1;
+}
+
+.interlude ~ li {
+  order: 2;
+}
+
+@media (min-width: 768px) and (max-width: 1099px) {
+  .interlude ~ li:nth-child(-n + 7) {
+    order: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .interlude ~ li:nth-child(-n + 9) {
+    order: 0;
+  }
+}
+
+/* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
+.grid > li:not(.interlude) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+/* Phones: only the card grid runs 8px from the screen edge; the shelf set into it takes the
+   full width back and keeps the page gutter for its title. */
+@media (max-width: 639px) {
+  .grid {
+    margin: 0 calc(8px - var(--page-gutter));
+  }
+
+  .interlude {
+    margin-inline: -8px;
+    padding-inline: var(--page-gutter);
+  }
+}
+
+/* Endless scroll: an invisible line at the end that loads the next page before it is reached. */
+.sentinel {
+  height: 1px;
+}
+
+.placeholder {
+  aspect-ratio: 3 / 4;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.loadingNote {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }

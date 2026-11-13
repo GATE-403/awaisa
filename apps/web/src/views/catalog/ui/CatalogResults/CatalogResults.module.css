@@ -30,7 +30,7 @@
 .places {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -44,7 +44,7 @@
 @media (min-width: 640px) {
   .places {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-3);
+    gap: 8px;
   }
 }
 
@@ -62,49 +62,9 @@
   border-bottom: 0.5px solid var(--color-border);
 }
 
-.views {
-  display: flex;
-  gap: var(--space-6);
-}
-
-.view {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-1);
-  height: 44px;
-  margin-bottom: -0.5px;
-  padding: 0;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: var(--color-muted-foreground);
-  font: inherit;
-  font-size: var(--text-md);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: color var(--duration-fast) var(--ease-standard);
-}
-
-.view[aria-selected="true"] {
-  border-bottom-color: var(--color-foreground);
-  color: var(--color-foreground);
-}
-
-.viewCount {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-regular);
-}
-
 .sort {
   width: auto;
   min-width: 0;
-}
-
-@media (hover: hover) {
-  .view:hover {
-    color: var(--color-foreground);
-  }
 }
 
 .title[data-quiet] {
@@ -114,4 +74,58 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* With the heading hidden, its row takes no room either (no empty gap above the tabs). */
+.header:has(> .title[data-quiet]) {
+  position: absolute;
+}
+
+/* The shelf set into the grid spans it, after two rows at every width: cards that belong in the
+   second row on wider grids are pulled before it with order. */
+.interlude {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin: var(--space-4) 0;
+  order: 1;
+}
+
+.interlude ~ li {
+  order: 2;
+}
+
+@media (min-width: 640px) and (max-width: 1099px) {
+  .interlude ~ li:nth-child(-n + 7) {
+    order: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .interlude ~ li:nth-child(-n + 9) {
+    order: 0;
+  }
+}
+
+/* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
+.places > li:not(.interlude) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
+/* Phones: only the card grid runs 8px from the screen edge; the shelf set into it takes the
+   full width back and keeps the page gutter for its title. */
+@media (max-width: 639px) {
+  .places {
+    margin: 0 calc(8px - var(--page-gutter));
+  }
+
+  .interlude {
+    margin-inline: -8px;
+    padding-inline: var(--page-gutter);
+  }
+}
+
+/* Endless scroll: an invisible line at the end that loads the next page before it is reached. */
+.sentinel {
+  height: 1px;
 }

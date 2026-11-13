@@ -12,11 +12,11 @@
   transition:
     translate var(--duration-normal) var(--ease-standard),
     opacity var(--duration-normal) var(--ease-standard);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
-  box-shadow:
-    inset 0 0 0 0.5px var(--color-material-border),
-    var(--shadow-lg);
+  /* An inverted capsule like a Live Activity: it reads as «yours, unfinished», apart from the
+     page and the tab bar; no live blur over scrolling content. */
+  background: var(--color-foreground);
+  color: var(--color-background);
+  box-shadow: var(--shadow-lg);
   animation: rise 300ms var(--ease-spring);
 }
 
@@ -54,27 +54,18 @@
 
 .title {
   overflow: hidden;
-  font-size: var(--text-body);
+  font-size: var(--text-footnote);
+  line-height: 1.25;
   font-weight: var(--font-weight-semibold);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.prefix {
-  color: var(--color-highlight);
-  font-weight: var(--font-weight-regular);
-}
-
-.status {
-  color: var(--color-highlight);
-  font-weight: var(--font-weight-semibold);
-}
-
 .meta {
-  display: none;
   overflow: hidden;
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
+  font-size: var(--text-xs);
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -148,11 +139,7 @@
   }
 
   .meta {
-    display: block;
-  }
-
-  .prefix {
-    display: none;
+    font-size: var(--text-footnote);
   }
 
   .go {
@@ -177,5 +164,34 @@
   .resume {
     transition: none;
     animation: none;
+  }
+}
+
+/* Inverted text and controls inside the dark capsule. */
+.resume .link {
+  color: var(--color-background);
+}
+
+.resume .meta {
+  color: color-mix(in srgb, var(--color-background) 65%, transparent);
+}
+
+.resume .go {
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.resume .dismiss {
+  color: color-mix(in srgb, var(--color-background) 70%, transparent);
+}
+
+/* Phones: no tile — the capsule is the mark; the text starts at its edge. */
+@media (max-width: 767px) {
+  .resume .link > :first-child {
+    display: none;
+  }
+
+  .resume .link {
+    padding-left: var(--space-4);
   }
 }

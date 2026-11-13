@@ -1,0 +1,128 @@
+.shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+  padding-top: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.count {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.track {
+  display: grid;
+  grid-auto-columns: minmax(150px, 42%);
+  grid-auto-flow: column;
+  gap: 6px;
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: 0 var(--page-gutter) var(--space-1);
+  overflow-x: auto;
+  scroll-padding-inline: var(--page-gutter);
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  --edge-fade: 48px;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.track > li {
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .track {
+    grid-auto-columns: minmax(180px, 24%);
+    gap: 8px;
+  }
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+.empty a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.emptyIcon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-danger);
+}
+
+/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
+   repainted every frame, so touch screens scroll them plain. */
+@media (hover: hover) and (pointer: fine) {
+  .track {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
+}
+
+/* In the profile tab the tab names it: the heading stays for screen readers only. */
+.head[data-hidden] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+
+/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+   short swipe feel stuck on phones. */
+@media (hover: none) {
+  .track {
+    scroll-snap-type: none;
+    touch-action: pan-x pan-y;
+  }
+}

@@ -1,5 +1,9 @@
 .page {
-  padding: var(--space-6) 0 var(--section-gap);
+  padding: 0 0 var(--section-gap);
+}
+
+.page > .content {
+  padding-top: var(--space-6);
 }
 
 .content {

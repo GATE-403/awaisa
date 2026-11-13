@@ -142,3 +142,5 @@
   height: 13px;
   color: var(--color-rating);
 }
+
+/* More visits wait: the last shown fades into the card and the button floats on the fade. */

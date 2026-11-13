@@ -44,7 +44,7 @@
 .steps {
   display: flex;
   flex-direction: column;
-  gap: var(--space-10);
+  gap: var(--space-6);
   min-width: 0;
 }
 
@@ -62,35 +62,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.accountPhone {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
-}
-
-.phone {
-  color: var(--color-foreground);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.anyIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-}
-
-.anyIcon svg {
-  width: 20px;
-  height: 20px;
 }
 
 .aside {
@@ -125,25 +96,184 @@
   gap: var(--space-2);
 }
 
+.branchChips {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.branchChips::-webkit-scrollbar {
+  display: none;
+}
+
 .branchAddress {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
 
-.more[open] .moreSummary {
-  display: none;
+.extras > details[open],
+.extras > p,
+/* Contacts as one inset group of Settings rows; an error sits under its row. */
+  .group {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
 }
 
-.moreSummary {
-  width: fit-content;
-  color: var(--color-link);
+/* `.group .fieldRow`: stronger than the kit's Field root, whichever stylesheet loads last
+   (arriving from a business page loads the kit's CSS after this one). */
+.group .fieldRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-4);
+}
+
+.group .fieldRow + .fieldRow::before,
+.group .commentArea + .fieldRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.group .fieldRow > label {
+  padding-left: 0;
+  margin: 0;
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-regular);
+}
+
+.group .fieldRow > input,
+.group .fieldRow > :not(label):not(p) {
+  min-width: 0;
+}
+
+.group .fieldRow > p,
+.group .fieldRow > [class*="error"] {
+  grid-column: 1 / -1;
+  padding-bottom: var(--space-2);
+}
+
+/* The booking note: a label over a multi-line field (radius 12, like iOS text views). */
+.comment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Reviewing: one centred column, the button inside the card (no second summary beside it). */
+@media (min-width: 1024px) {
+  .layout[data-reviewing] {
+    grid-template-columns: minmax(0, 640px);
+    justify-content: center;
+  }
+}
+
+.submitError {
+  margin-top: var(--space-2);
+  color: var(--color-danger-text);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  list-style: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Extras rows: label | value or field | an action at the right edge. */
+.group .fieldRow[data-action] {
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+}
+
+button.fieldRow {
   cursor: pointer;
 }
 
-.moreSummary::-webkit-details-marker {
+.extraLabel {
+  font-size: var(--text-body);
+}
+
+.extraValue {
+  justify-self: end;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+.extraChevron {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
+}
+
+.rowAction {
+  min-height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+/* The note opens inside the group, borderless under its row, like iOS Notes in a form. */
+.commentArea {
+  display: block;
+  width: 100%;
+  min-height: 84px;
+  padding: 0 var(--space-4) var(--space-3);
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-input);
+  line-height: 1.4;
+  resize: none;
+}
+
+.commentArea::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.commentArea:focus-visible {
+  outline: none;
+}
+
+.group + .group {
+  margin-top: var(--space-4);
+}
+
+/* No action yet (an empty promo field): two columns, so the value meets the right edge like the
+   name above it. */
+.group .fieldRow[data-action]:has(> span:empty:last-child) {
+  grid-template-columns: 96px minmax(0, 1fr);
+}
+
+.group .fieldRow[data-action] > span:empty:last-child {
   display: none;
 }

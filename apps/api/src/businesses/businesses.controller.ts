@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { SkipThrottle } from '@nestjs/throttler'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
+import { Cached } from '../cache/cached.decorator.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
@@ -21,18 +22,21 @@ export class BusinessesController {
   ) {}
 
   // The web server renders these for every visitor from one IP, so a per-IP limit would throttle everyone.
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get()
   @SkipThrottle()
   list(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
     return this.businesses.listCatalog(query)
   }
 
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('offers')
   @SkipThrottle()
   offers(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
     return this.businesses.listOffers(query)
   }
 
+  @Cached({ ttl: 300, tags: ['catalog'], maxAge: 120 })
   @Get('popular-services')
   @SkipThrottle()
   popularServices(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
@@ -44,6 +48,7 @@ export class BusinessesController {
     return this.businesses.checkSlug(query.slug)
   }
 
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get(':slug')
   @SkipThrottle()
   async getOne(@Param('slug') slug: string) {

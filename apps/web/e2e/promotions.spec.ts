@@ -110,7 +110,7 @@ test.describe('Promotions', () => {
       await expect(page.getByText('E2E Весь день · −20%')).toBeVisible()
 
       // The catalog marks services with an open promotion.
-      await page.goto('/?q=' + encodeURIComponent(service.name))
+      await page.goto(`/?q=${encodeURIComponent(service.name)}`)
       await expect(
         page
           .getByRole('article', { name: new RegExp(`${service.name}, Awaisa Studio`) })

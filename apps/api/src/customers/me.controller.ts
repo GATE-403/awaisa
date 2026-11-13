@@ -31,9 +31,13 @@ export class MeController {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
+  /** The account, with the places it runs and where it works as a master (profile shortcuts). */
   @Get()
-  getProfile(@CurrentCustomer() customer: Customer) {
-    return toCustomerView(customer, this.config.get('ADMIN_PHONES', { infer: true }))
+  async getProfile(@CurrentCustomer() customer: Customer) {
+    return {
+      ...toCustomerView(customer, this.config.get('ADMIN_PHONES', { infer: true })),
+      ...(await this.businesses.shortcutsFor(customer)),
+    }
   }
 
   @Patch()

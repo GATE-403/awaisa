@@ -58,7 +58,7 @@ test.describe('Return visits', () => {
     }
   })
 
-  test('a returning client sees «Снова к мастеру» on the catalog', async ({ page }) => {
+  test('a returning client finds «Снова к мастеру» in the search panel', async ({ page }) => {
     const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
     const master = business.catalog.specialists[0]
     const service = business.catalog.services.find((item: { id: string }) =>
@@ -89,6 +89,8 @@ test.describe('Return visits', () => {
       },
     )
     await page.goto('/')
+    // Where people start looking: opening the search shows recent masters, like recent searches.
+    await page.getByRole('searchbox').first().click()
     const again = page.getByRole('region', { name: 'Снова к мастеру' })
     const link = again.getByRole('link', {
       name: new RegExp(`^Записаться снова: ${service.name}`),

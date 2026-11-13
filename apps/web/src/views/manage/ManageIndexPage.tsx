@@ -12,6 +12,7 @@ import type { BusinessLink } from '@/shared/api/types'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { BusinessPickerCard } from '@/views/manage/ui/BusinessPickerCard/BusinessPickerCard'
+import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from './ManageIndexPage.module.css'
 
@@ -46,6 +47,8 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
 
   return (
     <main className={styles.page}>
+      {/* The owner's side looks like the cabinet: its own toolbar, not the client's header. */}
+      <CabinetBar title='Мои бизнесы' />
       <Container size='md' className={styles.content}>
         <PageTitle size='sm' title='Мои бизнесы.' subtitle='Выберите, чем управлять.' />
 

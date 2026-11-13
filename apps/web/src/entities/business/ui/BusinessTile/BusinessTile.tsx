@@ -31,6 +31,15 @@ export const pickTint = (name: string) => {
   return TINTS[hash % TINTS.length] ?? TINTS[0]
 }
 
+/** Avatar monogram colours from a name: people get the same vivid tints as app-icon tiles. */
+export const monogramTint = (name: string) => {
+  const tint = pickTint(name)
+  return {
+    '--system-monogram-from': `color-mix(in srgb, ${tint} 72%, white)`,
+    '--system-monogram-to': `color-mix(in srgb, ${tint} 88%, black)`,
+  } as CSSProperties
+}
+
 export const BusinessTile = ({ name, size = 'md', className }: BusinessTileProps) => (
   <span
     className={className ? `${styles.tile} ${className}` : styles.tile}

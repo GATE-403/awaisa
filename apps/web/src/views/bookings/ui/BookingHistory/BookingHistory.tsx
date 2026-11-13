@@ -6,6 +6,8 @@ import { useState } from 'react'
 import { getDateParts, parseBookings, readRaw } from '@/entities/booking'
 import { RateVisitSheet } from '@/features/rateVisit'
 import type { Booking } from '@/shared/api/types'
+import { pluralWord } from '@/shared/lib/plural'
+import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './BookingHistory.module.css'
 
 interface BookingHistoryProps {
@@ -14,83 +16,96 @@ interface BookingHistoryProps {
   onForget: (id: string) => void
 }
 
+// The latest few; the rest behind «Ещё N» on a fade, like the upcoming visits.
+const FIRST = 5
+
 const getCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
 export const BookingHistory = ({ bookings, canForget, onForget }: BookingHistoryProps) => {
   const [rated, setRated] = useState<Record<string, number>>({})
   const [rating, setRating] = useState<Booking | null>(null)
+  const [isAll, setIsAll] = useState(false)
+  const shown = isAll ? bookings : bookings.slice(0, FIRST)
   // A device booking proves itself with its token; signed-in visits go by the session cookie.
   const tokenOf = (id: string) =>
     parseBookings(readRaw()).find((item) => item.id === id)?.token ?? null
 
   return (
     <>
-      <ul className={styles.list}>
-        {bookings.map((booking) => {
-          const { day, month } = getDateParts(booking.date)
-          const isCancelled = booking.status === 'cancelled'
-          const stars = rated[booking.id] ?? booking.review?.rating ?? null
+      <MoreFade
+        hiddenCount={Math.max(0, bookings.length - FIRST)}
+        isOpen={isAll}
+        onToggle={() => setIsAll((value) => !value)}
+        label={pluralWord(bookings.length - FIRST, ['запись', 'записи', 'записей'])}
+        surface='card'
+      >
+        <ul className={styles.list}>
+          {shown.map((booking) => {
+            const { day, month } = getDateParts(booking.date)
+            const isCancelled = booking.status === 'cancelled'
+            const stars = rated[booking.id] ?? booking.review?.rating ?? null
 
-          return (
-            <li key={booking.id}>
-              <article className={styles.row} aria-label={`Запись ${getCode(booking.id)}`}>
-                <span className={styles.leaf} aria-hidden='true'>
-                  <span className={styles.leafMonth}>{month}</span>
-                  <span className={styles.leafDay}>{day}</span>
-                </span>
-                <span className={styles.body}>
-                  <span className={styles.title}>{booking.serviceName}</span>
-                  <span className={styles.meta}>
-                    {booking.business.name} · {booking.time}
-                    {isCancelled ? (
-                      <span className={styles.cancelled}> · Отменена</span>
-                    ) : (
-                      ' · Состоялась'
-                    )}
+            return (
+              <li key={booking.id}>
+                <article className={styles.row} aria-label={`Запись ${getCode(booking.id)}`}>
+                  <span className={styles.leaf} aria-hidden='true'>
+                    <span className={styles.leafMonth}>{month}</span>
+                    <span className={styles.leafDay}>{day}</span>
                   </span>
-                </span>
-                <span className={styles.actions}>
-                  {!isCancelled && stars !== null && (
-                    <span
-                      className={styles.stars}
-                      role='img'
-                      aria-label={`Ваша оценка: ${stars} из 5`}
-                    >
-                      <Star weight='fill' aria-hidden />
-                      {stars}
+                  <span className={styles.body}>
+                    <span className={styles.title}>{booking.serviceName}</span>
+                    <span className={styles.meta}>
+                      {booking.business.name} · {booking.time}
+                      {isCancelled ? (
+                        <span className={styles.cancelled}> · Отменена</span>
+                      ) : (
+                        ' · Состоялась'
+                      )}
                     </span>
-                  )}
-                  {!isCancelled && stars === null && (
-                    <button
-                      type='button'
-                      className={styles.rate}
-                      onClick={() => setRating(booking)}
+                  </span>
+                  <span className={styles.actions}>
+                    {!isCancelled && stars !== null && (
+                      <span
+                        className={styles.stars}
+                        role='img'
+                        aria-label={`Ваша оценка: ${stars} из 5`}
+                      >
+                        <Star weight='fill' aria-hidden />
+                        {stars}
+                      </span>
+                    )}
+                    {!isCancelled && stars === null && (
+                      <button
+                        type='button'
+                        className={styles.rate}
+                        onClick={() => setRating(booking)}
+                      >
+                        Оценить
+                      </button>
+                    )}
+                    {isCancelled && canForget(booking.id) && (
+                      <button
+                        type='button'
+                        className={styles.textButton}
+                        onClick={() => onForget(booking.id)}
+                        aria-label='Убрать из списка'
+                      >
+                        Убрать
+                      </button>
+                    )}
+                    <NextLink
+                      href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
+                      className={styles.again}
                     >
-                      Оценить
-                    </button>
-                  )}
-                  {isCancelled && canForget(booking.id) && (
-                    <button
-                      type='button'
-                      className={styles.textButton}
-                      onClick={() => onForget(booking.id)}
-                      aria-label='Убрать из списка'
-                    >
-                      Убрать
-                    </button>
-                  )}
-                  <NextLink
-                    href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
-                    className={styles.again}
-                  >
-                    Снова
-                  </NextLink>
-                </span>
-              </article>
-            </li>
-          )
-        })}
-      </ul>
+                      Снова
+                    </NextLink>
+                  </span>
+                </article>
+              </li>
+            )
+          })}
+        </ul>
+      </MoreFade>
       {rating && (
         <RateVisitSheet
           booking={rating}

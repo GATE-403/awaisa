@@ -69,15 +69,19 @@ const listPopularServices = async (kind: BusinessKind | undefined): Promise<Popu
   return response.json()
 }
 
+// The first page of the services feed; the rest loads on the client as the list nears its end.
+const OFFERS_PAGE_SIZE = 24 // the same as `views/catalog/model/useOfferPages`
+
 const listOffers = async (
   kind: BusinessKind | undefined,
   query: string | undefined,
+  sort: 'popular' | 'price' = 'popular',
 ): Promise<Offer[]> => {
   'use cache'
   cacheLife('minutes')
   cacheTag(BUSINESSES_TAG)
 
-  const params = new URLSearchParams()
+  const params = new URLSearchParams({ limit: String(OFFERS_PAGE_SIZE), sort })
   if (kind) params.set('kind', kind)
   if (query) params.set('q', query)
   const response = await fetch(`${API_URL}/businesses/offers?${params}`)
@@ -92,7 +96,7 @@ const listReviews = async (slug: string): Promise<ReviewSummary> => {
   cacheLife('minutes')
   cacheTag(businessTag(slug))
 
-  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}/reviews?limit=6`)
+  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}/reviews?limit=20`)
   if (!response.ok) return { count: 0, average: 0, distribution: [], items: [] }
 
   return response.json()
@@ -154,7 +158,18 @@ const listFeed = async (
   return response.json()
 }
 
+// A tagged work photo per service (the newest wins), for the place's service cards.
+const listServicePhotos = async (slug: string): Promise<Record<string, string>> => {
+  const page = await listFeed(undefined, slug, undefined).catch(() => null)
+  const photos: Record<string, string> = {}
+  for (const item of page?.items ?? []) {
+    if (item.service && !photos[item.service.id]) photos[item.service.id] = item.url
+  }
+  return photos
+}
+
 export {
+  listServicePhotos,
   listFeed,
   listPromotions,
   getPaymentPage,

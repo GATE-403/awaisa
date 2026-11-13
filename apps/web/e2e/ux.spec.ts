@@ -7,6 +7,7 @@ import {
   isInViewport,
   pickFirstFreeSlot,
   primaryAction,
+  submitBooking,
 } from './helpers'
 
 const fillContacts = async (page: import('@playwright/test').Page) => {
@@ -98,7 +99,7 @@ test.describe('UX: guidance and feedback', () => {
     await fillContacts(page)
 
     const slotsReload = page.waitForRequest(/\/api\/availability/)
-    await primaryAction(page).click()
+    await submitBooking(page)
     await slotsReload
 
     await expect(
@@ -165,7 +166,7 @@ test.describe('UX: guidance and feedback', () => {
       .click()
     await pickFirstFreeSlot(page)
     await fillContacts(page)
-    await primaryAction(page).click()
+    await submitBooking(page)
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'В календарь' })).toBeVisible()

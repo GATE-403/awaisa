@@ -1,11 +1,11 @@
 'use client'
 
-import { Avatar } from '@awaisa/ui/Avatar'
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
 import { X } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useEffect, useState } from 'react'
+import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addTeamMember, getTeam, removeTeamMember } from '@/shared/api/clientApi'
 import type { TeamMember } from '@/shared/api/types'
@@ -73,7 +73,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
         <ul className={styles.list}>
           {team.map((member) => (
             <li key={member.id} className={own.row}>
-              <Avatar name={member.name || member.phone} size='sm' />
+              <PersonAvatar name={member.name || member.phone} size='sm' />
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>{member.name || formatPhone(member.phone)}</span>
                 <span className={styles.rowMeta}>

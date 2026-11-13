@@ -18,6 +18,7 @@ import {
   CurrentBusiness,
   OwnerOnly,
 } from '../businesses/business-access.guard.js'
+import { Cached } from '../cache/cached.decorator.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
   type PromotionInput,
@@ -42,6 +43,7 @@ export class PromotionsController {
   }
 
   // The business page's «Акции» line: what is on now, without codes.
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/promotions')
   listPublic(@Param('slug') slug: string) {
     return this.promotions.publicForSlug(slug)

@@ -9,6 +9,12 @@
   margin: 0 calc(-1 * var(--page-gutter));
   padding: 0 var(--page-gutter);
   scroll-padding-inline: var(--page-gutter);
+  --edge-fade: 40px;
+}
+
+/* Times are one-line controls: capsules, like every other. */
+.slots > * {
+  border-radius: var(--radius-full);
 }
 
 .weekday,
@@ -72,4 +78,18 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
+}
+
+/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
+   repainted every frame, so touch screens scroll them plain. */
+@media (hover: hover) and (pointer: fine) {
+  .days {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade)),
+      transparent
+    );
+  }
 }

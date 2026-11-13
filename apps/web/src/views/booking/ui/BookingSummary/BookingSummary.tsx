@@ -1,9 +1,10 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { CaretRight, CaretUp } from '@phosphor-icons/react/ssr'
-import { useState } from 'react'
+import { CaretRight } from '@phosphor-icons/react/ssr'
+import { type CSSProperties, useState } from 'react'
 import { formatDayLong, formatDuration, formatPrice } from '@/entities/booking'
+import { BusinessTile, pickTint } from '@/entities/business'
 import type { PriceQuote, Service } from '@/shared/api/types'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -24,6 +25,10 @@ interface BookingSummaryProps {
   quote?: PriceQuote | null
   /** Opens a step from the summary, so a choice is changed where it was made. */
   onStepOpen?: (step: BookingStepId) => void
+  /** Overrides the button's words once everything is filled («Проверить запись»). */
+  submitLabel?: string
+  /** The card's head: the place's cover (or its tint) with its name, like a ticket's header. */
+  place?: { name: string; coverUrl: string | null }
 }
 
 const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
@@ -52,6 +57,8 @@ export const BookingSummary = ({
   onSubmit,
   onStepOpen,
   quote = null,
+  place,
+  submitLabel,
 }: BookingSummaryProps) => {
   const total = quote?.total ?? service?.price ?? null
   const discount = quote?.discount ?? null
@@ -70,7 +77,8 @@ export const BookingSummary = ({
       ? [{ label: 'Предоплата', value: `${formatPrice(service.deposit)} картой при записи` }]
       : []),
   ]
-  const buttonLabel = getButtonLabel(firstIncompleteStep, isSubmitting)
+  const buttonLabel =
+    (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting)
   const hint = firstIncompleteStep
     ? NEXT_STEP_HINTS[firstIncompleteStep]
     : service?.deposit
@@ -89,7 +97,6 @@ export const BookingSummary = ({
         >
           <span className={styles.barPrice}>
             {total !== null ? formatPrice(total) : 'Онлайн-запись'}
-            <CaretUp weight='bold' aria-hidden className={styles.barCaret} />
           </span>
           <span
             className={styles.barHint}
@@ -131,6 +138,22 @@ export const BookingSummary = ({
 
   return (
     <div className={styles.card}>
+      {place && (
+        <div
+          className={styles.cardCover}
+          style={{ '--tint': pickTint(place.name) } as CSSProperties}
+          aria-hidden
+        >
+          {place.coverUrl && (
+            // biome-ignore lint/performance/noImgElement: covers are resized already
+            <img src={place.coverUrl} alt='' className={styles.cardCoverImage} />
+          )}
+          <span className={styles.cardPlace}>
+            <BusinessTile name={place.name} size='xs' />
+            {place.name}
+          </span>
+        </div>
+      )}
       <h2 className={styles.cardTitle}>Ваша запись</h2>
       <ul className={styles.rows}>
         {rows.map((row) => {

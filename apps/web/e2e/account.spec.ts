@@ -4,8 +4,8 @@ import {
   bookingSteps,
   cancelViaApi,
   pickFirstFreeSlot,
-  primaryAction,
   readStoredBookings,
+  submitBooking,
 } from './helpers'
 
 test.describe('Account: sign in by SMS', () => {
@@ -32,7 +32,32 @@ test.describe('Account: sign in by SMS', () => {
     await page.getByRole('button', { name: 'Готово' }).click()
 
     await expect(page).toHaveURL(/\/bookings$/)
-    await expect(page.getByRole('region', { name: 'Аккаунт' })).toContainText(formatPhone(phone))
+    await expect(page.getByRole('region', { name: 'Профиль' })).toContainText(formatPhone(phone))
+  })
+
+  test('the profile takes a photo: it shows in place of the initials and can be removed', async ({
+    page,
+  }) => {
+    await signInViaApi(page, randomClientPhone(), 'E2E Фото')
+    await page.goto('/bookings')
+    const profile = page.getByRole('region', { name: 'Профиль' })
+    await expect(profile.getByRole('heading', { name: 'E2E Фото' })).toBeVisible()
+    await profile.getByLabel('Файл фото профиля').setInputFiles({
+      name: 'me.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAIAAAAy3EnLAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAFUlEQVQYlWNgKHxMGmIY1fB4KIYSAN5g1IFgp8jzAAAAAElFTkSuQmCC',
+        'base64',
+      ),
+    })
+    await expect(profile.getByRole('img', { name: 'E2E Фото' })).toBeVisible()
+    const me = await (await page.request.get('/api/me')).json()
+    expect(me.avatarUrl).toMatch(/^\/api\/media\/customers\/.+\.webp$/)
+
+    await profile.getByRole('button', { name: 'Фото профиля' }).click()
+    await page.getByRole('menuitem', { name: 'Удалить фото' }).click()
+    await expect(profile.getByRole('img', { name: 'E2E Фото' })).toHaveCount(0)
+    expect((await (await page.request.get('/api/me')).json()).avatarUrl).toBeNull()
   })
 
   test('a wrong code explains how many attempts are left', async ({ page }) => {
@@ -50,7 +75,7 @@ test.describe('Account: sign in by SMS', () => {
   }) => {
     await page.goto('/profile')
     await expect(page).toHaveURL(/\/bookings$/)
-    await page.getByRole('region', { name: 'Аккаунт' }).getByRole('link', { name: 'Войти' }).click()
+    await page.getByRole('region', { name: 'Профиль' }).getByRole('link', { name: 'Войти' }).click()
     await expect(page).toHaveURL(/\/login\?next=(%2F|\/)bookings/)
   })
 
@@ -68,7 +93,7 @@ test.describe('Account: sign in by SMS', () => {
     await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')
     await expect(steps.contacts.getByLabel('Телефон')).toHaveCount(0)
     await expect(steps.contacts).toContainText(formatPhone(phone))
-    await primaryAction(page).click()
+    await submitBooking(page)
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
 
     // Same session cookie, empty localStorage: the list must come from the account, not the device.
@@ -97,17 +122,19 @@ test.describe('Salon admin', () => {
     // Tomorrow: the strip also holds past days, which can't be closed.
     await page.getByRole('group', { name: 'День' }).locator('[data-today] + button').click()
 
+    // The phone and desktop runs close time for the same master and day at once: each finds its
+    // own block by its own reason.
+    const reason = `E2E перерыв ${testInfo.project.name}`
     await page.getByRole('button', { name: 'Закрыть время' }).click()
     const dialog = page.getByRole('dialog')
-    await dialog.getByLabel('Причина').fill('E2E перерыв')
+    await dialog.getByLabel('Причина').fill(reason)
     await dialog.getByRole('button', { name: 'Готово' }).click()
-    await expect(page.getByText('E2E перерыв')).toBeVisible()
+    const block = page.getByText(reason, { exact: true }).locator('..')
+    await expect(block).toBeVisible()
 
-    await page
-      .getByRole('button', { name: /^Открыть время 13:00–14:00/ })
-      .first()
-      .click()
-    await expect(page.getByText('E2E перерыв')).toHaveCount(0)
+    // A real visit may sit at the same time and cover the block: press its button directly.
+    await block.getByRole('button', { name: /^Открыть время/ }).dispatchEvent('click')
+    await expect(page.getByText(reason, { exact: true })).toHaveCount(0)
   })
 
   test('staff cancel a client booking and the client sees it cancelled', async ({
@@ -123,7 +150,7 @@ test.describe('Salon admin', () => {
       .specialist.getByRole('radio', { name: /Любой мастер/ })
       .click()
     await pickFirstFreeSlot(clientPage)
-    await primaryAction(clientPage).click()
+    await submitBooking(clientPage)
     await expect(clientPage.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     const booked = (await clientPage.request
       .get('/api/me/bookings')

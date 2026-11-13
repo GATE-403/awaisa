@@ -97,6 +97,7 @@ export const DateTimePicker = ({
         <ToggleGroup
           aria-label='Время'
           layout='grid'
+          className={styles.slots}
           value={time ? [time] : []}
           onValueChange={(values) => toSingleValue(values, onTimeChange)}
         >

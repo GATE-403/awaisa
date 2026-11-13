@@ -1,6 +1,7 @@
 'use client'
 
-import { Bell } from '@phosphor-icons/react/ssr'
+import { Bell, Phone } from '@phosphor-icons/react/ssr'
+import type { CSSProperties } from 'react'
 import { useSyncExternalStore } from 'react'
 import { addMinutes, parseClock } from '@/entities/business'
 import type { AdminBooking } from '@/shared/api/types'
@@ -10,7 +11,11 @@ import styles from './NowBar.module.css'
 interface NowBarProps {
   bookings: AdminBooking[]
   nowMinutes: number
+  /** Opens the booking sheet, the same as tapping its block in the calendar. */
+  onOpen: (booking: AdminBooking) => void
 }
+
+const SOON_MINUTES = 15
 
 const subscribeNoop = () => () => {}
 
@@ -26,8 +31,10 @@ const formatWait = (minutes: number) => {
     : `через ${hours} ч ${rest} мин`
 }
 
-// One glanceable line above today's calendar, like a widget: who is in the chair and who is next.
-export const NowBar = ({ bookings, nowMinutes }: NowBarProps) => {
+// Two glanceable tiles over today's calendar, like a widget: who is in the chair (with how much
+// of the visit is done) and who is next (with the countdown and a call button). A tile opens
+// its booking.
+export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   const permission = useSyncExternalStore(subscribeNoop, getPermission, () => 'denied')
   const live = bookings
     .filter((booking) => booking.status === 'confirmed')
@@ -37,6 +44,13 @@ export const NowBar = ({ bookings, nowMinutes }: NowBarProps) => {
     return start <= nowMinutes && nowMinutes < start + booking.durationMinutes
   })
   const next = live.find((booking) => parseClock(booking.time) > nowMinutes)
+  const wait = next ? parseClock(next.time) - nowMinutes : 0
+  const progress = current
+    ? Math.min(1, (nowMinutes - parseClock(current.time)) / current.durationMinutes)
+    : 0
+  const left = current
+    ? Math.max(0, parseClock(current.time) + current.durationMinutes - nowMinutes)
+    : 0
 
   const enableNotifications = () => {
     void Notification.requestPermission()
@@ -44,27 +58,62 @@ export const NowBar = ({ bookings, nowMinutes }: NowBarProps) => {
 
   return (
     <section className={styles.bar} aria-label='Сейчас'>
-      <div className={styles.lines}>
-        {current && (
-          <p className={styles.line}>
-            <span className={styles.live}>Сейчас</span>
-            <strong>{current.customerName}</strong> · {current.serviceName} ·{' '}
-            {current.specialistName} · до {addMinutes(current.time, current.durationMinutes)}
-          </p>
-        )}
-        {next ? (
-          <p className={styles.line}>
-            <span className={styles.label}>Следующий</span>
-            <strong>
-              {next.customerName} в {next.time}
-            </strong>
-            , {formatWait(parseClock(next.time) - nowMinutes)} · {next.serviceName} ·{' '}
-            {next.specialistName}
-          </p>
-        ) : (
-          !current && <p className={styles.line}>На сегодня записей больше нет.</p>
-        )}
-      </div>
+      {current && (
+        <div className={styles.tile} data-kind='now'>
+          <button type='button' className={styles.open} onClick={() => onOpen(current)}>
+            {/* How much of the visit is left, as a ring with the minutes inside. */}
+            <span
+              className={styles.ring}
+              style={{ '--progress': progress } as CSSProperties}
+              role='img'
+              aria-label={`Осталось ${pluralize(left, ['минута', 'минуты', 'минут'])}`}
+            >
+              <span className={styles.ringValue}>{left}</span>
+              <span className={styles.ringUnit}>мин</span>
+            </span>
+            <span className={styles.text}>
+              <span className={styles.caption}>
+                <span className={styles.live}>Сейчас</span>
+                до {addMinutes(current.time, current.durationMinutes)}
+              </span>
+              <span className={styles.who}>{current.customerName}</span>
+              <span className={styles.what}>
+                {current.serviceName} · {current.specialistName}
+              </span>
+            </span>
+          </button>
+        </div>
+      )}
+      {next ? (
+        <div className={styles.tile} data-soon={wait <= SOON_MINUTES || undefined}>
+          <button type='button' className={styles.open} onClick={() => onOpen(next)}>
+            <span className={styles.text}>
+              <span className={styles.caption}>
+                <span className={styles.label}>Следующий</span>
+                <span className={styles.wait}>{formatWait(wait)}</span>
+              </span>
+              <span className={styles.who}>
+                <span className={styles.time}>{next.time}</span> {next.customerName}
+              </span>
+              <span className={styles.what}>
+                {next.serviceName} · {next.specialistName}
+              </span>
+            </span>
+          </button>
+          {next.customerPhone && (
+            <a
+              href={`tel:${next.customerPhone}`}
+              className={styles.call}
+              aria-label={`Позвонить: ${next.customerName}`}
+              title='Позвонить'
+            >
+              <Phone weight='fill' aria-hidden />
+            </a>
+          )}
+        </div>
+      ) : (
+        !current && <p className={styles.empty}>На сегодня записей больше нет.</p>
+      )}
       {permission === 'default' && (
         <button type='button' className={styles.notify} onClick={enableNotifications}>
           <Bell weight='bold' aria-hidden />

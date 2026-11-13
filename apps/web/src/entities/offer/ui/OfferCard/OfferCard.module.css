@@ -1,14 +1,20 @@
-/* Store card: the picture, what it is and where, then price and the next free time. */
+/* The picture is the card: what, where, price and the next free time on a dark scrim at its
+   foot — the same shape as the place cards. */
 .card {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  justify-content: flex-end;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--duration-normal) var(--ease-standard);
+  color: #fff;
+  transition:
+    box-shadow var(--duration-normal) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
 }
 
 .card:active {
@@ -27,19 +33,26 @@
 }
 
 .media {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  aspect-ratio: 4 / 3;
+  padding-top: 22%;
   overflow: hidden;
-  background:
-    radial-gradient(
-      120% 90% at 30% 0%,
-      color-mix(in srgb, var(--tint) 28%, transparent),
-      transparent 70%
-    ),
-    color-mix(in srgb, var(--tint) 10%, var(--color-fill));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tint) 62%, white),
+    color-mix(in srgb, var(--tint) 88%, black)
+  );
+}
+
+.media::after {
+  content: "";
+  position: absolute;
+  inset: 25% 0 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.5) 45%, rgb(0 0 0 / 0.88));
 }
 
 .cover {
@@ -52,16 +65,16 @@
 
 .badge {
   position: absolute;
-  bottom: var(--space-2);
+  top: var(--space-2);
   left: var(--space-2);
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  background: var(--color-material);
-  backdrop-filter: var(--blur-material);
+  background: var(--color-sheet);
   color: var(--color-highlight);
 }
 
@@ -79,10 +92,9 @@
 
 .body {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-4) var(--space-4);
+  gap: 2px;
+  padding: var(--space-3);
 }
 
 .name {
@@ -97,7 +109,7 @@
 }
 
 .nameLink {
-  color: var(--color-foreground);
+  color: #fff;
   outline: none;
 }
 
@@ -113,7 +125,7 @@
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: var(--color-muted-foreground);
+  color: rgb(255 255 255 / 0.8);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
@@ -139,7 +151,7 @@
 .rating svg {
   width: 11px;
   height: 11px;
-  color: var(--color-rating);
+  color: #ffcc4d;
 }
 
 /* Price is the one thing the eye lands on; length and the next free time stay quiet beside it. */
@@ -147,8 +159,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-top: auto;
-  padding-top: var(--space-2);
+  padding-top: var(--space-1);
 }
 
 .price {
@@ -160,7 +171,7 @@
 }
 
 .duration {
-  color: var(--color-muted-foreground);
+  color: rgb(255 255 255 / 0.75);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-regular);
   letter-spacing: var(--tracking-caption);
@@ -168,7 +179,7 @@
 
 .slot {
   overflow: hidden;
-  color: var(--color-muted-foreground);
+  color: rgb(255 255 255 / 0.7);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
   text-overflow: ellipsis;
@@ -177,8 +188,19 @@
 
 .slot[data-state="today"],
 .slot[data-state="soon"] {
-  color: var(--color-link);
-  font-weight: var(--font-weight-medium);
+  color: #fff;
+  font-weight: var(--font-weight-semibold);
+}
+
+.slot[data-state="today"]::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: var(--radius-full);
+  background: #34c759;
+  vertical-align: 1px;
 }
 
 @media (max-width: 639px) {
@@ -202,6 +224,7 @@
   position: absolute;
   top: var(--space-2);
   left: var(--space-2);
+  z-index: 1;
   padding: 2px var(--space-2);
   border-radius: var(--radius-full);
   background: var(--color-danger);
@@ -209,4 +232,23 @@
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-bold);
   font-variant-numeric: tabular-nums;
+}
+
+/* Both marks: the fire sits after the discount instead of under it. */
+.discountBadge + .badge {
+  left: calc(var(--space-2) + 60px);
+}
+
+/* Phones: the place's name and rating would crowd the picture — the service, price and time stay. */
+@media (max-width: 639px) {
+  .place {
+    display: none;
+  }
+}
+
+/* On the vivid no-cover background the place's tile is frosted white. */
+.tile {
+  background: rgb(255 255 255 / 0.22);
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 0.4);
+  color: #fff;
 }
