@@ -5,6 +5,8 @@
   margin-top: var(--space-2);
   overflow: hidden;
   border-radius: var(--radius-lg);
+  /* Keeps the pill's z-index (above Leaflet's panes) inside the card, under the sticky header. */
+  isolation: isolate;
 }
 
 .map,
