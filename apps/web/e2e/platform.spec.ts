@@ -1,10 +1,18 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
 import { bookingSteps, pickFirstFreeSlot, primaryAction } from './helpers'
 
 // 16×10 px PNG; the API re-encodes it as WebP.
 const TINY_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAIAAAAy3EnLAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAFUlEQVQYlWNgKHxMGmIY1fB4KIYSAN5g1IFgp8jzAAAAAElFTkSuQmCC'
+
+// Settings sections sit in a sidebar from 1024px; phones go back to the list first.
+const openSettings = async (page: Page, name: string) => {
+  if ((page.viewportSize()?.width ?? 0) < 1024) {
+    await page.getByRole('link', { name: 'Назад к настройкам' }).click()
+  }
+  await page.getByRole('navigation', { name: 'Настройки' }).getByRole('link', { name }).click()
+}
 
 test.describe('Platform: a new business goes live', () => {
   test('owner registers, adds a service and a master; a client books; owner sees it', async ({
@@ -43,7 +51,7 @@ test.describe('Platform: a new business goes live', () => {
     await serviceDialog.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('button', { name: /Стрижка/ })).toBeVisible()
 
-    await page.getByRole('link', { name: 'Мастера' }).click()
+    await openSettings(page, 'Мастера')
     await page.getByRole('button', { name: 'Добавить мастера' }).first().click()
     const masterDialog = page.getByRole('dialog')
     await masterDialog.getByLabel('Имя').fill('Азамат')
@@ -52,7 +60,7 @@ test.describe('Platform: a new business goes live', () => {
     await expect(page.getByRole('heading', { name: 'Запуск записи' })).toHaveCount(0)
 
     // A second address: the booking page then asks where.
-    await page.getByRole('link', { name: 'Филиалы' }).click()
+    await openSettings(page, 'Филиалы')
     await expect(page.getByRole('button', { name: /^Основной/ })).toBeVisible()
     await page.getByRole('button', { name: 'Добавить филиал' }).click()
     const branchDialog = page.getByRole('dialog', { name: 'Новый филиал' })
@@ -62,7 +70,7 @@ test.describe('Platform: a new business goes live', () => {
     await expect(page.getByRole('button', { name: /Джал.*Нет метки/ })).toBeVisible()
 
     // A cover photo: uploaded, compressed by the API and shown on the catalog card.
-    await page.getByRole('link', { name: 'Профиль', exact: true }).click()
+    await openSettings(page, 'Профиль')
     await page.getByLabel('Файл обложки').setInputFiles({
       name: 'cover.png',
       mimeType: 'image/png',

@@ -68,28 +68,28 @@ export const PhotosSection = ({ slug, business, run }: PhotosSectionProps) => {
             <span className={styles.rowHint}>
               {busy === 'cover' ? 'Загружаем…' : 'Карточка в каталоге и шапка страницы'}
             </span>
-          </span>
-          <span className={styles.rowActions}>
-            <button
-              type='button'
-              className={styles.textButton}
-              onClick={() => coverInput.current?.click()}
-              disabled={busy !== null}
-            >
-              <Camera weight='bold' aria-hidden />
-              {business.coverUrl ? 'Заменить' : 'Добавить'}
-            </button>
-            {business.coverUrl && (
+            <span className={styles.rowActions}>
               <button
                 type='button'
                 className={styles.textButton}
-                data-danger
-                onClick={() => run(() => removeCover(slug), 'Обложка удалена')}
+                onClick={() => coverInput.current?.click()}
                 disabled={busy !== null}
               >
-                Удалить
+                <Camera weight='bold' aria-hidden />
+                {business.coverUrl ? 'Заменить' : 'Добавить'}
               </button>
-            )}
+              {business.coverUrl && (
+                <button
+                  type='button'
+                  className={styles.textButton}
+                  data-danger
+                  onClick={() => run(() => removeCover(slug), 'Обложка удалена')}
+                  disabled={busy !== null}
+                >
+                  Удалить
+                </button>
+              )}
+            </span>
           </span>
         </div>
 
