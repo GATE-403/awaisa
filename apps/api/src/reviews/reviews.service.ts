@@ -249,7 +249,16 @@ export class ReviewsService {
   }
 
   async listForManage(business: Business) {
-    return this.summary(business, 100, true)
+    const summary = await this.summary(business, 100, true)
+    // The cabinet's items always carry the client's phone and visit date.
+    return {
+      ...summary,
+      items: summary.items.map((item) => ({
+        ...item,
+        customerPhone: item.customerPhone ?? '',
+        visitDate: item.visitDate ?? null,
+      })),
+    }
   }
 
   async reply(business: Business, id: string, text: string) {

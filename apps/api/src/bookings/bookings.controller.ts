@@ -1,3 +1,4 @@
+import type { Availability, Booking, CreatedBooking, NextFree } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -54,13 +55,15 @@ export class BookingsController {
 
   @Cached({ ttl: 15, tags: ['availability'] })
   @Get('availability')
-  getAvailability(@Query({ schema: availabilityQuerySchema }) query: AvailabilityQuery) {
+  getAvailability(
+    @Query({ schema: availabilityQuerySchema }) query: AvailabilityQuery,
+  ): Promise<Availability> {
     return this.bookingsService.getAvailability(query)
   }
 
   @Cached({ ttl: 20, tags: ['availability'], maxAge: 10 })
   @Get('next-free')
-  getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery) {
+  getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery): Promise<NextFree> {
     return this.bookingsService.findNextFree(query.slugs)
   }
 
@@ -69,7 +72,7 @@ export class BookingsController {
   getServicesNextFree(
     @Param('slug') slug: string,
     @Query({ schema: servicesNextFreeQuerySchema }) query: ServicesNextFreeQuery,
-  ) {
+  ): Promise<NextFree> {
     return this.bookingsService.findNextFreeByService(slug, query.branchId)
   }
 
@@ -79,7 +82,7 @@ export class BookingsController {
   async create(
     @Body({ schema: createBookingSchema }) body: CreateBookingInput,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<CreatedBooking> {
     const booking = await this.bookingsService.create(body, customer)
     if (body.ref && !body.forOther)
       void this.referrals.recordFirstBooking(body.ref, booking.customerPhone)
@@ -90,7 +93,7 @@ export class BookingsController {
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
-  ) {
+  ): Promise<Booking> {
     return this.bookingsService.findByToken(id, parseToken(token))
   }
 
@@ -102,7 +105,7 @@ export class BookingsController {
     @Headers(TOKEN_HEADER) token: string | undefined,
     @CurrentCustomer() customer: Customer | null,
     @Body({ schema: moveBookingSchema }) body: MoveByClientInput,
-  ) {
+  ): Promise<Booking> {
     return this.bookingsService.moveByClient(id, { token: token ?? null, customer }, body)
   }
 
@@ -111,13 +114,16 @@ export class BookingsController {
   restore(
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
-  ) {
+  ): Promise<Booking> {
     return this.bookingsService.restoreByToken(id, parseToken(token))
   }
 
   @Delete('bookings/:id')
   @HttpCode(200)
-  cancel(@Param('id', ParseUUIDPipe) id: string, @Headers(TOKEN_HEADER) token: string | undefined) {
+  cancel(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+  ): Promise<Booking> {
     return this.bookingsService.cancel(id, parseToken(token))
   }
 }

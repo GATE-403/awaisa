@@ -1,3 +1,4 @@
+import type { BusinessQuestion, QuestionList } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -28,7 +29,7 @@ export class QuestionsController {
 
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/questions')
-  listPublic(@Param('slug') slug: string) {
+  listPublic(@Param('slug') slug: string): Promise<QuestionList> {
     return this.questions.listPublic(slug)
   }
 
@@ -39,14 +40,14 @@ export class QuestionsController {
     @Param('slug') slug: string,
     @CurrentCustomer() customer: Customer,
     @Body({ schema: askSchema }) body: AskInput,
-  ) {
+  ): Promise<BusinessQuestion> {
     return this.questions.ask(slug, customer, body.text)
   }
 
   // Staff answer too: «Как добраться?» is part of the day, not of the business setup.
   @Get('manage/:slug/questions')
   @UseGuards(BusinessAccessGuard)
-  listForManage(@CurrentBusiness() business: Business) {
+  listForManage(@CurrentBusiness() business: Business): Promise<BusinessQuestion[]> {
     return this.questions.listForManage(business)
   }
 
@@ -56,7 +57,7 @@ export class QuestionsController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: answerSchema }) body: AnswerInput,
-  ) {
+  ): Promise<BusinessQuestion> {
     return this.questions.answer(business, id, body.text)
   }
 

@@ -1,3 +1,12 @@
+import type {
+  Branch,
+  BusinessPage,
+  BusinessProfile,
+  Category,
+  CreatedId,
+  CreatedLeave,
+  MasterSchedule,
+} from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -57,7 +66,10 @@ export class ManageController {
   ) {}
 
   @Get()
-  async get(@CurrentBusiness() business: Business, @CurrentRole() role: MemberRole) {
+  async get(
+    @CurrentBusiness() business: Business,
+    @CurrentRole() role: MemberRole,
+  ): Promise<BusinessPage> {
     return {
       // The cabinet hides money and setup from administrators; the API refuses them too.
       role,
@@ -71,7 +83,7 @@ export class ManageController {
   createBranch(
     @CurrentBusiness() business: Business,
     @Body({ schema: branchSchema }) body: BranchInput,
-  ) {
+  ): Promise<Branch> {
     return this.businesses.saveBranch(business, body)
   }
 
@@ -81,7 +93,7 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: branchSchema }) body: BranchInput,
-  ) {
+  ): Promise<Branch> {
     return this.businesses.saveBranch(business, body, id)
   }
 
@@ -97,13 +109,16 @@ export class ManageController {
   update(
     @CurrentBusiness() business: Business,
     @Body({ schema: updateBusinessSchema }) body: UpdateBusinessInput,
-  ) {
+  ): Promise<BusinessProfile> {
     return this.businesses.update(business, body)
   }
 
   @OwnerOnly()
   @Put('hours')
-  setHours(@CurrentBusiness() business: Business, @Body({ schema: hoursSchema }) body: HoursInput) {
+  setHours(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: hoursSchema }) body: HoursInput,
+  ): Promise<BusinessProfile> {
     return this.businesses.setHours(business, body)
   }
 
@@ -112,7 +127,7 @@ export class ManageController {
   createCategory(
     @CurrentBusiness() business: Business,
     @Body({ schema: categorySchema }) body: CategoryInput,
-  ) {
+  ): Promise<Category> {
     return this.catalog.createCategory(business.id, body)
   }
 
@@ -139,7 +154,7 @@ export class ManageController {
   createService(
     @CurrentBusiness() business: Business,
     @Body({ schema: serviceSchema }) body: ServiceInput,
-  ) {
+  ): Promise<CreatedId> {
     return this.catalog.createService(business.id, body)
   }
 
@@ -159,7 +174,7 @@ export class ManageController {
   async createSpecialist(
     @CurrentBusiness() business: Business,
     @Body({ schema: specialistSchema }) body: SpecialistInput,
-  ) {
+  ): Promise<CreatedId> {
     const saved = await this.catalog.saveSpecialist(business.id, body)
     this.inviteMaster(business, saved)
     return { id: saved.id }
@@ -183,7 +198,10 @@ export class ManageController {
   }
 
   @Get('specialists/:id/schedule')
-  getMasterSchedule(@CurrentBusiness() business: Business, @Param('id') id: string) {
+  getMasterSchedule(
+    @CurrentBusiness() business: Business,
+    @Param('id') id: string,
+  ): Promise<MasterSchedule> {
     return this.masterSchedule.getSchedule(business.id, id)
   }
 
@@ -193,7 +211,7 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @Param('id') id: string,
     @Body({ schema: masterHoursSchema }) body: MasterHoursInput,
-  ) {
+  ): Promise<MasterSchedule> {
     return this.masterSchedule.setHours(business.id, id, body)
   }
 
@@ -202,7 +220,7 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @Param('id') id: string,
     @Body({ schema: leaveSchema }) body: LeaveBody,
-  ) {
+  ): Promise<CreatedLeave> {
     return this.masterSchedule.addLeave(business.id, id, body)
   }
 

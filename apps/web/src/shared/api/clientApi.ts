@@ -6,30 +6,45 @@ import type {
   AnalyticsDays,
   AnalyticsReport,
   Availability,
+  AvatarUpload,
+  BirthdayGreeting,
   Booking,
+  BookingTelegramLink,
   Branch,
   BranchInput,
-  Business,
   BusinessCard,
   BusinessLink,
   BusinessPage,
+  BusinessProfile,
   BusinessQuestion,
   Category,
+  CheckoutLink,
   ClientCard,
   ClientListItem,
   ClientLoyalty,
+  ClientNote,
+  ClosedDay,
+  CoverUpload,
   CreateBookingInput,
   CreateBusinessInput,
   CreatedBooking,
+  CreatedId,
+  CreatedLeave,
+  CreatedReview,
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  FeedLikes,
   FeedPage,
   GiftCertificate,
   ImportReport,
   JoinWaitlistInput,
+  LogoUpload,
   LoyaltyOverview,
+  LoyaltySettings,
+  MailingPreview,
   MailingSegment,
+  MailingSent,
   MailingsOverview,
   ManagedReview,
   ManagedWaitlistEntry,
@@ -43,6 +58,8 @@ import type {
   Offer,
   OtpRequest,
   OutcomeInput,
+  PaymentSync,
+  PaymentsConfig,
   PriceQuote,
   ProfileSettings,
   Promotion,
@@ -50,22 +67,30 @@ import type {
   PublicProfile,
   RecentBooking,
   Recommendation,
-  Review,
   ReviewAccess,
   ReviewerProfile,
+  ReviewPhotos,
+  ReviewReply,
   ReviewSummary,
   ServiceInput,
   SlugCheck,
   SpecialistInput,
+  SpecialistPhotoUpload,
   StockItem,
   StockItemInput,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
+  TelegramLink,
   TelegramStatus,
+  TestPaymentResult,
+  UnclosedDays,
   UpdateBusinessInput,
+  UploadedPhoto,
   VisitReview,
   WaitlistEntry,
+  WalletConfig,
+  WalletLinks,
   WorkingDay,
   WorkPhoto,
   WorkPhotoInput,
@@ -191,7 +216,7 @@ const getServicesNextFree = (slug: string, branchId?: string, signal?: AbortSign
 
 // «Нравится» in «Работы»: one per photo and device session; answers the photo's count.
 const likeFeedItem = (id: string, session: string, isLiked: boolean) =>
-  request<{ likes: number }>(`/feed/${id}/${isLiked ? 'like' : 'unlike'}`, {
+  request<FeedLikes>(`/feed/${id}/${isLiked ? 'like' : 'unlike'}`, {
     method: 'POST',
     body: JSON.stringify({ session }),
   })
@@ -213,9 +238,7 @@ const restoreBooking = (id: string, token: string) =>
     headers: { [TOKEN_HEADER]: token },
   })
 
-type WalletLinks = { apple: string | null; google: string | null }
-
-const getWalletConfig = () => request<{ apple: boolean; google: boolean }>('/wallet/config')
+const getWalletConfig = () => request<WalletConfig>('/wallet/config')
 
 const getWalletLinks = (id: string, token: string | null) =>
   token
@@ -273,7 +296,7 @@ const addReviewPhoto = (id: string, access: ReviewAccess, file: File) => {
   const body = new FormData()
   body.append('file', file)
 
-  return request<{ photos: string[] }>(`/bookings/${id}/review/photos`, {
+  return request<ReviewPhotos>(`/bookings/${id}/review/photos`, {
     method: 'POST',
     headers: accessHeaders(access),
     body,
@@ -288,7 +311,7 @@ const createReview = (
   access: ReviewAccess,
   input: { rating: number; comment: string },
 ) =>
-  request<Review & { slug: string }>(`/bookings/${id}/review`, {
+  request<CreatedReview>(`/bookings/${id}/review`, {
     method: 'POST',
     headers: accessHeaders(access),
     body: JSON.stringify(input),
@@ -298,7 +321,7 @@ const getManagedReviews = (slug: string, signal?: AbortSignal) =>
   request<ReviewSummary<ManagedReview>>(`${manage(slug)}/reviews`, { signal })
 
 const replyToReview = (slug: string, id: string, text: string) =>
-  send<{ id: string; reply: string | null }>('PUT', `${manage(slug)}/reviews/${id}/reply`, { text })
+  send<ReviewReply>('PUT', `${manage(slug)}/reviews/${id}/reply`, { text })
 
 const setBookingOutcome = (slug: string, id: string, input: OutcomeInput) =>
   send<AdminBooking>('PATCH', `${manage(slug)}/bookings/${id}/outcome`, input)
@@ -315,12 +338,7 @@ const updateClient = (
   slug: string,
   phone: string,
   input: { note: string; birthday: string | null },
-) =>
-  send<{ phone: string; note: string; birthday: string | null }>(
-    'PUT',
-    `${manage(slug)}/clients/${encodeURIComponent(phone)}`,
-    input,
-  )
+) => send<ClientNote>('PUT', `${manage(slug)}/clients/${encodeURIComponent(phone)}`, input)
 
 const getMasterSchedule = (slug: string, id: string, signal?: AbortSignal) =>
   request<MasterSchedule>(`${manage(slug)}/specialists/${id}/schedule`, { signal })
@@ -335,11 +353,7 @@ const addMasterLeave = (
   slug: string,
   id: string,
   input: { startsOn: string; endsOn: string; reason: string },
-) =>
-  post<{ leave: MasterSchedule['leaves'][number]; conflictingBookings: number }>(
-    `${manage(slug)}/specialists/${id}/leaves`,
-    input,
-  )
+) => post<CreatedLeave>(`${manage(slug)}/specialists/${id}/leaves`, input)
 
 const removeMasterLeave = (slug: string, id: string, leaveId: string) =>
   send<void>('DELETE', `${manage(slug)}/specialists/${id}/leaves/${leaveId}`)
@@ -362,22 +376,18 @@ const moveMyBooking = (id: string, token: string | null, input: { date: string; 
   })
 
 const closeDay = (slug: string, date: string) =>
-  post<{ ids: string[] }>(`${manage(slug)}/bookings/close-day`, { date })
+  post<ClosedDay>(`${manage(slug)}/bookings/close-day`, { date })
 
 const reopenVisits = (slug: string, ids: string[]) =>
   post<void>(`${manage(slug)}/bookings/reopen`, { ids })
 
 const getUnclosedVisits = (slug: string, signal?: AbortSignal) =>
-  request<{ total: number; days: { date: string; count: number }[] }>(
-    `${manage(slug)}/bookings/unclosed`,
-    { signal },
-  )
+  request<UnclosedDays>(`${manage(slug)}/bookings/unclosed`, { signal })
 
 const getTelegramStatus = (slug: string, signal?: AbortSignal) =>
   request<TelegramStatus>(`${manage(slug)}/telegram`, { signal })
 
-const createTelegramLink = (slug: string) =>
-  post<{ url: string; code: string }>(`${manage(slug)}/telegram/link`)
+const createTelegramLink = (slug: string) => post<TelegramLink>(`${manage(slug)}/telegram/link`)
 
 const removeTelegramChat = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/telegram/${id}`)
@@ -399,16 +409,16 @@ const getMyBusinesses = (signal?: AbortSignal) =>
 const checkSlug = (slug: string, signal?: AbortSignal) =>
   request<SlugCheck>(`/businesses/slug-available?${new URLSearchParams({ slug })}`, { signal })
 
-const createBusiness = (input: CreateBusinessInput) => post<Business>('/businesses', input)
+const createBusiness = (input: CreateBusinessInput) => post<BusinessProfile>('/businesses', input)
 
 const getManagedBusiness = (slug: string, signal?: AbortSignal) =>
   request<BusinessPage>(manage(slug), { signal })
 
 const updateBusiness = (slug: string, input: UpdateBusinessInput) =>
-  send<Business>('PATCH', manage(slug), input)
+  send<BusinessProfile>('PATCH', manage(slug), input)
 
 const setWorkingHours = (slug: string, days: WorkingDay[]) =>
-  send<Business>('PUT', `${manage(slug)}/hours`, days)
+  send<BusinessProfile>('PUT', `${manage(slug)}/hours`, days)
 
 const createCategory = (slug: string, name: string) =>
   post<Category>(`${manage(slug)}/categories`, { name })
@@ -420,13 +430,13 @@ const deleteCategory = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/categories/${id}`)
 
 const createService = (slug: string, input: ServiceInput) =>
-  post<{ id: string }>(`${manage(slug)}/services`, input)
+  post<CreatedId>(`${manage(slug)}/services`, input)
 
 const updateService = (slug: string, id: string, input: ServiceInput) =>
   send<void>('PUT', `${manage(slug)}/services/${id}`, input)
 
 const createSpecialist = (slug: string, input: SpecialistInput) =>
-  post<{ id: string }>(`${manage(slug)}/specialists`, input)
+  post<CreatedId>(`${manage(slug)}/specialists`, input)
 
 const updateSpecialist = (slug: string, id: string, input: SpecialistInput) =>
   send<void>('PUT', `${manage(slug)}/specialists/${id}`, input)
@@ -438,7 +448,7 @@ const createStaffBooking = (slug: string, input: CreateBookingInput) =>
   post<AdminBooking>(`${manage(slug)}/bookings`, input)
 
 const cancelBookingAsSalon = (slug: string, id: string) =>
-  post<AdminBooking>(`${manage(slug)}/bookings/${id}/cancel`)
+  post<Booking>(`${manage(slug)}/bookings/${id}/cancel`)
 
 const getRecentBookings = (slug: string, since: string, signal?: AbortSignal) =>
   request<RecentBooking[]>(`${manage(slug)}/bookings/recent?${new URLSearchParams({ since })}`, {
@@ -459,13 +469,11 @@ const upload = <Result>(path: string, file: File, fields: Record<string, string>
   return request<Result>(path, { method: 'POST', body })
 }
 
-const uploadCover = (slug: string, file: File) =>
-  upload<{ coverUrl: string }>(`${manage(slug)}/cover`, file)
+const uploadCover = (slug: string, file: File) => upload<CoverUpload>(`${manage(slug)}/cover`, file)
 
 const removeCover = (slug: string) => send<void>('DELETE', `${manage(slug)}/cover`)
 
-const uploadLogo = (slug: string, file: File) =>
-  upload<{ logoUrl: string }>(`${manage(slug)}/logo`, file)
+const uploadLogo = (slug: string, file: File) => upload<LogoUpload>(`${manage(slug)}/logo`, file)
 
 const removeLogo = (slug: string) => send<void>('DELETE', `${manage(slug)}/logo`)
 
@@ -489,7 +497,7 @@ const removePhoto = (slug: string, id: string) =>
   send<WorkPhoto[]>('DELETE', `${manage(slug)}/work-photos/${id}`)
 
 const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
-  upload<{ url: string }>(`/master/${slug}/photos`, file, { bookingId })
+  upload<UploadedPhoto>(`/master/${slug}/photos`, file, { bookingId })
 
 const getFeed = (
   query: {
@@ -536,7 +544,7 @@ const getRecommendations = (
 const reportFeedItem = (id: string) => post<void>(`/feed/${id}/report`, {})
 
 const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
-  upload<{ photoUrl: string }>(`${manage(slug)}/specialists/${id}/photo`, file)
+  upload<SpecialistPhotoUpload>(`${manage(slug)}/specialists/${id}/photo`, file)
 
 const removeSpecialistPhoto = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/specialists/${id}/photo`)
@@ -551,7 +559,7 @@ const deleteBranch = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/branches/${id}`)
 
 const restoreBookingAsSalon = (slug: string, id: string) =>
-  post<AdminBooking>(`${manage(slug)}/bookings/${id}/restore`)
+  post<Booking>(`${manage(slug)}/bookings/${id}/restore`)
 
 const createTimeOff = (slug: string, input: CreateTimeOffInput) =>
   post<CreatedTimeOff>(`${manage(slug)}/time-off`, input)
@@ -585,28 +593,27 @@ const removeManagedWaitlist = (slug: string, id: string) =>
   request<void>(`${manage(slug)}/waitlist/${id}`, { method: 'DELETE' })
 
 const getPaymentConfig = (signal?: AbortSignal) =>
-  request<{ isAvailable: boolean; driver: string }>('/payments/config', { signal })
+  request<PaymentsConfig>('/payments/config', { signal })
 
 const completeTestPayment = (id: string, signature: string) =>
-  request<{ bookingId: string; paymentStatus: string | null }>(
+  request<TestPaymentResult>(
     `/payments/${id}/test-complete?${new URLSearchParams({ s: signature })}`,
     { method: 'POST' },
   )
 
 const syncPayment = (id: string, signature: string) =>
-  request<{ bookingId: string; status: string; paymentStatus: string | null }>(
-    `/payments/${id}/sync?${new URLSearchParams({ s: signature })}`,
-    { method: 'POST' },
-  )
+  request<PaymentSync>(`/payments/${id}/sync?${new URLSearchParams({ s: signature })}`, {
+    method: 'POST',
+  })
 
 const getCheckoutUrl = (id: string, token: string | null) =>
-  request<{ url: string }>(`/bookings/${id}/checkout`, {
+  request<CheckoutLink>(`/bookings/${id}/checkout`, {
     headers: token ? { [TOKEN_HEADER]: token } : {},
   })
 
 // «Напоминать в Telegram»: the bot link for this booking's number (null without a bot).
 const getTelegramLink = (id: string, token: string | null) =>
-  request<{ url: string | null; isLinked: boolean }>(`/bookings/${id}/telegram`, {
+  request<BookingTelegramLink>(`/bookings/${id}/telegram`, {
     headers: token ? { [TOKEN_HEADER]: token } : {},
   })
 
@@ -635,7 +642,7 @@ const getLoyalty = (slug: string, signal?: AbortSignal) =>
   request<LoyaltyOverview>(`${manage(slug)}/loyalty`, { signal })
 
 const setBonusPercent = (slug: string, bonusPercent: number | null) =>
-  send<{ bonusPercent: number | null }>('PUT', `${manage(slug)}/loyalty/settings`, { bonusPercent })
+  send<LoyaltySettings>('PUT', `${manage(slug)}/loyalty/settings`, { bonusPercent })
 
 const saveSubscriptionPlan = (slug: string, input: SubscriptionPlanInput, id?: string) =>
   id
@@ -670,7 +677,7 @@ const receiveStock = (slug: string, id: string, quantity: number, unitCost?: num
 const adjustStock = (slug: string, id: string, quantity: number) =>
   post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
 
-const uploadAvatar = (file: File) => upload<{ avatarUrl: string }>('/me/avatar', file)
+const uploadAvatar = (file: File) => upload<AvatarUpload>('/me/avatar', file)
 
 const removeAvatar = () => send<void>('DELETE', '/me/avatar')
 
@@ -699,7 +706,7 @@ const previewMailing = (
   days: number,
   signal?: AbortSignal,
 ) =>
-  request<{ count: number; names: string[] }>(
+  request<MailingPreview>(
     `${manage(slug)}/mailings/preview?${new URLSearchParams({ segment, days: String(days) })}`,
     { signal },
   )
@@ -707,10 +714,10 @@ const previewMailing = (
 const sendMailing = (
   slug: string,
   input: { segment: MailingSegment; days: number; text: string },
-) => post<{ recipients: number }>(`${manage(slug)}/mailings`, input)
+) => post<MailingSent>(`${manage(slug)}/mailings`, input)
 
 const setBirthdayGreeting = (slug: string, text: string | null) =>
-  send<{ text: string | null }>('PUT', `${manage(slug)}/mailings/birthday`, { text })
+  send<BirthdayGreeting>('PUT', `${manage(slug)}/mailings/birthday`, { text })
 
 const getTeam = (slug: string, signal?: AbortSignal) =>
   request<TeamMember[]>(`${manage(slug)}/members`, { signal })

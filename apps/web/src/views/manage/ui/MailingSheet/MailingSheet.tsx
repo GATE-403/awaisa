@@ -12,6 +12,7 @@ import {
   setBirthdayGreeting,
 } from '@/shared/api/clientApi'
 import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize } from '@/shared/lib/plural'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -200,6 +201,7 @@ export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps)
                     {new Date(item.createdAt).toLocaleDateString('ru-RU', {
                       day: 'numeric',
                       month: 'short',
+                      timeZone: BUSINESS_TIME_ZONE,
                     })}
                   </span>
                   <span>{pluralize(item.recipients, ['клиент', 'клиента', 'клиентов'])}</span>

@@ -124,9 +124,10 @@ test.describe('Telegram for owners', () => {
     await page.reload()
     const row = page.getByText(`@${username}`)
     await expect(row).toBeVisible()
-    await page
-      .getByText(`@${username}`)
-      .locator('xpath=ancestor::div[1]/..')
+    // The nearest block around this chat that has its own button: other chats linked to the
+    // business (a developer's own, say) have theirs.
+    await row
+      .locator('xpath=ancestor::*[.//button[normalize-space()="Отключить"]][1]')
       .getByRole('button', { name: 'Отключить' })
       .click()
     await expect(page.getByText('Уведомления отключены')).toBeVisible()

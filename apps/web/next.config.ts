@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   outputFileTracingRoot: path.join(import.meta.dirname, '../../'),
   poweredByHeader: false,
-  transpilePackages: ['@awaisa/ui', '@awaisa/tokens'],
+  transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts'],
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   experimental: {
     agentFeedback: true,

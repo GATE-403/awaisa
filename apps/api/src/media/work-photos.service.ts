@@ -1,3 +1,4 @@
+import type { BusinessKind } from '@awaisa/contracts'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -194,7 +195,7 @@ export class WorkPhotosService {
       business: {
         slug: String(row.slug),
         name: String(row.businessName),
-        kind: String(row.kind),
+        kind: String(row.kind) as BusinessKind,
         address: String(row.address ?? ''),
       },
       service: row.serviceId

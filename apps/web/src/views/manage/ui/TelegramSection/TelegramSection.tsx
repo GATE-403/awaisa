@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { createTelegramLink, getTelegramStatus, removeTelegramChat } from '@/shared/api/clientApi'
 import type { TelegramStatus } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { haptic } from '@/shared/lib/nativeBridge'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import styles from './TelegramSection.module.css'
@@ -19,7 +20,11 @@ interface TelegramSectionProps {
 const POLL_MS = 3_000
 const POLL_LIMIT = 40
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 // New bookings, cancellations, reviews and the morning schedule in the owner's Telegram.
 // Linking is one tap: the bot opens with a one-time code, the cabinet notices the new chat.
