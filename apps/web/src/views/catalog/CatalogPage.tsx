@@ -1,3 +1,5 @@
+import { CaretRight, Trophy } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
 import { Suspense } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { ForYouShelf } from '@/features/forYou'
@@ -48,6 +50,18 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   return (
     <NextFreeProvider slugs={slugs}>
       <div className={styles.contained}>
+        {/* Picked for this client (or, with nothing known, popular and free soon) leads the page. */}
+        {isBrowsing && !kind && <ForYouShelf isForEveryone />}
+        {isBrowsing && (
+          // The leaderboards, one quiet line: who is best by reviews, masters and places.
+          <NextLink href={kind ? `/top?kind=${kind}` : '/top'} className={styles.topLink}>
+            <Trophy weight='fill' aria-hidden className={styles.topIcon} />
+            <span className={styles.topText}>
+              <strong>Рейтинг</strong> лучших мастеров и мест по отзывам
+            </span>
+            <CaretRight weight='bold' aria-hidden className={styles.topChevron} />
+          </NextLink>
+        )}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}
@@ -60,14 +74,8 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           initialSort={toSort(params.sort)}
           canReset={Boolean(query || kind)}
           interlude={
-            isBrowsing ? (
-              // Set into the grid after two rows, like Shorts in a feed: the masters' work, then
-              // services picked for this client (or, with nothing known, popular and free soon).
-              <div className={styles.interludes}>
-                {works && <WorkShelf items={works.items} kind={kind} />}
-                {!kind && <ForYouShelf isForEveryone />}
-              </div>
-            ) : undefined
+            // Set into the grid after two rows, like Shorts in a feed: the masters' work.
+            isBrowsing && works ? <WorkShelf items={works.items} kind={kind} /> : undefined
           }
         />
       </div>

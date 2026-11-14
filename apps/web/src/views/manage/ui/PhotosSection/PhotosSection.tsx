@@ -5,9 +5,11 @@ import {
   addPhoto,
   getWorkPhotos,
   removeCover,
+  removeLogo,
   removePhoto,
   updateWorkPhoto,
   uploadCover,
+  uploadLogo,
 } from '@/shared/api/clientApi'
 import type { Business, Catalog, WorkPhoto } from '@/shared/api/types'
 import styles from './PhotosSection.module.css'
@@ -28,8 +30,9 @@ const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 // tagged with its service and master, so the «Работы» feed books exactly that from the photo.
 export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionProps) => {
   const coverInput = useRef<HTMLInputElement>(null)
+  const logoInput = useRef<HTMLInputElement>(null)
   const photoInput = useRef<HTMLInputElement>(null)
-  const [busy, setBusy] = useState<'cover' | 'photo' | null>(null)
+  const [busy, setBusy] = useState<'cover' | 'logo' | 'photo' | null>(null)
   const [photos, setPhotos] = useState<WorkPhoto[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
   const open = photos.find((photo) => photo.id === openId) ?? null
@@ -56,6 +59,14 @@ export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionPro
     setBusy(null)
   }
 
+  const handleLogo = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = pick(event)
+    if (!file) return
+    setBusy('logo')
+    await run(() => uploadLogo(slug, file), 'Логотип обновлён')
+    setBusy(null)
+  }
+
   const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = pick(event)
     if (!file) return
@@ -75,6 +86,49 @@ export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionPro
     <section className={styles.group} aria-label='Фото'>
       <h3 className={styles.groupTitle}>Фото</h3>
       <div className={styles.list}>
+        {/* The logo first: it stands for the place everywhere — catalog, page, booking, map. */}
+        <div className={styles.coverRow} data-busy={busy === 'logo' || undefined}>
+          <button
+            type='button'
+            className={styles.logoThumb}
+            onClick={() => logoInput.current?.click()}
+            disabled={busy !== null}
+            aria-label={business.logoUrl ? 'Заменить логотип' : 'Добавить логотип'}
+          >
+            <BusinessTile name={business.name} logoUrl={business.logoUrl} size='lg' />
+          </button>
+          <span className={styles.rowText}>
+            <span className={styles.rowTitle}>Логотип</span>
+            <span className={styles.rowHint}>
+              {busy === 'logo'
+                ? 'Загружаем…'
+                : 'Квадратная картинка, в круге везде, где видно место'}
+            </span>
+            <span className={styles.rowActions}>
+              <button
+                type='button'
+                className={styles.textButton}
+                onClick={() => logoInput.current?.click()}
+                disabled={busy !== null}
+              >
+                <Camera weight='bold' aria-hidden />
+                {business.logoUrl ? 'Заменить' : 'Добавить'}
+              </button>
+              {business.logoUrl && (
+                <button
+                  type='button'
+                  className={styles.textButton}
+                  data-danger
+                  onClick={() => run(() => removeLogo(slug), 'Логотип удалён')}
+                  disabled={busy !== null}
+                >
+                  Удалить
+                </button>
+              )}
+            </span>
+          </span>
+        </div>
+
         <div className={styles.coverRow} data-busy={busy === 'cover' || undefined}>
           <button
             type='button'
@@ -88,7 +142,7 @@ export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionPro
               // biome-ignore lint/performance/noImgElement: already resized WebP from our API
               <img src={business.coverUrl} alt='Обложка' className={styles.image} />
             ) : (
-              <BusinessTile name={business.name} size='sm' />
+              <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
             )}
           </button>
           <span className={styles.rowText}>
@@ -171,6 +225,14 @@ export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionPro
         Фото работ — крупно и без текста. Нажмите на фото, чтобы указать услугу и мастера: так оно
         попадёт в ленту «Работы» с кнопкой записи. JPG, PNG или HEIC до 10 МБ.
       </p>
+      <input
+        ref={logoInput}
+        type='file'
+        accept={ACCEPT}
+        hidden
+        onChange={handleLogo}
+        aria-label='Файл логотипа'
+      />
       <input
         ref={coverInput}
         type='file'

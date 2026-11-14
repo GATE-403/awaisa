@@ -51,7 +51,7 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
             decoding='async'
           />
         ) : (
-          <BusinessTile name={place.name} size='md' />
+          <BusinessTile name={place.name} logoUrl={place.logoUrl} size='md' />
         )}
         <span className={styles.rowText}>
           <span className={styles.rowTitle}>{place.name}</span>

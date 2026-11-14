@@ -84,3 +84,69 @@ body {
     animation: none !important;
   }
 }
+
+/* Soft edges on sideways rows (`data-edge-fade`), only with a mouse: on phones a mask over a
+   scrolling row repaints every frame. The edges follow the scroll — no fade at the start until the
+   row has moved, none at the end once it is reached. Without scroll timelines only the right edge
+   fades, as before. */
+@property --edge-start {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@property --edge-end {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes edge-start {
+  from {
+    --edge-start: 1;
+  }
+
+  to {
+    --edge-start: 0;
+  }
+}
+
+@keyframes edge-end {
+  from {
+    --edge-end: 0;
+  }
+
+  to {
+    --edge-end: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-edge-fade] {
+    mask-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / var(--edge-start)),
+      #000 var(--page-gutter),
+      #000 calc(100% - var(--edge-fade, 48px)),
+      rgb(0 0 0 / var(--edge-end))
+    );
+  }
+
+  @supports (animation-timeline: scroll()) {
+    [data-edge-fade] {
+      animation:
+        edge-start linear both,
+        edge-end linear both;
+      animation-timeline: scroll(self inline), scroll(self inline);
+      animation-range:
+        0 48px,
+        calc(100% - 48px) 100%;
+    }
+  }
+}
+
+/* The scrollbar's room stays reserved: locking the page for a sheet (booking, search) does not
+   shift the page sideways when the bar disappears. */
+html {
+  scrollbar-gutter: stable;
+}

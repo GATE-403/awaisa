@@ -99,3 +99,56 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 6;
 }
+
+/* The author's name links to their profile: plain text, a full 44pt target around the line. */
+.authorButton {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+  min-width: 44px;
+  min-height: 44px;
+  margin-block: -10px;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+}
+
+@media (hover: hover) {
+  .authorButton:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.photos {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.photo {
+  display: block;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo:active {
+  scale: 0.97;
+}
+
+.photo:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}

@@ -2,13 +2,14 @@
 
 import { Sliders, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { formatPrice, useStoredBookings } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { usePreferences } from '../lib/preferences'
+import { deviceSession, readRecent, type Surface, track, trackPickClick } from '../lib/signals'
 import styles from './ForYou.module.css'
 import { PreferencesSheet } from './PreferencesSheet'
 
@@ -38,22 +39,29 @@ interface ForYouShelfProps {
   seedVisit?: string
   /** A service to leave out — the one just booked. */
   excludeServiceId?: string
+  /** The service being chosen (the booking form): picks of the same kind come first. */
+  likeServiceId?: string
   /** Picks for everyone (popular, near, free soon) even with nothing known; no questionnaire row. */
   isForEveryone?: boolean
   /** Inside a column (the success screen): the track keeps to it instead of bleeding to the edge. */
   isInline?: boolean
   /** «Настроить» beside the title — only in the profile, where the answers live. */
   isTunable?: boolean
+  /** Where the shelf stands, for what it learns from taps (`catalog`, `booking`, …). */
+  surface?: Surface
 }
 
 export const ForYouShelf = ({
   title = 'Для вас',
   seedVisit,
   excludeServiceId,
+  likeServiceId,
   isForEveryone = false,
   isInline = false,
   isTunable = false,
+  surface = 'catalog',
 }: ForYouShelfProps = {}) => {
+  const trackRef = useRef<HTMLUListElement>(null)
   const preferences = usePreferences()
   const { bookings: stored, isReady } = useStoredBookings()
   const session = useSession()
@@ -83,6 +91,9 @@ export const ForYouShelf = ({
           visits: visits || undefined,
           lat: point?.lat,
           lng: point?.lng,
+          like: likeServiceId,
+          recent: readRecent().join(',') || undefined,
+          session: deviceSession() ?? undefined,
         },
         controller.signal,
       )
@@ -90,7 +101,39 @@ export const ForYouShelf = ({
         .catch(() => undefined),
     )
     return () => controller.abort()
-  }, [isReady, hasSignals, preferences, visits, session.status])
+  }, [isReady, hasSignals, preferences, visits, session.status, likeServiceId])
+
+  const shownIds = items
+    ?.filter((item) => item.id !== excludeServiceId)
+    .map((item) => item.id)
+    .join(',')
+
+  // Shown = the shelf came into view: one impression per card per answer, like feeds count them.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once per set of cards
+  useEffect(() => {
+    const element = trackRef.current
+    if (!element || !items || !shownIds) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        track(
+          items
+            .filter((item) => item.id !== excludeServiceId)
+            .map((item, position) => ({
+              kind: 'impression' as const,
+              serviceId: item.id,
+              reason: item.reason,
+              surface,
+              position,
+            })),
+        )
+      },
+      { threshold: 0.5 },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [shownIds, surface])
 
   if (!isReady) return null
 
@@ -130,12 +173,15 @@ export const ForYouShelf = ({
           </button>
         )}
       </div>
-      <ul className={styles.track}>
-        {shown.map((item) => (
+      <ul ref={trackRef} className={styles.track} data-edge-fade=''>
+        {shown.map((item, position) => (
           <li key={item.id}>
             <NextLink
               href={`/${item.slug}/book?service=${item.id}`}
               className={styles.card}
+              onClick={() =>
+                trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
+              }
               aria-label={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
             >
               {item.coverUrl && (

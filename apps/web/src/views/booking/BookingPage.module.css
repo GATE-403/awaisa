@@ -68,25 +68,40 @@
   display: none;
 }
 
+/* Wide screens: a phone-wide side panel docked to the right, the site dimmed beside it —
+   like a drawer over a store page. One column, the same action bar as on phones at its foot. */
 @media (min-width: 1024px) {
   .page {
-    padding-bottom: var(--section-gap);
-  }
+    /* The phone layout, phone-wide: the same sheet people know from their phones. */
+    --page-gutter: 16px;
 
-  .layout {
-    grid-template-columns: minmax(0, 1fr) 360px;
-    align-items: start;
-    gap: var(--space-12);
-  }
-
-  .aside {
-    position: sticky;
-    top: calc(var(--header-height) + var(--business-bar-height) + var(--space-6));
-    display: block;
+    inset: 0 0 0 auto;
+    width: 440px;
+    /* The bar sits in the flow here, so no room is kept for a fixed one. */
+    padding-bottom: 0;
+    border-radius: var(--radius-2xl) 0 0 var(--radius-2xl);
+    animation-name: slide-in;
   }
 
   .bar {
-    display: none;
+    position: sticky;
+    bottom: var(--space-4);
+    padding-bottom: var(--space-4);
+    z-index: 40;
+    margin-top: var(--space-6);
+  }
+
+  /* The bar rides at the panel's foot instead of the window's. */
+  .bar > * {
+    position: relative;
+    inset: auto;
+    width: min(calc(100% - var(--space-8)), 520px);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    translate: 100% 0;
   }
 }
 
@@ -176,14 +191,6 @@
   gap: var(--space-2);
 }
 
-/* Reviewing: one centred column, the button inside the card (no second summary beside it). */
-@media (min-width: 1024px) {
-  .layout[data-reviewing] {
-    grid-template-columns: minmax(0, 640px);
-    justify-content: center;
-  }
-}
-
 .submitError {
   margin-top: var(--space-2);
   color: var(--color-danger-text);
@@ -261,7 +268,9 @@ button.fieldRow {
 }
 
 .commentArea:focus-visible {
+  /* Inside the group the global ring is clipped into two blue stripes: the caret says enough. */
   outline: none;
+  box-shadow: none;
 }
 
 .group + .group {
@@ -276,4 +285,25 @@ button.fieldRow {
 
 .group .fieldRow[data-action] > span:empty:last-child {
   display: none;
+}
+
+/* Reviews and picks under the form: parted by a wide gap (no line), like a new section of a
+   page, so nobody takes them for a step of the booking. */
+.after {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  margin-top: var(--space-20);
+}
+
+/* Length · description on one line (cut with an ellipsis), whole on the chosen service. */
+.serviceNote {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+label:has([data-checked]) .serviceNote {
+  white-space: normal;
 }

@@ -107,7 +107,9 @@ test.describe('Promotions', () => {
       await page.goto(
         `/${SLUG}/book?service=${service.id}&specialist=${master.id}&date=${date}&time=${time}`,
       )
-      await expect(page.getByText('E2E Весь день · −20%')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Показать, что выбрано' })).toContainText(
+        '−20%',
+      )
 
       // The catalog marks services with an open promotion.
       await page.goto(`/?q=${encodeURIComponent(service.name)}`)

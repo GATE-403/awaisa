@@ -1,0 +1,62 @@
+.wrap {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/* The laurel sits just outside the face, around its sides and bottom. */
+.laurel {
+  position: absolute;
+  inset: -16%;
+  width: 132%;
+  height: 132%;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / 0.35));
+}
+
+.number {
+  position: absolute;
+  bottom: -14%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  box-shadow:
+    0 0 0 2px var(--color-background),
+    inset 0 0 0 1px rgb(255 255 255 / 0.4);
+  color: #1d1d1f;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  translate: -50% 0;
+}
+
+/* Emblem on picture cards: a dark disc with the number, the laurel around it. */
+.badge {
+  display: inline-grid;
+}
+
+.badgeNumber {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.55);
+  color: var(--metal-deep);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

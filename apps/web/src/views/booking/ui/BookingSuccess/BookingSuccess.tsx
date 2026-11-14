@@ -89,6 +89,7 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           keep browsing rather than a push back to the catalog. */}
       <div className={styles.next}>
         <ForYouShelf
+          surface='success'
           title='Вам может понравиться'
           seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
           excludeServiceId={booking.serviceId}

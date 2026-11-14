@@ -1,0 +1,289 @@
+.page {
+  padding: 0 0 var(--section-gap);
+  /* A soft wash of the profile's colour behind the head, fading into the page. */
+  background: radial-gradient(
+    90% 380px at 50% 0%,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    transparent 70%
+  );
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--page-gutter) 0;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.face[data-size] {
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--space-3);
+  box-shadow:
+    0 0 0 0.5px var(--color-border),
+    var(--shadow-md);
+  font-size: 34px;
+}
+
+.wreath {
+  margin-bottom: var(--space-6);
+}
+
+.wreath .face[data-size] {
+  margin-bottom: 0;
+}
+
+.name {
+  font-size: var(--text-title1);
+  line-height: 1.15;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-body);
+}
+
+.statusEmoji {
+  font-size: 1.15em;
+  line-height: 1;
+}
+
+.facts {
+  margin-top: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.facts strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.level {
+  color: color-mix(in srgb, var(--accent) 75%, var(--color-foreground));
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.levelMuted {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.hidden {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Section captions as in iOS Settings: small, uppercase, quiet. */
+.caption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.captionCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  text-transform: none;
+}
+
+.star {
+  width: 12px;
+  height: 12px;
+  color: var(--color-rating);
+}
+
+/* Masters: small faces with first names, like favourites in Contacts. */
+.faces {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.faces::-webkit-scrollbar {
+  display: none;
+}
+
+.faceLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 60px;
+  color: var(--color-foreground);
+}
+
+.faceName {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Places: quiet capsules with the logo and how many visits. */
+.places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.place {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.placeCount {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Reviews: a thread on the page, hairlines between. */
+.reviews {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+}
+
+.review + .review {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.reviewPlace {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+  color: var(--color-foreground);
+}
+
+.reviewPlaceName {
+  overflow: hidden;
+  flex: 1;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reviewDate {
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.reviewBody {
+  padding-left: calc(32px + var(--space-3));
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.reviewText {
+  margin-top: 2px;
+  font-size: var(--text-body);
+  line-height: 1.4;
+}
+
+.about {
+  max-width: 420px;
+  margin-top: var(--space-1);
+  font-size: var(--text-footnote);
+  line-height: 1.4;
+}
+
+.featured {
+  margin-left: 3px;
+  font-size: 14px;
+}
+
+/* «Мой мастер»: a quiet capsule with the face, booking that master. */
+.myMaster {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  margin-top: var(--space-2);
+  padding: 0 var(--space-3) 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.myMaster strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.awaiting {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--color-link);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+}

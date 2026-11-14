@@ -9,6 +9,8 @@ const PAGES = [
   '/bookings',
   '/business',
   '/map',
+  '/top',
+  '/top?view=places',
   '/feed',
 ]
 

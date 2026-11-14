@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from '../auth/auth.module.js'
 import { BookingsModule } from '../bookings/bookings.module.js'
 import { BusinessesModule } from '../businesses/businesses.module.js'
+import { MediaModule } from '../media/media.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { Review } from './review.entity.js'
@@ -15,6 +16,7 @@ import { ReviewsService } from './reviews.service.js'
     AuthModule,
     BookingsModule,
     BusinessesModule,
+    MediaModule,
     NotificationsModule,
     TelegramModule,
   ],

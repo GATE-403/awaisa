@@ -18,8 +18,12 @@ type Service = {
   isActive?: boolean
 }
 
+/** 1–3 for the platform's top masters and most active clients (a laurel wreath). */
+type Rank = 1 | 2 | 3
+
 type Specialist = {
   id: string
+  rank?: Rank | null
   name: string
   role: string
   rating: number | null
@@ -56,6 +60,8 @@ type MapPlace = {
   name: string
   kind: BusinessKind
   coverUrl: string | null
+  /** The owner's logo (square); null = the tinted monogram. */
+  logoUrl?: string | null
   minPrice: number
   distanceKm: number | null
 }
@@ -81,6 +87,8 @@ type Business = {
   mapUrl: string
   slotMinutes: number
   coverUrl: string | null
+  /** The owner's logo (square); null = the tinted monogram. */
+  logoUrl?: string | null
   photos: string[]
   branches: Branch[]
   isPublished: boolean
@@ -94,6 +102,8 @@ type BusinessCard = Pick<
   servicesCount: number
   minPrice: number
   coverUrl: string | null
+  /** The owner's logo (square); null = the tinted monogram. */
+  logoUrl?: string | null
   hours: WorkingDay[]
 }
 
@@ -107,6 +117,8 @@ type Offer = {
   businessName: string
   kind: BusinessKind
   coverUrl: string | null
+  /** The owner's logo (square); null = the tinted monogram. */
+  logoUrl?: string | null
   rating: number | null
   address: string | null
   /** The biggest open promotion on this service, percent; null = none. */
@@ -134,7 +146,10 @@ type BusinessPage = {
 
 type TeamMember = { id: string; phone: string; name: string; role: 'owner' | 'admin' }
 
-type BusinessLink = Pick<Business, 'slug' | 'name' | 'kind' | 'isPublished' | 'coverUrl'> & {
+type BusinessLink = Pick<
+  Business,
+  'slug' | 'name' | 'kind' | 'isPublished' | 'coverUrl' | 'logoUrl'
+> & {
   role: 'owner' | 'staff' | 'admin'
   todayCount: number
   next: { date: string; time: string } | null
@@ -220,9 +235,161 @@ type Review = {
   createdAt: string
   specialistName: string
   serviceName: string
+  serviceId?: string | null
+  /** The author's public profile (`GET /reviewers/:id`); null for very old visits. */
+  authorId?: string | null
+  authorRank?: Rank | null
+  authorAvatarUrl?: string | null
+  /** Up to three pictures the client added to the review. */
+  photos?: string[]
+}
+
+// Another client's public page: their reviews across places.
+type ReviewerProfile = {
+  id: string
+  name: string
+  avatarUrl: string | null
+  count: number
+  average: number
+  places: number
+  since: string
+  items: (Review & { business: { slug: string; name: string; coverUrl: string | null } })[]
+}
+
+type ProfileBadge = { id: string; title: string; description: string }
+
+// A client's public profile (`GET /profiles/:id`, page `/u/<id>`).
+type PublicProfile = {
+  id: string
+  name: string
+  avatarUrl: string | null
+  banner: string
+  accent: string
+  status: string
+  statusEmoji: string
+  /** The short address (`/u/<handle>`); null = the public id. */
+  handle: string | null
+  /** Friends invited by this client who have come. */
+  friends: number
+  about: string
+  /** Achievements the client chose to show by the name (earned ones). */
+  featured: (ProfileBadge & { earned: boolean })[]
+  favoriteMaster: {
+    id: string
+    name: string
+    photoUrl: string | null
+    role: string
+    slug: string
+    businessName: string
+    visits: number
+    rank: Rank | null
+  } | null
+  isOwn: boolean
+  /** The owner's ended visits of the last two weeks without a review (0 for others). */
+  awaitingReview?: number
+  isPublic: boolean
+  since: string
+  level: { level: number; xp: number; next: number | null; progress: number }
+  rank: Rank | null
+  badges: ProfileBadge[]
+  /** Every achievement: earned ones and goals with progress. */
+  achievements: (ProfileBadge & {
+    earned: boolean
+    progress: { current: number; target: number }
+  })[]
+  stats: {
+    visits: number
+    places: number
+    reviews: number
+    average: number | null
+    friends: number
+  }
+  places: {
+    slug: string
+    name: string
+    logoUrl: string | null
+    coverUrl: string | null
+    visits: number
+  }[]
+  masters: {
+    id: string
+    name: string
+    photoUrl: string | null
+    role: string
+    slug: string
+    businessName: string
+    visits: number
+    rank: Rank | null
+  }[]
+  reviews: {
+    id: string
+    rating: number
+    photos?: string[]
+    comment: string
+    reply: string | null
+    createdAt: string
+    serviceName: string
+    specialistName: string
+    business: { slug: string; name: string; logoUrl: string | null; coverUrl: string | null }
+  }[]
+}
+
+// One master on the leaderboard (`GET /rankings/masters`, page `/top`).
+type LeaderboardMaster = {
+  place: number
+  /** The platform-wide wreath (1–3), whatever the kind. */
+  rank: Rank | null
+  id: string
+  name: string
+  role: string
+  photoUrl: string | null
+  average: number
+  reviews: number
+  visits30d: number
+  business: { slug: string; name: string; logoUrl: string | null }
+}
+
+// One place on the places' leaderboard (`GET /rankings/places`).
+type LeaderboardPlace = {
+  place: number
+  slug: string
+  name: string
+  logoUrl: string | null
+  coverUrl: string | null
+  address: string | null
+  average: number
+  reviews: number
+  visits30d: number
+}
+
+// The signed-in client's own profile look (`GET|PATCH /me/profile`).
+type ProfileSettings = {
+  id: string
+  banner: string
+  accent: string
+  status: string
+  statusEmoji: string
+  handle: string | null
+  about: string
+  featuredBadges: string[]
+  favoriteMasterId: string | null
+  isPublic: boolean
+  showPlaces: boolean
 }
 
 type ManagedReview = Review & { customerPhone: string; visitDate: string | null }
+
+// «Вопросы» on a business page: asked by a signed-in client, answered by the place.
+type BusinessQuestion = {
+  id: string
+  authorName: string
+  text: string
+  answer: string | null
+  answeredAt: string | null
+  createdAt: string
+}
+
+type QuestionList = { count: number; items: BusinessQuestion[] }
 
 type ReviewSummary<Item = Review> = {
   count: number
@@ -499,6 +666,8 @@ type CreateBookingInput = {
   smsConfirmation?: boolean
   reminderMinutes?: 60 | 120 | 1440 | null
   promoCode?: string
+  /** Who invited this client (`?ref=` from a profile link). */
+  ref?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -686,6 +855,8 @@ type MailingsOverview = {
 }
 
 export type {
+  BusinessQuestion,
+  QuestionList,
   AdminBooking,
   MasterDay,
   MasterPlace,
@@ -709,6 +880,13 @@ export type {
   Review,
   ReviewAccess,
   ReviewSummary,
+  ReviewerProfile,
+  ProfileBadge,
+  LeaderboardMaster,
+  LeaderboardPlace,
+  Rank,
+  ProfileSettings,
+  PublicProfile,
   TelegramStatus,
   VisitReview,
   AnalyticsDays,

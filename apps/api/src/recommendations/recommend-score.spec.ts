@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   type Candidate,
+  computeAffinities,
   interestsOf,
   type Profile,
   rankCandidates,
@@ -120,5 +121,104 @@ describe('rankCandidates reasons', () => {
     for (let index = 1; index < ranked.length; index += 1) {
       expect(ranked[index]?.reason).not.toBe(ranked[index - 1]?.reason)
     }
+  })
+})
+
+describe('the service being chosen', () => {
+  it('puts the same kind first over past barber visits and leaves men’s services out', () => {
+    const focus = { serviceId: 'nails-1', name: 'Маникюр с покрытием' }
+    const pastBarber = profile({
+      focus,
+      visits: [{ serviceId: 'x', slug: 'barber', serviceName: 'Мужская стрижка', daysAgo: 30 }],
+    })
+    const ranked = rankCandidates(
+      [
+        candidate({ serviceId: 'nails-1', name: 'Маникюр с покрытием', slug: 'nails' }),
+        candidate({ serviceId: 'nails-2', name: 'Педикюр', slug: 'nails' }),
+        candidate({ serviceId: 'beard', name: 'Оформление бороды', slug: 'barber' }),
+        candidate({ serviceId: 'kids', name: 'Детская стрижка', slug: 'barber' }),
+        candidate({ serviceId: 'brows', name: 'Ламинирование бровей', slug: 'brows' }),
+      ],
+      pastBarber,
+    )
+    const ids = ranked.map((entry) => entry.candidate.serviceId)
+    expect(ids[0]).toBe('nails-2')
+    expect(ids).not.toContain('nails-1')
+    expect(ids).not.toContain('beard')
+    expect(ranked[0]?.reason).toBe('Ваш выбор · ногти')
+    expect(ids.indexOf('brows')).toBeLessThan(ids.indexOf('kids'))
+  })
+})
+
+describe('«С этим часто берут»', () => {
+  const day = 86_400_000
+  const visit = (client: string, serviceName: string, days: number) => ({
+    client,
+    serviceName,
+    time: days * day,
+  })
+
+  it('finds kinds booked after each other more often than chance', () => {
+    const visits = [
+      // Three nail clients go on to brows; the barber clients never do.
+      ...['a', 'b', 'c'].flatMap((client) => [
+        visit(client, 'Маникюр с покрытием', 0),
+        visit(client, 'Ламинирование бровей', 20),
+      ]),
+      ...['d', 'e', 'f', 'g'].map((client) => visit(client, 'Мужская стрижка', 0)),
+      visit('h', 'Ламинирование бровей', 0),
+      // Too far apart to count.
+      visit('i', 'Маникюр', 0),
+      visit('i', 'Коррекция бровей', 200),
+    ]
+    const pairs = computeAffinities(visits)
+    const nailsToBrows = pairs.find((pair) => pair.from === 'nails' && pair.to === 'brows')
+    expect(nailsToBrows?.support).toBe(3)
+    // 3 of 4 nail clients vs 5 of 9 clients overall: 0.75 / 0.56.
+    expect(nailsToBrows?.lift).toBeCloseTo(1.35, 2)
+    // Fewer than three clients: no pair at all.
+    expect(pairs.find((pair) => pair.from === 'brows')).toBeUndefined()
+  })
+
+  it('gives the related kind a reason and a lift, then steps aside after being ignored', () => {
+    const brows = candidate({ serviceId: 'b1', name: 'Ламинирование бровей', slug: 'brows' })
+    const withAffinity = profile({
+      focus: { serviceId: 'n1', name: 'Маникюр' },
+      affinities: { nails: { brows: 2.4 } },
+    })
+    const plain = scoreCandidate(brows, profile({ focus: { serviceId: 'n1', name: 'Маникюр' } }))
+    const lifted = scoreCandidate(brows, withAffinity)
+    expect(lifted?.score).toBeGreaterThan(plain?.score ?? 0)
+    expect(lifted?.reasons).toContain('Часто берут с маникюром')
+
+    const ignored = scoreCandidate(brows, { ...withAffinity, seen: { b1: 5 } })
+    expect(ignored?.score).toBeLessThan(lifted?.score ?? 0)
+  })
+})
+
+describe('exploration', () => {
+  it('gives one early spot to a new place that would have ranked lower', () => {
+    const established = Array.from({ length: 8 }, (_, index) =>
+      candidate({
+        serviceId: `s${index}`,
+        name: `Стрижка ${index}`,
+        slug: `place-${index}`,
+        bookings30d: 40,
+      }),
+    )
+    const fresh = candidate({
+      serviceId: 'new',
+      name: 'Стрижка новая',
+      slug: 'new-place',
+      bookings30d: 0,
+      reviews: 0,
+      rating: null,
+      isNewPlace: true,
+    })
+    const ranked = rankCandidates([...established, fresh], profile(), { limit: 6 })
+    const index = ranked.findIndex((entry) => entry.candidate.serviceId === 'new')
+    expect(index).toBe(3)
+    expect(ranked[index]?.reason).toBe('Новое место')
+    expect(ranked).toHaveLength(6)
   })
 })

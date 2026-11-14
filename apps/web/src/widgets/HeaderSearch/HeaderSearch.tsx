@@ -155,7 +155,7 @@ export const HeaderSearch = () => {
                 {suggestions.map((business) => (
                   <li key={business.slug}>
                     <NextLink href={`/${business.slug}`} className={styles.place} onClick={close}>
-                      <BusinessTile name={business.name} size='sm' />
+                      <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
                       <span className={styles.placeText}>
                         <span className={styles.placeName}>{business.name}</span>
                         <span className={styles.placeMeta}>

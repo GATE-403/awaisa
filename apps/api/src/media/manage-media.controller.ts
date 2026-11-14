@@ -70,6 +70,27 @@ export class ManageMediaController {
     await this.businesses.update({ id: business.id }, { coverUrl: null })
   }
 
+  // The logo: square, shown round wherever the place appears (catalog, page, bar, booking).
+  @Post('logo')
+  @UseInterceptors(imageUpload)
+  async setLogo(
+    @CurrentBusiness() business: Business,
+    @UploadedFile() file: UploadedImage | undefined,
+  ) {
+    const url = await this.save(business, file, 'logo')
+    if (business.logoUrl) await this.storage.remove(business.logoUrl)
+    await this.businesses.update({ id: business.id }, { logoUrl: url })
+
+    return { logoUrl: url }
+  }
+
+  @Delete('logo')
+  @HttpCode(204)
+  async removeLogo(@CurrentBusiness() business: Business) {
+    if (business.logoUrl) await this.storage.remove(business.logoUrl)
+    await this.businesses.update({ id: business.id }, { logoUrl: null })
+  }
+
   /** A photo of a work, optionally tagged with the service and master (multipart fields). */
   @Post('photos')
   @UseInterceptors(imageUpload)
@@ -105,7 +126,8 @@ export class ManageMediaController {
 
   @Delete('work-photos/:id')
   async removePhoto(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
-    await this.storage.remove(await this.workPhotos.remove(business.id, id))
+    const url = await this.workPhotos.remove(business.id, id)
+    if (url) await this.storage.remove(url)
     return this.workPhotos.listForBusiness(business.id)
   }
 

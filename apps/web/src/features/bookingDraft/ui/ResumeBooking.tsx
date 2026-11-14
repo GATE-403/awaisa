@@ -1,12 +1,11 @@
 'use client'
 
-import { ArrowRight, X } from '@phosphor-icons/react/ssr'
+import { ArrowRight, CalendarBlank, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BusinessTile } from '@/entities/business'
 import { getBusinessSlug, isBookingPath, isCabinetPath } from '@/shared/config/navigation'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
-import { clearDraft, draftHref } from '../lib/bookingDraft'
+import { clearDraft, DRAFT_STEPS, draftHref } from '../lib/bookingDraft'
 import { useBookingDraft } from '../model/useBookingDraft'
 import styles from './ResumeBooking.module.css'
 
@@ -17,6 +16,10 @@ export const ResumeBooking = () => {
   const isTucked = useTuckOnScroll()
   // On another place's page that place's «Ближайшее окно» takes the spot: one pill at a time.
   const pageSlug = getBusinessSlug(pathname)
+
+  const stepsDone = Math.min(Math.max(draft?.stepsDone ?? 1, 1), DRAFT_STEPS)
+  // The ring's circumference for r = 14.
+  const circumference = 2 * Math.PI * 14
 
   if (
     !draft ||
@@ -37,12 +40,29 @@ export const ResumeBooking = () => {
       <NextLink
         href={draftHref(draft)}
         className={styles.link}
-        aria-label={`Продолжить запись: ${draft.serviceName}, ${draft.businessName}`}
+        aria-label={`Продолжить запись: ${draft.serviceName}, ${draft.businessName}. Готово ${stepsDone} из ${DRAFT_STEPS} шагов`}
       >
-        <BusinessTile name={draft.businessName} size='xs' />
+        {/* How far the booking got, like a download ring, with a calendar glyph in the
+            capsule's own colour (a tinted monogram vanished on the inverted fill). */}
+        <span className={styles.progress} aria-hidden>
+          <svg viewBox='0 0 32 32' className={styles.ring} aria-hidden='true'>
+            <circle cx='16' cy='16' r='14' className={styles.ringTrack} />
+            <circle
+              cx='16'
+              cy='16'
+              r='14'
+              className={styles.ringValue}
+              strokeDasharray={circumference}
+              strokeDashoffset={circumference * (1 - stepsDone / DRAFT_STEPS)}
+            />
+          </svg>
+          <CalendarBlank weight='fill' className={styles.glyph} />
+        </span>
         <span className={styles.text}>
           <span className={styles.title}>{draft.serviceName}</span>
-          <span className={styles.meta}>Продолжить запись · {draft.businessName}</span>
+          <span className={styles.meta}>
+            Готово {stepsDone} из {DRAFT_STEPS} · {draft.businessName}
+          </span>
         </span>
         <span className={styles.go} aria-hidden>
           <span className={styles.goLabel}>Продолжить</span>

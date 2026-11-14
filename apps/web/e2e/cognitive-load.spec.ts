@@ -79,7 +79,7 @@ test.describe('Cognitive load: booking', () => {
     await pickFirstFreeSlot(page)
 
     const fields = steps.contacts.getByRole('textbox')
-    const optional = steps.contacts.getByPlaceholder('Необязательно')
+    const optional = steps.contacts.getByPlaceholder(/^(Необязательно|Ввести)$/)
     expect((await fields.count()) - (await optional.count())).toBeLessThanOrEqual(
       LIMITS.requiredTextFields,
     )

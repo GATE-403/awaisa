@@ -33,7 +33,7 @@ export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
           </NextLink>
         </div>
         <NextFreeProvider slugs={others.map((place) => place.slug)}>
-          <ul className={styles.similarTrack}>
+          <ul className={styles.similarTrack} data-edge-fade=''>
             {others.map((place) => (
               <li key={place.slug}>
                 <BusinessCard business={place} />

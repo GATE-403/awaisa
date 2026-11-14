@@ -1,5 +1,9 @@
+'use client'
+
 import NextLink from 'next/link'
+import { useState } from 'react'
 import type { Business } from '@/shared/api/types'
+import { PhotoViewer } from '@/shared/ui/PhotoViewer/PhotoViewer'
 import styles from './Place.module.css'
 
 interface PhotosSectionProps {
@@ -7,8 +11,12 @@ interface PhotosSectionProps {
 }
 
 // A mosaic: the first photo large, the rest beside it — the work speaks before the copy.
+// A tap opens the photos full screen, all of them, not only the five shown.
 export const PhotosSection = ({ business }: PhotosSectionProps) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
   if (business.photos.length === 0) return null
+  const hiddenCount = business.photos.length - 5
 
   return (
     <section id='work' className={styles.section} aria-labelledby='place-work'>
@@ -23,17 +31,31 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
       <ul className={styles.photos} data-count={Math.min(business.photos.length, 5)}>
         {business.photos.slice(0, 5).map((url, index) => (
           <li key={url} className={styles.photo}>
-            {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-            <img
-              src={url}
-              alt={`${business.name}, фото ${index + 1}`}
-              loading='lazy'
-              decoding='async'
-              className={styles.photoImage}
-            />
+            <button
+              type='button'
+              className={styles.photoButton}
+              onClick={() => setOpenIndex(index)}
+              aria-label={`Открыть фото ${index + 1} из ${business.photos.length}`}
+            >
+              {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
+              <img src={url} alt='' loading='lazy' decoding='async' className={styles.photoImage} />
+              {index === 4 && hiddenCount > 0 && (
+                <span className={styles.photoMore} aria-hidden>
+                  +{hiddenCount}
+                </span>
+              )}
+            </button>
           </li>
         ))}
       </ul>
+      {openIndex !== null && (
+        <PhotoViewer
+          photos={business.photos}
+          startIndex={openIndex}
+          label={business.name}
+          onClose={() => setOpenIndex(null)}
+        />
+      )}
     </section>
   )
 }

@@ -2,13 +2,13 @@
 
 import { Input } from '@awaisa/ui/Input'
 import { MagnifyingGlass, X } from '@phosphor-icons/react/ssr'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { pluralize } from '@/shared/lib/plural'
-import chip from '@/shared/ui/Chip/Chip.module.css'
+import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './Place.module.css'
 
 interface ServicesBrowserProps {
@@ -50,8 +50,28 @@ export const ServicesBrowser = ({
 }: ServicesBrowserProps) => {
   const [category, setCategory] = useState(ALL)
   const [query, setQuery] = useState('')
-  // The chips row continues the business bar: the bar drops its hairline (one line under both).
-  useRootFlag(catalog.categories.length > 1 ? 'category-nav' : null)
+  // The tabs row continues the business bar: the bar drops its hairline (one line under both).
+  const menuHeadRef = useRef<HTMLDivElement>(null)
+  const [isStuck, setIsStuck] = useState(false)
+  useRootFlag(catalog.categories.length > 1 && isStuck ? 'category-nav' : null)
+
+  // The tabs lie on the page; only once pinned under the business bar do they take its material,
+  // so the menu scrolling under them stays readable.
+  useEffect(() => {
+    const head = menuHeadRef.current
+    if (!head) return
+    // Pinned, the bar sits a pixel above a root cut 2px below its sticky top: no longer whole.
+    const top = Number.parseFloat(getComputedStyle(head).top) || 0
+    const observer = new IntersectionObserver(
+      ([entry]) =>
+        setIsStuck(
+          entry ? entry.intersectionRatio < 1 && entry.boundingClientRect.top < top + 2 : false,
+        ),
+      { rootMargin: `-${Math.ceil(top) + 2}px 0px 0px 0px`, threshold: 1 },
+    )
+    observer.observe(head)
+    return () => observer.disconnect()
+  }, [])
   const needle = query.trim().toLowerCase()
   const popular = catalog.services.filter((service) => service.isPopular).slice(0, POPULAR_LIMIT)
   const groups = catalog.categories
@@ -125,31 +145,22 @@ export const ServicesBrowser = ({
             )}
           </label>
         )}
-        {/* Only the category chips stay pinned under the business bar; the search scrolls away. */}
+        {/* Only the category tabs stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (
-          <div className={styles.menuHead}>
-            <fieldset className={styles.chips}>
-              <legend className={styles.srOnly}>Разделы услуг</legend>
-              {[{ id: ALL, name: 'Все' }, ...catalog.categories].map((item) => {
-                const count =
+          <div ref={menuHeadRef} className={styles.menuHead} data-stuck={isStuck || undefined}>
+            {/* The app's one tab style; each tab says how many services it holds. */}
+            <TextTabs
+              label='Разделы услуг'
+              items={[{ id: ALL, name: 'Все' }, ...catalog.categories].map((item) => ({
+                label: item.name,
+                isActive: category === item.id,
+                onSelect: () => setCategory(item.id),
+                count:
                   item.id === ALL
                     ? catalog.services.length
-                    : catalog.services.filter((service) => service.categoryId === item.id).length
-                return (
-                  <button
-                    key={item.id}
-                    type='button'
-                    className={chip.chip}
-                    aria-pressed={category === item.id}
-                    onClick={() => setCategory(item.id)}
-                  >
-                    {item.name}
-                    {/* How many in each, so the choice says what it holds. */}
-                    <span className={chip.count}>{count}</span>
-                  </button>
-                )
-              })}
-            </fieldset>
+                    : catalog.services.filter((service) => service.categoryId === item.id).length,
+              }))}
+            />
           </div>
         )}
 

@@ -1,0 +1,259 @@
+/* A live preview of the profile head: the face on a soft wash of the chosen colour. */
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(
+      90% 100% at 50% 0%,
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 75%
+    ),
+    var(--color-sheet-surface);
+  text-align: center;
+}
+
+.face[data-size] {
+  width: 72px;
+  height: 72px;
+  margin-bottom: var(--space-2);
+}
+
+.previewName {
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+}
+
+.previewStatus {
+  font-size: var(--text-footnote);
+}
+
+.previewLevel {
+  color: color-mix(in srgb, var(--accent) 75%, var(--color-foreground));
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.accents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-inline: var(--space-1);
+}
+
+.accentOption {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.accentOption:has(.input:checked) {
+  box-shadow:
+    0 0 0 2px var(--color-sheet),
+    0 0 0 4px var(--color-foreground);
+}
+
+.accentOption:has(.input:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+.input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.check {
+  width: 18px;
+  height: 18px;
+  color: #fff;
+  opacity: 0;
+}
+
+.input:checked + .check {
+  opacity: 1;
+}
+
+/* Status emoji: a scrolling row of round keys, the chosen one on a ring. */
+.emojis {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-1) var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.emojis::-webkit-scrollbar {
+  display: none;
+}
+
+.emojiOption {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-sheet-surface);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.emojiOption[data-none] {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+.emojiOption:has(.input:checked) {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.emojiOption:has(.input:focus-visible) {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.previewLevel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.previewBadge {
+  font-size: 15px;
+}
+
+.previewAbout {
+  max-width: 300px;
+  margin-top: var(--space-1);
+  font-size: var(--text-footnote);
+  line-height: 1.35;
+}
+
+/* «О себе»: a borderless note inside the group, like the booking comment. */
+.about {
+  display: block;
+  width: 100%;
+  min-height: 84px;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-input);
+  line-height: 1.4;
+  resize: none;
+}
+
+.about::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+.about:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* The showcase: earned achievements as capsules; the chosen ones lit in the profile's colour. */
+.showcase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.showcaseChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-sheet-surface);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+.showcaseChip[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.showcaseChip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* «Мой мастер»: faces in a row, the chosen one on a ring. */
+.masters {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.masters::-webkit-scrollbar {
+  display: none;
+}
+
+.masterOption {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 60px;
+  padding-top: 3px;
+  cursor: pointer;
+}
+
+.masterOption > :nth-child(2) {
+  border-radius: var(--radius-full);
+}
+
+.masterOption:has(.input:checked) > :nth-child(2) {
+  box-shadow:
+    0 0 0 2px var(--color-sheet),
+    0 0 0 4px var(--color-primary);
+}
+
+.masterNone {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background: var(--color-sheet-surface);
+  color: var(--color-muted-foreground);
+}
+
+.masterName {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addressPrefix {
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}

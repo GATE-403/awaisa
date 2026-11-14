@@ -18,6 +18,7 @@ import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import { Cached } from '../cache/cached.decorator.js'
 import { validateEnv } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { ReferralsService } from '../referrals/referrals.service.js'
 import {
   type AvailabilityQuery,
   availabilityQuerySchema,
@@ -44,7 +45,10 @@ const parseToken = (value: string | undefined) => {
 
 @Controller()
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
+  constructor(
+    private readonly bookingsService: BookingsService,
+    private readonly referrals: ReferralsService,
+  ) {}
 
   @Cached({ ttl: 15, tags: ['availability'] })
   @Get('availability')
@@ -61,11 +65,13 @@ export class BookingsController {
   @Post('bookings')
   @Throttle({ default: { limit: getBookingRateLimit, ttl: 60_000 } })
   @UseGuards(OptionalAuthGuard)
-  create(
+  async create(
     @Body({ schema: createBookingSchema }) body: CreateBookingInput,
     @CurrentCustomer() customer: Customer | null,
   ) {
-    return this.bookingsService.create(body, customer)
+    const booking = await this.bookingsService.create(body, customer)
+    if (body.ref) void this.referrals.recordFirstBooking(body.ref, booking.customerPhone)
+    return booking
   }
 
   @Get('bookings/:id')

@@ -25,6 +25,7 @@ import { getCountdown, isUpcoming } from './bookingsUtils'
 import { AccountCard } from './ui/AccountCard/AccountCard'
 import { AccountSettings } from './ui/AccountSettings/AccountSettings'
 import { LoyaltyCard } from './ui/LoyaltyCard/LoyaltyCard'
+import { RateRecent } from './ui/RateRecent/RateRecent'
 
 // The nearest visits first; the rest behind «Ещё N записей», so the page does not run long.
 const UPCOMING_FIRST = 3
@@ -34,12 +35,24 @@ interface BookingsPageProps {
   initialAccountBookings?: Booking[] | null
 }
 
+const PROFILE_TABS = ['upcoming', 'history', 'favorites', 'settings'] as const
+type ProfileTab = (typeof PROFILE_TABS)[number]
+
 export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
   const today = useToday()
   const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } =
     useMyBookings(initialAccountBookings)
   const router = useRouter()
-  const [tab, setTab] = useState<'upcoming' | 'history' | 'favorites' | 'settings' | null>(null)
+  // The open tab lives in the URL (`?tab=history`), so a reload or a shared link keeps it. Read
+  // from `location` after mount: this page is also the static shell's fallback, where search
+  // params cannot be read during prerendering.
+  const [tab, setTabState] = useState<ProfileTab | null>(null)
+  const setTab = (next: ProfileTab) => {
+    setTabState(next)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', next)
+    window.history.replaceState(window.history.state, '', url)
+  }
   const { ids: favoriteIds } = useFavorites()
   const isSignedIn = useSession().status === 'signedIn'
   const [isAllUpcoming, setIsAllUpcoming] = useState(false)
@@ -48,6 +61,12 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
     .filter((booking) => isUpcoming(booking, today))
     .sort((first, second) => first.startsAt.localeCompare(second.startsAt))
   const history = bookings.filter((booking) => !isUpcoming(booking, today))
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('tab')
+    const known = PROFILE_TABS.find((item) => item === fromUrl)
+    if (known) setTabState(known)
+  }, [])
 
   // Back from the deposit checkout (`?paid=<booking>`): say it worked, once. Read from the URL in
   // an effect — this page is also the prerendered shell, where search params do not exist.
@@ -74,6 +93,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
 
         {isReady && (
           <div className={styles.feed}>
+            <RateRecent history={history} today={today} onRated={replace} />
             {/* The whole profile in four tabs: what is ahead, what has been, what was saved, and
                 the account's settings — one place to look, no long page to scroll. */}
             <TextTabs
@@ -169,7 +189,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 )}
                 {/* Nothing ahead: what to book next, picked for this person — here it is useful,
                     not at the foot of the profile. */}
-                {upcoming.length === 0 && <ForYouShelf title='Куда записаться' />}
+                {upcoming.length === 0 && <ForYouShelf title='Куда записаться' surface='profile' />}
                 <WaitlistList />
                 <LoyaltyCard />
               </div>
@@ -182,7 +202,12 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 aria-labelledby='tab-history'
               >
                 {history.length > 0 ? (
-                  <BookingHistory bookings={history} canForget={canForget} onForget={forget} />
+                  <BookingHistory
+                    bookings={history}
+                    canForget={canForget}
+                    onForget={forget}
+                    onRated={replace}
+                  />
                 ) : (
                   <p className={styles.panelEmpty}>Здесь появятся прошедшие визиты.</p>
                 )}

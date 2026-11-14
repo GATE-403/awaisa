@@ -1,0 +1,118 @@
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+  animation: appear 200ms var(--ease-standard);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+.bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + var(--space-2)) var(--space-4) var(--space-2);
+}
+
+.counter {
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+.close,
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 14%);
+  color: #fff;
+  cursor: pointer;
+}
+
+.close svg,
+.arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.close:active,
+.arrow:active {
+  scale: 0.97;
+}
+
+.track {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  display: flex;
+  flex: 0 0 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: calc(env(safe-area-inset-top) + 60px) 0 calc(env(safe-area-inset-bottom) + 24px);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Arrows only with a mouse: on phones the finger turns the photos. */
+.arrow {
+  position: absolute;
+  top: 50%;
+  display: none;
+  translate: 0 -50%;
+}
+
+.arrow[data-side="left"] {
+  left: var(--space-4);
+}
+
+.arrow[data-side="right"] {
+  right: var(--space-4);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .arrow {
+    display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer {
+    animation: none;
+  }
+}

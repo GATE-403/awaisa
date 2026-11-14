@@ -172,3 +172,43 @@
 .thread .replyEdit {
   margin: 0 0 0 auto;
 }
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  list-style: none;
+}
+
+.questionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: var(--space-4);
+}
+
+.questionItem + .questionItem {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.questionText {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.openMark {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
+}
+
+.answerText {
+  margin-top: var(--space-1);
+  font-size: var(--text-body);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

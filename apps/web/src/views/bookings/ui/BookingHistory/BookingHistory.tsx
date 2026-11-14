@@ -14,6 +14,8 @@ interface BookingHistoryProps {
   bookings: Booking[]
   canForget: (id: string) => boolean
   onForget: (id: string) => void
+  /** The visit with its new review, so the rest of the page knows it is rated. */
+  onRated?: (booking: Booking) => void
 }
 
 // The latest few; the rest behind «Ещё N» on a fade, like the upcoming visits.
@@ -21,7 +23,7 @@ const FIRST = 5
 
 const getCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
-export const BookingHistory = ({ bookings, canForget, onForget }: BookingHistoryProps) => {
+export const BookingHistory = ({ bookings, canForget, onForget, onRated }: BookingHistoryProps) => {
   const [rated, setRated] = useState<Record<string, number>>({})
   const [rating, setRating] = useState<Booking | null>(null)
   const [isAll, setIsAll] = useState(false)
@@ -110,7 +112,13 @@ export const BookingHistory = ({ bookings, canForget, onForget }: BookingHistory
         <RateVisitSheet
           booking={rating}
           access={{ token: tokenOf(rating.id) }}
-          onRated={(review) => setRated((current) => ({ ...current, [rating.id]: review.rating }))}
+          onRated={(review) => {
+            setRated((current) => ({ ...current, [rating.id]: review.rating }))
+            onRated?.({
+              ...rating,
+              review: { rating: review.rating, comment: review.comment, reply: null },
+            })
+          }}
           onClose={() => setRating(null)}
         />
       )}

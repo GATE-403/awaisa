@@ -412,10 +412,33 @@
   flex-direction: column;
   gap: var(--space-3);
   margin: 0 calc(var(--page-gutter) * -1);
-  padding: var(--space-2) var(--page-gutter);
+  padding: 0 var(--page-gutter);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+/* Pinned: one surface with the business bar — the same material out to the window's edges (a
+   spread shadow clipped to the bar's height, so nothing overflows sideways), one hairline under
+   both. */
+.menuHead[data-stuck] {
   background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
-  box-shadow: 0 0.5px 0 var(--color-border);
+  box-shadow:
+    0 0 0 100vmax var(--color-chrome),
+    0 0.5px 0 100vmax var(--color-border);
+  clip-path: inset(0 -100vmax -1px);
+}
+
+/* Beside the sticky aside the bar stops at the menu's column: it never covers the map card. */
+@media (min-width: 1024px) {
+  .menuHead[data-stuck] {
+    clip-path: inset(0 0 -1px -100vmax);
+  }
+}
+
+/* The tabs sit flush in the pinned bar: the bar keeps the gutter and the one hairline. */
+.menuHead > div {
+  margin-inline: 0;
+  padding-inline: 0;
 }
 
 @media (min-width: 768px) {
@@ -432,23 +455,6 @@
   gap: var(--space-3);
 }
 
-.chips {
-  display: flex;
-  flex: 1 1 auto;
-  gap: var(--space-2);
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  border: none;
-  scrollbar-width: none;
-}
-
-.chips::-webkit-scrollbar {
-  display: none;
-}
-
-/* The count beside each category: a small badge that inverts with the chosen chip. */
 .searchClear {
   position: absolute;
   right: var(--space-2);
@@ -752,7 +758,37 @@
   grid-row: span 2;
 }
 
+.photoButton {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+}
+
+.photoButton:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* The last tile says how many more wait in the viewer. */
+.photoMore {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 45%);
+  color: #fff;
+  font-size: var(--text-title2);
+  font-weight: var(--font-weight-semibold);
+}
+
 .photoImage {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1181,8 +1217,6 @@ details[open] > .info .infoChevron {
    hairline on top — holding the catalog's place cards in one row that scrolls sideways. */
 .similar {
   padding: var(--space-8) 0 var(--space-10);
-  border-top: 0.5px solid var(--color-border);
-  background: var(--color-surface);
   content-visibility: auto;
   contain-intrinsic-size: auto 380px;
 }
@@ -1294,6 +1328,12 @@ details[open] > .info .infoChevron {
   scale: 0.97;
 }
 
+.masterWreath {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+}
+
 .masterPhoto {
   position: absolute;
   inset: 0;
@@ -1366,38 +1406,6 @@ details[open] > .info .infoChevron {
 }
 
 /* ---------- The head ends here: a hairline parts it from the menu ---------- */
-
-/* A hairline as wide as the content (not the gutters) under the head. */
-.headerBody::after {
-  content: "";
-  height: 0.5px;
-  margin-top: var(--space-3);
-  background: var(--color-border);
-}
-
-/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
-   repainted every frame, so touch screens scroll them plain. */
-@media (hover: hover) and (pointer: fine) {
-  .similarTrack {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--page-gutter),
-      #000 calc(100% - var(--edge-fade)),
-      transparent
-    );
-  }
-
-  .masters {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--page-gutter),
-      #000 calc(100% - var(--edge-fade)),
-      transparent
-    );
-  }
-}
 
 /* The quick actions as one button group, like a macOS toolbar group: a single surface capsule
    holding the glyphs with hairlines between them — one object beside «Записаться», not a row of

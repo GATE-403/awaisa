@@ -40,3 +40,16 @@
   border-radius: var(--radius-full);
   font-size: var(--text-lg);
 }
+
+/* A logo fills the circle on a white plate (most logos are drawn for light backgrounds). */
+.tile[data-logo] {
+  overflow: hidden;
+  background: #fff;
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

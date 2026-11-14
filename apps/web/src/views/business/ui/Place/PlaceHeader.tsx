@@ -54,7 +54,12 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
 
       <div className={styles.headerBody}>
         <div className={styles.topRow}>
-          <BusinessTile name={business.name} size='lg' className={styles.tile} />
+          <BusinessTile
+            name={business.name}
+            logoUrl={business.logoUrl}
+            size='lg'
+            className={styles.tile}
+          />
           <PlaceActions business={business} />
         </div>
 

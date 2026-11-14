@@ -9,6 +9,7 @@ import type {
   BusinessPage,
   Customer,
   MasterPlace,
+  PublicProfile,
   VisitReview,
 } from './types'
 
@@ -51,6 +52,11 @@ const requireCustomer = async (next: string): Promise<Customer> => {
 // A failed read is not fatal on the server: the client island loads it again and shows errors.
 const orNull = async <Result>(read: Promise<Result>) => read.catch(() => null)
 
+// A public profile, read with the visitor's session so the owner also sees their hidden one
+// (`isOwn`); null when there is no such profile or it is hidden from this visitor.
+const getProfileOnServer = (id: string) =>
+  orNull(withSession<PublicProfile>(`/profiles/${encodeURIComponent(id)}`))
+
 const getMyBookingsOnServer = () => orNull(withSession<Booking[]>('/me/bookings'))
 
 const getMyBusinessesOnServer = () => orNull(withSession<BusinessLink[]>('/me/businesses'))
@@ -78,6 +84,7 @@ export {
   getMasterPlacesOnServer,
   getMyBookingsOnServer,
   getMyBusinessesOnServer,
+  getProfileOnServer,
   getSessionCustomer,
   getVisitReviewOnServer,
   requireCustomer,

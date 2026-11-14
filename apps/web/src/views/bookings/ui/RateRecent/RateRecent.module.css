@@ -1,0 +1,117 @@
+/* A quiet card like the passes under it: what to rate on two lines, then five stars in a row. */
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  border-radius: var(--radius-2xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.title {
+  font-size: var(--text-title3);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.meta {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.stars {
+  display: flex;
+  min-width: 0;
+  margin: 0 0 0 calc(-1 * var(--space-2));
+  padding: 0;
+  border: none;
+}
+
+.legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.star,
+.later {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+.star {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  color: var(--color-tertiary-foreground);
+  transition:
+    scale var(--duration-fast) var(--ease-spring),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.star svg {
+  width: 28px;
+  height: 28px;
+}
+
+.star[data-on] {
+  color: var(--color-rating);
+}
+
+.star:active {
+  scale: 0.88;
+}
+
+.later {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.star:focus-visible,
+.later:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+}
+
+/* With a mouse the stars light up to the pointer, like choosing in App Store. */
+@media (hover: hover) {
+  .stars:hover .star {
+    color: var(--color-rating);
+  }
+
+  .stars .star:hover ~ .star {
+    color: var(--color-tertiary-foreground);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star {
+    transition: none;
+  }
+}

@@ -1,15 +1,20 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
@@ -21,12 +26,14 @@ import {
   type ReplyInput,
   type ReviewsQuery,
   replySchema,
+  reviewerIdSchema,
   reviewsQuerySchema,
 } from './reviews.schemas.js'
 import { ReviewsService } from './reviews.service.js'
 
 const TOKEN_HEADER = 'x-booking-token'
 const SIGNATURE_HEADER = 'x-review-signature'
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 @Controller()
 export class ReviewsController {
@@ -64,13 +71,44 @@ export class ReviewsController {
     )
   }
 
+  @Post('bookings/:id/review/photos')
+  @UseGuards(OptionalAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: MAX_UPLOAD_BYTES, files: 1 },
+      fileFilter: (_request, file, accept) => accept(null, file.mimetype.startsWith('image/')),
+    }),
+  )
+  addPhoto(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+    @Headers(SIGNATURE_HEADER) signature: string | undefined,
+    @CurrentCustomer() customer: Customer | null,
+    @UploadedFile() file: { buffer: Buffer } | undefined,
+  ) {
+    if (!file) throw new BadRequestException('Выберите фото')
+    return this.reviews.addPhoto(
+      id,
+      { token: token ?? null, signature: signature ?? null, customer },
+      file.buffer,
+    )
+  }
+
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/reviews')
   listPublic(
     @Param('slug') slug: string,
     @Query({ schema: reviewsQuerySchema }) query: ReviewsQuery,
   ) {
-    return this.reviews.listPublic(slug, query.limit)
+    return this.reviews.listPublic(slug, query.limit, query.serviceId)
+  }
+
+  // Another client's public page: their reviews across places, opened from a review.
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
+  @Get('reviewers/:id')
+  reviewer(@Param('id') id: string) {
+    if (!reviewerIdSchema.safeParse(id).success) throw new NotFoundException('Профиль не найден')
+    return this.reviews.reviewer(id)
   }
 
   @Get('manage/:slug/reviews')

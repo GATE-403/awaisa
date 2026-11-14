@@ -34,6 +34,10 @@ const APP_SEGMENTS = new Set([
   'feed',
   'profile',
   'review',
+  // Clients' public profiles.
+  'u',
+  // The masters' leaderboard.
+  'top',
   // Signed checkout links for deposits.
   'pay',
   // Signed SMS links to a visit.

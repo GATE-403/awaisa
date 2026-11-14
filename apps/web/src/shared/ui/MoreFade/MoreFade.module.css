@@ -50,11 +50,18 @@
   translate: -50% 0;
 }
 
-/* Open: a quiet capsule under the list, centred. */
+/* Open: «Скрыть» floats at the bottom of the screen while the list is in view, so folding a
+   long list never means scrolling to its end; past the list it settles under it. */
 .less {
+  position: sticky;
+  bottom: calc(var(--tabbar-height, 0px) + env(safe-area-inset-bottom) + var(--space-3));
+  z-index: 4;
   display: flex;
   margin: var(--space-3) auto 0;
-  background: var(--color-fill);
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-lg);
   color: var(--color-foreground);
 }
 

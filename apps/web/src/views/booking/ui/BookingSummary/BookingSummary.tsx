@@ -96,7 +96,12 @@ export const BookingSummary = ({
           aria-label='Показать, что выбрано'
         >
           <span className={styles.barPrice}>
+            {/* The discount shows before the client commits: the old price struck, the percent. */}
+            {discount && service && (
+              <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
+            )}
             {total !== null ? formatPrice(total) : 'Онлайн-запись'}
+            {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span
             className={styles.barHint}

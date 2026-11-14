@@ -33,6 +33,8 @@ const createBookingSchema = z.object({
     .nullable()
     .default(120),
   promoCode: z.string().trim().max(40).optional(),
+  /** Who invited this client (a profile handle or public id from a `?ref=` link). */
+  ref: z.string().trim().max(40).optional(),
 })
 
 const nextFreeQuerySchema = z.object({

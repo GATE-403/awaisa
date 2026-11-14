@@ -26,6 +26,8 @@ const createPastVisit = async (
   specialistIndex = 0,
   /** How far back to move the visit; far by default so it never meets a real one. */
   daysBack?: number,
+  /** Who invited this client (`?ref=`), sent with the booking. */
+  ref?: string,
 ) => {
   const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
   const specialist = business.catalog.specialists[specialistIndex]
@@ -52,6 +54,7 @@ const createPastVisit = async (
         name,
         phone,
         smsConfirmation: false,
+        ref,
       }),
     })
     const booking = await response.json()

@@ -15,6 +15,7 @@ import {
 import { findDay, weekdayOf } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { clearDraft, saveDraft } from '@/features/bookingDraft'
+import { readRef } from '@/features/invite'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
@@ -178,6 +179,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }, [isPresetChecked, availability, dayKey, presetDate, presetTime, toast])
 
   // Keep the half-made booking on the device, so leaving the page never loses it.
+  const hasContacts = Boolean(name.trim()) && isPhoneValid
+  const stepsDone = [service, specialistId, time, hasContacts].filter(Boolean).length
   useEffect(() => {
     if (!service || createdBooking) return
     saveDraft({
@@ -187,8 +190,21 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       serviceName: service.name,
       specialistId: chosenSpecialistId,
       branchId: branchId ?? null,
+      date: time ? dayKey : null,
+      time,
+      stepsDone,
     })
-  }, [service, chosenSpecialistId, branchId, business.slug, business.name, createdBooking])
+  }, [
+    service,
+    chosenSpecialistId,
+    branchId,
+    business.slug,
+    business.name,
+    createdBooking,
+    dayKey,
+    time,
+    stepsDone,
+  ])
 
   // The first suggested day has no free time (today is over, or fully booked): open the next one.
   useEffect(() => {
@@ -270,6 +286,23 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     scrollToStep('contacts', true)
   }
 
+  // A quick time: service, master and time at once; the steps fold and contacts are next.
+  const pickSlot = (pick: {
+    serviceId: string
+    specialistId: string
+    dayKey: string
+    time: string
+  }) => {
+    setServiceId(pick.serviceId)
+    setSpecialistId(pick.specialistId)
+    setSelectedDayKey(pick.dayKey)
+    setTime(pick.time)
+    setFolded({})
+    setEditingStep(null)
+    setSubmitError(null)
+    scrollToStep('contacts', true)
+  }
+
   const submit = async () => {
     setHasTriedSubmit(true)
     if (firstIncompleteStep) {
@@ -294,6 +327,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         smsConfirmation,
         reminderMinutes,
         promoCode: promoCode && !codeError ? promoCode : undefined,
+        ref: readRef(),
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       if (!accountPhone) saveContact({ name: name.trim(), phone: phone.trim() })
@@ -371,6 +405,10 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     selectSpecialist,
     selectDay,
     selectTime,
+    pickSlot,
+    hasContacts,
+    today,
+    openDayKeys: openDays.map((day) => day.key),
     submit,
   }
 }

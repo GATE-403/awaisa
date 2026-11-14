@@ -1,15 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common'
+import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { addDays, toBusinessParts } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
-import { type Candidate, type Interest, type Profile, rankCandidates } from './recommend-score.js'
-import type { RecommendationsQuery } from './recommendations.schemas.js'
+import {
+  type Affinities,
+  type Candidate,
+  computeAffinities,
+  type Interest,
+  type Profile,
+  rankCandidates,
+} from './recommend-score.js'
+import type { RecommendationEventsInput, RecommendationsQuery } from './recommendations.schemas.js'
 
 type Row = Record<string, unknown>
 
 const DAY_MS = 86_400_000
+const AFFINITY_TTL_MS = 10 * 60_000
+// A place with fewer reviews than this is «new»: a shelf spot goes to such places.
+const NEW_PLACE_REVIEWS = 5
 
 /**
  * «Для вас»: every active service of a published place scored for this client — what they said
@@ -17,11 +28,100 @@ const DAY_MS = 86_400_000
  * how booked it is. No accounts needed: guests send their answers and device visits.
  */
 @Injectable()
-export class RecommendationsService {
+export class RecommendationsService implements OnApplicationBootstrap {
+  private readonly logger = new Logger(RecommendationsService.name)
+  private affinities: { value: Affinities; loadedAt: number } | null = null
+
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly bookings: BookingsService,
   ) {}
+
+  // A fresh database gets its affinities at once instead of waiting for the night.
+  onApplicationBootstrap() {
+    void this.query('SELECT 1 FROM "kind_affinities" LIMIT 1')
+      .then((rows) => (rows.length === 0 ? this.refreshAffinities() : undefined))
+      .catch((error: unknown) => this.logger.warn(`Affinities not checked: ${String(error)}`))
+  }
+
+  /** Nightly at 03:00 business time: what clients book after what, from 180 days of visits. */
+  @Cron('0 21 * * *')
+  async refreshAffinities() {
+    const rows = await this.query(
+      `SELECT bk."customer_phone" AS "client", s."name" AS "serviceName", bk."starts_at" AS "startsAt"
+       FROM "bookings" bk JOIN "services" s ON s."id" = bk."service_id"
+       WHERE bk."status" = 'confirmed' AND bk."outcome" IS DISTINCT FROM 'no_show'
+         AND bk."starts_at" > now() - interval '180 days' AND bk."starts_at" < now()`,
+    )
+    const pairs = computeAffinities(
+      rows.map((row) => ({
+        client: String(row.client),
+        serviceName: String(row.serviceName),
+        time: new Date(row.startsAt as string).getTime(),
+      })),
+    )
+    await this.dataSource.transaction(async (manager) => {
+      await manager.query('DELETE FROM "kind_affinities"')
+      for (const pair of pairs) {
+        await manager.query(
+          'INSERT INTO "kind_affinities" ("from_kind", "to_kind", "lift", "support") VALUES ($1, $2, $3, $4)',
+          [pair.from, pair.to, pair.lift, pair.support],
+        )
+      }
+    })
+    this.affinities = null
+    this.logger.log(`Kind affinities: ${pairs.length} pairs from ${rows.length} visits`)
+    return pairs.length
+  }
+
+  /** Shown, tapped and booked picks; never fails the page that sends them. */
+  async recordEvents(input: RecommendationEventsInput, customer: Customer | null) {
+    const values: unknown[] = []
+    const tuples = input.events.map((event, index) => {
+      values.push(
+        input.session,
+        customer?.id ?? null,
+        event.kind,
+        event.serviceId,
+        event.reason,
+        event.surface,
+        event.position ?? null,
+      )
+      const at = index * 7
+      return `($${at + 1}, $${at + 2}, $${at + 3}, $${at + 4}, $${at + 5}, $${at + 6}, $${at + 7})`
+    })
+    await this.query(
+      `INSERT INTO "recommendation_events"
+         ("session", "customer_id", "kind", "service_id", "reason", "surface", "position")
+       VALUES ${tuples.join(', ')}`,
+      values,
+    )
+    return { recorded: input.events.length }
+  }
+
+  /** Per reason: how often shown, tapped and booked — what actually brings bookings. */
+  async stats(days: number) {
+    const rows = await this.query(
+      `SELECT "reason",
+         COUNT(*) FILTER (WHERE "kind" = 'impression')::int AS "impressions",
+         COUNT(*) FILTER (WHERE "kind" = 'click')::int AS "clicks",
+         COUNT(*) FILTER (WHERE "kind" = 'book')::int AS "bookings"
+       FROM "recommendation_events"
+       WHERE "created_at" > now() - make_interval(days => $1)
+       GROUP BY "reason" ORDER BY "impressions" DESC`,
+      [days],
+    )
+    return rows.map((row) => {
+      const impressions = Number(row.impressions)
+      return {
+        reason: String(row.reason) || '—',
+        impressions,
+        clicks: Number(row.clicks),
+        bookings: Number(row.bookings),
+        ctr: impressions ? Math.round((Number(row.clicks) / impressions) * 1000) / 10 : 0,
+      }
+    })
+  }
 
   async recommend(query: RecommendationsQuery, customer: Customer | null) {
     const hasPoint = query.lat !== undefined && query.lng !== undefined
@@ -72,9 +172,11 @@ export class RecommendationsService {
     )
 
     const slugs = [...new Set(rows.map((row) => String(row.slug)))].slice(0, 80)
-    const [nextFree, visits] = await Promise.all([
+    const [nextFree, visits, affinities, seen] = await Promise.all([
       this.bookings.findNextFree(slugs),
       this.visitsOf(query.visits, customer),
+      this.loadAffinities(),
+      this.seenBy(query.session),
     ])
     const today = toBusinessParts(new Date()).dateKey
     const tomorrow = addDays(today, 1)
@@ -95,15 +197,29 @@ export class RecommendationsService {
         freeTime: slot?.time ?? null,
         discountPercent: row.discountPercent === null ? null : Number(row.discountPercent),
         rebookDays: row.rebookDays === null ? null : Number(row.rebookDays),
+        isNewPlace: Number(row.reviews) < NEW_PLACE_REVIEWS,
         row,
       } satisfies Candidate & { row: Row }
     })
 
+    const toRef = (candidate: Candidate) => ({
+      serviceId: candidate.serviceId,
+      name: candidate.name,
+    })
+    const focus = candidates.find((candidate) => candidate.serviceId === query.like)
+    const recent = query.recent
+      .map((id) => candidates.find((candidate) => candidate.serviceId === id))
+      .filter((candidate) => candidate !== undefined && candidate !== focus)
+      .map((candidate) => toRef(candidate as Candidate))
     const profile: Profile = {
       interests: query.interests as Interest[],
       gender: query.gender ?? null,
       budget: query.budget ?? null,
       visits,
+      focus: focus ? toRef(focus) : null,
+      recent,
+      affinities,
+      seen,
     }
     return rankCandidates(candidates, profile, { limit: query.limit }).map(
       ({ candidate, reason }) => ({
@@ -124,6 +240,41 @@ export class RecommendationsService {
         discountPercent: candidate.discountPercent,
         reason,
       }),
+    )
+  }
+
+  private async loadAffinities() {
+    if (this.affinities && Date.now() - this.affinities.loadedAt < AFFINITY_TTL_MS) {
+      return this.affinities.value
+    }
+    const rows = await this.query(
+      'SELECT "from_kind" AS "from", "to_kind" AS "to", "lift" FROM "kind_affinities"',
+    ).catch(() => [])
+    const value: Affinities = {}
+    for (const row of rows) {
+      const from = row.from as Interest
+      value[from] = { ...value[from], [row.to as Interest]: Number(row.lift) }
+    }
+    this.affinities = { value, loadedAt: Date.now() }
+    return value
+  }
+
+  /** Services shown to this device in the last week and never tapped: how many times. */
+  private async seenBy(session: string | undefined) {
+    if (!session) return {}
+    const rows = await this.query(
+      `SELECT "service_id" AS "serviceId",
+         COUNT(*) FILTER (WHERE "kind" = 'impression')::int AS "shown",
+         COUNT(*) FILTER (WHERE "kind" <> 'impression')::int AS "tapped"
+       FROM "recommendation_events"
+       WHERE "session" = $1 AND "created_at" > now() - interval '7 days'
+       GROUP BY "service_id"`,
+      [session],
+    ).catch(() => [])
+    return Object.fromEntries(
+      rows
+        .filter((row) => Number(row.tapped) === 0)
+        .map((row) => [String(row.serviceId), Number(row.shown)]),
     )
   }
 
@@ -170,7 +321,7 @@ export class RecommendationsService {
       }))
   }
 
-  private query(sql: string, params: unknown[]) {
+  private query(sql: string, params: unknown[] = []) {
     return this.dataSource.query(sql, params) as Promise<Row[]>
   }
 }

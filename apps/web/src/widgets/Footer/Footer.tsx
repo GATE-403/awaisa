@@ -13,6 +13,7 @@ const COLUMNS = [
     links: [
       { href: '/', label: 'Каталог' },
       { href: '/map', label: 'Рядом на карте' },
+      { href: '/top', label: 'Рейтинг мастеров' },
     ],
   },
   {

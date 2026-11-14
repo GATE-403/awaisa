@@ -79,7 +79,10 @@ export class WorkPhotosService {
     if (this.rows(rows).length === 0) throw new NotFoundException('Фото не найдено')
   }
 
-  /** Removes the row and returns its URL for the storage. */
+  /**
+   * Removes the row and returns its URL for the storage — or null when a client's review still
+   * shows the same file (review photos are added to «Работы» without a copy).
+   */
   async remove(businessId: string, id: string) {
     const rows = await this.query(
       `DELETE FROM "work_photos" WHERE "id" = $1 AND "business_id" = $2 RETURNING "url"`,
@@ -87,7 +90,18 @@ export class WorkPhotosService {
     )
     const [row] = this.rows(rows)
     if (!row) throw new NotFoundException('Фото не найдено')
-    return String(row.url)
+    const url = String(row.url)
+    const [used] = await this.query('SELECT 1 FROM "review_photos" WHERE "url" = $1 LIMIT 1', [url])
+    return used ? null : url
+  }
+
+  /** Whether there is room for one more, without refusing — for photos that only may go here. */
+  async hasRoom(businessId: string) {
+    const [row] = await this.query(
+      'SELECT COUNT(*)::int AS "count" FROM "work_photos" WHERE "business_id" = $1',
+      [businessId],
+    )
+    return Number(row?.count) < MAX_PHOTOS
   }
 
   async report(id: string) {

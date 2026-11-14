@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react'
 import { pickTint } from '@/entities/business'
 import type { Business, Specialist } from '@/shared/api/types'
 import { sizedImage } from '@/shared/lib/imageSizes'
+import { WreathBadge } from '@/shared/ui/Wreath/Wreath'
 import styles from './Place.module.css'
 
 interface MastersSectionProps {
@@ -31,8 +32,14 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
           Мастера
         </h2>
         <span className={styles.sectionCount}>{specialists.length}</span>
+        <NextLink
+          href={business.kind === 'barber' ? '/top' : `/top?kind=${business.kind}`}
+          className={styles.sectionLink}
+        >
+          Рейтинг ›
+        </NextLink>
       </div>
-      <ul className={styles.masters}>
+      <ul className={styles.masters} data-edge-fade=''>
         {specialists.map((specialist) => (
           <li key={specialist.id}>
             <NextLink
@@ -54,6 +61,10 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
                 <span className={styles.masterInitials} aria-hidden>
                   {initialsOf(specialist.name)}
                 </span>
+              )}
+              {/* One of the platform's three best masters: a laurel emblem with the place. */}
+              {specialist.rank && (
+                <WreathBadge rank={specialist.rank} className={styles.masterWreath} />
               )}
               <span className={styles.masterCaption}>
                 <span className={styles.masterName}>{specialist.name.split(' ')[0]}</span>

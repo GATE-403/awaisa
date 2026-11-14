@@ -1,0 +1,38 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(0 0 0 / 0.32);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(100%, 360px);
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: var(--color-sheet);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+
+.title {
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
