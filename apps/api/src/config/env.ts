@@ -1,9 +1,13 @@
 import { normalizePhone } from '../common/phone.js'
+import { type ProcessRole, parseProcessRole } from '../runtime/process-role.js'
 
 type Env = {
   NODE_ENV: 'development' | 'production' | 'test'
+  PROCESS_ROLE: ProcessRole
   API_PORT: number
   DATABASE_URL: string
+  DATABASE_POOL_SIZE: number
+  DATABASE_STATEMENT_TIMEOUT_MS: number
   WEB_ORIGIN: string[]
   RATE_LIMIT_PER_MINUTE: number
   BOOKING_RATE_LIMIT_PER_MINUTE: number
@@ -228,6 +232,17 @@ const parseWallet = (config: Record<string, unknown>) => ({
   GOOGLE_WALLET_SERVICE_ACCOUNT: decodeSecret(config.GOOGLE_WALLET_SERVICE_ACCOUNT),
 })
 
+// Split processes must share Redis: the worker's writes (released payment holds, waitlist) bump
+// cache tags the api instances have to see, and rate limits must count across every instance.
+const parseRole = (config: Record<string, unknown>) => {
+  const role = parseProcessRole(optionalString(config.PROCESS_ROLE))
+  if (role !== 'all' && !optionalString(config.REDIS_URL)) {
+    throw new Error(`PROCESS_ROLE=${role} needs REDIS_URL`)
+  }
+
+  return role
+}
+
 const validateEnv = (config: Record<string, unknown>): Env => {
   const nodeEnv = parseNodeEnv(config.NODE_ENV)
   const webOrigins = parseOrigins(config.WEB_ORIGIN)
@@ -235,8 +250,19 @@ const validateEnv = (config: Record<string, unknown>): Env => {
 
   return {
     NODE_ENV: nodeEnv,
+    PROCESS_ROLE: parseRole(config),
     API_PORT: parsePort(config.API_PORT ?? config.PORT),
     DATABASE_URL: parseDatabaseUrl(config.DATABASE_URL),
+    DATABASE_POOL_SIZE: parsePositiveInt(
+      'DATABASE_POOL_SIZE',
+      optionalString(config.DATABASE_POOL_SIZE),
+      10,
+    ),
+    DATABASE_STATEMENT_TIMEOUT_MS: parsePositiveInt(
+      'DATABASE_STATEMENT_TIMEOUT_MS',
+      optionalString(config.DATABASE_STATEMENT_TIMEOUT_MS),
+      30_000,
+    ),
     WEB_ORIGIN: webOrigins,
     RATE_LIMIT_PER_MINUTE: parsePositiveInt(
       'RATE_LIMIT_PER_MINUTE',

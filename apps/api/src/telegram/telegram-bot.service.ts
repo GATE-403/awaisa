@@ -12,6 +12,7 @@ import { DataSource, LessThan, Repository } from 'typeorm'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
+import { RuntimeService } from '../runtime/runtime.service.js'
 import { TelegramChat } from './telegram-chat.entity.js'
 import { TelegramLinkCode } from './telegram-link-code.entity.js'
 import {
@@ -49,6 +50,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     @InjectRepository(TelegramLinkCode) private readonly codes: Repository<TelegramLinkCode>,
     private readonly config: ConfigService<Env, true>,
     private readonly clientMessages: ClientMessagesService,
+    private readonly runtime: RuntimeService,
   ) {}
 
   get isAvailable() {
@@ -62,6 +64,8 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
   async onApplicationBootstrap() {
     const token = this.token()
     if (!token || this.config.get('NODE_ENV', { infer: true }) === 'test') return
+    // The webhook is set and the long-poll runs from the jobs process only: Telegram allows one poller.
+    if (!this.runtime.runsJobs) return
     const webhookUrl = this.config.get('TELEGRAM_WEBHOOK_URL', { infer: true })
     if (webhookUrl) {
       await this.call('setWebhook', {
@@ -71,7 +75,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       }).catch((error: unknown) => this.logger.warn(`setWebhook failed: ${String(error)}`))
       return
     }
-    // No public URL (local development): long polling, one instance only.
+    // No public URL (local development): long polling.
     await this.call('deleteWebhook', {}).catch(() => undefined)
     this.isPolling = true
     void this.poll(0)

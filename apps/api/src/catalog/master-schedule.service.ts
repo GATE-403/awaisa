@@ -128,6 +128,59 @@ export class MasterScheduleService {
     return days
   }
 
+  /**
+   * `offHoursBusy` for many masters and days with three queries in all: `windowOf` gives the
+   * business window of a master's day (null = the business is closed, nothing to add).
+   */
+  async offHoursBusyMany(
+    specialistIds: string[],
+    dateKeys: string[],
+    windowOf: (specialistId: string, dateKey: string) => OpeningWindow | null,
+  ) {
+    if (specialistIds.length === 0 || dateKeys.length === 0) return []
+    const sorted = [...dateKeys].sort()
+    const [specialists, hours, leaves] = await Promise.all([
+      this.specialists.find({
+        where: { id: In(specialistIds) },
+        select: { id: true, hasOwnHours: true },
+      }),
+      this.hours.findBy({
+        specialistId: In(specialistIds),
+        weekday: In([...new Set(dateKeys.map(weekdayOf))]),
+      }),
+      this.leaves.findBy({
+        specialistId: In(specialistIds),
+        startsOn: LessThanOrEqual(sorted[sorted.length - 1] ?? ''),
+        endsOn: MoreThanOrEqual(sorted[0] ?? ''),
+      }),
+    ])
+
+    return dateKeys.flatMap((dateKey) =>
+      specialists.flatMap((specialist) => {
+        const window = windowOf(specialist.id, dateKey)
+        if (!window) return []
+        const isOnLeave = leaves.some(
+          (leave) =>
+            leave.specialistId === specialist.id &&
+            leave.startsOn <= dateKey &&
+            leave.endsOn >= dateKey,
+        )
+        const own = hours.find(
+          (row) => row.specialistId === specialist.id && row.weekday === weekdayOf(dateKey),
+        )
+        const day: MasterDay = isOnLeave
+          ? null
+          : specialist.hasOwnHours
+            ? own
+              ? { opensMinutes: own.opensMinutes, closesMinutes: own.closesMinutes }
+              : null
+            : window
+
+        return offHoursAsBusy(specialist.id, dateKey, window, day)
+      }),
+    )
+  }
+
   /** Leaves on `dateKey`, so the schedule can say why a column is empty. */
   async leavesOn(specialistIds: string[], dateKey: string) {
     if (specialistIds.length === 0) return []
