@@ -16,6 +16,7 @@ type Env = {
   AUTH_SECRET: string
   ADMIN_PHONES: string[]
   SMS_DRIVER: SmsDriver
+  SMS_ALLOWED_COUNTRY_CODES: string[]
   TWILIO_ACCOUNT_SID?: string
   TWILIO_AUTH_TOKEN?: string
   TWILIO_FROM?: string
@@ -118,6 +119,18 @@ const parseAdminPhones = (value: unknown) =>
     .split(',')
     .map((phone) => normalizePhone(phone))
     .filter((phone): phone is string => phone !== null)
+
+const parseCountryCodes = (value: unknown) => {
+  const codes = (optionalString(value) ?? '996')
+    .split(',')
+    .map((code) => code.trim().replace(/^\+/, ''))
+  const invalid = codes.find((code) => code !== '*' && !/^\d{1,4}$/.test(code))
+  if (invalid !== undefined) {
+    throw new Error('SMS_ALLOWED_COUNTRY_CODES must be calling codes like 996,7 (or *)')
+  }
+
+  return codes
+}
 
 const parseSmsDriver = (config: Record<string, unknown>): SmsDriver => {
   const driver = optionalString(config.SMS_DRIVER)
@@ -287,6 +300,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     AUTH_SECRET: parseAuthSecret(config.AUTH_SECRET, nodeEnv),
     ADMIN_PHONES: parseAdminPhones(config.ADMIN_PHONES),
     SMS_DRIVER: smsDriver,
+    SMS_ALLOWED_COUNTRY_CODES: parseCountryCodes(config.SMS_ALLOWED_COUNTRY_CODES),
     PAYMENT_DRIVER: parsePaymentDriver(config, nodeEnv),
     FREEDOMPAY_MERCHANT_ID: optionalString(config.FREEDOMPAY_MERCHANT_ID),
     FREEDOMPAY_SECRET_KEY: optionalString(config.FREEDOMPAY_SECRET_KEY),
