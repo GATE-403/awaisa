@@ -10,8 +10,8 @@ import { ConfigService } from '@nestjs/config'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, IsNull, LessThan, MoreThanOrEqual, Repository } from 'typeorm'
+import { AvailabilityService } from '../bookings/availability.service.js'
 import { ANY_SPECIALIST_ID, UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
-import { BookingsService } from '../bookings/bookings.service.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { Service } from '../catalog/service.entity.js'
@@ -48,7 +48,7 @@ export class WaitlistService {
     @InjectRepository(WaitlistEntry) private readonly entries: Repository<WaitlistEntry>,
     @InjectRepository(Specialist) private readonly specialists: Repository<Specialist>,
     @InjectRepository(Service) private readonly services: Repository<Service>,
-    private readonly bookings: BookingsService,
+    private readonly availability: AvailabilityService,
     private readonly catalog: CatalogService,
     private readonly businesses: BusinessesService,
     private readonly sms: SmsService,
@@ -61,7 +61,7 @@ export class WaitlistService {
 
     // Same rules as booking (date range, published page, the master does the service); a day with
     // free time does not need a waitlist — the client books it instead.
-    const { slots } = await this.bookings.getAvailability({
+    const { slots } = await this.availability.getAvailability({
       serviceId: input.serviceId,
       specialistId: input.specialistId,
       date: input.date,
@@ -211,7 +211,7 @@ export class WaitlistService {
       if (!first) continue
       try {
         if (await this.hasFreshCancellation(first.businessId)) continue
-        const { slots } = await this.bookings.getAvailability({
+        const { slots } = await this.availability.getAvailability({
           serviceId: first.serviceId,
           specialistId: first.specialistId ?? ANY_SPECIALIST_ID,
           date: first.date,

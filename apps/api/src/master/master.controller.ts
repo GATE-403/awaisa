@@ -20,6 +20,7 @@ import {
 } from '../admin/admin.schemas.js'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
 import { BookingsService } from '../bookings/bookings.service.js'
+import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { CurrentBusiness } from '../businesses/business-access.guard.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
@@ -35,6 +36,7 @@ export class MasterController {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly bookings: BookingsService,
+    private readonly salonBookings: SalonBookingsService,
     private readonly businesses: BusinessesService,
     private readonly masterSchedule: MasterScheduleService,
   ) {}
@@ -63,7 +65,7 @@ export class MasterController {
     const [days, leaves, bookings] = await Promise.all([
       this.masterSchedule.daysFor([master.id], query.date, window),
       this.masterSchedule.leavesOn([master.id], query.date),
-      this.bookings.getAdminViews(business.id, {
+      this.salonBookings.getAdminViews(business.id, {
         dayStart: businessDateTimeToUtc(query.date, 0),
         dayEnd: businessDateTimeToUtc(query.date, 24 * 60),
       }),
@@ -97,6 +99,6 @@ export class MasterController {
       throw new ForbiddenException('Это запись другого мастера')
     }
 
-    return this.bookings.setOutcome(business.id, id, body)
+    return this.salonBookings.setOutcome(business.id, id, body)
   }
 }
