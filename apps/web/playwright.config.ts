@@ -48,6 +48,8 @@ export default defineConfig({
             SMS_DRIVER: 'console',
             // The cache under test is the real one: Redis when it runs (pnpm db:up), else memory.
             REDIS_URL: process.env.E2E_REDIS_URL ?? 'redis://localhost:6379',
+            // Servers run on UTC like CI and production; the browser is in Bishkek (timezoneId).
+            TZ: 'UTC',
             OTP_TEST_CODE: '111111',
             ADMIN_PHONES: '+996700000001,+996700000002',
             // The owners' bot without a token: messages are logged, the webhook is driven by tests.
@@ -61,7 +63,7 @@ export default defineConfig({
         {
           command: `pnpm next build && pnpm next start -p ${WEB_PORT}`,
           url: BASE_URL,
-          env: { API_URL, NEXT_DIST_DIR: '.next-e2e' },
+          env: { API_URL, NEXT_DIST_DIR: '.next-e2e', TZ: 'UTC' },
           reuseExistingServer: !process.env.CI,
           timeout: 300_000,
         },

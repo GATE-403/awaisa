@@ -4,6 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { Phone, X } from '@phosphor-icons/react/ssr'
 import { PersonAvatar } from '@/entities/business'
 import type { ManagedWaitlistEntry } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './WaitlistSheet.module.css'
@@ -46,7 +47,7 @@ export const WaitlistSheet = ({
             <p className={styles.status} data-notified={entry.status === 'notified' || undefined}>
               {entry.status === 'notified'
                 ? `SMS отправлено: свободно ${entry.notifiedTime}`
-                : `Ждёт с ${new Date(entry.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}`}
+                : `Ждёт с ${new Date(entry.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', timeZone: BUSINESS_TIME_ZONE })}`}
             </p>
             <div className={styles.actions}>
               <Button size='sm' onClick={() => onBook(entry)}>
