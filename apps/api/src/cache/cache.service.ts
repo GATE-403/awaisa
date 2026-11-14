@@ -8,6 +8,7 @@ type Entry = { value: string; expiresAt: number }
 type RedisClient = ReturnType<typeof createClient>
 
 const MEMORY_LIMIT = 2000
+const COMMAND_TIMEOUT_MS = 1000
 
 // Read-through cache for public answers. With REDIS_URL it lives in Redis (shared by every API
 // instance); without it, in this process's memory. Invalidation is by tag versions: a key
@@ -27,6 +28,11 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
     const client = createClient({
       url,
       socket: { reconnectStrategy: (tries) => Math.min(tries * 200, 5000) },
+      // While Redis is away, commands fail at once instead of queueing until it is back: by
+      // default every cached read and rate-limit check waited, which hung the whole API.
+      disableOfflineQueue: true,
+      // Connected but not answering (overloaded, a network stall): give up after a second.
+      commandOptions: { timeout: COMMAND_TIMEOUT_MS },
     })
     client.on('error', (error: Error) => this.logger.warn(`Redis: ${error.message}`))
     // Starting never waits on Redis for long: no answer in 3 s and the memory cache takes over.
