@@ -81,6 +81,16 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     void this.poll(0)
   }
 
+  /** Platform alerts (errors, Redis) to ALERT_TELEGRAM_CHAT_ID; logged when it is not set. */
+  async sendAlert(html: string) {
+    const chatId = this.config.get('ALERT_TELEGRAM_CHAT_ID', { infer: true })
+    if (!chatId) {
+      this.logger.warn(`Alert (no ALERT_TELEGRAM_CHAT_ID): ${html}`)
+      return
+    }
+    await this.send(chatId, html)
+  }
+
   onApplicationShutdown() {
     this.isPolling = false
   }
@@ -141,6 +151,8 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
     if (command === '/start' && argument) return this.link(chatId, argument, message.from)
     if (command === '/today') return this.sendToday(chatId)
+    // For ALERT_TELEGRAM_CHAT_ID: the platform's own alerts go to whichever chat this is.
+    if (command === '/chatid') return this.send(chatId, `ID этого чата: <code>${chatId}</code>`)
     if (command === '/stop') {
       // A client's chat: back to SMS reminders.
       if (await this.clientMessages.unlink(chatId)) {
