@@ -1,0 +1,52 @@
+name: Uptime
+
+# From outside the servers, so it notices what the worker's alerts cannot: the site or the API
+# being down altogether. GitHub runs scheduled workflows on the default branch only, at most
+# every 5 minutes and sometimes later; a dedicated uptime service (UptimeRobot, Better Stack)
+# checks every minute if that is not enough.
+#
+# Repository settings → Secrets and variables → Actions:
+#   variables: UPTIME_URLS — space-separated, e.g. "https://awaisa.kg https://awaisa.kg/api/health"
+#   secrets:   ALERT_TELEGRAM_BOT_TOKEN, ALERT_TELEGRAM_CHAT_ID (the chat's id: send /chatid to the bot)
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: vars.UPTIME_URLS != ''
+    steps:
+      - name: Check every URL
+        env:
+          URLS: ${{ vars.UPTIME_URLS }}
+          BOT_TOKEN: ${{ secrets.ALERT_TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.ALERT_TELEGRAM_CHAT_ID }}
+        run: |
+          failed=""
+          for url in $URLS; do
+            # Three tries a few seconds apart: one dropped request is not an outage.
+            for attempt in 1 2 3; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo 000)
+              [ "$code" -ge 200 ] && [ "$code" -lt 400 ] && break
+              sleep 10
+            done
+            if [ "$code" -lt 200 ] || [ "$code" -ge 400 ]; then
+              failed="$failed\n• $url → $code"
+            fi
+          done
+          if [ -z "$failed" ]; then
+            echo "All up"
+            exit 0
+          fi
+          echo -e "Down:$failed"
+          if [ -n "$BOT_TOKEN" ] && [ -n "$CHAT_ID" ]; then
+            curl -s -o /dev/null --max-time 15 "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+              --data-urlencode "chat_id=$CHAT_ID" \
+              --data-urlencode "text=$(echo -e "🔴 Сайт не отвечает$failed")"
+          fi
+          exit 1

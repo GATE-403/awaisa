@@ -6,14 +6,18 @@ import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
 import { AppModule } from './app.module.js'
 import type { Env } from './config/env.js'
+import { loadRootEnv } from './runtime/load-env.js'
 import { createLogger } from './runtime/logger.js'
 import { parseProcessRole, servesHttp } from './runtime/process-role.js'
 import { requestLog } from './runtime/request-log.js'
+import { initSentry } from './runtime/sentry.js'
 
 // HTTP server: PROCESS_ROLE `all` (default — also runs the jobs) or `api` (HTTP only).
 const bootstrap = async () => {
+  loadRootEnv()
   const role = parseProcessRole(process.env.PROCESS_ROLE)
   if (!servesHttp(role)) throw new Error('PROCESS_ROLE=worker starts with dist/worker.js')
+  initSentry(role)
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule.forRole(role), {
     logger: createLogger(),

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { captureError } from '../runtime/sentry.js'
 import { buildFunnel } from './funnel.js'
 import type { ClientErrorInput, FunnelEventsInput, FunnelStep } from './telemetry.schemas.js'
 
@@ -15,7 +16,8 @@ type ErrorReport = Omit<ClientErrorInput, 'stack' | 'url'> & {
 
 /**
  * Where people drop out of booking, and what breaks for them — kept in our own database, no
- * third-party tracker. Writes never fail a request: telemetry is best-effort.
+ * tracker in the browser. Errors are also sent, scrubbed, to Sentry when SENTRY_DSN is set.
+ * Writes never fail a request: telemetry is best-effort.
  */
 @Injectable()
 export class TelemetryService {
@@ -38,6 +40,7 @@ export class TelemetryService {
   }
 
   async recordError(source: 'web' | 'api', error: ErrorReport) {
+    captureError({ source, message: error.message, stack: error.stack, url: error.url })
     try {
       await this.dataSource.query(
         `INSERT INTO "app_errors" ("source", "message", "stack", "url", "session", "user_agent")
