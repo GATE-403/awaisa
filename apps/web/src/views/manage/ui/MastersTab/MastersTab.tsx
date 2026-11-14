@@ -38,10 +38,13 @@ export const MastersTab = ({ slug, catalog, branches, businessHours, run }: Mast
       <SectionHeader
         title='Мастера'
         description='У каждого своё расписание — записи не пересекаются.'
+        // While the list is empty its own empty state carries the one button.
         actions={
-          <Button size='sm' onClick={() => setEditing('new')}>
-            Добавить мастера
-          </Button>
+          catalog.specialists.length > 0 && (
+            <Button size='sm' onClick={() => setEditing('new')}>
+              Добавить мастера
+            </Button>
+          )
         }
       />
 

@@ -81,7 +81,8 @@ export class BookingsController {
     @CurrentCustomer() customer: Customer | null,
   ) {
     const booking = await this.bookingsService.create(body, customer)
-    if (body.ref) void this.referrals.recordFirstBooking(body.ref, booking.customerPhone)
+    if (body.ref && !body.forOther)
+      void this.referrals.recordFirstBooking(body.ref, booking.customerPhone)
     return booking
   }
 

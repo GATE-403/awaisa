@@ -18,8 +18,6 @@ import {
   ANY_SPECIALIST_ID,
   addDayKey,
   DateTimePicker,
-  formatDayLong,
-  formatDuration,
   formatPrice,
   getSpecialistLabel,
   getSpecialistsForService,
@@ -28,10 +26,12 @@ import { rememberService, trackBookedPick } from '@/features/forYou'
 import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
@@ -56,6 +56,7 @@ interface BookingPageProps {
 }
 
 export const BookingPage = ({ business, catalog, isModal = false }: BookingPageProps) => {
+  const t = useT()
   const form = useBookingForm(business, catalog)
   const serviceTimes = useServicesNextFree(business.slug, form.branchId ?? undefined)
   // «Сегодня с 15:30» on each service row: the choice shows when one could come, not only what.
@@ -63,14 +64,14 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     const next = serviceTimes?.[serviceId]
     const todayKey = form.today?.dayKey
     if (!next || !todayKey) return null
-    if (next.date === todayKey) return `Сегодня с ${next.time}`
-    if (next.date === addDayKey(todayKey, 1)) return `Завтра с ${next.time}`
+    if (next.date === todayKey) return t('Сегодня с {time}', { time: next.time })
+    if (next.date === addDayKey(todayKey, 1)) return t('Завтра с {time}', { time: next.time })
     return null
   }
   usePageScrollLock()
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
-  const specialistLabel = getSpecialistLabel(catalog, form.specialistId)
+  const specialistLabel = t(getSpecialistLabel(catalog, form.specialistId))
   const recentVisits = useRecentVisits()
   const chosenServiceId = form.serviceId
   const bookedServiceId = form.createdBooking?.serviceId ?? null
@@ -83,6 +84,27 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
   useEffect(() => {
     if (bookedServiceId) trackBookedPick(bookedServiceId)
   }, [bookedServiceId])
+
+  // The funnel: how far people get before they leave (see shared/lib/telemetry).
+  const {
+    service: hasService,
+    specialist: hasMaster,
+    datetime: hasTime,
+    contacts: hasContacts,
+  } = form.completedSteps
+  const slug = business.slug
+  useEffect(() => {
+    trackStep('booking_open', slug)
+  }, [slug])
+  useEffect(() => {
+    if (hasService) trackStep('service', slug)
+    if (hasMaster) trackStep('specialist', slug)
+    if (hasTime) trackStep('time', slug)
+    if (hasContacts) trackStep('contacts', slug)
+  }, [hasService, hasMaster, hasTime, hasContacts, slug])
+  useEffect(() => {
+    if (bookedServiceId) trackStep('booked', slug)
+  }, [bookedServiceId, slug])
   // Quick times only for a returning client, before anything is chosen: «Как в прошлый раз» with
   // the last visit's service and master. A generic «Ближайшее время» above the steps was taken
   // for the date-and-time step itself, so new clients go through the steps.
@@ -119,7 +141,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
   })
   const quickMaster =
     quickSpecialistId === ANY_SPECIALIST_ID
-      ? 'любой мастер'
+      ? t('любой мастер')
       : getSpecialistLabel(catalog, quickSpecialistId)
 
   if (form.createdBooking) {
@@ -193,10 +215,10 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                     how far it is, the chosen one checked — two chips with district names left
                     people unsure where they were going. */}
                 <h2 id='booking-branch' className={styles.branchCaption}>
-                  Куда приедете
+                  {t('Куда приедете')}
                 </h2>
                 <fieldset className={`${styles.group} ${styles.branchList}`}>
-                  <legend className={styles.srOnly}>Филиал</legend>
+                  <legend className={styles.srOnly}>{t('Филиал')}</legend>
                   {form.branches.map((branch) => {
                     const distance = form.branchDistances?.[branch.id]
                     const isChosen = form.branchId === branch.id
@@ -233,7 +255,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                       rel='noreferrer'
                       className={styles.branchRoute}
                     >
-                      Маршрут до «{chosen.name}» ›
+                      {t('Маршрут до «{name}» ›', { name: chosen.name })}
                     </a>
                   )
                 })()}
@@ -242,7 +264,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
 
             {isQuickShown && quickService && (
               <QuickSlots
-                title={isLastVisitShown ? 'Как в прошлый раз' : 'Ближайшее время'}
+                title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}
                 subtitle={`${quickService.name}, ${quickMaster}`}
                 slots={quick.slots}
                 isLoading={quick.isLoading}
@@ -274,7 +296,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                 action={
                   <>
                     <Button size='lg' fullWidth onClick={form.submit} disabled={form.isSubmitting}>
-                      {form.isSubmitting ? 'Записываем…' : 'Записаться'}
+                      {form.isSubmitting ? t('Записываем…') : t('Записаться')}
                     </Button>
                     {form.submitError && (
                       <p className={styles.submitError} role='alert'>
@@ -289,7 +311,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                 <BookingStep
                   id='service'
                   icon={Scissors}
-                  title='Услуга'
+                  title={t('Услуга')}
                   summary={form.service?.name}
                   isComplete={form.completedSteps.service}
                   isCollapsed={form.isStepCollapsed('service')}
@@ -297,7 +319,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                 >
                   <RadioGroup
                     variant='inset'
-                    aria-label='Услуга'
+                    aria-label={t('Услуга')}
                     value={form.serviceId}
                     onValueChange={(value) => form.selectService(String(value))}
                   >
@@ -313,7 +335,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                             {soonLabel(service.id) && (
                               <span className={styles.serviceSoon}>{soonLabel(service.id)} · </span>
                             )}
-                            {formatDuration(service.durationMinutes)}
+                            {t.duration(service.durationMinutes)}
                             {service.description.trim() && ` · ${service.description.trim()}`}
                           </span>
                         }
@@ -326,9 +348,9 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                 <BookingStep
                   id='specialist'
                   icon={User}
-                  title='Мастер'
+                  title={t('Мастер')}
                   summary={specialistLabel || undefined}
-                  hint={form.service ? undefined : 'Сначала выберите услугу'}
+                  hint={form.service ? undefined : t('Сначала выберите услугу')}
                   isComplete={form.completedSteps.specialist}
                   isCollapsed={form.isStepCollapsed('specialist')}
                   onToggle={() => form.toggleStep('specialist')}
@@ -340,24 +362,22 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                       onChange={form.selectSpecialist}
                     />
                   ) : (
-                    <p className={styles.hint}>Сначала выберите услугу</p>
+                    <p className={styles.hint}>{t('Сначала выберите услугу')}</p>
                   )}
                 </BookingStep>
 
                 <BookingStep
                   id='datetime'
                   icon={CalendarBlank}
-                  title='Дата и время'
+                  title={t('Дата и время')}
                   summary={
-                    form.dayKey && form.time
-                      ? `${formatDayLong(form.dayKey)}, ${form.time}`
-                      : undefined
+                    form.dayKey && form.time ? `${t.dayLong(form.dayKey)}, ${form.time}` : undefined
                   }
                   hint={
                     !form.service
-                      ? 'Сначала выберите услугу'
+                      ? t('Сначала выберите услугу')
                       : !form.specialistId
-                        ? 'Сначала выберите мастера'
+                        ? t('Сначала выберите мастера')
                         : undefined
                   }
                   isComplete={form.completedSteps.datetime}
@@ -382,7 +402,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                           specialistId={form.specialistId}
                           branchId={form.branchId ?? undefined}
                           date={form.dayKey}
-                          dayLabel={formatDayLong(form.dayKey)}
+                          dayLabel={t.dayLong(form.dayKey)}
                         />
                       ) : null
                     }
@@ -399,25 +419,31 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                   icon={ChatCircleText}
                   isCollapsed={form.isStepCollapsed('contacts')}
                   onToggle={() => form.toggleStep('contacts')}
-                  title='Контакты'
+                  title={t('Контакты')}
                   isComplete={form.completedSteps.contacts}
                 >
                   <div className={styles.fields}>
                     {/* Settings-style rows: the label on the left, the value typed on the right. */}
                     <div className={styles.group}>
-                      <Field label='Имя' error={form.errors.name} className={styles.fieldRow}>
+                      <Field
+                        label={t('Имя')}
+                        error={form.errors.name && t(form.errors.name)}
+                        className={styles.fieldRow}
+                      >
                         <Input
                           variant='plain'
                           value={form.name}
                           onValueChange={form.setName}
                           autoComplete='name'
-                          placeholder='Как к вам обращаться'
+                          placeholder={t(
+                            form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
+                          )}
                         />
                       </Field>
                       {form.accountPhone ? null : (
                         <Field
-                          label='Телефон'
-                          error={form.errors.phone}
+                          label={t('Телефон')}
+                          error={form.errors.phone && t(form.errors.phone)}
                           className={styles.fieldRow}
                         >
                           <Input
@@ -432,13 +458,23 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                         </Field>
                       )}
                     </div>
+                    {/* Mum or a child: their name and number, the visit stays in this account. */}
+                    {form.canBookForOther && (
+                      <button
+                        type='button'
+                        className={styles.forOther}
+                        onClick={() => form.setForOther(!form.isForOther)}
+                      >
+                        {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
+                      </button>
+                    )}
                     {/* Optional extras as a second group of the same Settings rows: a note and a
                         code read like the name and number above, not like loose buttons. */}
                     <div className={styles.group}>
                       {isCommentOpen || form.comment ? (
                         <>
                           <div className={styles.fieldRow} data-action=''>
-                            <span className={styles.extraLabel}>Комментарий</span>
+                            <span className={styles.extraLabel}>{t('Комментарий')}</span>
                             <span />
                             {/* Folds back and forgets the note: an extra is never a trap. */}
                             <button
@@ -449,15 +485,15 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                                 setIsCommentOpen(false)
                               }}
                             >
-                              Убрать
+                              {t('Убрать')}
                             </button>
                           </div>
                           <textarea
                             className={styles.commentArea}
-                            aria-label='Комментарий'
+                            aria-label={t('Комментарий')}
                             value={form.comment}
                             onChange={(event) => form.setComment(event.target.value)}
-                            placeholder='Например, «нужна парковка»'
+                            placeholder={t('Например, «нужна парковка»')}
                             rows={3}
                             maxLength={500}
                           />
@@ -469,8 +505,8 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                           data-action=''
                           onClick={() => setIsCommentOpen(true)}
                         >
-                          <span className={styles.extraLabel}>Комментарий</span>
-                          <span className={styles.extraValue}>Добавить</span>
+                          <span className={styles.extraLabel}>{t('Комментарий')}</span>
+                          <span className={styles.extraValue}>{t('Добавить')}</span>
                           <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
                         </button>
                       )}
@@ -499,7 +535,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
             {/* Under the form and set well apart from it (a wide gap), so it reads as something to
                 look at, not another step. Nothing here leads away: picks of other places live on
                 the success screen, not in the middle of a booking. */}
-            <aside className={styles.after} aria-label='Дополнительно'>
+            <aside className={styles.after} aria-label={t('Дополнительно')}>
               <PlaceReviews
                 slug={business.slug}
                 businessName={business.name}

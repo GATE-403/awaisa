@@ -29,6 +29,7 @@ import { ReferralsModule } from './referrals/referrals.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
 import { SearchModule } from './search/search.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
+import { TelemetryModule } from './telemetry/telemetry.module.js'
 import { WaitlistModule } from './waitlist/waitlist.module.js'
 import { WalletModule } from './wallet/wallet.module.js'
 
@@ -66,6 +67,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     InventoryModule,
     ImportModule,
     RecommendationsModule,
+    TelemetryModule,
     ProfilesModule,
     RankingsModule,
     ReferralsModule,

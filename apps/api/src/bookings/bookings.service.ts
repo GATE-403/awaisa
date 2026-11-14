@@ -28,8 +28,8 @@ import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
+import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
-import { SmsService } from '../notifications/sms.service.js'
 import { PromotionsService } from '../promotions/promotions.service.js'
 import { Review } from '../reviews/review.entity.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
@@ -176,7 +176,7 @@ export class BookingsService {
     private readonly catalogService: CatalogService,
     private readonly masterSchedule: MasterScheduleService,
     private readonly businesses: BusinessesService,
-    private readonly sms: SmsService,
+    private readonly clientMessages: ClientMessagesService,
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
@@ -275,7 +275,8 @@ export class BookingsService {
     staffBusinessId: string | null = null,
   ) {
     const now = new Date()
-    const phone = customer?.phone ?? normalizePhone(input.phone)
+    const isForOther = Boolean(customer && input.forOther && !staffBusinessId)
+    const phone = customer && !isForOther ? customer.phone : normalizePhone(input.phone)
     if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
     const request = await this.resolveRequest(
       input.serviceId,
@@ -349,7 +350,7 @@ export class BookingsService {
           }),
         )
         const view = await this.getView(saved.id)
-        if (customer && !customer.name) {
+        if (customer && !customer.name && !isForOther) {
           await this.customers.update({ id: customer.id }, { name: input.name })
         }
         // A deposit first: the confirmation and the owner's message wait for the payment.
@@ -376,7 +377,11 @@ export class BookingsService {
           }
         }
         if (input.smsConfirmation) {
-          void this.sms.sendSafely(phone, confirmationMessage(view, this.linkTo(view.id)))
+          void this.clientMessages.send(
+            phone,
+            confirmationMessage(view, this.linkTo(view.id)),
+            this.manageButton(view.id),
+          )
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
         if (!staffBusinessId) {
@@ -455,7 +460,11 @@ export class BookingsService {
 
     const view = await this.getView(id)
     if (booking.smsConfirmation) {
-      void this.sms.sendSafely(booking.customerPhone, rescheduleMessage(view, this.linkTo(view.id)))
+      void this.clientMessages.send(
+        booking.customerPhone,
+        rescheduleMessage(view, this.linkTo(view.id)),
+        this.manageButton(view.id),
+      )
     }
     const before = toBusinessParts(booking.startsAt)
     void this.telegram.notifyBusiness(
@@ -823,9 +832,10 @@ export class BookingsService {
     const booking = await this.bookings.findOneByOrFail({ id: bookingId })
     const view = await this.getView(bookingId)
     if (booking.smsConfirmation) {
-      void this.sms.sendSafely(
+      void this.clientMessages.send(
         booking.customerPhone,
         confirmationMessage(view, this.linkTo(view.id)),
+        this.manageButton(view.id),
       )
     }
     void this.telegram.notifyBusiness(
@@ -879,6 +889,20 @@ export class BookingsService {
   }
 
   /** The SMS link that opens this visit without signing in. */
+  /** «Напоминать в Telegram»: the bot link for this booking's number, null without a bot. */
+  async telegramLink(id: string, token: string | null, customer: Customer | null) {
+    const booking = await this.findAccessible(id, token, customer)
+    if (!booking) throw new NotFoundException('Запись не найдена')
+    return {
+      url: this.clientMessages.linkUrl(booking.id),
+      isLinked: await this.clientMessages.isLinked(booking.customerPhone),
+    }
+  }
+
+  private manageButton(id: string) {
+    return { label: 'Перенести или отменить', url: this.linkTo(id) }
+  }
+
   linkTo(id: string) {
     return visitLink(this.webUrl(), id, this.secret())
   }

@@ -99,6 +99,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [isPresetChecked, setIsPresetChecked] = useState(presetTime === null)
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
+  // Booking mum or a child: their own name and number, nothing of the client's own filled in.
+  const [isForOther, setIsForOther] = useState(false)
+  const [hasSavedContact, setHasSavedContact] = useState(false)
   const [comment, setComment] = useState('')
   const [promoCode, setPromoCode] = useState<string | null>(null)
   const [smsConfirmation, setSmsConfirmation] = useState(true)
@@ -142,7 +145,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     specialistId !== null &&
     skips < Math.min(MAX_AUTO_DAY_SKIPS, openDays.length - 1) &&
     !availability.slots.some((slot) => slot.isAvailable)
-  const accountPhone = session.customer?.phone ?? null
+  const accountPhone = isForOther ? null : (session.customer?.phone ?? null)
   const { quote, codeError } = usePriceQuote({
     serviceId,
     date: dayKey,
@@ -202,6 +205,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (session.status !== 'guest') return
     const stored = readContact()
     if (!stored) return
+    setHasSavedContact(true)
     setName((current) => current ?? stored.name)
     setPhone((current) => current || stored.phone)
   }, [session.status])
@@ -362,6 +366,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         time,
         name: name.trim(),
         phone: accountPhone ? '' : phone.trim(),
+        forOther: isForOther && session.status === 'signedIn',
         comment: comment.trim(),
         branchId,
         smsConfirmation,
@@ -370,7 +375,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         ref: readRef(),
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
-      if (!accountPhone) saveContact({ name: name.trim(), phone: phone.trim() })
+      // Someone else's name and number are not the guest's own next time.
+      if (!accountPhone && !isForOther) saveContact({ name: name.trim(), phone: phone.trim() })
       clearDraft()
       // A deposit: the slot is held, the client pays at the checkout and comes back to the ticket.
       if (checkoutUrl) {
@@ -404,6 +410,14 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     }
   }
 
+  const setForOther = (value: boolean) => {
+    setIsForOther(value)
+    // Back to oneself: the account's name (null) or the guest's saved contact.
+    setName(value ? '' : null)
+    setPhone(value ? '' : session.status === 'guest' ? (readContact()?.phone ?? '') : '')
+    if (value) focusNameSoon()
+  }
+
   return {
     branches,
     branchId,
@@ -421,6 +435,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     name,
     phone,
     accountPhone,
+    isForOther,
+    canBookForOther: session.status === 'signedIn' || hasSavedContact,
+    setForOther,
     comment,
     errors,
     submitError,

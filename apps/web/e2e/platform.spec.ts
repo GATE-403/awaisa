@@ -29,8 +29,8 @@ test.describe('Platform: a new business goes live', () => {
     await page.goto('/business')
     await page.getByRole('link', { name: 'Создать страницу' }).click()
     await page.getByLabel('Название').fill(name)
-    await expect(page.getByLabel('Адрес страницы')).toHaveValue(slug)
-    await expect(page.getByText(`Свободен: awaisa.kg/${slug}`)).toBeVisible()
+    await expect(page.getByLabel('Ссылка на страницу')).toHaveValue(slug)
+    await expect(page.getByText(`Свободна: awaisa.kg/${slug}`)).toBeVisible()
     await page.getByRole('button', { name: 'Далее' }).click()
 
     // Kind: a barbershop gets a starter menu; this test builds its own, so it picks «Другое».
@@ -179,7 +179,7 @@ test.describe('Platform: a new business goes live', () => {
 
     await page.getByLabel('Название').fill('Login')
     await expect(page.getByText('Этот адрес занят')).toBeVisible()
-    await page.getByLabel('Адрес страницы').fill('awaisa-studio')
+    await page.getByLabel('Ссылка на страницу').fill('awaisa-studio')
     await expect(page.getByText('Этот адрес занят')).toBeVisible()
   })
 

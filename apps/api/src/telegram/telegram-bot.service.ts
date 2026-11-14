@@ -11,6 +11,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, LessThan, Repository } from 'typeorm'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
+import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { TelegramChat } from './telegram-chat.entity.js'
 import { TelegramLinkCode } from './telegram-link-code.entity.js'
 import {
@@ -47,6 +48,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     @InjectRepository(TelegramChat) private readonly chats: Repository<TelegramChat>,
     @InjectRepository(TelegramLinkCode) private readonly codes: Repository<TelegramLinkCode>,
     private readonly config: ConfigService<Env, true>,
+    private readonly clientMessages: ClientMessagesService,
   ) {}
 
   get isAvailable() {
@@ -126,9 +128,20 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     const chatId = String(message.chat.id)
     const [command = '', argument = ''] = text.split(/\s+/)
 
+    // Clients link from their booking (a signed «v…» parameter); owners from the cabinet.
+    if (command === '/start' && argument && this.clientMessages.isClientParam(argument)) {
+      const isLinked = await this.clientMessages.link(chatId, argument)
+      if (!isLinked)
+        return this.send(chatId, 'Запись не нашли — откройте ссылку из записи ещё раз.')
+      return
+    }
     if (command === '/start' && argument) return this.link(chatId, argument, message.from)
     if (command === '/today') return this.sendToday(chatId)
     if (command === '/stop') {
+      // A client's chat: back to SMS reminders.
+      if (await this.clientMessages.unlink(chatId)) {
+        return this.send(chatId, 'Напоминания снова будут приходить по SMS.')
+      }
       await this.chats.delete({ chatId })
       return this.send(chatId, 'Уведомления отключены. Подключить снова можно в кабинете.')
     }

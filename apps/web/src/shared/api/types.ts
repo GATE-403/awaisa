@@ -674,6 +674,8 @@ type CreateBookingInput = {
   time: string
   name: string
   phone: string
+  /** A signed-in client booking someone else: `name` and `phone` are theirs. */
+  forOther?: boolean
   comment: string
   branchId?: string
   smsConfirmation?: boolean

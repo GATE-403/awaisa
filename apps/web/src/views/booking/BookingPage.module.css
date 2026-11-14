@@ -299,6 +299,19 @@ button.fieldRow {
   color: var(--color-tertiary-foreground);
 }
 
+.forOther {
+  align-self: flex-start;
+  min-height: var(--control-height-md);
+  margin-top: calc(-1 * var(--space-2));
+  padding: 0 var(--space-4);
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
 .rowAction {
   min-height: var(--control-height-md);
   padding: 0;

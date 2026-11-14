@@ -7,11 +7,14 @@
   margin: 0 auto;
   z-index: 40;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-2) var(--space-4);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
-  border-radius: var(--radius-full);
+  /* A capsule on one line; with large system text the button drops under the total and the bar
+     becomes a rounded rect instead of a stretched pill. */
+  border-radius: calc(var(--control-height-md) / 2 + var(--space-2));
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
   box-shadow:
@@ -21,10 +24,12 @@
 
 /* Concentric with the capsule bar: the button is a capsule too, as in Liquid Glass toolbars. */
 .bar .barButton {
+  margin-left: auto;
   border-radius: var(--radius-full);
 }
 
 .barInfo {
+  flex: 1 1 10em;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -63,11 +63,12 @@ export const CreateBusinessPage = () => {
                   />
                 </Field>
                 <Field
-                  label='Адрес страницы'
+                  label='Ссылка на страницу'
                   error={form.errors.slug}
+                  // «Адрес» read as the street: the link is said to be what clients get.
                   description={
                     form.isSlugAvailable
-                      ? `Свободен: awaisa.kg/${form.slug}`
+                      ? `Свободна: awaisa.kg/${form.slug} — её получат клиенты`
                       : 'Латиница, цифры и дефис'
                   }
                 >

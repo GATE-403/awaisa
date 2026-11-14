@@ -119,4 +119,15 @@ export class PaymentsController {
   ) {
     return this.bookings.checkoutUrl(id, token ?? null, customer)
   }
+
+  // «Напоминать в Telegram» on the success screen and the ticket: the bot link for this booking.
+  @Get('bookings/:id/telegram')
+  @UseGuards(OptionalAuthGuard)
+  telegram(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+    @CurrentCustomer() customer: Customer | null,
+  ) {
+    return this.bookings.telegramLink(id, token ?? null, customer)
+  }
 }

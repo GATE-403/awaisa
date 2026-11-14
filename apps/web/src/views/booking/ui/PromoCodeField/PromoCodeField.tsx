@@ -4,6 +4,7 @@ import { Input } from '@awaisa/ui/Input'
 import { CheckCircle } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import type { PriceQuote } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from './PromoCodeField.module.css'
 
 interface PromoCodeFieldProps {
@@ -29,6 +30,7 @@ export const PromoCodeField = ({
   onApply,
   onClear,
 }: PromoCodeFieldProps) => {
+  const t = useT()
   const [draft, setDraft] = useState(code ?? '')
   const isApplied = Boolean(code) && !error
   const percent = quote?.discount?.percent
@@ -36,16 +38,16 @@ export const PromoCodeField = ({
   if (isApplied && code) {
     return (
       <div className={className} data-action=''>
-        <span className={styles.label}>Промокод</span>
+        <span className={styles.label}>{t('Промокод')}</span>
         <span className={styles.applied}>
           <CheckCircle weight='fill' aria-hidden />
           {code}
           <span className={styles.note}>
             {isWaitingForTime
-              ? 'проверим со временем'
+              ? t('проверим со временем')
               : percent
                 ? `−${percent}%`
-                : 'не на это время'}
+                : t('не на это время')}
           </span>
         </span>
         <button
@@ -56,7 +58,7 @@ export const PromoCodeField = ({
             onClear()
           }}
         >
-          Убрать
+          {t('Убрать')}
         </button>
       </div>
     )
@@ -65,11 +67,11 @@ export const PromoCodeField = ({
   return (
     <>
       <div className={className} data-action=''>
-        <span className={styles.label}>Промокод</span>
+        <span className={styles.label}>{t('Промокод')}</span>
         <Input
           variant='plain'
-          aria-label='Промокод'
-          placeholder='Ввести'
+          aria-label={t('Промокод')}
+          placeholder={t('Ввести')}
           autoCapitalize='characters'
           value={draft}
           onValueChange={(value) => setDraft(value.toUpperCase().replace(/\s/g, ''))}
@@ -79,7 +81,7 @@ export const PromoCodeField = ({
         />
         {draft ? (
           <button type='button' className={styles.action} onClick={() => onApply(draft)}>
-            Применить
+            {t('Применить')}
           </button>
         ) : (
           <span />

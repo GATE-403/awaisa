@@ -2,9 +2,10 @@
 
 import { CaretRight, MapPin, Star } from '@phosphor-icons/react/ssr'
 import type { CSSProperties, ReactNode } from 'react'
-import { formatDuration, formatPrice, getDateParts } from '@/entities/booking'
+import { formatPrice, getDateParts } from '@/entities/booking'
 import { addMinutes, BusinessTile, PersonAvatar, pickTint } from '@/entities/business'
 import type { Business, PriceQuote, Service, Specialist } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { sizedImage } from '@/shared/lib/imageSizes'
@@ -27,16 +28,15 @@ interface BookingReviewProps {
   action?: ReactNode
 }
 
-const WEEKDAY = new Intl.DateTimeFormat('ru-RU', { weekday: 'long', timeZone: 'UTC' })
-
-const relativeDay = (dayKey: string, todayKey: string | null) => {
+const relativeDay = (dayKey: string, todayKey: string | null, t: Translate) => {
   if (!todayKey) return null
   const days = Math.round(
     (Date.parse(`${dayKey}T00:00:00Z`) - Date.parse(`${todayKey}T00:00:00Z`)) / 86_400_000,
   )
-  if (days === 0) return 'сегодня'
-  if (days === 1) return 'завтра'
-  if (days === 2) return 'послезавтра'
+  if (days === 0) return t('сегодня')
+  if (days === 1) return t('завтра')
+  if (days === 2) return t('послезавтра')
+  if (t.language !== 'ru') return t('через {days} дней', { days })
   return `через ${days} ${days < 5 ? 'дня' : 'дней'}`
 }
 
@@ -58,17 +58,19 @@ export const BookingReview = ({
   onEdit,
   action,
 }: BookingReviewProps) => {
+  const t = useT()
   const today = useToday()
-  const { day, month } = getDateParts(dayKey)
-  const weekday = WEEKDAY.format(new Date(`${dayKey}T00:00:00Z`))
-  const relative = relativeDay(dayKey, today?.dayKey ?? null)
+  const { day, month: ruMonth } = getDateParts(dayKey)
+  const month = t.language === 'ru' ? ruMonth : t.monthShort(dayKey)
+  const weekday = t.weekdayLong(dayKey)
+  const relative = relativeDay(dayKey, today?.dayKey ?? null, t)
   const total = quote?.total ?? service.price
   const discount = quote?.discount ?? null
 
   return (
     <section className={styles.review} aria-labelledby='review-title'>
       <h2 id='review-title' className={styles.title}>
-        Проверьте запись
+        {t('Проверьте запись')}
       </h2>
 
       <div className={styles.ticket} style={{ '--tint': pickTint(business.name) } as CSSProperties}>
@@ -110,7 +112,7 @@ export const BookingReview = ({
               {relative && ` · ${relative}`}
             </span>
           </span>
-          <span className={styles.edit}>Изменить</span>
+          <span className={styles.edit}>{t('Изменить')}</span>
         </button>
 
         <div className={styles.perforation} aria-hidden />
@@ -118,17 +120,17 @@ export const BookingReview = ({
         <ul className={styles.rows}>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('service')}>
-              <span className={styles.rowLabel}>Услуга</span>
+              <span className={styles.rowLabel}>{t('Услуга')}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{service.name}</span>
-                <span className={styles.rowMeta}>{formatDuration(service.durationMinutes)}</span>
+                <span className={styles.rowMeta}>{t.duration(service.durationMinutes)}</span>
               </span>
               <CaretRight weight='bold' aria-hidden className={styles.chevron} />
             </button>
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('specialist')}>
-              <span className={styles.rowLabel}>Мастер</span>
+              <span className={styles.rowLabel}>{t('Мастер')}</span>
               <span className={styles.master}>
                 {specialist ? (
                   <>
@@ -150,8 +152,8 @@ export const BookingReview = ({
                   </>
                 ) : (
                   <span className={styles.rowValue}>
-                    <span className={styles.rowName}>Любой свободный</span>
-                    <span className={styles.rowMeta}>подберём</span>
+                    <span className={styles.rowName}>{t('Любой свободный')}</span>
+                    <span className={styles.rowMeta}>{t('подберём')}</span>
                   </span>
                 )}
               </span>
@@ -160,7 +162,7 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>На кого</span>
+              <span className={styles.rowLabel}>{t('На кого')}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{name}</span>
                 <span className={styles.rowMeta}>{formatPhone(phone)}</span>
@@ -171,10 +173,10 @@ export const BookingReview = ({
           {/* The extras read as rows of the same ticket, each opening the contacts step. */}
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>Комментарий</span>
+              <span className={styles.rowLabel}>{t('Комментарий')}</span>
               <span className={styles.rowValue}>
                 <span className={comment ? styles.rowName : styles.rowEmpty}>
-                  {comment || 'Добавить'}
+                  {comment || t('Добавить')}
                 </span>
               </span>
               <CaretRight weight='bold' aria-hidden className={styles.chevron} />
@@ -182,10 +184,10 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>Промокод</span>
+              <span className={styles.rowLabel}>{t('Промокод')}</span>
               <span className={styles.rowValue}>
                 <span className={discount ? styles.rowName : styles.rowEmpty}>
-                  {discount ? `${discount.title} · −${discount.percent}%` : 'Ввести'}
+                  {discount ? `${discount.title} · −${discount.percent}%` : t('Ввести')}
                 </span>
               </span>
               <CaretRight weight='bold' aria-hidden className={styles.chevron} />
@@ -202,7 +204,7 @@ export const BookingReview = ({
             </p>
           )}
           <p className={styles.totalMain}>
-            <span>К оплате</span>
+            <span>{t('К оплате')}</span>
             <span>
               {discount && <s className={styles.old}>{formatPrice(service.price)}</s>}
               {formatPrice(total)}
@@ -210,8 +212,13 @@ export const BookingReview = ({
           </p>
           <p className={styles.terms}>
             {service.deposit
-              ? `Предоплата ${formatPrice(service.deposit)} картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.`
-              : 'Оплата в салоне — наличными или картой. Перенести или отменить можно по ссылке из SMS.'}
+              ? t(
+                  'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+                  { amount: formatPrice(service.deposit) },
+                )
+              : t(
+                  'Оплата в салоне — наличными или картой. Перенести или отменить можно по ссылке из SMS.',
+                )}
           </p>
         </div>
         {action && <div className={styles.action}>{action}</div>}

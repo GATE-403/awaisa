@@ -1,11 +1,16 @@
 'use client'
 
-import { useState } from 'react'
-import { DEFAULT_LANGUAGE, LANGUAGES } from '@/shared/config/languages'
+import { useEffect } from 'react'
+import { LANGUAGES } from '@/shared/config/languages'
+import { setLanguage, useLanguage } from '@/shared/i18n'
 import styles from './LanguageSwitcher.module.css'
 
 export const LanguageSwitcher = () => {
-  const [language, setLanguage] = useState(DEFAULT_LANGUAGE)
+  const language = useLanguage()
+
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
 
   return (
     <nav aria-label='Язык' className={styles.switcher}>
