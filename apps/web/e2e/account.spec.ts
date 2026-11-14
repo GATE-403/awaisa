@@ -35,6 +35,18 @@ test.describe('Account: sign in by SMS', () => {
     await expect(page.getByRole('region', { name: 'Профиль' })).toContainText(formatPhone(phone))
   })
 
+  test('a sign-in link cannot send the client to another site afterwards', async ({ page }) => {
+    // Browsers read a backslash as «/»: this path would open evil.example after the code.
+    await page.goto(`/login?next=${encodeURIComponent('/\\evil.example')}`)
+    await page.getByLabel('Номер телефона').fill(randomClientPhone())
+    await page.getByRole('button', { name: 'Получить код' }).click()
+    await page.getByLabel('Код подтверждения').fill(TEST_CODE)
+    await page.getByLabel('Имя').fill('E2E Тест')
+    await page.getByRole('button', { name: 'Готово' }).click()
+
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/bookings$/)
+  })
+
   test('the profile takes a photo: it shows in place of the initials and can be removed', async ({
     page,
   }) => {

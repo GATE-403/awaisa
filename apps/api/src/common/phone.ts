@@ -15,6 +15,11 @@ const normalizePhone = (value: string): string | null => {
   return `+${digits}`
 }
 
+// Texts cost money per message and international routes are where SMS fraud pays (bots request
+// codes to premium numbers). `codes` are country calling codes («996», «7»); «*» allows any.
+const isAllowedDestination = (phone: string, codes: string[]) =>
+  codes.includes('*') || codes.some((code) => phone.startsWith(`+${code}`))
+
 const maskPhone = (phone: string) => `${phone.slice(0, -4).replace(/\d/g, '•')}${phone.slice(-4)}`
 
-export { maskPhone, normalizePhone }
+export { isAllowedDestination, maskPhone, normalizePhone }

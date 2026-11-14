@@ -1,4 +1,4 @@
-import { maskPhone, normalizePhone } from './phone.js'
+import { isAllowedDestination, maskPhone, normalizePhone } from './phone.js'
 
 describe('normalizePhone', () => {
   it.each([
@@ -19,5 +19,14 @@ describe('normalizePhone', () => {
 describe('maskPhone', () => {
   it('keeps only the last four digits', () => {
     expect(maskPhone('+996555123456')).toBe('+••••••••3456')
+  })
+})
+
+describe('isAllowedDestination', () => {
+  it('lets texts go only to the listed countries', () => {
+    expect(isAllowedDestination('+996555123456', ['996'])).toBe(true)
+    expect(isAllowedDestination('+77011234567', ['996'])).toBe(false)
+    expect(isAllowedDestination('+77011234567', ['996', '7'])).toBe(true)
+    expect(isAllowedDestination('+2347011234567', ['*'])).toBe(true)
   })
 })
