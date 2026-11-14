@@ -9,35 +9,38 @@ import {
   CalendarBlank,
   CaretRight,
   ChatCircleText,
+  Check,
   Scissors,
   User,
 } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import {
   ANY_SPECIALIST_ID,
+  addDayKey,
+  DateTimePicker,
   formatDayLong,
   formatDuration,
   formatPrice,
   getSpecialistLabel,
   getSpecialistsForService,
 } from '@/entities/booking'
-import { ForYouShelf, rememberService, trackBookedPick } from '@/features/forYou'
+import { rememberService, trackBookedPick } from '@/features/forYou'
 import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { formatDistance } from '@/shared/lib/geo'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
-import chip from '@/shared/ui/Chip/Chip.module.css'
 import { Container } from '@/shared/ui/Container/Container'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
+import { useServicesNextFree } from '@/views/booking/model/useServicesNextFree'
 import { BookingReview } from '@/views/booking/ui/BookingReview/BookingReview'
 import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
 import { BookingScrim, BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
-import { DateTimePicker } from '@/views/booking/ui/DateTimePicker/DateTimePicker'
 import { MasterPicker } from '@/views/booking/ui/MasterPicker/MasterPicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
 import { PlaceReviews } from '@/views/booking/ui/PlaceReviews/PlaceReviews'
@@ -54,6 +57,16 @@ interface BookingPageProps {
 
 export const BookingPage = ({ business, catalog, isModal = false }: BookingPageProps) => {
   const form = useBookingForm(business, catalog)
+  const serviceTimes = useServicesNextFree(business.slug, form.branchId ?? undefined)
+  // «Сегодня с 15:30» on each service row: the choice shows when one could come, not only what.
+  const soonLabel = (serviceId: string) => {
+    const next = serviceTimes?.[serviceId]
+    const todayKey = form.today?.dayKey
+    if (!next || !todayKey) return null
+    if (next.date === todayKey) return `Сегодня с ${next.time}`
+    if (next.date === addDayKey(todayKey, 1)) return `Завтра с ${next.time}`
+    return null
+  }
   usePageScrollLock()
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
@@ -70,9 +83,10 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
   useEffect(() => {
     if (bookedServiceId) trackBookedPick(bookedServiceId)
   }, [bookedServiceId])
-  // Quick times only before the client reaches the calendar: for the chosen service, else the
-  // service and master of their last visit here, else the place's popular service with anyone.
-  const isQuickShown =
+  // Quick times only for a returning client, before anything is chosen: «Как в прошлый раз» with
+  // the last visit's service and master. A generic «Ближайшее время» above the steps was taken
+  // for the date-and-time step itself, so new clients go through the steps.
+  const isQuickShownStep =
     form.firstIncompleteStep === 'service' || form.firstIncompleteStep === 'specialist'
   const canDo = (serviceId: string, specialistId: string) =>
     getSpecialistsForService(catalog, serviceId).some(
@@ -87,6 +101,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
       canDo(visit.serviceId, visit.specialistId),
   )
   const isLastVisitShown = !form.service && !form.specialistId && Boolean(lastVisit)
+  const isQuickShown = isQuickShownStep && isLastVisitShown
   const quickService =
     form.service ??
     (isLastVisitShown
@@ -121,15 +136,10 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     )
   }
 
-  // Everything chosen and folded: the steps give way to one card to check before «Записаться».
-  // Everything filled: the first press shows this check, the second books (nobody folds the
-  // steps by hand to look before booking).
-  const isReviewing =
-    form.firstIncompleteStep === null &&
-    (isReviewRequested ||
-      (['service', 'specialist', 'datetime', 'contacts'] as const).every((step) =>
-        form.isStepCollapsed(step),
-      ))
+  // Everything filled: the action books at once — a separate «check» press made people think
+  // they were done and leave without booking. The check card shows only after a quick time was
+  // picked with one tap, so that tap never books by itself.
+  const isReviewing = form.firstIncompleteStep === null && isReviewRequested
 
   // Contacts known (a returning guest, or signed in): the tap goes straight to the check.
   const pickQuickSlot = (slot: QuickSlot) => {
@@ -153,18 +163,14 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     firstIncompleteStep: form.firstIncompleteStep,
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
-    onSubmit: () => {
-      if (!isReviewing && form.firstIncompleteStep === null) {
-        setIsReviewRequested(true)
-        window.scrollTo({ top: 0 })
-        document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
-        return
-      }
-      form.submit()
-    },
-    submitLabel: form.firstIncompleteStep === null && !isReviewing ? 'Проверить запись' : undefined,
+    onSubmit: form.submit,
+    submitLabel: undefined,
     quote: form.quote,
     place: { name: business.name, coverUrl: business.coverUrl },
+    address:
+      form.branches.find((branch) => branch.id === form.branchId)?.address ??
+      business.address ??
+      null,
     onStepOpen: (step: BookingStepId) => {
       setIsReviewRequested(false)
       form.editStep(step)
@@ -182,25 +188,55 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
         <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
           <div className={styles.steps}>
             {form.branches.length > 1 && (
-              <section className={styles.branches} aria-label='Филиал'>
-                {/* The same capsule chips as every filter in the app, chosen = inverted. */}
-                <fieldset className={styles.branchChips}>
+              <section className={styles.branches} aria-labelledby='booking-branch'>
+                {/* Where to come, said plainly: each branch is a row with its full address and
+                    how far it is, the chosen one checked — two chips with district names left
+                    people unsure where they were going. */}
+                <h2 id='booking-branch' className={styles.branchCaption}>
+                  Куда приедете
+                </h2>
+                <fieldset className={`${styles.group} ${styles.branchList}`}>
                   <legend className={styles.srOnly}>Филиал</legend>
-                  {form.branches.map((branch) => (
-                    <button
-                      key={branch.id}
-                      type='button'
-                      className={chip.chip}
-                      aria-pressed={form.branchId === branch.id}
-                      onClick={() => form.selectBranch(branch.id)}
-                    >
-                      {branch.name}
-                    </button>
-                  ))}
+                  {form.branches.map((branch) => {
+                    const distance = form.branchDistances?.[branch.id]
+                    const isChosen = form.branchId === branch.id
+                    return (
+                      <label key={branch.id} className={styles.branchRow}>
+                        <input
+                          type='radio'
+                          name='booking-branch'
+                          className={styles.branchRadio}
+                          checked={isChosen}
+                          onChange={() => form.selectBranch(branch.id)}
+                        />
+                        <span className={styles.branchText}>
+                          <span className={styles.branchName}>{branch.name}</span>
+                          <span className={styles.branchAddress}>
+                            {branch.address}
+                            {distance !== undefined && ` · ${formatDistance(distance)}`}
+                          </span>
+                        </span>
+                        {isChosen && (
+                          <Check weight='bold' className={styles.branchCheck} aria-hidden />
+                        )}
+                      </label>
+                    )
+                  })}
                 </fieldset>
-                <p className={styles.branchAddress}>
-                  {form.branches.find((branch) => branch.id === form.branchId)?.address}
-                </p>
+                {(() => {
+                  const chosen = form.branches.find((branch) => branch.id === form.branchId)
+                  if (!chosen || chosen.latitude === null || chosen.longitude === null) return null
+                  return (
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${chosen.latitude},${chosen.longitude}`}
+                      target='_blank'
+                      rel='noreferrer'
+                      className={styles.branchRoute}
+                    >
+                      Маршрут до «{chosen.name}» ›
+                    </a>
+                  )
+                })()}
               </section>
             )}
 
@@ -274,6 +310,9 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                           // Length and what is done on one quiet line: rows stay one height, and
                           // the chosen one shows the description whole.
                           <span className={styles.serviceNote}>
+                            {soonLabel(service.id) && (
+                              <span className={styles.serviceSoon}>{soonLabel(service.id)} · </span>
+                            )}
                             {formatDuration(service.durationMinutes)}
                             {service.description.trim() && ` · ${service.description.trim()}`}
                           </span>
@@ -457,21 +496,14 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
               </>
             )}
 
-            {/* Under the form and set well apart from it (a wide gap), so it reads as
-                something to look at, not another step: what people said, then picks nearby. */}
+            {/* Under the form and set well apart from it (a wide gap), so it reads as something to
+                look at, not another step. Nothing here leads away: picks of other places live on
+                the success screen, not in the middle of a booking. */}
             <aside className={styles.after} aria-label='Дополнительно'>
               <PlaceReviews
                 slug={business.slug}
                 businessName={business.name}
                 service={form.service ?? null}
-              />
-              <ForYouShelf
-                title='Вам может понравиться'
-                surface='booking'
-                likeServiceId={form.serviceId ?? undefined}
-                isForEveryone
-                isInline
-                excludeServiceId={form.serviceId ?? undefined}
               />
             </aside>
           </div>

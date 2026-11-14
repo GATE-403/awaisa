@@ -3,6 +3,7 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatCircleText, NavigationArrow, Phone, ShareNetwork } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
 import type { ComponentType } from 'react'
 import type { Business } from '@/shared/api/types'
 import styles from './Place.module.css'
@@ -95,8 +96,10 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
       <ButtonLink
         size='md'
         className={styles.bookButton}
-        // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-        render={<a href='#services' />}
+        data-place-book
+        // Opens the booking form itself (the side sheet over this page); scrolling to the menu
+        // just below looked like the button did nothing.
+        render={<NextLink href={`/${business.slug}/book`} />}
       >
         Записаться
       </ButtonLink>

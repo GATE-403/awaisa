@@ -1,0 +1,67 @@
+.crumbs {
+  min-width: 0;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-footnote);
+}
+
+.crumbs[data-align="center"] .list {
+  justify-content: center;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* The trail may be cut, never the page it ends on: earlier steps give way first. */
+.item:not(:last-child) {
+  flex-shrink: 1;
+}
+
+.link,
+.current {
+  overflow: hidden;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  color: var(--color-muted-foreground);
+}
+
+@media (hover: hover) {
+  .link:hover {
+    color: var(--color-foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.link:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.separator {
+  flex-shrink: 0;
+  padding: 0 var(--space-2);
+  color: var(--color-tertiary-foreground);
+}
+
+.current {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
+}

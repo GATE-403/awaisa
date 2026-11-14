@@ -30,3 +30,10 @@
     display: none;
   }
 }
+
+/* Wide screens only (a mouse): lighter than the header's categories, not taller than them. */
+.row .chip {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-footnote);
+}

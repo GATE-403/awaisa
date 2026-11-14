@@ -41,12 +41,30 @@ type StoryProfile = {
   level: { level: number }
   achievements: { id: string; title: string; earned: boolean }[]
   favoriteMaster: { name: string; businessName: string } | null
+  since: string | null
   stats: { visits: number; places: number; reviews: number }
 }
 
-// A 9:16 story card (1080 × 1920) for Instagram and Telegram: the face on a wash of the profile's
-// colour, the name and status, one line of facts, the level, the earned achievements as emoji,
-// «Мой мастер», and the short address to type — the invitation travels with the picture.
+const initialsOf = (name: string) =>
+  name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('')
+
+const formatSince = (iso: string | null) => {
+  if (!iso) return null
+  const date = new Date(iso)
+  return Number.isNaN(date.getTime())
+    ? null
+    : new Intl.DateTimeFormat('ru-RU', { month: 'short', year: 'numeric' })
+        .format(date)
+        .replace(' г.', '')
+}
+
+// A 9:16 story card (1080 × 1920) in a quiet, light frame: chips with the level and the date on
+// top, one rounded photo card glowing in the profile's colour — the name over the photo, the
+// face, handle and facts with a white capsule at its foot — and the address to type under it.
 export const GET = async (_request: Request, { params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params
   const response = await fetch(`${API_URL}/profiles/${encodeURIComponent(id)}`)
@@ -54,7 +72,22 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
   const profile = (await response.json()) as StoryProfile
   const accent = ACCENT_HEX[profile.accent] ?? '#0a84ff'
   const earned = profile.achievements.filter((item) => item.earned)
-  const address = `${new URL(SITE_URL).host}/u/${profile.handle ?? profile.id}`
+  const host = new URL(SITE_URL).host
+  const address = `${host}/u/${profile.handle ?? profile.id}`
+  const handle = profile.handle ? `@${profile.handle}` : profile.name
+  const since = formatSince(profile.since)
+  const status = `${profile.statusEmoji} ${profile.status}`.trim()
+  const chip = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    padding: '18px 34px',
+    borderRadius: 60,
+    border: '2px solid #c7c7cc',
+    fontSize: 34,
+    fontWeight: 600,
+    color: '#1d1d1f',
+  } as const
 
   return new ImageResponse(
     <div
@@ -64,24 +97,33 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
         alignItems: 'center',
         width: '100%',
         height: '100%',
-        padding: '220px 96px 140px',
-        background: `radial-gradient(90% 55% at 50% 0%, ${accent}55, #000 80%)`,
-        color: '#fff',
+        padding: '150px 90px 120px',
+        background: '#f7f7f8',
+        color: '#1d1d1f',
         fontFamily: 'sans-serif',
       }}
     >
+      <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+        <div style={chip}>
+          {`${earned.length > 0 ? (ACHIEVEMENT_EMOJI[earned[0]?.id ?? ''] ?? '✨') : '✨'} Уровень ${profile.level.level}`}
+        </div>
+        {since && <div style={chip}>{`с ${since}`}</div>}
+      </div>
+
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 360,
-          height: 360,
-          borderRadius: 180,
-          background: '#2c2c2e',
+          flexDirection: 'column',
+          position: 'relative',
+          width: 820,
+          height: 1150,
+          marginTop: 150,
+          borderRadius: 96,
           overflow: 'hidden',
-          fontSize: 140,
-          fontWeight: 700,
+          background: `linear-gradient(160deg, ${accent}cc, ${accent})`,
+          // The glow under the card, in the profile's colour.
+          boxShadow: `0 70px 180px ${accent}77`,
+          color: '#fff',
         }}
       >
         {profile.avatarUrl ? (
@@ -89,75 +131,146 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
           <img
             src={profile.avatarUrl}
             alt=''
-            width={360}
-            height={360}
-            style={{ objectFit: 'cover' }}
+            width={820}
+            height={1150}
+            style={{ position: 'absolute', top: 0, left: 0, objectFit: 'cover' }}
           />
         ) : (
-          profile.name.charAt(0)
+          <div
+            style={{
+              display: 'flex',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: 820,
+              height: 860,
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 340,
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.92)',
+            }}
+          >
+            {initialsOf(profile.name)}
+          </div>
         )}
-      </div>
-      <div style={{ display: 'flex', marginTop: 56, fontSize: 104, fontWeight: 700 }}>
-        {profile.name}
-      </div>
-      {(profile.status || profile.statusEmoji) && (
-        <div style={{ display: 'flex', marginTop: 16, fontSize: 44, color: '#ebebf5' }}>
-          {`${profile.statusEmoji} ${profile.status}`.trim()}
-        </div>
-      )}
-      <div style={{ display: 'flex', marginTop: 24, fontSize: 40, color: '#a1a1a6' }}>
-        {[
-          pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']),
-          pluralize(profile.stats.places, ['место', 'места', 'мест']),
-          pluralize(profile.stats.reviews, ['отзыв', 'отзыва', 'отзывов']),
-        ].join(' · ')}
-      </div>
-      <div style={{ display: 'flex', marginTop: 20, fontSize: 44, fontWeight: 700, color: accent }}>
-        {`Уровень ${profile.level.level}`}
-      </div>
-      {earned.length > 0 && (
+        {/* Soft at the top for the name, a warm veil of the colour at the foot for the row. */}
         <div
           style={{
             display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: 24,
-            marginTop: 72,
-            fontSize: 84,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 820,
+            height: 1150,
+            background: `linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 58%, ${accent}aa 86%, ${accent}ee 100%)`,
+          }}
+        />
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',
+            paddingTop: 72,
           }}
         >
-          {earned.slice(0, 8).map((item) => (
-            <div key={item.id} style={{ display: 'flex' }}>
-              {ACHIEVEMENT_EMOJI[item.id] ?? '🏅'}
+          <div style={{ display: 'flex', fontSize: 84, fontWeight: 700 }}>{profile.name}</div>
+          {status && (
+            <div style={{ display: 'flex', marginTop: 10, fontSize: 38, opacity: 0.92 }}>
+              {status}
             </div>
-          ))}
+          )}
         </div>
-      )}
-      {profile.favoriteMaster && (
+        <div style={{ display: 'flex', flex: 1 }} />
         <div
           style={{
             display: 'flex',
-            marginTop: 64,
-            padding: '20px 40px',
-            borderRadius: 60,
-            background: '#1c1c1e',
-            fontSize: 40,
-            color: '#ebebf5',
+            alignItems: 'center',
+            position: 'relative',
+            gap: 26,
+            padding: '0 56px 56px',
           }}
         >
-          {`Мой мастер — ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              overflow: 'hidden',
+              border: '3px solid rgba(255,255,255,0.85)',
+              background: accent,
+              fontSize: 38,
+              fontWeight: 700,
+            }}
+          >
+            {profile.avatarUrl ? (
+              // biome-ignore lint/performance/noImgElement: OG images render plain img
+              <img
+                src={profile.avatarUrl}
+                alt=''
+                width={96}
+                height={96}
+                style={{ objectFit: 'cover' }}
+              />
+            ) : (
+              initialsOf(profile.name)
+            )}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', width: 340 }}>
+            <div
+              style={{
+                display: 'block',
+                width: 340,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+                fontSize: 38,
+                fontWeight: 700,
+              }}
+            >
+              {handle}
+            </div>
+            <div style={{ display: 'flex', fontSize: 30, opacity: 0.85 }}>
+              {[
+                pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']),
+                pluralize(profile.stats.places, ['место', 'места', 'мест']),
+              ].join(' · ')}
+            </div>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '26px 40px',
+              borderRadius: 36,
+              background: '#fff',
+              color: '#1d1d1f',
+              fontSize: 36,
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            + Профиль
+          </div>
         </div>
-      )}
+      </div>
+
       <div style={{ display: 'flex', flex: 1 }} />
-      <div style={{ display: 'flex', fontSize: 40, color: '#a1a1a6' }}>
-        Записывайся к мастерам через Awaisa
+      <div style={{ display: 'flex', fontSize: 34, color: '#6e6e73' }}>
+        {profile.favoriteMaster
+          ? `Мой мастер — ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`
+          : 'Записывайся к мастерам через Awaisa'}
       </div>
       <div
         style={{
           display: 'flex',
-          marginTop: 12,
-          // A handle fits large; the 20-character id is set smaller so it stays on one line.
-          fontSize: profile.handle ? 56 : 40,
+          marginTop: 10,
+          fontSize: profile.handle ? 48 : 36,
           fontWeight: 700,
           whiteSpace: 'nowrap',
         }}

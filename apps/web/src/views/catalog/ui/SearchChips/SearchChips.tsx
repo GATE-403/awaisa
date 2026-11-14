@@ -19,7 +19,7 @@ export const SearchChips = ({ kind, services }: SearchChipsProps) => {
         <NextLink
           key={service.name}
           href={`/?${new URLSearchParams({ q: service.name, ...(kind ? { kind } : {}) })}`}
-          className={chip.chip}
+          className={`${chip.chip} ${styles.chip}`}
         >
           {service.name}
           <span className={styles.count}>{service.places}</span>

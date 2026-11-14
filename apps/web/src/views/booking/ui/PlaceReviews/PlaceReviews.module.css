@@ -28,6 +28,11 @@
 }
 
 .all {
+  appearance: none;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;

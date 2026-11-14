@@ -21,6 +21,8 @@ const PLACES_STEP = 24
 
 interface CatalogResultsProps {
   title: string
+  /** The text actually typed when it was read as something else («cnhb;rf» → «стрижка»). */
+  searchedFor?: string
   businesses: BusinessCardData[]
   offers: Offer[]
   initialView: ResultsView
@@ -32,9 +34,10 @@ interface CatalogResultsProps {
   query?: string
 }
 
-// First choose where (places), then what (services) — one switch instead of two long sections.
+// What first (services), then where (places) — one switch instead of two long sections.
 export const CatalogResults = ({
   title,
+  searchedFor,
   businesses,
   offers,
   initialView,
@@ -61,22 +64,28 @@ export const CatalogResults = ({
   )
   const shownPlaces = businesses.slice(0, placesShown)
   const views = [
-    { value: 'places' as const, label: 'Места', count: businesses.length },
     // While more pages wait, the count says «24+» rather than a total it does not know yet.
     {
       value: 'services' as const,
       label: 'Услуги',
       count: feed.hasMore ? `${feed.offers.length}+` : feed.offers.length,
     },
+    { value: 'places' as const, label: 'Места', count: businesses.length },
   ]
 
   return (
     <section className={styles.results} aria-labelledby='results-title'>
       <div className={styles.header}>
         {/* Browsing everything, the tabs say it all; a search or a kind keeps its heading. */}
-        <h2 id='results-title' className={styles.title} data-quiet={!canReset || undefined}>
-          {title}
-        </h2>
+        <div className={styles.titleBlock}>
+          <h2 id='results-title' className={styles.title} data-quiet={!canReset || undefined}>
+            {title}
+          </h2>
+          {searchedFor && (
+            // Like a big search engine: say what was searched instead, without making a fuss.
+            <p className={styles.searchedFor}>Вы искали «{searchedFor}»</p>
+          )}
+        </div>
         {canReset && (
           <NextLink href='/' className={styles.reset}>
             Сбросить

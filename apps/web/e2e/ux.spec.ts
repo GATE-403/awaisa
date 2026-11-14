@@ -25,16 +25,13 @@ test.describe('UX: guidance and feedback', () => {
     const action = primaryAction(page)
 
     await expect(action).toBeEnabled()
-    await expect(
-      page.getByText('Выберите услугу', { exact: true }).filter({ visible: true }),
-    ).toBeVisible()
+    // The action names the next thing to do instead of a bare «Далее».
+    await expect(action).toHaveText('Выбрать услугу')
     await action.click()
     await expect(steps.service).toBeInViewport()
 
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    await expect(
-      page.getByText('Выберите мастера', { exact: true }).filter({ visible: true }),
-    ).toBeVisible()
+    await expect(action).toHaveText('Выбрать мастера')
     await action.click()
     await expect(steps.specialist).toBeInViewport()
   })
@@ -108,7 +105,7 @@ test.describe('UX: guidance and feedback', () => {
     await expect(steps.datetime).toBeInViewport()
     await expect(steps.datetime.getByRole('button', { name: time, pressed: true })).toHaveCount(0)
     await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')
-    await expect(primaryAction(page)).toHaveText('Далее')
+    await expect(primaryAction(page)).toHaveText('Выбрать время')
   })
 
   test('slot loading failure offers a retry instead of a dead end', async ({ page }) => {
@@ -237,9 +234,7 @@ test.describe('UX: layout and ergonomics', () => {
     await page.keyboard.type('E2E Тест')
     await page.keyboard.press('Tab')
     await page.keyboard.type('+996555000111')
-    await primaryAction(page).focus()
-    await page.keyboard.press('Enter')
-    // The first press shows the check; the second books.
+    // Everything filled: one press books.
     await expect(primaryAction(page)).toHaveText('Записаться')
     await primaryAction(page).focus()
     await page.keyboard.press('Enter')

@@ -4,11 +4,13 @@ import { ArrowRight, MagnifyingGlass, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
+import { formatPrice } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import { RecentVisits } from '@/features/rebook'
-import { searchBusinesses } from '@/shared/api/clientApi'
-import type { BusinessCard } from '@/shared/api/types'
+import { listOffersPage, searchBusinesses } from '@/shared/api/clientApi'
+import type { BusinessCard, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { pluralize } from '@/shared/lib/plural'
 import styles from './HeaderSearch.module.css'
 
 const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Окрашивание', 'Массаж', 'Брови']
@@ -16,6 +18,35 @@ const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Ок
 const MIN_QUERY_LENGTH = 2
 const SUGGEST_DELAY_MS = 200
 const MAX_SUGGESTIONS = 6
+const MAX_SERVICES = 4
+
+type ServiceSuggestion = { name: string; minPrice: number; places: number }
+
+// What people type is mostly a service («стрижка»), so services lead: one row per service name
+// with its lowest price and how many places do it, before the places themselves.
+const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
+  const byName = new Map<string, ServiceSuggestion & { slugs: Set<string> }>()
+  for (const offer of offers) {
+    const key = offer.name.trim().toLocaleLowerCase('ru')
+    const known = byName.get(key)
+    if (known) {
+      known.minPrice = Math.min(known.minPrice, offer.price)
+      known.slugs.add(offer.slug)
+      known.places = known.slugs.size
+    } else {
+      byName.set(key, {
+        name: offer.name,
+        minPrice: offer.price,
+        places: 1,
+        slugs: new Set([offer.slug]),
+      })
+    }
+  }
+  return [...byName.values()]
+    .sort((first, second) => second.places - first.places)
+    .slice(0, MAX_SERVICES)
+    .map(({ name, minPrice, places }) => ({ name, minPrice, places }))
+}
 
 // The store's search field lives in the header, like on a marketplace: type, see places, press Enter.
 export const HeaderSearch = () => {
@@ -28,6 +59,7 @@ export const HeaderSearch = () => {
   const [draft, setDraft] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<BusinessCard[]>([])
+  const [services, setServices] = useState<ServiceSuggestion[]>([])
   const query = draft ?? urlQuery
   const trimmed = query.trim()
   const hasQuery = trimmed.length >= MIN_QUERY_LENGTH
@@ -39,6 +71,9 @@ export const HeaderSearch = () => {
     const timeout = window.setTimeout(() => {
       searchBusinesses(trimmed, controller.signal)
         .then((items) => setSuggestions(items.slice(0, MAX_SUGGESTIONS)))
+        .catch(() => undefined)
+      listOffersPage({ q: trimmed, offset: 0, limit: 40, sort: 'popular' }, controller.signal)
+        .then((offers) => setServices(groupServices(offers)))
         .catch(() => undefined)
     }, SUGGEST_DELAY_MS)
 
@@ -148,9 +183,36 @@ export const HeaderSearch = () => {
         <div id={listId} className={styles.panel}>
           {hasQuery ? (
             <section aria-label='Подсказки'>
-              <p className={styles.heading}>
-                {suggestions.length > 0 ? 'Места' : 'Нажмите Enter, чтобы искать по услугам'}
-              </p>
+              {services.length > 0 && (
+                <>
+                  <p className={styles.heading}>Услуги</p>
+                  <ul className={styles.list}>
+                    {services.map((service) => (
+                      <li key={service.name}>
+                        <button
+                          type='button'
+                          className={styles.place}
+                          onClick={() => search(service.name)}
+                        >
+                          <MagnifyingGlass className={styles.quickIcon} aria-hidden />
+                          <span className={styles.placeText}>
+                            <span className={styles.placeName}>{service.name}</span>
+                            <span className={styles.placeMeta}>
+                              от {formatPrice(service.minPrice)} ·{' '}
+                              {pluralize(service.places, ['место', 'места', 'мест'])}
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              {(suggestions.length > 0 || services.length === 0) && (
+                <p className={styles.heading}>
+                  {suggestions.length > 0 ? 'Места' : 'Нажмите Enter, чтобы искать по услугам'}
+                </p>
+              )}
               <ul className={styles.list}>
                 {suggestions.map((business) => (
                   <li key={business.slug}>

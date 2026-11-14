@@ -81,8 +81,19 @@
   }
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 1100px) and (max-width: 1399px) {
   .interlude ~ li:nth-child(-n + 9) {
+    order: 0;
+  }
+}
+
+/* Five across: the shelf still comes after two full rows (4 cards before it, 6 after). */
+@media (min-width: 1400px) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .interlude ~ li:nth-child(-n + 11) {
     order: 0;
   }
 }

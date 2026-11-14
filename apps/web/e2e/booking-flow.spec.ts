@@ -5,6 +5,7 @@ import {
   pickFirstFreeSlot,
   primaryAction,
   readStoredBookings,
+  revealNextSlot,
   submitBooking,
 } from './helpers'
 
@@ -18,9 +19,12 @@ test.describe('User flow: booking', () => {
     page,
   }) => {
     await page.goto('/')
+    // Services lead the catalog; places are the second tab.
+    await page.getByRole('tab', { name: /Места/ }).click()
     // The business card (not an offer inside the banner) leads to the business page.
     await page.locator('a[href="/awaisa-studio"]').first().click()
     await expect(page).toHaveURL(/\/awaisa-studio$/)
+    await revealNextSlot(page)
     const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
 
     await expect(nextSlot.getByText(/^(Сегодня|Завтра), \d{2}:\d{2}$|появятся скоро/)).toBeVisible()
@@ -29,11 +33,12 @@ test.describe('User flow: booking', () => {
     await expect(page).toHaveURL(/\/book\?service=/)
     const steps = bookingSteps(page)
     await expect(steps.service.getByRole('button', { name: 'Изменить' })).toBeVisible()
-    await expect(primaryAction(page)).toHaveText('Далее')
+    await expect(primaryAction(page)).toHaveText(/^(Выбрать (мастера|время)|Ввести контакты)$/)
   })
 
   test('a time shown on the business page is the time the booking opens with', async ({ page }) => {
     await page.goto('/awaisa-studio')
+    await revealNextSlot(page)
     const card = page
       .getByRole('complementary', { name: 'Ближайшее окно' })
       .getByRole('link', { name: /^Записаться на/ })
@@ -64,13 +69,12 @@ test.describe('User flow: booking', () => {
     await expect(steps.datetime).toContainText(time)
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
-    await expect(primaryAction(page)).toHaveText('Проверить запись')
+    await expect(primaryAction(page)).toHaveText('Записаться')
     await submitBooking(page)
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
-    await expect(page.getByRole('region', { name: /Notifications/ })).toContainText(
-      'Запись подтверждена',
-    )
+    // No toast over the success screen: it says in plain words what to do next.
+    await expect(page.getByText(new RegExp(`Приходите к ${time}`))).toBeVisible()
     await expect(page.getByRole('article', { name: /^Запись / })).toContainText(time)
 
     await page.getByRole('main').getByRole('link', { name: 'Мои записи' }).click()
@@ -150,5 +154,30 @@ test.describe('User flow: booking', () => {
     await resume.getByRole('link', { name: /Продолжить запись/ }).click()
     await expect(page).toHaveURL(/\/awaisa-studio\/book\?service=styling/)
     await expect(bookingSteps(page).service).toContainText('Укладка')
+  })
+})
+
+test.describe('Booking: helpful defaults', () => {
+  test('a shared location picks the nearest branch; each service says when one can come', async ({
+    page,
+    context,
+  }) => {
+    // Lumière (demo seed) has two branches: Асанбай and Ала-Арча; this point is by Ала-Арча.
+    await context.grantPermissions(['geolocation'])
+    await context.setGeolocation({ latitude: 42.848, longitude: 74.6015 })
+    await page.goto('/lumiere-salon/book')
+
+    const branches = page.getByRole('group', { name: 'Филиал' })
+    await expect(branches.getByRole('radio', { name: /Ала-Арча/ })).toBeChecked()
+    // Each branch says its address and how far it is; the route leads to the chosen one.
+    await expect(branches.getByText(/ · \d+ м$/).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Маршрут до «Ала-Арча» ›' })).toBeVisible()
+
+    // At least one service row names its first free time today or tomorrow.
+    await expect(
+      bookingSteps(page)
+        .service.getByText(/^(Сегодня|Завтра) с \d{2}:\d{2}/)
+        .first(),
+    ).toBeVisible()
   })
 })

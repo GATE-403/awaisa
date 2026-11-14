@@ -73,6 +73,7 @@ export const OffersFeed = ({
               <OfferCard
                 offer={offer}
                 isHit={hits.has(offer.id)}
+                isPriority={index < 4}
                 action={<FavoriteButton id={offer.id} label={offer.name} />}
               />
             </li>

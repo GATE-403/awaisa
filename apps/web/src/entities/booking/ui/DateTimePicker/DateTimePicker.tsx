@@ -2,8 +2,9 @@ import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import type { ReactNode } from 'react'
-import type { BookingDay } from '@/entities/booking'
 import type { TimeSlot } from '@/shared/api/types'
+import { pluralize } from '@/shared/lib/plural'
+import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
 import styles from './DateTimePicker.module.css'
 
 interface DateTimePickerProps {
@@ -49,6 +50,11 @@ export const DateTimePicker = ({
   fullDayAction,
 }: DateTimePickerProps) => {
   const availableCount = slots.filter((slot) => slot.isAvailable).length
+  // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
+  const todayKey = days.find((day) => day.isToday)?.key ?? null
+  const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
+  const relativeDay = (key: string) =>
+    key === todayKey ? 'Сегодня' : key === tomorrowKey ? 'Завтра' : null
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
@@ -71,7 +77,9 @@ export const DateTimePicker = ({
             disabled={day.isClosed}
             data-today={day.isToday || undefined}
           >
-            <span className={styles.weekday}>{day.weekday}</span>
+            <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
+              {relativeDay(day.key) ?? day.weekday}
+            </span>
             <span className={styles.dayNumber}>{day.dayOfMonth}</span>
             <span className={styles.month}>{day.month}</span>
           </Toggle>
@@ -95,6 +103,16 @@ export const DateTimePicker = ({
         </div>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
+        // Only free times, under a line that says a time is still to be picked: a grid half
+        // made of struck-out times read as «nothing to do here».
+        <p className={styles.caption} aria-hidden>
+          {time ? `Выбрано ${time}` : 'Выберите время'}
+          <span className={styles.captionCount}>
+            {pluralize(availableCount, ['свободное', 'свободных', 'свободных'])}
+          </span>
+        </p>
+      )}
+      {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup
           aria-label='Время'
           layout='grid'
@@ -102,11 +120,13 @@ export const DateTimePicker = ({
           value={time ? [time] : []}
           onValueChange={(values) => toSingleValue(values, onTimeChange)}
         >
-          {slots.map((slot) => (
-            <Toggle key={slot.time} value={slot.time} disabled={!slot.isAvailable}>
-              {slot.time}
-            </Toggle>
-          ))}
+          {slots
+            .filter((slot) => slot.isAvailable)
+            .map((slot) => (
+              <Toggle key={slot.time} value={slot.time}>
+                {slot.time}
+              </Toggle>
+            ))}
         </ToggleGroup>
       )}
     </div>

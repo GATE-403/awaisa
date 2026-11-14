@@ -87,8 +87,10 @@
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   color: var(--color-muted-foreground);
-  font-size: 11px;
-  line-height: 13px;
+  /* The kit's caption size: 11px under the glyphs read as fine print beside «Каталог». */
+  font-size: var(--text-xs);
+  line-height: 14px;
+  font-weight: var(--font-weight-medium);
   white-space: nowrap;
   transition: color var(--duration-fast) var(--ease-standard);
 }
@@ -96,8 +98,8 @@
 /* Phones: map and profile live in the tab bar, so the header keeps only the logo and search. */
 
 .action svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .action[aria-current="page"] {
@@ -342,8 +344,8 @@
 
 /* The person's face in place of the profile glyph: glyph-sized, ringed when this is the page. */
 .accountAvatar[data-size] {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   font-size: 10px;
 }
 

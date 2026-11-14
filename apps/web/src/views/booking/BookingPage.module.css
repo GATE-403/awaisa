@@ -111,25 +111,87 @@
   gap: var(--space-2);
 }
 
-.branchChips {
-  display: flex;
-  min-width: 0;
+.branchCaption {
+  padding-inline: var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.branchList {
   margin: 0;
   padding: 0;
   border: none;
-  gap: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
 }
 
-.branchChips::-webkit-scrollbar {
-  display: none;
+/* A Settings row: name over the address, a check on the chosen one; the radio covers the row. */
+.branchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+}
+
+.branchRow + .branchRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  border-top: 0.5px solid var(--color-border);
+}
+
+.branchRow:has(.branchRadio:focus-visible) {
+  box-shadow: inset var(--focus-ring);
+}
+
+.branchRadio {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.branchText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.branchName {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .branchAddress {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
+}
+
+.branchCheck {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+}
+
+.branchRoute {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: var(--space-4);
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
 }
 
 .extras > details[open],
@@ -302,6 +364,11 @@ button.fieldRow {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.serviceSoon {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
 }
 
 label:has([data-checked]) .serviceNote {

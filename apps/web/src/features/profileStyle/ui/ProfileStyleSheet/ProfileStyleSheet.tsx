@@ -8,10 +8,17 @@ import { useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { ACCENTS, achievementLook, profileStyle, STATUS_EMOJI } from '@/entities/profile'
 import { getErrorMessage } from '@/shared/api/apiError'
-import type { ProfileSettings, PublicProfile } from '@/shared/api/types'
+import type { ProfileLinkKind, ProfileSettings, PublicProfile } from '@/shared/api/types'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ProfileStyleSheet.module.css'
+
+const LINK_FIELDS: { kind: ProfileLinkKind; label: string; placeholder: string }[] = [
+  { kind: 'instagram', label: 'Instagram', placeholder: '@ник' },
+  { kind: 'telegram', label: 'Telegram', placeholder: '@ник' },
+  { kind: 'tiktok', label: 'TikTok', placeholder: '@ник' },
+  { kind: 'website', label: 'Сайт', placeholder: 'example.kg' },
+]
 
 const MAX_FEATURED = 3
 
@@ -39,6 +46,9 @@ export const ProfileStyleSheet = ({
   const [statusEmoji, setStatusEmoji] = useState(settings.statusEmoji)
   const [about, setAbout] = useState(settings.about)
   const [handle, setHandle] = useState(settings.handle ?? '')
+  const [links, setLinks] = useState(settings.links ?? {})
+  const setLink = (kind: ProfileLinkKind, value: string) =>
+    setLinks((current) => ({ ...current, [kind]: value }))
   const [featured, setFeatured] = useState(settings.featuredBadges)
   const [favoriteMasterId, setFavoriteMasterId] = useState(settings.favoriteMasterId)
   const earned = profile?.achievements.filter((item) => item.earned) ?? []
@@ -65,6 +75,9 @@ export const ProfileStyleSheet = ({
         status: status.trim(),
         statusEmoji,
         about: about.trim(),
+        links: Object.fromEntries(
+          LINK_FIELDS.map(({ kind }) => [kind, (links[kind] ?? '').trim()]),
+        ),
         handle: handle.trim() ? handle.trim().toLowerCase() : null,
         featuredBadges: featured,
         favoriteMasterId,
@@ -205,6 +218,32 @@ export const ProfileStyleSheet = ({
             onChange={(event) => setAbout(event.target.value)}
           />
         </div>
+      </div>
+
+      <div className={sheet.group}>
+        <h3 className={sheet.groupTitle}>Ссылки</h3>
+        <div className={sheet.list}>
+          {LINK_FIELDS.map(({ kind, label, placeholder }) => (
+            <label key={kind} className={sheet.row}>
+              <span className={sheet.rowLabel}>{label}</span>
+              <span className={sheet.rowControl}>
+                <Input
+                  variant='plain'
+                  aria-label={label}
+                  placeholder={placeholder}
+                  value={links[kind] ?? ''}
+                  maxLength={200}
+                  inputMode={kind === 'website' ? 'url' : 'text'}
+                  autoCapitalize='none'
+                  autoCorrect='off'
+                  spellCheck={false}
+                  onValueChange={(value) => setLink(kind, value)}
+                />
+              </span>
+            </label>
+          ))}
+        </div>
+        <p className={sheet.groupFooter}>Ник или ссылка — покажем значками на вашей странице.</p>
       </div>
 
       {earned.length > 0 && (

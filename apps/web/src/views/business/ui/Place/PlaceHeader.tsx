@@ -38,7 +38,9 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
       className={styles.header}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
-      <ViewTransition name={`business-${business.slug}`}>
+      {/* Only the catalog card → cover morph animates; while the page stays (the booking sheet
+          slides over it) the cover must not join the transition layer, which paints above it. */}
+      <ViewTransition name={`business-${business.slug}`} update='none'>
         <figure className={styles.cover} data-empty={!business.coverUrl || undefined}>
           {business.coverUrl && (
             // biome-ignore lint/performance/noImgElement: already resized WebP from our API

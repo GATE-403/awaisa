@@ -34,7 +34,8 @@ test.describe('Recommendations', () => {
     await page.goto('/')
     const shelf = page.getByRole('region', { name: 'Для вас' })
     await shelf.scrollIntoViewIfNeeded()
-    const first = shelf.getByRole('link').first()
+    // The head carries «Рейтинг ›»; the picks are the list's links.
+    const first = shelf.getByRole('listitem').getByRole('link').first()
     await expect(first).toHaveAttribute('href', /\/book\?service=/)
 
     // The shelf in view counts its cards as shown, per device session.

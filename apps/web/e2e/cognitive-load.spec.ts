@@ -116,11 +116,8 @@ test.describe('Cognitive load: booking', () => {
 
     await act(() => steps.contacts.getByLabel('Имя').fill('E2E Тест'))
     await act(() => steps.contacts.getByLabel('Телефон').fill('+996 555 000 111'))
-    // Check, then book: two presses.
+    // Everything filled: one press books.
     await act(() => primaryAction(page).click())
-    await act(() =>
-      page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).click(),
-    )
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     expect(actions).toBeLessThanOrEqual(LIMITS.happyPathActions)
@@ -164,18 +161,25 @@ test.describe('Cognitive load: booking', () => {
     }
   })
 
-  test('the next-step hint always tells what to do next', async ({ page, isMobile }) => {
-    test.skip(!isMobile, 'Hint lives in the phone action bar')
+  test('the action names the next step and the bar says how far along', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The step count lives in the phone action bar')
     await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
+    const action = primaryAction(page)
     const hint = page.locator('[aria-live="polite"]').filter({ visible: true }).last()
 
-    await expect(hint).toHaveText('Выберите услугу')
+    await expect(action).toHaveText('Выбрать услугу')
+    await expect(hint).toHaveText('Шаг 1 из 4')
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    await expect(hint).toHaveText('Выберите мастера')
+    await expect(action).toHaveText('Выбрать мастера')
+    await expect(hint).toHaveText('Шаг 2 из 4')
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
-    await expect(hint).toHaveText('Выберите время')
+    await expect(action).toHaveText('Выбрать время')
     await pickFirstFreeSlot(page)
-    await expect(hint).toHaveText('Оставьте контакты')
+    await expect(action).toHaveText('Ввести контакты')
+    await expect(hint).toHaveText('Шаг 4 из 4')
   })
 })

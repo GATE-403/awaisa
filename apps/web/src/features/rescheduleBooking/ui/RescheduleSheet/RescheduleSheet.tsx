@@ -1,11 +1,10 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import { ArrowRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { formatDayLong, getUpcomingDays, useAvailability } from '@/entities/booking'
+import { DateTimePicker, formatDayLong, getUpcomingDays, useAvailability } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { moveMyBooking } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
@@ -24,13 +23,8 @@ interface RescheduleSheetProps {
 
 const DAYS_SHOWN = 14
 
-const PARTS = [
-  { label: 'Утро', test: (time: string) => time < '12:00' },
-  { label: 'День', test: (time: string) => time >= '12:00' && time < '17:00' },
-  { label: 'Вечер', test: (time: string) => time >= '17:00' },
-]
-
-// Same master, same service, another time: a day row and the free times of that master.
+// Same master, same service, another time — chosen with the very picker of the booking form
+// (day cards with «Сегодня / Завтра», «Выберите время · N свободных», free times only).
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
   const toast = useToast()
   const today = useToday()
@@ -43,8 +37,9 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
     booking.specialistId,
     date,
   )
-  const free = slots.filter(
-    (slot) => slot.isAvailable && !(date === booking.date && slot.time === booking.time),
+  // The visit's own time is not a choice to move to.
+  const choices = slots.map((slot) =>
+    date === booking.date && slot.time === booking.time ? { ...slot, isAvailable: false } : slot,
   )
 
   const handleMove = async () => {
@@ -91,58 +86,21 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
         </div>
       </div>
 
-      <fieldset className={styles.days}>
-        <legend className={styles.legend}>День</legend>
-        {days.map((day) => (
-          <button
-            key={day.key}
-            type='button'
-            className={styles.day}
-            aria-pressed={day.key === date}
-            aria-label={day.label}
-            data-today={day.key === today?.dayKey || undefined}
-            onClick={() => {
-              setDate(day.key)
-              setTime(null)
-            }}
-          >
-            <span className={styles.weekday}>{day.weekday}</span>
-            <span className={styles.number}>{day.dayOfMonth}</span>
-          </button>
-        ))}
-      </fieldset>
-
-      {isLoading && <Skeleton className={styles.skeleton} />}
-      {!isLoading && free.length === 0 && (
-        <p className={styles.empty}>Свободного времени нет — выберите другой день.</p>
-      )}
-      {!isLoading && free.length > 0 && (
-        <fieldset className={styles.times}>
-          <legend className={styles.legend}>Время</legend>
-          {PARTS.map((part) => {
-            const items = free.filter((slot) => part.test(slot.time))
-            if (items.length === 0) return null
-            return (
-              <div key={part.label} className={styles.part}>
-                <p className={styles.partTitle}>{part.label}</p>
-                <div className={styles.partGrid}>
-                  {items.map((slot) => (
-                    <button
-                      key={slot.time}
-                      type='button'
-                      className={styles.time}
-                      aria-pressed={slot.time === time}
-                      onClick={() => setTime(slot.time)}
-                    >
-                      {slot.time}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </fieldset>
-      )}
+      <DateTimePicker
+        days={days}
+        dayKey={date}
+        slots={choices}
+        time={time}
+        isSpecialistSelected
+        isLoading={isLoading}
+        error={null}
+        onRetry={reload}
+        onDayChange={(key) => {
+          setDate(key)
+          setTime(null)
+        }}
+        onTimeChange={setTime}
+      />
 
       <Button size='lg' onClick={handleMove} disabled={!time || isMoving} className={styles.submit}>
         {time ? `Перенести на ${time}` : 'Выберите время'}

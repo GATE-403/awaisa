@@ -17,8 +17,17 @@ const feedQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).max(10_000).default(0),
 })
 
+// The device's random session (`awaisa:device:v1`): one like per photo and device, no account.
+const likeSchema = z.object({
+  session: z
+    .string()
+    .trim()
+    .regex(/^[0-9a-f-]{8,64}$/i),
+})
+
+type LikeInput = z.infer<typeof likeSchema>
 type UpdateWorkPhotoInput = z.infer<typeof updateWorkPhotoSchema>
 type FeedQuery = z.infer<typeof feedQuerySchema>
 
-export type { FeedQuery, UpdateWorkPhotoInput }
-export { feedQuerySchema, updateWorkPhotoSchema }
+export type { FeedQuery, LikeInput, UpdateWorkPhotoInput }
+export { feedQuerySchema, likeSchema, updateWorkPhotoSchema }

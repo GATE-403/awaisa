@@ -29,6 +29,8 @@ import {
   moveBookingSchema,
   type NextFreeQuery,
   nextFreeQuerySchema,
+  type ServicesNextFreeQuery,
+  servicesNextFreeQuerySchema,
 } from './bookings.schemas.js'
 import { BookingsService } from './bookings.service.js'
 
@@ -60,6 +62,15 @@ export class BookingsController {
   @Get('next-free')
   getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery) {
     return this.bookingsService.findNextFree(query.slugs)
+  }
+
+  @Cached({ ttl: 20, tags: ['availability'], maxAge: 10 })
+  @Get('businesses/:slug/next-free-services')
+  getServicesNextFree(
+    @Param('slug') slug: string,
+    @Query({ schema: servicesNextFreeQuerySchema }) query: ServicesNextFreeQuery,
+  ) {
+    return this.bookingsService.findNextFreeByService(slug, query.branchId)
   }
 
   @Post('bookings')

@@ -18,10 +18,23 @@ test.describe('Own profile', () => {
         about: 'E2E о себе',
         featuredBadges: ['first-visit'],
         favoriteMasterId: null,
+        // A pasted link and «@name» both become handles; the page builds the addresses.
+        links: { instagram: 'https://www.instagram.com/e2e.nails/?hl=ru', telegram: '@e2e_tester' },
       },
     })
     expect(saved.ok()).toBe(true)
+    expect((await saved.json()).links).toEqual({ instagram: 'e2e.nails', telegram: 'e2e_tester' })
+    expect(
+      (
+        await page.request.patch('/api/me/profile', { data: { links: { telegram: 'ab' } } })
+      ).status(),
+    ).toBe(400)
     await page.goto(`/u/${settings.id}`)
+    await expect(page.getByRole('link', { name: 'Instagram: @e2e.nails' })).toHaveAttribute(
+      'href',
+      'https://instagram.com/e2e.nails',
+    )
+    await expect(page.getByRole('link', { name: 'Telegram: @e2e_tester' })).toBeVisible()
     await expect(page.getByText('E2E статус')).toBeVisible()
     await expect(page.getByText('💅').first()).toBeVisible()
     await expect(page.getByText('E2E о себе')).toBeVisible()

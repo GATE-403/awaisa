@@ -131,14 +131,40 @@
 .footer {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: var(--space-1);
   padding-top: 2px;
 }
 
-.price {
+.place {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The place's own face on a white plate: a card with a logo is a place, not a service. */
+.place .logo {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  box-shadow: 0 0 0 1.5px rgb(255 255 255 / 0.9);
+}
+
+.rating,
+.services {
   flex-shrink: 0;
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
+}
+
+.rating::after {
+  content: " ·";
+  font-weight: var(--font-weight-regular);
+}
+
+.address::before {
+  content: "· ";
 }
 
 .address {

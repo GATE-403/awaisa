@@ -19,6 +19,7 @@ import { readRef } from '@/features/invite'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
+import { distanceKm, knownPosition } from '@/shared/lib/geo'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { usePriceQuote } from './usePriceQuote'
@@ -44,6 +45,19 @@ const scrollToStep = (stepId: BookingStepId, force = false) => {
     const isFarBelow = element.getBoundingClientRect().top > window.innerHeight * 0.55
     if (force || isFarBelow) element.scrollIntoView({ behavior: 'smooth', block: 'start' })
   })
+}
+
+// Once a time is picked, the cursor waits in «Имя»: a list-like row is not obviously a field to
+// someone new to forms. After the scroll settles; never steals focus from a field in use.
+const focusNameSoon = () => {
+  window.setTimeout(() => {
+    const input = document.querySelector<HTMLInputElement>(
+      '#step-contacts input[autocomplete="name"]',
+    )
+    const active = document.activeElement
+    if (!input || input.value || (active instanceof HTMLInputElement && active !== input)) return
+    input.focus({ preventScroll: true })
+  }, 450)
 }
 
 export const useBookingForm = (business: Business, catalog: Catalog) => {
@@ -73,6 +87,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // Pages cached before branches existed have none: treat them as single-branch.
   const branches = business.branches ?? []
   const [chosenBranchId, setBranchId] = useState(searchParams.get('branch'))
+  // How far each pinned branch is, when the visitor already shared their location.
+  const [branchDistances, setBranchDistances] = useState<Record<string, number> | null>(null)
   const branchId =
     branches.length > 1
       ? (branches.find((branch) => branch.id === chosenBranchId) ?? branches[0])?.id
@@ -159,6 +175,29 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   // A returning guest: their name and number from last time, editable as usual.
+  // With several branches and a location already allowed (no prompt), the nearest one is chosen
+  // — unless a link named a branch or the client picked one meanwhile.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once per place
+  useEffect(() => {
+    // A link to a master who works in one branch already decided it.
+    if (branches.length < 2 || presetSpecialist?.branchId) return
+    let isCancelled = false
+    knownPosition().then((position) => {
+      if (!position || isCancelled) return
+      const distances: Record<string, number> = {}
+      for (const branch of branches) {
+        if (branch.latitude === null || branch.longitude === null) continue
+        distances[branch.id] = distanceKm(position, { lat: branch.latitude, lng: branch.longitude })
+      }
+      const nearest = Object.entries(distances).sort((first, second) => first[1] - second[1])[0]
+      setBranchDistances(distances)
+      if (nearest) setBranchId((current) => current ?? nearest[0])
+    })
+    return () => {
+      isCancelled = true
+    }
+  }, [business.slug])
+
   useEffect(() => {
     if (session.status !== 'guest') return
     const stored = readContact()
@@ -284,6 +323,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setSubmitError(null)
     setEditingStep(null)
     scrollToStep('contacts', true)
+    if (!name.trim() && !hasContacts) focusNameSoon()
   }
 
   // A quick time: service, master and time at once; the steps fold and contacts are next.
@@ -339,12 +379,13 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       }
       setCreatedBooking(booking)
       haptic('success')
-      toast.show({
-        title: 'Запись подтверждена',
-        description: `${booking.serviceName}, ${booking.time}`,
-        type: 'success',
-      })
+      // No toast: the success screen is the confirmation, and a toast on top of it covered its
+      // «Вы записаны» exactly when a first-time client looks for it.
       window.scrollTo({ top: 0, behavior: 'smooth' })
+      // The booking sheet scrolls inside itself: bring its top («Вы записаны») into view too.
+      requestAnimationFrame(() =>
+        document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' }),
+      )
     } catch (error) {
       setSubmitError(getErrorMessage(error))
       haptic('error')
@@ -366,6 +407,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   return {
     branches,
     branchId,
+    branchDistances,
     selectBranch,
     service,
     services,

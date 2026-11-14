@@ -86,16 +86,13 @@ test.describe('Platform: a new business goes live', () => {
     await search.press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))
-    // «Ближайшее окно» is the booking entry on every screen size (the bar's button is desktop-only).
-    await clientPage
-      .getByRole('complementary', { name: 'Ближайшее окно' })
-      .getByRole('link', { name: 'Записаться' })
-      .click()
-    await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book\\?service=`))
+    // The head's «Записаться» opens the booking form itself, on every screen size.
+    await clientPage.locator('[data-place-book]').click()
+    await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book$`))
 
     await expect(clientPage.getByRole('group', { name: 'Филиал' })).toBeVisible()
     const steps = bookingSteps(clientPage)
-    // The next-slot link preselects the service.
+    await steps.service.getByRole('radio', { name: /^Стрижка/ }).click()
     await expect(steps.service).toContainText('Стрижка')
     // The only master is chosen for the client: the step is already filled in.
     await expect(steps.specialist).toContainText('Азамат')

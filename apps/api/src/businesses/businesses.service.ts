@@ -18,6 +18,7 @@ import {
 } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { SearchService } from '../search/search.service.js'
 import { Branch, type BranchView, toBranchView } from './branch.entity.js'
 import { Business } from './business.entity.js'
 import { BusinessMember } from './business-member.entity.js'
@@ -58,6 +59,9 @@ type BusinessCard = Pick<
   minPrice: number
   coverUrl: string | null
   logoUrl: string | null
+  /** The average of real reviews; null until the first one. */
+  rating: number | null
+  reviewsCount: number
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
@@ -105,6 +109,7 @@ export class BusinessesService {
     @InjectRepository(WorkingHours) private readonly hours: Repository<WorkingHours>,
     @InjectRepository(Branch) private readonly branches: Repository<Branch>,
     @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly search: SearchService,
   ) {}
 
   async listCatalog({
@@ -118,6 +123,9 @@ export class BusinessesService {
       SELECT b."slug", b."name", b."kind", b."description", b."city", b."address",
         b."cover_url" AS "coverUrl", b."logo_url" AS "logoUrl",
         COUNT(s."id")::int AS "servicesCount", MIN(s."price")::int AS "minPrice",
+        (SELECT ROUND(AVG(r."rating")::numeric, 1)::float8 FROM "reviews" r
+          WHERE r."business_id" = b."id") AS "rating",
+        (SELECT COUNT(*)::int FROM "reviews" r WHERE r."business_id" = b."id") AS "reviewsCount",
         (
           SELECT COALESCE(json_agg(json_build_object(
             'weekday', h."weekday", 'opensMinutes', h."opens_minutes", 'closesMinutes', h."closes_minutes"
@@ -128,10 +136,11 @@ export class BusinessesService {
       JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
       WHERE b."is_published"
         AND ($1::text IS NULL OR b."kind" = $1)
-        AND ($2::text IS NULL OR b."name" ILIKE $2 OR b."address" ILIKE $2 OR b."description" ILIKE $2
+        AND ($2::text[] IS NULL OR b."name" ILIKE ANY($2::text[]) OR b."address" ILIKE ANY($2::text[])
+          OR b."description" ILIKE ANY($2::text[])
           OR EXISTS (
             SELECT 1 FROM "services" sq
-            WHERE sq."business_id" = b."id" AND sq."is_active" AND sq."name" ILIKE $2
+            WHERE sq."business_id" = b."id" AND sq."is_active" AND sq."name" ILIKE ANY($2::text[])
           ))
       GROUP BY b."id"
       ORDER BY b."created_at" ASC, b."id" ASC
@@ -139,7 +148,7 @@ export class BusinessesService {
       `,
       [
         kind ?? null,
-        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+        q ? ((await this.search.resolve(q))?.patterns ?? null) : null,
         Math.min(limit, MAX_CATALOG_ITEMS),
         offset,
       ],
@@ -177,7 +186,7 @@ export class BusinessesService {
       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
       WHERE s."is_active"
         AND ($1::text IS NULL OR b."kind" = $1)
-        AND ($2::text IS NULL OR s."name" ILIKE $2 OR b."name" ILIKE $2)
+        AND ($2::text[] IS NULL OR s."name" ILIKE ANY($2::text[]) OR b."name" ILIKE ANY($2::text[]))
         AND ($5::text[] IS NULL OR s."id"::text = ANY($5::text[]))
       ORDER BY ${
         sort === 'price'
@@ -188,7 +197,7 @@ export class BusinessesService {
       `,
       [
         kind ?? null,
-        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+        q ? ((await this.search.resolve(q))?.patterns ?? null) : null,
         Math.min(limit, MAX_OFFERS),
         offset,
         ids && ids.length > 0 ? ids : null,
@@ -313,7 +322,11 @@ export class BusinessesService {
       JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
       WHERE br."is_active" AND br."latitude" IS NOT NULL AND br."longitude" IS NOT NULL
         AND ($3::text IS NULL OR b."kind" = $3)
-        AND ($4::text IS NULL OR b."name" ILIKE $4 OR br."address" ILIKE $4)
+        AND ($4::text[] IS NULL OR b."name" ILIKE ANY($4::text[]) OR br."address" ILIKE ANY($4::text[])
+          OR EXISTS (
+            SELECT 1 FROM "services" sq
+            WHERE sq."business_id" = b."id" AND sq."is_active" AND sq."name" ILIKE ANY($4::text[])
+          ))
       GROUP BY br."id", b."id"
       ORDER BY "distanceKm" ASC NULLS LAST, b."name" ASC
       LIMIT ${MAX_MAP_ITEMS}
@@ -322,7 +335,7 @@ export class BusinessesService {
         hasPoint ? lat : null,
         hasPoint ? lng : null,
         kind ?? null,
-        q ? `%${q.replace(/[%_\\]/g, '\\$&')}%` : null,
+        q ? ((await this.search.resolve(q))?.patterns ?? null) : null,
       ],
     )) as (Record<string, unknown> & { distanceKm: number | null })[]
 

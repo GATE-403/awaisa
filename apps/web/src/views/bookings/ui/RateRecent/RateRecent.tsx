@@ -58,6 +58,7 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
             (booking) =>
               booking.status === 'confirmed' &&
               booking.review === null &&
+              !booking.isNoShow &&
               !dismissed.includes(booking.id) &&
               Date.parse(`${today.dayKey}T00:00:00Z`) - Date.parse(`${booking.date}T00:00:00Z`) <=
                 ASK_DAYS * DAY_MS,

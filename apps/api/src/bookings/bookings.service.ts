@@ -69,6 +69,8 @@ type BookingView = {
     dueAt: string | null
   } | null
   review: { rating: number; comment: string; reply: string | null } | null
+  /** The salon marked «Не пришёл»: such a visit is never asked to be rated. */
+  isNoShow: boolean
   business: {
     slug: string
     name: string
@@ -146,6 +148,7 @@ const toView = (booking: Booking): BookingView => {
             dueAt: booking.paymentDueAt?.toISOString() ?? null,
           }
         : null,
+    isNoShow: booking.outcome === 'no_show',
     review: booking.review
       ? {
           rating: booking.review.rating,
@@ -224,6 +227,41 @@ export class BookingsService {
         }
 
         return [slug, null] as const
+      }),
+    )
+
+    return Object.fromEntries(entries)
+  }
+
+  /**
+   * Each active service of a place with its first free time (any master) today or tomorrow, so
+   * the booking form's list can say «Сегодня с 15:30» before a service is picked.
+   */
+  async findNextFreeByService(slug: string, branchId?: string) {
+    const rows = (await this.bookings.manager.query(
+      `SELECT s."id" FROM "services" s
+       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published" AND b."slug" = $1
+       WHERE s."is_active" LIMIT 60`,
+      [slug],
+    )) as { id: string }[]
+    const today = toBusinessParts(new Date()).dateKey
+    const entries = await Promise.all(
+      rows.map(async ({ id }) => {
+        for (const date of [today, addDays(today, 1)]) {
+          try {
+            const { slots } = await this.getAvailability({
+              serviceId: id,
+              specialistId: ANY_SPECIALIST_ID,
+              date,
+              branchId,
+            })
+            const free = slots.find((slot) => slot.isAvailable)
+            if (free) return [id, { date, time: free.time }] as const
+          } catch {
+            // No masters for it (in this branch): no time to show.
+          }
+        }
+        return [id, null] as const
       }),
     )
 

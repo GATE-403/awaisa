@@ -1,10 +1,11 @@
-import { Star } from '@phosphor-icons/react/ssr'
+import { Globe, InstagramLogo, Star, TelegramLogo, TiktokLogo } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { Achievements, achievementLook, profileStyle } from '@/entities/profile'
 import { EditProfileButton } from '@/features/profileStyle'
-import type { PublicProfile } from '@/shared/api/types'
+import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './ProfilePage.module.css'
 import { ProfileReviews } from './ui/ProfileReviews'
@@ -29,6 +30,13 @@ const MAX_PLACES = 4
 // A client's page in the app's own voice, like a contact card in iOS: the face centred on a soft
 // wash of their colour, name and status, one line of facts, the level as a line of text; then
 // achievements as medals and short rows of masters, places and reviews — on the page, no cards.
+const LINK_GLYPHS: Record<ProfileLinkKind, typeof Globe> = {
+  instagram: InstagramLogo,
+  telegram: TelegramLogo,
+  tiktok: TiktokLogo,
+  website: Globe,
+}
+
 export const ProfilePage = ({ profile }: ProfilePageProps) => {
   const earned = profile.achievements.filter((item) => item.earned).length
   const awaiting = profile.isOwn ? (profile.awaitingReview ?? 0) : 0
@@ -58,6 +66,14 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
   return (
     <main className={styles.page} style={profileStyle(profile.accent)}>
       <div className={styles.column}>
+        <Breadcrumbs
+          align='center'
+          className={styles.crumbs}
+          items={[
+            { label: 'Каталог', href: '/' },
+            { label: profile.name, href: `/u/${profile.handle ?? profile.id}` },
+          ]}
+        />
         <header className={styles.head}>
           {/* The three most active clients on the platform wear a laurel wreath. */}
           {profile.rank ? (
@@ -87,6 +103,28 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
             </p>
           )}
           {profile.about && <p className={styles.about}>{profile.about}</p>}
+          {profile.links && profile.links.length > 0 && (
+            // Quiet glyph links under the words, like a bio's: the API built each address.
+            <ul className={styles.links} aria-label='Ссылки'>
+              {profile.links.map((link) => {
+                const Glyph = LINK_GLYPHS[link.kind]
+                return (
+                  <li key={link.kind}>
+                    <a
+                      href={link.url}
+                      target='_blank'
+                      rel='noreferrer nofollow ugc'
+                      className={styles.link}
+                      aria-label={`${link.label}: ${link.text}`}
+                    >
+                      <Glyph weight='bold' aria-hidden />
+                      <span className={styles.linkText}>{link.text}</span>
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
           <p className={styles.facts}>
             {facts.map((fact, index) => (
               <span key={fact.label}>

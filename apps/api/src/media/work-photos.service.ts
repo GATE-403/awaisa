@@ -104,6 +104,31 @@ export class WorkPhotosService {
     return Number(row?.count) < MAX_PHOTOS
   }
 
+  /** One like per photo and device session; returns the photo's count either way. */
+  async like(id: string, session: string, isLiked: boolean) {
+    const rows = isLiked
+      ? await this.query(
+          `WITH added AS (
+             INSERT INTO "work_photo_likes" ("photo_id", "session") VALUES ($1, $2)
+             ON CONFLICT DO NOTHING RETURNING 1
+           )
+           UPDATE "work_photos" SET "likes" = "likes" + (SELECT COUNT(*) FROM added)
+           WHERE "id" = $1 RETURNING "likes"`,
+          [id, session],
+        )
+      : await this.query(
+          `WITH removed AS (
+             DELETE FROM "work_photo_likes" WHERE "photo_id" = $1 AND "session" = $2 RETURNING 1
+           )
+           UPDATE "work_photos" SET "likes" = GREATEST(0, "likes" - (SELECT COUNT(*) FROM removed))
+           WHERE "id" = $1 RETURNING "likes"`,
+          [id, session],
+        )
+    const [row] = this.rows(rows)
+    if (!row) throw new NotFoundException('Фото не найдено')
+    return { likes: Number(row.likes) }
+  }
+
   async report(id: string) {
     const rows = await this.query(
       `UPDATE "work_photos" SET "reports" = "reports" + 1,
@@ -136,7 +161,11 @@ export class WorkPhotosService {
          b."slug", b."name" AS "businessName", b."kind", b."address",
          s."id" AS "serviceId", s."name" AS "serviceName", s."price", s."duration_minutes" AS "duration",
          sp."id" AS "specialistId", sp."name" AS "specialistName", sp."photo_url" AS "specialistPhoto",
-         n."km"
+         n."km", w."likes",
+         -- What people said about this very service with this master (or the service at the place).
+         (SELECT COUNT(*)::int FROM "reviews" r
+           WHERE r."business_id" = b."id" AND r."service_id" = w."service_id"
+             AND (w."specialist_id" IS NULL OR r."specialist_id" = w."specialist_id")) AS "reviewsCount"
        FROM "work_photos" w
        JOIN "businesses" b ON b."id" = w."business_id" AND b."is_published"
        LEFT JOIN "services" s ON s."id" = w."service_id" AND s."is_active"
@@ -185,6 +214,8 @@ export class WorkPhotosService {
         : null,
       distanceKm:
         row.km === null || row.km === undefined ? null : Math.round(Number(row.km) * 10) / 10,
+      likes: Number(row.likes ?? 0),
+      reviewsCount: row.serviceId ? Number(row.reviewsCount ?? 0) : 0,
     }))
     return {
       items,

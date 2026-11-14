@@ -2,33 +2,22 @@
 
 import { Sliders, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useEffect, useId, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { formatPrice, useStoredBookings } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
+import { knownPosition } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { usePreferences } from '../lib/preferences'
 import { deviceSession, readRecent, type Surface, track, trackPickClick } from '../lib/signals'
 import styles from './ForYou.module.css'
 import { PreferencesSheet } from './PreferencesSheet'
 
-// Ask the browser for a position only when the visitor already allowed it: no prompt here.
-const knownPosition = async () => {
-  try {
-    const permission = await navigator.permissions?.query({ name: 'geolocation' })
-    if (permission?.state !== 'granted') return null
-    return await new Promise<{ lat: number; lng: number } | null>((resolve) =>
-      navigator.geolocation.getCurrentPosition(
-        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
-        () => resolve(null),
-        { maximumAge: 600_000, timeout: 4000 },
-      ),
-    )
-  } catch {
-    return null
-  }
-}
+// The capsule on a 144px card holds about 17 characters: past that only the reason's lead is
+// shown («Ваш выбор · стрижки» → «Ваш выбор»), never a word cut by an ellipsis.
+const shortReason = (reason: string) =>
+  reason.length > 17 ? (reason.split(' · ')[0] ?? reason) : reason
 
 // «Для вас»: services picked for this client — their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
@@ -49,6 +38,8 @@ interface ForYouShelfProps {
   isTunable?: boolean
   /** Where the shelf stands, for what it learns from taps (`catalog`, `booking`, …). */
   surface?: Surface
+  /** A link on the right of the head (the catalog's «Рейтинг ›»), so it costs no row of its own. */
+  headAction?: ReactNode
 }
 
 export const ForYouShelf = ({
@@ -60,6 +51,7 @@ export const ForYouShelf = ({
   isInline = false,
   isTunable = false,
   surface = 'catalog',
+  headAction,
 }: ForYouShelfProps = {}) => {
   const trackRef = useRef<HTMLUListElement>(null)
   const preferences = usePreferences()
@@ -172,6 +164,7 @@ export const ForYouShelf = ({
             Настроить
           </button>
         )}
+        {headAction}
       </div>
       <ul ref={trackRef} className={styles.track} data-edge-fade=''>
         {shown.map((item, position) => (
@@ -179,6 +172,7 @@ export const ForYouShelf = ({
             <NextLink
               href={`/${item.slug}/book?service=${item.id}`}
               className={styles.card}
+              data-card=''
               onClick={() =>
                 trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
               }
@@ -190,11 +184,14 @@ export const ForYouShelf = ({
                   {...sizedImage(item.coverUrl, 180)}
                   alt=''
                   className={styles.image}
-                  loading='lazy'
+                  data-card-media=''
+                  // The first picks are the first thing a newcomer sees: no grey cards.
+                  loading={position < 3 ? 'eager' : 'lazy'}
+                  fetchPriority={position === 0 ? 'high' : undefined}
                   decoding='async'
                 />
               )}
-              <span className={styles.reason}>{item.reason}</span>
+              <span className={styles.reason}>{shortReason(item.reason)}</span>
               <span className={styles.caption}>
                 <span className={styles.name}>{item.name}</span>
                 <span className={styles.meta}>

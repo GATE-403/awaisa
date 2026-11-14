@@ -1,6 +1,8 @@
 import { formatPrice } from '@/entities/booking'
 import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
 import { pluralWord } from '@/shared/lib/plural'
+import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
+import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './ServicesPage.module.css'
 import { ServicesCatalog } from './ui/ServicesCatalog'
@@ -18,6 +20,13 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
 
   return (
     <main className={styles.page}>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { label: 'Каталог', href: '/' },
+          { label: business.name, href: `/${business.slug}` },
+          { label: 'Услуги и цены', href: `/${business.slug}/services` },
+        ])}
+      />
       <Container className={styles.hero}>
         <h1 className={styles.title}>
           Услуги и цены<span className={styles.titleMuted}> в {business.name}</span>

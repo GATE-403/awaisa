@@ -1,9 +1,9 @@
 import NextLink from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business/ui/BusinessTile/BusinessTile'
 import type { BusinessCard as BusinessCardData } from '@/shared/api/types'
-import { sizedImage } from '@/shared/lib/imageSizes'
+import { gridImage } from '@/shared/lib/imageSizes'
+import { pluralize } from '@/shared/lib/plural'
 import styles from './BusinessCard.module.css'
 import { LiveStatus } from './LiveStatus'
 
@@ -11,11 +11,13 @@ interface BusinessCardProps {
   business: BusinessCardData
 }
 
-// Apple Store product card: the picture first, then name, live availability and the price.
+// A place, told apart from a service card at a glance: the place's own logo beside its name and
+// what a place has — rating and how many services — instead of a price.
 export const BusinessCard = ({ business }: BusinessCardProps) => (
   <NextLink
     href={`/${business.slug}`}
     className={styles.card}
+    data-card=''
     style={{ '--tint': pickTint(business.name) } as CSSProperties}
   >
     {/* Shares its name with the business page cover: the card grows into it on navigation. */}
@@ -24,11 +26,12 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
         {business.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API
           <img
-            {...sizedImage(business.coverUrl, 420)}
+            {...gridImage(business.coverUrl)}
             alt=''
             loading='lazy'
             decoding='async'
             className={styles.cover}
+            data-card-media=''
           />
         ) : (
           <BusinessTile
@@ -41,12 +44,27 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
       </span>
     </ViewTransition>
     <span className={styles.body}>
-      <span className={styles.title}>{business.name}</span>
-      <LiveStatus slug={business.slug} />
+      <span className={styles.place}>
+        {business.coverUrl && (
+          <BusinessTile
+            name={business.name}
+            logoUrl={business.logoUrl}
+            size='xs'
+            className={styles.logo}
+          />
+        )}
+        <span className={styles.title}>{business.name}</span>
+      </span>
       <span className={styles.footer}>
-        <span className={styles.price}>от {formatPrice(business.minPrice)}</span>
+        {business.rating ? (
+          <span className={styles.rating}>★ {business.rating.toLocaleString('ru-RU')}</span>
+        ) : null}
+        <span className={styles.services}>
+          {pluralize(business.servicesCount, ['услуга', 'услуги', 'услуг'])}
+        </span>
         <span className={styles.address}>{business.address}</span>
       </span>
+      <LiveStatus slug={business.slug} />
     </span>
   </NextLink>
 )

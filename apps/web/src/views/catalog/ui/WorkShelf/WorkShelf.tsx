@@ -37,12 +37,13 @@ export const WorkShelf = ({ items, kind }: WorkShelfProps) => {
       <ul className={styles.track} data-edge-fade=''>
         {items.slice(0, SHOWN).map((item) => (
           <li key={item.id}>
-            <NextLink href={feedHref(item.id)} className={styles.card}>
+            <NextLink href={feedHref(item.id)} className={styles.card} data-card=''>
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
               <img
                 {...sizedImage(item.url, 160)}
                 alt=''
                 className={styles.image}
+                data-card-media=''
                 loading='lazy'
                 decoding='async'
               />

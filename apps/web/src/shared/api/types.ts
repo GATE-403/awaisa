@@ -104,6 +104,9 @@ type BusinessCard = Pick<
   coverUrl: string | null
   /** The owner's logo (square); null = the tinted monogram. */
   logoUrl?: string | null
+  /** The average of real reviews; null until the first one. */
+  rating?: number | null
+  reviewsCount?: number
   hours: WorkingDay[]
 }
 
@@ -195,6 +198,8 @@ type Booking = {
   /** A deposit for online booking; pending = the slot is held until it is paid. */
   payment?: BookingPayment | null
   review?: { rating: number; comment: string; reply: string | null } | null
+  /** The salon marked «Не пришёл»: nothing to rate. */
+  isNoShow?: boolean
   business: BookingBusiness
 }
 
@@ -285,6 +290,7 @@ type PublicProfile = {
     rank: Rank | null
   } | null
   isOwn: boolean
+  links?: ProfileLink[]
   /** The owner's ended visits of the last two weeks without a review (0 for others). */
   awaitingReview?: number
   isPublic: boolean
@@ -371,11 +377,18 @@ type ProfileSettings = {
   statusEmoji: string
   handle: string | null
   about: string
+  /** Handles (Instagram, Telegram, TikTok) and a website address. */
+  links: Partial<Record<ProfileLinkKind, string>>
   featuredBadges: string[]
   favoriteMasterId: string | null
   isPublic: boolean
   showPlaces: boolean
 }
+
+type ProfileLinkKind = 'instagram' | 'telegram' | 'tiktok' | 'website'
+
+/** A link on a public profile, built by the API from a handle: never an arbitrary URL. */
+type ProfileLink = { kind: ProfileLinkKind; label: string; text: string; url: string }
 
 type ManagedReview = Review & { customerPhone: string; visitDate: string | null }
 
@@ -762,6 +775,10 @@ type FeedItem = {
   service: { id: string; name: string; price: number; durationMinutes: number } | null
   specialist: { id: string; name: string; photoUrl: string | null } | null
   distanceKm: number | null
+  /** Likes from devices («Нравится»); the feed is cached, so a fresh like adds on the client. */
+  likes?: number
+  /** Reviews of this service with this master (or the service at the place). */
+  reviewsCount?: number
 }
 
 type FeedPage = { items: FeedItem[]; nextOffset: number | null }
@@ -855,6 +872,8 @@ type MailingsOverview = {
 }
 
 export type {
+  ProfileLink,
+  ProfileLinkKind,
   BusinessQuestion,
   QuestionList,
   AdminBooking,

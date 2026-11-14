@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test'
 test.describe('Map: places nearby', () => {
   test('lists places with a pin and books at the chosen branch', async ({ page }) => {
     await page.goto('/map')
-    const studio = page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' })
+    // A place with several branches has a row each: take the first.
+    const studio = page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' }).first()
     await expect(studio).toBeVisible()
     await expect(page.getByRole('region', { name: 'Карта салонов и мастеров' })).toBeVisible()
 
@@ -16,19 +17,83 @@ test.describe('Map: places nearby', () => {
     await context.grantPermissions(['geolocation'])
     await context.setGeolocation({ latitude: 42.87, longitude: 74.6 })
     await page.goto('/map')
-    await page.getByRole('button', { name: 'Рядом со мной' }).click()
+    await page.getByRole('button', { name: 'Где вы?' }).click()
+    await page
+      .getByRole('dialog', { name: 'Где вы?' })
+      .getByRole('button', { name: 'Определить автоматически' })
+      .click()
     await expect(page.getByText(/ближайшие сверху/)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Моё место' })).toBeVisible()
     await expect(
       page
         .getByRole('listitem')
         .filter({ hasText: 'Awaisa Studio' })
-        .getByText(/\d+(,\d)? (км|м)$/),
+        .getByText(/\d+(,\d)? (км|м)$/)
+        .first(),
     ).toBeVisible()
+  })
+
+  test('without geolocation a district stands in for the location and is remembered', async ({
+    page,
+  }) => {
+    await page.goto('/map')
+    await expect(page.getByText(/Укажите, где вы/)).toBeVisible()
+    await page.getByRole('button', { name: 'Где вы?' }).click()
+    await page
+      .getByRole('dialog', { name: 'Где вы?' })
+      .getByRole('button', { name: 'Асанбай' })
+      .click()
+    await expect(page.getByText(/ближайшие сверху/)).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('button', { name: 'Асанбай' })).toBeVisible()
+    await expect(page.getByText(/ближайшие сверху/)).toBeVisible()
   })
 
   test('kind tabs filter the places', async ({ page }) => {
     await page.goto('/map?kind=barber')
     await expect(page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' })).toHaveCount(0)
+  })
+
+  test('on phones the full-screen list has a «Карта» button back to the map', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The sheet is a phone layout')
+    await page.goto('/map')
+    await expect(page.getByRole('button', { name: 'Карта', exact: true })).toHaveCount(0)
+    // The grabber steps from half to the whole screen…
+    await page.getByRole('button', { name: /Список наполовину/ }).click()
+    await expect(page.getByRole('button', { name: /Список на весь экран/ })).toBeVisible()
+    const back = page.getByRole('button', { name: 'Карта', exact: true })
+    await expect(back).toBeVisible()
+    // …and one tap brings the map back.
+    await back.click()
+    await expect(page.getByRole('button', { name: /Список наполовину/ })).toBeVisible()
+    await expect(back).toHaveCount(0)
+  })
+
+  test('on phones pulling the list down from its top collapses the sheet', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The sheet is a phone layout')
+    await page.goto('/map')
+    await expect(page.getByRole('button', { name: /Список наполовину/ })).toBeVisible()
+    const row = page.getByRole('listitem').first()
+    const box = await row.boundingBox()
+    if (!box) throw new Error('no row')
+    // A real finger: touch events through CDP, the list already at its top.
+    const cdp = await page.context().newCDPSession(page)
+    const x = box.x + box.width / 2
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', y: number) =>
+      cdp.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: type === 'touchEnd' ? [] : [{ x, y }],
+      })
+    await touch('touchStart', box.y + 10)
+    for (let step = 1; step <= 12; step += 1) await touch('touchMove', box.y + 10 + step * 25)
+    await touch('touchEnd', box.y + 310)
+    await expect(page.getByRole('button', { name: /Список свёрнут/ })).toBeVisible()
   })
 
   test('on phones the list sheet changes height by its grabber', async ({ page, isMobile }) => {
