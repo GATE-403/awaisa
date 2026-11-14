@@ -1,6 +1,9 @@
+'use client'
+
 import type { Icon } from '@phosphor-icons/react'
 import { CaretDown, Check } from '@phosphor-icons/react/ssr'
 import type { ReactNode } from 'react'
+import { useT } from '@/shared/i18n'
 import styles from './BookingStep.module.css'
 
 interface BookingStepProps {
@@ -29,6 +32,7 @@ export const BookingStep = ({
   onToggle,
   children,
 }: BookingStepProps) => {
+  const t = useT()
   const isWaiting = Boolean(hint) && isCollapsed && !isComplete && !summary
 
   return (
@@ -64,7 +68,7 @@ export const BookingStep = ({
             aria-controls={`step-${id}-body`}
             onClick={onToggle}
           >
-            {isCollapsed ? (isComplete ? 'Изменить' : 'Показать') : 'Свернуть'}
+            {isCollapsed ? t(isComplete ? 'Изменить' : 'Показать') : t('Свернуть')}
             <CaretDown className={styles.caret} weight='bold' aria-hidden />
           </button>
         )}

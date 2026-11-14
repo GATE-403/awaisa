@@ -6,8 +6,8 @@ import { DataSource } from 'typeorm'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
+import { ClientMessagesService } from './client-messages.service.js'
 import { reminderMessage } from './messages.js'
-import { SmsService } from './sms.service.js'
 
 type DueReminder = {
   id: string
@@ -25,7 +25,7 @@ export class RemindersService {
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    private readonly sms: SmsService,
+    private readonly messages: ClientMessagesService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -56,6 +56,11 @@ export class RemindersService {
       due.map((row) => {
         const { dateKey, minutes } = toBusinessParts(new Date(row.starts_at))
         const isToday = dateKey === toBusinessParts(new Date()).dateKey
+        const link = visitLink(
+          this.config.get('PUBLIC_WEB_URL', { infer: true }),
+          row.id,
+          this.config.get('AUTH_SECRET', { infer: true }),
+        )
         const message = reminderMessage(
           {
             business: { name: row.business_name, slug: row.business_slug },
@@ -65,14 +70,14 @@ export class RemindersService {
             time: formatMinutes(minutes),
           },
           isToday,
-          visitLink(
-            this.config.get('PUBLIC_WEB_URL', { infer: true }),
-            row.id,
-            this.config.get('AUTH_SECRET', { infer: true }),
-          ),
+          link,
         )
 
-        return this.sms.sendSafely(row.customer_phone, message)
+        // Telegram when the client linked it (a «Перенести или отменить» button), else SMS.
+        return this.messages.send(row.customer_phone, message, {
+          label: 'Перенести или отменить',
+          url: link,
+        })
       }),
     )
   }

@@ -1,5 +1,9 @@
+'use client'
+
+import { useToast } from '@awaisa/ui/Toast'
 import { Check } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
@@ -10,6 +14,8 @@ interface SetupProgressProps {
 }
 
 export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
+  const toast = useToast()
+  const wasIncomplete = useRef(false)
   const steps: { label: string; tab: ManageTab; isDone: boolean }[] = [
     {
       label: 'Добавьте услуги',
@@ -27,6 +33,30 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   ]
   const doneCount = steps.filter((step) => step.isDone).length
   const next = steps.find((step) => !step.isDone)
+  const isComplete = !next
+
+  // The last step done: say plainly that booking is open and hand over the link to share —
+  // a first-time owner otherwise does not know what to do with the page now.
+  useEffect(() => {
+    if (!isComplete) {
+      wasIncomplete.current = true
+      return
+    }
+    if (!wasIncomplete.current) return
+    wasIncomplete.current = false
+    const url = `${window.location.origin}/${business.slug}`
+    toast.show({
+      title: 'Запись открыта',
+      description: 'Отправьте клиентам ссылку на вашу страницу',
+      type: 'success',
+      timeout: 12_000,
+      action: {
+        label: 'Копировать ссылку',
+        onClick: () => void navigator.clipboard?.writeText(url).catch(() => undefined),
+      },
+    })
+  }, [isComplete, business.slug, toast])
+
   if (!next) return null
 
   return (

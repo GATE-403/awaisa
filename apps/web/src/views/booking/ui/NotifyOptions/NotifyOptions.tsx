@@ -2,6 +2,7 @@
 
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import type { ReminderChoice } from '../../model/useBookingForm'
 import styles from './NotifyOptions.module.css'
@@ -28,40 +29,53 @@ export const NotifyOptions = ({
   onSmsConfirmationChange,
   reminderMinutes,
   onReminderChange,
-}: NotifyOptionsProps) => (
+}: NotifyOptionsProps) => {
+  const t = useT()
+  const reminders = REMINDERS.map((item) => ({ ...item, label: t(item.label) }))
   // Folded into one line: the defaults suit most people, the rest opens on demand.
-  <details className={styles.group}>
-    <summary className={styles.summary}>
-      <span>
-        {smsConfirmation ? 'SMS-подтверждение' : 'Без SMS'}
-        {' · '}
-        {reminderMinutes === null
-          ? 'без напоминания'
-          : `напомним ${REMINDERS.find((item) => item.value === String(reminderMinutes))?.label.toLowerCase()}`}
-      </span>
-      <span className={styles.change}>Изменить</span>
-    </summary>
-    <div className={styles.list}>
-      <label className={styles.row}>
-        <span className={styles.labelText}>
-          <span className={styles.label}>SMS с подтверждением</span>
-          {/* Inside the row, not a footnote under the group: it says where that SMS goes. */}
-          {phone && <span className={styles.sublabel}>на {formatPhone(phone)}</span>}
+  return (
+    <details className={styles.group}>
+      <summary className={styles.summary}>
+        <span>
+          {smsConfirmation ? t('SMS-подтверждение') : t('Без SMS')}
+          {' · '}
+          {reminderMinutes === null
+            ? t('без напоминания')
+            : t('напомним {when}', {
+                when:
+                  reminders
+                    .find((item) => item.value === String(reminderMinutes))
+                    ?.label.toLowerCase() ?? '',
+              })}
         </span>
-        <Switch checked={smsConfirmation} onCheckedChange={onSmsConfirmationChange} />
-      </label>
-      <div className={styles.row}>
-        <span className={styles.label}>Напомнить о визите</span>
-        <Select
-          variant='plain'
-          aria-label='Когда напомнить'
-          items={REMINDERS}
-          value={reminderMinutes === null ? 'off' : String(reminderMinutes)}
-          onValueChange={(value) =>
-            onReminderChange(!value || value === 'off' ? null : (Number(value) as ReminderChoice))
-          }
-        />
+        <span className={styles.change}>{t('Изменить')}</span>
+      </summary>
+      <div className={styles.list}>
+        <label className={styles.row}>
+          <span className={styles.labelText}>
+            <span className={styles.label}>{t('SMS с подтверждением')}</span>
+            {/* Inside the row, not a footnote under the group: it says where that SMS goes. */}
+            {phone && (
+              <span className={styles.sublabel}>
+                {t('на {phone}', { phone: formatPhone(phone) })}
+              </span>
+            )}
+          </span>
+          <Switch checked={smsConfirmation} onCheckedChange={onSmsConfirmationChange} />
+        </label>
+        <div className={styles.row}>
+          <span className={styles.label}>{t('Напомнить о визите')}</span>
+          <Select
+            variant='plain'
+            aria-label={t('Когда напомнить')}
+            items={reminders}
+            value={reminderMinutes === null ? 'off' : String(reminderMinutes)}
+            onValueChange={(value) =>
+              onReminderChange(!value || value === 'off' ? null : (Number(value) as ReminderChoice))
+            }
+          />
+        </div>
       </div>
-    </div>
-  </details>
-)
+    </details>
+  )
+}

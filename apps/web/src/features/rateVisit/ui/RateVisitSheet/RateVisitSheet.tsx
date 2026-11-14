@@ -25,6 +25,8 @@ export const RateVisitSheet = ({
       access={access}
       specialistName={booking.specialistName}
       initialRating={initialRating}
+      rebookHref={`/${booking.business.slug}/book?service=${booking.serviceId}`}
+      specialistId={booking.specialistId}
       onRated={(review) => {
         onRated(review)
         onClose()

@@ -333,6 +333,8 @@
 /* Across from the tile: round glyph buttons, then the one primary capsule. */
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
@@ -341,7 +343,7 @@
 
 .bookButton {
   flex-shrink: 0;
-  height: var(--control-height-md);
+  min-height: var(--control-height-md);
   padding-inline: var(--space-5);
 }
 

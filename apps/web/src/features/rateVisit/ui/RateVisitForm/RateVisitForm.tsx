@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { Camera, X } from '@phosphor-icons/react/ssr'
+import { useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addReviewPhoto, createReview } from '@/shared/api/clientApi'
@@ -22,16 +23,25 @@ interface RateVisitFormProps {
   specialistName: string
   /** The stars already tapped outside the sheet («Как прошло?»). */
   initialRating?: number
+  /** The booking link for this service (no master): the thank-you toast offers it again. */
+  rebookHref?: string
+  /** With a good rating the toast books the same master again. */
+  specialistId?: string
   onRated: (review: Review) => void
 }
+
+const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name
 
 export const RateVisitForm = ({
   bookingId,
   access,
   specialistName,
   initialRating = 0,
+  rebookHref,
+  specialistId,
   onRated,
 }: RateVisitFormProps) => {
+  const router = useRouter()
   const toast = useToast()
   const commentId = useId()
   const [rating, setRating] = useState(initialRating)
@@ -96,7 +106,19 @@ export const RateVisitForm = ({
         }
       }
       haptic('success')
-      toast.show({ title: 'Спасибо за отзыв', type: 'success' })
+      // The shortest way back: liked the master → the same master; didn't → the same service.
+      const isLiked = rating >= 4 && Boolean(specialistId)
+      const href = rebookHref && (isLiked ? `${rebookHref}&specialist=${specialistId}` : rebookHref)
+      toast.show({
+        title: 'Спасибо за отзыв',
+        type: 'success',
+        action: href
+          ? {
+              label: isLiked ? `Снова к ${firstName(specialistName)}` : 'Другой мастер',
+              onClick: () => router.push(href),
+            }
+          : undefined,
+      })
       void refreshBusiness(review.slug)
       onRated({ ...review, photos: uploaded })
     } catch (submitError) {

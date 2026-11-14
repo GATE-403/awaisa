@@ -2,11 +2,12 @@
 
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
-import { Fragment, type ReactNode, useState } from 'react'
+import { Fragment, type ReactNode, useEffect, useState } from 'react'
 import { BusinessCard } from '@/entities/business'
 import type { BusinessCard as BusinessCardData, BusinessKind, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { pluralize } from '@/shared/lib/plural'
+import { trackStep } from '@/shared/lib/telemetry'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useOfferPages } from '../../model/useOfferPages'
 import { FEED_SORTS, type FeedSort, OffersFeed } from '../OffersFeed/OffersFeed'
@@ -50,6 +51,10 @@ export const CatalogResults = ({
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
+
+  useEffect(() => {
+    trackStep('catalog')
+  }, [])
   // The services feed pages from the server; «Ближе по времени» re-sorts what is loaded.
   const feed = useOfferPages({
     initial: offers,

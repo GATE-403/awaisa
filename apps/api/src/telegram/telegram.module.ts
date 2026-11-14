@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from '../auth/auth.module.js'
 import { BusinessesModule } from '../businesses/businesses.module.js'
+import { NotificationsModule } from '../notifications/notifications.module.js'
 import { TelegramController } from './telegram.controller.js'
 import { TelegramBotService } from './telegram-bot.service.js'
 import { TelegramChat } from './telegram-chat.entity.js'
@@ -12,6 +13,7 @@ import { TelegramLinkCode } from './telegram-link-code.entity.js'
     TypeOrmModule.forFeature([TelegramChat, TelegramLinkCode]),
     AuthModule,
     BusinessesModule,
+    NotificationsModule,
   ],
   controllers: [TelegramController],
   providers: [TelegramBotService],

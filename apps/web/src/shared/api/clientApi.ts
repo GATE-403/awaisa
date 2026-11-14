@@ -604,6 +604,12 @@ const getCheckoutUrl = (id: string, token: string | null) =>
     headers: token ? { [TOKEN_HEADER]: token } : {},
   })
 
+// «Напоминать в Telegram»: the bot link for this booking's number (null without a bot).
+const getTelegramLink = (id: string, token: string | null) =>
+  request<{ url: string | null; isLinked: boolean }>(`/bookings/${id}/telegram`, {
+    headers: token ? { [TOKEN_HEADER]: token } : {},
+  })
+
 const getPriceQuote = (
   params: { serviceId: string; date: string; time: string; code?: string; phone?: string },
   signal?: AbortSignal,
@@ -756,6 +762,7 @@ export {
   completeTestPayment,
   syncPayment,
   getCheckoutUrl,
+  getTelegramLink,
   getPaymentConfig,
   getManagedWaitlist,
   removeManagedWaitlist,

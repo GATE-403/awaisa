@@ -24,6 +24,9 @@ const createBookingSchema = z.object({
   name: z.string().trim().min(1, 'Укажите имя').max(120),
   // Signed-in clients book with their verified number, so the field may be empty; the service checks it.
   phone: z.string().trim().max(32).default(''),
+  /** A signed-in client booking someone else (mum, a child): their own name and number, the
+      booking still listed in the account. */
+  forOther: z.boolean().default(false),
   comment: z.string().trim().max(500).default(''),
   branchId: z.uuid().optional(),
   // What the client wants to receive: a confirmation SMS, and a reminder 1 h, 2 h or a day before.

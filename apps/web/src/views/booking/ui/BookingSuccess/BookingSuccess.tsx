@@ -5,11 +5,13 @@ import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useState } from 'react'
-import { downloadCalendarFile, formatDayLong, Ticket } from '@/entities/booking'
+import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { ForYouShelf } from '@/features/forYou'
+import { TelegramReminderLink } from '@/features/telegramReminders'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from './BookingSuccess.module.css'
 
 interface BookingSuccessProps {
@@ -18,14 +20,15 @@ interface BookingSuccessProps {
 
 export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const toast = useToast()
+  const t = useT()
   const session = useSession()
   const [isTicketOpen, setIsTicketOpen] = useState(false)
 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
     toast.show({
-      title: 'Событие для календаря готово',
-      description: 'Откройте файл, чтобы добавить',
+      title: t('Событие для календаря готово'),
+      description: t('Откройте файл, чтобы добавить'),
     })
   }
 
@@ -36,30 +39,41 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
       <span className={styles.check} aria-hidden>
         <Check weight='bold' />
       </span>
-      <h1 className={styles.title}>Вы записаны</h1>
+      <h1 className={styles.title}>{t('Вы записаны')}</h1>
       <p className={styles.lead}>
-        {formatDayLong(booking.date)} в {booking.time} · {booking.business.name}
+        {t('{day} в {time} · {place}', {
+          day: t.dayLong(booking.date),
+          time: booking.time,
+          place: booking.business.name,
+        })}
       </p>
       {/* What to do now, in plain words: someone new to this does not read a barcode. */}
       <p className={styles.nextStep}>
-        Приходите к {booking.time}
-        {booking.business.address ? ` по адресу ${booking.business.address}` : ''}.{' '}
-        {booking.payment?.status === 'paid' ? 'Остаток оплатите в салоне.' : 'Оплата в салоне.'}{' '}
-        Перенести или отменить можно по ссылке из SMS.
+        {t('Приходите к {time}', { time: booking.time })}
+        {booking.business.address
+          ? t(' по адресу {address}', { address: booking.business.address })
+          : ''}
+        .{' '}
+        {booking.payment?.status === 'paid'
+          ? t('Остаток оплатите в салоне.')
+          : t('Оплата в салоне.')}{' '}
+        {t('Перенести или отменить можно по ссылке из SMS.')}
       </p>
+      <TelegramReminderLink bookingId={booking.id} />
       {/* The ticket itself opens the full one: details, place, download. */}
       <button
         type='button'
         className={styles.ticket}
         onClick={() => setIsTicketOpen(true)}
-        aria-label='Показать талон'
+        aria-label={t('Показать талон')}
       >
         <Ticket booking={booking} />
       </button>
       {/* Next steps as three equal tiles, icon over word, like a share sheet's row. */}
       <div className={styles.tiles}>
         <button type='button' className={styles.tile} onClick={handleAddToCalendar}>
-          <CalendarPlus weight='bold' aria-hidden />В календарь
+          <CalendarPlus weight='bold' aria-hidden />
+          {t('В календарь')}
         </button>
         {booking.business.mapUrl ? (
           <a
@@ -69,27 +83,27 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
             className={styles.tile}
           >
             <MapPin weight='bold' aria-hidden />
-            Маршрут
+            {t('Маршрут')}
           </a>
         ) : null}
         <button type='button' className={styles.tile} onClick={() => setIsTicketOpen(true)}>
           <TicketIcon weight='bold' aria-hidden />
-          Талон
+          {t('Талон')}
         </button>
       </div>
       <div className={styles.primary}>
         <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
-          Мои записи
+          {t('Мои записи')}
         </ButtonLink>
       </div>
       {/* Guests keep bookings on this device only: say so at the moment it matters. */}
       {session.status === 'guest' && (
         <p className={styles.keep}>
-          Запись сохранена на этом телефоне.{' '}
+          {t('Запись сохранена на этом телефоне.')}{' '}
           <NextLink href='/login?next=/bookings' className={styles.keepLink}>
-            Войдите по номеру
+            {t('Войдите по номеру')}
           </NextLink>
-          , чтобы видеть записи на любом устройстве.
+          {t(', чтобы видеть записи на любом устройстве.')}
         </p>
       )}
       {/* What to look at next, chosen from this visit and the client's answers — a reason to
@@ -97,13 +111,13 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
       <div className={styles.next}>
         <ForYouShelf
           surface='success'
-          title='Вам может понравиться'
+          title={t('Вам может понравиться')}
           seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
           excludeServiceId={booking.serviceId}
           isInline
         />
         <NextLink href='/' className={styles.catalogLink}>
-          Все места и услуги ›
+          {t('Все места и услуги ›')}
         </NextLink>
       </div>
       {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}

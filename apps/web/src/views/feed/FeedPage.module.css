@@ -220,6 +220,14 @@
   cursor: pointer;
 }
 
+/* Large system text: the label keeps to the rail instead of running off the screen. */
+.sideButton > span:last-child {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sideIcon {
   display: grid;
   place-items: center;

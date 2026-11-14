@@ -39,7 +39,7 @@ export const TabBar = () => {
             ) : (
               <Icon className={styles.icon} weight={isActive ? 'fill' : 'regular'} aria-hidden />
             )}
-            <span>{label}</span>
+            <span className={styles.label}>{label}</span>
           </NextLink>
         )
       })}

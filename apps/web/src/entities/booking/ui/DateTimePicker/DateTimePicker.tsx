@@ -1,9 +1,11 @@
+'use client'
+
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import type { ReactNode } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
 import styles from './DateTimePicker.module.css'
 
@@ -49,19 +51,21 @@ export const DateTimePicker = ({
   onTimeChange,
   fullDayAction,
 }: DateTimePickerProps) => {
+  const t = useT()
   const availableCount = slots.filter((slot) => slot.isAvailable).length
   // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
   const relativeDay = (key: string) =>
-    key === todayKey ? 'Сегодня' : key === tomorrowKey ? 'Завтра' : null
+    key === todayKey ? t('Сегодня') : key === tomorrowKey ? t('Завтра') : null
+  const isRussian = t.language === 'ru'
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
   return (
     <div className={styles.picker}>
       <ToggleGroup
-        aria-label='День'
+        aria-label={t('День')}
         layout='scroll'
         className={styles.days}
         data-edge-fade=''
@@ -73,32 +77,40 @@ export const DateTimePicker = ({
             key={day.key}
             value={day.key}
             size='card'
-            aria-label={day.isClosed ? `${day.label}, выходной` : day.label}
+            aria-label={
+              day.isClosed
+                ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
+                : isRussian
+                  ? day.label
+                  : t.dayLong(day.key)
+            }
             disabled={day.isClosed}
             data-today={day.isToday || undefined}
           >
             <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
-              {relativeDay(day.key) ?? day.weekday}
+              {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
             </span>
             <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-            <span className={styles.month}>{day.month}</span>
+            <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
           </Toggle>
         ))}
       </ToggleGroup>
 
-      {!isSpecialistSelected && <p className={styles.hint}>Сначала выберите мастера</p>}
+      {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
       {isSpecialistSelected && isLoading && <SlotsSkeleton />}
       {isSpecialistSelected && error && (
         <div className={styles.hint}>
           <p>{error}</p>
           <Button variant='link' size='sm' onClick={onRetry}>
-            Повторить
+            {t('Повторить')}
           </Button>
         </div>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount === 0 && (
         <div className={styles.full}>
-          <p className={styles.hint}>На этот день свободного времени нет — выберите другой</p>
+          <p className={styles.hint}>
+            {t('На этот день свободного времени нет — выберите другой')}
+          </p>
           {fullDayAction}
         </div>
       )}
@@ -106,15 +118,15 @@ export const DateTimePicker = ({
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
         <p className={styles.caption} aria-hidden>
-          {time ? `Выбрано ${time}` : 'Выберите время'}
+          {time ? t('Выбрано {time}', { time }) : t('Выберите время')}
           <span className={styles.captionCount}>
-            {pluralize(availableCount, ['свободное', 'свободных', 'свободных'])}
+            {t.count(availableCount, ['свободное', 'свободных', 'свободных'])}
           </span>
         </p>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup
-          aria-label='Время'
+          aria-label={t('Время')}
           layout='grid'
           className={styles.slots}
           value={time ? [time] : []}

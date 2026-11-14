@@ -62,15 +62,28 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                   ))}
                 </p>
                 <p className={styles.doneTitle}>Спасибо! Отзыв помогает другим выбрать мастера.</p>
-                <ButtonLink
-                  render={
-                    <NextLink
-                      href={`/${visit.business.slug}/book?service=${visit.serviceId}&specialist=${visit.specialistId}`}
-                    />
-                  }
-                >
-                  Записаться снова
-                </ButtonLink>
+                {/* Liked the master → book them again in one tap; didn't → the same service,
+                    another master. */}
+                {stars >= 4 ? (
+                  <ButtonLink
+                    render={
+                      <NextLink
+                        href={`/${visit.business.slug}/book?service=${visit.serviceId}&specialist=${visit.specialistId}`}
+                      />
+                    }
+                  >
+                    Записаться снова к {visit.specialistName.trim().split(/\s+/)[0]}
+                  </ButtonLink>
+                ) : (
+                  <ButtonLink
+                    variant='secondary'
+                    render={
+                      <NextLink href={`/${visit.business.slug}/book?service=${visit.serviceId}`} />
+                    }
+                  >
+                    Выбрать другого мастера
+                  </ButtonLink>
+                )}
               </div>
             ) : data.canReview ? (
               <RateVisitForm

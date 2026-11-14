@@ -1,5 +1,8 @@
+'use client'
+
 import { Button } from '@awaisa/ui/Button'
-import { addDayKey, formatDayLong } from '@/entities/booking'
+import { addDayKey } from '@/entities/booking'
+import { type Translate, useT } from '@/shared/i18n'
 import type { QuickSlot } from '@/views/booking/model/useQuickSlots'
 import styles from './QuickSlots.module.css'
 
@@ -15,10 +18,10 @@ interface QuickSlotsProps {
 
 const PLACEHOLDERS = ['first', 'second', 'third']
 
-const dayLabel = (dayKey: string, todayKey: string | null) => {
-  if (todayKey && dayKey === todayKey) return 'Сегодня'
-  if (todayKey && dayKey === addDayKey(todayKey, 1)) return 'Завтра'
-  return formatDayLong(dayKey).split(',')[0] ?? dayKey
+const dayLabel = (dayKey: string, todayKey: string | null, t: Translate) => {
+  if (todayKey && dayKey === todayKey) return t('Сегодня')
+  if (todayKey && dayKey === addDayKey(todayKey, 1)) return t('Завтра')
+  return t.dayLong(dayKey).split(',')[0] ?? dayKey
 }
 
 // One tap books the nearest time: a quiet line and the kit's own capsules, nothing louder than
@@ -31,6 +34,7 @@ export const QuickSlots = ({
   todayKey,
   onPick,
 }: QuickSlotsProps) => {
+  const t = useT()
   if (!isLoading && slots.length === 0) return null
 
   return (
@@ -49,7 +53,7 @@ export const QuickSlots = ({
                 className={styles.slot}
                 onClick={() => onPick(slot)}
               >
-                <span className={styles.day}>{dayLabel(slot.dayKey, todayKey)}</span>
+                <span className={styles.day}>{dayLabel(slot.dayKey, todayKey, t)}</span>
                 {slot.time}
               </Button>
             ))}

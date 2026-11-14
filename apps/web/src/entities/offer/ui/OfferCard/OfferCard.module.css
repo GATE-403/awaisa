@@ -6,7 +6,10 @@
   flex-direction: column;
   justify-content: flex-end;
   aspect-ratio: 3 / 4;
-  overflow: hidden;
+  /* clip, not hidden: the card stays 3:4 but grows with large system text, and the text never
+     climbs over the marks at the top. */
+  overflow: clip;
+  padding-top: 44px;
   isolation: isolate;
   border-radius: var(--radius-md);
   background: var(--color-fill);

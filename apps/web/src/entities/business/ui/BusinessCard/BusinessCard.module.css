@@ -6,7 +6,9 @@
   flex-direction: column;
   justify-content: flex-end;
   aspect-ratio: 3 / 4;
-  overflow: hidden;
+  /* clip keeps 3:4 but lets the card grow with large system text (see OfferCard). */
+  overflow: clip;
+  padding-top: 44px;
   isolation: isolate;
   border-radius: var(--radius-md);
   background: var(--color-fill);

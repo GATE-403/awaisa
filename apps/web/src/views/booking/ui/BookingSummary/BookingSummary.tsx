@@ -3,9 +3,10 @@
 import { Button } from '@awaisa/ui/Button'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
-import { formatDayLong, formatDuration, formatPrice } from '@/entities/booking'
+import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { PriceQuote, Service } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import type { BookingStepId } from '@/views/booking/model/useBookingForm'
@@ -49,23 +50,17 @@ const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
   contacts: 'Оставьте контакты',
 }
 
-const dayShortFormatter = new Intl.DateTimeFormat('ru-RU', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  timeZone: 'UTC',
-})
-
-// «сб, 14 нояб.» — short enough to leave room for the address on the same line.
-const formatDayShort = (dayKey: string) => dayShortFormatter.format(new Date(`${dayKey}T00:00:00Z`))
-
 const STEPS: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
 
-const getButtonLabel = (firstIncompleteStep: BookingStepId | null, isSubmitting: boolean) => {
-  if (isSubmitting) return 'Записываем…'
-  if (firstIncompleteStep) return NEXT_STEP_ACTIONS[firstIncompleteStep]
+const getButtonLabel = (
+  firstIncompleteStep: BookingStepId | null,
+  isSubmitting: boolean,
+  t: Translate,
+) => {
+  if (isSubmitting) return t('Записываем…')
+  if (firstIncompleteStep) return t(NEXT_STEP_ACTIONS[firstIncompleteStep])
 
-  return 'Записаться'
+  return t('Записаться')
 }
 
 export const BookingSummary = ({
@@ -84,31 +79,48 @@ export const BookingSummary = ({
   submitLabel,
   address = null,
 }: BookingSummaryProps) => {
+  const t = useT()
   const total = quote?.total ?? service?.price ?? null
   const discount = quote?.discount ?? null
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const whenLabel = dayKey && time ? `${formatDayLong(dayKey)}, ${time}` : null
+  const whenLabel = dayKey && time ? `${t.dayLong(dayKey)}, ${time}` : null
   const details = [
-    { label: 'Услуга', value: service?.name },
-    { label: 'Мастер', value: specialistLabel },
-    { label: 'Когда', value: whenLabel },
-    { label: 'Длительность', value: service ? formatDuration(service.durationMinutes) : null },
+    { label: t('Услуга'), value: service?.name },
+    { label: t('Мастер'), value: specialistLabel },
+    { label: t('Когда'), value: whenLabel },
+    { label: t('Длительность'), value: service ? t.duration(service.durationMinutes) : null },
     ...(discount
-      ? [{ label: `Скидка «${discount.title}»`, value: `−${formatPrice(discount.amount)}` }]
+      ? [
+          {
+            label: t('Скидка «{title}»', { title: discount.title }),
+            value: `−${formatPrice(discount.amount)}`,
+          },
+        ]
       : []),
-    { label: 'Итого', value: total !== null ? formatPrice(total) : null },
+    { label: t('Итого'), value: total !== null ? formatPrice(total) : null },
     ...(service?.deposit
-      ? [{ label: 'Предоплата', value: `${formatPrice(service.deposit)} картой при записи` }]
+      ? [
+          {
+            label: t('Предоплата'),
+            value: t('{amount} картой при записи', { amount: formatPrice(service.deposit) }),
+          },
+        ]
       : []),
   ]
   const buttonLabel =
-    (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting)
+    (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
-  const shortWhen = dayKey && time ? `${formatDayShort(dayKey)}, ${time}` : null
+  const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
   const hint = firstIncompleteStep
-    ? `Шаг ${STEPS.indexOf(firstIncompleteStep) + 1} из ${STEPS.length}`
+    ? t('Шаг {step} из {total}', {
+        step: STEPS.indexOf(firstIncompleteStep) + 1,
+        total: STEPS.length,
+      })
     : service?.deposit
-      ? `${whenLabel} · предоплата ${formatPrice(service.deposit)}`
+      ? t('{when} · предоплата {amount}', {
+          when: whenLabel ?? '',
+          amount: formatPrice(service.deposit),
+        })
       : address
         ? `${shortWhen} · ${address}`
         : whenLabel
@@ -121,14 +133,14 @@ export const BookingSummary = ({
           type='button'
           className={styles.barInfo}
           onClick={() => setIsDetailsOpen(true)}
-          aria-label='Показать, что выбрано'
+          aria-label={t('Показать, что выбрано')}
         >
           <span className={styles.barPrice}>
             {/* The discount shows before the client commits: the old price struck, the percent. */}
             {discount && service && (
               <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
             )}
-            {total !== null ? formatPrice(total) : 'Онлайн-запись'}
+            {total !== null ? formatPrice(total) : t('Онлайн-запись')}
             {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span
@@ -144,7 +156,11 @@ export const BookingSummary = ({
           {buttonLabel}
         </Button>
         {isDetailsOpen && (
-          <Sheet title='Ваша запись' cancelLabel='Готово' onClose={() => setIsDetailsOpen(false)}>
+          <Sheet
+            title={t('Ваша запись')}
+            cancelLabel={t('Готово')}
+            onClose={() => setIsDetailsOpen(false)}
+          >
             <dl className={sheet.list}>
               {details.map((item) => (
                 <div key={item.label} className={sheet.row}>
@@ -162,12 +178,12 @@ export const BookingSummary = ({
   const rows: { step: BookingStepId; label: string; value: string | null; extra?: string }[] = [
     {
       step: 'service',
-      label: 'Услуга',
+      label: t('Услуга'),
       value: service?.name ?? null,
-      extra: service ? formatDuration(service.durationMinutes) : undefined,
+      extra: service ? t.duration(service.durationMinutes) : undefined,
     },
-    { step: 'specialist', label: 'Мастер', value: specialistLabel || null },
-    { step: 'datetime', label: 'Когда', value: whenLabel },
+    { step: 'specialist', label: t('Мастер'), value: specialistLabel || null },
+    { step: 'datetime', label: t('Когда'), value: whenLabel },
   ]
 
   return (
@@ -188,7 +204,7 @@ export const BookingSummary = ({
           </span>
         </div>
       )}
-      <h2 className={styles.cardTitle}>Ваша запись</h2>
+      <h2 className={styles.cardTitle}>{t('Ваша запись')}</h2>
       <ul className={styles.rows}>
         {rows.map((row) => {
           const isNext = firstIncompleteStep === row.step
@@ -209,7 +225,7 @@ export const BookingSummary = ({
                       {row.extra && <span className={styles.rowExtra}>{row.extra}</span>}
                     </>
                   ) : isNext ? (
-                    <span className={styles.rowAction}>{NEXT_STEP_HINTS[row.step]}</span>
+                    <span className={styles.rowAction}>{t(NEXT_STEP_HINTS[row.step])}</span>
                   ) : (
                     <span className={styles.rowEmpty}>—</span>
                   )}
@@ -229,7 +245,7 @@ export const BookingSummary = ({
         </div>
       )}
       <div className={styles.total}>
-        <span>Итого</span>
+        <span>{t('Итого')}</span>
         <span>
           {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
           {total !== null ? formatPrice(total) : '—'}
@@ -238,13 +254,15 @@ export const BookingSummary = ({
       {/* Said before the click: the deposit is paid right after, the rest at the salon. */}
       {service?.deposit ? (
         <p className={styles.deposit}>
-          Предоплата {formatPrice(service.deposit)} — картой сразу после записи, остальное в салоне.
-          Вернём при отмене за сутки.
+          {t(
+            'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+            { amount: formatPrice(service.deposit) },
+          )}
         </p>
       ) : null}
       {firstIncompleteStep === 'contacts' && (
         <p className={styles.nextStep} aria-live='polite'>
-          {NEXT_STEP_HINTS.contacts}
+          {t(NEXT_STEP_HINTS.contacts)}
         </p>
       )}
       <Button size='lg' fullWidth onClick={onSubmit} disabled={isSubmitting}>

@@ -46,6 +46,7 @@
   min-height: var(--control-height-md);
   color: var(--color-link);
   font-size: var(--text-sm);
+  white-space: nowrap;
 }
 
 .back svg {

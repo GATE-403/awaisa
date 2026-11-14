@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { listPlaceReviews } from '@/shared/api/clientApi'
 import type { ReviewSummary, Service } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './PlaceReviews.module.css'
 
@@ -20,6 +20,7 @@ type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 
 // While choosing, what people said decides it: three reviews of this very service under the form.
 export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps) => {
+  const t = useT()
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [isAllOpen, setIsAllOpen] = useState(false)
   const serviceId = service?.id
@@ -47,14 +48,14 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
     <section className={styles.reviews} aria-labelledby='booking-reviews'>
       <div className={styles.head}>
         <h2 id='booking-reviews' className={styles.title}>
-          Отзывы
+          {t('Отзывы')}
           {isForService && service && <span className={styles.about}> · {service.name}</span>}
         </h2>
         {/* Read here, over the form: a link to the place's page took people out of their
             booking, and they could not find their way back to it. */}
         {summary.items.length > 3 && (
           <button type='button' className={styles.all} onClick={() => setIsAllOpen(true)}>
-            Все ›
+            {t('Все ›')}
           </button>
         )}
       </div>
@@ -62,7 +63,7 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         <Star weight='fill' aria-hidden className={styles.star} />
         <strong>{summary.average.toLocaleString('ru-RU')}</strong>
         {' · '}
-        {pluralize(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
+        {t.count(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
       </p>
       <ul className={styles.list}>
         {summary.items.slice(0, 3).map((review) => (
@@ -71,8 +72,8 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
       </ul>
       {isAllOpen && (
         <Sheet
-          title={isForService && service ? service.name : 'Отзывы'}
-          cancelLabel='Готово'
+          title={isForService && service ? service.name : t('Отзывы')}
+          cancelLabel={t('Готово')}
           onClose={() => setIsAllOpen(false)}
         >
           <ul className={styles.list}>

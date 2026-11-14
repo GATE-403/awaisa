@@ -1,5 +1,7 @@
 'use client'
 
+import { deviceSession } from '@/shared/lib/telemetry'
+
 // What the shelves learn from: a random id per device, services looked at lately, and what was
 // shown, tapped and booked (sent in batches with sendBeacon, so leaving the page never loses them).
 
@@ -13,7 +15,6 @@ type PickEvent = {
   position?: number
 }
 
-const SESSION_KEY = 'awaisa:device:v1'
 const RECENT_KEY = 'awaisa:recent-services:v1'
 const CLICK_KEY = 'awaisa:pick-click:v1'
 const MAX_RECENT = 5
@@ -22,18 +23,6 @@ const ENDPOINT = '/api/recommendations/events'
 
 let queue: PickEvent[] = []
 let timer: number | null = null
-
-const deviceSession = () => {
-  try {
-    const stored = window.localStorage.getItem(SESSION_KEY)
-    if (stored) return stored
-    const id = crypto.randomUUID()
-    window.localStorage.setItem(SESSION_KEY, id)
-    return id
-  } catch {
-    return null
-  }
-}
 
 const readRecent = (): string[] => {
   try {

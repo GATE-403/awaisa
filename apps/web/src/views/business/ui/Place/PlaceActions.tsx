@@ -4,8 +4,9 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatCircleText, NavigationArrow, Phone, ShareNetwork } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import type { ComponentType } from 'react'
+import { type ComponentType, useEffect } from 'react'
 import type { Business } from '@/shared/api/types'
+import { trackStep } from '@/shared/lib/telemetry'
 import styles from './Place.module.css'
 
 interface PlaceActionsProps {
@@ -36,6 +37,10 @@ const directionsOf = (business: Business) => {
 export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const toast = useToast()
   const directions = directionsOf(business)
+
+  useEffect(() => {
+    trackStep('business', business.slug)
+  }, [business.slug])
 
   const handleShare = async () => {
     const url = window.location.href

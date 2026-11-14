@@ -8,7 +8,11 @@
   border-radius: var(--radius-control);
   font-weight: var(--font-weight-medium);
   letter-spacing: var(--tracking-normal);
-  white-space: nowrap;
+  /* One line as long as it fits; with large system text a label wraps inside its container
+     instead of running off the screen. */
+  max-width: 100%;
+  text-align: center;
+  text-wrap: balance;
   text-decoration: none;
   cursor: pointer;
   user-select: none;
@@ -33,22 +37,22 @@
 }
 
 .button[data-size="sm"] {
-  height: var(--control-height-sm);
-  padding: 0 var(--space-3);
+  min-height: var(--control-height-sm);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
 
 .button[data-size="md"] {
-  height: var(--control-height-md);
-  padding: 0 var(--space-4);
+  min-height: var(--control-height-md);
+  padding: var(--space-1) var(--space-4);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
 }
 
 .button[data-size="lg"] {
-  height: var(--control-height-lg);
-  padding: 0 var(--space-6);
+  min-height: var(--control-height-lg);
+  padding: var(--space-1) var(--space-6);
   font-size: var(--text-md);
   line-height: var(--text-md-line-height);
 }

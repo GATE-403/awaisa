@@ -6,6 +6,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { checkSlug, createBusiness } from '@/shared/api/clientApi'
 import type { BusinessKind, SlugCheck } from '@/shared/api/types'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
+import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { slugify } from '@/shared/lib/slugify'
 
 const SLUG_CHECK_DELAY_MS = 350
@@ -33,7 +34,7 @@ export const useCreateBusinessForm = () => {
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const slug = slugInput ?? slugify(name)
-  const phone = phoneInput ?? customer?.phone ?? ''
+  const phone = phoneInput ?? maskPhoneInput(customer?.phone ?? '')
   const currentCheck = slugCheck?.slug === slug ? slugCheck : null
   const templates = SERVICE_TEMPLATES[kind].map((template) => {
     const edit = edits[`${kind}:${template.name}`]
