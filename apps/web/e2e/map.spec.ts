@@ -1,8 +1,21 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
+
+// The page streams in over a pending copy of itself (the Suspense fallback is the same MapPage):
+// until React swaps them, the DOM holds two «Где вы?» and the fallback's controls do nothing.
+// A visible place row exists only once the real page is in.
+const openMap = async (page: Page, path = '/map') => {
+  await page.goto(path)
+  await expect(
+    page
+      .getByRole('listitem')
+      .filter({ has: page.getByRole('link') })
+      .first(),
+  ).toBeVisible()
+}
 
 test.describe('Map: places nearby', () => {
   test('lists places with a pin and books at the chosen branch', async ({ page }) => {
-    await page.goto('/map')
+    await openMap(page)
     // A place with several branches has a row each: take the first.
     const studio = page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' }).first()
     await expect(studio).toBeVisible()
@@ -16,7 +29,7 @@ test.describe('Map: places nearby', () => {
   test('sorts by distance once the location is shared', async ({ page, context }) => {
     await context.grantPermissions(['geolocation'])
     await context.setGeolocation({ latitude: 42.87, longitude: 74.6 })
-    await page.goto('/map')
+    await openMap(page)
     await page.getByRole('button', { name: 'Где вы?' }).click()
     await page
       .getByRole('dialog', { name: 'Где вы?' })
@@ -36,7 +49,7 @@ test.describe('Map: places nearby', () => {
   test('without geolocation a district stands in for the location and is remembered', async ({
     page,
   }) => {
-    await page.goto('/map')
+    await openMap(page)
     await expect(page.getByText(/Укажите, где вы/)).toBeVisible()
     await page.getByRole('button', { name: 'Где вы?' }).click()
     await page
@@ -50,7 +63,7 @@ test.describe('Map: places nearby', () => {
   })
 
   test('kind tabs filter the places', async ({ page }) => {
-    await page.goto('/map?kind=barber')
+    await openMap(page, '/map?kind=barber')
     await expect(page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' })).toHaveCount(0)
   })
 
@@ -59,7 +72,7 @@ test.describe('Map: places nearby', () => {
     isMobile,
   }) => {
     test.skip(!isMobile, 'The sheet is a phone layout')
-    await page.goto('/map')
+    await openMap(page)
     await expect(page.getByRole('button', { name: 'Карта', exact: true })).toHaveCount(0)
     // The grabber steps from half to the whole screen…
     await page.getByRole('button', { name: /Список наполовину/ }).click()
@@ -77,7 +90,7 @@ test.describe('Map: places nearby', () => {
     isMobile,
   }) => {
     test.skip(!isMobile, 'The sheet is a phone layout')
-    await page.goto('/map')
+    await openMap(page)
     await expect(page.getByRole('button', { name: /Список наполовину/ })).toBeVisible()
     const row = page.getByRole('listitem').first()
     const box = await row.boundingBox()
@@ -98,7 +111,7 @@ test.describe('Map: places nearby', () => {
 
   test('on phones the list sheet changes height by its grabber', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Desktop has a floating sidebar instead')
-    await page.goto('/map')
+    await openMap(page)
     const map = page.getByRole('region', { name: 'Карта салонов и мастеров' })
     await expect(map).toBeVisible()
     const half = (await map.boundingBox())?.height ?? 0
