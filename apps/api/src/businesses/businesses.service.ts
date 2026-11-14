@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, Repository } from 'typeorm'
+import { DataSource, In, Repository } from 'typeorm'
 import { Category } from '../catalog/category.entity.js'
 import { Service } from '../catalog/service.entity.js'
 import {
@@ -360,6 +360,34 @@ export class BusinessesService {
     const day = await this.hours.findOneBy({ businessId, weekday: weekdayOf(dateKey) })
 
     return day ? { opensMinutes: day.opensMinutes, closesMinutes: day.closesMinutes } : null
+  }
+
+  async findByIds(ids: string[]) {
+    if (ids.length === 0) return []
+    return this.businesses.findBy({ id: In(ids) })
+  }
+
+  /** `getOpeningWindow` for many businesses and days in one query, keyed `businessId:dateKey`. */
+  async getOpeningWindows(businessIds: string[], dateKeys: string[]) {
+    const windows = new Map<string, { opensMinutes: number; closesMinutes: number } | null>()
+    if (businessIds.length === 0 || dateKeys.length === 0) return windows
+    const rows = await this.hours.findBy({
+      businessId: In(businessIds),
+      weekday: In([...new Set(dateKeys.map(weekdayOf))]),
+    })
+    for (const businessId of businessIds) {
+      for (const dateKey of dateKeys) {
+        const day = rows.find(
+          (row) => row.businessId === businessId && row.weekday === weekdayOf(dateKey),
+        )
+        windows.set(
+          `${businessId}:${dateKey}`,
+          day ? { opensMinutes: day.opensMinutes, closesMinutes: day.closesMinutes } : null,
+        )
+      }
+    }
+
+    return windows
   }
 
   async checkSlug(slug: string) {

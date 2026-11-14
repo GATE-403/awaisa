@@ -136,6 +136,31 @@ export class CatalogService {
       .getMany()
   }
 
+  /** Active services by id; unknown or inactive ids are left out. */
+  async getActiveServices(ids: string[]) {
+    if (ids.length === 0) return []
+    return this.services.findBy({ id: In(ids), isActive: true })
+  }
+
+  /** `getSpecialistsForService` for many services at once: service id → its active masters in order. */
+  async getSpecialistsForServices(serviceIds: string[]) {
+    const byService = new Map<string, Specialist[]>(serviceIds.map((id) => [id, []]))
+    if (serviceIds.length === 0) return byService
+    const specialists = await this.specialists
+      .createQueryBuilder('specialist')
+      .innerJoinAndSelect('specialist.services', 'service', 'service.id IN (:...serviceIds)', {
+        serviceIds,
+      })
+      .where('specialist.isActive = true')
+      .orderBy('specialist.position', 'ASC')
+      .getMany()
+    for (const specialist of specialists) {
+      for (const service of specialist.services ?? []) byService.get(service.id)?.push(specialist)
+    }
+
+    return byService
+  }
+
   async listActiveSpecialists(businessId: string) {
     return this.specialists.find({
       where: { businessId, isActive: true },

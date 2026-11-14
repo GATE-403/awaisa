@@ -1,7 +1,56 @@
+x-api-env: &api-env
+  NODE_ENV: production
+  API_PORT: 4000
+  DATABASE_URL: postgres://${POSTGRES_USER:-awaisa}:${POSTGRES_PASSWORD:-awaisa}@postgres:5432/${POSTGRES_DB:-awaisa}
+  REDIS_URL: redis://redis:6379
+  DATABASE_POOL_SIZE: ${DATABASE_POOL_SIZE:-10}
+  DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-30000}
+  WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+  PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-}
+  AUTH_SECRET: ${AUTH_SECRET:-}
+  ADMIN_PHONES: ${ADMIN_PHONES:-}
+  SMS_DRIVER: ${SMS_DRIVER:-}
+  TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
+  TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
+  TWILIO_FROM: ${TWILIO_FROM:-}
+  TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
+  TELEGRAM_GATEWAY_TOKEN: ${TELEGRAM_GATEWAY_TOKEN:-}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+  TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+  TELEGRAM_WEBHOOK_URL: ${TELEGRAM_WEBHOOK_URL:-}
+  RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+  BOOKING_RATE_LIMIT_PER_MINUTE: ${BOOKING_RATE_LIMIT_PER_MINUTE:-5}
+  AUTH_RATE_LIMIT_PER_MINUTE: ${AUTH_RATE_LIMIT_PER_MINUTE:-5}
+  PAYMENT_DRIVER: ${PAYMENT_DRIVER:-}
+  FREEDOMPAY_MERCHANT_ID: ${FREEDOMPAY_MERCHANT_ID:-}
+  FREEDOMPAY_SECRET_KEY: ${FREEDOMPAY_SECRET_KEY:-}
+  FREEDOMPAY_API_URL: ${FREEDOMPAY_API_URL:-}
+  FREEDOMPAY_CURRENCY: ${FREEDOMPAY_CURRENCY:-}
+  FREEDOMPAY_TESTING_MODE: ${FREEDOMPAY_TESTING_MODE:-}
+  STORAGE_DRIVER: ${STORAGE_DRIVER:-}
+  UPLOAD_DIR: /data/uploads
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_ENDPOINT: ${S3_ENDPOINT:-}
+  S3_REGION: ${S3_REGION:-}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
+  S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+  WALLET_PASS_TYPE_ID: ${WALLET_PASS_TYPE_ID:-}
+  WALLET_TEAM_ID: ${WALLET_TEAM_ID:-}
+  WALLET_CERT_PEM: ${WALLET_CERT_PEM:-}
+  WALLET_KEY_PEM: ${WALLET_KEY_PEM:-}
+  WALLET_KEY_PASSPHRASE: ${WALLET_KEY_PASSPHRASE:-}
+  WALLET_WWDR_PEM: ${WALLET_WWDR_PEM:-}
+  GOOGLE_WALLET_ISSUER_ID: ${GOOGLE_WALLET_ISSUER_ID:-}
+  GOOGLE_WALLET_SERVICE_ACCOUNT: ${GOOGLE_WALLET_SERVICE_ACCOUNT:-}
+
 services:
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
+    # pg_stat_statements: which queries take the most time in total (pnpm --filter api db:slow).
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "pg_stat_statements.track=top"]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-awaisa}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-awaisa}
@@ -30,43 +79,27 @@ services:
       timeout: 3s
       retries: 10
 
-  api:
+  # Applies migrations once per deploy; api and worker start only after it succeeds.
+  migrate:
+    image: awaisa-api
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    profiles: [app]
+    command: ["node", "dist/database/migrate.js"]
+    environment: *api-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # HTTP only (PROCESS_ROLE=api): scale it freely, e.g. `docker compose up --scale api=3`.
+  api:
+    image: awaisa-api
     restart: unless-stopped
     profiles: [app]
     environment:
-      NODE_ENV: production
-      API_PORT: 4000
-      DATABASE_URL: postgres://${POSTGRES_USER:-awaisa}:${POSTGRES_PASSWORD:-awaisa}@postgres:5432/${POSTGRES_DB:-awaisa}
-      REDIS_URL: redis://redis:6379
-      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
-      PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-}
-      AUTH_SECRET: ${AUTH_SECRET:-}
-      ADMIN_PHONES: ${ADMIN_PHONES:-}
-      SMS_DRIVER: ${SMS_DRIVER:-}
-      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
-      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
-      TWILIO_FROM: ${TWILIO_FROM:-}
-      TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
-      TELEGRAM_GATEWAY_TOKEN: ${TELEGRAM_GATEWAY_TOKEN:-}
-      STORAGE_DRIVER: ${STORAGE_DRIVER:-}
-      UPLOAD_DIR: /data/uploads
-      S3_BUCKET: ${S3_BUCKET:-}
-      S3_ENDPOINT: ${S3_ENDPOINT:-}
-      S3_REGION: ${S3_REGION:-}
-      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-}
-      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-}
-      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
-      WALLET_PASS_TYPE_ID: ${WALLET_PASS_TYPE_ID:-}
-      WALLET_TEAM_ID: ${WALLET_TEAM_ID:-}
-      WALLET_CERT_PEM: ${WALLET_CERT_PEM:-}
-      WALLET_KEY_PEM: ${WALLET_KEY_PEM:-}
-      WALLET_KEY_PASSPHRASE: ${WALLET_KEY_PASSPHRASE:-}
-      WALLET_WWDR_PEM: ${WALLET_WWDR_PEM:-}
-      GOOGLE_WALLET_ISSUER_ID: ${GOOGLE_WALLET_ISSUER_ID:-}
-      GOOGLE_WALLET_SERVICE_ACCOUNT: ${GOOGLE_WALLET_SERVICE_ACCOUNT:-}
+      <<: *api-env
+      PROCESS_ROLE: api
     volumes:
       - uploads:/data/uploads
     ports:
@@ -77,9 +110,31 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    stop_grace_period: 30s
     depends_on:
-      postgres:
+      migrate:
+        condition: service_completed_successfully
+      redis:
         condition: service_healthy
+
+  # Cron jobs and the Telegram long-poll. Exactly one replica.
+  worker:
+    image: awaisa-api
+    restart: unless-stopped
+    profiles: [app]
+    command: ["node", "dist/worker.js"]
+    environment:
+      <<: *api-env
+      PROCESS_ROLE: worker
+      # Nightly recounts read months of visits; the jobs need few connections but more time.
+      DATABASE_POOL_SIZE: 4
+      DATABASE_STATEMENT_TIMEOUT_MS: 300000
+    volumes:
+      - uploads:/data/uploads
+    stop_grace_period: 30s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
 
