@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
+import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -47,6 +48,7 @@ export class AdminService {
   constructor(
     @InjectRepository(TimeOff) private readonly timeOff: Repository<TimeOff>,
     private readonly bookings: BookingsService,
+    private readonly salonBookings: SalonBookingsService,
     private readonly catalog: CatalogService,
     private readonly masterSchedule: MasterScheduleService,
     private readonly businesses: BusinessesService,
@@ -60,7 +62,7 @@ export class AdminService {
     const bounds = dayBounds(date)
     const specialists = await this.catalog.listActiveSpecialists(business.id)
     const [bookings, timeOff] = await Promise.all([
-      this.bookings.getAdminViews(business.id, bounds),
+      this.salonBookings.getAdminViews(business.id, bounds),
       specialists.length === 0
         ? []
         : this.timeOff
@@ -161,15 +163,15 @@ export class AdminService {
   }
 
   async moveBooking(business: Business, id: string, input: MoveBookingInput) {
-    const { view, previous, customerPhone } = await this.bookings.moveBySalon(
+    const { view, previous, customerPhone } = await this.salonBookings.moveBySalon(
       business.id,
       id,
       input,
     )
-    const movedTo = (await this.bookings.getStartsAt(id))?.getTime()
+    const movedTo = (await this.salonBookings.getStartsAt(id))?.getTime()
     // Like cancelling, the text waits for the undo window: a drag that is put back says nothing.
     setTimeout(async () => {
-      if ((await this.bookings.getStartsAt(id))?.getTime() !== movedTo) return
+      if ((await this.salonBookings.getStartsAt(id))?.getTime() !== movedTo) return
       if (await this.bookings.isCancelled(id)) return
       void this.sms.sendSafely(
         customerPhone,
@@ -181,7 +183,10 @@ export class AdminService {
   }
 
   async cancelBooking(business: Business, id: string) {
-    const { view, customerPhone, wasConfirmed } = await this.bookings.cancelBySalon(business.id, id)
+    const { view, customerPhone, wasConfirmed } = await this.salonBookings.cancelBySalon(
+      business.id,
+      id,
+    )
     if (wasConfirmed) {
       // The text waits out the undo window, so a mis-tap that is undone never reaches the client.
       setTimeout(async () => {
@@ -210,7 +215,7 @@ export class AdminService {
       }),
     )
     const conflicts = (
-      await this.bookings.getAdminViews(business.id, { dayStart: startsAt, dayEnd: endsAt })
+      await this.salonBookings.getAdminViews(business.id, { dayStart: startsAt, dayEnd: endsAt })
     ).filter(
       (booking) => booking.status === 'confirmed' && booking.specialistId === input.specialistId,
     )
