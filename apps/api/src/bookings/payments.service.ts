@@ -124,6 +124,17 @@ export class PaymentsService {
     const status = await this.callFreedomPay('get_status3.php', { pg_order_id: payment.id })
     if (status.pg_status !== 'ok') return { payment, isNew: false }
     if (status.pg_payment_status === 'success') {
+      // A success for another amount or currency than we asked for is not this deposit paid.
+      const currency = this.config.get('FREEDOMPAY_CURRENCY', { infer: true })
+      const isOtherAmount =
+        status.pg_amount !== undefined && Number(status.pg_amount) !== payment.amount
+      const isOtherCurrency = status.pg_currency !== undefined && status.pg_currency !== currency
+      if (isOtherAmount || isOtherCurrency) {
+        this.logger.error(
+          `Freedom Pay success for ${payment.id} with ${status.pg_amount} ${status.pg_currency}, expected ${payment.amount} ${currency}`,
+        )
+        return { payment, isNew: false }
+      }
       payment.providerRef = status.pg_payment_id ?? payment.providerRef
       return this.markSucceeded(payment)
     }
