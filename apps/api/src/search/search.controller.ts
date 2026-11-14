@@ -1,3 +1,4 @@
+import type { SearchCorrection } from '@awaisa/contracts'
 import { Controller, Get, Query } from '@nestjs/common'
 import { z } from 'zod'
 import { Cached } from '../cache/cached.decorator.js'
@@ -12,7 +13,9 @@ export class SearchController {
   /** What a query was read as — «Показаны результаты для «стрижка»» on the catalog. */
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('resolve')
-  async resolve(@Query({ schema: resolveQuerySchema }) query: z.infer<typeof resolveQuerySchema>) {
+  async resolve(
+    @Query({ schema: resolveQuerySchema }) query: z.infer<typeof resolveQuerySchema>,
+  ): Promise<SearchCorrection> {
     const resolved = await this.search.resolve(query.q)
     return { query: query.q, corrected: resolved?.corrected ?? null }
   }

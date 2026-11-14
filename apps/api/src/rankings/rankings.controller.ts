@@ -1,3 +1,4 @@
+import type { LeaderboardMaster, LeaderboardPlace } from '@awaisa/contracts'
 import { Controller, Get, Query } from '@nestjs/common'
 import { z } from 'zod'
 import { Cached } from '../cache/cached.decorator.js'
@@ -17,14 +18,18 @@ export class RankingsController {
   // The masters' leaderboard for `/top` (barbers unless a kind is asked for).
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 60 })
   @Get('masters')
-  masters(@Query({ schema: leaderboardSchema }) query: LeaderboardQuery) {
+  masters(
+    @Query({ schema: leaderboardSchema }) query: LeaderboardQuery,
+  ): Promise<LeaderboardMaster[]> {
     return this.rankings.leaderboard(query.kind, query.limit)
   }
 
   // The places' leaderboard (`/top?view=places`).
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 60 })
   @Get('places')
-  places(@Query({ schema: leaderboardSchema }) query: LeaderboardQuery) {
+  places(
+    @Query({ schema: leaderboardSchema }) query: LeaderboardQuery,
+  ): Promise<LeaderboardPlace[]> {
     return this.rankings.placesLeaderboard(query.kind, query.limit)
   }
 }

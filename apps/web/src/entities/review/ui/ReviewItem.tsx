@@ -2,6 +2,7 @@ import NextLink from 'next/link'
 import type { ReactNode } from 'react'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { Review } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './ReviewItem.module.css'
 import { ReviewPhotos } from './ReviewPhotos'
@@ -18,7 +19,11 @@ interface ReviewItemProps {
   authorHref?: string
 }
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 // One review as a thread, the same on the business page and in the cabinet: the person's face,
 // name and date on one line, stars, the words; the owner's reply hangs under it on a line from

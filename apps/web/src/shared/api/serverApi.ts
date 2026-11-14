@@ -18,6 +18,7 @@ import type {
   PublicPromotion,
   QuestionList,
   ReviewSummary,
+  SearchCorrection,
 } from './types'
 
 const NOT_FOUND = 404
@@ -118,13 +119,13 @@ const listQuestions = async (slug: string): Promise<QuestionList> => {
 }
 
 // What a search was read as («cnhb;rf» → «стрижка»), for «Показаны результаты для …».
-const resolveSearch = async (query: string): Promise<{ corrected: string | null }> => {
+const resolveSearch = async (query: string): Promise<SearchCorrection> => {
   'use cache'
   cacheLife('minutes')
   cacheTag(BUSINESSES_TAG)
 
   const response = await fetch(`${API_URL}/search/resolve?${new URLSearchParams({ q: query })}`)
-  if (!response.ok) return { corrected: null }
+  if (!response.ok) return { query, corrected: null }
   return response.json()
 }
 

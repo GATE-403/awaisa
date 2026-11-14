@@ -1,3 +1,4 @@
+import type { ManagedWaitlistEntry } from '@awaisa/contracts'
 import { Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, UseGuards } from '@nestjs/common'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
@@ -10,7 +11,7 @@ export class ManageWaitlistController {
   constructor(private readonly waitlist: WaitlistService) {}
 
   @Get()
-  list(@CurrentBusiness() business: Business) {
+  list(@CurrentBusiness() business: Business): Promise<ManagedWaitlistEntry[]> {
     return this.waitlist.listForBusiness(business.id)
   }
 

@@ -1,3 +1,4 @@
+import type { AdminBooking, MasterDay, MasterPlace } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -41,7 +42,7 @@ export class MasterController {
   /** Where the signed-in customer works as a master (for «Мой день» entry points). */
   @Get('me/master')
   @UseGuards(AuthGuard)
-  listPlaces(@CurrentCustomer() customer: Customer) {
+  listPlaces(@CurrentCustomer() customer: Customer): Promise<MasterPlace[]> {
     return this.dataSource.query(
       `SELECT bz."slug", bz."name" AS "businessName", sp."id" AS "specialistId", sp."name", sp."role"
        FROM "specialists" sp JOIN "businesses" bz ON bz."id" = sp."business_id"
@@ -57,7 +58,7 @@ export class MasterController {
     @CurrentBusiness() business: Business,
     @CurrentMaster() master: Specialist,
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
-  ) {
+  ): Promise<MasterDay> {
     const window = await this.businesses.getOpeningWindow(business.id, query.date)
     const [days, leaves, bookings] = await Promise.all([
       this.masterSchedule.daysFor([master.id], query.date, window),
@@ -90,7 +91,7 @@ export class MasterController {
     @CurrentMaster() master: Specialist,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: outcomeSchema }) body: OutcomeBody,
-  ) {
+  ): Promise<AdminBooking> {
     const booking = await this.bookings.findById(id)
     if (!booking || booking.specialistId !== master.id) {
       throw new ForbiddenException('Это запись другого мастера')

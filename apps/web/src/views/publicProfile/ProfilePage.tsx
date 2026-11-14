@@ -4,6 +4,7 @@ import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { Achievements, achievementLook, profileStyle } from '@/entities/profile'
 import { EditProfileButton } from '@/features/profileStyle'
 import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
@@ -16,12 +17,20 @@ interface ProfilePageProps {
   profile: PublicProfile
 }
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: BUSINESS_TIME_ZONE,
+})
+const yearFormatter = new Intl.DateTimeFormat('ru-RU', {
+  year: 'numeric',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 // «с сентября 2026»: the genitive month comes from a day-and-month format.
 const formatSince = (iso: string) => {
   const date = new Date(iso)
-  return `С ${dateFormatter.format(date).split(' ')[1] ?? ''} ${date.getFullYear()}`
+  return `С ${dateFormatter.format(date).split(' ')[1] ?? ''} ${yearFormatter.format(date)}`
 }
 
 const MAX_MASTERS = 6

@@ -1,3 +1,4 @@
+import type { WaitlistEntry } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -42,7 +43,7 @@ export class WaitlistController {
   join(
     @Body({ schema: joinWaitlistSchema }) body: JoinWaitlistInput,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<WaitlistEntry & { token: string }> {
     return this.waitlist.join(body, customer)
   }
 
@@ -50,24 +51,30 @@ export class WaitlistController {
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
-  ) {
+  ): Promise<WaitlistEntry> {
     return this.waitlist.findByToken(id, parseToken(token))
   }
 
   @Delete('waitlist/:id')
-  leave(@Param('id', ParseUUIDPipe) id: string, @Headers(TOKEN_HEADER) token: string | undefined) {
+  leave(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Headers(TOKEN_HEADER) token: string | undefined,
+  ): Promise<WaitlistEntry> {
     return this.waitlist.leave(id, parseToken(token))
   }
 
   @Get('me/waitlist')
   @UseGuards(AuthGuard)
-  listMine(@CurrentCustomer() customer: Customer) {
+  listMine(@CurrentCustomer() customer: Customer): Promise<WaitlistEntry[]> {
     return this.waitlist.listForCustomer(customer)
   }
 
   @Delete('me/waitlist/:id')
   @UseGuards(AuthGuard)
-  leaveMine(@Param('id', ParseUUIDPipe) id: string, @CurrentCustomer() customer: Customer) {
+  leaveMine(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentCustomer() customer: Customer,
+  ): Promise<WaitlistEntry> {
     return this.waitlist.leaveForCustomer(id, customer)
   }
 }

@@ -1,3 +1,4 @@
+import type { TelegramLink, TelegramStatus } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -33,7 +34,7 @@ export class TelegramController {
 
   @Get('manage/:slug/telegram')
   @UseGuards(BusinessAccessGuard)
-  async status(@CurrentBusiness() business: Business) {
+  async status(@CurrentBusiness() business: Business): Promise<TelegramStatus> {
     return {
       isAvailable: this.bot.isAvailable,
       botUsername: this.bot.botUsername,
@@ -44,7 +45,10 @@ export class TelegramController {
   @Post('manage/:slug/telegram/link')
   @UseGuards(BusinessAccessGuard)
   @OwnerOnly()
-  createLink(@CurrentBusiness() business: Business, @CurrentCustomer() customer: Customer | null) {
+  createLink(
+    @CurrentBusiness() business: Business,
+    @CurrentCustomer() customer: Customer | null,
+  ): Promise<TelegramLink> {
     if (!this.bot.isAvailable) throw new ForbiddenException('Telegram-бот не настроен')
     return this.bot.createLink(business.id, customer?.id ?? null)
   }

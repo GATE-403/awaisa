@@ -1,3 +1,4 @@
+import type { PaymentMethod, VisitOutcome } from '@awaisa/contracts'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
@@ -134,9 +135,9 @@ export class ClientsService {
           date: dateKey,
           time: formatMinutes(minutes),
           status: String(row.status),
-          outcome: (row.outcome as string | null) ?? null,
+          outcome: (row.outcome as VisitOutcome | null) ?? null,
           paidAmount: row.paidAmount === null ? null : toNumber(row.paidAmount),
-          paymentMethod: (row.paymentMethod as string | null) ?? null,
+          paymentMethod: (row.paymentMethod as PaymentMethod | null) ?? null,
           price: toNumber(row.price),
           serviceName: String(row.serviceName),
           specialistName: String(row.specialistName ?? ''),

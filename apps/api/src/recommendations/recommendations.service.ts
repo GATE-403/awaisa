@@ -1,3 +1,4 @@
+import type { BusinessKind } from '@awaisa/contracts'
 import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
@@ -233,7 +234,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
         isPopular: Boolean(candidate.row.isPopular),
         slug: candidate.slug,
         businessName: candidate.businessName,
-        kind: String(candidate.row.kind),
+        kind: String(candidate.row.kind) as BusinessKind,
         coverUrl:
           (candidate.row.servicePhoto as string | null) ??
           (candidate.row.coverUrl as string | null) ??
