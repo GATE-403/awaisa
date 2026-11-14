@@ -49,6 +49,23 @@ The look follows Apple HIG and the restrained style of apple.com: depth through 
 - Less to read: say only what decides the next tap. Phones get one-line meta, smaller titles (`PageTitle` 22px), no decorative headings where tabs already name the view, optional things behind a link («Добавить комментарий», notification settings, the week's hours, reviews past three). Prefer short facts («Сегодня с 15:30») to sentences («Свободно сегодня с 15:30»).
 - Spacing on a 4px grid (`--space-1` = 4px … `--space-20` = 80px). Breakpoints (JS only, literal px in media queries): sm 640, md 768, lg 1024, xl 1280.
 
+## Design taste (the owner's decisions — follow them)
+
+Rules the owner set after rejecting designs. They apply to every new screen.
+
+- No cheap UI. A «Ближайшее время» card made of a surface card, a tinted glyph in a circle, a title over a subtitle and three wide equal capsules with the day stacked over the time was rejected as «очень дешево, никогда не делай такой дизайн». «Для вас» redone as white row cards (a 64px thumbnail, a reason line, name, price · place) with ‹ › paddles was rejected the same way. Both read like generic templates and list UIs, not the app's picture-led catalog.
+  - New blocks start from what the app already has: the kit's `Button` capsules, Settings-style inset rows, footnote captions. Use content-width one-line capsules, not stretched grids. No icon unless it is a UI glyph.
+  - Picture shelves keep their 3:4 picture cards. To save space, trim spacing or the card size, never swap them for thumbnail row cards.
+  - When a request is about size or space, change the spacing first and ask before redesigning the component.
+- Quiet profile style (approved: «да так гораздо лучше запомни этот стиль»), the default for profile-like and content pages:
+  - One centred column (~640px) right on the page background. No separate cards per section and no big banners.
+  - A soft radial wash of the person's or place's colour behind the head. The face is centred: name in title1, status, then one footnote line of facts with bold numbers.
+  - Secondary facts (level, dates) are a single footnote line in the accent colour, not rings or progress widgets. Small secondary capsule actions.
+  - Sections under iOS-Settings-style uppercase footnote captions with the count on the right.
+  - Collections stay compact: small round faces with first names (≤ 6), capsules with logo and count (≤ 4), reviews as a hairline thread of three with the rest behind `MoreFade`.
+  - Gamification is colourful but restrained, like 2GIS: each achievement has its own system colour, earned ones are lit like a coin, unearned ones are grey with «2 из 5» and a thin progress line.
+  - A gradient banner with an avatar ring was rejected as «дефолтный шаблон ИИ». A photo-led profile (full-width photo melting into blur, big numbers, two-column desktop) was built and rolled back («убого» on desktop). Do not bring back a photo hero, banners or avatar rings unless asked. Even then, show a mockup or ask first, and never just blow up the phone layout on desktop.
+
 ## Web app structure
 
 The web app is a booking platform: any business registers and gets its own page at `/<slug>`; clients find businesses in the catalog on `/`. Awaisa Studio (`awaisa-studio`) is the first business, migrated from the single-salon version.
