@@ -3,6 +3,8 @@ import type { NextConfig } from 'next'
 import { API_URL, CLIENT_API_PREFIX } from './src/shared/config/api'
 
 const nextConfig: NextConfig = {
+  // E2E builds into its own folder so `next build` never touches a running `next dev`'s files.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // Links from before the platform (bookmarks, old SMS) pointed at the single salon.
   redirects: async () => [
     { source: '/book', destination: '/awaisa-studio/book', permanent: false },

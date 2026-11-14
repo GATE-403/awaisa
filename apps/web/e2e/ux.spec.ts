@@ -175,8 +175,16 @@ test.describe('UX: guidance and feedback', () => {
 })
 
 test.describe('UX: layout and ergonomics', () => {
-  for (const width of [320, 375, 768, 1024]) {
-    test(`no horizontal scroll at ${width}px`, async ({ page }) => {
+  // Phone widths on the phone project (touch, mobile user agent), tablet and laptop widths on
+  // desktop: each width is checked once, on the device it belongs to.
+  for (const [width, project] of [
+    [320, 'mobile'],
+    [375, 'mobile'],
+    [768, 'desktop'],
+    [1024, 'desktop'],
+  ] as const) {
+    test(`no horizontal scroll at ${width}px`, async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== project, `${width}px is checked on ${project}`)
       await page.setViewportSize({ width, height: 800 })
       for (const path of [
         '/',
@@ -190,7 +198,7 @@ test.describe('UX: layout and ergonomics', () => {
       ]) {
         await page.goto(path)
         // Map tiles keep the network busy; a short wait is enough for the page itself.
-        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => undefined)
+        await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => undefined)
         expect(await getHorizontalOverflow(page), path).toBeLessThanOrEqual(0)
       }
     })
