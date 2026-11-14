@@ -5,6 +5,8 @@ type CacheTag = 'catalog' | 'availability'
 
 type Entry = { value: string; expiresAt: number }
 
+type RedisClient = ReturnType<typeof createClient>
+
 const MEMORY_LIMIT = 2000
 
 // Read-through cache for public answers. With REDIS_URL it lives in Redis (shared by every API
@@ -14,13 +16,14 @@ const MEMORY_LIMIT = 2000
 @Injectable()
 export class CacheService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name)
-  private redis: ReturnType<typeof createClient> | null = null
+  private redis: RedisClient | null = null
   private readonly memory = new Map<string, Entry>()
   private readonly versions = new Map<string, number>()
 
   async onModuleInit() {
     const url = process.env.REDIS_URL
-    if (!url || process.env.API_CACHE === 'off') return
+    // Connected even with API_CACHE=off: the rate limits keep their counters here too.
+    if (!url) return
     const client = createClient({
       url,
       socket: { reconnectStrategy: (tries) => Math.min(tries * 200, 5000) },
@@ -42,6 +45,11 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     await this.redis?.quit().catch(() => undefined)
+  }
+
+  /** The shared Redis connection, or null when this process runs on memory alone. */
+  get redisClient(): RedisClient | null {
+    return this.redis
   }
 
   get isEnabled() {
@@ -108,4 +116,4 @@ export class CacheService implements OnModuleInit, OnModuleDestroy {
   }
 }
 
-export type { CacheTag }
+export type { CacheTag, RedisClient }

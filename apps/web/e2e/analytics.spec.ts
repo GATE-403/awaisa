@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
+import { createPastVisit } from './visits'
 
 test.describe('Cabinet analytics', () => {
   test('owner sees revenue, clients and load for the chosen period', async ({ page }, testInfo) => {
@@ -46,6 +47,9 @@ test.describe('Cabinet analytics', () => {
   })
 
   test("a master's percent turns their revenue into a payout", async ({ page }, testInfo) => {
+    // The cabinet opens on the last 30 days and shows its groups only when that month had a
+    // visit; a fresh database has none, so the test brings its own.
+    await createPastVisit('E2E Зарплата Тестов', randomClientPhone(), 0, 3)
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const managed = await (await page.request.get('/api/manage/awaisa-studio')).json()
     const master = managed.catalog.specialists[0]

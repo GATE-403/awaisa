@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { addDays, toBusinessParts } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { RuntimeService } from '../runtime/runtime.service.js'
 import {
   type Affinities,
   type Candidate,
@@ -35,10 +36,12 @@ export class RecommendationsService implements OnApplicationBootstrap {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly bookings: BookingsService,
+    private readonly runtime: RuntimeService,
   ) {}
 
   // A fresh database gets its affinities at once instead of waiting for the night.
   onApplicationBootstrap() {
+    if (!this.runtime.runsJobs) return
     void this.query('SELECT 1 FROM "kind_affinities" LIMIT 1')
       .then((rows) => (rows.length === 0 ? this.refreshAffinities() : undefined))
       .catch((error: unknown) => this.logger.warn(`Affinities not checked: ${String(error)}`))

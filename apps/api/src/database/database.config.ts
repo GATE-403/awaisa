@@ -1,6 +1,9 @@
-import type { DataSourceOptions } from 'typeorm'
+import type { PostgresDataSourceOptions } from 'typeorm/driver/postgres/PostgresDataSourceOptions.js'
 
-export const getDatabaseOptions = (url: string, isProduction: boolean): DataSourceOptions => ({
+export const getDatabaseOptions = (
+  url: string,
+  isProduction: boolean,
+): PostgresDataSourceOptions => ({
   type: 'postgres',
   url,
   entities: [`${import.meta.dirname}/../**/*.entity.js`],

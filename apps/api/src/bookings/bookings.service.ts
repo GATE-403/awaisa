@@ -209,28 +209,9 @@ export class BookingsService {
       `,
       [slugs],
     )) as { slug: string; serviceId: string }[]
-    const today = toBusinessParts(new Date()).dateKey
-    const entries = await Promise.all(
-      rows.map(async ({ slug, serviceId }) => {
-        for (const date of [today, addDays(today, 1)]) {
-          try {
-            const { slots } = await this.getAvailability({
-              serviceId,
-              specialistId: ANY_SPECIALIST_ID,
-              date,
-            })
-            const free = slots.find((slot) => slot.isAvailable)
-            if (free) return [slug, { date, time: free.time }] as const
-          } catch {
-            // A service without masters has no slots; the card just shows no time.
-          }
-        }
+    const times = await this.firstFreeTimes(rows.map(({ serviceId }) => ({ serviceId })))
 
-        return [slug, null] as const
-      }),
-    )
-
-    return Object.fromEntries(entries)
+    return Object.fromEntries(rows.map(({ slug }, index) => [slug, times[index] ?? null]))
   }
 
   /**
@@ -244,30 +225,15 @@ export class BookingsService {
        WHERE s."is_active" LIMIT 60`,
       [slug],
     )) as { id: string }[]
-    const today = toBusinessParts(new Date()).dateKey
-    const entries = await Promise.all(
-      rows.map(async ({ id }) => {
-        for (const date of [today, addDays(today, 1)]) {
-          try {
-            const { slots } = await this.getAvailability({
-              serviceId: id,
-              specialistId: ANY_SPECIALIST_ID,
-              date,
-              branchId,
-            })
-            const free = slots.find((slot) => slot.isAvailable)
-            if (free) return [id, { date, time: free.time }] as const
-          } catch {
-            // No masters for it (in this branch): no time to show.
-          }
-        }
-        return [id, null] as const
-      }),
-    )
+    const times = await this.firstFreeTimes(rows.map(({ id }) => ({ serviceId: id, branchId })))
 
-    return Object.fromEntries(entries)
+    return Object.fromEntries(rows.map(({ id }, index) => [id, times[index] ?? null]))
   }
 
+  /**
+   * Each active service of a place with its first free time (any master) today or tomorrow, so
+   * the booking form's list can say «Сегодня с 15:30» before a service is picked.
+   */
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
   async create(
     input: CreateBookingInput,
@@ -957,6 +923,107 @@ export class BookingsService {
       offering.find((specialist) => specialist.id === id)?.branchId ?? null
 
     return { service, specialistIds, branchOf, slotMinutes: business.slotMinutes }
+  }
+
+  /**
+   * The first free time today or tomorrow, with any master, for each request — the same answer
+   * as `getAvailability` day by day, but with a fixed number of queries however many requests
+   * there are (it used to be about eight per place per day: catalog cards and «Для вас» ask for
+   * dozens of places at once). A service without masters, or of an unpublished place, gets null.
+   */
+  private async firstFreeTimes(requests: { serviceId: string; branchId?: string }[]) {
+    const none = requests.map(() => null)
+    if (requests.length === 0) return none
+    const now = new Date()
+    const today = toBusinessParts(now).dateKey
+    const dates = [today, addDays(today, 1)]
+
+    const services = await this.catalogService.getActiveServices([
+      ...new Set(requests.map((request) => request.serviceId)),
+    ])
+    const serviceById = new Map(services.map((service) => [service.id, service]))
+    const [businesses, offerings] = await Promise.all([
+      this.businesses.findByIds([...new Set(services.map((service) => service.businessId))]),
+      this.catalogService.getSpecialistsForServices(services.map((service) => service.id)),
+    ])
+    const businessById = new Map(businesses.map((business) => [business.id, business]))
+    const plans = requests.map(({ serviceId, branchId }) => {
+      const service = serviceById.get(serviceId)
+      const business = service && businessById.get(service.businessId)
+      if (!service || !business?.isPublished) return null
+      const specialistIds = (offerings.get(service.id) ?? [])
+        .filter(
+          (specialist) =>
+            !branchId || specialist.branchId === null || specialist.branchId === branchId,
+        )
+        .map((specialist) => specialist.id)
+
+      return specialistIds.length > 0 ? { service, business, specialistIds } : null
+    })
+    const specialistIds = [...new Set(plans.flatMap((plan) => plan?.specialistIds ?? []))]
+    if (specialistIds.length === 0) return none
+
+    const businessOf = new Map(
+      [...offerings.values()].flat().map((specialist) => [specialist.id, specialist.businessId]),
+    )
+    const windows = await this.businesses.getOpeningWindows(
+      [...new Set(plans.flatMap((plan) => (plan ? [plan.business.id] : [])))],
+      dates,
+    )
+    const rangeStart = businessDateTimeToUtc(today, 0)
+    const rangeEnd = businessDateTimeToUtc(dates[1] ?? today, 24 * 60)
+    const [busy, blocked, offHours] = await Promise.all([
+      this.bookings
+        .createQueryBuilder('booking')
+        .select(['booking.specialistId', 'booking.startsAt', 'booking.endsAt'])
+        .where({ specialistId: In(specialistIds), status: 'confirmed' })
+        .andWhere('booking.startsAt < :rangeEnd AND booking.endsAt > :rangeStart', {
+          rangeStart,
+          rangeEnd,
+        })
+        .getMany(),
+      this.timeOff
+        .createQueryBuilder('timeOff')
+        .select(['timeOff.specialistId', 'timeOff.startsAt', 'timeOff.endsAt'])
+        .where({ specialistId: In(specialistIds) })
+        .andWhere('timeOff.startsAt < :rangeEnd AND timeOff.endsAt > :rangeStart', {
+          rangeStart,
+          rangeEnd,
+        })
+        .getMany(),
+      this.masterSchedule.offHoursBusyMany(
+        specialistIds,
+        dates,
+        (id, date) => windows.get(`${businessOf.get(id)}:${date}`) ?? null,
+      ),
+    ])
+    const intervals = [...busy, ...blocked, ...offHours]
+
+    return plans.map((plan) => {
+      if (!plan) return null
+      const ids = new Set(plan.specialistIds)
+      for (const date of dates) {
+        const dayStart = businessDateTimeToUtc(date, 0)
+        const dayEnd = businessDateTimeToUtc(date, 24 * 60)
+        const free = buildSlots({
+          dateKey: date,
+          window: windows.get(`${plan.business.id}:${date}`) ?? null,
+          slotMinutes: plan.business.slotMinutes,
+          now,
+          durationMinutes: plan.service.durationMinutes,
+          specialistIds: plan.specialistIds,
+          busy: intervals.filter(
+            (interval) =>
+              ids.has(interval.specialistId) &&
+              interval.startsAt < dayEnd &&
+              interval.endsAt > dayStart,
+          ),
+        }).find((slot) => slot.isAvailable)
+        if (free) return { date, time: free.time }
+      }
+
+      return null
+    })
   }
 
   private async buildSlotsFor(
