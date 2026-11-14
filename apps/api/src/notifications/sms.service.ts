@@ -1,6 +1,6 @@
 import { Injectable, Logger, type OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { maskPhone } from '../common/phone.js'
+import { isAllowedDestination, maskPhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 
 const TWILIO_API = 'https://api.twilio.com/2010-04-01'
@@ -20,7 +20,17 @@ export class SmsService implements OnModuleInit {
     )
   }
 
+  /** Whether texts may go to this number at all (SMS_ALLOWED_COUNTRY_CODES). */
+  canSendTo(phone: string) {
+    return isAllowedDestination(
+      phone,
+      this.config.get('SMS_ALLOWED_COUNTRY_CODES', { infer: true }),
+    )
+  }
+
   async send(to: string, body: string) {
+    // Refused in development too, so a number that gets no SMS in production gets none here.
+    if (!this.canSendTo(to)) throw new Error(`SMS to ${maskPhone(to)} is off for its country`)
     if (this.config.get('SMS_DRIVER', { infer: true }) === 'console') {
       this.logger.log(`[not sent, console driver] SMS to ${to}: ${body}`)
       return
@@ -31,6 +41,12 @@ export class SmsService implements OnModuleInit {
   }
 
   async sendSafely(to: string, body: string) {
+    if (!this.canSendTo(to)) {
+      this.logger.log(
+        `SMS to ${maskPhone(to)} skipped: its country is not in SMS_ALLOWED_COUNTRY_CODES`,
+      )
+      return
+    }
     try {
       await this.send(to, body)
     } catch (error) {

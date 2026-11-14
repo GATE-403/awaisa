@@ -44,6 +44,13 @@ export class AuthService {
 
   async requestCode(rawPhone: string, preferred: 'auto' | 'sms' = 'auto') {
     const phone = parsePhone(rawPhone)
+    // Codes cost money on either channel: none go where SMS is off (SMS_ALLOWED_COUNTRY_CODES).
+    if (!this.sms.canSendTo(phone)) {
+      const codes = this.config.get('SMS_ALLOWED_COUNTRY_CODES', { infer: true })
+      throw new BadRequestException(
+        `Вход пока доступен только по номерам ${codes.map((code) => `+${code}`).join(', ')}`,
+      )
+    }
     const now = Date.now()
     const recent = await this.codes.find({
       where: { phone, createdAt: MoreThan(new Date(now - DAY_MS)) },
@@ -103,15 +110,23 @@ export class AuthService {
       where: { phone, consumedAt: IsNull(), expiresAt: MoreThan(new Date()) },
       order: { createdAt: 'DESC' },
     })
-    if (!otp || otp.attempts >= OTP.maxAttempts) {
-      throw new BadRequestException('Код устарел — запросите новый')
-    }
+    if (!otp) throw new BadRequestException('Код устарел — запросите новый')
+    // The attempt is taken before the code is compared, in one statement: parallel guesses
+    // cannot all read «0 attempts» and try far more than five codes.
+    const taken = await this.codes
+      .createQueryBuilder()
+      .update()
+      .set({ attempts: () => '"attempts" + 1' })
+      .where('id = :id AND attempts < :max', { id: otp.id, max: OTP.maxAttempts })
+      .returning(['attempts'])
+      .execute()
+    const attempts = (taken.raw as { attempts: number }[])[0]?.attempts
+    if (attempts === undefined) throw new BadRequestException('Код устарел — запросите новый')
 
     const expected = Buffer.from(otp.codeHash, 'hex')
     const actual = Buffer.from(this.hashCode(phone, code), 'hex')
     if (!timingSafeEqual(expected, actual)) {
-      await this.codes.increment({ id: otp.id }, 'attempts', 1)
-      const left = OTP.maxAttempts - otp.attempts - 1
+      const left = OTP.maxAttempts - attempts
       throw new BadRequestException(
         left > 0 ? `Неверный код, осталось попыток: ${left}` : 'Код устарел — запросите новый',
       )
