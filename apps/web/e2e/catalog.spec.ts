@@ -58,3 +58,30 @@ test.describe('Catalog: endless scroll and similar places', () => {
     await expect(shelf.getByRole('article')).toHaveCount(1)
   })
 })
+
+test.describe('Search forgives how people type', () => {
+  test('typos, the wrong keyboard layout and everyday words still find services', async ({
+    page,
+    request,
+  }) => {
+    // A typo is read as the site's own word, and the page says what was searched instead.
+    await page.goto(`/?q=${encodeURIComponent('стришка')}`)
+    await expect(page.getByRole('heading', { name: '«стрижка»' })).toBeVisible()
+    await expect(page.getByText('Вы искали «стришка»')).toBeVisible()
+    await expect(page.locator('main article').first()).toContainText(/стрижка/i)
+
+    const names = async (q: string) =>
+      (
+        (await (
+          await request.get(`/api/businesses/offers?limit=60&q=${encodeURIComponent(q)}`)
+        ).json()) as { name: string }[]
+      ).map((offer) => offer.name.toLowerCase())
+    // The English layout, Latin letters and words people use for a service.
+    expect((await names('cnhb;rf')).some((name) => name.includes('стрижка'))).toBe(true)
+    expect((await names('strizhka')).some((name) => name.includes('стрижка'))).toBe(true)
+    expect((await names('ногти')).some((name) => name.includes('маникюр'))).toBe(true)
+    expect((await names('покраска')).some((name) => name.includes('окрашивание'))).toBe(true)
+    // Nonsense finds nothing rather than something random.
+    expect(await names('йцукенгш')).toEqual([])
+  })
+})

@@ -181,3 +181,8 @@
 .row > .rating {
   justify-self: end;
 }
+
+/* The trail sits close above the head: the column's gap is for sections, not for it. */
+.crumbs {
+  margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
+}

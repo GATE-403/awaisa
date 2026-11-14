@@ -1,0 +1,11 @@
+.note {
+  padding-top: var(--space-3);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: 1.4;
+}
+
+.note strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}

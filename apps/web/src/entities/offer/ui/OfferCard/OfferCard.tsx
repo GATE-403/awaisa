@@ -3,11 +3,11 @@
 import { Fire, Star } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
-import { addDayKey, formatDuration, formatPrice } from '@/entities/booking'
+import { addDayKey, formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint, useNextFree } from '@/entities/business'
 import type { Offer } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
-import { sizedImage } from '@/shared/lib/imageSizes'
+import { gridImage } from '@/shared/lib/imageSizes'
 import styles from './OfferCard.module.css'
 
 interface OfferCardProps {
@@ -22,9 +22,12 @@ interface OfferCardProps {
   slotText?: string
   /** On the place's own page the place's name and rating would repeat the page head. */
   isPlaceHidden?: boolean
+  /** One of the first cards on screen: its picture loads at once, not lazily. */
+  isPriority?: boolean
 }
 
-// A marketplace product card for a service: picture, price first, what and where, when you can come.
+// A service card: the service, where (the place's name), the price and when — and «Записаться» on
+// it, so it is never taken for a place card (those show a logo, rating and the number of services).
 export const OfferCard = ({
   offer,
   isHit = false,
@@ -33,6 +36,7 @@ export const OfferCard = ({
   linkLabel,
   slotText,
   isPlaceHidden = false,
+  isPriority = false,
 }: OfferCardProps) => {
   const today = useToday()
   const nextFree = useNextFree()
@@ -51,7 +55,11 @@ export const OfferCard = ({
     `/${offer.slug}/book?service=${offer.id}${slot && when ? `&date=${slot.date}` : ''}`
 
   return (
-    <article className={styles.card} aria-label={`${offer.name}, ${offer.businessName}`}>
+    <article
+      className={styles.card}
+      data-card=''
+      aria-label={`${offer.name}, ${offer.businessName}`}
+    >
       <div
         className={styles.media}
         style={{ '--tint': pickTint(offer.businessName) } as CSSProperties}
@@ -59,10 +67,12 @@ export const OfferCard = ({
         {offer.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: already resized WebP from our API
           <img
-            {...sizedImage(offer.coverUrl, 420)}
+            {...gridImage(offer.coverUrl)}
             alt=''
             className={styles.cover}
-            loading='lazy'
+            data-card-media=''
+            loading={isPriority ? 'eager' : 'lazy'}
+            fetchPriority={isPriority ? 'high' : undefined}
             decoding='async'
           />
         ) : (
@@ -103,20 +113,19 @@ export const OfferCard = ({
           </p>
         )}
         <div className={styles.footer}>
-          <p className={styles.price}>
-            {formatPrice(offer.price)}
-            <span className={styles.duration}> · {formatDuration(offer.durationMinutes)}</span>
-          </p>
-          <span
-            className={styles.slot}
-            data-state={
-              slotText ? 'soon' : slot && when ? (when === 'Сегодня' ? 'today' : 'soon') : 'none'
-            }
-          >
-            {slotText ??
-              (slot && when ? `${when} с ${slot.time}` : nextFree ? 'Нет окон рядом' : '\u00a0')}
-          </span>
+          <p className={styles.price}>{formatPrice(offer.price)}</p>
+          {/* Less on the picture: the length is in the booking form, and only a time today is
+              worth a line here («Завтра» and «Нет окон рядом» said little and crowded it). */}
+          {(slotText || (slot && when === 'Сегодня')) && (
+            <span className={styles.slot} data-state={slotText ? 'soon' : 'today'}>
+              {slotText ?? `Сегодня с ${slot?.time}`}
+            </span>
+          )}
         </div>
+        {/* What a tap does, said on the card: a service books, a place card opens the place. */}
+        <span className={styles.book} aria-hidden>
+          Записаться
+        </span>
       </div>
     </article>
   )

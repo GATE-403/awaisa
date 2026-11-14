@@ -117,6 +117,17 @@ const listQuestions = async (slug: string): Promise<QuestionList> => {
   return response.json()
 }
 
+// What a search was read as («cnhb;rf» → «стрижка»), for «Показаны результаты для …».
+const resolveSearch = async (query: string): Promise<{ corrected: string | null }> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(BUSINESSES_TAG)
+
+  const response = await fetch(`${API_URL}/search/resolve?${new URLSearchParams({ q: query })}`)
+  if (!response.ok) return { corrected: null }
+  return response.json()
+}
+
 // The masters' leaderboard for a kind: the same for everyone, refreshed with the catalog.
 const listLeaderboard = async (kind: BusinessKind): Promise<LeaderboardMaster[]> => {
   'use cache'
@@ -221,4 +232,5 @@ export {
   listPopularServices,
   listQuestions,
   listReviews,
+  resolveSearch,
 }

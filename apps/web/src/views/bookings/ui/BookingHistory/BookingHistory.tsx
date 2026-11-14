@@ -76,7 +76,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         {stars}
                       </span>
                     )}
-                    {!isCancelled && stars === null && (
+                    {!isCancelled && !booking.isNoShow && stars === null && (
                       <button
                         type='button'
                         className={styles.rate}

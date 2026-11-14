@@ -27,6 +27,7 @@ import { RankingsModule } from './rankings/rankings.module.js'
 import { RecommendationsModule } from './recommendations/recommendations.module.js'
 import { ReferralsModule } from './referrals/referrals.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
+import { SearchModule } from './search/search.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
 import { WaitlistModule } from './waitlist/waitlist.module.js'
 import { WalletModule } from './wallet/wallet.module.js'
@@ -57,6 +58,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     WalletModule,
     ReviewsModule,
     QuestionsModule,
+    SearchModule,
     WaitlistModule,
     PromotionsModule,
     LoyaltyModule,

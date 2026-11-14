@@ -46,12 +46,20 @@
 
 .barHint {
   overflow: hidden;
-  color: var(--color-link);
+  color: var(--color-muted-foreground);
   font-weight: var(--font-weight-medium);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Ready to book, the line carries the address: two lines rather than an address cut short. */
+.barHint[data-where] {
+  display: -webkit-box;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .barHint[data-error] {

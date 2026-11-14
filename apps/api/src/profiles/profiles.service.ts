@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -10,6 +15,7 @@ import { RankingsService } from '../rankings/rankings.service.js'
 import { interestsOf } from '../recommendations/recommend-score.js'
 import { ReferralsService } from '../referrals/referrals.service.js'
 import { achievementsOf, badgesOf, levelOf } from './profile-badges.js'
+import { LINK_LABELS, linksView, normalizeLinks, type ProfileLinks } from './profile-links.js'
 import { defaultStyle } from './profile-style.js'
 import type { UpdateProfileStyleInput } from './profiles.schemas.js'
 
@@ -65,6 +71,7 @@ export class ProfilesService {
       statusEmoji: customer.statusEmoji ?? '',
       handle: customer.handle ?? null,
       about: customer.about ?? '',
+      links: customer.socialLinks ?? {},
       featuredBadges: customer.featuredBadges ?? [],
       favoriteMasterId: customer.favoriteMasterId ?? null,
       isPublic: customer.isPublic,
@@ -73,6 +80,12 @@ export class ProfilesService {
   }
 
   async updateSettings(customer: Customer, input: UpdateProfileStyleInput) {
+    const cleaned = input.links ? normalizeLinks(input.links) : null
+    if (cleaned && cleaned.invalid.length > 0) {
+      throw new BadRequestException(
+        `Не получилось прочитать: ${cleaned.invalid.map((kind) => LINK_LABELS[kind]).join(', ')}`,
+      )
+    }
     if (input.handle) {
       if (RESERVED_HANDLES.has(input.handle)) throw new ConflictException('Этот адрес занят')
       const [taken] = (await this.dataSource.query(
@@ -92,7 +105,8 @@ export class ProfilesService {
          "about" = COALESCE($10, "about"),
          "featured_badges" = CASE WHEN $11 THEN $12::text[] ELSE "featured_badges" END,
          "favorite_master_id" = CASE WHEN $13 THEN $14 ELSE "favorite_master_id" END,
-         "handle" = CASE WHEN $15 THEN $16 ELSE "handle" END
+         "handle" = CASE WHEN $15 THEN $16 ELSE "handle" END,
+         "social_links" = CASE WHEN $17 THEN $18::jsonb ELSE "social_links" END
        WHERE "id" = $1`,
       [
         customer.id,
@@ -111,6 +125,8 @@ export class ProfilesService {
         input.favoriteMasterId ?? null,
         input.handle !== undefined,
         input.handle ?? null,
+        cleaned !== null,
+        JSON.stringify(cleaned?.links ?? {}),
       ],
     )
     const [updated] = (await this.dataSource.query('SELECT * FROM "customers" WHERE "id" = $1', [
@@ -124,6 +140,7 @@ export class ProfilesService {
       statusEmoji: String(updated?.status_emoji ?? ''),
       handle: (updated?.handle as string | null) ?? null,
       about: String(updated?.about ?? ''),
+      socialLinks: (updated?.social_links as ProfileLinks | null) ?? {},
       featuredBadges: (updated?.featured_badges as string[] | null) ?? [],
       favoriteMasterId: (updated?.favorite_master_id as string | null) ?? null,
       isPublic: Boolean(updated?.is_public),
@@ -260,6 +277,7 @@ export class ProfilesService {
       handle: person.handle,
       friends,
       about: person.about,
+      links: linksView(person.socialLinks),
       // The showcase: the achievements the client chose to show by the name (earned ones only).
       featured: person.featuredBadges
         .map((badgeId) => achievementsOf(stats).find((item) => item.id === badgeId && item.earned))
@@ -348,6 +366,7 @@ export class ProfilesService {
         statusEmoji: String(customer.status_emoji ?? ''),
         handle: (customer.handle as string | null) ?? null,
         about: String(customer.about ?? ''),
+        socialLinks: (customer.social_links as ProfileLinks | null) ?? {},
         featuredBadges: (customer.featured_badges as string[] | null) ?? [],
         favoriteMasterId: (customer.favorite_master_id as string | null) ?? null,
         isPublic: Boolean(customer.is_public),
@@ -374,6 +393,7 @@ export class ProfilesService {
       statusEmoji: '',
       handle: null as string | null,
       about: '',
+      socialLinks: {} as ProfileLinks,
       featuredBadges: [] as string[],
       favoriteMasterId: null as string | null,
       isPublic: true,

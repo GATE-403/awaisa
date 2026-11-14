@@ -29,6 +29,17 @@ interface BookingSummaryProps {
   submitLabel?: string
   /** The card's head: the place's cover (or its tint) with its name, like a ticket's header. */
   place?: { name: string; coverUrl: string | null }
+  /** Where to come (the chosen branch's address): said beside «Записаться», where it is read. */
+  address?: string | null
+}
+
+// The button names the next thing to do (a bare «Далее» left people unsure that a time was still
+// to be picked); the line over it says how far along they are.
+const NEXT_STEP_ACTIONS: Record<BookingStepId, string> = {
+  service: 'Выбрать услугу',
+  specialist: 'Выбрать мастера',
+  datetime: 'Выбрать время',
+  contacts: 'Ввести контакты',
 }
 
 const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
@@ -38,9 +49,21 @@ const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
   contacts: 'Оставьте контакты',
 }
 
+const dayShortFormatter = new Intl.DateTimeFormat('ru-RU', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+})
+
+// «сб, 14 нояб.» — short enough to leave room for the address on the same line.
+const formatDayShort = (dayKey: string) => dayShortFormatter.format(new Date(`${dayKey}T00:00:00Z`))
+
+const STEPS: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
+
 const getButtonLabel = (firstIncompleteStep: BookingStepId | null, isSubmitting: boolean) => {
   if (isSubmitting) return 'Записываем…'
-  if (firstIncompleteStep) return 'Далее'
+  if (firstIncompleteStep) return NEXT_STEP_ACTIONS[firstIncompleteStep]
 
   return 'Записаться'
 }
@@ -59,6 +82,7 @@ export const BookingSummary = ({
   quote = null,
   place,
   submitLabel,
+  address = null,
 }: BookingSummaryProps) => {
   const total = quote?.total ?? service?.price ?? null
   const discount = quote?.discount ?? null
@@ -79,11 +103,15 @@ export const BookingSummary = ({
   ]
   const buttonLabel =
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting)
+  // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
+  const shortWhen = dayKey && time ? `${formatDayShort(dayKey)}, ${time}` : null
   const hint = firstIncompleteStep
-    ? NEXT_STEP_HINTS[firstIncompleteStep]
+    ? `Шаг ${STEPS.indexOf(firstIncompleteStep) + 1} из ${STEPS.length}`
     : service?.deposit
       ? `${whenLabel} · предоплата ${formatPrice(service.deposit)}`
-      : whenLabel
+      : address
+        ? `${shortWhen} · ${address}`
+        : whenLabel
 
   if (variant === 'bar') {
     return (
@@ -106,6 +134,7 @@ export const BookingSummary = ({
           <span
             className={styles.barHint}
             data-error={errorMessage ? true : undefined}
+            data-where={!firstIncompleteStep && address ? true : undefined}
             aria-live='polite'
           >
             {errorMessage ?? hint}

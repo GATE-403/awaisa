@@ -58,7 +58,36 @@ test.describe('«Работы» feed', () => {
       await guest.goto(`/feed?start=${photoId}`)
       const card = guest.getByRole('article').first()
       await expect(card.getByRole('heading', { name: service.name })).toBeVisible()
-      const book = card.getByRole('link', { name: 'Записаться' })
+      // The master is the card's author: their face books them.
+      await expect(
+        card.getByRole('link', { name: `Записаться к мастеру ${master.name}` }),
+      ).toHaveAttribute('href', `/${SLUG}/book?specialist=${master.id}`)
+
+      // «Нравится» counts once per device and goes back; a double tap on the photo likes it.
+      const like = card.getByRole('button', { name: /^Нравится/ })
+      await like.click()
+      await expect(like).toHaveAttribute('aria-pressed', 'true')
+      await expect(like).toHaveAccessibleName('Нравится: 1')
+      await like.click()
+      await expect(like).toHaveAttribute('aria-pressed', 'false')
+      const photo = card.getByRole('img', { name: `Работа: ${service.name}` })
+      await photo.dblclick()
+      await expect(like).toHaveAttribute('aria-pressed', 'true')
+      await expect
+        .poll(async () => {
+          const feed = await (await guest.request.get(`/api/feed?start=${photoId}`)).json()
+          return feed.items.find((item: { id: string }) => item.id === photoId)?.likes
+        })
+        .toBeGreaterThanOrEqual(0)
+
+      // Reviews of this service with this master open over the feed.
+      await card.getByRole('button', { name: /^Отзывы/ }).click()
+      const reviews = guest.getByRole('dialog', { name: /^Отзывы/ })
+      await expect(reviews).toBeVisible()
+      await reviews.getByRole('button', { name: 'Готово' }).click()
+      await expect(reviews).toBeHidden()
+
+      const book = card.getByRole('link', { name: 'Записаться', exact: true })
       await expect(book).toHaveAttribute(
         'href',
         new RegExp(`^/${SLUG}/book\\?service=${service.id}&specialist=${master.id}`),

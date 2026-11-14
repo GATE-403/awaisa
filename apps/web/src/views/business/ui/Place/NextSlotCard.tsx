@@ -2,7 +2,7 @@
 
 import { ArrowRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { type CSSProperties, useSyncExternalStore } from 'react'
+import { type CSSProperties, useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
 import { pickTint } from '@/entities/business'
@@ -30,11 +30,27 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   const slot = useNextSlot(service.id)
   const draft = useBookingDraft()
   const isTucked = useTuckOnScroll()
+  // One way to book on screen at a time: while the head's «Записаться» is in view the pill waits,
+  // so it does not cover the menu right under the head when the page opens.
+  const [isHeadBookVisible, setIsHeadBookVisible] = useState(true)
   const isMounted = useSyncExternalStore(
     subscribeNoop,
     () => true,
     () => false,
   )
+  useEffect(() => {
+    const button = document.querySelector('[data-place-book]')
+    if (!button) {
+      setIsHeadBookVisible(false)
+      return
+    }
+    const observer = new IntersectionObserver(([entry]) =>
+      setIsHeadBookVisible(Boolean(entry?.isIntersecting)),
+    )
+    observer.observe(button)
+    return () => observer.disconnect()
+  }, [])
+
   const href = slot
     ? `/${business.slug}/book?service=${service.id}&specialist=any&date=${slot.date}&time=${slot.time}`
     : `/${business.slug}/book?service=${service.id}`
@@ -50,7 +66,7 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
     <aside
       className={styles.slotCard}
       aria-label='Ближайшее окно'
-      data-tucked={isTucked || undefined}
+      data-tucked={isTucked || isHeadBookVisible || undefined}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
       <NextLink

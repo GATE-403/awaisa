@@ -154,11 +154,16 @@ const getReviewer = (id: string, signal?: AbortSignal) =>
 // A place's reviews on the client (the booking form asks for those of the chosen service).
 const listPlaceReviews = (
   slug: string,
-  { serviceId, limit = 3 }: { serviceId?: string; limit?: number },
+  {
+    serviceId,
+    specialistId,
+    limit = 3,
+  }: { serviceId?: string; specialistId?: string; limit?: number },
   signal?: AbortSignal,
 ) => {
   const params = new URLSearchParams({ limit: String(limit) })
   if (serviceId) params.set('serviceId', serviceId)
+  if (serviceId && specialistId) params.set('specialistId', specialistId)
   return request<ReviewSummary>(`/businesses/${encodeURIComponent(slug)}/reviews?${params}`, {
     signal,
   })
@@ -175,6 +180,21 @@ const getMapPlaces = (
 
   return request<MapPlace[]>(`/map?${query}`, { signal })
 }
+
+// Each service of a place with its first free time today or tomorrow (the booking form's list).
+const getServicesNextFree = (slug: string, branchId?: string, signal?: AbortSignal) => {
+  const params = new URLSearchParams(branchId ? { branchId } : {})
+  return request<NextFree>(`/businesses/${encodeURIComponent(slug)}/next-free-services?${params}`, {
+    signal,
+  })
+}
+
+// «Нравится» in «Работы»: one per photo and device session; answers the photo's count.
+const likeFeedItem = (id: string, session: string, isLiked: boolean) =>
+  request<{ likes: number }>(`/feed/${id}/${isLiked ? 'like' : 'unlike'}`, {
+    method: 'POST',
+    body: JSON.stringify({ session }),
+  })
 
 const getNextFree = (slugs: string[], signal?: AbortSignal) =>
   request<NextFree>(`/next-free?${new URLSearchParams({ slugs: slugs.join(',') })}`, { signal })
@@ -803,6 +823,8 @@ export {
   getMyBookings,
   getMyBusinesses,
   getNextFree,
+  likeFeedItem,
+  getServicesNextFree,
   getRecentBookings,
   getWalletConfig,
   getWalletLinks,

@@ -6,6 +6,7 @@ import {
   listReviews,
   listServicePhotos,
 } from '@/shared/api/serverApi'
+import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { MastersSection } from '@/views/business/ui/Place/MastersSection'
@@ -42,6 +43,13 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
     // The cover runs the full width of the window; everything else keeps the page column.
     <main className={styles.shell}>
       <JsonLd data={buildBusinessJsonLd({ business, catalog }, reviews)} />
+      {/* The business bar shows this trail; search engines get it as markup. */}
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { label: 'Каталог', href: '/' },
+          { label: business.name, href: `/${business.slug}` },
+        ])}
+      />
       <PlaceHeader business={business} catalog={catalog} reviews={reviews} />
       <div className={styles.page}>
         <PromotionsStrip promotions={promotions} />

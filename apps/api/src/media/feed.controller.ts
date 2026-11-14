@@ -24,7 +24,12 @@ import type { Specialist } from '../catalog/specialist.entity.js'
 import { CurrentMaster, MasterGuard } from '../master/master.guard.js'
 import { processImage } from './images.js'
 import { StorageService } from './storage.service.js'
-import { type FeedQuery, feedQuerySchema } from './work-photos.schemas.js'
+import {
+  type FeedQuery,
+  feedQuerySchema,
+  type LikeInput,
+  likeSchema,
+} from './work-photos.schemas.js'
 import { WorkPhotosService } from './work-photos.service.js'
 
 const imageUpload = FileInterceptor('file', {
@@ -45,6 +50,16 @@ export class FeedController {
   @Get('feed')
   feed(@Query({ schema: feedQuerySchema }) query: FeedQuery) {
     return this.workPhotos.feed(query)
+  }
+
+  @Post('feed/:id/like')
+  like(@Param('id', ParseUUIDPipe) id: string, @Body({ schema: likeSchema }) body: LikeInput) {
+    return this.workPhotos.like(id, body.session, true)
+  }
+
+  @Post('feed/:id/unlike')
+  unlike(@Param('id', ParseUUIDPipe) id: string, @Body({ schema: likeSchema }) body: LikeInput) {
+    return this.workPhotos.like(id, body.session, false)
   }
 
   @Post('feed/:id/report')

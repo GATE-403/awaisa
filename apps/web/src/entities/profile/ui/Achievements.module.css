@@ -49,7 +49,8 @@
   font-size: 24px;
   line-height: 1;
   filter: grayscale(1);
-  opacity: 0.45;
+  /* A goal still reads as a picture: grey, but not washed into the page. */
+  opacity: 0.7;
 }
 
 .item[data-earned] .emoji {
@@ -68,7 +69,8 @@
 }
 
 .item:not([data-earned]) .title {
-  color: var(--color-muted-foreground);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
 }
 
 .description {
@@ -82,10 +84,11 @@
   height: 3px;
   margin-top: 2px;
   border-radius: var(--radius-full);
+  /* The progress already made, in the medal's own colour, on a visible track. */
   background: linear-gradient(
     to right,
-    var(--color-tertiary-foreground) var(--done),
-    var(--color-fill) 0
+    var(--medal, var(--color-primary)) var(--done),
+    color-mix(in srgb, var(--color-foreground) 14%, transparent) 0
   );
 }
 

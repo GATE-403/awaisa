@@ -79,3 +79,24 @@
   align-items: flex-start;
   gap: var(--space-3);
 }
+
+.caption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+.captionCount {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+/* «Сегодня» / «Завтра» read as words, not as a quiet weekday. */
+.weekday[data-relative] {
+  font-weight: var(--font-weight-semibold);
+  opacity: 1;
+}

@@ -243,9 +243,9 @@ export class ReviewsService {
     return { photos: rows.map((row) => row.url) }
   }
 
-  async listPublic(slug: string, limit: number, serviceId?: string) {
+  async listPublic(slug: string, limit: number, serviceId?: string, specialistId?: string) {
     const business = await this.businesses.findBySlug(slug)
-    return this.summary(business, limit, false, serviceId)
+    return this.summary(business, limit, false, serviceId, specialistId)
   }
 
   async listForManage(business: Business) {
@@ -296,10 +296,18 @@ export class ReviewsService {
     )
   }
 
-  private async summary(business: Business, limit: number, isManage = false, serviceId?: string) {
+  private async summary(
+    business: Business,
+    limit: number,
+    isManage = false,
+    serviceId?: string,
+    specialistId?: string,
+  ) {
     const clientRanks = await this.rankings.clientRanks()
-    const params = serviceId ? [business.id, serviceId] : [business.id]
-    const byService = serviceId ? ` AND "service_id" = $2` : ''
+    const params = serviceId ? [business.id, serviceId, specialistId ?? null] : [business.id]
+    const byService = serviceId
+      ? ` AND "service_id" = $2 AND ($3::text IS NULL OR "specialist_id" = $3)`
+      : ''
     const [totals] = (await this.dataSource.query(
       `SELECT COUNT(*)::int AS "count", COALESCE(round(avg("rating")::numeric, 1), 0)::float AS "average",
          COUNT(*) FILTER (WHERE "rating" = 5)::int AS "r5", COUNT(*) FILTER (WHERE "rating" = 4)::int AS "r4",
@@ -321,9 +329,13 @@ export class ReviewsService {
        LEFT JOIN "customers" c ON c."phone" = b."customer_phone"
        LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
        LEFT JOIN "services" s ON s."id" = r."service_id"
-       WHERE r."business_id" = $1${serviceId ? ' AND r."service_id" = $3' : ''}
+       WHERE r."business_id" = $1${
+         serviceId
+           ? ' AND r."service_id" = $3 AND ($4::text IS NULL OR r."specialist_id" = $4)'
+           : ''
+       }
        ORDER BY r."created_at" DESC LIMIT $2`,
-      serviceId ? [business.id, limit, serviceId] : [business.id, limit],
+      serviceId ? [business.id, limit, serviceId, specialistId ?? null] : [business.id, limit],
     )) as ReviewRow[]
 
     return {
@@ -345,7 +357,11 @@ export class ReviewsService {
   }
 
   private canReview(booking: Booking) {
-    return booking.status === 'confirmed' && booking.endsAt.getTime() <= Date.now()
+    return (
+      booking.status === 'confirmed' &&
+      booking.outcome !== 'no_show' &&
+      booking.endsAt.getTime() <= Date.now()
+    )
   }
 
   private async authorize(bookingId: string, { token, signature, customer }: Access) {

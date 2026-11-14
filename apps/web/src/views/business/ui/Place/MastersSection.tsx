@@ -46,6 +46,7 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
               href={`/${business.slug}/book?specialist=${specialist.id}`}
               aria-label={`${specialist.name}, ${specialist.role || 'мастер'}`}
               className={styles.master}
+              data-card=''
               style={{ '--tint': pickTint(specialist.name) } as CSSProperties}
             >
               {specialist.photoUrl ? (
@@ -54,6 +55,7 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
                   {...sizedImage(specialist.photoUrl, 180)}
                   alt=''
                   className={styles.masterPhoto}
+                  data-card-media=''
                   loading='lazy'
                   decoding='async'
                 />

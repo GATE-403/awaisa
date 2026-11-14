@@ -40,6 +40,13 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
       <p className={styles.lead}>
         {formatDayLong(booking.date)} в {booking.time} · {booking.business.name}
       </p>
+      {/* What to do now, in plain words: someone new to this does not read a barcode. */}
+      <p className={styles.nextStep}>
+        Приходите к {booking.time}
+        {booking.business.address ? ` по адресу ${booking.business.address}` : ''}.{' '}
+        {booking.payment?.status === 'paid' ? 'Остаток оплатите в салоне.' : 'Оплата в салоне.'}{' '}
+        Перенести или отменить можно по ссылке из SMS.
+      </p>
       {/* The ticket itself opens the full one: details, place, download. */}
       <button
         type='button'

@@ -23,6 +23,15 @@ const updateProfileStyleSchema = z.object({
     .optional(),
   featuredBadges: z.array(z.string().max(32)).max(3).optional(),
   favoriteMasterId: z.string().max(64).nullable().optional(),
+  /** Pasted handles or links; '' clears one (cleaned by `normalizeLinks`). */
+  links: z
+    .object({
+      instagram: z.string().max(200).optional(),
+      telegram: z.string().max(200).optional(),
+      tiktok: z.string().max(200).optional(),
+      website: z.string().max(200).optional(),
+    })
+    .optional(),
   isPublic: z.boolean().optional(),
   showPlaces: z.boolean().optional(),
 })

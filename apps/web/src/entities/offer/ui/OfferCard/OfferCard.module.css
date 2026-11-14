@@ -170,13 +170,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.duration {
-  color: rgb(255 255 255 / 0.75);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-caption);
-}
-
 .slot {
   overflow: hidden;
   color: rgb(255 255 255 / 0.7);
@@ -239,10 +232,38 @@
   left: calc(var(--space-2) + 60px);
 }
 
-/* Phones: the place's name and rating would crowd the picture — the service, price and time stay. */
+/* Phones: the rating would crowd the line; the place's name stays — it tells a service from a place. */
 @media (max-width: 639px) {
-  .place {
+  .rating {
     display: none;
+  }
+}
+
+/* A small white capsule like a store's «Купить»: the card is one link, this only says what it does. */
+.book {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 5px var(--space-3);
+  border-radius: var(--radius-full);
+  background: #fff;
+  color: #1d1d1f;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-semibold);
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+/* Pointing at the card lights the capsule up in the accent: this is what a click does. */
+@media (hover: hover) and (pointer: fine) {
+  .book {
+    transition:
+      background-color var(--duration-normal) var(--ease-standard),
+      color var(--duration-normal) var(--ease-standard);
+  }
+
+  .card:hover .book {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
   }
 }
 

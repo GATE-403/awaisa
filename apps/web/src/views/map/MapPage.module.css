@@ -391,3 +391,61 @@
 .panel::-webkit-scrollbar {
   display: none;
 }
+
+/* Phones, list on the whole screen: a floating «Карта» capsule above the tab bar (and above the
+   «Продолжить запись» pill when it is there) brings the map back. */
+.showMap {
+  position: fixed;
+  bottom: calc(var(--tabbar-space, 0px) + var(--resume-space, 0px) + var(--space-3));
+  left: 50%;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-height-md);
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-foreground);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-background);
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  translate: -50% 0;
+  animation: showMapIn 240ms var(--ease-spring);
+}
+
+.showMap svg {
+  width: 18px;
+  height: 18px;
+}
+
+.showMap:active {
+  scale: 0.97;
+}
+
+.showMap:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--shadow-lg);
+}
+
+@keyframes showMapIn {
+  from {
+    opacity: 0;
+    translate: -50% 12px;
+  }
+}
+
+@media (min-width: 900px) {
+  .showMap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showMap {
+    animation: none;
+  }
+}

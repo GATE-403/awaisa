@@ -18,14 +18,15 @@ const bookingSteps = (page: Page) => ({
 
 const primaryAction = (page: Page) =>
   page
-    .getByRole('button', { name: /^(Далее|Проверить запись|Записаться|Записываем…)$/ })
+    .getByRole('button', {
+      name: /^(Выбрать услугу|Выбрать мастера|Выбрать время|Ввести контакты|Записаться|Записываем…)$/,
+    })
     .filter({ visible: true })
 
-// Everything filled: the first press opens «Проверьте запись», the second books.
+// Everything filled: one press books (a quick time picked with one tap shows the check card,
+// which carries its own «Записаться»).
 const submitBooking = async (page: Page) => {
-  await primaryAction(page).click()
-  await page.getByRole('heading', { name: 'Проверьте запись' }).waitFor()
-  await page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).click()
+  await page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).first().click()
 }
 
 const pickFirstFreeSlot = async (page: Page) => {
@@ -101,7 +102,21 @@ const cancelViaApi = async (booking: CreatedBooking) => {
   })
 }
 
+// On phones the «Ближайшее окно» pill waits until the head's «Записаться» is off screen and the
+// page is not moving down: scroll well past the head, then a little back up, like a reader would.
+const revealNextSlot = async (page: Page) => {
+  await page.locator('[data-place-book]').first().waitFor()
+  await page.waitForLoadState('networkidle').catch(() => {})
+  for (let step = 0; step < 4; step += 1) {
+    await page.mouse.wheel(0, 600)
+    await page.waitForTimeout(150)
+  }
+  await page.mouse.wheel(0, -200)
+  await page.waitForTimeout(400)
+}
+
 export {
+  revealNextSlot,
   API_URL,
   MIN_TAP_TARGET,
   bookingSteps,

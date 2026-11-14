@@ -100,7 +100,7 @@ export class ReviewsController {
     @Param('slug') slug: string,
     @Query({ schema: reviewsQuerySchema }) query: ReviewsQuery,
   ) {
-    return this.reviews.listPublic(slug, query.limit, query.serviceId)
+    return this.reviews.listPublic(slug, query.limit, query.serviceId, query.specialistId)
   }
 
   // Another client's public page: their reviews across places, opened from a review.

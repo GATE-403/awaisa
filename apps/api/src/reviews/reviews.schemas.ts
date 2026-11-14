@@ -13,6 +13,8 @@ const reviewsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
   /** Only reviews of this service (the booking form shows what people said about it). */
   serviceId: z.string().trim().min(1).max(64).optional(),
+  /** With `serviceId`: only this master's (the «Работы» feed asks about one photo's master). */
+  specialistId: z.string().trim().min(1).max(64).optional(),
 })
 
 const reviewerIdSchema = z.string().regex(/^[0-9a-f]{20}$/)

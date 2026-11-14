@@ -187,3 +187,12 @@
   color: var(--color-link);
   font-size: var(--text-body);
 }
+
+.nextStep {
+  max-width: 340px;
+  margin: var(--space-1) auto 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: 1.45;
+  text-align: center;
+}

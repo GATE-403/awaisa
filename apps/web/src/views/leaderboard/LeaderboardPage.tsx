@@ -3,6 +3,7 @@ import NextLink from 'next/link'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { BusinessKind, LeaderboardMaster, LeaderboardPlace } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './LeaderboardPage.module.css'
 import { BoardViewSwitch } from './ui/BoardViewSwitch'
@@ -95,6 +96,14 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
   return (
     <main className={styles.page}>
       <div className={styles.column}>
+        <Breadcrumbs
+          align='center'
+          className={styles.crumbs}
+          items={[
+            { label: 'Каталог', href: '/' },
+            { label: 'Рейтинг', href: `/top?kind=${kind}${isPlaces ? '&view=places' : ''}` },
+          ]}
+        />
         <header className={styles.head}>
           <h1 className={styles.title}>{isPlaces ? board?.places : board?.masters}</h1>
           <p className={styles.lead}>По отзывам клиентов в Awaisa</p>

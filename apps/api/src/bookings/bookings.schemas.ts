@@ -46,6 +46,12 @@ const nextFreeQuerySchema = z.object({
 
 const moveBookingSchema = z.object({ date: DATE_SCHEMA, time: TIME_SCHEMA })
 
+// The booking form's service list: each service's first free time today or tomorrow.
+const servicesNextFreeQuerySchema = z.object({
+  branchId: z.string().trim().min(1).max(64).optional(),
+})
+
+type ServicesNextFreeQuery = z.infer<typeof servicesNextFreeQuerySchema>
 type MoveByClientInput = z.infer<typeof moveBookingSchema>
 
 const bookingTokenSchema = z.string().trim().min(16).max(128)
@@ -56,11 +62,18 @@ type CreateBookingInput = z.infer<typeof createBookingSchema>
 
 type NextFreeQuery = z.output<typeof nextFreeQuerySchema>
 
-export type { AvailabilityQuery, CreateBookingInput, MoveByClientInput, NextFreeQuery }
+export type {
+  AvailabilityQuery,
+  CreateBookingInput,
+  MoveByClientInput,
+  NextFreeQuery,
+  ServicesNextFreeQuery,
+}
 export {
   availabilityQuerySchema,
   bookingTokenSchema,
   createBookingSchema,
   moveBookingSchema,
   nextFreeQuerySchema,
+  servicesNextFreeQuerySchema,
 }

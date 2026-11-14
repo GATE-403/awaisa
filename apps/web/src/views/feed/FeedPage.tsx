@@ -1,12 +1,13 @@
 'use client'
 
-import { NavigationArrow } from '@phosphor-icons/react/ssr'
+import { CaretDown, CaretUp, NavigationArrow } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import styles from './FeedPage.module.css'
+import { useFeedLikes } from './model/useFeedLikes'
 import { FeedCard } from './ui/FeedCard'
 
 interface FeedPageProps {
@@ -30,6 +31,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const loadingRef = useRef(false)
+  const likes = useFeedLikes()
   // `start` keeps the tapped photo first, so later pages follow the same order.
   const query = { kind, business, start, ...(point ?? {}) }
 
@@ -83,6 +85,11 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       })
   }, [active, items.length, nextOffset])
 
+  const turn = (step: 1 | -1) => {
+    const scroller = scrollerRef.current
+    scroller?.scrollBy({ top: step * scroller.clientHeight, behavior: 'smooth' })
+  }
+
   const showNearby = () => {
     if (point || !navigator.geolocation) return
     setIsLocating(true)
@@ -105,29 +112,17 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   return (
     <main className={styles.page}>
       <h1 className={styles.visuallyHidden}>Работы мастеров</h1>
+      {/* Text tabs over the picture, like a short-video feed's top: no plates to hide the work. */}
       <nav className={styles.filters} aria-label='Категории работ'>
         {!business && (
-          <>
-            <NextLink
-              href='/feed'
-              className={styles.chip}
-              aria-current={!kind ? 'page' : undefined}
-              scroll={false}
-            >
-              Все
-            </NextLink>
-            {BUSINESS_KINDS.filter((item) => item.value !== 'other').map((item) => (
-              <NextLink
-                key={item.value}
-                href={`/feed?kind=${item.value}`}
-                className={styles.chip}
-                aria-current={kind === item.value ? 'page' : undefined}
-                scroll={false}
-              >
-                {item.label}
-              </NextLink>
-            ))}
-          </>
+          <NextLink
+            href='/feed'
+            className={styles.chip}
+            aria-current={!kind ? 'page' : undefined}
+            scroll={false}
+          >
+            Все
+          </NextLink>
         )}
         <button
           type='button'
@@ -139,7 +134,43 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
           <NavigationArrow weight='fill' aria-hidden />
           {isLocating ? 'Ищем…' : 'Рядом'}
         </button>
+        {!business &&
+          BUSINESS_KINDS.filter((item) => item.value !== 'other').map((item) => (
+            <NextLink
+              key={item.value}
+              href={`/feed?kind=${item.value}`}
+              className={styles.chip}
+              aria-current={kind === item.value ? 'page' : undefined}
+              scroll={false}
+            >
+              {item.label}
+            </NextLink>
+          ))}
       </nav>
+
+      {/* With a mouse: the next and previous work, like Shorts' arrows (keys work too). */}
+      {items.length > 1 && (
+        <div className={styles.turns}>
+          <button
+            type='button'
+            className={styles.turn}
+            aria-label='Предыдущая работа'
+            disabled={active === 0}
+            onClick={() => turn(-1)}
+          >
+            <CaretUp weight='bold' aria-hidden />
+          </button>
+          <button
+            type='button'
+            className={styles.turn}
+            aria-label='Следующая работа'
+            disabled={active >= items.length - 1}
+            onClick={() => turn(1)}
+          >
+            <CaretDown weight='bold' aria-hidden />
+          </button>
+        </div>
+      )}
 
       <div
         ref={scrollerRef}
@@ -167,6 +198,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             index={index}
             isActive={index === active}
             isNear={Math.abs(index - active) <= 1}
+            isLiked={likes.isLiked(item.id)}
+            onLike={(isLiked) => likes.setLiked(item.id, isLiked)}
           />
         ))}
       </div>

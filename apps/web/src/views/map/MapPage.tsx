@@ -2,14 +2,23 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { NavigationArrow } from '@phosphor-icons/react/ssr'
+import { MapTrifold, NavigationArrow } from '@phosphor-icons/react/ssr'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
-import { type MouseEvent, type PointerEvent, type UIEvent, useRef, useState } from 'react'
+import {
+  type MouseEvent,
+  type PointerEvent,
+  type UIEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { flushSync } from 'react-dom'
 import { NextFreeProvider } from '@/entities/business'
+import { PlacePickerSheet } from '@/features/myPlace'
 import type { BusinessKind, MapPlace } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { useMyPlace } from '@/shared/lib/myPlace'
 import { pluralize } from '@/shared/lib/plural'
 import type { Point } from '@/shared/ui/MapView/MapView'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -22,8 +31,6 @@ const MapView = dynamic(
   () => import('@/shared/ui/MapView/MapView').then((module) => module.MapView),
   { ssr: false, loading: () => <div className={styles.mapPlaceholder} /> },
 )
-
-type LocationState = 'idle' | 'locating' | 'denied'
 
 // Phones: how much of the screen the map keeps above the list, like Apple Maps' sheet detents.
 type Detent = 'peek' | 'half' | 'full'
@@ -46,8 +53,10 @@ interface MapPageProps {
 }
 
 export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPageProps) => {
-  const [location, setLocation] = useState<Point | null>(null)
-  const [locationState, setLocationState] = useState<LocationState>('idle')
+  const myPlace = useMyPlace()
+  // The place picked by hand or the browser's location — kept on the device for next time.
+  const location: Point | null = myPlace ? { latitude: myPlace.lat, longitude: myPlace.lng } : null
+  const [isPicking, setIsPicking] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [detent, setDetent] = useState<Detent>('half')
   const layoutRef = useRef<HTMLDivElement>(null)
@@ -68,21 +77,64 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
   const markers = toMarkers(places)
   const slugs = [...new Set(places.map((place) => place.slug))]
 
-  const locate = () => {
-    if (!navigator.geolocation) {
-      setLocationState('denied')
-      return
+  const detentRef = useRef(detent)
+  detentRef.current = detent
+
+  // Pulling the list down from its very top carries on as a drag of the sheet itself, which then
+  // settles lower or collapses — like Apple Maps; before, the list just stopped at its first row.
+  // Touch events, not pointer ones: a scroll container cancels the pointer once it scrolls.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handlers read refs; bound once
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+    let start: { x: number; y: number; isFromList: boolean } | null = null
+    const handleStart = (event: TouchEvent) => {
+      const touch = event.touches[0]
+      const target = event.target as HTMLElement | null
+      // The head has its own drag; only a pull that starts in the list is handled here.
+      start =
+        touch && !target?.closest('header')
+          ? { x: touch.clientX, y: touch.clientY, isFromList: true }
+          : null
     }
-    setLocationState('locating')
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setLocation({ latitude: coords.latitude, longitude: coords.longitude })
-        setLocationState('idle')
-      },
-      () => setLocationState('denied'),
-      { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
-    )
-  }
+    const handleMove = (event: TouchEvent) => {
+      const touch = event.touches[0]
+      if (!start || !touch || window.innerWidth >= 900) return
+      if (!drag.current) {
+        const dy = touch.clientY - start.y
+        const dx = touch.clientX - start.x
+        if (panel.scrollTop > 0 || dy < 8 || Math.abs(dx) > Math.abs(dy)) return
+        const layout = layoutRef.current
+        if (!layout) return
+        drag.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+          map: layout.clientHeight * MAP_SHARE[detentRef.current],
+          height: layout.clientHeight,
+          t: event.timeStamp,
+          v: 0,
+          axis: 'y',
+          pointerId: -1,
+        }
+      }
+      event.preventDefault()
+      follow(touch.clientY, event.timeStamp)
+    }
+    const handleEnd = () => {
+      start = null
+      if (drag.current?.pointerId === -1) endDrag()
+    }
+    panel.addEventListener('touchstart', handleStart, { passive: true })
+    panel.addEventListener('touchmove', handleMove, { passive: false })
+    panel.addEventListener('touchend', handleEnd)
+    panel.addEventListener('touchcancel', handleEnd)
+    return () => {
+      panel.removeEventListener('touchstart', handleStart)
+      panel.removeEventListener('touchmove', handleMove)
+      panel.removeEventListener('touchend', handleEnd)
+      panel.removeEventListener('touchcancel', handleEnd)
+    }
+  }, [])
 
   const select = (id: string) => {
     setSelectedId(id)
@@ -108,10 +160,26 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
     }
   }
 
+  // Moves the sheet under the finger: a transform only, no layout. The map is resized once, when
+  // the sheet settles — resizing Leaflet every frame is what made it stutter on phones.
+  const follow = (clientY: number, timeStamp: number) => {
+    const state = drag.current
+    if (!state) return
+    const map = Math.min(Math.max(state.map + clientY - state.y, 0), state.height * 0.85)
+    const dt = Math.max(timeStamp - state.t, 1)
+    state.v = (map - (state.lastMap ?? state.map)) / dt
+    state.lastMap = map
+    state.t = timeStamp
+    const panel = panelRef.current
+    if (panel) {
+      panel.style.transition = 'none'
+      panel.style.transform = `translateY(${map - state.map}px)`
+    }
+  }
+
   const moveDrag = (event: PointerEvent<HTMLElement>) => {
     const state = drag.current
-    const layout = layoutRef.current
-    if (!state || !layout) return
+    if (!state || !layoutRef.current) return
     const dx = event.clientX - state.x
     const delta = event.clientY - state.y
     if (!state.axis) {
@@ -120,18 +188,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
       if (state.axis === 'y') event.currentTarget.setPointerCapture(state.pointerId)
     }
     if (state.axis !== 'y') return
-    const map = Math.min(Math.max(state.map + delta, 0), state.height * 0.85)
-    const dt = Math.max(event.timeStamp - state.t, 1)
-    state.v = (map - (state.lastMap ?? state.map)) / dt
-    state.lastMap = map
-    state.t = event.timeStamp
-    // Only the sheet moves under the finger (a transform, no layout); the map is resized once,
-    // when the sheet settles — resizing Leaflet every frame is what made it stutter on phones.
-    const panel = panelRef.current
-    if (panel) {
-      panel.style.transition = 'none'
-      panel.style.transform = `translateY(${map - state.map}px)`
-    }
+    follow(event.clientY, event.timeStamp)
   }
 
   const endDrag = () => {
@@ -239,24 +296,20 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
                     ? `${pluralize(places.length, ['место', 'места', 'мест'])}, ближайшие сверху`
                     : pluralize(places.length, ['место', 'места', 'мест'])}
               </p>
+              {/* Where the visitor is: the browser's location or a district by name — the list
+                  is sorted from there and the map shows the spot. */}
               <Button
                 variant={location ? 'secondary' : 'outline'}
                 size='sm'
-                onClick={locate}
-                disabled={locationState === 'locating'}
+                onClick={() => setIsPicking(true)}
               >
                 <NavigationArrow weight='fill' aria-hidden />
-                {locationState === 'locating'
-                  ? 'Определяем…'
-                  : location
-                    ? 'Обновить место'
-                    : 'Рядом со мной'}
+                {myPlace ? myPlace.label : 'Где вы?'}
               </Button>
             </div>
-            {locationState === 'denied' && (
-              <p className={styles.hint} aria-live='polite'>
-                Нет доступа к геопозиции — разрешите его в настройках браузера или найдите место на
-                карте.
+            {!location && (
+              <p className={styles.hint}>
+                Укажите, где вы, — покажем ближайшие места и точку на карте.
               </p>
             )}
             {error && (
@@ -292,6 +345,22 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
           )}
         </section>
 
+        {isPicking && <PlacePickerSheet onClose={() => setIsPicking(false)} />}
+        {detent === 'full' && (
+          // The list over the whole screen hides the map: one floating button brings it back,
+          // like «Карта» in a listings app — the grabber alone was not found.
+          <button
+            type='button'
+            className={styles.showMap}
+            onClick={() => {
+              panelRef.current?.scrollTo({ top: 0 })
+              settle('half')
+            }}
+          >
+            <MapTrifold weight='fill' aria-hidden />
+            Карта
+          </button>
+        )}
         <div className={styles.mapArea}>
           <MapView
             markers={markers}

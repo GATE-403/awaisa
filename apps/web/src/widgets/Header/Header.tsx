@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  Compass,
   MapPin,
   MapTrifold,
   PlayCircle,
@@ -129,7 +130,7 @@ export const Header = () => {
           className={styles.catalog}
           aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
         >
-          <SquaresFour weight='fill' aria-hidden />
+          <Compass weight='fill' aria-hidden />
           Каталог
         </NextLink>
         {!isSlim && (

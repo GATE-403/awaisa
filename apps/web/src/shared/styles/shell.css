@@ -150,3 +150,72 @@ body {
 html {
   scrollbar-gutter: stable;
 }
+
+/* Picture cards (`data-card`): one response everywhere. With a mouse the picture slowly zooms
+   inside its frame and the card settles on a deeper shadow; a press sinks it at once, on touch
+   too. No lift: in sideways shelves a raised card would be clipped at the top. */
+:root [data-card] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    box-shadow var(--duration-normal) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+:root [data-card] [data-card-media] {
+  transition: scale 600ms var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root [data-card]:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  :root [data-card]:hover [data-card-media] {
+    scale: 1.06;
+  }
+}
+
+:root [data-card]:active {
+  scale: 0.97;
+  transition-duration: 80ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root [data-card],
+  :root [data-card] [data-card-media] {
+    transition: none;
+  }
+
+  :root [data-card]:hover [data-card-media] {
+    scale: none;
+  }
+}
+
+/* Wide desktops: the page column grows so a 1440px+ window does not frame the catalog with empty
+   bands; the catalog grids take a fifth column at the same width. */
+@media (min-width: 1400px) {
+  :root {
+    --layout-container-width: 1280px;
+  }
+}
+
+/* Dark theme: shadows vanish on black, so picture cards get a faint light edge instead (an
+   outline paints above the picture, keeping the card's own corners). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-card] {
+    outline: 1px solid rgb(255 255 255 / 0.09);
+    outline-offset: -1px;
+  }
+}
+
+:root[data-theme="dark"] [data-card] {
+  outline: 1px solid rgb(255 255 255 / 0.09);
+  outline-offset: -1px;
+}
+
+/* …while the keyboard focus ring still wins over that edge. */
+:root [data-card]:is(:focus-visible, :has(:focus-visible)) {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}

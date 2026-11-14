@@ -26,7 +26,7 @@ const initialsOf = (name: string) =>
 // accent ring and a check; native radios cover each card.
 export const MasterPicker = ({ specialists, value, onChange }: MasterPickerProps) => (
   <div className={styles.row} role='radiogroup' aria-label='Мастер' data-edge-fade=''>
-    <label className={styles.card} data-any=''>
+    <label className={styles.card} data-any='' data-card=''>
       <input
         type='radio'
         name='specialist'
@@ -48,6 +48,7 @@ export const MasterPicker = ({ specialists, value, onChange }: MasterPickerProps
       <label
         key={specialist.id}
         className={styles.card}
+        data-card=''
         style={{ '--tint': pickTint(specialist.name) } as CSSProperties}
       >
         <input
@@ -64,6 +65,7 @@ export const MasterPicker = ({ specialists, value, onChange }: MasterPickerProps
             {...sizedImage(specialist.photoUrl, 120)}
             alt=''
             className={styles.photo}
+            data-card-media=''
             loading='lazy'
             decoding='async'
           />
