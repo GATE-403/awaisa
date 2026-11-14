@@ -1,3 +1,4 @@
+import type { AnalyticsDays } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -149,7 +150,7 @@ export class AnalyticsService {
     const booked = current.visits + current.cancelled + current.noShows
 
     return {
-      period: { days, from: firstDay, to: today },
+      period: { days: days as AnalyticsDays, from: firstDay, to: today },
       totals: {
         revenue: current.revenue,
         revenueChange: change(current.revenue, previous.revenue),

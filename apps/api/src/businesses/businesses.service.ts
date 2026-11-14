@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { BusinessLink, MapPlace, Offer } from '@awaisa/contracts'
 import {
   BadRequestException,
   ConflictException,
@@ -202,7 +203,7 @@ export class BusinessesService {
         offset,
         ids && ids.length > 0 ? ids : null,
       ],
-    )) as Record<string, unknown>[]
+    )) as Offer[]
 
     return rows
   }
@@ -337,7 +338,7 @@ export class BusinessesService {
         kind ?? null,
         q ? ((await this.search.resolve(q))?.patterns ?? null) : null,
       ],
-    )) as (Record<string, unknown> & { distanceKm: number | null })[]
+    )) as (Omit<MapPlace, 'latitude' | 'longitude'> & { latitude: string; longitude: string })[]
 
     return rows.map((row) => ({
       ...row,
@@ -570,7 +571,7 @@ export class BusinessesService {
         isPublished,
         coverUrl,
         logoUrl,
-        role: roles.get(id) ?? 'admin',
+        role: (roles.get(id) ?? 'admin') as BusinessLink['role'],
         todayCount: statsById.get(id)?.todayCount ?? 0,
         next: nextParts
           ? { date: nextParts.dateKey, time: formatMinutes(nextParts.minutes) }

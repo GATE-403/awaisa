@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { FeedLikes, FeedPage, UploadedPhoto } from '@awaisa/contracts'
 import {
   BadRequestException,
   Body,
@@ -48,17 +49,23 @@ export class FeedController {
   /** «Работы»: a vertical feed of finished work, each photo one tap from booking it. */
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('feed')
-  feed(@Query({ schema: feedQuerySchema }) query: FeedQuery) {
+  feed(@Query({ schema: feedQuerySchema }) query: FeedQuery): Promise<FeedPage> {
     return this.workPhotos.feed(query)
   }
 
   @Post('feed/:id/like')
-  like(@Param('id', ParseUUIDPipe) id: string, @Body({ schema: likeSchema }) body: LikeInput) {
+  like(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: likeSchema }) body: LikeInput,
+  ): Promise<FeedLikes> {
     return this.workPhotos.like(id, body.session, true)
   }
 
   @Post('feed/:id/unlike')
-  unlike(@Param('id', ParseUUIDPipe) id: string, @Body({ schema: likeSchema }) body: LikeInput) {
+  unlike(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body({ schema: likeSchema }) body: LikeInput,
+  ): Promise<FeedLikes> {
     return this.workPhotos.like(id, body.session, false)
   }
 
@@ -77,7 +84,7 @@ export class FeedController {
     @CurrentMaster() master: Specialist,
     @UploadedFile() file: { buffer: Buffer } | undefined,
     @Body() body: { bookingId?: string },
-  ) {
+  ): Promise<UploadedPhoto> {
     if (!file) throw new BadRequestException('Выберите фото')
     const [booking] = (await this.dataSource.query(
       `SELECT "service_id" AS "serviceId", "specialist_id" AS "specialistId" FROM "bookings"

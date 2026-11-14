@@ -1,3 +1,4 @@
+import type { TeamMember } from '@awaisa/contracts'
 import {
   BadRequestException,
   Body,
@@ -40,7 +41,7 @@ export class MembersController {
   ) {}
 
   @Get()
-  list(@CurrentBusiness() business: Business) {
+  list(@CurrentBusiness() business: Business): Promise<TeamMember[]> {
     return this.members(business.id)
   }
 
@@ -48,7 +49,7 @@ export class MembersController {
   async add(
     @CurrentBusiness() business: Business,
     @Body({ schema: addMemberSchema }) body: AddMemberInput,
-  ) {
+  ): Promise<TeamMember[]> {
     const phone = normalizePhone(body.phone)
     if (!phone) throw new BadRequestException('Проверьте номер телефона')
     // The number may never have signed in: it gets an account now, named when it first does.
@@ -91,11 +92,13 @@ export class MembersController {
        WHERE m."business_id" = $1 ORDER BY m."role" = 'owner' DESC, m."created_at"`,
       [businessId],
     )) as { id: string; phone: string; name: string; role: string; createdAt: Date }[]
-    return rows.map((row) => ({
-      id: row.id,
-      phone: row.phone,
-      name: row.name,
-      role: row.role === 'owner' ? 'owner' : 'admin',
-    }))
+    return rows.map(
+      (row): TeamMember => ({
+        id: row.id,
+        phone: row.phone,
+        name: row.name,
+        role: row.role === 'owner' ? 'owner' : 'admin',
+      }),
+    )
   }
 }

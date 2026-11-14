@@ -1,3 +1,4 @@
+import type { StockItem } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -33,7 +34,7 @@ export class InventoryController {
   constructor(private readonly inventory: InventoryService) {}
 
   @Get()
-  list(@CurrentBusiness() business: Business) {
+  list(@CurrentBusiness() business: Business): Promise<StockItem[]> {
     return this.inventory.list(business.id)
   }
 
@@ -41,7 +42,7 @@ export class InventoryController {
   create(
     @CurrentBusiness() business: Business,
     @Body({ schema: stockItemSchema }) body: StockItemInput,
-  ) {
+  ): Promise<StockItem[]> {
     return this.inventory.create(business.id, body)
   }
 
@@ -50,7 +51,7 @@ export class InventoryController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: stockItemSchema }) body: StockItemInput,
-  ) {
+  ): Promise<StockItem[]> {
     return this.inventory.update(business.id, id, body)
   }
 
@@ -65,7 +66,7 @@ export class InventoryController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: receiveSchema }) body: ReceiveInput,
-  ) {
+  ): Promise<StockItem[]> {
     return this.inventory.receive(business.id, id, body.quantity, body.unitCost)
   }
 
@@ -74,7 +75,7 @@ export class InventoryController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: adjustSchema }) body: AdjustInput,
-  ) {
+  ): Promise<StockItem[]> {
     return this.inventory.adjust(business.id, id, body.quantity)
   }
 }

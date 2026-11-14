@@ -1,3 +1,4 @@
+import type { ImportReport } from '@awaisa/contracts'
 import { Body, Controller, Post, UseGuards } from '@nestjs/common'
 import type { Business } from '../businesses/business.entity.js'
 import {
@@ -23,7 +24,7 @@ export class ImportController {
   clients(
     @CurrentBusiness() business: Business,
     @Body({ schema: importClientsSchema }) body: ImportClientsInput,
-  ) {
+  ): Promise<ImportReport> {
     return this.imports.importClients(business.id, body)
   }
 
@@ -31,7 +32,7 @@ export class ImportController {
   bookings(
     @CurrentBusiness() business: Business,
     @Body({ schema: importBookingsSchema }) body: ImportBookingsInput,
-  ) {
+  ): Promise<ImportReport> {
     return this.imports.importBookings(business.id, body)
   }
 }

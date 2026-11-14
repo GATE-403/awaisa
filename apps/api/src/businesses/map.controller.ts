@@ -1,3 +1,4 @@
+import type { MapPlace } from '@awaisa/contracts'
 import { Controller, Get, Query } from '@nestjs/common'
 import { Cached } from '../cache/cached.decorator.js'
 import { type MapQuery, mapQuerySchema } from './businesses.schemas.js'
@@ -9,7 +10,7 @@ export class MapController {
 
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get()
-  list(@Query({ schema: mapQuerySchema }) query: MapQuery) {
+  list(@Query({ schema: mapQuerySchema }) query: MapQuery): Promise<MapPlace[]> {
     return this.businesses.listMap(query)
   }
 }

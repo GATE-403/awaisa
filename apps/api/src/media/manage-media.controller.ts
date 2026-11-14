@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { CoverUpload, LogoUpload, SpecialistPhotoUpload, WorkPhoto } from '@awaisa/contracts'
 import {
   BadRequestException,
   Body,
@@ -55,7 +56,7 @@ export class ManageMediaController {
   async setCover(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
-  ) {
+  ): Promise<CoverUpload> {
     const url = await this.save(business, file, 'cover')
     if (business.coverUrl) await this.storage.remove(business.coverUrl)
     await this.businesses.update({ id: business.id }, { coverUrl: url })
@@ -76,7 +77,7 @@ export class ManageMediaController {
   async setLogo(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
-  ) {
+  ): Promise<LogoUpload> {
     const url = await this.save(business, file, 'logo')
     if (business.logoUrl) await this.storage.remove(business.logoUrl)
     await this.businesses.update({ id: business.id }, { logoUrl: url })
@@ -98,7 +99,7 @@ export class ManageMediaController {
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
     @Body() body: { serviceId?: string; specialistId?: string },
-  ) {
+  ): Promise<WorkPhoto[]> {
     await this.workPhotos.assertRoom(business.id)
     const url = await this.save(business, file, 'photo')
     await this.workPhotos.add(business.id, url, {
@@ -110,7 +111,7 @@ export class ManageMediaController {
   }
 
   @Get('work-photos')
-  listPhotos(@CurrentBusiness() business: Business) {
+  listPhotos(@CurrentBusiness() business: Business): Promise<WorkPhoto[]> {
     return this.workPhotos.listForBusiness(business.id)
   }
 
@@ -119,13 +120,16 @@ export class ManageMediaController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: updateWorkPhotoSchema }) body: UpdateWorkPhotoInput,
-  ) {
+  ): Promise<WorkPhoto[]> {
     await this.workPhotos.update(business.id, id, body)
     return this.workPhotos.listForBusiness(business.id)
   }
 
   @Delete('work-photos/:id')
-  async removePhoto(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+  async removePhoto(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<WorkPhoto[]> {
     const url = await this.workPhotos.remove(business.id, id)
     if (url) await this.storage.remove(url)
     return this.workPhotos.listForBusiness(business.id)
@@ -137,7 +141,7 @@ export class ManageMediaController {
     @CurrentBusiness() business: Business,
     @Param('id') id: string,
     @UploadedFile() file: UploadedImage | undefined,
-  ) {
+  ): Promise<SpecialistPhotoUpload> {
     const specialist = await this.findSpecialist(business, id)
     const url = await this.save(business, file, 'avatar')
     if (specialist.photoUrl) await this.storage.remove(specialist.photoUrl)
