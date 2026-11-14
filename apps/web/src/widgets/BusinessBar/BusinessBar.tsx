@@ -49,7 +49,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
             className={styles.business}
             aria-current={pathname === base ? 'page' : undefined}
           >
-            <BusinessTile name={business.name} size='sm' />
+            <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
             <span className={styles.name}>{business.name}</span>
           </NextLink>
           {status && (

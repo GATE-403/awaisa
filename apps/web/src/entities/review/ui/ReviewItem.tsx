@@ -1,7 +1,10 @@
+import NextLink from 'next/link'
 import type { ReactNode } from 'react'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { Review } from '@/shared/api/types'
+import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './ReviewItem.module.css'
+import { ReviewPhotos } from './ReviewPhotos'
 import { Stars } from './Stars'
 
 interface ReviewItemProps {
@@ -11,6 +14,8 @@ interface ReviewItemProps {
   meta?: ReactNode
   /** Beside the owner's reply, or in its place (the cabinet's «Ответить» / «Изменить»). */
   replyAction?: ReactNode
+  /** The author's public profile (`/u/<id>`): the name links to it. */
+  authorHref?: string
 }
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
@@ -18,18 +23,54 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 
 // One review as a thread, the same on the business page and in the cabinet: the person's face,
 // name and date on one line, stars, the words; the owner's reply hangs under it on a line from
 // the author's face, with the place's own face and an «Ответ» badge.
-export const ReviewItem = ({ review, businessName, meta, replyAction }: ReviewItemProps) => (
+export const ReviewItem = ({
+  review,
+  businessName,
+  meta,
+  replyAction,
+  authorHref,
+}: ReviewItemProps) => (
   <li className={styles.review}>
     <div className={styles.post} data-replied={review.reply || replyAction ? true : undefined}>
-      <PersonAvatar name={review.authorName} size='sm' className={styles.face} />
+      {review.authorRank ? (
+        // The platform's three most active clients: a laurel wreath around the face.
+        <Wreath rank={review.authorRank} hasNumber={false}>
+          <PersonAvatar
+            name={review.authorName}
+            src={review.authorAvatarUrl ?? undefined}
+            size='sm'
+            className={styles.face}
+          />
+        </Wreath>
+      ) : (
+        <PersonAvatar
+          name={review.authorName}
+          src={review.authorAvatarUrl ?? undefined}
+          size='sm'
+          className={styles.face}
+        />
+      )}
       <div className={styles.body}>
         <div className={styles.head}>
-          <p className={styles.author}>{review.authorName}</p>
+          {authorHref ? (
+            <NextLink
+              href={authorHref}
+              className={styles.authorButton}
+              aria-label={`${review.authorName}: профиль`}
+            >
+              {review.authorName}
+            </NextLink>
+          ) : (
+            <p className={styles.author}>{review.authorName}</p>
+          )}
           <span className={styles.date}>{dateFormatter.format(new Date(review.createdAt))}</span>
         </div>
         <Stars rating={review.rating} />
         {meta && <div className={styles.meta}>{meta}</div>}
         {review.comment && <p className={styles.text}>{review.comment}</p>}
+        {review.photos && review.photos.length > 0 && (
+          <ReviewPhotos photos={review.photos} authorName={review.authorName} />
+        )}
       </div>
     </div>
     {review.reply ? (

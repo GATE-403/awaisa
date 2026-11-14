@@ -178,20 +178,6 @@
   }
 }
 
-/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
-   repainted every frame, so touch screens scroll them plain. */
-@media (hover: hover) and (pointer: fine) {
-  .track {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--page-gutter),
-      #000 calc(100% - var(--edge-fade)),
-      transparent
-    );
-  }
-}
-
 /* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
    short swipe feel stuck on phones. */
 @media (hover: none) {

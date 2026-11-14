@@ -45,6 +45,10 @@ export class Business {
   @Column({ name: 'cover_url', type: 'varchar', length: 512, nullable: true })
   coverUrl: string | null
 
+  /** The owner's own logo (square WebP); without it the place shows its tinted monogram. */
+  @Column({ name: 'logo_url', type: 'varchar', length: 512, nullable: true })
+  logoUrl: string | null
+
   @Column({ name: 'slot_minutes', type: 'int', default: 30 })
   slotMinutes: number
 

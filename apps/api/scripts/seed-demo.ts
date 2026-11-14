@@ -6,6 +6,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import pg from 'pg'
+import { PICTURE_SETS, PORTRAITS } from './demo-pictures.ts'
 
 const ROOT_ENV = join(import.meta.dirname, '../../../.env')
 if (existsSync(ROOT_ENV)) process.loadEnvFile(ROOT_ENV)
@@ -721,78 +722,129 @@ const weekdayOf = (key: string) => (new Date(`${key}T00:00:00Z`).getUTCDay() + 6
 
 const tokenHash = () => createHash('sha256').update(randomUUID()).digest('hex')
 
-// Demo pictures from Unsplash (free to use, hotlinked as their guidelines ask): a cover and
-// photos of finished work per kind, so the catalog cards and the «Работы» feed look real.
-const UNSPLASH = (id: string, size: 'cover' | 'work') =>
+// Demo pictures (scripts/demo-pictures.ts): a cover and up to eight photos of finished work per
+// place, each place its own slice of its set — no photo shows up at two places.
+const UNSPLASH = (id: string, size: 'cover' | 'work' | 'portrait') =>
   `https://images.unsplash.com/photo-${id}?${
-    size === 'cover' ? 'w=1600&h=1000' : 'w=900&h=1600'
-  }&fit=crop&auto=format&q=80`
+    size === 'cover'
+      ? 'w=1600&h=1000&fit=crop'
+      : size === 'work'
+        ? 'w=900&h=1600&fit=crop'
+        : 'w=600&h=800&fit=crop&crop=faces'
+  }&auto=format&q=80`
 
-const PICTURES: Record<string, { covers: string[]; works: string[] }> = {
-  barber: {
-    covers: ['1585747860715-2ba37e788b70', '1503951914875-452162b0f3f1'],
-    works: [
-      '1599351431202-1e0f0137899a',
-      '1622286342621-4bd786c2447c',
-      '1605497788044-5a32c7078486',
-      '1503951914875-452162b0f3f1',
-    ],
-  },
-  beauty: {
-    covers: ['1560066984-138dadb4c035', '1633681926022-84c23e8cb2d6'],
-    works: [
-      '1522337360788-8b13dee7a37e',
-      '1562322140-8baeececf3df',
-      '1527799820374-dcf8d9d4a388',
-      '1580618672591-eb180b1a973f',
-      '1634449571010-02389ed0f9b0',
-      '1595476108010-b4d1f102b1b1',
-    ],
-  },
-  brows: {
-    covers: ['1512496015851-a90fb38ba796'],
-    works: ['1487412947147-5cebf100ffc2', '1516975080664-ed2fc6a32937'],
-  },
-  nails: {
-    covers: ['1604654894610-df63bc536371'],
-    works: [
-      '1610992015732-2449b76344bc',
-      '1632345031435-8727f6897d53',
-      '1607779097040-26e80aa78e66',
-      '1519014816548-bf5fe059798b',
-    ],
-  },
-  spa: {
-    covers: ['1540555700478-4be289fbecef', '1600334089648-b0d9d3028eb2'],
-    works: [
-      '1544161515-4ab6ce6db874',
-      '1515377905703-c4788e51af15',
-      '1596178060671-7a80dc8059ea',
-      '1570172619644-dfd03ed5d881',
-    ],
-  },
-  health: {
-    covers: ['1519494026892-80bbd2d6fd0d'],
-    works: ['1576091160550-2173dba999ef'],
-  },
-  other: {
-    covers: ['1562962230-16e4623d36e6'],
-    works: ['1611501275019-9b5cda994e8d', '1562962230-16e4623d36e6'],
-  },
-}
-
-// Places whose pictures differ from their kind's (brows and make-up in «beauty», face care).
-const PICTURE_SET: Record<string, string> = {
+// Which set each demo place draws from (and, where a set has no covers of its own, whose covers).
+const PLACE_SET: Record<string, string> = {
+  'kings-barbershop': 'barber',
+  'boroda-barber': 'barber',
+  'barber-ok': 'barber',
+  'gentlemen-club': 'barber',
+  'fade-house': 'barber',
+  'old-school': 'barber',
+  'awaisa-studio': 'hair',
+  'aisuluu-beauty': 'hair',
+  'lumiere-salon': 'hair',
+  'silk-studio': 'hair',
+  'nur-beauty': 'hair',
+  'nail-room': 'nails',
+  'manikyur-7': 'nails',
+  'pink-nails': 'nails',
+  'nails-coffee': 'nails',
+  'ala-too-spa': 'spa',
+  'teplo-massage': 'spa',
+  'tengri-spa': 'spa',
+  'thai-massage': 'spa',
+  'skin-lab': 'face',
+  'sugar-room': 'wax',
   'brow-bar': 'brows',
   'lash-me': 'brows',
-  'makeup-lab': 'brows',
-  'skin-lab': 'spa',
-  'sugar-room': 'spa',
-  'pink-nails': 'nails',
+  'makeup-lab': 'makeup',
+  'ink-studio': 'tattoo',
+  'black-needle': 'tattoo',
+  'dent-smile': 'dental',
+  'kinezio-centr': 'physio',
+  'osteo-life': 'physio',
 }
+const COVERS_FROM: Record<string, string> = { wax: 'face', makeup: 'brows' }
+const WORKS_PER_PLACE = 8
 
-const picturesFor = (business: BusinessSeed) =>
-  PICTURES[PICTURE_SET[business.slug] ?? business.kind]
+/** Every demo place's cover and work photos, worked out once so the slices never overlap. */
+const pictureAssignment = (() => {
+  const result = new Map<string, { cover: string; works: string[] }>()
+  const usedCovers = new Set<string>()
+  const slugs = Object.keys(PLACE_SET)
+  for (const set of new Set(Object.values(PLACE_SET))) {
+    const members = slugs.filter((slug) => PLACE_SET[slug] === set)
+    const pool = PICTURE_SETS[set]?.works ?? []
+    const per = Math.min(WORKS_PER_PLACE, Math.floor(pool.length / members.length))
+    const coverPool = PICTURE_SETS[COVERS_FROM[set] ?? set]?.covers ?? []
+    for (const [index, slug] of members.entries()) {
+      const cover =
+        coverPool.find((id) => !usedCovers.has(id)) ?? coverPool[index % coverPool.length] ?? ''
+      usedCovers.add(cover)
+      result.set(slug, { cover, works: pool.slice(index * per, index * per + per) })
+    }
+  }
+  return result
+})()
+
+const FEMALE_NAMES = new Set([
+  'Айгерим',
+  'Айдана',
+  'Айжан',
+  'Айпери',
+  'Айсулуу',
+  'Алина',
+  'Алия',
+  'Аружан',
+  'Асель',
+  'Бегимай',
+  'Бермет',
+  'Гульнара',
+  'Диана',
+  'Елена',
+  'Жанара',
+  'Жибек',
+  'Зарина',
+  'Камила',
+  'Кристина',
+  'Мадина',
+  'Мээрим',
+  'Наталья',
+  'Нок',
+  'Нурай',
+  'Нургуль',
+  'Нуриза',
+  'Ольга',
+  'Регина',
+  'Сабина',
+  'Чолпон',
+  'Чынара',
+  'Эльмира',
+])
+const isFemale = (name: string) => FEMALE_NAMES.has(name.split(' ')[0] ?? '')
+
+/** A face per master, never the same face twice; past the portraits, small stock faces. */
+const portraitFor = (() => {
+  const next = { women: 0, men: 0 }
+  return (name: string) => {
+    const side = isFemale(name) ? 'women' : 'men'
+    const pool = PORTRAITS[side]
+    const index = next[side]
+    next[side] += 1
+    const id = pool[index]
+    return id
+      ? UNSPLASH(id, 'portrait')
+      : `https://randomuser.me/api/portraits/${side}/${(index * 7) % 100}.jpg`
+  }
+})()
+
+/** Small client faces (randomuser.me), stable per phone; about a quarter keep their initials. */
+const clientAvatarFor = (name: string, phone: string) => {
+  const seed = Number(phone.replace(/\D/g, '').slice(-5))
+  if (seed % 4 === 0) return null
+  return `https://randomuser.me/api/portraits/${isFemale(name) ? 'women' : 'men'}/${seed % 100}.jpg`
+}
 
 // `--add`: only demo businesses that are not in the database yet; the ones already there (and
 // any bookings made by hand) stay as they are.
@@ -889,9 +941,18 @@ const main = async (isAdding = false) => {
         const id = randomUUID()
         const branchId = branchIds.length > 1 ? (branchIds[index % branchIds.length] ?? null) : null
         await client.query(
-          `INSERT INTO "specialists" ("id", "business_id", "name", "role", "position", "branch_id", "commission_percent")
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [id, businessId, name, role, index, branchId, pick([30, 35, 40, 45, 50])],
+          `INSERT INTO "specialists" ("id", "business_id", "name", "role", "position", "branch_id", "commission_percent", "photo_url")
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [
+            id,
+            businessId,
+            name,
+            role,
+            index,
+            branchId,
+            pick([30, 35, 40, 45, 50]),
+            portraitFor(name),
+          ],
         )
         for (const service of services) {
           await client.query(
@@ -903,29 +964,7 @@ const main = async (isAdding = false) => {
       }
 
       // A cover and tagged work photos, newest first in the feed.
-      const pictures = picturesFor(seedBusiness)
-      if (pictures) {
-        const index = BUSINESSES.indexOf(seedBusiness)
-        await client.query('UPDATE "businesses" SET "cover_url" = $2 WHERE "id" = $1', [
-          businessId,
-          UNSPLASH(pictures.covers[index % pictures.covers.length] ?? '', 'cover'),
-        ])
-        for (const [position, photo] of pictures.works.entries()) {
-          const service = services[position % services.length]
-          const master = masters[position % masters.length]
-          await client.query(
-            `INSERT INTO "work_photos" ("business_id", "url", "service_id", "specialist_id", "created_at")
-             VALUES ($1, $2, $3, $4, now() - make_interval(hours => $5))`,
-            [
-              businessId,
-              UNSPLASH(photo, 'work'),
-              service?.id ?? null,
-              master?.id ?? null,
-              index * 7 + position,
-            ],
-          )
-        }
-      }
+      await writePictures(client, businessId, seedBusiness.slug, BUSINESSES.indexOf(seedBusiness))
 
       // A client base that comes back: about a third of visits are regulars.
       const regulars = Array.from({ length: between(25, 45) }, () => {
@@ -1031,6 +1070,7 @@ const main = async (isAdding = false) => {
       )
     }
 
+    await writeClientFaces(client)
     await client.query('COMMIT')
     // biome-ignore lint/suspicious/noConsole: a CLI script reports what it did
     console.log(
@@ -1044,53 +1084,100 @@ const main = async (isAdding = false) => {
   }
 }
 
-// `--pictures`: only covers and work photos for the demo businesses already in the database —
-// the rest of the data (and any bookings made by hand) stays as it is.
+/** A place's cover and tagged work photos (replacing earlier demo ones), newest first. */
+const writePictures = async (
+  client: pg.Client,
+  businessId: string,
+  slug: string,
+  order: number,
+) => {
+  const pictures = pictureAssignment.get(slug)
+  if (!pictures) return 0
+  await client.query('UPDATE "businesses" SET "cover_url" = $2 WHERE "id" = $1', [
+    businessId,
+    UNSPLASH(pictures.cover, 'cover'),
+  ])
+  await client.query(
+    `DELETE FROM "work_photos" WHERE "business_id" = $1 AND "url" LIKE 'https://images.unsplash.com/%'`,
+    [businessId],
+  )
+  const { rows: services } = await client.query(
+    'SELECT "id" FROM "services" WHERE "business_id" = $1 AND "is_active" ORDER BY "position"',
+    [businessId],
+  )
+  const { rows: masters } = await client.query(
+    'SELECT "id" FROM "specialists" WHERE "business_id" = $1 AND "is_active" ORDER BY "position"',
+    [businessId],
+  )
+  for (const [position, photo] of pictures.works.entries()) {
+    await client.query(
+      `INSERT INTO "work_photos" ("business_id", "url", "service_id", "specialist_id", "created_at")
+       VALUES ($1, $2, $3, $4, now() - make_interval(hours => $5))`,
+      [
+        businessId,
+        UNSPLASH(photo, 'work'),
+        services[position % Math.max(services.length, 1)]?.id ?? null,
+        masters[position % Math.max(masters.length, 1)]?.id ?? null,
+        order * 7 + position,
+      ],
+    )
+  }
+  return pictures.works.length
+}
+
+/** Demo clients become accounts with faces, so reviews and the cabinet show people. */
+const writeClientFaces = async (client: pg.Client) => {
+  const { rows } = await client.query(
+    `SELECT DISTINCT ON (bk."customer_phone") bk."customer_phone" AS "phone", bk."customer_name" AS "name"
+     FROM "bookings" bk WHERE bk."customer_phone" LIKE '+99670%'
+     ORDER BY bk."customer_phone", bk."created_at" DESC`,
+  )
+  let faces = 0
+  for (const row of rows as { phone: string; name: string }[]) {
+    const avatar = clientAvatarFor(row.name, row.phone)
+    await client.query(
+      `INSERT INTO "customers" ("phone", "name", "avatar_url") VALUES ($1, $2, $3)
+       ON CONFLICT ("phone") DO UPDATE SET "avatar_url" = COALESCE("customers"."avatar_url", EXCLUDED."avatar_url")`,
+      [row.phone, row.name.replace(/ [А-ЯЁ]\.$/, ''), avatar],
+    )
+    if (avatar) faces += 1
+  }
+  return faces
+}
+
+// `--pictures`: only pictures — covers, work photos, masters' portraits and clients' faces — for
+// the demo places already in the database; the rest (and bookings made by hand) stays as it is.
 const addPictures = async () => {
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL })
   await client.connect()
   try {
     let photos = 0
-    for (const [index, seedBusiness] of BUSINESSES.entries()) {
-      const pictures = picturesFor(seedBusiness)
-      const { rows } = await client.query('SELECT "id" FROM "businesses" WHERE "slug" = $1', [
-        seedBusiness.slug,
-      ])
+    let portraits = 0
+    for (const [order, slug] of Object.keys(PLACE_SET).entries()) {
+      const { rows } = await client.query('SELECT "id" FROM "businesses" WHERE "slug" = $1', [slug])
       const businessId = rows[0]?.id as string | undefined
-      if (!pictures || !businessId) continue
-      await client.query('UPDATE "businesses" SET "cover_url" = $2 WHERE "id" = $1', [
-        businessId,
-        UNSPLASH(pictures.covers[index % pictures.covers.length] ?? '', 'cover'),
-      ])
-      await client.query(
-        `DELETE FROM "work_photos" WHERE "business_id" = $1 AND "url" LIKE 'https://images.unsplash.com/%'`,
-        [businessId],
-      )
-      const { rows: services } = await client.query(
-        'SELECT "id" FROM "services" WHERE "business_id" = $1 AND "is_active" ORDER BY "position"',
-        [businessId],
-      )
+      if (!businessId) continue
+      photos += await writePictures(client, businessId, slug, order)
+      // Demo masters (no photo of their own, or an earlier demo one) get a face.
       const { rows: masters } = await client.query(
-        'SELECT "id" FROM "specialists" WHERE "business_id" = $1 AND "is_active" ORDER BY "position"',
+        `SELECT "id", "name" FROM "specialists" WHERE "business_id" = $1
+           AND ("photo_url" IS NULL OR "photo_url" LIKE 'https://images.unsplash.com/%' OR "photo_url" LIKE 'https://randomuser.me/%')
+         ORDER BY "position"`,
         [businessId],
       )
-      for (const [position, photo] of pictures.works.entries()) {
-        await client.query(
-          `INSERT INTO "work_photos" ("business_id", "url", "service_id", "specialist_id", "created_at")
-           VALUES ($1, $2, $3, $4, now() - make_interval(hours => $5))`,
-          [
-            businessId,
-            UNSPLASH(photo, 'work'),
-            services[position % Math.max(services.length, 1)]?.id ?? null,
-            masters[position % Math.max(masters.length, 1)]?.id ?? null,
-            index * 7 + position,
-          ],
-        )
-        photos += 1
+      for (const master of masters as { id: string; name: string }[]) {
+        await client.query('UPDATE "specialists" SET "photo_url" = $2 WHERE "id" = $1', [
+          master.id,
+          portraitFor(master.name),
+        ])
+        portraits += 1
       }
     }
+    const faces = await writeClientFaces(client)
     // biome-ignore lint/suspicious/noConsole: a CLI script reports what it did
-    console.log(`Demo pictures: ${photos} work photos and covers`)
+    console.log(
+      `Demo pictures: ${photos} work photos, covers, ${portraits} master portraits, ${faces} client faces`,
+    )
   } finally {
     await client.end()
   }

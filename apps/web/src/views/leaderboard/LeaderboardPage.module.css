@@ -1,0 +1,183 @@
+.page {
+  padding: 0 0 var(--section-gap);
+  /* A warm gold wash at the top: a board of the best, said quietly. */
+  background: radial-gradient(
+    90% 360px at 50% 0%,
+    color-mix(in srgb, var(--system-yellow) 12%, transparent),
+    transparent 70%
+  );
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--page-gutter) 0;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.title {
+  font-size: var(--text-title1);
+  line-height: 1.15;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.lead,
+.muted {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+.empty,
+.footnote {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: 1.4;
+  text-align: center;
+}
+
+.ratingValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.star {
+  width: 12px;
+  height: 12px;
+  color: var(--color-rating);
+}
+
+/* The rest: a thread of rows on the page, hairlines inset past the place number. */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list > li + li .row {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 30px auto minmax(0, 1fr) auto;
+  justify-items: start;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  color: var(--color-foreground);
+}
+
+.place {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.where {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  white-space: nowrap;
+}
+
+.rating {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+@media (hover: hover) {
+  .row:hover .name {
+    color: var(--color-link);
+  }
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.controls > fieldset {
+  width: min(100%, 320px);
+}
+
+/* Kinds: text tabs centred when they fit, scrolling sideways on narrow screens. */
+.kinds {
+  align-self: stretch;
+  min-width: 0;
+}
+
+.kinds > nav > div {
+  justify-content: center;
+}
+
+/* Gold, silver and bronze as a quiet tint of the number's capsule. */
+
+/* The top three: same rows, the place as a larger gold / silver / bronze numeral. */
+
+.place[data-place="1"],
+.place[data-place="2"],
+.place[data-place="3"] {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: var(--font-weight-bold);
+}
+
+.place[data-place="1"] {
+  /* Gold, darkened toward the label colour so it stays readable on the light page too. */
+  color: color-mix(in srgb, #c8921a 72%, var(--color-foreground));
+}
+
+.place[data-place="2"] {
+  color: color-mix(in srgb, #9aa1ab 60%, var(--color-foreground));
+}
+
+.place[data-place="3"] {
+  color: color-mix(in srgb, #b8733e 80%, var(--color-foreground));
+}
+
+/* Faces sit centred in one column, so every name starts at the same line. */
+.row > [data-size] {
+  justify-self: center;
+}
+
+.row > .rating {
+  justify-self: end;
+}

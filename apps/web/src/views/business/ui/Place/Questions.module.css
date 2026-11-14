@@ -1,0 +1,125 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  scroll-margin-top: calc(var(--header-height) + var(--business-bar-height, 0px) + var(--space-4));
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.count {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.ask {
+  margin-left: auto;
+}
+
+.empty {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+/* A thread like the reviews: the question, who asked, the place's answer under its face. */
+.list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: var(--space-4);
+}
+
+.item + .item {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.item:first-child {
+  padding-top: 0;
+}
+
+.question {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.author {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.answer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.tile {
+  flex-shrink: 0;
+}
+
+.answerText {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 112px;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-sheet-surface, var(--color-fill));
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-input);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-footnote);
+}
+
+.hint {
+  padding-inline: var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}

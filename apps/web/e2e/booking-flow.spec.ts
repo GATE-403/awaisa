@@ -64,7 +64,7 @@ test.describe('User flow: booking', () => {
     await expect(steps.datetime).toContainText(time)
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
-    await expect(primaryAction(page)).toHaveText('Записаться')
+    await expect(primaryAction(page)).toHaveText('Проверить запись')
     await submitBooking(page)
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()

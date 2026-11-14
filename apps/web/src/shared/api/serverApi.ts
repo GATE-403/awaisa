@@ -9,11 +9,14 @@ import type {
   BusinessKind,
   BusinessPage,
   FeedPage,
+  LeaderboardMaster,
+  LeaderboardPlace,
   MapPlace,
   Offer,
   PaymentPage,
   PopularService,
   PublicPromotion,
+  QuestionList,
   ReviewSummary,
 } from './types'
 
@@ -102,6 +105,41 @@ const listReviews = async (slug: string): Promise<ReviewSummary> => {
   return response.json()
 }
 
+// Answered questions; an owner's answer calls refreshBusiness(slug).
+const listQuestions = async (slug: string): Promise<QuestionList> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(businessTag(slug))
+
+  const response = await fetch(`${API_URL}/businesses/${encodeURIComponent(slug)}/questions`)
+  if (!response.ok) return { count: 0, items: [] }
+
+  return response.json()
+}
+
+// The masters' leaderboard for a kind: the same for everyone, refreshed with the catalog.
+const listLeaderboard = async (kind: BusinessKind): Promise<LeaderboardMaster[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(BUSINESSES_TAG)
+
+  const response = await fetch(`${API_URL}/rankings/masters?kind=${kind}&limit=50`)
+  if (!response.ok) throw await toApiError(response)
+
+  return response.json()
+}
+
+const listPlacesLeaderboard = async (kind: BusinessKind): Promise<LeaderboardPlace[]> => {
+  'use cache'
+  cacheLife('minutes')
+  cacheTag(BUSINESSES_TAG)
+
+  const response = await fetch(`${API_URL}/rankings/places?kind=${kind}&limit=50`)
+  if (!response.ok) throw await toApiError(response)
+
+  return response.json()
+}
+
 // The map's first list (no location yet): the same for everyone, so it is cached like the catalog.
 const listMapPlaces = async (kind: BusinessKind | undefined): Promise<MapPlace[]> => {
   'use cache'
@@ -169,6 +207,9 @@ const listServicePhotos = async (slug: string): Promise<Record<string, string>> 
 }
 
 export {
+  fetchBusiness as findBusiness,
+  listLeaderboard,
+  listPlacesLeaderboard,
   listServicePhotos,
   listFeed,
   listPromotions,
@@ -178,5 +219,6 @@ export {
   listBusinesses,
   listOffers,
   listPopularServices,
+  listQuestions,
   listReviews,
 }

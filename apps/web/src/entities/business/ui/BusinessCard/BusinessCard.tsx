@@ -31,7 +31,12 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
             className={styles.cover}
           />
         ) : (
-          <BusinessTile name={business.name} size='lg' className={styles.tile} />
+          <BusinessTile
+            name={business.name}
+            logoUrl={business.logoUrl}
+            size='lg'
+            className={styles.tile}
+          />
         )}
       </span>
     </ViewTransition>

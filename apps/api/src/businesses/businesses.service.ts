@@ -46,6 +46,7 @@ type BusinessView = {
   slotMinutes: number
   isPublished: boolean
   coverUrl: string | null
+  logoUrl: string | null
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
@@ -56,6 +57,7 @@ type BusinessCard = Pick<
   servicesCount: number
   minPrice: number
   coverUrl: string | null
+  logoUrl: string | null
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
 }
 
@@ -81,6 +83,7 @@ const toBusinessView = (business: Business): BusinessView => ({
   slotMinutes: business.slotMinutes,
   isPublished: business.isPublished,
   coverUrl: business.coverUrl,
+  logoUrl: business.logoUrl,
   hours: (business.hours ?? [])
     .map(({ weekday, opensMinutes, closesMinutes }) => ({ weekday, opensMinutes, closesMinutes }))
     .sort((first, second) => first.weekday - second.weekday),
@@ -113,7 +116,7 @@ export class BusinessesService {
     const rows = (await this.dataSource.query(
       `
       SELECT b."slug", b."name", b."kind", b."description", b."city", b."address",
-        b."cover_url" AS "coverUrl",
+        b."cover_url" AS "coverUrl", b."logo_url" AS "logoUrl",
         COUNT(s."id")::int AS "servicesCount", MIN(s."price")::int AS "minPrice",
         (
           SELECT COALESCE(json_agg(json_build_object(
@@ -158,7 +161,7 @@ export class BusinessesService {
       `
       SELECT s."id", s."name", s."price"::int AS "price", s."duration_minutes"::int AS "durationMinutes",
         s."is_popular" AS "isPopular",
-        b."slug", b."name" AS "businessName", b."kind", b."cover_url" AS "coverUrl",
+        b."slug", b."name" AS "businessName", b."kind", b."cover_url" AS "coverUrl", b."logo_url" AS "logoUrl",
         (SELECT ROUND(AVG(sp."rating")::numeric, 1)::float8 FROM "specialists" sp
           WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
         (SELECT br."address" FROM "branches" br
@@ -297,7 +300,7 @@ export class BusinessesService {
       `
       SELECT br."id" AS "branchId", br."name" AS "branchName", br."address",
         br."latitude", br."longitude",
-        b."slug", b."name", b."kind", b."cover_url" AS "coverUrl",
+        b."slug", b."name", b."kind", b."cover_url" AS "coverUrl", b."logo_url" AS "logoUrl",
         MIN(s."price")::int AS "minPrice",
         CASE WHEN $1::float8 IS NULL THEN NULL ELSE
           6371 * 2 * ASIN(SQRT(
@@ -515,7 +518,7 @@ export class BusinessesService {
     )) as { id: string; todayCount: number; nextStartsAt: Date | null }[]
     const statsById = new Map(stats.map((row) => [row.id, row]))
 
-    return businesses.map(({ id, slug, name, kind, isPublished, coverUrl }) => {
+    return businesses.map(({ id, slug, name, kind, isPublished, coverUrl, logoUrl }) => {
       const next = statsById.get(id)?.nextStartsAt
       const nextParts = next ? toBusinessParts(new Date(next)) : null
 
@@ -525,6 +528,7 @@ export class BusinessesService {
         kind,
         isPublished,
         coverUrl,
+        logoUrl,
         role: roles.get(id) ?? 'admin',
         todayCount: statsById.get(id)?.todayCount ?? 0,
         next: nextParts

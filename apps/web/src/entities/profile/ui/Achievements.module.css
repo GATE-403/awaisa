@@ -1,0 +1,99 @@
+/* Medals on the page itself, no card: three a row on phones, five from 768px. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+
+/* Earned: a medal of its colour, lit from the top like a coin; a goal: a flat grey disc. */
+.medal {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-tertiary-foreground);
+}
+
+.item[data-earned] .medal {
+  background:
+    radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--medal) 55%, white), transparent 62%),
+    var(--medal);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, white 28%, transparent),
+    0 4px 10px -4px color-mix(in srgb, var(--medal) 70%, transparent);
+  color: #fff;
+}
+
+.emoji {
+  font-size: 24px;
+  line-height: 1;
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.item[data-earned] .emoji {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+  opacity: 1;
+}
+
+.title {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item:not([data-earned]) .title {
+  color: var(--color-muted-foreground);
+}
+
+.description {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+}
+
+.track {
+  width: 48px;
+  height: 3px;
+  margin-top: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--color-tertiary-foreground) var(--done),
+    var(--color-fill) 0
+  );
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

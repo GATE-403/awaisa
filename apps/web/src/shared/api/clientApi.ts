@@ -13,6 +13,7 @@ import type {
   BusinessCard,
   BusinessLink,
   BusinessPage,
+  BusinessQuestion,
   Category,
   ClientCard,
   ClientListItem,
@@ -43,12 +44,15 @@ import type {
   OtpRequest,
   OutcomeInput,
   PriceQuote,
+  ProfileSettings,
   Promotion,
   PromotionInput,
+  PublicProfile,
   RecentBooking,
   Recommendation,
   Review,
   ReviewAccess,
+  ReviewerProfile,
   ReviewSummary,
   ServiceInput,
   SlugCheck,
@@ -131,6 +135,35 @@ const getAvailability = (
     { signal },
   )
 
+const getMyProfileSettings = (signal?: AbortSignal) =>
+  request<ProfileSettings>('/me/profile', { signal })
+
+const updateMyProfileSettings = (
+  input: Partial<Omit<ProfileSettings, 'id'>> & {
+    banner?: string | null
+    accent?: string | null
+  },
+) => send<ProfileSettings>('PATCH', '/me/profile', input)
+
+const getProfile = (id: string, signal?: AbortSignal) =>
+  request<PublicProfile>(`/profiles/${encodeURIComponent(id)}`, { signal })
+
+const getReviewer = (id: string, signal?: AbortSignal) =>
+  request<ReviewerProfile>(`/reviewers/${encodeURIComponent(id)}`, { signal })
+
+// A place's reviews on the client (the booking form asks for those of the chosen service).
+const listPlaceReviews = (
+  slug: string,
+  { serviceId, limit = 3 }: { serviceId?: string; limit?: number },
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (serviceId) params.set('serviceId', serviceId)
+  return request<ReviewSummary>(`/businesses/${encodeURIComponent(slug)}/reviews?${params}`, {
+    signal,
+  })
+}
+
 const getMapPlaces = (
   params: { lat?: number; lng?: number; kind?: string },
   signal?: AbortSignal,
@@ -200,6 +233,32 @@ const accessHeaders = ({ token, signature }: ReviewAccess): Record<string, strin
   ...(token ? { [TOKEN_HEADER]: token } : {}),
   ...(signature ? { [SIGNATURE_HEADER]: signature } : {}),
 })
+
+const askQuestion = (slug: string, text: string) =>
+  request<BusinessQuestion>(`/businesses/${encodeURIComponent(slug)}/questions`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  })
+
+const getManagedQuestions = (slug: string, signal?: AbortSignal) =>
+  request<BusinessQuestion[]>(`${manage(slug)}/questions`, { signal })
+
+const answerQuestion = (slug: string, id: string, text: string) =>
+  send<BusinessQuestion>('PUT', `${manage(slug)}/questions/${id}/answer`, { text })
+
+const removeQuestion = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/questions/${id}`)
+
+const addReviewPhoto = (id: string, access: ReviewAccess, file: File) => {
+  const body = new FormData()
+  body.append('file', file)
+
+  return request<{ photos: string[] }>(`/bookings/${id}/review/photos`, {
+    method: 'POST',
+    headers: accessHeaders(access),
+    body,
+  })
+}
 
 const getVisitReview = (id: string, access: ReviewAccess, signal?: AbortSignal) =>
   request<VisitReview>(`/bookings/${id}/review`, { headers: accessHeaders(access), signal })
@@ -385,6 +444,11 @@ const uploadCover = (slug: string, file: File) =>
 
 const removeCover = (slug: string) => send<void>('DELETE', `${manage(slug)}/cover`)
 
+const uploadLogo = (slug: string, file: File) =>
+  upload<{ logoUrl: string }>(`${manage(slug)}/logo`, file)
+
+const removeLogo = (slug: string) => send<void>('DELETE', `${manage(slug)}/logo`)
+
 const addPhoto = (
   slug: string,
   file: File,
@@ -433,6 +497,12 @@ const getRecommendations = (
     visits?: string
     lat?: number
     lng?: number
+    /** The service being chosen: picks follow it. */
+    like?: string
+    /** Services looked at lately on this device, comma-separated. */
+    recent?: string
+    /** The device's random id: what it was already shown steps aside. */
+    session?: string
   },
   signal?: AbortSignal,
 ) => {
@@ -710,6 +780,11 @@ export {
   getClient,
   updateClient,
   getVisitReview,
+  addReviewPhoto,
+  answerQuestion,
+  askQuestion,
+  getManagedQuestions,
+  removeQuestion,
   createReview,
   getManagedReviews,
   replyToReview,
@@ -717,6 +792,11 @@ export {
   createTelegramLink,
   removeTelegramChat,
   getAvailability,
+  getMyProfileSettings,
+  getProfile,
+  getReviewer,
+  updateMyProfileSettings,
+  listPlaceReviews,
   getBooking,
   getManagedBusiness,
   getMe,
@@ -728,6 +808,7 @@ export {
   getWalletLinks,
   moveBookingAsSalon,
   removeCover,
+  removeLogo,
   removePhoto,
   removeSpecialistPhoto,
   renameCategory,
@@ -740,6 +821,7 @@ export {
   updateService,
   updateSpecialist,
   uploadCover,
+  uploadLogo,
   uploadSpecialistPhoto,
   logout,
   requestOtp,

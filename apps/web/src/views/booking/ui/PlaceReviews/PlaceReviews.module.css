@@ -1,0 +1,63 @@
+.reviews {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+}
+
+.title {
+  overflow: hidden;
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-title);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.about {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.all {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 44px;
+  min-height: var(--control-height-md);
+  color: var(--color-link);
+  font-size: var(--text-body);
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.score strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.star {
+  width: 13px;
+  height: 13px;
+  color: var(--color-rating);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+}

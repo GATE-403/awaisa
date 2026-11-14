@@ -1,14 +1,14 @@
 'use client'
 
 import NextLink from 'next/link'
-import { usePathname } from 'next/navigation'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { isActivePath, isBookingPath, isCabinetPath, NAV_ITEMS } from '@/shared/config/navigation'
+import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import styles from './TabBar.module.css'
 
 export const TabBar = () => {
-  const pathname = usePathname()
+  const pathname = useChromePathname()
   const { customer } = useSession()
   // Owners do not need the pitch for businesses: their cabinet is one tap away in the profile.
   const isOwner = (customer?.businesses?.length ?? 0) > 0 || Boolean(customer?.isAdmin)

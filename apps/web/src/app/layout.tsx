@@ -6,6 +6,7 @@ import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
 import '@/shared/styles/shell.css'
 import { ResumeBooking } from '@/features/bookingDraft'
+import { InviteRefCapture } from '@/features/invite'
 import { PLATFORM } from '@/shared/config/platform'
 import { BASE_OPEN_GRAPH } from '@/shared/lib/seo/businessMetadata'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
@@ -42,7 +43,7 @@ export const viewport: Viewport = {
   ],
 }
 
-const RootLayout = ({ children }: LayoutProps<'/'>) => (
+const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
   // The boot script sets data-theme before hydration, so React must not compare that attribute.
   <html
     lang='ru'
@@ -51,17 +52,25 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
     data-scroll-behavior='smooth'
     suppressHydrationWarning
   >
-    <head>
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input */}
-      <script suppressHydrationWarning dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
-    </head>
+    <head />
     <body>
+      {/* The theme before the first paint, as raw HTML in a hidden wrapper: the browser runs it
+          while parsing the server's HTML, and React never sees a <script> element — so a client
+          re-render of the root (an extension's mismatch, a slot change) does not warn about one,
+          and nothing in <head> gets matched against scripts extensions inject there. */}
+      <div
+        hidden
+        suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input
+        dangerouslySetInnerHTML={{ __html: `<script>${THEME_BOOT_SCRIPT}</script>` }}
+      />
       <ToastProvider>
         <div className='root'>
           <Suspense fallback={<HeaderFallback />}>
             <Header />
           </Suspense>
           {children}
+          {modal}
           <Suspense>
             <FooterGate>
               <Footer />
@@ -70,6 +79,7 @@ const RootLayout = ({ children }: LayoutProps<'/'>) => (
           <Suspense>
             <TabBar />
             <ResumeBooking />
+            <InviteRefCapture />
           </Suspense>
         </div>
       </ToastProvider>

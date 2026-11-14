@@ -58,7 +58,10 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
         </p>
       ) : (
         <NextFreeProvider slugs={[...new Set(shown.map((offer) => offer.slug))]}>
-          <ul className={layout === 'grid' ? styles.grid : styles.track}>
+          <ul
+            className={layout === 'grid' ? styles.grid : styles.track}
+            data-edge-fade={layout === 'grid' ? undefined : ''}
+          >
             {shown.map((offer) => (
               <li key={offer.id}>
                 <OfferCard

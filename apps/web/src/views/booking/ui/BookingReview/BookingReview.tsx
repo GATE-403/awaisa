@@ -78,7 +78,12 @@ export const BookingReview = ({
             <img {...sizedImage(business.coverUrl, 480)} alt='' className={styles.cover} />
           )}
           <span className={styles.placeInner}>
-            <BusinessTile name={business.name} size='sm' className={styles.placeTile} />
+            <BusinessTile
+              name={business.name}
+              logoUrl={business.logoUrl}
+              size='sm'
+              className={styles.placeTile}
+            />
             <span className={styles.placeText}>
               <span className={styles.placeName}>{business.name}</span>
               {branchAddress && (

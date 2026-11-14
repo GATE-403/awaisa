@@ -20,8 +20,12 @@ import { LoyaltyModule } from './loyalty/loyalty.module.js'
 import { MailingsModule } from './mailings/mailings.module.js'
 import { MasterModule } from './master/master.module.js'
 import { MediaModule } from './media/media.module.js'
+import { ProfilesModule } from './profiles/profiles.module.js'
 import { PromotionsModule } from './promotions/promotions.module.js'
+import { QuestionsModule } from './questions/questions.module.js'
+import { RankingsModule } from './rankings/rankings.module.js'
 import { RecommendationsModule } from './recommendations/recommendations.module.js'
+import { ReferralsModule } from './referrals/referrals.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
 import { WaitlistModule } from './waitlist/waitlist.module.js'
@@ -52,6 +56,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     MediaModule,
     WalletModule,
     ReviewsModule,
+    QuestionsModule,
     WaitlistModule,
     PromotionsModule,
     LoyaltyModule,
@@ -59,6 +64,9 @@ import { WalletModule } from './wallet/wallet.module.js'
     InventoryModule,
     ImportModule,
     RecommendationsModule,
+    ProfilesModule,
+    RankingsModule,
+    ReferralsModule,
     TelegramModule,
     ClientsModule,
     MasterModule,

@@ -237,3 +237,23 @@
   height: 12px;
   color: var(--color-tertiary-foreground);
 }
+
+/* The profile's level as a line in its colour, under the facts. */
+.level {
+  color: color-mix(in srgb, var(--accent, var(--color-primary)) 75%, var(--color-foreground));
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.status {
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+}
+
+.wreath {
+  margin-bottom: var(--space-5);
+}
+
+.wreath .face {
+  margin-bottom: 0;
+}

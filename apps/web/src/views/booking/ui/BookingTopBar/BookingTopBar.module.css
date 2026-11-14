@@ -115,8 +115,8 @@
   position: fixed;
   inset: 0;
   z-index: 55;
+  /* Dimmed, not blurred: the page stays readable beside the panel and nothing is redrawn. */
   background: rgb(0 0 0 / 0.32);
-  backdrop-filter: blur(6px);
   animation: dim var(--duration-normal) var(--ease-standard);
 }
 

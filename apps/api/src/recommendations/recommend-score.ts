@@ -21,7 +21,17 @@ type Profile = {
   budget: number | null
   /** Past visits: service, place, when (from the device and the account). */
   visits: { serviceId: string; slug: string; serviceName: string; daysAgo: number }[]
+  /** The service being chosen right now (the booking form): picks follow it before anything. */
+  focus?: { serviceId: string; name: string } | null
+  /** Services looked at in this session (newest first), after the focus. */
+  recent?: { serviceId: string; name: string }[]
+  /** «After A people book B»: lift of kind B among clients who had kind A (from bookings). */
+  affinities?: Affinities
+  /** Times each service was shown to this device lately without a tap. */
+  seen?: Record<string, number>
 }
+
+type Affinities = Partial<Record<Interest, Partial<Record<Interest, number>>>>
 
 type Candidate = {
   serviceId: string
@@ -40,6 +50,8 @@ type Candidate = {
   discountPercent: number | null
   /** How often clients come back for it, days. */
   rebookDays: number | null
+  /** A place without a track record yet: a few shelf spots go to such places. */
+  isNewPlace?: boolean
 }
 
 const INTEREST_WORDS: Record<Interest, string[]> = {
@@ -86,6 +98,28 @@ const fitsGender = (serviceName: string, gender: Gender | null) => {
   return !/(женск|маникюр с дизайном|наращ)/.test(name)
 }
 
+/** «Часто берут с маникюром»: the kind in the instrumental case. */
+const INTEREST_WITH: Record<Interest, string> = {
+  haircut: 'со стрижкой',
+  beard: 'с бородой',
+  coloring: 'с окрашиванием',
+  nails: 'с маникюром',
+  brows: 'с бровями',
+  massage: 'с массажем',
+  face: 'с уходом за лицом',
+  tattoo: 'с тату',
+  health: 'с консультацией',
+}
+
+/** Who a service is for, when its name says so: «Маникюр» leans female, «Борода» male. */
+const genderOf = (serviceName: string): Gender | null => {
+  const name = normalize(serviceName)
+  if (/(мужск|бород|брить|усы)/.test(name)) return 'male'
+  if (/(женск|маникюр|педикюр|бров|ресниц|наращ|депиляц|шугаринг|макияж)/.test(name))
+    return 'female'
+  return null
+}
+
 const PRIOR_RATING = 4.3
 const PRIOR_WEIGHT = 10
 
@@ -101,9 +135,62 @@ const formatKm = (km: number) =>
 type Scored = { score: number; reason: string; reasons: string[] }
 
 const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null => {
-  if (!fitsGender(candidate.name, profile.gender)) return null
+  const focus = profile.focus ?? null
+  // Without a stated gender, the service being chosen tells who it is for.
+  const gender = profile.gender ?? (focus ? genderOf(focus.name) : null)
+  if (!fitsGender(candidate.name, gender)) return null
+  if (focus && candidate.serviceId === focus.serviceId) return null
   const parts: { value: number; reason: string }[] = []
   const interests = interestsOf(candidate.name)
+
+  // Choosing a manicure now outweighs a barber visit last month: same kind first, others down.
+  if (focus) {
+    const focusInterests = interestsOf(focus.name)
+    const shared = interests.find((interest) => focusInterests.includes(interest))
+    if (shared) parts.push({ value: 4, reason: INTEREST_LABEL[shared] })
+    else if (focusInterests.length > 0) parts.push({ value: -3, reason: '' })
+    // Near it: another service for the same person (brows beside a manicure, not a kids' cut).
+    if (!shared && gender && genderOf(candidate.name) === gender)
+      parts.push({ value: 2, reason: '' })
+  }
+
+  // Looked at in this session: the same kind again, a little.
+  const recentKinds = new Set((profile.recent ?? []).flatMap((item) => interestsOf(item.name)))
+  if (!focus && interests.some((interest) => recentKinds.has(interest))) {
+    parts.push({ value: 1.5, reason: 'Похоже на просмотренное' })
+  }
+
+  // «С этим часто берут» (Amazon's item-to-item, by kind): what clients book after what this one
+  // is choosing or had lately — brows after a manicure, a beard trim after a haircut.
+  const sources = new Set([
+    ...(focus ? interestsOf(focus.name) : []),
+    ...recentKinds,
+    ...profile.visits
+      .filter((visit) => visit.daysAgo <= 90)
+      .flatMap((v) => interestsOf(v.serviceName)),
+  ])
+  let bestLift = 0
+  let bestSource: Interest | null = null
+  for (const source of sources) {
+    for (const interest of interests) {
+      if (sources.has(interest)) continue
+      const lift = profile.affinities?.[source]?.[interest] ?? 0
+      if (lift > bestLift) {
+        bestLift = lift
+        bestSource = source
+      }
+    }
+  }
+  if (bestSource && bestLift >= 1.3) {
+    parts.push({
+      value: Math.min(3.5, 1 + (bestLift - 1) * 1.5),
+      reason: `Часто берут ${INTEREST_WITH[bestSource]}`,
+    })
+  }
+
+  // Shown again and again without a tap: step aside for something else (feed fatigue).
+  const seen = profile.seen?.[candidate.serviceId] ?? 0
+  if (seen > 2) parts.push({ value: -Math.min(seen - 2, 3), reason: '' })
 
   // Due again: the same service the client had, as long ago as people usually come back.
   const lastSame = profile.visits
@@ -117,7 +204,8 @@ const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null =
         ? { value: 5, reason: `Пора снова · ${weeks > 1 ? `${weeks} нед.` : 'неделя'}` }
         : { value: -2, reason: '' },
     )
-  } else if (profile.visits.some((visit) => visit.slug === candidate.slug)) {
+  } else if (!focus && profile.visits.some((visit) => visit.slug === candidate.slug)) {
+    // While choosing, the choice speaks for now: past places and kinds do not pull picks away.
     parts.push({ value: 1.5, reason: 'Вы были здесь' })
   }
 
@@ -127,7 +215,7 @@ const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null =
 
   // What they actually booked before counts like a stated interest.
   const visitedKinds = new Set(profile.visits.flatMap((visit) => interestsOf(visit.serviceName)))
-  if (!liked && interests.some((interest) => visitedKinds.has(interest))) {
+  if (!focus && !liked && interests.some((interest) => visitedKinds.has(interest))) {
     parts.push({ value: 1.5, reason: 'Как в ваших визитах' })
   }
 
@@ -179,7 +267,7 @@ const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null =
 const rankCandidates = <T extends Candidate>(
   candidates: T[],
   profile: Profile,
-  { limit = 12, perPlace = 2 } = {},
+  { limit = 12, perPlace = 2, exploreAt = 3 } = {},
 ) => {
   const scored = candidates
     .map((candidate) => ({ candidate, ...scoreCandidate(candidate, profile) }))
@@ -196,6 +284,25 @@ const rankCandidates = <T extends Candidate>(
     names.add(name)
     result.push(entry)
     if (result.length === limit) break
+  }
+  // Exploration: one spot near the front goes to a place without a track record, so new salons
+  // get seen at all (otherwise the shelf only ever shows what was already popular).
+  if (
+    exploreAt >= 0 &&
+    !result.slice(0, exploreAt + 3).some((entry) => entry.candidate.isNewPlace)
+  ) {
+    const fresh = scored.find(
+      (entry) =>
+        entry.candidate.isNewPlace &&
+        !result.includes(entry) &&
+        !names.has(normalize(entry.candidate.name).trim()) &&
+        (perSlug.get(entry.candidate.slug) ?? 0) < perPlace,
+    )
+    if (fresh && result.length > exploreAt) {
+      fresh.reasons = ['Новое место', ...fresh.reasons]
+      result.splice(exploreAt, 0, fresh)
+      if (result.length > limit) result.pop()
+    }
   }
   // Variety on the shelf: a card says the same as its neighbour or an already common reason only
   // when it has nothing else true to say («Часто выбирают» three times in a row tells nothing).
@@ -215,5 +322,56 @@ const rankCandidates = <T extends Candidate>(
 
 const INTERESTS = Object.keys(INTEREST_WORDS) as Interest[]
 
-export type { Candidate, Gender, Interest, Profile }
-export { INTERESTS, interestsOf, rankCandidates, scoreCandidate, trustedRating }
+const AFFINITY_WINDOW_DAYS = 120
+const MIN_SUPPORT = 3
+
+/**
+ * Lift of «kind B after kind A»: among clients who had A, the share who booked B within four
+ * months, over the share of all clients who booked B. Above 1 = booked together more than chance.
+ */
+const computeAffinities = (
+  visits: { client: string; serviceName: string; time: number }[],
+): { from: Interest; to: Interest; lift: number; support: number }[] => {
+  const byClient = new Map<string, { kinds: Interest[]; time: number }[]>()
+  for (const visit of visits) {
+    const kinds = interestsOf(visit.serviceName)
+    if (kinds.length === 0) continue
+    const list = byClient.get(visit.client) ?? []
+    list.push({ kinds, time: visit.time })
+    byClient.set(visit.client, list)
+  }
+  const clients = byClient.size
+  if (clients === 0) return []
+  const had = new Map<Interest, number>()
+  const pairs = new Map<string, number>()
+  const window = AFFINITY_WINDOW_DAYS * 86_400_000
+  for (const list of byClient.values()) {
+    list.sort((first, second) => first.time - second.time)
+    for (const kind of new Set(list.flatMap((item) => item.kinds))) {
+      had.set(kind, (had.get(kind) ?? 0) + 1)
+    }
+    const seen = new Set<string>()
+    for (const [index, first] of list.entries()) {
+      for (const second of list.slice(index + 1)) {
+        if (second.time - first.time > window) break
+        for (const from of first.kinds) {
+          for (const to of second.kinds) {
+            if (from === to) continue
+            seen.add(`${from}>${to}`)
+          }
+        }
+      }
+    }
+    for (const key of seen) pairs.set(key, (pairs.get(key) ?? 0) + 1)
+  }
+  return [...pairs.entries()]
+    .map(([key, support]) => {
+      const [from, to] = key.split('>') as [Interest, Interest]
+      const lift = support / (had.get(from) ?? 1) / ((had.get(to) ?? 0) / clients)
+      return { from, to, lift: Math.round(lift * 100) / 100, support }
+    })
+    .filter((pair) => pair.support >= MIN_SUPPORT)
+}
+
+export type { Affinities, Candidate, Gender, Interest, Profile }
+export { computeAffinities, INTERESTS, interestsOf, rankCandidates, scoreCandidate, trustedRating }

@@ -74,6 +74,13 @@ const reviewText = (
     .filter(Boolean)
     .join('\n')
 
+const questionText = (business: string, authorName: string, text: string) =>
+  [
+    `❓ <b>Новый вопрос</b> · ${escapeHtml(business)}`,
+    `${escapeHtml(authorName)}: «${escapeHtml(text)}»`,
+    'Ответьте в кабинете: Отзывы → Вопросы.',
+  ].join('\n')
+
 const dayText = (business: string, date: string, bookings: BookingLine[], title = 'Сегодня') => {
   if (bookings.length === 0) {
     return `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)}\nЗаписей нет.`
@@ -112,6 +119,7 @@ export {
   linkedText,
   movedByClientText,
   newBookingText,
+  questionText,
   reviewText,
   unclosedText,
 }

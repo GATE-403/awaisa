@@ -185,13 +185,41 @@
   color: color-mix(in srgb, var(--color-background) 70%, transparent);
 }
 
-/* Phones: no tile — the capsule is the mark; the text starts at its edge. */
-@media (max-width: 767px) {
-  .resume .link > :first-child {
-    display: none;
-  }
+/* The ring of steps done around a calendar glyph. */
+.progress {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
 
-  .resume .link {
-    padding-left: var(--space-4);
-  }
+.ring {
+  position: absolute;
+  inset: 0;
+  rotate: -90deg;
+}
+
+.ringTrack,
+.ringValue {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.ringTrack {
+  stroke: color-mix(in srgb, var(--color-background) 22%, transparent);
+}
+
+.ringValue {
+  stroke: var(--color-success);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--duration-normal) var(--ease-standard);
+}
+
+.glyph {
+  width: 16px;
+  height: 16px;
+  color: var(--color-background);
 }

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { withDb } from './visits'
 
 type Recommendation = { id: string; name: string; reason: string; slug: string }
 
@@ -27,11 +28,56 @@ test.describe('Recommendations', () => {
     await expect(cards.first()).toHaveAttribute('href', /\/book\?service=/)
   })
 
-  test('the catalog sets picks into its grid, even for a new guest', async ({ page }) => {
+  test('the catalog opens with picks, even for a new guest, and learns what was shown and tapped', async ({
+    page,
+  }) => {
     await page.goto('/')
     const shelf = page.getByRole('region', { name: 'Для вас' })
     await shelf.scrollIntoViewIfNeeded()
-    await expect(shelf.getByRole('link').first()).toHaveAttribute('href', /\/book\?service=/)
+    const first = shelf.getByRole('link').first()
+    await expect(first).toHaveAttribute('href', /\/book\?service=/)
+
+    // The shelf in view counts its cards as shown, per device session.
+    const session = await page.evaluate(() => localStorage.getItem('awaisa:device:v1'))
+    expect(session).toMatch(/^[0-9a-f-]{36}$/)
+    const countEvents = (kind: string) =>
+      withDb(async (client) => {
+        const { rows } = await client.query(
+          'SELECT COUNT(*)::int AS "count" FROM "recommendation_events" WHERE "session" = $1 AND "kind" = $2',
+          [session, kind],
+        )
+        return Number(rows[0]?.count ?? 0)
+      })
+    await expect.poll(() => countEvents('impression'), { timeout: 10_000 }).toBeGreaterThan(0)
+
+    // A tap is sent as the page changes; the shelf will not push an ignored card forever.
+    await first.click()
+    await page.waitForURL(/\/book\?service=/)
+    await expect.poll(() => countEvents('click'), { timeout: 10_000 }).toBe(1)
+    await withDb((client) =>
+      client.query('DELETE FROM "recommendation_events" WHERE "session" = $1', [session]),
+    )
+  })
+
+  test('the service being chosen leads the picks; refusing bad event batches', async ({
+    request,
+  }) => {
+    const nails = await (await request.get('/api/businesses/pink-nails')).json()
+    const manicure = nails.catalog?.services.find((service: { name: string }) =>
+      /маникюр/i.test(service.name),
+    )
+    test.skip(!manicure, 'No demo nail studio in this database')
+    const items: Recommendation[] = await (
+      await request.get(`/api/recommendations?like=${manicure.id}&limit=6`)
+    ).json()
+    expect(items.some((item) => item.id === manicure.id)).toBe(false)
+    expect(items.some((item) => /бород|мужск/i.test(item.name))).toBe(false)
+    expect(items[0]?.reason).toMatch(/ногти|маникюр/)
+
+    const bad = await request.post('/api/recommendations/events', {
+      data: { session: 'x', events: [] },
+    })
+    expect(bad.status()).toBe(400)
   })
 
   test('a visit as long ago as people come back puts that service first: «Пора снова»', async ({

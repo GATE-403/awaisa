@@ -58,6 +58,7 @@ export const DateTimePicker = ({
         aria-label='День'
         layout='scroll'
         className={styles.days}
+        data-edge-fade=''
         value={dayKey ? [dayKey] : []}
         onValueChange={(values) => toSingleValue(values, onDayChange)}
       >

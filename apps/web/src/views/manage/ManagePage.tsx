@@ -85,7 +85,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
           <header className={styles.header}>
             <div className={styles.identity}>
               {data ? (
-                <BusinessTile name={data.business.name} size='md' />
+                <BusinessTile name={data.business.name} logoUrl={data.business.logoUrl} size='md' />
               ) : (
                 <Skeleton className={styles.tileSkeleton} />
               )}

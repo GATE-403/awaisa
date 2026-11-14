@@ -37,7 +37,7 @@ export const BusinessPickerCard = ({ business }: BusinessPickerCardProps) => {
             // biome-ignore lint/performance/noImgElement: already resized WebP from our API
             <img src={business.coverUrl} alt='' className={styles.cover} loading='lazy' />
           ) : (
-            <BusinessTile name={business.name} size='md' />
+            <BusinessTile name={business.name} logoUrl={business.logoUrl} size='md' />
           )}
         </span>
         <span className={styles.text}>

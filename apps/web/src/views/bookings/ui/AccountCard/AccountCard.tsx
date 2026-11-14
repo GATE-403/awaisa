@@ -3,16 +3,26 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
-import { CalendarCheck, Camera, CaretRight, Storefront, Trash } from '@phosphor-icons/react/ssr'
+import {
+  CalendarCheck,
+  Camera,
+  CaretRight,
+  IdentificationBadge,
+  Storefront,
+  Trash,
+} from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { BusinessTile, monogramTint, PersonAvatar } from '@/entities/business'
+import { profileStyle } from '@/entities/profile'
 import { useSession } from '@/entities/session'
+import { useMyProfile } from '@/features/profileStyle'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { removeAvatar, uploadAvatar } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralWord } from '@/shared/lib/plural'
+import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './AccountCard.module.css'
 
 interface AccountCardProps {
@@ -31,6 +41,8 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   const toast = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const myProfile = useMyProfile(session.status === 'signedIn')
+  const look = myProfile.settings ? profileStyle(myProfile.settings.accent) : undefined
   const customer = session.customer
   const places = new Set(bookings.map((booking) => booking.business.slug)).size
   // Bold number, quiet word.
@@ -43,7 +55,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
 
   if (!customer) {
     return (
-      <section className={styles.header} aria-label='Профиль'>
+      <section className={styles.header} aria-label='Профиль' style={look}>
         <h1 className={styles.name}>Ваши записи</h1>
         <p className={styles.handle}>Только на этом телефоне — войдите, будут везде</p>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
@@ -89,7 +101,8 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
     if (file) void setAvatar(file)
   }
 
-  const face = (
+  const rank = myProfile.profile?.rank ?? null
+  const plainFace = (
     <span
       className={styles.face}
       style={monogramTint(displayName)}
@@ -104,6 +117,14 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
         <Camera weight='fill' />
       </span>
     </span>
+  )
+  // One of the platform's three most active clients: their face in a laurel wreath.
+  const face = rank ? (
+    <Wreath rank={rank} className={styles.wreath}>
+      {plainFace}
+    </Wreath>
+  ) : (
+    plainFace
   )
 
   return (
@@ -141,6 +162,11 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
       />
 
       <h1 className={styles.name}>{displayName}</h1>
+      {(myProfile.settings?.status || myProfile.settings?.statusEmoji) && (
+        <p className={styles.status}>
+          {myProfile.settings.statusEmoji} {myProfile.settings.status}
+        </p>
+      )}
       <p className={styles.handle}>{formatPhone(customer.phone)}</p>
       {stats.length > 0 && (
         <p className={styles.stats}>
@@ -153,9 +179,31 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
         </p>
       )}
 
+      {myProfile.profile && <p className={styles.level}>Уровень {myProfile.profile.level.level}</p>}
+
       {/* Where the person works, as capsules right under their name — not a lone row. */}
-      {(hasCabinet || masterOf.length > 0) && (
+      {(hasCabinet || masterOf.length > 0 || myProfile.settings) && (
         <div className={styles.shortcuts}>
+          {myProfile.settings && (
+            <NextLink
+              href={`/u/${myProfile.settings.handle ?? myProfile.settings.id}`}
+              className={styles.shortcut}
+            >
+              <IdentificationBadge weight='fill' aria-hidden className={styles.shortcutIcon} />
+              Мой профиль
+              {myProfile.profile && myProfile.profile.badges.length > 0 && (
+                <span className={styles.shortcutValue}>
+                  {myProfile.profile.badges.length}{' '}
+                  {pluralWord(myProfile.profile.badges.length, [
+                    'достижение',
+                    'достижения',
+                    'достижений',
+                  ])}
+                </span>
+              )}
+              <CaretRight weight='bold' aria-hidden className={styles.shortcutChevron} />
+            </NextLink>
+          )}
           {hasCabinet && (
             <NextLink href={cabinetHref} className={styles.shortcut}>
               {businesses.length === 1 && businesses[0] ? (

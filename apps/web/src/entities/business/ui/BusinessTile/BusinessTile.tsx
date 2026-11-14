@@ -5,6 +5,8 @@ interface BusinessTileProps {
   name: string
   size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
+  /** The owner's logo: shown in the same circle instead of the monogram. */
+  logoUrl?: string | null
 }
 
 const TINTS = [
@@ -40,13 +42,19 @@ export const monogramTint = (name: string) => {
   } as CSSProperties
 }
 
-export const BusinessTile = ({ name, size = 'md', className }: BusinessTileProps) => (
+export const BusinessTile = ({ name, size = 'md', className, logoUrl }: BusinessTileProps) => (
   <span
     className={className ? `${styles.tile} ${className}` : styles.tile}
     data-size={size}
+    data-logo={logoUrl ? '' : undefined}
     style={{ '--tint': pickTint(name) } as CSSProperties}
     aria-hidden='true'
   >
-    {getInitials(name)}
+    {logoUrl ? (
+      // biome-ignore lint/performance/noImgElement: a 512² WebP from our API, shown small
+      <img src={logoUrl} alt='' className={styles.logo} loading='lazy' decoding='async' />
+    ) : (
+      getInitials(name)
+    )}
   </span>
 )

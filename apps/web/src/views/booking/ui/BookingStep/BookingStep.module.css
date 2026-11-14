@@ -189,3 +189,9 @@
   width: 16px;
   height: 16px;
 }
+
+.hint {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}

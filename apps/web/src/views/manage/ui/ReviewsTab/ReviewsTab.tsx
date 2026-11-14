@@ -6,15 +6,17 @@ import { PencilSimple } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { getManagedReviews, replyToReview } from '@/shared/api/clientApi'
+import { getManagedQuestions, getManagedReviews, replyToReview } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
-import type { ManagedReview, ReviewSummary } from '@/shared/api/types'
+import type { BusinessQuestion, ManagedReview, ReviewSummary } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
+import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
+import { QuestionsPanel } from './QuestionsPanel'
 import styles from './ReviewsTab.module.css'
 
 interface ReviewsTabProps {
@@ -32,6 +34,8 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState<ManagedReview | null>(null)
   const [text, setText] = useState('')
+  const [view, setView] = useState<'reviews' | 'questions'>('reviews')
+  const [questions, setQuestions] = useState<BusinessQuestion[] | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -40,9 +44,16 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       .catch((loadError: unknown) => {
         if (!controller.signal.aborted) setError(getErrorMessage(loadError))
       })
+    getManagedQuestions(slug, controller.signal)
+      .then(setQuestions)
+      .catch(() => {
+        if (!controller.signal.aborted) setQuestions([])
+      })
 
     return () => controller.abort()
   }, [slug])
+
+  const openQuestions = questions?.filter((question) => !question.answer).length ?? 0
 
   const openReply = (review: ManagedReview) => {
     setEditing(review)
@@ -82,15 +93,35 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
             : 'Через два часа после визита клиент получает SMS с просьбой оценить мастера.'
         }
       />
-      {error && <p className={styles.error}>{error}</p>}
-      {!data && !error && <Skeleton className={styles.skeleton} />}
-      {data?.count === 0 && (
+      <TextTabs
+        label='Отзывы и вопросы'
+        items={[
+          {
+            label: 'Отзывы',
+            count: data?.count,
+            isActive: view === 'reviews',
+            onSelect: () => setView('reviews'),
+          },
+          {
+            label: 'Вопросы',
+            count: openQuestions > 0 ? `${openQuestions} без ответа` : questions?.length,
+            isActive: view === 'questions',
+            onSelect: () => setView('questions'),
+          },
+        ]}
+      />
+      {view === 'questions' && (
+        <QuestionsPanel slug={slug} questions={questions} onChange={setQuestions} />
+      )}
+      {view === 'reviews' && error && <p className={styles.error}>{error}</p>}
+      {view === 'reviews' && !data && !error && <Skeleton className={styles.skeleton} />}
+      {view === 'reviews' && data?.count === 0 && (
         <EmptyState
           title='Отзывов пока нет'
           text='Они появятся после первых визитов: клиенты оценивают мастера по ссылке из SMS или в «Моих записях».'
         />
       )}
-      {data && data.count > 0 && (
+      {view === 'reviews' && data && data.count > 0 && (
         // The same thread as on the business page, with the phone and visit under the name and
         // the reply action in the thread.
         <ul className={styles.thread}>

@@ -13,6 +13,7 @@ import type {
   SpecialistInput,
 } from '../businesses/businesses.schemas.js'
 import { normalizePhone } from '../common/phone.js'
+import { RankingsService } from '../rankings/rankings.service.js'
 import { Category } from './category.entity.js'
 import { Service } from './service.entity.js'
 import { Specialist } from './specialist.entity.js'
@@ -43,12 +44,13 @@ export class CatalogService {
     @InjectRepository(Category) private readonly categories: Repository<Category>,
     @InjectRepository(Service) private readonly services: Repository<Service>,
     @InjectRepository(Specialist) private readonly specialists: Repository<Specialist>,
+    private readonly rankings: RankingsService,
   ) {}
 
   // Public pages see active items only; the owner's cabinet also gets the hidden ones.
   async getCatalog(businessId: string, { includeInactive = false } = {}): Promise<CatalogView> {
     const activeOnly = includeInactive ? {} : { isActive: true }
-    const [categories, services, specialists] = await Promise.all([
+    const [categories, services, specialists, masterRanks] = await Promise.all([
       this.categories.find({ where: { businessId }, order: { position: 'ASC' } }),
       this.services.find({ where: { businessId, ...activeOnly }, order: { position: 'ASC' } }),
       this.specialists.find({
@@ -56,6 +58,7 @@ export class CatalogService {
         relations: { services: true },
         order: { position: 'ASC' },
       }),
+      this.rankings.masterRanks(),
     ])
     const visibleServiceIds = new Set(services.map((service) => service.id))
 
@@ -105,6 +108,8 @@ export class CatalogService {
           rating,
           photoUrl,
           branchId,
+          // Top three masters on the platform wear a laurel wreath.
+          rank: masterRanks.get(id) ?? null,
           serviceIds: offered
             .map((service) => service.id)
             .filter((serviceId) => visibleServiceIds.has(serviceId)),

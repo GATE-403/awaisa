@@ -66,7 +66,12 @@ export const OfferCard = ({
             decoding='async'
           />
         ) : (
-          <BusinessTile name={offer.businessName} size='lg' className={styles.tile} />
+          <BusinessTile
+            name={offer.businessName}
+            logoUrl={offer.logoUrl}
+            size='lg'
+            className={styles.tile}
+          />
         )}
         {offer.discountPercent ? (
           <span className={styles.discountBadge}>−{offer.discountPercent}%</span>

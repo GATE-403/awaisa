@@ -21,18 +21,25 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
   const hidden = Math.max(0, items.length - FIRST)
 
   return (
-    // While more wait, the last one fades into the page and the button sits on the fade.
-    <MoreFade
-      hiddenCount={hidden}
-      isOpen={isAll}
-      onToggle={() => setIsAll((value) => !value)}
-      label={pluralWord(hidden, ['отзыв', 'отзыва', 'отзывов'])}
-    >
-      <ul className={styles.reviews}>
-        {items.slice(0, shown).map((review) => (
-          <ReviewItem key={review.id} review={review} businessName={business.name} />
-        ))}
-      </ul>
-    </MoreFade>
+    <>
+      {/* While more wait, the last one fades into the page and the button sits on the fade. */}
+      <MoreFade
+        hiddenCount={hidden}
+        isOpen={isAll}
+        onToggle={() => setIsAll((value) => !value)}
+        label={pluralWord(hidden, ['отзыв', 'отзыва', 'отзывов'])}
+      >
+        <ul className={styles.reviews}>
+          {items.slice(0, shown).map((review) => (
+            <ReviewItem
+              key={review.id}
+              review={review}
+              businessName={business.name}
+              authorHref={review.authorId ? `/u/${review.authorId}` : undefined}
+            />
+          ))}
+        </ul>
+      </MoreFade>
+    </>
   )
 }

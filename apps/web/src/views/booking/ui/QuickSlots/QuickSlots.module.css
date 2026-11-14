@@ -1,0 +1,53 @@
+.quick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.caption {
+  overflow: hidden;
+  padding-inline: var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.for {
+  color: var(--color-muted-foreground);
+}
+
+/* One line of capsules that scrolls sideways when it runs out of room. */
+.slots {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+}
+
+.slots::-webkit-scrollbar {
+  display: none;
+}
+
+.slot {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The day plain, the time in the button's own weight: told apart without a paler grey. */
+.day {
+  font-weight: var(--font-weight-regular);
+}
+
+.placeholder {
+  width: 128px;
+  height: var(--control-height-md);
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}

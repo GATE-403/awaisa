@@ -19,10 +19,41 @@ const recommendationsQuerySchema = z.object({
   lng: z.coerce.number().min(-180).max(180).optional(),
   /** Device visits as `serviceId~YYYY-MM-DD`, newest first. */
   visits: z.preprocess(list, z.array(z.string().max(120)).max(30)).default([]),
+  /** The service being chosen (the booking form): picks follow it. */
+  like: z.string().trim().min(1).max(64).optional(),
+  /** Services looked at on this device lately, newest first. */
+  recent: z.preprocess(list, z.array(z.string().max(64)).max(5)).default([]),
+  /** A random id per device: what was already shown here steps aside. */
+  session: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{8,40}$/)
+    .optional(),
   limit: z.coerce.number().int().min(1).max(24).default(12),
 })
 
-type RecommendationsQuery = z.infer<typeof recommendationsQuerySchema>
+const recommendationEventsSchema = z.object({
+  session: z.string().regex(/^[A-Za-z0-9-]{8,40}$/),
+  events: z
+    .array(
+      z.object({
+        kind: z.enum(['impression', 'click', 'book']),
+        serviceId: z.string().min(1).max(64),
+        reason: z.string().max(80).default(''),
+        surface: z.enum(['catalog', 'profile', 'booking', 'success']),
+        position: z.number().int().min(0).max(100).optional(),
+      }),
+    )
+    .min(1)
+    .max(50),
+})
 
-export type { RecommendationsQuery }
-export { recommendationsQuerySchema }
+const recommendationStatsSchema = z.object({
+  days: z.coerce.number().int().min(1).max(90).default(14),
+})
+
+type RecommendationsQuery = z.infer<typeof recommendationsQuerySchema>
+type RecommendationEventsInput = z.infer<typeof recommendationEventsSchema>
+type RecommendationStatsQuery = z.infer<typeof recommendationStatsSchema>
+
+export type { RecommendationEventsInput, RecommendationStatsQuery, RecommendationsQuery }
+export { recommendationEventsSchema, recommendationStatsSchema, recommendationsQuerySchema }

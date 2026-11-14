@@ -1,12 +1,13 @@
 import { BadRequestException } from '@nestjs/common'
 import sharp from 'sharp'
 
-type ImageKind = 'cover' | 'photo' | 'avatar'
+type ImageKind = 'cover' | 'photo' | 'avatar' | 'logo'
 
 const SIZES: Record<ImageKind, { width: number; height?: number }> = {
   cover: { width: 1600, height: 1000 },
   photo: { width: 1400 },
   avatar: { width: 480, height: 480 },
+  logo: { width: 512, height: 512 },
 }
 
 const MAX_INPUT_PIXELS = 50_000_000

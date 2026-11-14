@@ -21,5 +21,6 @@ import { WorkPhotosService } from './work-photos.service.js'
   ],
   controllers: [MediaController, ManageMediaController, FeedController, MeAvatarController],
   providers: [StorageService, WorkPhotosService, MasterGuard],
+  exports: [StorageService, WorkPhotosService],
 })
 export class MediaModule {}

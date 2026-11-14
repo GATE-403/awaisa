@@ -125,11 +125,8 @@
   overflow: hidden;
   isolation: isolate;
   border-radius: var(--radius-md);
-  background: linear-gradient(
-    160deg,
-    var(--color-primary),
-    color-mix(in srgb, var(--color-primary) 60%, black)
-  );
+  /* While the picture loads (or when there is none): a quiet fill close to the page, not accent. */
+  background: var(--color-fill);
   color: #fff;
 }
 
@@ -278,20 +275,6 @@
 @media (prefers-reduced-motion: reduce) {
   .interestCell {
     transition: none;
-  }
-}
-
-/* Soft edges on the sideways rows — only with a mouse: on phones a mask over a scrolling row is
-   repainted every frame, so touch screens scroll them plain. */
-@media (hover: hover) and (pointer: fine) {
-  .track {
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--page-gutter),
-      #000 calc(100% - var(--edge-fade)),
-      transparent
-    );
   }
 }
 

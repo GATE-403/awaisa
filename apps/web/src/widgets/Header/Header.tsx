@@ -6,16 +6,18 @@ import {
   PlayCircle,
   SquaresFour,
   Storefront,
+  Trophy,
   UserCircle,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { KIND_ICONS } from '@/shared/config/kindStyles'
 import { getBusinessSlug, isActivePath, isCabinetPath } from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { Logo } from '@/shared/ui/Logo/Logo'
 import { HeaderSearch } from '@/widgets/HeaderSearch'
@@ -24,12 +26,13 @@ import styles from './Header.module.css'
 const ACTIONS = [
   { href: '/feed', label: 'Работы', icon: PlayCircle },
   { href: '/map', label: 'Карта', icon: MapTrifold },
+  { href: '/top', label: 'Рейтинг', icon: Trophy },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
 // A marketplace header: logo, «Каталог», the search field, labelled actions; categories below.
 export const Header = () => {
-  const pathname = usePathname()
+  const pathname = useChromePathname()
   const searchParams = useSearchParams()
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
@@ -63,7 +66,8 @@ export const Header = () => {
     pathname === '/business' ||
     pathname.startsWith('/business/') ||
     pathname.startsWith('/review/') ||
-    pathname.startsWith('/master')
+    pathname.startsWith('/master') ||
+    pathname.startsWith('/u/')
   // The map and the feed filter by kind themselves; catalog chips would leave them.
   // A business page has its own bar; the catalog's kinds there only push the place down.
   const hasCategories =
@@ -109,7 +113,11 @@ export const Header = () => {
       data-slim={isSlim || undefined}
       // Full-screen on phones: the feed (like Shorts), the map and the profile — only the tab bar.
       data-phone-hidden={
-        pathname === '/feed' || pathname === '/bookings' || pathname === '/map' || undefined
+        pathname === '/feed' ||
+        pathname === '/bookings' ||
+        pathname === '/map' ||
+        pathname.startsWith('/u/') ||
+        undefined
       }
     >
       <div className={styles.inner}>

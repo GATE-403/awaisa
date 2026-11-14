@@ -34,7 +34,7 @@ export const WorkShelf = ({ items, kind }: WorkShelfProps) => {
           <CaretRight weight='bold' aria-hidden />
         </NextLink>
       </div>
-      <ul className={styles.track}>
+      <ul className={styles.track} data-edge-fade=''>
         {items.slice(0, SHOWN).map((item) => (
           <li key={item.id}>
             <NextLink href={feedHref(item.id)} className={styles.card}>

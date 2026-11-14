@@ -113,6 +113,9 @@ test.describe('UX: guidance and feedback', () => {
 
   test('slot loading failure offers a retry instead of a dead end', async ({ page }) => {
     let failures = 1
+    await page.goto('/awaisa-studio/book?service=styling')
+    // The quick times ask for slots on open; only the picker's own request fails.
+    await page.waitForLoadState('networkidle')
     await page.route('**/api/availability**', (route) => {
       if (failures > 0) {
         failures -= 1
@@ -120,7 +123,6 @@ test.describe('UX: guidance and feedback', () => {
       }
       return route.fallback()
     })
-    await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
       .specialist.getByRole('radio', { name: /Любой мастер/ })
       .click()
@@ -187,6 +189,7 @@ test.describe('UX: layout and ergonomics', () => {
         '/bookings',
         '/business',
         '/map',
+        '/top',
       ]) {
         await page.goto(path)
         // Map tiles keep the network busy; a short wait is enough for the page itself.
@@ -236,6 +239,10 @@ test.describe('UX: layout and ergonomics', () => {
     await page.keyboard.type('+996555000111')
     await primaryAction(page).focus()
     await page.keyboard.press('Enter')
+    // The first press shows the check; the second books.
+    await expect(primaryAction(page)).toHaveText('Записаться')
+    await primaryAction(page).focus()
+    await page.keyboard.press('Enter')
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
   })
@@ -246,6 +253,9 @@ test.describe('UX: layout and ergonomics', () => {
     await page.goto('/awaisa-studio')
     await page.locator('a[href*="/book?service="]').first().click()
     await page.waitForURL(/\/book\?/)
+    // Opened over the page it was tapped on: the place's page stays under the panel.
+    await expect(page.locator('[data-booking-screen]')).toBeVisible()
+    await expect(page.locator('#masters')).toBeAttached()
     await expect
       .poll(() => page.evaluate(() => document.documentElement.style.overflow))
       .toBe('hidden')

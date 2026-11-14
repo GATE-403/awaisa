@@ -7,16 +7,24 @@ import { RateVisitForm } from '../RateVisitForm/RateVisitForm'
 interface RateVisitSheetProps {
   booking: Booking
   access: ReviewAccess
+  initialRating?: number
   onRated: (review: Review) => void
   onClose: () => void
 }
 
-export const RateVisitSheet = ({ booking, access, onRated, onClose }: RateVisitSheetProps) => (
+export const RateVisitSheet = ({
+  booking,
+  access,
+  initialRating,
+  onRated,
+  onClose,
+}: RateVisitSheetProps) => (
   <Sheet title={booking.business.name} onClose={onClose}>
     <RateVisitForm
       bookingId={booking.id}
       access={access}
       specialistName={booking.specialistName}
+      initialRating={initialRating}
       onRated={(review) => {
         onRated(review)
         onClose()

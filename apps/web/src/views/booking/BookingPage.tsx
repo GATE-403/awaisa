@@ -12,8 +12,17 @@ import {
   Scissors,
   User,
 } from '@phosphor-icons/react/ssr'
-import { useState } from 'react'
-import { formatDayLong, formatDuration, formatPrice, getSpecialistLabel } from '@/entities/booking'
+import { useEffect, useState } from 'react'
+import {
+  ANY_SPECIALIST_ID,
+  formatDayLong,
+  formatDuration,
+  formatPrice,
+  getSpecialistLabel,
+  getSpecialistsForService,
+} from '@/entities/booking'
+import { ForYouShelf, rememberService, trackBookedPick } from '@/features/forYou'
+import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -22,6 +31,7 @@ import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import chip from '@/shared/ui/Chip/Chip.module.css'
 import { Container } from '@/shared/ui/Container/Container'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
+import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
 import { BookingReview } from '@/views/booking/ui/BookingReview/BookingReview'
 import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
@@ -30,27 +40,79 @@ import { BookingScrim, BookingTopBar } from '@/views/booking/ui/BookingTopBar/Bo
 import { DateTimePicker } from '@/views/booking/ui/DateTimePicker/DateTimePicker'
 import { MasterPicker } from '@/views/booking/ui/MasterPicker/MasterPicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
+import { PlaceReviews } from '@/views/booking/ui/PlaceReviews/PlaceReviews'
 import { PromoCodeField } from '@/views/booking/ui/PromoCodeField/PromoCodeField'
+import { QuickSlots } from '@/views/booking/ui/QuickSlots/QuickSlots'
 import styles from './BookingPage.module.css'
 
 interface BookingPageProps {
   business: Business
   catalog: Catalog
+  /** Opened over the page it was tapped on (an intercepted route), not as a page of its own. */
+  isModal?: boolean
 }
 
-export const BookingPage = ({ business, catalog }: BookingPageProps) => {
+export const BookingPage = ({ business, catalog, isModal = false }: BookingPageProps) => {
   const form = useBookingForm(business, catalog)
   usePageScrollLock()
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
   const specialistLabel = getSpecialistLabel(catalog, form.specialistId)
+  const recentVisits = useRecentVisits()
+  const chosenServiceId = form.serviceId
+  const bookedServiceId = form.createdBooking?.serviceId ?? null
+
+  // What the client looks at and books teaches the picks (on this device, see features/forYou).
+  useEffect(() => {
+    if (chosenServiceId) rememberService(chosenServiceId)
+  }, [chosenServiceId])
+
+  useEffect(() => {
+    if (bookedServiceId) trackBookedPick(bookedServiceId)
+  }, [bookedServiceId])
+  // Quick times only before the client reaches the calendar: for the chosen service, else the
+  // service and master of their last visit here, else the place's popular service with anyone.
+  const isQuickShown =
+    form.firstIncompleteStep === 'service' || form.firstIncompleteStep === 'specialist'
+  const canDo = (serviceId: string, specialistId: string) =>
+    getSpecialistsForService(catalog, serviceId).some(
+      (specialist) =>
+        specialist.id === specialistId &&
+        (!form.branchId || !specialist.branchId || specialist.branchId === form.branchId),
+    )
+  const lastVisit = recentVisits.find(
+    (visit) =>
+      visit.business.slug === business.slug &&
+      form.services.some((service) => service.id === visit.serviceId) &&
+      canDo(visit.serviceId, visit.specialistId),
+  )
+  const isLastVisitShown = !form.service && !form.specialistId && Boolean(lastVisit)
+  const quickService =
+    form.service ??
+    (isLastVisitShown
+      ? form.services.find((service) => service.id === lastVisit?.serviceId)
+      : (form.services.find((service) => service.isPopular) ?? form.services[0])) ??
+    null
+  const quickSpecialistId =
+    form.specialistId ?? (isLastVisitShown ? lastVisit?.specialistId : null) ?? ANY_SPECIALIST_ID
+  const quick = useQuickSlots({
+    serviceId: quickService?.id ?? null,
+    specialistId: quickSpecialistId,
+    branchId: form.branchId,
+    dayKeys: form.openDayKeys,
+    isEnabled: isQuickShown && Boolean(quickService),
+  })
+  const quickMaster =
+    quickSpecialistId === ANY_SPECIALIST_ID
+      ? 'любой мастер'
+      : getSpecialistLabel(catalog, quickSpecialistId)
 
   if (form.createdBooking) {
     return (
       <>
-        <BookingScrim slug={business.slug} />
+        <BookingScrim slug={business.slug} isModal={isModal} />
         <main className={styles.page} data-booking-screen=''>
-          <BookingTopBar business={business} />
+          <BookingTopBar business={business} isModal={isModal} />
           <Container size='md'>
             <BookingSuccess booking={form.createdBooking} />
           </Container>
@@ -68,6 +130,20 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
       (['service', 'specialist', 'datetime', 'contacts'] as const).every((step) =>
         form.isStepCollapsed(step),
       ))
+
+  // Contacts known (a returning guest, or signed in): the tap goes straight to the check.
+  const pickQuickSlot = (slot: QuickSlot) => {
+    if (!quickService) return
+    form.pickSlot({
+      serviceId: quickService.id,
+      specialistId: quickSpecialistId,
+      dayKey: slot.dayKey,
+      time: slot.time,
+    })
+    if (!form.hasContacts) return
+    setIsReviewRequested(true)
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const summaryProps = {
     service: form.service,
@@ -100,9 +176,9 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
 
   return (
     <>
-      <BookingScrim slug={business.slug} />
+      <BookingScrim slug={business.slug} isModal={isModal} />
       <main className={styles.page} data-booking-screen=''>
-        <BookingTopBar business={business} />
+        <BookingTopBar business={business} isModal={isModal} />
         <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
           <div className={styles.steps}>
             {form.branches.length > 1 && (
@@ -128,6 +204,17 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
               </section>
             )}
 
+            {isQuickShown && quickService && (
+              <QuickSlots
+                title={isLastVisitShown ? 'Как в прошлый раз' : 'Ближайшее время'}
+                subtitle={`${quickService.name}, ${quickMaster}`}
+                slots={quick.slots}
+                isLoading={quick.isLoading}
+                todayKey={form.today?.dayKey ?? null}
+                onPick={pickQuickSlot}
+              />
+            )}
+
             {isReviewing && form.service && form.dayKey && form.time ? (
               <BookingReview
                 business={business}
@@ -136,7 +223,7 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                   business.address ??
                   null
                 }
-                service={form.service}
+                service={form.service ?? null}
                 specialist={
                   catalog.specialists.find((specialist) => specialist.id === form.specialistId) ??
                   null
@@ -183,7 +270,14 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                         key={service.id}
                         value={service.id}
                         title={service.name}
-                        description={formatDuration(service.durationMinutes)}
+                        description={
+                          // Length and what is done on one quiet line: rows stay one height, and
+                          // the chosen one shows the description whole.
+                          <span className={styles.serviceNote}>
+                            {formatDuration(service.durationMinutes)}
+                            {service.description.trim() && ` · ${service.description.trim()}`}
+                          </span>
+                        }
                         trailing={formatPrice(service.price)}
                       />
                     ))}
@@ -195,6 +289,7 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                   icon={User}
                   title='Мастер'
                   summary={specialistLabel || undefined}
+                  hint={form.service ? undefined : 'Сначала выберите услугу'}
                   isComplete={form.completedSteps.specialist}
                   isCollapsed={form.isStepCollapsed('specialist')}
                   onToggle={() => form.toggleStep('specialist')}
@@ -218,6 +313,13 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                     form.dayKey && form.time
                       ? `${formatDayLong(form.dayKey)}, ${form.time}`
                       : undefined
+                  }
+                  hint={
+                    !form.service
+                      ? 'Сначала выберите услугу'
+                      : !form.specialistId
+                        ? 'Сначала выберите мастера'
+                        : undefined
                   }
                   isComplete={form.completedSteps.datetime}
                   isCollapsed={form.isStepCollapsed('datetime')}
@@ -354,6 +456,24 @@ export const BookingPage = ({ business, catalog }: BookingPageProps) => {
                 </BookingStep>
               </>
             )}
+
+            {/* Under the form and set well apart from it (a wide gap), so it reads as
+                something to look at, not another step: what people said, then picks nearby. */}
+            <aside className={styles.after} aria-label='Дополнительно'>
+              <PlaceReviews
+                slug={business.slug}
+                businessName={business.name}
+                service={form.service ?? null}
+              />
+              <ForYouShelf
+                title='Вам может понравиться'
+                surface='booking'
+                likeServiceId={form.serviceId ?? undefined}
+                isForEveryone
+                isInline
+                excludeServiceId={form.serviceId ?? undefined}
+              />
+            </aside>
           </div>
 
           {!isReviewing && (

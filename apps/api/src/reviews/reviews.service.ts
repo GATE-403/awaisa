@@ -1,5 +1,6 @@
-import { createHmac, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -14,10 +15,15 @@ import type { Booking } from '../bookings/booking.entity.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
+import { saltOf } from '../common/public-id.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { processImage } from '../media/images.js'
+import { StorageService } from '../media/storage.service.js'
+import { WorkPhotosService } from '../media/work-photos.service.js'
 import { reviewRequestMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
+import { RankingsService } from '../rankings/rankings.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { reviewText } from '../telegram/telegram-messages.js'
 import { Review } from './review.entity.js'
@@ -35,14 +41,24 @@ type ReviewRow = {
   createdAt: Date
   specialistName: string
   serviceName: string
+  serviceId?: string
+  authorAvatarUrl?: string | null
   visitDate?: Date
   customerPhone?: string
+  photos?: string[] | null
+}
+
+type ReviewerRow = ReviewRow & {
+  slug: string
+  businessName: string
+  coverUrl: string | null
 }
 
 // The «how was it?» SMS goes out two hours after the visit, and not later than a day after.
 const REQUEST_AFTER_HOURS = 2
 const REQUEST_WITHIN_HOURS = 24
 const SIGNATURE_LENGTH = 22
+const MAX_REVIEW_PHOTOS = 3
 
 // Shown publicly as «Айгерим С.»: a first name and an initial, never the full name.
 const toAuthorName = (name: string) => {
@@ -50,8 +66,11 @@ const toAuthorName = (name: string) => {
   return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Клиент'
 }
 
-const toView = (row: ReviewRow) => ({
+const toView = (row: ReviewRow, authorId: string | null = null) => ({
   id: row.id,
+  authorId,
+  authorAvatarUrl: row.authorAvatarUrl ?? null,
+  serviceId: row.serviceId ?? null,
   rating: Number(row.rating),
   comment: row.comment,
   authorName: row.authorName,
@@ -60,6 +79,7 @@ const toView = (row: ReviewRow) => ({
   createdAt: new Date(row.createdAt).toISOString(),
   specialistName: row.specialistName,
   serviceName: row.serviceName,
+  photos: row.photos ?? [],
 })
 
 @Injectable()
@@ -74,7 +94,62 @@ export class ReviewsService {
     private readonly sms: SmsService,
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
+    private readonly rankings: RankingsService,
+    private readonly storage: StorageService,
+    private readonly workPhotos: WorkPhotosService,
   ) {}
+
+  /** The prefix of a reviewer's public key: secret, so the key never gives the phone away. */
+  private reviewerSalt() {
+    return saltOf(this.config.get('AUTH_SECRET', { infer: true }))
+  }
+
+  /** A stable public id for whoever wrote a review: one per phone, not reversible. */
+  reviewerId(phone: string) {
+    return createHash('sha256')
+      .update(this.reviewerSalt() + phone)
+      .digest('hex')
+      .slice(0, 20)
+  }
+
+  /** A reviewer's public page: their «Имя Ф.», face and reviews of published places. */
+  async reviewer(id: string) {
+    const rows = (await this.dataSource.query(
+      `SELECT r."id", r."rating", r."comment", r."author_name" AS "authorName", r."reply",
+         r."replied_at" AS "repliedAt", r."created_at" AS "createdAt",
+         sp."name" AS "specialistName", s."name" AS "serviceName", r."service_id" AS "serviceId",
+         c."avatar_url" AS "authorAvatarUrl",
+         COALESCE((SELECT array_agg(rp."url" ORDER BY rp."created_at") FROM "review_photos" rp
+           WHERE rp."review_id" = r."id"), '{}') AS "photos",
+         bz."slug", bz."name" AS "businessName", bz."cover_url" AS "coverUrl"
+       FROM "reviews" r
+       JOIN "bookings" b ON b."id" = r."booking_id"
+       JOIN "businesses" bz ON bz."id" = r."business_id" AND bz."is_published"
+       LEFT JOIN "customers" c ON c."phone" = b."customer_phone"
+       LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
+       LEFT JOIN "services" s ON s."id" = r."service_id"
+       WHERE left(encode(sha256(convert_to($2 || b."customer_phone", 'UTF8')), 'hex'), 20) = $1
+       ORDER BY r."created_at" DESC LIMIT 50`,
+      [id, this.reviewerSalt()],
+    )) as ReviewerRow[]
+    const [latest] = rows
+    if (!latest) throw new NotFoundException('Профиль не найден')
+    const total = rows.reduce((sum, row) => sum + Number(row.rating), 0)
+
+    return {
+      id,
+      name: latest.authorName,
+      avatarUrl: rows.find((row) => row.authorAvatarUrl)?.authorAvatarUrl ?? null,
+      count: rows.length,
+      average: Math.round((total / rows.length) * 10) / 10,
+      places: new Set(rows.map((row) => row.slug)).size,
+      since: new Date(rows[rows.length - 1]?.createdAt ?? latest.createdAt).toISOString(),
+      items: rows.map((row) => ({
+        ...toView(row, id),
+        business: { slug: row.slug, name: row.businessName, coverUrl: row.coverUrl },
+      })),
+    }
+  }
 
   /** A link that opens the review form for one visit without signing in (sent by SMS). */
   signature(bookingId: string) {
@@ -130,9 +205,47 @@ export class ReviewsService {
     }
   }
 
-  async listPublic(slug: string, limit: number) {
+  /**
+   * A picture for the visit's review (three at most). It also goes to the place's «Работы»,
+   * tagged with the visit's service and master, while there is room there.
+   */
+  async addPhoto(bookingId: string, access: Access, file: Buffer) {
+    const booking = await this.authorize(bookingId, access)
+    const review = await this.reviews.findOneBy({ bookingId })
+    if (!review) throw new NotFoundException('Сначала оцените визит')
+    const [count] = (await this.dataSource.query(
+      'SELECT COUNT(*)::int AS "count" FROM "review_photos" WHERE "review_id" = $1',
+      [review.id],
+    )) as { count: number }[]
+    if ((count?.count ?? 0) >= MAX_REVIEW_PHOTOS) {
+      throw new BadRequestException(`Можно до ${MAX_REVIEW_PHOTOS} фото`)
+    }
+    const url = await this.storage.put(
+      `${booking.businessId}/${randomUUID()}.webp`,
+      await processImage(file, 'photo'),
+    )
+    await this.dataSource.query(
+      'INSERT INTO "review_photos" ("review_id", "url") VALUES ($1, $2)',
+      [review.id, url],
+    )
+    if (await this.workPhotos.hasRoom(booking.businessId)) {
+      await this.workPhotos.add(booking.businessId, url, {
+        serviceId: booking.serviceId,
+        specialistId: booking.specialistId,
+        bookingId,
+      })
+    }
+    const rows = (await this.dataSource.query(
+      'SELECT "url" FROM "review_photos" WHERE "review_id" = $1 ORDER BY "created_at"',
+      [review.id],
+    )) as { url: string }[]
+
+    return { photos: rows.map((row) => row.url) }
+  }
+
+  async listPublic(slug: string, limit: number, serviceId?: string) {
     const business = await this.businesses.findBySlug(slug)
-    return this.summary(business, limit)
+    return this.summary(business, limit, false, serviceId)
   }
 
   async listForManage(business: Business) {
@@ -183,27 +296,34 @@ export class ReviewsService {
     )
   }
 
-  private async summary(business: Business, limit: number, isManage = false) {
+  private async summary(business: Business, limit: number, isManage = false, serviceId?: string) {
+    const clientRanks = await this.rankings.clientRanks()
+    const params = serviceId ? [business.id, serviceId] : [business.id]
+    const byService = serviceId ? ` AND "service_id" = $2` : ''
     const [totals] = (await this.dataSource.query(
       `SELECT COUNT(*)::int AS "count", COALESCE(round(avg("rating")::numeric, 1), 0)::float AS "average",
          COUNT(*) FILTER (WHERE "rating" = 5)::int AS "r5", COUNT(*) FILTER (WHERE "rating" = 4)::int AS "r4",
          COUNT(*) FILTER (WHERE "rating" = 3)::int AS "r3", COUNT(*) FILTER (WHERE "rating" = 2)::int AS "r2",
          COUNT(*) FILTER (WHERE "rating" = 1)::int AS "r1"
-       FROM "reviews" WHERE "business_id" = $1`,
-      [business.id],
+       FROM "reviews" WHERE "business_id" = $1${byService}`,
+      params,
     )) as Record<string, number>[]
     const rows = (await this.dataSource.query(
       `SELECT r."id", r."rating", r."comment", r."author_name" AS "authorName", r."reply",
          r."replied_at" AS "repliedAt", r."created_at" AS "createdAt",
-         sp."name" AS "specialistName", s."name" AS "serviceName",
-         b."starts_at" AS "visitDate", b."customer_phone" AS "customerPhone"
+         sp."name" AS "specialistName", s."name" AS "serviceName", r."service_id" AS "serviceId",
+         b."starts_at" AS "visitDate", b."customer_phone" AS "customerPhone",
+         c."avatar_url" AS "authorAvatarUrl",
+         COALESCE((SELECT array_agg(rp."url" ORDER BY rp."created_at") FROM "review_photos" rp
+           WHERE rp."review_id" = r."id"), '{}') AS "photos"
        FROM "reviews" r
        JOIN "bookings" b ON b."id" = r."booking_id"
+       LEFT JOIN "customers" c ON c."phone" = b."customer_phone"
        LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
        LEFT JOIN "services" s ON s."id" = r."service_id"
-       WHERE r."business_id" = $1
+       WHERE r."business_id" = $1${serviceId ? ' AND r."service_id" = $3' : ''}
        ORDER BY r."created_at" DESC LIMIT $2`,
-      [business.id, limit],
+      serviceId ? [business.id, limit, serviceId] : [business.id, limit],
     )) as ReviewRow[]
 
     return {
@@ -211,7 +331,9 @@ export class ReviewsService {
       average: totals?.average ?? 0,
       distribution: [5, 4, 3, 2, 1].map((stars) => ({ stars, count: totals?.[`r${stars}`] ?? 0 })),
       items: rows.map((row) => ({
-        ...toView(row),
+        ...toView(row, row.customerPhone ? this.reviewerId(row.customerPhone) : null),
+        // The platform's three most active clients wear a laurel wreath on their face.
+        authorRank: (row.customerPhone && clientRanks.get(row.customerPhone)) || null,
         ...(isManage
           ? {
               customerPhone: row.customerPhone ?? '',
