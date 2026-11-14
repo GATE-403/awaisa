@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, feat/booking-mvp]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          API_URL: http://localhost:4000
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: awaisa
+          POSTGRES_PASSWORD: awaisa
+          POSTGRES_DB: awaisa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U awaisa -d awaisa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env
+      - name: Migrate and seed demo data
+        run: |
+          pnpm --filter @awaisa/tokens --filter @awaisa/ui --if-present build
+          pnpm --filter api build
+          pnpm --filter api migrate
+          pnpm db:seed
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            apps/web/e2e-report
+            apps/web/e2e-results
+          retention-days: 7

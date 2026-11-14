@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { type DynamicModule, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js'
 import { BookingsModule } from './bookings/bookings.module.js'
 import { BusinessesModule } from './businesses/businesses.module.js'
 import { CacheModule } from './cache/cache.module.js'
+import { RateLimitStorage } from './cache/rate-limit.storage.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
@@ -27,6 +28,8 @@ import { RankingsModule } from './rankings/rankings.module.js'
 import { RecommendationsModule } from './recommendations/recommendations.module.js'
 import { ReferralsModule } from './referrals/referrals.module.js'
 import { ReviewsModule } from './reviews/reviews.module.js'
+import { type ProcessRole, runsJobs } from './runtime/process-role.js'
+import { RuntimeModule } from './runtime/runtime.module.js'
 import { SearchModule } from './search/search.module.js'
 import { TelegramModule } from './telegram/telegram.module.js'
 import { TelemetryModule } from './telemetry/telemetry.module.js'
@@ -42,12 +45,12 @@ import { WalletModule } from './wallet/wallet.module.js'
       validate: validateEnv,
     }),
     ThrottlerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService<Env, true>) => [
-        { ttl: 60_000, limit: config.get('RATE_LIMIT_PER_MINUTE', { infer: true }) },
-      ],
+      inject: [ConfigService, RateLimitStorage],
+      useFactory: (config: ConfigService<Env, true>, storage: RateLimitStorage) => ({
+        throttlers: [{ ttl: 60_000, limit: config.get('RATE_LIMIT_PER_MINUTE', { infer: true }) }],
+        storage,
+      }),
     }),
-    ScheduleModule.forRoot(),
     DatabaseModule,
     CatalogModule,
     BusinessesModule,
@@ -78,4 +81,12 @@ import { WalletModule } from './wallet/wallet.module.js'
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
-export class AppModule {}
+export class AppModule {
+  // Without ScheduleModule the @Cron handlers are plain methods: an `api` process never runs them.
+  static forRole(role: ProcessRole): DynamicModule {
+    return {
+      module: AppModule,
+      imports: [RuntimeModule.forRole(role), ...(runsJobs(role) ? [ScheduleModule.forRoot()] : [])],
+    }
+  }
+}

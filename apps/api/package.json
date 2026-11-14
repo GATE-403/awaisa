@@ -8,6 +8,8 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
+    "start:worker": "node dist/worker.js",
+    "migrate": "node dist/database/migrate.js",
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
@@ -18,7 +20,8 @@
     "migration:generate": "pnpm build && typeorm -d dist/database/data-source.js migration:generate src/database/migrations/Migration",
     "migration:run": "typeorm -d dist/database/data-source.js migration:run",
     "migration:revert": "typeorm -d dist/database/data-source.js migration:revert",
-    "seed:demo": "node scripts/seed-demo.ts"
+    "seed:demo": "node scripts/seed-demo.ts",
+    "db:slow": "node scripts/slow-queries.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1164.0",
