@@ -16,6 +16,7 @@ import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClients } from '@/shared/api/clientApi'
 import type { ClientListItem } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
@@ -33,7 +34,11 @@ interface ClientsTabProps {
 }
 
 const SEARCH_DELAY_MS = 250
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' })
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 // The client base, like Contacts: search by name or number, newest visits first.
 export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {

@@ -8,6 +8,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { answerQuestion, removeQuestion } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessQuestion } from '@/shared/api/types'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
@@ -20,7 +21,11 @@ interface QuestionsPanelProps {
 }
 
 const ANSWER_FORM = 'question-answer'
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 // Questions from the business page, open ones first; an answer puts the question on the page.
 export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProps) => {

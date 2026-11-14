@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize } from '@/shared/lib/plural'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 
@@ -57,7 +58,11 @@ const formatSince = (iso: string | null) => {
   const date = new Date(iso)
   return Number.isNaN(date.getTime())
     ? null
-    : new Intl.DateTimeFormat('ru-RU', { month: 'short', year: 'numeric' })
+    : new Intl.DateTimeFormat('ru-RU', {
+        month: 'short',
+        year: 'numeric',
+        timeZone: BUSINESS_TIME_ZONE,
+      })
         .format(date)
         .replace(' г.', '')
 }
