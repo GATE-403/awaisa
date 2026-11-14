@@ -1,3 +1,4 @@
+import type { Customer, OtpRequest } from '@awaisa/contracts'
 import { Body, Controller, HttpCode, Post, Req, Res } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Throttle } from '@nestjs/throttler'
@@ -30,7 +31,7 @@ export class AuthController {
   @Post('otp')
   @HttpCode(200)
   @Throttle({ default: { limit: getCodeRateLimit, ttl: 60_000 } })
-  requestCode(@Body({ schema: requestCodeSchema }) body: RequestCodeInput) {
+  requestCode(@Body({ schema: requestCodeSchema }) body: RequestCodeInput): Promise<OtpRequest> {
     return this.auth.requestCode(body.phone, body.channel)
   }
 
@@ -40,7 +41,7 @@ export class AuthController {
   async verify(
     @Body({ schema: verifyCodeSchema }) body: VerifyCodeInput,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<Customer> {
     const { token, customer } = await this.auth.verifyCode(body.phone, body.code)
     response.cookie(SESSION_COOKIE, token, {
       httpOnly: true,

@@ -12,6 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@awaisa/contracts": "workspace:*",
     "@awaisa/tokens": "workspace:*",
     "@awaisa/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",

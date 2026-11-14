@@ -35,8 +35,9 @@ export default defineConfig({
     : [
         {
           // Built into dist-e2e: `nest build` empties dist/, which a running `pnpm dev` serves from.
+          // Not incremental: its .tsbuildinfo outlives dist-e2e and would make tsc skip the emit.
           command:
-            'rm -rf dist-e2e && pnpm exec tsc -p tsconfig.build.json --outDir dist-e2e && node dist-e2e/main.js',
+            'rm -rf dist-e2e && pnpm exec tsc -p tsconfig.build.json --outDir dist-e2e --incremental false && node dist-e2e/main.js',
           cwd: '../api',
           url: `${API_URL}/health`,
           env: {

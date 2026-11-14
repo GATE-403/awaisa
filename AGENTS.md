@@ -6,6 +6,7 @@ Turborepo monorepo, pnpm workspaces.
 - `apps/api` — NestJS (ESM) + TypeORM + PostgreSQL. Read `apps/api/AGENTS.md` before editing it.
 - `apps/mobile` — Expo (SDK 58) shell that renders `apps/web` in a WebView. Read `apps/mobile/AGENTS.md` before editing it.
 - `packages/tokens` — design tokens (colors light/dark, spacing, radius, typography, durations) as TS. `build` generates `dist/tokens.css` (CSS variables). Used by web (CSS) and mobile (JS).
+- `packages/contracts` — the API's request and response types, shared by `apps/api` (type imports only) and `apps/web`.
 - `packages/ui` — in-house UI kit for web: Base UI (`@base-ui/react`) primitives styled with CSS Modules on token variables, shadcn-style (source lives here, not on npm).
 
 ## UI kit
@@ -79,7 +80,7 @@ The web app is a booking platform: any business registers and gets its own page 
 - Coming from outside (2ГИС, Instagram, QR): the cabinet «Филиалы» lists «Ссылки для записи» — one `/<slug>/book?branch=<id>` per branch with «Копировать», so the client lands with their branch chosen. Guests' name and phone are kept after a booking (`entities/booking/lib/contactStorage.ts`, `awaisa:contact:v1`) and filled in next time.
 - Client bookings: guests can book without an account; `localStorage` keeps `{ id, token, snapshot }` per booking (`entities/booking/lib/bookingStorage.ts`) and the token lets them view/cancel. Signed-in clients also get the server list (`GET /me/bookings`: their bookings plus any made on their verified number), merged with device bookings on `/bookings`.
 - Session on the client: `useSession()` (`entities/session`) (one shared store, fetches `/api/me` once; `status` is `loading | guest | signedIn`), `useRequireSession()` redirects guests to `/login?next=…`. The session is an httpOnly cookie set by the API through the `/api` rewrite — never read it from JS. Booking contacts skip the phone field when signed in. Phones are shown with `formatPhone()`.
-- API types are mirrored in `shared/api/types.ts` — keep them in sync with the API responses.
+- API shapes live in `packages/contracts` (`@awaisa/contracts`, TypeScript only): the web reads them through `shared/api/types.ts` (a re-export), and every API controller handler the web calls declares its answer with them (`Promise<Booking>`, `Promise<Offer[]>` …), so a field renamed, removed or made nullable in the API fails `pnpm typecheck` instead of a page. Adding or changing an endpoint: put the shape in contracts, type the handler, call it from `clientApi` with the same type; name small answers too (`CreatedId`, `CheckoutLink`) instead of writing `{ url: string }` at the call. The API imports contracts with `import type` only (`common/contracts-imports.spec.ts` fails otherwise — Node cannot load the package's .ts at run time). Answers built from raw SQL are typed where the rows are read (`as Offer[]`), which the compiler cannot check — keep the SELECT's aliases equal to the contract's fields.
 
 ## App shell and responsive rules
 

@@ -1,3 +1,11 @@
+import type {
+  BookingTelegramLink,
+  CheckoutLink,
+  PaymentPage,
+  PaymentSync,
+  PaymentsConfig,
+  TestPaymentResult,
+} from '@awaisa/contracts'
 import {
   BadRequestException,
   Body,
@@ -33,13 +41,16 @@ export class PaymentsController {
 
   // The cabinet shows the deposit field only when an acquirer is configured.
   @Get('payments/config')
-  getConfig() {
+  getConfig(): PaymentsConfig {
     return { isAvailable: this.payments.isAvailable, driver: this.payments.driver }
   }
 
   // The pay page: amount, what it is for and whether it is still due. Opened by its signed link.
   @Get('payments/:id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string, @Query('s') signature: string | undefined) {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('s') signature: string | undefined,
+  ): Promise<PaymentPage> {
     const payment = await this.payments.findSigned(id, requireSignature(signature))
     const view = await this.bookings.getView(payment.bookingId)
 
@@ -70,7 +81,7 @@ export class PaymentsController {
   async completeTest(
     @Param('id', ParseUUIDPipe) id: string,
     @Query('s') signature: string | undefined,
-  ) {
+  ): Promise<TestPaymentResult> {
     const { payment } = await this.payments.completeTest(id, requireSignature(signature))
     const view = await this.bookings.onPaid(payment.bookingId)
 
@@ -80,7 +91,10 @@ export class PaymentsController {
   // Back from the acquirer's page: ask it how the payment stands, confirm the booking if paid.
   @Post('payments/:id/sync')
   @HttpCode(200)
-  async sync(@Param('id', ParseUUIDPipe) id: string, @Query('s') signature: string | undefined) {
+  async sync(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('s') signature: string | undefined,
+  ): Promise<PaymentSync> {
     const payment = await this.payments.findSigned(id, requireSignature(signature))
     await this.payments.sync(payment)
     const view =
@@ -116,7 +130,7 @@ export class PaymentsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<CheckoutLink> {
     return this.bookings.checkoutUrl(id, token ?? null, customer)
   }
 
@@ -127,7 +141,7 @@ export class PaymentsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<BookingTelegramLink> {
     return this.bookings.telegramLink(id, token ?? null, customer)
   }
 }

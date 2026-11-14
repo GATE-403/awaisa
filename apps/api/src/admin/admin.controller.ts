@@ -1,3 +1,14 @@
+import type {
+  AdminBooking,
+  AdminSchedule,
+  AnalyticsReport,
+  Booking,
+  ClosedDay,
+  CreatedTimeOff,
+  MovedBooking,
+  RecentBooking,
+  UnclosedDays,
+} from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -55,7 +66,7 @@ export class AdminController {
   closeDay(
     @CurrentBusiness() business: Business,
     @Body({ schema: closeDaySchema }) body: CloseDayInput,
-  ) {
+  ): Promise<ClosedDay> {
     return this.admin.closeDay(business, body.date)
   }
 
@@ -69,7 +80,7 @@ export class AdminController {
   }
 
   @Get('bookings/unclosed')
-  listUnclosed(@CurrentBusiness() business: Business) {
+  listUnclosed(@CurrentBusiness() business: Business): Promise<UnclosedDays> {
     return this.admin.listUnclosed(business)
   }
 
@@ -78,7 +89,7 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: outcomeSchema }) body: OutcomeBody,
-  ) {
+  ): Promise<AdminBooking> {
     return this.bookings.setOutcome(business.id, id, body)
   }
 
@@ -87,7 +98,7 @@ export class AdminController {
   getAnalytics(
     @CurrentBusiness() business: Business,
     @Query({ schema: analyticsQuerySchema }) query: AnalyticsQuery,
-  ) {
+  ): Promise<AnalyticsReport> {
     return this.analytics.getReport(business, query.days)
   }
 
@@ -95,7 +106,7 @@ export class AdminController {
   getSchedule(
     @CurrentBusiness() business: Business,
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
-  ) {
+  ): Promise<AdminSchedule> {
     return this.admin.getSchedule(business, query.date)
   }
 
@@ -103,7 +114,7 @@ export class AdminController {
   getRecentBookings(
     @CurrentBusiness() business: Business,
     @Query({ schema: recentBookingsQuerySchema }) query: RecentBookingsQuery,
-  ) {
+  ): Promise<RecentBooking[]> {
     return this.bookings.listCreatedSince(business.id, new Date(query.since))
   }
 
@@ -111,7 +122,7 @@ export class AdminController {
   createBooking(
     @CurrentBusiness() business: Business,
     @Body({ schema: staffBookingSchema }) body: StaffBookingInput,
-  ) {
+  ): Promise<AdminBooking> {
     return this.admin.createBooking(business, body)
   }
 
@@ -120,19 +131,25 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: moveBookingSchema }) body: MoveBookingInput,
-  ) {
+  ): Promise<MovedBooking> {
     return this.admin.moveBooking(business, id, body)
   }
 
   @Post('bookings/:id/cancel')
   @HttpCode(200)
-  cancelBooking(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+  cancelBooking(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Booking> {
     return this.admin.cancelBooking(business, id)
   }
 
   @Post('bookings/:id/restore')
   @HttpCode(200)
-  restoreBooking(@CurrentBusiness() business: Business, @Param('id', ParseUUIDPipe) id: string) {
+  restoreBooking(
+    @CurrentBusiness() business: Business,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Booking> {
     return this.bookings.restoreBySalon(business.id, id)
   }
 
@@ -140,7 +157,7 @@ export class AdminController {
   addTimeOff(
     @CurrentBusiness() business: Business,
     @Body({ schema: createTimeOffSchema }) body: CreateTimeOffInput,
-  ) {
+  ): Promise<CreatedTimeOff> {
     return this.admin.addTimeOff(business, body)
   }
 

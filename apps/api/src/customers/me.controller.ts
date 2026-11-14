@@ -1,3 +1,4 @@
+import type { Booking, BusinessLink, Customer as CustomerView } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -33,7 +34,7 @@ export class MeController {
 
   /** The account, with the places it runs and where it works as a master (profile shortcuts). */
   @Get()
-  async getProfile(@CurrentCustomer() customer: Customer) {
+  async getProfile(@CurrentCustomer() customer: Customer): Promise<CustomerView> {
     return {
       ...toCustomerView(customer, this.config.get('ADMIN_PHONES', { infer: true })),
       ...(await this.businesses.shortcutsFor(customer)),
@@ -44,7 +45,7 @@ export class MeController {
   async updateProfile(
     @CurrentCustomer() customer: Customer,
     @Body({ schema: updateProfileSchema }) body: UpdateProfileInput,
-  ) {
+  ): Promise<CustomerView> {
     await this.customers.update({ id: customer.id }, { name: body.name })
 
     return toCustomerView(
@@ -54,7 +55,7 @@ export class MeController {
   }
 
   @Get('businesses')
-  listBusinesses(@CurrentCustomer() customer: Customer) {
+  listBusinesses(@CurrentCustomer() customer: Customer): Promise<BusinessLink[]> {
     const isPlatformAdmin = this.config
       .get('ADMIN_PHONES', { infer: true })
       .includes(customer.phone)
@@ -62,19 +63,25 @@ export class MeController {
   }
 
   @Get('bookings')
-  listBookings(@CurrentCustomer() customer: Customer) {
+  listBookings(@CurrentCustomer() customer: Customer): Promise<Booking[]> {
     return this.bookings.listForCustomer(customer)
   }
 
   @Post('bookings/:id/restore')
   @HttpCode(200)
-  restoreBooking(@CurrentCustomer() customer: Customer, @Param('id', ParseUUIDPipe) id: string) {
+  restoreBooking(
+    @CurrentCustomer() customer: Customer,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Booking> {
     return this.bookings.restoreForCustomer(id, customer)
   }
 
   @Delete('bookings/:id')
   @HttpCode(200)
-  cancelBooking(@CurrentCustomer() customer: Customer, @Param('id', ParseUUIDPipe) id: string) {
+  cancelBooking(
+    @CurrentCustomer() customer: Customer,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Booking> {
     return this.bookings.cancelForCustomer(id, customer)
   }
 }

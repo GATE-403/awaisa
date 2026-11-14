@@ -1,3 +1,11 @@
+import type {
+  BusinessCard,
+  BusinessPage,
+  BusinessProfile,
+  Offer,
+  PopularService,
+  SlugCheck,
+} from '@awaisa/contracts'
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { SkipThrottle } from '@nestjs/throttler'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
@@ -25,33 +33,35 @@ export class BusinessesController {
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get()
   @SkipThrottle()
-  list(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
+  list(@Query({ schema: catalogQuerySchema }) query: CatalogQuery): Promise<BusinessCard[]> {
     return this.businesses.listCatalog(query)
   }
 
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('offers')
   @SkipThrottle()
-  offers(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
+  offers(@Query({ schema: catalogQuerySchema }) query: CatalogQuery): Promise<Offer[]> {
     return this.businesses.listOffers(query)
   }
 
   @Cached({ ttl: 300, tags: ['catalog'], maxAge: 120 })
   @Get('popular-services')
   @SkipThrottle()
-  popularServices(@Query({ schema: catalogQuerySchema }) query: CatalogQuery) {
+  popularServices(
+    @Query({ schema: catalogQuerySchema }) query: CatalogQuery,
+  ): Promise<PopularService[]> {
     return this.businesses.listPopularServices(query.kind)
   }
 
   @Get('slug-available')
-  checkSlug(@Query({ schema: slugQuerySchema }) query: SlugQuery) {
+  checkSlug(@Query({ schema: slugQuerySchema }) query: SlugQuery): Promise<SlugCheck> {
     return this.businesses.checkSlug(query.slug)
   }
 
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get(':slug')
   @SkipThrottle()
-  async getOne(@Param('slug') slug: string) {
+  async getOne(@Param('slug') slug: string): Promise<BusinessPage> {
     const business = await this.businesses.findBySlug(slug)
 
     return {
@@ -65,7 +75,7 @@ export class BusinessesController {
   create(
     @Body({ schema: createBusinessSchema }) body: CreateBusinessInput,
     @CurrentCustomer() customer: Customer,
-  ) {
+  ): Promise<BusinessProfile> {
     return this.businesses.create(body, customer)
   }
 }

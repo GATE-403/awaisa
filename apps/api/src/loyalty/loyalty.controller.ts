@@ -1,3 +1,11 @@
+import type {
+  ClientLoyalty,
+  GiftCertificate,
+  LoyaltyOverview,
+  LoyaltySettings,
+  MyLoyalty,
+  SubscriptionPlan,
+} from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -36,7 +44,7 @@ export class ManageLoyaltyController {
   constructor(private readonly loyalty: LoyaltyService) {}
 
   @Get()
-  async overview(@CurrentBusiness() business: Business) {
+  async overview(@CurrentBusiness() business: Business): Promise<LoyaltyOverview> {
     const [settings, plans, certificates] = await Promise.all([
       this.loyalty.getSettings(business.id),
       this.loyalty.listPlans(business.id),
@@ -50,13 +58,16 @@ export class ManageLoyaltyController {
   setSettings(
     @CurrentBusiness() business: Business,
     @Body({ schema: loyaltySettingsSchema }) body: LoyaltySettingsInput,
-  ) {
+  ): Promise<LoyaltySettings> {
     return this.loyalty.setBonusPercent(business.id, body.bonusPercent)
   }
 
   @OwnerOnly()
   @Post('plans')
-  createPlan(@CurrentBusiness() business: Business, @Body({ schema: planSchema }) body: PlanInput) {
+  createPlan(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: planSchema }) body: PlanInput,
+  ): Promise<SubscriptionPlan[]> {
     return this.loyalty.savePlan(business.id, body)
   }
 
@@ -66,7 +77,7 @@ export class ManageLoyaltyController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: planSchema }) body: PlanInput,
-  ) {
+  ): Promise<SubscriptionPlan[]> {
     return this.loyalty.savePlan(business.id, body, id)
   }
 
@@ -82,7 +93,7 @@ export class ManageLoyaltyController {
   issueCertificate(
     @CurrentBusiness() business: Business,
     @Body({ schema: certificateSchema }) body: CertificateInput,
-  ) {
+  ): Promise<GiftCertificate> {
     return this.loyalty.issueCertificate(business.id, body)
   }
 
@@ -92,7 +103,10 @@ export class ManageLoyaltyController {
   }
 
   @Get('clients/:phone')
-  forClient(@CurrentBusiness() business: Business, @Param('phone') phone: string) {
+  forClient(
+    @CurrentBusiness() business: Business,
+    @Param('phone') phone: string,
+  ): Promise<ClientLoyalty> {
     return this.loyalty.forClient(business.id, phone)
   }
 
@@ -101,7 +115,7 @@ export class ManageLoyaltyController {
     @CurrentBusiness() business: Business,
     @Param('phone') phone: string,
     @Body({ schema: sellSubscriptionSchema }) body: SellSubscriptionInput,
-  ) {
+  ): Promise<ClientLoyalty> {
     return this.loyalty.sellSubscription(business.id, phone, body.planId)
   }
 }
@@ -112,7 +126,7 @@ export class MyLoyaltyController {
   constructor(private readonly loyalty: LoyaltyService) {}
 
   @Get()
-  mine(@CurrentCustomer() customer: Customer) {
+  mine(@CurrentCustomer() customer: Customer): Promise<MyLoyalty> {
     return this.loyalty.forCustomer(customer.phone)
   }
 }

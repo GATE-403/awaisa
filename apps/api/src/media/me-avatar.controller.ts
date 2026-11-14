@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import type { AvatarUpload } from '@awaisa/contracts'
 import {
   BadRequestException,
   Controller,
@@ -36,7 +37,7 @@ export class MeAvatarController {
   async upload(
     @CurrentCustomer() customer: Customer,
     @UploadedFile() file: { buffer: Buffer } | undefined,
-  ) {
+  ): Promise<AvatarUpload> {
     if (!file) throw new BadRequestException('Выберите фото')
     const url = await this.storage.put(
       `customers/${randomUUID()}.webp`,

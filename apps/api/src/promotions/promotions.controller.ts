@@ -1,3 +1,4 @@
+import type { PriceQuote, Promotion, PublicPromotion } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -38,14 +39,14 @@ export class PromotionsController {
   quote(
     @Query({ schema: quoteQuerySchema }) query: QuoteQuery,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<PriceQuote> {
     return this.promotions.quote(query, customer?.phone ?? null)
   }
 
   // The business page's «Акции» line: what is on now, without codes.
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/promotions')
-  listPublic(@Param('slug') slug: string) {
+  listPublic(@Param('slug') slug: string): Promise<PublicPromotion[]> {
     return this.promotions.publicForSlug(slug)
   }
 }
@@ -57,7 +58,7 @@ export class ManagePromotionsController {
   constructor(private readonly promotions: PromotionsService) {}
 
   @Get()
-  list(@CurrentBusiness() business: Business) {
+  list(@CurrentBusiness() business: Business): Promise<Promotion[]> {
     return this.promotions.list(business.id)
   }
 
@@ -65,7 +66,7 @@ export class ManagePromotionsController {
   create(
     @CurrentBusiness() business: Business,
     @Body({ schema: promotionSchema }) body: PromotionInput,
-  ) {
+  ): Promise<Promotion> {
     return this.promotions.create(business.id, body)
   }
 
@@ -74,7 +75,7 @@ export class ManagePromotionsController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: promotionSchema }) body: PromotionInput,
-  ) {
+  ): Promise<Promotion> {
     return this.promotions.update(business.id, id, body)
   }
 

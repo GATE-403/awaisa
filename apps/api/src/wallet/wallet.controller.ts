@@ -1,3 +1,4 @@
+import type { WalletConfig, WalletLinks } from '@awaisa/contracts'
 import {
   Controller,
   Get,
@@ -35,7 +36,7 @@ export class WalletController {
   ) {}
 
   @Get('wallet/config')
-  getConfig() {
+  getConfig(): WalletConfig {
     return { apple: this.wallet.isAppleEnabled, google: this.wallet.isGoogleEnabled }
   }
 
@@ -44,7 +45,7 @@ export class WalletController {
   async linksByToken(
     @Param('id', ParseUUIDPipe) id: string,
     @Headers(TOKEN_HEADER) token: string | undefined,
-  ) {
+  ): Promise<WalletLinks> {
     const parsed = bookingTokenSchema.safeParse(token)
     if (!parsed.success) throw new NotFoundException('Запись не найдена')
 
@@ -57,7 +58,7 @@ export class WalletController {
   async linksForCustomer(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentCustomer() customer: Customer,
-  ) {
+  ): Promise<WalletLinks> {
     return this.links(await this.bookings.findForCustomer(id, customer))
   }
 

@@ -1,3 +1,12 @@
+import type {
+  CreatedReview,
+  ManagedReview,
+  ReviewerProfile,
+  ReviewPhotos,
+  ReviewReply,
+  ReviewSummary,
+  VisitReview,
+} from '@awaisa/contracts'
 import {
   BadRequestException,
   Body,
@@ -47,7 +56,7 @@ export class ReviewsController {
     @Headers(TOKEN_HEADER) token: string | undefined,
     @Headers(SIGNATURE_HEADER) signature: string | undefined,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<VisitReview> {
     return this.reviews.getForClient(id, {
       token: token ?? null,
       signature: signature ?? null,
@@ -63,7 +72,7 @@ export class ReviewsController {
     @Headers(SIGNATURE_HEADER) signature: string | undefined,
     @CurrentCustomer() customer: Customer | null,
     @Body({ schema: createReviewSchema }) body: CreateReviewInput,
-  ) {
+  ): Promise<CreatedReview> {
     return this.reviews.create(
       id,
       { token: token ?? null, signature: signature ?? null, customer },
@@ -85,7 +94,7 @@ export class ReviewsController {
     @Headers(SIGNATURE_HEADER) signature: string | undefined,
     @CurrentCustomer() customer: Customer | null,
     @UploadedFile() file: { buffer: Buffer } | undefined,
-  ) {
+  ): Promise<ReviewPhotos> {
     if (!file) throw new BadRequestException('Выберите фото')
     return this.reviews.addPhoto(
       id,
@@ -99,21 +108,21 @@ export class ReviewsController {
   listPublic(
     @Param('slug') slug: string,
     @Query({ schema: reviewsQuerySchema }) query: ReviewsQuery,
-  ) {
+  ): Promise<ReviewSummary> {
     return this.reviews.listPublic(slug, query.limit, query.serviceId, query.specialistId)
   }
 
   // Another client's public page: their reviews across places, opened from a review.
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('reviewers/:id')
-  reviewer(@Param('id') id: string) {
+  reviewer(@Param('id') id: string): Promise<ReviewerProfile> {
     if (!reviewerIdSchema.safeParse(id).success) throw new NotFoundException('Профиль не найден')
     return this.reviews.reviewer(id)
   }
 
   @Get('manage/:slug/reviews')
   @UseGuards(BusinessAccessGuard)
-  listForManage(@CurrentBusiness() business: Business) {
+  listForManage(@CurrentBusiness() business: Business): Promise<ReviewSummary<ManagedReview>> {
     return this.reviews.listForManage(business)
   }
 
@@ -123,7 +132,7 @@ export class ReviewsController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: replySchema }) body: ReplyInput,
-  ) {
+  ): Promise<ReviewReply> {
     return this.reviews.reply(business, id, body.text)
   }
 }

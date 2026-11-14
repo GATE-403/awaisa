@@ -1,3 +1,4 @@
+import type { Recommendation } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -34,7 +35,7 @@ export class RecommendationsController {
   list(
     @Query({ schema: recommendationsQuerySchema }) query: RecommendationsQuery,
     @CurrentCustomer() customer: Customer | null,
-  ) {
+  ): Promise<Recommendation[]> {
     return this.recommendations.recommend(query, customer)
   }
 
