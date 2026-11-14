@@ -34,7 +34,9 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: 'pnpm build && pnpm start',
+          // Built into dist-e2e: `nest build` empties dist/, which a running `pnpm dev` serves from.
+          command:
+            'rm -rf dist-e2e && pnpm exec tsc -p tsconfig.build.json --outDir dist-e2e && node dist-e2e/main.js',
           cwd: '../api',
           url: `${API_URL}/health`,
           env: {
@@ -58,7 +60,7 @@ export default defineConfig({
         {
           command: `pnpm next build && pnpm next start -p ${WEB_PORT}`,
           url: BASE_URL,
-          env: { API_URL },
+          env: { API_URL, NEXT_DIST_DIR: '.next-e2e' },
           reuseExistingServer: !process.env.CI,
           timeout: 300_000,
         },

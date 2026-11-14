@@ -12,9 +12,11 @@
       "**",
       "!**/node_modules",
       "!**/.next",
+      "!**/.next-e2e",
       "!**/.turbo",
       "!**/.expo",
       "!**/dist",
+      "!**/dist-e2e",
       "!**/build",
       "!**/coverage"
     ]
