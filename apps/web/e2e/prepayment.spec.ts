@@ -138,7 +138,9 @@ test.describe('Prepayment', () => {
       expect((await read()).status).toBe('cancelled')
       expect((await slotsOn(date)).some((slot) => slot.time === time)).toBe(true)
     } finally {
-      await saveService(service.deposit ?? null)
+      // A run stopped before this line leaves the test's own deposit behind; taking that as the
+      // service's value would keep it there for good (the booking tests then land on /pay).
+      await saveService(service.deposit === DEPOSIT ? null : (service.deposit ?? null))
       await guest.close()
     }
   })

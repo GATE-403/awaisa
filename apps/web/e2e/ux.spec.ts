@@ -108,6 +108,25 @@ test.describe('UX: guidance and feedback', () => {
     await expect(primaryAction(page)).toHaveText('Выбрать время')
   })
 
+  test("a failed request for the services' free times is tried again", async ({ page }) => {
+    let failures = 1
+    await page.route('**/api/businesses/*/next-free-services**', (route) => {
+      if (failures > 0) {
+        failures -= 1
+        return route.fulfill({ status: 503, json: { message: 'Сервис временно недоступен' } })
+      }
+      return route.fallback()
+    })
+    await page.goto('/awaisa-studio/book')
+
+    await expect(
+      bookingSteps(page)
+        .service.getByText(/^(Сегодня|Завтра) с \d{2}:\d{2}/)
+        .first(),
+    ).toBeVisible()
+    expect(failures).toBe(0)
+  })
+
   test('slot loading failure offers a retry instead of a dead end', async ({ page }) => {
     let failures = 1
     await page.goto('/awaisa-studio/book?service=styling')
