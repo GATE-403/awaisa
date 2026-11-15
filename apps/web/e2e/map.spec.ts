@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { settledBox } from './helpers'
 
 // The page streams in over a pending copy of itself (the Suspense fallback is the same MapPage):
 // until React swaps them, the DOM holds two «Где вы?» and the fallback's controls do nothing.
@@ -121,7 +122,7 @@ test.describe('Map: places nearby', () => {
     await expect.poll(async () => (await map.boundingBox())?.height ?? 0).toBeLessThan(10)
     // Dragging down settles on the nearest height: the list folds and the map grows.
     const grabber = page.getByRole('button', { name: /Список на весь экран/ })
-    const box = await grabber.boundingBox()
+    const box = await settledBox(grabber)
     if (!box) throw new Error('no grabber')
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.down()
