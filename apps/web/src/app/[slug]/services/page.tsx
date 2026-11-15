@@ -3,8 +3,7 @@ import { Suspense } from 'react'
 import { getBusiness } from '@/shared/api/serverApi'
 import { PLATFORM } from '@/shared/config/platform'
 import { buildBusinessMetadata, describeBusiness } from '@/shared/lib/seo/businessMetadata'
-import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { ServicesPage } from '@/views/services'
+import { ServicesPage, ServicesSkeleton } from '@/views/services'
 
 export const generateMetadata = async ({
   params,
@@ -21,7 +20,7 @@ export const generateMetadata = async ({
 }
 
 const ServicesRoute = ({ params }: PageProps<'/[slug]/services'>) => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<ServicesSkeleton />}>
     {params.then(({ slug }) => (
       <ServicesPage slug={slug} />
     ))}

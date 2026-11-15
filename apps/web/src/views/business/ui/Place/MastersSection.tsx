@@ -47,6 +47,7 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
               aria-label={`${specialist.name}, ${specialist.role || 'мастер'}`}
               className={styles.master}
               data-card=''
+              data-picture-frame={specialist.photoUrl ? '' : undefined}
               style={{ '--tint': pickTint(specialist.name) } as CSSProperties}
             >
               {specialist.photoUrl ? (
