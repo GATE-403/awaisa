@@ -20,6 +20,7 @@ import { Cached } from '../cache/cached.decorator.js'
 import { validateEnv } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { ReferralsService } from '../referrals/referrals.service.js'
+import { AvailabilityService } from './availability.service.js'
 import {
   type AvailabilityQuery,
   availabilityQuerySchema,
@@ -50,6 +51,7 @@ const parseToken = (value: string | undefined) => {
 export class BookingsController {
   constructor(
     private readonly bookingsService: BookingsService,
+    private readonly availability: AvailabilityService,
     private readonly referrals: ReferralsService,
   ) {}
 
@@ -58,13 +60,13 @@ export class BookingsController {
   getAvailability(
     @Query({ schema: availabilityQuerySchema }) query: AvailabilityQuery,
   ): Promise<Availability> {
-    return this.bookingsService.getAvailability(query)
+    return this.availability.getAvailability(query)
   }
 
   @Cached({ ttl: 20, tags: ['availability'], maxAge: 10 })
   @Get('next-free')
   getNextFree(@Query({ schema: nextFreeQuerySchema }) query: NextFreeQuery): Promise<NextFree> {
-    return this.bookingsService.findNextFree(query.slugs)
+    return this.availability.findNextFree(query.slugs)
   }
 
   @Cached({ ttl: 20, tags: ['availability'], maxAge: 10 })
@@ -73,7 +75,7 @@ export class BookingsController {
     @Param('slug') slug: string,
     @Query({ schema: servicesNextFreeQuerySchema }) query: ServicesNextFreeQuery,
   ): Promise<NextFree> {
-    return this.bookingsService.findNextFreeByService(slug, query.branchId)
+    return this.availability.findNextFreeByService(slug, query.branchId)
   }
 
   @Post('bookings')

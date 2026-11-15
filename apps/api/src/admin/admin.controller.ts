@@ -22,7 +22,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { BookingsService } from '../bookings/bookings.service.js'
+import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -57,7 +57,7 @@ import { AnalyticsService } from './analytics.service.js'
 export class AdminController {
   constructor(
     private readonly admin: AdminService,
-    private readonly bookings: BookingsService,
+    private readonly salonBookings: SalonBookingsService,
     private readonly analytics: AnalyticsService,
   ) {}
 
@@ -90,7 +90,7 @@ export class AdminController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: outcomeSchema }) body: OutcomeBody,
   ): Promise<AdminBooking> {
-    return this.bookings.setOutcome(business.id, id, body)
+    return this.salonBookings.setOutcome(business.id, id, body)
   }
 
   @OwnerOnly()
@@ -115,7 +115,7 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Query({ schema: recentBookingsQuerySchema }) query: RecentBookingsQuery,
   ): Promise<RecentBooking[]> {
-    return this.bookings.listCreatedSince(business.id, new Date(query.since))
+    return this.salonBookings.listCreatedSince(business.id, new Date(query.since))
   }
 
   @Post('bookings')
@@ -150,7 +150,7 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Booking> {
-    return this.bookings.restoreBySalon(business.id, id)
+    return this.salonBookings.restoreBySalon(business.id, id)
   }
 
   @Post('time-off')
