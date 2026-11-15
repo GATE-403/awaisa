@@ -16,5 +16,17 @@
         "noStaticOnlyClass": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["load/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    }
+  ]
 }
