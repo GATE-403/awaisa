@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { isBookingPath, isCabinetPath } from '@/shared/config/navigation'
+import { isBookingPath, isCabinetPath, isStandalonePath } from '@/shared/config/navigation'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 
 interface FooterGateProps {
@@ -13,6 +13,7 @@ export const FooterGate = ({ children }: FooterGateProps) => {
 
   // The map is a full-window app view, like the cabinet; booking keeps the eyes on the form.
   return isCabinetPath(pathname) ||
+    isStandalonePath(pathname) ||
     isBookingPath(pathname) ||
     pathname === '/map' ||
     pathname === '/feed'

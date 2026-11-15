@@ -3,7 +3,13 @@
 import NextLink from 'next/link'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
-import { isActivePath, isBookingPath, isCabinetPath, NAV_ITEMS } from '@/shared/config/navigation'
+import {
+  isActivePath,
+  isBookingPath,
+  isCabinetPath,
+  isStandalonePath,
+  NAV_ITEMS,
+} from '@/shared/config/navigation'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import styles from './TabBar.module.css'
 
@@ -14,7 +20,7 @@ export const TabBar = () => {
   const isOwner = (customer?.businesses?.length ?? 0) > 0 || Boolean(customer?.isAdmin)
   const items = isOwner ? NAV_ITEMS.filter((item) => item.href !== '/business') : NAV_ITEMS
 
-  if (isBookingPath(pathname) || isCabinetPath(pathname)) return null
+  if (isBookingPath(pathname) || isCabinetPath(pathname) || isStandalonePath(pathname)) return null
 
   return (
     <nav aria-label='Нижнее меню' className={styles.tabBar}>

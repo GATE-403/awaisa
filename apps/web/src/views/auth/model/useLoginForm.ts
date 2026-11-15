@@ -4,6 +4,7 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
 import type { OtpChannel } from '@/shared/api/types'
+import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 
 type LoginStep = 'phone' | 'code' | 'name'
@@ -15,7 +16,7 @@ export const useLoginForm = () => {
   const searchParams = useSearchParams()
   const { setCustomer } = useSession()
   const [step, setStep] = useState<LoginStep>('phone')
-  const [phone, setPhone] = useState('')
+  const [phone, setPhoneValue] = useState('')
   const [normalizedPhone, setNormalizedPhone] = useState('')
   const [channel, setChannel] = useState<OtpChannel>('sms')
   const [code, setCode] = useState('')
@@ -23,6 +24,9 @@ export const useLoginForm = () => {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [resendIn, setResendIn] = useState(0)
+  // A wrong code: the cells turn red and shake once per attempt (the count re-keys the field).
+  const [wrongAttempts, setWrongAttempts] = useState(0)
+  const [isCodeInvalid, setIsCodeInvalid] = useState(false)
   const redirectTo = getSafeRedirect(searchParams.get('next'))
 
   useEffect(() => {
@@ -45,19 +49,32 @@ export const useLoginForm = () => {
     }
   }
 
-  const sendCode = (preferred: 'auto' | 'sms' = 'auto') =>
-    run(async () => {
+  const sendCode = (preferred: 'auto' | 'sms' = 'auto') => {
+    // Checked here, not by disabling the button: the person learns what is missing.
+    const problem = normalizedPhone ? null : phoneProblem(phone)
+    if (problem) {
+      setError(problem)
+      return
+    }
+    return run(async () => {
       const result = await requestOtp(normalizedPhone || phone, preferred)
       setNormalizedPhone(result.phone)
       setChannel(result.channel)
       setResendIn(result.resendAfterSeconds)
       setCode('')
+      setIsCodeInvalid(false)
       setStep('code')
     })
+  }
 
   const verify = (value: string) =>
     run(async () => {
-      const customer = await verifyOtp(normalizedPhone, value)
+      const customer = await verifyOtp(normalizedPhone, value).catch((verifyError: unknown) => {
+        setCode('')
+        setIsCodeInvalid(true)
+        setWrongAttempts((count) => count + 1)
+        throw verifyError
+      })
       setCustomer(customer)
       if (!customer.name) {
         setStep('name')
@@ -69,6 +86,7 @@ export const useLoginForm = () => {
   const changeCode = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, CODE_LENGTH)
     setCode(digits)
+    if (digits) setIsCodeInvalid(false)
     if (digits.length === CODE_LENGTH && !isSubmitting) void verify(digits)
   }
 
@@ -79,6 +97,11 @@ export const useLoginForm = () => {
     })
 
   const sendBySms = () => sendCode('sms')
+
+  const setPhone = (value: string) => {
+    setPhoneValue(value)
+    setError(null)
+  }
 
   const editPhone = () => {
     setNormalizedPhone('')
@@ -96,6 +119,9 @@ export const useLoginForm = () => {
     error,
     isSubmitting,
     resendIn,
+    wrongAttempts,
+    isCodeInvalid,
+    redirectTo,
     setPhone,
     setName,
     changeCode,

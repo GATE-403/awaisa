@@ -18,8 +18,27 @@ const maskPhoneInput = (value: string) => {
   return `+${KG_CODE} ${groups.join(' ')}`
 }
 
+// What is wrong with a typed phone before it is sent, or null when it is a whole Kyrgyz number
+// (+996 and 9 digits) — a half-typed number must not go out as a sign-in request.
+const phoneProblem = (value: string): string | null => {
+  const trimmed = value.trim()
+  const digits = trimmed.replace(/\D/g, '')
+  if (!digits) return 'Введите номер телефона'
+  if (trimmed.startsWith('+') && !digits.startsWith(KG_CODE)) {
+    return 'Пока принимаем только номера Кыргызстана: +996'
+  }
+  const local = (digits.startsWith(KG_CODE) ? digits.slice(KG_CODE.length) : digits).replace(
+    /^0/,
+    '',
+  )
+  if (local.length < KG_LOCAL_DIGITS) {
+    return `Номер неполный: после +996 нужно ${KG_LOCAL_DIGITS} цифр`
+  }
+  return null
+}
+
 // Groups thousands while a price is typed: «1500» → «1 500».
 const maskAmountInput = (digits: string) =>
   digits ? Number(digits).toLocaleString('ru-RU').replace(/\s/g, ' ') : ''
 
-export { maskAmountInput, maskPhoneInput }
+export { maskAmountInput, maskPhoneInput, phoneProblem }
