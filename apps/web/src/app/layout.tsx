@@ -12,6 +12,7 @@ import { BASE_OPEN_GRAPH } from '@/shared/lib/seo/businessMetadata'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 import { THEME_BOOT_SCRIPT } from '@/shared/lib/theme'
 import { ErrorReporter } from '@/shared/ui/ErrorReporter/ErrorReporter'
+import { Splash } from '@/shared/ui/Splash/Splash'
 import { Footer, FooterGate } from '@/widgets/Footer'
 import { Header, HeaderFallback } from '@/widgets/Header'
 import { TabBar } from '@/widgets/TabBar'
@@ -65,6 +66,7 @@ const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
         // biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, no user input
         dangerouslySetInnerHTML={{ __html: `<script>${THEME_BOOT_SCRIPT}</script>` }}
       />
+      <Splash />
       <ToastProvider>
         <div className='root'>
           <Suspense fallback={<HeaderFallback />}>
