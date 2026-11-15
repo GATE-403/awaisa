@@ -1,6 +1,6 @@
 import NextLink from 'next/link'
 import { Suspense } from 'react'
-import { NextFreeProvider } from '@/entities/business'
+import { NextFreeProvider, toPlaceCard } from '@/entities/business'
 import { ForYouShelf } from '@/features/forYou'
 import {
   listBusinesses,
@@ -84,7 +84,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           query={query || undefined}
           title={query ? `«${shown}»` : (kindLabel ?? 'Куда записаться')}
           searchedFor={resolved?.corrected ? query : undefined}
-          businesses={businesses}
+          businesses={businesses.map(toPlaceCard)}
           offers={offers}
           initialView={query && matchesPlace ? 'places' : 'services'}
           initialSort={toSort(params.sort)}
