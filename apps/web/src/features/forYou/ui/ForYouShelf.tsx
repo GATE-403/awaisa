@@ -127,6 +127,28 @@ export const ForYouShelf = ({
     return () => observer.disconnect()
   }, [shownIds, surface])
 
+  // The catalog's shelf is there for everyone: hold its place with blank cards while the picks
+  // load, so the results under it do not jump down when they arrive.
+  if (isForEveryone && (!isReady || items === null)) {
+    return (
+      <section className={styles.shelf} aria-labelledby={titleId} aria-busy='true'>
+        <div className={styles.head}>
+          <h2 id={titleId} className={styles.title}>
+            {title}
+          </h2>
+          {headAction}
+        </div>
+        <ul className={styles.track} aria-hidden='true'>
+          {[0, 1, 2, 3].map((index) => (
+            <li key={index}>
+              <span className={styles.card} data-placeholder='' />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
   if (!isReady) return null
 
   const sheet = isAsking && (
