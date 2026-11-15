@@ -1,0 +1,22 @@
+.tile {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+}
+
+.sections {
+  display: flex;
+  grid-area: sections;
+  align-items: center;
+  gap: var(--space-5);
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 768px) {
+  .sections {
+    justify-content: flex-end;
+  }
+}

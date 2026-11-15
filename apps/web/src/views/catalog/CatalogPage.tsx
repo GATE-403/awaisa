@@ -11,9 +11,9 @@ import {
 } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
+import { CatalogSkeleton } from './ui/CatalogSkeleton/CatalogSkeleton'
 import { FirstVisitNote } from './ui/FirstVisitNote/FirstVisitNote'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
@@ -102,7 +102,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
 // A marketplace, not a landing: search, categories, offers, then the places themselves.
 export const CatalogPage = ({ searchParams }: CatalogPageProps) => (
   <main className={styles.page}>
-    <Suspense fallback={<PageSkeleton />}>
+    <Suspense fallback={<CatalogSkeleton />}>
       <CatalogContent searchParams={searchParams} />
     </Suspense>
   </main>

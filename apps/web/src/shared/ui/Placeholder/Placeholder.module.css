@@ -1,0 +1,48 @@
+.line,
+.block,
+.picture {
+  animation: breathe 1.6s var(--ease-standard) infinite;
+}
+
+.line {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 1;
+  width: calc(var(--chars) * 0.55em);
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.line::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 0.8em;
+  border-radius: 0.4em;
+  background: var(--color-subtle);
+  translate: 0 -50%;
+}
+
+.block {
+  display: block;
+  background: var(--color-subtle);
+}
+
+.picture {
+  display: block;
+}
+
+@keyframes breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line,
+  .block,
+  .picture {
+    animation: none;
+  }
+}

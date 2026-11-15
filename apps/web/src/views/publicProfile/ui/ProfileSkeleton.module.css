@@ -1,0 +1,23 @@
+/* The trail above the head: one footnote line with 44pt targets. */
+.crumbs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: var(--control-height-md);
+  font-size: var(--text-footnote);
+}
+
+/* The face: 96pt, like the profile's. */
+.face {
+  width: 96px;
+  height: 96px;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+/* «Поделиться» and «В сторис»: the kit's small secondary capsules. */
+.action {
+  width: 112px;
+  height: var(--control-height-sm);
+  border-radius: var(--radius-full);
+}
