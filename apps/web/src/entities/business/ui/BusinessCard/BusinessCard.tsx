@@ -7,8 +7,33 @@ import { pluralize } from '@/shared/lib/plural'
 import styles from './BusinessCard.module.css'
 import { LiveStatus } from './LiveStatus'
 
+// Only what the card shows: the catalog hands its list to a client component, so every other
+// field (the week's hours, the description) would be serialized into the page for nothing.
+type PlaceCardData = Pick<
+  BusinessCardData,
+  'slug' | 'name' | 'coverUrl' | 'logoUrl' | 'rating' | 'servicesCount' | 'address'
+>
+
+const toPlaceCard = ({
+  slug,
+  name,
+  coverUrl,
+  logoUrl,
+  rating,
+  servicesCount,
+  address,
+}: PlaceCardData): PlaceCardData => ({
+  slug,
+  name,
+  coverUrl,
+  logoUrl,
+  rating,
+  servicesCount,
+  address,
+})
+
 interface BusinessCardProps {
-  business: BusinessCardData
+  business: PlaceCardData
 }
 
 // A place, told apart from a service card at a glance: the place's own logo beside its name and
@@ -68,3 +93,6 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
     </span>
   </NextLink>
 )
+
+export type { PlaceCardData }
+export { toPlaceCard }
