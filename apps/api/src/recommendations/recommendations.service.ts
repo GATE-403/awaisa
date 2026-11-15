@@ -4,9 +4,11 @@ import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { AvailabilityService } from '../bookings/availability.service.js'
+import { CacheService } from '../cache/cache.service.js'
 import { addDays, toBusinessParts } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
+import { type BranchPoint, nearestByBusiness } from './distance.js'
 import {
   type Affinities,
   type Candidate,
@@ -18,6 +20,43 @@ import {
 import type { RecommendationEventsInput, RecommendationsQuery } from './recommendations.schemas.js'
 
 type Row = Record<string, unknown>
+
+const CANDIDATES_KEY = 'recommendations:candidates:v1'
+const CANDIDATES_TTL_SECONDS = 60
+const NEXT_FREE_KEY = 'recommendations:next-free:v1'
+const NEXT_FREE_TTL_SECONDS = 20
+
+const CANDIDATES_SQL = `WITH demand AS (
+         SELECT bk."service_id", COUNT(*)::int AS "count" FROM "bookings" bk
+         WHERE bk."status" = 'confirmed' AND bk."starts_at" > now() - interval '30 days'
+         GROUP BY bk."service_id"
+       ),
+       reviewed AS (
+         SELECT r."business_id", COUNT(*)::int AS "count" FROM "reviews" r GROUP BY r."business_id"
+       )
+       SELECT s."id", s."name", s."price"::int AS "price", s."duration_minutes"::int AS "durationMinutes",
+         s."is_popular" AS "isPopular", s."rebook_days" AS "rebookDays",
+         b."slug", b."name" AS "businessName", b."kind", b."cover_url" AS "coverUrl",
+        -- The newest visible work photo of this very service shows on its card when there is one.
+        (SELECT wp."url" FROM "work_photos" wp
+          WHERE wp."service_id" = s."id" AND NOT wp."is_hidden"
+          ORDER BY wp."created_at" DESC LIMIT 1) AS "servicePhoto",
+         (SELECT ROUND(AVG(sp."rating")::numeric, 1)::float8 FROM "specialists" sp
+           WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
+         (SELECT br."address" FROM "branches" br
+           WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address",
+         (SELECT MAX(p."percent")::int FROM "promotions" p
+           WHERE p."business_id" = b."id" AND p."is_active" AND p."kind" <> 'promo_code'
+             AND (p."service_ids" IS NULL OR s."id" = ANY(p."service_ids"))
+             AND (p."ends_on" IS NULL OR p."ends_on" >= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
+             AND (p."starts_on" IS NULL OR p."starts_on" <= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
+         ) AS "discountPercent",
+         COALESCE(d."count", 0) AS "demand", COALESCE(rv."count", 0) AS "reviews", b."id" AS "businessId"
+       FROM "services" s
+       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
+       LEFT JOIN demand d ON d."service_id" = s."id"
+       LEFT JOIN reviewed rv ON rv."business_id" = b."id"
+       WHERE s."is_active"`
 
 const DAY_MS = 86_400_000
 const AFFINITY_TTL_MS = 10 * 60_000
@@ -38,6 +77,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly availability: AvailabilityService,
     private readonly runtime: RuntimeService,
+    private readonly cache: CacheService,
   ) {}
 
   // A fresh database gets its affinities at once instead of waiting for the night.
@@ -128,56 +168,15 @@ export class RecommendationsService implements OnApplicationBootstrap {
   }
 
   async recommend(query: RecommendationsQuery, customer: Customer | null) {
+    const { rows, branches } = await this.loadCandidates()
     const hasPoint = query.lat !== undefined && query.lng !== undefined
-    const rows = await this.query(
-      `WITH nearest AS (
-         SELECT br."business_id", MIN(
-           6371 * 2 * ASIN(SQRT(
-             POWER(SIN(RADIANS(br."latitude" - $1) / 2), 2) +
-             COS(RADIANS($1)) * COS(RADIANS(br."latitude")) * POWER(SIN(RADIANS(br."longitude" - $2) / 2), 2)
-           ))) AS "km"
-         FROM "branches" br
-         WHERE $1::float8 IS NOT NULL AND br."is_active" AND br."latitude" IS NOT NULL
-         GROUP BY br."business_id"
-       ),
-       demand AS (
-         SELECT bk."service_id", COUNT(*)::int AS "count" FROM "bookings" bk
-         WHERE bk."status" = 'confirmed' AND bk."starts_at" > now() - interval '30 days'
-         GROUP BY bk."service_id"
-       ),
-       reviewed AS (
-         SELECT r."business_id", COUNT(*)::int AS "count" FROM "reviews" r GROUP BY r."business_id"
-       )
-       SELECT s."id", s."name", s."price"::int AS "price", s."duration_minutes"::int AS "durationMinutes",
-         s."is_popular" AS "isPopular", s."rebook_days" AS "rebookDays",
-         b."slug", b."name" AS "businessName", b."kind", b."cover_url" AS "coverUrl",
-        -- The newest visible work photo of this very service shows on its card when there is one.
-        (SELECT wp."url" FROM "work_photos" wp
-          WHERE wp."service_id" = s."id" AND NOT wp."is_hidden"
-          ORDER BY wp."created_at" DESC LIMIT 1) AS "servicePhoto",
-         (SELECT ROUND(AVG(sp."rating")::numeric, 1)::float8 FROM "specialists" sp
-           WHERE sp."business_id" = b."id" AND sp."is_active" AND sp."rating" IS NOT NULL) AS "rating",
-         (SELECT br."address" FROM "branches" br
-           WHERE br."business_id" = b."id" AND br."is_active" ORDER BY br."position" LIMIT 1) AS "address",
-         (SELECT MAX(p."percent")::int FROM "promotions" p
-           WHERE p."business_id" = b."id" AND p."is_active" AND p."kind" <> 'promo_code'
-             AND (p."service_ids" IS NULL OR s."id" = ANY(p."service_ids"))
-             AND (p."ends_on" IS NULL OR p."ends_on" >= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
-             AND (p."starts_on" IS NULL OR p."starts_on" <= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
-         ) AS "discountPercent",
-         COALESCE(d."count", 0) AS "demand", COALESCE(rv."count", 0) AS "reviews", n."km"
-       FROM "services" s
-       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
-       LEFT JOIN demand d ON d."service_id" = s."id"
-       LEFT JOIN reviewed rv ON rv."business_id" = b."id"
-       LEFT JOIN nearest n ON n."business_id" = b."id"
-       WHERE s."is_active"`,
-      [hasPoint ? query.lat : null, hasPoint ? query.lng : null],
-    )
+    const nearest = hasPoint
+      ? nearestByBusiness(branches, query.lat as number, query.lng as number)
+      : new Map<string, number>()
 
     const slugs = [...new Set(rows.map((row) => String(row.slug)))].slice(0, 80)
     const [nextFree, visits, affinities, seen] = await Promise.all([
-      this.availability.findNextFree(slugs),
+      this.loadNextFree(slugs),
       this.visitsOf(query.visits, customer),
       this.loadAffinities(),
       this.seenBy(query.session),
@@ -196,7 +195,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
         rating: row.rating === null ? null : Number(row.rating),
         reviews: Number(row.reviews),
         bookings30d: Number(row.demand),
-        distanceKm: row.km === null || row.km === undefined ? null : Number(row.km),
+        distanceKm: nearest.get(String(row.businessId)) ?? null,
         freeInDays: slot?.date === today ? 0 : slot?.date === tomorrow ? 1 : null,
         freeTime: slot?.time ?? null,
         discountPercent: row.discountPercent === null ? null : Number(row.discountPercent),
@@ -244,6 +243,36 @@ export class RecommendationsService implements OnApplicationBootstrap {
         discountPercent: candidate.discountPercent,
         reason,
       }),
+    )
+  }
+
+  /**
+   * Every active service of a published place with what scores it — the same for everyone, so
+   * one copy is shared by all API instances for a minute (owners' edits bump `catalog`). It was
+   * 55% of the database's time under load (load/README.md). Distances are worked out per request
+   * from the branches' pins, since they depend on where the person is.
+   */
+  private loadCandidates() {
+    return this.cache.remember(CANDIDATES_KEY, CANDIDATES_TTL_SECONDS, ['catalog'], async () => {
+      const [rows, branches] = await Promise.all([
+        this.query(CANDIDATES_SQL),
+        this.query(
+          `SELECT br."business_id" AS "businessId", br."latitude"::float8 AS "latitude",
+             br."longitude"::float8 AS "longitude"
+           FROM "branches" br WHERE br."is_active" AND br."latitude" IS NOT NULL`,
+        ),
+      ])
+      return { rows, branches: branches as unknown as BranchPoint[] }
+    })
+  }
+
+  // The first free times of the candidates' places: the same for everyone, like /next-free.
+  private loadNextFree(slugs: string[]) {
+    return this.cache.remember(
+      `${NEXT_FREE_KEY}:${slugs.length}:${slugs.join(',').length}`,
+      NEXT_FREE_TTL_SECONDS,
+      ['availability'],
+      () => this.availability.findNextFree(slugs),
     )
   }
 
