@@ -1,6 +1,6 @@
 import { createVerify, generateKeyPairSync } from 'node:crypto'
 import type { ConfigService } from '@nestjs/config'
-import type { BookingView } from '../bookings/bookings.service.js'
+import type { BookingView } from '../bookings/booking-shared.js'
 import type { Env } from '../config/env.js'
 import { WalletService } from './wallet.service.js'
 

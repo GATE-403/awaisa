@@ -22,6 +22,7 @@ import {
 } from '@nestjs/common'
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { BookingPaymentsService } from './booking-payments.service.js'
 import { BookingsService } from './bookings.service.js'
 import { PaymentsService } from './payments.service.js'
 
@@ -37,6 +38,7 @@ export class PaymentsController {
   constructor(
     private readonly payments: PaymentsService,
     private readonly bookings: BookingsService,
+    private readonly bookingPayments: BookingPaymentsService,
   ) {}
 
   // The cabinet shows the deposit field only when an acquirer is configured.
@@ -83,7 +85,7 @@ export class PaymentsController {
     @Query('s') signature: string | undefined,
   ): Promise<TestPaymentResult> {
     const { payment } = await this.payments.completeTest(id, requireSignature(signature))
-    const view = await this.bookings.onPaid(payment.bookingId)
+    const view = await this.bookingPayments.onPaid(payment.bookingId)
 
     return { bookingId: view.id, paymentStatus: view.payment?.status ?? null }
   }
@@ -99,7 +101,7 @@ export class PaymentsController {
     await this.payments.sync(payment)
     const view =
       payment.status === 'succeeded'
-        ? await this.bookings.onPaid(payment.bookingId)
+        ? await this.bookingPayments.onPaid(payment.bookingId)
         : await this.bookings.getView(payment.bookingId)
 
     return {
@@ -118,7 +120,7 @@ export class PaymentsController {
       Object.entries(body ?? {}).map(([key, value]) => [key, String(value ?? '')]),
     )
     const { reply, paid } = await this.payments.handleFreedomPayResult(params)
-    if (paid) await this.bookings.onPaid(paid.bookingId)
+    if (paid) await this.bookingPayments.onPaid(paid.bookingId)
 
     return reply
   }
@@ -131,7 +133,7 @@ export class PaymentsController {
     @Headers(TOKEN_HEADER) token: string | undefined,
     @CurrentCustomer() customer: Customer | null,
   ): Promise<CheckoutLink> {
-    return this.bookings.checkoutUrl(id, token ?? null, customer)
+    return this.bookingPayments.checkoutUrl(id, token ?? null, customer)
   }
 
   // «Напоминать в Telegram» on the success screen and the ticket: the bot link for this booking.
