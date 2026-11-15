@@ -3,7 +3,7 @@ import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
-import { BookingsService } from '../bookings/bookings.service.js'
+import { AvailabilityService } from '../bookings/availability.service.js'
 import { addDays, toBusinessParts } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
@@ -36,7 +36,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    private readonly bookings: BookingsService,
+    private readonly availability: AvailabilityService,
     private readonly runtime: RuntimeService,
   ) {}
 
@@ -177,7 +177,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
 
     const slugs = [...new Set(rows.map((row) => String(row.slug)))].slice(0, 80)
     const [nextFree, visits, affinities, seen] = await Promise.all([
-      this.bookings.findNextFree(slugs),
+      this.availability.findNextFree(slugs),
       this.visitsOf(query.visits, customer),
       this.loadAffinities(),
       this.seenBy(query.session),
