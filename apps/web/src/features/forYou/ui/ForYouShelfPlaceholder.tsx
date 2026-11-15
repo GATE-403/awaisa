@@ -13,7 +13,8 @@ export const ForYouShelfPlaceholder = ({
   title = 'Для вас',
   headAction,
 }: ForYouShelfPlaceholderProps) => (
-  <section className={styles.shelf} aria-busy='true' aria-label={title}>
+  // Not a named region: tests and screen readers find the real shelf «Для вас», not this stand-in.
+  <div className={styles.shelf} aria-busy='true'>
     <div className={styles.head}>
       <p className={styles.title}>{title}</p>
       {headAction}
@@ -25,5 +26,5 @@ export const ForYouShelfPlaceholder = ({
         </li>
       ))}
     </ul>
-  </section>
+  </div>
 )
