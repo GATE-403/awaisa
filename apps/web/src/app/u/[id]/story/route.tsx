@@ -2,6 +2,7 @@ import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize } from '@/shared/lib/plural'
+import { OgMascot } from '@/shared/lib/seo/OgMascot'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 
 // Images cannot read CSS variables: the profile colours as plain values (`entities/profile`).
@@ -45,13 +46,6 @@ type StoryProfile = {
   since: string | null
   stats: { visits: number; places: number; reviews: number }
 }
-
-const initialsOf = (name: string) =>
-  name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join('')
 
 const formatSince = (iso: string | null) => {
   if (!iso) return null
@@ -151,12 +145,9 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
               height: 860,
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 340,
-              fontWeight: 700,
-              color: 'rgba(255,255,255,0.92)',
             }}
           >
-            {initialsOf(profile.name)}
+            <OgMascot size={300} color='rgba(255,255,255,0.92)' />
           </div>
         )}
         {/* Soft at the top for the name, a warm veil of the colour at the foot for the row. */}
@@ -222,7 +213,7 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
                 style={{ objectFit: 'cover' }}
               />
             ) : (
-              initialsOf(profile.name)
+              <OgMascot size={46} />
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', width: 340 }}>

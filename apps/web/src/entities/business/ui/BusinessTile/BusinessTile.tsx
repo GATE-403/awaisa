@@ -1,11 +1,12 @@
 import type { CSSProperties } from 'react'
+import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import styles from './BusinessTile.module.css'
 
 interface BusinessTileProps {
   name: string
   size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
-  /** The owner's logo: shown in the same circle instead of the monogram. */
+  /** The owner's logo: shown in the same circle instead of the mascot. */
   logoUrl?: string | null
 }
 
@@ -18,14 +19,6 @@ const TINTS = [
   'var(--system-green)',
   'var(--system-teal)',
 ]
-
-const getInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
 
 // The same name always gets the same colour, so a business is recognisable at a glance.
 export const pickTint = (name: string) => {
@@ -54,7 +47,7 @@ export const BusinessTile = ({ name, size = 'md', className, logoUrl }: Business
       // biome-ignore lint/performance/noImgElement: a 512² WebP from our API, shown small
       <img src={logoUrl} alt='' className={styles.logo} loading='lazy' decoding='async' />
     ) : (
-      getInitials(name)
+      <Mascot className={styles.mascot} />
     )}
   </span>
 )

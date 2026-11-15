@@ -1,6 +1,7 @@
 import { colors, palette } from '@awaisa/tokens'
 import { PLATFORM } from '@/shared/config/platform'
-import { getInitials, mixHex, pickTintHex } from './ogTint'
+import { OgMascot } from './OgMascot'
+import { mixHex, pickTintHex } from './ogTint'
 
 const LONG_NAME = 22
 
@@ -63,10 +64,9 @@ export const BusinessOgCard = ({
           background: `linear-gradient(160deg, ${mixHex(tint, palette.white, 0.78)}, ${mixHex(tint, theme.foreground, 0.82)})`,
           boxShadow: '0 12px 32px rgba(0, 0, 0, 0.16)',
           color: palette.white,
-          fontSize: 72,
         }}
       >
-        {getInitials(name)}
+        <OgMascot size={84} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div

@@ -33,12 +33,4 @@ const mixHex = (a: string, b: string, weight: number) => {
   return `#${mixed.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`
 }
 
-const getInitials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join('')
-
-export { getInitials, mixHex, pickTintHex }
+export { mixHex, pickTintHex }
