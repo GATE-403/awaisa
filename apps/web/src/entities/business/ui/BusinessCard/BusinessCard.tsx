@@ -47,7 +47,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
   >
     {/* Shares its name with the business page cover: the card grows into it on navigation. */}
     <ViewTransition name={`business-${business.slug}`}>
-      <span className={styles.media}>
+      <span className={styles.media} data-picture-frame={business.coverUrl ? '' : undefined}>
         {business.coverUrl ? (
           // biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API
           <img

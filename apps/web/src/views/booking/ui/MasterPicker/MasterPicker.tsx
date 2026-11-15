@@ -54,6 +54,7 @@ export const MasterPicker = ({ specialists, value, onChange }: MasterPickerProps
           key={specialist.id}
           className={styles.card}
           data-card=''
+          data-picture-frame={specialist.photoUrl ? '' : undefined}
           style={{ '--tint': pickTint(specialist.name) } as CSSProperties}
         >
           <input

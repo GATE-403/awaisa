@@ -1,0 +1,65 @@
+/* The round logo: 80pt, 120pt from 768px, ringed in the page colour over the cover. */
+.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 0 4px var(--color-background);
+}
+
+/* Three glyph buttons in one capsule (Позвонить · Написать · Маршрут), then «Записаться». */
+.quickActions {
+  width: 118px;
+  height: 44px;
+  border-radius: var(--radius-full);
+}
+
+.book {
+  width: 116px;
+  height: var(--control-height-md);
+  border-radius: var(--radius-full);
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  min-height: var(--control-height-md);
+  font-size: var(--text-sm);
+}
+
+.card {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+}
+
+/* The aside's cards («Ближайшее окно», contacts with the map) only beside the content. */
+.aside {
+  display: none;
+}
+
+.nextSlot {
+  height: 168px;
+  border-radius: var(--radius-2xl);
+}
+
+.visit {
+  height: 360px;
+  border-radius: var(--radius-2xl);
+}
+
+@media (min-width: 768px) {
+  .logo {
+    width: 120px;
+    height: 120px;
+  }
+
+  .quickActions {
+    width: 136px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .aside {
+    display: flex;
+  }
+}
