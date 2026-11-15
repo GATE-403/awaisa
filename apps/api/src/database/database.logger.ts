@@ -2,6 +2,8 @@ import { Logger } from '@nestjs/common'
 import type { Logger as TypeOrmLogger } from 'typeorm'
 
 const SQL_PREVIEW = 1000
+// Exclusion violation (an overlapping booking) and the deadlock two such bookings can hit.
+const EXPECTED_CONFLICTS = new Set(['23P01', '40P01'])
 
 const preview = (query: string) => query.replace(/\s+/g, ' ').slice(0, SQL_PREVIEW)
 
@@ -14,7 +16,14 @@ export class DatabaseLogger implements TypeOrmLogger {
   logQuery() {}
 
   logQueryError(error: string | Error, query: string) {
-    this.logger.error(`${error instanceof Error ? error.message : error} · ${preview(query)}`)
+    const message = `${error instanceof Error ? error.message : error} · ${preview(query)}`
+    // TypeORM hands over the pg driver's error here (code on it), or its own wrapper (driverError).
+    const failure = error as { code?: string; driverError?: { code?: string } }
+    const code = failure.code ?? failure.driverError?.code
+    // A booking refused because the time was just taken is an ordinary 409, not an error; a rush
+    // logged hundreds of these as errors. Deadlocks between two such bookings are handled the same.
+    if (code && EXPECTED_CONFLICTS.has(code)) return
+    this.logger.error(message)
   }
 
   logQuerySlow(time: number, query: string) {
