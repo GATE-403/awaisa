@@ -46,10 +46,20 @@ type AdminBookingView = BookingView & {
 }
 
 const EXCLUSION_VIOLATION = '23P01'
+// Two bookings racing for the same time can also end in a deadlock between their exclusion-index
+// checks; Postgres cancels one of them. It means the same as an overlap — someone else got the
+// time — but surfaced as a 500 under a rush (load/booking-rush.js: 10 of 200 at once).
+const DEADLOCK = '40P01'
 
-const isOverlapError = (error: unknown) =>
-  error instanceof QueryFailedError &&
-  (error.driverError as { code?: string } | undefined)?.code === EXCLUSION_VIOLATION
+const errorCode = (error: unknown) =>
+  error instanceof QueryFailedError
+    ? (error.driverError as { code?: string } | undefined)?.code
+    : undefined
+
+const isOverlapError = (error: unknown) => {
+  const code = errorCode(error)
+  return code === EXCLUSION_VIOLATION || code === DEADLOCK
+}
 
 const toAdminView = (booking: Booking): AdminBookingView => ({
   ...toView(booking),

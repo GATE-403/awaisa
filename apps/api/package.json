@@ -21,7 +21,12 @@
     "migration:run": "typeorm -d dist/database/data-source.js migration:run",
     "migration:revert": "typeorm -d dist/database/data-source.js migration:revert",
     "seed:demo": "node scripts/seed-demo.ts",
-    "db:slow": "node scripts/slow-queries.ts"
+    "db:slow": "node scripts/slow-queries.ts",
+    "load:stand": "./load/stand.sh up",
+    "load:browse": "./load/k6.sh browse.js",
+    "load:capacity": "./load/k6.sh capacity.js",
+    "load:rush": "./load/k6.sh booking-rush.js",
+    "load:pages": "./load/k6.sh pages.js"
   },
   "dependencies": {
     "@awaisa/contracts": "workspace:*",

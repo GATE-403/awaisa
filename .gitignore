@@ -35,3 +35,6 @@ apps/web/e2e-results/
 
 # uploaded photos (STORAGE_DRIVER=local)
 uploads/
+
+# load tests (apps/api/load)
+apps/api/load/results/
