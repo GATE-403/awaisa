@@ -72,6 +72,15 @@ test.describe('Account: sign in by SMS', () => {
     expect((await (await page.request.get('/api/me')).json()).avatarUrl).toBeNull()
   })
 
+  test('a half-typed number is not sent: the page says what is missing', async ({ page }) => {
+    await page.goto('/login')
+    await page.getByLabel('Номер телефона').fill('555 12')
+    await page.getByRole('button', { name: 'Получить код' }).click()
+
+    await expect(page.getByText('Номер неполный: после +996 нужно 9 цифр')).toBeVisible()
+    await expect(page.getByLabel('Код подтверждения')).toHaveCount(0)
+  })
+
   test('a wrong code explains how many attempts are left', async ({ page }) => {
     await page.goto('/login')
     await page.getByLabel('Номер телефона').fill(randomClientPhone())

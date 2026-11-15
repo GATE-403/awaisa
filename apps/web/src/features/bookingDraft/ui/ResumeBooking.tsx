@@ -3,7 +3,12 @@
 import { ArrowRight, CalendarBlank, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import { getBusinessSlug, isBookingPath, isCabinetPath } from '@/shared/config/navigation'
+import {
+  getBusinessSlug,
+  isBookingPath,
+  isCabinetPath,
+  isStandalonePath,
+} from '@/shared/config/navigation'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import { clearDraft, DRAFT_STEPS, draftHref } from '../lib/bookingDraft'
 import { useBookingDraft } from '../model/useBookingDraft'
@@ -25,6 +30,7 @@ export const ResumeBooking = () => {
     !draft ||
     isBookingPath(pathname) ||
     isCabinetPath(pathname) ||
+    isStandalonePath(pathname) ||
     pathname === '/feed' ||
     (pageSlug !== null && pageSlug !== draft.slug)
   )

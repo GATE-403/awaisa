@@ -16,7 +16,12 @@ import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { KIND_ICONS } from '@/shared/config/kindStyles'
-import { getBusinessSlug, isActivePath, isCabinetPath } from '@/shared/config/navigation'
+import {
+  getBusinessSlug,
+  isActivePath,
+  isCabinetPath,
+  isStandalonePath,
+} from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
@@ -43,7 +48,8 @@ export const Header = () => {
     : 'Записи и профиль'
   const currentKind = pathname === '/' ? searchParams.get('kind') : null
   const headerRef = useRef<HTMLElement>(null)
-  const isCabinet = isCabinetPath(pathname)
+  // The cabinet and sign-in are screens of their own: no site navigation there.
+  const isCabinet = isCabinetPath(pathname) || isStandalonePath(pathname)
   // Owners get a straight way into their cabinet instead of the pitch for businesses.
   const owned = customer?.businesses ?? []
   const actions =
