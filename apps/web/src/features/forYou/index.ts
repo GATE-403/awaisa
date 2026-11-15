@@ -3,4 +3,5 @@
 export { INTERESTS, usePreferences } from './lib/preferences'
 export { deviceSession, rememberService, trackBookedPick } from './lib/signals'
 export { ForYouShelf } from './ui/ForYouShelf'
+export { ForYouShelfPlaceholder } from './ui/ForYouShelfPlaceholder'
 export { PreferencesSheet } from './ui/PreferencesSheet'
