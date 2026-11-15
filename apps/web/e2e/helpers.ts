@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 
 const API_URL = process.env.E2E_API_URL ?? 'http://localhost:4210'
 
@@ -115,7 +115,26 @@ const revealNextSlot = async (page: Page) => {
   await page.waitForTimeout(400)
 }
 
+// Sheets slide into place: a box measured mid-slide makes a drag start beside its target, which
+// slow runners hit. Waits until the element stops moving and returns where it came to rest.
+const settledBox = async (locator: Locator) => {
+  let box = await locator.boundingBox()
+  await expect
+    .poll(
+      async () => {
+        const next = await locator.boundingBox()
+        const isStill = Boolean(box && next && Math.abs(next.y - box.y) < 0.5)
+        box = next
+        return isStill
+      },
+      { intervals: [100] },
+    )
+    .toBe(true)
+  return box
+}
+
 export {
+  settledBox,
   revealNextSlot,
   API_URL,
   MIN_TAP_TARGET,

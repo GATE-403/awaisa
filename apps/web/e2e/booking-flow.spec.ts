@@ -6,6 +6,7 @@ import {
   primaryAction,
   readStoredBookings,
   revealNextSlot,
+  settledBox,
   submitBooking,
 } from './helpers'
 
@@ -91,19 +92,7 @@ test.describe('User flow: booking', () => {
     // Sheets also close by pulling the top bar down.
     await ticket.getByRole('button', { name: 'Показать талон' }).click()
     const title = ticketSheet.getByRole('heading', { name: 'Талон' })
-    // The sheet slides up first: measured mid-slide, the pull starts below the bar and misses it.
-    let box = await title.boundingBox()
-    await expect
-      .poll(
-        async () => {
-          const next = await title.boundingBox()
-          const isStill = Boolean(box && next && Math.abs(next.y - box.y) < 0.5)
-          box = next
-          return isStill
-        },
-        { intervals: [100] },
-      )
-      .toBe(true)
+    const box = await settledBox(title)
     if (box) {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
       await page.mouse.down()
