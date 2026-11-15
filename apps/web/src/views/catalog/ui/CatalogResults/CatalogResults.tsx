@@ -3,8 +3,8 @@
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
 import { Fragment, type ReactNode, useEffect, useState } from 'react'
-import { BusinessCard } from '@/entities/business'
-import type { BusinessCard as BusinessCardData, BusinessKind, Offer } from '@/shared/api/types'
+import { BusinessCard, type PlaceCardData } from '@/entities/business'
+import type { BusinessKind, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { pluralize } from '@/shared/lib/plural'
 import { trackStep } from '@/shared/lib/telemetry'
@@ -24,7 +24,7 @@ interface CatalogResultsProps {
   title: string
   /** The text actually typed when it was read as something else («cnhb;rf» → «стрижка»). */
   searchedFor?: string
-  businesses: BusinessCardData[]
+  businesses: PlaceCardData[]
   offers: Offer[]
   initialView: ResultsView
   initialSort: FeedSort

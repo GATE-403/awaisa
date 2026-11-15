@@ -286,3 +286,12 @@
     touch-action: pan-x pan-y;
   }
 }
+
+/* A blank card holding the shelf's place while the picks load. */
+.card[data-placeholder] {
+  display: block;
+}
+
+.card[data-placeholder]::after {
+  content: none;
+}

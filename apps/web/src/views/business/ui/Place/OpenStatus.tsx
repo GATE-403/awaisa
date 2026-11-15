@@ -9,10 +9,11 @@ interface OpenStatusProps {
   hours: WorkingDay[]
 }
 
-// Reads the clock, so it renders on the client only (the server snapshot has no time).
+// Reads the clock, so it renders on the client only (the server snapshot has no time). Until then
+// a blank line keeps its height, so the description under it does not move when it appears.
 export const OpenStatus = ({ hours }: OpenStatusProps) => {
   const today = useToday()
-  if (!today) return null
+  if (!today) return <span aria-hidden='true'>{'\u00a0'}</span>
   const status = getOpeningStatus(hours, today.dayKey, today.minutes)
 
   return (
