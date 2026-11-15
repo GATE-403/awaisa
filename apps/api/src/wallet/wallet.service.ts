@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PKPass } from 'passkit-generator'
 import sharp from 'sharp'
-import type { BookingView } from '../bookings/bookings.service.js'
+import type { BookingView } from '../bookings/booking-shared.js'
 import type { Env } from '../config/env.js'
 
 const LINK_TTL_MS = 10 * 60_000

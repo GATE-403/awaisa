@@ -10,12 +10,15 @@ import { LoyaltyModule } from '../loyalty/loyalty.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { PromotionsModule } from '../promotions/promotions.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
+import { AvailabilityService } from './availability.service.js'
 import { Booking } from './booking.entity.js'
+import { BookingPaymentsService } from './booking-payments.service.js'
 import { BookingsController } from './bookings.controller.js'
 import { BookingsService } from './bookings.service.js'
 import { Payment } from './payment.entity.js'
 import { PaymentsController } from './payments.controller.js'
 import { PaymentsService } from './payments.service.js'
+import { SalonBookingsService } from './salon-bookings.service.js'
 
 @Module({
   imports: [
@@ -30,7 +33,13 @@ import { PaymentsService } from './payments.service.js'
     TelegramModule,
   ],
   controllers: [BookingsController, PaymentsController],
-  providers: [BookingsService, PaymentsService],
-  exports: [BookingsService, PaymentsService],
+  providers: [
+    AvailabilityService,
+    BookingsService,
+    SalonBookingsService,
+    BookingPaymentsService,
+    PaymentsService,
+  ],
+  exports: [AvailabilityService, BookingsService, SalonBookingsService, PaymentsService],
 })
 export class BookingsModule {}
