@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { getBusiness } from '@/shared/api/serverApi'
-import { BusinessBar } from '@/widgets/BusinessBar'
+import { BusinessBar, BusinessBarSkeleton } from '@/widgets/BusinessBar'
 
 const BusinessBarSlot = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { business } = await getBusiness((await params).slug)
@@ -11,7 +11,7 @@ const BusinessBarSlot = async ({ params }: { params: Promise<{ slug: string }> }
 // Every page of a business (overview, services, booking) shares its local navigation bar.
 const BusinessLayout = ({ children, params }: LayoutProps<'/[slug]'>) => (
   <>
-    <Suspense fallback={null}>
+    <Suspense fallback={<BusinessBarSkeleton />}>
       <BusinessBarSlot params={params} />
     </Suspense>
     {children}
