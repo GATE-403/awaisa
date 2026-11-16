@@ -2,11 +2,13 @@
    each takes its own row. Only transforms move, so the fan is smooth on phones. */
 .stack {
   --card-height: 64px;
-  --peek: 20px;
+  --peek: 30px;
   --gap: 8px;
 
   position: relative;
   height: calc(var(--card-height) + (var(--count) - 1) * var(--peek));
+  /* Sideways moves are ours (they shuffle the stack); up and down still scroll the sheet. */
+  touch-action: pan-y;
   transition: height 420ms var(--ease-spring);
 }
 
@@ -14,7 +16,7 @@
   height: calc(var(--count) * (var(--card-height) + var(--gap)) - var(--gap));
 }
 
-.stack:has(.fold) {
+.stack:has(.foot) {
   margin-bottom: var(--control-height-md);
 }
 
@@ -35,12 +37,18 @@
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.14)) drop-shadow(0 10px 18px rgb(0 0 0 / 0.2))
     brightness(calc(1 - var(--depth) * 0.08));
   color: #fff;
-  transform: translateY(calc(var(--i) * var(--peek))) scale(calc(1 - var(--depth) * 0.05));
+  transform: translate(var(--drag), calc(var(--i) * var(--peek))) rotate(var(--tilt))
+    scale(calc(1 - var(--depth) * 0.05));
   transform-origin: top center;
   transition:
     transform 420ms var(--ease-spring),
     filter 420ms var(--ease-standard);
   animation: land 520ms var(--ease-spring) backwards;
+}
+
+/* Under the finger the front card follows it at once; let go and it springs. */
+.card[data-dragging] {
+  transition: none;
 }
 
 .stack[data-fanned] .card {
@@ -162,19 +170,31 @@
   outline-offset: 2px;
 }
 
-.fold {
+/* Under the open stack: «Начать заново» on the left, «Свернуть» on the right — the stack's own
+   controls, not a stray link at the foot of the sheet. */
+.foot {
   position: absolute;
   top: 100%;
-  left: 50%;
-  translate: -50% 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.footAction {
   min-height: var(--control-height-md);
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-2);
   border: none;
   background: none;
   color: var(--color-link);
   font: inherit;
   font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
+}
+
+.footAction[data-end] {
+  margin-left: auto;
 }
 
 .srOnly {
@@ -196,20 +216,20 @@
 
 /* Folded, the cards behind show one line in the strip that peeks out — their name and price —
    instead of the top half of a face and a cut title. */
-.stack:not([data-fanned]) .card:not(:last-of-type) {
+.stack:not([data-fanned]) .card[data-back] {
   align-items: flex-start;
-  padding-top: 3px;
+  padding-top: 7px;
 }
 
-.stack:not([data-fanned]) .card:not(:last-of-type) .media,
-.stack:not([data-fanned]) .card:not(:last-of-type) .secondary {
+.stack:not([data-fanned]) .card[data-back] .media,
+.stack:not([data-fanned]) .card[data-back] .secondary {
   visibility: hidden;
   width: 0;
   margin-right: calc(-1 * var(--space-3));
 }
 
-.stack:not([data-fanned]) .card:not(:last-of-type) .primary,
-.stack:not([data-fanned]) .card:not(:last-of-type) .trailing {
+.stack:not([data-fanned]) .card[data-back] .primary,
+.stack:not([data-fanned]) .card[data-back] .trailing {
   font-size: var(--text-footnote);
   line-height: 16px;
 }

@@ -10,6 +10,7 @@ type CreatedBooking = {
 }
 
 const bookingSteps = (page: Page) => ({
+  branch: page.locator('#step-branch'),
   service: page.locator('#step-service'),
   specialist: page.locator('#step-specialist'),
   datetime: page.locator('#step-datetime'),

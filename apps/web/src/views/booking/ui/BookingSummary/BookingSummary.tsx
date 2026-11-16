@@ -2,7 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { CaretRight } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, useState } from 'react'
+import { type CSSProperties, type ReactNode, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { PriceQuote, Service } from '@/shared/api/types'
@@ -32,6 +32,8 @@ interface BookingSummaryProps {
   place?: { name: string; coverUrl: string | null }
   /** Where to come (the chosen branch's address): said beside «Записаться», where it is read. */
   address?: string | null
+  /** The «Ваша запись» sheet shows this ticket (the cards of the stack) over the money rows. */
+  ticket?: ReactNode
 }
 
 // The button names the next thing to do (a bare «Далее» left people unsure that a time was still
@@ -78,6 +80,7 @@ export const BookingSummary = ({
   place,
   submitLabel,
   address = null,
+  ticket,
 }: BookingSummaryProps) => {
   const t = useT()
   const total = quote?.total ?? service?.price ?? null
@@ -107,6 +110,9 @@ export const BookingSummary = ({
         ]
       : []),
   ]
+  // With the ticket shown, only what it does not say: the discount and a deposit (its stub
+  // already carries the price to pay).
+  const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t('Итого')) : details
   const buttonLabel =
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
@@ -161,14 +167,17 @@ export const BookingSummary = ({
             cancelLabel={t('Готово')}
             onClose={() => setIsDetailsOpen(false)}
           >
-            <dl className={sheet.list}>
-              {details.map((item) => (
-                <div key={item.label} className={sheet.row}>
-                  <dt className={sheet.rowLabel}>{item.label}</dt>
-                  <dd className={styles.detailValue}>{item.value || '—'}</dd>
-                </div>
-              ))}
-            </dl>
+            {ticket && <div className={styles.ticket}>{ticket}</div>}
+            {sheetRows.length > 0 && (
+              <dl className={sheet.list}>
+                {sheetRows.map((item) => (
+                  <div key={item.label} className={sheet.row}>
+                    <dt className={sheet.rowLabel}>{item.label}</dt>
+                    <dd className={styles.detailValue}>{item.value || '—'}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </Sheet>
         )}
       </div>

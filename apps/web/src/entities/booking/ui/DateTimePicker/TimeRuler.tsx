@@ -12,6 +12,8 @@ interface TimeRulerProps {
   /** The visit's length, for «до 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
+  /** Another day is loading: the dial stays, dimmed and still. */
+  isPending?: boolean
 }
 
 // One tick per slot, as wide as a finger.
@@ -28,7 +30,13 @@ const toTime = (minutes: number) =>
 // The day as a ruler, like a dial: free times stand tall, taken ones lie low, so the shape of the
 // day — a busy morning, a free evening — reads before any number. Scrolling moves the day under
 // the needle and the big time follows it; a tap on a free tick (or «Выбрать») takes that time.
-export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerProps) => {
+export const TimeRuler = ({
+  slots,
+  time,
+  durationMinutes,
+  onPick,
+  isPending = false,
+}: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
   const firstFree = Math.max(
@@ -92,7 +100,7 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
   )
 
   return (
-    <div className={styles.ruler}>
+    <div className={styles.ruler} data-pending={isPending || undefined} aria-busy={isPending}>
       <div className={styles.readout} aria-hidden>
         <span className={styles.time} data-taken={isFree ? undefined : ''}>
           {current?.time ?? '—'}
@@ -123,7 +131,7 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
               aria-pressed={slot.time === time}
-              disabled={!slot.isAvailable}
+              disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
             >
               <span className={styles.label}>{slot.time}</span>
