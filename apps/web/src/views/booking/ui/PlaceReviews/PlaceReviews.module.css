@@ -27,22 +27,6 @@
   font-weight: var(--font-weight-regular);
 }
 
-.all {
-  appearance: none;
-  border: none;
-  background: none;
-  font: inherit;
-  cursor: pointer;
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: flex-end;
-  min-width: 44px;
-  min-height: var(--control-height-md);
-  color: var(--color-link);
-  font-size: var(--text-body);
-}
-
 .score {
   display: flex;
   align-items: center;

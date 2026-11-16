@@ -90,7 +90,7 @@ test.describe('Platform: a new business goes live', () => {
     await clientPage.locator('[data-place-book]').click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}/book$`))
 
-    await expect(clientPage.getByRole('group', { name: 'Филиал' })).toBeVisible()
+    await expect(clientPage.locator('#step-branch')).toBeVisible()
     const steps = bookingSteps(clientPage)
     await steps.service.getByRole('radio', { name: /^Стрижка/ }).click()
     await expect(steps.service).toContainText('Стрижка')

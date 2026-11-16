@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import {
   bookingSteps,
   cancelViaApi,
+  editStep,
   pickFirstFreeSlot,
   primaryAction,
   readStoredBookings,
@@ -169,11 +170,15 @@ test.describe('Booking: helpful defaults', () => {
     await context.setGeolocation({ latitude: 42.848, longitude: 74.6015 })
     await page.goto('/lumiere-salon/book')
 
+    // The branch is the first card of the ticket; «Изменить» opens the list.
+    await expect(bookingSteps(page).branch).toContainText('Ала-Арча')
+    await editStep(page, 'branch')
     const branches = page.getByRole('group', { name: 'Филиал' })
     await expect(branches.getByRole('radio', { name: /Ала-Арча/ })).toBeChecked()
     // Each branch says its address and how far it is; the route leads to the chosen one.
     await expect(branches.getByText(/ · \d+ м$/).first()).toBeVisible()
     await expect(page.getByRole('link', { name: 'Маршрут до «Ала-Арча» ›' })).toBeVisible()
+    await branches.getByRole('radio', { name: /Ала-Арча/ }).click()
 
     // At least one service row names its first free time today or tomorrow.
     await expect(

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import styles from './TimeRuler.module.css'
@@ -12,6 +12,10 @@ interface TimeRulerProps {
   /** The visit's length, for «до 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
+  /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
+  days?: ReactNode
+  /** Another day is loading: the dial stays, dimmed and still. */
+  isPending?: boolean
 }
 
 // One tick per slot, as wide as a finger.
@@ -28,9 +32,17 @@ const toTime = (minutes: number) =>
 // The day as a ruler, like a dial: free times stand tall, taken ones lie low, so the shape of the
 // day — a busy morning, a free evening — reads before any number. Scrolling moves the day under
 // the needle and the big time follows it; a tap on a free tick (or «Выбрать») takes that time.
-export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerProps) => {
+export const TimeRuler = ({
+  slots,
+  time,
+  durationMinutes,
+  onPick,
+  isPending = false,
+  days,
+}: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
+  const hasShown = useRef(false)
   const firstFree = Math.max(
     0,
     slots.findIndex((slot) => slot.isAvailable),
@@ -45,7 +57,10 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
   useEffect(() => {
     const track = trackRef.current
     if (!track) return
-    track.scrollLeft = startIndex * TICK_WIDTH
+    // The first day jumps into place; a next day glides there, so the step never blinks.
+    if (hasShown.current) track.scrollTo({ left: startIndex * TICK_WIDTH, behavior: 'smooth' })
+    else track.scrollLeft = startIndex * TICK_WIDTH
+    hasShown.current = true
     setCentered(startIndex)
   }, [slotsKey])
 
@@ -92,7 +107,7 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
   )
 
   return (
-    <div className={styles.ruler}>
+    <div className={styles.ruler} data-pending={isPending || undefined} aria-busy={isPending}>
       <div className={styles.readout} aria-hidden>
         <span className={styles.time} data-taken={isFree ? undefined : ''}>
           {current?.time ?? '—'}
@@ -123,7 +138,7 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
               aria-pressed={slot.time === time}
-              disabled={!slot.isAvailable}
+              disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
             >
               <span className={styles.label}>{slot.time}</span>
@@ -147,6 +162,8 @@ export const TimeRuler = ({ slots, time, durationMinutes, onPick }: TimeRulerPro
           </span>
         )}
       </p>
+
+      {days}
 
       {/* Never a dead button: on a taken time it leads to the nearest free one. */}
       <Button

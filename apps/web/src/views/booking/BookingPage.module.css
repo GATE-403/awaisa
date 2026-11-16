@@ -359,7 +359,7 @@ button.fieldRow {
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-  margin-top: var(--space-20);
+  margin-top: var(--space-10);
 }
 
 /* Length · description on one line (cut with an ellipsis), whole on the chosen service. */
@@ -402,30 +402,38 @@ label:has([data-checked]) .serviceNote {
   pointer-events: none;
 }
 
-/* What sits on the stack cards: the service's picture, the master's face, the day's leaf. */
-.stackThumb {
-  display: block;
+/* What sits on the stack cards — the service's picture, the master's face, the branch's pin,
+   the day's leaf — all one shape: a 44pt rounded square, no rings. */
+.stackThumb,
+.stackPin,
+.stackLeaf,
+.stackFace.stackFace[data-size] {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
+}
+
+.stackThumb {
+  display: block;
   object-fit: cover;
 }
 
-.stackThumb[data-empty] {
-  background: var(--place-tint);
+.stackFace.stackFace[data-size] {
+  box-shadow: none;
 }
 
-.stackFace {
-  box-shadow: 0 0 0 2px #fff;
+.stackFace[data-size] img {
+  border-radius: inherit;
 }
 
+.stackPin,
 .stackFace[data-any] {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.2);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.18);
   color: #fff;
   font-size: 20px;
 }
@@ -433,42 +441,74 @@ label:has([data-checked]) .serviceNote {
 .stackLeaf {
   display: flex;
   flex-direction: column;
-  width: 40px;
   overflow: hidden;
-  border-radius: var(--radius-sm);
   background: #fff;
   color: #1d1d1f;
   text-align: center;
 }
 
 .stackLeafMonth {
-  padding: 1px 0;
+  padding: 2px 0 1px;
   background: var(--system-red);
   color: #fff;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
+  line-height: 1;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .stackLeafDay {
+  flex: 1;
+  display: grid;
+  place-items: center;
   font-size: var(--text-title3);
   font-weight: var(--font-weight-semibold);
-  line-height: 26px;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-/* Inside the open card the groups are filled wells, so a field reads as a field on any surface
-   (a white group on a white card vanished in the dark theme); the row being typed in lights up. */
-[id^="step-"] .group {
-  background: var(--color-fill);
-  box-shadow: none;
-}
-
+/* The row being typed in lights up, so the next field is easy to find. */
 [id^="step-"] .group .fieldRow {
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 [id^="step-"] .group .fieldRow:focus-within {
   background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+}
+
+/* Content fades out into the sheet's colour before it reaches the glass bar, so reviews and
+   pictures passing under it never compete with the total and the action. */
+.bar::before {
+  content: "";
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 39;
+  height: calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-background) 0%, transparent),
+    color-mix(in srgb, var(--color-background) 80%, transparent) 35%,
+    var(--color-background) 60%
+  );
+  pointer-events: none;
+}
+
+@media (min-width: 1024px) {
+  .bar::before {
+    position: absolute;
+    bottom: calc(-1 * var(--space-4));
+    /* Behind the bar inside its own stacking context. */
+    z-index: -1;
+    height: calc(100% + var(--space-16));
+  }
+}
+
+.readyNote {
+  margin: calc(-1 * var(--space-2)) 0 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
