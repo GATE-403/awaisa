@@ -271,8 +271,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (isCollapsed) setEditingStep(step)
   }
 
-  // A tap on what is already chosen: nothing changes, the step just closes again.
-  const finishEditing = () => setEditingStep(null)
+  // A tap on what is already chosen: nothing changes, the step closes again and the client is back
+  // where they were (the next unfinished step, or the contacts once all is chosen).
+  const finishEditing = () => {
+    setEditingStep(null)
+    scrollToStep(firstIncompleteStep ?? 'contacts', true)
+  }
 
   const editStep = (step: BookingStepId) => {
     setFolded((current) => ({ ...current, [step]: false }))
