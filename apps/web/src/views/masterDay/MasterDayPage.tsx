@@ -16,6 +16,7 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { DayStrip } from '@/widgets/DayStrip'
@@ -201,14 +202,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
             )}
 
             {day.bookings.length === 0 ? (
-              <div className={styles.empty}>
-                <p className={styles.emptyTitle}>{day.hours ? 'Записей пока нет' : hoursLine}</p>
-                <p className={styles.emptyText}>
-                  {day.hours
+              <EmptyState
+                title={day.hours ? 'Записей пока нет' : (hoursLine ?? undefined)}
+                text={
+                  day.hours
                     ? 'Новые записи появятся здесь сами.'
-                    : 'В этот день записи к вам не открыты.'}
-                </p>
-              </div>
+                    : 'В этот день записи к вам не открыты.'
+                }
+              />
             ) : (
               <ol className={styles.agenda}>
                 {day.bookings.map((booking) => {

@@ -11,15 +11,12 @@ import {
 } from '@awaisa/ui/Dialog'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
-import { Link } from '@awaisa/ui/Link'
 import { Radio, RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
 import { Select } from '@awaisa/ui/Select'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Switch } from '@awaisa/ui/Switch'
-import { Tabs, TabsList, TabsPanel, TabsTab } from '@awaisa/ui/Tabs'
 import type { Metadata } from 'next'
-import NextLink from 'next/link'
 import styles from './page.module.css'
 
 export const metadata: Metadata = {
@@ -52,16 +49,6 @@ const UiKitPage = () => (
         <Button size='sm'>Small</Button>
         <Button size='md'>Medium</Button>
         <Button size='lg'>Large</Button>
-      </div>
-    </section>
-
-    <section className={styles.section}>
-      <h2 className={styles.heading}>Link</h2>
-      <div className={styles.row}>
-        <Link render={<NextLink href='/map' />}>Открыть карту</Link>
-        <Link variant='muted' href='#'>
-          Muted
-        </Link>
       </div>
     </section>
 
@@ -108,24 +95,8 @@ const UiKitPage = () => (
       <h2 className={styles.heading}>RadioCard</h2>
       <RadioGroup defaultValue='pro' aria-label='Тариф' className={styles.cards}>
         <RadioCard value='basic' title='Базовый' description='Для знакомства' />
-        <RadioCard value='pro' title='Pro' description='Всё без ограничений' size='lg'>
-          <Link href='#'>Подробнее</Link>
-        </RadioCard>
+        <RadioCard value='pro' title='Pro' description='Всё без ограничений' size='lg' />
       </RadioGroup>
-    </section>
-
-    <section className={styles.section}>
-      <h2 className={styles.heading}>Tabs</h2>
-      <Tabs defaultValue='overview'>
-        <TabsList>
-          <TabsTab value='overview'>Обзор</TabsTab>
-          <TabsTab value='reviews'>Отзывы</TabsTab>
-          <TabsTab value='photos'>Фото</TabsTab>
-        </TabsList>
-        <TabsPanel value='overview'>Описание места</TabsPanel>
-        <TabsPanel value='reviews'>Отзывов пока нет</TabsPanel>
-        <TabsPanel value='photos'>Фото появятся позже</TabsPanel>
-      </Tabs>
     </section>
 
     <section className={styles.section}>

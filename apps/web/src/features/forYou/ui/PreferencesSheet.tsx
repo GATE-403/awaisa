@@ -3,6 +3,7 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { Check } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -63,12 +64,12 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
     <Sheet title='Подберём для вас' onClose={onClose} action={{ label: 'Готово', onClick: save }}>
       <div className={sheet.form}>
         <section className={sheet.group}>
-          <h3 className={sheet.groupTitle}>Для кого</h3>
+          <SectionCaption>Для кого</SectionCaption>
           <SegmentedControl label='Для кого' value={gender} items={GENDERS} onChange={setGender} />
         </section>
 
         <section className={sheet.group}>
-          <h3 className={sheet.groupTitle}>Что интересно</h3>
+          <SectionCaption>Что интересно</SectionCaption>
           {/* Two columns of checkmark rows: nine choices in five rows. */}
           <div className={styles.interestGrid}>
             {shown.map((item) => (
@@ -86,7 +87,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         </section>
 
         <section className={sheet.group}>
-          <h3 className={sheet.groupTitle}>Бюджет за визит, сом</h3>
+          <SectionCaption>Бюджет за визит, сом</SectionCaption>
           <SegmentedControl
             label='Бюджет за визит'
             value={budget}

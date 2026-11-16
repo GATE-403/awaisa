@@ -4,6 +4,7 @@ import { type FormEvent, useState } from 'react'
 import { formatDuration, formatPrice, useAvailability } from '@/entities/booking'
 import type { Catalog, CreateBookingInput, Specialist } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -101,7 +102,7 @@ export const NewBookingDialog = ({
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <section className={sheet.group} aria-label='Визит'>
-          <h3 className={sheet.groupTitle}>{dayLabel}</h3>
+          <SectionCaption>{dayLabel}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Мастер</span>
@@ -154,7 +155,7 @@ export const NewBookingDialog = ({
         </section>
 
         <section className={sheet.group} aria-label='Клиент'>
-          <h3 className={sheet.groupTitle}>Клиент</h3>
+          <SectionCaption>Клиент</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>Имя</span>

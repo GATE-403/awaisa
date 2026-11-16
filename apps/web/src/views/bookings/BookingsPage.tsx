@@ -14,6 +14,7 @@ import type { Booking } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -145,16 +146,16 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 aria-labelledby='tab-upcoming'
               >
                 {bookings.length === 0 ? (
-                  <div className={styles.empty}>
-                    <Mascot className={styles.mascot} />
-                    <p className={styles.emptyTitle}>Запишитесь к мастеру</p>
-                    <p className={styles.emptyText}>
-                      Найдите салон и выберите время — запись появится здесь
-                    </p>
-                    <ButtonLink render={<NextLink href='/' />} size='lg'>
-                      Найти, куда записаться
-                    </ButtonLink>
-                  </div>
+                  <EmptyState
+                    icon={<Mascot />}
+                    title='Запишитесь к мастеру'
+                    text='Найдите салон и выберите время — запись появится здесь'
+                    action={
+                      <ButtonLink render={<NextLink href='/' />} size='lg'>
+                        Найти, куда записаться
+                      </ButtonLink>
+                    }
+                  />
                 ) : upcoming.length > 0 ? (
                   <MoreFade
                     hiddenCount={Math.max(0, upcoming.length - UPCOMING_FIRST)}

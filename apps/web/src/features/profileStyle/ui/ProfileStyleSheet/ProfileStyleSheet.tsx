@@ -9,6 +9,7 @@ import { PersonAvatar } from '@/entities/business'
 import { ACCENTS, achievementLook, profileStyle, STATUS_EMOJI } from '@/entities/profile'
 import { getErrorMessage } from '@/shared/api/apiError'
 import type { ProfileLinkKind, ProfileSettings, PublicProfile } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ProfileStyleSheet.module.css'
@@ -122,7 +123,7 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>Цвет</h3>
+        <SectionCaption>Цвет</SectionCaption>
         <div className={styles.accents} role='radiogroup' aria-label='Цвет профиля'>
           {Object.entries(ACCENTS).map(([key, item]) => (
             <label key={key} className={styles.accentOption} style={profileStyle(key)}>
@@ -141,7 +142,7 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>Статус</h3>
+        <SectionCaption>Статус</SectionCaption>
         <div className={styles.emojis} role='radiogroup' aria-label='Эмодзи статуса'>
           <label className={styles.emojiOption} data-none=''>
             <input
@@ -183,7 +184,7 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>Адрес профиля</h3>
+        <SectionCaption>Адрес профиля</SectionCaption>
         <div className={sheet.list}>
           <label className={sheet.row}>
             <span className={styles.addressPrefix}>awaisa.kg/u/</span>
@@ -206,7 +207,7 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>О себе</h3>
+        <SectionCaption>О себе</SectionCaption>
         <div className={sheet.list}>
           <textarea
             className={styles.about}
@@ -221,7 +222,7 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>Ссылки</h3>
+        <SectionCaption>Ссылки</SectionCaption>
         <div className={sheet.list}>
           {LINK_FIELDS.map(({ kind, label, placeholder }) => (
             <label key={kind} className={sheet.row}>
@@ -248,7 +249,7 @@ export const ProfileStyleSheet = ({
 
       {earned.length > 0 && (
         <div className={sheet.group}>
-          <h3 className={sheet.groupTitle}>Витрина</h3>
+          <SectionCaption>Витрина</SectionCaption>
           <div className={styles.showcase}>
             {earned.map((item) => {
               const isOn = featured.includes(item.id)
@@ -273,7 +274,7 @@ export const ProfileStyleSheet = ({
 
       {masters.length > 0 && (
         <div className={sheet.group}>
-          <h3 className={sheet.groupTitle}>Мой мастер</h3>
+          <SectionCaption>Мой мастер</SectionCaption>
           <div className={styles.masters} role='radiogroup' aria-label='Мой мастер'>
             <label className={styles.masterOption}>
               <input

@@ -7,6 +7,7 @@ import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './ProfilePage.module.css'
 import { ProfileReviews } from './ui/ProfileReviews'
@@ -189,20 +190,20 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
         </header>
 
         <section className={styles.section} aria-labelledby='profile-achievements'>
-          <h2 id='profile-achievements' className={styles.caption}>
+          <SectionCaption as='h2' isInset={false} id='profile-achievements'>
             Достижения{' '}
             <span className={styles.captionCount}>
               {earned} из {profile.achievements.length}
             </span>
-          </h2>
+          </SectionCaption>
           <Achievements items={profile.achievements} />
         </section>
 
         {profile.masters.length > 0 && (
           <section className={styles.section} aria-labelledby='profile-masters'>
-            <h2 id='profile-masters' className={styles.caption}>
+            <SectionCaption as='h2' isInset={false} id='profile-masters'>
               Мастера
-            </h2>
+            </SectionCaption>
             <ul className={styles.faces}>
               {profile.masters.slice(0, MAX_MASTERS).map((master) => (
                 <li key={master.id}>
@@ -236,9 +237,9 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
 
         {profile.places.length > 0 && (
           <section className={styles.section} aria-labelledby='profile-places'>
-            <h2 id='profile-places' className={styles.caption}>
+            <SectionCaption as='h2' isInset={false} id='profile-places'>
               Чаще всего
-            </h2>
+            </SectionCaption>
             <ul className={styles.places}>
               {profile.places.slice(0, MAX_PLACES).map((place) => (
                 <li key={place.slug}>
@@ -255,7 +256,7 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
 
         {(profile.reviews.length > 0 || awaiting > 0) && (
           <section className={styles.section} aria-labelledby='profile-reviews'>
-            <h2 id='profile-reviews' className={styles.caption}>
+            <SectionCaption as='h2' isInset={false} id='profile-reviews'>
               Отзывы
               {profile.stats.average !== null && (
                 <span className={styles.captionCount}>
@@ -263,7 +264,7 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => {
                   {profile.stats.average.toLocaleString('ru-RU')}
                 </span>
               )}
-            </h2>
+            </SectionCaption>
             {/* Only the owner sees it: recent visits still waiting for their stars. */}
             {awaiting > 0 && (
               <NextLink href='/bookings' className={styles.awaiting}>

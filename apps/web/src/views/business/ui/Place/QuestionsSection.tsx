@@ -10,6 +10,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { askQuestion } from '@/shared/api/clientApi'
 import type { Business, QuestionList } from '@/shared/api/types'
 import { pluralWord } from '@/shared/lib/plural'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './Questions.module.css'
@@ -85,7 +86,10 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
         )}
       </div>
       {questions.items.length === 0 ? (
-        <p className={styles.empty}>Спросите о парковке, оплате или детях — место ответит здесь.</p>
+        <EmptyState
+          variant='inline'
+          text='Спросите о парковке, оплате или детях — место ответит здесь.'
+        />
       ) : (
         <MoreFade
           hiddenCount={hidden}

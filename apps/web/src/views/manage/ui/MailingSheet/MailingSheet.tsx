@@ -14,6 +14,7 @@ import {
 import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -158,7 +159,7 @@ export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps)
         </section>
 
         <section className={sheet.group} aria-label='Текст'>
-          <h3 className={sheet.groupTitle}>Текст</h3>
+          <SectionCaption>Текст</SectionCaption>
           <div className={sheet.list}>
             <textarea
               aria-label='Текст рассылки'
@@ -192,7 +193,7 @@ export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps)
 
         {overview && overview.history.length > 0 && (
           <section className={sheet.group} aria-label='Отправленные'>
-            <h3 className={sheet.groupTitle}>Отправленные</h3>
+            <SectionCaption>Отправленные</SectionCaption>
             <div className={sheet.list}>
               {overview.history.slice(0, 5).map((item) => (
                 <div key={item.id} className={sheet.row}>

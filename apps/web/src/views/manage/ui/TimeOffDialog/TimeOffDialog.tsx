@@ -3,6 +3,7 @@ import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
 import { TIME_OPTIONS } from '@/entities/business'
 import type { CreateTimeOffInput, Specialist } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -50,7 +51,7 @@ export const TimeOffDialog = ({
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <section className={sheet.group} aria-label='Время'>
-          <h3 className={sheet.groupTitle}>{dayLabel}</h3>
+          <SectionCaption>{dayLabel}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Мастер</span>

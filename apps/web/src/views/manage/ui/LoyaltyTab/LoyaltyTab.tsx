@@ -17,6 +17,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -71,7 +72,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       />
 
       <section className={sheet.group} aria-label='Бонусы'>
-        <h3 className={sheet.groupTitle}>Бонусы</h3>
+        <SectionCaption>Бонусы</SectionCaption>
         <div className={sheet.list}>
           <label className={sheet.row}>
             <span className={sheet.rowLabel}>Начислять бонусы</span>
@@ -111,7 +112,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
 
       <section className={sheet.group} aria-label='Абонементы'>
         <div className={sheet.groupHeader}>
-          <h3 className={sheet.groupTitle}>Абонементы</h3>
+          <SectionCaption isInset={false}>Абонементы</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setEditingPlan('new')}>
             <Plus weight='bold' aria-hidden /> Новый
           </button>
@@ -154,7 +155,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
 
       <section className={sheet.group} aria-label='Сертификаты'>
         <div className={sheet.groupHeader}>
-          <h3 className={sheet.groupTitle}>Сертификаты</h3>
+          <SectionCaption isInset={false}>Сертификаты</SectionCaption>
           <Button size='sm' variant='secondary' onClick={() => setIsIssuing(true)}>
             <Plus weight='bold' aria-hidden />
             Выпустить

@@ -6,6 +6,7 @@ import { formatDuration, formatPrice } from '@/entities/booking'
 import { getPaymentConfig } from '@/shared/api/clientApi'
 import type { Category, Service, ServiceInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -111,7 +112,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
         </div>
 
         <section className={sheet.group} aria-label='Цена и время'>
-          <h3 className={sheet.groupTitle}>Цена и время</h3>
+          <SectionCaption>Цена и время</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Длительность</span>
@@ -158,7 +159,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
         </section>
 
         <section className={sheet.group} aria-label='Пора прийти снова'>
-          <h3 className={sheet.groupTitle}>Пора прийти снова</h3>
+          <SectionCaption>Пора прийти снова</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Напомнить по SMS</span>
@@ -182,7 +183,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
 
         {canTakeDeposits && (
           <section className={sheet.group} aria-label='Предоплата'>
-            <h3 className={sheet.groupTitle}>Предоплата</h3>
+            <SectionCaption>Предоплата</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
                 <span className={sheet.rowLabel}>При записи онлайн</span>

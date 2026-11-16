@@ -160,11 +160,6 @@
   border-radius: var(--radius-lg);
 }
 
-.empty {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-}
-
 .link {
   color: var(--color-link);
 }
