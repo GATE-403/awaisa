@@ -56,6 +56,41 @@ test.describe('Sign-in through the Telegram bot', () => {
     })
   })
 
+  test('the sign-in page waits for the bot and signs in by itself', async ({ page, context }) => {
+    // The bot link opens Telegram in a new tab; the test stays on our page.
+    await context.route('https://t.me/**', (route) => route.fulfill({ body: 'Telegram' }))
+    await page.goto('/login?next=/bookings')
+    const button = page.getByRole('link', { name: 'Войти через Telegram' })
+    await expect(button).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=login_/)
+    const href = (await button.getAttribute('href')) ?? ''
+    const token = href.split('login_')[1] ?? ''
+    await button.click()
+    await expect(page.getByRole('heading', { name: 'Подтвердите в Telegram' })).toBeVisible()
+
+    const phone = randomClientPhone()
+    const chatId = 7_100_000_000 + Math.floor(Math.random() * 1_000_000)
+    const bot = (message: Record<string, unknown>) =>
+      page.request.post(`${API_URL}/telegram/webhook`, {
+        data: {
+          update_id: Date.now(),
+          message: { chat: { id: chatId }, from: { id: chatId }, ...message },
+        },
+        headers: { 'x-telegram-bot-api-secret-token': WEBHOOK_SECRET },
+      })
+    await bot({ text: `/start login_${token}` })
+    await bot({ contact: { phone_number: phone, user_id: chatId } })
+
+    // A new client: the page asks for a name, then goes where it was asked to.
+    await expect(page.getByRole('heading', { name: 'Вы вошли' })).toBeVisible()
+    await page.getByLabel('Имя').fill('E2E Telegram')
+    await page.getByRole('button', { name: 'Готово' }).click()
+    await expect(page).toHaveURL(/\/bookings$/)
+
+    await withDb((client) =>
+      client.query('DELETE FROM "client_telegram_chats" WHERE "phone" = $1', [phone]),
+    )
+  })
+
   test('unknown and malformed tokens open nothing', async ({ page }) => {
     const unknown = randomBytes(32).toString('base64url')
     expect(
