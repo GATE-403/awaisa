@@ -184,6 +184,7 @@
 
 /* Another day on its way: the dial stays as it is (no fade, no skeleton) and takes no taps;
    when the day arrives the bars grow or shrink into place and the needle glides on. */
-.ruler[data-pending] {
+.ruler[data-pending] .track,
+.ruler[data-pending] .pick {
   pointer-events: none;
 }

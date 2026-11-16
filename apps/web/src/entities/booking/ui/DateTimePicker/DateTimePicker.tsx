@@ -99,43 +99,48 @@ export const DateTimePicker = ({
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
+  const dayRow = (
+    <ToggleGroup
+      aria-label={t('День')}
+      layout='scroll'
+      className={styles.days}
+      data-edge-fade=''
+      value={dayKey ? [dayKey] : []}
+      onValueChange={(values) => toSingleValue(values, onDayChange)}
+    >
+      {days.map((day) => (
+        <Toggle
+          key={day.key}
+          value={day.key}
+          size='card'
+          aria-label={
+            day.isClosed
+              ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
+              : isRussian
+                ? day.label
+                : t.dayLong(day.key)
+          }
+          disabled={day.isClosed}
+          data-today={day.isToday || undefined}
+        >
+          <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
+            {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
+          </span>
+          <span className={styles.dayNumber}>{day.dayOfMonth}</span>
+          <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
+        </Toggle>
+      ))}
+    </ToggleGroup>
+  )
+
   return (
     <div className={styles.picker} data-view={view}>
-      <ToggleGroup
-        aria-label={t('День')}
-        layout='scroll'
-        className={styles.days}
-        data-edge-fade=''
-        value={dayKey ? [dayKey] : []}
-        onValueChange={(values) => toSingleValue(values, onDayChange)}
-      >
-        {days.map((day) => (
-          <Toggle
-            key={day.key}
-            value={day.key}
-            size='card'
-            aria-label={
-              day.isClosed
-                ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
-                : isRussian
-                  ? day.label
-                  : t.dayLong(day.key)
-            }
-            disabled={day.isClosed}
-            data-today={day.isToday || undefined}
-          >
-            <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
-              {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
-            </span>
-            <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-            <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
-          </Toggle>
-        ))}
-      </ToggleGroup>
+      {view === 'grid' && dayRow}
 
       {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
       {isSpecialistSelected &&
         isLoading &&
+        !isRulerShown &&
         (view === 'ruler' ? <RulerSkeleton /> : <SlotsSkeleton />)}
       {isSpecialistSelected && error && (
         <div className={styles.hint}>
@@ -160,8 +165,11 @@ export const DateTimePicker = ({
           time={time}
           durationMinutes={durationMinutes}
           onPick={onTimeChange}
+          days={dayRow}
         />
       )}
+      {/* Without a dial (loading, a full day, an error) the days still sit under it. */}
+      {view === 'ruler' && !isRulerShown && dayRow}
       {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
