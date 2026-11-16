@@ -57,6 +57,15 @@ export class ClientMessagesService {
     return true
   }
 
+  /** A number confirmed in the chat itself (Telegram sign-in): its messages go there too. */
+  async linkPhone(chatId: string, phone: string) {
+    await this.dataSource.query(
+      `INSERT INTO "client_telegram_chats" ("phone", "chat_id") VALUES ($1, $2)
+       ON CONFLICT ("phone") DO UPDATE SET "chat_id" = EXCLUDED."chat_id", "created_at" = now()`,
+      [phone, chatId],
+    )
+  }
+
   async unlink(chatId: string) {
     const result = (await this.dataSource.query(
       'DELETE FROM "client_telegram_chats" WHERE "chat_id" = $1 RETURNING "phone"',
