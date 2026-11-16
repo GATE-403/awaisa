@@ -238,10 +238,10 @@ export const BookingPage = ({
   const chosenSpecialist = catalog.specialists.find(
     (specialist) => specialist.id === form.specialistId,
   )
-  // The ticket's parts in one colour — the place's own — told apart by lightness alone, each
-  // next card a step lighter; several hues side by side pulled the eye everywhere at once.
+  // The ticket's parts in the place's own hue; the stack sets each card's lightness by where it
+  // lies (the furthest always the darkest), not by which step it is.
   const placeTint = pickTint(business.name)
-  const cardTone = (index: number) => `oklch(from ${placeTint} ${0.34 + index * 0.045} 0.085 h)`
+  const cardTone = (_index: number) => placeTint
   const chosenCards: StackCardProps[] = []
   if (form.branches.length > 1 && chosenBranch) {
     const distance = form.branchDistances?.[chosenBranch.id]
