@@ -22,14 +22,23 @@
     var(--shadow-md);
 }
 
+@media (max-width: 399px) {
+  /* The struck old price would push the button down; the percent says the same. */
+  .barOldPrice {
+    display: none;
+  }
+}
+
 /* Concentric with the capsule bar: the button is a capsule too, as in Liquid Glass toolbars. */
 .bar .barButton {
   margin-left: auto;
   border-radius: var(--radius-full);
 }
 
+/* A small basis keeps the total and a long action («Выбрать мастера») on one line on phones;
+   only large system text, where they truly do not fit, drops the button under the total. */
 .barInfo {
-  flex: 1 1 10em;
+  flex: 1 1 6em;
   display: flex;
   flex-direction: column;
   justify-content: center;

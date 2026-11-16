@@ -17,7 +17,6 @@ import { CatalogSkeleton } from './ui/CatalogSkeleton/CatalogSkeleton'
 import { FirstVisitNote } from './ui/FirstVisitNote/FirstVisitNote'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
-import { WorkShelf } from './ui/WorkShelf/WorkShelf'
 
 interface CatalogPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -43,7 +42,20 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
     listOffers(kind, query || undefined, params.sort === 'price' ? 'price' : 'popular'),
     isBrowsing ? listPopularServices(kind) : Promise.resolve([]),
     // The shelf is a nice-to-have: the catalog renders without it.
-    isBrowsing ? listFeed(kind, undefined, undefined).catch(() => null) : Promise.resolve(null),
+    // Two pages of work (24), enough for several mosaic blocks down the grid.
+    isBrowsing
+      ? Promise.all([
+          listFeed(kind, undefined, undefined),
+          listFeed(kind, undefined, undefined, 12).catch(() => null),
+        ])
+          .then(([first, second]) => ({
+            ...first,
+            items: [...first.items, ...(second?.items ?? [])].filter(
+              (item, index, all) => all.findIndex((other) => other.id === item.id) === index,
+            ),
+          }))
+          .catch(() => null)
+      : Promise.resolve(null),
     // Typos, the wrong keyboard layout or Latin letters: the API searched something else.
     query ? resolveSearch(query) : Promise.resolve(null),
   ])
@@ -71,12 +83,6 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
             }
           />
         )}
-        {isBrowsing && kind && (
-          // With a kind chosen there is no shelf: the leaderboard of that kind is one quiet line.
-          <NextLink href={`/top?kind=${kind}`} className={styles.topLink}>
-            Рейтинг мастеров ›
-          </NextLink>
-        )}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
         <CatalogResults
           key={`${kind ?? ''}|${query}`}
@@ -89,10 +95,8 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           initialView={query && matchesPlace ? 'places' : 'services'}
           initialSort={toSort(params.sort)}
           canReset={Boolean(query || kind)}
-          interlude={
-            // Set into the grid after two rows, like Shorts in a feed: the masters' work.
-            isBrowsing && works ? <WorkShelf items={works.items} kind={kind} /> : undefined
-          }
+          // The masters' work, set into the grid Instagram Explore style, block after block.
+          works={isBrowsing && works ? works.items : undefined}
         />
       </div>
     </NextFreeProvider>

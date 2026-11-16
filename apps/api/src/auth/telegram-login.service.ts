@@ -89,6 +89,29 @@ export class TelegramLoginService {
     return rows.length > 0 ? 'confirmed' : 'none'
   }
 
+  /**
+   * The number this chat has already shared to sign in (its own contact, checked then), so the
+   * next sign-in from the same chat does not ask again. Null after `/stop` or never shared.
+   */
+  async rememberedPhone(chatId: string) {
+    const [row] = (await this.dataSource.query(
+      `SELECT "phone" FROM "telegram_logins"
+       WHERE "chat_id" = $1 AND "phone" IS NOT NULL
+       ORDER BY "created_at" DESC LIMIT 1`,
+      [chatId],
+    )) as { phone: string }[]
+    return row?.phone ?? null
+  }
+
+  /** `/stop` in the bot: the chat's number is forgotten, the next sign-in asks for it again. */
+  async forgetChat(chatId: string) {
+    await this.dataSource.query(
+      `UPDATE "telegram_logins" SET "phone" = NULL
+       WHERE "chat_id" = $1 AND "status" <> 'confirmed'`,
+      [chatId],
+    )
+  }
+
   /** What the page sees while it waits; a confirmed token opens a session once. */
   async check(token: string): Promise<CheckResult> {
     if (!isLoginToken(token)) return { status: 'expired' }

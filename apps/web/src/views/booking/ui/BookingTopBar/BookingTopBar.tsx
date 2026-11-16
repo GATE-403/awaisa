@@ -7,6 +7,7 @@ import type { MouseEvent } from 'react'
 import { BusinessTile } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { useSheetDrag } from '@/shared/ui/Sheet/useSheetDrag'
 import styles from './BookingTopBar.module.css'
 
 interface BookingTopBarProps {
@@ -30,10 +31,16 @@ const useClose = (isModal: boolean) => {
 // bar with the place and a close button — all attention on the form.
 export const BookingTopBar = ({ business, isModal = false }: BookingTopBarProps) => {
   const close = useClose(isModal)
+  const router = useRouter()
   const t = useT()
+  // Pulled down by its bar, the sheet leaves the same way ✕ does.
+  const drag = useSheetDrag(() =>
+    isModal ? router.back() : router.push(`/${business.slug}`, { scroll: false }),
+  )
 
   return (
-    <header className={styles.bar}>
+    <header className={styles.bar} {...drag}>
+      <span className={styles.grabber} aria-hidden />
       <div className={styles.inner}>
         <NextLink
           href={`/${business.slug}`}
