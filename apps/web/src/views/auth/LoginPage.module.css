@@ -1,41 +1,116 @@
+/* A screen of its own on the page colour: the column sits a little above the middle, where the
+   eye lands first, with room for the keyboard on phones. */
 .page {
-  padding: var(--space-6) 0 var(--section-gap);
-}
-
-.content {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  min-height: 100svh;
+  padding: env(safe-area-inset-top) var(--page-gutter) env(safe-area-inset-bottom);
 }
 
-.card {
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+.topBar {
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+/* ✕ back to where the person came from; ‹ back to the number on the code step. */
+.corner {
+  display: grid;
+  place-items: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  margin-left: calc(var(--space-2) * -1);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.corner svg {
+  width: 17px;
+  height: 17px;
+}
+
+.corner:active {
+  scale: 0.92;
+}
+
+.corner:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 8vh 0 var(--space-16);
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: center;
+}
+
+.mascot {
+  width: 52px;
+  height: auto;
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-title1);
+  line-height: 1.15;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
 }
 
 .lead {
+  max-width: 30ch;
+  margin-bottom: var(--space-4);
+  color: var(--color-muted-foreground);
   font-size: var(--text-body);
   line-height: var(--text-body-line-height);
+  text-wrap: balance;
 }
 
 .phone {
+  color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.code {
-  font-size: var(--text-xl);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.4em;
+.field {
+  width: 100%;
+}
+
+/* The question above already says what goes here; the label stays for screen readers. */
+.field > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.otp {
+  margin-bottom: var(--space-1);
 }
 
 .note {
@@ -44,13 +119,27 @@
   line-height: var(--text-footnote-line-height);
 }
 
+.error {
+  color: var(--color-danger-text);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
 .links {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-2);
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-2);
 }
 
 .links > * {
   min-height: var(--control-height-md);
+}
+
+@media (min-width: 768px) {
+  .column {
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 12vh;
+  }
 }
