@@ -39,6 +39,7 @@
   background: var(--tint);
   box-shadow: var(--shadow-sm);
   color: #fff;
+  text-shadow: var(--card-text-shadow);
   cursor: pointer;
 }
 
@@ -47,12 +48,7 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(
-    to bottom,
-    rgb(0 0 0 / 0) 30%,
-    rgb(0 0 0 / 0.5) 62%,
-    rgb(0 0 0 / 0.86)
-  );
+  background: var(--card-scrim);
 }
 
 .image {
