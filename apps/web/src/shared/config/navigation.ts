@@ -1,5 +1,5 @@
 import type { Icon } from '@phosphor-icons/react'
-import { Cards, Compass, MapTrifold, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
+import { Compass, MapTrifold, Sparkle, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
 
 type NavItem = {
   href: string
@@ -10,7 +10,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: Compass },
   // Finished work as a vertical feed, each photo one tap from booking it.
-  { href: '/feed', label: 'Образы', icon: Cards },
+  { href: '/feed', label: 'Образы', icon: Sparkle },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/business', label: 'Бизнес', icon: Storefront },
   // Profile and bookings are one page.
