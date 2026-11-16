@@ -1,19 +1,33 @@
 'use client'
 
-import { ArrowRight, MagnifyingGlass, X } from '@phosphor-icons/react/ssr'
+import { ArrowRight, MagnifyingGlass, NavigationArrow, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
+import { PlacePickerSheet } from '@/features/myPlace'
 import { RecentVisits } from '@/features/rebook'
 import { listOffersPage, searchBusinesses } from '@/shared/api/clientApi'
 import type { BusinessCard, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { useMyPlace } from '@/shared/lib/myPlace'
 import { pluralize } from '@/shared/lib/plural'
 import styles from './HeaderSearch.module.css'
 
 const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Окрашивание', 'Массаж', 'Брови']
+
+// What the empty field suggests, one at a time: real searches, so the field reads as «ask me»
+// rather than a blank box. They change every few seconds (the words only; still with reduced motion).
+const HINTS = [
+  'маникюр рядом',
+  'стрижка сегодня',
+  'барбер',
+  'массаж спины',
+  'брови и ресницы',
+  'окрашивание',
+]
+const HINT_MS = 3200
 
 const MIN_QUERY_LENGTH = 2
 const SUGGEST_DELAY_MS = 200
@@ -50,6 +64,9 @@ const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
 
 // The store's search field lives in the header, like on a marketplace: type, see places, press Enter.
 export const HeaderSearch = () => {
+  const myPlace = useMyPlace()
+  const [isPicking, setIsPicking] = useState(false)
+  const [hintIndex, setHintIndex] = useState(0)
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -63,6 +80,15 @@ export const HeaderSearch = () => {
   const query = draft ?? urlQuery
   const trimmed = query.trim()
   const hasQuery = trimmed.length >= MIN_QUERY_LENGTH
+
+  useEffect(() => {
+    if (query) return
+    const interval = window.setInterval(
+      () => setHintIndex((index) => (index + 1) % HINTS.length),
+      HINT_MS,
+    )
+    return () => window.clearInterval(interval)
+  }, [query])
 
   useEffect(() => {
     if (!hasQuery || !isOpen) return
@@ -139,21 +165,30 @@ export const HeaderSearch = () => {
       <search className={styles.search} data-open={isOpen || undefined}>
         <form className={styles.form} onSubmit={handleSubmit} data-open={isOpen || undefined}>
           <MagnifyingGlass className={styles.icon} weight='bold' aria-hidden />
-          <input
-            type='search'
-            className={styles.input}
-            value={query}
-            onChange={(event) => {
-              setDraft(event.target.value)
-              setIsOpen(true)
-            }}
-            onFocus={() => setIsOpen(true)}
-            placeholder='Услуга, салон или мастер'
-            aria-label='Поиск салонов и мастеров'
-            aria-describedby={isOpen ? listId : undefined}
-            enterKeyHint='search'
-            autoComplete='off'
-          />
+          <span className={styles.field}>
+            {!query && (
+              <span className={styles.hint} aria-hidden>
+                Найти{' '}
+                <span key={hintIndex} className={styles.hintWord}>
+                  {HINTS[hintIndex]}
+                </span>
+              </span>
+            )}
+            <input
+              type='search'
+              className={styles.input}
+              value={query}
+              onChange={(event) => {
+                setDraft(event.target.value)
+                setIsOpen(true)
+              }}
+              onFocus={() => setIsOpen(true)}
+              aria-label='Поиск салонов и мастеров'
+              aria-describedby={isOpen ? listId : undefined}
+              enterKeyHint='search'
+              autoComplete='off'
+            />
+          </span>
           {query && (
             <button
               type='button'
@@ -167,6 +202,18 @@ export const HeaderSearch = () => {
               <X weight='bold' aria-hidden />
             </button>
           )}
+          {!isOpen && (
+            // Where results are counted from: the saved place, or a question until there is one.
+            <button
+              type='button'
+              className={styles.where}
+              onClick={() => setIsPicking(true)}
+              aria-label={myPlace ? `Место: ${myPlace.label}. Изменить` : 'Указать, где вы'}
+            >
+              <NavigationArrow weight='fill' aria-hidden />
+              <span className={styles.whereLabel}>{myPlace?.label ?? 'Где вы?'}</span>
+            </button>
+          )}
           <button type='submit' className={styles.submit} aria-label='Найти'>
             <MagnifyingGlass weight='bold' aria-hidden />
           </button>
@@ -178,6 +225,7 @@ export const HeaderSearch = () => {
           </button>
         )}
       </search>
+      {isPicking && <PlacePickerSheet onClose={() => setIsPicking(false)} />}
 
       {isOpen && (
         <div id={listId} className={styles.panel}>

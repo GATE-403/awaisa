@@ -278,6 +278,26 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setEditingStep(step)
   }
 
+  // «Начать заново»: the choices go (service, master, time, comment, code) and so does the draft
+  // and the link's preset; the name and phone stay — they are the same person.
+  const startOver = () => {
+    setServiceId(null)
+    setSpecialistId(null)
+    setSelectedDayKey(null)
+    setTime(null)
+    setComment('')
+    setPromoCode(null)
+    setSubmitError(null)
+    setHasTriedSubmit(false)
+    setFolded({})
+    setEditingStep(null)
+    clearDraft()
+    const url = new URL(window.location.href)
+    for (const key of ['service', 'specialist', 'date', 'time']) url.searchParams.delete(key)
+    window.history.replaceState(window.history.state, '', url)
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const selectService = (id: string) => {
     setFolded((current) => ({ ...current, service: undefined }))
     const nextSpecialists = getSpecialistsForService(catalog, id).filter(
@@ -462,6 +482,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     clearPromoCode: () => setPromoCode(null),
     selectService,
     selectSpecialist,
+    isStarted: Boolean(service || chosenSpecialistId || time),
+    startOver,
     selectDay,
     selectTime,
     pickSlot,

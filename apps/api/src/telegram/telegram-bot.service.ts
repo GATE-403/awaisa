@@ -29,6 +29,7 @@ import {
   LOGIN_REFUSED,
   LOGIN_SHARE_BUTTON,
   linkedText,
+  loginKnownText,
   unclosedText,
 } from './telegram-messages.js'
 
@@ -163,6 +164,11 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       if (!(await this.telegramLogin.attachChat(loginToken, chatId))) {
         return this.send(chatId, LOGIN_EXPIRED)
       }
+      // Shared here before: no need to ask again.
+      const known = await this.telegramLogin.rememberedPhone(chatId)
+      if (known && (await this.telegramLogin.confirmContact(chatId, known)) === 'confirmed') {
+        return this.send(chatId, loginKnownText(known), { remove_keyboard: true })
+      }
       return this.send(chatId, LOGIN_ASK_CONTACT, {
         keyboard: [[{ text: LOGIN_SHARE_BUTTON, request_contact: true }]],
         resize_keyboard: true,
@@ -182,6 +188,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     // For ALERT_TELEGRAM_CHAT_ID: the platform's own alerts go to whichever chat this is.
     if (command === '/chatid') return this.send(chatId, `ID этого чата: <code>${chatId}</code>`)
     if (command === '/stop') {
+      await this.telegramLogin.forgetChat(chatId)
       // A client's chat: back to SMS reminders.
       if (await this.clientMessages.unlink(chatId)) {
         return this.send(chatId, 'Напоминания снова будут приходить по SMS.')

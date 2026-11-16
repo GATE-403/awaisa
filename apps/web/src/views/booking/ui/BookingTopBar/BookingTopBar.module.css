@@ -1,6 +1,8 @@
 .bar {
   position: sticky;
   top: 0;
+  /* The bar is the handle: pulled down, the sheet follows the finger (useSheetDrag). */
+  touch-action: none;
   z-index: 40;
   border-radius: inherit;
   border-bottom-right-radius: 0;
@@ -123,5 +125,23 @@
 @keyframes dim {
   from {
     opacity: 0;
+  }
+}
+
+/* iOS grabber: the sheet can be pulled down. Phones and tablets only — on desktop it is a panel. */
+.grabber {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  width: 36px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
+  translate: -50% 0;
+}
+
+@media (min-width: 1024px) {
+  .grabber {
+    display: none;
   }
 }
