@@ -110,12 +110,28 @@ const unclosedText = (count: number) =>
 const HELP_TEXT =
   'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today — записи на сегодня\n/stop — отключить уведомления'
 
+// «Войти через Telegram»: the bot asks for the person's own number with one button.
+const LOGIN_ASK_CONTACT =
+  'Вход в <b>Awaisa</b>. Нажмите «Поделиться номером» внизу — так мы узнаем ваш номер и войдём в ваш профиль с записями.'
+const LOGIN_SHARE_BUTTON = '📱 Поделиться номером'
+const LOGIN_DONE =
+  'Готово — вы вошли. Вернитесь на сайт или в приложение. Напоминания о визитах теперь будут приходить сюда.'
+const LOGIN_EXPIRED = 'Ссылка для входа устарела. Нажмите «Войти через Telegram» на сайте ещё раз.'
+const LOGIN_NOT_OWN = 'Нужен ваш собственный номер — нажмите кнопку «Поделиться номером» внизу.'
+const LOGIN_REFUSED = 'Пока принимаем только номера Кыргызстана (+996).'
+
 export type { BookingLine }
 export {
   cancelledText,
   dayText,
   escapeHtml,
   HELP_TEXT,
+  LOGIN_ASK_CONTACT,
+  LOGIN_DONE,
+  LOGIN_EXPIRED,
+  LOGIN_NOT_OWN,
+  LOGIN_REFUSED,
+  LOGIN_SHARE_BUTTON,
   linkedText,
   movedByClientText,
   newBookingText,

@@ -15,9 +15,16 @@ const verifyCodeSchema = z.object({
     .regex(/^\d{6}$/, 'Код состоит из 6 цифр'),
 })
 
+// The page's random sign-in token for the bot (checked again by `isLoginToken`).
+const telegramLoginSchema = z.object({
+  token: z.string().trim().min(32).max(58),
+})
+
 type RequestCodeInput = z.infer<typeof requestCodeSchema>
 
 type VerifyCodeInput = z.infer<typeof verifyCodeSchema>
 
-export type { RequestCodeInput, VerifyCodeInput }
-export { requestCodeSchema, verifyCodeSchema }
+type TelegramLoginInput = z.infer<typeof telegramLoginSchema>
+
+export type { RequestCodeInput, TelegramLoginInput, VerifyCodeInput }
+export { requestCodeSchema, telegramLoginSchema, verifyCodeSchema }
