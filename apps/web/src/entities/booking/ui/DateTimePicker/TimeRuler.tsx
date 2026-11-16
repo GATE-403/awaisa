@@ -39,6 +39,7 @@ export const TimeRuler = ({
 }: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
+  const hasShown = useRef(false)
   const firstFree = Math.max(
     0,
     slots.findIndex((slot) => slot.isAvailable),
@@ -53,7 +54,10 @@ export const TimeRuler = ({
   useEffect(() => {
     const track = trackRef.current
     if (!track) return
-    track.scrollLeft = startIndex * TICK_WIDTH
+    // The first day jumps into place; a next day glides there, so the step never blinks.
+    if (hasShown.current) track.scrollTo({ left: startIndex * TICK_WIDTH, behavior: 'smooth' })
+    else track.scrollLeft = startIndex * TICK_WIDTH
+    hasShown.current = true
     setCentered(startIndex)
   }, [slotsKey])
 

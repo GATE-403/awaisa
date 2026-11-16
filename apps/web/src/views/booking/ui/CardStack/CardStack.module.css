@@ -1,7 +1,7 @@
 /* Folded, the cards lie on one another 12pt apart, the older ones a little smaller behind; fanned,
    each takes its own row. Only transforms move, so the fan is smooth on phones. */
 .stack {
-  --card-height: 64px;
+  --card-height: 72px;
   --peek: 22px;
   --gap: 8px;
 

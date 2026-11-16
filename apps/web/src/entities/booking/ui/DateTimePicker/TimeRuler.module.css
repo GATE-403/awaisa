@@ -182,7 +182,8 @@
   }
 }
 
+/* Another day on its way: the dial stays as it is (no fade, no skeleton) and takes no taps;
+   when the day arrives the bars grow or shrink into place and the needle glides on. */
 .ruler[data-pending] {
-  opacity: 0.45;
   pointer-events: none;
 }

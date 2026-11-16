@@ -402,30 +402,38 @@ label:has([data-checked]) .serviceNote {
   pointer-events: none;
 }
 
-/* What sits on the stack cards: the service's picture, the master's face, the day's leaf. */
-.stackThumb {
-  display: block;
+/* What sits on the stack cards — the service's picture, the master's face, the branch's pin,
+   the day's leaf — all one shape: a 44pt rounded square, no rings. */
+.stackThumb,
+.stackPin,
+.stackLeaf,
+.stackFace.stackFace[data-size] {
   width: 44px;
   height: 44px;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
+}
+
+.stackThumb {
+  display: block;
   object-fit: cover;
 }
 
-.stackThumb[data-empty] {
-  background: var(--place-tint);
+.stackFace.stackFace[data-size] {
+  box-shadow: none;
 }
 
-.stackFace {
-  box-shadow: 0 0 0 2px #fff;
+.stackFace[data-size] img {
+  border-radius: inherit;
 }
 
+.stackPin,
 .stackFace[data-any] {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.2);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.18);
   color: #fff;
   font-size: 20px;
 }
@@ -433,28 +441,30 @@ label:has([data-checked]) .serviceNote {
 .stackLeaf {
   display: flex;
   flex-direction: column;
-  width: 40px;
   overflow: hidden;
-  border-radius: var(--radius-sm);
   background: #fff;
   color: #1d1d1f;
   text-align: center;
 }
 
 .stackLeafMonth {
-  padding: 1px 0;
+  padding: 2px 0 1px;
   background: var(--system-red);
   color: #fff;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
+  line-height: 1;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .stackLeafDay {
+  flex: 1;
+  display: grid;
+  place-items: center;
   font-size: var(--text-title3);
   font-weight: var(--font-weight-semibold);
-  line-height: 26px;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
@@ -494,17 +504,6 @@ label:has([data-checked]) .serviceNote {
     z-index: -1;
     height: calc(100% + var(--space-16));
   }
-}
-
-.stackPin {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.2);
-  color: #fff;
-  font-size: 20px;
 }
 
 .readyNote {
