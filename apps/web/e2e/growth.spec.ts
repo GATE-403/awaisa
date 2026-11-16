@@ -46,7 +46,7 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
   test('the booking form speaks Kyrgyz when chosen', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.setItem('awaisa:lang:v1', 'ky'))
     await page.goto('/lumiere-salon/book')
-    await expect(page.getByRole('heading', { name: 'Кызмат' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Эмне кылабыз?' })).toBeVisible()
     await expect(page.getByRole('radiogroup', { name: 'Кызмат' })).toBeVisible()
   })
 

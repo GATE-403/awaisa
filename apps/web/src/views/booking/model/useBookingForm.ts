@@ -37,13 +37,11 @@ const CONFLICT_STATUS = 409
 // How many open days the form looks ahead for a free slot before showing an empty day.
 const MAX_AUTO_DAY_SKIPS = 6
 
-const scrollToStep = (stepId: BookingStepId, force = false) => {
+// The sheet is a stack of done cards over one open card: after each choice it goes back to its
+// top, where the new card has just landed and the next question waits right under it.
+const scrollToStep = (_stepId: BookingStepId, _force = false) => {
   requestAnimationFrame(() => {
-    const element = document.getElementById(`step-${stepId}`)
-    if (!element) return
-
-    const isFarBelow = element.getBoundingClientRect().top > window.innerHeight * 0.55
-    if (force || isFarBelow) element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   })
 }
 
@@ -465,6 +463,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     firstIncompleteStep,
     completedSteps,
     createdBooking,
+    editingStep,
     isStepCollapsed,
     toggleStep,
     editStep,

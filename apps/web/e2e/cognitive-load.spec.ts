@@ -54,7 +54,9 @@ test.describe('Cognitive load: booking', () => {
     await page.goto('/awaisa-studio/book')
     const words = await page.evaluate(() => {
       const main = document.querySelector('main')
-      const firstChoice = document.querySelector('#step-service [role="radio"]')?.closest('label')
+      const firstChoice = document
+        .querySelector('#step-service input[type="radio"]')
+        ?.closest('label')
       if (!main || !firstChoice) return Number.POSITIVE_INFINITY
       const range = document.createRange()
       range.setStartBefore(main)

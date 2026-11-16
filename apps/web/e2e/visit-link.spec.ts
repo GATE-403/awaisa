@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto'
 import { expect, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
-import { API_URL } from './helpers'
+import { API_URL, bookingSteps, pickFirstFreeSlot } from './helpers'
 import './visits'
 
 const SLUG = 'awaisa-studio'
@@ -78,6 +78,13 @@ test.describe('Client flow from outside the site', () => {
       )
     })
     await page.goto(`/${SLUG}/book`)
+    // Contacts come last, after the choices.
+    const steps = bookingSteps(page)
+    await steps.service.getByRole('radio').first().click()
+    await page.locator('#step-specialist [type="radio"], #step-datetime').first().waitFor()
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    if (await anyMaster.isVisible()) await anyMaster.click()
+    await pickFirstFreeSlot(page)
     await expect(page.locator('#step-contacts').getByLabel('Имя')).toHaveValue('E2E Постоянный')
     await expect(page.locator('#step-contacts').getByLabel('Телефон')).toHaveValue(
       '+996 555 000 111',

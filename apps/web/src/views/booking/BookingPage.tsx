@@ -3,17 +3,8 @@
 import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
-import { RadioGroup } from '@awaisa/ui/Radio'
-import { RadioCard } from '@awaisa/ui/RadioCard'
-import {
-  CalendarBlank,
-  CaretRight,
-  ChatCircleText,
-  Check,
-  Scissors,
-  User,
-} from '@phosphor-icons/react/ssr'
-import { useEffect, useState } from 'react'
+import { CaretRight, Check, UsersThree } from '@phosphor-icons/react/ssr'
+import { type CSSProperties, useEffect, useState } from 'react'
 import {
   ANY_SPECIALIST_ID,
   addDayKey,
@@ -22,14 +13,15 @@ import {
   getSpecialistLabel,
   getSpecialistsForService,
 } from '@/entities/booking'
+import { PersonAvatar, pickTint } from '@/entities/business'
 import { rememberService, trackBookedPick } from '@/features/forYou'
 import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
+import { sizedImage } from '@/shared/lib/imageSizes'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
@@ -42,11 +34,13 @@ import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
 import { BookingScrim, BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
+import { CardStack, type StackCardProps } from '@/views/booking/ui/CardStack/CardStack'
 import { MasterPicker } from '@/views/booking/ui/MasterPicker/MasterPicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
 import { PlaceReviews } from '@/views/booking/ui/PlaceReviews/PlaceReviews'
 import { PromoCodeField } from '@/views/booking/ui/PromoCodeField/PromoCodeField'
 import { QuickSlots } from '@/views/booking/ui/QuickSlots/QuickSlots'
+import { ServicePicker } from '@/views/booking/ui/ServicePicker/ServicePicker'
 import styles from './BookingPage.module.css'
 
 interface BookingPageProps {
@@ -54,9 +48,22 @@ interface BookingPageProps {
   catalog: Catalog
   /** Opened over the page it was tapped on (an intercepted route), not as a page of its own. */
   isModal?: boolean
+  /** A work photo per service (`listServicePhotos`), for the service cards. */
+  servicePhotos?: Record<string, string>
 }
 
-export const BookingPage = ({ business, catalog, isModal = false }: BookingPageProps) => {
+const addMinutes = (time: string, minutes: number) => {
+  const [hours = 0, mins = 0] = time.split(':').map(Number)
+  const total = hours * 60 + mins + minutes
+  return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+export const BookingPage = ({
+  business,
+  catalog,
+  isModal = false,
+  servicePhotos,
+}: BookingPageProps) => {
   const t = useT()
   const form = useBookingForm(business, catalog)
   const serviceTimes = useServicesNextFree(business.slug, form.branchId ?? undefined)
@@ -149,7 +156,13 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     return (
       <>
         <BookingScrim slug={business.slug} isModal={isModal} />
-        <main className={styles.page} data-booking-screen='' data-sheet-drag=''>
+        <main
+          className={styles.page}
+          data-booking-screen=''
+          data-sheet-drag=''
+          style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+        >
+          <div className={styles.wash} aria-hidden />
           <BookingTopBar business={business} isModal={isModal} />
           <Container size='md'>
             <BookingSuccess booking={form.createdBooking} />
@@ -178,6 +191,81 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // One open step under a stack of done ones: the step being changed, else the first unfinished,
+  // and contacts once everything is chosen.
+  const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
+  const openStep = (step: BookingStepId) => {
+    setIsReviewRequested(false)
+    form.editStep(step)
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const chosenSpecialist = catalog.specialists.find(
+    (specialist) => specialist.id === form.specialistId,
+  )
+  const stackCards: StackCardProps[] = []
+  if (form.service && activeStep !== 'service') {
+    const picture = servicePhotos?.[form.service.id] ?? business.coverUrl
+    stackCards.push({
+      id: 'service',
+      title: t('Услуга'),
+      tone: 'color-mix(in srgb, var(--place-tint) 26%, #1c1c1e)',
+      media: picture ? (
+        // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
+        <img {...sizedImage(picture, 88)} alt='' className={styles.stackThumb} />
+      ) : (
+        <span className={styles.stackThumb} data-empty='' />
+      ),
+      primary: form.service.name,
+      secondary: t.duration(form.service.durationMinutes),
+      trailing: formatPrice(form.quote?.total ?? form.service.price),
+    })
+  }
+  if (form.specialistId && activeStep !== 'specialist') {
+    stackCards.push({
+      id: 'specialist',
+      title: t('Мастер'),
+      tone: chosenSpecialist
+        ? `color-mix(in srgb, ${pickTint(chosenSpecialist.name)} 72%, black)`
+        : 'color-mix(in srgb, var(--color-muted-foreground) 70%, black)',
+      media: chosenSpecialist ? (
+        <PersonAvatar
+          name={chosenSpecialist.name}
+          src={chosenSpecialist.photoUrl ?? undefined}
+          size='md'
+          className={styles.stackFace}
+        />
+      ) : (
+        <span className={styles.stackFace} data-any=''>
+          <UsersThree weight='fill' />
+        </span>
+      ),
+      primary: chosenSpecialist ? chosenSpecialist.name : t('Любой мастер'),
+      secondary: chosenSpecialist
+        ? [
+            chosenSpecialist.rating ? `★ ${chosenSpecialist.rating.toFixed(1)}` : null,
+            chosenSpecialist.role,
+          ]
+            .filter(Boolean)
+            .join(' · ')
+        : t('кто свободен'),
+    })
+  }
+  if (form.time && form.dayKey && form.service && activeStep !== 'datetime') {
+    stackCards.push({
+      id: 'datetime',
+      title: t('Дата и время'),
+      tone: 'var(--color-primary)',
+      media: (
+        <span className={styles.stackLeaf}>
+          <span className={styles.stackLeafMonth}>{t.monthShort(form.dayKey)}</span>
+          <span className={styles.stackLeafDay}>{Number(form.dayKey.slice(8))}</span>
+        </span>
+      ),
+      primary: `${form.time}–${addMinutes(form.time, form.service.durationMinutes)}`,
+      secondary: t.dayLong(form.dayKey),
+    })
+  }
+
   const summaryProps = {
     service: form.service,
     specialistLabel,
@@ -194,19 +282,19 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
       form.branches.find((branch) => branch.id === form.branchId)?.address ??
       business.address ??
       null,
-    onStepOpen: (step: BookingStepId) => {
-      setIsReviewRequested(false)
-      form.editStep(step)
-      document
-        .getElementById(`step-${step}`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    },
+    onStepOpen: openStep,
   }
 
   return (
     <>
       <BookingScrim slug={business.slug} isModal={isModal} />
-      <main className={styles.page} data-booking-screen='' data-sheet-drag=''>
+      <main
+        className={styles.page}
+        data-booking-screen=''
+        data-sheet-drag=''
+        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+      >
+        <div className={styles.wash} aria-hidden />
         <BookingTopBar business={business} isModal={isModal} />
         <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
           <div className={styles.steps}>
@@ -309,227 +397,190 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
               />
             ) : (
               <>
-                <BookingStep
-                  id='service'
-                  icon={Scissors}
-                  title={t('Услуга')}
-                  summary={form.service?.name}
-                  isComplete={form.completedSteps.service}
-                  isCollapsed={form.isStepCollapsed('service')}
-                  onToggle={() => form.toggleStep('service')}
-                >
-                  <RadioGroup
-                    variant='inset'
-                    aria-label={t('Услуга')}
-                    value={form.serviceId}
-                    onValueChange={(value) => form.selectService(String(value))}
-                  >
-                    {form.services.map((service) => (
-                      <RadioCard
-                        key={service.id}
-                        value={service.id}
-                        title={service.name}
-                        description={
-                          // Length and what is done on one quiet line: rows stay one height, and
-                          // the chosen one shows the description whole.
-                          <span className={styles.serviceNote}>
-                            {soonLabel(service.id) && (
-                              <span className={styles.serviceSoon}>{soonLabel(service.id)} · </span>
-                            )}
-                            {t.duration(service.durationMinutes)}
-                            {service.description.trim() && ` · ${service.description.trim()}`}
-                          </span>
-                        }
-                        trailing={formatPrice(service.price)}
-                      />
-                    ))}
-                  </RadioGroup>
-                </BookingStep>
+                <CardStack cards={stackCards} onEdit={(step) => openStep(step as BookingStepId)} />
 
-                <BookingStep
-                  id='specialist'
-                  icon={User}
-                  title={t('Мастер')}
-                  summary={specialistLabel || undefined}
-                  hint={form.service ? undefined : t('Сначала выберите услугу')}
-                  isComplete={form.completedSteps.specialist}
-                  isCollapsed={form.isStepCollapsed('specialist')}
-                  onToggle={() => form.toggleStep('specialist')}
-                >
-                  {form.service ? (
+                {activeStep === 'service' && (
+                  <BookingStep id='service' title={t('Что делаем?')}>
+                    <ServicePicker
+                      services={form.services}
+                      categories={catalog.categories}
+                      value={form.serviceId}
+                      onChange={form.selectService}
+                      photos={servicePhotos}
+                      coverUrl={business.coverUrl}
+                      businessName={business.name}
+                      soonLabel={soonLabel}
+                    />
+                  </BookingStep>
+                )}
+
+                {activeStep === 'specialist' && (
+                  <BookingStep id='specialist' title={t('К кому записаться?')}>
                     <MasterPicker
                       specialists={form.specialists}
                       value={form.specialistId}
                       onChange={form.selectSpecialist}
                     />
-                  ) : (
-                    <p className={styles.hint}>{t('Сначала выберите услугу')}</p>
-                  )}
-                </BookingStep>
+                  </BookingStep>
+                )}
 
-                <BookingStep
-                  id='datetime'
-                  icon={CalendarBlank}
-                  title={t('Дата и время')}
-                  summary={
-                    form.dayKey && form.time ? `${t.dayLong(form.dayKey)}, ${form.time}` : undefined
-                  }
-                  hint={
-                    !form.service
-                      ? t('Сначала выберите услугу')
-                      : !form.specialistId
-                        ? t('Сначала выберите мастера')
-                        : undefined
-                  }
-                  isComplete={form.completedSteps.datetime}
-                  isCollapsed={form.isStepCollapsed('datetime')}
-                  onToggle={() => form.toggleStep('datetime')}
-                >
-                  <DateTimePicker
-                    days={form.days}
-                    dayKey={form.dayKey}
-                    slots={form.availability.slots}
-                    isLoading={form.availability.isLoading}
-                    error={form.availability.error}
-                    onRetry={form.availability.reload}
-                    time={form.time}
-                    isSpecialistSelected={Boolean(form.specialistId)}
-                    onDayChange={form.selectDay}
-                    onTimeChange={form.selectTime}
-                    fullDayAction={
-                      form.serviceId && form.specialistId && form.dayKey ? (
-                        <WaitlistJoin
-                          serviceId={form.serviceId}
-                          specialistId={form.specialistId}
-                          branchId={form.branchId ?? undefined}
-                          date={form.dayKey}
-                          dayLabel={t.dayLong(form.dayKey)}
-                        />
-                      ) : null
-                    }
-                  />
-                </BookingStep>
+                {activeStep === 'datetime' && (
+                  <BookingStep id='datetime' title={t('Когда удобно?')}>
+                    <DateTimePicker
+                      view='ruler'
+                      durationMinutes={form.service?.durationMinutes}
+                      days={form.days}
+                      dayKey={form.dayKey}
+                      slots={form.availability.slots}
+                      isLoading={form.availability.isLoading}
+                      error={form.availability.error}
+                      onRetry={form.availability.reload}
+                      time={form.time}
+                      isSpecialistSelected={Boolean(form.specialistId)}
+                      onDayChange={form.selectDay}
+                      onTimeChange={form.selectTime}
+                      fullDayAction={
+                        form.serviceId && form.specialistId && form.dayKey ? (
+                          <WaitlistJoin
+                            serviceId={form.serviceId}
+                            specialistId={form.specialistId}
+                            branchId={form.branchId ?? undefined}
+                            date={form.dayKey}
+                            dayLabel={t.dayLong(form.dayKey)}
+                          />
+                        ) : null
+                      }
+                    />
+                  </BookingStep>
+                )}
 
-                <BookingStep
-                  id='contacts'
-                  summary={
-                    form.isStepCollapsed('contacts') && form.name.trim()
-                      ? `${form.name.trim()} · ${formatPhone(form.accountPhone ?? form.phone)}`
-                      : undefined
-                  }
-                  icon={ChatCircleText}
-                  isCollapsed={form.isStepCollapsed('contacts')}
-                  onToggle={() => form.toggleStep('contacts')}
-                  title={t('Контакты')}
-                  isComplete={form.completedSteps.contacts}
-                >
-                  <div className={styles.fields}>
-                    {/* Settings-style rows: the label on the left, the value typed on the right. */}
-                    <div className={styles.group}>
-                      <Field
-                        label={t('Имя')}
-                        error={form.errors.name && t(form.errors.name)}
-                        className={styles.fieldRow}
-                      >
-                        <Input
-                          variant='plain'
-                          value={form.name}
-                          onValueChange={form.setName}
-                          autoComplete='name'
-                          placeholder={t(
-                            form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
-                          )}
-                        />
-                      </Field>
-                      {form.accountPhone ? null : (
+                {activeStep === 'contacts' && (
+                  <BookingStep id='contacts' title={t('Как вас записать?')}>
+                    <div className={styles.fields}>
+                      {/* Settings-style rows: the label on the left, the value typed on the right. */}
+                      <div className={styles.group}>
                         <Field
-                          label={t('Телефон')}
-                          error={form.errors.phone && t(form.errors.phone)}
+                          label={t('Имя')}
+                          error={form.errors.name && t(form.errors.name)}
                           className={styles.fieldRow}
                         >
                           <Input
                             variant='plain'
-                            type='tel'
-                            inputMode='tel'
-                            autoComplete='tel'
-                            value={form.phone}
-                            onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
-                            placeholder='+996 555 123 456'
+                            value={form.name}
+                            onValueChange={form.setName}
+                            autoComplete='name'
+                            enterKeyHint={form.accountPhone ? 'done' : 'next'}
+                            // Enter moves on to the number: one keyboard, no hunting for the field.
+                            onKeyDown={(event) => {
+                              if (event.key !== 'Enter') return
+                              event.preventDefault()
+                              const phoneInput = document.querySelector<HTMLInputElement>(
+                                '#step-contacts input[type="tel"]',
+                              )
+                              if (phoneInput) phoneInput.focus()
+                              else event.currentTarget.blur()
+                            }}
+                            placeholder={t(
+                              form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
+                            )}
                           />
                         </Field>
-                      )}
-                    </div>
-                    {/* Mum or a child: their name and number, the visit stays in this account. */}
-                    {form.canBookForOther && (
-                      <button
-                        type='button'
-                        className={styles.forOther}
-                        onClick={() => form.setForOther(!form.isForOther)}
-                      >
-                        {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
-                      </button>
-                    )}
-                    {/* Optional extras as a second group of the same Settings rows: a note and a
-                        code read like the name and number above, not like loose buttons. */}
-                    <div className={styles.group}>
-                      {isCommentOpen || form.comment ? (
-                        <>
-                          <div className={styles.fieldRow} data-action=''>
-                            <span className={styles.extraLabel}>{t('Комментарий')}</span>
-                            <span />
-                            {/* Folds back and forgets the note: an extra is never a trap. */}
-                            <button
-                              type='button'
-                              className={styles.rowAction}
-                              onClick={() => {
-                                form.setComment('')
-                                setIsCommentOpen(false)
+                        {form.accountPhone ? null : (
+                          <Field
+                            label={t('Телефон')}
+                            error={form.errors.phone && t(form.errors.phone)}
+                            className={styles.fieldRow}
+                          >
+                            <Input
+                              variant='plain'
+                              type='tel'
+                              inputMode='tel'
+                              autoComplete='tel'
+                              enterKeyHint='done'
+                              onKeyDown={(event) => {
+                                if (event.key !== 'Enter') return
+                                event.preventDefault()
+                                event.currentTarget.blur()
                               }}
-                            >
-                              {t('Убрать')}
-                            </button>
-                          </div>
-                          <textarea
-                            className={styles.commentArea}
-                            aria-label={t('Комментарий')}
-                            value={form.comment}
-                            onChange={(event) => form.setComment(event.target.value)}
-                            placeholder={t('Например, «нужна парковка»')}
-                            rows={3}
-                            maxLength={500}
-                          />
-                        </>
-                      ) : (
+                              value={form.phone}
+                              onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
+                              placeholder='+996 555 123 456'
+                            />
+                          </Field>
+                        )}
+                      </div>
+                      {/* Mum or a child: their name and number, the visit stays in this account. */}
+                      {form.canBookForOther && (
                         <button
                           type='button'
-                          className={styles.fieldRow}
-                          data-action=''
-                          onClick={() => setIsCommentOpen(true)}
+                          className={styles.forOther}
+                          onClick={() => form.setForOther(!form.isForOther)}
                         >
-                          <span className={styles.extraLabel}>{t('Комментарий')}</span>
-                          <span className={styles.extraValue}>{t('Добавить')}</span>
-                          <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
+                          {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
                         </button>
                       )}
-                      <PromoCodeField
-                        className={styles.fieldRow}
-                        code={form.promoCode}
-                        error={form.promoCodeError}
-                        quote={form.quote}
-                        isWaitingForTime={!form.time}
-                        onApply={form.applyPromoCode}
-                        onClear={form.clearPromoCode}
-                      />
+                      {/* Optional extras as a second group of the same Settings rows: a note and a
+                        code read like the name and number above, not like loose buttons. */}
+                      <div className={styles.group}>
+                        {isCommentOpen || form.comment ? (
+                          <>
+                            <div className={styles.fieldRow} data-action=''>
+                              <span className={styles.extraLabel}>{t('Комментарий')}</span>
+                              <span />
+                              {/* Folds back and forgets the note: an extra is never a trap. */}
+                              <button
+                                type='button'
+                                className={styles.rowAction}
+                                onClick={() => {
+                                  form.setComment('')
+                                  setIsCommentOpen(false)
+                                }}
+                              >
+                                {t('Убрать')}
+                              </button>
+                            </div>
+                            <textarea
+                              className={styles.commentArea}
+                              aria-label={t('Комментарий')}
+                              value={form.comment}
+                              onChange={(event) => form.setComment(event.target.value)}
+                              placeholder={t('Например, «нужна парковка»')}
+                              rows={3}
+                              maxLength={500}
+                            />
+                          </>
+                        ) : (
+                          <button
+                            type='button'
+                            className={styles.fieldRow}
+                            data-action=''
+                            onClick={() => setIsCommentOpen(true)}
+                          >
+                            <span className={styles.extraLabel}>{t('Комментарий')}</span>
+                            <span className={styles.extraValue}>{t('Добавить')}</span>
+                            <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
+                          </button>
+                        )}
+                        <PromoCodeField
+                          className={styles.fieldRow}
+                          code={form.promoCode}
+                          error={form.promoCodeError}
+                          quote={form.quote}
+                          isWaitingForTime={!form.time}
+                          onApply={form.applyPromoCode}
+                          onClear={form.clearPromoCode}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <NotifyOptions
-                    phone={form.accountPhone ?? (form.phone.trim() || null)}
-                    smsConfirmation={form.smsConfirmation}
-                    onSmsConfirmationChange={form.setSmsConfirmation}
-                    reminderMinutes={form.reminderMinutes}
-                    onReminderChange={form.setReminderMinutes}
-                  />
-                </BookingStep>
+                    <NotifyOptions
+                      phone={form.accountPhone ?? (form.phone.trim() || null)}
+                      smsConfirmation={form.smsConfirmation}
+                      onSmsConfirmationChange={form.setSmsConfirmation}
+                      reminderMinutes={form.reminderMinutes}
+                      onReminderChange={form.setReminderMinutes}
+                    />
+                  </BookingStep>
+                )}
               </>
             )}
 
