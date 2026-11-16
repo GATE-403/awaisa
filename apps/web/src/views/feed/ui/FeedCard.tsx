@@ -172,9 +172,9 @@ export const FeedCard = ({ item, index, isActive, isNear, isLiked, onLike }: Fee
           onClick={() => like(!isLiked)}
         >
           <span className={styles.sideIcon}>
-            <Heart weight='fill' aria-hidden />
+            <Heart weight={isLiked ? 'fill' : 'regular'} aria-hidden />
           </span>
-          <span aria-hidden>{likes > 0 ? compact(likes) : 'Нравится'}</span>
+          {likes > 0 && <span aria-hidden>{compact(likes)}</span>}
         </button>
         {service && (
           <button
@@ -184,16 +184,22 @@ export const FeedCard = ({ item, index, isActive, isNear, isLiked, onLike }: Fee
             onClick={() => setIsReviewsOpen(true)}
           >
             <span className={styles.sideIcon}>
-              <ChatCircle weight='fill' aria-hidden />
+              <ChatCircle weight='regular' aria-hidden />
             </span>
-            <span aria-hidden>{item.reviewsCount ? compact(item.reviewsCount) : 'Отзывы'}</span>
+            {Boolean(item.reviewsCount) && (
+              <span aria-hidden>{compact(item.reviewsCount ?? 0)}</span>
+            )}
           </button>
         )}
-        <button type='button' className={styles.sideButton} onClick={() => void share()}>
+        <button
+          type='button'
+          className={styles.sideButton}
+          aria-label='Поделиться'
+          onClick={() => void share()}
+        >
           <span className={styles.sideIcon}>
-            <ShareFat weight='fill' aria-hidden />
+            <ShareFat weight='regular' aria-hidden />
           </span>
-          <span>Поделиться</span>
         </button>
         <Menu
           label='Ещё'
@@ -203,7 +209,6 @@ export const FeedCard = ({ item, index, isActive, isNear, isLiked, onLike }: Fee
               <span className={styles.sideIcon}>
                 <DotsThree weight='bold' aria-hidden />
               </span>
-              <span aria-hidden>Ещё</span>
             </>
           }
         >

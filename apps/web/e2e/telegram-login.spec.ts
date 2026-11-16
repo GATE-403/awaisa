@@ -47,6 +47,22 @@ test.describe('Sign-in through the Telegram bot', () => {
     // A token signs in once.
     expect(await check()).toEqual({ status: 'expired' })
 
+    // The same chat signs in again without sharing the number twice; /stop forgets it.
+    const again = randomBytes(32).toString('base64url')
+    const checkAgain = async (value: string) =>
+      (await page.request.post('/api/auth/telegram/check', { data: { token: value } })).json()
+    await page.request.post('/api/auth/telegram', { data: { token: again } })
+    await bot({ text: `/start login_${again}`, from: { id: chatId } })
+    const remembered = await checkAgain(again)
+    expect(remembered.status).toBe('signedIn')
+    expect(remembered.customer.phone).toBe(phone)
+
+    await bot({ text: '/stop', from: { id: chatId } })
+    const afterStop = randomBytes(32).toString('base64url')
+    await page.request.post('/api/auth/telegram', { data: { token: afterStop } })
+    await bot({ text: `/start login_${afterStop}`, from: { id: chatId } })
+    expect(await checkAgain(afterStop)).toEqual({ status: 'pending' })
+
     await withDb(async (client) => {
       await client.query('DELETE FROM "client_telegram_chats" WHERE "phone" = $1', [phone])
       await client.query('UPDATE "customers" SET "name" = $2 WHERE "phone" = $1', [

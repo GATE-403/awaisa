@@ -149,7 +149,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
     return (
       <>
         <BookingScrim slug={business.slug} isModal={isModal} />
-        <main className={styles.page} data-booking-screen=''>
+        <main className={styles.page} data-booking-screen='' data-sheet-drag=''>
           <BookingTopBar business={business} isModal={isModal} />
           <Container size='md'>
             <BookingSuccess booking={form.createdBooking} />
@@ -206,7 +206,7 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
   return (
     <>
       <BookingScrim slug={business.slug} isModal={isModal} />
-      <main className={styles.page} data-booking-screen=''>
+      <main className={styles.page} data-booking-screen='' data-sheet-drag=''>
         <BookingTopBar business={business} isModal={isModal} />
         <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
           <div className={styles.steps}>
@@ -531,6 +531,13 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                   />
                 </BookingStep>
               </>
+            )}
+
+            {form.isStarted && !isReviewing && (
+              // A way out of a half-made booking without closing the sheet.
+              <Button variant='link' className={styles.startOver} onClick={form.startOver}>
+                {t('Начать заново')}
+              </Button>
             )}
 
             {/* Under the form and set well apart from it (a wide gap), so it reads as something to

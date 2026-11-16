@@ -1,6 +1,7 @@
 'use client'
 
 import NextLink from 'next/link'
+import type { CSSProperties } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import {
@@ -22,8 +23,17 @@ export const TabBar = () => {
 
   if (isBookingPath(pathname) || isCabinetPath(pathname) || isStandalonePath(pathname)) return null
 
+  const activeIndex = items.findIndex((item) => isActivePath(pathname, item.href))
+
   return (
     <nav aria-label='Нижнее меню' className={styles.tabBar}>
+      {/* One highlight that slides to the chosen tab, like iOS's tab bar — not a fill per tab. */}
+      <span
+        className={styles.indicator}
+        data-hidden={activeIndex < 0 || undefined}
+        style={{ '--index': Math.max(0, activeIndex), '--count': items.length } as CSSProperties}
+        aria-hidden
+      />
       {items.map(({ href, label, icon: Icon }) => {
         const isActive = isActivePath(pathname, href)
 

@@ -6,13 +6,20 @@
 
 /* The search field from the macOS 26 kit, sized for the header: a 44pt capsule with the accent button. */
 .form {
+  position: relative;
+  /* The place's name shows only when the field has room for it (see .whereLabel). */
+  container-type: inline-size;
   display: flex;
   align-items: center;
   height: 44px;
   padding: 0 4px 0 var(--space-4);
   border-radius: var(--radius-full);
-  background: var(--color-fill);
-  box-shadow: inset 0 0 0 1.5px transparent;
+  /* Raised a little off the header (white with a hairline and a soft shadow; a lighter grey in
+     the dark): the field is the first thing to touch, not one more grey shape. */
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-sm);
   transition:
     box-shadow var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard);
@@ -30,7 +37,118 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
+  color: var(--color-link);
+}
+
+/* The input and the rotating example share one box between the glyph and the buttons: the example
+   («Найти маникюр рядом») lies over the empty input, keeps its padding and never takes a tap. */
+.field {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.28em;
+  padding: 0 var(--space-3);
+  overflow: hidden;
   color: var(--color-muted-foreground);
+  font-size: var(--text-input);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.hintWord {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-foreground);
+  animation: hint-in 420ms var(--ease-standard) both;
+}
+
+@keyframes hint-in {
+  from {
+    translate: 0 60%;
+    opacity: 0;
+  }
+}
+
+/* Where results count from, at the field's end: from 768px the place's name in the accent colour
+   after a hairline («│ ➤ Асанбай»); on phones only the arrow, so the example keeps the room. A tap
+   opens «Где вы?». */
+.where {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  max-width: 150px;
+  height: 36px;
+  margin-right: var(--space-1);
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.where::before {
+  content: "";
+  display: none;
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 0.5px;
+  background: var(--color-border);
+}
+
+.where svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.whereLabel {
+  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.where:active {
+  background: var(--color-fill);
+}
+
+/* A wide field (desktop) names the place after a hairline; a narrow one shows the arrow alone. */
+@container (min-width: 420px) {
+  .whereLabel,
+  .where::before {
+    display: inline;
+  }
+}
+
+@media (hover: hover) {
+  .where:hover {
+    background: var(--color-fill);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hintWord {
+    animation: none;
+  }
 }
 
 .input {
