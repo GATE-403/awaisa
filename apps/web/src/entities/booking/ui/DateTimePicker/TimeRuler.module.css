@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: var(--space-3);
   min-width: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 /* The time under the needle, large — the one thing this step asks for. */
@@ -44,7 +45,7 @@
   margin: 0;
   border: none;
   align-items: flex-end;
-  height: 88px;
+  height: 108px;
   /* The first and last ticks can reach the needle in the middle. */
   padding-inline: calc(50% - 22px);
   overflow-x: auto;
@@ -91,7 +92,7 @@
   position: absolute;
   top: 0;
   color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
+  font-size: var(--text-footnote);
   font-variant-numeric: tabular-nums;
 }
 
@@ -104,8 +105,8 @@
 }
 
 .bar {
-  width: 4px;
-  height: 12px;
+  width: 10px;
+  height: 18px;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
   transition:
@@ -114,18 +115,18 @@
 }
 
 .tick[data-free] .bar {
-  height: 40px;
+  height: 60px;
   background: var(--place-tint, var(--color-primary));
 }
 
 .tick[aria-pressed="true"] .bar {
-  width: 6px;
+  width: 12px;
   background: var(--color-foreground);
 }
 
 @media (hover: hover) {
   .tick[data-free]:hover .bar {
-    height: 46px;
+    height: 68px;
   }
 }
 
@@ -134,7 +135,7 @@
   bottom: 0;
   left: 50%;
   width: 3px;
-  height: 56px;
+  height: 78px;
   margin-left: -1.5px;
   border-radius: var(--radius-full);
   background: var(--color-foreground);
@@ -159,7 +160,7 @@
 
 /* Little bars, shaped like the ruler's own: tall for free, low for taken. */
 .swatch {
-  width: 4px;
+  width: 6px;
   height: 6px;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
@@ -179,4 +180,9 @@
   .time {
     transition: none;
   }
+}
+
+.ruler[data-pending] {
+  opacity: 0.45;
+  pointer-events: none;
 }

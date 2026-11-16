@@ -3,8 +3,8 @@
 import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
-import { CaretRight, Check, UsersThree } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, useEffect, useState } from 'react'
+import { CaretRight, Check, MapPin, UsersThree } from '@phosphor-icons/react/ssr'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import {
   ANY_SPECIALIST_ID,
   addDayKey,
@@ -12,20 +12,21 @@ import {
   formatPrice,
   getSpecialistLabel,
   getSpecialistsForService,
+  Ticket,
 } from '@/entities/booking'
 import { PersonAvatar, pickTint } from '@/entities/business'
 import { rememberService, trackBookedPick } from '@/features/forYou'
 import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
-import type { Business, Catalog } from '@/shared/api/types'
+import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
-import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
 import { useServicesNextFree } from '@/views/booking/model/useServicesNextFree'
@@ -79,6 +80,11 @@ export const BookingPage = ({
   usePageScrollLock()
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
+  // The contacts fold into a card too, once the number is whole (or «Готово» is pressed), so the
+  // last step closes like the others and «Всё готово» says what is left: one press.
+  const [isContactsDone, setIsContactsDone] = useState(false)
+  const [isBranchOpen, setIsBranchOpen] = useState(false)
+  const foldTimer = useRef<number | undefined>(undefined)
   const specialistLabel = t(getSpecialistLabel(catalog, form.specialistId))
   const recentVisits = useRecentVisits()
   const chosenServiceId = form.serviceId
@@ -152,6 +158,22 @@ export const BookingPage = ({
       ? t('любой мастер')
       : getSpecialistLabel(catalog, quickSpecialistId)
 
+  // One open step under a stack of done ones: the step being changed, else the first unfinished,
+  // and contacts once everything is chosen.
+  const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
+  const contactsReady = form.firstIncompleteStep === null
+  const isContactsFolded = isContactsDone && activeStep === 'contacts' && contactsReady
+  // Away from contacts (a taken time sends the client back to the times), they open again.
+  useEffect(() => {
+    if (activeStep === 'contacts') return
+    window.clearTimeout(foldTimer.current)
+    setIsContactsDone(false)
+  }, [activeStep])
+  useEffect(() => {
+    if (isContactsFolded)
+      document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [isContactsFolded])
+
   if (form.createdBooking) {
     return (
       <>
@@ -191,37 +213,70 @@ export const BookingPage = ({
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // One open step under a stack of done ones: the step being changed, else the first unfinished,
-  // and contacts once everything is chosen.
-  const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
-  const openStep = (step: BookingStepId) => {
+  const openStep = (step: BookingStepId | 'branch') => {
     setIsReviewRequested(false)
+    window.clearTimeout(foldTimer.current)
+    setIsContactsDone(false)
+    if (step === 'branch') {
+      setIsBranchOpen(true)
+      document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    setIsBranchOpen(false)
     form.editStep(step)
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  const foldContacts = () => {
+    if (!contactsReady) return
+    setIsContactsDone(true)
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const chosenBranch = form.branches.find((branch) => branch.id === form.branchId)
   const chosenSpecialist = catalog.specialists.find(
     (specialist) => specialist.id === form.specialistId,
   )
-  const stackCards: StackCardProps[] = []
-  if (form.service && activeStep !== 'service') {
+  const chosenCards: StackCardProps[] = []
+  if (form.branches.length > 1 && chosenBranch) {
+    const distance = form.branchDistances?.[chosenBranch.id]
+    chosenCards.push({
+      id: 'branch',
+      title: t('Филиал'),
+      tone: `color-mix(in srgb, ${pickTint(business.name)} 55%, #1c1c1e)`,
+      media: (
+        <span className={styles.stackPin}>
+          <MapPin weight='fill' />
+        </span>
+      ),
+      primary: chosenBranch.name,
+      secondary: [chosenBranch.address, distance !== undefined ? formatDistance(distance) : null]
+        .filter(Boolean)
+        .join(' · '),
+    })
+  }
+  if (form.service) {
     const picture = servicePhotos?.[form.service.id] ?? business.coverUrl
-    stackCards.push({
+    chosenCards.push({
       id: 'service',
       title: t('Услуга'),
-      tone: 'color-mix(in srgb, var(--place-tint) 26%, #1c1c1e)',
+      tone: `color-mix(in srgb, ${pickTint(business.name)} 26%, #1c1c1e)`,
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
         <img {...sizedImage(picture, 88)} alt='' className={styles.stackThumb} />
       ) : (
-        <span className={styles.stackThumb} data-empty='' />
+        <span
+          className={styles.stackThumb}
+          data-empty=''
+          style={{ background: pickTint(business.name) }}
+        />
       ),
       primary: form.service.name,
       secondary: t.duration(form.service.durationMinutes),
       trailing: formatPrice(form.quote?.total ?? form.service.price),
     })
   }
-  if (form.specialistId && activeStep !== 'specialist') {
-    stackCards.push({
+  if (form.specialistId) {
+    chosenCards.push({
       id: 'specialist',
       title: t('Мастер'),
       tone: chosenSpecialist
@@ -250,8 +305,8 @@ export const BookingPage = ({
         : t('кто свободен'),
     })
   }
-  if (form.time && form.dayKey && form.service && activeStep !== 'datetime') {
-    stackCards.push({
+  if (form.time && form.dayKey && form.service) {
+    chosenCards.push({
       id: 'datetime',
       title: t('Дата и время'),
       tone: 'var(--color-primary)',
@@ -264,6 +319,46 @@ export const BookingPage = ({
       primary: `${form.time}–${addMinutes(form.time, form.service.durationMinutes)}`,
       secondary: t.dayLong(form.dayKey),
     })
+  }
+
+  if (isContactsFolded) {
+    chosenCards.push({
+      id: 'contacts',
+      title: t('Контакты'),
+      tone: 'color-mix(in srgb, #8e8e93 42%, #1c1c1e)',
+      media: <PersonAvatar name={form.name.trim()} size='md' className={styles.stackFace} />,
+      primary: form.name.trim(),
+      secondary: formatPhone(form.accountPhone ?? form.phone),
+    })
+  }
+  const stackCards = chosenCards.filter(
+    (card) =>
+      (card.id !== activeStep || card.id === 'contacts') && !(isBranchOpen && card.id === 'branch'),
+  )
+  // «Ваша запись» is the e-ticket the booking turns into, filled in as far as it goes.
+  const draftTicket: Booking = {
+    id: 'draft',
+    status: 'confirmed',
+    serviceId: form.service?.id ?? '',
+    serviceName: form.service?.name ?? t('Услуга не выбрана'),
+    price: form.quote?.total ?? form.service?.price ?? 0,
+    durationMinutes: form.service?.durationMinutes ?? 0,
+    specialistId: form.specialistId ?? '',
+    specialistName: chosenSpecialist?.name ?? (form.specialistId ? t('Любой мастер') : ''),
+    date: form.time && form.dayKey ? form.dayKey : '',
+    time: form.time ?? '',
+    startsAt: '',
+    customerName: form.name,
+    business: {
+      slug: business.slug,
+      name: business.name,
+      address:
+        form.branches.find((branch) => branch.id === form.branchId)?.address ??
+        business.address ??
+        null,
+      phone: business.phone,
+      mapUrl: business.mapUrl,
+    },
   }
 
   const summaryProps = {
@@ -285,6 +380,72 @@ export const BookingPage = ({
     onStepOpen: openStep,
   }
 
+  // A note, a code and the SMS options: under the contacts while they are typed, and on their
+  // own under «Всё готово» once the contacts have folded into a card.
+  const contactExtras = (
+    <>
+      {/* Optional extras as a second group of the same Settings rows: a note and a
+                        code read like the name and number above, not like loose buttons. */}
+      <div className={styles.group}>
+        {isCommentOpen || form.comment ? (
+          <>
+            <div className={styles.fieldRow} data-action=''>
+              <span className={styles.extraLabel}>{t('Комментарий')}</span>
+              <span />
+              {/* Folds back and forgets the note: an extra is never a trap. */}
+              <button
+                type='button'
+                className={styles.rowAction}
+                onClick={() => {
+                  form.setComment('')
+                  setIsCommentOpen(false)
+                }}
+              >
+                {t('Убрать')}
+              </button>
+            </div>
+            <textarea
+              className={styles.commentArea}
+              aria-label={t('Комментарий')}
+              value={form.comment}
+              onChange={(event) => form.setComment(event.target.value)}
+              placeholder={t('Например, «нужна парковка»')}
+              rows={3}
+              maxLength={500}
+            />
+          </>
+        ) : (
+          <button
+            type='button'
+            className={styles.fieldRow}
+            data-action=''
+            onClick={() => setIsCommentOpen(true)}
+          >
+            <span className={styles.extraLabel}>{t('Комментарий')}</span>
+            <span className={styles.extraValue}>{t('Добавить')}</span>
+            <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
+          </button>
+        )}
+        <PromoCodeField
+          className={styles.fieldRow}
+          code={form.promoCode}
+          error={form.promoCodeError}
+          quote={form.quote}
+          isWaitingForTime={!form.time}
+          onApply={form.applyPromoCode}
+          onClear={form.clearPromoCode}
+        />
+      </div>
+      <NotifyOptions
+        phone={form.accountPhone ?? (form.phone.trim() || null)}
+        smsConfirmation={form.smsConfirmation}
+        onSmsConfirmationChange={form.setSmsConfirmation}
+        reminderMinutes={form.reminderMinutes}
+        onReminderChange={form.setReminderMinutes}
+      />
+    </>
+  )
+
   return (
     <>
       <BookingScrim slug={business.slug} isModal={isModal} />
@@ -298,59 +459,6 @@ export const BookingPage = ({
         <BookingTopBar business={business} isModal={isModal} />
         <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
           <div className={styles.steps}>
-            {form.branches.length > 1 && (
-              <section className={styles.branches} aria-labelledby='booking-branch'>
-                {/* Where to come, said plainly: each branch is a row with its full address and
-                    how far it is, the chosen one checked — two chips with district names left
-                    people unsure where they were going. */}
-                <SectionCaption as='h2' id='booking-branch'>
-                  {t('Куда приедете')}
-                </SectionCaption>
-                <fieldset className={`${styles.group} ${styles.branchList}`}>
-                  <legend className={styles.srOnly}>{t('Филиал')}</legend>
-                  {form.branches.map((branch) => {
-                    const distance = form.branchDistances?.[branch.id]
-                    const isChosen = form.branchId === branch.id
-                    return (
-                      <label key={branch.id} className={styles.branchRow}>
-                        <input
-                          type='radio'
-                          name='booking-branch'
-                          className={styles.branchRadio}
-                          checked={isChosen}
-                          onChange={() => form.selectBranch(branch.id)}
-                        />
-                        <span className={styles.branchText}>
-                          <span className={styles.branchName}>{branch.name}</span>
-                          <span className={styles.branchAddress}>
-                            {branch.address}
-                            {distance !== undefined && ` · ${formatDistance(distance)}`}
-                          </span>
-                        </span>
-                        {isChosen && (
-                          <Check weight='bold' className={styles.branchCheck} aria-hidden />
-                        )}
-                      </label>
-                    )
-                  })}
-                </fieldset>
-                {(() => {
-                  const chosen = form.branches.find((branch) => branch.id === form.branchId)
-                  if (!chosen || chosen.latitude === null || chosen.longitude === null) return null
-                  return (
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${chosen.latitude},${chosen.longitude}`}
-                      target='_blank'
-                      rel='noreferrer'
-                      className={styles.branchRoute}
-                    >
-                      {t('Маршрут до «{name}» ›', { name: chosen.name })}
-                    </a>
-                  )
-                })()}
-              </section>
-            )}
-
             {isQuickShown && quickService && (
               <QuickSlots
                 title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}
@@ -397,9 +505,65 @@ export const BookingPage = ({
               />
             ) : (
               <>
-                <CardStack cards={stackCards} onEdit={(step) => openStep(step as BookingStepId)} />
+                <CardStack
+                  cards={stackCards}
+                  onEdit={(step) => openStep(step as BookingStepId | 'branch')}
+                  onStartOver={form.isStarted ? form.startOver : undefined}
+                />
 
-                {activeStep === 'service' && (
+                {isBranchOpen && (
+                  <BookingStep id='branch' title={t('Куда приедете?')}>
+                    {/* Each branch a row with its full address and how far it is, the chosen
+                        one checked; picking one folds it back into its card. */}
+                    <fieldset className={`${styles.group} ${styles.branchList}`}>
+                      <legend className={styles.srOnly}>{t('Филиал')}</legend>
+                      {form.branches.map((branch) => {
+                        const distance = form.branchDistances?.[branch.id]
+                        const isChosen = form.branchId === branch.id
+                        return (
+                          <label key={branch.id} className={styles.branchRow}>
+                            <input
+                              type='radio'
+                              name='booking-branch'
+                              className={styles.branchRadio}
+                              checked={isChosen}
+                              onChange={() => form.selectBranch(branch.id)}
+                              // Also a tap on the branch already chosen: it folds back into its card.
+                              onClick={() => setIsBranchOpen(false)}
+                            />
+                            <span className={styles.branchText}>
+                              <span className={styles.branchName}>{branch.name}</span>
+                              <span className={styles.branchAddress}>
+                                {branch.address}
+                                {distance !== undefined && ` · ${formatDistance(distance)}`}
+                              </span>
+                            </span>
+                            {isChosen && (
+                              <Check weight='bold' className={styles.branchCheck} aria-hidden />
+                            )}
+                          </label>
+                        )
+                      })}
+                    </fieldset>
+                    {(() => {
+                      const chosen = form.branches.find((branch) => branch.id === form.branchId)
+                      if (!chosen || chosen.latitude === null || chosen.longitude === null)
+                        return null
+                      return (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${chosen.latitude},${chosen.longitude}`}
+                          target='_blank'
+                          rel='noreferrer'
+                          className={styles.branchRoute}
+                        >
+                          {t('Маршрут до «{name}» ›', { name: chosen.name })}
+                        </a>
+                      )
+                    })()}
+                  </BookingStep>
+                )}
+
+                {!isBranchOpen && activeStep === 'service' && (
                   <BookingStep id='service' title={t('Что делаем?')}>
                     <ServicePicker
                       services={form.services}
@@ -414,7 +578,7 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {activeStep === 'specialist' && (
+                {!isBranchOpen && activeStep === 'specialist' && (
                   <BookingStep id='specialist' title={t('К кому записаться?')}>
                     <MasterPicker
                       specialists={form.specialists}
@@ -424,7 +588,7 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {activeStep === 'datetime' && (
+                {!isBranchOpen && activeStep === 'datetime' && (
                   <BookingStep id='datetime' title={t('Когда удобно?')}>
                     <DateTimePicker
                       view='ruler'
@@ -454,7 +618,7 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {activeStep === 'contacts' && (
+                {!isBranchOpen && activeStep === 'contacts' && !isContactsFolded && (
                   <BookingStep id='contacts' title={t('Как вас записать?')}>
                     <div className={styles.fields}>
                       {/* Settings-style rows: the label on the left, the value typed on the right. */}
@@ -478,7 +642,7 @@ export const BookingPage = ({
                                 '#step-contacts input[type="tel"]',
                               )
                               if (phoneInput) phoneInput.focus()
-                              else event.currentTarget.blur()
+                              else foldContacts()
                             }}
                             placeholder={t(
                               form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
@@ -500,10 +664,22 @@ export const BookingPage = ({
                               onKeyDown={(event) => {
                                 if (event.key !== 'Enter') return
                                 event.preventDefault()
-                                event.currentTarget.blur()
+                                foldContacts()
                               }}
                               value={form.phone}
-                              onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
+                              onValueChange={(value) => {
+                                const masked = maskPhoneInput(value)
+                                form.setPhone(masked)
+                                // A whole number (+996 and nine digits) with a name: the card folds,
+                                // like a code field moving on once full.
+                                if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
+                                  window.clearTimeout(foldTimer.current)
+                                  foldTimer.current = window.setTimeout(
+                                    () => setIsContactsDone(true),
+                                    450,
+                                  )
+                                }
+                              }}
                               placeholder='+996 555 123 456'
                             />
                           </Field>
@@ -519,76 +695,22 @@ export const BookingPage = ({
                           {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
                         </button>
                       )}
-                      {/* Optional extras as a second group of the same Settings rows: a note and a
-                        code read like the name and number above, not like loose buttons. */}
-                      <div className={styles.group}>
-                        {isCommentOpen || form.comment ? (
-                          <>
-                            <div className={styles.fieldRow} data-action=''>
-                              <span className={styles.extraLabel}>{t('Комментарий')}</span>
-                              <span />
-                              {/* Folds back and forgets the note: an extra is never a trap. */}
-                              <button
-                                type='button'
-                                className={styles.rowAction}
-                                onClick={() => {
-                                  form.setComment('')
-                                  setIsCommentOpen(false)
-                                }}
-                              >
-                                {t('Убрать')}
-                              </button>
-                            </div>
-                            <textarea
-                              className={styles.commentArea}
-                              aria-label={t('Комментарий')}
-                              value={form.comment}
-                              onChange={(event) => form.setComment(event.target.value)}
-                              placeholder={t('Например, «нужна парковка»')}
-                              rows={3}
-                              maxLength={500}
-                            />
-                          </>
-                        ) : (
-                          <button
-                            type='button'
-                            className={styles.fieldRow}
-                            data-action=''
-                            onClick={() => setIsCommentOpen(true)}
-                          >
-                            <span className={styles.extraLabel}>{t('Комментарий')}</span>
-                            <span className={styles.extraValue}>{t('Добавить')}</span>
-                            <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
-                          </button>
-                        )}
-                        <PromoCodeField
-                          className={styles.fieldRow}
-                          code={form.promoCode}
-                          error={form.promoCodeError}
-                          quote={form.quote}
-                          isWaitingForTime={!form.time}
-                          onApply={form.applyPromoCode}
-                          onClear={form.clearPromoCode}
-                        />
-                      </div>
                     </div>
-                    <NotifyOptions
-                      phone={form.accountPhone ?? (form.phone.trim() || null)}
-                      smsConfirmation={form.smsConfirmation}
-                      onSmsConfirmationChange={form.setSmsConfirmation}
-                      reminderMinutes={form.reminderMinutes}
-                      onReminderChange={form.setReminderMinutes}
-                    />
+                    {contactExtras}
+                  </BookingStep>
+                )}
+
+                {!isBranchOpen && isContactsFolded && (
+                  <BookingStep id='ready' title={t('Всё готово')}>
+                    <p className={styles.readyNote}>
+                      {t(
+                        'Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы изменить.',
+                      )}
+                    </p>
+                    {contactExtras}
                   </BookingStep>
                 )}
               </>
-            )}
-
-            {form.isStarted && !isReviewing && (
-              // A way out of a half-made booking without closing the sheet.
-              <Button variant='link' className={styles.startOver} onClick={form.startOver}>
-                {t('Начать заново')}
-              </Button>
             )}
 
             {/* Under the form and set well apart from it (a wide gap), so it reads as something to
@@ -611,7 +733,11 @@ export const BookingPage = ({
         </Container>
 
         <div className={styles.bar}>
-          <BookingSummary variant='bar' {...summaryProps} />
+          <BookingSummary
+            variant='bar'
+            {...summaryProps}
+            ticket={<Ticket booking={draftTicket} isDraft />}
+          />
         </div>
       </main>
     </>

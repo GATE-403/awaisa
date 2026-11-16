@@ -13,21 +13,34 @@ interface TicketProps {
   onOpen?: () => void
   /** A control in the top-right corner instead of the «Электронный талон» label. */
   headerAction?: ReactNode
+  /** Not booked yet (the form's «Ваша запись»): no number or barcode, «—» for what is still to
+      choose. */
+  isDraft?: boolean
 }
 
 const getBookingCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
-export const Ticket = ({ booking, footer, onCodeClick, onOpen, headerAction }: TicketProps) => {
-  const { day, month, weekday } = getDateParts(booking.date)
-  const code = getBookingCode(booking.id)
+export const Ticket = ({
+  booking,
+  footer,
+  onCodeClick,
+  onOpen,
+  headerAction,
+  isDraft = false,
+}: TicketProps) => {
+  const { day, month, weekday } = booking.date
+    ? getDateParts(booking.date)
+    : { day: '—', month: '', weekday: 'Дата не выбрана' }
+  const code = isDraft ? '—' : getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
 
   return (
     <article
       className={styles.wrap}
       data-status={booking.status}
+      data-draft={isDraft || undefined}
       data-interactive={onOpen ? '' : undefined}
-      aria-label={`Запись ${code}`}
+      aria-label={isDraft ? 'Ваша запись' : `Запись ${code}`}
     >
       <div className={styles.ticket}>
         {onOpen && (
@@ -48,7 +61,7 @@ export const Ticket = ({ booking, footer, onCodeClick, onOpen, headerAction }: T
             ) : headerAction ? (
               <span className={styles.headerAction}>{headerAction}</span>
             ) : (
-              <span className={styles.kind}>Электронный талон</span>
+              <span className={styles.kind}>{isDraft ? 'Черновик' : 'Электронный талон'}</span>
             )}
           </header>
 
@@ -59,7 +72,7 @@ export const Ticket = ({ booking, footer, onCodeClick, onOpen, headerAction }: T
             </div>
             <div className={styles.details}>
               <p className={styles.weekday}>{weekday}</p>
-              <p className={styles.time}>{booking.time}</p>
+              <p className={styles.time}>{booking.time || '—'}</p>
               <p className={styles.service}>{booking.serviceName}</p>
               <p className={styles.meta}>
                 {[booking.specialistName, booking.business.address].filter(Boolean).join(' · ')}
@@ -85,7 +98,7 @@ export const Ticket = ({ booking, footer, onCodeClick, onOpen, headerAction }: T
               {formatAmount(booking.price)} <small>{CURRENCY}</small>
             </span>
           </div>
-          <Barcode value={booking.id} />
+          {!isDraft && <Barcode value={booking.id} />}
         </div>
       </div>
       {footer && <div className={styles.footer}>{footer}</div>}
