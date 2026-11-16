@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
@@ -45,7 +45,7 @@ const SlotsSkeleton = () => (
 
 // The ruler while the day loads: the big time, the dial's ticks and the button, in place —
 // so the step keeps its shape instead of showing a grid of capsules that is not coming.
-const RULER_TICKS = [12, 40, 40, 12, 40, 40, 40, 12, 40, 40, 12, 12, 40]
+const RULER_TICKS = [18, 60, 60, 18, 60, 60, 60, 18, 60, 60, 18, 18, 60]
 
 const RulerSkeleton = () => (
   <div className={styles.rulerSkeleton} aria-hidden>
@@ -77,6 +77,18 @@ export const DateTimePicker = ({
   durationMinutes = 0,
 }: DateTimePickerProps) => {
   const t = useT()
+  // Another day loading keeps the day before on the ruler (dimmed) until it arrives: swapping
+  // the dial for a skeleton and back made the whole step jump.
+  const [lastSlots, setLastSlots] = useState<TimeSlot[]>([])
+  useEffect(() => {
+    if (!isLoading && !error) setLastSlots(slots)
+  }, [slots, isLoading, error])
+  const rulerSlots = isLoading ? lastSlots : slots
+  const isRulerShown =
+    view === 'ruler' &&
+    isSpecialistSelected &&
+    !error &&
+    rulerSlots.some((slot) => slot.isAvailable)
   const availableCount = slots.filter((slot) => slot.isAvailable).length
   // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
@@ -87,43 +99,48 @@ export const DateTimePicker = ({
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
+  const dayRow = (
+    <ToggleGroup
+      aria-label={t('День')}
+      layout='scroll'
+      className={styles.days}
+      data-edge-fade=''
+      value={dayKey ? [dayKey] : []}
+      onValueChange={(values) => toSingleValue(values, onDayChange)}
+    >
+      {days.map((day) => (
+        <Toggle
+          key={day.key}
+          value={day.key}
+          size='card'
+          aria-label={
+            day.isClosed
+              ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
+              : isRussian
+                ? day.label
+                : t.dayLong(day.key)
+          }
+          disabled={day.isClosed}
+          data-today={day.isToday || undefined}
+        >
+          <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
+            {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
+          </span>
+          <span className={styles.dayNumber}>{day.dayOfMonth}</span>
+          <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
+        </Toggle>
+      ))}
+    </ToggleGroup>
+  )
+
   return (
     <div className={styles.picker} data-view={view}>
-      <ToggleGroup
-        aria-label={t('День')}
-        layout='scroll'
-        className={styles.days}
-        data-edge-fade=''
-        value={dayKey ? [dayKey] : []}
-        onValueChange={(values) => toSingleValue(values, onDayChange)}
-      >
-        {days.map((day) => (
-          <Toggle
-            key={day.key}
-            value={day.key}
-            size='card'
-            aria-label={
-              day.isClosed
-                ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
-                : isRussian
-                  ? day.label
-                  : t.dayLong(day.key)
-            }
-            disabled={day.isClosed}
-            data-today={day.isToday || undefined}
-          >
-            <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
-              {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
-            </span>
-            <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-            <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
-          </Toggle>
-        ))}
-      </ToggleGroup>
+      {view === 'grid' && dayRow}
 
       {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
       {isSpecialistSelected &&
         isLoading &&
+        !isRulerShown &&
         (view === 'ruler' ? <RulerSkeleton /> : <SlotsSkeleton />)}
       {isSpecialistSelected && error && (
         <div className={styles.hint}>
@@ -141,14 +158,18 @@ export const DateTimePicker = ({
           {fullDayAction}
         </div>
       )}
-      {view === 'ruler' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
+      {isRulerShown && (
         <TimeRuler
-          slots={slots}
+          slots={rulerSlots}
+          isPending={isLoading}
           time={time}
           durationMinutes={durationMinutes}
           onPick={onTimeChange}
+          days={dayRow}
         />
       )}
+      {/* Without a dial (loading, a full day, an error) the days still sit under it. */}
+      {view === 'ruler' && !isRulerShown && dayRow}
       {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
