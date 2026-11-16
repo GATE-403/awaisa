@@ -108,7 +108,7 @@
   width: 10px;
   height: 18px;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
   transition:
     height var(--duration-fast) var(--ease-spring),
     background var(--duration-fast) var(--ease-standard);
@@ -116,7 +116,7 @@
 
 .tick[data-free] .bar {
   height: 60px;
-  background: var(--place-tint, var(--color-primary));
+  background: color-mix(in srgb, var(--color-foreground) 55%, transparent);
 }
 
 .tick[aria-pressed="true"] .bar {
@@ -163,12 +163,12 @@
   width: 6px;
   height: 6px;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
 }
 
 .swatch[data-free] {
   height: 14px;
-  background: var(--place-tint, var(--color-primary));
+  background: color-mix(in srgb, var(--color-foreground) 55%, transparent);
 }
 
 .pick {

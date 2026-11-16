@@ -486,12 +486,12 @@ label:has([data-checked]) .serviceNote {
   bottom: 0;
   left: 0;
   z-index: 39;
-  height: calc(var(--space-20) + var(--space-4) + env(safe-area-inset-bottom));
+  height: calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-background) 0%, transparent),
-    color-mix(in srgb, var(--color-background) 88%, transparent) 55%,
-    var(--color-background)
+    color-mix(in srgb, var(--color-background) 80%, transparent) 35%,
+    var(--color-background) 60%
   );
   pointer-events: none;
 }
