@@ -82,6 +82,8 @@ import type {
   SubscriptionPlanInput,
   TeamMember,
   TelegramLink,
+  TelegramLoginConfig,
+  TelegramLoginState,
   TelegramStatus,
   TestPaymentResult,
   UnclosedDays,
@@ -252,6 +254,14 @@ const requestOtp = (phone: string, channel: 'auto' | 'sms' = 'auto') =>
   post<OtpRequest>('/auth/otp', { phone, channel })
 
 const verifyOtp = (phone: string, code: string) => post<Customer>('/auth/verify', { phone, code })
+
+const getTelegramLoginConfig = (signal?: AbortSignal) =>
+  request<TelegramLoginConfig>('/auth/telegram', { signal })
+
+const startTelegramLogin = (token: string) => post<void>('/auth/telegram', { token })
+
+const checkTelegramLogin = (token: string) =>
+  post<TelegramLoginState>('/auth/telegram/check', { token })
 
 const logout = () => post<void>('/auth/logout')
 
@@ -861,6 +871,9 @@ export {
   uploadSpecialistPhoto,
   logout,
   requestOtp,
+  startTelegramLogin,
+  checkTelegramLogin,
+  getTelegramLoginConfig,
   updateMe,
   verifyOtp,
 }
