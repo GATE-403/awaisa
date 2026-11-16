@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { conflict, mockCreateBooking, succeed } from './fixtures'
 import {
   bookingSteps,
+  editStep,
   findSmallTapTargets,
   getHorizontalOverflow,
   isInViewport,
@@ -57,7 +58,9 @@ test.describe('UX: guidance and feedback', () => {
 
   test('no validation errors before the first submit attempt', async ({ page }) => {
     await page.goto('/awaisa-studio/book?service=styling')
-    const { contacts } = bookingSteps(page)
+    const { contacts, specialist } = bookingSteps(page)
+    await specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    await pickFirstFreeSlot(page)
 
     await contacts.getByLabel('Имя').fill('А')
     await contacts.getByLabel('Имя').fill('')
@@ -104,8 +107,10 @@ test.describe('UX: guidance and feedback', () => {
     ).toBeVisible()
     await expect(steps.datetime).toBeInViewport()
     await expect(steps.datetime.getByRole('button', { name: time, pressed: true })).toHaveCount(0)
-    await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')
     await expect(primaryAction(page)).toHaveText('Выбрать время')
+    // Contacts wait under the time: a new time brings them back as typed.
+    await pickFirstFreeSlot(page)
+    await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')
   })
 
   test("a failed request for the services' free times is tried again", async ({ page }) => {
@@ -157,7 +162,7 @@ test.describe('UX: guidance and feedback', () => {
 
     await expect(steps.service.getByRole('radio')).toHaveCount(0)
     await expect(steps.service).toContainText('Маникюр с покрытием')
-    await steps.service.getByRole('button', { name: 'Изменить' }).click()
+    await editStep(page, 'service')
     await expect(steps.service.getByRole('radio', { name: /Маникюр/ })).toBeChecked()
   })
 
@@ -169,7 +174,7 @@ test.describe('UX: guidance and feedback', () => {
     await steps.specialist.getByRole('radio', { name: /Айгерим/ }).click()
     await pickFirstFreeSlot(page)
 
-    await steps.service.getByRole('button', { name: 'Изменить' }).click()
+    await editStep(page, 'service')
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
 
     await expect(steps.specialist).toContainText('Айгерим Садыкова')

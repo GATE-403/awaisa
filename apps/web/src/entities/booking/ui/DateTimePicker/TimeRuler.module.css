@@ -1,0 +1,182 @@
+.ruler {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* The time under the needle, large — the one thing this step asks for. */
+.readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.time {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-display);
+  line-height: 1;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.time[data-taken] {
+  color: var(--color-tertiary-foreground);
+}
+
+.status {
+  min-height: 1lh;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.frame {
+  position: relative;
+  margin: 0 calc(-1 * var(--space-4));
+}
+
+.track {
+  display: flex;
+  min-width: 0;
+  margin: 0;
+  border: none;
+  align-items: flex-end;
+  height: 88px;
+  /* The first and last ticks can reach the needle in the middle. */
+  padding-inline: calc(50% - 22px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.tick {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 44px;
+  height: 100%;
+  padding: 0 0 var(--space-2);
+  border: none;
+  background: none;
+  color: inherit;
+  scroll-snap-align: center;
+  cursor: pointer;
+}
+
+.tick:disabled {
+  cursor: default;
+}
+
+.tick:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Every time is in the button for screen readers; only the hours show. */
+.label {
+  position: absolute;
+  top: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.tick:not([data-hour]) .label {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.bar {
+  width: 4px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  transition:
+    height var(--duration-fast) var(--ease-spring),
+    background var(--duration-fast) var(--ease-standard);
+}
+
+.tick[data-free] .bar {
+  height: 40px;
+  background: var(--place-tint, var(--color-primary));
+}
+
+.tick[aria-pressed="true"] .bar {
+  width: 6px;
+  background: var(--color-foreground);
+}
+
+@media (hover: hover) {
+  .tick[data-free]:hover .bar {
+    height: 46px;
+  }
+}
+
+.needle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 3px;
+  height: 56px;
+  margin-left: -1.5px;
+  border-radius: var(--radius-full);
+  background: var(--color-foreground);
+  pointer-events: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Little bars, shaped like the ruler's own: tall for free, low for taken. */
+.swatch {
+  width: 4px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+}
+
+.swatch[data-free] {
+  height: 14px;
+  background: var(--place-tint, var(--color-primary));
+}
+
+.pick {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar,
+  .time {
+    transition: none;
+  }
+}

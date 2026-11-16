@@ -1,6 +1,6 @@
 import { unstable_rethrow } from 'next/navigation'
 import { Suspense } from 'react'
-import { findBusiness } from '@/shared/api/serverApi'
+import { findBusiness, listServicePhotos } from '@/shared/api/serverApi'
 import { BookingPage, BookingUnavailable } from '@/views/booking'
 
 const BookingOverPage = async ({ slug }: { slug: string }) => {
@@ -8,14 +8,22 @@ const BookingOverPage = async ({ slug }: { slug: string }) => {
   // with «Не нашли» and leave the slot stuck: a small sheet says so and closes back. Next's own
   // signals (prerender aborts, postpones) are not failures and go through untouched.
   let data: Awaited<ReturnType<typeof findBusiness>> = null
+  let servicePhotos: Record<string, string> = {}
   try {
-    data = await findBusiness(slug)
+    ;[data, servicePhotos] = await Promise.all([findBusiness(slug), listServicePhotos(slug)])
   } catch (error) {
     unstable_rethrow(error)
   }
   if (!data) return <BookingUnavailable />
 
-  return <BookingPage business={data.business} catalog={data.catalog} isModal />
+  return (
+    <BookingPage
+      business={data.business}
+      catalog={data.catalog}
+      servicePhotos={servicePhotos}
+      isModal
+    />
+  )
 }
 
 // «Записаться» tapped on a page opens the booking over that page (an intercepted route): the page
