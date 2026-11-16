@@ -1,10 +1,10 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
+import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { OtpField } from '@awaisa/ui/OtpField'
-import { CaretLeft, X } from '@phosphor-icons/react/ssr'
+import { CaretLeft, TelegramLogo, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { FormEvent } from 'react'
 import { PersonAvatar } from '@/entities/business'
@@ -12,6 +12,7 @@ import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { CODE_LENGTH, useLoginForm } from '@/views/auth/model/useLoginForm'
+import { useTelegramLogin } from '@/views/auth/model/useTelegramLogin'
 import styles from './LoginPage.module.css'
 
 const handleSubmit = (action: () => void) => (event: FormEvent) => {
@@ -23,16 +24,18 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
 // page colour, one question at a time (number → code → name), like the system's own sign-in.
 export const LoginPage = () => {
   const form = useLoginForm()
+  const telegram = useTelegramLogin(form.finishSignIn)
+  const isWaitingForTelegram = form.step === 'phone' && telegram.isWaiting
 
   return (
     <main className={styles.page}>
       <div className={styles.topBar}>
-        {form.step === 'code' ? (
+        {form.step === 'code' || isWaitingForTelegram ? (
           <button
             type='button'
             className={styles.corner}
-            onClick={form.editPhone}
-            aria-label='Изменить номер'
+            onClick={isWaitingForTelegram ? telegram.cancel : form.editPhone}
+            aria-label={isWaitingForTelegram ? 'Назад' : 'Изменить номер'}
           >
             <CaretLeft weight='bold' aria-hidden />
           </button>
@@ -44,7 +47,32 @@ export const LoginPage = () => {
       </div>
 
       <section className={styles.column} aria-live='polite'>
-        {form.step === 'phone' && (
+        {isWaitingForTelegram && (
+          <div className={styles.form}>
+            <TelegramLogo weight='fill' className={styles.telegramMark} aria-hidden />
+            <h1 className={styles.title}>Подтвердите в Telegram</h1>
+            <p className={styles.lead}>
+              Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда
+            </p>
+            <p className={styles.note}>Ждём ваш номер…</p>
+            <div className={styles.links}>
+              <ButtonLink
+                href={telegram.href}
+                target='_blank'
+                rel='noreferrer'
+                variant='link'
+                size='sm'
+              >
+                Открыть Telegram снова
+              </ButtonLink>
+              <Button variant='link' size='sm' onClick={telegram.cancel}>
+                Войти по SMS
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {form.step === 'phone' && !isWaitingForTelegram && (
           <form className={styles.form} onSubmit={handleSubmit(() => form.sendCode())}>
             <Mascot className={styles.mascot} />
             <h1 className={styles.title}>Вход</h1>
@@ -63,7 +91,28 @@ export const LoginPage = () => {
             <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
               {form.isSubmitting ? 'Отправляем…' : 'Получить код'}
             </Button>
-            <p className={styles.note}>Код придёт в Telegram или по SMS</p>
+            {telegram.isAvailable && (
+              // Without typing the number: the bot asks for it with one button.
+              <ButtonLink
+                href={telegram.href}
+                target='_blank'
+                rel='noreferrer'
+                variant='secondary'
+                size='lg'
+                fullWidth
+                onClick={telegram.start}
+              >
+                <TelegramLogo weight='fill' aria-hidden />
+                Войти через Telegram
+              </ButtonLink>
+            )}
+            {telegram.isExpired ? (
+              <p className={styles.error} role='alert'>
+                Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз
+              </p>
+            ) : (
+              <p className={styles.note}>Код придёт в Telegram или по SMS</p>
+            )}
           </form>
         )}
 
