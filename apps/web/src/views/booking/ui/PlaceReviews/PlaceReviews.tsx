@@ -2,11 +2,12 @@
 
 import { Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
-import { ReviewItem } from '@/entities/review'
+import { PersonAvatar } from '@/entities/business'
+import { Stars } from '@/entities/review'
 import { listPlaceReviews } from '@/shared/api/clientApi'
 import type { ReviewSummary, Service } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { Sheet } from '@/shared/ui/Sheet/Sheet'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import styles from './PlaceReviews.module.css'
 
 interface PlaceReviewsProps {
@@ -16,13 +17,21 @@ interface PlaceReviewsProps {
   service: Service | null
 }
 
+const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: BUSINESS_TIME_ZONE,
+})
+
 type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 
-// While choosing, what people said decides it: three reviews of this very service under the form.
+// While choosing, what people said decides it: reviews of this very service under the form, as a
+// sideways row of short cards (like an app store's) — the page never grows long and nothing opens
+// over the booking; a tap on a card shows its whole text in place.
 export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps) => {
   const t = useT()
   const [loaded, setLoaded] = useState<Loaded | null>(null)
-  const [isAllOpen, setIsAllOpen] = useState(false)
+  const [openId, setOpenId] = useState<string | null>(null)
   const serviceId = service?.id
   const key = `${slug}|${serviceId ?? ''}`
 
@@ -51,13 +60,6 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
           {t('Отзывы')}
           {isForService && service && <span className={styles.about}> · {service.name}</span>}
         </h2>
-        {/* Read here, over the form: a link to the place's page took people out of their
-            booking, and they could not find their way back to it. */}
-        {summary.items.length > 3 && (
-          <button type='button' className={styles.all} onClick={() => setIsAllOpen(true)}>
-            {t('Все ›')}
-          </button>
-        )}
       </div>
       <p className={styles.score}>
         <Star weight='fill' aria-hidden className={styles.star} />
@@ -65,24 +67,46 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         {' · '}
         {t.count(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
       </p>
-      <ul className={styles.list}>
-        {summary.items.slice(0, 3).map((review) => (
-          <ReviewItem key={review.id} review={review} businessName={businessName} />
-        ))}
+      <ul className={styles.row} data-edge-fade=''>
+        {/* The ones with words first: a row opening on bare stars says little. */}
+        {[...summary.items]
+          .sort((first, second) => Number(Boolean(second.comment)) - Number(Boolean(first.comment)))
+          .map((review) => {
+            const isOpen = openId === review.id
+            return (
+              <li key={review.id} className={styles.card} data-open={isOpen || undefined}>
+                <div className={styles.cardHead}>
+                  <PersonAvatar
+                    name={review.authorName}
+                    src={review.authorAvatarUrl ?? undefined}
+                    size='sm'
+                  />
+                  <span className={styles.author}>{review.authorName}</span>
+                  <span className={styles.date}>
+                    {dateFormatter.format(new Date(review.createdAt))}
+                  </span>
+                </div>
+                <Stars rating={review.rating} />
+                {review.comment && <p className={styles.text}>{review.comment}</p>}
+                {review.reply && (
+                  <p className={styles.reply}>
+                    <strong>{businessName}:</strong> {review.reply}
+                  </p>
+                )}
+                {(review.comment.length > 110 || Boolean(review.reply)) && (
+                  <button
+                    type='button'
+                    className={styles.more}
+                    aria-expanded={isOpen}
+                    onClick={() => setOpenId(isOpen ? null : review.id)}
+                  >
+                    {isOpen ? t('Свернуть') : t('Читать целиком')}
+                  </button>
+                )}
+              </li>
+            )
+          })}
       </ul>
-      {isAllOpen && (
-        <Sheet
-          title={isForService && service ? service.name : t('Отзывы')}
-          cancelLabel={t('Готово')}
-          onClose={() => setIsAllOpen(false)}
-        >
-          <ul className={styles.list}>
-            {summary.items.map((review) => (
-              <ReviewItem key={review.id} review={review} businessName={businessName} />
-            ))}
-          </ul>
-        </Sheet>
-      )}
     </section>
   )
 }
