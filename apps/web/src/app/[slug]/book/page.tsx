@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { getBusiness } from '@/shared/api/serverApi'
-import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { BookingPage } from '@/views/booking'
+import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
+import { BookingPage, BookingSkeleton } from '@/views/booking'
 
 export const generateMetadata = async ({
   params,
@@ -13,13 +12,16 @@ export const generateMetadata = async ({
 }
 
 const BookingWithBusiness = async ({ slug }: { slug: string }) => {
-  const { business, catalog } = await getBusiness(slug)
+  const [{ business, catalog }, servicePhotos] = await Promise.all([
+    getBusiness(slug),
+    listServicePhotos(slug),
+  ])
 
-  return <BookingPage business={business} catalog={catalog} />
+  return <BookingPage business={business} catalog={catalog} servicePhotos={servicePhotos} />
 }
 
 const BookRoute = ({ params }: PageProps<'/[slug]/book'>) => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<BookingSkeleton />}>
     {params.then(({ slug }) => (
       <BookingWithBusiness slug={slug} />
     ))}

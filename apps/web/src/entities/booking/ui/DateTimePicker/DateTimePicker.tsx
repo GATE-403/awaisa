@@ -8,6 +8,7 @@ import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
 import styles from './DateTimePicker.module.css'
+import { TimeRuler } from './TimeRuler'
 
 interface DateTimePickerProps {
   days: BookingDay[]
@@ -22,6 +23,10 @@ interface DateTimePickerProps {
   onTimeChange: (time: string) => void
   /** Offered on a full day, e.g. «Сообщить, когда освободится» (views pass features in). */
   fullDayAction?: ReactNode
+  /** `ruler`: the whole day as a dial of free and taken times (the booking form); `grid`: free times as capsules. */
+  view?: 'grid' | 'ruler'
+  /** The visit's length, shown by the ruler as «до 14:45». */
+  durationMinutes?: number
 }
 
 const toSingleValue = (values: string[], onChange: (value: string) => void) => {
@@ -38,6 +43,24 @@ const SlotsSkeleton = () => (
   </div>
 )
 
+// The ruler while the day loads: the big time, the dial's ticks and the button, in place —
+// so the step keeps its shape instead of showing a grid of capsules that is not coming.
+const RULER_TICKS = [12, 40, 40, 12, 40, 40, 40, 12, 40, 40, 12, 12, 40]
+
+const RulerSkeleton = () => (
+  <div className={styles.rulerSkeleton} aria-hidden>
+    <Skeleton className={styles.rulerTime} />
+    <Skeleton className={styles.rulerStatus} />
+    <div className={styles.rulerTicks}>
+      {RULER_TICKS.map((height, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static placeholders never reorder
+        <Skeleton key={index} className={styles.rulerTick} style={{ height }} />
+      ))}
+    </div>
+    <Skeleton className={styles.rulerButton} />
+  </div>
+)
+
 export const DateTimePicker = ({
   days,
   dayKey,
@@ -50,6 +73,8 @@ export const DateTimePicker = ({
   onDayChange,
   onTimeChange,
   fullDayAction,
+  view = 'grid',
+  durationMinutes = 0,
 }: DateTimePickerProps) => {
   const t = useT()
   const availableCount = slots.filter((slot) => slot.isAvailable).length
@@ -63,7 +88,7 @@ export const DateTimePicker = ({
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
   return (
-    <div className={styles.picker}>
+    <div className={styles.picker} data-view={view}>
       <ToggleGroup
         aria-label={t('День')}
         layout='scroll'
@@ -97,7 +122,9 @@ export const DateTimePicker = ({
       </ToggleGroup>
 
       {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
-      {isSpecialistSelected && isLoading && <SlotsSkeleton />}
+      {isSpecialistSelected &&
+        isLoading &&
+        (view === 'ruler' ? <RulerSkeleton /> : <SlotsSkeleton />)}
       {isSpecialistSelected && error && (
         <div className={styles.hint}>
           <p>{error}</p>
@@ -114,7 +141,15 @@ export const DateTimePicker = ({
           {fullDayAction}
         </div>
       )}
-      {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
+      {view === 'ruler' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
+        <TimeRuler
+          slots={slots}
+          time={time}
+          durationMinutes={durationMinutes}
+          onPick={onTimeChange}
+        />
+      )}
+      {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
         <p className={styles.caption} aria-hidden>
@@ -124,7 +159,7 @@ export const DateTimePicker = ({
           </span>
         </p>
       )}
-      {isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
+      {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup
           aria-label={t('Время')}
           layout='grid'
