@@ -62,6 +62,7 @@ export const OfferCard = ({
     >
       <div
         className={styles.media}
+        data-picture-frame={offer.coverUrl ? '' : undefined}
         style={{ '--tint': pickTint(offer.businessName) } as CSSProperties}
       >
         {offer.coverUrl ? (
