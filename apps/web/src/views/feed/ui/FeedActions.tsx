@@ -97,10 +97,12 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
       </Menu>
       <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
         {service ? 'Записаться' : 'Выбрать услугу'}
-        {service && slot && (
+        {/* The second line is always there (its time arrives a moment later), so the button never
+            jumps from one line to two when a card comes in. */}
+        {service && (
           <span className={styles.slot}>
             <span className={styles.visuallyHidden}> · </span>
-            {slot.dayLabel} {slot.time}
+            {slot ? `${slot.dayLabel} ${slot.time}` : '\u00a0'}
           </span>
         )}
       </ButtonLink>
