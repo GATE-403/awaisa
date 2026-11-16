@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { getProfileOnServer } from '@/shared/api/sessionApi'
-import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { ProfilePage } from '@/views/publicProfile'
+import { ProfilePage, ProfileSkeleton } from '@/views/publicProfile'
 
 export const generateMetadata = async ({ params }: PageProps<'/u/[id]'>): Promise<Metadata> => {
   const profile = await getProfileOnServer((await params).id)
@@ -24,7 +23,7 @@ const ProfileWithData = async ({ id }: { id: string }) => {
 }
 
 const ProfileRoute = ({ params }: PageProps<'/u/[id]'>) => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<ProfileSkeleton />}>
     {params.then(({ id }) => (
       <ProfileWithData id={id} />
     ))}

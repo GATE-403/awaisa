@@ -287,11 +287,15 @@
   }
 }
 
-/* A blank card holding the shelf's place while the picks load. */
-.card[data-placeholder] {
-  display: block;
+/* A pick still on its way: the card's frame without its gradient or text. */
+.placeholderCard {
+  width: 144px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
 }
 
-.card[data-placeholder]::after {
-  content: none;
+@media (min-width: 768px) {
+  .placeholderCard {
+    width: 172px;
+  }
 }

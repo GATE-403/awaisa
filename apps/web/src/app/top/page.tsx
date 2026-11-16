@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { listLeaderboard, listPlacesLeaderboard } from '@/shared/api/serverApi'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
-import { LeaderboardPage } from '@/views/leaderboard'
+import { LeaderboardPage, LeaderboardSkeleton } from '@/views/leaderboard'
 
 export const metadata: Metadata = {
   title: 'Рейтинг мастеров и мест',
@@ -29,7 +28,7 @@ const LeaderboardWithData = async ({
 }
 
 const TopRoute = ({ searchParams }: PageProps<'/top'>) => (
-  <Suspense fallback={<PageSkeleton />}>
+  <Suspense fallback={<LeaderboardSkeleton />}>
     {searchParams.then((query) => (
       <LeaderboardWithData kindParam={query.kind} viewParam={query.view} />
     ))}
