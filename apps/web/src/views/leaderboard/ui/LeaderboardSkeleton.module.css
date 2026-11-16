@@ -1,0 +1,28 @@
+/* «Мастера · Места»: the segmented control's 46pt capsule. */
+.switch {
+  width: min(100%, 320px);
+  height: 46px;
+  border-radius: var(--radius-full);
+}
+
+.kinds {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  overflow: hidden;
+}
+
+.face {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+}
+
+/* The trail «Каталог › Рейтинг»: one footnote line with 44pt targets. */
+.crumbs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: var(--control-height-md);
+  font-size: var(--text-footnote);
+}

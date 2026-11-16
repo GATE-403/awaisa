@@ -1,2 +1,3 @@
 // Public API of the slice: other layers import only from here (Feature-Sliced Design).
 export * from './BusinessBar'
+export { BusinessBarSkeleton } from './BusinessBarSkeleton'
