@@ -8,6 +8,7 @@ import { getClientLoyalty } from '@/shared/api/clientApi'
 import type { AdminBooking, ClientLoyalty, OutcomeInput, PaymentMethod } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './BookingDetailsDialog.module.css'
@@ -81,7 +82,7 @@ export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSec
 
   return (
     <section className={sheet.group} aria-label='Итог визита'>
-      <h3 className={sheet.groupTitle}>Итог визита</h3>
+      <SectionCaption>Итог визита</SectionCaption>
       {/* The control stands on its own, like a macOS segmented control in a form. */}
       <div className={styles.outcomeRow}>
         <SegmentedControl

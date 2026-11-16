@@ -7,6 +7,7 @@ import { updateBusiness } from '@/shared/api/clientApi'
 import type { Business, BusinessKind, Catalog, UpdateBusinessInput } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { PhotosSection } from '@/views/manage/ui/PhotosSection/PhotosSection'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -71,7 +72,7 @@ export const ProfileTab = ({ slug, business, catalog, run }: ProfileTabProps) =>
       <PhotosSection slug={slug} business={business} catalog={catalog} run={run} />
 
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>О бизнесе</h3>
+        <SectionCaption>О бизнесе</SectionCaption>
         <div className={styles.list}>
           {ABOUT.map(renderField)}
           <div className={styles.fieldRow}>
@@ -88,12 +89,12 @@ export const ProfileTab = ({ slug, business, catalog, run }: ProfileTabProps) =>
       </div>
 
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>Контакты</h3>
+        <SectionCaption>Контакты</SectionCaption>
         <div className={styles.list}>{CONTACTS.map(renderField)}</div>
       </div>
 
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>Публикация</h3>
+        <SectionCaption>Публикация</SectionCaption>
         <div className={styles.list}>
           <label className={styles.settingRow}>
             <span className={styles.rowBody}>

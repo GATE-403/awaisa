@@ -10,6 +10,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { importBookings, importClients } from '@/shared/api/clientApi'
 import type { ImportReport } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -180,7 +181,7 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
 
         {headers && !result && (
           <section className={sheet.group} aria-label='Колонки'>
-            <h3 className={sheet.groupTitle}>Колонки</h3>
+            <SectionCaption>Колонки</SectionCaption>
             <div className={sheet.list}>
               {fields.map((field) => (
                 <div key={field.key} className={sheet.row}>
@@ -228,10 +229,10 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
 
         {result && (
           <section className={sheet.group} aria-label='Итог импорта'>
-            <h3 className={sheet.groupTitle}>
+            <SectionCaption>
               Загружено {result.imported}
               {result.skippedCount > 0 && ` · пропущено ${result.skippedCount}`}
-            </h3>
+            </SectionCaption>
             {result.skipped.length > 0 && (
               <div className={sheet.list}>
                 {result.skipped.map((item) => (

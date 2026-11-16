@@ -514,15 +514,6 @@
   margin-top: var(--space-4);
 }
 
-.groupTitle {
-  padding: 0 var(--space-4);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: var(--tracking-caption);
-  text-transform: uppercase;
-}
-
 .list {
   margin: 0;
   padding: 0;

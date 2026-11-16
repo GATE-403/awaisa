@@ -48,11 +48,6 @@
   list-style: none;
 }
 
-.empty {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-}
-
 @media (min-width: 640px) {
   .places {
     grid-template-columns: repeat(3, minmax(0, 1fr));

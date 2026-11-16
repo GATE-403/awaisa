@@ -6,6 +6,7 @@ import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
 import type { Service, StockItem, StockItemInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { formatQuantity } from './formatQuantity'
@@ -155,9 +156,9 @@ export const StockItemSheet = ({
 
         {item && (
           <section className={sheet.group} aria-label='Остаток'>
-            <h3 className={sheet.groupTitle}>
+            <SectionCaption>
               Остаток · {formatQuantity(item.quantity)} {item.unit}
-            </h3>
+            </SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
                 <span className={sheet.rowControl}>
@@ -205,7 +206,7 @@ export const StockItemSheet = ({
 
         {services.length > 0 && (
           <section className={sheet.group} aria-label='Расход на услугу'>
-            <h3 className={sheet.groupTitle}>Расход на одну услугу</h3>
+            <SectionCaption>Расход на одну услугу</SectionCaption>
             <div className={sheet.list}>
               {services.map((service) => (
                 <label key={service.id} className={sheet.row}>

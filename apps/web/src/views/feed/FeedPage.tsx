@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
 import { useFeedLikes } from './model/useFeedLikes'
 import { FeedCard } from './ui/FeedCard'
@@ -181,15 +182,16 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       >
         {isPending && <div className={styles.placeholder} />}
         {!isPending && items.length === 0 && (
-          <div className={styles.empty}>
-            <p className={styles.emptyTitle}>Работ пока нет</p>
-            <p className={styles.emptyText}>
-              Здесь появятся фото работ мастеров — с ценой и записью в один тап.
-            </p>
-            <NextLink href='/' className={styles.emptyLink}>
-              Открыть каталог ›
-            </NextLink>
-          </div>
+          <EmptyState
+            isOnDark
+            title='Работ пока нет'
+            text='Здесь появятся фото работ мастеров — с ценой и записью в один тап.'
+            action={
+              <NextLink href='/' className={styles.emptyLink}>
+                Открыть каталог ›
+              </NextLink>
+            }
+          />
         )}
         {items.map((item, index) => (
           <FeedCard

@@ -7,10 +7,11 @@ import { useState } from 'react'
 import type { AnalyticsDays, AnalyticsReport, Business } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAnalytics } from '@/views/manage/model/useAnalytics'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import styles from './AnalyticsTab.module.css'
@@ -256,7 +257,7 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
 
           <div className={styles.pairs}>
             <div className={forms.group}>
-              <h3 className={forms.groupTitle}>Услуги</h3>
+              <SectionCaption>Услуги</SectionCaption>
               {report.services.length === 0 ? (
                 <p className={forms.groupEmpty}>
                   Здесь появятся услуги, которые приносят больше всего.
@@ -284,7 +285,7 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             </div>
 
             <div className={forms.group}>
-              <h3 className={forms.groupTitle}>Мастера</h3>
+              <SectionCaption>Мастера</SectionCaption>
               <ul className={forms.list}>
                 {report.masters.map((master) => (
                   <li key={master.id} className={styles.row}>
@@ -308,7 +309,7 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
           </div>
 
           <div className={forms.group}>
-            <h3 className={forms.groupTitle}>Загрузка по часам</h3>
+            <SectionCaption>Загрузка по часам</SectionCaption>
             <div className={styles.card}>
               <LoadHeatmap cells={report.heatmap} hours={business.hours} />
             </div>
@@ -317,9 +318,9 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
           <div className={styles.pairs}>
             <PayrollGroup masters={report.masters} />
             <div className={forms.group}>
-              <h3 className={forms.groupTitle}>
+              <SectionCaption>
                 Клиенты <span className={forms.groupCount}>{report.clients.length}</span>
-              </h3>
+              </SectionCaption>
               {report.clients.length === 0 ? (
                 <p className={forms.groupEmpty}>
                   Здесь появятся клиенты, которые пришли за период.
@@ -372,7 +373,7 @@ const PayrollGroup = ({ masters }: PayrollGroupProps) => {
 
   return (
     <div className={forms.group}>
-      <h3 className={forms.groupTitle}>Зарплата мастерам</h3>
+      <SectionCaption>Зарплата мастерам</SectionCaption>
       {paid.length === 0 ? (
         <p className={forms.groupEmpty}>
           Укажите процент мастера в его карточке (Мастера) — здесь появится, сколько кому выплатить.

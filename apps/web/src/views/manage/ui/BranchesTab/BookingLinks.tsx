@@ -4,6 +4,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { Copy } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import links from './BookingLinks.module.css'
 
@@ -48,7 +49,7 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
 
   return (
     <div className={styles.group}>
-      <h3 className={styles.groupTitle}>Ссылки для записи</h3>
+      <SectionCaption>Ссылки для записи</SectionCaption>
       <ul className={styles.list}>
         {items.map((item) => {
           const url = `${origin}${item.path}`

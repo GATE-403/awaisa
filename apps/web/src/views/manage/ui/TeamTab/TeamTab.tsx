@@ -11,6 +11,7 @@ import { addTeamMember, getTeam, removeTeamMember } from '@/shared/api/clientApi
 import type { TeamMember } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -96,7 +97,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
         </ul>
       )}
       <form className={sheet.group} onSubmit={add} aria-label='Добавить администратора'>
-        <h3 className={sheet.groupTitle}>Добавить администратора</h3>
+        <SectionCaption>Добавить администратора</SectionCaption>
         <div className={own.add}>
           <Input
             type='tel'

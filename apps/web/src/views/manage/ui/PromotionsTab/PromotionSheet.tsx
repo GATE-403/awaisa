@@ -6,6 +6,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
 import type { Promotion, PromotionInput, PromotionKind, Service } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -167,7 +168,7 @@ export const PromotionSheet = ({
 
         {kind === 'happy_hours' && (
           <section className={sheet.group} aria-label='Когда'>
-            <h3 className={sheet.groupTitle}>Когда</h3>
+            <SectionCaption>Когда</SectionCaption>
             <fieldset className={styles.days}>
               <legend className={styles.legend}>Дни недели</legend>
               {WEEKDAYS.map((day, index) => (
@@ -213,7 +214,7 @@ export const PromotionSheet = ({
 
         <section className={sheet.group} aria-label='Услуги'>
           <div className={sheet.groupHeader}>
-            <h3 className={sheet.groupTitle}>Услуги</h3>
+            <SectionCaption isInset={false}>Услуги</SectionCaption>
             <button type='button' className={sheet.groupLink} onClick={() => setServiceIds(null)}>
               Все
             </button>

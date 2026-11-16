@@ -10,7 +10,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { Branch, Catalog, Specialist, SpecialistInput, WorkingDay } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { MasterDialog } from './MasterDialog'

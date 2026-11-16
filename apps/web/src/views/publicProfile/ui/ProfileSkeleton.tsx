@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { AchievementsPlaceholder } from '@/entities/profile'
 import { Block, TextLine } from '@/shared/ui/Placeholder/Placeholder'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '../ProfilePage.module.css'
 import skeleton from './ProfileSkeleton.module.css'
 
@@ -39,7 +40,9 @@ export const ProfileSkeleton = () => (
         </div>
       </header>
       <section className={styles.section}>
-        <p className={styles.caption}>Достижения</p>
+        <SectionCaption as='p' isInset={false}>
+          Достижения
+        </SectionCaption>
         <AchievementsPlaceholder />
       </section>
     </div>

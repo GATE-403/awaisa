@@ -6,6 +6,7 @@ import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -199,7 +200,7 @@ export const MasterDialog = ({
         {services.length > 0 && (
           <section className={sheet.group} aria-label='Услуги мастера'>
             <div className={sheet.groupHeader}>
-              <h3 className={sheet.groupTitle}>Выполняет услуги</h3>
+              <SectionCaption isInset={false}>Выполняет услуги</SectionCaption>
               <button type='button' className={sheet.groupLink} onClick={toggleAll}>
                 {allSelected ? 'Снять все' : 'Выбрать все'}
               </button>

@@ -9,9 +9,9 @@ import { answerQuestion, removeQuestion } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessQuestion } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from './ReviewsTab.module.css'
 
 interface QuestionsPanelProps {

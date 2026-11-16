@@ -33,6 +33,7 @@ import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
 import { useServicesNextFree } from '@/views/booking/model/useServicesNextFree'
@@ -214,9 +215,9 @@ export const BookingPage = ({ business, catalog, isModal = false }: BookingPageP
                 {/* Where to come, said plainly: each branch is a row with its full address and
                     how far it is, the chosen one checked — two chips with district names left
                     people unsure where they were going. */}
-                <h2 id='booking-branch' className={styles.branchCaption}>
+                <SectionCaption as='h2' id='booking-branch'>
                   {t('Куда приедете')}
-                </h2>
+                </SectionCaption>
                 <fieldset className={`${styles.group} ${styles.branchList}`}>
                   <legend className={styles.srOnly}>{t('Филиал')}</legend>
                   {form.branches.map((branch) => {

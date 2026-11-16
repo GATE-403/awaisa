@@ -14,8 +14,8 @@ import {
   saveStockItem,
 } from '@/shared/api/clientApi'
 import type { Catalog, StockItem } from '@/shared/api/types'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { formatQuantity } from './formatQuantity'
