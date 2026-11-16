@@ -2,7 +2,7 @@
    each takes its own row. Only transforms move, so the fan is smooth on phones. */
 .stack {
   --card-height: 72px;
-  --peek: 22px;
+  --peek: 30px;
   --gap: 8px;
 
   /* A pull down spreads the folded cards toward their fanned rows under the finger. */
@@ -275,7 +275,7 @@
    instead of the top half of a face and a cut title. */
 .stack:not([data-fanned]) .card[data-back] {
   align-items: flex-start;
-  padding-top: 3px;
+  padding-top: 7px;
 }
 
 .stack:not([data-fanned]) .card[data-back] .media,
