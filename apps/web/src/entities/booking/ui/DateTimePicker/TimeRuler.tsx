@@ -45,6 +45,8 @@ export const TimeRuler = ({
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
   const hasShown = useRef(false)
+  // Until the dial is touched, one line says how it works.
+  const [hasMoved, setHasMoved] = useState(false)
   const firstFree = Math.max(
     0,
     slots.findIndex((slot) => slot.isAvailable),
@@ -126,6 +128,8 @@ export const TimeRuler = ({
           ref={trackRef}
           className={styles.track}
           aria-label={t('Время')}
+          onPointerDown={() => setHasMoved(true)}
+          onWheel={() => setHasMoved(true)}
           onScroll={handleScroll}
         >
           {slots.map((slot, index) => (
@@ -135,6 +139,7 @@ export const TimeRuler = ({
               className={styles.tick}
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
+              data-centered={index === centered || undefined}
               aria-pressed={slot.time === time}
               disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
@@ -144,8 +149,17 @@ export const TimeRuler = ({
             </button>
           ))}
         </fieldset>
+        {/* A pointer over the dial, like a time picker's: the tick under it is the one offered. */}
         <span className={styles.needle} aria-hidden />
+        <span className={styles.edge} data-side='left' aria-hidden>
+          ‹
+        </span>
+        <span className={styles.edge} data-side='right' aria-hidden>
+          ›
+        </span>
       </div>
+
+      {!hasMoved && <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>}
 
       {/* The legend mirrors the ruler — a tall bar for free, a low one for taken — with counts. */}
       <p className={styles.legend}>
