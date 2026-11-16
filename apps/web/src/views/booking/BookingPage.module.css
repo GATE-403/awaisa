@@ -359,7 +359,7 @@ button.fieldRow {
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-  margin-top: var(--space-20);
+  margin-top: var(--space-10);
 }
 
 /* Length · description on one line (cut with an ellipsis), whole on the chosen service. */
