@@ -9,7 +9,8 @@ import {
   updateService,
 } from '@/shared/api/clientApi'
 import type { Catalog, Service, ServiceInput } from '@/shared/api/types'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { CategoryDialog } from './CategoryDialog'
@@ -66,10 +67,10 @@ export const ServicesTab = ({ slug, catalog, run }: ServicesTabProps) => {
           return (
             <div key={category.id} className={styles.group}>
               <div className={styles.groupHeader}>
-                <h3 className={styles.groupTitle}>
+                <SectionCaption>
                   {category.name}
                   <span className={styles.groupCount}>{services.length}</span>
-                </h3>
+                </SectionCaption>
                 {canDelete && (
                   <button
                     type='button'

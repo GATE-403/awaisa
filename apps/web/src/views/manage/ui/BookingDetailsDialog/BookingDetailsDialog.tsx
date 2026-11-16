@@ -4,6 +4,7 @@ import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/boo
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './BookingDetailsDialog.module.css'
@@ -137,7 +138,7 @@ export const BookingDetailsDialog = ({
 
       {booking.comment && (
         <section className={sheet.group} aria-label='Комментарий'>
-          <h3 className={sheet.groupTitle}>Комментарий клиента</h3>
+          <SectionCaption>Комментарий клиента</SectionCaption>
           <p className={styles.comment}>{booking.comment}</p>
         </section>
       )}

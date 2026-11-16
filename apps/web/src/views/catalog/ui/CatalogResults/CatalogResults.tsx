@@ -8,6 +8,7 @@ import type { BusinessKind, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { pluralize } from '@/shared/lib/plural'
 import { trackStep } from '@/shared/lib/telemetry'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useOfferPages } from '../../model/useOfferPages'
 import { FEED_SORTS, type FeedSort, OffersFeed } from '../OffersFeed/OffersFeed'
@@ -123,7 +124,10 @@ export const CatalogResults = ({
 
       {view === 'places' &&
         (businesses.length === 0 ? (
-          <p className={styles.empty}>Мест не нашли — попробуйте другую категорию или услугу.</p>
+          <EmptyState
+            variant='inline'
+            text='Мест не нашли — попробуйте другую категорию или услугу.'
+          />
         ) : (
           <ul
             className={styles.places}
@@ -150,7 +154,7 @@ export const CatalogResults = ({
 
       {view === 'services' &&
         (feed.offers.length === 0 ? (
-          <p className={styles.empty}>Услуг не нашли — попробуйте другое слово.</p>
+          <EmptyState variant='inline' text='Услуг не нашли — попробуйте другое слово.' />
         ) : (
           <OffersFeed
             offers={feed.offers}

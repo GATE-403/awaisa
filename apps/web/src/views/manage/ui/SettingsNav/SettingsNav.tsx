@@ -13,6 +13,7 @@ import {
   UsersThree,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { type ManageTab, SETTINGS_GROUPS } from '@/views/manage/manageTabs'
 import styles from './SettingsNav.module.css'
 
@@ -41,7 +42,9 @@ export const SettingsNav = ({ slug, current }: SettingsNavProps) => (
   <nav aria-label='Настройки' className={styles.nav}>
     {SETTINGS_GROUPS.map((group) => (
       <section key={group.label} className={styles.group} aria-label={group.label}>
-        <h2 className={styles.caption}>{group.label}</h2>
+        <SectionCaption as='h2' className={styles.caption}>
+          {group.label}
+        </SectionCaption>
         <ul className={styles.list}>
           {group.items.map(({ value, label, tone }) => {
             const Glyph = ICONS[value] ?? Storefront

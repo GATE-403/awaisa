@@ -12,6 +12,7 @@ import {
   uploadLogo,
 } from '@/shared/api/clientApi'
 import type { Business, Catalog, WorkPhoto } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from './PhotosSection.module.css'
 import { WorkPhotoSheet } from './WorkPhotoSheet'
 
@@ -84,7 +85,7 @@ export const PhotosSection = ({ slug, business, catalog, run }: PhotosSectionPro
 
   return (
     <section className={styles.group} aria-label='Фото'>
-      <h3 className={styles.groupTitle}>Фото</h3>
+      <SectionCaption>Фото</SectionCaption>
       <div className={styles.list}>
         {/* The logo first: it stands for the place everywhere — catalog, page, booking, map. */}
         <div className={styles.coverRow} data-busy={busy === 'logo' || undefined}>

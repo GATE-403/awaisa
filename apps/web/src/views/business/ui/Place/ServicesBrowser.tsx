@@ -8,6 +8,7 @@ import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './Place.module.css'
 
@@ -166,7 +167,7 @@ export const ServicesBrowser = ({
 
         {hasPopular && (
           <div className={styles.group}>
-            <h3 className={styles.groupTitle}>Часто выбирают</h3>
+            <SectionCaption>Часто выбирают</SectionCaption>
             <ul className={styles.serviceGrid}>
               {popular.map((service, index) => (
                 <PopularCard key={service.id} offer={toOffer(service)} isHit={index === 0} />
@@ -192,9 +193,9 @@ export const ServicesBrowser = ({
           <div key={group.id} className={styles.group}>
             {/* With «Часто выбирают» above, the rest always gets a heading so the two lists read apart. */}
             {(catalog.categories.length > 1 || needle || hasPopular) && (
-              <h3 className={styles.groupTitle}>
+              <SectionCaption>
                 {catalog.categories.length > 1 ? group.name : 'Все услуги'}
-              </h3>
+              </SectionCaption>
             )}
             <ul className={styles.serviceGrid}>
               {services.map((service) => (

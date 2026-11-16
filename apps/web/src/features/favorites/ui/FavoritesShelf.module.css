@@ -54,31 +54,6 @@
   }
 }
 
-.empty {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-}
-
-.empty a {
-  color: var(--color-link);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.emptyIcon {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  color: var(--color-danger);
-}
-
 /* In the profile tab the tab names it: the heading stays for screen readers only. */
 .head[data-hidden] {
   position: absolute;
@@ -111,4 +86,8 @@
     scroll-snap-type: none;
     touch-action: pan-x pan-y;
   }
+}
+
+.heart {
+  color: var(--color-danger);
 }

@@ -11,6 +11,7 @@ import { getClient, updateClient } from '@/shared/api/clientApi'
 import type { ClientCard } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
@@ -188,7 +189,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps)
           <ClientLoyaltySection slug={slug} phone={card.phone} />
 
           <section className={sheet.group} aria-label='Заметки'>
-            <h3 className={sheet.groupTitle}>Только для вас</h3>
+            <SectionCaption>Только для вас</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row} htmlFor={birthdayId}>
                 <span className={sheet.rowLabel}>День рождения</span>
@@ -214,7 +215,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved }: ClientSheetProps)
           </section>
 
           <section className={sheet.group} aria-label='История'>
-            <h3 className={sheet.groupTitle}>История · {card.history.length}</h3>
+            <SectionCaption>История · {card.history.length}</SectionCaption>
             <ul className={`${sheet.list} ${styles.history}`}>
               {card.history.map((item) => {
                 const status = visitStatus(item)

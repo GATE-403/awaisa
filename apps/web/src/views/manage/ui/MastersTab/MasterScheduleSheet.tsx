@@ -18,6 +18,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { MasterSchedule, Specialist, WorkingDay } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './MasterScheduleSheet.module.css'
@@ -163,7 +164,7 @@ export const MasterScheduleSheet = ({
       {schedule && (
         <>
           <section className={sheet.group} aria-label='Часы работы'>
-            <h3 className={sheet.groupTitle}>Часы работы</h3>
+            <SectionCaption>Часы работы</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
                 <span className={sheet.rowLabel}>Как у салона</span>
@@ -213,7 +214,7 @@ export const MasterScheduleSheet = ({
           </section>
 
           <section className={sheet.group} aria-label='Отпуск и выходные'>
-            <h3 className={sheet.groupTitle}>Отпуск и выходные</h3>
+            <SectionCaption>Отпуск и выходные</SectionCaption>
             <div className={sheet.list}>
               {schedule.leaves.map((item) => (
                 <div key={item.id} className={styles.leave}>

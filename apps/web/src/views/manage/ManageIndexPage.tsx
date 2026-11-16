@@ -10,10 +10,10 @@ import { useRequireSession } from '@/entities/session'
 import { getMyBusinesses } from '@/shared/api/clientApi'
 import type { BusinessLink } from '@/shared/api/types'
 import { Container } from '@/shared/ui/Container/Container'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { BusinessPickerCard } from '@/views/manage/ui/BusinessPickerCard/BusinessPickerCard'
 import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
-import { EmptyState } from '@/views/manage/ui/EmptyState/EmptyState'
 import styles from './ManageIndexPage.module.css'
 
 interface ManageIndexPageProps {

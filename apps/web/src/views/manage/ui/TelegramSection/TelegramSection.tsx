@@ -8,6 +8,7 @@ import { createTelegramLink, getTelegramStatus, removeTelegramChat } from '@/sha
 import type { TelegramStatus } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import styles from './TelegramSection.module.css'
 
@@ -93,7 +94,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
 
   return (
     <div className={forms.group}>
-      <h3 className={forms.groupTitle}>Уведомления в Telegram</h3>
+      <SectionCaption>Уведомления в Telegram</SectionCaption>
       <div className={forms.list}>
         {status.chats.map((chat) => (
           <div key={chat.id} className={styles.row}>

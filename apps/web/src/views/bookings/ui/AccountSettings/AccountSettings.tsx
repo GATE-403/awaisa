@@ -23,6 +23,7 @@ import type { MasterPlace } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
 import type { Theme } from '@/shared/lib/theme'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { NameDialog } from '../NameDialog'
 import styles from './AccountSettings.module.css'
 
@@ -122,7 +123,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         </div>
       </div>
 
-      <h3 className={styles.groupTitle}>Подборка</h3>
+      <SectionCaption className={styles.caption}>Подборка</SectionCaption>
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsTuning(true)}>
           <span className={styles.glyph} data-tone='orange' aria-hidden>
@@ -137,7 +138,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи.
       </p>
 
-      <h3 className={styles.groupTitle}>Бизнес</h3>
+      <SectionCaption className={styles.caption}>Бизнес</SectionCaption>
       <div className={styles.list}>
         {places.length > 0 && (
           <NextLink href='/master' className={styles.row}>

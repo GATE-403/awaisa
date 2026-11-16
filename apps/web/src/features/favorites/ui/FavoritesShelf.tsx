@@ -7,6 +7,7 @@ import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { listOffersByIds } from '@/shared/api/clientApi'
 import type { Offer } from '@/shared/api/types'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { useFavorites } from '../model/useFavorites'
 import { FavoriteButton } from './FavoriteButton'
 import styles from './FavoritesShelf.module.css'
@@ -50,12 +51,15 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
         {shown.length > 0 && <span className={styles.count}>{shown.length}</span>}
       </div>
       {offers !== null && shown.length === 0 ? (
-        <p className={styles.empty}>
-          <Heart weight='fill' aria-hidden className={styles.emptyIcon} />
-          <span>
-            Нажмите ♡ на услуге в <NextLink href='/'>каталоге</NextLink> — она появится здесь.
-          </span>
-        </p>
+        <EmptyState
+          icon={<Heart weight='fill' className={styles.heart} />}
+          title='Сохраняйте услуги'
+          text={
+            <>
+              Нажмите ♡ на услуге в <NextLink href='/'>каталоге</NextLink> — она появится здесь.
+            </>
+          }
+        />
       ) : (
         <NextFreeProvider slugs={[...new Set(shown.map((offer) => offer.slug))]}>
           <ul

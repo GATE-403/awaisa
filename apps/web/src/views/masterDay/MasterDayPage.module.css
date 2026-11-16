@@ -81,28 +81,6 @@
   font-size: var(--text-sm);
 }
 
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-10) var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
-}
-
-.emptyTitle {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-}
-
-.emptyText {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-}
-
 /* The agenda: Calendar's list view — times on the left, the visit, a call button. */
 .agenda {
   margin: 0;

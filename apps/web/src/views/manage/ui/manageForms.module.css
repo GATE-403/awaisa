@@ -17,20 +17,6 @@
   gap: var(--space-3);
 }
 
-/* Settings-style inset group header: uppercase footnote above the card. */
-.groupTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-4);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
 .groupCount {
   color: var(--color-tertiary-foreground);
   font-variant-numeric: tabular-nums;
@@ -276,32 +262,6 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-12) var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  text-align: center;
-}
-
-.emptyTitle {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-semibold);
-}
-
-.emptyText {
-  max-width: 40ch;
-  margin-bottom: var(--space-4);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
 }
 
 .form {

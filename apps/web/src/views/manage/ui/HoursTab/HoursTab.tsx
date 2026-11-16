@@ -5,6 +5,7 @@ import { type FormEvent, useState } from 'react'
 import { findDay, formatClock, parseClock, TIME_OPTIONS, WEEKDAYS_FULL } from '@/entities/business'
 import { setWorkingHours, updateBusiness } from '@/shared/api/clientApi'
 import type { Business, WorkingDay } from '@/shared/api/types'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 
@@ -63,7 +64,7 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
       />
 
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>Часы работы</h3>
+        <SectionCaption>Часы работы</SectionCaption>
         <ul className={styles.list}>
           {days.map((day, weekday) => (
             <li key={WEEKDAYS_FULL[weekday]} className={styles.hoursRow}>
@@ -105,7 +106,7 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
       </div>
 
       <div className={styles.group}>
-        <h3 className={styles.groupTitle}>Запись</h3>
+        <SectionCaption>Запись</SectionCaption>
         <div className={styles.list}>
           <label className={styles.settingRow}>
             <span className={styles.rowBody}>

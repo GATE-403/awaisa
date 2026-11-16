@@ -4,6 +4,7 @@ import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { BusinessKind, LeaderboardMaster, LeaderboardPlace } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './LeaderboardPage.module.css'
 import { BoardViewSwitch } from './ui/BoardViewSwitch'
@@ -128,9 +129,11 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
         </div>
 
         {entries.length === 0 ? (
-          <p className={styles.empty}>
-            Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок станет больше.
-          </p>
+          <EmptyState
+            variant='inline'
+            isCentered
+            text='Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок станет больше.'
+          />
         ) : (
           <>
             {/* One list from the first, every row the same; the top three's place is a gold /
