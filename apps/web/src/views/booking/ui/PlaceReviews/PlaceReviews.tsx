@@ -2,12 +2,11 @@
 
 import { Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
-import { PersonAvatar } from '@/entities/business'
-import { Stars } from '@/entities/review'
+import { ReviewItem } from '@/entities/review'
 import { listPlaceReviews } from '@/shared/api/clientApi'
 import type { ReviewSummary, Service } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './PlaceReviews.module.css'
 
 interface PlaceReviewsProps {
@@ -17,21 +16,17 @@ interface PlaceReviewsProps {
   service: Service | null
 }
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: BUSINESS_TIME_ZONE,
-})
-
 type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 
-// While choosing, what people said decides it: reviews of this very service under the form, as a
-// sideways row of short cards (like an app store's) — the page never grows long and nothing opens
-// over the booking; a tap on a card shows its whole text in place.
+// While choosing, what people said decides it: reviews of this very service under the form as a
+// thread — three, the last fading with «Ещё N отзывов» on it, which opens a few more right here
+// (never a sheet over the booking, never a list that runs on and on).
+const SHOWN = 3
+const OPENED = 8
 export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps) => {
   const t = useT()
   const [loaded, setLoaded] = useState<Loaded | null>(null)
-  const [openId, setOpenId] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
   const serviceId = service?.id
   const key = `${slug}|${serviceId ?? ''}`
 
@@ -67,46 +62,23 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         {' · '}
         {t.count(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
       </p>
-      <ul className={styles.row} data-edge-fade=''>
-        {/* The ones with words first: a row opening on bare stars says little. */}
-        {[...summary.items]
-          .sort((first, second) => Number(Boolean(second.comment)) - Number(Boolean(first.comment)))
-          .map((review) => {
-            const isOpen = openId === review.id
-            return (
-              <li key={review.id} className={styles.card} data-open={isOpen || undefined}>
-                <div className={styles.cardHead}>
-                  <PersonAvatar
-                    name={review.authorName}
-                    src={review.authorAvatarUrl ?? undefined}
-                    size='sm'
-                  />
-                  <span className={styles.author}>{review.authorName}</span>
-                  <span className={styles.date}>
-                    {dateFormatter.format(new Date(review.createdAt))}
-                  </span>
-                </div>
-                <Stars rating={review.rating} />
-                {review.comment && <p className={styles.text}>{review.comment}</p>}
-                {review.reply && (
-                  <p className={styles.reply}>
-                    <strong>{businessName}:</strong> {review.reply}
-                  </p>
-                )}
-                {(review.comment.length > 110 || Boolean(review.reply)) && (
-                  <button
-                    type='button'
-                    className={styles.more}
-                    aria-expanded={isOpen}
-                    onClick={() => setOpenId(isOpen ? null : review.id)}
-                  >
-                    {isOpen ? t('Свернуть') : t('Читать целиком')}
-                  </button>
-                )}
-              </li>
-            )
-          })}
-      </ul>
+      <MoreFade
+        hiddenCount={Math.min(summary.items.length, OPENED) - SHOWN}
+        isOpen={isOpen}
+        isLessFloating={false}
+        onToggle={() => setIsOpen((current) => !current)}
+        label={t
+          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['отзыв', 'отзыва', 'отзывов'])
+          .split(' ')
+          .slice(1)
+          .join(' ')}
+      >
+        <ul className={styles.list}>
+          {summary.items.slice(0, isOpen ? OPENED : SHOWN).map((review) => (
+            <ReviewItem key={review.id} review={review} businessName={businessName} />
+          ))}
+        </ul>
+      </MoreFade>
     </section>
   )
 }

@@ -14,6 +14,9 @@ interface MoreFadeProps {
   label: string
   /** What the fade melts into: the page, or the card the list sits on. */
   surface?: 'page' | 'card'
+  /** «Скрыть» floats at the bottom of the screen while the open list is in view (default);
+      false keeps it under the list — for short lists in a sheet with its own bottom bar. */
+  isLessFloating?: boolean
 }
 
 // One expander for every long list: closed, the last shown item fades and «Ещё N …» floats on
@@ -25,6 +28,7 @@ export const MoreFade = ({
   onToggle,
   label,
   surface = 'page',
+  isLessFloating = true,
 }: MoreFadeProps) => {
   if (hiddenCount <= 0 && !isOpen) return <>{children}</>
 
@@ -32,7 +36,13 @@ export const MoreFade = ({
     <div className={styles.wrap} data-closed={!isOpen || undefined} data-surface={surface}>
       {children}
       {isOpen ? (
-        <button type='button' className={styles.less} onClick={onToggle} aria-expanded>
+        <button
+          type='button'
+          className={styles.less}
+          data-inline={isLessFloating ? undefined : ''}
+          onClick={onToggle}
+          aria-expanded
+        >
           Скрыть
           <CaretUp weight='bold' aria-hidden />
         </button>

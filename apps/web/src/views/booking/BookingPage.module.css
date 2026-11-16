@@ -486,7 +486,7 @@ label:has([data-checked]) .serviceNote {
   bottom: 0;
   left: 0;
   z-index: 39;
-  height: calc(var(--space-20) + var(--space-12) + env(safe-area-inset-bottom));
+  height: calc(var(--space-20) + var(--space-4) + env(safe-area-inset-bottom));
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-background) 0%, transparent),
