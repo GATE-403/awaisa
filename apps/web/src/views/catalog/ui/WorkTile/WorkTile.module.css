@@ -1,0 +1,121 @@
+/* One cell of the services grid, shaped like the service cards around it (3:4, radius 12, the
+   same scrim); a feature spans two of them — on phones the grid's width at one card's height,
+   from 768px two cards by two. */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /* Both set, so a row taller than 3:4 (the card beside it) never widens the tile past its column. */
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 3 / 4;
+  overflow: clip;
+  isolation: isolate;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: #fff;
+}
+
+.tile[data-big] {
+  aspect-ratio: auto;
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* The scrim: clear at the top, dark from the middle down, like the cards beside it. */
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0) 40%,
+    rgb(0 0 0 / 0.5) 70%,
+    rgb(0 0 0 / 0.85)
+  );
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A play mark where the service cards keep their heart: these open as a vertical feed. */
+.play {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.45);
+}
+
+.play svg {
+  width: 14px;
+  height: 14px;
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+/* Who made it: the master's face and first name with the place, like a reel's author line. */
+.author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 2px;
+}
+
+.face[data-size] {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 0 0 1.5px #fff;
+  font-size: 9px;
+}
+
+.authorName {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.85);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tile[data-big] .name {
+  font-size: var(--text-title3);
+}
+
+.price {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}

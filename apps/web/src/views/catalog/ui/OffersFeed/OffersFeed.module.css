@@ -65,11 +65,22 @@
   }
 }
 
-/* A block set into the grid (the masters' work) spans it; dense flow fills the row before it. */
-.interlude {
-  grid-column: 1 / -1;
+/* A master's work is one more cell; a feature spans two — on phones the width of the grid at about
+   one card's height, from 768px two cards by two. Dense flow fills any hole it leaves. */
+.work {
   min-width: 0;
-  margin: var(--space-4) 0;
+}
+
+.work[data-big] {
+  grid-column: span 2;
+  aspect-ratio: 3 / 2;
+}
+
+@media (min-width: 768px) {
+  .work[data-big] {
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
 }
 
 /* Five across: the shelf still comes after two full rows (4 cards before it, 6 after). */
@@ -80,7 +91,7 @@
 }
 
 /* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
-.grid > li:not(.interlude) {
+.grid > li:not(.work) {
   content-visibility: auto;
   contain-intrinsic-size: auto 240px;
 }
@@ -90,11 +101,6 @@
 @media (max-width: 639px) {
   .grid {
     margin: 0 calc(8px - var(--page-gutter));
-  }
-
-  /* The mosaic's pictures keep the cards' 8px edges; only its heading keeps the page gutter. */
-  .interlude > section > div:first-child {
-    padding-inline: calc(var(--page-gutter) - 8px);
   }
 }
 

@@ -2,7 +2,7 @@
 
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
-import { Fragment, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
@@ -12,13 +12,11 @@ import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useOfferPages } from '../../model/useOfferPages'
 import { FEED_SORTS, type FeedSort, OffersFeed } from '../OffersFeed/OffersFeed'
-import { WorkMosaic } from '../WorkMosaic/WorkMosaic'
 import styles from './CatalogResults.module.css'
 
 type ResultsView = 'places' | 'services'
 
 /** Two rows on phones; CSS moves the shelf below two rows on wider grids too. */
-const INTERLUDE_AFTER = 4
 /** Places are drawn a screenful at a time as the list scrolls. */
 const PLACES_STEP = 24
 
@@ -32,7 +30,7 @@ interface CatalogResultsProps {
   initialSort: FeedSort
   canReset: boolean
   /** A shelf set into the grid after the first rows, like Shorts in a video feed. */
-  /** The masters' work, set into the grid as mosaic blocks (`WorkMosaic`). */
+  /** The masters' work, set into the grid one at a time (`WorkTile`). */
   works?: FeedItem[]
   kind?: BusinessKind
   query?: string
@@ -53,10 +51,6 @@ export const CatalogResults = ({
 }: CatalogResultsProps) => {
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
-  // Mosaic blocks of the masters' work, by their number from the top of the grid.
-  const interlude = works?.length
-    ? (block: number) => <WorkMosaic items={works} kind={kind} block={block} />
-    : undefined
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
 
   useEffect(() => {
@@ -139,19 +133,11 @@ export const CatalogResults = ({
             className={styles.places}
             aria-label={pluralize(businesses.length, ['место', 'места', 'мест'])}
           >
-            {shownPlaces.map((business, index) => (
-              <Fragment key={business.slug}>
-                {index === INTERLUDE_AFTER && interlude && (
-                  <li className={styles.interlude}>{interlude(0)}</li>
-                )}
-                <li>
-                  <BusinessCard business={business} />
-                </li>
-              </Fragment>
+            {shownPlaces.map((business) => (
+              <li key={business.slug}>
+                <BusinessCard business={business} />
+              </li>
             ))}
-            {businesses.length <= INTERLUDE_AFTER && interlude && (
-              <li className={styles.interlude}>{interlude(0)}</li>
-            )}
           </ul>
         ))}
       {view === 'places' && placesShown < businesses.length && (
@@ -165,7 +151,8 @@ export const CatalogResults = ({
           <OffersFeed
             offers={feed.offers}
             sort={sort}
-            interlude={interlude}
+            works={works}
+            kind={kind}
             hasMore={feed.hasMore}
             isLoading={feed.isLoading}
             onEndReached={feed.loadMore}
