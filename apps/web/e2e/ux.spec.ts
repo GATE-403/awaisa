@@ -107,7 +107,7 @@ test.describe('UX: guidance and feedback', () => {
     ).toBeVisible()
     await expect(steps.datetime).toBeInViewport()
     await expect(steps.datetime.getByRole('button', { name: time, pressed: true })).toHaveCount(0)
-    await expect(primaryAction(page)).toHaveText('Выбрать время')
+    await expect(primaryAction(page)).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
     // Contacts wait under the time: a new time brings them back as typed.
     await pickFirstFreeSlot(page)
     await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')

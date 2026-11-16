@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
@@ -14,6 +13,8 @@ interface TimeRulerProps {
   onPick: (time: string) => void
   /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
   days?: ReactNode
+  /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
+  onCenter?: (time: string | null) => void
   /** Another day is loading: the dial stays, dimmed and still. */
   isPending?: boolean
 }
@@ -39,6 +40,7 @@ export const TimeRuler = ({
   onPick,
   isPending = false,
   days,
+  onCenter,
 }: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
@@ -84,9 +86,6 @@ export const TimeRuler = ({
     setCentered(Math.min(slots.length - 1, Math.max(0, index)))
   }
 
-  const moveTo = (index: number) =>
-    trackRef.current?.scrollTo({ left: index * TICK_WIDTH, behavior: 'smooth' })
-
   const pick = (index: number) => {
     const slot = slots[index]
     if (!slot?.isAvailable) return
@@ -97,14 +96,13 @@ export const TimeRuler = ({
   const freeCount = slots.filter((slot) => slot.isAvailable).length
   const takenCount = slots.length - freeCount
   const current = slots[centered]
+  const centeredTime = !isPending && current?.isAvailable ? current.time : null
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tell only when the time changes
+  useEffect(() => {
+    onCenter?.(centeredTime)
+  }, [centeredTime])
   const isFree = Boolean(current?.isAvailable)
-  const nearestFree = slots.reduce(
-    (best, slot, index) =>
-      slot.isAvailable && (best < 0 || Math.abs(index - centered) < Math.abs(best - centered))
-        ? index
-        : best,
-    -1,
-  )
 
   return (
     <div className={styles.ruler} data-pending={isPending || undefined} aria-busy={isPending}>
@@ -164,21 +162,6 @@ export const TimeRuler = ({
       </p>
 
       {days}
-
-      {/* Never a dead button: on a taken time it leads to the nearest free one. */}
-      <Button
-        variant='outline'
-        size='lg'
-        fullWidth
-        className={styles.pick}
-        onClick={() => (isFree ? pick(centered) : moveTo(nearestFree))}
-      >
-        {isFree && current
-          ? current.time === time
-            ? t('Выбрано {time}', { time: current.time })
-            : t('Выбрать {time}', { time: current.time })
-          : t('Ближайшее свободное: {time}', { time: slots[nearestFree]?.time ?? '' })}
-      </Button>
     </div>
   )
 }
