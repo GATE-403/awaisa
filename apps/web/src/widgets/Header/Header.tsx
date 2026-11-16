@@ -1,10 +1,10 @@
 'use client'
 
 import {
+  Cards,
   Compass,
   MapPin,
   MapTrifold,
-  PlayCircle,
   SquaresFour,
   Storefront,
   Trophy,
@@ -30,7 +30,7 @@ import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
 
 const ACTIONS = [
-  { href: '/feed', label: 'Работы', icon: PlayCircle },
+  { href: '/feed', label: 'Образы', icon: Cards },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/top', label: 'Рейтинг', icon: Trophy },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
