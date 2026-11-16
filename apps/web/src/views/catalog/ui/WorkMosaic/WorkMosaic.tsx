@@ -12,8 +12,8 @@ interface WorkMosaicProps {
   block: number
 }
 
-// Seven on the widest grids (a feature and a 3×2 beside it); narrower ones show the first five.
-const PER_BLOCK = 7
+// Eleven on wide grids (a feature and a 5×2 beside it); 7 from 768px, 5 on phones.
+const PER_BLOCK = 11
 
 // The masters' work set into the services grid like Instagram's Explore: a tall picture and four
 // smaller ones, again further down with the next works, the tall one switching sides. Each opens
@@ -53,7 +53,7 @@ export const WorkMosaic = ({ items, kind, block }: WorkMosaicProps) => {
             >
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
               <img
-                {...sizedImage(item.url, index === 0 ? 360 : 220)}
+                {...sizedImage(item.url, index === 0 ? 280 : 200)}
                 alt=''
                 className={styles.image}
                 data-card-media=''

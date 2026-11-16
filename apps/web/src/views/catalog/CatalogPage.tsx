@@ -42,7 +42,20 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
     listOffers(kind, query || undefined, params.sort === 'price' ? 'price' : 'popular'),
     isBrowsing ? listPopularServices(kind) : Promise.resolve([]),
     // The shelf is a nice-to-have: the catalog renders without it.
-    isBrowsing ? listFeed(kind, undefined, undefined).catch(() => null) : Promise.resolve(null),
+    // Two pages of work (24), enough for several mosaic blocks down the grid.
+    isBrowsing
+      ? Promise.all([
+          listFeed(kind, undefined, undefined),
+          listFeed(kind, undefined, undefined, 12).catch(() => null),
+        ])
+          .then(([first, second]) => ({
+            ...first,
+            items: [...first.items, ...(second?.items ?? [])].filter(
+              (item, index, all) => all.findIndex((other) => other.id === item.id) === index,
+            ),
+          }))
+          .catch(() => null)
+      : Promise.resolve(null),
     // Typos, the wrong keyboard layout or Latin letters: the API searched something else.
     query ? resolveSearch(query) : Promise.resolve(null),
   ])
@@ -69,12 +82,6 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
               </NextLink>
             }
           />
-        )}
-        {isBrowsing && kind && (
-          // With a kind chosen there is no shelf: the leaderboard of that kind is one quiet line.
-          <NextLink href={`/top?kind=${kind}`} className={styles.topLink}>
-            Рейтинг мастеров ›
-          </NextLink>
         )}
         {isBrowsing && <SearchChips kind={kind} services={popular} />}
         <CatalogResults
