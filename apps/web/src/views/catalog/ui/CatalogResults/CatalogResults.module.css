@@ -41,6 +41,9 @@
 
 .places {
   display: grid;
+  /* Blocks set into the grid span it; cards after one fill any hole left before it, so a
+     row is never left half empty whatever the column count. */
+  grid-auto-flow: row dense;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin: 0;
@@ -89,44 +92,15 @@
   position: absolute;
 }
 
-/* The shelf set into the grid spans it, after two rows at every width: cards that belong in the
-   second row on wider grids are pulled before it with order. */
-.interlude {
-  grid-column: 1 / -1;
-  min-width: 0;
-  margin: var(--space-4) 0;
-  order: 1;
-}
-
-.interlude ~ li {
-  order: 2;
-}
-
-@media (min-width: 640px) and (max-width: 1099px) {
-  .interlude ~ li:nth-child(-n + 7) {
-    order: 0;
-  }
-}
-
-@media (min-width: 1100px) and (max-width: 1399px) {
-  .interlude ~ li:nth-child(-n + 9) {
-    order: 0;
-  }
-}
-
 /* Five across: the shelf still comes after two full rows (4 cards before it, 6 after). */
 @media (min-width: 1400px) {
   .places {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
-
-  .interlude ~ li:nth-child(-n + 11) {
-    order: 0;
-  }
 }
 
 /* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
-.places > li:not(.interlude) {
+.places > li {
   content-visibility: auto;
   contain-intrinsic-size: auto 240px;
 }
@@ -136,11 +110,6 @@
 @media (max-width: 639px) {
   .places {
     margin: 0 calc(8px - var(--page-gutter));
-  }
-
-  .interlude {
-    margin-inline: -8px;
-    padding-inline: var(--page-gutter);
   }
 }
 

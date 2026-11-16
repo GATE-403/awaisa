@@ -193,6 +193,7 @@ const listFeed = async (
   kind: BusinessKind | undefined,
   business: string | undefined,
   start: string | undefined,
+  offset = 0,
 ): Promise<FeedPage> => {
   'use cache'
   cacheLife('minutes')
@@ -202,6 +203,7 @@ const listFeed = async (
   if (kind) params.set('kind', kind)
   if (business) params.set('business', business)
   if (start) params.set('start', start)
+  if (offset) params.set('offset', String(offset))
   const response = await fetch(`${API_URL}/feed?${params}`)
   if (!response.ok) throw await toApiError(response)
 

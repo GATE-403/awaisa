@@ -22,6 +22,8 @@
 }
 
 .tab {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -52,9 +54,41 @@
 }
 
 .tab[aria-current="page"] {
-  background: var(--color-fill);
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
+}
+
+/* The chosen tab's glyph pops a little as the highlight arrives under it. */
+.tab[aria-current="page"] .icon,
+.tab[aria-current="page"] .avatar {
+  animation: tab-pop 420ms var(--ease-spring);
+}
+
+@keyframes tab-pop {
+  from {
+    scale: 0.78;
+  }
+}
+
+/* The highlight: one capsule the width of a tab, sliding (spring) to the chosen one. The bar's
+   padding and its grid gap are both --space-1, so a tab's step is its width plus one gap. */
+.indicator {
+  position: absolute;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  left: var(--space-1);
+  width: calc((100% - var(--space-1) * (var(--count) + 1)) / var(--count));
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  translate: calc(var(--index) * (100% + var(--space-1))) 0;
+  transition:
+    translate 460ms var(--ease-spring),
+    opacity var(--duration-fast) var(--ease-standard);
+  pointer-events: none;
+}
+
+.indicator[data-hidden] {
+  opacity: 0;
 }
 
 .tab:active .icon {
@@ -82,4 +116,15 @@
 
 [aria-current="page"] > .avatar {
   box-shadow: 0 0 0 2px var(--color-link);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    transition: none;
+  }
+
+  .tab[aria-current="page"] .icon,
+  .tab[aria-current="page"] .avatar {
+    animation: none;
+  }
 }

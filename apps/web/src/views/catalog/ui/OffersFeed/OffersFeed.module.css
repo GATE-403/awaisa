@@ -27,6 +27,9 @@
 /* Two across on phones, three on tablets, four on desktops: big enough to read at a glance. */
 .grid {
   display: grid;
+  /* Blocks set into the grid span it; cards after one fill any hole left before it, so a
+     row is never left half empty whatever the column count. */
+  grid-auto-flow: row dense;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   /* Tight like a photo grid: the pictures carry the cards, gutters stay thin. */
   gap: 6px;
@@ -62,28 +65,21 @@
   }
 }
 
-/* The shelf set into the grid spans it, after two rows at every width: cards that belong in the
-   second row on wider grids are pulled before it with order. */
-.interlude {
-  grid-column: 1 / -1;
+/* A master's work is one more cell; a feature spans two — on phones the width of the grid at about
+   one card's height, from 768px two cards by two. Dense flow fills any hole it leaves. */
+.work {
   min-width: 0;
-  margin: var(--space-4) 0;
-  order: 1;
 }
 
-.interlude ~ li {
-  order: 2;
+.work[data-big] {
+  grid-column: span 2;
+  aspect-ratio: 3 / 2;
 }
 
-@media (min-width: 768px) and (max-width: 1099px) {
-  .interlude ~ li:nth-child(-n + 7) {
-    order: 0;
-  }
-}
-
-@media (min-width: 1100px) and (max-width: 1399px) {
-  .interlude ~ li:nth-child(-n + 9) {
-    order: 0;
+@media (min-width: 768px) {
+  .work[data-big] {
+    grid-row: span 2;
+    aspect-ratio: auto;
   }
 }
 
@@ -92,14 +88,10 @@
   .grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
-
-  .interlude ~ li:nth-child(-n + 11) {
-    order: 0;
-  }
 }
 
 /* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
-.grid > li:not(.interlude) {
+.grid > li:not(.work) {
   content-visibility: auto;
   contain-intrinsic-size: auto 240px;
 }
@@ -109,11 +101,6 @@
 @media (max-width: 639px) {
   .grid {
     margin: 0 calc(8px - var(--page-gutter));
-  }
-
-  .interlude {
-    margin-inline: -8px;
-    padding-inline: var(--page-gutter);
   }
 }
 

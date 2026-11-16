@@ -237,7 +237,8 @@ html {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: -1;
+  /* Below every layer of the frame: a picture (some sit at -2) covers it once decoded. */
+  z-index: -10;
   width: clamp(24px, 22%, 64px);
   aspect-ratio: 30 / 32;
   margin: auto;

@@ -377,3 +377,9 @@ button.fieldRow {
 label:has([data-checked]) .serviceNote {
   white-space: normal;
 }
+
+/* Quiet, under the steps: not a step and not the main action. */
+.startOver {
+  align-self: center;
+  min-height: var(--control-height-md);
+}
