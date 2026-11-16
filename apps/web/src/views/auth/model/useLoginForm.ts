@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
-import type { OtpChannel } from '@/shared/api/types'
+import type { Customer, OtpChannel } from '@/shared/api/types'
 import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 
@@ -75,13 +75,19 @@ export const useLoginForm = () => {
         setWrongAttempts((count) => count + 1)
         throw verifyError
       })
-      setCustomer(customer)
-      if (!customer.name) {
-        setStep('name')
-        return
-      }
-      router.replace(redirectTo)
+      finishSignIn(customer)
     })
+
+  // A verified number (by code or through the Telegram bot): new clients name themselves first.
+  const finishSignIn = (customer: Customer) => {
+    setCustomer(customer)
+    if (!customer.name) {
+      setNormalizedPhone(customer.phone)
+      setStep('name')
+      return
+    }
+    router.replace(redirectTo)
+  }
 
   const changeCode = (value: string) => {
     const digits = value.replace(/\D/g, '').slice(0, CODE_LENGTH)
@@ -129,6 +135,7 @@ export const useLoginForm = () => {
     sendBySms,
     verify,
     saveName,
+    finishSignIn,
     editPhone,
   }
 }
