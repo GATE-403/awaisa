@@ -452,6 +452,20 @@ type OtpRequest = {
   resendAfterSeconds: number
 }
 
+/** `GET /auth/telegram`: whether «Войти через Telegram» can be offered, and the bot to open. */
+type TelegramLoginConfig = {
+  isAvailable: boolean
+  botUsername: string | null
+}
+
+/**
+ * `POST /auth/telegram/check`: waiting for the number in the bot, signed in (the session cookie
+ * is set), or gone (expired, already used, unknown) — start again.
+ */
+type TelegramLoginState =
+  | { status: 'pending' | 'expired' }
+  | { status: 'signedIn'; customer: Customer }
+
 type VisitOutcome = 'arrived' | 'no_show'
 
 type PaymentMethod = 'cash' | 'card' | 'transfer' | 'subscription' | 'certificate'
@@ -932,6 +946,8 @@ type UploadedPhoto = { url: string }
 type SearchCorrection = { query: string; corrected: string | null }
 
 export type {
+  TelegramLoginConfig,
+  TelegramLoginState,
   AvatarUpload,
   BirthdayGreeting,
   BookingTelegramLink,
