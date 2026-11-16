@@ -17,7 +17,6 @@ import { CatalogSkeleton } from './ui/CatalogSkeleton/CatalogSkeleton'
 import { FirstVisitNote } from './ui/FirstVisitNote/FirstVisitNote'
 import type { FeedSort } from './ui/OffersFeed/OffersFeed'
 import { SearchChips } from './ui/SearchChips/SearchChips'
-import { WorkShelf } from './ui/WorkShelf/WorkShelf'
 
 interface CatalogPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -89,10 +88,8 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           initialView={query && matchesPlace ? 'places' : 'services'}
           initialSort={toSort(params.sort)}
           canReset={Boolean(query || kind)}
-          interlude={
-            // Set into the grid after two rows, like Shorts in a feed: the masters' work.
-            isBrowsing && works ? <WorkShelf items={works.items} kind={kind} /> : undefined
-          }
+          // The masters' work, set into the grid Instagram Explore style, block after block.
+          works={isBrowsing && works ? works.items : undefined}
         />
       </div>
     </NextFreeProvider>

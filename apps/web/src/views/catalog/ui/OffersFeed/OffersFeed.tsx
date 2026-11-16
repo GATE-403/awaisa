@@ -14,8 +14,8 @@ type FeedSort = 'popular' | 'soon' | 'price'
 interface OffersFeedProps {
   offers: Offer[]
   sort: FeedSort
-  /** A shelf set into the grid after the first rows. */
-  interlude?: ReactNode
+  /** Blocks set into the grid — the first after two rows, then every `INTERLUDE_EVERY` cards. */
+  interlude?: (block: number) => ReactNode
   /** More pages wait on the server: the end of the list asks for the next one. */
   hasMore?: boolean
   isLoading?: boolean
@@ -29,6 +29,14 @@ const FEED_SORTS: { value: FeedSort; label: string }[] = [
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
+const INTERLUDE_FIRST = 4
+const INTERLUDE_EVERY = 8
+
+// Where a block goes: after the 4th card, then after every eighth one more.
+const blockAt = (index: number) =>
+  index >= INTERLUDE_FIRST && (index - INTERLUDE_FIRST) % INTERLUDE_EVERY === 0
+    ? (index - INTERLUDE_FIRST) / INTERLUDE_EVERY
+    : null
 
 // The main feed, like products on a marketplace: every service in every place, sortable.
 export const OffersFeed = ({
@@ -66,20 +74,27 @@ export const OffersFeed = ({
   return (
     <div className={styles.feed}>
       <ul className={styles.grid}>
-        {sorted.map((offer, index) => (
-          <Fragment key={offer.id}>
-            {index === 4 && interlude && <li className={styles.interlude}>{interlude}</li>}
-            <li>
-              <OfferCard
-                offer={offer}
-                isHit={hits.has(offer.id)}
-                isPriority={index < 4}
-                action={<FavoriteButton id={offer.id} label={offer.name} />}
-              />
-            </li>
-          </Fragment>
-        ))}
-        {sorted.length <= 4 && interlude && <li className={styles.interlude}>{interlude}</li>}
+        {sorted.map((offer, index) => {
+          const block = interlude ? blockAt(index) : null
+          return (
+            <Fragment key={offer.id}>
+              {block !== null && interlude?.(block) && (
+                <li className={styles.interlude}>{interlude(block)}</li>
+              )}
+              <li>
+                <OfferCard
+                  offer={offer}
+                  isHit={hits.has(offer.id)}
+                  isPriority={index < 4}
+                  action={<FavoriteButton id={offer.id} label={offer.name} />}
+                />
+              </li>
+            </Fragment>
+          )
+        })}
+        {sorted.length <= INTERLUDE_FIRST && interlude && (
+          <li className={styles.interlude}>{interlude(0)}</li>
+        )}
         {/* The next page on its way: placeholder cards of the same shape. */}
         {isLoading &&
           Array.from({ length: 4 }, (_, index) => (
