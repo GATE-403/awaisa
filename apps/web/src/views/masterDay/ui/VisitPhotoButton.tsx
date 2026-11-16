@@ -29,7 +29,7 @@ export const VisitPhotoButton = ({ slug, bookingId }: VisitPhotoButtonProps) => 
       await addVisitPhoto(slug, bookingId, file)
       setState('done')
       haptic('success')
-      toast.show({ title: 'Фото в ленте «Работы»', type: 'success' })
+      toast.show({ title: 'Фото в «Образах»', type: 'success' })
     } catch (error) {
       setState('idle')
       toast.show({ title: 'Не загрузилось', description: getErrorMessage(error), type: 'error' })

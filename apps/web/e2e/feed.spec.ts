@@ -9,7 +9,7 @@ const TINY_PNG =
 
 type WorkPhoto = { id: string; serviceId: string | null; isHidden: boolean }
 
-test.describe('«Работы» feed', () => {
+test.describe('«Образы» feed', () => {
   test('a tagged work photo books that service with that master; reports hide it', async ({
     page,
     browser,
@@ -63,8 +63,9 @@ test.describe('«Работы» feed', () => {
         card.getByRole('link', { name: `Записаться к мастеру ${master.name}` }),
       ).toHaveAttribute('href', `/${SLUG}/book?specialist=${master.id}`)
 
-      // «Нравится» counts once per device and goes back; a double tap on the photo likes it.
-      const like = card.getByRole('button', { name: /^Нравится/ })
+      // «Нравится» (under the hand) counts once per device and goes back; a double tap on the
+      // photo likes it.
+      const like = guest.getByRole('button', { name: /^Нравится/ })
       await like.click()
       await expect(like).toHaveAttribute('aria-pressed', 'true')
       await expect(like).toHaveAccessibleName('Нравится: 1')
@@ -81,13 +82,14 @@ test.describe('«Работы» feed', () => {
         .toBeGreaterThanOrEqual(0)
 
       // Reviews of this service with this master open over the feed.
-      await card.getByRole('button', { name: /^Отзывы/ }).click()
+      await guest.getByRole('button', { name: 'Ещё' }).click()
+      await guest.getByRole('menuitem', { name: /^Отзывы/ }).click()
       const reviews = guest.getByRole('dialog', { name: /^Отзывы/ })
       await expect(reviews).toBeVisible()
       await reviews.getByRole('button', { name: 'Готово' }).click()
       await expect(reviews).toBeHidden()
 
-      const book = card.getByRole('link', { name: 'Записаться', exact: true })
+      const book = guest.getByRole('link', { name: /^Записаться( ·|$)/ })
       await expect(book).toHaveAttribute(
         'href',
         new RegExp(`^/${SLUG}/book\\?service=${service.id}&specialist=${master.id}`),
@@ -116,6 +118,6 @@ test.describe('«Работы» feed', () => {
       'aria-current',
       'page',
     )
-    await expect(page.getByRole('feed', { name: 'Лента работ' })).toBeVisible()
+    await expect(page.getByRole('feed', { name: 'Образы' })).toBeVisible()
   })
 })

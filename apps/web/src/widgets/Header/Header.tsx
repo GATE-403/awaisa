@@ -4,7 +4,7 @@ import {
   Compass,
   MapPin,
   MapTrifold,
-  PlayCircle,
+  Sparkle,
   SquaresFour,
   Storefront,
   Trophy,
@@ -30,7 +30,7 @@ import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
 
 const ACTIONS = [
-  { href: '/feed', label: 'Работы', icon: PlayCircle },
+  { href: '/feed', label: 'Образы', icon: Sparkle },
   { href: '/map', label: 'Карта', icon: MapTrifold },
   { href: '/top', label: 'Рейтинг', icon: Trophy },
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
