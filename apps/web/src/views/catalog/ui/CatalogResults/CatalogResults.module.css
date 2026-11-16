@@ -92,13 +92,6 @@
   position: absolute;
 }
 
-/* A block set into the grid (the masters' work) spans it; dense flow fills the row before it. */
-.interlude {
-  grid-column: 1 / -1;
-  min-width: 0;
-  margin: var(--space-4) 0;
-}
-
 /* Five across: the shelf still comes after two full rows (4 cards before it, 6 after). */
 @media (min-width: 1400px) {
   .places {
@@ -107,7 +100,7 @@
 }
 
 /* Off-screen cards skip layout and paint until scrolled near (long photo grids on phones). */
-.places > li:not(.interlude) {
+.places > li {
   content-visibility: auto;
   contain-intrinsic-size: auto 240px;
 }
@@ -117,11 +110,6 @@
 @media (max-width: 639px) {
   .places {
     margin: 0 calc(8px - var(--page-gutter));
-  }
-
-  /* The mosaic's pictures keep the cards' 8px edges; only its heading keeps the page gutter. */
-  .interlude > section > div:first-child {
-    padding-inline: calc(var(--page-gutter) - 8px);
   }
 }
 

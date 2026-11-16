@@ -1,12 +1,13 @@
 'use client'
 
-import { Fragment, type ReactNode } from 'react'
+import { Fragment } from 'react'
 import { useNextFree } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { FavoriteButton } from '@/features/favorites'
-import type { Offer } from '@/shared/api/types'
+import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { Picture } from '@/shared/ui/Placeholder/Placeholder'
+import { WorkTile } from '../WorkTile/WorkTile'
 import styles from './OffersFeed.module.css'
 
 type FeedSort = 'popular' | 'soon' | 'price'
@@ -14,8 +15,10 @@ type FeedSort = 'popular' | 'soon' | 'price'
 interface OffersFeedProps {
   offers: Offer[]
   sort: FeedSort
-  /** Blocks set into the grid — the first after two rows, then every `INTERLUDE_EVERY` cards. */
-  interlude?: (block: number) => ReactNode
+  /** The masters' work, set into the grid one cell at a time (`WorkTile`). */
+  works?: FeedItem[]
+  /** The chosen kind, so a work opens «Работы» of the same kind. */
+  kind?: BusinessKind
   /** More pages wait on the server: the end of the list asks for the next one. */
   hasMore?: boolean
   isLoading?: boolean
@@ -29,20 +32,25 @@ const FEED_SORTS: { value: FeedSort; label: string }[] = [
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
-const INTERLUDE_FIRST = 4
-const INTERLUDE_EVERY = 8
+const WORK_FIRST = 3
+const WORK_EVERY = 5
 
-// Where a block goes: after the 4th card, then after every eighth one more.
-const blockAt = (index: number) =>
-  index >= INTERLUDE_FIRST && (index - INTERLUDE_FIRST) % INTERLUDE_EVERY === 0
-    ? (index - INTERLUDE_FIRST) / INTERLUDE_EVERY
+// Which work goes before this card: the first after three cards, then one every five more —
+// the grid keeps its rhythm and the work reads as part of it, not as a section.
+const workAt = (index: number) =>
+  index >= WORK_FIRST && (index - WORK_FIRST) % WORK_EVERY === 0
+    ? (index - WORK_FIRST) / WORK_EVERY
     : null
+
+// Every third work is a feature (two cards wide), so the grid has a beat instead of a list's.
+const isBigWork = (position: number) => position % 3 === 1
 
 // The main feed, like products on a marketplace: every service in every place, sortable.
 export const OffersFeed = ({
   offers,
   sort,
-  interlude,
+  works,
+  kind,
   hasMore = false,
   isLoading = false,
   onEndReached,
@@ -75,11 +83,14 @@ export const OffersFeed = ({
     <div className={styles.feed}>
       <ul className={styles.grid}>
         {sorted.map((offer, index) => {
-          const block = interlude ? blockAt(index) : null
+          const position = workAt(index)
+          const work = position === null ? undefined : works?.[position]
           return (
             <Fragment key={offer.id}>
-              {block !== null && interlude?.(block) && (
-                <li className={styles.interlude}>{interlude(block)}</li>
+              {work && position !== null && (
+                <li className={styles.work} data-big={isBigWork(position) || undefined}>
+                  <WorkTile item={work} kind={kind} isBig={isBigWork(position)} />
+                </li>
               )}
               <li>
                 <OfferCard
@@ -92,9 +103,6 @@ export const OffersFeed = ({
             </Fragment>
           )
         })}
-        {sorted.length <= INTERLUDE_FIRST && interlude && (
-          <li className={styles.interlude}>{interlude(0)}</li>
-        )}
         {/* The next page on its way: placeholder cards of the same shape. */}
         {isLoading &&
           Array.from({ length: 4 }, (_, index) => (
