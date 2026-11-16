@@ -2,11 +2,14 @@
    each takes its own row. Only transforms move, so the fan is smooth on phones. */
 .stack {
   --card-height: 64px;
-  --peek: 30px;
+  --peek: 22px;
   --gap: 8px;
 
+  /* A pull down spreads the folded cards toward their fanned rows under the finger. */
+  --spread: calc(var(--peek) + var(--pull, 0) * (var(--card-height) + var(--gap) - var(--peek)));
+
   position: relative;
-  height: calc(var(--card-height) + (var(--count) - 1) * var(--peek));
+  height: calc(var(--card-height) + (var(--count) - 1) * var(--spread));
   /* Sideways moves are ours (they shuffle the stack); up and down still scroll the sheet. */
   touch-action: pan-y;
   transition: height 420ms var(--ease-spring);
@@ -35,10 +38,10 @@
   isolation: isolate;
   /* The shadow follows the notched outline (a box-shadow would be cut away with it). */
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.14)) drop-shadow(0 10px 18px rgb(0 0 0 / 0.2))
-    brightness(calc(1 - var(--depth) * 0.08));
+    brightness(calc(1 - var(--depth) * 0.1 * (1 - var(--pull, 0))));
   color: #fff;
-  transform: translate(var(--drag), calc(var(--i) * var(--peek))) rotate(var(--tilt))
-    scale(calc(1 - var(--depth) * 0.05));
+  transform: translate(var(--drag), calc(var(--i) * var(--spread))) rotate(var(--tilt))
+    scale(calc(1 - var(--depth) * 0.03 * (1 - var(--pull, 0))));
   transform-origin: top center;
   transition:
     transform 420ms var(--ease-spring),
@@ -46,9 +49,63 @@
   animation: land 520ms var(--ease-spring) backwards;
 }
 
-/* Under the finger the front card follows it at once; let go and it springs. */
-.card[data-dragging] {
+/* Under the finger the cards follow it at once; let go and they spring. */
+.card[data-dragging],
+.stack[data-pulling],
+.stack[data-pulling] .card {
   transition: none;
+}
+
+/* Folded and movable, the stack takes the finger in every direction (swipe aside, pull down);
+   the sheet still scrolls from anywhere else. */
+.stack[data-movable] {
+  touch-action: none;
+}
+
+/* Once: the front card leans aside and back, a hint that it can be swiped. */
+.stack[data-nudge] .card:not([data-back]) {
+  animation:
+    land 520ms var(--ease-spring) backwards,
+    nudge 900ms var(--ease-standard) 600ms;
+}
+
+@keyframes nudge {
+  30% {
+    translate: -18px 0;
+    rotate: -1.5deg;
+  }
+  60% {
+    translate: 8px 0;
+    rotate: 0.6deg;
+  }
+}
+
+.dots {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 50%;
+  display: flex;
+  gap: 6px;
+  translate: -50% 0;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 22%, transparent);
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    width var(--duration-fast) var(--ease-spring);
+}
+
+.dot[data-current] {
+  width: 16px;
+  background: var(--color-foreground);
+}
+
+.stack:has(.dots) {
+  margin-bottom: var(--space-5);
 }
 
 .stack[data-fanned] .card {
@@ -218,7 +275,7 @@
    instead of the top half of a face and a cut title. */
 .stack:not([data-fanned]) .card[data-back] {
   align-items: flex-start;
-  padding-top: 7px;
+  padding-top: 3px;
 }
 
 .stack:not([data-fanned]) .card[data-back] .media,

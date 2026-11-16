@@ -1,6 +1,13 @@
 'use client'
 
-import { type CSSProperties, type PointerEvent, type ReactNode, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './CardStack.module.css'
@@ -27,6 +34,9 @@ interface CardStackProps {
 
 // How far a sideways pull goes before it shuffles the stack.
 const SWIPE_DISTANCE = 48
+// How far a pull down spreads the folded stack fully; past a third of it, it stays fanned.
+const PULL_DISTANCE = 140
+const NUDGE_KEY = 'awaisa:stack-nudge:v1'
 
 // Done steps become cards — torn-off parts of the ticket the booking turns into — and slide into a
 // stack above the open question, the newest in front. A sideways swipe shuffles the folded stack
@@ -38,12 +48,30 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
   const [dragX, setDragX] = useState(0)
+  // 0…1 while a pull down spreads the folded stack under the finger.
+  const [pull, setPull] = useState(0)
+  // The first time a stack of two shows, its front card leans aside once: it can be swiped.
+  const [isNudging, setIsNudging] = useState(false)
   const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
   const swallowClick = useRef(false)
   const count = cards.length
   const isOpen = isFanned || count === 1
   // Where each card lies in the folded stack: 0 at the back, count - 1 in front.
   const placeOf = (index: number) => (((index + shift) % count) + count) % count
+
+  const canMove = !isOpen && count > 1
+  useEffect(() => {
+    if (!canMove) return
+    try {
+      if (window.sessionStorage.getItem(NUDGE_KEY)) return
+      window.sessionStorage.setItem(NUDGE_KEY, '1')
+    } catch {
+      return
+    }
+    setIsNudging(true)
+    const timer = window.setTimeout(() => setIsNudging(false), 1800)
+    return () => window.clearTimeout(timer)
+  }, [canMove])
 
   if (count === 0) return null
 
@@ -59,16 +87,25 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     const dy = event.clientY - start.y
     if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      if (start.isSideways) event.currentTarget.setPointerCapture(event.pointerId)
+      event.currentTarget.setPointerCapture(event.pointerId)
     }
     if (start.isSideways) setDragX(dx)
+    else if (start.isSideways === false) setPull(Math.min(1, Math.max(0, dy / PULL_DISTANCE)))
   }
 
   const handlePointerUp = () => {
     const start = gesture.current
     gesture.current = null
-    if (!start?.isSideways) return
+    if (!start || start.isSideways === null) return
     swallowClick.current = true
+    if (!start.isSideways) {
+      if (pull > 0.33) {
+        setIsFanned(true)
+        haptic('selection')
+      }
+      setPull(0)
+      return
+    }
     if (Math.abs(dragX) > SWIPE_DISTANCE) {
       setShift((current) => current + (dragX < 0 ? 1 : -1))
       haptic('selection')
@@ -80,7 +117,10 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     <div
       className={styles.stack}
       data-fanned={isOpen || undefined}
-      style={{ '--count': count } as CSSProperties}
+      data-movable={canMove || undefined}
+      data-pulling={pull > 0 || undefined}
+      data-nudge={isNudging || undefined}
+      style={{ '--count': count, '--pull': pull } as CSSProperties}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -137,6 +177,18 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
           </section>
         )
       })}
+      {canMove && (
+        // Which card is in front, like a pager: the stack can be swiped and pulled.
+        <span className={styles.dots} aria-hidden>
+          {cards.map((card, index) => (
+            <span
+              key={card.id}
+              className={styles.dot}
+              data-current={placeOf(index) === count - 1 || undefined}
+            />
+          ))}
+        </span>
+      )}
       {!isOpen && (
         <button
           type='button'
