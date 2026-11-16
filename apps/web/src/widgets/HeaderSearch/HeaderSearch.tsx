@@ -202,8 +202,9 @@ export const HeaderSearch = () => {
               <X weight='bold' aria-hidden />
             </button>
           )}
-          {!isOpen && (
+          {!isOpen && pathname !== '/map' && (
             // Where results are counted from: the saved place, or a question until there is one.
+            // Not on /map, whose list has its own «Где вы?» beside the places it sorts.
             <button
               type='button'
               className={styles.where}
