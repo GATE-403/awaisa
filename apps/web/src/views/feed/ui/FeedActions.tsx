@@ -1,0 +1,125 @@
+'use client'
+
+import { ButtonLink } from '@awaisa/ui/Button'
+import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { useToast } from '@awaisa/ui/Toast'
+import { ChatCircle, DotsThree, Flag, Heart, ShareFat } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
+import { useState } from 'react'
+import { useNextSlot } from '@/entities/booking'
+import { reportFeedItem } from '@/shared/api/clientApi'
+import type { FeedItem } from '@/shared/api/types'
+import styles from '../FeedPage.module.css'
+import { WorkReviewsSheet } from './WorkReviewsSheet'
+
+interface FeedActionsProps {
+  item: FeedItem
+  isLiked: boolean
+  onLike: (isLiked: boolean) => void
+  onReported: () => void
+}
+
+const ANY = 'any'
+
+const compact = (count: number) =>
+  count >= 1000
+    ? `${(count / 1000).toFixed(1).replace('.', ',').replace(',0', '')} тыс.`
+    : `${count}`
+
+// Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Записаться»
+// with the first free time, and ♥ with its count.
+export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsProps) => {
+  const toast = useToast()
+  const [isReviewsOpen, setIsReviewsOpen] = useState(false)
+  // The cached feed may not include this device's like yet: count it once, on top. (Rendered
+  // with the work's id as its key, so this is read once per work.)
+  const [wasLiked] = useState(isLiked)
+  const likes = (item.likes ?? 0) + (isLiked === wasLiked ? 0 : isLiked ? 1 : -1)
+  const { business, service, specialist } = item
+  const slot = useNextSlot(service?.id ?? null, { specialistId: specialist?.id ?? ANY })
+  const bookParams = new URLSearchParams(
+    service
+      ? {
+          service: service.id,
+          specialist: specialist?.id ?? ANY,
+          ...(slot ? { date: slot.date, time: slot.time } : {}),
+        }
+      : {},
+  )
+  const bookHref = service ? `/${business.slug}/book?${bookParams}` : `/${business.slug}`
+
+  const share = async () => {
+    const url = `${window.location.origin}/feed?start=${item.id}`
+    const title = service ? `${service.name} — ${business.name}` : business.name
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url })
+        return
+      }
+      await navigator.clipboard.writeText(url)
+      toast.show({ title: 'Ссылка скопирована', type: 'success' })
+    } catch {
+      // The share sheet was closed: nothing to do.
+    }
+  }
+
+  const report = async () => {
+    onReported()
+    await reportFeedItem(item.id).catch(() => undefined)
+    toast.show({ title: 'Спасибо, проверим фото', type: 'info' })
+  }
+
+  return (
+    <div className={styles.actions}>
+      <Menu
+        label='Ещё'
+        className={styles.roundButton}
+        trigger={<DotsThree weight='bold' aria-hidden />}
+      >
+        {service && (
+          <MenuItem
+            icon={<ChatCircle weight='bold' aria-hidden />}
+            onClick={() => setIsReviewsOpen(true)}
+          >
+            {`Отзывы${item.reviewsCount ? ` · ${compact(item.reviewsCount)}` : ''}`}
+          </MenuItem>
+        )}
+        <MenuItem icon={<ShareFat weight='bold' aria-hidden />} onClick={() => void share()}>
+          Поделиться
+        </MenuItem>
+        <MenuItem
+          variant='danger'
+          icon={<Flag weight='bold' aria-hidden />}
+          onClick={() => void report()}
+        >
+          Пожаловаться
+        </MenuItem>
+      </Menu>
+      <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
+        {service ? 'Записаться' : 'Выбрать услугу'}
+        {service && slot && (
+          <span className={styles.slot}>
+            <span className={styles.visuallyHidden}> · </span>
+            {slot.dayLabel} {slot.time}
+          </span>
+        )}
+      </ButtonLink>
+      <button
+        type='button'
+        className={styles.roundButton}
+        aria-pressed={isLiked}
+        aria-label={`Нравится: ${likes}`}
+        data-liked={isLiked || undefined}
+        onClick={() => onLike(!isLiked)}
+      >
+        <Heart weight={isLiked ? 'fill' : 'regular'} aria-hidden />
+        {likes > 0 && (
+          <span className={styles.count} aria-hidden>
+            {compact(likes)}
+          </span>
+        )}
+      </button>
+      {isReviewsOpen && <WorkReviewsSheet item={item} onClose={() => setIsReviewsOpen(false)} />}
+    </div>
+  )
+}
