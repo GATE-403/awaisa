@@ -43,6 +43,24 @@ const SlotsSkeleton = () => (
   </div>
 )
 
+// The ruler while the day loads: the big time, the dial's ticks and the button, in place —
+// so the step keeps its shape instead of showing a grid of capsules that is not coming.
+const RULER_TICKS = [12, 40, 40, 12, 40, 40, 40, 12, 40, 40, 12, 12, 40]
+
+const RulerSkeleton = () => (
+  <div className={styles.rulerSkeleton} aria-hidden>
+    <Skeleton className={styles.rulerTime} />
+    <Skeleton className={styles.rulerStatus} />
+    <div className={styles.rulerTicks}>
+      {RULER_TICKS.map((height, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: static placeholders never reorder
+        <Skeleton key={index} className={styles.rulerTick} style={{ height }} />
+      ))}
+    </div>
+    <Skeleton className={styles.rulerButton} />
+  </div>
+)
+
 export const DateTimePicker = ({
   days,
   dayKey,
@@ -104,7 +122,9 @@ export const DateTimePicker = ({
       </ToggleGroup>
 
       {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
-      {isSpecialistSelected && isLoading && <SlotsSkeleton />}
+      {isSpecialistSelected &&
+        isLoading &&
+        (view === 'ruler' ? <RulerSkeleton /> : <SlotsSkeleton />)}
       {isSpecialistSelected && error && (
         <div className={styles.hint}>
           <p>{error}</p>

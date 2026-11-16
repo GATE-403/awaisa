@@ -105,3 +105,46 @@
   font-weight: var(--font-weight-semibold);
   opacity: 1;
 }
+
+.rulerSkeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.rulerTime {
+  width: 148px;
+  height: 48px;
+  border-radius: var(--radius-md);
+}
+
+.rulerStatus {
+  width: 132px;
+  height: 14px;
+  border-radius: var(--radius-full);
+}
+
+.rulerTicks {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  height: 88px;
+  padding-bottom: var(--space-2);
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+.rulerTick {
+  flex: none;
+  width: 4px;
+  border-radius: var(--radius-full);
+}
+
+.rulerButton {
+  width: 100%;
+  height: var(--control-height-lg);
+  border-radius: var(--radius-full);
+}
