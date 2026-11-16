@@ -2,9 +2,9 @@
 
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
-import { Fragment, type ReactNode, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
-import type { BusinessKind, Offer } from '@/shared/api/types'
+import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { pluralize } from '@/shared/lib/plural'
 import { trackStep } from '@/shared/lib/telemetry'
@@ -12,6 +12,7 @@ import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useOfferPages } from '../../model/useOfferPages'
 import { FEED_SORTS, type FeedSort, OffersFeed } from '../OffersFeed/OffersFeed'
+import { WorkMosaic } from '../WorkMosaic/WorkMosaic'
 import styles from './CatalogResults.module.css'
 
 type ResultsView = 'places' | 'services'
@@ -31,7 +32,8 @@ interface CatalogResultsProps {
   initialSort: FeedSort
   canReset: boolean
   /** A shelf set into the grid after the first rows, like Shorts in a video feed. */
-  interlude?: ReactNode
+  /** The masters' work, set into the grid as mosaic blocks (`WorkMosaic`). */
+  works?: FeedItem[]
   kind?: BusinessKind
   query?: string
 }
@@ -45,12 +47,16 @@ export const CatalogResults = ({
   initialView,
   initialSort,
   canReset,
-  interlude,
+  works,
   kind,
   query,
 }: CatalogResultsProps) => {
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
+  // Mosaic blocks of the masters' work, by their number from the top of the grid.
+  const interlude = works?.length
+    ? (block: number) => <WorkMosaic items={works} kind={kind} block={block} />
+    : undefined
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
 
   useEffect(() => {
@@ -136,7 +142,7 @@ export const CatalogResults = ({
             {shownPlaces.map((business, index) => (
               <Fragment key={business.slug}>
                 {index === INTERLUDE_AFTER && interlude && (
-                  <li className={styles.interlude}>{interlude}</li>
+                  <li className={styles.interlude}>{interlude(0)}</li>
                 )}
                 <li>
                   <BusinessCard business={business} />
@@ -144,7 +150,7 @@ export const CatalogResults = ({
               </Fragment>
             ))}
             {businesses.length <= INTERLUDE_AFTER && interlude && (
-              <li className={styles.interlude}>{interlude}</li>
+              <li className={styles.interlude}>{interlude(0)}</li>
             )}
           </ul>
         ))}
