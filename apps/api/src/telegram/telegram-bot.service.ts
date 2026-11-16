@@ -9,7 +9,10 @@ import { ConfigService } from '@nestjs/config'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, LessThan, Repository } from 'typeorm'
+import { readLoginStartParam } from '../auth/telegram-login.js'
+import { TelegramLoginService } from '../auth/telegram-login.service.js'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
+import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
@@ -19,6 +22,12 @@ import {
   type BookingLine,
   dayText,
   HELP_TEXT,
+  LOGIN_ASK_CONTACT,
+  LOGIN_DONE,
+  LOGIN_EXPIRED,
+  LOGIN_NOT_OWN,
+  LOGIN_REFUSED,
+  LOGIN_SHARE_BUTTON,
   linkedText,
   unclosedText,
 } from './telegram-messages.js'
@@ -28,9 +37,13 @@ type Update = {
   message?: {
     text?: string
     chat: { id: number }
-    from?: { username?: string; first_name?: string }
+    from?: { id?: number; username?: string; first_name?: string }
+    /** «Поделиться номером»: `user_id` is whose number it is (a forwarded contact differs). */
+    contact?: { phone_number: string; user_id?: number }
   }
 }
+
+type ReplyMarkup = Record<string, unknown>
 
 const API_URL = 'https://api.telegram.org'
 const LINK_TTL_MS = 15 * 60_000
@@ -50,6 +63,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     @InjectRepository(TelegramLinkCode) private readonly codes: Repository<TelegramLinkCode>,
     private readonly config: ConfigService<Env, true>,
     private readonly clientMessages: ClientMessagesService,
+    private readonly telegramLogin: TelegramLoginService,
     private readonly runtime: RuntimeService,
   ) {}
 
@@ -137,10 +151,24 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
 
   async handleUpdate(update: Update) {
     const message = update.message
+    if (message?.contact) return this.signInWithContact(message)
     const text = message?.text?.trim()
     if (!message || !text) return
     const chatId = String(message.chat.id)
     const [command = '', argument = ''] = text.split(/\s+/)
+
+    // «Войти через Telegram» on the site: ask for the person's own number.
+    const loginToken = command === '/start' ? readLoginStartParam(argument) : null
+    if (loginToken) {
+      if (!(await this.telegramLogin.attachChat(loginToken, chatId))) {
+        return this.send(chatId, LOGIN_EXPIRED)
+      }
+      return this.send(chatId, LOGIN_ASK_CONTACT, {
+        keyboard: [[{ text: LOGIN_SHARE_BUTTON, request_contact: true }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      })
+    }
 
     // Clients link from their booking (a signed «v…» parameter); owners from the cabinet.
     if (command === '/start' && argument && this.clientMessages.isClientParam(argument)) {
@@ -224,6 +252,23 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     return this.send(chatId, linkedText(business?.name ?? ''))
   }
 
+  private async signInWithContact(message: NonNullable<Update['message']>) {
+    const chatId = String(message.chat.id)
+    const contact = message.contact
+    if (!contact) return
+    // Only the person's own number signs them in, never a contact they forwarded.
+    if (!message.from?.id || contact.user_id !== message.from.id) {
+      return this.send(chatId, LOGIN_NOT_OWN)
+    }
+    const result = await this.telegramLogin.confirmContact(chatId, contact.phone_number)
+    const removeKeyboard = { remove_keyboard: true }
+    if (result === 'refused') return this.send(chatId, LOGIN_REFUSED, removeKeyboard)
+    if (result === 'none') return this.send(chatId, LOGIN_EXPIRED, removeKeyboard)
+    const phone = normalizePhone(contact.phone_number)
+    if (phone) await this.clientMessages.linkPhone(chatId, phone)
+    return this.send(chatId, LOGIN_DONE, removeKeyboard)
+  }
+
   private async sendToday(chatId: string) {
     const chats = await this.chats.findBy({ chatId })
     if (chats.length === 0) return this.send(chatId, HELP_TEXT)
@@ -290,7 +335,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
   }
 
-  private async send(chatId: string, html: string) {
+  private async send(chatId: string, html: string, replyMarkup?: ReplyMarkup) {
     if (!this.token()) {
       this.logger.log(`Telegram to ${chatId}: ${html}`)
       return
@@ -300,6 +345,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       text: html,
       parse_mode: 'HTML',
       link_preview_options: { is_disabled: true },
+      ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
     }).catch((error: unknown) => this.logger.warn(`Telegram send failed: ${String(error)}`))
   }
 

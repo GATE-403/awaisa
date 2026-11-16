@@ -134,6 +134,12 @@ export class AuthService {
 
     await this.codes.update({ id: otp.id }, { consumedAt: new Date() })
     if (otp.providerRequestId) void this.telegram.reportVerified(otp.providerRequestId, code)
+
+    return this.openSession(phone)
+  }
+
+  /** A verified number signs in: the customer is created when new, and a session opens. */
+  async openSession(phone: string) {
     await this.customers.upsert(
       { phone },
       { conflictPaths: ['phone'], skipUpdateIfNoValuesChanged: true },
