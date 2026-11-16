@@ -8,6 +8,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { getClientLoyalty, getLoyalty, sellSubscription } from '@/shared/api/clientApi'
 import type { ClientLoyalty, SubscriptionPlan } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
 interface ClientLoyaltySectionProps {
@@ -54,7 +55,7 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
 
   return (
     <section className={sheet.group} aria-label='Лояльность'>
-      <h3 className={sheet.groupTitle}>Лояльность</h3>
+      <SectionCaption>Лояльность</SectionCaption>
       <div className={sheet.list}>
         {(loyalty.bonusPercent !== null || loyalty.bonusBalance > 0) && (
           <div className={sheet.row}>

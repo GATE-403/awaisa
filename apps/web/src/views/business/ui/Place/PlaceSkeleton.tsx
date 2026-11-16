@@ -1,4 +1,5 @@
 import { Block, Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from './Place.module.css'
 import skeleton from './PlaceSkeleton.module.css'
 
@@ -57,9 +58,9 @@ export const PlaceSkeleton = () => (
               <TextLine chars={7} />
             </p>
             <div className={styles.group}>
-              <p className={styles.groupTitle}>
+              <SectionCaption as='p'>
                 <TextLine chars={14} />
-              </p>
+              </SectionCaption>
               <ul className={styles.serviceGrid} aria-hidden='true'>
                 {Array.from({ length: CARDS }, (_, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: identical placeholders

@@ -29,11 +29,6 @@
   margin-left: auto;
 }
 
-.empty {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-}
-
 /* A thread like the reviews: the question, who asked, the place's answer under its face. */
 .list {
   display: flex;

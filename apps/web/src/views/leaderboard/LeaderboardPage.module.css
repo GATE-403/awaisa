@@ -39,7 +39,6 @@
   font-weight: var(--font-weight-regular);
 }
 
-.empty,
 .footnote {
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);

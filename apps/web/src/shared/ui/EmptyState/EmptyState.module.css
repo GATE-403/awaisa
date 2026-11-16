@@ -1,0 +1,72 @@
+.root[data-variant="card"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-12) var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.root[data-variant="inline"] {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.root[data-variant="inline"][data-centered] {
+  align-items: center;
+  text-align: center;
+}
+
+/* On a dark stage the card is the stage itself: no surface, light words. */
+.root[data-on-dark] {
+  justify-content: center;
+  height: 100%;
+  background: none;
+  box-shadow: none;
+  color: #fff;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-1);
+  color: var(--color-primary);
+}
+
+.icon > svg {
+  width: 56px;
+  height: auto;
+}
+
+.title {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text {
+  max-width: 40ch;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+}
+
+.root[data-on-dark] .text {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.root:has(> :last-child:not(.text)) .text {
+  margin-bottom: var(--space-2);
+}
+
+.root a:not([data-variant]) {
+  color: var(--color-link);
+}

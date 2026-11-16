@@ -4,6 +4,7 @@ import { Check, NavigationArrow } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { BISHKEK_AREAS } from '@/shared/config/areas'
 import { type MyPlace, saveMyPlace, useMyPlace } from '@/shared/lib/myPlace'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './PlacePickerSheet.module.css'
@@ -61,7 +62,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
       </div>
 
       <div className={sheet.group}>
-        <h3 className={sheet.groupTitle}>Район Бишкека</h3>
+        <SectionCaption>Район Бишкека</SectionCaption>
         <div className={sheet.list}>
           {BISHKEK_AREAS.map((area) => {
             const isChosen = current?.source === 'area' && current.label === area.label

@@ -10,6 +10,7 @@ import { useRequireSession } from '@/entities/session'
 import { getMasterPlaces } from '@/shared/api/clientApi'
 import type { MasterPlace } from '@/shared/api/types'
 import { Container } from '@/shared/ui/Container/Container'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import styles from './MasterDayPage.module.css'
 
@@ -45,12 +46,10 @@ export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps
         <PageTitle size='sm' title='Мой день.' subtitle='Где вы работаете мастером.' />
         {!places && <Skeleton className={styles.skeleton} />}
         {places?.length === 0 && (
-          <div className={styles.empty}>
-            <p className={styles.emptyTitle}>Этот номер не привязан к мастеру</p>
-            <p className={styles.emptyText}>
-              Попросите владельца указать его в карточке мастера: Кабинет → Мастера.
-            </p>
-          </div>
+          <EmptyState
+            title='Этот номер не привязан к мастеру'
+            text='Попросите владельца указать его в карточке мастера: Кабинет → Мастера.'
+          />
         )}
         {places && places.length > 0 && (
           <ul className={styles.agenda}>

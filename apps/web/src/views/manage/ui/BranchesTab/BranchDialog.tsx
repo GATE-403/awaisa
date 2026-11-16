@@ -5,6 +5,7 @@ import { type FormEvent, useState } from 'react'
 import type { Branch, BranchInput } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import type { Point } from '@/shared/ui/MapView/MapView'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -114,7 +115,7 @@ export const BranchDialog = ({
         </div>
 
         <section className={sheet.group} aria-label='Метка на карте'>
-          <h3 className={sheet.groupTitle}>Метка на карте</h3>
+          <SectionCaption>Метка на карте</SectionCaption>
           <LocationPicker value={point} onChange={setPoint} />
           <p className={sheet.groupFooter}>
             {point

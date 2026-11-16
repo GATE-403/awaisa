@@ -20,6 +20,7 @@ import type { BusinessKind, MapPlace } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { useMyPlace } from '@/shared/lib/myPlace'
 import { pluralize } from '@/shared/lib/plural'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import type { Point } from '@/shared/ui/MapView/MapView'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useMapPlaces } from '@/views/map/model/useMapPlaces'
@@ -322,13 +323,15 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
           {isLoading && places.length === 0 ? (
             <Skeleton className={styles.skeleton} />
           ) : places.length === 0 ? (
-            <p className={styles.empty}>
-              Здесь пока нет мест на карте. Попробуйте другой вид или{' '}
-              <NextLink href='/' className={styles.link}>
-                каталог
-              </NextLink>
-              .
-            </p>
+            <EmptyState
+              variant='inline'
+              text={
+                <>
+                  Здесь пока нет мест на карте. Попробуйте другой вид или{' '}
+                  <NextLink href='/'>каталог</NextLink>.
+                </>
+              }
+            />
           ) : (
             <NextFreeProvider slugs={slugs}>
               <ul className={styles.list}>

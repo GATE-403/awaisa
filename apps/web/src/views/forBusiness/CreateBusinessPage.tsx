@@ -17,6 +17,7 @@ import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { useCreateBusinessForm } from '@/views/forBusiness/model/useCreateBusinessForm'
 import styles from './CreateBusinessPage.module.css'
 
@@ -126,7 +127,7 @@ export const CreateBusinessPage = () => {
 
                 {form.templates.length > 0 ? (
                   <section className={styles.group} aria-label='Услуги'>
-                    <h2 className={styles.groupTitle}>Услуги</h2>
+                    <SectionCaption as='h2'>Услуги</SectionCaption>
                     <ul className={styles.list}>
                       {form.templates.map((template) => (
                         <li key={template.name} className={styles.serviceRow}>

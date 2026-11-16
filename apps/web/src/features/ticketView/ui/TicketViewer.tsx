@@ -14,6 +14,7 @@ import { addMinutes } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './TicketViewer.module.css'
@@ -96,7 +97,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
 
       {/* Everything about the visit, not just what fits on the ticket. */}
       <section className={sheet.group} aria-label='О визите'>
-        <h3 className={sheet.groupTitle}>О визите</h3>
+        <SectionCaption>О визите</SectionCaption>
         <dl className={`${sheet.list} ${styles.details}`}>
           <div className={styles.detail}>
             <dt>Когда</dt>
@@ -143,7 +144,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
       </section>
 
       <section className={sheet.group} aria-label='Где'>
-        <h3 className={sheet.groupTitle}>{booking.business.name}</h3>
+        <SectionCaption>{booking.business.name}</SectionCaption>
         <div className={sheet.list}>
           {booking.business.address && (
             <a
