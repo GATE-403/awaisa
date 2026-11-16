@@ -236,13 +236,10 @@ export const BookingPage = ({
   const chosenSpecialist = catalog.specialists.find(
     (specialist) => specialist.id === form.specialistId,
   )
-  // The ticket's parts in one family: the place's own hue, then each next card 30° further round
-  // the wheel at the same lightness and strength — they go together and still read apart. The
-  // walk turns away from the olive-yellow band (pink and orange go toward purple, the rest
-  // toward blue), where dark tones turn muddy.
+  // The ticket's parts in one colour — the place's own — told apart by lightness alone, each
+  // next card a step lighter; several hues side by side pulled the eye everywhere at once.
   const placeTint = pickTint(business.name)
-  const step = /pink|orange|purple/.test(placeTint) ? -30 : 30
-  const cardTone = (index: number) => `oklch(from ${placeTint} 0.47 0.12 calc(h + ${index * step}))`
+  const cardTone = (index: number) => `oklch(from ${placeTint} ${0.34 + index * 0.045} 0.085 h)`
   const chosenCards: StackCardProps[] = []
   if (form.branches.length > 1 && chosenBranch) {
     const distance = form.branchDistances?.[chosenBranch.id]
