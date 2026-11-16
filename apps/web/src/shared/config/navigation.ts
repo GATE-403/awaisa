@@ -50,6 +50,9 @@ const getBusinessSlug = (pathname: string) => {
 const isCabinetPath = (pathname: string) =>
   pathname === '/manage' || pathname.startsWith('/manage/')
 
+// Screens of their own, without the site's header, tab bar and footer (sign-in).
+const isStandalonePath = (pathname: string) => pathname === '/login'
+
 const isBookingPath = (pathname: string) => /^\/[^/]+\/book$/.test(pathname)
 
 const isActivePath = (pathname: string, href: string) => {
@@ -58,4 +61,4 @@ const isActivePath = (pathname: string, href: string) => {
 }
 
 export type { NavItem }
-export { getBusinessSlug, isActivePath, isBookingPath, isCabinetPath, NAV_ITEMS }
+export { getBusinessSlug, isActivePath, isBookingPath, isCabinetPath, isStandalonePath, NAV_ITEMS }
