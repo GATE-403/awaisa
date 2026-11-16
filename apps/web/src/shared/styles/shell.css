@@ -1,4 +1,17 @@
 :root {
+  /* Text over pictures (offer, place, master, «Для вас», work and service cards): one scrim,
+     clear over the top third and nearly black at the foot, eased so it never shows a band, and
+     a soft shadow under the letters — light photos used to swallow white text. */
+  --card-scrim: linear-gradient(
+    to bottom,
+    rgb(0 0 0 / 0) 30%,
+    rgb(0 0 0 / 0.28) 46%,
+    rgb(0 0 0 / 0.62) 62%,
+    rgb(0 0 0 / 0.84) 80%,
+    rgb(0 0 0 / 0.92)
+  );
+  --card-text-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 0 14px rgb(0 0 0 / 0.3);
+
   /* Phones: the mascot with the search field, then category chips. */
   --header-height: 96px;
   --tabbar-height: 64px;
