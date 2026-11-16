@@ -236,13 +236,20 @@ export const BookingPage = ({
   const chosenSpecialist = catalog.specialists.find(
     (specialist) => specialist.id === form.specialistId,
   )
+  // The ticket's parts in one family: the place's own hue, then each next card 30° further round
+  // the wheel at the same lightness and strength — they go together and still read apart. The
+  // walk turns away from the olive-yellow band (pink and orange go toward purple, the rest
+  // toward blue), where dark tones turn muddy.
+  const placeTint = pickTint(business.name)
+  const step = /pink|orange|purple/.test(placeTint) ? -30 : 30
+  const cardTone = (index: number) => `oklch(from ${placeTint} 0.47 0.12 calc(h + ${index * step}))`
   const chosenCards: StackCardProps[] = []
   if (form.branches.length > 1 && chosenBranch) {
     const distance = form.branchDistances?.[chosenBranch.id]
     chosenCards.push({
       id: 'branch',
       title: t('Филиал'),
-      tone: `color-mix(in srgb, ${pickTint(business.name)} 55%, #1c1c1e)`,
+      tone: cardTone(0),
       media: (
         <span className={styles.stackPin}>
           <MapPin weight='fill' />
@@ -259,7 +266,7 @@ export const BookingPage = ({
     chosenCards.push({
       id: 'service',
       title: t('Услуга'),
-      tone: `color-mix(in srgb, ${pickTint(business.name)} 26%, #1c1c1e)`,
+      tone: cardTone(1),
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
         <img {...sizedImage(picture, 88)} alt='' className={styles.stackThumb} />
@@ -279,9 +286,7 @@ export const BookingPage = ({
     chosenCards.push({
       id: 'specialist',
       title: t('Мастер'),
-      tone: chosenSpecialist
-        ? `color-mix(in srgb, ${pickTint(chosenSpecialist.name)} 72%, black)`
-        : 'color-mix(in srgb, var(--color-muted-foreground) 70%, black)',
+      tone: cardTone(2),
       media: chosenSpecialist ? (
         <PersonAvatar
           name={chosenSpecialist.name}
@@ -309,7 +314,7 @@ export const BookingPage = ({
     chosenCards.push({
       id: 'datetime',
       title: t('Дата и время'),
-      tone: 'var(--color-primary)',
+      tone: cardTone(3),
       media: (
         <span className={styles.stackLeaf}>
           <span className={styles.stackLeafMonth}>{t.monthShort(form.dayKey)}</span>
@@ -325,7 +330,7 @@ export const BookingPage = ({
     chosenCards.push({
       id: 'contacts',
       title: t('Контакты'),
-      tone: 'color-mix(in srgb, #8e8e93 42%, #1c1c1e)',
+      tone: cardTone(4),
       media: <PersonAvatar name={form.name.trim()} size='md' className={styles.stackFace} />,
       primary: form.name.trim(),
       secondary: formatPhone(form.accountPhone ?? form.phone),
