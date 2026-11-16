@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import styles from './TimeRuler.module.css'
@@ -12,6 +12,8 @@ interface TimeRulerProps {
   /** The visit's length, for «до 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
+  /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
+  days?: ReactNode
   /** Another day is loading: the dial stays, dimmed and still. */
   isPending?: boolean
 }
@@ -36,6 +38,7 @@ export const TimeRuler = ({
   durationMinutes,
   onPick,
   isPending = false,
+  days,
 }: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
@@ -159,6 +162,8 @@ export const TimeRuler = ({
           </span>
         )}
       </p>
+
+      {days}
 
       {/* Never a dead button: on a taken time it leads to the nearest free one. */}
       <Button
