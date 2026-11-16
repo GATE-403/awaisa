@@ -1,12 +1,12 @@
 'use client'
 
-import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Fragment, type ReactNode } from 'react'
 import { useNextFree } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { FavoriteButton } from '@/features/favorites'
 import type { Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
+import { Picture } from '@/shared/ui/Placeholder/Placeholder'
 import styles from './OffersFeed.module.css'
 
 type FeedSort = 'popular' | 'soon' | 'price'
@@ -85,7 +85,7 @@ export const OffersFeed = ({
           Array.from({ length: 4 }, (_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: identical placeholders
             <li key={`loading-${index}`} aria-hidden>
-              <Skeleton className={styles.placeholder} />
+              <Picture className={styles.placeholder} />
             </li>
           ))}
       </ul>

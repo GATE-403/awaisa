@@ -37,6 +37,8 @@ type ColorScheme = {
   subtle: string
   subtleHover: string
   fill: string
+  /** The mascot drawn on a picture frame while its picture loads (or when there is none). */
+  placeholderMark: string
   fillHover: string
   mutedForeground: string
   tertiaryForeground: string
@@ -84,6 +86,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     subtleHover: 'rgb(0 0 0 / 0.1)',
     // Bordered Neutral controls (buttons, segmented track) in the macOS 26 kit.
     fill: 'rgb(0 0 0 / 0.05)',
+    placeholderMark: 'rgb(0 0 0 / 0.12)',
     fillHover: 'rgb(0 0 0 / 0.08)',
     mutedForeground: '#6e6e73',
     tertiaryForeground: 'rgb(0 0 0 / 0.25)',
@@ -135,6 +138,7 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     subtle: 'rgb(255 255 255 / 0.1)',
     subtleHover: 'rgb(255 255 255 / 0.14)',
     fill: 'rgb(255 255 255 / 0.1)',
+    placeholderMark: 'rgb(255 255 255 / 0.14)',
     fillHover: 'rgb(255 255 255 / 0.14)',
     mutedForeground: 'rgb(255 255 255 / 0.62)',
     tertiaryForeground: 'rgb(255 255 255 / 0.3)',

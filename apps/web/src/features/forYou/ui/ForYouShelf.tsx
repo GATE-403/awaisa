@@ -12,6 +12,7 @@ import { sizedImage } from '@/shared/lib/imageSizes'
 import { usePreferences } from '../lib/preferences'
 import { deviceSession, readRecent, type Surface, track, trackPickClick } from '../lib/signals'
 import styles from './ForYou.module.css'
+import { ForYouShelfPlaceholder } from './ForYouShelfPlaceholder'
 import { PreferencesSheet } from './PreferencesSheet'
 
 // The capsule on a 144px card holds about 17 characters: past that only the reason's lead is
@@ -127,26 +128,10 @@ export const ForYouShelf = ({
     return () => observer.disconnect()
   }, [shownIds, surface])
 
-  // The catalog's shelf is there for everyone: hold its place with blank cards while the picks
-  // load, so the results under it do not jump down when they arrive.
+  // The catalog's shelf is there for everyone: it holds its place while the picks load, so the
+  // results under it do not jump down when they arrive.
   if (isForEveryone && (!isReady || items === null)) {
-    return (
-      <section className={styles.shelf} aria-labelledby={titleId} aria-busy='true'>
-        <div className={styles.head}>
-          <h2 id={titleId} className={styles.title}>
-            {title}
-          </h2>
-          {headAction}
-        </div>
-        <ul className={styles.track} aria-hidden='true'>
-          {[0, 1, 2, 3].map((index) => (
-            <li key={index}>
-              <span className={styles.card} data-placeholder='' />
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
+    return <ForYouShelfPlaceholder title={title} headAction={headAction} />
   }
 
   if (!isReady) return null
@@ -195,6 +180,7 @@ export const ForYouShelf = ({
               href={`/${item.slug}/book?service=${item.id}`}
               className={styles.card}
               data-card=''
+              data-picture-frame={item.coverUrl ? '' : undefined}
               onClick={() =>
                 trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
               }
