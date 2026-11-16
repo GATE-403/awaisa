@@ -16,6 +16,13 @@ const bookingSteps = (page: Page) => ({
   contacts: page.locator('#step-contacts'),
 })
 
+// Done steps lie in a stack; folded, a tap fans it out so each card's «Изменить» can be reached.
+const editStep = async (page: Page, step: keyof ReturnType<typeof bookingSteps>) => {
+  const reveal = page.getByRole('button', { name: 'Показать выбор' })
+  if (await reveal.isVisible()) await reveal.click()
+  await bookingSteps(page)[step].getByRole('button', { name: 'Изменить' }).click()
+}
+
 const primaryAction = (page: Page) =>
   page
     .getByRole('button', {
@@ -134,6 +141,7 @@ const settledBox = async (locator: Locator) => {
 }
 
 export {
+  editStep,
   settledBox,
   revealNextSlot,
   API_URL,

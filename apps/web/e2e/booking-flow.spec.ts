@@ -33,7 +33,8 @@ test.describe('User flow: booking', () => {
 
     await expect(page).toHaveURL(/\/book\?service=/)
     const steps = bookingSteps(page)
-    await expect(steps.service.getByRole('button', { name: 'Изменить' })).toBeVisible()
+    // The chosen service already lies in the stack of done cards.
+    await expect(steps.service).toBeVisible()
     await expect(primaryAction(page)).toHaveText(/^(Выбрать (мастера|время)|Ввести контакты)$/)
   })
 
