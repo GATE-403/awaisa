@@ -128,14 +128,15 @@
   /* While the picture loads (or when there is none): a quiet fill close to the page, not accent. */
   background: var(--color-fill);
   color: #fff;
+  text-shadow: var(--card-text-shadow);
 }
 
 .card::after {
   content: "";
   position: absolute;
-  inset: 35% 0 0;
+  inset: 0;
   z-index: -1;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.8));
+  background: var(--card-scrim);
 }
 
 .card:active {

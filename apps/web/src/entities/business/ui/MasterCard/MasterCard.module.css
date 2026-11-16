@@ -15,6 +15,7 @@
   );
   box-shadow: var(--shadow-sm);
   color: #fff;
+  text-shadow: var(--card-text-shadow);
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
@@ -22,9 +23,9 @@
 .card::after {
   content: "";
   position: absolute;
-  inset: 40% 0 0;
+  inset: 0;
   z-index: -1;
-  background: linear-gradient(to bottom, rgb(0 0 0 / 0), rgb(0 0 0 / 0.75));
+  background: var(--card-scrim);
 }
 
 /* «Любой мастер»: a neutral card with a glyph instead of a face. */
