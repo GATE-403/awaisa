@@ -164,6 +164,10 @@ test.describe('UX: guidance and feedback', () => {
     await expect(steps.service).toContainText('Маникюр с покрытием')
     await editStep(page, 'service')
     await expect(steps.service.getByRole('radio', { name: /Маникюр/ })).toBeChecked()
+    // Tapping the chosen card again changes nothing and closes the step.
+    await steps.service.getByRole('radio', { name: /Маникюр/ }).click()
+    await expect(steps.service.getByRole('radio')).toHaveCount(0)
+    await expect(steps.service).toContainText('Маникюр с покрытием')
   })
 
   test('changing the service keeps a compatible master but drops the chosen time', async ({
