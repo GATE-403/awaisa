@@ -19,6 +19,24 @@
     inset 0 0 0 0.5px var(--color-material-border),
     var(--shadow-material),
     var(--shadow-lg);
+  /* Only transform and opacity move (the compositor carries them); the page's own padding for
+     the bar stays, so nothing under it jumps. */
+  transition:
+    translate var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard);
+}
+
+.tabBar[data-tucked] {
+  translate: 0 calc(100% + var(--tabbar-offset) + env(safe-area-inset-bottom) + var(--space-2));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A keyboard user tabbing into the bar always sees it. */
+.tabBar[data-tucked]:focus-within {
+  translate: none;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .tab {
@@ -119,6 +137,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tabBar,
   .indicator {
     transition: none;
   }
