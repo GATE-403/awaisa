@@ -389,9 +389,14 @@
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
 
-/* Tablets: the city link keeps to «Бишкек», so every category fits beside it. */
+/* Tablets: the city link keeps to «Бишкек» and the categories drop their glyphs, so every
+   category fits beside it — on an iPad «Другое» used to hide under the city link. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .cityMore {
+    display: none;
+  }
+
+  .category svg {
     display: none;
   }
 }
