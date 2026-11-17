@@ -233,6 +233,24 @@ class UxContext {
       await this.page.waitForLoadState('domcontentloaded')
       // Let sheets and transitions settle so we judge what a person sees.
       await this.page.waitForTimeout(this.device.network ? 600 : 350)
+      // Finite animations (fades, slides) end first: a row caught mid-fade read as 1.3:1.
+      await this.page
+        .evaluate(() =>
+          Promise.race([
+            Promise.all(
+              document
+                .getAnimations()
+                .filter(
+                  (animation) =>
+                    animation.playState === 'running' &&
+                    Number.isFinite(animation.effect?.getComputedTiming().endTime ?? Infinity),
+                )
+                .map((animation) => animation.finished.catch(() => undefined)),
+            ),
+            new Promise((resolve) => setTimeout(resolve, 2000)),
+          ]),
+        )
+        .catch(() => undefined)
       const index = this.steps.length + 1
       const screenshot = await this.saveShot(`step-${index}`)
       const record: StepRecord = { name, url: this.page.url(), screenshot, vision: [] }

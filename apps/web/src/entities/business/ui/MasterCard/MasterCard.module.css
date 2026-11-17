@@ -110,7 +110,8 @@
 }
 
 .card[data-any] .meta {
-  color: var(--color-muted-foreground);
+  /* «кто свободен»: muted grey on the fill was 3.8:1. */
+  color: var(--color-foreground);
 }
 
 .rating {
@@ -132,4 +133,13 @@
   .card {
     transition: none;
   }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

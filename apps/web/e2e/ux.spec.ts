@@ -197,8 +197,10 @@ test.describe('UX: guidance and feedback', () => {
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'В календарь' })).toBeVisible()
-    await expect(page.getByRole('main').getByRole('link', { name: 'Маршрут' })).toBeVisible()
-    await expect(page.getByRole('main').getByRole('link', { name: 'Мои записи' })).toBeVisible()
+    // The sheet, not the place's page dimmed under it (a direct link opens both).
+    const screen = page.locator('[data-booking-screen]')
+    await expect(screen.getByRole('link', { name: 'Маршрут' })).toBeVisible()
+    await expect(screen.getByRole('link', { name: 'Мои записи' })).toBeVisible()
   })
 })
 

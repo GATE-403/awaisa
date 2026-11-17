@@ -188,14 +188,28 @@ const checkTargets = (page: Page) =>
     const out: TargetResult = []
     // A «stretched link» (an absolutely placed ::after) makes its whole positioned box the
     // target: a card whose title is the link is tapped anywhere on the card.
+    // A positioned control may instead widen itself with a pseudo-element on negative insets
+    // (an invisible 44pt hit area): its box is the union of both.
     const targetRect = (element: Element) => {
+      const own = element.getBoundingClientRect()
+      const isPositioned = getComputedStyle(element).position !== 'static'
+      let box = own
       for (const pseudo of ['::after', '::before']) {
         const style = getComputedStyle(element, pseudo)
         if (style.content === 'none' || style.position !== 'absolute') continue
-        const host = (element as HTMLElement).offsetParent
-        if (host) return host.getBoundingClientRect()
+        if (!isPositioned) {
+          const host = (element as HTMLElement).offsetParent
+          if (host) return host.getBoundingClientRect()
+          continue
+        }
+        const px = (value: string) => Number.parseFloat(value) || 0
+        const left = Math.min(box.left, own.left + px(style.left))
+        const top = Math.min(box.top, own.top + px(style.top))
+        const right = Math.max(box.right, own.right - px(style.right))
+        const bottom = Math.max(box.bottom, own.bottom - px(style.bottom))
+        box = new DOMRect(left, top, right - left, bottom - top)
       }
-      return element.getBoundingClientRect()
+      return box
     }
     const all: { element: Element; rect: DOMRect }[] = []
     for (const control of scope.querySelectorAll(controls)) {

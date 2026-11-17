@@ -17,9 +17,15 @@ const countWords = (text: string) =>
 
 const countVisiblePrimaryButtons = (page: Page) =>
   page.evaluate(() => {
+    // Inert content (the place's page dimmed under the booking sheet) cannot be acted on.
     const isVisible = (element: Element) => {
       const rect = element.getBoundingClientRect()
-      return rect.width > 0 && rect.bottom > 0 && rect.top < window.innerHeight
+      return (
+        rect.width > 0 &&
+        rect.bottom > 0 &&
+        rect.top < window.innerHeight &&
+        !element.closest('[inert]')
+      )
     }
 
     return [...document.querySelectorAll('[data-variant="primary"]')].filter(isVisible).length

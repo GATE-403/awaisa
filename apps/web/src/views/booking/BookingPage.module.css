@@ -65,6 +65,14 @@
   gap: var(--space-4);
 }
 
+/* One quiet line of terms over the contact rows, not a card. */
+.terms {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
 .aside {
   display: none;
 }

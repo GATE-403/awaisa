@@ -53,6 +53,10 @@ const DICTIONARY: Record<string, Entry> = {
   'Скидка «{title}»': ['«{title}» арзандатуусу', 'Discount «{title}»'],
   Итого: ['Жалпы', 'Total'],
   Предоплата: ['Алдын ала төлөм', 'Deposit'],
+  'Предоплата {amount} — вернём, если отмените за сутки': [
+    'Алдын ала төлөм {amount} — бир сутка мурда жокко чыгарсаңыз, кайтарабыз',
+    'Deposit {amount}, refunded if you cancel a day ahead',
+  ],
   '{amount} картой при записи': ['{amount} жазылууда карта менен', '{amount} by card when booking'],
   'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.':
     [

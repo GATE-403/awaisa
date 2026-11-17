@@ -74,6 +74,7 @@ export const BookingScrim = ({ slug, isModal = false }: { slug: string; isModal?
       className={styles.scrim}
       aria-hidden='true'
       tabIndex={-1}
+      data-keep-interactive=''
       onClick={close}
     />
   )

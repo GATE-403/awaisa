@@ -135,12 +135,7 @@ export const BookingSummary = ({
     return (
       <div className={styles.bar}>
         {/* Tapping the price shows everything chosen so far, without scrolling back up. */}
-        <button
-          type='button'
-          className={styles.barInfo}
-          onClick={() => setIsDetailsOpen(true)}
-          aria-label={t('Показать, что выбрано')}
-        >
+        <button type='button' className={styles.barInfo} onClick={() => setIsDetailsOpen(true)}>
           <span className={styles.barPrice}>
             {/* The discount shows before the client commits: the old price struck, the percent. */}
             {discount && service && (
@@ -157,6 +152,8 @@ export const BookingSummary = ({
           >
             {errorMessage ?? hint}
           </span>
+          {/* After the visible total, not instead of it: the name keeps what is written (2.5.3). */}
+          <span className={styles.srOnly}>{`, ${t('Показать, что выбрано')}`}</span>
         </button>
         <Button size='lg' className={styles.barButton} onClick={onSubmit} disabled={isSubmitting}>
           {buttonLabel}

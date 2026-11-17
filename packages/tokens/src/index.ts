@@ -95,11 +95,13 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     control: palette.light.gray5,
     // macOS 26 accent (#0D6FFF), a hair deeper so white labels pass AA.
     primary: '#0a6cf0',
-    primaryHover: '#0d6fff',
+    // Darker on hover, not lighter: white text keeps AA (#0d6fff was 4.4:1).
+    primaryHover: '#0a66e6',
     primaryForeground: palette.white,
     primarySubtle: 'rgb(0 136 255 / 0.12)',
     primarySubtleHover: 'rgb(0 136 255 / 0.18)',
-    link: '#0066cc',
+    // apple.com's #0066cc a hair deeper: it read 4.2–4.5:1 on grey fills (toast action, today).
+    link: '#0060c2',
     ring: 'rgb(0 136 255 / 0.4)',
     danger: palette.light.red,
     dangerHover: '#f52f32',
