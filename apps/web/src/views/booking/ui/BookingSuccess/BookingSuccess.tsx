@@ -4,7 +4,7 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useState } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { ForYouShelf } from '@/features/forYou'
@@ -12,7 +12,16 @@ import { TelegramReminderLink } from '@/features/telegramReminders'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import styles from './BookingSuccess.module.css'
+
+// The rings after the drop, each one fainter.
+const RINGS = [0, 1]
+// The water is drawn small and scaled up: sheet-sized layers (four of ~1800px) ran a phone's
+// WebView out of tile memory and the whole sheet blinked dark for a frame.
+const RIPPLE_SIZE = 240
+// Long enough for the last ring to reach the edge; then the layers leave the page.
+const RIPPLE_MS = 3800
 
 interface BookingSuccessProps {
   booking: Booking
@@ -23,6 +32,38 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const t = useT()
   const session = useSession()
   const [isTicketOpen, setIsTicketOpen] = useState(false)
+  const pondRef = useRef<HTMLDivElement>(null)
+  const checkRef = useRef<HTMLSpanElement>(null)
+  const hasTapped = useRef(false)
+  const [isRippling, setIsRippling] = useState(true)
+
+  // The water spreads from the check to the farthest corner of the sheet.
+  useLayoutEffect(() => {
+    const pond = pondRef.current
+    const check = checkRef.current
+    if (!pond || !check) return
+    const area = pond.getBoundingClientRect()
+    const drop = check.getBoundingClientRect()
+    const x = drop.left + drop.width / 2 - area.left
+    const y = drop.top + drop.height / 2 - area.top
+    const reach = Math.hypot(Math.max(x, area.width - x), Math.max(y, area.height - y))
+    pond.style.setProperty('--drop-x', `${x}px`)
+    pond.style.setProperty('--drop-y', `${y}px`)
+    pond.style.setProperty('--grow', `${(reach * 2) / RIPPLE_SIZE}`)
+  }, [])
+
+  // The drop is felt once, as the check lands: one firm tap (Taptic in the app, a short buzz in
+  // browsers that can vibrate). The ref keeps React's dev double-run from tapping twice.
+  useEffect(() => {
+    const timer = window.setTimeout(() => setIsRippling(false), RIPPLE_MS)
+    const isCalm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!hasTapped.current && !isCalm) {
+      if (getNativeApp()) haptic('impact')
+      else navigator.vibrate?.(30)
+    }
+    hasTapped.current = true
+    return () => window.clearTimeout(timer)
+  }, [])
 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
@@ -36,7 +77,20 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
     <div className={styles.success}>
       {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
           matters — when. */}
-      <span className={styles.check} aria-hidden>
+      {isRippling && (
+        <div ref={pondRef} className={styles.pond} aria-hidden>
+          <span className={styles.ripple} data-kind='swell' />
+          {RINGS.map((n) => (
+            <span
+              key={n}
+              className={styles.ripple}
+              data-kind='ring'
+              style={{ '--n': n } as CSSProperties}
+            />
+          ))}
+        </div>
+      )}
+      <span ref={checkRef} className={styles.check} aria-hidden>
         <Check weight='bold' />
       </span>
       <h1 className={styles.title}>{t('Вы записаны')}</h1>

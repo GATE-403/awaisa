@@ -20,6 +20,7 @@
   border-radius: var(--radius-full);
   background: var(--color-success);
   color: #fff;
+  position: relative;
   animation: pop 420ms var(--ease-spring) both;
 }
 
@@ -195,4 +196,164 @@
   font-size: var(--text-body);
   line-height: 1.45;
   text-align: center;
+}
+
+/* Arrival, like a drop falling into still water: the check lands, a swell of soft green light
+   spreads from it over the whole sheet, and rings follow it out to the edges, each fainter than the
+   one before; a sheen runs across «Вы записаны» as the water passes, and the lines rise one after
+   another. The pond is sized and centred on the check from script (it covers the sheet, so it is
+   absolute in the sheet, not in this column); only transform and opacity move. */
+.pond {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  top: var(--drop-y, 120px);
+  left: var(--drop-x, 50%);
+  width: 240px;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* The big water: one broad swell of light. */
+.ripple[data-kind="swell"] {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-success) 30%, transparent),
+    color-mix(in srgb, var(--color-success) 12%, transparent) 45%,
+    transparent 70%
+  );
+}
+
+/* The rings: a soft band at the rim that widens as it travels, like a ripple flattening out. */
+.ripple[data-kind="ring"] {
+  background: radial-gradient(
+    closest-side,
+    transparent 56%,
+    color-mix(in srgb, var(--color-success) 18%, transparent) 70%,
+    color-mix(in srgb, var(--color-success) 40%, transparent) 82%,
+    color-mix(in srgb, var(--color-success) 18%, transparent) 92%,
+    transparent 100%
+  );
+}
+
+.check::before,
+.check::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--color-success);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ripple[data-kind="swell"] {
+    animation: swell 2600ms cubic-bezier(0.25, 0.6, 0.3, 1) 80ms;
+  }
+
+  .ripple[data-kind="ring"] {
+    animation: ripple 3000ms cubic-bezier(0.25, 0.6, 0.3, 1) calc(160ms + var(--n) * 450ms);
+  }
+
+  .check::before {
+    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+  }
+
+  .check::after {
+    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 360ms;
+  }
+
+  .title {
+    background:
+      linear-gradient(
+        100deg,
+        currentColor 40%,
+        color-mix(in srgb, var(--color-success) 55%, #fff) 50%,
+        currentColor 60%
+      )
+      100% 0 / 300% 100%;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+      rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 160ms backwards,
+      sheen 1100ms var(--ease-standard) 380ms backwards;
+  }
+
+  .lead {
+    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 240ms backwards;
+  }
+
+  .nextStep {
+    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 320ms backwards;
+  }
+
+  .ticket {
+    animation-delay: 380ms;
+  }
+}
+
+@keyframes swell {
+  from {
+    opacity: 1;
+    scale: 0.2;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 0;
+    scale: var(--grow, 8);
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: calc(0.7 - var(--n) * 0.2);
+    scale: 0.2;
+  }
+
+  to {
+    opacity: 0;
+    scale: var(--grow, 8);
+  }
+}
+
+@keyframes ring {
+  from {
+    opacity: 0.7;
+    scale: 1;
+  }
+
+  to {
+    opacity: 0;
+    scale: 2.4;
+  }
+}
+
+@keyframes sheen {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
 }
