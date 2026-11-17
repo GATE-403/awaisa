@@ -22,6 +22,7 @@ import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { distanceKm, knownPosition } from '@/shared/lib/geo'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackFormError } from '@/shared/lib/telemetry'
 import { usePriceQuote } from './usePriceQuote'
 
 type ReminderChoice = 60 | 120 | 1440 | null
@@ -186,6 +187,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     datetime: Boolean(time),
     contacts: firstIncompleteStep === null,
   }
+
+  // Which contact field people get wrong (a code, never the value), once per field and page.
+  useEffect(() => {
+    if (errors.name) trackFormError('name', business.slug)
+    if (errors.phone) trackFormError('phone', business.slug)
+  }, [errors.name, errors.phone, business.slug])
 
   // A returning guest: their name and number from last time, editable as usual.
   // With several branches and a location already allowed (no prompt), the nearest one is chosen

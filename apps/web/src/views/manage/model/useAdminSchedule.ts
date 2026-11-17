@@ -21,6 +21,7 @@ import type {
 } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { pluralize } from '@/shared/lib/plural'
+import { trackToastAction } from '@/shared/lib/telemetry'
 
 // Slightly shorter than the API's 15-second undo window.
 const UNDO_TIMEOUT_MS = 12_000
@@ -87,7 +88,13 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
         description: 'Клиенту уйдёт SMS через 15 секунд',
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
-        action: { label: 'Вернуть', onClick: () => void restore(id) },
+        action: {
+          label: 'Вернуть',
+          onClick: () => {
+            trackToastAction('staff_undo_cancel')
+            void restore(id)
+          },
+        },
       })
       reload()
       return true
@@ -122,6 +129,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
           label: 'Вернуть',
           onClick: () =>
             void runAction(async () => {
+              trackToastAction('staff_undo_move')
               await moveBookingAsSalon(slug, booking.id, moved.previous)
               return 'Запись на прежнем месте'
             }),

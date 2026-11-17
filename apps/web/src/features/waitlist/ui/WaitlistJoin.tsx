@@ -5,7 +5,7 @@ import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
 import { BellRinging, CheckCircle } from '@phosphor-icons/react/ssr'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { readContact, saveContact } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -13,6 +13,7 @@ import { joinWaitlist } from '@/shared/api/clientApi'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import { saveWaitlistEntry, useStoredWaitlist } from '../model/waitlistStorage'
 import styles from './WaitlistJoin.module.css'
@@ -57,6 +58,11 @@ export const WaitlistJoin = ({
       (snapshot.specialist?.id ?? 'any') === specialistId,
   )
 
+  // Shown only on a full day: how many who hit one leave a number rather than go.
+  useEffect(() => {
+    trackStep('full_day_shown')
+  }, [])
+
   const open = () => {
     const contact = readContact()
     setName(session.customer?.name || contact?.name || '')
@@ -64,6 +70,7 @@ export const WaitlistJoin = ({
     setError(null)
     setFieldError(null)
     setIsOpen(true)
+    trackStep('waitlist_open')
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -72,10 +79,12 @@ export const WaitlistJoin = ({
     // what the server says.
     if (!name.trim()) {
       setFieldError({ field: 'name', message: 'Укажите имя' })
+      trackFormError('waitlist_name')
       return
     }
     if (!accountPhone && phone.replace(/\D/g, '').length < 9) {
       setFieldError({ field: 'phone', message: 'Укажите номер — на него придёт SMS' })
+      trackFormError('waitlist_phone')
       return
     }
     setFieldError(null)
@@ -91,6 +100,7 @@ export const WaitlistJoin = ({
       })
       saveWaitlistEntry({ id: entry.id, token, snapshot: entry })
       if (!accountPhone) saveContact({ name: name.trim(), phone })
+      trackStep('waitlist_joined')
       haptic('success')
       setIsOpen(false)
       toast.show({

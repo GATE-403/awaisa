@@ -1,3 +1,4 @@
+import type { FunnelReport, FunnelSegmentsReport, FunnelSignalsReport } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -17,7 +18,9 @@ import {
   type ClientErrorInput,
   clientErrorSchema,
   type FunnelEventsInput,
+  type FunnelReportQuery,
   funnelEventsSchema,
+  funnelReportSchema,
   telemetryReportSchema,
 } from './telemetry.schemas.js'
 import { TelemetryService } from './telemetry.service.js'
@@ -45,15 +48,36 @@ export class TelemetryController {
     await this.telemetry.recordError('web', { ...body, userAgent })
   }
 
-  // Platform admins: where people drop out of booking, and what breaks.
+  // Platform admins: where people drop out of each flow (?flow=), for everyone or one kind of
+  // device (?type=phone&textScale=large&net=slow…), and what breaks.
   @Get('funnel')
   @UseGuards(AuthGuard)
   funnel(
+    @Query({ schema: funnelReportSchema }) query: FunnelReportQuery,
+    @CurrentCustomer() customer: Customer,
+  ): Promise<FunnelReport> {
+    this.assertAdmin(customer)
+    return this.telemetry.funnel(query)
+  }
+
+  @Get('signals')
+  @UseGuards(AuthGuard)
+  signals(
     @Query({ schema: telemetryReportSchema }) query: { days: number },
     @CurrentCustomer() customer: Customer,
-  ) {
+  ): Promise<FunnelSignalsReport> {
     this.assertAdmin(customer)
-    return this.telemetry.funnel(query.days)
+    return this.telemetry.signals(query.days)
+  }
+
+  @Get('segments')
+  @UseGuards(AuthGuard)
+  segments(
+    @Query({ schema: telemetryReportSchema }) query: { days: number },
+    @CurrentCustomer() customer: Customer,
+  ): Promise<FunnelSegmentsReport> {
+    this.assertAdmin(customer)
+    return this.telemetry.segments(query.days)
   }
 
   @Get('errors')

@@ -2,6 +2,7 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { ArrowRight, Bell, CalendarCheck, CaretDown, Columns } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { CSSProperties } from 'react'
+import { TrackStep } from '@/shared/ui/TrackStep/TrackStep'
 import styles from './ForBusinessPage.module.css'
 import { FAQ, STATS, STEPS } from './forBusinessContent'
 import { DragVisual, ReminderVisual, SlotsVisual } from './ui/FeatureVisuals'
@@ -40,6 +41,7 @@ const BLOCKS = [
 // Static at build time (SSG): only the list of places in TrustRow loads in the browser.
 export const ForBusinessPage = () => (
   <main className={styles.page}>
+    <TrackStep step='business_landing' />
     <header className={styles.hero}>
       <div className={styles.heroCopy}>
         <h1 className={styles.title}>Онлайн-запись, которая работает сама</h1>

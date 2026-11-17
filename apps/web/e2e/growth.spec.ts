@@ -7,6 +7,7 @@ import {
   readStoredBookings,
   submitBooking,
 } from './helpers'
+import { withDb } from './visits'
 
 test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => {
   test('a signed-in client books mum with her own name and number; it stays in the account', async ({
@@ -85,5 +86,101 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
       items: { message: string; source: string }[]
     }
     expect(errors.items.find((item) => item.message === message)?.source).toBe('web')
+  })
+
+  test('each flow has its own funnel, read for one kind of device; signals keep codes only', async ({
+    page,
+  }, testInfo) => {
+    const session = `e2e-${Math.random().toString(36).slice(2, 12)}`
+    const device = {
+      type: 'phone',
+      os: 'android',
+      app: 'web',
+      textScale: 'huge',
+      net: 'slow',
+      lang: 'ru',
+      reducedMotion: false,
+      contrastMore: false,
+      dark: false,
+    }
+    const events = await page.request.post('/api/telemetry/events', {
+      data: {
+        session,
+        device,
+        events: [
+          { step: 'login_open' },
+          { step: 'otp_sent', meta: { channel: 'sms' } },
+          { step: 'form_error', meta: { field: 'phone' } },
+        ],
+      },
+    })
+    expect(events.status()).toBe(202)
+    // A value someone typed never fits a code; an unknown flow is refused.
+    const typed = await page.request.post('/api/telemetry/events', {
+      data: { session, events: [{ step: 'form_error', meta: { field: '+996 555 000 111' } }] },
+    })
+    expect(typed.status()).toBe(400)
+
+    await signInViaApi(page, adminPhone(testInfo))
+    expect((await page.request.get('/api/telemetry/funnel?flow=nope')).status()).toBe(400)
+    const funnel = (await (
+      await page.request.get('/api/telemetry/funnel?days=1&flow=login&textScale=huge&net=slow')
+    ).json()) as {
+      flow: string
+      segment: Record<string, string>
+      steps: { step: string; sessions: number }[]
+    }
+    expect(funnel.flow).toBe('login')
+    expect(funnel.segment).toEqual({ textScale: 'huge', net: 'slow' })
+    expect(funnel.steps.map((row) => row.step)).toEqual([
+      'login_open',
+      'otp_sent',
+      'otp_ok',
+      'login_done',
+    ])
+    expect(funnel.steps[1]?.sessions).toBeGreaterThan(0)
+    const signals = (await (await page.request.get('/api/telemetry/signals?days=1')).json()) as {
+      items: { step: string; value: string | null; sessions: number }[]
+    }
+    expect(
+      signals.items.find((item) => item.step === 'form_error' && item.value === 'phone')?.sessions,
+    ).toBeGreaterThan(0)
+    const segments = (await (await page.request.get('/api/telemetry/segments?days=1')).json()) as {
+      items: { dimension: string; value: string; sessions: number }[]
+    }
+    expect(
+      segments.items.find((item) => item.dimension === 'textScale' && item.value === 'huge')
+        ?.sessions,
+    ).toBeGreaterThan(0)
+  })
+
+  test('the sign-in page reports its step with a coarse device profile', async ({ page }) => {
+    // A known device id, so what the page sent can be read back from the database.
+    const session = `e2e-${Math.random().toString(36).slice(2, 12)}`
+    await page.addInitScript((id) => window.localStorage.setItem('awaisa:device:v1', id), session)
+    await page.goto('/login')
+    await expect(page.getByLabel('Номер телефона')).toBeVisible()
+
+    const stored = () =>
+      withDb(async (client) => {
+        const steps = await client.query(
+          'SELECT "step", "flow" FROM "funnel_events" WHERE "session" = $1',
+          [session],
+        )
+        const device = await client.query(
+          'SELECT "device", "text_scale" FROM "funnel_sessions" WHERE "session" = $1',
+          [session],
+        )
+        return { steps: steps.rows, device: device.rows[0] ?? null }
+      })
+    await expect
+      .poll(async () => (await stored()).steps, { timeout: 15_000 })
+      .toContainEqual({
+        step: 'login_open',
+        flow: 'login',
+      })
+    const { device } = await stored()
+    expect(['phone', 'tablet', 'desktop']).toContain(device?.device)
+    expect(device?.text_scale).toBe('normal')
   })
 })

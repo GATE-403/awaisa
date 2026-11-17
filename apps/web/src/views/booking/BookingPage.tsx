@@ -80,6 +80,10 @@ export const BookingPage = ({
   }
   usePageScrollLock()
   const screenRef = useRef<HTMLElement>(null)
+  // The deposit's terms reached the screen before the name and number were asked for.
+  const trackDepositShown = (node: HTMLElement | null) => {
+    if (node) trackStep('deposit_shown', business.slug)
+  }
   useInertOutside(screenRef, Boolean(form.createdBooking))
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
@@ -664,7 +668,7 @@ export const BookingPage = ({
                       {/* Said before the name and number are asked for: what is paid now, when it
                           comes back and where to go. The side panel has no summary card for it. */}
                       {form.service?.deposit ? (
-                        <p className={styles.terms}>
+                        <p className={styles.terms} ref={trackDepositShown}>
                           {t('Предоплата {amount} — вернём, если отмените за сутки', {
                             amount: formatPrice(form.service.deposit),
                           })}
