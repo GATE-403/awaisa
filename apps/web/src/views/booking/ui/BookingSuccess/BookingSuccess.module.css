@@ -186,6 +186,12 @@
   text-align: center;
 }
 
+.amount {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+}
+
 /* Arrival, like a drop falling into still water: the check lands, a swell of soft green light
    spreads from it over the whole sheet, and rings follow it out to the edges, each fainter than the
    one before; a sheen runs across «Вы записаны» as the water passes, and the lines rise one after

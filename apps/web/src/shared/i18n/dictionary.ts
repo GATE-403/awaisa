@@ -167,8 +167,8 @@ const DICTIONARY: Record<string, Entry> = {
   '{day} в {time} · {place}': ['{day}, {time} · {place}', '{day} at {time} · {place}'],
   'Приходите к {time}': ['{time} келиңиз', 'Come at {time}'],
   ' по адресу {address}': [', дареги: {address}', ' to {address}'],
-  'Остаток оплатите в салоне.': ['Калганын салондо төлөйсүз.', 'Pay the rest at the salon.'],
-  'Оплата в салоне.': ['Төлөм салондо.', 'Pay at the salon.'],
+  'Остаток в салоне —': ['Калганы салондо —', 'The rest at the salon:'],
+  'Оплата в салоне —': ['Салондо төлөйсүз —', 'Pay at the salon:'],
   'Перенести или отменить можно по ссылке из SMS.': [
     'SMSтеги шилтеме аркылуу которуп же жокко чыгарсаңыз болот.',
     'Move or cancel by the link in the SMS.',
