@@ -23,7 +23,8 @@ const ErrorPage = ({ error, retry }: ErrorPageProps) => {
         <Mascot className={styles.mascot} />
         <h1 className={styles.title}>Что-то пошло не так</h1>
         <p className={styles.text}>
-          Не получилось загрузить данные. Проверьте интернет и попробуйте ещё раз.
+          Не получилось загрузить страницу. Попробуйте ещё раз через минуту — ваши записи никуда не
+          делись.
         </p>
         <Button size='lg' onClick={retry}>
           Повторить
