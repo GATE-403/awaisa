@@ -5,7 +5,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { downloadCalendarFile, Ticket } from '@/entities/booking'
+import { downloadCalendarFile, formatPrice, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { ForYouShelf } from '@/features/forYou'
 import { TelegramReminderLink } from '@/features/telegramReminders'
@@ -65,6 +65,10 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
     return () => window.clearTimeout(timer)
   }, [])
 
+  const price = booking.price - (booking.discount?.amount ?? 0)
+  const isDepositPaid = booking.payment?.status === 'paid'
+  const toPay = isDepositPaid ? Math.max(0, price - (booking.payment?.amount ?? 0)) : price
+
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
     toast.show({
@@ -108,9 +112,9 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           ? t(' по адресу {address}', { address: booking.business.address })
           : ''}
         .{' '}
-        {booking.payment?.status === 'paid'
-          ? t('Остаток оплатите в салоне.')
-          : t('Оплата в салоне.')}{' '}
+        {/* The sum itself, in bold: «Оплата в салоне» alone sent people looking in the ticket. */}
+        {isDepositPaid ? t('Остаток в салоне —') : t('Оплата в салоне —')}{' '}
+        <b className={styles.amount}>{formatPrice(toPay)}</b>.{' '}
         {t('Перенести или отменить можно по ссылке из SMS.')}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
