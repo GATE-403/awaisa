@@ -213,7 +213,10 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = gesture.current
     gesture.current = null
-    schedulePaint()
+    // Let go of the drag now, not on the next frame: the deck turns in this same render, and with
+    // the drag still on (transitions off) the cards jumped to their places instead of gliding.
+    if (frame.current) cancelAnimationFrame(frame.current)
+    paint()
     if (!start || start.isSideways === null) return
     if (event.type === 'pointerup') record(start, event.clientX, event.clientY)
     // Far enough, or a quick flick the same way however short.
