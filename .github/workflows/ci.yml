@@ -29,17 +29,24 @@ jobs:
         env:
           API_URL: http://localhost:4000
 
-  # The phone and desktop projects run side by side, each with its own Postgres and Redis, so
-  # the suite takes about half the time it does in one job.
+  # The suite is split into shards, each a job with its own Postgres and Redis (specs share one
+  # database within a run, so they cannot run side by side in one job), started at once beside
+  # `check` instead of after it. Desktop has the most specs, so it gets a shard more. Playwright
+  # splits by spec file. Wall time went from ~10 min (check, then two jobs of 4 and 6 min) to
+  # about the slowest shard.
   e2e:
-    name: E2E (${{ matrix.project }})
+    name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    needs: check
-    timeout-minutes: 40
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        project: [mobile, desktop]
+        include:
+          - { project: mobile, shard: 1/2 }
+          - { project: mobile, shard: 2/2 }
+          - { project: desktop, shard: 1/3 }
+          - { project: desktop, shard: 2/3 }
+          - { project: desktop, shard: 3/3 }
     services:
       postgres:
         image: postgres:18-alpine
@@ -88,11 +95,15 @@ jobs:
           path: apps/web/.next-e2e/cache
           key: next-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
           restore-keys: next-e2e-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
-      - run: pnpm --filter web exec playwright test --project=${{ matrix.project }}
+      - run: pnpm --filter web exec playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}
+      - name: Report name
+        if: failure()
+        id: report
+        run: echo "name=e2e-report-${{ matrix.project }}-$(echo '${{ matrix.shard }}' | tr / -)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: e2e-report-${{ matrix.project }}
+          name: ${{ steps.report.outputs.name }}
           path: |
             apps/web/e2e-report
             apps/web/e2e-results
