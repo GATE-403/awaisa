@@ -7,7 +7,6 @@ import { useFavorites } from '@/features/favorites'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { haptic } from '@/shared/lib/nativeBridge'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
 import { useFeedLikes } from './model/useFeedLikes'
@@ -65,11 +64,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const current = shown[active]
 
   const turn = (step: number) => {
-    setActive((index) => {
-      const next = Math.min(shown.length - 1, Math.max(0, index + step))
-      if (next !== index) haptic('selection')
-      return next
-    })
+    setActive((index) => Math.min(shown.length - 1, Math.max(0, index + step)))
   }
 
   // Arrow keys, Page Up/Down and j/k turn the hand by one card.
@@ -116,10 +111,20 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
   useEffect(() => () => stopListening.current?.(), [])
 
+  // The photos about to come up are decoded ahead, off screen: decoding a large photo the moment
+  // its card slid into view cost frames in the middle of the move.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once per turn
+  useEffect(() => {
+    for (const item of shown.slice(active + 1, active + 5)) {
+      const image = new Image()
+      image.src = item.url
+      image.decode().catch(() => undefined)
+    }
+  }, [active, shown.length])
+
   const like = (item: FeedItem, next: boolean) => {
     likes.setLiked(item.id, next)
     if (!next) return
-    haptic('impact')
     // A liked work keeps its service in «Избранное», like saving a post.
     if (item.service && !favorites.isFavorite(item.service.id)) favorites.toggle(item.service.id)
   }
@@ -189,7 +194,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   }
 
   // The finger's path is written straight to CSS variables once a frame, never through React state:
-  // re-rendering the deck on every move dropped frames on phones.
+  // re-rendering the deck on every move dropped frames on phones. They go on the card in play
+  // itself — set on the stage, every card and every line of text in it was restyled each frame.
   const paint = () => {
     frame.current = 0
     const stage = stageRef.current
@@ -197,10 +203,15 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (!stage) return
     const dx = state?.isSideways ? state.dx : 0
     const dy = state && state.isSideways === false ? state.dy : 0
-    stage.style.setProperty('--stage-drag', `${dx}px`)
-    stage.style.setProperty('--stage-lift', `${dy / 3}px`)
-    stage.style.setProperty('--tilt', `${dx / 30}deg`)
-    stage.toggleAttribute('data-dragging', dx !== 0 || dy !== 0)
+    const isDragging = dx !== 0 || dy !== 0
+    const card = stage.querySelector<HTMLElement>('[data-active]')
+    if (card) {
+      card.style.setProperty('--drag', `${dx}px`)
+      card.style.setProperty('--lift', `${dy / 3}px`)
+      card.style.setProperty('--tilt', `${dx / 30}deg`)
+    }
+    if (stage.hasAttribute('data-dragging') !== isDragging)
+      stage.toggleAttribute('data-dragging', isDragging)
   }
 
   const schedulePaint = () => {

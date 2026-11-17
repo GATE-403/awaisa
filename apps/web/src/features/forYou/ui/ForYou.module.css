@@ -312,5 +312,4 @@
 
 .track[data-stories] {
   gap: var(--space-3);
-  padding-top: var(--space-1);
 }
