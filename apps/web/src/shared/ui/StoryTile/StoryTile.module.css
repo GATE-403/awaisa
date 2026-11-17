@@ -1,0 +1,138 @@
+/* A row of stories: sideways, with momentum on touch, the page gutter kept at both ends. */
+.row {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 calc(var(--page-gutter) * -1);
+  padding: var(--space-1) var(--page-gutter) var(--space-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--page-gutter);
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+  list-style: none;
+  --edge-fade: 40px;
+}
+
+.row::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  flex: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 96px;
+  color: var(--color-foreground);
+  text-decoration: none;
+}
+
+.tile:focus-visible {
+  outline: none;
+}
+
+.tile:focus-visible .frame {
+  box-shadow: var(--focus-ring);
+}
+
+/* The ring is a 2.5pt border around a 2pt gap of the page colour, like a story's. */
+.frame {
+  position: relative;
+  display: block;
+  width: 92px;
+  height: 92px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--color-fill);
+  outline: 2.5px solid transparent;
+  outline-offset: 2px;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.tile[data-ring="new"] .frame {
+  outline-color: var(--color-primary);
+}
+
+.tile[data-ring="seen"] .frame {
+  outline-color: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+}
+
+.tile:active .frame {
+  scale: 0.96;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chip {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  left: 5px;
+  overflow: hidden;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.62);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 14px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  display: grid;
+  overflow: hidden;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+.badge > * {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.label {
+  overflow: hidden;
+  width: 100%;
+  font-size: var(--text-xs);
+  line-height: 1.25;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note {
+  overflow: hidden;
+  width: 100%;
+  margin-top: -4px;
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame {
+    transition: none;
+  }
+}
