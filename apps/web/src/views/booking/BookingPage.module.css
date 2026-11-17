@@ -497,7 +497,8 @@ label:has([data-checked]) .serviceNote {
   bottom: 0;
   left: 0;
   z-index: 39;
-  height: calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
+  /* At most 30% of the screen: at 200% zoom a fixed 144pt fade washed out a third of the form. */
+  height: min(calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom)), 30dvh);
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--color-background) 0%, transparent),

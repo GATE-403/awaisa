@@ -48,3 +48,10 @@
     animation: none;
   }
 }
+
+/* iPhone SE and other narrow phones: the gap gives way so each cell stays 44pt wide. */
+@media (max-width: 400px) {
+  .root {
+    gap: var(--space-1);
+  }
+}
