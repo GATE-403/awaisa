@@ -78,24 +78,6 @@
   touch-action: none;
 }
 
-/* Once: the front card leans aside and back, a hint that it can be swiped. */
-.stack[data-nudge] .card:not([data-back]) {
-  animation:
-    land 520ms var(--ease-spring) backwards,
-    nudge 900ms var(--ease-standard) 600ms;
-}
-
-@keyframes nudge {
-  30% {
-    translate: -18px 0;
-    rotate: -1.5deg;
-  }
-  60% {
-    translate: 8px 0;
-    rotate: 0.6deg;
-  }
-}
-
 .dots {
   position: absolute;
   top: calc(100% + var(--space-2));
