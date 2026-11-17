@@ -24,8 +24,13 @@ interface FeedPageProps {
 
 /** Load the next page this many cards before the end. */
 const PREFETCH_AHEAD = 3
-/** How far a sideways pull goes before the next card comes to the middle. */
-const SWIPE_DISTANCE = 60
+/** How far a sideways swipe (to the next card) or a pull up (back to the last one) goes… */
+const SWIPE_DISTANCE = 32
+/** …or how fast (px per ms): a quick flick counts however short it is. */
+const FLICK_SPEED = 0.25
+const FLICK_MIN = 10
+/** The flick's speed is read over the finger's last moments, not the whole gesture. */
+const FLICK_WINDOW_MS = 90
 
 // «Образы»: finished work as a hand of cards — one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
@@ -34,12 +39,24 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [items, setItems] = useState<FeedItem[]>(initialPage?.items ?? [])
   const [nextOffset, setNextOffset] = useState(initialPage?.nextOffset ?? null)
   const [active, setActive] = useState(0)
-  const [dragX, setDragX] = useState(0)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const frame = useRef(0)
+  const stopListening = useRef<(() => void) | null>(null)
+  // The side the last card was swiped to: it waits there and comes back from there.
+  const [flyDir, setFlyDir] = useState<1 | -1>(-1)
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const [reported, setReported] = useState<string[]>([])
   const loadingRef = useRef(false)
-  const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
+  const gesture = useRef<{
+    x: number
+    y: number
+    time: number
+    isSideways: boolean | null
+    dx: number
+    dy: number
+    samples: { t: number; x: number; y: number }[]
+  } | null>(null)
   const likes = useFeedLikes()
   const favorites = useFavorites()
   // `start` keeps the tapped photo first, so later pages follow the same order.
@@ -97,6 +114,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       })
   }, [active, shown.length, nextOffset])
 
+  useEffect(() => () => stopListening.current?.(), [])
+
   const like = (item: FeedItem, next: boolean) => {
     likes.setLiked(item.id, next)
     if (!next) return
@@ -124,33 +143,115 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     )
   }
 
-  // Sideways moves are ours: the middle card follows the finger, and past a short pull the next
-  // (or the previous) one comes in. A tap stays a tap (double tap likes).
+  // A swipe either way sends the card in play off that side and the next one comes up, like
+  // dealing from a deck; a pull up brings the last card back. A tap stays a tap (double tap likes).
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null }
+    gesture.current = {
+      x: event.clientX,
+      y: event.clientY,
+      time: performance.now(),
+      isSideways: null,
+      dx: 0,
+      dy: 0,
+      samples: [{ t: performance.now(), x: event.clientX, y: event.clientY }],
+    }
+    // The rest of the gesture is followed on the window: a mouse that wanders off the stack, or
+    // is let go outside the window, still ends it (the card used to freeze mid-drag).
+    stopListening.current?.()
+    const end = (upEvent: Event) => handlePointerUp(upEvent)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+    window.addEventListener('blur', end)
+    stopListening.current = () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+      window.removeEventListener('blur', end)
+      stopListening.current = null
+    }
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+  // Where the finger went over its last moments: a phone's WebView delivers moves late and in
+  // bursts, so an average from the first touch read a quick flick as a slow drag.
+  const record = (state: NonNullable<typeof gesture.current>, x: number, y: number) => {
+    const now = performance.now()
+    state.samples.push({ t: now, x, y })
+    while (state.samples.length > 2 && now - (state.samples[0]?.t ?? now) > FLICK_WINDOW_MS)
+      state.samples.shift()
+  }
+
+  const speed = (state: NonNullable<typeof gesture.current>, axis: 'x' | 'y') => {
+    const first = state.samples[0]
+    const last = state.samples.at(-1)
+    if (!first || !last || last.t === first.t) return 0
+    return (last[axis] - first[axis]) / (last.t - first.t)
+  }
+
+  // The finger's path is written straight to CSS variables once a frame, never through React state:
+  // re-rendering the deck on every move dropped frames on phones.
+  const paint = () => {
+    frame.current = 0
+    const stage = stageRef.current
+    const state = gesture.current
+    if (!stage) return
+    const dx = state?.isSideways ? state.dx : 0
+    const dy = state && state.isSideways === false ? state.dy : 0
+    stage.style.setProperty('--stage-drag', `${dx}px`)
+    stage.style.setProperty('--stage-lift', `${dy / 3}px`)
+    stage.style.setProperty('--tilt', `${dx / 30}deg`)
+    stage.toggleAttribute('data-dragging', dx !== 0 || dy !== 0)
+  }
+
+  const schedulePaint = () => {
+    if (!frame.current) frame.current = requestAnimationFrame(paint)
+  }
+
+  const handlePointerMove = (event: globalThis.PointerEvent) => {
     const start = gesture.current
     if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
-    if (start.isSideways === null && Math.hypot(dx, dy) > 8) {
+    record(start, event.clientX, event.clientY)
+    if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      if (start.isSideways) event.currentTarget.setPointerCapture(event.pointerId)
     }
-    if (!start.isSideways) return
-    // At either end the card only gives a little, like a rubber band.
-    const isEdge = (dx > 0 && active === 0) || (dx < 0 && active === shown.length - 1)
-    setDragX(isEdge ? dx / 4 : dx)
+    if (start.isSideways === null) return
+    if (start.isSideways) {
+      // At the end of the deck the card only gives a little, like a rubber band.
+      start.dx = active >= shown.length - 1 ? dx / 4 : dx
+    } else {
+      // Only up, and only when there is a card to bring back.
+      start.dy = active > 0 && dy < 0 ? dy : dy / 6
+    }
+    schedulePaint()
   }
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (event: globalThis.PointerEvent | Event) => {
+    stopListening.current?.()
     const start = gesture.current
     gesture.current = null
-    if (!start?.isSideways) return
-    if (Math.abs(dragX) > SWIPE_DISTANCE) turn(dragX < 0 ? 1 : -1)
-    setDragX(0)
+    // Let go of the drag now, not on the next frame: the deck turns in this same render, and with
+    // the drag still on (transitions off) the cards jumped to their places instead of gliding.
+    if (frame.current) cancelAnimationFrame(frame.current)
+    paint()
+    if (!start || start.isSideways === null) return
+    if (event instanceof PointerEvent && event.type === 'pointerup')
+      record(start, event.clientX, event.clientY)
+    // Far enough, or a quick flick the same way however short.
+    const isFar = (distance: number, velocity: number) =>
+      distance > SWIPE_DISTANCE ||
+      (distance > FLICK_MIN &&
+        Math.abs(velocity) > FLICK_SPEED &&
+        Math.sign(velocity) === Math.sign(distance))
+    if (start.isSideways && active < shown.length - 1) {
+      const vx = speed(start, 'x')
+      if (isFar(Math.abs(start.dx), Math.sign(start.dx) * vx)) {
+        setFlyDir(start.dx < 0 ? -1 : 1)
+        turn(1)
+      }
+    }
+    if (!start.isSideways && start.dy < 0 && isFar(-start.dy, -speed(start, 'y'))) turn(-1)
   }
 
   return (
@@ -193,20 +294,13 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       <div
         className={styles.stage}
-        role='feed'
-        aria-label='Образы'
-        aria-busy={isPending || undefined}
-        data-dragging={dragX !== 0 || undefined}
-        style={{ '--drag': `${dragX}px`, '--tilt': `${dragX / 30}deg` } as CSSProperties}
+        ref={stageRef}
+        style={{ '--fly': flyDir } as CSSProperties}
         onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
       >
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (
           <EmptyState
-            isOnDark
             title='Образов пока нет'
             text='Здесь появятся фото работ мастеров — с ценой и записью в один тап.'
             action={
@@ -216,22 +310,43 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             }
           />
         )}
-        {/* The card in play, one at each side, and the next one waiting unseen (its photo loads). */}
-        {shown.map((item, index) => {
-          const offset = index - active
-          if (offset < -1 || offset > 2) return null
-          return (
-            <FeedCard
-              key={item.id}
-              item={item}
-              index={index}
-              offset={offset}
-              isLiked={likes.isLiked(item.id)}
-              onDoubleTap={() => like(item, true)}
-              onSelect={() => turn(offset)}
-            />
-          )
-        })}
+        {/* The card in play, two fanned behind it, the next one waiting unseen (its photo loads) and
+            the last one gone off to the side. */}
+        {/* Only the cards are the feed (a feed holds articles alone); the actions sit beside it. */}
+        <div
+          className={styles.deck}
+          role='feed'
+          aria-label='Образы'
+          aria-busy={isPending || undefined}
+        >
+          {shown.map((item, index) => {
+            const offset = index - active
+            if (offset < -1 || offset > 3) return null
+            return (
+              <FeedCard
+                key={item.id}
+                item={item}
+                index={index}
+                offset={offset}
+                isLiked={likes.isLiked(item.id)}
+                onDoubleTap={() => like(item, true)}
+                onSelect={() => turn(offset)}
+              />
+            )
+          })}
+        </div>
+        {current && (
+          <FeedActions
+            key={current.id}
+            item={current}
+            isLiked={likes.isLiked(current.id)}
+            onLike={(next) => like(current, next)}
+            onReported={() => {
+              setReported((known) => [...known, current.id])
+              setActive((index) => Math.max(0, Math.min(index, shown.length - 2)))
+            }}
+          />
+        )}
       </div>
 
       {/* With a mouse: the previous and the next card at the sides of the hand (keys work too). */}
@@ -260,22 +375,10 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         </div>
       )}
 
-      {current && (
-        <>
-          <p className={styles.counter} aria-hidden>
-            {active + 1} из {nextOffset === null ? shown.length : `${shown.length}+`}
-          </p>
-          <FeedActions
-            key={current.id}
-            item={current}
-            isLiked={likes.isLiked(current.id)}
-            onLike={(next) => like(current, next)}
-            onReported={() => {
-              setReported((known) => [...known, current.id])
-              setActive((index) => Math.max(0, Math.min(index, shown.length - 2)))
-            }}
-          />
-        </>
+      {active > 0 && (
+        <p className={styles.hint} aria-hidden>
+          Потяните вверх — вернуть прошлую
+        </p>
       )}
     </main>
   )

@@ -53,7 +53,13 @@
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   touch-action: pan-x;
-  mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+
+/* Edge fades only with a mouse: a mask over a scrolling row repaints every frame on phones. */
+@media (hover: hover) and (pointer: fine) {
+  .track {
+    mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+  }
 }
 
 .track::-webkit-scrollbar {
@@ -105,8 +111,16 @@
 }
 
 .bar {
+  /* The magnet: ticks within a step and a half of the pointer lean toward it and grow a little as
+     the dial moves (--pos is the dial's place in ticks, written on scroll). */
+  --d: calc(var(--pos, 0) - var(--idx, 0));
+  --near: max(0, 1.5 - max(var(--d), -1 * var(--d)));
+
   width: 10px;
   height: 18px;
+  translate: calc(clamp(-1, var(--d), 1) * var(--near) * 4px) 0;
+  scale: 1 calc(1 + var(--near) * 0.08);
+  transform-origin: bottom center;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
   transition:
