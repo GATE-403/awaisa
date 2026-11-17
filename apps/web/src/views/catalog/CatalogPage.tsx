@@ -76,6 +76,8 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
         {isBrowsing && !kind && (
           <ForYouShelf
             isForEveryone
+            // Picks lead the page as a stories row: small squares, so the services start high.
+            variant='stories'
             headAction={
               <NextLink href='/top' className={styles.topLink}>
                 Рейтинг ›

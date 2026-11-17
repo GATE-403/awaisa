@@ -17,6 +17,13 @@
   }
 }
 
+.eyebrow {
+  margin: 0 0 calc(-1 * var(--space-3));
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
 .title {
   margin: 0;
   font-family: var(--font-display);
