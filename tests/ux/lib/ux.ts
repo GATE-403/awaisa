@@ -272,6 +272,17 @@ class UxContext {
   }
 
   private async runAxe() {
+    // A fade-in caught halfway reads as a contrast failure (the header's rotating search hint
+    // starts at opacity 0): play short animations to their end first. Endless ones stay.
+    await this.page
+      .evaluate(() => {
+        for (const animation of document.getAnimations()) {
+          if (animation.effect?.getComputedTiming().iterations !== Number.POSITIVE_INFINITY) {
+            animation.finish()
+          }
+        }
+      })
+      .catch(() => undefined)
     const results = await new AxeBuilder({ page: this.page })
       .withTags(WCAG_TAGS)
       .exclude('.leaflet-container')
