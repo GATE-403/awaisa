@@ -74,7 +74,8 @@
 }
 
 .day[aria-pressed="true"][data-today] .number {
-  background: var(--color-danger);
+  /* White on the system red is 3.6:1; the strong red keeps the day number AA. */
+  background: var(--color-danger-strong);
   color: var(--color-primary-foreground);
 }
 
@@ -118,4 +119,13 @@
   border-radius: var(--radius-full);
   background: var(--color-rating);
   translate: -50% 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

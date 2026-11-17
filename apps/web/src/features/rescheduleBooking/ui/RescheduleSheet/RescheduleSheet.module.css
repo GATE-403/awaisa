@@ -45,7 +45,8 @@
 }
 
 .wasTime {
-  color: var(--color-tertiary-foreground);
+  /* The line-through says «was»; the colour still has to be readable (AA). */
+  color: var(--color-muted-foreground);
   text-decoration: line-through;
   text-decoration-thickness: 2px;
 }
@@ -55,7 +56,7 @@
 }
 
 .will[data-empty] .willTime {
-  color: var(--color-tertiary-foreground);
+  color: var(--color-muted-foreground);
 }
 
 .date {

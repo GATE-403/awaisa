@@ -43,7 +43,8 @@
   width: 100%;
   padding: 1px 0;
   background: color-mix(in srgb, var(--color-foreground) 10%, transparent);
-  color: var(--color-muted-foreground);
+  /* Muted grey on the leaf's own tint was 3.5:1. */
+  color: var(--color-foreground);
   font-size: 10px;
   line-height: 14px;
   font-weight: var(--font-weight-semibold);

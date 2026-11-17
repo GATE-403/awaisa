@@ -59,6 +59,18 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: calc(var(--header-height) + var(--space-4));
+  /* Tab scrolls the focused control clear of the fixed bars at the foot too (WCAG 2.4.11):
+     at 200% zoom they used to hide it. */
+  scroll-padding-bottom: calc(
+    var(--tabbar-height) +
+    var(--resume-space) +
+    var(--space-4) +
+    env(safe-area-inset-bottom)
+  );
+}
+
+:root[data-business-bar] {
+  scroll-padding-top: calc(var(--header-height) + var(--business-bar-height) + var(--space-4));
 }
 
 body {

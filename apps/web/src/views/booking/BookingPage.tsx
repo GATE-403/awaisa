@@ -22,6 +22,7 @@ import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
+import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
@@ -78,6 +79,8 @@ export const BookingPage = ({
     return null
   }
   usePageScrollLock()
+  const screenRef = useRef<HTMLElement>(null)
+  useInertOutside(screenRef, Boolean(form.createdBooking))
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
   // The contacts fold into a card too, once the number is whole (or «Готово» is pressed), so the
@@ -181,6 +184,7 @@ export const BookingPage = ({
       <>
         <BookingScrim slug={business.slug} isModal={isModal} />
         <main
+          ref={screenRef}
           className={styles.page}
           data-booking-screen=''
           data-sheet-drag=''
@@ -466,6 +470,7 @@ export const BookingPage = ({
     <>
       <BookingScrim slug={business.slug} isModal={isModal} />
       <main
+        ref={screenRef}
         className={styles.page}
         data-booking-screen=''
         data-sheet-drag=''
@@ -656,6 +661,16 @@ export const BookingPage = ({
                     title={t('Как вас записать?')}
                   >
                     <div className={styles.fields}>
+                      {/* Said before the name and number are asked for: what is paid now, when it
+                          comes back and where to go. The side panel has no summary card for it. */}
+                      {form.service?.deposit ? (
+                        <p className={styles.terms}>
+                          {t('Предоплата {amount} — вернём, если отмените за сутки', {
+                            amount: formatPrice(form.service.deposit),
+                          })}
+                          {summaryProps.address ? ` · ${summaryProps.address}` : ''}
+                        </p>
+                      ) : null}
                       {/* Settings-style rows: the label on the left, the value typed on the right. */}
                       <div className={styles.group}>
                         <Field

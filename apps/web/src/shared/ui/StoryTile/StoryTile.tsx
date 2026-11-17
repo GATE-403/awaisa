@@ -6,8 +6,12 @@ import styles from './StoryTile.module.css'
 interface StoryTileProps {
   href: string
   label: string
-  /** For screen readers: what the tile opens. */
-  ariaLabel: string
+  /**
+   * Read after the visible label and note, for screen readers only («Тенгри SPA, 2 600 сом»).
+   * Not an aria-label: the name must contain what is written on the tile (WCAG 2.5.3), so
+   * «нажми Чистка лица» in voice control finds it.
+   */
+  details?: string
   imageUrl?: string | null
   /** A small square in the corner: the master's face or the place's tile. */
   badge?: ReactNode
@@ -26,7 +30,7 @@ interface StoryTileProps {
 export const StoryTile = ({
   href,
   label,
-  ariaLabel,
+  details,
   imageUrl,
   badge,
   chip,
@@ -36,13 +40,7 @@ export const StoryTile = ({
   onOpen,
 }: StoryTileProps) => (
   <li className={styles.item}>
-    <NextLink
-      href={href}
-      className={styles.tile}
-      data-ring={ring}
-      aria-label={ariaLabel}
-      onClick={onOpen}
-    >
+    <NextLink href={href} className={styles.tile} data-ring={ring} onClick={onOpen}>
       <span className={styles.frame} data-picture-frame=''>
         {imageUrl && (
           // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures
@@ -59,6 +57,7 @@ export const StoryTile = ({
       </span>
       <span className={styles.label}>{label}</span>
       {note && <span className={styles.note}>{note}</span>}
+      {details && <span className={styles.srOnly}>{`, ${details}`}</span>}
     </NextLink>
   </li>
 )
