@@ -6,6 +6,7 @@ import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
 import type { Customer, OtpChannel } from '@/shared/api/types'
 import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
+import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 
 type LoginStep = 'phone' | 'code' | 'name'
 
@@ -28,6 +29,10 @@ export const useLoginForm = () => {
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
   const redirectTo = getSafeRedirect(searchParams.get('next'))
+
+  useEffect(() => {
+    trackStep('login_open')
+  }, [])
 
   useEffect(() => {
     if (resendIn <= 0) return
@@ -54,10 +59,12 @@ export const useLoginForm = () => {
     const problem = normalizedPhone ? null : phoneProblem(phone)
     if (problem) {
       setError(problem)
+      trackFormError('phone')
       return
     }
     return run(async () => {
       const result = await requestOtp(normalizedPhone || phone, preferred)
+      trackStep('otp_sent', undefined, { channel: result.channel })
       setNormalizedPhone(result.phone)
       setChannel(result.channel)
       setResendIn(result.resendAfterSeconds)
@@ -73,6 +80,7 @@ export const useLoginForm = () => {
         setCode('')
         setIsCodeInvalid(true)
         setWrongAttempts((count) => count + 1)
+        trackStep('otp_error')
         throw verifyError
       })
       finishSignIn(customer)
@@ -81,11 +89,13 @@ export const useLoginForm = () => {
   // A verified number (by code or through the Telegram bot): new clients name themselves first.
   const finishSignIn = (customer: Customer) => {
     setCustomer(customer)
+    trackStep('otp_ok')
     if (!customer.name) {
       setNormalizedPhone(customer.phone)
       setStep('name')
       return
     }
+    trackStep('login_done')
     router.replace(redirectTo)
   }
 
@@ -99,6 +109,7 @@ export const useLoginForm = () => {
   const saveName = () =>
     run(async () => {
       setCustomer(await updateMe(name))
+      trackStep('login_done')
       router.replace(redirectTo)
     })
 

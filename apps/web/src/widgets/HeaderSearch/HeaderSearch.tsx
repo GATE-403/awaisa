@@ -13,6 +13,7 @@ import type { BusinessCard, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
 import { useMyPlace } from '@/shared/lib/myPlace'
 import { pluralize } from '@/shared/lib/plural'
+import { trackStep } from '@/shared/lib/telemetry'
 import styles from './HeaderSearch.module.css'
 
 const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Окрашивание', 'Массаж', 'Брови']
@@ -181,8 +182,12 @@ export const HeaderSearch = () => {
               onChange={(event) => {
                 setDraft(event.target.value)
                 setIsOpen(true)
+                if (event.target.value.trim()) trackStep('search_typed')
               }}
-              onFocus={() => setIsOpen(true)}
+              onFocus={() => {
+                setIsOpen(true)
+                trackStep('search_open')
+              }}
               aria-label='Поиск салонов и мастеров'
               aria-describedby={isOpen ? listId : undefined}
               enterKeyHint='search'
@@ -265,7 +270,14 @@ export const HeaderSearch = () => {
               <ul className={styles.list}>
                 {suggestions.map((business) => (
                   <li key={business.slug}>
-                    <NextLink href={`/${business.slug}`} className={styles.place} onClick={close}>
+                    <NextLink
+                      href={`/${business.slug}`}
+                      className={styles.place}
+                      onClick={() => {
+                        trackStep('search_pick', business.slug, { kind: 'place' })
+                        close()
+                      }}
+                    >
                       <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
                       <span className={styles.placeText}>
                         <span className={styles.placeName}>{business.name}</span>

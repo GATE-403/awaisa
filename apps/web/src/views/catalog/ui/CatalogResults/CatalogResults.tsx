@@ -2,7 +2,7 @@
 
 import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
@@ -52,10 +52,25 @@ export const CatalogResults = ({
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
+  const sectionRef = useRef<HTMLElement>(null)
+  const isEmpty = offers.length === 0 && businesses.length === 0
 
   useEffect(() => {
     trackStep('catalog')
   }, [])
+  // A search's results: found something or nothing, and whether a result was then opened.
+  useEffect(() => {
+    if (!query) return
+    trackStep(isEmpty ? 'search_empty' : 'search_results')
+    const section = sectionRef.current
+    if (!section) return
+    const handleClick = (event: MouseEvent) => {
+      if ((event.target as Element | null)?.closest('a[href]'))
+        trackStep('search_pick', undefined, { kind: 'result' })
+    }
+    section.addEventListener('click', handleClick)
+    return () => section.removeEventListener('click', handleClick)
+  }, [query, isEmpty])
   // The services feed pages from the server; «Ближе по времени» re-sorts what is loaded.
   const feed = useOfferPages({
     initial: offers,
@@ -80,7 +95,7 @@ export const CatalogResults = ({
   ]
 
   return (
-    <section className={styles.results} aria-labelledby='results-title'>
+    <section ref={sectionRef} className={styles.results} aria-labelledby='results-title'>
       <div className={styles.header}>
         {/* Browsing everything, the tabs say it all; a search or a kind keeps its heading. */}
         <div className={styles.titleBlock}>

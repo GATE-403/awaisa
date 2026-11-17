@@ -10,6 +10,7 @@ import { addReviewPhoto, createReview } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Review, ReviewAccess } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 import { StarRating } from '../StarRating/StarRating'
 import styles from './RateVisitForm.module.css'
 
@@ -53,6 +54,11 @@ export const RateVisitForm = ({
   const previews = useRef<string[]>([])
 
   useEffect(() => {
+    trackStep('review_open')
+    if (initialRating) trackStep('review_rated')
+  }, [initialRating])
+
+  useEffect(() => {
     previews.current = photos.map((photo) => photo.preview)
   }, [photos])
 
@@ -86,11 +92,13 @@ export const RateVisitForm = ({
     // The button stays active: a tap without stars explains what is missing instead.
     if (rating === 0) {
       setError('Поставьте оценку — от одной до пяти звёзд')
+      trackFormError('rating')
       return
     }
     setIsSending(true)
     try {
       const review = await createReview(bookingId, access, { rating, comment })
+      trackStep('review_sent')
       // The review is saved already; a picture that fails to upload does not undo it.
       let uploaded: string[] = []
       for (const photo of photos) {
@@ -137,6 +145,7 @@ export const RateVisitForm = ({
         onChange={(value) => {
           setRating(value)
           setError(null)
+          trackStep('review_rated')
         }}
       />
       <label htmlFor={commentId} className={styles.label}>

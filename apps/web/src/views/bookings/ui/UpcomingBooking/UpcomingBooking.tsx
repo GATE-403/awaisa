@@ -24,6 +24,7 @@ import { TicketViewer } from '@/features/ticketView'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getCheckoutUrl } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
+import { trackStep } from '@/shared/lib/telemetry'
 import styles from './UpcomingBooking.module.css'
 
 interface UpcomingBookingProps {
@@ -68,7 +69,10 @@ export const UpcomingBooking = ({
         <button
           type='button'
           className={styles.open}
-          onClick={() => setIsTicketOpen(true)}
+          onClick={() => {
+            setIsTicketOpen(true)
+            trackStep('ticket_open', booking.business.slug)
+          }}
           aria-label='Показать талон'
         />
         <span className={styles.leaf} aria-hidden='true'>
@@ -121,7 +125,14 @@ export const UpcomingBooking = ({
               </button>
             ) : (
               <>
-                <button type='button' className={styles.link} onClick={() => setIsMoving(true)}>
+                <button
+                  type='button'
+                  className={styles.link}
+                  onClick={() => {
+                    setIsMoving(true)
+                    trackStep('reschedule_open', booking.business.slug)
+                  }}
+                >
                   <ArrowsClockwise weight='bold' aria-hidden />
                   Перенести
                 </button>
