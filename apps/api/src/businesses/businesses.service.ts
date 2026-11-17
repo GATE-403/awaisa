@@ -32,6 +32,7 @@ import type {
   MapQuery,
   UpdateBusinessInput,
 } from './businesses.schemas.js'
+import { type PlaceSignals, rankSimilarPlaces } from './similar-places.js'
 import { WorkingHours } from './working-hours.entity.js'
 
 type BusinessView = {
@@ -67,6 +68,7 @@ type BusinessCard = Pick<
 }
 
 const MAX_CATALOG_ITEMS = 60
+const SIMILAR_PLACES = 10
 
 const MAX_MAP_ITEMS = 200
 
@@ -225,6 +227,52 @@ export class BusinessesService {
     )) as { name: string; places: number; minPrice: number; durationMinutes: number }[]
 
     return rows
+  }
+
+  /** «Похожие места»: the place's kind ranked by distance, menu, price level and rating. */
+  async listSimilar(slug: string, limit = SIMILAR_PLACES): Promise<BusinessCard[]> {
+    const business = await this.findBySlug(slug)
+    const cards = await this.listCatalog({
+      kind: business.kind,
+      offset: 0,
+      limit: MAX_CATALOG_ITEMS,
+      sort: 'popular',
+    })
+    const rows = (await this.dataSource.query(
+      `
+      SELECT b."slug",
+        COALESCE((
+          SELECT json_agg(json_build_object('latitude', br."latitude", 'longitude', br."longitude"))
+          FROM "branches" br
+          WHERE br."business_id" = b."id" AND br."is_active"
+            AND br."latitude" IS NOT NULL AND br."longitude" IS NOT NULL
+        ), '[]') AS "pins",
+        COALESCE((
+          SELECT array_agg(s."name") FROM "services" s
+          WHERE s."business_id" = b."id" AND s."is_active"
+        ), '{}') AS "services"
+      FROM "businesses" b
+      WHERE b."kind" = $1 AND (b."is_published" OR b."id" = $2)
+      `,
+      [business.kind, business.id],
+    )) as { slug: string; pins: PlaceSignals['pins']; services: string[] }[]
+    const cardBySlug = new Map(cards.map((card) => [card.slug, card]))
+    const signals = (row: (typeof rows)[number]): PlaceSignals => {
+      const card = cardBySlug.get(row.slug)
+      return {
+        ...row,
+        minPrice: card?.minPrice ?? null,
+        rating: card?.rating ?? null,
+        reviewsCount: card?.reviewsCount ?? 0,
+      }
+    }
+    const target = rows.find((row) => row.slug === slug)
+    if (!target) return []
+    const candidates = rows.filter((row) => cardBySlug.has(row.slug)).map(signals)
+
+    return rankSimilarPlaces(signals(target), candidates)
+      .slice(0, limit)
+      .flatMap((candidate) => cardBySlug.get(candidate) ?? [])
   }
 
   async findBySlug(slug: string, { publishedOnly = true } = {}) {

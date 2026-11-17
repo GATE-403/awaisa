@@ -59,6 +59,13 @@ export class BusinessesController {
   }
 
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
+  @Get(':slug/similar')
+  @SkipThrottle()
+  similar(@Param('slug') slug: string): Promise<BusinessCard[]> {
+    return this.businesses.listSimilar(slug)
+  }
+
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get(':slug')
   @SkipThrottle()
   async getOne(@Param('slug') slug: string): Promise<BusinessPage> {
