@@ -103,25 +103,13 @@
   justify-content: center;
   width: 100%;
   margin-top: var(--space-5);
-  padding: 0;
-  border: none;
   border-radius: var(--radius-xl);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
   animation: print 700ms var(--ease-spring) both;
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
 .ticket:active {
   scale: 0.98;
-}
-
-.ticket:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
 }
 
 .chips {

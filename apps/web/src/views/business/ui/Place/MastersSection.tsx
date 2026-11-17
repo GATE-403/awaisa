@@ -33,7 +33,6 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
             <MasterCard
               specialist={specialist}
               href={`/${business.slug}/book?specialist=${specialist.id}`}
-              aria-label={`${specialist.name}, ${specialist.role || 'мастер'}`}
             />
           </li>
         ))}

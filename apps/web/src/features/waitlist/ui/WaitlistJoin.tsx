@@ -44,6 +44,9 @@ export const WaitlistJoin = ({
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [fieldError, setFieldError] = useState<{ field: 'name' | 'phone'; message: string } | null>(
+    null,
+  )
   const [isSending, setIsSending] = useState(false)
   const accountPhone = session.customer?.phone ?? null
   const joined = stored.find(
@@ -59,19 +62,23 @@ export const WaitlistJoin = ({
     setName(session.customer?.name || contact?.name || '')
     setPhone(contact?.phone ?? '')
     setError(null)
+    setFieldError(null)
     setIsOpen(true)
   }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
+    // Field errors sit under their field and mark it invalid; the alert below the form is for
+    // what the server says.
     if (!name.trim()) {
-      setError('Укажите имя')
+      setFieldError({ field: 'name', message: 'Укажите имя' })
       return
     }
     if (!accountPhone && phone.replace(/\D/g, '').length < 9) {
-      setError('Укажите номер — на него придёт SMS')
+      setFieldError({ field: 'phone', message: 'Укажите номер — на него придёт SMS' })
       return
     }
+    setFieldError(null)
     setIsSending(true)
     try {
       const { token, ...entry } = await joinWaitlist({
@@ -127,13 +134,19 @@ export const WaitlistJoin = ({
             <p className={styles.lead}>
               {dayLabel}: если кто-то отменит запись, пришлём одно SMS со ссылкой на это время.
             </p>
-            <Field label='Имя'>
+            <Field
+              label='Имя'
+              error={fieldError?.field === 'name' ? fieldError.message : undefined}
+            >
               <Input value={name} onValueChange={setName} autoComplete='name' />
             </Field>
             {accountPhone ? (
               <p className={styles.phone}>SMS придёт на {formatPhone(accountPhone)}</p>
             ) : (
-              <Field label='Телефон'>
+              <Field
+                label='Телефон'
+                error={fieldError?.field === 'phone' ? fieldError.message : undefined}
+              >
                 <Input
                   type='tel'
                   inputMode='tel'

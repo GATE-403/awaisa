@@ -30,7 +30,6 @@ export const DayStrip = ({ days, value, onChange, marks }: DayStripProps) => {
             key={day.key}
             type='button'
             className={styles.day}
-            aria-label={marks?.has(day.key) ? `${day.label}, есть незакрытые визиты` : day.label}
             aria-pressed={day.key === value}
             data-day={day.key}
             data-today={day.isToday || undefined}
@@ -39,6 +38,10 @@ export const DayStrip = ({ days, value, onChange, marks }: DayStripProps) => {
           >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
+            {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
+            <span className={styles.srOnly}>
+              {`, ${day.label}${marks?.has(day.key) ? ', есть незакрытые визиты' : ''}`}
+            </span>
           </button>
         ))}
       </fieldset>

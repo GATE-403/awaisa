@@ -30,7 +30,10 @@
 }
 
 [data-pressed] > .weekday,
-[data-pressed] > .month {
+[data-pressed] > .month,
+/* Today's card is in the link blue: at 75% its month read 3.4:1. */
+  [data-today]
+  > .month {
   opacity: 1;
 }
 
@@ -147,4 +150,13 @@
   width: 100%;
   height: var(--control-height-lg);
   border-radius: var(--radius-full);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -192,7 +192,7 @@ export const ForYouShelf = ({
               key={item.id}
               href={`/${item.slug}/book?service=${item.id}`}
               label={item.name}
-              ariaLabel={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
+              details={`${item.businessName}, ${formatPrice(item.price)}`}
               imageUrl={item.coverUrl}
               note={storyNote(item.reason)}
               isEager={position < 5}
@@ -214,7 +214,6 @@ export const ForYouShelf = ({
                 onClick={() =>
                   trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
                 }
-                aria-label={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
               >
                 {item.coverUrl && (
                   // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures
