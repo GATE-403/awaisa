@@ -4,7 +4,7 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useState } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { ForYouShelf } from '@/features/forYou'
@@ -12,7 +12,13 @@ import { TelegramReminderLink } from '@/features/telegramReminders'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import styles from './BookingSuccess.module.css'
+
+// The rings after the drop: each one fainter, the vibration fading with them.
+const RINGS = [0, 1, 2]
+const RING_TAPS_MS = [140, 360, 580]
+const WEB_VIBRATION = [26, 120, 12, 200, 8, 200, 5]
 
 interface BookingSuccessProps {
   booking: Booking
@@ -23,6 +29,36 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const t = useT()
   const session = useSession()
   const [isTicketOpen, setIsTicketOpen] = useState(false)
+  const pondRef = useRef<HTMLDivElement>(null)
+  const checkRef = useRef<HTMLSpanElement>(null)
+
+  // The water spreads from the check to the farthest corner of the sheet.
+  useLayoutEffect(() => {
+    const pond = pondRef.current
+    const check = checkRef.current
+    if (!pond || !check) return
+    const area = pond.getBoundingClientRect()
+    const drop = check.getBoundingClientRect()
+    const x = drop.left + drop.width / 2 - area.left
+    const y = drop.top + drop.height / 2 - area.top
+    const reach = Math.hypot(Math.max(x, area.width - x), Math.max(y, area.height - y))
+    pond.style.setProperty('--drop-x', `${x}px`)
+    pond.style.setProperty('--drop-y', `${y}px`)
+    pond.style.setProperty('--drop-size', `${Math.ceil(reach * 2)}px`)
+  }, [])
+
+  // The drop is felt: a firm tap as the check lands, then lighter ones as the rings go out. In the
+  // app through the Taptic Engine; in a browser that can vibrate (Android), a fading pattern.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (!getNativeApp()) {
+      navigator.vibrate?.(WEB_VIBRATION)
+      return
+    }
+    haptic('success')
+    const timers = RING_TAPS_MS.map((delay) => window.setTimeout(() => haptic('selection'), delay))
+    return () => timers.forEach(window.clearTimeout)
+  }, [])
 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
@@ -36,7 +72,18 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
     <div className={styles.success}>
       {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
           matters — when. */}
-      <span className={styles.check} aria-hidden>
+      <div ref={pondRef} className={styles.pond} aria-hidden>
+        <span className={styles.ripple} data-kind='swell' />
+        {RINGS.map((n) => (
+          <span
+            key={n}
+            className={styles.ripple}
+            data-kind='ring'
+            style={{ '--n': n } as CSSProperties}
+          />
+        ))}
+      </div>
+      <span ref={checkRef} className={styles.check} aria-hidden>
         <Check weight='bold' />
       </span>
       <h1 className={styles.title}>{t('Вы записаны')}</h1>

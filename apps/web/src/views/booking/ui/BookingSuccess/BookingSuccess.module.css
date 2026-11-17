@@ -1,6 +1,4 @@
 .success {
-  position: relative;
-  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -200,28 +198,48 @@
   text-align: center;
 }
 
-/* Arrival: a wave of soft green light spreads from the check over the screen and fades, a ring
-   leaves the check, a sheen runs across «Вы записаны» as the wave passes, and the lines rise one
-   after another behind it. Only transform and opacity move (the sheen is one short text paint),
-   and the wave stays inside the column so nothing scrolls sideways. */
-.success::before {
-  content: "";
+/* Arrival, like a drop falling into still water: the check lands, a swell of soft green light
+   spreads from it over the whole sheet, and rings follow it out to the edges, each fainter than the
+   one before; a sheen runs across «Вы записаны» as the water passes, and the lines rise one after
+   another. The pond is sized and centred on the check from script (it covers the sheet, so it is
+   absolute in the sheet, not in this column); only transform and opacity move. */
+.pond {
   position: absolute;
-  top: calc(var(--space-8) + 28px);
-  left: 50%;
+  inset: 0;
   z-index: -1;
-  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ripple {
+  position: absolute;
+  top: var(--drop-y, 120px);
+  left: var(--drop-x, 50%);
+  width: var(--drop-size, 200vmax);
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 50%;
+  opacity: 0;
+}
+
+/* The big water: one broad swell of light. */
+.ripple[data-kind="swell"] {
   background: radial-gradient(
     closest-side,
-    color-mix(in srgb, var(--color-success) 38%, transparent),
-    color-mix(in srgb, var(--color-success) 14%, transparent) 55%,
-    transparent
+    color-mix(in srgb, var(--color-success) 30%, transparent),
+    color-mix(in srgb, var(--color-success) 12%, transparent) 45%,
+    transparent 70%
   );
-  opacity: 0;
-  pointer-events: none;
+}
+
+/* The rings: a soft band at the rim that widens as it travels, like a ripple flattening out. */
+.ripple[data-kind="ring"] {
+  background: radial-gradient(
+    closest-side,
+    transparent 80%,
+    color-mix(in srgb, var(--color-success) 45%, #fff) 91%,
+    transparent 100%
+  );
 }
 
 .check::before,
@@ -236,8 +254,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .success::before {
-    animation: wave 1300ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+  .ripple[data-kind="swell"] {
+    animation: swell 1400ms cubic-bezier(0.2, 0.7, 0.3, 1) 80ms;
+  }
+
+  .ripple[data-kind="ring"] {
+    animation: ripple 1700ms cubic-bezier(0.2, 0.6, 0.35, 1) calc(140ms + var(--n) * 220ms);
   }
 
   .check::before {
@@ -277,14 +299,26 @@
   }
 }
 
-@keyframes wave {
+@keyframes swell {
   from {
     opacity: 1;
-    scale: 0.12;
+    scale: 0.04;
   }
 
-  60% {
-    opacity: 0.7;
+  50% {
+    opacity: 0.8;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: calc(0.7 - var(--n) * 0.2);
+    scale: 0.03;
   }
 
   to {
