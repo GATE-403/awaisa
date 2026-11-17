@@ -95,6 +95,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [autoDay, setAutoDay] = useState({ key: '', skips: 0 })
   const [time, setTime] = useState<string | null>(presetTime)
   const [isPresetChecked, setIsPresetChecked] = useState(presetTime === null)
+  // After moving to another branch the chosen time is kept, then checked once that branch's
+  // free times arrive.
+  const [isBranchTimeChecked, setIsBranchTimeChecked] = useState(true)
   const [nameInput, setName] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
   // Booking mum or a child: their own name and number, nothing of the client's own filled in.
@@ -112,9 +115,18 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // Steps the client folded or unfolded by hand win over the automatic behaviour.
   const [folded, setFolded] = useState<Partial<Record<BookingStepId, boolean>>>({})
   const service = findService(catalog, serviceId)
-  const services = presetSpecialist
-    ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
-    : catalog.services
+  // A service is offered at a branch when someone there does it (a master of that branch or one
+  // who works at every branch).
+  const servesBranch = (id: string, branch: string | undefined) =>
+    !branch ||
+    getSpecialistsForService(catalog, id).some(
+      (specialist) => !specialist.branchId || specialist.branchId === branch,
+    )
+  const services = (
+    presetSpecialist
+      ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
+      : catalog.services
+  ).filter((item) => servesBranch(item.id, branchId))
   // Masters of the chosen branch, plus those who work at every branch.
   const specialists = getSpecialistsForService(catalog, serviceId).filter(
     (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
@@ -218,6 +230,16 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       toast.show({ title: `${presetTime} уже заняли — выберите другое время`, type: 'info' })
     }
   }, [isPresetChecked, availability, dayKey, presetDate, presetTime, toast])
+
+  useEffect(() => {
+    if (isBranchTimeChecked || availability.isLoading) return
+    setIsBranchTimeChecked(true)
+    if (!time || availability.error) return
+    if (!availability.slots.some((slot) => slot.isAvailable && slot.time === time)) {
+      toast.show({ title: `В этом филиале ${time} занято — выберите другое время`, type: 'info' })
+      setTime(null)
+    }
+  }, [isBranchTimeChecked, availability, time, toast])
 
   // Keep the half-made booking on the device, so leaving the page never loses it.
   const hasContacts = Boolean(name.trim()) && isPhoneValid
@@ -329,16 +351,31 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     scrollToStep('datetime', true)
   }
 
+  // Another branch keeps what still fits there: the service if someone there does it, the master
+  // if they work there, the day and time until that branch's free times say otherwise. Whatever
+  // no longer fits is cleared, so the form opens on that step to choose again.
   const selectBranch = (id: string) => {
+    if (id === branchId) return
     setBranchId(id)
-    setTime(null)
     setSubmitError(null)
+    const keepsService = serviceId !== null && servesBranch(serviceId, id)
+    if (!keepsService) {
+      setServiceId(null)
+      setSpecialistId(null)
+      setTime(null)
+      return
+    }
     const keepsSpecialist =
       chosenSpecialistId === ANY_SPECIALIST_ID ||
       catalog.specialists.some(
         (item) => item.id === chosenSpecialistId && (!item.branchId || item.branchId === id),
       )
-    if (!keepsSpecialist) setSpecialistId(null)
+    if (!keepsSpecialist) {
+      setSpecialistId(null)
+      setTime(null)
+      return
+    }
+    if (time) setIsBranchTimeChecked(false)
   }
 
   const selectDay = (key: string) => {

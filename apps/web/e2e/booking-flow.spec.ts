@@ -187,4 +187,21 @@ test.describe('Booking: helpful defaults', () => {
         .first(),
     ).toBeVisible()
   })
+
+  test('another branch keeps the service and the «any master» choice', async ({ page }) => {
+    await page.goto('/lumiere-salon/book')
+    const steps = bookingSteps(page)
+    await steps.service.getByRole('radio').first().click()
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    await anyMaster.click()
+    const chosenService = (await steps.service.textContent()) ?? ''
+
+    await editStep(page, 'branch')
+    const branches = page.getByRole('group', { name: 'Филиал' })
+    await branches.getByRole('radio', { checked: false }).first().click()
+
+    // Nothing to choose again: the service card stays, the form waits on the time.
+    await expect(steps.service).toContainText(chosenService.trim().split(' ')[0] ?? '')
+    await expect(primaryAction(page)).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
+  })
 })
