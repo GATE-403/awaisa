@@ -12,6 +12,8 @@ type LayoutResult = {
   covered: (Described & { by: Described })[]
   fixedShare: number
   fixedParts: Described[]
+  /** Sideways rows that also scroll up and down a few pixels (a finger makes them wobble). */
+  wobblyRows: (Described & { extra: number })[]
 }
 
 type TargetResult = (Described & {
@@ -130,6 +132,22 @@ const checkLayout = (page: Page) =>
       if (hit.closest('label')?.contains(element)) continue
       if (element.closest('label')?.contains(hit)) continue
       if (isPinned(hit) && !isPinned(element)) continue
+      // Scrolled out of its own sideways row or scroll box: hidden by the box, not covered.
+      let isScrolledAway = false
+      for (
+        let node = element.parentElement;
+        node && node !== document.body;
+        node = node.parentElement
+      ) {
+        const style = getComputedStyle(node)
+        if (!/(auto|scroll|hidden|clip)/.test(`${style.overflowX} ${style.overflowY}`)) continue
+        const box = node.getBoundingClientRect()
+        if (x < box.left || x > box.right || y < box.top || y > box.bottom) {
+          isScrolledAway = true
+          break
+        }
+      }
+      if (isScrolledAway) continue
       if (skip(hit)) continue
       // A deliberate layer (popover, search panel, sheet) over the page is not a layout bug.
       let isLayer = false
@@ -166,7 +184,19 @@ const checkLayout = (page: Page) =>
         fixedParts.push(window.__uxDescribe(element))
       }
 
+    // 5. A sideways row that can also scroll vertically: something pokes out of it.
+    const wobblyRows: LayoutResult['wobblyRows'] = []
+    for (const element of document.body.querySelectorAll('*')) {
+      if (wobblyRows.length >= 5 || skip(element) || !isShown(element)) continue
+      const style = getComputedStyle(element)
+      if (!/(auto|scroll)/.test(style.overflowX) || style.overflowY === 'hidden') continue
+      if (element.scrollWidth <= element.clientWidth + 1) continue
+      const extra = element.scrollHeight - element.clientHeight
+      if (extra > 1 && extra < 40) wobblyRows.push({ ...window.__uxDescribe(element), extra })
+    }
+
     return {
+      wobblyRows,
       overflowX,
       wideElements,
       clipped,

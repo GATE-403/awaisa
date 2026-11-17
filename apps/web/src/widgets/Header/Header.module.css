@@ -159,8 +159,10 @@
 .categoryList {
   display: flex;
   gap: var(--space-2);
-  margin: 0;
-  padding: 0 var(--page-gutter) var(--space-2);
+  /* Room for the chips' invisible 44pt hit areas inside the row, taken back by the margin:
+     poking out, they made the sideways row scroll up and down a few pixels. */
+  margin: calc(-1 * var(--space-2)) 0 0;
+  padding: var(--space-2) var(--page-gutter);
   overflow-x: auto;
   list-style: none;
   scrollbar-width: none;
@@ -311,7 +313,9 @@
 
   .categoryList {
     gap: var(--space-5);
-    padding: 0;
+    /* 40pt rows: 2pt of room keeps the 44pt hit areas inside, taken back by the margin. */
+    margin: -2px 0;
+    padding: 2px 0;
   }
 
   .category,
@@ -383,4 +387,16 @@
   position: absolute;
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
+}
+
+/* Tablets: the city link keeps to «Бишкек» and the categories drop their glyphs, so every
+   category fits beside it — on an iPad «Другое» used to hide under the city link. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cityMore {
+    display: none;
+  }
+
+  .category svg {
+    display: none;
+  }
 }

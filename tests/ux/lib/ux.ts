@@ -371,6 +371,16 @@ class UxContext {
         shoot: `[data-ux-id="${item.id}"]`,
       })
     }
+    for (const row of layout.wobblyRows)
+      await this.add({
+        severity: 'moderate',
+        rule: 'ux-row-wobble',
+        title: `Лента прокручивается и вбок, и вверх-вниз${context}`,
+        detail: `${row.selector}: лишние ${row.extra}px по вертикали — лента «ёрзает» под пальцем`,
+        target: row.selector,
+        classes: row.classes,
+        shoot: `[data-ux-id="${row.id}"]`,
+      })
     if (layout.fixedShare > 0.34) {
       const share = Math.round(layout.fixedShare * 100)
       await this.add({
@@ -525,7 +535,7 @@ class UxContext {
       .evaluate((value) => {
         const element = document.querySelector(value)
         if (!element) return false
-        element.scrollIntoView({ block: 'center', inline: 'nearest' })
+        element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
         const rect = element.getBoundingClientRect()
         const mark = document.createElement('div')
         mark.id = 'ux-mark'

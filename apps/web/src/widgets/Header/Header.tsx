@@ -212,9 +212,15 @@ export const Header = () => {
                 )
               })}
             </ul>
-            <NextLink href='/map' className={styles.city}>
+            {/* On tablets only «Бишкек» shows, so the last categories are not hidden under it;
+                the name stays whole and still holds the visible word (WCAG 2.5.3). */}
+            <NextLink href='/map' className={styles.city} aria-label='Бишкек · рядом на карте'>
               <MapPin weight='fill' aria-hidden />
-              Бишкек · <span className={styles.cityLink}>рядом на карте</span>
+              Бишкек
+              <span className={styles.cityMore}>
+                {' · '}
+                <span className={styles.cityLink}>рядом на карте</span>
+              </span>
             </NextLink>
           </div>
         </nav>
