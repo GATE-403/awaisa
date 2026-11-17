@@ -1,6 +1,9 @@
 // A transparent score instead of a black box: each part adds a little and the strongest part
 // becomes the card's reason («Пора снова», «Вы любите маникюр», «Рядом · 1,2 км»).
 
+/** Logged with every event: bump it whenever the ranking changes, so versions can be compared. */
+const ALGORITHM = 'score-v1'
+
 type Interest =
   | 'haircut'
   | 'beard'
@@ -374,4 +377,12 @@ const computeAffinities = (
 }
 
 export type { Affinities, Candidate, Gender, Interest, Profile }
-export { computeAffinities, INTERESTS, interestsOf, rankCandidates, scoreCandidate, trustedRating }
+export {
+  ALGORITHM,
+  computeAffinities,
+  INTERESTS,
+  interestsOf,
+  rankCandidates,
+  scoreCandidate,
+  trustedRating,
+}

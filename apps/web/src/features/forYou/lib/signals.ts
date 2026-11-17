@@ -13,6 +13,11 @@ type PickEvent = {
   reason: string
   surface: Surface
   position?: number
+  /** The answer the card came from and the scorer's version (see GET /recommendations). */
+  requestId?: string
+  algorithm?: string
+  /** On `book`: the booking the pick led to. */
+  bookingId?: string
 }
 
 const RECENT_KEY = 'awaisa:recent-services:v1'
@@ -83,14 +88,14 @@ const trackPickClick = (event: Omit<PickEvent, 'kind'>) => {
 }
 
 /** After a booking: if it was a service tapped on a shelf, the shelf gets the credit. */
-const trackBookedPick = (serviceId: string) => {
+const trackBookedPick = (serviceId: string, bookingId: string) => {
   try {
     const raw = window.sessionStorage.getItem(CLICK_KEY)
     if (!raw) return
     const click = JSON.parse(raw) as Omit<PickEvent, 'kind'>
     if (click.serviceId !== serviceId) return
     window.sessionStorage.removeItem(CLICK_KEY)
-    track([{ ...click, kind: 'book' }])
+    track([{ ...click, kind: 'book', bookingId }])
     flush()
   } catch {
     // Same as above.
