@@ -85,6 +85,36 @@ const readFocus = (ux: UxContext, within: string | null) =>
     }
   }, within)
 
+// The page scrolls to the focused control smoothly (`scroll-behavior: smooth`): judge where it
+// came to rest, not a frame of the way there.
+const settleScroll = (ux: UxContext) =>
+  ux.page
+    .evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const positions = () =>
+            [document.scrollingElement, ...document.querySelectorAll('*')]
+              .filter((node): node is Element =>
+                Boolean(node && node.scrollHeight > node.clientHeight),
+              )
+              .slice(0, 40)
+              .map((node) => `${node.scrollTop}:${node.scrollLeft}`)
+              .join('|')
+          let last = positions()
+          let still = 0
+          const started = performance.now()
+          const tick = () => {
+            const next = positions()
+            still = next === last ? still + 1 : 0
+            last = next
+            if (still >= 3 || performance.now() - started > 1500) resolve()
+            else requestAnimationFrame(tick)
+          }
+          requestAnimationFrame(tick)
+        }),
+    )
+    .catch(() => undefined)
+
 class KeyboardWalker {
   private readonly ux: UxContext
   private checked = new Set<string>()
@@ -170,6 +200,7 @@ class KeyboardWalker {
   async tabTo(target: Target, label: string, reverse = false) {
     for (let count = 1; count <= MAX_TABS; count += 1) {
       await this.ux.page.keyboard.press(reverse ? 'Shift+Tab' : 'Tab')
+      await settleScroll(this.ux)
       const info = await readFocus(this.ux, target.within ?? null)
       await this.inspect(info)
       if (this.matches(info, target)) {
