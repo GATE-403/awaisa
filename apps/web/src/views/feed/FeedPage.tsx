@@ -24,8 +24,8 @@ interface FeedPageProps {
 
 /** Load the next page this many cards before the end. */
 const PREFETCH_AHEAD = 3
-/** How far a sideways pull goes before the next card comes to the middle. */
-const SWIPE_DISTANCE = 60
+/** How far a sideways swipe (to the next card) or a pull up (back to the last one) goes. */
+const SWIPE_DISTANCE = 70
 
 // «Образы»: finished work as a hand of cards — one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
@@ -35,6 +35,9 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [nextOffset, setNextOffset] = useState(initialPage?.nextOffset ?? null)
   const [active, setActive] = useState(0)
   const [dragX, setDragX] = useState(0)
+  const [dragY, setDragY] = useState(0)
+  // The side the last card was swiped to: it waits there and comes back from there.
+  const [flyDir, setFlyDir] = useState<1 | -1>(-1)
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [isLocating, setIsLocating] = useState(false)
   const [reported, setReported] = useState<string[]>([])
@@ -124,8 +127,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     )
   }
 
-  // Sideways moves are ours: the middle card follows the finger, and past a short pull the next
-  // (or the previous) one comes in. A tap stays a tap (double tap likes).
+  // A swipe either way sends the card in play off that side and the next one comes up, like
+  // dealing from a deck; a pull up brings the last card back. A tap stays a tap (double tap likes).
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     gesture.current = { x: event.clientX, y: event.clientY, isSideways: null }
   }
@@ -137,20 +140,29 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     const dy = event.clientY - start.y
     if (start.isSideways === null && Math.hypot(dx, dy) > 8) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      if (start.isSideways) event.currentTarget.setPointerCapture(event.pointerId)
+      event.currentTarget.setPointerCapture(event.pointerId)
     }
-    if (!start.isSideways) return
-    // At either end the card only gives a little, like a rubber band.
-    const isEdge = (dx > 0 && active === 0) || (dx < 0 && active === shown.length - 1)
-    setDragX(isEdge ? dx / 4 : dx)
+    if (start.isSideways === null) return
+    if (start.isSideways) {
+      // At the end of the deck the card only gives a little, like a rubber band.
+      setDragX(active >= shown.length - 1 ? dx / 4 : dx)
+      return
+    }
+    // Only up, and only when there is a card to bring back.
+    setDragY(active > 0 && dy < 0 ? dy : dy / 6)
   }
 
   const handlePointerUp = () => {
     const start = gesture.current
     gesture.current = null
-    if (!start?.isSideways) return
-    if (Math.abs(dragX) > SWIPE_DISTANCE) turn(dragX < 0 ? 1 : -1)
+    if (!start || start.isSideways === null) return
+    if (start.isSideways && Math.abs(dragX) > SWIPE_DISTANCE && active < shown.length - 1) {
+      setFlyDir(dragX < 0 ? -1 : 1)
+      turn(1)
+    }
+    if (!start.isSideways && dragY < -SWIPE_DISTANCE) turn(-1)
     setDragX(0)
+    setDragY(0)
   }
 
   return (
@@ -196,8 +208,15 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         role='feed'
         aria-label='Образы'
         aria-busy={isPending || undefined}
-        data-dragging={dragX !== 0 || undefined}
-        style={{ '--drag': `${dragX}px`, '--tilt': `${dragX / 30}deg` } as CSSProperties}
+        data-dragging={dragX !== 0 || dragY !== 0 || undefined}
+        style={
+          {
+            '--drag': `${dragX}px`,
+            '--lift': `${dragY / 3}px`,
+            '--tilt': `${dragX / 30}deg`,
+            '--fly': flyDir,
+          } as CSSProperties
+        }
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -206,7 +225,6 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (
           <EmptyState
-            isOnDark
             title='Образов пока нет'
             text='Здесь появятся фото работ мастеров — с ценой и записью в один тап.'
             action={
@@ -216,10 +234,11 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             }
           />
         )}
-        {/* The card in play, one at each side, and the next one waiting unseen (its photo loads). */}
+        {/* The card in play, two fanned behind it, the next one waiting unseen (its photo loads) and
+            the last one gone off to the side. */}
         {shown.map((item, index) => {
           const offset = index - active
-          if (offset < -1 || offset > 2) return null
+          if (offset < -1 || offset > 3) return null
           return (
             <FeedCard
               key={item.id}
@@ -232,6 +251,18 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             />
           )
         })}
+        {current && (
+          <FeedActions
+            key={current.id}
+            item={current}
+            isLiked={likes.isLiked(current.id)}
+            onLike={(next) => like(current, next)}
+            onReported={() => {
+              setReported((known) => [...known, current.id])
+              setActive((index) => Math.max(0, Math.min(index, shown.length - 2)))
+            }}
+          />
+        )}
       </div>
 
       {/* With a mouse: the previous and the next card at the sides of the hand (keys work too). */}
@@ -260,22 +291,10 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         </div>
       )}
 
-      {current && (
-        <>
-          <p className={styles.counter} aria-hidden>
-            {active + 1} из {nextOffset === null ? shown.length : `${shown.length}+`}
-          </p>
-          <FeedActions
-            key={current.id}
-            item={current}
-            isLiked={likes.isLiked(current.id)}
-            onLike={(next) => like(current, next)}
-            onReported={() => {
-              setReported((known) => [...known, current.id])
-              setActive((index) => Math.max(0, Math.min(index, shown.length - 2)))
-            }}
-          />
-        </>
+      {active > 0 && (
+        <p className={styles.hint} aria-hidden>
+          Потяните вверх — вернуть прошлую
+        </p>
       )}
     </main>
   )
