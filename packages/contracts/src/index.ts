@@ -890,6 +890,117 @@ type MailingsOverview = {
   birthdayGreeting: string | null
 }
 
+// Funnel telemetry (POST /telemetry/events): which step of which scenario a device reached —
+// never what anyone typed. A step belongs to exactly one flow; the API works the flow out.
+type FunnelFlow =
+  | 'booking'
+  | 'search'
+  | 'login'
+  | 'manage_booking'
+  | 'prepayment'
+  | 'waitlist'
+  | 'review'
+  | 'owner'
+  | 'signals'
+
+type FunnelStep =
+  // booking
+  | 'catalog'
+  | 'business'
+  | 'booking_open'
+  | 'service'
+  | 'specialist'
+  | 'time'
+  | 'contacts'
+  | 'booked'
+  // search
+  | 'search_open'
+  | 'search_typed'
+  | 'search_results'
+  | 'search_pick'
+  // login
+  | 'login_open'
+  | 'otp_sent'
+  | 'otp_ok'
+  | 'login_done'
+  // manage_booking
+  | 'ticket_open'
+  | 'reschedule_open'
+  | 'reschedule_done'
+  | 'cancel'
+  | 'cancel_undone'
+  // prepayment
+  | 'deposit_shown'
+  | 'checkout_open'
+  | 'pay_click'
+  | 'paid'
+  // waitlist
+  | 'full_day_shown'
+  | 'waitlist_open'
+  | 'waitlist_joined'
+  // review
+  | 'review_open'
+  | 'review_rated'
+  | 'review_sent'
+  // owner
+  | 'business_landing'
+  | 'register_name'
+  | 'register_kind'
+  | 'register_contacts'
+  | 'register_done'
+  // signals: trouble, not progress
+  | 'form_error'
+  | 'toast_action'
+  | 'search_empty'
+  | 'otp_error'
+  | 'pay_failed'
+
+/** Short codes only (`phone`, `sms`, `undo_cancel`): never a value a person typed. */
+type FunnelEventMeta = { field?: string; channel?: string; kind?: string }
+
+type FunnelEvent = { step: FunnelStep; slug?: string; meta?: FunnelEventMeta }
+
+/** A coarse picture of the device and its settings, the same for everyone who has them. */
+type DeviceProfile = {
+  type: 'phone' | 'tablet' | 'desktop'
+  os: 'ios' | 'android' | 'other'
+  app: 'web' | 'native'
+  /** The browser's own font size: normal, large (≥ 120%) or huge (≥ 175%). */
+  textScale: 'normal' | 'large' | 'huge'
+  /** `slow` for 2G/3G or «save data», `unknown` where the browser does not say. */
+  net: 'slow' | 'fast' | 'unknown'
+  lang: 'ru' | 'ky' | 'en'
+  reducedMotion: boolean
+  contrastMore: boolean
+  dark: boolean
+}
+
+type FunnelEventsInput = { session: string; events: FunnelEvent[]; device?: DeviceProfile }
+
+type FunnelRow = {
+  step: FunnelStep
+  sessions: number
+  /** Share of sessions kept from the step before, %; null for the first step. */
+  fromPrevious: number | null
+  /** Share of the flow's first step, %. */
+  fromStart: number | null
+}
+
+type FunnelSegment = Partial<Pick<DeviceProfile, 'type' | 'os' | 'app' | 'textScale' | 'net'>>
+
+type FunnelReport = { days: number; flow: FunnelFlow; segment: FunnelSegment; steps: FunnelRow[] }
+
+type FunnelSignalsReport = {
+  days: number
+  items: { step: FunnelStep; value: string | null; count: number; sessions: number }[]
+}
+
+type FunnelSegmentsReport = {
+  days: number
+  sessions: number
+  items: { dimension: keyof FunnelSegment; value: string; sessions: number }[]
+}
+
 // Small answers named once, so the API and the web read the same shape.
 type FeedLikes = { likes: number }
 
@@ -946,6 +1057,17 @@ type UploadedPhoto = { url: string }
 type SearchCorrection = { query: string; corrected: string | null }
 
 export type {
+  DeviceProfile,
+  FunnelEvent,
+  FunnelEventMeta,
+  FunnelEventsInput,
+  FunnelFlow,
+  FunnelReport,
+  FunnelRow,
+  FunnelSegment,
+  FunnelSegmentsReport,
+  FunnelSignalsReport,
+  FunnelStep,
   TelegramLoginConfig,
   TelegramLoginState,
   AvatarUpload,

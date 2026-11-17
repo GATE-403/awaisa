@@ -19,6 +19,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackStep, trackToastAction } from '@/shared/lib/telemetry'
 
 const NOT_FOUND_STATUS = 404
 
@@ -98,12 +99,19 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
         (current) => current?.map((item) => (item.id === id ? cancelled : item)) ?? null,
       )
       haptic('warning')
+      trackStep('cancel', cancelled.business.slug)
       toast.show({
         title: 'Запись отменена',
         description: 'Время освободилось для других',
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
-        action: { label: 'Вернуть', onClick: () => void restore(id) },
+        action: {
+          label: 'Вернуть',
+          onClick: () => {
+            trackToastAction('undo_cancel')
+            void restore(id)
+          },
+        },
       })
     } catch (cancelError) {
       toast.show({
@@ -127,6 +135,7 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
       setAccountBookings(
         (current) => current?.map((item) => (item.id === id ? restored : item)) ?? null,
       )
+      trackStep('cancel_undone', restored.business.slug)
       toast.show({ title: 'Запись возвращена', type: 'success' })
     } catch (restoreError) {
       toast.show({

@@ -19,6 +19,7 @@ import {
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { trackToastAction } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
@@ -201,7 +202,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         type: 'success',
         action: {
           label: 'Вернуть',
-          onClick: () => void reopenVisits(slug, ids).then(reload),
+          onClick: () => {
+            trackToastAction('staff_undo_close_day')
+            void reopenVisits(slug, ids).then(reload)
+          },
         },
       })
     } catch (closeError) {
