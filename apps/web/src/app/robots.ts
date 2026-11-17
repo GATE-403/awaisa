@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 
-const APP_ONLY_PAGES = ['/manage', '/master', '/bookings', '/login', '/ui']
+const APP_ONLY_PAGES = ['/manage', '/master', '/bookings', '/login', '/ui', '/insights']
 
 const robots = (): MetadataRoute.Robots => ({
   rules: {

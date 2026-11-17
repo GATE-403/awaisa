@@ -36,6 +36,11 @@ import type {
   Customer,
   FeedLikes,
   FeedPage,
+  FunnelFlow,
+  FunnelReport,
+  FunnelSegment,
+  FunnelSegmentsReport,
+  FunnelSignalsReport,
   GiftCertificate,
   ImportReport,
   JoinWaitlistInput,
@@ -254,6 +259,23 @@ const requestOtp = (phone: string, channel: 'auto' | 'sms' = 'auto') =>
   post<OtpRequest>('/auth/otp', { phone, channel })
 
 const verifyOtp = (phone: string, code: string) => post<Customer>('/auth/verify', { phone, code })
+
+// Platform admins: a flow's funnel, for everyone or one kind of device; trouble; who comes.
+const getFunnelReport = (
+  query: { days: number; flow: FunnelFlow } & FunnelSegment,
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query))
+    if (value !== undefined) params.set(key, String(value))
+  return request<FunnelReport>(`/telemetry/funnel?${params}`, { signal })
+}
+
+const getFunnelSignals = (days: number, signal?: AbortSignal) =>
+  request<FunnelSignalsReport>(`/telemetry/signals?days=${days}`, { signal })
+
+const getFunnelSegments = (days: number, signal?: AbortSignal) =>
+  request<FunnelSegmentsReport>(`/telemetry/segments?days=${days}`, { signal })
 
 const getTelegramLoginConfig = (signal?: AbortSignal) =>
   request<TelegramLoginConfig>('/auth/telegram', { signal })
@@ -739,6 +761,9 @@ const removeTeamMember = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/members/${id}`)
 
 export {
+  getFunnelReport,
+  getFunnelSegments,
+  getFunnelSignals,
   listOffersByIds,
   listOffersPage,
   addTeamMember,

@@ -38,6 +38,8 @@ const APP_SEGMENTS = new Set([
   'v',
   'ui',
   'api',
+  // Platform admins' funnels and devices.
+  'insights',
 ])
 
 const getBusinessSlug = (pathname: string) => {
@@ -48,7 +50,7 @@ const getBusinessSlug = (pathname: string) => {
 // The owner cabinet is a self-contained app: no client tab bar or marketing footer there.
 // The owner's side is its own app: the list of businesses and each cabinet.
 const isCabinetPath = (pathname: string) =>
-  pathname === '/manage' || pathname.startsWith('/manage/')
+  pathname === '/manage' || pathname.startsWith('/manage/') || pathname === '/insights'
 
 // Screens of their own, without the site's header, tab bar and footer (sign-in).
 const isStandalonePath = (pathname: string) => pathname === '/login'
