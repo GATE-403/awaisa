@@ -5,6 +5,7 @@ import { Select } from '@awaisa/ui/Select'
 import {
   CalendarCheck,
   CaretRight,
+  ChartBar,
   CircleHalf,
   Phone,
   PlusCircle,
@@ -166,6 +167,16 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.label}>Подключить бизнес</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </NextLink>
+        {/* Platform admins: where people drop out of each scenario, on which devices. */}
+        {customer.isAdmin && (
+          <NextLink href='/insights' className={styles.row}>
+            <span className={styles.glyph} data-tone='gray' aria-hidden>
+              <ChartBar weight='fill' />
+            </span>
+            <span className={styles.label}>Воронки</span>
+            <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          </NextLink>
+        )}
       </div>
 
       {/* Destructive, as on iOS: a red row, and a confirmation by the row before it happens. */}
