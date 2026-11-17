@@ -25,6 +25,8 @@ interface DateTimePickerProps {
   fullDayAction?: ReactNode
   /** `ruler`: the whole day as a dial of free and taken times (the booking form); `grid`: free times as capsules. */
   view?: 'grid' | 'ruler'
+  /** The ruler's free time under the needle, for an action outside the picker. */
+  onCenteredTimeChange?: (time: string | null) => void
   /** The visit's length, shown by the ruler as «до 14:45». */
   durationMinutes?: number
 }
@@ -75,6 +77,7 @@ export const DateTimePicker = ({
   fullDayAction,
   view = 'grid',
   durationMinutes = 0,
+  onCenteredTimeChange,
 }: DateTimePickerProps) => {
   const t = useT()
   // Another day loading keeps the day before on the ruler (dimmed) until it arrives: swapping
@@ -165,6 +168,7 @@ export const DateTimePicker = ({
           time={time}
           durationMinutes={durationMinutes}
           onPick={onTimeChange}
+          onCenter={onCenteredTimeChange}
           days={dayRow}
         />
       )}

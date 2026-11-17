@@ -15,6 +15,8 @@ interface ServicePickerProps {
   categories: Category[]
   value: string | null
   onChange: (id: string) => void
+  /** The chosen card tapped again: close the step without changing anything. */
+  onReselect?: () => void
   /** A work photo per service (newest tagged one), else the place's cover. */
   photos?: Record<string, string>
   coverUrl?: string | null
@@ -31,6 +33,7 @@ export const ServicePicker = ({
   value,
   onChange,
   photos,
+  onReselect,
   coverUrl,
   businessName,
   soonLabel,
@@ -86,6 +89,9 @@ export const ServicePicker = ({
                 className={styles.input}
                 checked={isChosen}
                 onChange={() => onChange(service.id)}
+                onClick={() => {
+                  if (isChosen) onReselect?.()
+                }}
                 aria-label={`${service.name}, ${formatPrice(service.price)}, ${t.duration(service.durationMinutes)}`}
               />
               {service.isPopular && (
