@@ -47,12 +47,19 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
-  const [dragX, setDragX] = useState(0)
-  // 0…1 while a pull down spreads the folded stack under the finger.
-  const [pull, setPull] = useState(0)
   // The first time a stack of two shows, its front card leans aside once: it can be swiped.
   const [isNudging, setIsNudging] = useState(false)
-  const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
+  // The finger's path lives outside React: written straight to CSS variables once a frame, so a
+  // drag never re-renders the form (each re-render cost a dropped frame on phones).
+  const gesture = useRef<{
+    x: number
+    y: number
+    isSideways: boolean | null
+    dx: number
+    pull: number
+  } | null>(null)
+  const frame = useRef(0)
+  const stopListening = useRef<(() => void) | null>(null)
   const swallowClick = useRef(false)
   const stackRef = useRef<HTMLDivElement>(null)
   const count = cards.length
@@ -86,44 +93,82 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     return () => document.removeEventListener('pointerdown', fold)
   }, [isFanned])
 
+  // A drag still under way when the step changes: stop following the window.
+  useEffect(() => () => stopListening.current?.(), [])
+
   if (count === 0) return null
+
+  const paint = () => {
+    frame.current = 0
+    const stack = stackRef.current
+    const state = gesture.current
+    if (!stack) return
+    const dx = state?.isSideways ? state.dx : 0
+    const pull = state && state.isSideways === false ? state.pull : 0
+    stack.style.setProperty('--stack-drag', `${dx}px`)
+    stack.style.setProperty('--stack-tilt', `${dx / 40}deg`)
+    stack.style.setProperty('--pull', `${pull}`)
+    stack.toggleAttribute('data-dragging', dx !== 0 || pull > 0)
+  }
+
+  const schedulePaint = () => {
+    if (!frame.current) frame.current = requestAnimationFrame(paint)
+  }
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (isOpen || count < 2) return
-    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null }
+    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null, dx: 0, pull: 0 }
+    // The rest of the gesture is followed on the window: a mouse that wanders off the stack, or
+    // is let go outside the window, still ends it (the card used to freeze mid-drag).
+    stopListening.current?.()
+    const end = () => handlePointerUp()
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+    window.addEventListener('blur', end)
+    stopListening.current = () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+      window.removeEventListener('blur', end)
+      stopListening.current = null
+    }
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = (event: globalThis.PointerEvent) => {
     const start = gesture.current
     if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      event.currentTarget.setPointerCapture(event.pointerId)
     }
-    if (start.isSideways) setDragX(dx)
-    else if (start.isSideways === false) setPull(Math.min(1, Math.max(0, dy / PULL_DISTANCE)))
+    if (start.isSideways) start.dx = dx
+    else if (start.isSideways === false) start.pull = Math.min(1, Math.max(0, dy / PULL_DISTANCE))
+    schedulePaint()
   }
 
   const handlePointerUp = () => {
+    stopListening.current?.()
     const start = gesture.current
     gesture.current = null
+    // Let go of the drag now, not on the next frame: the stack shuffles in this same render, and
+    // with the drag still on (transitions off) the cards jumped instead of gliding.
+    if (frame.current) cancelAnimationFrame(frame.current)
+    paint()
     if (!start || start.isSideways === null) return
     swallowClick.current = true
     if (!start.isSideways) {
-      if (pull > 0.33) {
+      if (start.pull > 0.33) {
         setIsFanned(true)
         haptic('selection')
       }
-      setPull(0)
       return
     }
-    if (Math.abs(dragX) > SWIPE_DISTANCE) {
-      setShift((current) => current + (dragX < 0 ? 1 : -1))
+    if (Math.abs(start.dx) > SWIPE_DISTANCE) {
+      setShift((current) => current + (start.dx < 0 ? 1 : -1))
       haptic('selection')
     }
-    setDragX(0)
   }
 
   return (
@@ -131,14 +176,11 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       ref={stackRef}
       className={styles.stack}
       data-fanned={isOpen || undefined}
+      data-dealt={(isFanned && count > 1) || undefined}
       data-movable={canMove || undefined}
-      data-pulling={pull > 0 || undefined}
       data-nudge={isNudging || undefined}
-      style={{ '--count': count, '--pull': pull } as CSSProperties}
+      style={{ '--count': count } as CSSProperties}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
       onClickCapture={(event) => {
         if (!swallowClick.current) return
         swallowClick.current = false
@@ -156,26 +198,33 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
             aria-labelledby={`step-${card.id}-title`}
             className={styles.card}
             data-back={!isOpen && !isFront ? '' : undefined}
-            data-dragging={isFront && dragX !== 0 ? '' : undefined}
+            data-front={isFront || undefined}
             style={
               {
                 '--i': place,
                 '--depth': count - 1 - place,
                 '--tone': card.tone,
-                '--drag': isFront ? `${dragX}px` : '0px',
-                '--tilt': isFront ? `${dragX / 40}deg` : '0deg',
               } as CSSProperties
             }
           >
             <h2 id={`step-${card.id}-title`} className={styles.srOnly}>
               {card.title}
             </h2>
-            <span className={styles.media}>{card.media}</span>
-            <span className={styles.text}>
-              <span className={styles.primary}>{card.primary}</span>
-              {card.secondary && <span className={styles.secondary}>{card.secondary}</span>}
+            {/* Behind the front card only a strip peeks out: it names the step («Мастер · …»), and
+                the whole card fades in as the stack is pulled open. */}
+            <span className={styles.peek} aria-hidden>
+              <span className={styles.peekLabel}>{card.title}</span>
+              <span className={styles.peekValue}>{card.primary}</span>
+              {card.trailing && <span className={styles.peekTrailing}>{card.trailing}</span>}
             </span>
-            {card.trailing && <span className={styles.trailing}>{card.trailing}</span>}
+            <span className={styles.content}>
+              <span className={styles.media}>{card.media}</span>
+              <span className={styles.text}>
+                <span className={styles.primary}>{card.primary}</span>
+                {card.secondary && <span className={styles.secondary}>{card.secondary}</span>}
+              </span>
+              {card.trailing && <span className={styles.trailing}>{card.trailing}</span>}
+            </span>
             <button
               type='button'
               className={styles.edit}

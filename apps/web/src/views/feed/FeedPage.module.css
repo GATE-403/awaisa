@@ -1,11 +1,11 @@
-/* «Образы»: a dark stage with a hand of cards — one large in the middle, one tilted at each side.
-   Phones: the whole screen, the tab bar floats over it; from 768px under the header. */
+/* «Образы»: a deck of cards on the page — one tall card in play, the next two fanned behind it.
+   Phones: the whole screen, the tab bar floats over it; from 768px under the header. The page keeps
+   the theme's own background (a black stage in the light theme looked like another app). */
 .page {
   position: relative;
   height: 100dvh;
   overflow: hidden;
-  background: #000;
-  color-scheme: dark;
+  background: var(--color-background);
 }
 
 .visuallyHidden {
@@ -46,18 +46,17 @@
   padding: 0 var(--space-1);
   border: none;
   background: none;
-  color: rgb(255 255 255 / 0.72);
+  color: var(--color-muted-foreground);
   font: inherit;
   font-size: var(--text-body);
   font-weight: var(--font-weight-semibold);
-  text-shadow: 0 1px 6px rgb(0 0 0 / 0.45);
   white-space: nowrap;
   cursor: pointer;
 }
 
 .chip[aria-current="page"],
 .chip[aria-pressed="true"] {
-  color: #fff;
+  color: var(--color-foreground);
 }
 
 .chip[aria-current="page"]::after,
@@ -69,13 +68,12 @@
   left: 30%;
   height: 2px;
   border-radius: var(--radius-full);
-  background: #fff;
+  background: var(--color-foreground);
 }
 
 .chip svg {
   width: 14px;
   height: 14px;
-  filter: drop-shadow(0 1px 3px rgb(0 0 0 / 0.45));
 }
 
 .chip:focus-visible {
@@ -179,7 +177,9 @@
 
 .placeholder {
   height: 100%;
-  background: #111;
+  margin: 0 var(--page-gutter);
+  border-radius: 28px;
+  background: var(--color-fill);
 }
 
 .emptyLink {
@@ -216,50 +216,76 @@
   text-underline-offset: 3px;
 }
 
-/* The stage holds the hand; cards are sized from it (container units), so the middle one is as
-   large as the screen allows, three-quarters portrait. */
+/* The stage holds the deck right under the tabs and down to the tab bar; cards are sized from it
+   (container units), so the one in play is as tall as the screen allows. */
 .stage {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 56px);
+  top: calc(env(safe-area-inset-top) + 52px);
   right: 0;
-  bottom: calc(var(--tabbar-height, 60px) + env(safe-area-inset-bottom) + 104px);
+  bottom: calc(var(--tabbar-height, 60px) + env(safe-area-inset-bottom) + var(--space-3));
   left: 0;
   container-type: size;
   overflow: hidden;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
+/* The feed's own box adds nothing to the layout: cards are placed against the stage. */
+.deck {
+  display: contents;
+}
+
+.card,
+.actions {
+  --width: min(92cqw, 100cqh * 0.68);
+}
+
+/* Offsets: 0 in play; 1 and 2 behind it, fanned left and right like the cards held in a hand;
+   −1 the one just swiped away, off the screen to the side it went (it comes back on a pull up). */
 .card {
-  --width: min(78cqw, 100cqh * 0.72);
+  --fan: clamp(0, var(--offset), 2);
+  /* 0 → in the middle, 1 → behind on the left, 2 → behind on the right. */
+  --side: calc(var(--fan) * (var(--fan) * 1.5 - 2.5));
+  --drag: 0px;
+  --lift: 0px;
 
   position: absolute;
   top: 50%;
   left: 50%;
   width: var(--width);
-  aspect-ratio: 0.72;
-  max-height: 100cqh;
+  height: min(100cqh, var(--width) / 0.6);
   margin: 0;
-  border-radius: 26px;
+  border-radius: 28px;
   overflow: hidden;
   isolation: isolate;
   background: #1c1c1e;
-  box-shadow: 0 24px 48px rgb(0 0 0 / 0.5);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.22);
   color: #fff;
   text-shadow: var(--card-text-shadow);
-  /* Side cards: pushed out, tilted away and dimmed, like the cards held behind the one shown. */
   transform: translate(-50%, -50%)
-    translateX(calc(var(--offset) * (var(--width) * 0.7) + var(--drag, 0px)))
-    translateY(calc(min(1, var(--offset) * var(--offset)) * 4%)) rotate(calc(var(--offset) * 9deg))
-    scale(calc(1 - min(1, var(--offset) * var(--offset)) * 0.2));
-  filter: brightness(calc(1 - min(1, var(--offset) * var(--offset)) * 0.5));
+    translate(calc(var(--side) * 7% + var(--drag, 0px)), calc(var(--fan) * 1.5% + var(--lift, 0px)))
+    rotate(calc(var(--side) * 4deg)) scale(calc(1 - var(--fan) * 0.04));
+  /* A soft settle, no overshoot; only transform and opacity move, so the compositor carries it
+     (a brightness filter on three big cards cost frames on phones). */
   transition:
-    transform 520ms var(--ease-spring),
-    filter 400ms var(--ease-standard),
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 300ms var(--ease-standard);
-  z-index: calc(10 - var(--offset) * var(--offset));
+  will-change: transform;
+  z-index: calc(10 - var(--fan));
 }
 
-.card[data-offset="2"] {
+/* The card swiped away keeps flying the way it went and fades on its way out. Its transform has
+   the same functions as the others', so the browser glides between them instead of jumping. */
+.card[data-offset="-1"] {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) translate(calc(var(--fly, 1) * 130%), 4%)
+    rotate(calc(var(--fly, 1) * 18deg)) scale(0.96);
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 360ms var(--ease-standard) 80ms;
+}
+
+.card[data-offset="3"] {
   opacity: 0;
   pointer-events: none;
 }
@@ -268,9 +294,24 @@
   transition: none;
 }
 
-/* The middle card leans a little with the finger. */
+/* The card in play follows and leans with the finger. */
 .card[data-active] {
+  --drag: var(--stage-drag, 0px);
+  --lift: var(--stage-lift, 0px);
+
   rotate: var(--tilt, 0deg);
+}
+
+/* The cards behind are dimmed by a plain dark layer, not a filter. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #000;
+  opacity: calc(var(--fan) * 0.18);
+  pointer-events: none;
+  transition: opacity 400ms var(--ease-standard);
 }
 
 .media {
@@ -310,7 +351,7 @@
 .info {
   position: absolute;
   right: var(--space-4);
-  bottom: var(--space-4);
+  bottom: calc(52px + var(--space-4) * 2);
   left: var(--space-4);
   display: flex;
   flex-direction: column;
@@ -330,30 +371,31 @@
   -webkit-line-clamp: 2;
 }
 
-.counter {
+/* Once a card has gone: how to bring it back. */
+.hint {
   position: absolute;
-  bottom: calc(var(--tabbar-height, 60px) + env(safe-area-inset-bottom) + 80px);
+  top: calc(env(safe-area-inset-top) + 40px);
   left: 0;
   right: 0;
+  z-index: 4;
   margin: 0;
-  color: rgb(255 255 255 / 0.55);
+  color: var(--color-muted-foreground);
   font-size: var(--text-xs);
   text-align: center;
-  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
-/* Under the hand: «⋯», the one wide «Записаться», and ♥ with its count. */
+/* On the card in play, at its foot: «⋯», the one wide «Записаться», and ♥ with its count. */
 .actions {
   position: absolute;
-  right: var(--page-gutter);
-  bottom: calc(var(--tabbar-height, 60px) + env(safe-area-inset-bottom) + var(--space-4));
-  left: var(--page-gutter);
-  z-index: 5;
+  bottom: calc(50cqh - min(100cqh, var(--width) / 0.6) / 2 + var(--space-4));
+  left: 50%;
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  max-width: 520px;
-  margin: 0 auto;
+  gap: var(--space-2);
+  width: calc(var(--width) - var(--space-4) * 2);
+  translate: -50% 0;
 }
 
 /* «Записаться» over the first free time, two short lines instead of one that wraps. */
@@ -379,10 +421,11 @@
   gap: 4px;
   min-width: 52px;
   height: 52px;
+  backdrop-filter: none;
   padding: 0 var(--space-3);
   border: none;
   border-radius: var(--radius-full);
-  background: rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.18);
   color: #fff;
   font: inherit;
   font-size: var(--text-footnote);
@@ -435,8 +478,8 @@
     height: 48px;
     border: none;
     border-radius: var(--radius-full);
-    background: rgb(255 255 255 / 0.12);
-    color: #fff;
+    background: var(--color-fill);
+    color: var(--color-foreground);
     cursor: pointer;
   }
 
@@ -454,7 +497,7 @@
   }
 
   .turn:hover:not(:disabled) {
-    background: rgb(255 255 255 / 0.2);
+    background: var(--color-fill-hover);
   }
 
   .turn:disabled {
@@ -466,7 +509,6 @@
 @media (min-width: 768px) {
   .page {
     height: calc(100dvh - var(--header-height, 64px));
-    background: #0e0e10;
   }
 
   .filters {
@@ -476,15 +518,11 @@
 
   .stage {
     top: 60px;
-    bottom: 104px;
-  }
-
-  .counter {
-    bottom: 80px;
-  }
-
-  .actions {
     bottom: var(--space-5);
+  }
+
+  .hint {
+    top: 44px;
   }
 }
 
