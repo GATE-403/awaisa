@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react'
-import { CURRENCY, formatAmount, getDateParts } from '@/entities/booking/lib/bookingUtils'
+import {
+  CURRENCY,
+  formatAmount,
+  formatPrice,
+  getDateParts,
+} from '@/entities/booking/lib/bookingUtils'
 import type { Booking } from '@/shared/api/types'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { Barcode } from './Barcode'
@@ -33,6 +38,10 @@ export const Ticket = ({
     : { day: '—', month: '', weekday: 'Дата не выбрана' }
   const code = isDraft ? '—' : getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
+  const price = booking.price - (booking.discount?.amount ?? 0)
+  const isDepositPaid = booking.payment?.status === 'paid'
+  const toPay = isDepositPaid ? Math.max(0, price - (booking.payment?.amount ?? 0)) : price
+  const payLabel = isCancelled ? 'Оплата не нужна' : isDepositPaid ? 'В салоне' : 'К оплате'
 
   return (
     <article
@@ -82,6 +91,20 @@ export const Ticket = ({
         </div>
 
         <div className={styles.stub}>
+          {/* The price leads the stub: it is what people look for on a ticket, the number only
+              matters at the desk. */}
+          <div className={styles.stubInfo}>
+            <span className={styles.stubLabel}>
+              {payLabel}
+              {/* On the label's line, so the stub keeps two lines and its fixed height. */}
+              {booking.discount && !isCancelled && (
+                <s className={styles.oldAmount}>{formatPrice(booking.price)}</s>
+              )}
+            </span>
+            <span className={styles.amount}>
+              {formatAmount(toPay)} <small>{CURRENCY}</small>
+            </span>
+          </div>
           <div className={styles.stubInfo}>
             <span className={styles.stubLabel}>Номер</span>
             {onCodeClick ? (
@@ -91,12 +114,6 @@ export const Ticket = ({
             ) : (
               <span className={styles.code}>{code}</span>
             )}
-          </div>
-          <div className={styles.stubInfo}>
-            <span className={styles.stubLabel}>{isCancelled ? 'Оплата не нужна' : 'К оплате'}</span>
-            <span className={styles.amount}>
-              {formatAmount(booking.price)} <small>{CURRENCY}</small>
-            </span>
           </div>
           {!isDraft && <Barcode value={booking.id} />}
         </div>
