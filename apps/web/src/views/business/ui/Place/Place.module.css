@@ -1397,12 +1397,22 @@ details[open] > .info .infoChevron {
 
 /* One-line text links in the head and section heads stay 44pt tall to a finger without moving
    the line: the padding is taken back by a negative margin (WCAG 2.5.8, our 44pt rule). */
-.stat,
 .address,
 .sectionLink,
 .infoAction {
   padding-block: 12px;
   margin-block: -12px;
+}
+
+/* The counts in the stats line get less: at 200% zoom the line wraps and 44pt areas ran into
+   the open status under them. 28pt still clears WCAG's 24, and wrapped rows keep apart. */
+.stat {
+  padding-block: var(--space-1);
+  margin-block: calc(-1 * var(--space-1));
+}
+
+.stats {
+  row-gap: var(--space-2);
 }
 
 /* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
@@ -1416,4 +1426,10 @@ details[open] > .info .infoChevron {
   position: absolute;
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
+}
+
+/* The quick actions sit side by side in one capsule: their hit area grows up and down only,
+   or each ran into its neighbour when the buttons narrow (200% zoom). */
+.quickAction::before {
+  inset-inline: 0;
 }
