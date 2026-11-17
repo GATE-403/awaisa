@@ -133,7 +133,10 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const handlePointerUp = () => {
     const start = gesture.current
     gesture.current = null
-    schedulePaint()
+    // Let go of the drag now, not on the next frame: the stack shuffles in this same render, and
+    // with the drag still on (transitions off) the cards jumped instead of gliding.
+    if (frame.current) cancelAnimationFrame(frame.current)
+    paint()
     if (!start || start.isSideways === null) return
     swallowClick.current = true
     if (!start.isSideways) {
