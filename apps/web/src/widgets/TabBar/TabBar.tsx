@@ -12,11 +12,15 @@ import {
   NAV_ITEMS,
 } from '@/shared/config/navigation'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
+import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './TabBar.module.css'
 
 export const TabBar = () => {
   const pathname = useChromePathname()
   const { customer } = useSession()
+  // Reading down a long page, the bar steps aside like Safari's toolbar; any scroll up brings it
+  // back. Pages that do not scroll the window (map, «Образы») keep it.
+  const isTucked = useTuckOnScroll()
   // Owners do not need the pitch for businesses: their cabinet is one tap away in the profile.
   const isOwner = (customer?.businesses?.length ?? 0) > 0 || Boolean(customer?.isAdmin)
   const items = isOwner ? NAV_ITEMS.filter((item) => item.href !== '/business') : NAV_ITEMS
@@ -26,7 +30,7 @@ export const TabBar = () => {
   const activeIndex = items.findIndex((item) => isActivePath(pathname, item.href))
 
   return (
-    <nav aria-label='Нижнее меню' className={styles.tabBar}>
+    <nav aria-label='Нижнее меню' className={styles.tabBar} data-tucked={isTucked || undefined}>
       {/* One highlight that slides to the chosen tab, like iOS's tab bar — not a fill per tab. */}
       <span
         className={styles.indicator}
