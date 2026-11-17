@@ -96,8 +96,17 @@ export const DateTimePicker = ({
   // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
-  const relativeDay = (key: string) =>
-    key === todayKey ? t('Сегодня') : key === tomorrowKey ? t('Завтра') : null
+  // With large text «Сегодня» no longer fits its card and lost the word to «Сего…»: once it
+  // overflows, both say it short, like the weekdays beside them.
+  const [isShortRelative, setIsShortRelative] = useState(false)
+  const measureRelative = (node: HTMLElement | null) => {
+    if (node && node.scrollWidth > node.clientWidth + 1) setIsShortRelative(true)
+  }
+  const relativeDay = (key: string) => {
+    if (key === todayKey) return isShortRelative ? t('Сег.') : t('Сегодня')
+    if (key === tomorrowKey) return isShortRelative ? t('Завт.') : t('Завтра')
+    return null
+  }
   const isRussian = t.language === 'ru'
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
@@ -119,7 +128,11 @@ export const DateTimePicker = ({
           disabled={day.isClosed}
           data-today={day.isToday || undefined}
         >
-          <span className={styles.weekday} data-relative={relativeDay(day.key) ? '' : undefined}>
+          <span
+            className={styles.weekday}
+            data-relative={relativeDay(day.key) ? '' : undefined}
+            ref={relativeDay(day.key) ? measureRelative : undefined}
+          >
             {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
           </span>
           <span className={styles.dayNumber}>{day.dayOfMonth}</span>

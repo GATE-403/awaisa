@@ -282,11 +282,13 @@
 }
 
 .placeMeta {
+  /* Two lines at most: with large text the address or the place wraps instead of being cut. */
+  display: -webkit-box;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .all {

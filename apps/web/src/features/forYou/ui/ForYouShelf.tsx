@@ -18,8 +18,19 @@ import { PreferencesSheet } from './PreferencesSheet'
 
 // The capsule on a 144px card holds about 17 characters: past that only the reason's lead is
 // shown («Ваш выбор · стрижки» → «Ваш выбор»), never a word cut by an ellipsis.
-const shortReason = (reason: string) =>
-  reason.length > 17 ? (reason.split(' · ')[0] ?? reason) : reason
+// Reasons with no « · » get a short form of their own: «Похоже на просмотренное» was cut to
+// «Похоже на просмотре…».
+const SHORT_LEADS: [RegExp, string][] = [
+  [/^Похоже на просмотренное/, 'Похожее'],
+  [/^Как в ваших визитах/, 'Как обычно'],
+  [/^Часто берут/, 'Берут вместе'],
+]
+
+const shortReason = (reason: string) => {
+  if (reason.length <= 17) return reason
+  const lead = reason.split(' · ')[0] ?? reason
+  return SHORT_LEADS.find(([pattern]) => pattern.test(lead))?.[1] ?? lead
+}
 
 // Under a 76pt story tile there is room for about 12 characters: the reason in its shortest words.
 const storyNote = (reason: string) => {

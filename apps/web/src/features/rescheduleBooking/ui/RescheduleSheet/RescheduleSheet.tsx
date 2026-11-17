@@ -4,7 +4,13 @@ import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ArrowRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { DateTimePicker, formatDayLong, getUpcomingDays, useAvailability } from '@/entities/booking'
+import {
+  DateTimePicker,
+  formatDayLong,
+  formatDayShort,
+  getUpcomingDays,
+  useAvailability,
+} from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { moveMyBooking } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
@@ -77,13 +83,13 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
           <span className={styles.was}>
             <span className={styles.caption}>Сейчас</span>
             <span className={styles.wasTime}>{booking.time}</span>
-            <span className={styles.date}>{formatDayLong(booking.date)}</span>
+            <span className={styles.date}>{formatDayShort(booking.date)}</span>
           </span>
           <ArrowRight weight='bold' aria-hidden className={styles.arrow} />
           <span className={styles.will} data-empty={!time || undefined}>
             <span className={styles.caption}>Станет</span>
             <span className={styles.willTime}>{time ?? '—:—'}</span>
-            <span className={styles.date}>{formatDayLong(date)}</span>
+            <span className={styles.date}>{formatDayShort(date)}</span>
           </span>
         </div>
       </div>

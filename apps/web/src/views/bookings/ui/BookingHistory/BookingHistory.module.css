@@ -72,12 +72,14 @@
 }
 
 .meta {
+  /* Two lines at most: with large text the place's name wraps instead of being cut. */
+  display: -webkit-box;
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .cancelled {
