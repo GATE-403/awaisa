@@ -1,0 +1,20 @@
+{
+  "name": "@awaisa/ux-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UX checks per persona: accessibility (WCAG 2.2 AA), large text and zoom, eyesight, slow phones, desktop layouts",
+  "scripts": {
+    "ux": "playwright test",
+    "test:a11y": "UX_MODE=a11y UX_CHECKS=axe,targets,formErrors playwright test --grep @a11y",
+    "report": "node --no-warnings report/build-report.ts --open",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
+    "typescript": "^5"
+  }
+}
