@@ -215,7 +215,7 @@
   position: absolute;
   top: var(--drop-y, 120px);
   left: var(--drop-x, 50%);
-  width: var(--drop-size, 200vmax);
+  width: 240px;
   aspect-ratio: 1;
   translate: -50% -50%;
   border-radius: 50%;
@@ -302,7 +302,7 @@
 @keyframes swell {
   from {
     opacity: 1;
-    scale: 0.04;
+    scale: 0.2;
   }
 
   50% {
@@ -311,19 +311,19 @@
 
   to {
     opacity: 0;
-    scale: 1;
+    scale: var(--grow, 8);
   }
 }
 
 @keyframes ripple {
   from {
     opacity: calc(0.7 - var(--n) * 0.2);
-    scale: 0.03;
+    scale: 0.2;
   }
 
   to {
     opacity: 0;
-    scale: 1;
+    scale: var(--grow, 8);
   }
 }
 

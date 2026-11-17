@@ -15,10 +15,13 @@ import { useT } from '@/shared/i18n'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import styles from './BookingSuccess.module.css'
 
-// The rings after the drop: each one fainter, the vibration fading with them.
-const RINGS = [0, 1, 2]
-const RING_TAPS_MS = [140, 360, 580]
-const WEB_VIBRATION = [26, 120, 12, 200, 8, 200, 5]
+// The rings after the drop, each one fainter.
+const RINGS = [0, 1]
+// The water is drawn small and scaled up: sheet-sized layers (four of ~1800px) ran a phone's
+// WebView out of tile memory and the whole sheet blinked dark for a frame.
+const RIPPLE_SIZE = 240
+// Long enough for the last ring to reach the edge; then the layers leave the page.
+const RIPPLE_MS = 2400
 
 interface BookingSuccessProps {
   booking: Booking
@@ -31,6 +34,8 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const pondRef = useRef<HTMLDivElement>(null)
   const checkRef = useRef<HTMLSpanElement>(null)
+  const hasTapped = useRef(false)
+  const [isRippling, setIsRippling] = useState(true)
 
   // The water spreads from the check to the farthest corner of the sheet.
   useLayoutEffect(() => {
@@ -44,20 +49,20 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
     const reach = Math.hypot(Math.max(x, area.width - x), Math.max(y, area.height - y))
     pond.style.setProperty('--drop-x', `${x}px`)
     pond.style.setProperty('--drop-y', `${y}px`)
-    pond.style.setProperty('--drop-size', `${Math.ceil(reach * 2)}px`)
+    pond.style.setProperty('--grow', `${(reach * 2) / RIPPLE_SIZE}`)
   }, [])
 
-  // The drop is felt: a firm tap as the check lands, then lighter ones as the rings go out. In the
-  // app through the Taptic Engine; in a browser that can vibrate (Android), a fading pattern.
+  // The drop is felt once, as the check lands: one firm tap (Taptic in the app, a short buzz in
+  // browsers that can vibrate). The ref keeps React's dev double-run from tapping twice.
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    if (!getNativeApp()) {
-      navigator.vibrate?.(WEB_VIBRATION)
-      return
+    const timer = window.setTimeout(() => setIsRippling(false), RIPPLE_MS)
+    const isCalm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!hasTapped.current && !isCalm) {
+      if (getNativeApp()) haptic('impact')
+      else navigator.vibrate?.(30)
     }
-    haptic('success')
-    const timers = RING_TAPS_MS.map((delay) => window.setTimeout(() => haptic('selection'), delay))
-    return () => timers.forEach(window.clearTimeout)
+    hasTapped.current = true
+    return () => window.clearTimeout(timer)
   }, [])
 
   const handleAddToCalendar = () => {
@@ -72,17 +77,19 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
     <div className={styles.success}>
       {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
           matters — when. */}
-      <div ref={pondRef} className={styles.pond} aria-hidden>
-        <span className={styles.ripple} data-kind='swell' />
-        {RINGS.map((n) => (
-          <span
-            key={n}
-            className={styles.ripple}
-            data-kind='ring'
-            style={{ '--n': n } as CSSProperties}
-          />
-        ))}
-      </div>
+      {isRippling && (
+        <div ref={pondRef} className={styles.pond} aria-hidden>
+          <span className={styles.ripple} data-kind='swell' />
+          {RINGS.map((n) => (
+            <span
+              key={n}
+              className={styles.ripple}
+              data-kind='ring'
+              style={{ '--n': n } as CSSProperties}
+            />
+          ))}
+        </div>
+      )}
       <span ref={checkRef} className={styles.check} aria-hidden>
         <Check weight='bold' />
       </span>
