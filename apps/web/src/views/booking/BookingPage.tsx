@@ -361,7 +361,10 @@ export const BookingPage = ({
     status: 'confirmed',
     serviceId: form.service?.id ?? '',
     serviceName: form.service?.name ?? t('Услуга не выбрана'),
-    price: form.quote?.total ?? form.service?.price ?? 0,
+    price: form.service?.price ?? 0,
+    discount: form.quote?.discount
+      ? { title: form.quote.discount.title, amount: form.quote.discount.amount }
+      : null,
     durationMinutes: form.service?.durationMinutes ?? 0,
     specialistId: form.specialistId ?? '',
     specialistName: chosenSpecialist?.name ?? (form.specialistId ? t('Любой мастер') : ''),
