@@ -36,7 +36,6 @@ interface CardStackProps {
 const SWIPE_DISTANCE = 48
 // How far a pull down spreads the folded stack fully; past a third of it, it stays fanned.
 const PULL_DISTANCE = 140
-const NUDGE_KEY = 'awaisa:stack-nudge:v1'
 
 // Done steps become cards — torn-off parts of the ticket the booking turns into — and slide into a
 // stack above the open question, the newest in front. A sideways swipe shuffles the folded stack
@@ -47,8 +46,6 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
-  // The first time a stack of two shows, its front card leans aside once: it can be swiped.
-  const [isNudging, setIsNudging] = useState(false)
   // The finger's path lives outside React: written straight to CSS variables once a frame, so a
   // drag never re-renders the form (each re-render cost a dropped frame on phones).
   const gesture = useRef<{
@@ -68,19 +65,6 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const placeOf = (index: number) => (((index + shift) % count) + count) % count
 
   const canMove = !isOpen && count > 1
-  useEffect(() => {
-    if (!canMove) return
-    try {
-      if (window.sessionStorage.getItem(NUDGE_KEY)) return
-      window.sessionStorage.setItem(NUDGE_KEY, '1')
-    } catch {
-      return
-    }
-    setIsNudging(true)
-    const timer = window.setTimeout(() => setIsNudging(false), 1800)
-    return () => window.clearTimeout(timer)
-  }, [canMove])
-
   // A fanned stack folds back on a tap anywhere outside it, like a menu.
   useEffect(() => {
     if (!isFanned) return
@@ -178,7 +162,6 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       data-fanned={isOpen || undefined}
       data-dealt={(isFanned && count > 1) || undefined}
       data-movable={canMove || undefined}
-      data-nudge={isNudging || undefined}
       style={{ '--count': count } as CSSProperties}
       onPointerDown={handlePointerDown}
       onClickCapture={(event) => {
