@@ -1,0 +1,86 @@
+name: UX kit
+
+# The persona checks from tests/ux (docs/ux-testing): accessibility, large text and zoom,
+# eyesight, slow phones, desktop layouts. A pull request that touches the web gets the quick
+# accessibility pass (one device per persona); every night and on demand, the whole kit. The
+# HTML report (reports/ux) is attached to every run.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/ui/**'
+      - 'packages/tokens/**'
+      - 'tests/ux/**'
+      - '.github/workflows/ux.yml'
+  schedule:
+    # 03:00 in Bishkek.
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ux:
+    name: ${{ github.event_name == 'pull_request' && 'UX kit (accessibility)' || 'UX kit (all personas)' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: awaisa
+          POSTGRES_PASSWORD: awaisa
+          POSTGRES_DB: awaisa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U awaisa -d awaisa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      CI: 'true'
+      UX_WORKERS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env
+      - name: Migrate and seed demo data
+        run: |
+          pnpm --filter @awaisa/tokens --filter @awaisa/ui --if-present build
+          pnpm --filter api build
+          pnpm --filter api migrate
+          pnpm db:seed
+      - name: Playwright version
+        id: playwright
+        run: echo "version=$(pnpm --filter @awaisa/ux-tests exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - run: pnpm --filter @awaisa/ux-tests exec playwright install --with-deps chromium
+      # The kit builds its own web into apps/web/.next-ux: reuse Next's cache between runs.
+      - uses: actions/cache@v4
+        with:
+          path: apps/web/.next-ux/cache
+          key: next-ux-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: next-ux-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+      - name: Run the kit
+        run: pnpm ${{ github.event_name == 'pull_request' && 'test:a11y' || 'test:ux' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ux-report
+          path: reports/ux
+          retention-days: 14

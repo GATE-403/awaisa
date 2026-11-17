@@ -286,8 +286,14 @@ class UxContext {
       for (const node of violation.nodes.slice(0, 3)) {
         const selector = node.target.map(String).at(-1) ?? ''
         const described = await this.describeSelector(selector)
+        // «Partially obscured» depends on where the page was scrolled when axe looked (a sticky
+        // bar over the top of a short screen); real overlaps are our own ux-control-covered.
+        const isScrollCover =
+          violation.id === 'target-size' && /obscured/i.test(node.failureSummary ?? '')
         await this.add({
-          severity: (violation.impact as Severity | null) ?? 'moderate',
+          severity: isScrollCover
+            ? 'moderate'
+            : ((violation.impact as Severity | null) ?? 'moderate'),
           rule: violation.id,
           title: violation.help,
           detail: `${described?.name ? `«${described.name}»: ` : ''}${node.failureSummary?.split('\n').slice(1, 3).join(' ').trim() ?? ''}`,
