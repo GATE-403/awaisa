@@ -71,8 +71,8 @@ const SLOW_4G = {
 const scaledTextVars = (scale: number) => {
   const css = readFileSync(join(__dirname, '../../../packages/tokens/dist/tokens.css'), 'utf8')
   const vars: Record<string, string> = {}
-  for (const [, name, value] of css.matchAll(/(--text-[\w-]+):\s*([\d.]+)px/g))
-    vars[name] = `${Math.round(Number(value) * scale * 10) / 10}px`
+  for (const [, name, value, unit] of css.matchAll(/(--text-[\w-]+):\s*([\d.]+)(px|rem)/g))
+    vars[name] = `${Math.round(Number(value) * scale * 1000) / 1000}${unit}`
   return vars
 }
 
