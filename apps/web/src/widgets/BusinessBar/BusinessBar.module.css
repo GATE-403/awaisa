@@ -189,3 +189,15 @@
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
+
+/* «Каталог» in the trail: a 44pt hit area around the short link, invisible. */
+:where(.crumb) {
+  position: relative;
+}
+
+.crumb::before {
+  content: "";
+  position: absolute;
+  inset-block: min(0px, calc((100% - 44px) / 2));
+  inset-inline: min(0px, calc((100% - 44px) / 2));
+}
