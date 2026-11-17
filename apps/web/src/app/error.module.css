@@ -31,3 +31,19 @@
   margin-bottom: var(--space-3);
   color: var(--color-muted-foreground);
 }
+
+/* global-error.tsx draws its own document: the page colour and a column of its own. */
+.globalBody {
+  display: flex;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0 var(--space-4);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.globalBody .page {
+  justify-content: center;
+  width: 100%;
+}
