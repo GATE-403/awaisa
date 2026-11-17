@@ -215,6 +215,13 @@ export const BookingPage = ({
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // «Шаг 2 из 4» over the question: where one is, said where one looks (the bar's line was missed).
+  const stepEyebrow = (step: BookingStepId) =>
+    t('Шаг {step} из {total}', {
+      step: ['service', 'specialist', 'datetime', 'contacts'].indexOf(step) + 1,
+      total: 4,
+    })
+
   const openStep = (step: BookingStepId | 'branch') => {
     setIsReviewRequested(false)
     window.clearTimeout(foldTimer.current)
@@ -277,7 +284,8 @@ export const BookingPage = ({
         />
       ),
       primary: form.service.name,
-      secondary: t.duration(form.service.durationMinutes),
+      // The price on the card itself, not only in the bar: it was missed down there.
+      secondary: `${t.duration(form.service.durationMinutes)} · ${formatPrice(form.quote?.total ?? form.service.price)}`,
       trailing: formatPrice(form.quote?.total ?? form.service.price),
     })
   }
@@ -572,7 +580,11 @@ export const BookingPage = ({
                 )}
 
                 {!isBranchOpen && activeStep === 'service' && (
-                  <BookingStep id='service' title={t('Что делаем?')}>
+                  <BookingStep
+                    id='service'
+                    eyebrow={stepEyebrow('service')}
+                    title={t('Что делаем?')}
+                  >
                     <ServicePicker
                       services={form.services}
                       categories={catalog.categories}
@@ -588,7 +600,11 @@ export const BookingPage = ({
                 )}
 
                 {!isBranchOpen && activeStep === 'specialist' && (
-                  <BookingStep id='specialist' title={t('К кому записаться?')}>
+                  <BookingStep
+                    id='specialist'
+                    eyebrow={stepEyebrow('specialist')}
+                    title={t('К кому записаться?')}
+                  >
                     <MasterPicker
                       specialists={form.specialists}
                       value={form.specialistId}
@@ -599,7 +615,11 @@ export const BookingPage = ({
                 )}
 
                 {!isBranchOpen && activeStep === 'datetime' && (
-                  <BookingStep id='datetime' title={t('Когда удобно?')}>
+                  <BookingStep
+                    id='datetime'
+                    eyebrow={stepEyebrow('datetime')}
+                    title={t('Когда удобно?')}
+                  >
                     <DateTimePicker
                       view='ruler'
                       onCenteredTimeChange={setRulerTime}
@@ -630,7 +650,11 @@ export const BookingPage = ({
                 )}
 
                 {!isBranchOpen && activeStep === 'contacts' && !isContactsFolded && (
-                  <BookingStep id='contacts' title={t('Как вас записать?')}>
+                  <BookingStep
+                    id='contacts'
+                    eyebrow={stepEyebrow('contacts')}
+                    title={t('Как вас записать?')}
+                  >
                     <div className={styles.fields}>
                       {/* Settings-style rows: the label on the left, the value typed on the right. */}
                       <div className={styles.group}>

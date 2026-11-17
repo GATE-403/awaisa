@@ -9,6 +9,7 @@ import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
 import { knownPosition } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
+import { StoryRow, StoryTile } from '@/shared/ui/StoryTile/StoryTile'
 import { usePreferences } from '../lib/preferences'
 import { deviceSession, readRecent, type Surface, track, trackPickClick } from '../lib/signals'
 import styles from './ForYou.module.css'
@@ -19,6 +20,14 @@ import { PreferencesSheet } from './PreferencesSheet'
 // shown («Ваш выбор · стрижки» → «Ваш выбор»), never a word cut by an ellipsis.
 const shortReason = (reason: string) =>
   reason.length > 17 ? (reason.split(' · ')[0] ?? reason) : reason
+
+// Under a 76pt story tile there is room for about 12 characters: the reason in its shortest words.
+const storyNote = (reason: string) => {
+  const lead = reason.split(' · ')[0] ?? reason
+  if (lead.startsWith('Часто выбирают')) return 'Популярное'
+  if (lead.startsWith('Часто берут')) return 'Берут вместе'
+  return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
+}
 
 // «Для вас»: services picked for this client — their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
@@ -41,6 +50,8 @@ interface ForYouShelfProps {
   surface?: Surface
   /** A link on the right of the head (the catalog's «Рейтинг ›»), so it costs no row of its own. */
   headAction?: ReactNode
+  /** `stories`: small square tiles like a stories row (the catalog's top); `cards` (default) the shelf. */
+  variant?: 'cards' | 'stories'
 }
 
 export const ForYouShelf = ({
@@ -53,6 +64,7 @@ export const ForYouShelf = ({
   isTunable = false,
   surface = 'catalog',
   headAction,
+  variant = 'cards',
 }: ForYouShelfProps = {}) => {
   const trackRef = useRef<HTMLUListElement>(null)
   const preferences = usePreferences()
@@ -131,7 +143,7 @@ export const ForYouShelf = ({
   // The catalog's shelf is there for everyone: it holds its place while the picks load, so the
   // results under it do not jump down when they arrive.
   if (isForEveryone && (!isReady || items === null)) {
-    return <ForYouShelfPlaceholder title={title} headAction={headAction} />
+    return <ForYouShelfPlaceholder title={title} headAction={headAction} variant={variant} />
   }
 
   if (!isReady) return null
@@ -173,43 +185,62 @@ export const ForYouShelf = ({
         )}
         {headAction}
       </div>
-      <ul ref={trackRef} className={styles.track} data-edge-fade=''>
-        {shown.map((item, position) => (
-          <li key={item.id}>
-            <NextLink
+      {variant === 'stories' ? (
+        <StoryRow ref={trackRef}>
+          {shown.map((item, position) => (
+            <StoryTile
+              key={item.id}
               href={`/${item.slug}/book?service=${item.id}`}
-              className={styles.card}
-              data-card=''
-              data-picture-frame={item.coverUrl ? '' : undefined}
-              onClick={() =>
+              label={item.name}
+              ariaLabel={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
+              imageUrl={item.coverUrl}
+              note={storyNote(item.reason)}
+              isEager={position < 5}
+              onOpen={() =>
                 trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
               }
-              aria-label={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
-            >
-              {item.coverUrl && (
-                // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures
-                <img
-                  {...sizedImage(item.coverUrl, 180)}
-                  alt=''
-                  className={styles.image}
-                  data-card-media=''
-                  // The first picks are the first thing a newcomer sees: no grey cards.
-                  loading={position < 3 ? 'eager' : 'lazy'}
-                  fetchPriority={position === 0 ? 'high' : undefined}
-                  decoding='async'
-                />
-              )}
-              <span className={styles.reason}>{shortReason(item.reason)}</span>
-              <span className={styles.caption}>
-                <span className={styles.name}>{item.name}</span>
-                <span className={styles.meta}>
-                  <strong>{formatPrice(item.price)}</strong> · {item.businessName}
+            />
+          ))}
+        </StoryRow>
+      ) : (
+        <ul ref={trackRef} className={styles.track} data-edge-fade=''>
+          {shown.map((item, position) => (
+            <li key={item.id}>
+              <NextLink
+                href={`/${item.slug}/book?service=${item.id}`}
+                className={styles.card}
+                data-card=''
+                data-picture-frame={item.coverUrl ? '' : undefined}
+                onClick={() =>
+                  trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
+                }
+                aria-label={`${item.name}, ${item.businessName}, ${formatPrice(item.price)}. ${item.reason}`}
+              >
+                {item.coverUrl && (
+                  // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures
+                  <img
+                    {...sizedImage(item.coverUrl, 180)}
+                    alt=''
+                    className={styles.image}
+                    data-card-media=''
+                    // The first picks are the first thing a newcomer sees: no grey cards.
+                    loading={position < 3 ? 'eager' : 'lazy'}
+                    fetchPriority={position === 0 ? 'high' : undefined}
+                    decoding='async'
+                  />
+                )}
+                <span className={styles.reason}>{shortReason(item.reason)}</span>
+                <span className={styles.caption}>
+                  <span className={styles.name}>{item.name}</span>
+                  <span className={styles.meta}>
+                    <strong>{formatPrice(item.price)}</strong> · {item.businessName}
+                  </span>
                 </span>
-              </span>
-            </NextLink>
-          </li>
-        ))}
-      </ul>
+              </NextLink>
+            </li>
+          ))}
+        </ul>
+      )}
       {sheet}
     </section>
   )
