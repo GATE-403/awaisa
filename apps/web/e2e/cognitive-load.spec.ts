@@ -59,7 +59,8 @@ test.describe('Cognitive load: booking', () => {
   test('the first choice is reachable without reading a wall of text', async ({ page }) => {
     await page.goto('/awaisa-studio/book')
     const words = await page.evaluate(() => {
-      const main = document.querySelector('main')
+      // The sheet: a direct link also renders the place's page, dimmed, under it.
+      const main = document.querySelector('[data-booking-screen]')
       const firstChoice = document
         .querySelector('#step-service input[type="radio"]')
         ?.closest('label')

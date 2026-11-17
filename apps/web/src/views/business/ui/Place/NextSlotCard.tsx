@@ -69,15 +69,10 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
       data-tucked={isTucked || isHeadBookVisible || undefined}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
-      <NextLink
-        href={href}
-        className={styles.slotLink}
-        aria-label={
-          slot
-            ? `Записаться на ${slot.dayLabel.toLowerCase()} ${slot.time}: ${service.name}`
-            : `Записаться: ${service.name}`
-        }
-      >
+      <NextLink href={href} className={styles.slotLink}>
+        {/* Said before what the card shows, not instead of it: the name keeps the visible
+            words (WCAG 2.5.3), so voice control finds «Сегодня, 18:30». */}
+        <span className={styles.srOnly}>{slot ? 'Записаться на ' : 'Записаться: '}</span>
         <span className={styles.slotText}>
           <span
             className={styles.slotWhen}
