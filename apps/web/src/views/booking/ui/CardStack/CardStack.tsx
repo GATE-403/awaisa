@@ -176,6 +176,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       ref={stackRef}
       className={styles.stack}
       data-fanned={isOpen || undefined}
+      data-dealt={(isFanned && count > 1) || undefined}
       data-movable={canMove || undefined}
       data-nudge={isNudging || undefined}
       style={{ '--count': count } as CSSProperties}
