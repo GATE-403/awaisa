@@ -41,6 +41,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [active, setActive] = useState(0)
   const stageRef = useRef<HTMLDivElement>(null)
   const frame = useRef(0)
+  const stopListening = useRef<(() => void) | null>(null)
   // The side the last card was swiped to: it waits there and comes back from there.
   const [flyDir, setFlyDir] = useState<1 | -1>(-1)
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
@@ -113,6 +114,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       })
   }, [active, shown.length, nextOffset])
 
+  useEffect(() => () => stopListening.current?.(), [])
+
   const like = (item: FeedItem, next: boolean) => {
     likes.setLiked(item.id, next)
     if (!next) return
@@ -152,6 +155,21 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       dy: 0,
       samples: [{ t: performance.now(), x: event.clientX, y: event.clientY }],
     }
+    // The rest of the gesture is followed on the window: a mouse that wanders off the stack, or
+    // is let go outside the window, still ends it (the card used to freeze mid-drag).
+    stopListening.current?.()
+    const end = (upEvent: Event) => handlePointerUp(upEvent)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+    window.addEventListener('blur', end)
+    stopListening.current = () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+      window.removeEventListener('blur', end)
+      stopListening.current = null
+    }
   }
 
   // Where the finger went over its last moments: a phone's WebView delivers moves late and in
@@ -189,7 +207,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (!frame.current) frame.current = requestAnimationFrame(paint)
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = (event: globalThis.PointerEvent) => {
     const start = gesture.current
     if (!start) return
     const dx = event.clientX - start.x
@@ -197,7 +215,6 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     record(start, event.clientX, event.clientY)
     if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      event.currentTarget.setPointerCapture(event.pointerId)
     }
     if (start.isSideways === null) return
     if (start.isSideways) {
@@ -210,7 +227,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     schedulePaint()
   }
 
-  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
+  const handlePointerUp = (event: globalThis.PointerEvent | Event) => {
+    stopListening.current?.()
     const start = gesture.current
     gesture.current = null
     // Let go of the drag now, not on the next frame: the deck turns in this same render, and with
@@ -218,7 +236,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (frame.current) cancelAnimationFrame(frame.current)
     paint()
     if (!start || start.isSideways === null) return
-    if (event.type === 'pointerup') record(start, event.clientX, event.clientY)
+    if (event instanceof PointerEvent && event.type === 'pointerup')
+      record(start, event.clientX, event.clientY)
     // Far enough, or a quick flick the same way however short.
     const isFar = (distance: number, velocity: number) =>
       distance > SWIPE_DISTANCE ||
@@ -278,9 +297,6 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         ref={stageRef}
         style={{ '--fly': flyDir } as CSSProperties}
         onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
       >
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (

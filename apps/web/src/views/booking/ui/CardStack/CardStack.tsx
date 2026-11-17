@@ -59,6 +59,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     pull: number
   } | null>(null)
   const frame = useRef(0)
+  const stopListening = useRef<(() => void) | null>(null)
   const swallowClick = useRef(false)
   const stackRef = useRef<HTMLDivElement>(null)
   const count = cards.length
@@ -92,6 +93,9 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     return () => document.removeEventListener('pointerdown', fold)
   }, [isFanned])
 
+  // A drag still under way when the step changes: stop following the window.
+  useEffect(() => () => stopListening.current?.(), [])
+
   if (count === 0) return null
 
   const paint = () => {
@@ -114,16 +118,30 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (isOpen || count < 2) return
     gesture.current = { x: event.clientX, y: event.clientY, isSideways: null, dx: 0, pull: 0 }
+    // The rest of the gesture is followed on the window: a mouse that wanders off the stack, or
+    // is let go outside the window, still ends it (the card used to freeze mid-drag).
+    stopListening.current?.()
+    const end = () => handlePointerUp()
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+    window.addEventListener('blur', end)
+    stopListening.current = () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+      window.removeEventListener('blur', end)
+      stopListening.current = null
+    }
   }
 
-  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = (event: globalThis.PointerEvent) => {
     const start = gesture.current
     if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
     if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
-      event.currentTarget.setPointerCapture(event.pointerId)
     }
     if (start.isSideways) start.dx = dx
     else if (start.isSideways === false) start.pull = Math.min(1, Math.max(0, dy / PULL_DISTANCE))
@@ -131,6 +149,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   }
 
   const handlePointerUp = () => {
+    stopListening.current?.()
     const start = gesture.current
     gesture.current = null
     // Let go of the drag now, not on the next frame: the stack shuffles in this same render, and
@@ -161,9 +180,6 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       data-nudge={isNudging || undefined}
       style={{ '--count': count } as CSSProperties}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
       onClickCapture={(event) => {
         if (!swallowClick.current) return
         swallowClick.current = false
