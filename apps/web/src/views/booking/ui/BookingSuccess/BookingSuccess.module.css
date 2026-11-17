@@ -249,7 +249,8 @@
   }
 
   .title {
-    background: linear-gradient(
+    background:
+      linear-gradient(
         100deg,
         currentColor 40%,
         color-mix(in srgb, var(--color-success) 55%, #fff) 50%,
