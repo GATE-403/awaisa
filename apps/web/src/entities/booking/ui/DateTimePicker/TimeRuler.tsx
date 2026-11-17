@@ -100,9 +100,12 @@ export const TimeRuler = ({
   const current = slots[centered]
   const centeredTime = !isPending && current?.isAvailable ? current.time : null
 
+  // The form (and its bar) hears of the time under the needle once the dial settles, not on every
+  // tick it passes: each tick re-rendered the whole booking form mid-scroll.
   // biome-ignore lint/correctness/useExhaustiveDependencies: tell only when the time changes
   useEffect(() => {
-    onCenter?.(centeredTime)
+    const timer = window.setTimeout(() => onCenter?.(centeredTime), 140)
+    return () => window.clearTimeout(timer)
   }, [centeredTime])
   const isFree = Boolean(current?.isAvailable)
 
