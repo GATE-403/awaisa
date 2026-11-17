@@ -11,6 +11,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { completeTestPayment, syncPayment } from '@/shared/api/clientApi'
 import type { PaymentPage } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './PayPage.module.css'
 
@@ -29,14 +30,21 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     payment?.driver === 'freedompay' && payment.status === 'pending',
   )
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once per visit
+  useEffect(() => {
+    if (payment) trackStep('checkout_open', payment.booking.business.slug)
+  }, [])
+
   // Back from Freedom Pay's page: ask how the payment went before showing «pay» again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: once per visit
   useEffect(() => {
     if (!payment || payment.driver !== 'freedompay' || payment.status !== 'pending') return
     syncPayment(payment.id, signature)
       .then((result) => {
-        if (result.status === 'succeeded') router.replace(`/bookings?paid=${result.bookingId}`)
-        else setIsChecking(false)
+        if (result.status === 'succeeded') {
+          trackStep('paid', payment.booking.business.slug)
+          router.replace(`/bookings?paid=${result.bookingId}`)
+        } else setIsChecking(false)
       })
       .catch(() => setIsChecking(false))
   }, [])
@@ -68,14 +76,18 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
   const isExpired = booking.paymentStatus === 'expired' || payment.status === 'failed'
 
   const handlePay = async () => {
+    const slug = booking.business.slug
     setIsPaying(true)
     setError(null)
+    trackStep('pay_click', slug)
     try {
       const result = await completeTestPayment(payment.id, signature)
       haptic('success')
+      trackStep('paid', slug)
       router.replace(`/bookings?paid=${result.bookingId}`)
     } catch (payError) {
       haptic('error')
+      trackStep('pay_failed', slug)
       setError(getErrorMessage(payError))
       setIsPaying(false)
     }
@@ -144,8 +156,13 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 <ButtonLink
                   size='lg'
                   fullWidth
-                  // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
-                  render={<a href={payment.checkoutUrl} />}
+                  render={
+                    // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
+                    <a
+                      href={payment.checkoutUrl}
+                      onClick={() => trackStep('pay_click', booking.business.slug)}
+                    />
+                  }
                 >
                   <LockSimple weight='fill' aria-hidden />
                   {isChecking ? 'Проверяем оплату…' : `Оплатить ${formatPrice(payment.amount)}`}

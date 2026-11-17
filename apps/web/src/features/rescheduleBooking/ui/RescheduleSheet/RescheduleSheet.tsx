@@ -10,6 +10,7 @@ import { moveMyBooking } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { trackStep } from '@/shared/lib/telemetry'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './RescheduleSheet.module.css'
 
@@ -52,6 +53,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
         title: `Перенесено: ${formatDayLong(moved.date)}, ${moved.time}`,
         type: 'success',
       })
+      trackStep('reschedule_done', booking.business.slug)
       onMoved(moved)
       onClose()
     } catch (moveError) {

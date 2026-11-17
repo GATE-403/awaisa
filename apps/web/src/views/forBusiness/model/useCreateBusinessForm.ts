@@ -8,6 +8,7 @@ import type { BusinessKind, SlugCheck } from '@/shared/api/types'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { slugify } from '@/shared/lib/slugify'
+import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 
 const SLUG_CHECK_DELAY_MS = 350
 const MIN_SLUG_LENGTH = 3
@@ -50,6 +51,16 @@ export const useCreateBusinessForm = () => {
     name: hasTriedSubmit && name.trim().length < 2 ? 'Укажите название' : undefined,
     slug: currentCheck && !currentCheck.available ? currentCheck.reason : undefined,
   }
+
+  // Which step of the setup people reach, and what the name step refuses (codes only).
+  useEffect(() => {
+    trackStep(`register_${step}`)
+  }, [step])
+
+  useEffect(() => {
+    if (errors.name) trackFormError('business_name')
+    if (errors.slug) trackFormError('business_slug')
+  }, [errors.name, errors.slug])
 
   useEffect(() => {
     if (slug.length < MIN_SLUG_LENGTH) return
@@ -133,6 +144,7 @@ export const useCreateBusinessForm = () => {
             : 'Добавьте услуги и мастеров — и можно принимать записи',
         type: 'success',
       })
+      trackStep('register_done', business.slug)
       router.replace(`/manage/${business.slug}?tab=${services.length > 0 ? 'masters' : 'services'}`)
     } catch (error) {
       toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
