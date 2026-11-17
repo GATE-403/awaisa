@@ -40,6 +40,8 @@ const APP_SEGMENTS = new Set([
   'api',
   // Platform admins' funnels and devices.
   'insights',
+  // «Что нового».
+  'updates',
 ])
 
 const getBusinessSlug = (pathname: string) => {

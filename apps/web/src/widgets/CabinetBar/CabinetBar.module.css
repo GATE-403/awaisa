@@ -129,3 +129,16 @@
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
+
+/* Unread news: a small accent dot on the glyph's corner, like a badge in the macOS toolbar. */
+.icon[data-unread]::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  box-shadow: 0 0 0 1.5px var(--color-material);
+}

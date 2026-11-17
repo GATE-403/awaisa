@@ -8,6 +8,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: absoluteUrl('/map'), changeFrequency: 'daily', priority: 0.7 },
   { url: absoluteUrl('/feed'), changeFrequency: 'daily', priority: 0.7 },
   { url: absoluteUrl('/business'), changeFrequency: 'monthly', priority: 0.5 },
+  { url: absoluteUrl('/updates'), changeFrequency: 'weekly', priority: 0.3 },
 ]
 
 // An API outage must not fail the build or blank the sitemap's static part.
