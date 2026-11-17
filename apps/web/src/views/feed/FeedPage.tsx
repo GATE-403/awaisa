@@ -24,8 +24,11 @@ interface FeedPageProps {
 
 /** Load the next page this many cards before the end. */
 const PREFETCH_AHEAD = 3
-/** How far a sideways swipe (to the next card) or a pull up (back to the last one) goes. */
-const SWIPE_DISTANCE = 70
+/** How far a sideways swipe (to the next card) or a pull up (back to the last one) goes… */
+const SWIPE_DISTANCE = 40
+/** …or how fast (px per ms): a quick flick counts however short it is. */
+const FLICK_SPEED = 0.35
+const FLICK_MIN = 16
 
 // «Образы»: finished work as a hand of cards — one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
@@ -42,7 +45,12 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [isLocating, setIsLocating] = useState(false)
   const [reported, setReported] = useState<string[]>([])
   const loadingRef = useRef(false)
-  const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
+  const gesture = useRef<{
+    x: number
+    y: number
+    time: number
+    isSideways: boolean | null
+  } | null>(null)
   const likes = useFeedLikes()
   const favorites = useFavorites()
   // `start` keeps the tapped photo first, so later pages follow the same order.
@@ -130,7 +138,12 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   // A swipe either way sends the card in play off that side and the next one comes up, like
   // dealing from a deck; a pull up brings the last card back. A tap stays a tap (double tap likes).
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null }
+    gesture.current = {
+      x: event.clientX,
+      y: event.clientY,
+      time: performance.now(),
+      isSideways: null,
+    }
   }
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -138,7 +151,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
-    if (start.isSideways === null && Math.hypot(dx, dy) > 8) {
+    if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
       event.currentTarget.setPointerCapture(event.pointerId)
     }
@@ -156,11 +169,14 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     const start = gesture.current
     gesture.current = null
     if (!start || start.isSideways === null) return
-    if (start.isSideways && Math.abs(dragX) > SWIPE_DISTANCE && active < shown.length - 1) {
+    const elapsed = Math.max(1, performance.now() - start.time)
+    const isFar = (distance: number) =>
+      distance > SWIPE_DISTANCE || (distance > FLICK_MIN && distance / elapsed > FLICK_SPEED)
+    if (start.isSideways && isFar(Math.abs(dragX)) && active < shown.length - 1) {
       setFlyDir(dragX < 0 ? -1 : 1)
       turn(1)
     }
-    if (!start.isSideways && dragY < -SWIPE_DISTANCE) turn(-1)
+    if (!start.isSideways && dragY < 0 && isFar(-dragY)) turn(-1)
     setDragX(0)
     setDragY(0)
   }
