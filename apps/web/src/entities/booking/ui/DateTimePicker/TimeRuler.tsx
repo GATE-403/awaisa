@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import styles from './TimeRuler.module.css'
@@ -45,6 +45,9 @@ export const TimeRuler = ({
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
   const hasShown = useRef(false)
+  const settleTimer = useRef<number | undefined>(undefined)
+  // A finger resting on the dial: no pull until it lets go.
+  const isHolding = useRef(false)
   // Until the dial is touched, one line says how it works.
   const [hasMoved, setHasMoved] = useState(false)
   const firstFree = Math.max(
@@ -68,6 +71,8 @@ export const TimeRuler = ({
     setCentered(startIndex)
   }, [slotsKey])
 
+  useEffect(() => () => window.clearTimeout(settleTimer.current), [])
+
   // A mouse wheel turns the ruler: it has no other sideways gesture.
   useEffect(() => {
     const track = trackRef.current
@@ -84,8 +89,21 @@ export const TimeRuler = ({
   const handleScroll = () => {
     const track = trackRef.current
     if (!track) return
+    // Where the dial is between ticks, for the magnet (CSS only, no re-render per frame).
+    track.style.setProperty('--pos', `${track.scrollLeft / TICK_WIDTH}`)
     const index = Math.round(track.scrollLeft / TICK_WIDTH)
     setCentered(Math.min(slots.length - 1, Math.max(0, index)))
+    // Settled between two ticks (a mouse wheel, a jerky scroll): pull to the nearest one.
+    window.clearTimeout(settleTimer.current)
+    settleTimer.current = window.setTimeout(settle, 140)
+  }
+
+  const settle = () => {
+    const track = trackRef.current
+    if (!track || isHolding.current) return
+    const target = Math.round(track.scrollLeft / TICK_WIDTH) * TICK_WIDTH
+    if (Math.abs(track.scrollLeft - target) > 0.5)
+      track.scrollTo({ left: target, behavior: 'smooth' })
   }
 
   const pick = (index: number) => {
@@ -131,7 +149,18 @@ export const TimeRuler = ({
           ref={trackRef}
           className={styles.track}
           aria-label={t('Время')}
-          onPointerDown={() => setHasMoved(true)}
+          onPointerDown={() => {
+            setHasMoved(true)
+            isHolding.current = true
+          }}
+          onPointerUp={() => {
+            isHolding.current = false
+            window.clearTimeout(settleTimer.current)
+            settleTimer.current = window.setTimeout(settle, 140)
+          }}
+          onPointerCancel={() => {
+            isHolding.current = false
+          }}
           onWheel={() => setHasMoved(true)}
           onScroll={handleScroll}
         >
@@ -143,6 +172,7 @@ export const TimeRuler = ({
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
               data-centered={index === centered || undefined}
+              style={{ '--idx': index } as CSSProperties}
               aria-pressed={slot.time === time}
               disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
