@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import type { BusinessKind } from '@awaisa/contracts'
 import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
@@ -11,6 +12,7 @@ import { RuntimeService } from '../runtime/runtime.service.js'
 import { type BranchPoint, nearestByBusiness } from './distance.js'
 import {
   type Affinities,
+  ALGORITHM,
   type Candidate,
   computeAffinities,
   type Interest,
@@ -121,8 +123,8 @@ export class RecommendationsService implements OnApplicationBootstrap {
   /** Shown, tapped and booked picks; never fails the page that sends them. */
   async recordEvents(input: RecommendationEventsInput, customer: Customer | null) {
     const values: unknown[] = []
-    const tuples = input.events.map((event, index) => {
-      values.push(
+    const tuples = input.events.map((event) => {
+      const row = [
         input.session,
         customer?.id ?? null,
         event.kind,
@@ -130,13 +132,18 @@ export class RecommendationsService implements OnApplicationBootstrap {
         event.reason,
         event.surface,
         event.position ?? null,
-      )
-      const at = index * 7
-      return `($${at + 1}, $${at + 2}, $${at + 3}, $${at + 4}, $${at + 5}, $${at + 6}, $${at + 7})`
+        event.requestId ?? null,
+        event.algorithm ?? null,
+        event.bookingId ?? null,
+      ]
+      const at = values.length
+      values.push(...row)
+      return `(${row.map((_, column) => `$${at + column + 1}`).join(', ')})`
     })
     await this.query(
       `INSERT INTO "recommendation_events"
-         ("session", "customer_id", "kind", "service_id", "reason", "surface", "position")
+         ("session", "customer_id", "kind", "service_id", "reason", "surface", "position",
+          "request_id", "algorithm", "booking_id")
        VALUES ${tuples.join(', ')}`,
       values,
     )
@@ -224,6 +231,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
       affinities,
       seen,
     }
+    const requestId = randomUUID()
     return rankCandidates(candidates, profile, { limit: query.limit }).map(
       ({ candidate, reason }) => ({
         id: candidate.serviceId,
@@ -242,6 +250,8 @@ export class RecommendationsService implements OnApplicationBootstrap {
         address: (candidate.row.address as string | null) ?? null,
         discountPercent: candidate.discountPercent,
         reason,
+        requestId,
+        algorithm: ALGORITHM,
       }),
     )
   }

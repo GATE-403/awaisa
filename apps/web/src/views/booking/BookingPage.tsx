@@ -98,6 +98,7 @@ export const BookingPage = ({
   const recentVisits = useRecentVisits()
   const chosenServiceId = form.serviceId
   const bookedServiceId = form.createdBooking?.serviceId ?? null
+  const bookedId = form.createdBooking?.id ?? null
 
   // What the client looks at and books teaches the picks (on this device, see features/forYou).
   useEffect(() => {
@@ -105,8 +106,8 @@ export const BookingPage = ({
   }, [chosenServiceId])
 
   useEffect(() => {
-    if (bookedServiceId) trackBookedPick(bookedServiceId)
-  }, [bookedServiceId])
+    if (bookedServiceId && bookedId) trackBookedPick(bookedServiceId, bookedId)
+  }, [bookedServiceId, bookedId])
 
   // The funnel: how far people get before they leave (see shared/lib/telemetry).
   const {
