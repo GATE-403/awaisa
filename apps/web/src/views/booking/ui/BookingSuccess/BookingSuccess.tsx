@@ -21,7 +21,7 @@ const RINGS = [0, 1]
 // WebView out of tile memory and the whole sheet blinked dark for a frame.
 const RIPPLE_SIZE = 240
 // Long enough for the last ring to reach the edge; then the layers leave the page.
-const RIPPLE_MS = 2400
+const RIPPLE_MS = 3800
 
 interface BookingSuccessProps {
   booking: Booking
