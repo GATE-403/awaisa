@@ -1,6 +1,5 @@
-import { Play } from '@phosphor-icons/react/ssr'
+import { CaretRight, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { formatPrice } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
 import type { BusinessKind, FeedItem } from '@/shared/api/types'
 import { sizedImage } from '@/shared/lib/imageSizes'
@@ -28,7 +27,7 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
       data-big={isBig || undefined}
       data-card=''
       data-picture-frame=''
-      aria-label={`Работа мастера: ${item.service?.name ?? item.business.name}, ${item.business.name}`}
+      aria-label={`Образ: ${item.service?.name ?? item.business.name}, ${item.business.name} — смотреть`}
     >
       {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
       <img
@@ -39,8 +38,11 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
         loading='lazy'
         decoding='async'
       />
-      <span className={styles.play} aria-hidden>
-        <Play weight='fill' />
+      {/* Told apart from a service card at a glance: an «Образ» label instead of the heart, and
+          «Смотреть» instead of a price and «Записаться» — it opens «Образы», it does not book. */}
+      <span className={styles.kind} aria-hidden>
+        <Sparkle weight='fill' />
+        Образ
       </span>
       <span className={styles.caption} aria-hidden>
         <span className={styles.author}>
@@ -57,7 +59,10 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
           </span>
         </span>
         {item.service && <span className={styles.name}>{item.service.name}</span>}
-        {item.service && <span className={styles.price}>{formatPrice(item.service.price)}</span>}
+        <span className={styles.watch}>
+          Смотреть
+          <CaretRight weight='bold' />
+        </span>
       </span>
     </NextLink>
   )
