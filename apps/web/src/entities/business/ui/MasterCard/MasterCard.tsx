@@ -15,7 +15,6 @@ interface MasterCardProps {
   specialist: MasterCardPerson | null
   /** A link card (the business page); without it the card is a `<label>` for `children`. */
   href?: string
-  'aria-label'?: string
   className?: string
   /** Inside a picker: the native radio covering the card and its check badge. */
   children?: ReactNode
@@ -32,7 +31,6 @@ interface MasterCardProps {
 export const MasterCard = ({
   specialist,
   href,
-  'aria-label': ariaLabel,
   className,
   children,
   icon,
@@ -77,6 +75,11 @@ export const MasterCard = ({
           )}
         </span>
       </span>
+      {/* The card shows the first name; the full one is read after what is written on it, so
+          the name still contains the visible text (WCAG 2.5.3) and voice control finds it. */}
+      {specialist?.name.includes(' ') && (
+        <span className={styles.srOnly}>{`, ${specialist.name}`}</span>
+      )}
       {children}
     </>
   )
@@ -89,7 +92,7 @@ export const MasterCard = ({
   }
 
   return href ? (
-    <NextLink href={href} aria-label={ariaLabel} {...props}>
+    <NextLink href={href} {...props}>
       {body}
     </NextLink>
   ) : (

@@ -114,15 +114,12 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
         {t('Перенести или отменить можно по ссылке из SMS.')}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
-      {/* The ticket itself opens the full one: details, place, download. */}
-      <button
-        type='button'
-        className={styles.ticket}
-        onClick={() => setIsTicketOpen(true)}
-        aria-label={t('Показать талон')}
-      >
-        <Ticket booking={booking} />
-      </button>
+      {/* The ticket itself opens the full one: details, place, download. Its own stretched
+          «Показать талон» button, not a button around the whole ticket — an article inside a
+          button read as one long label that did not match what is written (WCAG 2.5.3). */}
+      <div className={styles.ticket}>
+        <Ticket booking={booking} onOpen={() => setIsTicketOpen(true)} />
+      </div>
       {/* Next steps as three equal tiles, icon over word, like a share sheet's row. */}
       <div className={styles.tiles}>
         <button type='button' className={styles.tile} onClick={handleAddToCalendar}>

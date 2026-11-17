@@ -27,7 +27,6 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
       data-big={isBig || undefined}
       data-card=''
       data-picture-frame=''
-      aria-label={`Образ: ${item.service?.name ?? item.business.name}, ${item.business.name} — смотреть`}
     >
       {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
       <img
@@ -40,11 +39,12 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
       />
       {/* Told apart from a service card at a glance: an «Образ» label instead of the heart, and
           «Смотреть» instead of a price and «Записаться» — it opens «Образы», it does not book. */}
-      <span className={styles.kind} aria-hidden>
-        <Sparkle weight='fill' />
+      {/* The visible words name the link (WCAG 2.5.3): «Образ … Смотреть». */}
+      <span className={styles.kind}>
+        <Sparkle weight='fill' aria-hidden />
         Образ
       </span>
-      <span className={styles.caption} aria-hidden>
+      <span className={styles.caption}>
         <span className={styles.author}>
           {item.specialist ? (
             <PersonAvatar
@@ -61,7 +61,7 @@ export const WorkTile = ({ item, kind, isBig = false }: WorkTileProps) => {
         {item.service && <span className={styles.name}>{item.service.name}</span>}
         <span className={styles.watch}>
           Смотреть
-          <CaretRight weight='bold' />
+          <CaretRight weight='bold' aria-hidden />
         </span>
       </span>
     </NextLink>

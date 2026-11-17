@@ -38,6 +38,8 @@
 /* A small basis keeps the total and a long action («Выбрать мастера») on one line on phones;
    only large system text, where they truly do not fit, drops the button under the total. */
 .barInfo {
+  /* Holds its screen-reader-only text, which would otherwise stretch the page sideways. */
+  position: relative;
   flex: 1 1 6em;
   display: flex;
   flex-direction: column;
@@ -316,4 +318,13 @@
   padding: var(--space-4);
   border-radius: var(--radius-2xl);
   background: var(--color-background);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -116,13 +116,6 @@ export const DateTimePicker = ({
           key={day.key}
           value={day.key}
           size='card'
-          aria-label={
-            day.isClosed
-              ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
-              : isRussian
-                ? day.label
-                : t.dayLong(day.key)
-          }
           disabled={day.isClosed}
           data-today={day.isToday || undefined}
         >
@@ -131,6 +124,17 @@ export const DateTimePicker = ({
           </span>
           <span className={styles.dayNumber}>{day.dayOfMonth}</span>
           <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
+          {/* The whole date is read after what the card shows, not instead of it: the name keeps
+              the visible words, so voice control finds «Сегодня» (WCAG 2.5.3). */}
+          <span className={styles.srOnly}>
+            {`, ${
+              day.isClosed
+                ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
+                : isRussian
+                  ? day.label
+                  : t.dayLong(day.key)
+            }`}
+          </span>
         </Toggle>
       ))}
     </ToggleGroup>

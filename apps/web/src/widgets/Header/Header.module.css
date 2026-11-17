@@ -51,7 +51,13 @@
 .home {
   display: flex;
   grid-area: home;
+  align-items: center;
   justify-self: start;
+  /* On phones the logo is a 20pt mascot: the link around it is 44pt, taken back by the margin
+     so nothing moves (WCAG 2.5.8). */
+  min-height: var(--control-height-md);
+  padding-inline: var(--space-3);
+  margin-inline: calc(-1 * var(--space-3));
   border-radius: var(--radius-sm);
 }
 
@@ -351,4 +357,19 @@
 
 [aria-current="page"] > .accountAvatar {
   box-shadow: 0 0 0 2px var(--color-link);
+}
+
+/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
+   our 44pt rule). `:where` keeps the control's own position if it has one. */
+:where(.category),
+:where(.city) {
+  position: relative;
+}
+
+.category::before,
+.city::before {
+  content: "";
+  position: absolute;
+  inset-block: min(0px, calc((100% - 44px) / 2));
+  inset-inline: min(0px, calc((100% - 44px) / 2));
 }

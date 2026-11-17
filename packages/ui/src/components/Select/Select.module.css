@@ -120,3 +120,16 @@
   box-shadow: none;
   color: var(--color-foreground);
 }
+
+/* Keyboard focus shows on the closed trigger too (WCAG 2.4.7); the plain row value had none. */
+.trigger:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px var(--color-primary),
+    var(--focus-ring);
+}
+
+.trigger[data-variant="plain"]:focus-visible {
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}

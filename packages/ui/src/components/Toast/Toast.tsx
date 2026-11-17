@@ -112,7 +112,9 @@ const ToastList = () => {
 }
 
 const ToastProvider = ({ children }: ToastProviderProps) => (
-  <BaseToast.Provider timeout={3500} limit={3}>
+  // 6 s, not 3.5: a slow reader (or someone at 200% zoom) lost «Перенесено: …» before the end.
+  // Hover and focus pause it; undo toasts set their own, longer timeout.
+  <BaseToast.Provider timeout={6000} limit={3}>
     {children}
     <BaseToast.Portal>
       <BaseToast.Viewport className={styles.viewport}>
