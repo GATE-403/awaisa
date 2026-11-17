@@ -190,12 +190,21 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
             <h2 id={`step-${card.id}-title`} className={styles.srOnly}>
               {card.title}
             </h2>
-            <span className={styles.media}>{card.media}</span>
-            <span className={styles.text}>
-              <span className={styles.primary}>{card.primary}</span>
-              {card.secondary && <span className={styles.secondary}>{card.secondary}</span>}
+            {/* Behind the front card only a strip peeks out: it names the step («Мастер · …»), and
+                the whole card fades in as the stack is pulled open. */}
+            <span className={styles.peek} aria-hidden>
+              <span className={styles.peekLabel}>{card.title}</span>
+              <span className={styles.peekValue}>{card.primary}</span>
+              {card.trailing && <span className={styles.peekTrailing}>{card.trailing}</span>}
             </span>
-            {card.trailing && <span className={styles.trailing}>{card.trailing}</span>}
+            <span className={styles.content}>
+              <span className={styles.media}>{card.media}</span>
+              <span className={styles.text}>
+                <span className={styles.primary}>{card.primary}</span>
+                {card.secondary && <span className={styles.secondary}>{card.secondary}</span>}
+              </span>
+              {card.trailing && <span className={styles.trailing}>{card.trailing}</span>}
+            </span>
             <button
               type='button'
               className={styles.edit}
