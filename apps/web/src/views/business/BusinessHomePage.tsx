@@ -1,10 +1,10 @@
 import {
   getBusiness,
-  listBusinesses,
   listPromotions,
   listQuestions,
   listReviews,
   listServicePhotos,
+  listSimilarPlaces,
 } from '@/shared/api/serverApi'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
@@ -32,9 +32,8 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
     listPromotions(slug),
     listQuestions(slug),
   ])
-  // Others of the same kind for «Похожие места»; the page renders without them.
   const [similar, servicePhotos] = await Promise.all([
-    listBusinesses(business.kind, undefined).catch(() => []),
+    listSimilarPlaces(slug),
     listServicePhotos(slug),
   ])
   const quickest = catalog.services.find((service) => service.isPopular) ?? catalog.services[0]

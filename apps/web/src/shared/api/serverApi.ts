@@ -167,6 +167,21 @@ const listPlacesLeaderboard = async (kind: BusinessKind): Promise<LeaderboardPla
   return data
 }
 
+// «Похожие места» of a place, ranked by the API (distance, menu, price level, rating); the page
+// renders without them.
+const listSimilarPlaces = async (slug: string): Promise<BusinessCard[]> => {
+  'use cache'
+  cacheTag(BUSINESSES_TAG, businessTag(slug))
+
+  const { data, isStale } = await readApi<BusinessCard[]>(
+    `/businesses/${encodeURIComponent(slug)}/similar`,
+    { fallback: [] },
+  )
+  if (isStale) cacheLife('seconds')
+  else cacheLife('minutes')
+  return data
+}
+
 // The map's first list (no location yet): the same for everyone, so it is cached like the catalog.
 const listMapPlaces = async (kind: BusinessKind | undefined): Promise<MapPlace[]> => {
   'use cache'
@@ -242,6 +257,7 @@ export {
   listLeaderboard,
   listPlacesLeaderboard,
   listServicePhotos,
+  listSimilarPlaces,
   listFeed,
   listPromotions,
   getPaymentPage,
