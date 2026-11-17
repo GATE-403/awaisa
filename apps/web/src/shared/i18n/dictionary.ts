@@ -111,6 +111,8 @@ const DICTIONARY: Record<string, Entry> = {
 
   // Date and time
   Сегодня: ['Бүгүн', 'Today'],
+  'Сег.': ['Бүг.', 'Tod.'],
+  'Завт.': ['Эрт.', 'Tmrw'],
   Завтра: ['Эртең', 'Tomorrow'],
   День: ['Күн', 'Day'],
   '{day}, выходной': ['{day}, дем алыш', '{day}, closed'],

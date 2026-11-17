@@ -56,13 +56,14 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                   </span>
                   <span className={styles.body}>
                     <span className={styles.title}>{booking.serviceName}</span>
+                    {/* The status leads: cut at the end of a narrow row, it used to go first. */}
                     <span className={styles.meta}>
-                      {booking.business.name} · {booking.time}
                       {isCancelled ? (
-                        <span className={styles.cancelled}> · Отменена</span>
+                        <span className={styles.cancelled}>Отменена</span>
                       ) : (
-                        ' · Состоялась'
+                        'Состоялась'
                       )}
+                      {` · ${booking.time} · ${booking.business.name}`}
                     </span>
                   </span>
                   <span className={styles.actions}>

@@ -13,6 +13,7 @@
 
 .ticket {
   position: relative;
+  container: ticket / inline-size;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -137,12 +138,22 @@
 }
 
 .meta {
+  /* Master · address on two lines at most: with large text the street used to be cut. */
+  display: -webkit-box;
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* A narrow ticket (iPhone SE, large text) keeps the place's name whole and drops the
+   «Электронный талон» label beside it; a draft keeps «Черновик», which says what it is. */
+@container ticket (max-width: 360px) {
+  .wrap:not([data-draft]) .kind {
+    display: none;
+  }
 }
 
 .stub {

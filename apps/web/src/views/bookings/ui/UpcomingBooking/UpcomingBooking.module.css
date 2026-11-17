@@ -186,11 +186,18 @@
   letter-spacing: normal;
 }
 
-.service,
-.meta {
+.service {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.meta {
+  /* Two lines at most: with large text the address or the place wraps instead of being cut. */
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .service {
