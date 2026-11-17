@@ -67,14 +67,15 @@ export const Header = () => {
             : action,
         )
       : ACTIONS
-  // Profile and the business landing are about the person, not shopping: no search, no categories.
+  // Profile, the business landing and «Что нового» are not shopping: no search, no categories.
   const isSlim =
     pathname === '/bookings' ||
     pathname === '/business' ||
     pathname.startsWith('/business/') ||
     pathname.startsWith('/review/') ||
     pathname.startsWith('/master') ||
-    pathname.startsWith('/u/')
+    pathname.startsWith('/u/') ||
+    pathname === '/updates'
   // The map and the feed filter by kind themselves; catalog chips would leave them.
   // A business page has its own bar; the catalog's kinds there only push the place down.
   const hasCategories =

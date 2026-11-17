@@ -22,6 +22,7 @@ const COLUMNS = [
       { href: '/business', label: 'Как это работает' },
       { href: '/business/new', label: 'Подключить бизнес' },
       { href: '/manage', label: 'Кабинет' },
+      { href: '/updates', label: 'Что нового' },
     ],
   },
   {

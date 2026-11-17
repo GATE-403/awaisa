@@ -1,10 +1,11 @@
 'use client'
 
-import { ArrowSquareOut, CaretLeft, UserCircle } from '@phosphor-icons/react/ssr'
+import { ArrowSquareOut, CaretLeft, Megaphone, UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
+import { useUpdatesSeen } from '@/shared/lib/hooks/useUpdatesSeen'
 import styles from './CabinetBar.module.css'
 
 interface CabinetBarProps {
@@ -18,6 +19,7 @@ interface CabinetBarProps {
 export const CabinetBar = ({ slug, title, isPublished = true }: CabinetBarProps) => {
   const isScrolled = useIsScrolled()
   const { customer } = useSession()
+  const { hasUnread } = useUpdatesSeen()
 
   return (
     <div className={styles.bar} data-scrolled={isScrolled || undefined}>
@@ -43,6 +45,16 @@ export const CabinetBar = ({ slug, title, isPublished = true }: CabinetBarProps)
                 <ArrowSquareOut aria-hidden />
               </NextLink>
             )}
+            {/* What changed in Awaisa; a dot until this device has read the newest entry. */}
+            <NextLink
+              href='/updates'
+              className={styles.icon}
+              data-unread={hasUnread || undefined}
+              aria-label={hasUnread ? 'Что нового — есть обновления' : 'Что нового'}
+              title='Что нового'
+            >
+              <Megaphone aria-hidden />
+            </NextLink>
             <ThemeToggle />
             <NextLink
               href='/bookings'
