@@ -10,6 +10,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Keyboard focus is scrolled clear of the sheet's top bar and its action bar (WCAG 2.4.11). */
+  scroll-padding-block: calc(60px + var(--space-3))
+    calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
   padding: 0 0 calc(var(--space-20) + var(--space-6) + env(safe-area-inset-bottom));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--color-background);

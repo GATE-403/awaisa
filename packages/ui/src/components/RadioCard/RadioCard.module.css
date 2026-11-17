@@ -77,7 +77,8 @@
 }
 
 .description {
-  color: var(--color-muted-foreground);
+  /* A hair darker than secondary text: on the chosen card's fill plain muted read 4.3:1. */
+  color: color-mix(in srgb, var(--color-muted-foreground) 85%, var(--color-foreground));
   font-size: var(--text-sm);
   line-height: var(--text-sm-line-height);
 }

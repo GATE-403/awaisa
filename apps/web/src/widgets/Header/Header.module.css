@@ -11,6 +11,17 @@
     0 0.5px 0 var(--color-border);
 }
 
+/* With the phone search open, its suggestions are a fixed full screen under the bar. A
+   backdrop-filter makes the bar the containing block of fixed children, which cut that screen
+   down to the bar's own height wherever the blur is on (iOS Safari, a laptop at 200% zoom).
+   The open search sits on the solid page colour anyway, so the bar drops its blur meanwhile. */
+@media (max-width: 767px) {
+  .header:has(search[data-open]) {
+    background: var(--color-background);
+    backdrop-filter: none;
+  }
+}
+
 /* Scroll edge effect: content softly dims under the bar instead of meeting a hard hairline. */
 .header::after {
   content: "";

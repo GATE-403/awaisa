@@ -30,7 +30,10 @@
 }
 
 [data-pressed] > .weekday,
-[data-pressed] > .month {
+[data-pressed] > .month,
+/* Today's card is in the link blue: at 75% its month read 3.4:1. */
+  [data-today]
+  > .month {
   opacity: 1;
 }
 
