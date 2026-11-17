@@ -13,7 +13,10 @@
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "test:e2e": "pnpm --filter web test:e2e",
-    "db:seed": "pnpm --filter api seed:demo"
+    "db:seed": "pnpm --filter api seed:demo",
+    "test:ux": "pnpm --filter @awaisa/ux-tests ux",
+    "test:a11y": "pnpm --filter @awaisa/ux-tests test:a11y",
+    "test:ux:report": "pnpm --filter @awaisa/ux-tests report"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

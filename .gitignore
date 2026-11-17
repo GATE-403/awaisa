@@ -38,3 +38,10 @@ uploads/
 
 # load tests (apps/api/load)
 apps/api/load/results/
+
+# UX kit (tests/ux): its own builds, Playwright output and the generated report
+.next-ux/
+dist-ux/
+tests/ux/test-results/
+reports/ux/*
+!reports/ux/README.md
