@@ -18,6 +18,7 @@ const RESERVED_SLUGS = new Set([
   'login',
   'logout',
   'manage',
+  'insights',
   'feed',
   'master',
   'map',

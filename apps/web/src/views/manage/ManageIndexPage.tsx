@@ -13,7 +13,7 @@ import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { BusinessPickerCard } from '@/views/manage/ui/BusinessPickerCard/BusinessPickerCard'
-import { CabinetBar } from '@/views/manage/ui/CabinetBar/CabinetBar'
+import { CabinetBar } from '@/widgets/CabinetBar'
 import styles from './ManageIndexPage.module.css'
 
 interface ManageIndexPageProps {

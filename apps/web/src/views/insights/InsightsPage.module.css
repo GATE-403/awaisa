@@ -1,0 +1,155 @@
+.page {
+  padding: 0 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-top: var(--space-6);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Settings-style rows: the cut on the left, the chosen value on the right. */
+.group,
+.list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  list-style: none;
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-4);
+}
+
+.filterRow + .filterRow,
+.row + .row {
+  box-shadow:
+    inset 16px 0.5px 0 var(--color-surface),
+    inset 0 0.5px 0 var(--color-border);
+}
+
+.filterLabel {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+
+.list[data-loading] {
+  opacity: 0.55;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+/* A step or a value: words on the left, the count and its share on the right, a meter under. */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.rowMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  letter-spacing: var(--tracking-caption);
+}
+
+.rowValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-md-line-height);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rowShare {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--text-footnote-line-height);
+}
+
+.meter {
+  grid-column: 1 / -1;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+}
+
+.meter::before {
+  content: "";
+  display: block;
+  width: var(--share, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+}
+
+.dimensions {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.dimension {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dimensionTitle {
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-footnote-line-height);
+}
+
+@media (min-width: 768px) {
+  .dimensions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list[data-loading] {
+    transition: none;
+  }
+}

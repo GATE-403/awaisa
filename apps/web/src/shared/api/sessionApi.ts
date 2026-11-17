@@ -8,6 +8,9 @@ import type {
   BusinessLink,
   BusinessPage,
   Customer,
+  FunnelReport,
+  FunnelSegmentsReport,
+  FunnelSignalsReport,
   MasterPlace,
   PublicProfile,
   VisitReview,
@@ -59,6 +62,16 @@ const getProfileOnServer = (id: string) =>
 
 const getMyBookingsOnServer = () => orNull(withSession<Booking[]>('/me/bookings'))
 
+// Platform admins' first view of /insights: the booking funnel, trouble and devices, 30 days.
+const getInsightsOnServer = async (days: number) => {
+  const [funnel, signals, segments] = await Promise.all([
+    orNull(withSession<FunnelReport>(`/telemetry/funnel?days=${days}&flow=booking`)),
+    orNull(withSession<FunnelSignalsReport>(`/telemetry/signals?days=${days}`)),
+    orNull(withSession<FunnelSegmentsReport>(`/telemetry/segments?days=${days}`)),
+  ])
+  return { funnel, signals, segments }
+}
+
 const getMyBusinessesOnServer = () => orNull(withSession<BusinessLink[]>('/me/businesses'))
 
 const getManagedBusinessOnServer = (slug: string) =>
@@ -80,6 +93,7 @@ const getVisitReviewOnServer = async (id: string, signature: string | null) => {
 }
 
 export {
+  getInsightsOnServer,
   getManagedBusinessOnServer,
   getMasterPlacesOnServer,
   getMyBookingsOnServer,
