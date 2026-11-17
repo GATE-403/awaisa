@@ -352,7 +352,8 @@
 
 @media (max-width: 767px) {
   .form {
-    height: 40px;
+    /* 44pt like on desktop: the field is what a thumb aims at first. */
+    height: var(--control-height-md);
     padding-right: var(--space-1);
   }
 
