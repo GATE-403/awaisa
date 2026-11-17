@@ -97,7 +97,7 @@ export const FeedCard = ({
           src={item.url}
           alt={service ? `Работа: ${service.name}` : `Работа в ${business.name}`}
           className={styles.photo}
-          loading={Math.abs(offset) <= 2 ? 'eager' : 'lazy'}
+          loading='eager'
           decoding='async'
           draggable={false}
         />
