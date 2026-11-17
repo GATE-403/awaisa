@@ -25,10 +25,12 @@ interface FeedPageProps {
 /** Load the next page this many cards before the end. */
 const PREFETCH_AHEAD = 3
 /** How far a sideways swipe (to the next card) or a pull up (back to the last one) goes… */
-const SWIPE_DISTANCE = 40
+const SWIPE_DISTANCE = 32
 /** …or how fast (px per ms): a quick flick counts however short it is. */
-const FLICK_SPEED = 0.35
-const FLICK_MIN = 16
+const FLICK_SPEED = 0.25
+const FLICK_MIN = 10
+/** The flick's speed is read over the finger's last moments, not the whole gesture. */
+const FLICK_WINDOW_MS = 90
 
 // «Образы»: finished work as a hand of cards — one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
@@ -52,6 +54,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     isSideways: boolean | null
     dx: number
     dy: number
+    samples: { t: number; x: number; y: number }[]
   } | null>(null)
   const likes = useFeedLikes()
   const favorites = useFavorites()
@@ -147,7 +150,24 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       isSideways: null,
       dx: 0,
       dy: 0,
+      samples: [{ t: performance.now(), x: event.clientX, y: event.clientY }],
     }
+  }
+
+  // Where the finger went over its last moments: a phone's WebView delivers moves late and in
+  // bursts, so an average from the first touch read a quick flick as a slow drag.
+  const record = (state: NonNullable<typeof gesture.current>, x: number, y: number) => {
+    const now = performance.now()
+    state.samples.push({ t: now, x, y })
+    while (state.samples.length > 2 && now - (state.samples[0]?.t ?? now) > FLICK_WINDOW_MS)
+      state.samples.shift()
+  }
+
+  const speed = (state: NonNullable<typeof gesture.current>, axis: 'x' | 'y') => {
+    const first = state.samples[0]
+    const last = state.samples.at(-1)
+    if (!first || !last || last.t === first.t) return 0
+    return (last[axis] - first[axis]) / (last.t - first.t)
   }
 
   // The finger's path is written straight to CSS variables once a frame, never through React state:
@@ -174,6 +194,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (!start) return
     const dx = event.clientX - start.x
     const dy = event.clientY - start.y
+    record(start, event.clientX, event.clientY)
     if (start.isSideways === null && Math.hypot(dx, dy) > 6) {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
       event.currentTarget.setPointerCapture(event.pointerId)
@@ -189,19 +210,26 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     schedulePaint()
   }
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
     const start = gesture.current
     gesture.current = null
     schedulePaint()
     if (!start || start.isSideways === null) return
-    const elapsed = Math.max(1, performance.now() - start.time)
-    const isFar = (distance: number) =>
-      distance > SWIPE_DISTANCE || (distance > FLICK_MIN && distance / elapsed > FLICK_SPEED)
-    if (start.isSideways && isFar(Math.abs(start.dx)) && active < shown.length - 1) {
-      setFlyDir(start.dx < 0 ? -1 : 1)
-      turn(1)
+    if (event.type === 'pointerup') record(start, event.clientX, event.clientY)
+    // Far enough, or a quick flick the same way however short.
+    const isFar = (distance: number, velocity: number) =>
+      distance > SWIPE_DISTANCE ||
+      (distance > FLICK_MIN &&
+        Math.abs(velocity) > FLICK_SPEED &&
+        Math.sign(velocity) === Math.sign(distance))
+    if (start.isSideways && active < shown.length - 1) {
+      const vx = speed(start, 'x')
+      if (isFar(Math.abs(start.dx), Math.sign(start.dx) * vx)) {
+        setFlyDir(start.dx < 0 ? -1 : 1)
+        turn(1)
+      }
     }
-    if (!start.isSideways && start.dy < 0 && isFar(-start.dy)) turn(-1)
+    if (!start.isSideways && start.dy < 0 && isFar(-start.dy, -speed(start, 'y'))) turn(-1)
   }
 
   return (
