@@ -12,7 +12,7 @@
   height: calc(var(--card-height) + (var(--count) - 1) * var(--spread));
   /* Sideways moves are ours (they shuffle the stack); up and down still scroll the sheet. */
   touch-action: pan-y;
-  transition: height 420ms var(--ease-spring);
+  transition: height 460ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stack[data-fanned] {
@@ -35,25 +35,41 @@
   height: var(--card-height);
   padding: 0 var(--space-4) 0 var(--space-3);
   border-radius: 18px;
+  --drag: 0px;
+  --tilt: 0deg;
+
   isolation: isolate;
-  /* The shadow follows the notched outline (a box-shadow would be cut away with it). */
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.14)) drop-shadow(0 10px 18px rgb(0 0 0 / 0.2))
-    brightness(calc(1 - var(--depth) * 0.1 * (1 - var(--pull, 0))));
   color: #fff;
   transform: translate(var(--drag), calc(var(--i) * var(--spread))) rotate(var(--tilt))
     scale(calc(1 - var(--depth) * 0.03 * (1 - var(--pull, 0))));
   transform-origin: top center;
-  transition:
-    transform 420ms var(--ease-spring),
-    filter 420ms var(--ease-standard);
-  animation: land 520ms var(--ease-spring) backwards;
+  /* A soft settle, no overshoot: a bouncing spring on big cards read as jerky. Only transforms
+     move (no filters), so the phone's compositor carries it. */
+  transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: land 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  will-change: transform;
 }
 
-/* Under the finger the cards follow it at once; let go and they spring. */
-.card[data-dragging],
-.stack[data-pulling],
-.stack[data-pulling] .card {
+.card[data-front] {
+  --drag: var(--stack-drag, 0px);
+  --tilt: var(--stack-tilt, 0deg);
+}
+
+/* Under the finger the cards follow it at once; let go and they settle. */
+.stack[data-dragging],
+.stack[data-dragging] .card {
   transition: none;
+}
+
+/* The shadow is a plain box-shadow on a layer under the notched one: a drop-shadow filter that
+   followed the notches had to be redrawn on every frame of a move. */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 4px 10px 0;
+  z-index: -2;
+  border-radius: inherit;
+  box-shadow: 0 8px 18px rgb(0 0 0 / 0.22);
 }
 
 /* Folded and movable, the stack takes the finger in every direction (swipe aside, pull down);
@@ -109,7 +125,6 @@
 }
 
 .stack[data-fanned] .card {
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.14)) drop-shadow(0 10px 18px rgb(0 0 0 / 0.2));
   transform: translateY(calc(var(--i) * (var(--card-height) + var(--gap))));
 }
 

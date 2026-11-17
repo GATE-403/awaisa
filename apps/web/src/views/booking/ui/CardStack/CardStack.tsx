@@ -47,12 +47,18 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
-  const [dragX, setDragX] = useState(0)
-  // 0…1 while a pull down spreads the folded stack under the finger.
-  const [pull, setPull] = useState(0)
   // The first time a stack of two shows, its front card leans aside once: it can be swiped.
   const [isNudging, setIsNudging] = useState(false)
-  const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
+  // The finger's path lives outside React: written straight to CSS variables once a frame, so a
+  // drag never re-renders the form (each re-render cost a dropped frame on phones).
+  const gesture = useRef<{
+    x: number
+    y: number
+    isSideways: boolean | null
+    dx: number
+    pull: number
+  } | null>(null)
+  const frame = useRef(0)
   const swallowClick = useRef(false)
   const stackRef = useRef<HTMLDivElement>(null)
   const count = cards.length
@@ -88,9 +94,26 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
 
   if (count === 0) return null
 
+  const paint = () => {
+    frame.current = 0
+    const stack = stackRef.current
+    const state = gesture.current
+    if (!stack) return
+    const dx = state?.isSideways ? state.dx : 0
+    const pull = state && state.isSideways === false ? state.pull : 0
+    stack.style.setProperty('--stack-drag', `${dx}px`)
+    stack.style.setProperty('--stack-tilt', `${dx / 40}deg`)
+    stack.style.setProperty('--pull', `${pull}`)
+    stack.toggleAttribute('data-dragging', dx !== 0 || pull > 0)
+  }
+
+  const schedulePaint = () => {
+    if (!frame.current) frame.current = requestAnimationFrame(paint)
+  }
+
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (isOpen || count < 2) return
-    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null }
+    gesture.current = { x: event.clientX, y: event.clientY, isSideways: null, dx: 0, pull: 0 }
   }
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -102,28 +125,28 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       start.isSideways = Math.abs(dx) > Math.abs(dy)
       event.currentTarget.setPointerCapture(event.pointerId)
     }
-    if (start.isSideways) setDragX(dx)
-    else if (start.isSideways === false) setPull(Math.min(1, Math.max(0, dy / PULL_DISTANCE)))
+    if (start.isSideways) start.dx = dx
+    else if (start.isSideways === false) start.pull = Math.min(1, Math.max(0, dy / PULL_DISTANCE))
+    schedulePaint()
   }
 
   const handlePointerUp = () => {
     const start = gesture.current
     gesture.current = null
+    schedulePaint()
     if (!start || start.isSideways === null) return
     swallowClick.current = true
     if (!start.isSideways) {
-      if (pull > 0.33) {
+      if (start.pull > 0.33) {
         setIsFanned(true)
         haptic('selection')
       }
-      setPull(0)
       return
     }
-    if (Math.abs(dragX) > SWIPE_DISTANCE) {
-      setShift((current) => current + (dragX < 0 ? 1 : -1))
+    if (Math.abs(start.dx) > SWIPE_DISTANCE) {
+      setShift((current) => current + (start.dx < 0 ? 1 : -1))
       haptic('selection')
     }
-    setDragX(0)
   }
 
   return (
@@ -132,9 +155,8 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
       className={styles.stack}
       data-fanned={isOpen || undefined}
       data-movable={canMove || undefined}
-      data-pulling={pull > 0 || undefined}
       data-nudge={isNudging || undefined}
-      style={{ '--count': count, '--pull': pull } as CSSProperties}
+      style={{ '--count': count } as CSSProperties}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -156,14 +178,12 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
             aria-labelledby={`step-${card.id}-title`}
             className={styles.card}
             data-back={!isOpen && !isFront ? '' : undefined}
-            data-dragging={isFront && dragX !== 0 ? '' : undefined}
+            data-front={isFront || undefined}
             style={
               {
                 '--i': place,
                 '--depth': count - 1 - place,
                 '--tone': card.tone,
-                '--drag': isFront ? `${dragX}px` : '0px',
-                '--tilt': isFront ? `${dragX / 40}deg` : '0deg',
               } as CSSProperties
             }
           >

@@ -37,8 +37,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const [items, setItems] = useState<FeedItem[]>(initialPage?.items ?? [])
   const [nextOffset, setNextOffset] = useState(initialPage?.nextOffset ?? null)
   const [active, setActive] = useState(0)
-  const [dragX, setDragX] = useState(0)
-  const [dragY, setDragY] = useState(0)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const frame = useRef(0)
   // The side the last card was swiped to: it waits there and comes back from there.
   const [flyDir, setFlyDir] = useState<1 | -1>(-1)
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
@@ -50,6 +50,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     y: number
     time: number
     isSideways: boolean | null
+    dx: number
+    dy: number
   } | null>(null)
   const likes = useFeedLikes()
   const favorites = useFavorites()
@@ -143,7 +145,28 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
       y: event.clientY,
       time: performance.now(),
       isSideways: null,
+      dx: 0,
+      dy: 0,
     }
+  }
+
+  // The finger's path is written straight to CSS variables once a frame, never through React state:
+  // re-rendering the deck on every move dropped frames on phones.
+  const paint = () => {
+    frame.current = 0
+    const stage = stageRef.current
+    const state = gesture.current
+    if (!stage) return
+    const dx = state?.isSideways ? state.dx : 0
+    const dy = state && state.isSideways === false ? state.dy : 0
+    stage.style.setProperty('--stage-drag', `${dx}px`)
+    stage.style.setProperty('--stage-lift', `${dy / 3}px`)
+    stage.style.setProperty('--tilt', `${dx / 30}deg`)
+    stage.toggleAttribute('data-dragging', dx !== 0 || dy !== 0)
+  }
+
+  const schedulePaint = () => {
+    if (!frame.current) frame.current = requestAnimationFrame(paint)
   }
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -158,27 +181,27 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (start.isSideways === null) return
     if (start.isSideways) {
       // At the end of the deck the card only gives a little, like a rubber band.
-      setDragX(active >= shown.length - 1 ? dx / 4 : dx)
-      return
+      start.dx = active >= shown.length - 1 ? dx / 4 : dx
+    } else {
+      // Only up, and only when there is a card to bring back.
+      start.dy = active > 0 && dy < 0 ? dy : dy / 6
     }
-    // Only up, and only when there is a card to bring back.
-    setDragY(active > 0 && dy < 0 ? dy : dy / 6)
+    schedulePaint()
   }
 
   const handlePointerUp = () => {
     const start = gesture.current
     gesture.current = null
+    schedulePaint()
     if (!start || start.isSideways === null) return
     const elapsed = Math.max(1, performance.now() - start.time)
     const isFar = (distance: number) =>
       distance > SWIPE_DISTANCE || (distance > FLICK_MIN && distance / elapsed > FLICK_SPEED)
-    if (start.isSideways && isFar(Math.abs(dragX)) && active < shown.length - 1) {
-      setFlyDir(dragX < 0 ? -1 : 1)
+    if (start.isSideways && isFar(Math.abs(start.dx)) && active < shown.length - 1) {
+      setFlyDir(start.dx < 0 ? -1 : 1)
       turn(1)
     }
-    if (!start.isSideways && dragY < 0 && isFar(-dragY)) turn(-1)
-    setDragX(0)
-    setDragY(0)
+    if (!start.isSideways && start.dy < 0 && isFar(-start.dy)) turn(-1)
   }
 
   return (
@@ -224,15 +247,8 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         role='feed'
         aria-label='Образы'
         aria-busy={isPending || undefined}
-        data-dragging={dragX !== 0 || dragY !== 0 || undefined}
-        style={
-          {
-            '--drag': `${dragX}px`,
-            '--lift': `${dragY / 3}px`,
-            '--tilt': `${dragX / 30}deg`,
-            '--fly': flyDir,
-          } as CSSProperties
-        }
+        ref={stageRef}
+        style={{ '--fly': flyDir } as CSSProperties}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
