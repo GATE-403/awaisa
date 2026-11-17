@@ -1,4 +1,6 @@
 .success {
+  position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,6 +22,7 @@
   border-radius: var(--radius-full);
   background: var(--color-success);
   color: #fff;
+  position: relative;
   animation: pop 420ms var(--ease-spring) both;
 }
 
@@ -195,4 +198,125 @@
   font-size: var(--text-body);
   line-height: 1.45;
   text-align: center;
+}
+
+/* Arrival: a wave of soft green light spreads from the check over the screen and fades, a ring
+   leaves the check, a sheen runs across «Вы записаны» as the wave passes, and the lines rise one
+   after another behind it. Only transform and opacity move (the sheen is one short text paint),
+   and the wave stays inside the column so nothing scrolls sideways. */
+.success::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--space-8) + 28px);
+  left: 50%;
+  z-index: -1;
+  width: 100%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--color-success) 38%, transparent),
+    color-mix(in srgb, var(--color-success) 14%, transparent) 55%,
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.check::before,
+.check::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--color-success);
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .success::before {
+    animation: wave 1300ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+  }
+
+  .check::before {
+    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
+  }
+
+  .check::after {
+    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 360ms;
+  }
+
+  .title {
+    background: linear-gradient(
+        100deg,
+        currentColor 40%,
+        color-mix(in srgb, var(--color-success) 55%, #fff) 50%,
+        currentColor 60%
+      )
+      100% 0 / 300% 100%;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation:
+      rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 160ms backwards,
+      sheen 1100ms var(--ease-standard) 380ms backwards;
+  }
+
+  .lead {
+    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 240ms backwards;
+  }
+
+  .nextStep {
+    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 320ms backwards;
+  }
+
+  .ticket {
+    animation-delay: 380ms;
+  }
+}
+
+@keyframes wave {
+  from {
+    opacity: 1;
+    scale: 0.12;
+  }
+
+  60% {
+    opacity: 0.7;
+  }
+
+  to {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@keyframes ring {
+  from {
+    opacity: 0.7;
+    scale: 1;
+  }
+
+  to {
+    opacity: 0;
+    scale: 2.4;
+  }
+}
+
+@keyframes sheen {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
 }
