@@ -28,10 +28,15 @@ const toVariables = (prefix: string, values: Record<string, string | number>, un
     return `  --${prefix}-${toKebabCase(key)}: ${cssValue};`
   })
 
+// Type in rem (16px = 1rem): the same sizes at the default, but the browser's own «font size»
+// setting (and zoom-free large text) now reaches the text. Line heights follow in rem too, or
+// larger letters would overlap their lines.
+const toRem = (px: number) => `${Number((px / 16).toFixed(4))}rem`
+
 const toTextVariables = () =>
   Object.entries(text).flatMap(([key, { size, lineHeight }]) => [
-    `  --text-${key}: ${size}px;`,
-    `  --text-${key}-line-height: ${lineHeight}px;`,
+    `  --text-${key}: ${toRem(size)};`,
+    `  --text-${key}-line-height: ${toRem(lineHeight)};`,
   ])
 
 const toColorVariables = (scheme: ColorScheme) => toVariables('color', scheme)
