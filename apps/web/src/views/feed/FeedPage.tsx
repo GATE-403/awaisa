@@ -244,9 +244,6 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       <div
         className={styles.stage}
-        role='feed'
-        aria-label='Образы'
-        aria-busy={isPending || undefined}
         ref={stageRef}
         style={{ '--fly': flyDir } as CSSProperties}
         onPointerDown={handlePointerDown}
@@ -268,21 +265,29 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         )}
         {/* The card in play, two fanned behind it, the next one waiting unseen (its photo loads) and
             the last one gone off to the side. */}
-        {shown.map((item, index) => {
-          const offset = index - active
-          if (offset < -1 || offset > 3) return null
-          return (
-            <FeedCard
-              key={item.id}
-              item={item}
-              index={index}
-              offset={offset}
-              isLiked={likes.isLiked(item.id)}
-              onDoubleTap={() => like(item, true)}
-              onSelect={() => turn(offset)}
-            />
-          )
-        })}
+        {/* Only the cards are the feed (a feed holds articles alone); the actions sit beside it. */}
+        <div
+          className={styles.deck}
+          role='feed'
+          aria-label='Образы'
+          aria-busy={isPending || undefined}
+        >
+          {shown.map((item, index) => {
+            const offset = index - active
+            if (offset < -1 || offset > 3) return null
+            return (
+              <FeedCard
+                key={item.id}
+                item={item}
+                index={index}
+                offset={offset}
+                isLiked={likes.isLiked(item.id)}
+                onDoubleTap={() => like(item, true)}
+                onSelect={() => turn(offset)}
+              />
+            )
+          })}
+        </div>
         {current && (
           <FeedActions
             key={current.id}

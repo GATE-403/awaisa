@@ -229,6 +229,11 @@
   touch-action: none;
 }
 
+/* The feed's own box adds nothing to the layout: cards are placed against the stage. */
+.deck {
+  display: contents;
+}
+
 .card,
 .actions {
   --width: min(92cqw, 100cqh * 0.68);
