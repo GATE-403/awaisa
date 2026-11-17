@@ -84,6 +84,8 @@ export const BookingPage = ({
   // last step closes like the others and «Всё готово» says what is left: one press.
   const [isContactsDone, setIsContactsDone] = useState(false)
   const [isBranchOpen, setIsBranchOpen] = useState(false)
+  // The free time under the ruler's needle: the bar's one action takes it («Выбрать 12:00»).
+  const [rulerTime, setRulerTime] = useState<string | null>(null)
   const foldTimer = useRef<number | undefined>(undefined)
   const specialistLabel = t(getSpecialistLabel(catalog, form.specialistId))
   const recentVisits = useRecentVisits()
@@ -236,10 +238,10 @@ export const BookingPage = ({
   const chosenSpecialist = catalog.specialists.find(
     (specialist) => specialist.id === form.specialistId,
   )
-  // The ticket's parts in one colour — the place's own — told apart by lightness alone, each
-  // next card a step lighter; several hues side by side pulled the eye everywhere at once.
+  // The ticket's parts in the place's own hue; the stack sets each card's lightness by where it
+  // lies (the furthest always the darkest), not by which step it is.
   const placeTint = pickTint(business.name)
-  const cardTone = (index: number) => `oklch(from ${placeTint} ${0.34 + index * 0.045} 0.085 h)`
+  const cardTone = (_index: number) => placeTint
   const chosenCards: StackCardProps[] = []
   if (form.branches.length > 1 && chosenBranch) {
     const distance = form.branchDistances?.[chosenBranch.id]
@@ -371,8 +373,12 @@ export const BookingPage = ({
     firstIncompleteStep: form.firstIncompleteStep,
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
-    onSubmit: form.submit,
-    submitLabel: undefined,
+    ...(activeStep === 'datetime' && !isBranchOpen && rulerTime
+      ? {
+          onSubmit: () => form.selectTime(rulerTime),
+          submitLabel: t('Выбрать {time}', { time: rulerTime }),
+        }
+      : { onSubmit: form.submit, submitLabel: undefined }),
     quote: form.quote,
     place: { name: business.name, coverUrl: business.coverUrl },
     address:
@@ -572,6 +578,7 @@ export const BookingPage = ({
                       categories={catalog.categories}
                       value={form.serviceId}
                       onChange={form.selectService}
+                      onReselect={form.finishEditing}
                       photos={servicePhotos}
                       coverUrl={business.coverUrl}
                       businessName={business.name}
@@ -586,6 +593,7 @@ export const BookingPage = ({
                       specialists={form.specialists}
                       value={form.specialistId}
                       onChange={form.selectSpecialist}
+                      onReselect={form.finishEditing}
                     />
                   </BookingStep>
                 )}
@@ -594,6 +602,7 @@ export const BookingPage = ({
                   <BookingStep id='datetime' title={t('Когда удобно?')}>
                     <DateTimePicker
                       view='ruler'
+                      onCenteredTimeChange={setRulerTime}
                       durationMinutes={form.service?.durationMinutes}
                       days={form.days}
                       dayKey={form.dayKey}

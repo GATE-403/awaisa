@@ -54,6 +54,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
   const [isNudging, setIsNudging] = useState(false)
   const gesture = useRef<{ x: number; y: number; isSideways: boolean | null } | null>(null)
   const swallowClick = useRef(false)
+  const stackRef = useRef<HTMLDivElement>(null)
   const count = cards.length
   const isOpen = isFanned || count === 1
   // Where each card lies in the folded stack: 0 at the back, count - 1 in front.
@@ -72,6 +73,18 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     const timer = window.setTimeout(() => setIsNudging(false), 1800)
     return () => window.clearTimeout(timer)
   }, [canMove])
+
+  // A fanned stack folds back on a tap anywhere outside it, like a menu.
+  useEffect(() => {
+    if (!isFanned) return
+    const fold = (event: globalThis.PointerEvent) => {
+      if (stackRef.current?.contains(event.target as Node)) return
+      setIsFanned(false)
+      setShift(0)
+    }
+    document.addEventListener('pointerdown', fold)
+    return () => document.removeEventListener('pointerdown', fold)
+  }, [isFanned])
 
   if (count === 0) return null
 
@@ -115,6 +128,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
 
   return (
     <div
+      ref={stackRef}
       className={styles.stack}
       data-fanned={isOpen || undefined}
       data-movable={canMove || undefined}

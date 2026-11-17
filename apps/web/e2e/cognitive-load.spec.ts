@@ -179,7 +179,8 @@ test.describe('Cognitive load: booking', () => {
     await expect(action).toHaveText('Выбрать мастера')
     await expect(hint).toHaveText('Шаг 2 из 4')
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
-    await expect(action).toHaveText('Выбрать время')
+    // On the time step the action offers the time under the ruler's needle.
+    await expect(action).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
     await pickFirstFreeSlot(page)
     await expect(action).toHaveText('Ввести контакты')
     await expect(hint).toHaveText('Шаг 4 из 4')

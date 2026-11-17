@@ -39,6 +39,10 @@ const DICTIONARY: Record<string, Entry> = {
     'Check the cards above and book. Tap a card to change it.',
   ],
   'Читать целиком': ['Толук окуу', 'Read more'],
+  'Листайте шкалу или нажмите на время': [
+    'Шкаланы жылдырыңыз же убакытты басыңыз',
+    'Scroll the dial or tap a time',
+  ],
   'Начать заново': ['Кайра баштоо', 'Start over'],
   'Ваша запись': ['Сиздин жазылууңуз', 'Your booking'],
   Готово: ['Даяр', 'Done'],

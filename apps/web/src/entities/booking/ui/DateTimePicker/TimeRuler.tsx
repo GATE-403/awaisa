@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
@@ -14,6 +13,8 @@ interface TimeRulerProps {
   onPick: (time: string) => void
   /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
   days?: ReactNode
+  /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
+  onCenter?: (time: string | null) => void
   /** Another day is loading: the dial stays, dimmed and still. */
   isPending?: boolean
 }
@@ -39,10 +40,13 @@ export const TimeRuler = ({
   onPick,
   isPending = false,
   days,
+  onCenter,
 }: TimeRulerProps) => {
   const t = useT()
   const trackRef = useRef<HTMLFieldSetElement>(null)
   const hasShown = useRef(false)
+  // Until the dial is touched, one line says how it works.
+  const [hasMoved, setHasMoved] = useState(false)
   const firstFree = Math.max(
     0,
     slots.findIndex((slot) => slot.isAvailable),
@@ -84,9 +88,6 @@ export const TimeRuler = ({
     setCentered(Math.min(slots.length - 1, Math.max(0, index)))
   }
 
-  const moveTo = (index: number) =>
-    trackRef.current?.scrollTo({ left: index * TICK_WIDTH, behavior: 'smooth' })
-
   const pick = (index: number) => {
     const slot = slots[index]
     if (!slot?.isAvailable) return
@@ -97,14 +98,13 @@ export const TimeRuler = ({
   const freeCount = slots.filter((slot) => slot.isAvailable).length
   const takenCount = slots.length - freeCount
   const current = slots[centered]
+  const centeredTime = !isPending && current?.isAvailable ? current.time : null
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tell only when the time changes
+  useEffect(() => {
+    onCenter?.(centeredTime)
+  }, [centeredTime])
   const isFree = Boolean(current?.isAvailable)
-  const nearestFree = slots.reduce(
-    (best, slot, index) =>
-      slot.isAvailable && (best < 0 || Math.abs(index - centered) < Math.abs(best - centered))
-        ? index
-        : best,
-    -1,
-  )
 
   return (
     <div className={styles.ruler} data-pending={isPending || undefined} aria-busy={isPending}>
@@ -128,6 +128,8 @@ export const TimeRuler = ({
           ref={trackRef}
           className={styles.track}
           aria-label={t('Время')}
+          onPointerDown={() => setHasMoved(true)}
+          onWheel={() => setHasMoved(true)}
           onScroll={handleScroll}
         >
           {slots.map((slot, index) => (
@@ -137,6 +139,7 @@ export const TimeRuler = ({
               className={styles.tick}
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
+              data-centered={index === centered || undefined}
               aria-pressed={slot.time === time}
               disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
@@ -146,8 +149,17 @@ export const TimeRuler = ({
             </button>
           ))}
         </fieldset>
+        {/* A pointer over the dial, like a time picker's: the tick under it is the one offered. */}
         <span className={styles.needle} aria-hidden />
+        <span className={styles.edge} data-side='left' aria-hidden>
+          ‹
+        </span>
+        <span className={styles.edge} data-side='right' aria-hidden>
+          ›
+        </span>
       </div>
+
+      {!hasMoved && <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>}
 
       {/* The legend mirrors the ruler — a tall bar for free, a low one for taken — with counts. */}
       <p className={styles.legend}>
@@ -164,21 +176,6 @@ export const TimeRuler = ({
       </p>
 
       {days}
-
-      {/* Never a dead button: on a taken time it leads to the nearest free one. */}
-      <Button
-        variant='outline'
-        size='lg'
-        fullWidth
-        className={styles.pick}
-        onClick={() => (isFree ? pick(centered) : moveTo(nearestFree))}
-      >
-        {isFree && current
-          ? current.time === time
-            ? t('Выбрано {time}', { time: current.time })
-            : t('Выбрать {time}', { time: current.time })
-          : t('Ближайшее свободное: {time}', { time: slots[nearestFree]?.time ?? '' })}
-      </Button>
     </div>
   )
 }

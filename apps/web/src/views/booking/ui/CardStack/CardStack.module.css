@@ -120,7 +120,8 @@
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: var(--tone);
+  /* Lightness by place in the stack: the front card the lightest, each one behind darker. */
+  background: oklch(from var(--tone) calc(0.3 + var(--i) * 0.05) 0.085 h);
   mask:
     radial-gradient(circle 7px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
     radial-gradient(circle 7px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;

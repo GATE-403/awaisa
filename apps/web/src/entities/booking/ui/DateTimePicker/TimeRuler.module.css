@@ -130,16 +130,49 @@
   }
 }
 
+/* A small pointer over the dial (not a line through the tick it points at). */
 .needle {
   position: absolute;
-  bottom: 0;
+  top: 26px;
   left: 50%;
-  width: 3px;
-  height: 78px;
-  margin-left: -1.5px;
-  border-radius: var(--radius-full);
-  background: var(--color-foreground);
+  width: 0;
+  height: 0;
+  margin-left: -7px;
+  border-top: 8px solid var(--color-foreground);
+  border-right: 7px solid transparent;
+  border-left: 7px solid transparent;
   pointer-events: none;
+}
+
+/* The tick under the pointer: full colour and wider, so it reads as the one offered. */
+.tick[data-centered][data-free] .bar {
+  width: 14px;
+  background: var(--color-foreground);
+}
+
+/* Faint ‹ › at the dial's ends: it moves sideways. */
+.edge {
+  position: absolute;
+  bottom: 30px;
+  color: color-mix(in srgb, var(--color-foreground) 35%, transparent);
+  font-size: 22px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.edge[data-side="left"] {
+  left: var(--space-4);
+}
+
+.edge[data-side="right"] {
+  right: var(--space-4);
+}
+
+.hint {
+  margin: calc(-1 * var(--space-1)) 0 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-align: center;
 }
 
 .legend {
