@@ -300,3 +300,17 @@
     width: 172px;
   }
 }
+
+/* A story tile still on its way (the catalog's «Для вас» row). */
+.placeholderStory {
+  display: block;
+  width: 92px;
+  height: 92px;
+  margin: 0 2px calc(var(--text-xs) * 2.5 + 8px);
+  border-radius: 20px;
+}
+
+.track[data-stories] {
+  gap: var(--space-3);
+  padding-top: var(--space-1);
+}
