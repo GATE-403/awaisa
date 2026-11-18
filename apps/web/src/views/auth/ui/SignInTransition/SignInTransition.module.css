@@ -1,0 +1,126 @@
+/* Over the sign-in screen: it blurs away while a cloud of the accent sweeps up through it. */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-background) 40%, transparent);
+  backdrop-filter: var(--blur-material);
+  animation: settle 500ms var(--ease-standard) 650ms both;
+}
+
+/* The page colour fills in behind the cloud as it passes, so the status rests on a clean screen. */
+@keyframes settle {
+  to {
+    background: var(--color-background);
+  }
+}
+
+.cloud {
+  position: absolute;
+  left: -40%;
+  width: 180%;
+  height: 110vh;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    closest-side,
+    white 0%,
+    color-mix(in srgb, var(--color-primary) 22%, white) 28%,
+    color-mix(in srgb, var(--color-primary) 60%, white) 50%,
+    var(--color-primary) 68%,
+    color-mix(in srgb, var(--color-primary) 60%, black) 84%,
+    transparent 100%
+  );
+  filter: blur(28px);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: sweep 1300ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes sweep {
+  0% {
+    opacity: 0.85;
+    transform: translateY(85vh) scale(0.7);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-130vh) scale(0.9);
+  }
+}
+
+.status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  animation: appear 300ms var(--ease-standard) 900ms both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border-strong);
+  border-top-color: var(--color-foreground);
+  border-radius: var(--radius-full);
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-foreground);
+  color: var(--color-background);
+  animation: pop 260ms var(--ease-spring) both;
+}
+
+.check svg {
+  width: 11px;
+  height: 11px;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    background: var(--color-background);
+    animation: none;
+  }
+
+  .cloud {
+    display: none;
+  }
+
+  .status,
+  .check {
+    animation: none;
+  }
+}

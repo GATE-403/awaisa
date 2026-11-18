@@ -28,6 +28,8 @@ export const useLoginForm = () => {
   // A wrong code: the cells turn red and shake once per attempt (the count re-keys the field).
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
+  // Signed in: the transition plays over the screen, then `leave` goes where the person was going.
+  const [isSignedIn, setIsSignedIn] = useState(false)
   const redirectTo = getSafeRedirect(searchParams.get('next'))
 
   useEffect(() => {
@@ -96,7 +98,8 @@ export const useLoginForm = () => {
       return
     }
     trackStep('login_done')
-    router.replace(redirectTo)
+    router.prefetch(redirectTo)
+    setIsSignedIn(true)
   }
 
   const changeCode = (value: string) => {
@@ -110,7 +113,8 @@ export const useLoginForm = () => {
     run(async () => {
       setCustomer(await updateMe(name))
       trackStep('login_done')
-      router.replace(redirectTo)
+      router.prefetch(redirectTo)
+      setIsSignedIn(true)
     })
 
   const sendBySms = () => sendCode('sms')
@@ -126,8 +130,22 @@ export const useLoginForm = () => {
     setError(null)
   }
 
+  const leave = () => router.replace(redirectTo)
+
+  // Visited routes stay mounted (hidden): once the page is left, it starts over from the number,
+  // or coming back to /login would replay the transition and leave again.
+  const reset = () => {
+    setIsSignedIn(false)
+    setStep('phone')
+    setCode('')
+    setError(null)
+  }
+
   return {
     step,
+    isSignedIn,
+    leave,
+    reset,
     phone,
     normalizedPhone,
     channel,
