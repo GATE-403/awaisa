@@ -16,7 +16,10 @@
     "db:seed": "pnpm --filter api seed:demo",
     "test:ux": "pnpm --filter @awaisa/ux-tests ux",
     "test:a11y": "pnpm --filter @awaisa/ux-tests test:a11y",
-    "test:ux:report": "pnpm --filter @awaisa/ux-tests report"
+    "test:ux:report": "pnpm --filter @awaisa/ux-tests report",
+    "rec:eval": "pnpm --filter @awaisa/recsys-eval eval",
+    "rec:judge": "pnpm --filter @awaisa/recsys-eval judge",
+    "rec:traffic": "pnpm --filter @awaisa/recsys-eval traffic"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

@@ -1,0 +1,22 @@
+{
+  "name": "@awaisa/recsys-eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline evaluation of «Для вас» recommendations: time split, baselines, metrics, persona judge",
+  "scripts": {
+    "eval": "node --no-warnings src/run.ts",
+    "judge": "node --no-warnings src/personas/judge.ts",
+    "traffic": "node --no-warnings src/traffic.ts",
+    "test": "node --no-warnings --test 'test/*.test.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
+    "typescript": "^6.0.2",
+    "zod": "^4.6.7"
+  }
+}

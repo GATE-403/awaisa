@@ -40,6 +40,14 @@ const storyNote = (reason: string) => {
   return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
 }
 
+// What every event about a card carries: the answer it came from, so the list can be rebuilt.
+const pickOf = (item: Recommendation) => ({
+  serviceId: item.id,
+  reason: item.reason,
+  requestId: item.requestId,
+  algorithm: item.algorithm,
+})
+
 // «Для вас»: services picked for this client — their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
 interface ForYouShelfProps {
@@ -138,8 +146,7 @@ export const ForYouShelf = ({
             .filter((item) => item.id !== excludeServiceId)
             .map((item, position) => ({
               kind: 'impression' as const,
-              serviceId: item.id,
-              reason: item.reason,
+              ...pickOf(item),
               surface,
               position,
             })),
@@ -207,9 +214,7 @@ export const ForYouShelf = ({
               imageUrl={item.coverUrl}
               note={storyNote(item.reason)}
               isEager={position < 5}
-              onOpen={() =>
-                trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
-              }
+              onOpen={() => trackPickClick({ ...pickOf(item), surface, position })}
             />
           ))}
         </StoryRow>
@@ -222,9 +227,7 @@ export const ForYouShelf = ({
                 className={styles.card}
                 data-card=''
                 data-picture-frame={item.coverUrl ? '' : undefined}
-                onClick={() =>
-                  trackPickClick({ serviceId: item.id, reason: item.reason, surface, position })
-                }
+                onClick={() => trackPickClick({ ...pickOf(item), surface, position })}
               >
                 {item.coverUrl && (
                   // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures

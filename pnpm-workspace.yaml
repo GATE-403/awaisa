@@ -2,6 +2,7 @@ packages:
   - apps/*
   - packages/*
   - tests/*
+  - recsys_eval
 
 allowBuilds:
   sharp: false

@@ -41,6 +41,14 @@ const recommendationEventsSchema = z.object({
         reason: z.string().max(80).default(''),
         surface: z.enum(['catalog', 'profile', 'booking', 'success']),
         position: z.number().int().min(0).max(100).optional(),
+        /** The answer the card came from (`requestId` of GET /recommendations). */
+        requestId: z.uuid().optional(),
+        algorithm: z
+          .string()
+          .regex(/^[a-z0-9.-]{1,24}$/)
+          .optional(),
+        /** On `book`: the booking the pick led to. */
+        bookingId: z.uuid().optional(),
       }),
     )
     .min(1)

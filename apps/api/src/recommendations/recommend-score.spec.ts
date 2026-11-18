@@ -222,3 +222,78 @@ describe('exploration', () => {
     expect(ranked).toHaveLength(6)
   })
 })
+
+describe('score-v2', () => {
+  const visit = (daysAgo: number) => ({
+    serviceId: 's1',
+    slug: 'barber',
+    serviceName: 'Мужская стрижка',
+    daysAgo,
+  })
+
+  it('counts the usual as due a week early, where score-v1 held it back', () => {
+    // A 28-day cycle is due from day 24 (85%); at day 18 it is due within a week.
+    const almost = profile({ visits: [visit(18)] })
+    expect(scoreCandidate(candidate(), almost, 'score-v1')?.reason).not.toMatch(/^Пора снова/)
+    expect(scoreCandidate(candidate(), almost)?.reason).toMatch(/^Пора снова/)
+    // Right after a visit it still steps back.
+    const fresh = profile({ visits: [visit(3)] })
+    expect(scoreCandidate(candidate(), fresh)?.score ?? 0).toBeLessThan(
+      scoreCandidate(candidate(), profile())?.score ?? 0,
+    )
+  })
+
+  it('makes a service booked again and again more likely, saying «Ваше обычное»', () => {
+    const once = scoreCandidate(candidate(), profile({ visits: [visit(12)] }))
+    const habit = scoreCandidate(
+      candidate(),
+      profile({ visits: [visit(12), visit(40), visit(70)] }),
+    )
+    expect(habit?.score ?? 0).toBeGreaterThan(once?.score ?? 0)
+    expect(habit?.reasons).toContain('Ваше обычное')
+  })
+
+  it('keeps the client’s own place above the same name elsewhere', () => {
+    const own = candidate({ serviceId: 'own', slug: 'mine', rating: 4.1, bookings30d: 2 })
+    const other = candidate({ serviceId: 'other', slug: 'top', rating: 4.9, bookings30d: 60 })
+    const regular = profile({
+      visits: [
+        { serviceId: 'own', slug: 'mine', serviceName: 'Мужская стрижка', daysAgo: 10 },
+        { serviceId: 'own', slug: 'mine', serviceName: 'Мужская стрижка', daysAgo: 38 },
+      ],
+    })
+    const pick = (version: 'score-v1' | 'score-v2') =>
+      rankCandidates([other, own], regular, { version }).map((entry) => entry.candidate.serviceId)
+    // One card per name: score-v1 kept the other place's cut and dropped the client's own.
+    expect(pick('score-v1')).toEqual(['other'])
+    expect(pick('score-v2')).toEqual(['own'])
+  })
+
+  it('does not show a barbershop’s cuts to women or kids’ cuts to everyone', () => {
+    const clipper = candidate({ name: 'Стрижка машинкой', placeKind: 'barber' })
+    expect(scoreCandidate(clipper, profile({ gender: 'female' }), 'score-v1')).not.toBeNull()
+    expect(scoreCandidate(clipper, profile({ gender: 'female' }))).toBeNull()
+    expect(scoreCandidate(clipper, profile({ gender: 'male' }))).not.toBeNull()
+
+    const kids = candidate({ serviceId: 'kids', name: 'Детская стрижка', placeKind: 'barber' })
+    const adult = candidate({ serviceId: 'adult', name: 'Стрижка машинкой', placeKind: 'barber' })
+    expect(scoreCandidate(kids, profile())?.score ?? 0).toBeLessThan(
+      scoreCandidate(adult, profile())?.score ?? 0,
+    )
+    const parent = profile({
+      visits: [{ serviceId: 'kids', slug: 'barber', serviceName: 'Детская стрижка', daysAgo: 40 }],
+    })
+    expect(scoreCandidate(kids, parent)?.reason).toMatch(/^Пора снова/)
+  })
+})
+
+describe('score-v2 audience', () => {
+  it('does not show evening hairstyles, make-up or nails to men', () => {
+    const men = profile({ gender: 'male' })
+    for (const name of ['Вечерняя причёска', 'Дневной макияж', 'Педикюр', 'Свадебный образ']) {
+      expect(scoreCandidate(candidate({ name }), men, 'score-v1')).not.toBeNull()
+      expect(scoreCandidate(candidate({ name }), men)).toBeNull()
+    }
+    expect(scoreCandidate(candidate({ name: 'Окрашивание корней' }), men)).not.toBeNull()
+  })
+})
