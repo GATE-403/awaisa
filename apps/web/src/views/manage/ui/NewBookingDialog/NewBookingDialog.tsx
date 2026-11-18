@@ -18,7 +18,7 @@ interface NewBookingDialogProps {
   onClose: () => void
   onSubmit: (input: CreateBookingInput) => Promise<boolean>
   /** Prefill, e.g. a client from the waitlist. */
-  initial?: { serviceId: string; name: string; phone: string }
+  initial?: { serviceId: string | null; name: string; phone: string }
 }
 
 const FORM_ID = 'new-booking-form'

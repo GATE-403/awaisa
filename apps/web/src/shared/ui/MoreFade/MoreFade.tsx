@@ -12,8 +12,8 @@ interface MoreFadeProps {
   onToggle: () => void
   /** «запись / записи / записей» for «Ещё N …». */
   label: string
-  /** What the fade melts into: the page, or the card the list sits on. */
-  surface?: 'page' | 'card'
+  /** What the fade melts into: the page, the card the list sits on, or a sheet's inset group. */
+  surface?: 'page' | 'card' | 'sheet'
   /** «Скрыть» floats at the bottom of the screen while the open list is in view (default);
       false keeps it under the list — for short lists in a sheet with its own bottom bar. */
   isLessFloating?: boolean
