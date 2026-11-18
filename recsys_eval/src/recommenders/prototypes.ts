@@ -139,7 +139,7 @@ const adjusted = (
   prepare,
   recommend: (user, context, k) =>
     selectShelf(
-      productionScores(user, context).map(({ candidate, score }) => ({
+      productionScores(user, context, 'score-v1').map(({ candidate, score }) => ({
         candidate,
         score: score + delta(user, context, candidate.serviceId, candidate.name),
       })),

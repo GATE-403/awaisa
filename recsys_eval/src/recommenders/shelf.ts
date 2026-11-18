@@ -1,10 +1,11 @@
 import type { Candidate } from '../../../apps/api/src/recommendations/recommend-score.ts'
 
-// How rankCandidates turns scores into a shelf — best first, at most two per place, one per
+// How rankCandidates (score-v1) turns scores into a shelf — best first, at most two per place, one per
 // service name, one spot (the 4th) for a new place — repeated here so a prototype can change the
 // scores *before* that selection. Adding to scores after it is too late: the name rule has already
 // dropped, say, the client's own «Стрижка + борода» for the same name at another place.
-// `shelf.test.ts` checks that with no change this gives exactly what rankCandidates gives.
+// `eval.test.ts` checks that with no change this gives exactly what rankCandidates gives for
+// score-v1 (score-v2 also keeps the client's own place for a name they had there).
 
 const PER_PLACE = 2
 const EXPLORE_AT = 3

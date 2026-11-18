@@ -1,6 +1,7 @@
 import {
   type Affinities,
   ALGORITHM,
+  type Algorithm,
   type Candidate,
   computeAffinities,
   type Interest,
@@ -49,6 +50,7 @@ const candidatesAt = (context: Context): CandidateWithKind[] => {
       slug: item.slug,
       businessName: item.businessName,
       kind: item.kind,
+      placeKind: item.kind,
       rating: rating?.average ?? null,
       reviews: rating?.count ?? 0,
       bookings30d: context.demand30d.get(item.serviceId) ?? 0,
@@ -84,36 +86,50 @@ const profileOf = (user: User, context: Context): Profile => ({
   seen: {},
 })
 
-const productionScored = (user: User, context: Context, limit: number, exploreAt = 3) =>
-  rankCandidates(candidatesAt(context), profileOf(user, context), { limit, exploreAt })
+const productionScored = (
+  user: User,
+  context: Context,
+  limit: number,
+  { exploreAt = 3, version = ALGORITHM }: { exploreAt?: number; version?: Algorithm } = {},
+) => rankCandidates(candidatesAt(context), profileOf(user, context), { limit, exploreAt, version })
 
-/** Every candidate with its production score (no shelf rules yet), for prototypes to adjust. */
-const productionScores = (user: User, context: Context) => {
+/** Every candidate with its score (no shelf rules yet), for prototypes to adjust. */
+const productionScores = (user: User, context: Context, version: Algorithm) => {
   const profile = profileOf(user, context)
   return candidatesAt(context).flatMap((candidate) => {
-    const scored = scoreCandidate(candidate, profile)
+    const scored = scoreCandidate(candidate, profile, version)
     return scored ? [{ candidate, score: scored.score }] : []
   })
 }
 
-const production: Recommender = {
-  name: ALGORITHM,
-  description: 'Текущая формула «Для вас» (rankCandidates из API) — production.',
+const scorer = (version: Algorithm, description: string): Recommender => ({
+  name: version,
+  description,
   recommend: (user, context, k) =>
-    productionScored(user, context, k).map((entry) => entry.candidate.serviceId),
-}
+    productionScored(user, context, k, { version }).map((entry) => entry.candidate.serviceId),
+})
+
+const production = scorer(
+  ALGORITHM,
+  'Текущая формула «Для вас» (rankCandidates из API) — production.',
+)
+const previous = scorer(
+  'score-v1',
+  'Прошлая версия формулы (до 2026-11-18): для сравнения и interleaving.',
+)
 
 // A diagnostic, not a candidate: what the exploration spot costs in today's accuracy (its gain —
 // new places getting seen at all — only shows online).
 const productionNoExplore: Recommender = {
   name: `${ALGORITHM}-no-explore`,
-  description: 'Диагностика: score-v1 без слота «Новое место».',
+  description: `Диагностика: ${ALGORITHM} без слота «Новое место».`,
   recommend: (user, context, k) =>
-    productionScored(user, context, k, -1).map((entry) => entry.candidate.serviceId),
+    productionScored(user, context, k, { exploreAt: -1 }).map((entry) => entry.candidate.serviceId),
 }
 
 export {
   candidatesAt,
+  previous,
   production,
   productionNoExplore,
   productionScored,

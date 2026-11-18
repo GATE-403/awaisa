@@ -135,8 +135,9 @@ describe('selectShelf', () => {
     for (const { user } of split.cases.slice(0, 20)) {
       const expected = rankCandidates(candidatesAt(split.context), profileOf(user, split.context), {
         limit: 10,
+        version: 'score-v1',
       }).map((entry) => entry.candidate.serviceId)
-      const actual = selectShelf(productionScores(user, split.context), 10).map(
+      const actual = selectShelf(productionScores(user, split.context, 'score-v1'), 10).map(
         (candidate) => candidate.serviceId,
       )
       assert.deepEqual(actual, expected)
