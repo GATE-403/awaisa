@@ -1,0 +1,80 @@
+.cloud {
+  position: relative;
+  width: min(100%, 420px);
+  height: 260px;
+  margin: 0 auto;
+}
+
+/* A round picture with a lit rim, like a soap bubble; it drifts a few pixels, transform only. */
+.bubble {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    circle at 30% 25%,
+    color-mix(in srgb, var(--tint) 35%, white),
+    color-mix(in srgb, var(--tint) 85%, black)
+  );
+  box-shadow: var(--shadow-md);
+  translate: -50% -50%;
+  animation: drift 6s var(--ease-standard) var(--delay) infinite alternate;
+}
+
+/* The bubble's gloss: a soft light top-left and a thin bright rim, over the photo. */
+.bubble::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 28% 22%,
+    color-mix(in srgb, white 45%, transparent),
+    transparent 38%
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, white 55%, transparent),
+    inset 0 -8px 18px color-mix(in srgb, black 18%, transparent);
+}
+
+.picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mascot {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-lg);
+  color: var(--color-primary);
+  translate: -50% 0;
+}
+
+.mascot svg {
+  width: 30px;
+  height: auto;
+}
+
+@keyframes drift {
+  to {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble {
+    animation: none;
+  }
+}
