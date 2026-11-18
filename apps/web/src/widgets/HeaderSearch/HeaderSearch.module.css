@@ -71,10 +71,12 @@
   animation: hint-in 420ms var(--ease-standard) both;
 }
 
+/* The word slides up into view clipped, never faded: a half-transparent word read as
+   low-contrast text to the accessibility check whenever it caught the change. */
 @keyframes hint-in {
   from {
     translate: 0 60%;
-    opacity: 0;
+    clip-path: inset(0 0 100% 0);
   }
 }
 
