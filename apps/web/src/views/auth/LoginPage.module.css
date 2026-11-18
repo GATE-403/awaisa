@@ -223,7 +223,8 @@
 .or::after {
   content: "";
   flex: 1;
-  height: 0.5px;
+  /* A whole pixel: Safari drops 0.5px lines on screens without retina density. */
+  height: 1px;
   background: var(--color-border-strong);
 }
 
