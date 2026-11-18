@@ -17,6 +17,24 @@
   }
 }
 
+/* The trace fades in as the wave passes the middle and stays under the greeting. */
+.trace {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: settle 1200ms var(--ease-standard) 700ms forwards;
+}
+
+.trace > * {
+  position: absolute;
+}
+
+@keyframes settle {
+  to {
+    opacity: 1;
+  }
+}
+
 /* The wave is light: added onto what is under it. */
 .wave {
   position: absolute;
@@ -85,6 +103,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .trace {
+    opacity: 1;
+    animation: none;
+  }
+
   .overlay,
   .greeting,
   .hello {
