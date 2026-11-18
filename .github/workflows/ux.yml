@@ -1,18 +1,11 @@
 name: UX kit
 
 # The persona checks from tests/ux (docs/ux-testing): accessibility, large text and zoom,
-# eyesight, slow phones, desktop layouts. A pull request that touches the web gets the quick
-# accessibility pass (one device per persona); every night and on demand, the whole kit. The
+# eyesight, slow phones, desktop layouts. Actions minutes are paid, so the whole kit runs once a
+# night (only when something was merged that day) and on demand, not on every pull request. The
 # HTML report (reports/ux) is attached to every run.
 
 on:
-  pull_request:
-    paths:
-      - 'apps/web/**'
-      - 'packages/ui/**'
-      - 'packages/tokens/**'
-      - 'tests/ux/**'
-      - '.github/workflows/ux.yml'
   schedule:
     # 03:00 in Bishkek.
     - cron: '0 21 * * *'
@@ -23,7 +16,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The nightly run is skipped when nothing was merged in the last day.
+  changes:
+    name: Anything new today
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      fresh: ${{ steps.log.outputs.fresh }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 200
+      - id: log
+        run: |
+          if [ -n "$(git log --since='25 hours ago' --format=%h | head -1)" ]; then
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+          fi
+
   ux:
+    needs: changes
+    if: always() && (github.event_name != 'schedule' || needs.changes.outputs.fresh == 'true')
     name: ${{ github.event_name == 'pull_request' && 'UX kit (accessibility)' || 'UX kit (all personas)' }}
     runs-on: ubuntu-latest
     timeout-minutes: 50

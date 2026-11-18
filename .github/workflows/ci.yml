@@ -1,17 +1,53 @@
 name: CI
 
+# Actions minutes are paid, so the heavy part runs once a day, not on every pull request:
+# - a pull request gets only `check` (lint, types, unit tests, build: one job, a few minutes);
+# - the e2e suite (five jobs, each building the apps against its own database) runs every night
+#   on feat/booking-mvp, and only when something was merged since the last night;
+# - a pull request labelled `e2e` (a risky change) gets the suite too, and «Run workflow» starts it
+#   by hand. A failed night is texted to the alerts chat when its secrets are set.
+
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   push:
-    branches: [main, feat/booking-mvp]
+    branches: [main]
+  schedule:
+    # 02:00 in Bishkek, an hour before the UX kit.
+    - cron: '0 20 * * *'
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Adding a label must not cancel the code check of the same pull request.
+  group: ci-${{ github.ref }}-${{ github.event.action == 'labeled' && 'label' || 'code' }}
   cancel-in-progress: true
 
 jobs:
+  # The nightly run is skipped when nothing was merged in the last day.
+  changes:
+    name: Anything new today
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      fresh: ${{ steps.log.outputs.fresh }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 200
+      - id: log
+        run: |
+          if [ -n "$(git log --since='25 hours ago' --format=%h | head -1)" ]; then
+            echo "fresh=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "fresh=false" >> "$GITHUB_OUTPUT"
+          fi
+
   check:
     name: Lint, types, unit tests, build
+    if: >-
+      github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.action != 'labeled')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -36,6 +72,15 @@ jobs:
   # about the slowest shard.
   e2e:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
+    needs: changes
+    if: >-
+      always() && (
+        github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'schedule' && needs.changes.outputs.fresh == 'true') ||
+        (github.event_name == 'pull_request' &&
+          contains(github.event.pull_request.labels.*.name, 'e2e') &&
+          (github.event.action != 'labeled' || github.event.label.name == 'e2e'))
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -108,3 +153,21 @@ jobs:
             apps/web/e2e-report
             apps/web/e2e-results
           retention-days: 7
+
+  # Nobody watches a night run: a failure is texted to the same chat as the uptime alerts.
+  notify:
+    name: Tell the alerts chat
+    needs: e2e
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - env:
+          BOT_TOKEN: ${{ secrets.ALERT_TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.ALERT_TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ] && exit 0
+          curl -s -o /dev/null "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+            --data-urlencode "chat_id=$CHAT_ID" \
+            --data-urlencode "text=Ночные e2e-тесты упали: $RUN_URL"
