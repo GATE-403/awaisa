@@ -1,11 +1,13 @@
-import { Globe, InstagramLogo, Star, TelegramLogo, TiktokLogo } from '@phosphor-icons/react/ssr'
+import { Globe, Star, TiktokLogo } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import type { ComponentType } from 'react'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { Achievements, achievementLook, profileStyle } from '@/entities/profile'
 import { EditProfileButton } from '@/features/profileStyle'
 import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { InstagramMark, TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
@@ -40,9 +42,12 @@ const MAX_PLACES = 4
 // A client's page in the app's own voice, like a contact card in iOS: the face centred on a soft
 // wash of their colour, name and status, one line of facts, the level as a line of text; then
 // achievements as medals and short rows of masters, places and reviews — on the page, no cards.
-const LINK_GLYPHS: Record<ProfileLinkKind, typeof Globe> = {
-  instagram: InstagramLogo,
-  telegram: TelegramLogo,
+const LINK_GLYPHS: Record<
+  ProfileLinkKind,
+  ComponentType<{ weight?: 'bold'; 'aria-hidden'?: boolean }>
+> = {
+  instagram: InstagramMark,
+  telegram: TelegramMark,
   tiktok: TiktokLogo,
   website: Globe,
 }

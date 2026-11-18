@@ -4,14 +4,17 @@ import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { OtpField } from '@awaisa/ui/OtpField'
-import { CaretLeft, TelegramLogo, X } from '@phosphor-icons/react/ssr'
+import { CaretLeft, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { type FormEvent, type ReactNode, useEffect } from 'react'
+import { type FormEvent, useEffect } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { CODE_LENGTH, useLoginForm } from '@/views/auth/model/useLoginForm'
 import { useTelegramLogin } from '@/views/auth/model/useTelegramLogin'
+import { GradientFlow } from '@/views/auth/ui/GradientFlow/GradientFlow'
 import { SignInTransition } from '@/views/auth/ui/SignInTransition/SignInTransition'
 import styles from './LoginPage.module.css'
 
@@ -20,15 +23,10 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
   action()
 }
 
-interface LoginPageProps {
-  /** The welcome picture over the number: a cloud of real work, read on the server. */
-  hero?: ReactNode
-}
-
 // Sign-in as a screen of its own — no site header, tab bar or footer: one quiet column on the
 // page colour, one question at a time (number → code → name), like the system's own sign-in.
-// It opens on finished work around the mascot and ends with a sweep of the accent.
-export const LoginPage = ({ hero }: LoginPageProps) => {
+// It opens on slow living colour behind the mascot and ends with a wave of light.
+export const LoginPage = () => {
   const form = useLoginForm()
   const telegram = useTelegramLogin(form.finishSignIn)
   const isWaitingForTelegram = form.step === 'phone' && telegram.isWaiting
@@ -59,7 +57,7 @@ export const LoginPage = ({ hero }: LoginPageProps) => {
       <section className={styles.column} aria-live='polite'>
         {isWaitingForTelegram && (
           <div className={styles.form}>
-            <TelegramLogo weight='fill' className={styles.telegramMark} aria-hidden />
+            <TelegramMark className={styles.telegramMark} />
             <h1 className={styles.title}>Подтвердите в Telegram</h1>
             <p className={styles.lead}>
               Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда
@@ -84,7 +82,10 @@ export const LoginPage = ({ hero }: LoginPageProps) => {
 
         {form.step === 'phone' && !isWaitingForTelegram && (
           <form className={styles.welcome} onSubmit={handleSubmit(() => form.sendCode())}>
-            {hero}
+            <GradientFlow />
+            <span className={styles.badge} aria-hidden='true'>
+              <Mascot />
+            </span>
             <h1 className={styles.headline}>
               Запись к мастерам.
               <span className={styles.headlineMuted}> Без звонков.</span>
@@ -115,7 +116,7 @@ export const LoginPage = ({ hero }: LoginPageProps) => {
                   fullWidth
                   onClick={telegram.start}
                 >
-                  <TelegramLogo weight='fill' aria-hidden />
+                  <TelegramMark className={styles.brand} />
                   Войти через Telegram
                 </ButtonLink>
               )}
@@ -212,7 +213,7 @@ export const LoginPage = ({ hero }: LoginPageProps) => {
           </form>
         )}
       </section>
-      {form.isSignedIn && <SignInTransition onDone={form.leave} />}
+      {form.isSignedIn && <SignInTransition name={form.signedInName} onDone={form.leave} />}
     </main>
   )
 }

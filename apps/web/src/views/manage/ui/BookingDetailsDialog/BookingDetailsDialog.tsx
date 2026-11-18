@@ -1,9 +1,10 @@
-import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
+import { ChatCircle, Phone } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
 import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -38,7 +39,7 @@ export const BookingDetailsDialog = ({
   const digits = booking.customerPhone.replace(/\D/g, '')
   const contactActions = [
     { href: `tel:${booking.customerPhone}`, label: 'Позвонить', icon: Phone },
-    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappLogo, external: true },
+    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappMark, external: true },
     { href: `sms:${booking.customerPhone}`, label: 'SMS', icon: ChatCircle },
   ]
 
