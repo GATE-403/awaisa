@@ -54,8 +54,9 @@ export const LoginPage = () => {
         )}
       </div>
 
-      {/* Past the number, the light of the sign-in keeps passing faintly over the page. */}
-      {(form.step !== 'phone' || isWaitingForTelegram) && <GradientFlow variant='glow' />}
+      {/* Waiting for Telegram and naming oneself, the light of the sign-in passes faintly over
+          the page; the code step stays plain, nothing moves while the digits are typed. */}
+      {(form.step === 'name' || isWaitingForTelegram) && <GradientFlow variant='glow' />}
       <section className={styles.column} aria-live='polite'>
         {isWaitingForTelegram && (
           <div className={styles.form}>
