@@ -45,7 +45,7 @@ interface ScheduleTabProps {
 type Draft = {
   specialistId: string
   time: string | null
-  initial?: { serviceId: string; name: string; phone: string }
+  initial?: { serviceId: string | null; name: string; phone: string }
 }
 
 const DAYS_SHOWN = 14
@@ -173,6 +173,21 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         name: entry.customerName,
         phone: entry.customerPhone,
       },
+    })
+  }
+
+  // «Записать снова» from the client's card: their usual service, its first master, this day.
+  const handleBookAgain = (client: { name: string; phone: string; serviceName: string | null }) => {
+    const service = catalog.services.find((item) => item.name === client.serviceName) ?? null
+    const masterId =
+      catalog.specialists.find((master) => service && master.serviceIds.includes(service.id))?.id ??
+      schedule?.specialists[0]?.id ??
+      ''
+    setClientPhone(null)
+    setDraft({
+      specialistId: masterId,
+      time: null,
+      initial: { serviceId: service?.id ?? null, name: client.name, phone: client.phone },
     })
   }
 
@@ -350,7 +365,12 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       )}
 
       {clientPhone && (
-        <ClientSheet slug={slug} phone={clientPhone} onClose={() => setClientPhone(null)} />
+        <ClientSheet
+          slug={slug}
+          phone={clientPhone}
+          onClose={() => setClientPhone(null)}
+          onBook={isPast ? undefined : handleBookAgain}
+        />
       )}
 
       {draft && schedule && date && (
