@@ -11,7 +11,7 @@ type ManageTab =
   | 'masters'
   | 'branches'
   | 'hours'
-  | 'profile'
+  | 'page'
   | 'notifications'
   /** The settings list itself: on phones the iOS Settings root, on wide screens the first section. */
   | 'settings'
@@ -27,7 +27,6 @@ const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
   {
     label: 'Бизнес',
     items: [
-      { value: 'profile', label: 'Профиль', tone: 'blue' },
       { value: 'branches', label: 'Филиалы', tone: 'green' },
       { value: 'hours', label: 'График', tone: 'orange' },
       { value: 'notifications', label: 'Уведомления', tone: 'red' },
@@ -58,6 +57,8 @@ const MAIN_TABS: TabItem[] = [
   { value: 'clients', label: 'Клиенты' },
   { value: 'analytics', label: 'Аналитика' },
   { value: 'reviews', label: 'Отзывы' },
+  // The public page itself, edited in place: the business's profile, not a settings row.
+  { value: 'page', label: 'Страница' },
 ]
 
 const ALL_TABS: TabItem[] = [
@@ -66,8 +67,9 @@ const ALL_TABS: TabItem[] = [
   { value: 'settings', label: 'Настройки' },
 ]
 
+// «Настройки → Профиль» became the «Страница» tab; old links still land there.
 const toManageTab = (value: string | null): ManageTab =>
-  ALL_TABS.find((tab) => tab.value === value)?.value ?? 'schedule'
+  ALL_TABS.find((tab) => tab.value === (value === 'profile' ? 'page' : value))?.value ?? 'schedule'
 
 const isSettingsTab = (tab: ManageTab) =>
   tab === 'settings' || SETTINGS_TABS.some((item) => item.value === tab)

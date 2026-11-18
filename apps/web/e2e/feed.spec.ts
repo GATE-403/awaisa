@@ -32,7 +32,7 @@ test.describe('«Образы» feed', () => {
       // The strip loads its photos once hydrated; picking a file earlier would be lost.
       await Promise.all([
         page.waitForResponse((response) => response.url().includes('/work-photos')),
-        page.goto(`/manage/${SLUG}?tab=profile`),
+        page.goto(`/manage/${SLUG}?tab=page`),
       ])
       await page.getByLabel('Файл фото').setInputFiles({
         name: 'work.png',
