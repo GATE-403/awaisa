@@ -1,13 +1,13 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
-import { TelegramLogo } from '@phosphor-icons/react/ssr'
 import { useEffect, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { createTelegramLink, getTelegramStatus, removeTelegramChat } from '@/shared/api/clientApi'
 import type { TelegramStatus } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import styles from './TelegramSection.module.css'
@@ -99,7 +99,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
         {status.chats.map((chat) => (
           <div key={chat.id} className={styles.row}>
             <span className={styles.icon} aria-hidden='true'>
-              <TelegramLogo weight='fill' />
+              <TelegramMark />
             </span>
             <span className={styles.text}>
               <span className={styles.title}>
