@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { GradientFlow } from '@/views/auth/ui/GradientFlow/GradientFlow'
-import { playLightWave } from './lightWave'
+import { LightWave } from '@/shared/ui/LightWave/LightWave'
 import styles from './SignInTransition.module.css'
 
 interface SignInTransitionProps {
@@ -16,12 +15,9 @@ interface SignInTransitionProps {
 const LEAVE_AFTER_WAVE = 2300
 const LEAVE_QUICKLY = 900
 
-const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  // The form re-renders every second (the resend countdown) with a new callback: the timers run
-  // once from the start and call the latest one.
+  // The form re-renders every second (the resend countdown) with a new callback: the timer runs
+  // once from the start and calls the latest one.
   const onDoneRef = useRef(onDone)
   const firstName = name.trim().split(/\s+/)[0] ?? ''
 
@@ -30,28 +26,18 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
   })
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    const stop = canvas && !prefersReducedMotion() ? playLightWave(canvas) : null
+    const isCalm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const leave = window.setTimeout(
       () => onDoneRef.current(),
-      stop ? LEAVE_AFTER_WAVE : LEAVE_QUICKLY,
+      isCalm ? LEAVE_QUICKLY : LEAVE_AFTER_WAVE,
     )
-
-    return () => {
-      stop?.()
-      window.clearTimeout(leave)
-    }
+    return () => window.clearTimeout(leave)
   }, [])
 
   return (
     <output className={styles.overlay} aria-live='polite'>
-      {/* What the wave leaves behind: its light keeps passing faintly under the greeting. */}
-      <span className={styles.trace}>
-        <GradientFlow variant='glow' isOnDark />
-      </span>
-      <span className={styles.wave} aria-hidden='true'>
-        <canvas ref={canvasRef} />
-      </span>
+      {/* The wave from the top edge, then its light keeps passing faintly under the greeting. */}
+      <LightWave afterglow />
       <span className={styles.greeting}>
         {firstName ? (
           <>
