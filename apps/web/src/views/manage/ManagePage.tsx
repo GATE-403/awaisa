@@ -19,7 +19,7 @@ import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
 import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
 import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
-import { ProfileTab } from '@/views/manage/ui/ProfileTab/ProfileTab'
+import { PageTab } from '@/views/manage/ui/PageTab/PageTab'
 import { PromotionsTab } from '@/views/manage/ui/PromotionsTab/PromotionsTab'
 import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
@@ -202,8 +202,8 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
               {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
               {data && tab === 'stock' && <StockTab slug={slug} catalog={data.catalog} />}
               {data && tab === 'team' && <TeamTab slug={slug} />}
-              {data && tab === 'profile' && (
-                <ProfileTab slug={slug} business={data.business} catalog={data.catalog} run={run} />
+              {data && tab === 'page' && (
+                <PageTab slug={slug} business={data.business} catalog={data.catalog} run={run} />
               )}
             </div>
           </div>
