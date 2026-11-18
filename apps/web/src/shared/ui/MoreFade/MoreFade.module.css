@@ -20,6 +20,10 @@
   background: linear-gradient(to bottom, transparent, var(--color-surface) 72%);
 }
 
+.wrap[data-surface="sheet"][data-closed]::after {
+  background: linear-gradient(to bottom, transparent, var(--color-sheet-surface) 72%);
+}
+
 .more,
 .less {
   display: inline-flex;
