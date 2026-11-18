@@ -172,22 +172,31 @@
 
 .booking {
   z-index: 1;
-  gap: 2px;
+  gap: 3px;
   margin-top: 1px;
-  padding: 6px 10px;
-  /* Calendar on iOS 26: a soft tinted fill, coloured title, a hairline in the master's colour. */
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--tint) 16%, var(--color-surface));
-  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 32%, transparent);
+  padding: 6px 8px;
+  /* A white task card on the day: a quiet chip row, the client, the service, then the time. */
+  border-radius: 12px;
+  background: var(--color-elevated);
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 0.5px var(--color-border);
   color: var(--color-foreground);
   cursor: pointer;
   transition:
-    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
     scale var(--duration-fast) var(--ease-standard);
 }
 
 .booking:active:not([data-cancelled]) {
   scale: 0.98;
+}
+
+/* The visit under way: the card wears the accent ring, like a focused item. */
+.booking[data-tone="accent"] {
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 1.5px var(--color-primary);
 }
 
 .booking[data-cancelled] {
@@ -203,25 +212,25 @@
 }
 
 .booking[data-cancelled] .blockTitle {
+  color: inherit;
   text-decoration: line-through;
 }
 
-/* A no-show keeps its place but fades: a tinted outline instead of the fill. */
+/* A no-show keeps its place but steps back: no lift, a dashed edge. */
 .booking[data-outcome="no_show"] {
-  background-color: var(--color-surface);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tint) 45%, transparent);
-  opacity: 0.7;
+  background: var(--color-surface);
+  box-shadow: none;
+  outline: 1px dashed color-mix(in srgb, var(--color-danger) 60%, transparent);
+  outline-offset: -1px;
 }
 
 .booking[data-outcome="no_show"] .blockTitle {
   color: var(--color-muted-foreground);
+  text-decoration: line-through;
 }
 
-.outcomeIcon {
-  width: 11px;
-  height: 11px;
-  margin-right: 3px;
-  vertical-align: -1px;
+.booking[data-outcome="arrived"] {
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
 }
 
 .timeOff {
@@ -236,34 +245,30 @@
 }
 
 .blockTime {
-  color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
   font-size: var(--text-xs);
   line-height: 16px;
   font-weight: var(--font-weight-medium);
   font-variant-numeric: tabular-nums;
 }
 
-.booking[data-cancelled] .blockTime,
-.booking[data-cancelled] .blockTitle,
 .timeOff .blockTime {
   color: inherit;
 }
 
 .blockTitle {
   overflow: hidden;
-  color: color-mix(in srgb, var(--tint) 62%, var(--color-foreground));
-  font-size: var(--text-sm);
-  line-height: 19px;
+  min-width: 0;
+  font-size: var(--text-footnote);
+  line-height: 18px;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.01em;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.blockMeta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
+.blockService {
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
@@ -272,76 +277,136 @@
   white-space: nowrap;
 }
 
-.blockClient {
+.blockLine {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: 16px;
 }
 
-.blockClientName {
+.blockLine .blockTitle {
+  flex: 1;
+}
+
+.chips {
+  display: flex;
+  gap: 4px;
+  min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  margin-bottom: 1px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 1;
+  font-weight: var(--font-weight-medium);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.mini {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--tint) 70%, var(--color-foreground));
-  color: var(--color-primary-foreground);
-  font-size: 10px;
-  font-weight: var(--font-weight-semibold);
+.chip:last-child {
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.booking[data-cancelled] .mini {
+.chip svg {
+  width: 11px;
+  height: 11px;
+}
+
+.chip[data-tone="accent"] {
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+}
+
+.chip[data-tone="warning"] {
+  background: color-mix(in srgb, var(--color-highlight) 14%, transparent);
+  color: var(--color-highlight);
+}
+
+.chip[data-tone="success"] {
+  background: color-mix(in srgb, var(--color-success) 14%, transparent);
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
+}
+
+.chip[data-tone="danger"] {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger-text);
+}
+
+.stateDot {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
   background: var(--color-tertiary-foreground);
 }
 
-.blockComment {
-  display: -webkit-box;
-  overflow: hidden;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: 16px;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+.stateDot[data-tone="accent"] {
+  background: var(--color-primary);
 }
 
-.commentIcon {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
+.stateDot[data-tone="warning"] {
+  background: var(--color-rating);
+}
+
+.stateDot[data-tone="success"] {
+  background: var(--color-success);
+}
+
+.stateDot[data-tone="danger"] {
+  background: var(--color-danger);
 }
 
 .blockFooter {
   display: flex;
   justify-content: space-between;
   gap: var(--space-2);
-  white-space: nowrap;
   margin-top: auto;
+  padding-top: 5px;
+  border-top: 0.5px solid var(--color-border);
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
   line-height: 16px;
-  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.blockFooter > :first-child {
+.footerNote,
+.footerTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.footerNote {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.blockPrice {
-  color: color-mix(in srgb, var(--tint) 62%, var(--color-foreground));
-  font-weight: var(--font-weight-semibold);
+.footerTime {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.blockFooter svg {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.booking[data-tone="accent"] .footerTime {
+  color: var(--color-link);
 }
 
 .remove {
@@ -387,19 +452,15 @@
 }
 
 .booking[data-size="compact"] {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: var(--space-2);
-}
-
-.booking[data-size="compact"] .blockClient {
-  flex-basis: 100%;
+  gap: 0;
+  padding-block: 4px;
 }
 
 @media (hover: hover) {
-  .booking:not([data-cancelled]):hover {
-    background: color-mix(in srgb, var(--tint) 22%, var(--color-surface));
+  .booking:not([data-cancelled], [data-outcome="no_show"]):hover {
+    box-shadow:
+      var(--shadow-md),
+      inset 0 0 0 0.5px var(--color-border);
   }
 
   .remove:hover {

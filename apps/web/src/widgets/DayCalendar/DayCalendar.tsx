@@ -1,6 +1,6 @@
 'use client'
 
-import { ChatText, Check, X } from '@phosphor-icons/react/ssr'
+import { ChatText, Check, Clock, X } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
@@ -27,6 +27,8 @@ interface DayCalendarProps {
   timeOff: TimeOff[]
   hours: WorkingDay | null
   nowMinutes: number | null
+  /** A day gone by: every visit on it has ended. */
+  isPast?: boolean
   slotMinutes: number
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
@@ -36,6 +38,28 @@ interface DayCalendarProps {
 }
 
 type Hover = { specialistId: string; minutes: number }
+
+type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
+
+// What a visit needs from the salon right now, read at a glance from the first chip.
+const blockState = (
+  booking: AdminBooking,
+  from: number,
+  to: number,
+  nowMinutes: number | null,
+  isPast: boolean,
+): { tone: BlockTone; label: string } => {
+  if (booking.status === 'cancelled') return { tone: 'muted', label: 'Отменена' }
+  if (booking.payment?.status === 'pending') return { tone: 'muted', label: 'Ждёт оплату' }
+  if (booking.outcome === 'arrived') return { tone: 'success', label: 'Пришёл' }
+  if (booking.outcome === 'no_show') return { tone: 'danger', label: 'Не пришёл' }
+  if (isPast || (nowMinutes !== null && to <= nowMinutes)) {
+    return { tone: 'warning', label: 'Отметить' }
+  }
+  if (nowMinutes !== null && from <= nowMinutes) return { tone: 'accent', label: 'Сейчас' }
+
+  return { tone: 'plain', label: 'Ждём' }
+}
 
 const position = (from: number, to: number, start: number): CSSProperties => ({
   top: toPx(from - start),
@@ -76,6 +100,7 @@ export const DayCalendar = ({
   timeOff,
   hours,
   nowMinutes,
+  isPast = false,
   slotMinutes,
   onSelectBooking,
   onRemoveTimeOff,
@@ -264,6 +289,11 @@ export const DayCalendar = ({
                     : blockHeight >= TALL_BLOCK_PX
                       ? 'tall'
                       : 'normal'
+                const state = blockState(booking, from, to, nowMinutes, isPast)
+                const paid =
+                  booking.outcome === 'arrived'
+                    ? (booking.paidAmount ?? booking.price)
+                    : booking.price - (booking.discount?.amount ?? 0)
 
                 return (
                   <button
@@ -272,6 +302,7 @@ export const DayCalendar = ({
                     className={styles.booking}
                     data-cancelled={booking.status === 'cancelled' || undefined}
                     data-outcome={booking.outcome ?? undefined}
+                    data-tone={state.tone}
                     data-size={size}
                     data-dragging={drag.dragged?.id === booking.id || undefined}
                     style={position(from, to, range.start)}
@@ -281,33 +312,47 @@ export const DayCalendar = ({
                     }}
                     aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
                   >
-                    <span className={styles.blockTime}>
-                      {booking.outcome === 'arrived' && (
-                        <Check weight='bold' aria-hidden className={styles.outcomeIcon} />
-                      )}
-                      {booking.time}–{end}
-                      {booking.outcome === 'no_show' && ' · не пришёл'}
-                      {booking.status === 'confirmed' &&
-                        booking.payment?.status === 'pending' &&
-                        ' · ждёт оплату'}
-                    </span>
-                    <span className={styles.blockTitle}>{booking.serviceName}</span>
-                    <span className={styles.blockClient}>
-                      <span className={styles.mini} aria-hidden='true'>
-                        {booking.customerName.trim().charAt(0).toUpperCase()}
+                    {size === 'compact' ? (
+                      <span className={styles.blockLine}>
+                        {state.tone !== 'plain' && (
+                          <span className={styles.stateDot} data-tone={state.tone} aria-hidden />
+                        )}
+                        <span className={styles.blockTitle}>{booking.customerName}</span>
+                        <span className={styles.blockTime}>{booking.time}</span>
                       </span>
-                      <span className={styles.blockClientName}>{booking.customerName}</span>
-                      {booking.comment && size !== 'tall' && (
-                        <ChatText className={styles.commentIcon} aria-hidden />
-                      )}
-                    </span>
-                    {size === 'tall' && booking.comment && (
-                      <span className={styles.blockComment}>«{booking.comment}»</span>
+                    ) : (
+                      <span className={styles.chips}>
+                        <span className={styles.chip} data-tone={state.tone}>
+                          {state.tone === 'success' && <Check weight='bold' aria-hidden />}
+                          {state.tone === 'accent' && (
+                            <span className={styles.stateDot} data-tone='accent' aria-hidden />
+                          )}
+                          {state.label}
+                        </span>
+                        <span className={styles.chip}>
+                          {size === 'tall' ? formatPrice(paid) : `${booking.time}–${end}`}
+                        </span>
+                      </span>
                     )}
+                    {size !== 'compact' && (
+                      <span className={styles.blockTitle}>{booking.customerName}</span>
+                    )}
+                    <span className={styles.blockService}>↳ {booking.serviceName}</span>
                     {size === 'tall' && (
                       <span className={styles.blockFooter}>
-                        <span>{formatPhone(booking.customerPhone)}</span>
-                        <span className={styles.blockPrice}>{formatPrice(booking.price)}</span>
+                        <span className={styles.footerNote}>
+                          {booking.comment ? (
+                            <>
+                              <ChatText aria-hidden />«{booking.comment}»
+                            </>
+                          ) : (
+                            formatPhone(booking.customerPhone)
+                          )}
+                        </span>
+                        <span className={styles.footerTime}>
+                          <Clock aria-hidden />
+                          {booking.time}–{end}
+                        </span>
                       </span>
                     )}
                   </button>
