@@ -25,6 +25,15 @@ LLM-судья (`claude-opus-5-5`) оценивает ленты персон. �
 запросы только записываются в `reports/judge-prompts.md`. Это 18 запросов на прогон.
 
 ```bash
+pnpm rec:traffic -- --days=14
+```
+
+Реальный трафик полок из `recommendation_events` (только чтение): сессии с показом, нажатием и
+записью по дням и версиям. Из них считает, сколько дней займёт каждый тест из
+`docs/recsys/experiments.md`. Для прода нужно указать `DATABASE_URL` реплики. Пишет
+`reports/traffic.md`.
+
+```bash
 pnpm --filter @awaisa/recsys-eval test
 ```
 

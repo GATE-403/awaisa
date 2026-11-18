@@ -1,8 +1,17 @@
 // A transparent score instead of a black box: each part adds a little and the strongest part
 // becomes the card's reason («Пора снова», «Вы любите маникюр», «Рядом · 1,2 км»).
 
-/** Logged with every event: bump it whenever the ranking changes, so versions can be compared. */
-const ALGORITHM = 'score-v1'
+/** Every version still served (interleaving compares two of them online). */
+const ALGORITHMS = ['score-v1', 'score-v2'] as const
+type Algorithm = (typeof ALGORITHMS)[number]
+
+/**
+ * The version shelves get. Logged with every event: add a new one whenever the ranking changes,
+ * so versions can be compared. score-v2 (docs/recsys/roadmap.md): the client's usual services are
+ * a habit, not only a due date; barbershops and kids' services are not shown to people they are
+ * not for.
+ */
+const ALGORITHM: Algorithm = 'score-v2'
 
 type Interest =
   | 'haircut'
@@ -55,6 +64,8 @@ type Candidate = {
   rebookDays: number | null
   /** A place without a track record yet: a few shelf spots go to such places. */
   isNewPlace?: boolean
+  /** The place's kind (barber, beauty, …): a barbershop's «Стрижка машинкой» is a men's cut. */
+  placeKind?: string
 }
 
 const INTEREST_WORDS: Record<Interest, string[]> = {
@@ -137,14 +148,48 @@ const formatKm = (km: number) =>
 
 type Scored = { score: number; reason: string; reasons: string[] }
 
-const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null => {
+// A habit counts a few days early: people book ahead, and a cut due next week is worth showing.
+const HABIT_LOOKAHEAD_DAYS = 7
+
+const scoreCandidate = (
+  candidate: Candidate,
+  profile: Profile,
+  version: Algorithm = ALGORITHM,
+): Scored | null => {
+  const isV2 = version !== 'score-v1'
   const focus = profile.focus ?? null
   // Without a stated gender, the service being chosen tells who it is for.
   const gender = profile.gender ?? (focus ? genderOf(focus.name) : null)
   if (!fitsGender(candidate.name, gender)) return null
+  // A barbershop's «Стрижка машинкой» says nothing about men in its name, but it is a men's cut.
+  if (
+    isV2 &&
+    gender === 'female' &&
+    candidate.placeKind === 'barber' &&
+    !/(женск|детск)/.test(normalize(candidate.name))
+  ) {
+    return null
+  }
+  // And the other way: evening hairstyles, curls, make-up and nails are not shown to men.
+  if (
+    isV2 &&
+    gender === 'male' &&
+    (genderOf(candidate.name) === 'female' ||
+      /(причес|локон|образ)/.test(normalize(candidate.name)))
+  ) {
+    return null
+  }
   if (focus && candidate.serviceId === focus.serviceId) return null
   const parts: { value: number; reason: string }[] = []
   const interests = interestsOf(candidate.name)
+
+  // Kids' services only for someone who has booked for a child or is choosing one now.
+  if (isV2 && /детск/.test(normalize(candidate.name))) {
+    const forKids = [...profile.visits.map((visit) => visit.serviceName), focus?.name ?? ''].some(
+      (name) => /детск/.test(normalize(name)),
+    )
+    if (!forKids) parts.push({ value: -4, reason: '' })
+  }
 
   // Choosing a manicure now outweighs a barber visit last month: same kind first, others down.
   if (focus) {
@@ -202,11 +247,18 @@ const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null =
   if (lastSame) {
     const cycle = candidate.rebookDays ?? 28
     const weeks = Math.round(lastSame.daysAgo / 7)
-    parts.push(
-      lastSame.daysAgo >= cycle * 0.85
-        ? { value: 5, reason: `Пора снова · ${weeks > 1 ? `${weeks} нед.` : 'неделя'}` }
-        : { value: -2, reason: '' },
-    )
+    const dueAgain = { value: 5, reason: `Пора снова · ${weeks > 1 ? `${weeks} нед.` : 'неделя'}` }
+    if (!isV2) {
+      parts.push(lastSame.daysAgo >= cycle * 0.85 ? dueAgain : { value: -2, reason: '' })
+    } else {
+      // The usual is a habit: due a week early, held back only right after a visit, and every
+      // repeat makes it more likely again (offline: NDCG@10 0.209 → 0.336 on the simulation).
+      const times = profile.visits.filter((visit) => visit.serviceId === candidate.serviceId).length
+      if (lastSame.daysAgo + HABIT_LOOKAHEAD_DAYS >= cycle * 0.85) parts.push(dueAgain)
+      else if (lastSame.daysAgo < HABIT_LOOKAHEAD_DAYS) parts.push({ value: -2, reason: '' })
+      else parts.push({ value: 1, reason: '' })
+      if (times > 1) parts.push({ value: Math.min(times - 1, 3), reason: 'Ваше обычное' })
+    }
   } else if (!focus && profile.visits.some((visit) => visit.slug === candidate.slug)) {
     // While choosing, the choice speaks for now: past places and kinds do not pull picks away.
     parts.push({ value: 1.5, reason: 'Вы были здесь' })
@@ -270,19 +322,36 @@ const scoreCandidate = (candidate: Candidate, profile: Profile): Scored | null =
 const rankCandidates = <T extends Candidate>(
   candidates: T[],
   profile: Profile,
-  { limit = 12, perPlace = 2, exploreAt = 3 } = {},
+  {
+    limit = 12,
+    perPlace = 2,
+    exploreAt = 3,
+    version = ALGORITHM,
+  }: { limit?: number; perPlace?: number; exploreAt?: number; version?: Algorithm } = {},
 ) => {
   const scored = candidates
-    .map((candidate) => ({ candidate, ...scoreCandidate(candidate, profile) }))
+    .map((candidate) => ({ candidate, ...scoreCandidate(candidate, profile, version) }))
     .filter((entry): entry is { candidate: T } & Scored => typeof entry.score === 'number')
     .sort((first, second) => second.score - first.score)
   const perSlug = new Map<string, number>()
   const names = new Set<string>()
   const result: ({ candidate: T } & Scored)[] = []
+  // score-v2: one card per name is the client's own place for a service they had there — a
+  // better-rated «Стрижка» across town used to push their own salon's off the shelf.
+  const ownPlaces = new Map<string, Set<string>>()
+  if (version !== 'score-v1') {
+    const offered = new Set(scored.map((entry) => entry.candidate.serviceId))
+    for (const visit of profile.visits) {
+      if (!offered.has(visit.serviceId)) continue
+      const name = normalize(visit.serviceName).trim()
+      ownPlaces.set(name, (ownPlaces.get(name) ?? new Set<string>()).add(visit.slug))
+    }
+  }
   for (const entry of scored) {
     const count = perSlug.get(entry.candidate.slug) ?? 0
     const name = normalize(entry.candidate.name).trim()
     if (count >= perPlace || names.has(name)) continue
+    if (ownPlaces.get(name)?.has(entry.candidate.slug) === false) continue
     perSlug.set(entry.candidate.slug, count + 1)
     names.add(name)
     result.push(entry)
@@ -376,9 +445,10 @@ const computeAffinities = (
     .filter((pair) => pair.support >= MIN_SUPPORT)
 }
 
-export type { Affinities, Candidate, Gender, Interest, Profile }
+export type { Affinities, Algorithm, Candidate, Gender, Interest, Profile }
 export {
   ALGORITHM,
+  ALGORITHMS,
   computeAffinities,
   INTERESTS,
   interestsOf,

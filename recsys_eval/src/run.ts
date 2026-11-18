@@ -6,7 +6,7 @@ import { simulate } from './data/simulate.ts'
 import { splitByTime } from './data/split.ts'
 import { evaluate } from './evaluate.ts'
 import { popular, popularInCategory, random, repeatPlaces } from './recommenders/baselines.ts'
-import { production, productionNoExplore } from './recommenders/production.ts'
+import { previous, production, productionNoExplore } from './recommenders/production.ts'
 import { makePrototypes } from './recommenders/prototypes.ts'
 import { type Section, toHtml, toMarkdown } from './report.ts'
 import type { Dataset, Recommender } from './types.ts'
@@ -34,6 +34,7 @@ const recommenders: Recommender[] = [
   popular,
   popularInCategory,
   repeatPlaces,
+  previous,
   production,
   productionNoExplore,
   ...makePrototypes(),

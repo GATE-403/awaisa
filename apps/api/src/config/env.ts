@@ -1,4 +1,5 @@
 import { normalizePhone } from '../common/phone.js'
+import { ALGORITHM, ALGORITHMS, type Algorithm } from '../recommendations/recommend-score.js'
 import { type ProcessRole, parseProcessRole } from '../runtime/process-role.js'
 
 type Env = {
@@ -50,6 +51,8 @@ type Env = {
   FREEDOMPAY_API_URL: string
   FREEDOMPAY_CURRENCY: string
   FREEDOMPAY_TESTING_MODE: boolean
+  /** Team-draft interleaving of «Для вас» with another scorer; null = off (docs/recsys/experiments.md). */
+  RECS_INTERLEAVE: { algorithm: Algorithm; percent: number } | null
 }
 
 type StorageDriver = 'local' | 's3'
@@ -257,6 +260,24 @@ const parseRole = (config: Record<string, unknown>) => {
   return role
 }
 
+// `RECS_INTERLEAVE=score-v1:50` mixes score-v1 into the shelves of half the devices (by a hash of
+// the device session); empty or `off` serves the current scorer alone.
+const parseInterleave = (value: unknown): Env['RECS_INTERLEAVE'] => {
+  const raw = optionalString(value)
+  if (!raw || raw === 'off') return null
+  const [algorithm, percentText] = raw.split(':')
+  const percent = percentText === undefined ? 100 : Number(percentText)
+  if (!ALGORITHMS.includes(algorithm as Algorithm) || algorithm === ALGORITHM) {
+    throw new Error(
+      `RECS_INTERLEAVE must name another scorer (${ALGORITHMS.filter((name) => name !== ALGORITHM).join(', ')}), optionally :percent`,
+    )
+  }
+  if (!Number.isInteger(percent) || percent < 1 || percent > 100) {
+    throw new Error('RECS_INTERLEAVE percent must be 1–100')
+  }
+  return { algorithm: algorithm as Algorithm, percent }
+}
+
 const validateEnv = (config: Record<string, unknown>): Env => {
   const nodeEnv = parseNodeEnv(config.NODE_ENV)
   const webOrigins = parseOrigins(config.WEB_ORIGIN)
@@ -308,6 +329,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     FREEDOMPAY_CURRENCY: optionalString(config.FREEDOMPAY_CURRENCY) ?? 'KGS',
     // Test payments on Freedom Pay's side (their test cards), still through the real API.
     FREEDOMPAY_TESTING_MODE: optionalString(config.FREEDOMPAY_TESTING_MODE) === 'true',
+    RECS_INTERLEAVE: parseInterleave(config.RECS_INTERLEAVE),
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),

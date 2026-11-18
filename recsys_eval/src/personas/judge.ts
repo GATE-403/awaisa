@@ -7,8 +7,7 @@ import { z } from 'zod'
 import { exportDb } from '../data/exportDb.ts'
 import { DAY_MS, splitByTime } from '../data/split.ts'
 import { popularInCategory } from '../recommenders/baselines.ts'
-import { production } from '../recommenders/production.ts'
-import { makePrototypes } from '../recommenders/prototypes.ts'
+import { previous, production } from '../recommenders/production.ts'
 import type { Context, Recommender, User } from '../types.ts'
 import { PERSONAS, type Persona, toUser } from './personas.ts'
 
@@ -82,12 +81,7 @@ if (!process.env.DATABASE_URL) {
 const db = await exportDb(process.env.DATABASE_URL)
 // The catalog as it is now: everything before the latest visit is history.
 const { context, train } = splitByTime(db, 0)
-const prototypes = makePrototypes()
-const judged: Recommender[] = [
-  production,
-  ...prototypes.filter((entry) => entry.name === 'proto-usual'),
-  popularInCategory,
-]
+const judged: Recommender[] = [production, previous, popularInCategory]
 for (const recommender of judged) recommender.prepare?.(context, train)
 
 type Task = { persona: Persona; model: string; ids: string[]; prompt: string }
