@@ -15,7 +15,9 @@ import type { Dataset, Recommender } from './types.ts'
 // its catalog, split both by time, run every recommender, write reports/latest.{md,html}.
 
 const root = resolve(dirname(new URL(import.meta.url).pathname), '..', '..')
+// `pnpm rec:eval -- --k=5` passes the `--` on: drop it.
 const { values } = parseArgs({
+  args: process.argv.slice(2).filter((arg) => arg !== '--'),
   options: {
     source: { type: 'string', default: 'both' },
     k: { type: 'string', default: '10' },
