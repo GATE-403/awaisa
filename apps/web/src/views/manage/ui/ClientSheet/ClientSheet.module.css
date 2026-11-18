@@ -8,103 +8,183 @@
   font-size: var(--text-sm);
 }
 
-.identity {
+/* The quiet profile head: a soft wash of the client's colour behind a centred face. */
+.head {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  margin: calc(var(--space-5) * -1) calc(var(--space-4) * -1) 0;
+  padding: var(--space-6) var(--space-4) 0;
+  background: radial-gradient(
+    60% 80% at 50% 0%,
+    color-mix(in srgb, var(--client-tint) 22%, transparent),
+    transparent
+  );
   text-align: center;
 }
 
 .name {
-  margin-top: var(--space-2);
+  margin: var(--space-2) 0 0;
   font-family: var(--font-display);
-  font-size: var(--text-xl);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
 }
 
 .phone {
+  margin: 0;
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
+  font-size: var(--text-footnote);
   font-variant-numeric: tabular-nums;
 }
 
+.facts,
+.usual,
+.next {
+  margin: var(--space-2) 0 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-variant-numeric: tabular-nums;
+}
+
+.facts strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.usual,
+.next {
+  margin-top: 0;
+}
+
+.next {
+  color: var(--color-link);
+}
+
 .warning {
-  margin-top: var(--space-1);
-  padding: 2px var(--space-3);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  margin: var(--space-1) 0 0;
   color: var(--color-danger-text);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
 }
 
-.contacts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* Call · WhatsApp · SMS as one capsule of glyphs, like the place page's quick actions. */
+.contacts {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-sheet-surface);
+  list-style: none;
+}
+
+.contacts > li {
+  position: relative;
+  display: flex;
+}
+
+.contacts > li + li::before {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 0;
+  width: 0.5px;
+  background: var(--color-border);
 }
 
 .contact {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: 56px;
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--color-sheet-surface);
+  justify-content: center;
+  width: 48px;
+  height: 40px;
+  border-radius: var(--radius-full);
   color: var(--color-link);
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-semibold);
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.contact:active {
+  scale: 0.94;
 }
 
 .contact svg {
-  width: 20px;
-  height: 20px;
+  width: 19px;
+  height: 19px;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
-  margin: 0;
+.contact:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--color-sheet-surface);
+.count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 
-.stat dt {
+.birthdayValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
 }
 
-.stat dd {
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-title);
-}
-
-.value {
-  color: var(--color-muted-foreground);
-  text-align: right;
-}
-
-.date {
+.linkButton {
+  position: relative;
+  padding: 0;
   border: none;
   background: transparent;
-  color: var(--color-foreground);
+  color: var(--color-link);
   font: inherit;
-  text-align: right;
+  cursor: pointer;
+}
+
+.linkButton::before {
+  content: "";
+  position: absolute;
+  inset: -12px -8px;
+}
+
+.linkButton[data-tone="danger"] {
+  color: var(--color-danger-text);
+}
+
+.linkButton:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+.birthdayPickers {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+
+.birthdayPickers > span {
+  display: grid;
+  min-width: 0;
+}
+
+.birthdayPickers > button {
+  grid-column: 1 / -1;
+  justify-self: start;
 }
 
 .note {
@@ -121,8 +201,7 @@
   resize: vertical;
 }
 
-.note:focus-visible,
-.date:focus-visible {
+.note:focus-visible {
   outline: none;
   box-shadow: inset var(--focus-ring);
 }
@@ -147,9 +226,50 @@
 
 .visitText {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 1px;
   min-width: 0;
+}
+
+/* The visit's day as a small tear-off leaf, as in the profile's history. */
+.leaf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  width: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.leafMonth {
+  width: 100%;
+  padding: 1px 0;
+  background: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+  color: var(--color-foreground);
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.leafDay {
+  font-size: var(--text-body);
+  line-height: 24px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .visitTitle {
