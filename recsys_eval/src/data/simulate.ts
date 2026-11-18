@@ -1,4 +1,7 @@
-import { type Interest, interestsOf } from '../../../apps/api/src/recommendations/recommend-score.ts'
+import {
+  type Interest,
+  interestsOf,
+} from '../../../apps/api/src/recommendations/recommend-score.ts'
 import { mulberry32, pick, type Random } from '../lib/random.ts'
 import type { Dataset, Item, Review, StatedPreferences, Visit } from '../types.ts'
 import { DAY_MS } from './split.ts'
@@ -200,8 +203,7 @@ const simulate = (catalog: Item[], { clients = 4000, seed = 7 } = {}): Dataset =
   const horizon = START + DAYS * DAY_MS
   return {
     source: 'sim',
-    note:
-      'Симуляция поведения поверх реального каталога: вкусы, свой ритм, привычное место, бюджет, «после А берут Б». Модель людей, а не люди.',
+    note: 'Симуляция поведения поверх реального каталога: вкусы, свой ритм, привычное место, бюджет, «после А берут Б». Модель людей, а не люди.',
     items: catalog,
     visits: visits.filter((visit) => visit.time < horizon).sort((a, b) => a.time - b.time),
     reviews,
