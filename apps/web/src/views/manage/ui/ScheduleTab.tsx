@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { BellRinging, CalendarX, Plus } from '@phosphor-icons/react/ssr'
+import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
@@ -282,16 +282,9 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               )}
               {!isPast && (
                 <>
-                  {/* A rarer action: a glyph with a name for screen readers and a tooltip. */}
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={() => setIsClosingTime(true)}
-                    aria-label='Закрыть время'
-                    title='Закрыть время: перерыв, отгул'
-                    className={styles.iconAction}
-                  >
-                    <CalendarX weight='bold' aria-hidden />
+                  <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+                    <Coffee weight='bold' aria-hidden />
+                    Перерыв
                   </Button>
                   <Button
                     size='sm'
@@ -339,6 +332,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             timeOff={schedule.timeOff}
             hours={dayHours}
             nowMinutes={today && date === today.dayKey ? today.minutes : null}
+            isPast={isPast}
             slotMinutes={business.slotMinutes}
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}

@@ -146,7 +146,7 @@ test.describe('Salon admin', () => {
     // The phone and desktop runs close time for the same master and day at once: each finds its
     // own block by its own reason.
     const reason = `E2E перерыв ${testInfo.project.name}`
-    await page.getByRole('button', { name: 'Закрыть время' }).click()
+    await page.getByRole('button', { name: 'Перерыв' }).click()
     const dialog = page.getByRole('dialog')
     await dialog.getByLabel('Причина').fill(reason)
     await dialog.getByRole('button', { name: 'Готово' }).click()
