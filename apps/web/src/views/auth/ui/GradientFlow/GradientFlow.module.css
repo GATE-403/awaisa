@@ -1,11 +1,10 @@
-/* Full-bleed behind the hero (the mascot and the headline): from the top of the screen to a little
-   below the headline, at any size or zoom, then it melts into the page colour before the form —
-   so the white headline always stands on colour and the field and buttons on the plain page. */
+/* Behind the hero (the mascot and the headline): from far above the screen's top — the shader
+   paints sky up there — to well below the headline, melting slowly into the page colour before
+   the form, so the white headline always stands on colour and the field on the plain page. */
 .flow {
   position: absolute;
-  /* Up past the top bar to the screen edge (the bar, the column padding and the notch). */
-  top: calc(-96px - env(safe-area-inset-top));
-  bottom: -14vh;
+  top: -100vh;
+  bottom: -30vh;
   left: calc(50% - 50vw);
   z-index: -1;
   width: 100vw;
@@ -13,14 +12,27 @@
   /* Before the shader's first frame (or without WebGL): the same colours as a still gradient. */
   background: linear-gradient(
     to bottom,
-    var(--system-blue),
-    var(--system-indigo) 30%,
-    var(--system-orange) 48%,
-    black 68%,
+    var(--system-blue) 60%,
+    var(--system-indigo) 70%,
+    var(--system-orange) 80%,
+    black 90%,
     var(--system-indigo)
   );
-  mask-image: linear-gradient(to bottom, black calc(100% - 22vh), transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 42vh), transparent);
   pointer-events: none;
+}
+
+/* The glow covers the whole screen behind everything, on the page colour. */
+.flow[data-variant="glow"] {
+  position: fixed;
+  inset: 0;
+  width: auto;
+  background: var(--color-background);
+  mask-image: none;
+}
+
+.flow[data-on-dark] {
+  background: black;
 }
 
 .canvas {
