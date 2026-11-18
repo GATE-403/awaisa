@@ -1,0 +1,396 @@
+/* The public page's own column, edited in place. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  width: 100%;
+  min-width: 0;
+  max-width: 640px;
+  margin-inline: auto;
+  padding-bottom: var(--space-20);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+
+.toolbarNote {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
+}
+
+.statusDot[data-on] {
+  background: var(--color-success);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: calc(var(--space-8) * -1 + var(--space-4));
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+  background: color-mix(in srgb, var(--place-tint) 14%, var(--color-surface));
+  box-shadow: var(--shadow-sm);
+}
+
+/* No cover yet: a quiet dashed frame that says what goes there. */
+.cover[data-empty] {
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  background-image: radial-gradient(
+    70% 90% at 50% 0%,
+    color-mix(in srgb, var(--place-tint) 18%, transparent),
+    transparent
+  );
+}
+
+.coverImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverButton,
+.coverAdd {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+/* Over the photo: a dark capsule that reads on any picture, bottom-right like a photo app. */
+.coverButton {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  background: color-mix(in srgb, black 55%, transparent);
+  color: white;
+}
+
+.coverAdd {
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-link);
+}
+
+.coverButton:active,
+.coverAdd:active,
+.logoButton:active {
+  scale: 0.97;
+}
+
+.coverButton svg,
+.coverAdd svg {
+  width: 16px;
+  height: 16px;
+}
+
+.identity {
+  display: flex;
+  margin: -44px 0 var(--space-2) var(--space-4);
+}
+
+.logoButton {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+}
+
+.logo {
+  position: relative;
+  display: inline-flex;
+  border-radius: var(--radius-full);
+  box-shadow:
+    0 0 0 4px var(--color-background),
+    var(--shadow-md);
+}
+
+.logo > :first-child {
+  width: 88px;
+  height: 88px;
+}
+
+.logo[data-busy] {
+  opacity: 0.6;
+}
+
+.logoBadge {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 3px var(--color-background),
+    var(--shadow-sm);
+  color: var(--color-link);
+}
+
+.logoBadge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.coverButton:focus-visible,
+.coverAdd:focus-visible,
+.logoButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Text typed in place: it looks like the page until pointed at, then shows it can change. */
+.name,
+.description {
+  width: calc(100% + var(--space-2));
+  min-width: 0;
+  margin: 0;
+  padding: 2px var(--space-2);
+  margin-left: calc(var(--space-2) * -1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: var(--text-title1);
+  line-height: var(--text-title1-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.description {
+  margin-top: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  field-sizing: content;
+  max-width: calc(100% + var(--space-2));
+  min-height: 2lh;
+  resize: none;
+}
+
+.name:hover,
+.description:hover {
+  background: var(--color-fill);
+}
+
+.name:focus-visible,
+.description:focus-visible {
+  outline: none;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1.5px var(--color-primary);
+}
+
+.handle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+/* The kind reads as text with a small chevron, like the handle line of the public page. */
+.kind {
+  min-height: 32px;
+  padding-inline: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.street {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.facts strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.open {
+  color: var(--color-muted-foreground);
+}
+
+.open[data-open] {
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.count {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--control-height-md);
+  margin-left: auto;
+  color: var(--color-link);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: normal;
+}
+
+.more svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Masters as small round faces with first names, «+» first. */
+.faces {
+  display: flex;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 64px;
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  text-align: center;
+}
+
+.addFace {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-full);
+  color: var(--color-link);
+}
+
+.face[data-add] {
+  color: var(--color-link);
+}
+
+.addFace svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hoursRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-foreground);
+}
+
+.hoursText {
+  font-size: var(--text-body);
+}
+
+.hoursAction {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-link);
+}
+
+.hoursAction svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (hover: hover) {
+  .hoursRow:hover {
+    background: color-mix(in srgb, var(--color-fill) 60%, var(--color-surface));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverButton,
+  .coverAdd,
+  .name,
+  .description {
+    transition: none;
+  }
+}

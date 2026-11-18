@@ -24,7 +24,6 @@ interface SettingsNavProps {
 }
 
 const ICONS: Partial<Record<ManageTab, Icon>> = {
-  profile: Storefront,
   branches: MapPin,
   hours: Clock,
   notifications: Bell,
