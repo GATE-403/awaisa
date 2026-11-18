@@ -70,7 +70,8 @@ test.describe('Platform: a new business goes live', () => {
     await expect(page.getByRole('button', { name: /Джал.*Нет метки/ })).toBeVisible()
 
     // A cover photo: uploaded, compressed by the API and shown on the catalog card.
-    await openSettings(page, 'Профиль')
+    // The public page is its own tab: the cover is changed right on its head.
+    await page.getByRole('link', { name: 'Страница', exact: true }).click()
     await page.getByLabel('Файл обложки').setInputFiles({
       name: 'cover.png',
       mimeType: 'image/png',
