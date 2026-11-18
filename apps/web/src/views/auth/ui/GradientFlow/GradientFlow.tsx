@@ -8,8 +8,8 @@ import { readColors, runShader } from './shaderCanvas'
 interface GradientFlowProps {
   /**
    * `flow`: the welcome's waves of colour behind the hero. `glow`: full screen, the trace of the
-   * wave of light — faint fronts from the top edge with a fading glow — on the code and name
-   * steps and under the greeting after sign-in.
+   * wave of light — faint fronts from the top edge with a fading glow — under the greeting after
+   * sign-in.
    */
   variant?: 'flow' | 'glow'
   /** The glow over black whatever the theme: under the light words of the sign-in transition. */

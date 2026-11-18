@@ -54,9 +54,6 @@ export const LoginPage = () => {
         )}
       </div>
 
-      {/* Waiting for Telegram, the light of the sign-in passes faintly over the page; the code
-          and name steps stay plain, nothing moves while one types. */}
-      {isWaitingForTelegram && <GradientFlow variant='glow' />}
       <section className={styles.column} aria-live='polite'>
         {isWaitingForTelegram && (
           <div className={styles.form}>
