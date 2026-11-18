@@ -82,14 +82,16 @@ export const LoginPage = () => {
 
         {form.step === 'phone' && !isWaitingForTelegram && (
           <form className={styles.welcome} onSubmit={handleSubmit(() => form.sendCode())}>
-            <GradientFlow />
-            <span className={styles.badge} aria-hidden='true'>
-              <Mascot />
-            </span>
-            <h1 className={styles.headline}>
-              Запись к мастерам.
-              <span className={styles.headlineMuted}> Без звонков.</span>
-            </h1>
+            <div className={styles.hero}>
+              <GradientFlow />
+              <span className={styles.badge} aria-hidden='true'>
+                <Mascot />
+              </span>
+              <h1 className={styles.headline}>
+                Запись к мастерам.
+                <span className={styles.headlineMuted}> Без звонков.</span>
+              </h1>
+            </div>
             <div className={styles.actions}>
               <Field label='Номер телефона' error={form.error} className={styles.field}>
                 <Input

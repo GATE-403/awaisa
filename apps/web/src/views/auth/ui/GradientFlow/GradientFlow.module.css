@@ -1,10 +1,14 @@
-/* Full-bleed behind the top of the screen; it melts into the page colour before the form, so the
-   field and the buttons sit on the plain page. */
+/* Full-bleed behind the hero (the mascot and the headline): from the top of the screen to a little
+   below the headline, at any size or zoom, then it melts into the page colour before the form —
+   so the white headline always stands on colour and the field and buttons on the plain page. */
 .flow {
   position: absolute;
-  inset: 0 0 auto;
-  z-index: 0;
-  height: 72svh;
+  /* Up past the top bar to the screen edge (the bar, the column padding and the notch). */
+  top: calc(-96px - env(safe-area-inset-top));
+  bottom: -14vh;
+  left: calc(50% - 50vw);
+  z-index: -1;
+  width: 100vw;
   overflow: hidden;
   /* Before the shader's first frame (or without WebGL): the same colours as a still gradient. */
   background: linear-gradient(
@@ -15,7 +19,7 @@
     black 68%,
     var(--system-indigo)
   );
-  mask-image: linear-gradient(to bottom, black 55%, transparent);
+  mask-image: linear-gradient(to bottom, black calc(100% - 22vh), transparent);
   pointer-events: none;
 }
 
