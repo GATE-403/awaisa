@@ -30,6 +30,8 @@ export const useLoginForm = () => {
   const [isCodeInvalid, setIsCodeInvalid] = useState(false)
   // Signed in: the transition plays over the screen, then `leave` goes where the person was going.
   const [isSignedIn, setIsSignedIn] = useState(false)
+  // Whom the transition greets: the account's name, or the one just typed.
+  const [signedInName, setSignedInName] = useState('')
   const redirectTo = getSafeRedirect(searchParams.get('next'))
 
   useEffect(() => {
@@ -99,6 +101,7 @@ export const useLoginForm = () => {
     }
     trackStep('login_done')
     router.prefetch(redirectTo)
+    setSignedInName(customer.name)
     setIsSignedIn(true)
   }
 
@@ -114,6 +117,7 @@ export const useLoginForm = () => {
       setCustomer(await updateMe(name))
       trackStep('login_done')
       router.prefetch(redirectTo)
+      setSignedInName(name)
       setIsSignedIn(true)
     })
 
@@ -144,6 +148,7 @@ export const useLoginForm = () => {
   return {
     step,
     isSignedIn,
+    signedInName,
     leave,
     reset,
     phone,
