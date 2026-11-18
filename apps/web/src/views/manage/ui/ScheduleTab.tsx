@@ -25,6 +25,7 @@ import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
+import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
 import { NewBookingDialog } from '@/views/manage/ui/NewBookingDialog/NewBookingDialog'
 import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -74,6 +75,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const [clientPhone, setClientPhone] = useState<string | null>(null)
   const [waitlist, setWaitlist] = useState<ManagedWaitlistEntry[]>([])
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false)
+  // «✕» on the bar: hidden until the cabinet is opened again.
+  const [isCloseBarHidden, setIsCloseBarHidden] = useState(false)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
   const isPast = date !== null && today !== null && date < today.dayKey
@@ -247,19 +250,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         description={
           <>
             {schedule ? summary : <span className={styles.dayTitle}>{dayLabel}</span>}
-            {/* Day states read as part of the hint, not as more buttons beside the actions.
-                Here, not above the calendar: they load late and must not shift the grid. */}
-            {unclosed.total > openHere && (
-              <button
-                type='button'
-                className={styles.statusLink}
-                onClick={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
-                title='Отметьте, кто пришёл: так выручка в аналитике будет точной'
-              >
-                <span className={styles.statusDot} aria-hidden />
-                Не закрыто: {pluralize(unclosed.total - openHere, ['визит', 'визита', 'визитов'])} ›
-              </button>
-            )}
+            {/* The waiting list is a state of the day: part of the hint, not another button. */}
             {!isPast && dayWaitlist.length > 0 && (
               <button
                 type='button'
@@ -275,11 +266,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
-              {openHere > 0 && (
-                <Button variant='secondary' size='sm' onClick={handleCloseDay}>
-                  Все пришли ({openHere})
-                </Button>
-              )}
               {!isPast && (
                 <>
                   <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
@@ -341,6 +327,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           />
         )}
       </div>
+
+      {hasMasters && !isCloseBarHidden && (
+        <CloseDayBar
+          openHere={openHere}
+          openElsewhere={unclosed.total - openHere}
+          onCloseDay={handleCloseDay}
+          onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
+          onDismiss={() => setIsCloseBarHidden(true)}
+        />
+      )}
 
       {selected && (
         <BookingDetailsDialog

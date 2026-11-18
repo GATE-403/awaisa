@@ -80,9 +80,12 @@ test.describe('Visit outcomes and the client base', () => {
     expect(before.days).toContainEqual(expect.objectContaining({ date: visit.date }))
 
     await page.goto(`/manage/${SLUG}`)
-    await expect(page.getByRole('button', { name: /Не закрыто: \d+ визит/ })).toBeVisible()
+    // The floating bar says visits wait for an outcome; on their day it offers «Все пришли».
+    const bar = page.getByRole('region', { name: 'Неотмеченные визиты' })
+    await expect(bar).toBeVisible()
     await page.locator(`[data-day="${visit.date}"]`).click()
     await expect(page.locator(`[data-day="${visit.date}"]`)).toHaveAttribute('aria-pressed', 'true')
+    await expect(bar.getByRole('button', { name: 'Все пришли' })).toBeVisible()
     // Booking into a past day is not offered.
     await expect(page.getByRole('button', { name: 'Новая запись', exact: true })).toHaveCount(0)
 

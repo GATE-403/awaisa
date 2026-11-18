@@ -75,10 +75,3 @@
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
 }
-
-.statusDot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-  background: var(--color-rating);
-}
