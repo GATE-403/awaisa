@@ -55,6 +55,18 @@ test.describe('Recommendations', () => {
     await first.click()
     await page.waitForURL(/\/book\?service=/)
     await expect.poll(() => countEvents('click'), { timeout: 10_000 }).toBe(1)
+    // Every event names the answer it came from: the shown list comes back whole, in order.
+    const slate = await withDb(async (client) => {
+      const { rows } = await client.query(
+        `SELECT COUNT(DISTINCT "request_id")::int AS "requests", COUNT(*)::int AS "events",
+           COUNT(*) FILTER (WHERE "request_id" IS NULL OR "algorithm" IS NULL)::int AS "untagged"
+         FROM "recommendation_events" WHERE "session" = $1`,
+        [session],
+      )
+      return rows[0] as { requests: number; events: number; untagged: number }
+    })
+    expect(slate.untagged).toBe(0)
+    expect(slate.requests).toBeGreaterThan(0)
     await withDb((client) =>
       client.query('DELETE FROM "recommendation_events" WHERE "session" = $1', [session]),
     )

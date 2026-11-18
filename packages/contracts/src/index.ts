@@ -132,7 +132,13 @@ type Offer = {
 }
 
 /** A service picked for this client, with why («Пора снова», «Вы любите маникюр»). */
-type Recommendation = Offer & { reason: string }
+type Recommendation = Offer & {
+  reason: string
+  /** One id per answer of GET /recommendations: events carry it, so a shown list can be rebuilt. */
+  requestId: string
+  /** The scorer that made the list («score-v1»): versions are compared by it. */
+  algorithm: string
+}
 
 type PopularService = {
   name: string

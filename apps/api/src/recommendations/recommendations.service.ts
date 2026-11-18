@@ -1,16 +1,21 @@
+import { randomUUID } from 'node:crypto'
 import type { BusinessKind } from '@awaisa/contracts'
 import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { AvailabilityService } from '../bookings/availability.service.js'
 import { CacheService } from '../cache/cache.service.js'
 import { addDays, toBusinessParts } from '../common/business-time.js'
+import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
 import { type BranchPoint, nearestByBusiness } from './distance.js'
+import { interleavingVerdict, isInterleaved, teamDraft } from './interleave.js'
 import {
   type Affinities,
+  ALGORITHM,
   type Candidate,
   computeAffinities,
   type Interest,
@@ -78,6 +83,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
     private readonly availability: AvailabilityService,
     private readonly runtime: RuntimeService,
     private readonly cache: CacheService,
+    private readonly config: ConfigService<Env, true>,
   ) {}
 
   // A fresh database gets its affinities at once instead of waiting for the night.
@@ -121,8 +127,8 @@ export class RecommendationsService implements OnApplicationBootstrap {
   /** Shown, tapped and booked picks; never fails the page that sends them. */
   async recordEvents(input: RecommendationEventsInput, customer: Customer | null) {
     const values: unknown[] = []
-    const tuples = input.events.map((event, index) => {
-      values.push(
+    const tuples = input.events.map((event) => {
+      const row = [
         input.session,
         customer?.id ?? null,
         event.kind,
@@ -130,17 +136,50 @@ export class RecommendationsService implements OnApplicationBootstrap {
         event.reason,
         event.surface,
         event.position ?? null,
-      )
-      const at = index * 7
-      return `($${at + 1}, $${at + 2}, $${at + 3}, $${at + 4}, $${at + 5}, $${at + 6}, $${at + 7})`
+        event.requestId ?? null,
+        event.algorithm ?? null,
+        event.bookingId ?? null,
+      ]
+      const at = values.length
+      values.push(...row)
+      return `(${row.map((_, column) => `$${at + column + 1}`).join(', ')})`
     })
     await this.query(
       `INSERT INTO "recommendation_events"
-         ("session", "customer_id", "kind", "service_id", "reason", "surface", "position")
+         ("session", "customer_id", "kind", "service_id", "reason", "surface", "position",
+          "request_id", "algorithm", "booking_id")
        VALUES ${tuples.join(', ')}`,
       values,
     )
     return { recorded: input.events.length }
+  }
+
+  /** Interleaved shelves of the last days: which scorer's cards won the taps and bookings. */
+  async interleaving(days: number) {
+    const rows = await this.query(
+      `WITH mixed AS (
+         SELECT "request_id" FROM "recommendation_events"
+         WHERE "kind" = 'impression' AND "request_id" IS NOT NULL
+           AND "created_at" > now() - make_interval(days => $1)
+         GROUP BY "request_id" HAVING COUNT(DISTINCT "algorithm") = 2
+       )
+       SELECT e."request_id" AS "requestId", e."algorithm",
+         COUNT(*) FILTER (WHERE e."kind" = 'click')::int AS "clicks",
+         COUNT(*) FILTER (WHERE e."kind" = 'book')::int AS "bookings",
+         (SELECT COUNT(*)::int FROM mixed) AS "requests"
+       FROM "recommendation_events" e JOIN mixed m ON m."request_id" = e."request_id"
+       GROUP BY e."request_id", e."algorithm"`,
+      [days],
+    )
+    return interleavingVerdict(
+      rows.map((row) => ({
+        requestId: String(row.requestId),
+        algorithm: String(row.algorithm),
+        clicks: Number(row.clicks),
+        bookings: Number(row.bookings),
+      })),
+      Number(rows[0]?.requests ?? 0),
+    )
   }
 
   /** Per reason: how often shown, tapped and booked — what actually brings bookings. */
@@ -201,6 +240,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
         discountPercent: row.discountPercent === null ? null : Number(row.discountPercent),
         rebookDays: row.rebookDays === null ? null : Number(row.rebookDays),
         isNewPlace: Number(row.reviews) < NEW_PLACE_REVIEWS,
+        placeKind: String(row.kind),
         row,
       } satisfies Candidate & { row: Row }
     })
@@ -224,25 +264,51 @@ export class RecommendationsService implements OnApplicationBootstrap {
       affinities,
       seen,
     }
-    return rankCandidates(candidates, profile, { limit: query.limit }).map(
-      ({ candidate, reason }) => ({
-        id: candidate.serviceId,
-        name: candidate.name,
-        price: candidate.price,
-        durationMinutes: Number(candidate.row.durationMinutes),
-        isPopular: Boolean(candidate.row.isPopular),
-        slug: candidate.slug,
-        businessName: candidate.businessName,
-        kind: String(candidate.row.kind) as BusinessKind,
-        coverUrl:
-          (candidate.row.servicePhoto as string | null) ??
-          (candidate.row.coverUrl as string | null) ??
-          null,
-        rating: candidate.rating,
-        address: (candidate.row.address as string | null) ?? null,
-        discountPercent: candidate.discountPercent,
-        reason,
-      }),
+    const requestId = randomUUID()
+    return this.rank(candidates, profile, query).map(({ candidate, reason, algorithm }) => ({
+      id: candidate.serviceId,
+      name: candidate.name,
+      price: candidate.price,
+      durationMinutes: Number(candidate.row.durationMinutes),
+      isPopular: Boolean(candidate.row.isPopular),
+      slug: candidate.slug,
+      businessName: candidate.businessName,
+      kind: String(candidate.row.kind) as BusinessKind,
+      coverUrl:
+        (candidate.row.servicePhoto as string | null) ??
+        (candidate.row.coverUrl as string | null) ??
+        null,
+      rating: candidate.rating,
+      address: (candidate.row.address as string | null) ?? null,
+      discountPercent: candidate.discountPercent,
+      reason,
+      requestId,
+      algorithm,
+    }))
+  }
+
+  /** The current scorer, or — for devices in an interleaving test — it and another drafted together. */
+  private rank<T extends Candidate>(
+    candidates: T[],
+    profile: Profile,
+    query: RecommendationsQuery,
+  ) {
+    const test = this.config.get('RECS_INTERLEAVE', { infer: true })
+    if (!test || !isInterleaved(query.session, test.algorithm, test.percent)) {
+      return rankCandidates(candidates, profile, { limit: query.limit }).map((entry) => ({
+        ...entry,
+        algorithm: ALGORITHM,
+      }))
+    }
+    // Each scorer ranks past the limit, so the draft still has cards when the other took its best.
+    const depth = query.limit * 2
+    return teamDraft(
+      { algorithm: ALGORITHM, ranked: rankCandidates(candidates, profile, { limit: depth }) },
+      {
+        algorithm: test.algorithm,
+        ranked: rankCandidates(candidates, profile, { limit: depth, version: test.algorithm }),
+      },
+      query.limit,
     )
   }
 

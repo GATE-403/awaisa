@@ -61,6 +61,16 @@ export class RecommendationsController {
     return this.recommendations.stats(query.days)
   }
 
+  @Get('interleaving')
+  @UseGuards(AuthGuard)
+  interleaving(
+    @Query({ schema: recommendationStatsSchema }) query: RecommendationStatsQuery,
+    @CurrentCustomer() customer: Customer,
+  ) {
+    this.assertAdmin(customer)
+    return this.recommendations.interleaving(query.days)
+  }
+
   @Post('affinities/refresh')
   @UseGuards(AuthGuard)
   async refresh(@CurrentCustomer() customer: Customer) {
