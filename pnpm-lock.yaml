@@ -277,6 +277,21 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  recsys_eval:
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.2
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
+      pg:
+        specifier: ^8.23.1
+        version: 8.23.1
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
   tests/ux:
     devDependencies:
       '@axe-core/playwright':
