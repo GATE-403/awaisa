@@ -22,19 +22,6 @@
   pointer-events: none;
 }
 
-/* The glow covers the whole screen behind everything, on the page colour. */
-.flow[data-variant="glow"] {
-  position: fixed;
-  inset: 0;
-  width: auto;
-  background: var(--color-background);
-  mask-image: none;
-}
-
-.flow[data-on-dark] {
-  background: black;
-}
-
 .canvas {
   display: block;
   width: 100%;
