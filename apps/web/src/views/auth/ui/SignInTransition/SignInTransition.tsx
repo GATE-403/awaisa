@@ -38,7 +38,7 @@ export const SignInTransition = ({ onDone }: SignInTransitionProps) => {
   }, [])
 
   return (
-    <div className={styles.overlay} role='status' aria-live='polite'>
+    <output className={styles.overlay} aria-live='polite'>
       <span className={styles.cloud} aria-hidden='true' />
       <span className={styles.status}>
         {isSignedIn ? (
@@ -55,6 +55,6 @@ export const SignInTransition = ({ onDone }: SignInTransitionProps) => {
           </>
         )}
       </span>
-    </div>
+    </output>
   )
 }

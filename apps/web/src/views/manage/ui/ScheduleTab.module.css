@@ -65,12 +65,6 @@
   scale: 0.97;
 }
 
-/* «Закрыть время» as a round glyph button beside the labelled ones. */
-.iconAction {
-  width: 32px;
-  padding: 0;
-}
-
 .statusLink svg {
   width: 14px;
   height: 14px;

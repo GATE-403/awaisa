@@ -34,9 +34,11 @@ const getDayRange = (
 const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 
 export type { Range }
-// Below this height a block shows time and title on one line; from TALL_BLOCK_PX it also shows contact details.
-const COMPACT_BLOCK_PX = 72
-const TALL_BLOCK_PX = 128
+// Below this height (50 min) a block is the client and time on one line over the service; from
+// there the chip row (state, time) leads; from TALL_BLOCK_PX it also shows a footer line.
+const COMPACT_BLOCK_PX = 80
+// Tall enough for the footer line (phone or comment, time) under the name and service.
+const TALL_BLOCK_PX = 108
 
 // Each master keeps one colour, like calendars in Apple Calendar.
 const MASTER_TINTS = [
