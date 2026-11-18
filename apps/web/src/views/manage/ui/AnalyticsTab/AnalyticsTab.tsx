@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { ArrowDownRight, ArrowUpRight, DownloadSimple } from '@phosphor-icons/react/ssr'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import type { AnalyticsDays, AnalyticsReport, Business } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -17,7 +18,21 @@ import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import styles from './AnalyticsTab.module.css'
 import { formatDay, formatMoney, numberFormatter, toBuckets } from './analyticsFormat'
 import { LoadHeatmap } from './LoadHeatmap'
-import { RevenueChart } from './RevenueChart'
+
+// Recharts is loaded with the tab, never with the rest of the cabinet.
+const chartsModule = () => import('./AnalyticsCharts')
+const RevenueChart = dynamic(() => chartsModule().then((charts) => charts.RevenueChart), {
+  ssr: false,
+  loading: () => <div className={styles.chartPlaceholder} />,
+})
+const Sparkline = dynamic(() => chartsModule().then((charts) => charts.Sparkline), {
+  ssr: false,
+  loading: () => <div className={styles.sparkPlaceholder} />,
+})
+const PaymentsDonut = dynamic(() => chartsModule().then((charts) => charts.PaymentsDonut), {
+  ssr: false,
+  loading: () => <div className={styles.sparkPlaceholder} />,
+})
 
 interface AnalyticsTabProps {
   slug: string
@@ -35,37 +50,6 @@ interface StatProps {
   /** The same measure per day: a sparkline under the value. */
   trend?: number[]
   children?: React.ReactNode
-}
-
-interface SparklineProps {
-  values: number[]
-}
-
-// One series, no axis: the shape of the period under a number (the number carries the value).
-const Sparkline = ({ values }: SparklineProps) => {
-  if (values.length < 2) return null
-  const max = Math.max(...values, 1)
-  const points = values.map((value, index) => [
-    (index / (values.length - 1)) * 100,
-    26 - (value / max) * 22,
-  ])
-  const last = points.at(-1) ?? [0, 0]
-
-  return (
-    <svg
-      className={styles.sparkline}
-      viewBox='0 0 100 30'
-      preserveAspectRatio='none'
-      aria-hidden='true'
-    >
-      <polyline
-        points={points.map(([x, y]) => `${x},${y}`).join(' ')}
-        fill='none'
-        vectorEffect='non-scaling-stroke'
-      />
-      <circle cx={last[0]} cy={last[1]} r='3' vectorEffect='non-scaling-stroke' />
-    </svg>
-  )
 }
 
 const PERIODS: { value: `${AnalyticsDays}`; label: string }[] = [
@@ -227,7 +211,10 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                 )}
               </div>
             </div>
-            <RevenueChart buckets={toBuckets(report.daily, report.period.days)} />
+            <RevenueChart
+              buckets={toBuckets(report.daily, report.period.days)}
+              previous={toBuckets(report.previousDaily, report.period.days)}
+            />
           </article>
 
           <div className={styles.stats}>
@@ -417,22 +404,11 @@ const PaymentsLine = ({ payments }: PaymentsLineProps) => {
     { label: 'Не отмечено', value: payments.unmarked },
   ].filter((part) => part.value > 0)
   if (parts.length === 0) return null
-  const total = parts.reduce((sum, part) => sum + part.value, 0)
 
   return (
     <div className={styles.payments}>
       <span className={styles.heroLabel}>Как платили</span>
-      <dl className={styles.paymentList}>
-        {parts.map((part) => (
-          <div key={part.label} className={styles.payment}>
-            <dt>{part.label}</dt>
-            <dd>{formatMoney(part.value)}</dd>
-            <span className={styles.paymentMeter} aria-hidden='true'>
-              <span style={{ width: `${(part.value / total) * 100}%` }} />
-            </span>
-          </div>
-        ))}
-      </dl>
+      <PaymentsDonut parts={parts} />
     </div>
   )
 }
