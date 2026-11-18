@@ -52,31 +52,33 @@ export class AnalyticsService {
     const previousFrom = businessDateTimeToUtc(addDays(firstDay, -days), 0)
     const id = business.id
 
-    const [current, previous, daily, services, masters, clients, heatmap, upcoming, hours] =
-      await Promise.all([
-        this.totals(id, from, now),
-        this.totals(id, previousFrom, from),
-        this.query(
-          `SELECT to_char(${LOCAL}::date, 'YYYY-MM-DD') AS "date",
-             COUNT(*) FILTER (WHERE ${DONE})::int AS "visits",
-             COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
-             COUNT(*) FILTER (WHERE b."status" = 'cancelled')::int AS "cancelled"
-           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
-           WHERE b."business_id" = $1 AND b."starts_at" >= $2 AND b."starts_at" < $3
-           GROUP BY 1 ORDER BY 1`,
-          [id, from, now],
-        ),
-        this.query(
-          `SELECT s."id", s."name", COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue",
+    const [
+      current,
+      previous,
+      daily,
+      previousDaily,
+      services,
+      masters,
+      clients,
+      heatmap,
+      upcoming,
+      hours,
+    ] = await Promise.all([
+      this.totals(id, from, now),
+      this.totals(id, previousFrom, from),
+      this.daily(id, from, now),
+      this.daily(id, previousFrom, from),
+      this.query(
+        `SELECT s."id", s."name", COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue",
              COALESCE(SUM(${MATERIALS}), 0)::int AS "materialsCost"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
            WHERE b."business_id" = $1 AND ${DONE}
              AND b."starts_at" >= $2 AND b."starts_at" < $3
            GROUP BY s."id" ORDER BY "revenue" DESC, "visits" DESC LIMIT 8`,
-          [id, from, now],
-        ),
-        this.query(
-          `SELECT sp."id", sp."name", sp."role", sp."commission_percent" AS "percent",
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT sp."id", sp."name", sp."role", sp."commission_percent" AS "percent",
              COUNT(b."id") FILTER (WHERE ${DONE})::int AS "visits",
              COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
              COALESCE(SUM(s."duration_minutes") FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes"
@@ -86,10 +88,10 @@ export class AnalyticsService {
            LEFT JOIN "services" s ON s."id" = b."service_id"
            WHERE sp."business_id" = $1 AND sp."is_active"
            GROUP BY sp."id" ORDER BY "revenue" DESC`,
-          [id, from, now],
-        ),
-        this.query(
-          `SELECT b."customer_phone" AS "phone", MAX(b."customer_name") AS "name",
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT b."customer_phone" AS "phone", MAX(b."customer_name") AS "name",
              COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue",
              to_char(MAX(${LOCAL}), 'YYYY-MM-DD') AS "lastVisit",
              NOT EXISTS (
@@ -101,30 +103,30 @@ export class AnalyticsService {
            WHERE b."business_id" = $1 AND ${DONE}
              AND b."starts_at" >= $2 AND b."starts_at" < $3
            GROUP BY b."customer_phone" ORDER BY "revenue" DESC, "visits" DESC`,
-          [id, from, now],
-        ),
-        this.query(
-          `SELECT (EXTRACT(ISODOW FROM ${LOCAL})::int - 1) AS "weekday",
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT (EXTRACT(ISODOW FROM ${LOCAL})::int - 1) AS "weekday",
              EXTRACT(HOUR FROM ${LOCAL})::int AS "hour", COUNT(*)::int AS "visits"
            FROM "bookings" b
            WHERE b."business_id" = $1 AND ${DONE}
              AND b."starts_at" >= $2 AND b."starts_at" < $3
            GROUP BY 1, 2`,
-          [id, from, now],
-        ),
-        this.query(
-          `SELECT COUNT(*)::int AS "visits", COALESCE(SUM(${PRICE}), 0)::int AS "revenue"
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT COUNT(*)::int AS "visits", COALESCE(SUM(${PRICE}), 0)::int AS "revenue"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
            WHERE b."business_id" = $1 AND b."status" = 'confirmed'
              AND b."starts_at" >= $2 AND b."starts_at" < $3`,
-          [id, now, new Date(now.getTime() + days * 24 * 60 * 60_000)],
-        ),
-        this.query(
-          `SELECT "weekday", "opens_minutes" AS "opens", "closes_minutes" AS "closes"
+        [id, now, new Date(now.getTime() + days * 24 * 60 * 60_000)],
+      ),
+      this.query(
+        `SELECT "weekday", "opens_minutes" AS "opens", "closes_minutes" AS "closes"
            FROM "working_hours" WHERE "business_id" = $1`,
-          [id],
-        ),
-      ])
+        [id],
+      ),
+    ])
 
     // Open minutes in the period, the same for every master: the base for their load.
     const openByWeekday = new Map(
@@ -175,6 +177,8 @@ export class AnalyticsService {
         upcomingRevenue: toNumber(upcoming[0]?.revenue),
       },
       daily: this.fillDays(firstDay, days, daily),
+      // The same days one period back, so charts can lay the two side by side.
+      previousDaily: this.fillDays(addDays(firstDay, -days), days, previousDaily),
       services: services.map((row) => ({
         id: String(row.id),
         name: String(row.name),
@@ -242,6 +246,19 @@ export class AnalyticsService {
   }
 
   // Every day of the period, including days without visits, so the chart has no gaps.
+  private daily(id: string, from: Date, to: Date) {
+    return this.query(
+      `SELECT to_char(${LOCAL}::date, 'YYYY-MM-DD') AS "date",
+         COUNT(*) FILTER (WHERE ${DONE})::int AS "visits",
+         COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
+         COUNT(*) FILTER (WHERE b."status" = 'cancelled')::int AS "cancelled"
+       FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+       WHERE b."business_id" = $1 AND b."starts_at" >= $2 AND b."starts_at" < $3
+       GROUP BY 1 ORDER BY 1`,
+      [id, from, to],
+    )
+  }
+
   private fillDays(firstDay: string, days: number, rows: Record<string, unknown>[]) {
     const byDate = new Map(rows.map((row) => [String(row.date), row]))
 

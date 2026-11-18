@@ -832,6 +832,8 @@ type AnalyticsReport = {
     margin: number
   }
   daily: { date: string; visits: number; revenue: number; cancelled: number }[]
+  /** The period before, day by day and as long, for side-by-side charts. */
+  previousDaily: { date: string; visits: number; revenue: number; cancelled: number }[]
   services: { id: string; name: string; visits: number; revenue: number; materialsCost: number }[]
   masters: {
     id: string
