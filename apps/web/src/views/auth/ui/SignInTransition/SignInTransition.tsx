@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { GradientFlow } from '@/views/auth/ui/GradientFlow/GradientFlow'
 import { playLightWave } from './lightWave'
 import styles from './SignInTransition.module.css'
 
@@ -44,6 +45,10 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
 
   return (
     <output className={styles.overlay} aria-live='polite'>
+      {/* What the wave leaves behind: its light keeps passing faintly under the greeting. */}
+      <span className={styles.trace}>
+        <GradientFlow variant='glow' isOnDark />
+      </span>
       <span className={styles.wave} aria-hidden='true'>
         <canvas ref={canvasRef} />
       </span>
