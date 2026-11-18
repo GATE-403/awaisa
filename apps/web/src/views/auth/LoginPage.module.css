@@ -2,6 +2,7 @@
    eye lands first, with room for the keyboard on phones. */
 .page {
   position: relative;
+  isolation: isolate;
   overflow-x: clip;
   display: flex;
   flex-direction: column;
@@ -194,6 +195,9 @@
 }
 
 .actions {
+  /* Above the hero's colour, which runs on below the headline and melts out behind the form. */
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -202,6 +206,25 @@
   max-width: 400px;
   margin-top: auto;
   padding-top: var(--space-8);
+}
+
+/* «или» between the number and Telegram: two hairlines and a quiet word. */
+.or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  margin: var(--space-1) 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.or::before,
+.or::after {
+  content: "";
+  flex: 1;
+  height: 0.5px;
+  background: var(--color-border-strong);
 }
 
 /* One height for the field and both buttons, like a system sign-in sheet (iOS uses 50pt). */
@@ -213,6 +236,10 @@
 
 .actions input {
   height: 50px;
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-strong),
+    var(--shadow-sm);
 }
 
 .brand {

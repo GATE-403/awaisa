@@ -22,7 +22,7 @@ void main(){
   c=mix(c,vec3(band(dd,f,w*.45)),.55);
   vec3 tint=.5+.5*cos(6.2831*(a*.35+t*.25+vec3(0.,.33,.67)));
   c*=mix(vec3(1.),tint,.55);
-  c+=smoothstep(f,0.,dd)*exp(-(f-dd)*3.5)*.22*(1.-e*.6)*tint;
+  c+=smoothstep(f,0.,dd)*exp(-(f-dd)*2.2)*.38*tint;
   c+=exp(-d*9.)*smoothstep(0.,.15,t)*smoothstep(.6,.2,t)*1.4*vec3(.85,.9,1.);
   gl_FragColor=vec4(c*1.5*smoothstep(2.6,1.8,t),1.);
 }`

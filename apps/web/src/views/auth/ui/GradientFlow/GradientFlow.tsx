@@ -1,34 +1,56 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { type Palette, startFlow } from './flowShader'
+import { FLOW_FRAGMENT, GLOW_FRAGMENT } from './flowShader'
 import styles from './GradientFlow.module.css'
+import { readColors, runShader } from './shaderCanvas'
+
+interface GradientFlowProps {
+  /**
+   * `flow`: the welcome's waves of colour behind the hero. `glow`: full screen, the trace of the
+   * wave of light — faint fronts from the top edge with a fading glow — on the code and name
+   * steps and under the greeting after sign-in.
+   */
+  variant?: 'flow' | 'glow'
+  /** The glow over black whatever the theme: under the light words of the sign-in transition. */
+  isOnDark?: boolean
+}
 
 // The system colours the waves are made of, top to bottom: cool sky, violet, warm, then (after
 // a dark trough) a soft lavender.
-const PALETTE_TOKENS = [
-  '--system-blue',
-  '--system-indigo',
-  '--system-orange',
-  '--system-indigo',
-  '--system-purple',
-]
+const FLOW_COLORS = {
+  c0: '--system-blue',
+  c1: '--system-indigo',
+  c2: '--system-orange',
+  c3: '--system-indigo',
+  c4: '--system-purple',
+}
+const FILM_COLORS = {
+  c0: '--system-blue',
+  c1: '--system-purple',
+  c2: '--system-pink',
+  c3: '--system-orange',
+}
+const GLOW_COLORS = { b: '--color-background', ...FILM_COLORS }
 
-// The sign-in screen's backdrop: slow living colour behind the mascot and the headline, melting
-// into the page where the form starts. Paused off screen; one still frame under reduced motion.
-export const GradientFlow = () => {
+// Living colour for the sign-in screen, drawn by a shader; paused off screen, one still frame
+// under reduced motion, a CSS fallback without WebGL.
+export const GradientFlow = ({ variant = 'flow', isOnDark = false }: GradientFlowProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const styles = getComputedStyle(document.documentElement)
-    const palette = PALETTE_TOKENS.map((token) => styles.getPropertyValue(token).trim()) as Palette
+    const isGlow = variant === 'glow'
+    const fragment = isGlow ? GLOW_FRAGMENT : FLOW_FRAGMENT
+    const colors = readColors(
+      isGlow ? (isOnDark ? { ...GLOW_COLORS, b: 'black' } : GLOW_COLORS) : FLOW_COLORS,
+    )
     const isStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let stop: (() => void) | null = null
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry?.isIntersecting && !stop) stop = startFlow(canvas, palette, isStill)
+      if (entry?.isIntersecting && !stop) stop = runShader(canvas, fragment, colors, { isStill })
       if (!entry?.isIntersecting && stop) {
         stop()
         stop = null
@@ -40,10 +62,15 @@ export const GradientFlow = () => {
       observer.disconnect()
       stop?.()
     }
-  }, [])
+  }, [variant, isOnDark])
 
   return (
-    <div className={styles.flow} aria-hidden='true'>
+    <div
+      className={styles.flow}
+      data-variant={variant}
+      data-on-dark={isOnDark || undefined}
+      aria-hidden='true'
+    >
       <canvas ref={canvasRef} className={styles.canvas} />
     </div>
   )
