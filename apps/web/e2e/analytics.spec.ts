@@ -10,6 +10,7 @@ test.describe('Cabinet analytics', () => {
     expect(response.ok()).toBe(true)
     const report = await response.json()
     expect(report.daily).toHaveLength(7)
+    expect(report.previousDaily).toHaveLength(7)
     expect(report.totals).toMatchObject({
       revenue: expect.any(Number),
       visits: expect.any(Number),
