@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { LoginPage } from '@/views/auth'
+import { BubbleCloud, LoginBubbles, LoginPage } from '@/views/auth'
 
 export const metadata: Metadata = {
   title: 'Вход',
@@ -8,7 +8,13 @@ export const metadata: Metadata = {
 
 const LoginRoute = () => (
   <Suspense>
-    <LoginPage />
+    <LoginPage
+      hero={
+        <Suspense fallback={<BubbleCloud pictures={[]} />}>
+          <LoginBubbles />
+        </Suspense>
+      }
+    />
   </Suspense>
 )
 

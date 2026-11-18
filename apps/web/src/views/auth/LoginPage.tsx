@@ -6,13 +6,13 @@ import { Input } from '@awaisa/ui/Input'
 import { OtpField } from '@awaisa/ui/OtpField'
 import { CaretLeft, TelegramLogo, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import type { FormEvent } from 'react'
+import { type FormEvent, type ReactNode, useEffect } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
-import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { CODE_LENGTH, useLoginForm } from '@/views/auth/model/useLoginForm'
 import { useTelegramLogin } from '@/views/auth/model/useTelegramLogin'
+import { SignInTransition } from '@/views/auth/ui/SignInTransition/SignInTransition'
 import styles from './LoginPage.module.css'
 
 const handleSubmit = (action: () => void) => (event: FormEvent) => {
@@ -20,12 +20,22 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
   action()
 }
 
+interface LoginPageProps {
+  /** The welcome picture over the number: a cloud of real work, read on the server. */
+  hero?: ReactNode
+}
+
 // Sign-in as a screen of its own — no site header, tab bar or footer: one quiet column on the
 // page colour, one question at a time (number → code → name), like the system's own sign-in.
-export const LoginPage = () => {
+// It opens on finished work around the mascot and ends with a sweep of the accent.
+export const LoginPage = ({ hero }: LoginPageProps) => {
   const form = useLoginForm()
   const telegram = useTelegramLogin(form.finishSignIn)
   const isWaitingForTelegram = form.step === 'phone' && telegram.isWaiting
+  const { reset } = form
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only when the page is hidden or left
+  useEffect(() => () => reset(), [])
 
   return (
     <main className={styles.page}>
@@ -73,46 +83,50 @@ export const LoginPage = () => {
         )}
 
         {form.step === 'phone' && !isWaitingForTelegram && (
-          <form className={styles.form} onSubmit={handleSubmit(() => form.sendCode())}>
-            <Mascot className={styles.mascot} />
-            <h1 className={styles.title}>Вход</h1>
-            <p className={styles.lead}>Ваши записи, бонусы и избранное — на любом телефоне</p>
-            <Field label='Номер телефона' error={form.error} className={styles.field}>
-              <Input
-                type='tel'
-                inputMode='tel'
-                autoComplete='tel'
-                placeholder='+996 555 123 456'
-                value={form.phone}
-                onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
-                autoFocus
-              />
-            </Field>
-            <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
-              {form.isSubmitting ? 'Отправляем…' : 'Получить код'}
-            </Button>
-            {telegram.isAvailable && (
-              // Without typing the number: the bot asks for it with one button.
-              <ButtonLink
-                href={telegram.href}
-                target='_blank'
-                rel='noreferrer'
-                variant='secondary'
-                size='lg'
-                fullWidth
-                onClick={telegram.start}
-              >
-                <TelegramLogo weight='fill' aria-hidden />
-                Войти через Telegram
-              </ButtonLink>
-            )}
-            {telegram.isExpired ? (
-              <p className={styles.error} role='alert'>
-                Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз
-              </p>
-            ) : (
-              <p className={styles.note}>Код придёт в Telegram или по SMS</p>
-            )}
+          <form className={styles.welcome} onSubmit={handleSubmit(() => form.sendCode())}>
+            {hero}
+            <h1 className={styles.headline}>
+              Запись к мастерам.
+              <span className={styles.headlineMuted}> Без звонков.</span>
+            </h1>
+            <div className={styles.actions}>
+              <Field label='Номер телефона' error={form.error} className={styles.field}>
+                <Input
+                  type='tel'
+                  inputMode='tel'
+                  autoComplete='tel'
+                  placeholder='+996 555 123 456'
+                  value={form.phone}
+                  onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
+                  autoFocus
+                />
+              </Field>
+              <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
+                {form.isSubmitting ? 'Отправляем…' : 'Получить код'}
+              </Button>
+              {telegram.isAvailable && (
+                // Without typing the number: the bot asks for it with one button.
+                <ButtonLink
+                  href={telegram.href}
+                  target='_blank'
+                  rel='noreferrer'
+                  variant='secondary'
+                  size='lg'
+                  fullWidth
+                  onClick={telegram.start}
+                >
+                  <TelegramLogo weight='fill' aria-hidden />
+                  Войти через Telegram
+                </ButtonLink>
+              )}
+              {telegram.isExpired ? (
+                <p className={styles.error} role='alert'>
+                  Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз
+                </p>
+              ) : (
+                <p className={styles.note}>Код придёт в Telegram или по SMS</p>
+              )}
+            </div>
           </form>
         )}
 
@@ -198,6 +212,7 @@ export const LoginPage = () => {
           </form>
         )}
       </section>
+      {form.isSignedIn && <SignInTransition onDone={form.leave} />}
     </main>
   )
 }
