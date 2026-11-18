@@ -6,49 +6,21 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: color-mix(in srgb, black 45%, transparent);
+  background: color-mix(in srgb, black 90%, transparent);
   backdrop-filter: var(--blur-material);
-  animation: dim 600ms var(--ease-standard) both;
+  animation: dim 1900ms var(--ease-standard) both;
 }
 
+/* The screen dims under the wave, then settles nearly black behind the greeting, so the light's
+   trace and the white words stand out in either theme. */
 @keyframes dim {
   from {
     background: transparent;
   }
-}
 
-/* The trace fades in as the wave passes the middle and stays under the greeting. */
-.trace {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  animation: settle 1200ms var(--ease-standard) 700ms forwards;
-}
-
-.trace > * {
-  position: absolute;
-}
-
-@keyframes settle {
-  to {
-    opacity: 1;
+  30% {
+    background: color-mix(in srgb, black 45%, transparent);
   }
-}
-
-/* The wave is light: added onto what is under it. */
-.wave {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
-.wave canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .greeting {
@@ -103,11 +75,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .trace {
-    opacity: 1;
-    animation: none;
-  }
-
   .overlay,
   .greeting,
   .hello {

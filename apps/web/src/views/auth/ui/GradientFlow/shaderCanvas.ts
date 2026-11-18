@@ -1,29 +1,12 @@
+import { toRgb } from '@/shared/lib/cssColor'
+
 // One full-screen fragment shader on a canvas, animated until stopped: the shared runner for the
-// sign-in screen's living colour and the trace of its wave of light. No library.
+// sign-in screen's living colour. No library.
 
 const VERTEX = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`
 
+/** Shader uniform name → CSS colour or token (`--system-blue`). */
 type Colors = Record<string, string>
-
-const toRgb = (color: string): [number, number, number] => {
-  const probe = document.createElement('canvas').getContext('2d')
-  if (!probe) return [0, 0, 0]
-  probe.fillStyle = color
-  probe.fillRect(0, 0, 1, 1)
-  const [red = 0, green = 0, blue = 0] = probe.getImageData(0, 0, 1, 1).data
-  return [red / 255, green / 255, blue / 255]
-}
-
-/** Reads CSS colour tokens (`--system-blue` …) as the shader's vec3 uniforms; other values pass as they are. */
-const readColors = (tokens: Record<string, string>): Colors => {
-  const style = getComputedStyle(document.documentElement)
-  return Object.fromEntries(
-    Object.entries(tokens).map(([name, token]) => [
-      name,
-      token.startsWith('--') ? style.getPropertyValue(token).trim() : token,
-    ]),
-  )
-}
 
 /**
  * Runs `fragment` (uniforms `r` — size in pixels, `t` — seconds, plus a vec3 per colour) on
@@ -95,4 +78,4 @@ const runShader = (
 }
 
 export type { Colors }
-export { readColors, runShader }
+export { runShader }
