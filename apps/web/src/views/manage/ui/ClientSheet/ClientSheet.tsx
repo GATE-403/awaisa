@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { ChatCircle, Phone, Star, WhatsappLogo } from '@phosphor-icons/react/ssr'
+import { ChatCircle, Phone, Star } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useId, useState } from 'react'
 import { formatPrice, getDateParts } from '@/entities/booking'
 import { PersonAvatar, pickTint } from '@/entities/business'
@@ -13,6 +13,7 @@ import type { ClientCard } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -117,7 +118,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
   const digits = phone.replace(/\D/g, '')
   const contacts = [
     { href: `tel:${phone}`, label: 'Позвонить', icon: Phone },
-    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappLogo, external: true },
+    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappMark, external: true },
     { href: `sms:${phone}`, label: 'SMS', icon: ChatCircle },
   ]
   const name = card?.name || 'Без имени'

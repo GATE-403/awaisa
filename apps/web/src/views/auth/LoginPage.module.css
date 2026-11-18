@@ -9,6 +9,8 @@
 }
 
 .topBar {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   height: 60px;
@@ -67,13 +69,6 @@
 .mascot {
   width: 52px;
   height: auto;
-  margin-bottom: var(--space-2);
-  color: var(--color-primary);
-}
-
-.telegramMark {
-  width: 52px;
-  height: 52px;
   margin-bottom: var(--space-2);
   color: var(--color-primary);
 }
@@ -154,8 +149,33 @@
   text-align: center;
 }
 
+.welcome > :not(:first-child) {
+  position: relative;
+  z-index: 1;
+}
+
+/* The mascot on a white disc, floating on the colour. */
+.badge {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-top: 18svh;
+  border-radius: var(--radius-full);
+  background: white;
+  box-shadow: var(--shadow-lg);
+  color: var(--color-primary);
+}
+
+.badge svg {
+  width: 34px;
+  height: auto;
+}
+
+/* Over the colour the headline is always light, in both themes. */
 .headline {
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
+  color: white;
   font-family: var(--font-display);
   font-size: var(--text-title1);
   line-height: 1.15;
@@ -165,18 +185,40 @@
 }
 
 .headlineMuted {
-  color: var(--color-muted-foreground);
+  color: color-mix(in srgb, white 72%, transparent);
 }
 
 .actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
+  gap: 10px;
   width: 100%;
   max-width: 400px;
   margin-top: auto;
   padding-top: var(--space-8);
+}
+
+/* One height for the field and both buttons, like a system sign-in sheet (iOS uses 50pt). */
+.actions input,
+.actions > :is(button, a) {
+  min-height: 50px;
+  font-size: var(--text-body);
+}
+
+.actions input {
+  height: 50px;
+}
+
+.brand {
+  width: 22px;
+  height: 22px;
+}
+
+.telegramMark {
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-2);
 }
 
 @media (min-width: 768px) {

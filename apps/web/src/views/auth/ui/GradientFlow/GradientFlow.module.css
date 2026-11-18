@@ -1,0 +1,39 @@
+/* Full-bleed behind the top of the screen; it melts into the page colour before the form, so the
+   field and the buttons sit on the plain page. */
+.flow {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: 72svh;
+  overflow: hidden;
+  /* Before the shader's first frame (or without WebGL): the same colours as a still gradient. */
+  background: linear-gradient(
+    to bottom,
+    var(--system-blue),
+    var(--system-indigo) 30%,
+    var(--system-orange) 48%,
+    black 68%,
+    var(--system-indigo)
+  );
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+  pointer-events: none;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: appear 900ms var(--ease-standard) both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas {
+    animation: none;
+  }
+}
