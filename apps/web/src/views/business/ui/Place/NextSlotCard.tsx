@@ -2,12 +2,14 @@
 
 import { ArrowRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { usePathname } from 'next/navigation'
 import { type CSSProperties, useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
 import { pickTint } from '@/entities/business'
 import { useBookingDraft } from '@/features/bookingDraft'
 import type { Business, Service } from '@/shared/api/types'
+import { isBookingPath } from '@/shared/config/navigation'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './Place.module.css'
 
@@ -30,6 +32,7 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
   const slot = useNextSlot(service.id)
   const draft = useBookingDraft()
   const isTucked = useTuckOnScroll()
+  const pathname = usePathname()
   // One way to book on screen at a time: while the head's «Записаться» is in view the pill waits,
   // so it does not cover the menu right under the head when the page opens.
   const [isHeadBookVisible, setIsHeadBookVisible] = useState(true)
@@ -56,7 +59,9 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
     : `/${business.slug}/book?service=${service.id}`
 
   // A booking already started here: «Продолжить запись» is the one pill, not this.
-  if (draft?.slug === business.slug || !isMounted) return null
+  // The booking sheet is open over this page: from 768px the pill never tucks away and would sit
+  // on the sheet's own action bar.
+  if (draft?.slug === business.slug || !isMounted || isBookingPath(pathname)) return null
 
   // Rendered into <body>: a fixed pill inside a section with `content-visibility` (which contains
   // paint) would be fixed to that section and slide under the next one.
