@@ -11,9 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
     "@types/node": "^24.0.0",
     "@types/pg": "^8.23.1",
     "pg": "^8.23.1",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "zod": "^4.6.7"
   }
 }
