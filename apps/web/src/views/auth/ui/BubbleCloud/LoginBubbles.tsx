@@ -1,3 +1,4 @@
+import { connection } from 'next/server'
 import { listFeed } from '@/shared/api/serverApi'
 import { BubbleCloud } from './BubbleCloud'
 
@@ -6,6 +7,9 @@ const BUBBLES = 9
 // Real finished work from «Образы»: different places first so the cloud shows the range, then
 // more of the same places until every bubble has a picture.
 export const LoginBubbles = async () => {
+  // Read when the page is asked for, not at build: the static shell keeps the tinted bubbles
+  // (the API is not there while building).
+  await connection()
   const pages = await Promise.all([
     listFeed(undefined, undefined, undefined).catch(() => null),
     listFeed(undefined, undefined, undefined, 12).catch(() => null),
