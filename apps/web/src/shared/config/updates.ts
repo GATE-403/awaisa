@@ -1,5 +1,9 @@
+import fromPullRequests from './updates.json'
+
 // «Что нового» (`/updates`): the newest first. Add an entry when a change is felt by people —
-// not for refactors or CI. `id` must be new each time: it marks the entry as read.
+// not for refactors or CI. Usually through the PR: its «## Что нового» section is copied into
+// `updates.json` when it merges (`.github/workflows/updates.yml`). `id` must be new each time: it
+// marks the entry as read.
 type UpdateAudience = 'clients' | 'business' | 'everyone'
 
 type UpdateEntry = {
@@ -13,7 +17,7 @@ type UpdateEntry = {
   link?: { href: string; label: string }
 }
 
-const UPDATES: UpdateEntry[] = [
+const WRITTEN_BY_HAND: UpdateEntry[] = [
   {
     id: '2026-11-19-hold-to-delete',
     date: '2026-11-19',
@@ -124,6 +128,11 @@ const UPDATES: UpdateEntry[] = [
     text: 'Выбранные услуга, мастер и время складываются в стопку карточек над следующим шагом. Нажмите на стопку, чтобы что-то поменять.',
   },
 ]
+
+// Newest day first; within a day the merged PRs' entries lead, in the order they were written.
+const UPDATES: UpdateEntry[] = [...(fromPullRequests as UpdateEntry[]), ...WRITTEN_BY_HAND].sort(
+  (a, b) => b.date.localeCompare(a.date),
+)
 
 const LATEST_UPDATE_ID = UPDATES[0]?.id ?? ''
 
