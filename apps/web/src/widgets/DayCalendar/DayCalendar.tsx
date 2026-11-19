@@ -514,6 +514,16 @@ export const DayCalendar = ({
     return () => window.clearTimeout(timer)
   }, [focusedBookingId])
 
+  // Going to a visit from an edge tab: the day glides there and the card lights up for a moment,
+  // so the eye lands on it.
+  const goToVisit = (bookingId: string, offset: number) => {
+    scrollToOffset(offset)
+    const card = scrollerRef.current?.querySelector<HTMLElement>(`[data-booking-id="${bookingId}"]`)
+    if (!card) return
+    card.dataset.flash = ''
+    window.setTimeout(() => delete card.dataset.flash, 1800)
+  }
+
   const scrollToOffset = (offset: number) =>
     scrollerRef.current?.scrollTo({
       [isTimeline ? 'left' : 'top']: Math.max(0, offset - view.size / 3),
@@ -806,7 +816,7 @@ export const DayCalendar = ({
           <button
             type='button'
             className={styles.edgeHint}
-            onClick={() => scrollToOffset(nearest.from)}
+            onClick={() => goToVisit(nearest.booking.id, nearest.from)}
           >
             {content}
             <span className={styles.srOnlyText}> — {count}</span>
@@ -820,7 +830,10 @@ export const DayCalendar = ({
             <VisitMenuItems
               visits={visits.map(({ booking }) => booking)}
               onPick={(booking) =>
-                scrollToOffset(visits.find((visit) => visit.booking.id === booking.id)?.from ?? 0)
+                goToVisit(
+                  booking.id,
+                  visits.find((visit) => visit.booking.id === booking.id)?.from ?? 0,
+                )
               }
             />
           </Menu>

@@ -1778,23 +1778,6 @@
   box-shadow: var(--focus-ring);
 }
 
-/* A visit picked from the list flashes once where it landed. */
-.booking[data-flash] {
-  animation: flash 1.6s var(--ease-standard);
-}
-
-@keyframes flash {
-  0%,
-  60% {
-    box-shadow:
-      0 0 0 3px var(--tint),
-      0 6px 18px color-mix(in srgb, var(--tint) 40%, transparent);
-  }
-
-  100% {
-    box-shadow: none;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .booking[data-flash] {
@@ -2661,4 +2644,69 @@
   background-image: linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
   background-size: var(--hour-px) 100%;
   background-repeat: repeat-x;
+}
+
+/* A visit just gone to (an edge tab, the unmarked list) is the active card for a moment: a ring
+   of its master's colour hugging the fill, a deeper fill and its own shadow — then it settles.
+   Drawn with outline and colour, not an animation, so the edge fade's animations never cancel it. */
+:root .grid .booking {
+  transition:
+    outline-color 600ms var(--ease-standard),
+    background-color 600ms var(--ease-standard),
+    scale 120ms var(--ease-standard);
+}
+
+:root .grid .booking[data-flash],
+:root .grid .booking[data-flash][data-tone] {
+  outline: 2px solid var(--tint);
+  outline-offset: -3px;
+  background: color-mix(in srgb, var(--tint) 34%, var(--color-surface));
+  z-index: 4;
+  transition-duration: 150ms;
+}
+
+:root .grid .booking[data-tone="accent"][data-flash] {
+  outline-color: color-mix(in srgb, var(--tint) 60%, black);
+  background: color-mix(in srgb, var(--tint) 92%, black);
+}
+
+/* ——— One layer of lines ———
+   The lines were drawn twice — on each lane and on the gaps — and one translucent line over two
+   greys read as two shades, broken at every gap. Now one layer over the whole day draws them once:
+   above the lanes' fill, under the cards (later in the tree) and the lanes' own labels. */
+:root .grid[data-layout="timeline"],
+:root .grid[data-layout="timeline"] section.column {
+  background-image: none;
+}
+
+.grid[data-layout="timeline"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  bottom: 0;
+  left: var(--space-3);
+  z-index: 1;
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 0,
+    0 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+  pointer-events: none;
+}
+
+/* Over the lines: the lane's name, the empty lane's capsule, the slot preview. */
+.grid[data-layout="timeline"] :is(.laneTag, .ghost) {
+  z-index: 2;
+}
+
+/* The lanes' own hour lines would draw a second, darker line over the layer's — off on the
+   timeline (the dashed quarter lines from 3× stay). */
+.grid[data-layout="timeline"] .line {
+  display: none;
 }
