@@ -540,9 +540,12 @@
 .grid[data-layout="timeline"] {
   /* No row of its own for the hours: they are written on the hour lines, in the room the first
      master's row keeps above its cards. */
-  grid-template-columns: 184px max-content;
+  grid-template-columns: max-content;
   grid-template-rows: 0 94px;
   grid-auto-rows: 76px;
+  /* Lanes part by a little of the day's own grey, not by a white line. */
+  row-gap: var(--space-1);
+  background: var(--color-background);
 }
 
 .grid[data-layout="timeline"] .corner {
@@ -669,7 +672,132 @@
 
 .grid[data-layout="timeline"] .booking > * {
   position: sticky;
-  left: calc(184px + var(--space-2));
+  left: var(--space-2);
   align-self: flex-start;
   max-width: 100%;
+}
+
+/* «Лента» without a names column: no table — the masters are on their cards (a small face), in
+   the corner stack and on an empty lane; lanes part by a little space, not by lines. */
+.grid[data-layout="timeline"] :is(.corner, .columnHead) {
+  display: none;
+}
+
+.grid[data-layout="timeline"] .column {
+  border-top: none;
+}
+
+.frame {
+  position: relative;
+}
+
+/* Who is on today, as overlapping faces on a raised capsule in the corner. */
+.faces {
+  position: absolute;
+  margin: 0;
+  border: none;
+  top: var(--space-2);
+  right: var(--space-3);
+  z-index: 7;
+  display: flex;
+  padding: 3px 3px 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-sm);
+}
+
+.faceButton {
+  position: relative;
+  margin-left: -6px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+/* A 44pt target around the 28pt face. */
+.faceButton::before {
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+
+.faceButton:active {
+  scale: 0.94;
+}
+
+.faceButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.faceButton[data-dimmed] {
+  opacity: 0.4;
+}
+
+.faces .faceButton .stackFace {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
+  box-shadow:
+    0 0 0 2px var(--color-elevated),
+    0 0 0 3.5px var(--tint);
+}
+
+.faces .faceButton[aria-pressed="true"] .stackFace {
+  box-shadow:
+    0 0 0 2px var(--color-elevated),
+    0 0 0 4px var(--tint);
+}
+
+/* The master's small face leading a card's first line (outweighs the kit's avatar size). */
+.grid :is(.booking, .ghost, .laneEmpty) .cardFace {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--tint) 70%, transparent);
+}
+
+.grid[data-layout="timeline"] .ghost {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* An empty lane still says whose it is: face, first name and «свободен весь день». */
+.laneEmpty {
+  position: sticky;
+  left: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: 26px;
+  margin-left: var(--space-2);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  pointer-events: none;
+}
+
+.grid[data-layout="timeline"] section.column:first-of-type .laneEmpty {
+  margin-top: 40px;
+}
+
+.legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A short visit on the timeline: its place on the hours already says when — the room goes to the
+   client's name. */
+.grid[data-layout="timeline"] .blockLine .blockTime {
+  display: none;
 }
