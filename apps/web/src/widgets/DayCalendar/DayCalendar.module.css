@@ -1854,3 +1854,249 @@
     scale: 1.06;
   }
 }
+
+/* ——— Edges of the timeline ——— */
+
+/* Cards leaving the view recede: over their last 56px before an edge they fade toward the day,
+   instead of being cut by it. Driven by the scroll itself (a view timeline), so it costs no
+   script and never lags; off while a card is dragged and under reduced motion. */
+@supports (animation-timeline: view(inline)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .grid[data-layout="timeline"] .booking:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both;
+      animation-timeline: view(inline), view(inline);
+      animation-range:
+        entry 0px entry 56px,
+        exit calc(100% - 56px) exit 100%;
+    }
+  }
+}
+
+@keyframes recede-in {
+  from {
+    opacity: 0.25;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes recede-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.25;
+  }
+}
+
+/* The lane's first line: the left tab (when visits lie before the view), then whose lane it is.
+   It sticks to the day's left edge, so the tab sits flush with it. */
+.grid[data-layout="timeline"] .laneTag {
+  left: 0;
+  gap: var(--space-2);
+  margin-left: 0;
+  padding-left: var(--space-3);
+  pointer-events: none;
+}
+
+.grid[data-layout="timeline"] .laneTag:has(> .edgeTab) {
+  padding-left: 0;
+}
+
+.laneWho {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* How full the day is, as the masters' track shows it: a thin ring of the master's colour. */
+.laneRing {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: conic-gradient(
+    var(--tint) var(--load),
+    color-mix(in srgb, var(--tint) 18%, var(--color-fill)) var(--load)
+  );
+}
+
+.grid .laneRing .cardFace {
+  box-shadow: 0 0 0 1.5px var(--color-surface);
+}
+
+.laneRole {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A tab flush with the edge: square on the edge's side, round inside, on the lane's first line. */
+.edgeTab {
+  position: relative;
+  display: inline-flex;
+  pointer-events: auto;
+}
+
+.edgeBand > .edgeTab {
+  position: absolute;
+  top: 2px;
+  right: 0;
+}
+
+.grid[data-layout="timeline"] section.column:first-of-type .edgeBand > .edgeTab {
+  top: 20px;
+}
+
+.grid .edgeTab .edgeHint {
+  position: relative;
+  top: auto;
+  right: auto;
+  left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    0 2px 8px rgb(0 0 0 / 0.08);
+  color: var(--color-link);
+  font-variant-numeric: tabular-nums;
+  translate: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.grid .edgeTab .edgeHint[data-side="after"] {
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+}
+
+.edgeHint svg {
+  width: 11px;
+  height: 11px;
+}
+
+.edgeTime {
+  font-weight: var(--font-weight-semibold);
+}
+
+.edgeMore {
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-link) 12%, transparent);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 18px;
+}
+
+/* Who is beyond the edge, opened by pointing at the tab (or tabbing into it). */
+.edgeList {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-height: 240px;
+  padding: var(--space-1);
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 -4px;
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    translate var(--duration-fast) var(--ease-standard),
+    visibility 0s linear var(--duration-fast);
+}
+
+.edgeTab[data-side="after"] .edgeList {
+  right: 0;
+  left: auto;
+}
+
+/* The gap between the tab and the list stays hoverable. */
+.edgeList::before {
+  content: "";
+  position: absolute;
+  inset: -8px 0 auto;
+  height: 8px;
+}
+
+.edgeTab:focus-within .edgeList {
+  opacity: 1;
+  visibility: visible;
+  translate: none;
+  transition-delay: 0s;
+}
+
+.edgeRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  text-align: left;
+  cursor: pointer;
+}
+
+.edgeRow:focus-visible {
+  outline: none;
+  background: var(--color-fill);
+}
+
+.edgeRowTime {
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.edgeRowName {
+  overflow: hidden;
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .edgeTab:hover .edgeList {
+    opacity: 1;
+    visibility: visible;
+    translate: none;
+    transition-delay: 0s;
+  }
+
+  .grid .edgeTab .edgeHint:hover {
+    background: color-mix(in srgb, var(--color-link) 8%, var(--color-elevated));
+  }
+
+  .edgeRow:hover {
+    background: var(--color-fill);
+  }
+}
+
+/* Above the cards of the lanes below, so the left tab's list opens over them. */
+.grid[data-layout="timeline"] .laneTag:has(> .edgeTab) {
+  z-index: 6;
+}
