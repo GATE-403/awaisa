@@ -1123,30 +1123,18 @@ export const DayCalendar = ({
                     }
                     aria-hidden='true'
                   >
-                    {isTimeline ? (
-                      // The slot as a card to come: the same shape as the visits, ringed in the
-                      // master's colour — when, «+ Новая запись», whose.
-                      <>
-                        <span className={styles.blockTop}>
-                          <span className={styles.blockRange}>
-                            {formatClock(hover.minutes)}
-                            <span className={styles.rangeEndGhost}>
-                              –{formatClock(hover.minutes + slotMinutes)}
-                            </span>
-                          </span>
-                        </span>
-                        <span className={styles.ghostTitle}>
-                          <Plus weight='bold' aria-hidden />
-                          <span className={styles.ghostLabel}>Новая запись</span>
-                        </span>
-                        <span className={styles.ghostWho}>
+                    {/* A time cursor, not a card: a thin line in the master's colour where the
+                        visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
+                    <span className={styles.ghostChip}>
+                      <Plus weight='bold' aria-hidden />
+                      {formatClock(hover.minutes)}
+                      {isTimeline && (
+                        <span className={styles.ghostChipWho}>
                           {face(specialist, styles.cardFace)}
                           {specialist.name.split(' ')[0]}
                         </span>
-                      </>
-                    ) : (
-                      formatClock(hover.minutes)
-                    )}
+                      )}
+                    </span>
                   </span>
                 )}
                 {view.size > 0 &&

@@ -2450,3 +2450,90 @@
     opacity: 0;
   }
 }
+
+/* ——— The slot preview as a time cursor ———
+   A whole card for a visit that does not exist yet read as a real booking. Now: a 2px line in the
+   master's colour where it would start and one small raised capsule on it. */
+:root .grid .ghost,
+:root .grid[data-layout="timeline"] .ghost {
+  overflow: visible;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+:root .grid .ghost::before {
+  content: "";
+  position: absolute;
+  border-radius: var(--radius-full);
+  background: var(--tint);
+}
+
+:root .grid[data-layout="timeline"] .ghost::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+:root .grid[data-layout="columns"] .ghost::before {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+}
+
+.ghostChip {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.06),
+    var(--shadow-sm);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.grid[data-layout="columns"] .ghostChip {
+  top: -14px;
+  left: var(--space-2);
+}
+
+.ghostChip svg {
+  width: 12px;
+  height: 12px;
+  color: var(--tint);
+}
+
+.ghostChipWho {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.grid .ghostChipWho .cardFace {
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+
+/* ——— No outline on the cards: the clear 3px edge alone parts them ——— */
+:root .grid[data-layout] .booking,
+:root .grid[data-layout] .booking[data-ended] {
+  outline: none;
+}
