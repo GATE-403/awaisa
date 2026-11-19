@@ -540,9 +540,9 @@
 .grid[data-layout="timeline"] {
   /* No row of its own for the hours: they are written on the hour lines, in the room the first
      master's row keeps above its cards. */
-  grid-template-columns: 200px max-content;
-  grid-template-rows: 0 106px;
-  grid-auto-rows: 88px;
+  grid-template-columns: 184px max-content;
+  grid-template-rows: 0 94px;
+  grid-auto-rows: 76px;
 }
 
 .grid[data-layout="timeline"] .corner {
@@ -588,7 +588,7 @@
 /* The first master's row makes room above its cards for the hours. */
 .grid[data-layout="timeline"] section.column:first-of-type
   :is(.booking, .timeOff, .ghost, .dropPreview) {
-  top: 24px;
+  top: 22px;
 }
 
 .grid[data-layout="timeline"] .column {
@@ -617,8 +617,25 @@
 }
 
 .grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
-  top: 6px;
+  top: 4px;
   right: auto;
-  bottom: 6px;
+  bottom: 4px;
   margin-top: 0;
+}
+
+/* A row is lower than a column is tall: the card's lines sit a little closer. */
+.grid[data-layout="timeline"] .booking:not([data-size="compact"]) {
+  gap: 1px;
+  padding-block: 5px;
+}
+
+/* The master's head in a row: a smaller face, the name and role close together. */
+.grid[data-layout="timeline"] .columnHead {
+  padding-inline: var(--space-3) var(--space-2);
+}
+
+.grid[data-layout="timeline"] .face {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
 }
