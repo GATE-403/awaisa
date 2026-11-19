@@ -1575,10 +1575,10 @@
   display: none;
 }
 
-/* A card answers the pointer: a deeper fill and a soft lift — ended ones too. */
+/* A card answers the pointer with a deeper fill only — no glow around it. */
 :root .grid .booking:not([data-cancelled]):hover {
   background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--tint) 22%, transparent);
+  box-shadow: none;
 }
 
 :root .grid .booking[data-ended]:not([data-cancelled]):hover {
@@ -2268,4 +2268,17 @@
   .viewBar .trackMaster[aria-pressed="true"] .trackLabelInner {
     padding: 0;
   }
+}
+
+/* Air around the day: the first and last hours keep 12px from the board's sides (the hour lines
+   move with them), so a visit at opening never sits flush against the edge. */
+.grid[data-layout="timeline"] {
+  padding-inline: var(--space-3);
+  background-position: var(--space-3) 0;
+}
+
+/* The now-line sits on the grid itself (absolute, measured from its padding edge): shift it by
+   the same air as the lanes and hours. */
+.grid[data-layout="timeline"] > .nowLine {
+  margin-left: var(--space-3);
 }
