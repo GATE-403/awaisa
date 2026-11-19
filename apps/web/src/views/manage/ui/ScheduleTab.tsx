@@ -305,7 +305,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         }
         actions={
           hasMasters && (
-            <>
+            <div className={styles.toolbar} data-wide>
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -315,22 +315,28 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               />
               {!isPast && (
                 <>
-                  <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    className={styles.iconOnPhone}
+                    onClick={() => setIsClosingTime(true)}
+                  >
                     <Coffee weight='bold' aria-hidden />
-                    Перерыв
+                    <span className={styles.buttonLabel}>Перерыв</span>
                   </Button>
                   <Button
                     size='sm'
+                    className={styles.iconOnPhone}
                     onClick={() =>
                       setDraft({ specialistId: schedule?.specialists[0]?.id ?? '', time: null })
                     }
                   >
                     <Plus weight='bold' aria-hidden />
-                    Новая запись
+                    <span className={styles.buttonLabel}>Новая запись</span>
                   </Button>
                 </>
               )}
-            </>
+            </div>
           )
         }
       />

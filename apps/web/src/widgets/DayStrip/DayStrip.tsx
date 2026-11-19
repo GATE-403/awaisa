@@ -26,7 +26,12 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
 
   return (
     <div className={styles.strip} data-variant={variant}>
-      <fieldset aria-label='День' className={styles.days} ref={daysRef}>
+      <fieldset
+        aria-label='День'
+        className={styles.days}
+        ref={daysRef}
+        data-edge-fade={variant === 'compact' || undefined}
+      >
         {days.map((day) => (
           <button
             key={day.key}
@@ -47,7 +52,8 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
           </button>
         ))}
       </fieldset>
-      {today && (
+      {/* The way back appears only once another day is open (a greyed «Сегодня» read as broken). */}
+      {today && (variant === 'default' || value !== today.key) && (
         <button
           type='button'
           className={styles.today}

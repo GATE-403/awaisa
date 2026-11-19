@@ -81,3 +81,39 @@
 .barSpace {
   height: 72px;
 }
+
+/* The toolbar: the view switch, «Перерыв» and «Новая запись» in one row. On phones it takes the
+   whole line — the switch stretches, the two actions become round glyph buttons (their names
+   stay for screen readers) — instead of wrapping into a heap of capsules. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 639px) {
+  .toolbar {
+    width: 100%;
+  }
+
+  .toolbar > :first-child {
+    flex: 1;
+  }
+
+  .toolbar .iconOnPhone[data-size] {
+    flex-shrink: 0;
+    width: var(--control-height-md);
+    min-width: var(--control-height-md);
+    height: var(--control-height-md);
+    padding: 0;
+  }
+
+  .buttonLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
