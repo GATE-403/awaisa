@@ -118,3 +118,22 @@
     white-space: nowrap;
   }
 }
+
+/* Phones: the whole toolbar at 44pt, a thumb's size (the view switch's segments included). */
+@media (max-width: 639px) {
+  .toolbar .iconOnPhone[data-size] {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  /* Over the control's own `sm` size (0,3,0). */
+  .toolbar.toolbar > fieldset[class] {
+    padding-block: 0;
+  }
+
+  .toolbar.toolbar > fieldset label[class][class] {
+    height: 44px;
+    min-width: 48px;
+  }
+}
