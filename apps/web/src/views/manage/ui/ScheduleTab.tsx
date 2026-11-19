@@ -21,8 +21,10 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
+import { useScheduleLayout } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
@@ -31,7 +33,7 @@ import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
-import { DayCalendar } from '@/widgets/DayCalendar'
+import { type CalendarLayout, DayCalendar } from '@/widgets/DayCalendar'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './ScheduleTab.module.css'
 
@@ -50,10 +52,16 @@ type Draft = {
 }
 
 const DAYS_SHOWN = 14
+
+const LAYOUTS: { value: CalendarLayout; label: string }[] = [
+  { value: 'columns', label: 'Колонки' },
+  { value: 'timeline', label: 'Лента' },
+]
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
+  const { layout, setLayout } = useScheduleLayout()
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
@@ -266,6 +274,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
+              <SegmentedControl
+                label='Вид расписания'
+                size='sm'
+                value={layout}
+                items={LAYOUTS}
+                onChange={setLayout}
+              />
               {!isPast && (
                 <>
                   <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
@@ -320,6 +335,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             nowMinutes={today && date === today.dayKey ? today.minutes : null}
             isPast={isPast}
             slotMinutes={business.slotMinutes}
+            layout={layout}
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
