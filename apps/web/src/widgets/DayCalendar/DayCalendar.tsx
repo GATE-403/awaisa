@@ -575,6 +575,7 @@ export const DayCalendar = ({
                   <div
                     key={item.id}
                     className={styles.timeOff}
+                    onPointerEnter={() => setHover(null)}
                     style={place(parseClock(item.from), parseClock(item.to))}
                   >
                     <span className={styles.blockTime}>
@@ -641,6 +642,9 @@ export const DayCalendar = ({
                           : ({ ...place(from, to), '--progress': `${progress}%` } as CSSProperties)
                       }
                       onPointerDown={(event) => drag.handlePointerDown(event, booking)}
+                      // The empty-slot preview must not peek out from under a card the pointer
+                      // moved onto.
+                      onPointerEnter={() => setHover(null)}
                       onClick={() => {
                         if (!drag.consumeClick()) onSelectBooking(booking)
                       }}
