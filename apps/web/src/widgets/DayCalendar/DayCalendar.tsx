@@ -8,6 +8,7 @@ import {
   ChatText,
   Check,
   Clock,
+  Plus,
   X,
 } from '@phosphor-icons/react/ssr'
 import {
@@ -22,6 +23,7 @@ import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import chip from '@/shared/ui/Chip/Chip.module.css'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
@@ -295,12 +297,15 @@ export const DayCalendar = ({
       const top = scroller.getBoundingClientRect().top + window.scrollY
       // Whatever sits below the box (panel padding, page gutter) still has to fit on screen.
       const below = document.documentElement.scrollHeight - (top + scroller.offsetHeight)
-      scroller.style.maxHeight = `${Math.max(420, window.innerHeight - top - below)}px`
+      const fill = `${Math.max(420, window.innerHeight - top - below)}px`
+      scroller.style.maxHeight = fill
+      // The timeline always runs to the window's foot: its lanes share the height.
+      scroller.style.height = layout === 'timeline' ? fill : ''
     }
     fit()
     window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
-  }, [])
+  }, [layout])
 
   // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
   useEffect(() => {
@@ -377,25 +382,30 @@ export const DayCalendar = ({
   return (
     <div className={styles.frame}>
       {isTimeline && specialists.length > 1 && (
-        // Who is on today, as a stack of faces; a tap leaves only that master on the timeline.
-        <fieldset className={styles.faces}>
-          <legend className={styles.legend}>Мастера</legend>
+        // Whose day to show: everyone, or one master — capsules with the face and first name.
+        <div className={styles.filters}>
+          <button
+            type='button'
+            className={chip.chip}
+            aria-pressed={focusId === null}
+            onClick={() => setFocusId(null)}
+          >
+            Все
+          </button>
           {specialists.map((specialist) => (
             <button
               key={specialist.id}
               type='button'
-              className={styles.faceButton}
+              className={`${chip.chip} ${styles.filterChip}`}
               style={{ '--tint': tintOf(specialist.id) } as CSSProperties}
               aria-pressed={focusId === specialist.id}
-              data-dimmed={(focusId !== null && focusId !== specialist.id) || undefined}
-              title={specialist.name}
-              aria-label={`Только ${specialist.name}`}
               onClick={() => setFocusId(focusId === specialist.id ? null : specialist.id)}
             >
-              {face(specialist, styles.stackFace)}
+              {face(specialist, styles.chipFace)}
+              {specialist.name.split(' ')[0]}
             </button>
           ))}
-        </fieldset>
+        </div>
       )}
       {nowSide && nowMinutes !== null && (
         <button
@@ -504,18 +514,34 @@ export const DayCalendar = ({
                   {formatClock(hover.minutes)}
                 </span>
               )}
-              {/* No names on the timeline: a master with nothing booked still says who the lane is. */}
+              {/* No names on the timeline: a master with nothing booked says so, and books in a tap. */}
               {isTimeline &&
                 !bookings.some((booking) => booking.specialistId === specialist.id) &&
-                !timeOff.some((item) => item.specialistId === specialist.id) && (
-                  <span className={styles.laneEmpty} aria-hidden='true'>
+                !timeOff.some((item) => item.specialistId === specialist.id) &&
+                (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
+                  <span className={styles.laneEmpty}>
                     {face(specialist, styles.cardFace)}
-                    {specialist.name.split(' ')[0]} ·{' '}
+                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                     {dayOf(specialist) === null || specialist.isOnLeave
                       ? (headNote(specialist) ?? 'Выходной')
-                      : 'свободен весь день'}
+                      : 'без записей'}
                   </span>
-                )}
+                ) : (
+                  <button
+                    type='button'
+                    className={styles.laneEmpty}
+                    data-action
+                    onClick={() => onCreateBooking(specialist.id, null)}
+                  >
+                    {face(specialist, styles.cardFace)}
+                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                    свободен весь день
+                    <span className={styles.laneBook}>
+                      <Plus weight='bold' aria-hidden />
+                      Записать
+                    </span>
+                  </button>
+                ))}
               {hourMarks.slice(1, -1).map((minutes) => (
                 <span
                   key={minutes}
@@ -613,8 +639,8 @@ export const DayCalendar = ({
                     >
                       {size === 'compact' ? (
                         <span className={styles.blockLine}>
-                          {isTimeline && face(specialist, styles.cardFace)}
-                          {/* On the timeline the card's own fill already says the state. */}
+                          {/* On the timeline the card's own fill already says the state; a short card keeps its room
+                             for the client's name, the lane's other cards carry the face. */}
                           {state.tone !== 'plain' && !isTimeline && (
                             <span className={styles.stateDot} data-tone={state.tone} aria-hidden />
                           )}

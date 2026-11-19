@@ -531,8 +531,10 @@
   /* No row of its own for the hours: they are written on the hour lines, in the room the first
      master's row keeps above its cards. */
   grid-template-columns: max-content;
-  grid-template-rows: 0 94px;
-  grid-auto-rows: 76px;
+  grid-template-rows: 0 minmax(94px, 1fr);
+  grid-auto-rows: minmax(76px, 1fr);
+  /* The lanes share the box's whole height (the scroller is sized to the window's foot). */
+  min-height: 100%;
   /* Lanes part by a little of the day's own grey, not by a white line. */
   row-gap: var(--space-1);
   background: var(--color-background);
@@ -676,69 +678,6 @@
   position: relative;
 }
 
-/* Who is on today, as overlapping faces on a raised capsule in the corner. */
-.faces {
-  position: absolute;
-  margin: 0;
-  border: none;
-  top: var(--space-2);
-  right: var(--space-3);
-  z-index: 7;
-  display: flex;
-  padding: 3px 3px 3px 9px;
-  border-radius: var(--radius-full);
-  background: var(--color-elevated);
-  box-shadow: var(--shadow-sm);
-}
-
-.faceButton {
-  position: relative;
-  margin-left: -6px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-full);
-  background: none;
-  cursor: pointer;
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    scale var(--duration-fast) var(--ease-standard);
-}
-
-/* A 44pt target around the 28pt face. */
-.faceButton::before {
-  content: "";
-  position: absolute;
-  inset: -8px -2px;
-}
-
-.faceButton:active {
-  scale: 0.94;
-}
-
-.faceButton:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-.faceButton[data-dimmed] {
-  opacity: 0.4;
-}
-
-.faces .faceButton .stackFace {
-  width: 28px;
-  height: 28px;
-  font-size: 11px;
-  box-shadow:
-    0 0 0 2px var(--color-elevated),
-    0 0 0 3.5px var(--tint);
-}
-
-.faces .faceButton[aria-pressed="true"] .stackFace {
-  box-shadow:
-    0 0 0 2px var(--color-elevated),
-    0 0 0 4px var(--tint);
-}
-
 /* The master's small face leading a card's first line (outweighs the kit's avatar size). */
 .grid :is(.booking, .ghost, .laneEmpty) .cardFace {
   flex-shrink: 0;
@@ -752,33 +691,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-}
-
-/* An empty lane still says whose it is: face, first name and «свободен весь день». */
-.laneEmpty {
-  position: sticky;
-  left: var(--space-2);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: 26px;
-  margin-left: var(--space-2);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  pointer-events: none;
-}
-
-.grid[data-layout="timeline"] section.column:first-of-type .laneEmpty {
-  margin-top: 40px;
-}
-
-.legend {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 /* A short visit on the timeline: its place on the hours already says when — the room goes to the
@@ -891,4 +803,102 @@
 
 .toNow[data-layout="columns"][data-side="after"] {
   bottom: var(--space-3);
+}
+
+/* Lanes grow with the window; a card keeps its own height at the top of its lane. */
+.grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
+  bottom: auto;
+  height: 68px;
+}
+
+/* Whose day: «Все» and a capsule per master with the face and first name (the kit's chips). */
+.filters {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 0.5px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar {
+  display: none;
+}
+
+.filterChip {
+  padding-left: 4px;
+}
+
+.filters .filterChip .chipFace {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  box-shadow: 0 0 0 1.5px var(--tint);
+}
+
+/* An empty lane: the master and «свободен весь день», and on a day still ahead one tap books. */
+.laneEmpty {
+  position: sticky;
+  left: var(--space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  margin-top: 26px;
+  margin-left: var(--space-3);
+  padding: 0 var(--space-2) 0 6px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-muted-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+}
+
+.grid[data-layout="timeline"] section.column:first-of-type .laneEmpty {
+  margin-top: 38px;
+}
+
+.laneEmpty[data-action] {
+  cursor: pointer;
+}
+
+.laneEmpty[data-action]:active {
+  scale: 0.97;
+}
+
+.laneEmpty[data-action]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.laneName {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.laneBook {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-weight: var(--font-weight-semibold);
+  line-height: 28px;
+}
+
+.laneBook svg {
+  width: 12px;
+  height: 12px;
+}
+
+.grid .laneEmpty .cardFace {
+  width: 28px;
+  height: 28px;
+  font-size: 11px;
 }
