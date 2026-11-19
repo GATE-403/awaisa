@@ -283,3 +283,29 @@
     transition: none;
   }
 }
+
+/* How full the day is: a thin track along the chip's foot, filled from the left — a glance down
+   the row shows the busy days. */
+.load {
+  position: absolute;
+  right: 10px;
+  bottom: 4px;
+  left: 10px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    currentColor calc(var(--load, 0) * 100%),
+    color-mix(in srgb, currentColor 18%, transparent) calc(var(--load, 0) * 100%)
+  );
+  opacity: 0.55;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] .load {
+  color: var(--color-background);
+  opacity: 0.8;
+}
+
+.strip[data-variant="compact"] .day {
+  overflow: hidden;
+}

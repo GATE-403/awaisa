@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useRef } from 'react'
 import type { BookingDay } from '@/entities/booking'
 import styles from './DayStrip.module.css'
 
@@ -10,11 +10,20 @@ interface DayStripProps {
   onChange: (dayKey: string) => void
   /** Days with something to do (e.g. visits not closed yet): a small dot under the number. */
   marks?: ReadonlySet<string>
+  /** How full each day is, 0–1 (compact only): a thin bar along the bottom of its chip. */
+  loads?: ReadonlyMap<string, number>
   /** `compact`: one thin line of «чт 19» capsules (the cabinet); default: weekday over number. */
   variant?: 'default' | 'compact'
 }
 
-export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: DayStripProps) => {
+export const DayStrip = ({
+  days,
+  value,
+  onChange,
+  marks,
+  loads,
+  variant = 'default',
+}: DayStripProps) => {
   const daysRef = useRef<HTMLFieldSetElement>(null)
   const knobRef = useRef<HTMLSpanElement>(null)
   const today = days.find((day) => day.isToday)
@@ -68,9 +77,20 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
           >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
+            {variant === 'compact' && loads?.has(day.key) && (
+              <span
+                className={styles.load}
+                style={{ '--load': Math.min(1, loads.get(day.key) ?? 0) } as CSSProperties}
+                aria-hidden='true'
+              />
+            )}
             {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
-              {`, ${day.label}${marks?.has(day.key) ? ', есть незакрытые визиты' : ''}`}
+              {`, ${day.label}${marks?.has(day.key) ? ', есть незакрытые визиты' : ''}${
+                loads?.has(day.key)
+                  ? `, занято на ${Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100)}%`
+                  : ''
+              }`}
             </span>
           </button>
         ))}

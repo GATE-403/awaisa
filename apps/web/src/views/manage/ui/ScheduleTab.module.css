@@ -151,3 +151,31 @@
 .dayStats strong {
   font-weight: var(--font-weight-bold);
 }
+
+/* «Найти место»: the service being placed, and the way out. */
+.fitBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: calc(-1 * var(--space-3));
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+}
+
+.fitText {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}

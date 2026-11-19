@@ -1,0 +1,74 @@
+.group {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.group :is(button, a) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.group :is(button, a) svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* An invisible 44pt target around each 36pt glyph. */
+.group :is(button, a)::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.group :is(button, a)[aria-pressed="true"],
+.group :is(button, a)[data-popup-open] {
+  background: var(--color-elevated);
+  color: var(--color-foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+}
+
+.group :is(button, a):active {
+  scale: 0.94;
+}
+
+.group :is(button, a):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .group :is(button, a):hover {
+    background: var(--color-fill-hover);
+    color: var(--color-foreground);
+  }
+}
+
+/* Phones: the glyphs at a thumb's 44pt. */
+@media (max-width: 639px) {
+  .group :is(button, a) {
+    width: 44px;
+    height: 40px;
+  }
+
+  .group :is(button, a)::before {
+    inset: -2px 0;
+  }
+}
