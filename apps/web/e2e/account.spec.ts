@@ -191,7 +191,10 @@ test.describe('Salon admin', () => {
 
     const phonePattern = clientPhone.replace('+', '\\+')
     await page.getByRole('button', { name: new RegExp(phonePattern) }).click()
-    await page.getByRole('dialog').getByRole('button', { name: 'Отменить запись' }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Отменить запись' })
+      .click({ delay: 1300 })
     await expect(
       page.getByRole('button', { name: new RegExp(`${phonePattern}, отменена`) }),
     ).toBeVisible()

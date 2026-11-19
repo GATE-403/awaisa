@@ -10,8 +10,8 @@ import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessQuestion } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
-import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ReviewsTab.module.css'
 
 interface QuestionsPanelProps {
@@ -133,11 +133,7 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
               Вопрос с ответом увидят все на странице места. Пустой ответ снимает его.
             </p>
           </form>
-          <div className={sheet.group}>
-            <button type='button' className={sheet.danger} onClick={handleRemove}>
-              Удалить вопрос
-            </button>
-          </div>
+          <HoldButton onConfirm={handleRemove}>Удалить вопрос</HoldButton>
         </Sheet>
       )}
     </>

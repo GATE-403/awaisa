@@ -4,7 +4,6 @@ import { Skeleton } from '@awaisa/ui/Skeleton'
 import { CaretLeft } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { BusinessTile } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { useNewBookingAlerts } from '@/features/bookingAlerts'
 import type { BusinessPage } from '@/shared/api/types'
@@ -79,51 +78,33 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
         <CabinetBar
           slug={slug}
           title={data?.business.name ?? null}
+          logoUrl={data?.business.logoUrl}
           isPublished={data?.business.isPublished ?? true}
+          nav={
+            <TextTabs
+              label='Разделы кабинета'
+              items={[
+                ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
+                  ({ value, label }) => ({
+                    href: `/manage/${slug}?tab=${value}`,
+                    label,
+                    isActive: tab === value,
+                  }),
+                ),
+                ...(role === 'owner'
+                  ? [
+                      {
+                        href: `/manage/${slug}?tab=settings`,
+                        label: 'Настройки',
+                        isActive: isSettings,
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          }
         />
         <Container className={styles.content}>
-          <header className={styles.header}>
-            <div className={styles.identity}>
-              {data ? (
-                <BusinessTile name={data.business.name} logoUrl={data.business.logoUrl} size='md' />
-              ) : (
-                <Skeleton className={styles.tileSkeleton} />
-              )}
-              {data ? (
-                <h1 className={styles.title}>
-                  {data.business.name}.
-                  <span className={styles.titleMuted}>
-                    {data.business.isPublished ? ' Кабинет' : ' Кабинет · страница скрыта'}
-                  </span>
-                </h1>
-              ) : (
-                <Skeleton className={styles.titleSkeleton} />
-              )}
-            </div>
-          </header>
-
-          <TextTabs
-            label='Разделы кабинета'
-            items={[
-              ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
-                ({ value, label }) => ({
-                  href: `/manage/${slug}?tab=${value}`,
-                  label,
-                  isActive: tab === value,
-                }),
-              ),
-              ...(role === 'owner'
-                ? [
-                    {
-                      href: `/manage/${slug}?tab=settings`,
-                      label: 'Настройки',
-                      isActive: isSettings,
-                    },
-                  ]
-                : []),
-            ]}
-          />
-
           {data && role === 'owner' && (
             <SetupProgress business={data.business} catalog={data.catalog} />
           )}

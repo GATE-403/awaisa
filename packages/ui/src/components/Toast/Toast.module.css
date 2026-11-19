@@ -3,7 +3,9 @@
   --toast-peek: 10px;
 
   position: fixed;
-  top: calc(env(safe-area-inset-top) + var(--space-2));
+  /* A page whose toolbar carries its main controls (the cabinet) sets --toast-top so toasts land
+     under it instead of over its tabs. */
+  top: calc(var(--toast-top, env(safe-area-inset-top)) + var(--space-2));
   right: 0;
   left: 0;
   z-index: 100;
