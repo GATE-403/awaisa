@@ -786,7 +786,8 @@ export const DayCalendar = ({
                           <span className={styles.progressFill} />
                         </span>
                       )}
-                      {size === 'tall' && (
+                      {/* Across, a card is as tall as its lane: room for the phone or the comment. */}
+                      {(size === 'tall' || (isTimeline && size === 'normal')) && (
                         <span className={styles.blockFooter}>
                           <span className={styles.footerNote}>
                             {booking.comment ? (
