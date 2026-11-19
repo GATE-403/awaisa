@@ -20,6 +20,8 @@ interface VisitOutcomeSectionProps {
   onChange: (input: OutcomeInput) => Promise<AdminBooking | null>
   /** In the inspector: no caption, the small segmented control. */
   isCompact?: boolean
+  /** The segmented control's size (compact defaults to the small one). */
+  controlSize?: 'sm' | 'md'
 }
 
 type OutcomeChoice = 'pending' | 'arrived' | 'no_show'
@@ -48,6 +50,7 @@ export const VisitOutcomeSection = ({
   booking,
   onChange,
   isCompact = false,
+  controlSize = isCompact ? 'sm' : 'md',
 }: VisitOutcomeSectionProps) => {
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
@@ -96,7 +99,7 @@ export const VisitOutcomeSection = ({
       <div className={styles.outcomeRow}>
         <SegmentedControl
           label='Итог визита'
-          size={isCompact ? 'sm' : 'md'}
+          size={controlSize}
           value={choice}
           items={OUTCOMES}
           onChange={(value) => void save({ outcome: value === 'pending' ? null : value })}

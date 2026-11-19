@@ -1,12 +1,12 @@
 'use client'
 
 import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
-import { CaretRight, ChatCircle, DotsThree, Phone } from '@phosphor-icons/react/ssr'
+import { CaretRight, ChatCircle, DotsThree, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { VisitOutcomeSection } from '@/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection'
 import styles from './BookingInspector.module.css'
@@ -42,6 +42,7 @@ export const BookingInspector = ({
   onOpenClient,
   onClose,
 }: BookingInspectorProps) => {
+  const isTouch = useMediaQuery('(pointer: coarse)')
   const isCancelled = booking.status === 'cancelled'
   const digits = booking.customerPhone.replace(/\D/g, '')
   const total = booking.price - (booking.discount?.amount ?? 0)
@@ -92,27 +93,30 @@ export const BookingInspector = ({
       {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
 
       <div className={styles.actions}>
+        {/* A capsule of thin glyphs with a mouse; on phones four labelled tiles, like the
+            actions under a contact in iOS. The labels name the buttons either way. */}
         <GlyphGroup label='Связаться с клиентом'>
-          <a
-            href={`tel:${booking.customerPhone}`}
-            aria-label={`Позвонить: ${formatPhone(booking.customerPhone)}`}
-            title={formatPhone(booking.customerPhone)}
-          >
+          <a href={`tel:${booking.customerPhone}`} title={formatPhone(booking.customerPhone)}>
             <Phone aria-hidden />
+            <span className={styles.actionLabel}>Позвонить</span>
           </a>
-          <a
-            href={`https://wa.me/${digits}`}
-            target='_blank'
-            rel='noreferrer'
-            aria-label='Написать в WhatsApp'
-            title='WhatsApp'
-          >
-            <WhatsappMark />
+          <a href={`https://wa.me/${digits}`} target='_blank' rel='noreferrer' title='WhatsApp'>
+            <WhatsappLogo aria-hidden />
+            <span className={styles.actionLabel}>WhatsApp</span>
           </a>
-          <a href={`sms:${booking.customerPhone}`} aria-label='Написать SMS' title='SMS'>
+          <a href={`sms:${booking.customerPhone}`} title='SMS'>
             <ChatCircle aria-hidden />
+            <span className={styles.actionLabel}>SMS</span>
           </a>
-          <Menu label='Ещё действия' trigger={<DotsThree weight='bold' aria-hidden />}>
+          <Menu
+            label='Ещё действия'
+            trigger={
+              <>
+                <DotsThree weight='bold' aria-hidden />
+                <span className={styles.actionLabel}>Ещё</span>
+              </>
+            }
+          >
             <MenuItem onClick={() => onOpenClient(booking.customerPhone)}>
               Карточка клиента
             </MenuItem>
@@ -137,6 +141,7 @@ export const BookingInspector = ({
           booking={booking}
           onChange={(input) => onOutcome(booking.id, input)}
           isCompact
+          controlSize={isTouch ? 'md' : 'sm'}
         />
       )}
     </div>
