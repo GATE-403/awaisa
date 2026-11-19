@@ -142,3 +142,69 @@
   background: var(--color-danger);
   box-shadow: 0 0 0 1.5px var(--color-material);
 }
+
+/* Inside a cabinet the bar is the page's whole head: ‹, the business, its sections and the tools
+   in one row from 1024px; narrower, the sections take a second row and scroll sideways. */
+.bar[data-compact] .inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-3);
+  height: auto;
+  min-height: 52px;
+}
+
+.bar[data-compact] .back {
+  justify-content: center;
+  min-width: 32px;
+  margin-left: calc(-1 * var(--space-2));
+}
+
+.business {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  min-height: 52px;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.businessName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav {
+  order: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .bar[data-compact] .inner {
+    flex-wrap: nowrap;
+    gap: var(--space-4);
+    height: 52px;
+  }
+
+  .business {
+    flex: 0 1 auto;
+  }
+
+  .nav {
+    order: 0;
+    flex: 1;
+    width: auto;
+    margin-left: var(--space-4);
+  }
+
+  /* The tabs' own bleed is for the page edge; in the bar they sit in the row. */
+  .nav > * {
+    margin: 0;
+    padding: 0;
+  }
+}
