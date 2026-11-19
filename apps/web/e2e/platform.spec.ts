@@ -132,7 +132,8 @@ test.describe('Platform: a new business goes live', () => {
       const bottoms = [
         ...(element.parentElement?.querySelectorAll('[class*="booking"]') ?? []),
       ].map((block) => block.getBoundingClientRect().bottom - box.top)
-      const y = Math.min(box.height - 30, Math.max(60, ...bottoms) + 40)
+      // Clear of the sticky masters' row, which covers the column's top once it scrolls into view.
+      const y = Math.min(box.height - 30, Math.max(140, ...bottoms) + 40)
       const scroller = element.closest<HTMLElement>('[class*="scroller"]')
       if (scroller) {
         const view = scroller.getBoundingClientRect()
