@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { ChatCircle, Phone, Star } from '@phosphor-icons/react/ssr'
+import { Star } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useId, useState } from 'react'
 import { formatPrice, getDateParts } from '@/entities/booking'
 import { PersonAvatar, pickTint } from '@/entities/business'
@@ -11,9 +11,8 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { getClient, updateClient } from '@/shared/api/clientApi'
 import type { ClientCard } from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
-import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
-import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { ContactRows } from '@/shared/ui/ContactRows/ContactRows'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -115,12 +114,6 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
     }
   }
 
-  const digits = phone.replace(/\D/g, '')
-  const contacts = [
-    { href: `tel:${phone}`, label: 'Позвонить', icon: Phone },
-    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappMark, external: true },
-    { href: `sms:${phone}`, label: 'SMS', icon: ChatCircle },
-  ]
   const name = card?.name || 'Без имени'
   const stats = card?.stats
   const history = card?.history ?? []
@@ -144,7 +137,6 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
           >
             <PersonAvatar name={card.name || card.phone.slice(-2)} size='lg' />
             <h3 className={styles.name}>{name}</h3>
-            <p className={styles.phone}>{formatPhone(card.phone)}</p>
             {stats.visits > 0 && (
               <p className={styles.facts}>
                 <strong>{stats.visits}</strong>{' '}
@@ -174,23 +166,8 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
                 Не пришёл {pluralize(stats.noShows, ['раз', 'раза', 'раз'])}
               </p>
             )}
-            <div className={styles.actions}>
-              <ul className={styles.contacts}>
-                {contacts.map(({ href, label, icon: Icon, external }) => (
-                  <li key={label}>
-                    <a
-                      href={href}
-                      className={styles.contact}
-                      aria-label={label}
-                      title={label}
-                      {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-                    >
-                      <Icon weight='fill' aria-hidden />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-              {onBook && (
+            {onBook && (
+              <div className={styles.actions}>
                 <Button
                   size='sm'
                   onClick={() =>
@@ -203,9 +180,11 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
                 >
                   Записать снова
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </header>
+
+          <ContactRows phone={card.phone} />
 
           <section className={sheet.group} aria-label='Только для вас'>
             <SectionCaption>Только для вас</SectionCaption>

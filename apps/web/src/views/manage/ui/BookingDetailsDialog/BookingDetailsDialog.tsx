@@ -1,11 +1,10 @@
-import { CaretRight, ChatCircle, Phone, XCircle } from '@phosphor-icons/react/ssr'
+import { CaretRight, XCircle } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatDuration, formatPrice, getDateParts, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
-import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
-import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { ContactRows } from '@/shared/ui/ContactRows/ContactRows'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -52,12 +51,6 @@ export const BookingDetailsDialog = ({
   const { day, month, weekday } = getDateParts(booking.date)
   const relative = relativeDay(booking.date, today?.dayKey)
   const total = booking.price - (booking.discount?.amount ?? 0)
-  const digits = booking.customerPhone.replace(/\D/g, '')
-  const contacts = [
-    { href: `tel:${booking.customerPhone}`, label: 'Позвонить', icon: Phone },
-    { href: `https://wa.me/${digits}`, label: 'WhatsApp', icon: WhatsappMark, external: true },
-    { href: `sms:${booking.customerPhone}`, label: 'SMS', icon: ChatCircle },
-  ]
 
   const handleCancel = async () => {
     setIsCancelling(true)
@@ -114,26 +107,10 @@ export const BookingDetailsDialog = ({
                 <span className={styles.clientName}>
                   {booking.customerName}
                   <CaretRight weight='bold' aria-hidden className={styles.chevron} />
-                  <span className={styles.srOnly}>, карточка клиента</span>
                 </span>
-                <span className={styles.clientPhone}>{formatPhone(booking.customerPhone)}</span>
+                <span className={styles.clientPhone}>Карточка клиента</span>
               </span>
             </button>
-            <ul className={styles.contacts}>
-              {contacts.map(({ href, label, icon: Icon, external }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    className={styles.contact}
-                    aria-label={label}
-                    title={label}
-                    {...(external ? { target: '_blank', rel: 'noreferrer' } : {})}
-                  >
-                    <Icon weight='fill' aria-hidden />
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
@@ -162,6 +139,8 @@ export const BookingDetailsDialog = ({
           </div>
         </div>
       </article>
+
+      <ContactRows phone={booking.customerPhone} />
 
       {!isCancelled && onOutcome && (
         <VisitOutcomeSection

@@ -1,0 +1,106 @@
+/* An inset group of Settings rows; hairlines start after the glyph tile. */
+.list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-sheet-surface);
+  list-style: none;
+}
+
+.list[data-surface="page"] {
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.list > li {
+  position: relative;
+}
+
+.list > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--space-4) + 29px + var(--space-3));
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  padding: 0 var(--space-4);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row:active {
+  background: var(--color-fill);
+}
+
+.row:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .row:hover {
+    background: var(--color-fill);
+  }
+}
+
+.glyph {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 29px;
+  height: 29px;
+  border-radius: 7px;
+  color: #fff;
+}
+
+.glyph svg {
+  width: 17px;
+  height: 17px;
+}
+
+.glyph[data-tone="call"] {
+  background: var(--color-success);
+}
+
+/* WhatsApp's own green: its mark (a green disc) melts into the tile, leaving the white glyph. */
+.glyph[data-tone="whatsapp"] {
+  background: #25d366;
+}
+
+.glyph[data-tone="whatsapp"] svg {
+  width: 29px;
+  height: 29px;
+}
+
+.glyph[data-tone="sms"] {
+  background: var(--color-primary);
+}
+
+.label {
+  flex: 1;
+}
+
+.value {
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  color: var(--color-tertiary-foreground);
+}
