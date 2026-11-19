@@ -390,6 +390,9 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           />
         )}
       </div>
+      {/* On a short screen the day keeps its least height and the page scrolls: room under it,
+          so the floating bar never sits over the day's foot (the masters and the zoom). */}
+      {isCloseBarShown && <div className={styles.barSpace} aria-hidden='true' />}
 
       {hasMasters && !isCloseBarHidden && (
         <CloseDayBar

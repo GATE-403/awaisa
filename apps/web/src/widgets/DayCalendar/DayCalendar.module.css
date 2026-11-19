@@ -2000,103 +2000,170 @@
   line-height: 18px;
 }
 
-/* Who is beyond the edge, opened by pointing at the tab (or tabbing into it). */
-.edgeList {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  min-width: 200px;
-  max-height: 240px;
-  padding: var(--space-1);
-  overflow-y: auto;
-  border-radius: var(--radius-lg);
-  background: var(--color-elevated);
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.08),
-    var(--shadow-md);
-  opacity: 0;
-  visibility: hidden;
-  translate: 0 -4px;
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    translate var(--duration-fast) var(--ease-standard),
-    visibility 0s linear var(--duration-fast);
-}
-
-.edgeTab[data-side="after"] .edgeList {
-  right: 0;
-  left: auto;
-}
-
-/* The gap between the tab and the list stays hoverable. */
-.edgeList::before {
-  content: "";
-  position: absolute;
-  inset: -8px 0 auto;
-  height: 8px;
-}
-
-.edgeTab:focus-within .edgeList {
-  opacity: 1;
-  visibility: visible;
-  translate: none;
-  transition-delay: 0s;
-}
-
-.edgeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 36px;
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  text-align: left;
-  cursor: pointer;
-}
-
-.edgeRow:focus-visible {
-  outline: none;
-  background: var(--color-fill);
-}
-
-.edgeRowTime {
-  color: var(--color-muted-foreground);
-  font-variant-numeric: tabular-nums;
-}
-
-.edgeRowName {
-  overflow: hidden;
-  font-weight: var(--font-weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (hover: hover) {
-  .edgeTab:hover .edgeList {
-    opacity: 1;
-    visibility: visible;
-    translate: none;
-    transition-delay: 0s;
-  }
-
   .grid .edgeTab .edgeHint:hover {
-    background: color-mix(in srgb, var(--color-link) 8%, var(--color-elevated));
-  }
-
-  .edgeRow:hover {
-    background: var(--color-fill);
+    background: var(--color-primary-hover);
   }
 }
 
 /* Above the cards of the lanes below, so the left tab's list opens over them. */
 .grid[data-layout="timeline"] .laneTag:has(> .edgeTab) {
   z-index: 6;
+}
+
+/* ——— The day a shade grey, the masters' heads and hours on the panel's white ——— */
+.grid {
+  --day-bg: color-mix(in srgb, var(--color-background) 60%, var(--color-surface));
+}
+
+.grid[data-layout] {
+  background-color: var(--day-bg);
+}
+
+.grid .column,
+.grid[data-layout="timeline"] .column {
+  background: transparent;
+}
+
+/* ——— Edge tabs: filled in the accent so they read as a way to go, not a note ——— */
+.grid .edgeTab .edgeHint {
+  background: var(--color-primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+.grid .edgeTab .edgeMore {
+  background: rgb(255 255 255 / 0.24);
+}
+
+.grid .edgeTab .edgeHint:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* On the columns the tabs hang from the masters' row and stand on the view's foot, centred. */
+.grid[data-layout="columns"] .edgeBand {
+  top: var(--view-inset);
+  left: auto;
+  width: 100%;
+  height: var(--view-size, 100%);
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab {
+  position: absolute;
+  right: auto;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab[data-side="before"] {
+  top: 0;
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab[data-side="after"] {
+  top: auto;
+  bottom: 0;
+}
+
+.grid[data-layout="columns"] .edgeTab .edgeHint,
+.grid[data-layout="columns"] .edgeTab .edgeHint[data-side="after"] {
+  padding: 0 var(--space-3);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.grid[data-layout="columns"] .edgeTab[data-side="after"] .edgeHint {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.grid .edgeTab[data-side="after"] .edgeHint {
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+}
+
+/* The columns' cards fade under the masters' row and at the view's foot, like the timeline's. */
+@supports (animation-timeline: view(block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .grid[data-layout="columns"] .booking:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both;
+      animation-timeline: view(block var(--view-inset) 0px), view(block var(--view-inset) 0px);
+      animation-range:
+        entry 0px entry 48px,
+        exit calc(100% - 48px) exit 100%;
+    }
+  }
+}
+
+/* The columns' heads carry the same load ring and fact as the timeline's lanes. */
+.columnHead .laneRing {
+  padding: 2px;
+}
+
+.columnHead .laneRole {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ——— Phones ——— */
+
+/* The lane's first line never reaches under the right tab. */
+.grid[data-layout="timeline"] .laneTag {
+  max-width: calc(var(--view-size, 100vw) - var(--space-3));
+}
+
+.grid[data-layout="timeline"] .laneTag[data-has-after] {
+  max-width: calc(var(--view-size, 100vw) - 96px);
+}
+
+.laneName {
+  flex-shrink: 0;
+}
+
+.laneWho,
+.laneRole {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  /* Phones keep only the fact: «Нурсултан · свободен с 15:00». */
+  .laneRoleName {
+    display: none;
+  }
+
+  .laneTag .laneRole::before {
+    content: "· ";
+  }
+
+  .laneTag .laneRole:has(> .laneRoleName:only-child)::before {
+    content: none;
+  }
+
+  .laneRole:has(> .laneRoleName:only-child) > .laneRoleName {
+    display: inline;
+  }
+
+  /* No zoom capsule (two fingers zoom), so the masters' track has the whole foot; the chosen face
+     stays a face — its name and note would not fit. */
+  .zoomPill {
+    display: none;
+  }
+
+  /* The tab keeps to the time: the list still opens on a tap. */
+  .grid .edgeTab .edgeMore {
+    display: none;
+  }
+
+  .viewBar {
+    max-width: calc(100% - 2 * var(--space-3));
+  }
+
+  .viewBar .trackMaster[aria-pressed="true"] .trackLabel {
+    grid-template-columns: 0fr;
+  }
 }

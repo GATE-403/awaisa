@@ -135,11 +135,32 @@
   color: var(--color-muted-foreground);
 }
 
-.visitTime {
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
+/* On phones the bar keeps to the screen: «6 визитов без отметки» and the button, never cut. */
+.short {
+  display: none;
 }
 
-.visitMeta {
-  color: var(--color-muted-foreground);
+@media (max-width: 479px) {
+  .long {
+    display: none;
+  }
+
+  .short {
+    display: inline;
+  }
+
+  .bar {
+    gap: var(--space-2);
+    padding-left: var(--space-3);
+  }
+
+  .dot {
+    display: none;
+  }
+}
+
+@media (max-width: 479px) {
+  .who {
+    min-width: 0;
+  }
 }
