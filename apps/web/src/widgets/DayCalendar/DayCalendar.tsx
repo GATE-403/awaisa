@@ -68,6 +68,8 @@ interface DayCalendarProps {
   onMarkArrived?: (booking: AdminBooking) => void
   /** A visit to bring into view and flash (picked from «N визитов прошли без отметки»). */
   focusedBookingId?: string | null
+  /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
+  bottomInset?: number
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -148,6 +150,7 @@ export const DayCalendar = ({
   onZoomChange,
   onMarkArrived,
   focusedBookingId = null,
+  bottomInset = 0,
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
@@ -328,7 +331,7 @@ export const DayCalendar = ({
     if (!scroller) return
     const fit = () => {
       const top = scroller.getBoundingClientRect().top + window.scrollY
-      const fill = `${Math.max(420, window.innerHeight - top - BOTTOM_GAP_PX)}px`
+      const fill = `${Math.max(420, window.innerHeight - top - BOTTOM_GAP_PX - bottomInset)}px`
       if (scroller.style.height === fill) return
       scroller.style.height = fill
       scroller.style.maxHeight = fill
@@ -342,7 +345,7 @@ export const DayCalendar = ({
       observer.disconnect()
       window.removeEventListener('resize', fit)
     }
-  }, [])
+  }, [bottomInset])
 
   // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
   useEffect(() => {

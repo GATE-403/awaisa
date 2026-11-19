@@ -69,6 +69,8 @@ const dayTitleFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
+// The «Все пришли» bar's height and its margin over the window's foot.
+const CLOSE_BAR_SPACE_PX = 72
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
@@ -152,6 +154,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
+  const isCloseBarShown = hasMasters && !isCloseBarHidden && unclosed.total > 0
   // Who those are: the day's ended visits with no outcome yet, in time order.
   const unmarkedHere = (schedule?.bookings ?? [])
     .filter(
@@ -383,6 +386,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
+            bottomInset={isCloseBarShown ? CLOSE_BAR_SPACE_PX : 0}
           />
         )}
       </div>
