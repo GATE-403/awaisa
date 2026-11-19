@@ -699,7 +699,6 @@ export const DayCalendar = ({
                         </span>
                       ) : (
                         <span className={styles.chips}>
-                          {isTimeline && face(specialist, styles.cardFace)}
                           <span className={styles.chip} data-tone={state.tone}>
                             {state.tone === 'success' && <Check weight='bold' aria-hidden />}
                             {state.tone === 'accent' && (
@@ -708,7 +707,12 @@ export const DayCalendar = ({
                             {state.label}
                           </span>
                           <span className={styles.chip}>
-                            {size === 'tall' ? formatPrice(paid) : `${booking.time}–${end}`}
+                            {size === 'tall'
+                              ? formatPrice(paid)
+                              : // Across, the card's length already shows when it ends.
+                                isTimeline
+                                ? booking.time
+                                : `${booking.time}–${end}`}
                           </span>
                         </span>
                       )}

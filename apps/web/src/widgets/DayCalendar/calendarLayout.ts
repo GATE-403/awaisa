@@ -36,10 +36,11 @@ const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 /** «Колонки»: masters side by side, time running down. «Лента»: masters as rows, time across. */
 type CalendarLayout = 'columns' | 'timeline'
 
-// Across, an hour is 180px: a 45-minute visit has room for the client and the service.
-const TIMELINE_PX_PER_MINUTE = 3
-// Below this width (about an hour) a timeline block is one line of client and time.
-const TIMELINE_COMPACT_PX = 150
+// Across, an hour is 240px: a 45-minute visit (180px) has room for its state, time, client and
+// service.
+const TIMELINE_PX_PER_MINUTE = 4
+// Below this width (under half an hour) a timeline block is one line of client and time.
+const TIMELINE_COMPACT_PX = 110
 
 // The timeline zooms (pinch, ctrl + wheel, − / +): from the whole day to quarter hours.
 const MIN_ZOOM = 1

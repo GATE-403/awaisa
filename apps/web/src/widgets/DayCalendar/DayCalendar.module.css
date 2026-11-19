@@ -531,8 +531,8 @@
   /* No row of its own for the hours: they are written on the hour lines, in the room the first
      master's row keeps above its cards. */
   grid-template-columns: max-content;
-  grid-template-rows: 0 minmax(124px, 1fr);
-  grid-auto-rows: minmax(106px, 1fr);
+  grid-template-rows: 0 minmax(142px, 1fr);
+  grid-auto-rows: minmax(124px, 1fr);
   /* The lanes share the box's whole height (the scroller is sized to the window's foot). */
   min-height: 100%;
   /* Lanes part by a little of the day's own grey, not by a white line. */
@@ -809,7 +809,7 @@
 /* Lanes grow with the window; a card keeps its own height at the top of its lane. */
 .grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
   bottom: auto;
-  height: 68px;
+  height: 86px;
 }
 
 /* The calendar's own bar: whose day (chips) on the left, the view on the right. */
@@ -1007,4 +1007,46 @@
 
 .grid[data-layout="timeline"] section.column:first-of-type .laneTag {
   margin-top: 20px;
+}
+
+/* One type scale for the schedule (the lane's master is a heading, everything secondary is the
+   footnote size): client 15 semibold, service and hours 13/12, state chips 12. */
+.grid[data-layout="timeline"] .booking .blockTitle {
+  font-size: var(--text-body);
+  line-height: 20px;
+}
+
+.grid[data-layout="timeline"] .booking .blockService {
+  font-size: var(--text-footnote);
+  line-height: 18px;
+}
+
+.grid[data-layout="timeline"] .booking:not([data-size="compact"]) {
+  gap: 3px;
+  padding: 8px 10px;
+}
+
+.grid[data-layout="timeline"] .hour {
+  font-size: var(--text-xs);
+}
+
+.laneTag .laneName {
+  font-size: var(--text-body);
+}
+
+/* The masters' filter chips match the day strip: one size, footnote text, 32pt tall. */
+.viewBar .filterChip,
+.viewBar :global(button) {
+  height: 32px;
+  padding-inline: var(--space-3);
+  font-size: var(--text-footnote);
+}
+
+.viewBar .filterChip {
+  padding-left: 4px;
+}
+
+.filters .filterChip .chipFace {
+  width: 24px;
+  height: 24px;
 }
