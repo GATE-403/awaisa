@@ -1,10 +1,11 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { Menu } from '@awaisa/ui/Menu'
 import { CaretDown, Check, X } from '@phosphor-icons/react/ssr'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import styles from './CloseDayBar.module.css'
 
 interface CloseDayBarProps {
@@ -51,26 +52,24 @@ export const CloseDayBar = ({
                 <>
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
-                    {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+                    <span className={styles.long}>
+                      {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+                    </span>
+                    <span className={styles.short}>без отметки</span>
                   </span>
                   <CaretDown weight='bold' aria-hidden className={styles.caret} />
                 </>
               }
             >
-              {visitsHere.map((booking) => (
-                <MenuItem key={booking.id} onClick={() => onOpen(booking)}>
-                  <span className={styles.visitTime}>{booking.time}</span> {booking.customerName}
-                  <span className={styles.visitMeta}>
-                    {' '}
-                    · {booking.serviceName} · {booking.specialistName}
-                  </span>
-                </MenuItem>
-              ))}
+              <VisitMenuItems visits={visitsHere} onPick={onOpen} isMasterShown />
             </Menu>
           ) : (
             <span className={styles.text}>
               <strong>{visits(openHere)}</strong>{' '}
-              {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+              <span className={styles.long}>
+                {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+              </span>
+              <span className={styles.short}>без отметки</span>
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>

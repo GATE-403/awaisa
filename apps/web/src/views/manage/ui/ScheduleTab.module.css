@@ -76,3 +76,8 @@
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
 }
+
+/* Room under the day for the floating «Все пришли» bar when the page scrolls. */
+.barSpace {
+  height: 72px;
+}

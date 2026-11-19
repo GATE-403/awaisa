@@ -1,12 +1,15 @@
 'use client'
 
+import { Menu } from '@awaisa/ui/Menu'
 import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  CaretDown,
   CaretLeft,
   CaretRight,
+  CaretUp,
   ChatText,
   Check,
   Clock,
@@ -28,6 +31,7 @@ import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/bu
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralWord } from '@/shared/lib/plural'
+import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
@@ -164,7 +168,8 @@ export const DayCalendar = ({
   // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
   const [nowSide, setNowSide] = useState<'before' | 'after' | null>(null)
   // The timeline's visible stretch, for the «‹ 2 записи» / «3 записи ›» hints at the lanes' edges.
-  const [view, setView] = useState({ left: 0, width: 0 })
+  // The part of the day in view, along its axis (the columns' masters row covers `inset` of it).
+  const [view, setView] = useState({ start: 0, size: 0, inset: 0 })
   const scrollerRef = useRef<HTMLDivElement>(null)
   const edgeKeyRef = useRef<(left: number, width: number) => string>(() => '')
   const scrolledToNow = useRef<CalendarLayout | null>(null)
@@ -208,7 +213,8 @@ export const DayCalendar = ({
     '--columns': specialists.length,
     // The timeline draws its hour lines down the whole box, under and below the lanes.
     '--hour-px': `${toPx(HOUR)}px`,
-    '--view-w': view.width > 0 ? `${view.width}px` : undefined,
+    '--view-size': view.size > 0 ? `${view.size}px` : undefined,
+    '--view-inset': `${view.inset}px`,
   } as CSSProperties
   // Masters without their own day (older API) follow the business hours.
   const dayOf = (specialist: DayCalendarProps['specialists'][number]) =>
@@ -370,30 +376,37 @@ export const DayCalendar = ({
 
   useEffect(() => {
     const scroller = scrollerRef.current
-    if (!scroller || !isTimeline) return
+    if (!scroller) return
     let frame = 0
     const read = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        const next = { left: scroller.scrollLeft, width: scroller.clientWidth }
-        // Re-render only when a visit crosses an edge of the view (the capsules' counts change),
-        // not on every scrolled frame — a re-render of the whole day per frame made it shake.
+        const inset = isTimeline
+          ? 0
+          : (scroller.querySelector<HTMLElement>('[data-column-head]')?.offsetHeight ?? 0)
+        const next = isTimeline
+          ? { start: scroller.scrollLeft, size: scroller.clientWidth, inset }
+          : { start: scroller.scrollTop, size: scroller.clientHeight - inset, inset }
+        // Re-render only when a visit crosses an edge of the view (the tabs change), not on every
+        // scrolled frame — a re-render of the whole day per frame made it shake.
         setView((current) =>
-          current.width === next.width &&
-          edgeKeyRef.current(current.left, current.width) ===
-            edgeKeyRef.current(next.left, next.width)
+          current.size === next.size &&
+          current.inset === next.inset &&
+          edgeKeyRef.current(current.start, current.size) ===
+            edgeKeyRef.current(next.start, next.size)
             ? current
             : next,
         )
       })
     }
     read()
+    const observer = new ResizeObserver(read)
+    observer.observe(scroller)
     scroller.addEventListener('scroll', read, { passive: true })
-    window.addEventListener('resize', read)
     return () => {
       cancelAnimationFrame(frame)
+      observer.disconnect()
       scroller.removeEventListener('scroll', read)
-      window.removeEventListener('resize', read)
     }
   }, [isTimeline])
 
@@ -410,8 +423,11 @@ export const DayCalendar = ({
     return () => window.clearTimeout(timer)
   }, [focusedBookingId])
 
-  const scrollToX = (x: number) =>
-    scrollerRef.current?.scrollTo({ left: Math.max(0, x - view.width / 3), behavior: 'smooth' })
+  const scrollToOffset = (offset: number) =>
+    scrollerRef.current?.scrollTo({
+      [isTimeline ? 'left' : 'top']: Math.max(0, offset - view.size / 3),
+      behavior: 'smooth',
+    })
 
   const scrollToNow = () => {
     const scroller = scrollerRef.current
@@ -493,9 +509,9 @@ export const DayCalendar = ({
         }
       })
     return {
-      before: visits.filter(({ to }) => to < view.left).sort((a, b) => b.from - a.from),
+      before: visits.filter(({ to }) => to < view.start).sort((a, b) => b.from - a.from),
       after: visits
-        .filter(({ from }) => from > view.left + view.width)
+        .filter(({ from }) => from > view.start + view.size)
         .sort((a, b) => a.from - b.from),
     }
   }
@@ -530,44 +546,69 @@ export const DayCalendar = ({
     if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return 'свободен сейчас'
     return `свободен с ${formatClock(freeFrom)}`
   }
-  // A tab flush with the day's edge: the nearest visit beyond it, how many more, and on hover the
-  // list of who is there — a tap glides to the nearest, a row to its own visit.
+  const ringStyle = (specialist: DayCalendarProps['specialists'][number]) =>
+    ({ '--load': `${Math.round(loadOf(specialist).share * 360)}deg` }) as CSSProperties
+  // «Барбер · свободен с 15:00»: phones keep only the fact.
+  const roleLine = (specialist: DayCalendarProps['specialists'][number]) => {
+    const fact = laneFact(specialist)
+    return (
+      <span className={styles.laneRole}>
+        <span className={styles.laneRoleName}>
+          {headNote(specialist) ?? specialist.role}
+          {fact && ' · '}
+        </span>
+        {fact && <span>{fact}</span>}
+      </span>
+    )
+  }
+  // A tab flush with the day's edge: the nearest visit beyond it and how many more. One visit —
+  // a tap glides to it; several — the kit's pull-down menu lists who is there, nearest first.
   const edgeTab = (side: 'before' | 'after', visits: ReturnType<typeof edgeVisits>['before']) => {
     const [nearest] = visits
     if (!nearest) return null
     const more = visits.length - 1
+    const Lead = isTimeline ? CaretLeft : CaretUp
+    const Trail = isTimeline ? CaretRight : CaretDown
+    const where = isTimeline
+      ? side === 'before'
+        ? 'раньше'
+        : 'позже'
+      : side === 'before'
+        ? 'выше'
+        : 'ниже'
+    const count = `${visits.length} ${pluralWord(visits.length, ['запись', 'записи', 'записей'])} ${where}`
+    const content = (
+      <>
+        {side === 'before' && <Lead weight='bold' aria-hidden />}
+        <span className={styles.edgeTime}>{nearest.booking.time}</span>
+        {more > 0 && <span className={styles.edgeMore}>+{more}</span>}
+        {side === 'after' && <Trail weight='bold' aria-hidden />}
+      </>
+    )
     return (
       <span className={styles.edgeTab} data-side={side}>
-        <button
-          type='button'
-          className={styles.edgeHint}
-          data-side={side}
-          onClick={() => scrollToX(nearest.from)}
-        >
-          {side === 'before' && <CaretLeft weight='bold' aria-hidden />}
-          <span className={styles.edgeTime}>{nearest.booking.time}</span>
-          {more > 0 && <span className={styles.edgeMore}>+{more}</span>}
-          {side === 'after' && <CaretRight weight='bold' aria-hidden />}
-          <span className={styles.srOnlyText}>
-            {' '}
-            — {visits.length} {pluralWord(visits.length, ['запись', 'записи', 'записей'])}{' '}
-            {side === 'before' ? 'раньше' : 'позже'}
-          </span>
-        </button>
-        {more > 0 && (
-          <span className={styles.edgeList}>
-            {visits.map(({ booking, from }) => (
-              <button
-                key={booking.id}
-                type='button'
-                className={styles.edgeRow}
-                onClick={() => scrollToX(from)}
-              >
-                <span className={styles.edgeRowTime}>{booking.time}</span>
-                <span className={styles.edgeRowName}>{booking.customerName}</span>
-              </button>
-            ))}
-          </span>
+        {more === 0 ? (
+          <button
+            type='button'
+            className={styles.edgeHint}
+            onClick={() => scrollToOffset(nearest.from)}
+          >
+            {content}
+            <span className={styles.srOnlyText}> — {count}</span>
+          </button>
+        ) : (
+          <Menu
+            label={`${nearest.booking.time} +${more} — ${count}`}
+            className={styles.edgeHint}
+            trigger={content}
+          >
+            <VisitMenuItems
+              visits={visits.map(({ booking }) => booking)}
+              onPick={(booking) =>
+                scrollToOffset(visits.find((visit) => visit.booking.id === booking.id)?.from ?? 0)
+              }
+            />
+          </Menu>
         )}
       </span>
     )
@@ -724,18 +765,21 @@ export const DayCalendar = ({
             <div
               key={specialist.id}
               className={styles.columnHead}
+              data-column-head
               style={{ '--tint': tintOf(specialist.id), ...cell(index + 2, 1) } as CSSProperties}
             >
-              <PersonAvatar
-                name={specialist.name}
-                src={specialist.photoUrl ?? undefined}
-                size='sm'
-                className={styles.face}
-              />
+              <span className={styles.laneRing} style={ringStyle(specialist)}>
+                <PersonAvatar
+                  name={specialist.name}
+                  src={specialist.photoUrl ?? undefined}
+                  size='sm'
+                  className={styles.face}
+                />
+              </span>
               <span className={styles.headText}>
                 <span className={styles.master}>{specialist.name}</span>
                 <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
-                  {headNote(specialist) ?? specialist.role}
+                  {roleLine(specialist)}
                 </span>
               </span>
             </div>
@@ -846,40 +890,37 @@ export const DayCalendar = ({
                   )}
                 </span>
               )}
-              {isTimeline &&
-                view.width > 0 &&
+              {view.size > 0 &&
                 (() => {
-                  // Only the right-hand tab lives in this sticky band the width of the view (the
-                  // browser keeps it in place while the day scrolls); the left one leads the lane's
-                  // first line. Both sit on that line, above the cards, so they never cover a visit.
-                  const { after } = edgeVisits(specialist.id)
-                  if (after.length === 0) return null
+                  // A sticky band as big as the view: the browser keeps the tabs in place while
+                  // the day scrolls, so they never lag. On the timeline only the right tab lives
+                  // here (the left one leads the lane's first line); the columns hold both.
+                  const { before, after } = edgeVisits(specialist.id)
+                  if (after.length === 0 && (isTimeline || before.length === 0)) return null
                   return (
                     <span className={styles.edgeRail}>
-                      <span className={styles.edgeBand}>{edgeTab('after', after)}</span>
+                      <span className={styles.edgeBand}>
+                        {!isTimeline && edgeTab('before', before)}
+                        {edgeTab('after', after)}
+                      </span>
                     </span>
                   )
                 })()}
               {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
               {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
-                <span className={styles.laneTag}>
-                  {view.width > 0 && edgeTab('before', edgeVisits(specialist.id).before)}
+                <span
+                  className={styles.laneTag}
+                  data-has-after={
+                    (view.size > 0 && edgeVisits(specialist.id).after.length > 0) || undefined
+                  }
+                >
+                  {view.size > 0 && edgeTab('before', edgeVisits(specialist.id).before)}
                   <span className={styles.laneWho} aria-hidden='true'>
-                    <span
-                      className={styles.laneRing}
-                      style={
-                        {
-                          '--load': `${Math.round(loadOf(specialist).share * 360)}deg`,
-                        } as CSSProperties
-                      }
-                    >
+                    <span className={styles.laneRing} style={ringStyle(specialist)}>
                       {face(specialist, styles.cardFace)}
                     </span>
                     <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                    <span className={styles.laneRole}>
-                      {headNote(specialist) ?? specialist.role}
-                      {laneFact(specialist) && ` · ${laneFact(specialist)}`}
-                    </span>
+                    {roleLine(specialist)}
                   </span>
                 </span>
               )}
