@@ -93,3 +93,53 @@
     animation: none;
   }
 }
+
+/* The count is a button: it lists who the unmarked visits are. */
+.who {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.who::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+@media (hover: hover) {
+  .who:hover {
+    background: var(--color-fill);
+  }
+}
+
+.who:focus-visible {
+  /* Focus given back after the list closes is shown as the hover fill, not a ring that read as
+     a stuck selection. */
+  outline: none;
+  background: var(--color-fill);
+}
+
+.caret {
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.visitTime {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.visitMeta {
+  color: var(--color-muted-foreground);
+}

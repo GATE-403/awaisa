@@ -82,13 +82,14 @@ export class AdminService {
 
     return {
       date,
-      specialists: specialists.map(({ id, name, role, branchId }) => {
+      specialists: specialists.map(({ id, name, role, branchId, photoUrl }) => {
         const day = window ? clampToWindow(days.get(id) ?? null, window) : null
         return {
           id,
           name,
           role,
           branchId,
+          photoUrl,
           // The master's own day inside the business hours; null = not working.
           hours: day,
           leaveReason: leaves.find((leave) => leave.specialistId === id)?.reason ?? null,

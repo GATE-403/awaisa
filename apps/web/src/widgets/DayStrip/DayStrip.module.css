@@ -129,3 +129,66 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Compact: one thin line — «чт 19» in a capsule per day, the chosen one filled; the dot of a day
+   with unmarked visits sits beside the number. */
+.strip[data-variant="compact"] {
+  padding-block: 6px;
+}
+
+.strip[data-variant="compact"] .day {
+  flex-direction: row;
+  gap: 4px;
+  width: auto;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+}
+
+.strip[data-variant="compact"] .weekday {
+  font-size: var(--text-footnote);
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.strip[data-variant="compact"] .number {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  font-size: var(--text-footnote);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] {
+  background: var(--color-foreground);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] :is(.weekday, .number) {
+  background: none;
+  color: var(--color-background);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] {
+  background: var(--color-danger-strong);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] :is(.weekday, .number) {
+  color: var(--color-primary-foreground);
+}
+
+.strip[data-variant="compact"] .day[data-marked]::after {
+  position: static;
+  width: 5px;
+  height: 5px;
+  translate: none;
+}
+
+@media (hover: hover) {
+  .strip[data-variant="compact"] .day[aria-pressed="false"]:hover {
+    background: var(--color-subtle);
+  }
+
+  .strip[data-variant="compact"] .day[aria-pressed="false"]:hover .number {
+    background: none;
+  }
+}

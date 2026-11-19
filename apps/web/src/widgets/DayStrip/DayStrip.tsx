@@ -10,9 +10,11 @@ interface DayStripProps {
   onChange: (dayKey: string) => void
   /** Days with something to do (e.g. visits not closed yet): a small dot under the number. */
   marks?: ReadonlySet<string>
+  /** `compact`: one thin line of «чт 19» capsules (the cabinet); default: weekday over number. */
+  variant?: 'default' | 'compact'
 }
 
-export const DayStrip = ({ days, value, onChange, marks }: DayStripProps) => {
+export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: DayStripProps) => {
   const daysRef = useRef<HTMLFieldSetElement>(null)
   const today = days.find((day) => day.isToday)
 
@@ -23,7 +25,7 @@ export const DayStrip = ({ days, value, onChange, marks }: DayStripProps) => {
   }, [value])
 
   return (
-    <div className={styles.strip}>
+    <div className={styles.strip} data-variant={variant}>
       <fieldset aria-label='День' className={styles.days} ref={daysRef}>
         {days.map((day) => (
           <button

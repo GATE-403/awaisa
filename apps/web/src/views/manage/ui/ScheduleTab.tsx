@@ -7,7 +7,7 @@ import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
-import { findDay, weekdayOf } from '@/entities/business'
+import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   closeDay,
@@ -21,8 +21,10 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
+import { useScheduleLayout } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
@@ -31,7 +33,7 @@ import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
-import { DayCalendar } from '@/widgets/DayCalendar'
+import { type CalendarLayout, DayCalendar } from '@/widgets/DayCalendar'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './ScheduleTab.module.css'
 
@@ -50,10 +52,31 @@ type Draft = {
 }
 
 const DAYS_SHOWN = 14
+
+const LAYOUTS: { value: CalendarLayout; label: string }[] = [
+  { value: 'columns', label: 'Колонки' },
+  { value: 'timeline', label: 'Лента' },
+]
+
+// «Чт, 19 ноября»: the day in the toolbar's one line.
+const capitalizeFirst = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+const dayTitleFormatter = new Intl.DateTimeFormat('ru-RU', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'long',
+})
+
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
+// The «Все пришли» bar's height and its margin over the window's foot.
+const CLOSE_BAR_SPACE_PX = 72
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
+  const { layout, setLayout } = useScheduleLayout()
+  const [zoom, setZoom] = useState(1)
+  // A visit picked from «N визитов прошли без отметки»: the calendar scrolls to it and flashes it.
+  const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
@@ -92,6 +115,9 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     removeTimeOff,
   } = useAdminSchedule(slug, date, refreshKey)
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
+  const dayTitle = date
+    ? capitalizeFirst(dayTitleFormatter.format(new Date(`${date}T12:00:00`)))
+    : ''
   const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
   // What the day brings: paid amounts once marked, prices otherwise; no-shows bring nothing.
   const revenue = confirmed.reduce(
@@ -103,7 +129,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   // The day as a title, its numbers in one line under it with the figures in bold.
   const summary = (
     <>
-      <span className={styles.dayTitle}>{dayLabel}</span>
+      <span className={styles.dayTitle}>{dayTitle}</span>
       <span className={styles.dayStats}>
         {!dayHours ? (
           'Выходной'
@@ -128,6 +154,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
+  const isCloseBarShown = hasMasters && !isCloseBarHidden && unclosed.total > 0
+  // Who those are: the day's ended visits with no outcome yet, in time order.
+  const unmarkedHere = (schedule?.bookings ?? [])
+    .filter(
+      (booking) =>
+        booking.status === 'confirmed' &&
+        !booking.outcome &&
+        booking.payment?.status !== 'pending' &&
+        (isPast ||
+          (today !== null &&
+            date === today.dayKey &&
+            parseClock(booking.time) + booking.durationMinutes <= today.minutes)),
+    )
+    .sort((first, second) => first.time.localeCompare(second.time))
   const dayWaitlist = waitlist.filter((entry) => entry.date === date)
 
   // Arrived from a «Новая запись» toast or notification: show that day and open the booking once.
@@ -249,7 +289,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         title='Расписание'
         description={
           <>
-            {schedule ? summary : <span className={styles.dayTitle}>{dayLabel}</span>}
+            {schedule ? summary : <span className={styles.dayTitle}>{dayTitle}</span>}
             {/* The waiting list is a state of the day: part of the hint, not another button. */}
             {!isPast && dayWaitlist.length > 0 && (
               <button
@@ -266,6 +306,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
+              <SegmentedControl
+                label='Вид расписания'
+                size='sm'
+                value={layout}
+                items={LAYOUTS}
+                onChange={setLayout}
+              />
               {!isPast && (
                 <>
                   <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
@@ -298,7 +345,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       )}
 
       <div className={styles.panel}>
-        <DayStrip days={days} value={date} onChange={setSelectedDay} marks={marks} />
+        <DayStrip
+          variant='compact'
+          days={days}
+          value={date}
+          onChange={setSelectedDay}
+          marks={marks}
+        />
         {schedule && hasMasters && today && date === today.dayKey && (
           <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
         )}
@@ -320,10 +373,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             nowMinutes={today && date === today.dayKey ? today.minutes : null}
             isPast={isPast}
             slotMinutes={business.slotMinutes}
+            layout={layout}
+            zoom={zoom}
+            onZoomChange={setZoom}
+            focusedBookingId={focusedBookingId}
+            onMarkArrived={
+              today && date && date <= today.dayKey
+                ? (booking) => void markOutcome(booking.id, { outcome: 'arrived' })
+                : undefined
+            }
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
+            bottomInset={isCloseBarShown ? CLOSE_BAR_SPACE_PX : 0}
           />
         )}
       </div>
@@ -332,6 +395,11 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         <CloseDayBar
           openHere={openHere}
           openElsewhere={unclosed.total - openHere}
+          visitsHere={unmarkedHere}
+          onOpen={(booking) => {
+            setFocusedBookingId(null)
+            requestAnimationFrame(() => setFocusedBookingId(booking.id))
+          }}
           onCloseDay={handleCloseDay}
           onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
           onDismiss={() => setIsCloseBarHidden(true)}

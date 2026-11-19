@@ -265,3 +265,7 @@
   flex: 1;
   justify-content: center;
 }
+
+.rowLink {
+  color: var(--color-link);
+}
