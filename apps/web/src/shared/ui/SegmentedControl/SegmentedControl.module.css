@@ -62,6 +62,13 @@
   transition: color var(--duration-fast) var(--ease-standard);
 }
 
+/* Toolbar size: 32 + the track = 36pt, the height of the kit's small buttons beside it. */
+.control[data-size="sm"] .segment {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-footnote);
+}
+
 /* Hairlines between unselected neighbours, as in the kit. */
 .segment:not(:has(:checked)) + .segment:not(:has(:checked))::before {
   content: "";

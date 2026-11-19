@@ -618,7 +618,7 @@ type TimeOff = {
 
 type AdminSchedule = {
   date: string
-  specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'branchId'> & {
+  specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'branchId' | 'photoUrl'> & {
     /** The master's working time that day inside the business hours; null = not working. */
     hours?: { opensMinutes: number; closesMinutes: number } | null
     isOnLeave?: boolean

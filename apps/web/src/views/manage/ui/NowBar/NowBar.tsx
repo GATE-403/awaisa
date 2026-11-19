@@ -6,7 +6,6 @@ import { useSyncExternalStore } from 'react'
 import { addMinutes, parseClock } from '@/entities/business'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
-import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './NowBar.module.css'
 
 interface NowBarProps {
@@ -53,6 +52,9 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
     ? Math.max(0, parseClock(current.time) + current.durationMinutes - nowMinutes)
     : 0
 
+  // Nothing in the chair and nothing ahead: no row at all — the calendar under it says enough.
+  if (!current && !next) return null
+
   const enableNotifications = () => {
     void Notification.requestPermission()
   }
@@ -85,7 +87,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           </button>
         </div>
       )}
-      {next ? (
+      {next && (
         <div className={styles.tile} data-soon={wait <= SOON_MINUTES || undefined}>
           <button type='button' className={styles.open} onClick={() => onOpen(next)}>
             <span className={styles.text}>
@@ -112,14 +114,6 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             </a>
           )}
         </div>
-      ) : (
-        !current && (
-          <EmptyState
-            variant='inline'
-            className={styles.empty}
-            text='На сегодня записей больше нет.'
-          />
-        )
       )}
       {permission === 'default' && (
         <button type='button' className={styles.notify} onClick={enableNotifications}>
