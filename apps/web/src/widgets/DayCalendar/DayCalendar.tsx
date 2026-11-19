@@ -24,7 +24,6 @@ import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import chip from '@/shared/ui/Chip/Chip.module.css'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
@@ -34,6 +33,7 @@ import {
   HOUR,
   MAX_ZOOM,
   MIN_ZOOM,
+  masterDayLoad,
   minorStep,
   pxPerMinute,
   TALL_BLOCK_PX,
@@ -394,31 +394,67 @@ export const DayCalendar = ({
   return (
     <div className={styles.frame}>
       {isTimeline && specialists.length > 1 && (
-        // Whose day to show: everyone, or one master — capsules with the face and first name.
+        // Whose day to show, as one track of faces like the kit's segmented control: each face in a
+        // ring of how full their day is; the chosen one opens into a white capsule with the name
+        // and when they are free next — where a new client fits.
         <div className={styles.viewBar}>
-          <div className={styles.filters}>
+          <fieldset className={styles.track}>
+            <legend className={styles.trackLegend}>Мастера</legend>
             <button
               type='button'
-              className={chip.chip}
+              className={styles.trackAll}
               aria-pressed={focusId === null}
               onClick={() => setFocusId(null)}
             >
               Все
             </button>
-            {specialists.map((specialist) => (
-              <button
-                key={specialist.id}
-                type='button'
-                className={`${chip.chip} ${styles.filterChip}`}
-                style={{ '--tint': tintOf(specialist.id) } as CSSProperties}
-                aria-pressed={focusId === specialist.id}
-                onClick={() => setFocusId(focusId === specialist.id ? null : specialist.id)}
-              >
-                {face(specialist, styles.chipFace)}
-                {specialist.name.split(' ')[0]}
-              </button>
-            ))}
-          </div>
+            {specialists.map((specialist) => {
+              const isChosen = focusId === specialist.id
+              const day = dayOf(specialist)
+              const load = masterDayLoad(
+                day,
+                bookings.filter((booking) => booking.specialistId === specialist.id),
+                isPast ? (day?.closesMinutes ?? null) : nowMinutes,
+                slotMinutes,
+              )
+              const note =
+                day === null || specialist.isOnLeave
+                  ? (headNote(specialist) ?? 'Выходной')
+                  : load.share === 0 && !isPast
+                    ? 'свободен весь день'
+                    : `занят на ${Math.round(load.share * 100)}%${
+                        isPast
+                          ? ''
+                          : load.freeFrom === null
+                            ? ' · до конца дня'
+                            : ` · свободен с ${formatClock(load.freeFrom)}`
+                      }`
+              return (
+                <button
+                  key={specialist.id}
+                  type='button'
+                  className={styles.trackMaster}
+                  style={
+                    {
+                      '--tint': tintOf(specialist.id),
+                      '--load': `${Math.round(load.share * 360)}deg`,
+                    } as CSSProperties
+                  }
+                  aria-pressed={isChosen}
+                  onClick={() => setFocusId(isChosen ? null : specialist.id)}
+                >
+                  <span className={styles.ring}>{face(specialist, styles.ringFace)}</span>
+                  {/* Folded to nothing unless chosen; screen readers always read it. */}
+                  <span className={styles.trackLabel}>
+                    <span className={styles.trackLabelInner}>
+                      <span className={styles.trackName}>{specialist.name.split(' ')[0]}</span>
+                      <span className={styles.trackNote}>{note}</span>
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </fieldset>
         </div>
       )}
       {isTimeline && onZoomChange && (

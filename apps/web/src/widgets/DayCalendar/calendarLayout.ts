@@ -33,6 +33,46 @@ const getDayRange = (
 
 const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 
+type DayWindow = { opensMinutes: number; closesMinutes: number }
+
+// How full a master's day is (booked minutes inside their hours) and the first slot left from
+// now (or from opening on another day) — what the timeline's masters filter shows on each face.
+const masterDayLoad = (
+  day: DayWindow | null,
+  bookings: AdminBooking[],
+  nowMinutes: number | null,
+  slotMinutes: number,
+): { share: number; freeFrom: number | null } => {
+  if (!day) return { share: 0, freeFrom: null }
+  const visits = bookings
+    .filter((booking) => booking.status === 'confirmed')
+    .map((booking) => {
+      const from = parseClock(booking.time)
+      return { from, to: from + booking.durationMinutes }
+    })
+    .sort((first, second) => first.from - second.from)
+  const open = day.closesMinutes - day.opensMinutes
+  const busy = visits.reduce(
+    (sum, { from, to }) =>
+      sum + Math.max(0, Math.min(to, day.closesMinutes) - Math.max(from, day.opensMinutes)),
+    0,
+  )
+  let start =
+    nowMinutes === null
+      ? day.opensMinutes
+      : Math.max(day.opensMinutes, Math.ceil(nowMinutes / slotMinutes) * slotMinutes)
+  for (const { from, to } of visits) {
+    if (to <= start) continue
+    if (from >= start + slotMinutes) break
+    start = Math.max(start, to)
+  }
+
+  return {
+    share: open > 0 ? Math.min(1, busy / open) : 0,
+    freeFrom: start + slotMinutes <= day.closesMinutes ? start : null,
+  }
+}
+
 /** «Колонки»: masters side by side, time running down. «Лента»: masters as rows, time across. */
 type CalendarLayout = 'columns' | 'timeline'
 
@@ -82,6 +122,7 @@ const getMasterTint = (index: number) =>
 
 export {
   clampZoom,
+  masterDayLoad,
   COMPACT_BLOCK_PX,
   MAX_ZOOM,
   MIN_ZOOM,
