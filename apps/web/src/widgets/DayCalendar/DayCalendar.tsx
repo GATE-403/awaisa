@@ -14,6 +14,7 @@ import {
 } from '@phosphor-icons/react/ssr'
 import {
   type CSSProperties,
+  Fragment,
   type MouseEvent,
   useEffect,
   useLayoutEffect,
@@ -24,6 +25,7 @@ import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { pluralWord } from '@/shared/lib/plural'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
@@ -62,6 +64,10 @@ interface DayCalendarProps {
   zoom?: number
   /** Pinch or ctrl + wheel over the timeline asks for a new zoom. */
   onZoomChange?: (zoom: number) => void
+  /** «✓ Пришёл» right on an ended, unmarked visit's card. */
+  onMarkArrived?: (booking: AdminBooking) => void
+  /** A visit to bring into view and flash (picked from «N визитов прошли без отметки»). */
+  focusedBookingId?: string | null
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -140,6 +146,8 @@ export const DayCalendar = ({
   layout = 'columns',
   zoom = 1,
   onZoomChange,
+  onMarkArrived,
+  focusedBookingId = null,
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
@@ -150,7 +158,10 @@ export const DayCalendar = ({
   const [focusId, setFocusId] = useState<string | null>(null)
   // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
   const [nowSide, setNowSide] = useState<'before' | 'after' | null>(null)
+  // The timeline's visible stretch, for the «‹ 2 записи» / «3 записи ›» hints at the lanes' edges.
+  const [view, setView] = useState({ left: 0, width: 0 })
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const edgeKeyRef = useRef<(left: number, width: number) => string>(() => '')
   const scrolledToNow = useRef<CalendarLayout | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
   const isTimeline = layout === 'timeline'
@@ -188,7 +199,12 @@ export const DayCalendar = ({
     (_, index) => range.start + index * HOUR,
   )
   const showNow = nowMinutes !== null && nowMinutes >= range.start && nowMinutes <= range.end
-  const gridStyle = { '--columns': specialists.length } as CSSProperties
+  const gridStyle = {
+    '--columns': specialists.length,
+    // The timeline draws its hour lines down the whole box, under and below the lanes.
+    '--hour-px': `${toPx(HOUR)}px`,
+    '--view-w': view.width > 0 ? `${view.width}px` : undefined,
+  } as CSSProperties
   // Masters without their own day (older API) follow the business hours.
   const dayOf = (specialist: DayCalendarProps['specialists'][number]) =>
     specialist.hours === undefined ? hours : specialist.hours
@@ -255,7 +271,16 @@ export const DayCalendar = ({
       onZoomRef.current?.(zoomTo)
     }
     const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey && !event.metaKey) return
+      // A plain wheel turns the day sideways while every lane fits the box's height (a mouse
+      // otherwise needs Shift); a trackpad's own sideways swipe passes through untouched.
+      if (!event.ctrlKey && !event.metaKey) {
+        const fitsHeight = scroller.scrollHeight <= scroller.clientHeight + 2
+        if (fitsHeight && Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          event.preventDefault()
+          scroller.scrollLeft += event.deltaY
+        }
+        return
+      }
       event.preventDefault()
       zoomAround(zoomRef.current * Math.exp(-event.deltaY * 0.01), event.clientX)
     }
@@ -338,6 +363,51 @@ export const DayCalendar = ({
     return () => scroller.removeEventListener('scroll', check)
   }, [nowOffset, isTimeline])
 
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller || !isTimeline) return
+    let frame = 0
+    const read = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const next = { left: scroller.scrollLeft, width: scroller.clientWidth }
+        // Re-render only when a visit crosses an edge of the view (the capsules' counts change),
+        // not on every scrolled frame — a re-render of the whole day per frame made it shake.
+        setView((current) =>
+          current.width === next.width &&
+          edgeKeyRef.current(current.left, current.width) ===
+            edgeKeyRef.current(next.left, next.width)
+            ? current
+            : next,
+        )
+      })
+    }
+    read()
+    scroller.addEventListener('scroll', read, { passive: true })
+    window.addEventListener('resize', read)
+    return () => {
+      cancelAnimationFrame(frame)
+      scroller.removeEventListener('scroll', read)
+      window.removeEventListener('resize', read)
+    }
+  }, [isTimeline])
+
+  // A visit picked from the list of unmarked ones glides into the middle and flashes.
+  useEffect(() => {
+    if (!focusedBookingId) return
+    const card = scrollerRef.current?.querySelector<HTMLElement>(
+      `[data-booking-id="${focusedBookingId}"]`,
+    )
+    if (!card) return
+    card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })
+    card.dataset.flash = ''
+    const timer = window.setTimeout(() => delete card.dataset.flash, 1800)
+    return () => window.clearTimeout(timer)
+  }, [focusedBookingId])
+
+  const scrollToX = (x: number) =>
+    scrollerRef.current?.scrollTo({ left: Math.max(0, x - view.width / 3), behavior: 'smooth' })
+
   const scrollToNow = () => {
     const scroller = scrollerRef.current
     if (!scroller || nowOffset === null) return
@@ -356,15 +426,24 @@ export const DayCalendar = ({
 
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
   // in, once per layout — the minute ticks after that must not pull the view back.
+  // Another day (no «now») forgets it, so coming back to today opens at now again; the scroll waits
+  // a frame, until the day's width and the box's height are laid out.
   useEffect(() => {
     const scroller = scrollerRef.current
-    if (!scroller || nowOffset === null || scrolledToNow.current === layout) return
-    scrolledToNow.current = layout
-    if (layout === 'timeline') {
-      scroller.scrollLeft = Math.max(0, nowOffset - scroller.clientWidth / 3)
-    } else {
-      scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
+    if (nowOffset === null) {
+      scrolledToNow.current = null
+      return
     }
+    if (!scroller || scrolledToNow.current === layout) return
+    scrolledToNow.current = layout
+    const frame = requestAnimationFrame(() => {
+      if (layout === 'timeline') {
+        scroller.scrollLeft = Math.max(0, nowOffset - scroller.clientWidth / 3)
+      } else {
+        scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
+      }
+    })
+    return () => cancelAnimationFrame(frame)
   }, [nowOffset, layout])
 
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
@@ -394,6 +473,21 @@ export const DayCalendar = ({
         const from = parseClock(booking.time)
         return { from, to: from + booking.durationMinutes }
       })
+  // How many visits sit off each side of the view, per lane — what the edge capsules show.
+  useEffect(() => {
+    edgeKeyRef.current = (left, width) =>
+      specialists
+        .map(({ id }) => {
+          const visits = busyOf(id).map(({ from, to }) => ({
+            from: toPx(from - range.start),
+            to: toPx(to - range.start),
+          }))
+          const before = visits.filter(({ to }) => to < left).length
+          const after = visits.filter(({ from }) => from > left + width).length
+          return `${before}:${after}`
+        })
+        .join('|')
+  })
   const isTaken = (specialistId: string, minutes: number) =>
     busyOf(specialistId).some(({ from, to }) => from < minutes + slotMinutes && to > minutes)
   // How far the free time runs from a slot, so the preview never reaches under the next visit.
@@ -653,6 +747,48 @@ export const DayCalendar = ({
                   )}
                 </span>
               )}
+              {isTimeline &&
+                view.width > 0 &&
+                (() => {
+                  // Visits out of view on either side, as quiet capsules at the lane's edges.
+                  const visits = busyOf(specialist.id).map(({ from, to }) => ({
+                    from: toPx(from - range.start),
+                    to: toPx(to - range.start),
+                  }))
+                  const before = visits.filter(({ to }) => to < view.left)
+                  const after = visits.filter(({ from }) => from > view.left + view.width)
+                  const word = (count: number) =>
+                    `${count} ${pluralWord(count, ['запись', 'записи', 'записей'])}`
+                  if (before.length === 0 && after.length === 0) return null
+                  // A sticky band the width of the view: the browser keeps it in place while
+                  // the day scrolls, so the capsules never lag a frame behind the finger.
+                  return (
+                    <span className={styles.edgeRail}>
+                      <span className={styles.edgeBand}>
+                        {before.length > 0 && (
+                          <button
+                            type='button'
+                            className={styles.edgeHint}
+                            data-side='before'
+                            onClick={() => scrollToX(Math.max(...before.map(({ from }) => from)))}
+                          >
+                            ‹ {word(before.length)}
+                          </button>
+                        )}
+                        {after.length > 0 && (
+                          <button
+                            type='button'
+                            className={styles.edgeHint}
+                            data-side='after'
+                            onClick={() => scrollToX(Math.min(...after.map(({ from }) => from)))}
+                          >
+                            {word(after.length)} ›
+                          </button>
+                        )}
+                      </span>
+                    </span>
+                  )
+                })()}
               {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
               {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
                 <span className={styles.laneTag} aria-hidden='true'>
@@ -765,93 +901,132 @@ export const DayCalendar = ({
                       ? (booking.paidAmount ?? booking.price)
                       : booking.price - (booking.discount?.amount ?? 0)
 
+                  const box = place(from, to) as {
+                    left?: number
+                    width?: number
+                    top?: number
+                    height?: number
+                  }
+                  // One press marks an ended visit arrived, right on its card (shown on hover;
+                  // always on touch screens) — the sheet stays for anything more.
+                  const quickMark = state.tone === 'warning' &&
+                    onMarkArrived &&
+                    size !== 'compact' && (
+                      <button
+                        type='button'
+                        className={styles.quickMark}
+                        style={
+                          isTimeline
+                            ? { left: (box.left ?? 0) + (box.width ?? 0) - 10 }
+                            : { top: (box.top ?? 0) + (box.height ?? 0) - 8, right: 12 }
+                        }
+                        data-layout={layout}
+                        onClick={() => onMarkArrived(booking)}
+                      >
+                        <Check weight='bold' aria-hidden />
+                        Пришёл
+                        <span className={styles.srOnlyText}>: {booking.customerName}</span>
+                      </button>
+                    )
                   return (
-                    <button
-                      key={booking.id}
-                      type='button'
-                      className={styles.booking}
-                      data-cancelled={booking.status === 'cancelled' || undefined}
-                      data-outcome={booking.outcome ?? undefined}
-                      data-tone={state.tone}
-                      data-ended={isPast || (nowMinutes !== null && to <= nowMinutes) || undefined}
-                      data-size={size}
-                      data-narrow={(isTimeline && length < 190) || undefined}
-                      data-dragging={drag.dragged?.id === booking.id || undefined}
-                      style={
-                        progress === null
-                          ? place(from, to)
-                          : ({ ...place(from, to), '--progress': `${progress}%` } as CSSProperties)
-                      }
-                      onPointerDown={(event) => drag.handlePointerDown(event, booking)}
-                      // The empty-slot preview must not peek out from under a card the pointer
-                      // moved onto.
-                      onPointerEnter={() => setHover(null)}
-                      onClick={() => {
-                        if (!drag.consumeClick()) onSelectBooking(booking)
-                      }}
-                      aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
-                    >
-                      {size === 'compact' ? (
-                        <span className={styles.blockLine}>
-                          {/* On the timeline the card's own fill already says the state; a short card keeps its room
+                    <Fragment key={booking.id}>
+                      <button
+                        type='button'
+                        className={styles.booking}
+                        data-cancelled={booking.status === 'cancelled' || undefined}
+                        data-outcome={booking.outcome ?? undefined}
+                        data-tone={state.tone}
+                        data-ended={
+                          isPast || (nowMinutes !== null && to <= nowMinutes) || undefined
+                        }
+                        data-size={size}
+                        data-narrow={(isTimeline && length < 190) || undefined}
+                        data-booking-id={booking.id}
+                        data-dragging={drag.dragged?.id === booking.id || undefined}
+                        style={
+                          progress === null
+                            ? place(from, to)
+                            : ({
+                                ...place(from, to),
+                                '--progress': `${progress}%`,
+                              } as CSSProperties)
+                        }
+                        onPointerDown={(event) => drag.handlePointerDown(event, booking)}
+                        // The empty-slot preview must not peek out from under a card the pointer
+                        // moved onto.
+                        onPointerEnter={() => setHover(null)}
+                        onClick={() => {
+                          if (!drag.consumeClick()) onSelectBooking(booking)
+                        }}
+                        aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
+                      >
+                        {size === 'compact' ? (
+                          <span className={styles.blockLine}>
+                            {/* On the timeline the card's own fill already says the state; a short card keeps its room
                              for the client's name, the lane's other cards carry the face. */}
-                          {state.tone !== 'plain' && !isTimeline && (
-                            <span className={styles.stateDot} data-tone={state.tone} aria-hidden />
-                          )}
+                            {state.tone !== 'plain' && !isTimeline && (
+                              <span
+                                className={styles.stateDot}
+                                data-tone={state.tone}
+                                aria-hidden
+                              />
+                            )}
+                            <span className={styles.blockTitle}>{booking.customerName}</span>
+                            <span className={styles.blockTime}>{booking.time}</span>
+                          </span>
+                        ) : (
+                          // The time and the state on one quiet line, like an event in Calendar.
+                          <span className={styles.blockTop}>
+                            <span className={styles.blockRange}>
+                              {booking.time}
+                              <span className={styles.rangeEnd}>–{end}</span>
+                            </span>
+                            <span className={styles.blockState}>
+                              {state.tone === 'success' && <Check weight='bold' aria-hidden />}
+                              {state.tone === 'accent' && (
+                                <span className={styles.liveDot} aria-hidden />
+                              )}
+                              {state.label}
+                            </span>
+                          </span>
+                        )}
+                        {size !== 'compact' && (
                           <span className={styles.blockTitle}>{booking.customerName}</span>
-                          <span className={styles.blockTime}>{booking.time}</span>
+                        )}
+                        <span className={styles.blockService}>
+                          {booking.serviceName}
+                          {size !== 'compact' &&
+                            (progress !== null && nowMinutes !== null
+                              ? ` · ещё ${to - nowMinutes} мин`
+                              : ` · ${formatPrice(paid)}`)}
                         </span>
-                      ) : (
-                        // The time and the state on one quiet line, like an event in Calendar.
-                        <span className={styles.blockTop}>
-                          <span className={styles.blockRange}>
-                            {booking.time}
-                            <span className={styles.rangeEnd}>–{end}</span>
+                        {/* The visit under way: how much of it has passed, as a thin bar. */}
+                        {progress !== null && size !== 'compact' && (
+                          <span className={styles.progressTrack} aria-hidden>
+                            <span className={styles.progressFill} />
                           </span>
-                          <span className={styles.blockState}>
-                            {state.tone === 'success' && <Check weight='bold' aria-hidden />}
-                            {state.tone === 'accent' && (
-                              <span className={styles.liveDot} aria-hidden />
-                            )}
-                            {state.label}
+                        )}
+                        {/* Across, a card is as tall as its lane: room for the phone or the comment. */}
+                        {(size === 'tall' || (isTimeline && size === 'normal')) && (
+                          <span className={styles.blockFooter}>
+                            <span className={styles.footerNote}>
+                              {booking.comment ? (
+                                <>
+                                  <ChatText aria-hidden />«{booking.comment}»
+                                </>
+                              ) : (
+                                formatPhone(booking.customerPhone)
+                              )}
+                            </span>
+                            <span className={styles.footerTime}>
+                              <Clock aria-hidden />
+                              {booking.time}–{end}
+                            </span>
                           </span>
-                        </span>
-                      )}
-                      {size !== 'compact' && (
-                        <span className={styles.blockTitle}>{booking.customerName}</span>
-                      )}
-                      <span className={styles.blockService}>
-                        {booking.serviceName}
-                        {size !== 'compact' &&
-                          (progress !== null && nowMinutes !== null
-                            ? ` · ещё ${to - nowMinutes} мин`
-                            : ` · ${formatPrice(paid)}`)}
-                      </span>
-                      {/* The visit under way: how much of it has passed, as a thin bar. */}
-                      {progress !== null && size !== 'compact' && (
-                        <span className={styles.progressTrack} aria-hidden>
-                          <span className={styles.progressFill} />
-                        </span>
-                      )}
-                      {/* Across, a card is as tall as its lane: room for the phone or the comment. */}
-                      {(size === 'tall' || (isTimeline && size === 'normal')) && (
-                        <span className={styles.blockFooter}>
-                          <span className={styles.footerNote}>
-                            {booking.comment ? (
-                              <>
-                                <ChatText aria-hidden />«{booking.comment}»
-                              </>
-                            ) : (
-                              formatPhone(booking.customerPhone)
-                            )}
-                          </span>
-                          <span className={styles.footerTime}>
-                            <Clock aria-hidden />
-                            {booking.time}–{end}
-                          </span>
-                        </span>
-                      )}
-                    </button>
+                        )}
+                      </button>
+                      {quickMark}
+                    </Fragment>
                   )
                 })}
 

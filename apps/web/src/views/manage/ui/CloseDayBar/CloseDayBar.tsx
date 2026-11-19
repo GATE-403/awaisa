@@ -14,7 +14,7 @@ interface CloseDayBarProps {
   openElsewhere: number
   /** Who exactly: the open day's unmarked visits, listed from the count. */
   visitsHere?: AdminBooking[]
-  /** Opens a visit's sheet to mark it on its own. */
+  /** Brings a visit into view on the calendar, to mark it on its own. */
   onOpen?: (booking: AdminBooking) => void
   onCloseDay: () => void
   onShowOther: () => void
@@ -42,8 +42,8 @@ export const CloseDayBar = ({
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
-            // The count opens the list of who it is: time, client, service · master — a tap opens
-            // that visit to mark it on its own.
+            // The count opens the list of who it is: time, client, service · master — a tap scrolls
+            // the calendar to that visit's card (with «✓ Пришёл» on it).
             <Menu
               label={`${visits(openHere)} ${openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'} — показать кто`}
               className={styles.who}

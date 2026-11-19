@@ -123,8 +123,10 @@
 }
 
 .who:focus-visible {
+  /* Focus given back after the list closes is shown as the hover fill, not a ring that read as
+     a stuck selection. */
   outline: none;
-  box-shadow: var(--focus-ring);
+  background: var(--color-fill);
 }
 
 .caret {

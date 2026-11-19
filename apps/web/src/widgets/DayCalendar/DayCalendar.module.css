@@ -1640,3 +1640,178 @@
 .ghost[data-narrow] .rangeEndGhost {
   display: none;
 }
+
+/* «✓ Пришёл» on an ended, unmarked visit: a small white capsule at the card's corner, shown when
+   the card is pointed at (always on touch screens); one press marks it. */
+.quickMark {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    0 2px 8px rgb(0 0 0 / 0.14);
+  color: var(--color-success-text, color-mix(in srgb, var(--system-green) 55%, black));
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  opacity: 0;
+  translate: -100% -100%;
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+/* A 44pt target around the 28pt capsule. */
+.quickMark::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+
+.quickMark[data-layout="timeline"] {
+  top: auto;
+  bottom: 18px;
+  translate: -100% 0;
+}
+
+.quickMark[data-layout="columns"] {
+  translate: 0 -100%;
+}
+
+.quickMark svg {
+  width: 12px;
+  height: 12px;
+}
+
+.booking:hover + .quickMark,
+.quickMark:hover,
+.quickMark:focus-visible {
+  opacity: 1;
+}
+
+.quickMark:active {
+  scale: 0.95;
+}
+
+.quickMark:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: none) {
+  .quickMark {
+    opacity: 1;
+  }
+}
+
+.srOnlyText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Visits out of view: a quiet capsule at the lane's edge, «‹ 2 записи» / «3 записи ›»; a tap
+   glides there. */
+.edgeRail {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.edgeBand {
+  position: sticky;
+  left: 0;
+  display: block;
+  width: var(--view-w, 100%);
+  height: 100%;
+}
+
+.edgeHint {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  z-index: 4;
+  pointer-events: auto;
+  min-height: 30px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.08),
+    0 2px 8px rgb(0 0 0 / 0.1);
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  translate: 0 -50%;
+}
+
+.edgeHint[data-side="after"] {
+  right: var(--space-3);
+  left: auto;
+}
+
+/* A 44pt target around the 30pt capsule. */
+.edgeHint::before {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+
+.edgeHint:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* A visit picked from the list flashes once where it landed. */
+.booking[data-flash] {
+  animation: flash 1.6s var(--ease-standard);
+}
+
+@keyframes flash {
+  0%,
+  60% {
+    box-shadow:
+      0 0 0 3px var(--tint),
+      0 6px 18px color-mix(in srgb, var(--tint) 40%, transparent);
+  }
+
+  100% {
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking[data-flash] {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--tint);
+  }
+}
+
+/* «Сейчас ↓» sits above the floating «Все пришли» bar, never under it. */
+.toNow[data-layout="columns"][data-side="after"] {
+  bottom: calc(var(--space-3) + 72px);
+}
+
+/* Hour lines run the whole height of the box, below the last lane too (they used to stop there
+   while the now-line went on). */
+.grid[data-layout="timeline"] {
+  background-color: var(--color-surface);
+  background-image: linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-size: var(--hour-px) 100%;
+}
