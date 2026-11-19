@@ -236,3 +236,50 @@
     );
   }
 }
+
+/* The gliding fill of the compact row: under the days, at the chosen one. */
+.strip[data-variant="compact"] .days {
+  position: relative;
+}
+
+.knob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--w, 0);
+  height: var(--h, 0);
+  border-radius: var(--radius-full);
+  background: var(--color-foreground);
+  translate: var(--x, 0) var(--y, 0);
+  pointer-events: none;
+}
+
+.knob[data-today] {
+  background: var(--color-danger-strong);
+}
+
+.knob[data-ready] {
+  transition:
+    translate 380ms var(--ease-spring),
+    width 380ms var(--ease-spring),
+    background-color 200ms var(--ease-standard);
+}
+
+.strip[data-variant="compact"] .day {
+  position: relative;
+  z-index: 1;
+  transition: color 200ms var(--ease-standard);
+}
+
+/* The knob draws the chosen fill now. */
+.strip[data-variant="compact"] .day[aria-pressed="true"],
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob[data-ready] {
+    transition: none;
+  }
+}

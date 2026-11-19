@@ -394,6 +394,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
             bottomInset={isCloseBarShown ? CLOSE_BAR_SPACE_PX : 0}
+            dayKey={schedule.date}
           />
         )}
       </div>

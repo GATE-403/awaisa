@@ -2282,3 +2282,93 @@
 .grid[data-layout="timeline"] > .nowLine {
   margin-left: var(--space-3);
 }
+
+/* ——— Motion ———
+   The day lays itself out: lane after lane (40ms apart), sliding in from the side the day moved
+   to — later days from the right, earlier ones from the left — or rising a little on first open.
+   Only opacity and translate, once, and nothing under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .grid section.column {
+    animation: lane-in 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(min(var(--enter-i, 0), 6) * 40ms);
+  }
+
+  .grid section.column[data-enter="next"] {
+    --enter-x: 20px;
+  }
+
+  .grid section.column[data-enter="prev"] {
+    --enter-x: -20px;
+  }
+
+  .grid section.column[data-enter="first"] {
+    --enter-y: 8px;
+  }
+}
+
+@keyframes lane-in {
+  from {
+    opacity: 0;
+    translate: var(--enter-x, 0) var(--enter-y, 0);
+  }
+}
+
+/* «Пришёл» lands: the card's fill eases into its new tone and the check pops in — one after
+   another down the day when «Все пришли» marked many (45ms apart, eight at most waiting). */
+@media (prefers-reduced-motion: no-preference) {
+  .grid .booking[data-just-marked] {
+    animation: mark-fill 420ms var(--ease-standard) backwards;
+    animation-delay: calc(min(var(--mark-i, 0), 8) * 45ms);
+  }
+
+  .grid .booking[data-just-marked] .blockState svg {
+    animation: mark-pop 420ms var(--ease-spring) backwards;
+    animation-delay: calc(min(var(--mark-i, 0), 8) * 45ms + 80ms);
+  }
+}
+
+@keyframes mark-fill {
+  from {
+    opacity: 0.55;
+    scale: 0.97;
+  }
+}
+
+@keyframes mark-pop {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+/* With the scroll-driven edge fade on, a marked card runs both: the fade and its own landing. */
+@supports (animation-timeline: view(inline)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .grid[data-layout="timeline"] .booking[data-just-marked]:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both,
+        mark-fill 420ms var(--ease-standard) backwards;
+      animation-timeline: view(inline), view(inline), auto;
+      animation-range:
+        entry 0px entry 56px,
+        exit calc(100% - 56px) exit 100%,
+        normal;
+      animation-delay: 0s, 0s, calc(min(var(--mark-i, 0), 8) * 45ms);
+    }
+
+    .grid[data-layout="columns"] .booking[data-just-marked]:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both,
+        mark-fill 420ms var(--ease-standard) backwards;
+      animation-timeline:
+        view(block var(--view-inset) 0px), view(block var(--view-inset) 0px), auto;
+      animation-range:
+        entry 0px entry 48px,
+        exit calc(100% - 48px) exit 100%,
+        normal;
+      animation-delay: 0s, 0s, calc(min(var(--mark-i, 0), 8) * 45ms);
+    }
+  }
+}
