@@ -2,6 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
+import { Select } from '@awaisa/ui/Select'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { getClientLoyalty } from '@/shared/api/clientApi'
@@ -44,6 +45,7 @@ export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSec
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [certificateCode, setCertificateCode] = useState('')
+  const [isCertificateOpen, setIsCertificateOpen] = useState(false)
   const due = booking.price - (booking.discount?.amount ?? 0)
   const [amount, setAmount] = useState(String(booking.paidAmount ?? due))
   const choice: OutcomeChoice = current.outcome ?? 'pending'
@@ -111,12 +113,15 @@ export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSec
                   onBlur={handleAmountBlur}
                 />
               </label>
-              <div className={styles.outcomeRow}>
-                <SegmentedControl
-                  label='Способ оплаты'
-                  value={current.paymentMethod ?? 'cash'}
+              <div className={sheet.row}>
+                <span className={sheet.rowLabel}>Способ</span>
+                <Select
+                  variant='plain'
+                  aria-label='Способ оплаты'
                   items={METHODS}
-                  onChange={(method) =>
+                  value={current.paymentMethod ?? 'cash'}
+                  onValueChange={(method) =>
+                    method &&
                     void save({
                       outcome: 'arrived',
                       paidAmount: current.paidAmount,
@@ -125,74 +130,93 @@ export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSec
                   }
                 />
               </div>
+              {/* A certificate is rare: a row that opens its field only when asked. */}
+              {isCertificateOpen ? (
+                <div className={sheet.row}>
+                  <span className={sheet.rowControl}>
+                    <Input
+                      variant='plain'
+                      aria-label='Код сертификата'
+                      placeholder='Код сертификата'
+                      autoFocus
+                      value={certificateCode}
+                      onValueChange={(value) =>
+                        setCertificateCode(value.toUpperCase().replace(/\s/g, ''))
+                      }
+                    />
+                  </span>
+                  <Button
+                    size='sm'
+                    variant='outline'
+                    disabled={certificateCode.length < 4}
+                    onClick={() =>
+                      void save({
+                        outcome: 'arrived',
+                        certificateCode,
+                        paymentMethod: current.paymentMethod,
+                      }).then(() => {
+                        setCertificateCode('')
+                        setIsCertificateOpen(false)
+                      })
+                    }
+                  >
+                    Применить
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  type='button'
+                  className={sheet.row}
+                  onClick={() => setIsCertificateOpen(true)}
+                >
+                  <span className={sheet.rowLabel}>Сертификат</span>
+                  <span className={styles.rowLink}>Ввести код ›</span>
+                </button>
+              )}
             </>
           )}
         </div>
       )}
-      {current.outcome === 'arrived' && loyalty && !isPaidByLoyalty && (
-        <section className={sheet.list} aria-label='Лояльность клиента'>
-          {subscriptions.map((subscription) => (
-            <div key={subscription.id} className={sheet.row}>
-              <span className={sheet.rowLabel}>
-                {subscription.title} · осталось{' '}
-                {pluralize(subscription.visitsLeft, ['визит', 'визита', 'визитов'])}
-              </span>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={() => void save({ outcome: 'arrived', subscriptionId: subscription.id })}
-              >
-                Списать визит
-              </Button>
-            </div>
-          ))}
-          {loyalty.bonusBalance > 0 && (
-            <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Бонусы · {formatPrice(loyalty.bonusBalance)}</span>
-              <Button
-                size='sm'
-                variant='outline'
-                onClick={() =>
-                  void save({
-                    outcome: 'arrived',
-                    bonusAmount: Math.min(loyalty.bonusBalance, current.paidAmount ?? due),
-                    paymentMethod: current.paymentMethod,
-                  })
-                }
-              >
-                Списать
-              </Button>
-            </div>
-          )}
-          <div className={sheet.row}>
-            <span className={sheet.rowControl}>
-              <Input
-                variant='plain'
-                aria-label='Код сертификата'
-                placeholder='Код сертификата'
-                value={certificateCode}
-                onValueChange={(value) =>
-                  setCertificateCode(value.toUpperCase().replace(/\s/g, ''))
-                }
-              />
-            </span>
-            <Button
-              size='sm'
-              variant='outline'
-              disabled={certificateCode.length < 4}
-              onClick={() =>
-                void save({
-                  outcome: 'arrived',
-                  certificateCode,
-                  paymentMethod: current.paymentMethod,
-                }).then(() => setCertificateCode(''))
-              }
-            >
-              Применить
-            </Button>
-          </div>
-        </section>
-      )}
+      {current.outcome === 'arrived' &&
+        loyalty &&
+        !isPaidByLoyalty &&
+        (subscriptions.length > 0 || loyalty.bonusBalance > 0) && (
+          <section className={sheet.list} aria-label='Лояльность клиента'>
+            {subscriptions.map((subscription) => (
+              <div key={subscription.id} className={sheet.row}>
+                <span className={sheet.rowLabel}>
+                  {subscription.title} · осталось{' '}
+                  {pluralize(subscription.visitsLeft, ['визит', 'визита', 'визитов'])}
+                </span>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onClick={() => void save({ outcome: 'arrived', subscriptionId: subscription.id })}
+                >
+                  Списать визит
+                </Button>
+              </div>
+            ))}
+            {loyalty.bonusBalance > 0 && (
+              <div className={sheet.row}>
+                <span className={sheet.rowLabel}>Бонусы · {formatPrice(loyalty.bonusBalance)}</span>
+                <Button
+                  size='sm'
+                  variant='outline'
+                  onClick={() =>
+                    void save({
+                      outcome: 'arrived',
+                      bonusAmount: Math.min(loyalty.bonusBalance, current.paidAmount ?? due),
+                      paymentMethod: current.paymentMethod,
+                    })
+                  }
+                >
+                  Списать
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
       {current.outcome === 'arrived' && loyalty?.bonusPercent && !isPaidByLoyalty && (
         <p className={sheet.groupFooter}>
           Клиенту начислится {loyalty.bonusPercent}% бонусами от оплаты деньгами.
