@@ -4,6 +4,7 @@ import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useState } from 'react'
 import type { Service, Specialist, WorkPhoto, WorkPhotoInput } from '@/shared/api/types'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './PhotosSection.module.css'
@@ -108,18 +109,14 @@ export const WorkPhotoSheet = ({
                 : 'В ленте «Работы» под фото будет цена, ближайшее время и «Записаться».'}
           </p>
         </section>
-        <div className={sheet.list}>
-          <button
-            type='button'
-            className={sheet.danger}
-            onClick={() => {
-              onDelete()
-              onClose()
-            }}
-          >
-            Удалить фото
-          </button>
-        </div>
+        <HoldButton
+          onConfirm={() => {
+            onDelete()
+            onClose()
+          }}
+        >
+          Удалить фото
+        </HoldButton>
       </div>
     </Sheet>
   )

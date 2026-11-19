@@ -102,7 +102,7 @@ test.describe('Questions on a business page', () => {
 
     // Removed by the owner, it leaves the page.
     await item.getByRole('button', { name: 'Изменить' }).click()
-    await ownerPage.getByRole('button', { name: 'Удалить вопрос' }).click()
+    await ownerPage.getByRole('button', { name: 'Удалить вопрос' }).click({ delay: 1300 })
     await expect(ownerPage.getByText('Вопрос удалён')).toBeVisible()
     await owner.close()
   })

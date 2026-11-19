@@ -1,4 +1,4 @@
-import { CaretRight, ChatCircle, Phone } from '@phosphor-icons/react/ssr'
+import { CaretRight, ChatCircle, Phone, XCircle } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatDuration, formatPrice, getDateParts, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
@@ -6,6 +6,7 @@ import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -178,16 +179,13 @@ export const BookingDetailsDialog = ({
       )}
 
       {!isCancelled && (
-        <div className={sheet.list}>
-          <button
-            type='button'
-            className={sheet.danger}
-            onClick={handleCancel}
-            disabled={isCancelling}
-          >
-            Отменить запись
-          </button>
-        </div>
+        <HoldButton
+          icon={<XCircle weight='bold' aria-hidden />}
+          onConfirm={() => void handleCancel()}
+          disabled={isCancelling}
+        >
+          Отменить запись
+        </HoldButton>
       )}
     </Sheet>
   )

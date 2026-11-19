@@ -6,6 +6,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
 import type { Promotion, PromotionInput, PromotionKind, Service } from '@/shared/api/types'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -257,18 +258,14 @@ export const PromotionSheet = ({
         </section>
 
         {onDelete && (
-          <div className={sheet.list}>
-            <button
-              type='button'
-              className={sheet.danger}
-              onClick={() => {
-                onDelete()
-                onClose()
-              }}
-            >
-              Удалить акцию
-            </button>
-          </div>
+          <HoldButton
+            onConfirm={() => {
+              onDelete()
+              onClose()
+            }}
+          >
+            Удалить акцию
+          </HoldButton>
         )}
       </form>
     </Sheet>
