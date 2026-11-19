@@ -41,8 +41,22 @@ const TIMELINE_PX_PER_MINUTE = 2.4
 // Below this width (about an hour) a timeline block is one line of client and time.
 const TIMELINE_COMPACT_PX = 150
 
-const pxPerMinute = (layout: CalendarLayout) =>
-  layout === 'timeline' ? TIMELINE_PX_PER_MINUTE : PX_PER_MINUTE
+// The timeline zooms (pinch, ctrl + wheel, − / +): from the whole day to quarter hours.
+const MIN_ZOOM = 1
+const MAX_ZOOM = 4
+
+const pxPerMinute = (layout: CalendarLayout, zoom = 1) =>
+  layout === 'timeline' ? TIMELINE_PX_PER_MINUTE * zoom : PX_PER_MINUTE
+
+// Between the hours, the marks the zoom has room for: halves from 1.75×, quarters from 3×.
+const minorStep = (layout: CalendarLayout, zoom: number) => {
+  if (layout !== 'timeline') return null
+  if (zoom >= 3) return 15
+  if (zoom >= 1.75) return 30
+  return null
+}
+
+const clampZoom = (zoom: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom))
 
 export type { CalendarLayout, Range }
 // Below this height (50 min) a block is the client and time on one line over the service; from
@@ -66,7 +80,11 @@ const getMasterTint = (index: number) =>
   MASTER_TINTS[index % MASTER_TINTS.length] ?? MASTER_TINTS[0]
 
 export {
+  clampZoom,
   COMPACT_BLOCK_PX,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  minorStep,
   getDayRange,
   getMasterTint,
   HOUR,

@@ -1,7 +1,14 @@
 'use client'
 
 import { ChatText, Check, Clock, X } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type MouseEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
@@ -9,9 +16,11 @@ import { formatPhone } from '@/shared/lib/formatPhone'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
+  clampZoom,
   getDayRange,
   getMasterTint,
   HOUR,
+  minorStep,
   pxPerMinute,
   TALL_BLOCK_PX,
   TIMELINE_COMPACT_PX,
@@ -35,6 +44,10 @@ interface DayCalendarProps {
   slotMinutes: number
   /** «Колонки» (default) or «Лента»: masters as rows with time running across. */
   layout?: CalendarLayout
+  /** The timeline's zoom, 1–4 (ignored by the columns). */
+  zoom?: number
+  /** Pinch or ctrl + wheel over the timeline asks for a new zoom. */
+  onZoomChange?: (zoom: number) => void
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -68,11 +81,13 @@ const blockState = (
 
 type Place = (from: number, to: number) => CSSProperties
 
+// The timeline's pinned names column (keep equal to `.grid[data-layout="timeline"]` in CSS).
+const NAMES_PX = 184
+
 // A span of the day as a box: down a column, or across a timeline row.
 const placer =
-  (layout: CalendarLayout, start: number): Place =>
+  (layout: CalendarLayout, start: number, perMinute: number): Place =>
   (from, to) => {
-    const perMinute = pxPerMinute(layout)
     const offset = (from - start) * perMinute
     const length = Math.max((to - from) * perMinute - 2, 28)
     return layout === 'timeline' ? { left: offset, width: length } : { top: offset, height: length }
@@ -109,6 +124,8 @@ export const DayCalendar = ({
   isPast = false,
   slotMinutes,
   layout = 'columns',
+  zoom = 1,
+  onZoomChange,
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
@@ -119,9 +136,17 @@ export const DayCalendar = ({
   const scrolledToNow = useRef<CalendarLayout | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
   const isTimeline = layout === 'timeline'
-  const perMinute = pxPerMinute(layout)
+  const perMinute = pxPerMinute(layout, zoom)
   const toPx = (minutes: number) => minutes * perMinute
-  const place = placer(layout, range.start)
+  const place = placer(layout, range.start, perMinute)
+  const step = minorStep(layout, zoom)
+  // Halves or quarters between the hours once the timeline is zoomed in far enough.
+  const minorMarks = step
+    ? Array.from(
+        { length: (range.end - range.start) / step },
+        (_, index) => range.start + index * step,
+      ).filter((minutes) => minutes % HOUR !== 0)
+    : []
   // The day's length along its axis: the columns' height, or the timeline rows' width.
   const span = toPx(range.end - range.start)
   const along = (minutes: number): CSSProperties =>
@@ -162,6 +187,86 @@ export const DayCalendar = ({
     onMove: onMoveBooking,
   })
   const nowOffset = showNow ? toPx(nowMinutes - range.start) : null
+  // What stays under the pointer (or in the middle) while the zoom changes.
+  const anchorRef = useRef<{ minutes: number; x: number } | null>(null)
+  const perMinuteRef = useRef(perMinute)
+  const zoomRef = useRef(zoom)
+  const onZoomRef = useRef(onZoomChange)
+
+  useEffect(() => {
+    zoomRef.current = zoom
+    onZoomRef.current = onZoomChange
+  })
+
+  // Zooming keeps the anchored time where it was: under the pointer for a pinch, else the middle.
+  useLayoutEffect(() => {
+    const scroller = scrollerRef.current
+    const previous = perMinuteRef.current
+    perMinuteRef.current = perMinute
+    if (!scroller || !isTimeline || previous === perMinute) return
+    const visible = scroller.clientWidth - NAMES_PX
+    const anchor = anchorRef.current ?? {
+      minutes: (scroller.scrollLeft + visible / 2) / previous,
+      x: NAMES_PX + visible / 2,
+    }
+    anchorRef.current = null
+    scroller.scrollLeft = anchor.minutes * perMinute + NAMES_PX - anchor.x
+  }, [perMinute, isTimeline])
+
+  // Pinch on a trackpad (a wheel event with ctrl), ctrl/⌘ + wheel, or two fingers on a screen.
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller || !isTimeline) return
+    const zoomAround = (next: number, clientX: number) => {
+      const zoomTo = clampZoom(next)
+      if (zoomTo === zoomRef.current) return
+      const x = clientX - scroller.getBoundingClientRect().left
+      anchorRef.current = {
+        minutes: (scroller.scrollLeft + x - NAMES_PX) / perMinuteRef.current,
+        x,
+      }
+      onZoomRef.current?.(zoomTo)
+    }
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return
+      event.preventDefault()
+      zoomAround(zoomRef.current * Math.exp(-event.deltaY * 0.01), event.clientX)
+    }
+    let pinch: { distance: number; zoom: number } | null = null
+    const spread = (touches: TouchList) => {
+      const [first, second] = [touches[0], touches[1]]
+      return first && second
+        ? Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY)
+        : 0
+    }
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length === 2)
+        pinch = { distance: spread(event.touches), zoom: zoomRef.current }
+    }
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!pinch || event.touches.length !== 2 || pinch.distance === 0) return
+      event.preventDefault()
+      const [first, second] = [event.touches[0], event.touches[1]]
+      if (!first || !second) return
+      zoomAround(
+        pinch.zoom * (spread(event.touches) / pinch.distance),
+        (first.clientX + second.clientX) / 2,
+      )
+    }
+    const handleTouchEnd = (event: TouchEvent) => {
+      if (event.touches.length < 2) pinch = null
+    }
+    scroller.addEventListener('wheel', handleWheel, { passive: false })
+    scroller.addEventListener('touchstart', handleTouchStart, { passive: true })
+    scroller.addEventListener('touchmove', handleTouchMove, { passive: false })
+    scroller.addEventListener('touchend', handleTouchEnd)
+    return () => {
+      scroller.removeEventListener('wheel', handleWheel)
+      scroller.removeEventListener('touchstart', handleTouchStart)
+      scroller.removeEventListener('touchmove', handleTouchMove)
+      scroller.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isTimeline])
 
   // The box ends at the bottom of the window, so the page itself does not scroll for the day.
   useEffect(() => {
@@ -185,7 +290,7 @@ export const DayCalendar = ({
     if (!scroller || nowOffset === null || scrolledToNow.current === layout) return
     scrolledToNow.current = layout
     if (layout === 'timeline') {
-      scroller.scrollLeft = Math.max(0, nowOffset - (scroller.clientWidth - 184) / 3)
+      scroller.scrollLeft = Math.max(0, nowOffset - (scroller.clientWidth - NAMES_PX) / 3)
     } else {
       scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
     }
@@ -240,6 +345,11 @@ export const DayCalendar = ({
               {formatClock(minutes)}
             </span>
           ))}
+          {minorMarks.map((minutes) => (
+            <span key={minutes} className={styles.minorHour} style={along(minutes)}>
+              {formatClock(minutes)}
+            </span>
+          ))}
         </div>
 
         {specialists.map((specialist, index) => (
@@ -283,6 +393,14 @@ export const DayCalendar = ({
               <span
                 key={minutes}
                 className={styles.line}
+                style={along(minutes)}
+                aria-hidden='true'
+              />
+            ))}
+            {minorMarks.map((minutes) => (
+              <span
+                key={minutes}
+                className={styles.minorLine}
                 style={along(minutes)}
                 aria-hidden='true'
               />
