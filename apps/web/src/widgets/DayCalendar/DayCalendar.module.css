@@ -1340,3 +1340,51 @@
 .booking[data-tone="accent"] :is(.blockService, .blockRange, .footerNote) {
   opacity: 1;
 }
+
+/* The slot preview on the timeline is a card to come, the same shape as the visits: a light card
+   ringed in the master's colour, its time, «+ Новая запись» and whose — wide enough to read. */
+.grid[data-layout="timeline"] .ghost {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 160px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--color-elevated) 88%, transparent);
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 55%, transparent),
+    0 6px 14px color-mix(in srgb, var(--tint) 18%, transparent);
+  color: var(--color-foreground);
+  font-size: var(--text-xs);
+}
+
+.ghostTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: color-mix(in srgb, var(--tint) 55%, var(--color-foreground));
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: 20px;
+}
+
+.ghostTitle svg {
+  width: 13px;
+  height: 13px;
+}
+
+.ghostWho {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.grid .ghost .cardFace {
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
