@@ -1388,3 +1388,119 @@
   height: 18px;
   font-size: 8px;
 }
+
+/* ——— macOS Calendar (the owner's direction): a white day with hairline hours, events as soft
+   fills in their calendar's — here the master's — colour with text in a deeper shade of it, small
+   corners, no shadow and no bar; the visit under way is the selected event (solid colour, white
+   text); visits that have ended step back. These rules come last and win over the ones above. */
+.grid .column,
+.grid[data-layout="timeline"] .column {
+  background: var(--color-surface);
+}
+
+.grid[data-layout="timeline"] {
+  row-gap: 0;
+  background: var(--color-surface);
+}
+
+.grid[data-layout="timeline"] .column + .column,
+.grid[data-layout="timeline"] section.column ~ section.column {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.grid .booking,
+.grid .booking:is([data-tone="warning"], [data-tone="success"], [data-tone="danger"]) {
+  --ink: color-mix(in srgb, var(--tint) 62%, black);
+
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--tint) 20%, var(--color-surface));
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.grid .booking:hover {
+  background: color-mix(in srgb, var(--tint) 28%, var(--color-surface));
+}
+
+/* The visit under way: the selected event — solid colour, white text. */
+.grid .booking[data-tone="accent"] {
+  --ink: var(--color-primary-foreground);
+
+  background: color-mix(in srgb, var(--tint) 92%, black);
+  box-shadow: none;
+}
+
+/* Ended visits step back, as past events do in Calendar; the unmarked ones keep their orange
+   word so they are still found. */
+.grid .booking[data-ended] {
+  background: color-mix(in srgb, var(--tint) 10%, var(--color-surface));
+  color: color-mix(in srgb, var(--ink) 70%, var(--color-surface));
+}
+
+.grid .booking:not([data-tone="plain"]) :is(.blockService, .blockRange, .footerNote) {
+  opacity: 1;
+}
+
+.grid .booking :is(.blockService, .blockRange, .footerNote, .footerTime) {
+  color: color-mix(in srgb, currentColor 75%, transparent);
+}
+
+.grid .booking[data-tone="warning"] .blockState {
+  color: color-mix(in srgb, var(--system-orange) 72%, black);
+}
+
+.grid .booking[data-tone="danger"] .blockState {
+  color: var(--color-danger-text);
+}
+
+.grid .booking[data-tone="accent"] .progressTrack {
+  background: rgb(255 255 255 / 0.3);
+}
+
+.grid .booking :is(.blockTitle) {
+  color: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .grid .booking {
+    --ink: color-mix(in srgb, var(--tint) 65%, white);
+
+    background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+  }
+
+  :root:not([data-theme="light"]) .grid .booking[data-tone="warning"] .blockState {
+    color: var(--system-orange);
+  }
+}
+
+[data-theme="dark"] .grid .booking {
+  --ink: color-mix(in srgb, var(--tint) 65%, white);
+
+  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+}
+
+[data-theme="dark"] .grid .booking[data-tone="warning"] .blockState {
+  color: var(--system-orange);
+}
+
+:root .grid .booking[data-tone="accent"] {
+  --ink: var(--color-primary-foreground);
+
+  background: color-mix(in srgb, var(--tint) 92%, black);
+}
+
+/* Ended visits step back in both themes (wins over the dark theme's fill above). */
+:root .grid .booking[data-ended] {
+  background: color-mix(in srgb, var(--tint) 10%, var(--color-surface));
+  color: color-mix(in srgb, var(--ink) 70%, var(--color-surface));
+}
+
+/* The time–state line takes the card's ink too (it was the muted grey, lost on the solid card). */
+.grid .booking .blockTop {
+  color: inherit;
+}
+
+/* White on the solid card stays full strength (AA at 11–13px). */
+.grid .booking[data-tone="accent"] :is(.blockService, .blockRange, .footerNote, .footerTime) {
+  color: inherit;
+}
