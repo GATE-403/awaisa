@@ -734,28 +734,36 @@ export const DayCalendar = ({
                           <span className={styles.blockTime}>{booking.time}</span>
                         </span>
                       ) : (
-                        <span className={styles.chips}>
-                          <span className={styles.chip} data-tone={state.tone}>
+                        // The time and the state on one quiet line, like an event in Calendar.
+                        <span className={styles.blockTop}>
+                          <span className={styles.blockRange}>
+                            {booking.time}–{end}
+                          </span>
+                          <span className={styles.blockState}>
                             {state.tone === 'success' && <Check weight='bold' aria-hidden />}
                             {state.tone === 'accent' && (
-                              <span className={styles.stateDot} data-tone='accent' aria-hidden />
+                              <span className={styles.liveDot} aria-hidden />
                             )}
                             {state.label}
-                          </span>
-                          <span className={styles.chip}>
-                            {size === 'tall'
-                              ? formatPrice(paid)
-                              : // Across, the card's length already shows when it ends.
-                                isTimeline
-                                ? booking.time
-                                : `${booking.time}–${end}`}
                           </span>
                         </span>
                       )}
                       {size !== 'compact' && (
                         <span className={styles.blockTitle}>{booking.customerName}</span>
                       )}
-                      <span className={styles.blockService}>↳ {booking.serviceName}</span>
+                      <span className={styles.blockService}>
+                        {booking.serviceName}
+                        {size !== 'compact' &&
+                          (progress !== null && nowMinutes !== null
+                            ? ` · ещё ${to - nowMinutes} мин`
+                            : ` · ${formatPrice(paid)}`)}
+                      </span>
+                      {/* The visit under way: how much of it has passed, as a thin bar. */}
+                      {progress !== null && size !== 'compact' && (
+                        <span className={styles.progressTrack} aria-hidden>
+                          <span className={styles.progressFill} />
+                        </span>
+                      )}
                       {size === 'tall' && (
                         <span className={styles.blockFooter}>
                           <span className={styles.footerNote}>
