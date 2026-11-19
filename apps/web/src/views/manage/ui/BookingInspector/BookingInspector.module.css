@@ -147,22 +147,74 @@
   white-space: nowrap;
 }
 
-/* ——— Phones ———
-   The service may take two lines; the actions become four equal labelled tiles a thumb finds,
-   like the row under a contact in iOS; the outcome control is the full 46pt one. */
+/* ——— Phones: like an event in iOS Calendar ———
+   Everything centred: the face, the name, «service · master», when, the price; then the four ways
+   to reach the client as bare glyphs with a word under each (no tiles, no fills); the outcome. */
 @media (pointer: coarse), (max-width: 639px) {
+  .inspector {
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+  }
+
+  .head,
+  .who {
+    display: contents;
+  }
+
+  .head > :first-child {
+    order: 1;
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-2);
+    font-size: 24px;
+  }
+
+  .client {
+    order: 2;
+    align-self: center;
+    font-size: var(--text-title2);
+    font-weight: var(--font-weight-regular);
+  }
+
   .what {
+    order: 3;
     display: -webkit-box;
     overflow: hidden;
+    font-size: var(--text-body);
     white-space: normal;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
 
+  .when {
+    order: 4;
+  }
+
+  .price {
+    order: 5;
+    align-self: center;
+    align-items: center;
+    margin-top: var(--space-1);
+    font-size: var(--text-body);
+  }
+
+  .cancelled,
+  .comment {
+    order: 6;
+    align-self: center;
+    margin-top: var(--space-1);
+  }
+
+  .actions {
+    order: 7;
+    width: 100%;
+    margin-top: var(--space-4);
+  }
+
   .actions > span {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-2);
     width: 100%;
     padding: 0;
     background: none;
@@ -172,15 +224,15 @@
     flex-direction: column;
     gap: 4px;
     width: auto;
-    height: 64px;
+    height: 56px;
     border-radius: var(--radius-lg);
-    background: var(--color-fill);
+    background: none;
     color: var(--color-link);
   }
 
   .actions > span > :is(a, button) svg {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
   .actionLabel {
@@ -189,8 +241,15 @@
     height: auto;
     overflow: visible;
     clip-path: none;
-    color: var(--color-foreground);
+    color: var(--color-muted-foreground);
     font-size: var(--text-xs);
     font-weight: var(--font-weight-regular);
+  }
+
+  .inspector > :last-child:not(.actions) {
+    order: 8;
+    width: 100%;
+    margin-top: var(--space-4);
+    text-align: left;
   }
 }
