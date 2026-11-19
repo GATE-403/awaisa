@@ -98,6 +98,9 @@
 .column {
   position: relative;
   border-left: 0.5px solid var(--color-border);
+  /* The day itself is the grouped grey of the page, so the white visit cards stand off it; the
+     masters' heads and the hours stay on the panel's white. */
+  background: var(--color-background);
 }
 
 .line,
