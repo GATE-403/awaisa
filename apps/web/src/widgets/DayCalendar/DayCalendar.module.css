@@ -1504,3 +1504,55 @@
 .grid .booking[data-tone="accent"] :is(.blockService, .blockRange, .footerNote, .footerTime) {
   color: inherit;
 }
+
+/* Readable events (the owner: «не читаемый текст»): the ink is a deep shade of the master's
+   colour, secondary lines the same ink a step lighter (no transparency), and an ended visit fades
+   only its fill — its words stay readable. Contrast ≥ 4.5:1 on the 20% fill. */
+:root .grid .booking:not([data-tone="accent"]) {
+  --ink: color-mix(in srgb, var(--tint) 42%, black);
+
+  color: var(--ink);
+}
+
+:root
+  .grid
+  .booking:not([data-tone="accent"])
+  :is(.blockService, .blockRange, .footerNote, .footerTime, .blockTime) {
+  color: color-mix(in srgb, var(--ink) 82%, var(--color-surface));
+}
+
+:root .grid .booking[data-ended]:not([data-tone="accent"]) {
+  color: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .grid .booking:not([data-tone="accent"]) {
+    --ink: color-mix(in srgb, var(--tint) 55%, white);
+  }
+}
+
+[data-theme="dark"] .grid .booking:not([data-tone="accent"]) {
+  --ink: color-mix(in srgb, var(--tint) 55%, white);
+}
+
+/* The first line already says when: the tall card's footer keeps only the phone or comment. */
+.grid .booking .footerTime {
+  display: none;
+}
+
+/* Lanes no taller than they need (the owner: «слишком большие блоки и маленькие карточки»), and a
+   card fills its lane under the master's line — the phone or comment at its foot. */
+.grid[data-layout="timeline"] {
+  grid-template-rows: 0 minmax(142px, 192px);
+  grid-auto-rows: minmax(124px, 174px);
+  align-content: start;
+}
+
+.grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
+  bottom: 10px;
+  height: auto;
+}
+
+.grid[data-layout="timeline"] .booking .blockFooter {
+  margin-top: auto;
+}
