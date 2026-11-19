@@ -1556,3 +1556,87 @@
 .grid[data-layout="timeline"] .booking .blockFooter {
   margin-top: auto;
 }
+
+/* Card layout fixes: the footer spans the card (its hairline too), a long phone ends in an
+   ellipsis, and a narrow card shows only when it starts («11:30», never «11:…»). */
+.grid[data-layout="timeline"] .booking > .blockFooter {
+  position: static;
+  align-self: stretch;
+}
+
+.grid .booking .footerNote {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booking[data-narrow] .rangeEnd {
+  display: none;
+}
+
+/* A card answers the pointer: a deeper fill and a soft lift — ended ones too. */
+:root .grid .booking:not([data-cancelled]):hover {
+  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--tint) 22%, transparent);
+}
+
+:root .grid .booking[data-ended]:not([data-cancelled]):hover {
+  background: color-mix(in srgb, var(--tint) 18%, var(--color-surface));
+}
+
+:root .grid .booking[data-tone="accent"]:hover {
+  background: color-mix(in srgb, var(--tint) 82%, black);
+}
+
+/* The slot preview: no ring, a soft fill of the master's colour, as wide as the free time allows
+   (never reaching under the next visit). */
+.grid[data-layout="timeline"] .ghost {
+  min-width: min(160px, var(--free, 160px));
+  background: color-mix(in srgb, var(--tint) 14%, var(--color-surface));
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.grid[data-layout="timeline"] .ghost :is(.ghostTitle, .blockRange) {
+  color: color-mix(in srgb, var(--tint) 42%, black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])
+    .grid[data-layout="timeline"]
+    .ghost
+    :is(.ghostTitle, .blockRange) {
+    color: color-mix(in srgb, var(--tint) 55%, white);
+  }
+}
+
+[data-theme="dark"] .grid[data-layout="timeline"] .ghost :is(.ghostTitle, .blockRange) {
+  color: color-mix(in srgb, var(--tint) 55%, white);
+}
+
+/* A narrow card keeps its start time whole: the state becomes a dot of its colour. */
+.booking[data-narrow] .blockState {
+  font-size: 0;
+}
+
+.booking[data-narrow] .blockState :is(svg, .liveDot) {
+  display: none;
+}
+
+.booking[data-narrow]:not([data-tone="plain"]) .blockState::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+
+/* A narrow free gap: the preview says only «+» and the time. */
+.ghost[data-narrow] :is(.ghostLabel, .ghostWho) {
+  display: none;
+}
+
+.ghost[data-narrow] .rangeEndGhost {
+  display: none;
+}
