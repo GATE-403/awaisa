@@ -3,7 +3,7 @@
 import { ChatText, Check, Clock, X } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
-import { addMinutes, formatClock, parseClock } from '@/entities/business'
+import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import {
@@ -21,6 +21,7 @@ import { useBookingDrag } from './useBookingDrag'
 
 interface DayCalendarProps {
   specialists: (Pick<Specialist, 'id' | 'name' | 'role'> & {
+    photoUrl?: string | null
     hours?: { opensMinutes: number; closesMinutes: number } | null
     isOnLeave?: boolean
     leaveReason?: string | null
@@ -218,9 +219,17 @@ export const DayCalendar = ({
             className={styles.columnHead}
             style={{ '--tint': getMasterTint(index), ...cell(index + 2, 1) } as CSSProperties}
           >
-            <span className={styles.master}>{specialist.name}</span>
-            <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
-              {headNote(specialist) ?? specialist.role}
+            <PersonAvatar
+              name={specialist.name}
+              src={specialist.photoUrl ?? undefined}
+              size='sm'
+              className={styles.face}
+            />
+            <span className={styles.headText}>
+              <span className={styles.master}>{specialist.name}</span>
+              <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
+                {headNote(specialist) ?? specialist.role}
+              </span>
             </span>
           </div>
         ))}
@@ -326,6 +335,11 @@ export const DayCalendar = ({
                       ? 'tall'
                       : 'normal'
                 const state = blockState(booking, from, to, nowMinutes, isPast)
+                // The visit under way fills up to now, like a progress bar along its time.
+                const progress =
+                  state.tone === 'accent' && nowMinutes !== null
+                    ? Math.round(((nowMinutes - from) / (to - from)) * 100)
+                    : null
                 const paid =
                   booking.outcome === 'arrived'
                     ? (booking.paidAmount ?? booking.price)
@@ -341,7 +355,11 @@ export const DayCalendar = ({
                     data-tone={state.tone}
                     data-size={size}
                     data-dragging={drag.dragged?.id === booking.id || undefined}
-                    style={place(from, to)}
+                    style={
+                      progress === null
+                        ? place(from, to)
+                        : ({ ...place(from, to), '--progress': `${progress}%` } as CSSProperties)
+                    }
                     onPointerDown={(event) => drag.handlePointerDown(event, booking)}
                     onClick={() => {
                       if (!drag.consumeClick()) onSelectBooking(booking)
