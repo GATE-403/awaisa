@@ -219,3 +219,20 @@
     background: var(--color-subtle);
   }
 }
+
+/* On touch screens too the compact row melts into the panel at its sides instead of cutting a
+   chip in half: a small row, so the mask costs nothing while it scrolls. */
+@media (pointer: coarse) {
+  .strip[data-variant="compact"] .days {
+    padding-inline: var(--space-3);
+    margin-inline: calc(-1 * var(--space-3));
+    scroll-padding-inline: var(--space-6);
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 var(--space-6),
+      #000 calc(100% - var(--space-6)),
+      transparent
+    );
+  }
+}

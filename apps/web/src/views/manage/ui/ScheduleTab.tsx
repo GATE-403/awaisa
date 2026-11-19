@@ -3,9 +3,9 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
+import { BellRinging, Coffee, Columns, Plus, Rows } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -53,9 +53,10 @@ type Draft = {
 
 const DAYS_SHOWN = 14
 
-const LAYOUTS: { value: CalendarLayout; label: string }[] = [
-  { value: 'columns', label: 'Колонки' },
-  { value: 'timeline', label: 'Лента' },
+// Glyphs, named in a tooltip: a column per master, or a row per master.
+const LAYOUTS: { value: CalendarLayout; label: string; icon: ReactNode }[] = [
+  { value: 'columns', label: 'Колонки', icon: <Columns aria-hidden /> },
+  { value: 'timeline', label: 'Лента', icon: <Rows aria-hidden /> },
 ]
 
 // «Чт, 19 ноября»: the day in the toolbar's one line.
