@@ -309,3 +309,27 @@
 .strip[data-variant="compact"] .day {
   overflow: hidden;
 }
+
+/* Days with visits to mark carry the same dashed-circle glyph as the cards, not a dot. */
+.day[data-marked]::after,
+.strip[data-variant="compact"] .day[data-marked]::after {
+  content: none;
+}
+
+.markGlyph {
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  color: var(--system-orange);
+}
+
+.strip:not([data-variant="compact"]) .markGlyph {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] .markGlyph {
+  color: color-mix(in srgb, var(--system-orange) 70%, white);
+}

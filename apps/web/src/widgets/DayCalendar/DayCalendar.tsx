@@ -13,10 +13,13 @@ import {
   CaretUp,
   ChatText,
   Check,
+  CircleDashed,
   Clock,
   Minus,
   Plus,
+  Timer,
   X,
+  XCircle,
 } from '@phosphor-icons/react/ssr'
 import {
   type CSSProperties,
@@ -99,6 +102,16 @@ interface DayCalendarProps {
 type Hover = { specialistId: string; minutes: number }
 
 type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
+
+// A visit's state as a glyph, never a bare dot: to mark — a dashed circle waiting for its tick;
+// came — a tick; did not come — a crossed circle; under way — a timer.
+const StateGlyph = ({ tone }: { tone: BlockTone }) => {
+  if (tone === 'warning') return <CircleDashed weight='bold' aria-hidden />
+  if (tone === 'success') return <Check weight='bold' aria-hidden />
+  if (tone === 'danger') return <XCircle weight='bold' aria-hidden />
+  if (tone === 'accent') return <Timer weight='bold' aria-hidden />
+  return null
+}
 
 // What a visit needs from the salon right now, read at a glance from the first chip.
 const blockState = (
@@ -1353,11 +1366,9 @@ export const DayCalendar = ({
                               {/* On the timeline the card's own fill already says the state; a short card keeps its room
                              for the client's name, the lane's other cards carry the face. */}
                               {state.tone !== 'plain' && !isTimeline && (
-                                <span
-                                  className={styles.stateDot}
-                                  data-tone={state.tone}
-                                  aria-hidden
-                                />
+                                <span className={styles.stateGlyph} data-tone={state.tone}>
+                                  <StateGlyph tone={state.tone} />
+                                </span>
                               )}
                               <span className={styles.blockTitle}>{booking.customerName}</span>
                               <span className={styles.blockTime}>{booking.time}</span>
@@ -1369,11 +1380,8 @@ export const DayCalendar = ({
                                 {booking.time}
                                 <span className={styles.rangeEnd}>–{end}</span>
                               </span>
-                              <span className={styles.blockState}>
-                                {state.tone === 'success' && <Check weight='bold' aria-hidden />}
-                                {state.tone === 'accent' && (
-                                  <span className={styles.liveDot} aria-hidden />
-                                )}
+                              <span className={styles.blockState} data-tone={state.tone}>
+                                <StateGlyph tone={state.tone} />
                                 {state.label}
                               </span>
                             </span>
