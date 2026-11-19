@@ -1815,3 +1815,42 @@
   background-image: linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
   background-size: var(--hour-px) 100%;
 }
+
+/* Hover answers on the floating pieces too: the empty lane's capsule rises a little and its
+   «Записать» darkens like the kit's primary button; a face in the masters' track gets the fill
+   of a segment about to be chosen and its ring grows. */
+.laneEmpty[data-action] {
+  transition:
+    box-shadow var(--duration-fast) var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.laneBook {
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.ringFace,
+.ring {
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .laneEmpty[data-action]:hover {
+    box-shadow:
+      0 0 0 0.5px rgb(0 0 0 / 0.06),
+      var(--shadow-md);
+  }
+
+  .laneEmpty[data-action]:hover .laneBook {
+    background: var(--color-primary-hover);
+  }
+
+  .viewBar .trackAll:not([aria-pressed="true"]):hover,
+  .viewBar .trackMaster:not([aria-pressed="true"]):hover {
+    background: var(--color-fill);
+  }
+
+  .trackMaster:not([aria-pressed="true"]):hover .ring {
+    scale: 1.06;
+  }
+}
