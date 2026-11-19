@@ -822,30 +822,6 @@
   border-bottom: 0.5px solid var(--color-border);
 }
 
-.filters {
-  display: flex;
-  flex: 1;
-  gap: var(--space-2);
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.filters::-webkit-scrollbar {
-  display: none;
-}
-
-.filterChip {
-  padding-left: 4px;
-}
-
-.filters .filterChip .chipFace {
-  width: 24px;
-  height: 24px;
-  font-size: 10px;
-  box-shadow: 0 0 0 1.5px var(--tint);
-}
-
 /* An empty lane: the master and «свободен весь день», and on a day still ahead one tap books. */
 .laneEmpty {
   position: sticky;
@@ -1034,19 +1010,163 @@
   font-size: var(--text-body);
 }
 
-/* The masters' filter chips match the day strip: one size, footnote text, 32pt tall. */
-.viewBar .filterChip,
-.viewBar :global(button) {
-  height: 32px;
-  padding-inline: var(--space-3);
-  font-size: var(--text-footnote);
-}
-
-.viewBar .filterChip {
-  padding-left: 4px;
-}
-
 .filters .filterChip .chipFace {
   width: 24px;
   height: 24px;
+}
+
+/* The masters' track (variant «В»): the kit's segmented look — a capsule of fill, a raised white
+   pill under the chosen one — with each face ringed by how full its day is. */
+.track {
+  display: inline-flex;
+  min-width: 0;
+  margin: 0;
+  border: none;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  padding: 3px;
+  overflow-x: auto;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.trackAll,
+.trackMaster {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 260ms var(--ease-standard),
+    box-shadow 260ms var(--ease-standard),
+    color 260ms var(--ease-standard),
+    scale var(--duration-fast) var(--ease-standard);
+}
+
+.trackAll {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+.trackMaster {
+  padding: 3px;
+}
+
+.trackAll[aria-pressed="true"],
+.trackMaster[aria-pressed="true"] {
+  background: var(--color-segment-knob);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.04),
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 2px 6px rgb(0 0 0 / 0.06);
+  color: var(--color-foreground);
+}
+
+.trackAll:active,
+.trackMaster:active {
+  scale: 0.96;
+}
+
+.trackAll:focus-visible,
+.trackMaster:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .trackAll:not([aria-pressed="true"]):hover,
+  .trackMaster:not([aria-pressed="true"]):hover {
+    color: var(--color-foreground);
+  }
+}
+
+/* How full the day is, as an Activity-style ring in the master's colour around the face. */
+.ring {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: conic-gradient(
+    var(--tint) var(--load),
+    color-mix(in srgb, var(--tint) 20%, var(--color-fill)) var(--load)
+  );
+}
+
+.track .ring .ringFace {
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
+/* The name and the note open beside the chosen face (grid 0fr → 1fr), never jumping. */
+.trackLabel {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trackMaster[aria-pressed="true"] .trackLabel {
+  grid-template-columns: 1fr;
+}
+
+.trackLabelInner {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 0;
+  text-align: left;
+  white-space: nowrap;
+  transition: padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trackMaster[aria-pressed="true"] .trackLabelInner {
+  padding: 0 var(--space-3) 0 var(--space-2);
+}
+
+.trackName {
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  line-height: 18px;
+}
+
+.trackNote {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  line-height: 15px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trackLabel,
+  .trackLabelInner {
+    transition: none;
+  }
+}
+
+.trackLegend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
