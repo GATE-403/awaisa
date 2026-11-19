@@ -1,0 +1,58 @@
+.positioner {
+  z-index: 85;
+  outline: none;
+}
+
+.popup {
+  position: relative;
+  width: min(352px, calc(100vw - 24px));
+  max-height: min(var(--available-height), 640px);
+  overflow-y: auto;
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-material-border),
+    var(--shadow-lg);
+  outline: none;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    scale var(--duration-normal) var(--ease-spring);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+  opacity: 0;
+  scale: 0.94;
+}
+
+/* The arrow to what it is about: a small square of the popup's own colour, turned. */
+.arrow {
+  width: 14px;
+  height: 14px;
+  background: var(--color-elevated);
+  rotate: 45deg;
+}
+
+.arrow[data-side="right"] {
+  left: -7px;
+}
+
+.arrow[data-side="left"] {
+  right: -7px;
+}
+
+.arrow[data-side="top"] {
+  bottom: -7px;
+}
+
+.arrow[data-side="bottom"] {
+  top: -7px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup {
+    transition: none;
+  }
+}
