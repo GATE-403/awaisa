@@ -5,6 +5,8 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  CaretLeft,
+  CaretRight,
   ChatText,
   Check,
   Clock,
@@ -438,8 +440,10 @@ export const DayCalendar = ({
       return
     }
     if (!scroller || scrolledToNow.current === layout) return
-    scrolledToNow.current = layout
+    // The flag is set in the frame itself: a cleanup that cancels the frame (React runs effects
+    // twice in development) must leave the next run free to scroll.
     const frame = requestAnimationFrame(() => {
+      scrolledToNow.current = layout
       if (layout === 'timeline') {
         scroller.scrollLeft = Math.max(0, nowOffset - scroller.clientWidth / 3)
       } else {
@@ -476,6 +480,98 @@ export const DayCalendar = ({
         const from = parseClock(booking.time)
         return { from, to: from + booking.durationMinutes }
       })
+  // A master's visits off each side of the view, nearest to the view first.
+  const edgeVisits = (specialistId: string) => {
+    const visits = bookings
+      .filter((booking) => booking.specialistId === specialistId && booking.status === 'confirmed')
+      .map((booking) => {
+        const start = parseClock(booking.time)
+        return {
+          booking,
+          from: toPx(start - range.start),
+          to: toPx(start + booking.durationMinutes - range.start),
+        }
+      })
+    return {
+      before: visits.filter(({ to }) => to < view.left).sort((a, b) => b.from - a.from),
+      after: visits
+        .filter(({ from }) => from > view.left + view.width)
+        .sort((a, b) => a.from - b.from),
+    }
+  }
+  const loadOf = (specialist: DayCalendarProps['specialists'][number]) => {
+    const day = dayOf(specialist)
+    return masterDayLoad(
+      day,
+      bookings.filter((booking) => booking.specialistId === specialist.id),
+      isPast ? (day?.closesMinutes ?? null) : nowMinutes,
+      slotMinutes,
+    )
+  }
+  // One fact after the role that decides where the next client goes: busy now, or free from when.
+  const laneFact = (specialist: DayCalendarProps['specialists'][number]) => {
+    if (isPast || headNote(specialist)) return null
+    if (nowMinutes !== null) {
+      const current = bookings.find((booking) => {
+        const start = parseClock(booking.time)
+        return (
+          booking.specialistId === specialist.id &&
+          booking.status === 'confirmed' &&
+          start <= nowMinutes &&
+          start + booking.durationMinutes > nowMinutes
+        )
+      })
+      if (current) {
+        return `с клиентом до ${formatClock(parseClock(current.time) + current.durationMinutes)}`
+      }
+    }
+    const { freeFrom } = loadOf(specialist)
+    if (freeFrom === null) return 'занят до конца дня'
+    if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return 'свободен сейчас'
+    return `свободен с ${formatClock(freeFrom)}`
+  }
+  // A tab flush with the day's edge: the nearest visit beyond it, how many more, and on hover the
+  // list of who is there — a tap glides to the nearest, a row to its own visit.
+  const edgeTab = (side: 'before' | 'after', visits: ReturnType<typeof edgeVisits>['before']) => {
+    const [nearest] = visits
+    if (!nearest) return null
+    const more = visits.length - 1
+    return (
+      <span className={styles.edgeTab} data-side={side}>
+        <button
+          type='button'
+          className={styles.edgeHint}
+          data-side={side}
+          onClick={() => scrollToX(nearest.from)}
+        >
+          {side === 'before' && <CaretLeft weight='bold' aria-hidden />}
+          <span className={styles.edgeTime}>{nearest.booking.time}</span>
+          {more > 0 && <span className={styles.edgeMore}>+{more}</span>}
+          {side === 'after' && <CaretRight weight='bold' aria-hidden />}
+          <span className={styles.srOnlyText}>
+            {' '}
+            — {visits.length} {pluralWord(visits.length, ['запись', 'записи', 'записей'])}{' '}
+            {side === 'before' ? 'раньше' : 'позже'}
+          </span>
+        </button>
+        {more > 0 && (
+          <span className={styles.edgeList}>
+            {visits.map(({ booking, from }) => (
+              <button
+                key={booking.id}
+                type='button'
+                className={styles.edgeRow}
+                onClick={() => scrollToX(from)}
+              >
+                <span className={styles.edgeRowTime}>{booking.time}</span>
+                <span className={styles.edgeRowName}>{booking.customerName}</span>
+              </button>
+            ))}
+          </span>
+        )}
+      </span>
+    )
+  }
   // How many visits sit off each side of the view, per lane — what the edge capsules show.
   useEffect(() => {
     edgeKeyRef.current = (left, width) =>
@@ -753,51 +849,38 @@ export const DayCalendar = ({
               {isTimeline &&
                 view.width > 0 &&
                 (() => {
-                  // Visits out of view on either side, as quiet capsules at the lane's edges.
-                  const visits = busyOf(specialist.id).map(({ from, to }) => ({
-                    from: toPx(from - range.start),
-                    to: toPx(to - range.start),
-                  }))
-                  const before = visits.filter(({ to }) => to < view.left)
-                  const after = visits.filter(({ from }) => from > view.left + view.width)
-                  const word = (count: number) =>
-                    `${count} ${pluralWord(count, ['запись', 'записи', 'записей'])}`
-                  if (before.length === 0 && after.length === 0) return null
-                  // A sticky band the width of the view: the browser keeps it in place while
-                  // the day scrolls, so the capsules never lag a frame behind the finger.
+                  // Only the right-hand tab lives in this sticky band the width of the view (the
+                  // browser keeps it in place while the day scrolls); the left one leads the lane's
+                  // first line. Both sit on that line, above the cards, so they never cover a visit.
+                  const { after } = edgeVisits(specialist.id)
+                  if (after.length === 0) return null
                   return (
                     <span className={styles.edgeRail}>
-                      <span className={styles.edgeBand}>
-                        {before.length > 0 && (
-                          <button
-                            type='button'
-                            className={styles.edgeHint}
-                            data-side='before'
-                            onClick={() => scrollToX(Math.max(...before.map(({ from }) => from)))}
-                          >
-                            ‹ {word(before.length)}
-                          </button>
-                        )}
-                        {after.length > 0 && (
-                          <button
-                            type='button'
-                            className={styles.edgeHint}
-                            data-side='after'
-                            onClick={() => scrollToX(Math.min(...after.map(({ from }) => from)))}
-                          >
-                            {word(after.length)} ›
-                          </button>
-                        )}
-                      </span>
+                      <span className={styles.edgeBand}>{edgeTab('after', after)}</span>
                     </span>
                   )
                 })()}
               {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
               {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
-                <span className={styles.laneTag} aria-hidden='true'>
-                  {face(specialist, styles.cardFace)}
-                  <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                  {headNote(specialist) ?? specialist.role}
+                <span className={styles.laneTag}>
+                  {view.width > 0 && edgeTab('before', edgeVisits(specialist.id).before)}
+                  <span className={styles.laneWho} aria-hidden='true'>
+                    <span
+                      className={styles.laneRing}
+                      style={
+                        {
+                          '--load': `${Math.round(loadOf(specialist).share * 360)}deg`,
+                        } as CSSProperties
+                      }
+                    >
+                      {face(specialist, styles.cardFace)}
+                    </span>
+                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                    <span className={styles.laneRole}>
+                      {headNote(specialist) ?? specialist.role}
+                      {laneFact(specialist) && ` · ${laneFact(specialist)}`}
+                    </span>
+                  </span>
                 </span>
               )}
               {/* No names on the timeline: a master with nothing booked says so, and books in a tap. */}
