@@ -2256,3 +2256,16 @@
 .grid[data-layout="timeline"] {
   padding-bottom: calc(64px + var(--foot-lift, 0px));
 }
+
+/* Phones: the track keeps to faces, so every master stays one tap away — a chosen face opening
+   into its name pushed the others out of reach. The chosen one rides the raised knob; its name and
+   «свободен с …» already lead its lane. */
+@media (max-width: 639px) {
+  .viewBar .trackMaster[aria-pressed="true"] .trackLabel {
+    grid-template-columns: 0fr;
+  }
+
+  .viewBar .trackMaster[aria-pressed="true"] .trackLabelInner {
+    padding: 0;
+  }
+}

@@ -52,13 +52,19 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
           </button>
         ))}
       </fieldset>
-      {/* The way back appears only once another day is open (a greyed «Сегодня» read as broken). */}
-      {today && (variant === 'default' || value !== today.key) && (
+      {/* Always there in the compact row: on another day it opens today, on today it brings the
+          row back to it after the days were scrolled away. */}
+      {today && (
         <button
           type='button'
           className={styles.today}
-          onClick={() => onChange(today.key)}
-          disabled={value === today.key}
+          onClick={() => {
+            onChange(today.key)
+            daysRef.current
+              ?.querySelector<HTMLElement>(`[data-day="${today.key}"]`)
+              ?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+          }}
+          disabled={variant === 'default' && value === today.key}
         >
           Сегодня
         </button>
