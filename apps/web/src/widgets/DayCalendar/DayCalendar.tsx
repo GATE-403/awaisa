@@ -567,6 +567,9 @@ export const DayCalendar = ({
                 type='button'
                 className={styles.slotTarget}
                 aria-label={`Новая запись к мастеру ${specialist.name}`}
+                // A mouse press must not focus the lane: the new-booking sheet gives focus back on
+                // close, and the whole lane then wore a focus ring.
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={(event) => handleCreate(event, specialist.id)}
                 onPointerMove={(event) => {
                   if (event.pointerType !== 'mouse' || drag.dragged) return
@@ -725,6 +728,7 @@ export const DayCalendar = ({
                       data-cancelled={booking.status === 'cancelled' || undefined}
                       data-outcome={booking.outcome ?? undefined}
                       data-tone={state.tone}
+                      data-ended={isPast || (nowMinutes !== null && to <= nowMinutes) || undefined}
                       data-size={size}
                       data-dragging={drag.dragged?.id === booking.id || undefined}
                       style={
