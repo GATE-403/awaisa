@@ -2622,3 +2622,43 @@
 .grid[data-layout="timeline"] > .nowLine {
   z-index: 7;
 }
+
+/* ——— Lines run the whole day ———
+   The hour lines are drawn on the grid itself too, so they carry on through the gaps between
+   lanes and the room under the last one (no breaks, no blank foot); a fainter line marks every
+   half hour, in the lanes and around them alike. */
+.grid[data-layout="timeline"] {
+  --hour-line: var(--color-border);
+  --half-line: color-mix(in srgb, var(--color-border) 40%, transparent);
+
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--space-3) + var(--hour-px) / 2) 0,
+    var(--space-3) 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+}
+
+:root .grid[data-layout="timeline"] section.column {
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 0,
+    0 0;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+}
+
+/* The sticky hours keep their own lines under the labels, so the ruler is not a blank band. */
+:root .grid[data-layout="timeline"] .axis {
+  background-color: var(--color-background);
+  background-image: linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-size: var(--hour-px) 100%;
+  background-repeat: repeat-x;
+}
