@@ -582,9 +582,27 @@ export const DayCalendar = ({
                   style={place(hover.minutes, hover.minutes + slotMinutes)}
                   aria-hidden='true'
                 >
-                  {isTimeline && face(specialist, styles.cardFace)}
-                  {isTimeline && `${specialist.name.split(' ')[0]} · `}
-                  {formatClock(hover.minutes)}
+                  {isTimeline ? (
+                    // The slot as a card to come: the same shape as the visits, ringed in the
+                    // master's colour — when, «+ Новая запись», whose.
+                    <>
+                      <span className={styles.blockTop}>
+                        <span className={styles.blockRange}>
+                          {formatClock(hover.minutes)}–{formatClock(hover.minutes + slotMinutes)}
+                        </span>
+                      </span>
+                      <span className={styles.ghostTitle}>
+                        <Plus weight='bold' aria-hidden />
+                        Новая запись
+                      </span>
+                      <span className={styles.ghostWho}>
+                        {face(specialist, styles.cardFace)}
+                        {specialist.name.split(' ')[0]}
+                      </span>
+                    </>
+                  ) : (
+                    formatClock(hover.minutes)
+                  )}
                 </span>
               )}
               {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
