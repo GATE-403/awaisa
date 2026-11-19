@@ -31,7 +31,7 @@ import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
-import { DayCalendar, getMasterTint } from '@/widgets/DayCalendar'
+import { DayCalendar } from '@/widgets/DayCalendar'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './ScheduleTab.module.css'
 
@@ -343,13 +343,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           slug={slug}
           key={selected.id}
           booking={selected}
-          dayLabel={dayLabel}
-          tint={getMasterTint(
-            Math.max(
-              0,
-              (schedule?.specialists ?? []).findIndex(({ id }) => id === selected.specialistId),
-            ),
-          )}
           onClose={() => setSelected(null)}
           onCancel={cancelBooking}
           onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}

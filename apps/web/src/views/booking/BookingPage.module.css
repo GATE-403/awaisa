@@ -103,8 +103,11 @@
     margin-top: var(--space-6);
   }
 
-  /* The bar rides at the panel's foot instead of the window's. */
-  .bar > * {
+  /* The bar rides at the panel's foot instead of the window's. `.page` lifts this over
+     BookingSummary's own `.bar { position: fixed }`, which has the same weight: which of two equal
+     rules wins depends on the order the CSS chunks load in, and in some builds the bar escaped
+     the panel to the window's left edge. */
+  .page .bar > * {
     position: relative;
     inset: auto;
     width: min(calc(100% - var(--space-8)), 520px);
