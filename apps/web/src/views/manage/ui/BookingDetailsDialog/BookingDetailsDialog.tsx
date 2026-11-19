@@ -1,4 +1,4 @@
-import { CaretRight, XCircle } from '@phosphor-icons/react/ssr'
+import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatDuration, formatPrice, getDateParts, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
@@ -158,11 +158,7 @@ export const BookingDetailsDialog = ({
       )}
 
       {!isCancelled && (
-        <HoldButton
-          icon={<XCircle weight='bold' aria-hidden />}
-          onConfirm={() => void handleCancel()}
-          disabled={isCancelling}
-        >
+        <HoldButton icon={null} onConfirm={() => void handleCancel()} disabled={isCancelling}>
           Отменить запись
         </HoldButton>
       )}
