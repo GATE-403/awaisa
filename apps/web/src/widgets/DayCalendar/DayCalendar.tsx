@@ -171,6 +171,7 @@ export const DayCalendar = ({
   // The part of the day in view, along its axis (the columns' masters row covers `inset` of it).
   const [view, setView] = useState({ start: 0, size: 0, inset: 0 })
   const scrollerRef = useRef<HTMLDivElement>(null)
+  const frameRef = useRef<HTMLDivElement>(null)
   const edgeKeyRef = useRef<(left: number, width: number) => string>(() => '')
   const scrolledToNow = useRef<CalendarLayout | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
@@ -352,6 +353,38 @@ export const DayCalendar = ({
     return () => {
       observer.disconnect()
       window.removeEventListener('resize', fit)
+    }
+  }, [bottomInset])
+
+  // On a short screen (iPhone SE) the day keeps its least height and runs under the floating
+  // «Все пришли» bar: the corner controls (masters, zoom, «Сейчас») rise above the bar by as much
+  // as it covers. Written to a CSS variable on scroll — no re-render.
+  useEffect(() => {
+    const box = frameRef.current
+    if (!box) return
+    if (!bottomInset) {
+      box.style.removeProperty('--foot-lift')
+      return
+    }
+    let frame = 0
+    const measure = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const covered = box.getBoundingClientRect().bottom - (window.innerHeight - bottomInset)
+        const lift = `${Math.max(0, Math.round(covered))}px`
+        if (box.style.getPropertyValue('--foot-lift') !== lift) {
+          box.style.setProperty('--foot-lift', lift)
+        }
+      })
+    }
+    measure()
+    window.addEventListener('scroll', measure, { passive: true })
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', measure)
+      window.removeEventListener('resize', measure)
+      box.style.removeProperty('--foot-lift')
     }
   }, [bottomInset])
 
@@ -652,7 +685,7 @@ export const DayCalendar = ({
   }
 
   return (
-    <div className={styles.frame}>
+    <div className={styles.frame} ref={frameRef}>
       {isTimeline && specialists.length > 1 && (
         // Whose day to show, as one track of faces like the kit's segmented control: each face in a
         // ring of how full their day is; the chosen one opens into a white capsule with the name

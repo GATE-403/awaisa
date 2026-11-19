@@ -2243,3 +2243,16 @@
 [data-theme="dark"] .grid .quickMark {
   color: color-mix(in srgb, var(--tint) 65%, white);
 }
+
+/* Over a floating bar at the window's foot, the corner controls rise by what it covers. */
+.frame .viewBar,
+.frame .zoomPill,
+.frame .toNow[data-layout="columns"][data-side="after"] {
+  bottom: calc(var(--space-3) + var(--foot-lift, 0px));
+}
+
+/* Room under the last lane for the floating masters' track (and what the bar covers), so the
+   last lane can always scroll out from under it. */
+.grid[data-layout="timeline"] {
+  padding-bottom: calc(64px + var(--foot-lift, 0px));
+}
