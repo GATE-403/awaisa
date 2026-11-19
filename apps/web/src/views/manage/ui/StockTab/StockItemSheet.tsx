@@ -6,6 +6,7 @@ import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
 import type { Service, StockItem, StockItemInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -236,18 +237,14 @@ export const StockItemSheet = ({
         )}
 
         {onDelete && (
-          <div className={sheet.list}>
-            <button
-              type='button'
-              className={sheet.danger}
-              onClick={() => {
-                onDelete()
-                onClose()
-              }}
-            >
-              Удалить позицию
-            </button>
-          </div>
+          <HoldButton
+            onConfirm={() => {
+              onDelete()
+              onClose()
+            }}
+          >
+            Удалить позицию
+          </HoldButton>
         )}
       </form>
     </Sheet>

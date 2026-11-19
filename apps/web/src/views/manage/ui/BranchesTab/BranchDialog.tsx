@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { type FormEvent, useState } from 'react'
 import type { Branch, BranchInput } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import type { Point } from '@/shared/ui/MapView/MapView'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -131,13 +132,7 @@ export const BranchDialog = ({
           </label>
         </div>
 
-        {branch && canDelete && (
-          <div className={sheet.list}>
-            <button type='button' className={sheet.danger} onClick={handleDelete}>
-              Удалить филиал
-            </button>
-          </div>
-        )}
+        {branch && canDelete && <HoldButton onConfirm={handleDelete}>Удалить филиал</HoldButton>}
       </form>
     </Sheet>
   )

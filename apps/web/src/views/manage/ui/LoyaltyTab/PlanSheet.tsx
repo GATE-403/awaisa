@@ -6,6 +6,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
 import type { Service, SubscriptionPlan, SubscriptionPlanInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
+import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -139,18 +140,14 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
           )}
         </section>
         {onDelete && (
-          <div className={sheet.list}>
-            <button
-              type='button'
-              className={sheet.danger}
-              onClick={() => {
-                onDelete()
-                onClose()
-              }}
-            >
-              Удалить абонемент
-            </button>
-          </div>
+          <HoldButton
+            onConfirm={() => {
+              onDelete()
+              onClose()
+            }}
+          >
+            Удалить абонемент
+          </HoldButton>
         )}
       </form>
     </Sheet>
