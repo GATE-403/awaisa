@@ -185,7 +185,7 @@ export const DayCalendar = ({
     if (!scroller || nowOffset === null || scrolledToNow.current === layout) return
     scrolledToNow.current = layout
     if (layout === 'timeline') {
-      scroller.scrollLeft = Math.max(0, nowOffset - (scroller.clientWidth - 200) / 3)
+      scroller.scrollLeft = Math.max(0, nowOffset - (scroller.clientWidth - 184) / 3)
     } else {
       scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
     }
