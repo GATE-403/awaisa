@@ -33,13 +33,6 @@
   letter-spacing: var(--tracking-title);
 }
 
-.phone {
-  margin: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  font-variant-numeric: tabular-nums;
-}
-
 .facts,
 .usual,
 .next {
@@ -81,55 +74,6 @@
 }
 
 /* Call · WhatsApp · SMS as one capsule of glyphs, like the place page's quick actions. */
-.contacts {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  padding: 2px;
-  border-radius: var(--radius-full);
-  background: var(--color-sheet-surface);
-  list-style: none;
-}
-
-.contacts > li {
-  position: relative;
-  display: flex;
-}
-
-.contacts > li + li::before {
-  content: "";
-  position: absolute;
-  top: 25%;
-  bottom: 25%;
-  left: 0;
-  width: 0.5px;
-  background: var(--color-border);
-}
-
-.contact {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 40px;
-  border-radius: var(--radius-full);
-  color: var(--color-link);
-  transition: scale var(--duration-fast) var(--ease-standard);
-}
-
-.contact:active {
-  scale: 0.94;
-}
-
-.contact svg {
-  width: 19px;
-  height: 19px;
-}
-
-.contact:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
 
 .count {
   margin-left: auto;
