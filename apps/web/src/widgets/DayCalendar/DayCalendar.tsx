@@ -7,12 +7,14 @@ import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import {
+  type CalendarLayout,
   COMPACT_BLOCK_PX,
   getDayRange,
   getMasterTint,
   HOUR,
+  pxPerMinute,
   TALL_BLOCK_PX,
-  toPx,
+  TIMELINE_COMPACT_PX,
 } from './calendarLayout'
 import styles from './DayCalendar.module.css'
 import { useBookingDrag } from './useBookingDrag'
@@ -30,6 +32,8 @@ interface DayCalendarProps {
   /** A day gone by: every visit on it has ended. */
   isPast?: boolean
   slotMinutes: number
+  /** «Колонки» (default) or «Лента»: masters as rows with time running across. */
+  layout?: CalendarLayout
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -61,34 +65,35 @@ const blockState = (
   return { tone: 'plain', label: 'Ждём' }
 }
 
-const position = (from: number, to: number, start: number): CSSProperties => ({
-  top: toPx(from - start),
-  height: Math.max(toPx(to - from) - 2, 28),
-})
+type Place = (from: number, to: number) => CSSProperties
+
+// A span of the day as a box: down a column, or across a timeline row.
+const placer =
+  (layout: CalendarLayout, start: number): Place =>
+  (from, to) => {
+    const perMinute = pxPerMinute(layout)
+    const offset = (from - start) * perMinute
+    const length = Math.max((to - from) * perMinute - 2, 28)
+    return layout === 'timeline' ? { left: offset, width: length } : { top: offset, height: length }
+  }
 
 interface OffHoursProps {
   day: { opensMinutes: number; closesMinutes: number } | null
   range: { start: number; end: number }
-  height: number
+  place: Place
 }
 
 // Each master's own day: hatched before and after it, or all day when they are off.
-const OffHours = ({ day, range, height }: OffHoursProps) => {
-  if (!day) return <span className={styles.closed} style={{ top: 0, height }} />
+const OffHours = ({ day, range, place }: OffHoursProps) => {
+  if (!day) return <span className={styles.closed} style={place(range.start, range.end)} />
 
   return (
     <>
       {day.opensMinutes > range.start && (
-        <span
-          className={styles.closed}
-          style={position(range.start, day.opensMinutes, range.start)}
-        />
+        <span className={styles.closed} style={place(range.start, day.opensMinutes)} />
       )}
       {day.closesMinutes < range.end && (
-        <span
-          className={styles.closed}
-          style={position(day.closesMinutes, range.end, range.start)}
-        />
+        <span className={styles.closed} style={place(day.closesMinutes, range.end)} />
       )}
     </>
   )
@@ -102,6 +107,7 @@ export const DayCalendar = ({
   nowMinutes,
   isPast = false,
   slotMinutes,
+  layout = 'columns',
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
@@ -109,9 +115,21 @@ export const DayCalendar = ({
 }: DayCalendarProps) => {
   const [hover, setHover] = useState<Hover | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
-  const scrolledToNow = useRef(false)
+  const scrolledToNow = useRef<CalendarLayout | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
-  const height = toPx(range.end - range.start)
+  const isTimeline = layout === 'timeline'
+  const perMinute = pxPerMinute(layout)
+  const toPx = (minutes: number) => minutes * perMinute
+  const place = placer(layout, range.start)
+  // The day's length along its axis: the columns' height, or the timeline rows' width.
+  const span = toPx(range.end - range.start)
+  const along = (minutes: number): CSSProperties =>
+    isTimeline ? { left: toPx(minutes - range.start) } : { top: toPx(minutes - range.start) }
+  const daySize: CSSProperties = isTimeline ? { width: span } : { height: span }
+  // On the timeline the grid is laid out by hand: hours across the top, then a row per master
+  // (its name, then its day) — the same elements as the columns, placed differently.
+  const cell = (row: number, column: number): CSSProperties =>
+    isTimeline ? { gridRow: row, gridColumn: column } : {}
   const hourMarks = Array.from(
     { length: (range.end - range.start) / HOUR + 1 },
     (_, index) => range.start + index * HOUR,
@@ -134,7 +152,14 @@ export const DayCalendar = ({
     }
     return `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
   }
-  const drag = useBookingDrag({ scrollerRef, range, slotMinutes, onMove: onMoveBooking })
+  const drag = useBookingDrag({
+    scrollerRef,
+    range,
+    slotMinutes,
+    axis: isTimeline ? 'x' : 'y',
+    pxPerMinute: perMinute,
+    onMove: onMoveBooking,
+  })
   const nowOffset = showNow ? toPx(nowMinutes - range.start) : null
 
   // The box ends at the bottom of the window, so the page itself does not scroll for the day.
@@ -153,16 +178,21 @@ export const DayCalendar = ({
   }, [])
 
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
-  // down, once — the minute ticks after that must not pull the view back.
+  // in, once per layout — the minute ticks after that must not pull the view back.
   useEffect(() => {
     const scroller = scrollerRef.current
-    if (!scroller || nowOffset === null || scrolledToNow.current) return
-    scrolledToNow.current = true
-    scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
-  }, [nowOffset])
+    if (!scroller || nowOffset === null || scrolledToNow.current === layout) return
+    scrolledToNow.current = layout
+    if (layout === 'timeline') {
+      scroller.scrollLeft = Math.max(0, nowOffset - (scroller.clientWidth - 200) / 3)
+    } else {
+      scroller.scrollTop = Math.max(0, nowOffset - scroller.clientHeight / 3)
+    }
+  }, [nowOffset, layout])
 
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
-    const offset = event.clientY - event.currentTarget.getBoundingClientRect().top
+    const rect = event.currentTarget.getBoundingClientRect()
+    const offset = isTimeline ? event.clientX - rect.left : event.clientY - rect.top
     const minutes = range.start + offset / toPx(1)
     const snapped = Math.floor(minutes / slotMinutes) * slotMinutes
 
@@ -180,13 +210,13 @@ export const DayCalendar = ({
       ref={scrollerRef}
       data-dragging={drag.dragged ? true : undefined}
     >
-      <div className={styles.grid} style={gridStyle}>
-        <div className={styles.corner} />
+      <div className={styles.grid} style={gridStyle} data-layout={layout}>
+        <div className={styles.corner} style={cell(1, 1)} />
         {specialists.map((specialist, index) => (
           <div
             key={specialist.id}
             className={styles.columnHead}
-            style={{ '--tint': getMasterTint(index) } as CSSProperties}
+            style={{ '--tint': getMasterTint(index), ...cell(index + 2, 1) } as CSSProperties}
           >
             <span className={styles.master}>{specialist.name}</span>
             <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
@@ -195,13 +225,9 @@ export const DayCalendar = ({
           </div>
         ))}
 
-        <div className={styles.axis} style={{ height }} aria-hidden='true'>
+        <div className={styles.axis} style={{ ...daySize, ...cell(1, 2) }} aria-hidden='true'>
           {hourMarks.map((minutes) => (
-            <span
-              key={minutes}
-              className={styles.hour}
-              style={{ top: toPx(minutes - range.start) }}
-            >
+            <span key={minutes} className={styles.hour} style={along(minutes)}>
               {formatClock(minutes)}
             </span>
           ))}
@@ -211,7 +237,13 @@ export const DayCalendar = ({
           <section
             key={specialist.id}
             className={styles.column}
-            style={{ height, '--tint': getMasterTint(index) } as CSSProperties}
+            style={
+              {
+                ...daySize,
+                '--tint': getMasterTint(index),
+                ...cell(index + 2, 2),
+              } as CSSProperties
+            }
             aria-label={specialist.name}
             data-specialist-id={specialist.id}
             onPointerLeave={() => setHover(null)}
@@ -232,7 +264,7 @@ export const DayCalendar = ({
             {!drag.dragged && hover?.specialistId === specialist.id && (
               <span
                 className={styles.ghost}
-                style={position(hover.minutes, hover.minutes + slotMinutes, range.start)}
+                style={place(hover.minutes, hover.minutes + slotMinutes)}
                 aria-hidden='true'
               >
                 {formatClock(hover.minutes)}
@@ -242,11 +274,11 @@ export const DayCalendar = ({
               <span
                 key={minutes}
                 className={styles.line}
-                style={{ top: toPx(minutes - range.start) }}
+                style={along(minutes)}
                 aria-hidden='true'
               />
             ))}
-            <OffHours day={dayOf(specialist)} range={range} height={height} />
+            <OffHours day={dayOf(specialist)} range={range} place={place} />
 
             {timeOff
               .filter((item) => item.specialistId === specialist.id)
@@ -254,7 +286,7 @@ export const DayCalendar = ({
                 <div
                   key={item.id}
                   className={styles.timeOff}
-                  style={position(parseClock(item.from), parseClock(item.to), range.start)}
+                  style={place(parseClock(item.from), parseClock(item.to))}
                 >
                   <span className={styles.blockTime}>
                     {item.from}–{item.to}
@@ -282,11 +314,15 @@ export const DayCalendar = ({
                 const from = parseClock(booking.time)
                 const to = from + booking.durationMinutes
                 const end = addMinutes(booking.time, booking.durationMinutes)
-                const blockHeight = toPx(to - from)
-                const size =
-                  blockHeight < COMPACT_BLOCK_PX
+                const length = toPx(to - from)
+                // Across, a block is as tall as its row: it never grows the footer line.
+                const size = isTimeline
+                  ? length < TIMELINE_COMPACT_PX
                     ? 'compact'
-                    : blockHeight >= TALL_BLOCK_PX
+                    : 'normal'
+                  : length < COMPACT_BLOCK_PX
+                    ? 'compact'
+                    : length >= TALL_BLOCK_PX
                       ? 'tall'
                       : 'normal'
                 const state = blockState(booking, from, to, nowMinutes, isPast)
@@ -305,7 +341,7 @@ export const DayCalendar = ({
                     data-tone={state.tone}
                     data-size={size}
                     data-dragging={drag.dragged?.id === booking.id || undefined}
-                    style={position(from, to, range.start)}
+                    style={place(from, to)}
                     onPointerDown={(event) => drag.handlePointerDown(event, booking)}
                     onClick={() => {
                       if (!drag.consumeClick()) onSelectBooking(booking)
@@ -362,10 +398,9 @@ export const DayCalendar = ({
             {drag.dragged && drag.target?.specialistId === specialist.id && (
               <span
                 className={styles.dropPreview}
-                style={position(
+                style={place(
                   drag.target.minutes,
                   drag.target.minutes + drag.dragged.durationMinutes,
-                  range.start,
                 )}
                 aria-hidden='true'
               >
@@ -378,11 +413,7 @@ export const DayCalendar = ({
             )}
 
             {showNow && nowMinutes !== null && (
-              <span
-                className={styles.now}
-                style={{ top: toPx(nowMinutes - range.start) }}
-                aria-hidden='true'
-              />
+              <span className={styles.now} style={along(nowMinutes)} aria-hidden='true' />
             )}
           </section>
         ))}

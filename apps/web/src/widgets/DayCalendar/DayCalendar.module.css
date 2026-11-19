@@ -504,3 +504,80 @@
     scale: 1;
   }
 }
+
+/* «Лента»: masters as rows on the left, the hours across the top, visits as bars along their row
+   — the same blocks as the columns, only the axis turned. Names stay pinned on the left and the
+   hours on top while the day scrolls sideways. */
+.grid[data-layout="timeline"] {
+  grid-template-columns: 200px max-content;
+  grid-template-rows: 36px;
+  grid-auto-rows: 88px;
+}
+
+.grid[data-layout="timeline"] .corner {
+  min-height: 36px;
+}
+
+.grid[data-layout="timeline"] .columnHead {
+  top: auto;
+  left: 0;
+  z-index: 4;
+  min-height: 0;
+  border-bottom: none;
+  border-left: none;
+  border-top: 0.5px solid var(--color-border);
+}
+
+.grid[data-layout="timeline"] .axis {
+  top: 0;
+  left: auto;
+  z-index: 5;
+  height: 36px;
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.grid[data-layout="timeline"] .hour {
+  top: 50%;
+  right: auto;
+  translate: -50% -50%;
+}
+
+.grid[data-layout="timeline"] .hour:first-child {
+  translate: 4px -50%;
+}
+
+.grid[data-layout="timeline"] .hour:last-child {
+  translate: calc(-100% - 4px) -50%;
+}
+
+.grid[data-layout="timeline"] .column {
+  border-top: 0.5px solid var(--color-border);
+  border-left: none;
+}
+
+.grid[data-layout="timeline"] :is(.line, .closed, .now) {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  height: auto;
+}
+
+.grid[data-layout="timeline"] .line {
+  width: 0.5px;
+}
+
+.grid[data-layout="timeline"] .now {
+  width: 2px;
+}
+
+.grid[data-layout="timeline"] .now::before {
+  top: -3px;
+  left: -3px;
+}
+
+.grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
+  top: 6px;
+  right: auto;
+  bottom: 6px;
+  margin-top: 0;
+}

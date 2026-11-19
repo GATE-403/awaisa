@@ -10,6 +10,8 @@ interface SegmentedControlProps<Value extends string> {
   value: Value
   items: Segment<Value>[]
   onChange: (value: Value) => void
+  /** `sm` sits beside the kit's small buttons in a toolbar (36pt). */
+  size?: 'md' | 'sm'
 }
 
 // The macOS 26 segmented control: a capsule track, equal segments and a raised knob that slides
@@ -19,6 +21,7 @@ export const SegmentedControl = <Value extends string>({
   value,
   items,
   onChange,
+  size = 'md',
 }: SegmentedControlProps<Value>) => {
   const name = useId()
   const index = Math.max(
@@ -29,6 +32,7 @@ export const SegmentedControl = <Value extends string>({
   return (
     <fieldset
       className={styles.control}
+      data-size={size}
       style={{ '--count': items.length, '--index': index } as CSSProperties}
     >
       <legend className={styles.legend}>{label}</legend>

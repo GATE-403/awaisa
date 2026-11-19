@@ -10,7 +10,7 @@ import {
 import { formatClock, parseClock } from '@/entities/business'
 import type { AdminBooking } from '@/shared/api/types'
 import { haptic } from '@/shared/lib/nativeBridge'
-import { type Range, toPx } from './calendarLayout'
+import type { Range } from './calendarLayout'
 
 type DragTarget = { specialistId: string; minutes: number }
 
@@ -28,6 +28,9 @@ type UseBookingDragOptions = {
   scrollerRef: RefObject<HTMLDivElement | null>
   range: Range
   slotMinutes: number
+  /** Which way time runs: down the columns or across the timeline rows. */
+  axis: 'x' | 'y'
+  pxPerMinute: number
   onMove: (booking: AdminBooking, specialistId: string, time: string) => void
 }
 
@@ -41,6 +44,8 @@ export const useBookingDrag = ({
   scrollerRef,
   range,
   slotMinutes,
+  axis,
+  pxPerMinute,
   onMove,
 }: UseBookingDragOptions) => {
   const pendingRef = useRef<Pending | null>(null)
@@ -57,7 +62,9 @@ export const useBookingDrag = ({
       )
     if (!column?.dataset.specialistId) return null
 
-    const raw = range.start + (y - column.getBoundingClientRect().top) / toPx(1) - offsetMinutes
+    const rect = column.getBoundingClientRect()
+    const along = axis === 'x' ? x - rect.left : y - rect.top
+    const raw = range.start + along / pxPerMinute - offsetMinutes
     const snapped = Math.round(raw / slotMinutes) * slotMinutes
 
     return {
@@ -105,7 +112,8 @@ export const useBookingDrag = ({
       pointerType: event.pointerType,
       startX: event.clientX,
       startY: event.clientY,
-      offsetMinutes: (event.clientY - rect.top) / toPx(1),
+      offsetMinutes:
+        (axis === 'x' ? event.clientX - rect.left : event.clientY - rect.top) / pxPerMinute,
       isDragging: false,
     }
     pendingRef.current = pending

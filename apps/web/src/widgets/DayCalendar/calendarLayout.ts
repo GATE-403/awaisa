@@ -33,7 +33,18 @@ const getDayRange = (
 
 const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 
-export type { Range }
+/** «Колонки»: masters side by side, time running down. «Лента»: masters as rows, time across. */
+type CalendarLayout = 'columns' | 'timeline'
+
+// Across, an hour is 144px: a 45-minute visit still has room for the client and the service.
+const TIMELINE_PX_PER_MINUTE = 2.4
+// Below this width (about an hour) a timeline block is one line of client and time.
+const TIMELINE_COMPACT_PX = 150
+
+const pxPerMinute = (layout: CalendarLayout) =>
+  layout === 'timeline' ? TIMELINE_PX_PER_MINUTE : PX_PER_MINUTE
+
+export type { CalendarLayout, Range }
 // Below this height (50 min) a block is the client and time on one line over the service; from
 // there the chip row (state, time) leads; from TALL_BLOCK_PX it also shows a footer line.
 const COMPACT_BLOCK_PX = 80
@@ -54,4 +65,13 @@ const MASTER_TINTS = [
 const getMasterTint = (index: number) =>
   MASTER_TINTS[index % MASTER_TINTS.length] ?? MASTER_TINTS[0]
 
-export { COMPACT_BLOCK_PX, getDayRange, getMasterTint, HOUR, TALL_BLOCK_PX, toPx }
+export {
+  COMPACT_BLOCK_PX,
+  getDayRange,
+  getMasterTint,
+  HOUR,
+  pxPerMinute,
+  TALL_BLOCK_PX,
+  TIMELINE_COMPACT_PX,
+  toPx,
+}
