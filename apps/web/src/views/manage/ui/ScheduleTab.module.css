@@ -31,8 +31,9 @@
 
 /* The day as a title over its numbers; day states follow as small tinted capsules. */
 .dayTitle {
-  display: block;
-  margin-bottom: 2px;
+  /* One line with the day's numbers: «Чт, 19 ноября  6 записей · 6 100 сом». */
+  display: inline;
+  margin-right: var(--space-2);
   color: var(--color-foreground);
   font-size: var(--text-title3);
   font-weight: var(--font-weight-semibold);
@@ -74,10 +75,4 @@
   outline: none;
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
-}
-
-/* − and + for the timeline's zoom, two small capsules close together. */
-.zoom {
-  display: inline-flex;
-  gap: var(--space-1);
 }

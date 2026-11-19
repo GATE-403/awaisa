@@ -8,6 +8,7 @@ import {
   ChatText,
   Check,
   Clock,
+  Minus,
   Plus,
   X,
 } from '@phosphor-icons/react/ssr'
@@ -31,6 +32,8 @@ import {
   getDayRange,
   getMasterTint,
   HOUR,
+  MAX_ZOOM,
+  MIN_ZOOM,
   minorStep,
   pxPerMinute,
   TALL_BLOCK_PX,
@@ -89,6 +92,9 @@ const blockState = (
 
   return { tone: 'plain', label: 'Ждём' }
 }
+
+// Room left under the day before the window's foot.
+const BOTTOM_GAP_PX = 24
 
 type Place = (from: number, to: number) => CSSProperties
 
@@ -289,23 +295,29 @@ export const DayCalendar = ({
     }
   }, [isTimeline])
 
-  // The box ends at the bottom of the window, so the page itself does not scroll for the day.
+  // The day fills the window down to its foot in both views, so the page itself does not scroll
+  // for it: measured from where the box starts (which moves when the bars above it change), with
+  // a small margin under it — floating bars («Все пришли») sit over the day's foot.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
     const fit = () => {
       const top = scroller.getBoundingClientRect().top + window.scrollY
-      // Whatever sits below the box (panel padding, page gutter) still has to fit on screen.
-      const below = document.documentElement.scrollHeight - (top + scroller.offsetHeight)
-      const fill = `${Math.max(420, window.innerHeight - top - below)}px`
+      const fill = `${Math.max(420, window.innerHeight - top - BOTTOM_GAP_PX)}px`
+      if (scroller.style.height === fill) return
+      scroller.style.height = fill
       scroller.style.maxHeight = fill
-      // The timeline always runs to the window's foot: its lanes share the height.
-      scroller.style.height = layout === 'timeline' ? fill : ''
     }
     fit()
+    const observer = new ResizeObserver(fit)
+    if (scroller.parentElement) observer.observe(scroller.parentElement)
+    observer.observe(document.body)
     window.addEventListener('resize', fit)
-    return () => window.removeEventListener('resize', fit)
-  }, [layout])
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', fit)
+    }
+  }, [])
 
   // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
   useEffect(() => {
@@ -383,28 +395,52 @@ export const DayCalendar = ({
     <div className={styles.frame}>
       {isTimeline && specialists.length > 1 && (
         // Whose day to show: everyone, or one master — capsules with the face and first name.
-        <div className={styles.filters}>
+        <div className={styles.viewBar}>
+          <div className={styles.filters}>
+            <button
+              type='button'
+              className={chip.chip}
+              aria-pressed={focusId === null}
+              onClick={() => setFocusId(null)}
+            >
+              Все
+            </button>
+            {specialists.map((specialist) => (
+              <button
+                key={specialist.id}
+                type='button'
+                className={`${chip.chip} ${styles.filterChip}`}
+                style={{ '--tint': tintOf(specialist.id) } as CSSProperties}
+                aria-pressed={focusId === specialist.id}
+                onClick={() => setFocusId(focusId === specialist.id ? null : specialist.id)}
+              >
+                {face(specialist, styles.chipFace)}
+                {specialist.name.split(' ')[0]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {isTimeline && onZoomChange && (
+        // Zoom, like a map's: a small capsule in the corner of the timeline.
+        <div className={styles.zoomPill}>
           <button
             type='button'
-            className={chip.chip}
-            aria-pressed={focusId === null}
-            onClick={() => setFocusId(null)}
+            aria-label='Уменьшить масштаб'
+            disabled={zoom <= MIN_ZOOM}
+            onClick={() => onZoomChange(clampZoom(zoom / 1.5))}
           >
-            Все
+            <Minus weight='bold' aria-hidden />
           </button>
-          {specialists.map((specialist) => (
-            <button
-              key={specialist.id}
-              type='button'
-              className={`${chip.chip} ${styles.filterChip}`}
-              style={{ '--tint': tintOf(specialist.id) } as CSSProperties}
-              aria-pressed={focusId === specialist.id}
-              onClick={() => setFocusId(focusId === specialist.id ? null : specialist.id)}
-            >
-              {face(specialist, styles.chipFace)}
-              {specialist.name.split(' ')[0]}
-            </button>
-          ))}
+          <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
+          <button
+            type='button'
+            aria-label='Увеличить масштаб'
+            disabled={zoom >= MAX_ZOOM}
+            onClick={() => onZoomChange(clampZoom(zoom * 1.5))}
+          >
+            <Plus weight='bold' aria-hidden />
+          </button>
         </div>
       )}
       {nowSide && nowMinutes !== null && (
@@ -515,7 +551,7 @@ export const DayCalendar = ({
                   {formatClock(hover.minutes)}
                 </span>
               )}
-              {/* Whose lane this is, pinned to its bottom-left corner while the day scrolls. */}
+              {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
               {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
                 <span className={styles.laneTag} aria-hidden='true'>
                   {face(specialist, styles.cardFace)}
@@ -528,7 +564,7 @@ export const DayCalendar = ({
                 !bookings.some((booking) => booking.specialistId === specialist.id) &&
                 !timeOff.some((item) => item.specialistId === specialist.id) &&
                 (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
-                  <span className={styles.laneEmpty}>
+                  <span className={styles.laneEmpty} onPointerEnter={() => setHover(null)}>
                     {face(specialist, styles.cardFace)}
                     <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                     {dayOf(specialist) === null || specialist.isOnLeave
@@ -539,6 +575,7 @@ export const DayCalendar = ({
                   <button
                     type='button'
                     className={styles.laneEmpty}
+                    onPointerEnter={() => setHover(null)}
                     data-action
                     onClick={() => onCreateBooking(specialist.id, null)}
                   >

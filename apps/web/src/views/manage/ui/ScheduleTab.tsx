@@ -3,17 +3,11 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import {
-  BellRinging,
-  Coffee,
-  MagnifyingGlassMinus,
-  MagnifyingGlassPlus,
-  Plus,
-} from '@phosphor-icons/react/ssr'
+import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
-import { findDay, weekdayOf } from '@/entities/business'
+import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   closeDay,
@@ -39,13 +33,7 @@ import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
-import {
-  type CalendarLayout,
-  clampZoom,
-  DayCalendar,
-  MAX_ZOOM,
-  MIN_ZOOM,
-} from '@/widgets/DayCalendar'
+import { type CalendarLayout, DayCalendar } from '@/widgets/DayCalendar'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './ScheduleTab.module.css'
 
@@ -69,6 +57,16 @@ const LAYOUTS: { value: CalendarLayout; label: string }[] = [
   { value: 'columns', label: 'Колонки' },
   { value: 'timeline', label: 'Лента' },
 ]
+
+// «Чт, 19 ноября»: the day in the toolbar's one line.
+const capitalizeFirst = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+const dayTitleFormatter = new Intl.DateTimeFormat('ru-RU', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'long',
+})
+
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
 
@@ -113,6 +111,9 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     removeTimeOff,
   } = useAdminSchedule(slug, date, refreshKey)
   const dayLabel = days.find((day) => day.key === date)?.label ?? ''
+  const dayTitle = date
+    ? capitalizeFirst(dayTitleFormatter.format(new Date(`${date}T12:00:00`)))
+    : ''
   const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
   // What the day brings: paid amounts once marked, prices otherwise; no-shows bring nothing.
   const revenue = confirmed.reduce(
@@ -124,7 +125,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   // The day as a title, its numbers in one line under it with the figures in bold.
   const summary = (
     <>
-      <span className={styles.dayTitle}>{dayLabel}</span>
+      <span className={styles.dayTitle}>{dayTitle}</span>
       <span className={styles.dayStats}>
         {!dayHours ? (
           'Выходной'
@@ -149,6 +150,19 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
+  // Who those are: the day's ended visits with no outcome yet, in time order.
+  const unmarkedHere = (schedule?.bookings ?? [])
+    .filter(
+      (booking) =>
+        booking.status === 'confirmed' &&
+        !booking.outcome &&
+        booking.payment?.status !== 'pending' &&
+        (isPast ||
+          (today !== null &&
+            date === today.dayKey &&
+            parseClock(booking.time) + booking.durationMinutes <= today.minutes)),
+    )
+    .sort((first, second) => first.time.localeCompare(second.time))
   const dayWaitlist = waitlist.filter((entry) => entry.date === date)
 
   // Arrived from a «Новая запись» toast or notification: show that day and open the booking once.
@@ -270,7 +284,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         title='Расписание'
         description={
           <>
-            {schedule ? summary : <span className={styles.dayTitle}>{dayLabel}</span>}
+            {schedule ? summary : <span className={styles.dayTitle}>{dayTitle}</span>}
             {/* The waiting list is a state of the day: part of the hint, not another button. */}
             {!isPast && dayWaitlist.length > 0 && (
               <button
@@ -287,28 +301,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
-              {layout === 'timeline' && (
-                <span className={styles.zoom}>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    aria-label='Уменьшить масштаб'
-                    disabled={zoom <= MIN_ZOOM}
-                    onClick={() => setZoom(clampZoom(zoom / 1.5))}
-                  >
-                    <MagnifyingGlassMinus weight='bold' aria-hidden />
-                  </Button>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    aria-label='Увеличить масштаб'
-                    disabled={zoom >= MAX_ZOOM}
-                    onClick={() => setZoom(clampZoom(zoom * 1.5))}
-                  >
-                    <MagnifyingGlassPlus weight='bold' aria-hidden />
-                  </Button>
-                </span>
-              )}
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -348,7 +340,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       )}
 
       <div className={styles.panel}>
-        <DayStrip days={days} value={date} onChange={setSelectedDay} marks={marks} />
+        <DayStrip
+          variant='compact'
+          days={days}
+          value={date}
+          onChange={setSelectedDay}
+          marks={marks}
+        />
         {schedule && hasMasters && today && date === today.dayKey && (
           <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
         )}
@@ -385,6 +383,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         <CloseDayBar
           openHere={openHere}
           openElsewhere={unclosed.total - openHere}
+          visitsHere={unmarkedHere}
+          onOpen={setSelected}
           onCloseDay={handleCloseDay}
           onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
           onDismiss={() => setIsCloseBarHidden(true)}
