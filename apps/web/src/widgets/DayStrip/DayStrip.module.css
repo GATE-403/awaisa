@@ -192,3 +192,30 @@
     background: none;
   }
 }
+
+/* Compact days read as a row of chips one taps and scrolls: each day on a quiet fill, the chosen
+   one filled, the row fading at its edges (`data-edge-fade`) and cut by the panel's side. */
+.strip[data-variant="compact"] .days {
+  gap: var(--space-1);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="false"] {
+  background: var(--color-fill);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="false"][data-today] :is(.weekday, .number) {
+  color: var(--color-danger-text);
+}
+
+/* «Сегодня» as the kit's outline capsule: accent on a 10% accent fill. */
+.strip[data-variant="compact"] .today {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (hover: hover) {
+  .strip[data-variant="compact"] .day[aria-pressed="false"]:hover {
+    background: var(--color-subtle);
+  }
+}

@@ -2160,10 +2160,45 @@
   }
 
   .viewBar {
-    max-width: calc(100% - 2 * var(--space-3));
+    right: var(--space-3);
   }
+}
 
-  .viewBar .trackMaster[aria-pressed="true"] .trackLabel {
-    grid-template-columns: 0fr;
+/* ——— Cards stand apart ———
+   Back-to-back visits used to touch, and a soft fill on a soft fill hid where one ended. A clear
+   3px edge (the day shows through it) parts neighbours and keeps cards off the board's sides, and
+   a hairline of the master's colour draws each card's outline. */
+.grid[data-layout] .booking {
+  border: 3px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+  outline: 0.5px solid color-mix(in srgb, var(--tint) 45%, transparent);
+  outline-offset: -3.5px;
+}
+
+.grid[data-layout] .booking[data-ended] {
+  outline-color: color-mix(in srgb, var(--tint) 28%, transparent);
+}
+
+/* The live visit is solid already. */
+.grid[data-layout] .booking[data-tone="accent"] {
+  outline-color: transparent;
+}
+
+/* The masters' track may run the board's width (the zoom keeps the right corner), so the chosen
+   face opens into its name and note in full instead of being cut. */
+.viewBar {
+  right: 168px;
+  max-width: none;
+  pointer-events: none;
+}
+
+.viewBar .track {
+  pointer-events: auto;
+}
+
+@media (max-width: 639px) {
+  .viewBar {
+    right: var(--space-3);
   }
 }

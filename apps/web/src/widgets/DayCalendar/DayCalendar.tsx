@@ -701,7 +701,15 @@ export const DayCalendar = ({
                     } as CSSProperties
                   }
                   aria-pressed={isChosen}
-                  onClick={() => setFocusId(isChosen ? null : specialist.id)}
+                  onClick={(event) => {
+                    const button = event.currentTarget
+                    setFocusId(isChosen ? null : specialist.id)
+                    // Once its name has opened, keep the chosen face in the track's view.
+                    window.setTimeout(
+                      () => button.scrollIntoView({ block: 'nearest', inline: 'nearest' }),
+                      320,
+                    )
+                  }}
                 >
                   <span className={styles.ring}>{face(specialist, styles.ringFace)}</span>
                   {/* Folded to nothing unless chosen; screen readers always read it. */}
