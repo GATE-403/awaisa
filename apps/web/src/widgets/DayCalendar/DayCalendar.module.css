@@ -2537,3 +2537,88 @@
 :root .grid[data-layout] .booking[data-ended] {
   outline: none;
 }
+
+/* ——— The timeline's grid ———
+   The hours ride a row of their own pinned to the top; each master is a rounded lane of the day's
+   grey on the page's darker grey, parted by a 6px gap instead of a line; hour lines run inside the
+   lanes, with a short tick at each half hour along the lane's foot, like a ruler. */
+.grid[data-layout="timeline"] {
+  grid-template-rows: 28px minmax(124px, 174px);
+  row-gap: 6px;
+  background-color: var(--color-background);
+  background-image: none;
+}
+
+:root .grid[data-layout="timeline"] .axis {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  height: 28px;
+  background: var(--color-background);
+}
+
+:root .grid[data-layout="timeline"] .hour {
+  top: 7px;
+}
+
+:root .grid[data-layout="timeline"] section.column {
+  border: none;
+  border-radius: 14px;
+  background-color: var(--day-bg);
+  background-image:
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 100%,
+    0 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 7px,
+    var(--hour-px) 100%;
+}
+
+/* With the hours above, the first lane is like the others again. */
+:root
+  .grid[data-layout="timeline"]
+  section.column:first-of-type
+  :is(.booking, .timeOff, .ghost, .dropPreview, .fitSlot) {
+  top: 32px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .laneTag {
+  margin-top: 2px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .laneEmpty {
+  margin-top: 4px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .edgeBand > .edgeTab {
+  top: 2px;
+}
+
+/* What has passed sits a shade darker, like Calendar: today up to now, a past day whole. */
+.past {
+  position: absolute;
+  z-index: 0;
+  background: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  pointer-events: none;
+}
+
+.grid[data-layout="timeline"] .past {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 14px 0 0 14px;
+}
+
+.grid[data-layout="columns"] .past {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+/* The now-line and its time stay over the pinned hours. */
+.grid[data-layout="timeline"] > .nowLine {
+  z-index: 7;
+}

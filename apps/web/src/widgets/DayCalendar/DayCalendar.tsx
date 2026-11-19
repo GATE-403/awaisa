@@ -1425,6 +1425,26 @@ export const DayCalendar = ({
                 {showNow && nowMinutes !== null && !isTimeline && (
                   <span className={styles.now} style={along(nowMinutes)} aria-hidden='true' />
                 )}
+                {/* What has passed, a shade darker: today up to now, a past day whole. */}
+                {(isPast || (showNow && nowMinutes !== null)) && (
+                  <span
+                    className={styles.past}
+                    style={
+                      isTimeline
+                        ? {
+                            width: isPast
+                              ? '100%'
+                              : toPx((nowMinutes ?? range.start) - range.start),
+                          }
+                        : {
+                            height: isPast
+                              ? '100%'
+                              : toPx((nowMinutes ?? range.start) - range.start),
+                          }
+                    }
+                    aria-hidden='true'
+                  />
+                )}
               </section>
             ))}
           </div>
