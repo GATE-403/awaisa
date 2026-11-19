@@ -18,6 +18,8 @@ interface VisitOutcomeSectionProps {
   slug: string
   booking: AdminBooking
   onChange: (input: OutcomeInput) => Promise<AdminBooking | null>
+  /** In the inspector: no caption, the small segmented control. */
+  isCompact?: boolean
 }
 
 type OutcomeChoice = 'pending' | 'arrived' | 'no_show'
@@ -41,7 +43,12 @@ const METHODS: { value: PaymentMethod; label: string }[] = [
 
 // Staff close the visit in two taps: «Пришёл» fills the price and cash; the amount and the way
 // of paying can be corrected right there. Each change is saved at once.
-export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSectionProps) => {
+export const VisitOutcomeSection = ({
+  slug,
+  booking,
+  onChange,
+  isCompact = false,
+}: VisitOutcomeSectionProps) => {
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [certificateCode, setCertificateCode] = useState('')
@@ -84,11 +91,12 @@ export const VisitOutcomeSection = ({ slug, booking, onChange }: VisitOutcomeSec
 
   return (
     <section className={sheet.group} aria-label='Итог визита'>
-      <SectionCaption>Итог визита</SectionCaption>
+      {!isCompact && <SectionCaption>Итог визита</SectionCaption>}
       {/* The control stands on its own, like a macOS segmented control in a form. */}
       <div className={styles.outcomeRow}>
         <SegmentedControl
           label='Итог визита'
+          size={isCompact ? 'sm' : 'md'}
           value={choice}
           items={OUTCOMES}
           onChange={(value) => void save({ outcome: value === 'pending' ? null : value })}

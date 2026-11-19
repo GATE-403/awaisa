@@ -2754,3 +2754,13 @@
 .stateGlyph[data-tone="success"] {
   color: var(--color-success-text, var(--system-green));
 }
+
+/* Cards always above the line layer (z 1): live ones at 2, a cancelled one at 1 — under the live
+   visit that took its time, still over the lines (at 0 the lines crossed it). */
+:root .grid[data-layout] .booking {
+  z-index: 2;
+}
+
+:root .grid[data-layout] .booking[data-cancelled] {
+  z-index: 1;
+}

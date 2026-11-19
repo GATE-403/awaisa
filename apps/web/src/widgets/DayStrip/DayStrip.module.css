@@ -333,3 +333,18 @@
 .strip[data-variant="compact"] .day[aria-pressed="true"] .markGlyph {
   color: color-mix(in srgb, var(--system-orange) 70%, white);
 }
+
+/* Only the chosen day has a fill; the others are plain text with their load bar under them. */
+.strip[data-variant="compact"] .day[aria-pressed="false"] {
+  background: transparent;
+}
+
+/* On the chosen chip (black, or red for today) its marks read in the chip's own light ink. */
+.strip[data-variant="compact"] .day[aria-pressed="true"] :is(.load, .markGlyph) {
+  color: var(--color-background);
+  opacity: 0.9;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] :is(.load, .markGlyph) {
+  color: var(--color-primary-foreground);
+}

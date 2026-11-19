@@ -52,8 +52,13 @@ export const BookingInspector = ({
     if (await onCancel(booking.id)) onClose()
   }
 
+  const handleCopyPhone = () => {
+    void navigator.clipboard?.writeText(booking.customerPhone)
+  }
+
   return (
     <div className={styles.inspector} data-cancelled={isCancelled || undefined}>
+      {/* Who and what in two lines beside the face; the price on the right. */}
       <header className={styles.head}>
         <PersonAvatar name={booking.customerName} size='md' />
         <span className={styles.who}>
@@ -66,9 +71,9 @@ export const BookingInspector = ({
             <CaretRight weight='bold' aria-hidden />
             <span className={styles.srOnly}>: карточка клиента</span>
           </button>
-          <a className={styles.phone} href={`tel:${booking.customerPhone}`}>
-            {formatPhone(booking.customerPhone)}
-          </a>
+          <span className={styles.what}>
+            {booking.serviceName} · {master}
+          </span>
         </span>
         <span className={styles.price}>
           {booking.discount && <s className={styles.oldPrice}>{formatPrice(booking.price)}</s>}
@@ -76,33 +81,23 @@ export const BookingInspector = ({
         </span>
       </header>
 
-      <div className={styles.facts}>
-        <p className={styles.what}>
-          {booking.serviceName}
-          <span className={styles.muted}> · {master}</span>
-        </p>
-        <p className={styles.when}>
-          {day} · {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
-          {formatDuration(booking.durationMinutes)}
-        </p>
-        {isCancelled && <p className={styles.cancelled}>Запись отменена</p>}
-        {booking.discount && (
-          <p className={styles.note}>
-            {booking.discount.title} · −{formatPrice(booking.discount.amount)}
-          </p>
-        )}
-        {booking.payment && (
-          <p className={styles.note}>
-            Предоплата {formatPrice(booking.payment.amount)} ·{' '}
-            {PAYMENT_STATUS_TEXT[booking.payment.status]}
-          </p>
-        )}
-        {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
-      </div>
+      <p className={styles.when}>
+        {day}, {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
+        {formatDuration(booking.durationMinutes)}
+        {booking.discount && ` · ${booking.discount.title}`}
+        {booking.payment &&
+          ` · предоплата ${formatPrice(booking.payment.amount)}, ${PAYMENT_STATUS_TEXT[booking.payment.status].toLowerCase()}`}
+      </p>
+      {isCancelled && <p className={styles.cancelled}>Запись отменена</p>}
+      {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
 
       <div className={styles.actions}>
         <GlyphGroup label='Связаться с клиентом'>
-          <a href={`tel:${booking.customerPhone}`} aria-label='Позвонить' title='Позвонить'>
+          <a
+            href={`tel:${booking.customerPhone}`}
+            aria-label={`Позвонить: ${formatPhone(booking.customerPhone)}`}
+            title={formatPhone(booking.customerPhone)}
+          >
             <Phone aria-hidden />
           </a>
           <a
@@ -121,6 +116,9 @@ export const BookingInspector = ({
             <MenuItem onClick={() => onOpenClient(booking.customerPhone)}>
               Карточка клиента
             </MenuItem>
+            <MenuItem onClick={handleCopyPhone}>
+              Скопировать {formatPhone(booking.customerPhone)}
+            </MenuItem>
             {!isCancelled && (
               <>
                 <MenuSeparator />
@@ -138,6 +136,7 @@ export const BookingInspector = ({
           slug={slug}
           booking={booking}
           onChange={(input) => onOutcome(booking.id, input)}
+          isCompact
         />
       )}
     </div>
