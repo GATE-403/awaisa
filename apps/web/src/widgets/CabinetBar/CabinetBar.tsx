@@ -2,7 +2,7 @@
 
 import { ArrowSquareOut, CaretLeft, Megaphone, UserCircle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useRef } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
@@ -32,9 +32,28 @@ export const CabinetBar = ({
   const isScrolled = useIsScrolled()
   const { customer } = useSession()
   const { hasUnread } = useUpdatesSeen()
+  const barRef = useRef<HTMLDivElement>(null)
+  const isCompact = Boolean(nav)
+
+  // With the sections in the bar, toasts come down under it: on phones they used to land right
+  // over the tabs just when someone wanted to switch after saving.
+  useEffect(() => {
+    const bar = barRef.current
+    if (!isCompact || !bar) return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() => {
+      root.style.setProperty('--toast-top', `${bar.getBoundingClientRect().bottom}px`)
+    })
+    observer.observe(bar)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--toast-top')
+    }
+  }, [isCompact])
 
   return (
     <div
+      ref={barRef}
       className={styles.bar}
       data-scrolled={isScrolled || undefined}
       data-compact={nav ? true : undefined}
