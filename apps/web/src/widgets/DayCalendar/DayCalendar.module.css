@@ -2372,3 +2372,81 @@
     }
   }
 }
+
+/* ——— «Найти место» ———
+   Where the chosen service fits: dashed accent blocks over the free stretches, the visits stepping
+   back while the search is on. A tap books that master from the gap's start. */
+.fitSlot {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px dashed color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: clip;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.fitSlot svg {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  margin-top: 2px;
+}
+
+.fitSlot[data-layout="timeline"] {
+  top: 32px;
+  bottom: 10px;
+}
+
+.grid[data-layout="timeline"] section.column:first-of-type .fitSlot {
+  top: 50px;
+}
+
+.fitSlot[data-layout="columns"] {
+  right: var(--space-1);
+  left: var(--space-1);
+}
+
+.fitSlot:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .fitSlot:hover {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  }
+}
+
+/* The visits step back (their opacity belongs to the edge fade): a paler fill, faded words. */
+:root .grid[data-fit] .booking,
+:root .grid[data-fit] .booking[data-tone] {
+  background: color-mix(in srgb, var(--tint) 8%, var(--color-surface));
+}
+
+.grid[data-fit] .booking > * {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fitSlot {
+    animation: fit-in 260ms var(--ease-standard) backwards;
+  }
+}
+
+@keyframes fit-in {
+  from {
+    opacity: 0;
+  }
+}

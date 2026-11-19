@@ -1,6 +1,7 @@
 'use client'
 
-import { Menu } from '@awaisa/ui/Menu'
+import { ContextMenu } from '@awaisa/ui/ContextMenu'
+import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
 import {
   ArrowDown,
   ArrowLeft,
@@ -30,6 +31,7 @@ import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { pluralWord } from '@/shared/lib/plural'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import {
@@ -48,6 +50,7 @@ import {
   TIMELINE_COMPACT_PX,
 } from './calendarLayout'
 import styles from './DayCalendar.module.css'
+import { freeGaps } from './freeGaps'
 import { useBookingDrag } from './useBookingDrag'
 
 interface DayCalendarProps {
@@ -78,6 +81,14 @@ interface DayCalendarProps {
   bottomInset?: number
   /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
   dayKey?: string
+  /** «Найти место»: light up the gaps where a service this long fits (only these masters). */
+  fit?: { minutes: number; specialistIds: string[] | null } | null
+  /** «Не пришёл» from a card's right-click menu. */
+  onMarkNoShow?: (booking: AdminBooking) => void
+  /** «Отменить запись» from a card's right-click menu (undo comes from the toast). */
+  onCancelBooking?: (booking: AdminBooking) => void
+  /** A swipe sideways past the day's edge: the next (1) or previous (-1) day. */
+  onSwipeDay?: (step: 1 | -1) => void
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -160,12 +171,22 @@ export const DayCalendar = ({
   focusedBookingId = null,
   bottomInset = 0,
   dayKey,
+  fit = null,
+  onMarkNoShow,
+  onCancelBooking,
+  onSwipeDay,
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
   onMoveBooking,
 }: DayCalendarProps) => {
   const [hover, setHover] = useState<Hover | null>(null)
+  // A right click opens the visit's menu with a mouse; on touch screens a long press drags.
+  const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
+  // What the right click landed on: a visit, or a free spot in a master's lane.
+  const [menuTarget, setMenuTarget] = useState<
+    { booking: AdminBooking } | { specialistId: string; minutes: number | null } | null
+  >(null)
   // The timeline can show one master alone: a tap on their face in the corner stack.
   const [focusId, setFocusId] = useState<string | null>(null)
   // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
@@ -539,6 +560,130 @@ export const DayCalendar = ({
     return () => cancelAnimationFrame(frame)
   }, [nowOffset, layout])
 
+  // A swipe sideways turns the day: on the columns whenever they fit the width, on the timeline
+  // only past its start or end (inside, the finger scrolls the day).
+  const swipeRef = useRef(onSwipeDay)
+  useEffect(() => {
+    swipeRef.current = onSwipeDay
+  })
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller) return
+    let start: { x: number; y: number; left: number; atStart: boolean; atEnd: boolean } | null =
+      null
+    const handleStart = (event: TouchEvent) => {
+      const touch = event.touches[0]
+      if (event.touches.length !== 1 || !touch) {
+        start = null
+        return
+      }
+      const maxLeft = scroller.scrollWidth - scroller.clientWidth
+      start = {
+        x: touch.clientX,
+        y: touch.clientY,
+        left: scroller.scrollLeft,
+        atStart: scroller.scrollLeft <= 1,
+        atEnd: scroller.scrollLeft >= maxLeft - 1,
+      }
+    }
+    const handleEnd = (event: TouchEvent) => {
+      const touch = event.changedTouches[0]
+      if (!start || !touch || !swipeRef.current) return
+      const dx = touch.clientX - start.x
+      const dy = touch.clientY - start.y
+      const moved = Math.abs(scroller.scrollLeft - start.left) > 2
+      const isSideways = Math.abs(dx) > 72 && Math.abs(dx) > 2 * Math.abs(dy)
+      const fits = scroller.scrollWidth <= scroller.clientWidth + 2
+      if (isSideways && !moved) {
+        if (dx < 0 && (fits || start.atEnd)) swipeRef.current(1)
+        if (dx > 0 && (fits || start.atStart)) swipeRef.current(-1)
+      }
+      start = null
+    }
+    scroller.addEventListener('touchstart', handleStart, { passive: true })
+    scroller.addEventListener('touchend', handleEnd, { passive: true })
+    return () => {
+      scroller.removeEventListener('touchstart', handleStart)
+      scroller.removeEventListener('touchend', handleEnd)
+    }
+  }, [])
+
+  const handleContextMenu = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement
+    const card = target.closest<HTMLElement>('[data-booking-id]')
+    const booking = card && bookings.find((item) => item.id === card.dataset.bookingId)
+    if (booking) {
+      setMenuTarget({ booking })
+      return
+    }
+    const lane = target.closest<HTMLElement>('section[data-specialist-id]')
+    const specialistId = lane?.dataset.specialistId
+    if (!lane || !specialistId) {
+      setMenuTarget(null)
+      return
+    }
+    const rect = lane.getBoundingClientRect()
+    const offset = isTimeline ? event.clientX - rect.left : event.clientY - rect.top
+    const snapped = Math.floor((range.start + offset / toPx(1)) / slotMinutes) * slotMinutes
+    const minutes = Math.min(Math.max(snapped, range.start), range.end - slotMinutes)
+    setMenuTarget({
+      specialistId,
+      minutes: isPast || isTaken(specialistId, minutes) ? null : minutes,
+    })
+  }
+
+  const contextItems = (() => {
+    if (!menuTarget) return null
+    if ('booking' in menuTarget) {
+      const { booking } = menuTarget
+      const digits = booking.customerPhone.replace(/\D/g, '')
+      const isLive = booking.status === 'confirmed'
+      const hasStarted = isPast || (nowMinutes !== null && parseClock(booking.time) <= nowMinutes)
+      return (
+        <>
+          <MenuItem onClick={() => onSelectBooking(booking)}>Открыть запись</MenuItem>
+          <MenuSeparator />
+          <MenuItem onClick={() => window.open(`tel:+${digits}`, '_self')}>Позвонить</MenuItem>
+          <MenuItem onClick={() => window.open(`https://wa.me/${digits}`, '_blank', 'noopener')}>
+            Написать в WhatsApp
+          </MenuItem>
+          {isLive && hasStarted && (onMarkArrived || onMarkNoShow) && (
+            <>
+              <MenuSeparator />
+              {onMarkArrived && booking.outcome !== 'arrived' && (
+                <MenuItem onClick={() => onMarkArrived(booking)}>Пришёл</MenuItem>
+              )}
+              {onMarkNoShow && booking.outcome !== 'no_show' && (
+                <MenuItem onClick={() => onMarkNoShow(booking)}>Не пришёл</MenuItem>
+              )}
+            </>
+          )}
+          {isLive && onCancelBooking && (
+            <>
+              <MenuSeparator />
+              <MenuItem variant='danger' onClick={() => onCancelBooking(booking)}>
+                Отменить запись
+              </MenuItem>
+            </>
+          )}
+        </>
+      )
+    }
+    const specialist = specialists.find(({ id }) => id === menuTarget.specialistId)
+    if (!specialist || isPast) return null
+    const { minutes } = menuTarget
+    return (
+      <MenuItem
+        onClick={() =>
+          onCreateBooking(specialist.id, minutes === null ? null : formatClock(minutes))
+        }
+      >
+        Новая запись{minutes === null ? '' : ` · ${formatClock(minutes)}`} ·{' '}
+        {specialist.name.split(' ')[0]}
+      </MenuItem>
+    )
+  })()
+
   const minutesAt = (event: MouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
     const offset = isTimeline ? event.clientX - rect.left : event.clientY - rect.top
@@ -837,430 +982,465 @@ export const DayCalendar = ({
         ref={scrollerRef}
         data-dragging={drag.dragged ? true : undefined}
       >
-        <div className={styles.grid} style={gridStyle} data-layout={layout}>
-          <div className={styles.corner} style={cell(1, 1)} />
-          {shown.map((specialist, index) => (
-            <div
-              key={specialist.id}
-              className={styles.columnHead}
-              data-column-head
-              style={{ '--tint': tintOf(specialist.id), ...cell(index + 2, 1) } as CSSProperties}
-            >
-              <span className={styles.laneRing} style={ringStyle(specialist)}>
-                <PersonAvatar
-                  name={specialist.name}
-                  src={specialist.photoUrl ?? undefined}
-                  size='sm'
-                  className={styles.face}
-                />
-              </span>
-              <span className={styles.headText}>
-                <span className={styles.master}>{specialist.name}</span>
-                <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
-                  {roleLine(specialist)}
+        <ContextMenu menu={contextItems} disabled={!isFinePointer || !contextItems}>
+          <div
+            className={styles.grid}
+            style={gridStyle}
+            data-layout={layout}
+            data-fit={fit ? '' : undefined}
+            onContextMenuCapture={handleContextMenu}
+          >
+            <div className={styles.corner} style={cell(1, 1)} />
+            {shown.map((specialist, index) => (
+              <div
+                key={specialist.id}
+                className={styles.columnHead}
+                data-column-head
+                style={{ '--tint': tintOf(specialist.id), ...cell(index + 2, 1) } as CSSProperties}
+              >
+                <span className={styles.laneRing} style={ringStyle(specialist)}>
+                  <PersonAvatar
+                    name={specialist.name}
+                    src={specialist.photoUrl ?? undefined}
+                    size='sm'
+                    className={styles.face}
+                  />
                 </span>
-              </span>
-            </div>
-          ))}
-
-          <div className={styles.axis} style={{ ...daySize, ...cell(1, 1) }} aria-hidden='true'>
-            {hourMarks.map((minutes) => (
-              <span key={minutes} className={styles.hour} style={along(minutes)}>
-                {formatClock(minutes)}
-              </span>
-            ))}
-            {minorMarks.map((minutes) => (
-              <span key={minutes} className={styles.minorHour} style={along(minutes)}>
-                {formatClock(minutes)}
-              </span>
-            ))}
-            {/* The time now, as a red capsule on the hours: what the red line means. */}
-            {showNow && nowMinutes !== null && !isTimeline && (
-              <span className={styles.nowLabel} style={along(nowMinutes)}>
-                {formatClock(nowMinutes)}
-              </span>
-            )}
-          </div>
-
-          {/* On the timeline «now» is one line through every lane, its time on top. */}
-          {showNow && nowMinutes !== null && isTimeline && (
-            <span className={styles.nowLine} style={along(nowMinutes)} aria-hidden='true'>
-              <span className={styles.nowLabel}>{formatClock(nowMinutes)}</span>
-            </span>
-          )}
-
-          {shown.map((specialist, index) => (
-            <section
-              // A new day remounts the lanes, so their entrance plays again.
-              key={`${dayKey ?? ''}:${specialist.id}`}
-              className={styles.column}
-              data-enter={shownDay.direction ?? 'first'}
-              style={
-                {
-                  ...daySize,
-                  '--tint': tintOf(specialist.id),
-                  '--enter-i': index,
-                  ...cell(index + 2, 1),
-                } as CSSProperties
-              }
-              aria-label={specialist.name}
-              data-specialist-id={specialist.id}
-              onPointerLeave={() => setHover(null)}
-            >
-              <button
-                type='button'
-                className={styles.slotTarget}
-                aria-label={`Новая запись к мастеру ${specialist.name}`}
-                // A mouse press must not focus the lane: the new-booking sheet gives focus back on
-                // close, and the whole lane then wore a focus ring.
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={(event) => handleCreate(event, specialist.id)}
-                onPointerMove={(event) => {
-                  if (event.pointerType !== 'mouse' || drag.dragged) return
-                  const minutes = minutesAt(event)
-                  if (isTaken(specialist.id, minutes)) {
-                    if (hover) setHover(null)
-                    return
-                  }
-                  if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
-                    setHover({ specialistId: specialist.id, minutes })
-                  }
-                }}
-              />
-              {!drag.dragged && hover?.specialistId === specialist.id && (
-                <span
-                  className={styles.ghost}
-                  data-narrow={
-                    (isTimeline &&
-                      toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) < 130) ||
-                    undefined
-                  }
-                  style={
-                    isTimeline
-                      ? ({
-                          ...place(hover.minutes, hover.minutes + slotMinutes),
-                          '--free': `${toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) - 4}px`,
-                        } as CSSProperties)
-                      : place(hover.minutes, hover.minutes + slotMinutes)
-                  }
-                  aria-hidden='true'
-                >
-                  {isTimeline ? (
-                    // The slot as a card to come: the same shape as the visits, ringed in the
-                    // master's colour — when, «+ Новая запись», whose.
-                    <>
-                      <span className={styles.blockTop}>
-                        <span className={styles.blockRange}>
-                          {formatClock(hover.minutes)}
-                          <span className={styles.rangeEndGhost}>
-                            –{formatClock(hover.minutes + slotMinutes)}
-                          </span>
-                        </span>
-                      </span>
-                      <span className={styles.ghostTitle}>
-                        <Plus weight='bold' aria-hidden />
-                        <span className={styles.ghostLabel}>Новая запись</span>
-                      </span>
-                      <span className={styles.ghostWho}>
-                        {face(specialist, styles.cardFace)}
-                        {specialist.name.split(' ')[0]}
-                      </span>
-                    </>
-                  ) : (
-                    formatClock(hover.minutes)
-                  )}
-                </span>
-              )}
-              {view.size > 0 &&
-                (() => {
-                  // A sticky band as big as the view: the browser keeps the tabs in place while
-                  // the day scrolls, so they never lag. On the timeline only the right tab lives
-                  // here (the left one leads the lane's first line); the columns hold both.
-                  const { before, after } = edgeVisits(specialist.id)
-                  if (after.length === 0 && (isTimeline || before.length === 0)) return null
-                  return (
-                    <span className={styles.edgeRail}>
-                      <span className={styles.edgeBand}>
-                        {!isTimeline && edgeTab('before', before)}
-                        {edgeTab('after', after)}
-                      </span>
-                    </span>
-                  )
-                })()}
-              {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
-              {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
-                <span
-                  className={styles.laneTag}
-                  data-has-after={
-                    (view.size > 0 && edgeVisits(specialist.id).after.length > 0) || undefined
-                  }
-                >
-                  {view.size > 0 && edgeTab('before', edgeVisits(specialist.id).before)}
-                  <span className={styles.laneWho} aria-hidden='true'>
-                    <span className={styles.laneRing} style={ringStyle(specialist)}>
-                      {face(specialist, styles.cardFace)}
-                    </span>
-                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                <span className={styles.headText}>
+                  <span className={styles.master}>{specialist.name}</span>
+                  <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
                     {roleLine(specialist)}
                   </span>
                 </span>
-              )}
-              {/* No names on the timeline: a master with nothing booked says so, and books in a tap. */}
-              {isTimeline &&
-                !bookings.some((booking) => booking.specialistId === specialist.id) &&
-                !timeOff.some((item) => item.specialistId === specialist.id) &&
-                (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
-                  <span className={styles.laneEmpty} onPointerEnter={() => setHover(null)}>
-                    {face(specialist, styles.cardFace)}
-                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                    {dayOf(specialist) === null || specialist.isOnLeave
-                      ? (headNote(specialist) ?? 'Выходной')
-                      : 'без записей'}
-                  </span>
-                ) : (
-                  <button
-                    type='button'
-                    className={styles.laneEmpty}
-                    onPointerEnter={() => setHover(null)}
-                    data-action
-                    onClick={() => onCreateBooking(specialist.id, null)}
-                  >
-                    {face(specialist, styles.cardFace)}
-                    <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                    свободен весь день
-                    <span className={styles.laneBook}>
-                      <Plus weight='bold' aria-hidden />
-                      Записать
-                    </span>
-                  </button>
-                ))}
-              {hourMarks.slice(1, -1).map((minutes) => (
-                <span
-                  key={minutes}
-                  className={styles.line}
-                  style={along(minutes)}
-                  aria-hidden='true'
-                />
+              </div>
+            ))}
+
+            <div className={styles.axis} style={{ ...daySize, ...cell(1, 1) }} aria-hidden='true'>
+              {hourMarks.map((minutes) => (
+                <span key={minutes} className={styles.hour} style={along(minutes)}>
+                  {formatClock(minutes)}
+                </span>
               ))}
               {minorMarks.map((minutes) => (
-                <span
-                  key={minutes}
-                  className={styles.minorLine}
-                  style={along(minutes)}
-                  aria-hidden='true'
-                />
+                <span key={minutes} className={styles.minorHour} style={along(minutes)}>
+                  {formatClock(minutes)}
+                </span>
               ))}
-              <OffHours day={dayOf(specialist)} range={range} place={place} />
-
-              {timeOff
-                .filter((item) => item.specialistId === specialist.id)
-                .map((item) => (
-                  <div
-                    key={item.id}
-                    className={styles.timeOff}
-                    onPointerEnter={() => setHover(null)}
-                    style={place(parseClock(item.from), parseClock(item.to))}
-                  >
-                    <span className={styles.blockTime}>
-                      {item.from}–{item.to}
-                    </span>
-                    <span className={styles.blockTitle}>{item.reason || 'Время закрыто'}</span>
-                    <button
-                      type='button'
-                      className={styles.remove}
-                      aria-label={`Открыть время ${item.from}–${item.to}`}
-                      onClick={() => onRemoveTimeOff(item.id)}
-                    >
-                      <X weight='bold' aria-hidden />
-                    </button>
-                  </div>
-                ))}
-
-              {bookings
-                .filter((booking) => booking.specialistId === specialist.id)
-                // Cancelled slots can be re-booked; draw them first so live bookings sit on top.
-                .sort(
-                  (first, second) =>
-                    Number(first.status === 'confirmed') - Number(second.status === 'confirmed'),
-                )
-                .map((booking) => {
-                  const from = parseClock(booking.time)
-                  const to = from + booking.durationMinutes
-                  const end = addMinutes(booking.time, booking.durationMinutes)
-                  const length = toPx(to - from)
-                  // Across, a block is as tall as its row: it never grows the footer line.
-                  const size = isTimeline
-                    ? length < TIMELINE_COMPACT_PX
-                      ? 'compact'
-                      : 'normal'
-                    : length < COMPACT_BLOCK_PX
-                      ? 'compact'
-                      : length >= TALL_BLOCK_PX
-                        ? 'tall'
-                        : 'normal'
-                  const state = blockState(booking, from, to, nowMinutes, isPast)
-                  // The visit under way fills up to now, like a progress bar along its time.
-                  const progress =
-                    state.tone === 'accent' && nowMinutes !== null
-                      ? Math.round(((nowMinutes - from) / (to - from)) * 100)
-                      : null
-                  const paid =
-                    booking.outcome === 'arrived'
-                      ? (booking.paidAmount ?? booking.price)
-                      : booking.price - (booking.discount?.amount ?? 0)
-
-                  const box = place(from, to) as {
-                    left?: number
-                    width?: number
-                    top?: number
-                    height?: number
-                  }
-                  // One press marks an ended visit arrived, right on its card (shown on hover;
-                  // always on touch screens) — the sheet stays for anything more.
-                  const quickMark = state.tone === 'warning' &&
-                    onMarkArrived &&
-                    size !== 'compact' && (
-                      <button
-                        type='button'
-                        className={styles.quickMark}
-                        style={
-                          isTimeline
-                            ? { left: (box.left ?? 0) + (box.width ?? 0) - 10 }
-                            : { top: (box.top ?? 0) + (box.height ?? 0) - 8, right: 12 }
-                        }
-                        data-layout={layout}
-                        onClick={() => onMarkArrived(booking)}
-                      >
-                        <Check weight='bold' aria-hidden />
-                        Пришёл
-                        <span className={styles.srOnlyText}>: {booking.customerName}</span>
-                      </button>
-                    )
-                  return (
-                    <Fragment key={booking.id}>
-                      <button
-                        type='button'
-                        className={styles.booking}
-                        data-cancelled={booking.status === 'cancelled' || undefined}
-                        data-outcome={booking.outcome ?? undefined}
-                        data-tone={state.tone}
-                        data-ended={
-                          isPast || (nowMinutes !== null && to <= nowMinutes) || undefined
-                        }
-                        data-size={size}
-                        data-narrow={(isTimeline && length < 190) || undefined}
-                        data-booking-id={booking.id}
-                        data-dragging={drag.dragged?.id === booking.id || undefined}
-                        data-just-marked={marked.ids.includes(booking.id) || undefined}
-                        style={
-                          {
-                            ...place(from, to),
-                            ...(progress === null ? {} : { '--progress': `${progress}%` }),
-                            '--mark-i': Math.max(0, marked.ids.indexOf(booking.id)),
-                          } as CSSProperties
-                        }
-                        onPointerDown={(event) => drag.handlePointerDown(event, booking)}
-                        // The empty-slot preview must not peek out from under a card the pointer
-                        // moved onto.
-                        onPointerEnter={() => setHover(null)}
-                        onClick={() => {
-                          if (!drag.consumeClick()) onSelectBooking(booking)
-                        }}
-                        aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
-                      >
-                        {size === 'compact' ? (
-                          <span className={styles.blockLine}>
-                            {/* On the timeline the card's own fill already says the state; a short card keeps its room
-                             for the client's name, the lane's other cards carry the face. */}
-                            {state.tone !== 'plain' && !isTimeline && (
-                              <span
-                                className={styles.stateDot}
-                                data-tone={state.tone}
-                                aria-hidden
-                              />
-                            )}
-                            <span className={styles.blockTitle}>{booking.customerName}</span>
-                            <span className={styles.blockTime}>{booking.time}</span>
-                          </span>
-                        ) : (
-                          // The time and the state on one quiet line, like an event in Calendar.
-                          <span className={styles.blockTop}>
-                            <span className={styles.blockRange}>
-                              {booking.time}
-                              <span className={styles.rangeEnd}>–{end}</span>
-                            </span>
-                            <span className={styles.blockState}>
-                              {state.tone === 'success' && <Check weight='bold' aria-hidden />}
-                              {state.tone === 'accent' && (
-                                <span className={styles.liveDot} aria-hidden />
-                              )}
-                              {state.label}
-                            </span>
-                          </span>
-                        )}
-                        {size !== 'compact' && (
-                          <span className={styles.blockTitle}>{booking.customerName}</span>
-                        )}
-                        <span className={styles.blockService}>
-                          {booking.serviceName}
-                          {size !== 'compact' &&
-                            (progress !== null && nowMinutes !== null
-                              ? ` · ещё ${to - nowMinutes} мин`
-                              : ` · ${formatPrice(paid)}`)}
-                        </span>
-                        {/* The visit under way: how much of it has passed, as a thin bar. */}
-                        {progress !== null && size !== 'compact' && (
-                          <span className={styles.progressTrack} aria-hidden>
-                            <span className={styles.progressFill} />
-                          </span>
-                        )}
-                        {/* Across, a card is as tall as its lane: room for the phone or the comment. */}
-                        {(size === 'tall' || (isTimeline && size === 'normal')) && (
-                          <span className={styles.blockFooter}>
-                            <span className={styles.footerNote}>
-                              {booking.comment ? (
-                                <>
-                                  <ChatText aria-hidden />«{booking.comment}»
-                                </>
-                              ) : (
-                                formatPhone(booking.customerPhone)
-                              )}
-                            </span>
-                            <span className={styles.footerTime}>
-                              <Clock aria-hidden />
-                              {booking.time}–{end}
-                            </span>
-                          </span>
-                        )}
-                      </button>
-                      {quickMark}
-                    </Fragment>
-                  )
-                })}
-
-              {drag.dragged && drag.target?.specialistId === specialist.id && (
-                <span
-                  className={styles.dropPreview}
-                  style={place(
-                    drag.target.minutes,
-                    drag.target.minutes + drag.dragged.durationMinutes,
-                  )}
-                  aria-hidden='true'
-                >
-                  <span className={styles.blockTime}>
-                    {formatClock(drag.target.minutes)}–
-                    {formatClock(drag.target.minutes + drag.dragged.durationMinutes)}
-                  </span>
-                  <span className={styles.blockTitle}>{drag.dragged.customerName}</span>
+              {/* The time now, as a red capsule on the hours: what the red line means. */}
+              {showNow && nowMinutes !== null && !isTimeline && (
+                <span className={styles.nowLabel} style={along(nowMinutes)}>
+                  {formatClock(nowMinutes)}
                 </span>
               )}
+            </div>
 
-              {showNow && nowMinutes !== null && !isTimeline && (
-                <span className={styles.now} style={along(nowMinutes)} aria-hidden='true' />
-              )}
-            </section>
-          ))}
-        </div>
+            {/* On the timeline «now» is one line through every lane, its time on top. */}
+            {showNow && nowMinutes !== null && isTimeline && (
+              <span className={styles.nowLine} style={along(nowMinutes)} aria-hidden='true'>
+                <span className={styles.nowLabel}>{formatClock(nowMinutes)}</span>
+              </span>
+            )}
+
+            {shown.map((specialist, index) => (
+              <section
+                // A new day remounts the lanes, so their entrance plays again.
+                key={`${dayKey ?? ''}:${specialist.id}`}
+                className={styles.column}
+                data-enter={shownDay.direction ?? 'first'}
+                style={
+                  {
+                    ...daySize,
+                    '--tint': tintOf(specialist.id),
+                    '--enter-i': index,
+                    ...cell(index + 2, 1),
+                  } as CSSProperties
+                }
+                aria-label={specialist.name}
+                data-specialist-id={specialist.id}
+                onPointerLeave={() => setHover(null)}
+              >
+                <button
+                  type='button'
+                  className={styles.slotTarget}
+                  aria-label={`Новая запись к мастеру ${specialist.name}`}
+                  // A mouse press must not focus the lane: the new-booking sheet gives focus back on
+                  // close, and the whole lane then wore a focus ring.
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={(event) => handleCreate(event, specialist.id)}
+                  onPointerMove={(event) => {
+                    if (event.pointerType !== 'mouse' || drag.dragged) return
+                    const minutes = minutesAt(event)
+                    if (isTaken(specialist.id, minutes)) {
+                      if (hover) setHover(null)
+                      return
+                    }
+                    if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
+                      setHover({ specialistId: specialist.id, minutes })
+                    }
+                  }}
+                />
+                {fit &&
+                  !isPast &&
+                  (fit.specialistIds === null || fit.specialistIds.includes(specialist.id)) &&
+                  freeGaps({
+                    day: dayOf(specialist),
+                    bookings: bookings.filter((booking) => booking.specialistId === specialist.id),
+                    timeOff: timeOff.filter((item) => item.specialistId === specialist.id),
+                    from: nowMinutes,
+                    slotMinutes,
+                    minMinutes: fit.minutes,
+                  }).map((gap) => (
+                    <button
+                      key={gap.from}
+                      type='button'
+                      className={styles.fitSlot}
+                      data-layout={layout}
+                      style={place(gap.from, gap.to)}
+                      onClick={() => onCreateBooking(specialist.id, formatClock(gap.from))}
+                    >
+                      <Plus weight='bold' aria-hidden />
+                      {formatClock(gap.from)}–{formatClock(gap.to)}
+                      <span className={styles.srOnlyText}>
+                        : записать к мастеру {specialist.name}
+                      </span>
+                    </button>
+                  ))}
+                {!drag.dragged && hover?.specialistId === specialist.id && (
+                  <span
+                    className={styles.ghost}
+                    data-narrow={
+                      (isTimeline &&
+                        toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) < 130) ||
+                      undefined
+                    }
+                    style={
+                      isTimeline
+                        ? ({
+                            ...place(hover.minutes, hover.minutes + slotMinutes),
+                            '--free': `${toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) - 4}px`,
+                          } as CSSProperties)
+                        : place(hover.minutes, hover.minutes + slotMinutes)
+                    }
+                    aria-hidden='true'
+                  >
+                    {isTimeline ? (
+                      // The slot as a card to come: the same shape as the visits, ringed in the
+                      // master's colour — when, «+ Новая запись», whose.
+                      <>
+                        <span className={styles.blockTop}>
+                          <span className={styles.blockRange}>
+                            {formatClock(hover.minutes)}
+                            <span className={styles.rangeEndGhost}>
+                              –{formatClock(hover.minutes + slotMinutes)}
+                            </span>
+                          </span>
+                        </span>
+                        <span className={styles.ghostTitle}>
+                          <Plus weight='bold' aria-hidden />
+                          <span className={styles.ghostLabel}>Новая запись</span>
+                        </span>
+                        <span className={styles.ghostWho}>
+                          {face(specialist, styles.cardFace)}
+                          {specialist.name.split(' ')[0]}
+                        </span>
+                      </>
+                    ) : (
+                      formatClock(hover.minutes)
+                    )}
+                  </span>
+                )}
+                {view.size > 0 &&
+                  (() => {
+                    // A sticky band as big as the view: the browser keeps the tabs in place while
+                    // the day scrolls, so they never lag. On the timeline only the right tab lives
+                    // here (the left one leads the lane's first line); the columns hold both.
+                    const { before, after } = edgeVisits(specialist.id)
+                    if (after.length === 0 && (isTimeline || before.length === 0)) return null
+                    return (
+                      <span className={styles.edgeRail}>
+                        <span className={styles.edgeBand}>
+                          {!isTimeline && edgeTab('before', before)}
+                          {edgeTab('after', after)}
+                        </span>
+                      </span>
+                    )
+                  })()}
+                {/* Whose lane this is: its first line, above the cards, pinned left while the day scrolls. */}
+                {isTimeline &&
+                  bookings.some((booking) => booking.specialistId === specialist.id) && (
+                    <span
+                      className={styles.laneTag}
+                      data-has-after={
+                        (view.size > 0 && edgeVisits(specialist.id).after.length > 0) || undefined
+                      }
+                    >
+                      {view.size > 0 && edgeTab('before', edgeVisits(specialist.id).before)}
+                      <span className={styles.laneWho} aria-hidden='true'>
+                        <span className={styles.laneRing} style={ringStyle(specialist)}>
+                          {face(specialist, styles.cardFace)}
+                        </span>
+                        <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                        {roleLine(specialist)}
+                      </span>
+                    </span>
+                  )}
+                {/* No names on the timeline: a master with nothing booked says so, and books in a tap. */}
+                {isTimeline &&
+                  !bookings.some((booking) => booking.specialistId === specialist.id) &&
+                  !timeOff.some((item) => item.specialistId === specialist.id) &&
+                  (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
+                    <span className={styles.laneEmpty} onPointerEnter={() => setHover(null)}>
+                      {face(specialist, styles.cardFace)}
+                      <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                      {dayOf(specialist) === null || specialist.isOnLeave
+                        ? (headNote(specialist) ?? 'Выходной')
+                        : 'без записей'}
+                    </span>
+                  ) : (
+                    <button
+                      type='button'
+                      className={styles.laneEmpty}
+                      onPointerEnter={() => setHover(null)}
+                      data-action
+                      onClick={() => onCreateBooking(specialist.id, null)}
+                    >
+                      {face(specialist, styles.cardFace)}
+                      <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                      свободен весь день
+                      <span className={styles.laneBook}>
+                        <Plus weight='bold' aria-hidden />
+                        Записать
+                      </span>
+                    </button>
+                  ))}
+                {hourMarks.slice(1, -1).map((minutes) => (
+                  <span
+                    key={minutes}
+                    className={styles.line}
+                    style={along(minutes)}
+                    aria-hidden='true'
+                  />
+                ))}
+                {minorMarks.map((minutes) => (
+                  <span
+                    key={minutes}
+                    className={styles.minorLine}
+                    style={along(minutes)}
+                    aria-hidden='true'
+                  />
+                ))}
+                <OffHours day={dayOf(specialist)} range={range} place={place} />
+
+                {timeOff
+                  .filter((item) => item.specialistId === specialist.id)
+                  .map((item) => (
+                    <div
+                      key={item.id}
+                      className={styles.timeOff}
+                      onPointerEnter={() => setHover(null)}
+                      style={place(parseClock(item.from), parseClock(item.to))}
+                    >
+                      <span className={styles.blockTime}>
+                        {item.from}–{item.to}
+                      </span>
+                      <span className={styles.blockTitle}>{item.reason || 'Время закрыто'}</span>
+                      <button
+                        type='button'
+                        className={styles.remove}
+                        aria-label={`Открыть время ${item.from}–${item.to}`}
+                        onClick={() => onRemoveTimeOff(item.id)}
+                      >
+                        <X weight='bold' aria-hidden />
+                      </button>
+                    </div>
+                  ))}
+
+                {bookings
+                  .filter((booking) => booking.specialistId === specialist.id)
+                  // Cancelled slots can be re-booked; draw them first so live bookings sit on top.
+                  .sort(
+                    (first, second) =>
+                      Number(first.status === 'confirmed') - Number(second.status === 'confirmed'),
+                  )
+                  .map((booking) => {
+                    const from = parseClock(booking.time)
+                    const to = from + booking.durationMinutes
+                    const end = addMinutes(booking.time, booking.durationMinutes)
+                    const length = toPx(to - from)
+                    // Across, a block is as tall as its row: it never grows the footer line.
+                    const size = isTimeline
+                      ? length < TIMELINE_COMPACT_PX
+                        ? 'compact'
+                        : 'normal'
+                      : length < COMPACT_BLOCK_PX
+                        ? 'compact'
+                        : length >= TALL_BLOCK_PX
+                          ? 'tall'
+                          : 'normal'
+                    const state = blockState(booking, from, to, nowMinutes, isPast)
+                    // The visit under way fills up to now, like a progress bar along its time.
+                    const progress =
+                      state.tone === 'accent' && nowMinutes !== null
+                        ? Math.round(((nowMinutes - from) / (to - from)) * 100)
+                        : null
+                    const paid =
+                      booking.outcome === 'arrived'
+                        ? (booking.paidAmount ?? booking.price)
+                        : booking.price - (booking.discount?.amount ?? 0)
+
+                    const box = place(from, to) as {
+                      left?: number
+                      width?: number
+                      top?: number
+                      height?: number
+                    }
+                    // One press marks an ended visit arrived, right on its card (shown on hover;
+                    // always on touch screens) — the sheet stays for anything more.
+                    const quickMark = state.tone === 'warning' &&
+                      onMarkArrived &&
+                      size !== 'compact' && (
+                        <button
+                          type='button'
+                          className={styles.quickMark}
+                          style={
+                            isTimeline
+                              ? { left: (box.left ?? 0) + (box.width ?? 0) - 10 }
+                              : { top: (box.top ?? 0) + (box.height ?? 0) - 8, right: 12 }
+                          }
+                          data-layout={layout}
+                          onClick={() => onMarkArrived(booking)}
+                        >
+                          <Check weight='bold' aria-hidden />
+                          Пришёл
+                          <span className={styles.srOnlyText}>: {booking.customerName}</span>
+                        </button>
+                      )
+                    return (
+                      <Fragment key={booking.id}>
+                        <button
+                          type='button'
+                          className={styles.booking}
+                          data-cancelled={booking.status === 'cancelled' || undefined}
+                          data-outcome={booking.outcome ?? undefined}
+                          data-tone={state.tone}
+                          data-ended={
+                            isPast || (nowMinutes !== null && to <= nowMinutes) || undefined
+                          }
+                          data-size={size}
+                          data-narrow={(isTimeline && length < 190) || undefined}
+                          data-booking-id={booking.id}
+                          data-dragging={drag.dragged?.id === booking.id || undefined}
+                          data-just-marked={marked.ids.includes(booking.id) || undefined}
+                          style={
+                            {
+                              ...place(from, to),
+                              ...(progress === null ? {} : { '--progress': `${progress}%` }),
+                              '--mark-i': Math.max(0, marked.ids.indexOf(booking.id)),
+                            } as CSSProperties
+                          }
+                          onPointerDown={(event) => drag.handlePointerDown(event, booking)}
+                          // The empty-slot preview must not peek out from under a card the pointer
+                          // moved onto.
+                          onPointerEnter={() => setHover(null)}
+                          onClick={() => {
+                            if (!drag.consumeClick()) onSelectBooking(booking)
+                          }}
+                          aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
+                        >
+                          {size === 'compact' ? (
+                            <span className={styles.blockLine}>
+                              {/* On the timeline the card's own fill already says the state; a short card keeps its room
+                             for the client's name, the lane's other cards carry the face. */}
+                              {state.tone !== 'plain' && !isTimeline && (
+                                <span
+                                  className={styles.stateDot}
+                                  data-tone={state.tone}
+                                  aria-hidden
+                                />
+                              )}
+                              <span className={styles.blockTitle}>{booking.customerName}</span>
+                              <span className={styles.blockTime}>{booking.time}</span>
+                            </span>
+                          ) : (
+                            // The time and the state on one quiet line, like an event in Calendar.
+                            <span className={styles.blockTop}>
+                              <span className={styles.blockRange}>
+                                {booking.time}
+                                <span className={styles.rangeEnd}>–{end}</span>
+                              </span>
+                              <span className={styles.blockState}>
+                                {state.tone === 'success' && <Check weight='bold' aria-hidden />}
+                                {state.tone === 'accent' && (
+                                  <span className={styles.liveDot} aria-hidden />
+                                )}
+                                {state.label}
+                              </span>
+                            </span>
+                          )}
+                          {size !== 'compact' && (
+                            <span className={styles.blockTitle}>{booking.customerName}</span>
+                          )}
+                          <span className={styles.blockService}>
+                            {booking.serviceName}
+                            {size !== 'compact' &&
+                              (progress !== null && nowMinutes !== null
+                                ? ` · ещё ${to - nowMinutes} мин`
+                                : ` · ${formatPrice(paid)}`)}
+                          </span>
+                          {/* The visit under way: how much of it has passed, as a thin bar. */}
+                          {progress !== null && size !== 'compact' && (
+                            <span className={styles.progressTrack} aria-hidden>
+                              <span className={styles.progressFill} />
+                            </span>
+                          )}
+                          {/* Across, a card is as tall as its lane: room for the phone or the comment. */}
+                          {(size === 'tall' || (isTimeline && size === 'normal')) && (
+                            <span className={styles.blockFooter}>
+                              <span className={styles.footerNote}>
+                                {booking.comment ? (
+                                  <>
+                                    <ChatText aria-hidden />«{booking.comment}»
+                                  </>
+                                ) : (
+                                  formatPhone(booking.customerPhone)
+                                )}
+                              </span>
+                              <span className={styles.footerTime}>
+                                <Clock aria-hidden />
+                                {booking.time}–{end}
+                              </span>
+                            </span>
+                          )}
+                        </button>
+                        {quickMark}
+                      </Fragment>
+                    )
+                  })}
+
+                {drag.dragged && drag.target?.specialistId === specialist.id && (
+                  <span
+                    className={styles.dropPreview}
+                    style={place(
+                      drag.target.minutes,
+                      drag.target.minutes + drag.dragged.durationMinutes,
+                    )}
+                    aria-hidden='true'
+                  >
+                    <span className={styles.blockTime}>
+                      {formatClock(drag.target.minutes)}–
+                      {formatClock(drag.target.minutes + drag.dragged.durationMinutes)}
+                    </span>
+                    <span className={styles.blockTitle}>{drag.dragged.customerName}</span>
+                  </span>
+                )}
+
+                {showNow && nowMinutes !== null && !isTimeline && (
+                  <span className={styles.now} style={along(nowMinutes)} aria-hidden='true' />
+                )}
+              </section>
+            ))}
+          </div>
+        </ContextMenu>
       </div>
     </div>
   )
