@@ -164,3 +164,12 @@
     min-width: 0;
   }
 }
+
+/* The glyph of visits waiting to be marked — the same as on their cards. */
+.bar .dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: none;
+  color: var(--system-orange);
+}

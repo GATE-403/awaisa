@@ -1,5 +1,6 @@
 'use client'
 
+import { CircleDashed } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef } from 'react'
 import type { BookingDay } from '@/entities/booking'
 import styles from './DayStrip.module.css'
@@ -77,6 +78,9 @@ export const DayStrip = ({
           >
             <span className={styles.weekday}>{day.weekday}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
+            {marks?.has(day.key) && (
+              <CircleDashed weight='bold' className={styles.markGlyph} aria-hidden />
+            )}
             {variant === 'compact' && loads?.has(day.key) && (
               <span
                 className={styles.load}

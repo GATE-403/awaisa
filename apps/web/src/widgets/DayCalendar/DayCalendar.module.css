@@ -1413,7 +1413,7 @@
   --ink: color-mix(in srgb, var(--tint) 62%, black);
 
   border-radius: 7px;
-  background: color-mix(in srgb, var(--tint) 20%, var(--color-surface));
+  background: color-mix(in srgb, var(--tint) 26%, var(--color-surface));
   box-shadow: none;
   color: var(--ink);
 }
@@ -1465,7 +1465,7 @@
   :root:not([data-theme="light"]) .grid .booking {
     --ink: color-mix(in srgb, var(--tint) 65%, white);
 
-    background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+    background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
   }
 
   :root:not([data-theme="light"]) .grid .booking[data-tone="warning"] .blockState {
@@ -1476,7 +1476,7 @@
 [data-theme="dark"] .grid .booking {
   --ink: color-mix(in srgb, var(--tint) 65%, white);
 
-  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+  background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
 }
 
 [data-theme="dark"] .grid .booking[data-tone="warning"] .blockState {
@@ -1577,7 +1577,7 @@
 
 /* A card answers the pointer with a deeper fill only — no glow around it. */
 :root .grid .booking:not([data-cancelled]):hover {
-  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+  background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
   box-shadow: none;
 }
 
@@ -1777,7 +1777,6 @@
   outline: none;
   box-shadow: var(--focus-ring);
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .booking[data-flash] {
@@ -2152,7 +2151,7 @@
    3px edge (the day shows through it) parts neighbours and keeps cards off the board's sides, and
    a hairline of the master's colour draws each card's outline. */
 .grid[data-layout] .booking {
-  border: 3px solid transparent;
+  border: 4px solid transparent;
   border-radius: 10px;
   background-clip: padding-box;
   outline: 0.5px solid color-mix(in srgb, var(--tint) 45%, transparent);
@@ -2659,8 +2658,8 @@
 :root .grid .booking[data-flash],
 :root .grid .booking[data-flash][data-tone] {
   outline: 2px solid var(--tint);
-  outline-offset: -3px;
-  background: color-mix(in srgb, var(--tint) 34%, var(--color-surface));
+  outline-offset: -4px;
+  background: color-mix(in srgb, var(--tint) 42%, var(--color-surface));
   z-index: 4;
   transition-duration: 150ms;
 }
@@ -2709,4 +2708,49 @@
    timeline (the dashed quarter lines from 3× stay). */
 .grid[data-layout="timeline"] .line {
   display: none;
+}
+
+/* ——— State glyphs instead of dots ———
+   The colour of a state now lives in its glyph (12pt, beside the word in the card's ink); a narrow
+   card keeps the glyph alone. */
+:root .grid .booking .blockState::before,
+:root .grid .booking[data-narrow] .blockState::before {
+  content: none;
+}
+
+:root .grid .booking .blockState {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+:root .grid .booking .blockState svg,
+.stateGlyph svg {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+:root .grid .booking[data-narrow] .blockState svg {
+  display: inline-block;
+}
+
+:root .grid .booking[data-tone="warning"] .blockState svg,
+.stateGlyph[data-tone="warning"] {
+  color: var(--system-orange);
+}
+
+:root .grid .booking[data-tone="danger"] .blockState svg,
+.stateGlyph[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.stateGlyph {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.stateGlyph[data-tone="success"] {
+  color: var(--color-success-text, var(--system-green));
 }

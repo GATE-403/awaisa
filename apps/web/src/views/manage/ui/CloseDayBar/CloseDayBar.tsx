@@ -2,7 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Menu } from '@awaisa/ui/Menu'
-import { CaretDown, Check, X } from '@phosphor-icons/react/ssr'
+import { CaretDown, Check, CircleDashed, X } from '@phosphor-icons/react/ssr'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
@@ -39,7 +39,7 @@ export const CloseDayBar = ({
 
   return (
     <section className={styles.bar} aria-label='Неотмеченные визиты'>
-      <span className={styles.dot} aria-hidden />
+      <CircleDashed weight='bold' className={styles.dot} aria-hidden />
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
