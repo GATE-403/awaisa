@@ -76,6 +76,8 @@ interface DayCalendarProps {
   focusedBookingId?: string | null
   /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
   bottomInset?: number
+  /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
+  dayKey?: string
   onSelectBooking: (booking: AdminBooking) => void
   onRemoveTimeOff: (id: string) => void
   /** `time` is null when the slot was chosen from the keyboard: the sheet picks the first free one. */
@@ -157,6 +159,7 @@ export const DayCalendar = ({
   onMarkArrived,
   focusedBookingId = null,
   bottomInset = 0,
+  dayKey,
   onSelectBooking,
   onRemoveTimeOff,
   onCreateBooking,
@@ -170,6 +173,40 @@ export const DayCalendar = ({
   // The timeline's visible stretch, for the «‹ 2 записи» / «3 записи ›» hints at the lanes' edges.
   // The part of the day in view, along its axis (the columns' masters row covers `inset` of it).
   const [view, setView] = useState({ start: 0, size: 0, inset: 0 })
+  // Which way the day moved, kept beside the key (the «previous prop in state» pattern): the lanes
+  // slide in from the right for a later day, from the left for an earlier one.
+  const [shownDay, setShownDay] = useState<{ key?: string; direction?: 'next' | 'prev' }>({
+    key: dayKey,
+  })
+  if (dayKey !== shownDay.key) {
+    setShownDay({
+      key: dayKey,
+      direction: dayKey && shownDay.key ? (dayKey > shownDay.key ? 'next' : 'prev') : undefined,
+    })
+  }
+  // Visits that have just turned «Пришёл» (one at a time, or the whole day by «Все пришли»), in
+  // the day's order: their cards play the check in a wave. Kept beside the outcomes they came
+  // from, so a newly loaded day animates nothing.
+  const outcomesKey = bookings.map((booking) => `${booking.id}:${booking.outcome ?? ''}`).join('|')
+  const [marked, setMarked] = useState<{ key: string; ids: string[] }>({
+    key: outcomesKey,
+    ids: [],
+  })
+  if (outcomesKey !== marked.key) {
+    const before = new Map(
+      marked.key.split('|').map((pair) => pair.split(':') as [string, string | undefined]),
+    )
+    const ids = bookings
+      .filter(
+        (booking) =>
+          booking.outcome === 'arrived' &&
+          before.has(booking.id) &&
+          before.get(booking.id) !== 'arrived',
+      )
+      .sort((first, second) => first.time.localeCompare(second.time))
+      .map((booking) => booking.id)
+    setMarked({ key: outcomesKey, ids })
+  }
   const scrollerRef = useRef<HTMLDivElement>(null)
   const frameRef = useRef<HTMLDivElement>(null)
   const edgeKeyRef = useRef<(left: number, width: number) => string>(() => '')
@@ -854,12 +891,15 @@ export const DayCalendar = ({
 
           {shown.map((specialist, index) => (
             <section
-              key={specialist.id}
+              // A new day remounts the lanes, so their entrance plays again.
+              key={`${dayKey ?? ''}:${specialist.id}`}
               className={styles.column}
+              data-enter={shownDay.direction ?? 'first'}
               style={
                 {
                   ...daySize,
                   '--tint': tintOf(specialist.id),
+                  '--enter-i': index,
                   ...cell(index + 2, 1),
                 } as CSSProperties
               }
@@ -1111,13 +1151,13 @@ export const DayCalendar = ({
                         data-narrow={(isTimeline && length < 190) || undefined}
                         data-booking-id={booking.id}
                         data-dragging={drag.dragged?.id === booking.id || undefined}
+                        data-just-marked={marked.ids.includes(booking.id) || undefined}
                         style={
-                          progress === null
-                            ? place(from, to)
-                            : ({
-                                ...place(from, to),
-                                '--progress': `${progress}%`,
-                              } as CSSProperties)
+                          {
+                            ...place(from, to),
+                            ...(progress === null ? {} : { '--progress': `${progress}%` }),
+                            '--mark-i': Math.max(0, marked.ids.indexOf(booking.id)),
+                          } as CSSProperties
                         }
                         onPointerDown={(event) => drag.handlePointerDown(event, booking)}
                         // The empty-slot preview must not peek out from under a card the pointer

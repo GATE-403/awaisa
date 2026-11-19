@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { BookingDay } from '@/entities/booking'
 import styles from './DayStrip.module.css'
 
@@ -16,6 +16,7 @@ interface DayStripProps {
 
 export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: DayStripProps) => {
   const daysRef = useRef<HTMLFieldSetElement>(null)
+  const knobRef = useRef<HTMLSpanElement>(null)
   const today = days.find((day) => day.isToday)
 
   // Past days sit to the left: bring the chosen day into view, not the first one.
@@ -23,6 +24,27 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
     const selected = daysRef.current?.querySelector<HTMLElement>(`[data-day="${value}"]`)
     selected?.scrollIntoView({ block: 'nearest', inline: 'center' })
   }, [value])
+
+  // The compact row's chosen fill is one knob that glides to the picked day (a spring), like the
+  // segmented control's — measured and written to CSS variables, no re-render.
+  useLayoutEffect(() => {
+    const knob = knobRef.current
+    const selected = daysRef.current?.querySelector<HTMLElement>(`[data-day="${value}"]`)
+    if (!knob || days.length === 0) return
+    if (!selected) {
+      knob.hidden = true
+      return
+    }
+    knob.hidden = false
+    // Glide from the second placement on: the first one (the page opening) lands in place.
+    if (knob.hasAttribute('data-placed')) knob.setAttribute('data-ready', '')
+    knob.setAttribute('data-placed', '')
+    knob.style.setProperty('--x', `${selected.offsetLeft}px`)
+    knob.style.setProperty('--w', `${selected.offsetWidth}px`)
+    knob.style.setProperty('--h', `${selected.offsetHeight}px`)
+    knob.style.setProperty('--y', `${selected.offsetTop}px`)
+    knob.toggleAttribute('data-today', selected.hasAttribute('data-today'))
+  }, [value, days])
 
   return (
     <div className={styles.strip} data-variant={variant}>
@@ -32,6 +54,7 @@ export const DayStrip = ({ days, value, onChange, marks, variant = 'default' }: 
         ref={daysRef}
         data-edge-fade={variant === 'compact' || undefined}
       >
+        {variant === 'compact' && <span ref={knobRef} className={styles.knob} aria-hidden='true' />}
         {days.map((day) => (
           <button
             key={day.key}
