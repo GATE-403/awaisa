@@ -3,7 +3,13 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
+import {
+  BellRinging,
+  Coffee,
+  MagnifyingGlassMinus,
+  MagnifyingGlassPlus,
+  Plus,
+} from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
@@ -33,7 +39,13 @@ import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
-import { type CalendarLayout, DayCalendar } from '@/widgets/DayCalendar'
+import {
+  type CalendarLayout,
+  clampZoom,
+  DayCalendar,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from '@/widgets/DayCalendar'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './ScheduleTab.module.css'
 
@@ -62,6 +74,7 @@ const PAST_DAYS = 14
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
+  const [zoom, setZoom] = useState(1)
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
@@ -274,6 +287,28 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         actions={
           hasMasters && (
             <>
+              {layout === 'timeline' && (
+                <span className={styles.zoom}>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    aria-label='Уменьшить масштаб'
+                    disabled={zoom <= MIN_ZOOM}
+                    onClick={() => setZoom(clampZoom(zoom / 1.5))}
+                  >
+                    <MagnifyingGlassMinus weight='bold' aria-hidden />
+                  </Button>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    aria-label='Увеличить масштаб'
+                    disabled={zoom >= MAX_ZOOM}
+                    onClick={() => setZoom(clampZoom(zoom * 1.5))}
+                  >
+                    <MagnifyingGlassPlus weight='bold' aria-hidden />
+                  </Button>
+                </span>
+              )}
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -336,6 +371,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             isPast={isPast}
             slotMinutes={business.slotMinutes}
             layout={layout}
+            zoom={zoom}
+            onZoomChange={setZoom}
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}

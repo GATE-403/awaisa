@@ -639,3 +639,37 @@
   height: 28px;
   font-size: 11px;
 }
+
+/* Zoomed in: halves or quarters between the hours — a fainter dashed line and a smaller,
+   lighter time beside its top, so the whole hours still lead. */
+.minorLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 0.5px dashed color-mix(in srgb, var(--color-border) 70%, transparent);
+  pointer-events: none;
+}
+
+.minorHour {
+  position: absolute;
+  top: 5px;
+  color: var(--color-muted-foreground);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  translate: 5px 0;
+}
+
+/* Zoomed in, a long visit may start off screen: its lines stick just right of the names, so who
+   and what stay readable while any part of the card is in view. */
+/* `clip` cuts like `hidden` but is no scroll box, so the sticky lines follow the day's scroller. */
+.grid[data-layout="timeline"] .booking {
+  overflow: clip;
+}
+
+.grid[data-layout="timeline"] .booking > * {
+  position: sticky;
+  left: calc(184px + var(--space-2));
+  align-self: flex-start;
+  max-width: 100%;
+}
