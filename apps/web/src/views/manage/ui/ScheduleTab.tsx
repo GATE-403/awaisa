@@ -2,6 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { Popover } from '@awaisa/ui/Popover'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import {
@@ -28,6 +29,7 @@ import {
   reopenVisits,
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
+import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
@@ -38,6 +40,7 @@ import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { useScheduleLayout } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
+import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
 import { NewBookingDialog } from '@/views/manage/ui/NewBookingDialog/NewBookingDialog'
@@ -146,6 +149,12 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     0,
   )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
+  const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
+  // The selected visit's card on the board, for the inspector to point at.
+  const selectedCard =
+    selected && typeof document !== 'undefined'
+      ? document.querySelector(`[data-booking-id="${selected.id}"]`)
+      : null
   const fitService = catalog.services.find((service) => service.id === fitServiceId) ?? null
   const fit = fitService
     ? {
@@ -505,20 +514,45 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         />
       )}
 
-      {selected && (
-        <BookingDetailsDialog
-          slug={slug}
-          key={selected.id}
-          booking={selected}
-          onClose={() => setSelected(null)}
-          onCancel={cancelBooking}
-          onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
-          onOpenClient={(phone) => {
-            setSelected(null)
-            setClientPhone(phone)
-          }}
-        />
-      )}
+      {selected &&
+        // With a mouse the visit opens as an inspector beside its card; on touch screens (or when
+        // the card is not on the board) as a compact sheet.
+        (isFinePointer && selectedCard ? (
+          <Popover
+            open
+            onOpenChange={(open) => {
+              if (!open) setSelected(null)
+            }}
+            anchor={selectedCard}
+            label={`Запись: ${selected.customerName}, ${selected.time}`}
+          >
+            <BookingInspector
+              key={selected.id}
+              slug={slug}
+              booking={selected}
+              onClose={() => setSelected(null)}
+              onCancel={cancelBooking}
+              onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
+              onOpenClient={(phone) => {
+                setSelected(null)
+                setClientPhone(phone)
+              }}
+            />
+          </Popover>
+        ) : (
+          <BookingDetailsDialog
+            slug={slug}
+            key={selected.id}
+            booking={selected}
+            onClose={() => setSelected(null)}
+            onCancel={cancelBooking}
+            onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
+            onOpenClient={(phone) => {
+              setSelected(null)
+              setClientPhone(phone)
+            }}
+          />
+        ))}
 
       {clientPhone && (
         <ClientSheet
