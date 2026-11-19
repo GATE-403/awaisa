@@ -7,6 +7,7 @@
 }
 
 .grid {
+  position: relative;
   display: grid;
   grid-template-columns: 56px repeat(var(--columns), minmax(180px, 1fr));
   min-width: min-content;
@@ -469,17 +470,6 @@
   pointer-events: none;
 }
 
-.now::before {
-  content: "";
-  position: absolute;
-  top: -3px;
-  left: -4px;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-danger);
-}
-
 .booking[data-size="compact"] {
   gap: 0;
   padding-block: 4px;
@@ -612,11 +602,6 @@
 
 .grid[data-layout="timeline"] .now {
   width: 2px;
-}
-
-.grid[data-layout="timeline"] .now::before {
-  top: -3px;
-  left: -3px;
 }
 
 .grid[data-layout="timeline"] :is(.booking, .timeOff, .ghost, .dropPreview) {
@@ -800,4 +785,110 @@
    client's name. */
 .grid[data-layout="timeline"] .blockLine .blockTime {
   display: none;
+}
+
+/* «Now», one red line with its time in a capsule — on the hours for the columns, on top of the
+   timeline's single line through every lane. No dots: the capsule says what the line is. */
+.nowLabel {
+  position: absolute;
+  z-index: 3;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.axis .nowLabel {
+  right: var(--space-1);
+  translate: 0 -50%;
+}
+
+.nowLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 2px;
+  background: var(--color-danger);
+  pointer-events: none;
+  translate: -1px 0;
+}
+
+.nowLine .nowLabel {
+  top: 2px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+/* «Сейчас 13:41 →» when the day is scrolled away from now; a tap glides back. */
+.toNow {
+  position: absolute;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  box-shadow: var(--shadow-md);
+  color: #fff;
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+/* A 44pt target around the 32pt capsule. */
+.toNow::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+
+.toNow svg {
+  width: 13px;
+  height: 13px;
+}
+
+.toNow:active {
+  scale: 0.96;
+}
+
+.toNow:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.toNow[data-layout="timeline"] {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.toNow[data-layout="timeline"][data-side="before"] {
+  left: var(--space-3);
+}
+
+.toNow[data-layout="timeline"][data-side="after"] {
+  right: var(--space-3);
+}
+
+.toNow[data-layout="columns"] {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.toNow[data-layout="columns"][data-side="before"] {
+  top: calc(56px + var(--space-2));
+}
+
+.toNow[data-layout="columns"][data-side="after"] {
+  bottom: var(--space-3);
 }

@@ -1,6 +1,15 @@
 'use client'
 
-import { ChatText, Check, Clock, X } from '@phosphor-icons/react/ssr'
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ChatText,
+  Check,
+  Clock,
+  X,
+} from '@phosphor-icons/react/ssr'
 import {
   type CSSProperties,
   type MouseEvent,
@@ -131,6 +140,8 @@ export const DayCalendar = ({
   const [hover, setHover] = useState<Hover | null>(null)
   // The timeline can show one master alone: a tap on their face in the corner stack.
   const [focusId, setFocusId] = useState<string | null>(null)
+  // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
+  const [nowSide, setNowSide] = useState<'before' | 'after' | null>(null)
   const scrollerRef = useRef<HTMLDivElement>(null)
   const scrolledToNow = useRef<CalendarLayout | null>(null)
   const range = getDayRange(hours, bookings, timeOff)
@@ -291,6 +302,41 @@ export const DayCalendar = ({
     return () => window.removeEventListener('resize', fit)
   }, [])
 
+  // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
+  useEffect(() => {
+    const scroller = scrollerRef.current
+    if (!scroller || nowOffset === null) {
+      setNowSide(null)
+      return
+    }
+    const check = () => {
+      const position = isTimeline ? nowOffset - scroller.scrollLeft : nowOffset - scroller.scrollTop
+      // The columns' masters row (56pt) covers the top of the view.
+      const size = isTimeline ? scroller.clientWidth : scroller.clientHeight - 56
+      const next = position < 0 ? 'before' : position > size ? 'after' : null
+      setNowSide((current) => (current === next ? current : next))
+    }
+    check()
+    scroller.addEventListener('scroll', check, { passive: true })
+    return () => scroller.removeEventListener('scroll', check)
+  }, [nowOffset, isTimeline])
+
+  const scrollToNow = () => {
+    const scroller = scrollerRef.current
+    if (!scroller || nowOffset === null) return
+    if (isTimeline) {
+      scroller.scrollTo({
+        left: Math.max(0, nowOffset - scroller.clientWidth / 3),
+        behavior: 'smooth',
+      })
+    } else {
+      scroller.scrollTo({
+        top: Math.max(0, nowOffset - scroller.clientHeight / 3),
+        behavior: 'smooth',
+      })
+    }
+  }
+
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
   // in, once per layout — the minute ticks after that must not pull the view back.
   useEffect(() => {
@@ -351,6 +397,21 @@ export const DayCalendar = ({
           ))}
         </fieldset>
       )}
+      {nowSide && nowMinutes !== null && (
+        <button
+          type='button'
+          className={styles.toNow}
+          data-side={nowSide}
+          data-layout={layout}
+          onClick={scrollToNow}
+        >
+          {isTimeline && nowSide === 'before' && <ArrowLeft weight='bold' aria-hidden />}
+          {!isTimeline && nowSide === 'before' && <ArrowUp weight='bold' aria-hidden />}
+          Сейчас {formatClock(nowMinutes)}
+          {isTimeline && nowSide === 'after' && <ArrowRight weight='bold' aria-hidden />}
+          {!isTimeline && nowSide === 'after' && <ArrowDown weight='bold' aria-hidden />}
+        </button>
+      )}
       <div
         className={styles.scroller}
         ref={scrollerRef}
@@ -390,7 +451,20 @@ export const DayCalendar = ({
                 {formatClock(minutes)}
               </span>
             ))}
+            {/* The time now, as a red capsule on the hours: what the red line means. */}
+            {showNow && nowMinutes !== null && !isTimeline && (
+              <span className={styles.nowLabel} style={along(nowMinutes)}>
+                {formatClock(nowMinutes)}
+              </span>
+            )}
           </div>
+
+          {/* On the timeline «now» is one line through every lane, its time on top. */}
+          {showNow && nowMinutes !== null && isTimeline && (
+            <span className={styles.nowLine} style={along(nowMinutes)} aria-hidden='true'>
+              <span className={styles.nowLabel}>{formatClock(nowMinutes)}</span>
+            </span>
+          )}
 
           {shown.map((specialist, index) => (
             <section
@@ -604,7 +678,7 @@ export const DayCalendar = ({
                 </span>
               )}
 
-              {showNow && nowMinutes !== null && (
+              {showNow && nowMinutes !== null && !isTimeline && (
                 <span className={styles.now} style={along(nowMinutes)} aria-hidden='true' />
               )}
             </section>
