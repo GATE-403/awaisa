@@ -511,7 +511,16 @@ export const DayCalendar = ({
                   aria-hidden='true'
                 >
                   {isTimeline && face(specialist, styles.cardFace)}
+                  {isTimeline && `${specialist.name.split(' ')[0]} · `}
                   {formatClock(hover.minutes)}
+                </span>
+              )}
+              {/* Whose lane this is, pinned to its bottom-left corner while the day scrolls. */}
+              {isTimeline && bookings.some((booking) => booking.specialistId === specialist.id) && (
+                <span className={styles.laneTag} aria-hidden='true'>
+                  {face(specialist, styles.cardFace)}
+                  <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
+                  {headNote(specialist) ?? specialist.role}
                 </span>
               )}
               {/* No names on the timeline: a master with nothing booked says so, and books in a tap. */}

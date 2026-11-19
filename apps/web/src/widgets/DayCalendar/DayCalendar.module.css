@@ -902,3 +902,35 @@
   height: 28px;
   font-size: 11px;
 }
+
+/* Whose lane: a faint wash of the master's colour, and their face, name and role pinned to the
+   lane's bottom-left corner (empty lanes say it with their «Записать» capsule instead). */
+.grid[data-layout="timeline"] .column {
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--tint) 5%, var(--color-background));
+}
+
+.laneTag {
+  position: sticky;
+  left: var(--space-3);
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-2);
+  margin: auto 0 var(--space-2) var(--space-3);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.grid .laneTag .cardFace {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+.grid[data-layout="timeline"] .laneEmpty {
+  align-self: flex-start;
+}
