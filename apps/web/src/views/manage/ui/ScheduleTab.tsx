@@ -73,6 +73,8 @@ const PAST_DAYS = 14
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
   const [zoom, setZoom] = useState(1)
+  // A visit picked from «N визитов прошли без отметки»: the calendar scrolls to it and flashes it.
+  const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
   const toast = useToast()
@@ -371,6 +373,12 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             layout={layout}
             zoom={zoom}
             onZoomChange={setZoom}
+            focusedBookingId={focusedBookingId}
+            onMarkArrived={
+              today && date && date <= today.dayKey
+                ? (booking) => void markOutcome(booking.id, { outcome: 'arrived' })
+                : undefined
+            }
             onSelectBooking={setSelected}
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
@@ -384,7 +392,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           openHere={openHere}
           openElsewhere={unclosed.total - openHere}
           visitsHere={unmarkedHere}
-          onOpen={setSelected}
+          onOpen={(booking) => {
+            setFocusedBookingId(null)
+            requestAnimationFrame(() => setFocusedBookingId(booking.id))
+          }}
           onCloseDay={handleCloseDay}
           onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
           onDismiss={() => setIsCloseBarHidden(true)}
