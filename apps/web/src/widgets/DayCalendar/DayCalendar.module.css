@@ -178,12 +178,13 @@
   gap: 3px;
   margin-top: 1px;
   padding: 6px 8px;
-  /* A white task card on the day: a quiet chip row, the client, the service, then the time. */
+  /* A task card on the day: a quiet chip row, the client, the service, then the time — white,
+     breathed on by the master's colour (a pastel, not a fill: the state chip still leads). */
   border-radius: 12px;
-  background: var(--color-elevated);
+  background: color-mix(in srgb, var(--tint) 6%, var(--color-elevated));
   box-shadow:
     var(--shadow-sm),
-    inset 0 0 0 0.5px var(--color-border);
+    inset 0 0 0 0.5px color-mix(in srgb, var(--tint) 16%, var(--color-border));
   color: var(--color-foreground);
   cursor: pointer;
   transition:
@@ -307,8 +308,9 @@
   height: 20px;
   padding: 0 7px;
   border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-muted-foreground);
+  /* The neutral chips (time, price) take the same pastel, a step deeper than the card. */
+  background: color-mix(in srgb, var(--tint) 12%, transparent);
+  color: color-mix(in srgb, var(--tint) 35%, var(--color-foreground));
   font-size: var(--text-xs);
   line-height: 1;
   font-weight: var(--font-weight-medium);
