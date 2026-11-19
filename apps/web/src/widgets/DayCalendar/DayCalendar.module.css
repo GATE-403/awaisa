@@ -2202,3 +2202,44 @@
     right: var(--space-3);
   }
 }
+
+/* ——— One ink per card ———
+   Orange and red words on a blue or violet card clashed. The state word takes the card's own
+   ink; its colour lives only in a small dot before it (Calendar marks events the same way). */
+:root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: inherit;
+}
+
+:root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState::before {
+  content: "";
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+}
+
+:root .grid .booking[data-tone="warning"] .blockState::before {
+  background: var(--system-orange);
+}
+
+:root .grid .booking[data-tone="danger"] .blockState::before {
+  background: var(--color-danger);
+}
+
+/* «✓ Пришёл» on the card speaks in the card's ink too, on a white capsule. */
+.grid .quickMark {
+  color: color-mix(in srgb, var(--tint) 42%, black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .grid .quickMark {
+    color: color-mix(in srgb, var(--tint) 65%, white);
+  }
+}
+
+[data-theme="dark"] .grid .quickMark {
+  color: color-mix(in srgb, var(--tint) 65%, white);
+}

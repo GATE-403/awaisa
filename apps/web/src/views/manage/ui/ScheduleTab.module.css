@@ -96,15 +96,16 @@
     width: 100%;
   }
 
+  /* The view switch on the left, the two actions on the right, all 36pt like the switch. */
   .toolbar > :first-child {
-    flex: 1;
+    margin-right: auto;
   }
 
   .toolbar .iconOnPhone[data-size] {
     flex-shrink: 0;
-    width: var(--control-height-md);
-    min-width: var(--control-height-md);
-    height: var(--control-height-md);
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
     padding: 0;
   }
 

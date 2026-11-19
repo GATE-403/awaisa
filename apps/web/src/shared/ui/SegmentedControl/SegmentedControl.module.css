@@ -106,3 +106,23 @@
     transition: none;
   }
 }
+
+/* Glyph segments: a 44pt-wide segment around a 20pt glyph, the name only for screen readers. */
+.segment[data-icon] {
+  position: relative;
+  min-width: 44px;
+}
+
+.segment[data-icon] svg {
+  width: 20px;
+  height: 20px;
+}
+
+.iconLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
