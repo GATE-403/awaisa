@@ -386,9 +386,35 @@ export const DayCalendar = ({
     />
   )
 
+  // A master's visits as minute spans, to keep new bookings off taken time.
+  const busyOf = (specialistId: string) =>
+    bookings
+      .filter((booking) => booking.specialistId === specialistId && booking.status === 'confirmed')
+      .map((booking) => {
+        const from = parseClock(booking.time)
+        return { from, to: from + booking.durationMinutes }
+      })
+  const isTaken = (specialistId: string, minutes: number) =>
+    busyOf(specialistId).some(({ from, to }) => from < minutes + slotMinutes && to > minutes)
+  // How far the free time runs from a slot, so the preview never reaches under the next visit.
+  const freeUntil = (specialistId: string, minutes: number) =>
+    Math.min(
+      range.end,
+      ...busyOf(specialistId)
+        .filter(({ from }) => from >= minutes)
+        .map(({ from }) => from),
+    )
+
   const handleCreate = (event: MouseEvent<HTMLElement>, specialistId: string) => {
     // detail is 0 for a click from the keyboard: there is no pointer position to read.
-    onCreateBooking(specialistId, event.detail === 0 ? null : formatClock(minutesAt(event)))
+    if (event.detail === 0) {
+      onCreateBooking(specialistId, null)
+      return
+    }
+    const minutes = minutesAt(event)
+    // Taken time is not offered: a click there does nothing (the visit's card is the target).
+    if (isTaken(specialistId, minutes)) return
+    onCreateBooking(specialistId, formatClock(minutes))
   }
 
   return (
@@ -574,6 +600,10 @@ export const DayCalendar = ({
                 onPointerMove={(event) => {
                   if (event.pointerType !== 'mouse' || drag.dragged) return
                   const minutes = minutesAt(event)
+                  if (isTaken(specialist.id, minutes)) {
+                    if (hover) setHover(null)
+                    return
+                  }
                   if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
                     setHover({ specialistId: specialist.id, minutes })
                   }
@@ -582,7 +612,19 @@ export const DayCalendar = ({
               {!drag.dragged && hover?.specialistId === specialist.id && (
                 <span
                   className={styles.ghost}
-                  style={place(hover.minutes, hover.minutes + slotMinutes)}
+                  data-narrow={
+                    (isTimeline &&
+                      toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) < 130) ||
+                    undefined
+                  }
+                  style={
+                    isTimeline
+                      ? ({
+                          ...place(hover.minutes, hover.minutes + slotMinutes),
+                          '--free': `${toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) - 4}px`,
+                        } as CSSProperties)
+                      : place(hover.minutes, hover.minutes + slotMinutes)
+                  }
                   aria-hidden='true'
                 >
                   {isTimeline ? (
@@ -591,12 +633,15 @@ export const DayCalendar = ({
                     <>
                       <span className={styles.blockTop}>
                         <span className={styles.blockRange}>
-                          {formatClock(hover.minutes)}–{formatClock(hover.minutes + slotMinutes)}
+                          {formatClock(hover.minutes)}
+                          <span className={styles.rangeEndGhost}>
+                            –{formatClock(hover.minutes + slotMinutes)}
+                          </span>
                         </span>
                       </span>
                       <span className={styles.ghostTitle}>
                         <Plus weight='bold' aria-hidden />
-                        Новая запись
+                        <span className={styles.ghostLabel}>Новая запись</span>
                       </span>
                       <span className={styles.ghostWho}>
                         {face(specialist, styles.cardFace)}
@@ -730,6 +775,7 @@ export const DayCalendar = ({
                       data-tone={state.tone}
                       data-ended={isPast || (nowMinutes !== null && to <= nowMinutes) || undefined}
                       data-size={size}
+                      data-narrow={(isTimeline && length < 190) || undefined}
                       data-dragging={drag.dragged?.id === booking.id || undefined}
                       style={
                         progress === null
@@ -759,7 +805,8 @@ export const DayCalendar = ({
                         // The time and the state on one quiet line, like an event in Calendar.
                         <span className={styles.blockTop}>
                           <span className={styles.blockRange}>
-                            {booking.time}–{end}
+                            {booking.time}
+                            <span className={styles.rangeEnd}>–{end}</span>
                           </span>
                           <span className={styles.blockState}>
                             {state.tone === 'success' && <Check weight='bold' aria-hidden />}
