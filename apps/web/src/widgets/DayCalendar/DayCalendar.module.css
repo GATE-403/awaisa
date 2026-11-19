@@ -29,9 +29,8 @@
 
 .columnHead {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border-left: 0.5px solid var(--color-border);
 }
@@ -47,17 +46,22 @@
   white-space: nowrap;
 }
 
-.master::before {
-  content: "";
+/* The master's face, ringed in their colour: the colour their cards are breathed on by. */
+.face {
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--tint);
+  box-shadow:
+    0 0 0 1.5px var(--color-surface),
+    0 0 0 3px var(--tint);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
 }
 
 .role {
-  padding-left: calc(8px + var(--space-2));
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
@@ -196,11 +200,28 @@
   scale: 0.98;
 }
 
-/* The visit under way: the card wears the accent ring, like a focused item. */
+/* The visit under way: the card wears the accent ring, like a focused item, and fills with a
+   soft blue up to now — down the column, across the timeline. */
 .booking[data-tone="accent"] {
+  --fill: color-mix(in srgb, var(--color-primary) 14%, var(--color-elevated));
+  --rest: color-mix(in srgb, var(--tint) 6%, var(--color-elevated));
+
+  background: linear-gradient(
+    to bottom,
+    var(--fill) var(--progress, 0%),
+    var(--rest) var(--progress, 0%)
+  );
   box-shadow:
     var(--shadow-sm),
     inset 0 0 0 1.5px var(--color-primary);
+}
+
+.grid[data-layout="timeline"] .booking[data-tone="accent"] {
+  background: linear-gradient(
+    to right,
+    var(--fill) var(--progress, 0%),
+    var(--rest) var(--progress, 0%)
+  );
 }
 
 .booking[data-cancelled] {
@@ -222,7 +243,8 @@
 
 /* A no-show keeps its place but steps back: no lift, a dashed edge. */
 .booking[data-outcome="no_show"] {
-  background: var(--color-surface);
+  /* A no-show is washed in a faint red, still dashed and struck through. */
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
   box-shadow: none;
   outline: 1px dashed color-mix(in srgb, var(--color-danger) 60%, transparent);
   outline-offset: -1px;
@@ -234,7 +256,9 @@
 }
 
 .booking[data-outcome="arrived"] {
-  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  /* Done: the card turns a soft green, like a ticked task. */
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-elevated));
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--color-success) 30%, var(--color-border));
 }
 
 .timeOff {
@@ -514,13 +538,16 @@
    — the same blocks as the columns, only the axis turned. Names stay pinned on the left and the
    hours on top while the day scrolls sideways. */
 .grid[data-layout="timeline"] {
+  /* No row of its own for the hours: they are written on the hour lines, in the room the first
+     master's row keeps above its cards. */
   grid-template-columns: 200px max-content;
-  grid-template-rows: 36px;
+  grid-template-rows: 0 106px;
   grid-auto-rows: 88px;
 }
 
 .grid[data-layout="timeline"] .corner {
-  min-height: 36px;
+  min-height: 0;
+  border-bottom: none;
 }
 
 .grid[data-layout="timeline"] .columnHead {
@@ -533,26 +560,35 @@
   border-top: 0.5px solid var(--color-border);
 }
 
+.grid[data-layout="timeline"] .columnHead:nth-child(2),
+.grid[data-layout="timeline"] section.column:first-of-type {
+  border-top: none;
+}
+
 .grid[data-layout="timeline"] .axis {
   top: 0;
   left: auto;
-  z-index: 5;
-  height: 36px;
-  border-bottom: 0.5px solid var(--color-border);
+  z-index: 3;
+  height: 0;
+  background: none;
 }
 
+/* Each hour beside the top of its line, small and quiet; the last one before its line. */
 .grid[data-layout="timeline"] .hour {
-  top: 50%;
+  top: 4px;
   right: auto;
-  translate: -50% -50%;
-}
-
-.grid[data-layout="timeline"] .hour:first-child {
-  translate: 4px -50%;
+  font-size: 11px;
+  translate: 5px 0;
 }
 
 .grid[data-layout="timeline"] .hour:last-child {
-  translate: calc(-100% - 4px) -50%;
+  translate: calc(-100% - 5px) 0;
+}
+
+/* The first master's row makes room above its cards for the hours. */
+.grid[data-layout="timeline"] section.column:first-of-type
+  :is(.booking, .timeOff, .ghost, .dropPreview) {
+  top: 24px;
 }
 
 .grid[data-layout="timeline"] .column {
