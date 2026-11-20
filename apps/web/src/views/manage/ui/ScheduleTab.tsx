@@ -6,6 +6,8 @@ import { Popover } from '@awaisa/ui/Popover'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import {
+  ArrowsInLineHorizontal,
+  ArrowsOutLineHorizontal,
   BellRinging,
   Coffee,
   Columns,
@@ -38,7 +40,7 @@ import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
-import { useScheduleLayout } from '@/views/manage/model/useScheduleLayout'
+import { useScheduleLayout, useScheduleWide } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
@@ -91,6 +93,7 @@ const CLOSE_BAR_SPACE_PX = 72
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
+  const { isWide, setWide } = useScheduleWide()
   const [zoom, setZoom] = useState(1)
   // A visit picked from «N визитов прошли без отметки»: the calendar scrolls to it and flashes it.
   const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
@@ -221,6 +224,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     setSelected(booking)
     router.replace(`/manage/${slug}?tab=schedule`, { scroll: false })
   }, [linkedBookingId, schedule, slug])
+
+  // The wide board spans the window minus the page's own scrollbar, measured while it is on.
+  useEffect(() => {
+    if (!isWide) return
+    const root = document.documentElement
+    const measure = () =>
+      root.style.setProperty('--scrollbar-width', `${window.innerWidth - root.clientWidth}px`)
+    measure()
+    window.addEventListener('resize', measure)
+    return () => {
+      window.removeEventListener('resize', measure)
+      root.style.removeProperty('--scrollbar-width')
+    }
+  }, [isWide])
 
   // Re-read after every schedule change: marking a visit may close a day, booking someone in
   // takes them off the waitlist.
@@ -367,6 +384,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 <>
                   {/* Secondary tools as one capsule of thin glyphs (named in tooltips). */}
                   <GlyphGroup label='Инструменты дня'>
+                    <span className={styles.wideToggle}>
+                      <GlyphButton
+                        icon={
+                          isWide ? (
+                            <ArrowsInLineHorizontal aria-hidden />
+                          ) : (
+                            <ArrowsOutLineHorizontal aria-hidden />
+                          )
+                        }
+                        label={isWide ? 'Обычный вид' : 'На всю ширину'}
+                        aria-pressed={isWide}
+                        onClick={() => setWide(!isWide)}
+                      />
+                    </span>
                     <GlyphButton
                       icon={<Coffee aria-hidden />}
                       label='Перерыв'
@@ -435,7 +466,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         </div>
       )}
 
-      <div className={styles.panel}>
+      <div className={styles.panel} data-wide={isWide || undefined}>
         <DayStrip
           variant='compact'
           days={days}

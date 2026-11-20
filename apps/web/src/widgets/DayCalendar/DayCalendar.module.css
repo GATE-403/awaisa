@@ -2764,3 +2764,22 @@
 :root .grid[data-layout] .booking[data-cancelled] {
   z-index: 1;
 }
+
+/* The visit under way shows its progress in its own fill, not a bar: the part already done a
+   shade deeper, from the start edge to now — left to right on the timeline, top down in the
+   columns. Both shades keep the white words AA. */
+:root .grid .booking[data-tone="accent"] {
+  background: linear-gradient(
+    var(--progress-direction, 180deg),
+    color-mix(in srgb, var(--tint) 72%, black) var(--progress, 0%),
+    color-mix(in srgb, var(--tint) 92%, black) var(--progress, 0%)
+  );
+}
+
+:root .grid[data-layout="timeline"] .booking[data-tone="accent"] {
+  --progress-direction: 90deg;
+}
+
+:root .grid .booking[data-tone="accent"] .progressTrack {
+  display: none;
+}
