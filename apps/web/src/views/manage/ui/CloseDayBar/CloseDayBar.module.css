@@ -135,11 +135,142 @@
   color: var(--color-muted-foreground);
 }
 
-.visitTime {
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
+/* On phones the bar keeps to the screen: «6 визитов без отметки» and the button, never cut. */
+.short {
+  display: none;
 }
 
-.visitMeta {
-  color: var(--color-muted-foreground);
+@media (max-width: 479px) {
+  .long {
+    display: none;
+  }
+
+  .short {
+    display: inline;
+  }
+
+  .bar {
+    gap: var(--space-2);
+    padding-left: var(--space-3);
+  }
+
+  .dot {
+    display: none;
+  }
+}
+
+@media (max-width: 479px) {
+  .who {
+    min-width: 0;
+  }
+}
+
+/* The glyph of visits waiting to be marked — the same as on their cards. */
+.bar .dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: none;
+  color: var(--system-orange);
+}
+
+/* Inside the board, one slim row over the day like «Сейчас» — no floating capsule over the
+   window's foot, so the day keeps its whole height (the room kept for it was wasted). */
+.bar {
+  position: static;
+  z-index: auto;
+  width: 100%;
+  max-width: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 0;
+  border-bottom: 0.5px solid var(--color-border);
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  translate: none;
+  animation: none;
+}
+
+.bar > :is(.who, .text) {
+  flex: 0 1 auto;
+  margin-right: auto;
+}
+
+@media (max-width: 479px) {
+  .bar > :is(.who, .text) {
+    flex: 0 0 auto;
+  }
+
+  .bar {
+    gap: var(--space-1);
+  }
+}
+
+/* In the status row it is one capsule in orange — what asks for action — «◌ 4 без отметки ⌄»,
+   then «✓ Все пришли» and a small ✕. */
+.bar {
+  gap: 2px;
+  min-height: 36px;
+  padding: 0 2px 0 var(--space-3);
+  border-bottom: none;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--system-orange) 12%, transparent);
+}
+
+.bar .dot {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  margin-right: 4px;
+}
+
+.long {
+  display: none;
+}
+
+.short {
+  display: inline;
+}
+
+.bar > :is(.who, .text) {
+  flex: 0 0 auto;
+  margin-right: var(--space-1);
+}
+
+.bar :global(button[data-size="sm"]) {
+  min-height: 30px;
+  padding-inline: var(--space-3);
+}
+
+.close {
+  width: 30px;
+  height: 30px;
+}
+
+@media (max-width: 479px) {
+  .close {
+    display: none;
+  }
+}
+
+/* With the glyph inside the trigger, the trigger starts at the capsule's own edge: its hover and
+   focus fill is an orange shade that follows the capsule's rounded start, never a grey oval. */
+.bar[data-glyph-inside] {
+  padding-left: 2px;
+}
+
+.bar .who {
+  min-height: 32px;
+  padding: 0 var(--space-2) 0 10px;
+}
+
+.bar .who:focus-visible,
+.bar .who[data-popup-open] {
+  background: color-mix(in srgb, var(--system-orange) 14%, transparent);
+}
+
+@media (hover: hover) {
+  .bar .who:hover {
+    background: color-mix(in srgb, var(--system-orange) 14%, transparent);
+  }
 }

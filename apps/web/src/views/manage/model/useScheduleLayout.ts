@@ -39,3 +39,39 @@ export const useScheduleLayout = () => {
 
   return { layout, setLayout }
 }
+
+const WIDE_KEY = 'awaisa:schedule-wide:v1'
+const WIDE_EVENT = 'awaisa:schedule-wide'
+
+const readWide = () => {
+  try {
+    return window.localStorage.getItem(WIDE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+const subscribeWide = (onChange: () => void) => {
+  window.addEventListener(WIDE_EVENT, onChange)
+  window.addEventListener('storage', onChange)
+  return () => {
+    window.removeEventListener(WIDE_EVENT, onChange)
+    window.removeEventListener('storage', onChange)
+  }
+}
+
+// The schedule's board at the cabinet's width or across the whole window, kept on this device.
+export const useScheduleWide = () => {
+  const isWide = useSyncExternalStore(subscribeWide, readWide, () => false)
+
+  const setWide = (next: boolean) => {
+    try {
+      window.localStorage.setItem(WIDE_KEY, next ? '1' : '0')
+    } catch {
+      // Private mode: the choice lasts until the page is left.
+    }
+    window.dispatchEvent(new Event(WIDE_EVENT))
+  }
+
+  return { isWide, setWide }
+}

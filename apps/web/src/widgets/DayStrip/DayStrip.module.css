@@ -192,3 +192,159 @@
     background: none;
   }
 }
+
+/* Compact days read as a row of chips one taps and scrolls: each day on a quiet fill, the chosen
+   one filled, the row fading at its edges (`data-edge-fade`) and cut by the panel's side. */
+.strip[data-variant="compact"] .days {
+  gap: var(--space-1);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="false"] {
+  background: var(--color-fill);
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="false"][data-today] :is(.weekday, .number) {
+  color: var(--color-danger-text);
+}
+
+/* «Сегодня» as the kit's outline capsule: accent on a 10% accent fill. */
+.strip[data-variant="compact"] .today {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-link);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (hover: hover) {
+  .strip[data-variant="compact"] .day[aria-pressed="false"]:hover {
+    background: var(--color-subtle);
+  }
+}
+
+/* On touch screens too the compact row melts into the panel at its sides instead of cutting a
+   chip in half: a small row, so the mask costs nothing while it scrolls. */
+@media (pointer: coarse) {
+  .strip[data-variant="compact"] .days {
+    padding-inline: var(--space-3);
+    margin-inline: calc(-1 * var(--space-3));
+    scroll-padding-inline: var(--space-6);
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 var(--space-6),
+      #000 calc(100% - var(--space-6)),
+      transparent
+    );
+  }
+}
+
+/* The gliding fill of the compact row: under the days, at the chosen one. */
+.strip[data-variant="compact"] .days {
+  position: relative;
+}
+
+.knob {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--w, 0);
+  height: var(--h, 0);
+  border-radius: var(--radius-full);
+  background: var(--color-foreground);
+  translate: var(--x, 0) var(--y, 0);
+  pointer-events: none;
+}
+
+.knob[data-on-today] {
+  background: var(--color-danger-strong);
+}
+
+.knob[data-ready] {
+  transition:
+    translate 380ms var(--ease-spring),
+    width 380ms var(--ease-spring),
+    background-color 200ms var(--ease-standard);
+}
+
+.strip[data-variant="compact"] .day {
+  position: relative;
+  z-index: 1;
+  transition: color 200ms var(--ease-standard);
+}
+
+/* The knob draws the chosen fill now. */
+.strip[data-variant="compact"] .day[aria-pressed="true"],
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knob[data-ready] {
+    transition: none;
+  }
+}
+
+/* How full the day is: a thin track along the chip's foot, filled from the left — a glance down
+   the row shows the busy days. */
+.load {
+  position: absolute;
+  right: 10px;
+  bottom: 4px;
+  left: 10px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    currentColor calc(var(--load, 0) * 100%),
+    color-mix(in srgb, currentColor 18%, transparent) calc(var(--load, 0) * 100%)
+  );
+  opacity: 0.55;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] .load {
+  color: var(--color-background);
+  opacity: 0.8;
+}
+
+.strip[data-variant="compact"] .day {
+  overflow: hidden;
+}
+
+/* Days with visits to mark carry the same dashed-circle glyph as the cards, not a dot. */
+.day[data-marked]::after,
+.strip[data-variant="compact"] .day[data-marked]::after {
+  content: none;
+}
+
+.markGlyph {
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  color: var(--system-orange);
+}
+
+.strip:not([data-variant="compact"]) .markGlyph {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"] .markGlyph {
+  color: color-mix(in srgb, var(--system-orange) 70%, white);
+}
+
+/* Only the chosen day has a fill; the others are plain text with their load bar under them. */
+.strip[data-variant="compact"] .day[aria-pressed="false"] {
+  background: transparent;
+}
+
+/* On the chosen chip (black, or red for today) its marks read in the chip's own light ink. */
+.strip[data-variant="compact"] .day[aria-pressed="true"] :is(.load, .markGlyph) {
+  color: var(--color-background);
+  opacity: 0.9;
+}
+
+.strip[data-variant="compact"] .day[aria-pressed="true"][data-today] :is(.load, .markGlyph) {
+  color: var(--color-primary-foreground);
+}

@@ -1030,6 +1030,9 @@ type ClosedDay = { ids: string[] }
 
 type UnclosedDays = { total: number; days: { date: string; count: number }[] }
 
+/** How full each day is: booked minutes against the masters' open minutes (business hours × active masters). */
+type ScheduleLoad = { date: string; minutes: number; capacity: number }[]
+
 type TelegramLink = { url: string; code: string }
 
 type CreatedId = { id: string }
@@ -1102,6 +1105,7 @@ export type {
   TelegramLink,
   TestPaymentResult,
   UnclosedDays,
+  ScheduleLoad,
   UploadedPhoto,
   WalletConfig,
   WalletLinks,

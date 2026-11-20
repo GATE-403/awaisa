@@ -7,6 +7,7 @@ import type {
   CreatedTimeOff,
   MovedBooking,
   RecentBooking,
+  ScheduleLoad,
   UnclosedDays,
 } from '@awaisa/contracts'
 import {
@@ -44,8 +45,10 @@ import {
   type ReopenInput,
   recentBookingsQuerySchema,
   reopenSchema,
+  type ScheduleLoadQuery,
   type ScheduleQuery,
   type StaffBookingInput,
+  scheduleLoadQuerySchema,
   scheduleQuerySchema,
   staffBookingSchema,
 } from './admin.schemas.js'
@@ -108,6 +111,14 @@ export class AdminController {
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
   ): Promise<AdminSchedule> {
     return this.admin.getSchedule(business, query.date)
+  }
+
+  @Get('schedule/load')
+  getScheduleLoad(
+    @CurrentBusiness() business: Business,
+    @Query({ schema: scheduleLoadQuerySchema }) query: ScheduleLoadQuery,
+  ): Promise<ScheduleLoad> {
+    return this.admin.getLoad(business, query.from, query.days)
   }
 
   @Get('bookings/recent')

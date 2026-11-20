@@ -77,6 +77,7 @@ import type {
   ReviewPhotos,
   ReviewReply,
   ReviewSummary,
+  ScheduleLoad,
   ServiceInput,
   SlugCheck,
   SpecialistInput,
@@ -412,6 +413,9 @@ const closeDay = (slug: string, date: string) =>
 
 const reopenVisits = (slug: string, ids: string[]) =>
   post<void>(`${manage(slug)}/bookings/reopen`, { ids })
+
+const getScheduleLoad = (slug: string, from: string, days: number, signal?: AbortSignal) =>
+  request<ScheduleLoad>(`${manage(slug)}/schedule/load?from=${from}&days=${days}`, { signal })
 
 const getUnclosedVisits = (slug: string, signal?: AbortSignal) =>
   request<UnclosedDays>(`${manage(slug)}/bookings/unclosed`, { signal })
@@ -836,6 +840,7 @@ export {
   closeDay,
   reopenVisits,
   moveMyBooking,
+  getScheduleLoad,
   getUnclosedVisits,
   getMasterPlaces,
   getMasterDay,

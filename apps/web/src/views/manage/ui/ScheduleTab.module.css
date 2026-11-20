@@ -76,3 +76,149 @@
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
 }
+
+/* The toolbar: the view switch, «Перерыв» and «Новая запись» in one row. On phones it takes the
+   whole line — the switch stretches, the two actions become round glyph buttons (their names
+   stay for screen readers) — instead of wrapping into a heap of capsules. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 639px) {
+  .toolbar {
+    width: 100%;
+  }
+
+  /* The view switch on the left, the two actions on the right, all 36pt like the switch. */
+  .toolbar > :first-child {
+    margin-right: auto;
+  }
+
+  .toolbar .iconOnPhone[data-size] {
+    flex-shrink: 0;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+
+  .buttonLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: the whole toolbar at 44pt, a thumb's size (the view switch's segments included). */
+@media (max-width: 639px) {
+  .toolbar .iconOnPhone[data-size] {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  /* Over the control's own `sm` size (0,3,0). */
+  .toolbar.toolbar > fieldset[class] {
+    padding-block: 0;
+  }
+
+  .toolbar.toolbar > fieldset label[class][class] {
+    height: 44px;
+    min-width: 48px;
+  }
+}
+
+/* The day's numbers are what the owner checks first: the title's size, figures bold in the label
+   colour, the words a step quieter but still medium. */
+.dayStats {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.dayStats strong {
+  font-weight: var(--font-weight-bold);
+}
+
+/* «Найти место»: the service being placed, and the way out. */
+.fitBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: calc(-1 * var(--space-3));
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+}
+
+.fitText {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+
+/* «На всю ширину»: the board leaves the cabinet's column and runs edge to edge of the window
+   (the page's scrollbar left out), square at its sides; «Обычный вид» brings it back. */
+.panel[data-wide] {
+  position: relative;
+  left: 50%;
+  width: calc(100vw - var(--scrollbar-width, 0px));
+  border-radius: 0;
+  translate: -50% 0;
+}
+
+/* The toggle only matters with room to grow: phones already use the whole width. */
+.wideToggle {
+  display: contents;
+}
+
+@media (max-width: 1023px) {
+  .wideToggle {
+    display: none;
+  }
+}
+
+/* The day's status row: «Сейчас», «Далее» and the unmarked visits as capsules on one line. */
+.dayStatus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.dayStatus:empty {
+  display: none;
+}
+
+.dayStatus > section {
+  display: inline-flex;
+  flex: 0 1 auto;
+  width: auto;
+  padding: 0;
+  border: none;
+}
+
+/* Wide, the board stands on the window's foot too: no shadow line under it. */
+.panel[data-wide] {
+  box-shadow: none;
+}

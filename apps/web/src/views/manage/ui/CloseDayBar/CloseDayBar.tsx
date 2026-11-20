@@ -1,10 +1,11 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { Menu, MenuItem } from '@awaisa/ui/Menu'
-import { CaretDown, Check, X } from '@phosphor-icons/react/ssr'
+import { Menu } from '@awaisa/ui/Menu'
+import { CaretDown, Check, CircleDashed, X } from '@phosphor-icons/react/ssr'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import styles from './CloseDayBar.module.css'
 
 interface CloseDayBarProps {
@@ -37,8 +38,16 @@ export const CloseDayBar = ({
   if (openHere === 0 && openElsewhere === 0) return null
 
   return (
-    <section className={styles.bar} aria-label='Неотмеченные визиты'>
-      <span className={styles.dot} aria-hidden />
+    <section
+      className={styles.bar}
+      aria-label='Неотмеченные визиты'
+      data-glyph-inside={(openHere > 0 && visitsHere.length > 0 && onOpen) || undefined}
+    >
+      {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
+          the capsule's own rounded start. */}
+      {!(openHere > 0 && visitsHere.length > 0 && onOpen) && (
+        <CircleDashed weight='bold' className={styles.dot} aria-hidden />
+      )}
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
@@ -49,28 +58,27 @@ export const CloseDayBar = ({
               className={styles.who}
               trigger={
                 <>
+                  <CircleDashed weight='bold' className={styles.dot} aria-hidden />
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
-                    {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+                    <span className={styles.long}>
+                      {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+                    </span>
+                    <span className={styles.short}>без отметки</span>
                   </span>
                   <CaretDown weight='bold' aria-hidden className={styles.caret} />
                 </>
               }
             >
-              {visitsHere.map((booking) => (
-                <MenuItem key={booking.id} onClick={() => onOpen(booking)}>
-                  <span className={styles.visitTime}>{booking.time}</span> {booking.customerName}
-                  <span className={styles.visitMeta}>
-                    {' '}
-                    · {booking.serviceName} · {booking.specialistName}
-                  </span>
-                </MenuItem>
-              ))}
+              <VisitMenuItems visits={visitsHere} onPick={onOpen} isMasterShown />
             </Menu>
           ) : (
             <span className={styles.text}>
               <strong>{visits(openHere)}</strong>{' '}
-              {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+              <span className={styles.long}>
+                {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
+              </span>
+              <span className={styles.short}>без отметки</span>
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>
