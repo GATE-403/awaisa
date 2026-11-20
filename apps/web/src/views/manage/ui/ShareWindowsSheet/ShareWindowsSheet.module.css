@@ -1,6 +1,7 @@
 /* The message as plain text, the way the client reads it. */
 .message {
-  padding: var(--space-1) var(--space-4) 0;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
   line-height: var(--text-body-line-height);
   white-space: pre-line;
   user-select: text;
@@ -30,18 +31,29 @@
   height: 14px;
 }
 
-/* «Отправить клиентам» and the glyph capsule on one line. */
+/* One wide action and the messengers' glyph capsule beside it, one height. */
 .send {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding-left: var(--space-4);
+  gap: var(--space-2);
 }
 
-.sendLabel {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
+.copy {
+  flex: 1;
+}
+
+/* The glyph capsule's own height (36 + its 2px track; 40 + 2 on phones), so the two read as one
+   row. Doubled class: the kit's size rule has the same weight and may load later. */
+.send .copy.copy {
+  height: 40px;
+  min-height: 40px;
+}
+
+@media (max-width: 639px) {
+  .send .copy.copy {
+    height: 44px;
+    min-height: 44px;
+  }
 }
 
 .send svg {

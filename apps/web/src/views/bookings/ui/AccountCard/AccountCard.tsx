@@ -6,14 +6,13 @@ import { useToast } from '@awaisa/ui/Toast'
 import {
   CalendarCheck,
   Camera,
-  CaretRight,
   IdentificationBadge,
   Storefront,
   Trash,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type ChangeEvent, useRef, useState } from 'react'
-import { BusinessTile, monogramTint, PersonAvatar } from '@/entities/business'
+import { monogramTint, PersonAvatar } from '@/entities/business'
 import { profileStyle } from '@/entities/profile'
 import { useSession } from '@/entities/session'
 import { useMyProfile } from '@/features/profileStyle'
@@ -181,50 +180,41 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
 
       {myProfile.profile && <p className={styles.level}>Уровень {myProfile.profile.level.level}</p>}
 
-      {/* Where the person works, as capsules right under their name — not a lone row. */}
+      {/* Small secondary capsules of one height, centred on the column's axis under the face. */}
       {(hasCabinet || masterOf.length > 0 || myProfile.settings) && (
         <div className={styles.shortcuts}>
           {myProfile.settings && (
-            <NextLink
-              href={`/u/${myProfile.settings.handle ?? myProfile.settings.id}`}
-              className={styles.shortcut}
+            <ButtonLink
+              variant='secondary'
+              size='sm'
+              render={
+                <NextLink href={`/u/${myProfile.settings.handle ?? myProfile.settings.id}`} />
+              }
             >
-              <IdentificationBadge weight='fill' aria-hidden className={styles.shortcutIcon} />
+              <IdentificationBadge aria-hidden />
               Мой профиль
-              {myProfile.profile && myProfile.profile.badges.length > 0 && (
-                <span className={styles.shortcutValue}>
-                  {myProfile.profile.badges.length}{' '}
-                  {pluralWord(myProfile.profile.badges.length, [
-                    'достижение',
-                    'достижения',
-                    'достижений',
-                  ])}
-                </span>
-              )}
-              <CaretRight weight='bold' aria-hidden className={styles.shortcutChevron} />
-            </NextLink>
+            </ButtonLink>
           )}
           {hasCabinet && (
-            <NextLink href={cabinetHref} className={styles.shortcut}>
-              {businesses.length === 1 && businesses[0] ? (
-                <BusinessTile name={businesses[0].name} size='xs' />
-              ) : (
-                <Storefront weight='fill' aria-hidden className={styles.shortcutIcon} />
-              )}
+            <ButtonLink variant='secondary' size='sm' render={<NextLink href={cabinetHref} />}>
+              <Storefront aria-hidden />
               Кабинет
-              <span className={styles.shortcutValue}>{cabinetName}</span>
-              <CaretRight weight='bold' aria-hidden className={styles.shortcutChevron} />
-            </NextLink>
+              <span className={styles.srOnly}> · {cabinetName}</span>
+            </ButtonLink>
           )}
           {masterOf.length > 0 && (
-            <NextLink
-              href={masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master'}
-              className={styles.shortcut}
+            <ButtonLink
+              variant='secondary'
+              size='sm'
+              render={
+                <NextLink
+                  href={masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master'}
+                />
+              }
             >
-              <CalendarCheck weight='fill' aria-hidden className={styles.shortcutIcon} />
+              <CalendarCheck aria-hidden />
               Мой день
-              <CaretRight weight='bold' aria-hidden className={styles.shortcutChevron} />
-            </NextLink>
+            </ButtonLink>
           )}
         </div>
       )}

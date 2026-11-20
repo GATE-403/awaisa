@@ -1,31 +1,3 @@
-.search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: var(--space-3);
-  width: 16px;
-  height: 16px;
-  color: var(--color-muted-foreground);
-  pointer-events: none;
-}
-
-.searchInput {
-  width: 100%;
-}
-
-/* Beats the kit's own input padding so the text starts after the glyph. */
-.search input.searchInput {
-  padding-left: calc(var(--space-3) + 24px);
-}
-
-.searchIcon {
-  z-index: 1;
-}
-
 .skeleton {
   height: 320px;
   border-radius: var(--radius-xl);

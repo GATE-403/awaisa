@@ -22,12 +22,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* A group with nothing in it yet: one quiet line where the list would be, no card around it. */
 .groupEmpty {
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  padding: 0 var(--space-4);
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
 .textButton {
@@ -100,7 +100,9 @@
 }
 
 .hoursRow {
-  grid-template-columns: auto 128px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  min-height: 48px;
+  padding-block: 0;
 }
 
 .settingRow {
@@ -202,9 +204,8 @@
   gap: var(--space-2);
 }
 
-.timeRange > :not(.dash) {
-  width: 104px;
-  min-width: 0;
+.dayShort {
+  display: none;
 }
 
 .dash {
@@ -308,21 +309,13 @@
 }
 
 @media (max-width: 639px) {
-  .hoursRow {
-    grid-template-columns: auto minmax(0, 1fr);
+  /* Phones: the short day keeps the row on one line beside its hours and switch. */
+  .dayFull {
+    display: none;
   }
 
-  .hoursRow > .timeRange,
-  .hoursRow > .cellMuted {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
-    text-align: left;
-  }
-
-  .timeRange > :not(.dash) {
-    flex: 1;
-    width: auto;
-    min-width: 0;
+  .dayShort {
+    display: inline;
   }
 }
 

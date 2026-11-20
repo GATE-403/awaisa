@@ -54,6 +54,15 @@
   cursor: pointer;
 }
 
+/* Centred in a box as wide as the rows' glyph tiles, so the glyph and the word sit in the same
+   columns as the tiles and labels above. */
+.danger svg {
+  box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+  padding-inline: calc((29px - 20px) / 2);
+}
+
 div.row {
   cursor: default;
 }
@@ -76,14 +85,26 @@ div.row {
   color: var(--color-tertiary-foreground);
 }
 
-.danger {
+/* «Выйти» on the page itself: the glyph lines up with the rows' tiles above (16pt in). */
+.signOut {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: var(--space-4);
+}
+
+.signOut .footnote {
+  padding-top: 0;
+}
+
+.danger {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-3);
-  width: 100%;
-  min-height: 52px;
+  min-height: var(--control-height-md);
   padding: 0 var(--space-4);
   border: none;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-danger-text);
   font: inherit;

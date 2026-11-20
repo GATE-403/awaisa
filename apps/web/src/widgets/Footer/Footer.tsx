@@ -36,7 +36,7 @@ const COLUMNS = [
 
 // Like apple.com: fine print first, link columns (collapsible on phones), then a quiet bottom row.
 export const Footer = () => (
-  <footer className={styles.footer}>
+  <footer data-site-footer className={styles.footer}>
     <Container className={styles.inner}>
       <nav className={styles.columns} aria-label='Карта сайта'>
         {COLUMNS.map((column) => (
