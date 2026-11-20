@@ -130,22 +130,26 @@ test.describe('Platform: a new business goes live', () => {
     // Bring the free spot to the middle of the day's own box (the page into view first), then click
     // that point of the screen: clicking the tall column itself scrolled it to its top, where the
     // sticky masters' row covered the spot.
-    await column.scrollIntoViewIfNeeded()
-    const point = await column.evaluate(async (element) => {
-      const box = element.getBoundingClientRect()
-      const bottoms = [
-        ...(element.parentElement?.querySelectorAll('[class*="booking"]') ?? []),
-      ].map((block) => block.getBoundingClientRect().bottom - box.top)
-      const y = Math.min(box.height - 30, Math.max(60, ...bottoms) + 40)
-      const scroller = element.closest<HTMLElement>('[class*="scroller"]')
-      if (scroller) {
-        const view = scroller.getBoundingClientRect()
-        scroller.scrollTop += box.top + y - view.top - scroller.clientHeight / 2
-      }
-      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
-      const after = element.getBoundingClientRect()
-      return { x: after.left + 24, y: after.top + y }
-    })
+    // A new day remounts the lanes (they slide in): wait for the settled column before measuring.
+    let point = { x: 0, y: 0 }
+    await expect(async () => {
+      await column.scrollIntoViewIfNeeded({ timeout: 2000 })
+      point = await column.evaluate(async (element) => {
+        const box = element.getBoundingClientRect()
+        const bottoms = [
+          ...(element.parentElement?.querySelectorAll('[class*="booking"]') ?? []),
+        ].map((block) => block.getBoundingClientRect().bottom - box.top)
+        const y = Math.min(box.height - 30, Math.max(60, ...bottoms) + 40)
+        const scroller = element.closest<HTMLElement>('[class*="scroller"]')
+        if (scroller) {
+          const view = scroller.getBoundingClientRect()
+          scroller.scrollTop += box.top + y - view.top - scroller.clientHeight / 2
+        }
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+        const after = element.getBoundingClientRect()
+        return { x: after.left + 24, y: after.top + y }
+      })
+    }).toPass({ timeout: 15000 })
     await page.mouse.click(point.x, point.y)
     const sheet = page.getByRole('dialog', { name: 'Новая запись' })
     await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
