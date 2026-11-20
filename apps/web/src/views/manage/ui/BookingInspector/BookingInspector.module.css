@@ -105,10 +105,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.inspector[data-cancelled] :is(.what, .when) {
-  text-decoration: line-through;
-}
-
 .actions {
   display: flex;
 }
@@ -260,5 +256,81 @@
 @media (hover: hover) and (pointer: fine) and (min-width: 640px) {
   .callPrimary {
     display: none;
+  }
+}
+
+/* ——— Cancelled ———
+   One quiet line on top instead of a red pill and struck-through lines. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+}
+
+.status svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-danger);
+}
+
+.lostPrice {
+  color: var(--color-muted-foreground);
+}
+
+/* The face steps back with the visit. */
+.inspector[data-cancelled] .head > :first-child {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+/* «Записать снова» shares the row with the glyph capsule, as tall as it, pushed to the end. */
+.actions .bookAgain {
+  order: 2;
+  min-height: 40px;
+  margin-left: auto;
+}
+
+.actions .bookAgain svg {
+  width: 16px;
+  height: 16px;
+}
+
+.status {
+  margin-bottom: calc(var(--space-1) * -1);
+}
+
+@media (max-width: 639px) {
+  .status {
+    order: 0;
+    align-self: center;
+  }
+
+  /* Phones: the wide capsule is «Записать снова»; the call is back among the glyphs. */
+  .actions .bookAgain {
+    order: 0;
+    flex: 1;
+    min-height: var(--control-height-md);
+    margin-left: 0;
+  }
+
+  .actions[data-book-again] .callGlyph {
+    display: inline-flex;
+  }
+
+  /* One line beside the four glyphs: the label alone, no glyph. */
+  .actions .bookAgain {
+    padding-inline: var(--space-3);
+    white-space: nowrap;
+  }
+
+  .actions .bookAgain svg {
+    display: none;
+  }
+
+  .status {
+    margin-bottom: 0;
   }
 }

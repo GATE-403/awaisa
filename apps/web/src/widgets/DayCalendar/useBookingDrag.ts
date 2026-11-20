@@ -136,7 +136,14 @@ export const useBookingDrag = ({
         return
       }
       const next = findTarget(moveEvent.clientX, moveEvent.clientY, pending.offsetMinutes)
-      if (next) setTarget(next)
+      // Only a new slot or master is news: a fresh object on every move re-rendered the whole day.
+      if (next) {
+        setTarget((current) =>
+          current?.specialistId === next.specialistId && current.minutes === next.minutes
+            ? current
+            : next,
+        )
+      }
     }
 
     const handleUp = (upEvent: PointerEvent) => {

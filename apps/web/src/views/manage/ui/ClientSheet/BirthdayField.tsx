@@ -107,6 +107,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
           <span>
             <Select
               aria-label='День'
+              className={styles.picker}
               items={dayItems}
               value={parsed.day}
               placeholder='День'
@@ -116,6 +117,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
           <span>
             <Select
               aria-label='Месяц'
+              className={styles.picker}
               items={monthItems}
               value={parsed.month}
               placeholder='Месяц'
@@ -125,6 +127,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
           <span>
             <Select
               aria-label='Год'
+              className={styles.picker}
               items={yearItems}
               value={value ? parsed.year : null}
               placeholder='Год'

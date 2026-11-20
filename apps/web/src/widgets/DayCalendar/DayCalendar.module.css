@@ -1,7 +1,7 @@
 .scroller {
   /* The day scrolls inside the panel, under the sticky masters row and beside the sticky hours,
      so the page (and the day strip above) stays put. */
-  max-height: max(420px, calc(100dvh - 180px));
+  max-height: max(260px, calc(100dvh - 180px));
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -2901,4 +2901,149 @@
    it at AA (the line itself stays the system red). */
 .grid .nowLabel {
   background: var(--color-danger-strong);
+}
+
+/* ——— Weak devices ———
+   The edge fade gives every card two scroll-driven animations — a compositor layer each, a
+   hundred on a busy day. Phones and tablets skip that decoration (and the landing of a mark,
+   which shares the animation list); with a mouse it stays. */
+@media (pointer: coarse) {
+  :root .grid[data-layout] .booking,
+  :root .grid[data-layout] .booking[data-just-marked] {
+    animation: none;
+  }
+}
+
+/* ——— Small cards keep their answers ———
+   The answers take the card's width (less its padding) and measure it: where «Пришёл» and
+   «Не пришёл» do not fit, they become two round glyphs (named in tooltips) instead of spilling
+   past the card. The bar itself lets clicks through to the card, and it sits on its card's layer,
+   so the pinned hours row passes over both. */
+:root .markBar {
+  z-index: 2;
+  container-type: inline-size;
+  display: block;
+  pointer-events: none;
+}
+
+:root .markBar[data-layout="columns"] {
+  right: var(--space-3);
+}
+
+.markBar .markButton {
+  pointer-events: auto;
+  vertical-align: top;
+}
+
+.markBar .markButton + .markButton {
+  margin-left: 6px;
+}
+
+@container (max-width: 190px) {
+  .markLabel {
+    display: none;
+  }
+
+  .markBar .markButton {
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .markBar .markButton svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .markBar .markButton::before {
+    inset: -6px;
+  }
+}
+
+/* «Сейчас ←/→» on the timeline rides the pinned hours row, at its side — in the middle of the
+   lanes it sat over the lane tags and the edge tabs. */
+:root .toNow[data-layout="timeline"] {
+  top: 2px;
+  min-height: 24px;
+  translate: none;
+}
+
+/* Phones: the empty lane says «свободен», not «свободен весь день», so the capsule with its
+   «Записать» fits the board instead of running past its edge. */
+@media (max-width: 639px) {
+  .laneNoteLong {
+    display: none;
+  }
+}
+
+/* The columns' last hour can scroll out from under a bar floating over the day's foot too. */
+.grid[data-layout="columns"] {
+  padding-bottom: var(--foot-lift, 0px);
+}
+
+/* ——— Compact columns on phones ———
+   The hours take 40px instead of 56, the masters' heads a first name and the fact under a 26pt
+   face in 44pt, and a column 140px, so two masters fit side by side on a phone. */
+@media (max-width: 639px) {
+  .grid[data-layout="columns"] {
+    grid-template-columns: 40px repeat(var(--columns), minmax(140px, 1fr));
+  }
+
+  .grid[data-layout="columns"] :is(.corner, .columnHead) {
+    min-height: 44px;
+  }
+
+  .grid[data-layout="columns"] .columnHead {
+    gap: 6px;
+    padding: 4px var(--space-2);
+  }
+
+  :root .grid[data-layout="columns"] .columnHead .face {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .grid[data-layout="columns"] .master {
+    font-size: var(--text-footnote);
+  }
+
+  .grid[data-layout="columns"] .lastName {
+    display: none;
+  }
+
+  .grid[data-layout="columns"] .hour {
+    right: 6px;
+  }
+
+  .toNow[data-layout="columns"][data-side="before"] {
+    top: calc(44px + var(--space-2));
+  }
+}
+
+@media (max-width: 639px) {
+  /* The red time of now fits the 40px hours. */
+  .grid[data-layout="columns"] .axis .nowLabel {
+    right: 2px;
+    padding-inline: 4px;
+  }
+
+  /* On a 140px column the time comes first: the state keeps its glyph, its word goes to screen
+     readers only. */
+  .grid[data-layout="columns"] .stateWord {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: the masters' track stands centred over the centred floating toolbar. */
+@media (max-width: 639px) {
+  :root .viewBar {
+    justify-content: center;
+  }
 }

@@ -1,7 +1,16 @@
 'use client'
 
+import { Button } from '@awaisa/ui/Button'
 import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
-import { CaretRight, ChatCircle, DotsThree, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
+import {
+  ArrowCounterClockwise,
+  CaretRight,
+  ChatCircle,
+  DotsThree,
+  Phone,
+  Prohibit,
+  WhatsappLogo,
+} from '@phosphor-icons/react/ssr'
 import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
@@ -19,6 +28,8 @@ interface BookingInspectorProps {
   /** Set once the visit's day has come: staff can mark it. */
   onOutcome?: (id: string, input: OutcomeInput) => Promise<AdminBooking | null>
   onOpenClient: (phone: string) => void
+  /** A cancelled visit on a day still ahead: book the same client, service and master again. */
+  onBookAgain?: (booking: AdminBooking) => void
   onClose: () => void
 }
 
@@ -40,10 +51,12 @@ export const BookingInspector = ({
   onCancel,
   onOutcome,
   onOpenClient,
+  onBookAgain,
   onClose,
 }: BookingInspectorProps) => {
   const isTouch = useMediaQuery('(pointer: coarse)')
   const isCancelled = booking.status === 'cancelled'
+  const canBookAgain = isCancelled && onBookAgain !== undefined
   const digits = booking.customerPhone.replace(/\D/g, '')
   const total = booking.price - (booking.discount?.amount ?? 0)
   const day = capitalizeFirst(dayFormatter.format(new Date(`${booking.date}T12:00:00`)))
@@ -59,6 +72,15 @@ export const BookingInspector = ({
 
   return (
     <div className={styles.inspector} data-cancelled={isCancelled || undefined}>
+      {/* Cancelled: said once, at the top, like a cancelled event in Calendar — the glyph of its
+          card in red, the words quiet; the rest stays readable (no strike-through), only the
+          price is struck, the one thing that will not come. */}
+      {isCancelled && (
+        <p className={styles.status}>
+          <Prohibit weight='bold' aria-hidden />
+          Запись отменена
+        </p>
+      )}
       {/* Who and what in two lines beside the face; the price on the right. */}
       <header className={styles.head}>
         <PersonAvatar name={booking.customerName} size='md' />
@@ -77,8 +99,14 @@ export const BookingInspector = ({
           </span>
         </span>
         <span className={styles.price}>
-          {booking.discount && <s className={styles.oldPrice}>{formatPrice(booking.price)}</s>}
-          {formatPrice(total)}
+          {booking.discount && !isCancelled && (
+            <s className={styles.oldPrice}>{formatPrice(booking.price)}</s>
+          )}
+          {isCancelled ? (
+            <s className={styles.lostPrice}>{formatPrice(total)}</s>
+          ) : (
+            formatPrice(total)
+          )}
         </span>
       </header>
 
@@ -89,17 +117,29 @@ export const BookingInspector = ({
         {booking.payment &&
           ` · предоплата ${formatPrice(booking.payment.amount)}, ${PAYMENT_STATUS_TEXT[booking.payment.status].toLowerCase()}`}
       </p>
-      {isCancelled && <p className={styles.cancelled}>Запись отменена</p>}
       {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
 
-      <div className={styles.actions}>
+      <div className={styles.actions} data-book-again={canBookAgain || undefined}>
         {/* A capsule of thin glyphs with a mouse; on phones four labelled tiles, like the
             actions under a contact in iOS. The labels name the buttons either way. */}
         {/* Phones: calling is the one main action, a wide accent capsule. */}
-        <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
-          <Phone weight='bold' aria-hidden />
-          Позвонить
-        </a>
+        {/* A cancelled visit's one action is to book it again, in the same row as the ways to
+            reach the client (on phones it takes the wide capsule; the call joins the glyphs). */}
+        {canBookAgain ? (
+          <Button
+            variant={isTouch ? 'primary' : 'secondary'}
+            className={styles.bookAgain}
+            onClick={() => onBookAgain(booking)}
+          >
+            <ArrowCounterClockwise aria-hidden />
+            Записать снова
+          </Button>
+        ) : (
+          <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
+            <Phone weight='bold' aria-hidden />
+            Позвонить
+          </a>
+        )}
         <GlyphGroup label='Связаться с клиентом'>
           <a
             className={styles.callGlyph}

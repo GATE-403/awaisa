@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
-import { bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
+import { bookingSteps, pickFirstFreeSlot, submitBooking, waitForToastsToLeave } from './helpers'
 
 // 16×10 px PNG; the API re-encodes it as WebP.
 const TINY_PNG =
@@ -113,6 +113,7 @@ test.describe('Platform: a new business goes live', () => {
     await page.getByRole('link', { name: 'Расписание' }).click()
     const day = page.locator(`[data-day="${booked}"]`)
     await day.waitFor()
+    await waitForToastsToLeave(page)
     await day.click()
     const phonePattern = clientPhone.replace('+', '\\+')
     await expect(
@@ -122,6 +123,7 @@ test.describe('Platform: a new business goes live', () => {
     // A walk-in on the next day: late in the afternoon today has no room left to drag it an hour.
     const nextDay = new Date(`${booked}T00:00:00Z`)
     nextDay.setUTCDate(nextDay.getUTCDate() + 1)
+    await waitForToastsToLeave(page)
     await page.locator(`[data-day="${nextDay.toISOString().slice(0, 10)}"]`).click()
     // A walk-in: the owner taps an empty slot and books the client in.
     // Below the master's last booking, wherever the day has it: a fixed spot meets the client's
@@ -151,7 +153,11 @@ test.describe('Platform: a new business goes live', () => {
       })
     }).toPass({ timeout: 15000 })
     await page.mouse.click(point.x, point.y)
-    const sheet = page.getByRole('dialog', { name: 'Новая запись' })
+    // The sheet, not the «Новая запись» toast for the client's booking (a dialog of that name too,
+    // which may come down at any moment while the cabinet polls for new bookings).
+    const sheet = page
+      .getByRole('dialog', { name: 'Новая запись' })
+      .and(page.locator(':not([data-type])'))
     await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
     await sheet.getByLabel('Имя').fill('E2E Гость')
     await sheet.getByLabel('Телефон').fill(randomClientPhone())
