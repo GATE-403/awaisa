@@ -2902,3 +2902,14 @@
 .grid .nowLabel {
   background: var(--color-danger-strong);
 }
+
+/* ——— Weak devices ———
+   The edge fade gives every card two scroll-driven animations — a compositor layer each, a
+   hundred on a busy day. Phones and tablets skip that decoration (and the landing of a mark,
+   which shares the animation list); with a mouse it stays. */
+@media (pointer: coarse) {
+  :root .grid[data-layout] .booking,
+  :root .grid[data-layout] .booking[data-just-marked] {
+    animation: none;
+  }
+}
