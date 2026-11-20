@@ -2,6 +2,7 @@
 
 import { ContextMenu } from '@awaisa/ui/ContextMenu'
 import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
+import type { IconProps } from '@phosphor-icons/react'
 import {
   ArrowDown,
   ArrowLeft,
@@ -13,15 +14,19 @@ import {
   CaretUp,
   ChatText,
   Check,
+  CheckCircle,
   CircleDashed,
   Clock,
+  CreditCard,
+  HourglassMedium,
   Minus,
   Plus,
-  Timer,
+  Prohibit,
+  UserMinus,
   X,
-  XCircle,
 } from '@phosphor-icons/react/ssr'
 import {
+  type ComponentType,
   type CSSProperties,
   Fragment,
   type MouseEvent,
@@ -103,14 +108,22 @@ type Hover = { specialistId: string; minutes: number }
 
 type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
 
-// A visit's state as a glyph, never a bare dot: to mark — a dashed circle waiting for its tick;
-// came — a tick; did not come — a crossed circle; under way — a timer.
-const StateGlyph = ({ tone }: { tone: BlockTone }) => {
-  if (tone === 'warning') return <CircleDashed weight='bold' aria-hidden />
-  if (tone === 'success') return <Check weight='bold' aria-hidden />
-  if (tone === 'danger') return <XCircle weight='bold' aria-hidden />
-  if (tone === 'accent') return <Timer weight='bold' aria-hidden />
-  return null
+// A visit's state as its own glyph, never a bare dot: waiting — a clock; under way — an
+// hourglass; ended unmarked — a dashed circle, a tick still to be put; came — a ticked circle;
+// did not come — a person taken away; cancelled — a struck circle; deposit not paid — a card.
+const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
+  Ждём: Clock,
+  Сейчас: HourglassMedium,
+  Отметить: CircleDashed,
+  Пришёл: CheckCircle,
+  'Не пришёл': UserMinus,
+  Отменена: Prohibit,
+  'Ждёт оплату': CreditCard,
+}
+
+const StateGlyph = ({ label }: { label: string }) => {
+  const Glyph = STATE_GLYPHS[label]
+  return Glyph ? <Glyph weight='bold' aria-hidden /> : null
 }
 
 // What a visit needs from the salon right now, read at a glance from the first chip.
@@ -1367,7 +1380,7 @@ export const DayCalendar = ({
                              for the client's name, the lane's other cards carry the face. */}
                               {state.tone !== 'plain' && !isTimeline && (
                                 <span className={styles.stateGlyph} data-tone={state.tone}>
-                                  <StateGlyph tone={state.tone} />
+                                  <StateGlyph label={state.label} />
                                 </span>
                               )}
                               <span className={styles.blockTitle}>{booking.customerName}</span>
@@ -1381,7 +1394,7 @@ export const DayCalendar = ({
                                 <span className={styles.rangeEnd}>–{end}</span>
                               </span>
                               <span className={styles.blockState} data-tone={state.tone}>
-                                <StateGlyph tone={state.tone} />
+                                <StateGlyph label={state.label} />
                                 {state.label}
                               </span>
                             </span>
