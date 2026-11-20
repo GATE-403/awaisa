@@ -30,10 +30,12 @@ import {
   type CSSProperties,
   Fragment,
   type MouseEvent,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
@@ -105,6 +107,60 @@ interface DayCalendarProps {
 }
 
 type Hover = { specialistId: string; minutes: number }
+
+// Where the pointer hovers, outside React state: a pointer crossing slots used to re-render the
+// whole day (every card) on each slot. Only the one lane's time cursor subscribes to it now.
+type HoverStore = {
+  get: () => Hover | null
+  set: (next: Hover | null) => void
+  subscribe: (onChange: () => void) => () => void
+}
+
+const createHoverStore = (): HoverStore => {
+  let value: Hover | null = null
+  const listeners = new Set<() => void>()
+  return {
+    get: () => value,
+    set: (next) => {
+      if (
+        next === value ||
+        (next &&
+          value &&
+          next.specialistId === value.specialistId &&
+          next.minutes === value.minutes)
+      ) {
+        return
+      }
+      value = next
+      for (const listener of listeners) listener()
+    },
+    subscribe: (onChange) => {
+      listeners.add(onChange)
+      return () => {
+        listeners.delete(onChange)
+      }
+    },
+  }
+}
+
+interface SlotCursorProps {
+  store: HoverStore
+  specialistId: string
+  render: (minutes: number) => ReactNode
+}
+
+// One lane's time cursor: it alone re-renders as the pointer moves through that lane.
+const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
+  const minutes = useSyncExternalStore(
+    store.subscribe,
+    () => {
+      const hover = store.get()
+      return hover?.specialistId === specialistId ? hover.minutes : null
+    },
+    () => null,
+  )
+  return minutes === null ? null : render(minutes)
+}
 
 type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
 
@@ -239,7 +295,7 @@ export const DayCalendar = ({
   onCreateBooking,
   onMoveBooking,
 }: DayCalendarProps) => {
-  const [hover, setHover] = useState<Hover | null>(null)
+  const [hoverStore] = useState(createHoverStore)
   // A right click opens the visit's menu with a mouse; on touch screens a long press drags.
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
   // What the right click landed on: a visit, or a free spot in a master's lane.
@@ -1135,7 +1191,7 @@ export const DayCalendar = ({
                 }
                 aria-label={specialist.name}
                 data-specialist-id={specialist.id}
-                onPointerLeave={() => setHover(null)}
+                onPointerLeave={() => hoverStore.set(null)}
               >
                 <button
                   type='button'
@@ -1148,13 +1204,11 @@ export const DayCalendar = ({
                   onPointerMove={(event) => {
                     if (event.pointerType !== 'mouse' || drag.dragged) return
                     const minutes = minutesAt(event)
-                    if (isTaken(specialist.id, minutes)) {
-                      if (hover) setHover(null)
-                      return
-                    }
-                    if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
-                      setHover({ specialistId: specialist.id, minutes })
-                    }
+                    hoverStore.set(
+                      isTaken(specialist.id, minutes)
+                        ? null
+                        : { specialistId: specialist.id, minutes },
+                    )
                   }}
                 />
                 {fit &&
@@ -1183,37 +1237,42 @@ export const DayCalendar = ({
                       </span>
                     </button>
                   ))}
-                {!drag.dragged && hover?.specialistId === specialist.id && (
-                  <span
-                    className={styles.ghost}
-                    data-narrow={
-                      (isTimeline &&
-                        toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) < 130) ||
-                      undefined
-                    }
-                    style={
-                      isTimeline
-                        ? ({
-                            ...place(hover.minutes, hover.minutes + slotMinutes),
-                            '--free': `${toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) - 4}px`,
-                          } as CSSProperties)
-                        : place(hover.minutes, hover.minutes + slotMinutes)
-                    }
-                    aria-hidden='true'
-                  >
-                    {/* A time cursor, not a card: a thin line in the master's colour where the
+                {!drag.dragged && (
+                  <SlotCursor
+                    store={hoverStore}
+                    specialistId={specialist.id}
+                    render={(hovered) => (
+                      <span
+                        className={styles.ghost}
+                        data-narrow={
+                          (isTimeline && toPx(freeUntil(specialist.id, hovered) - hovered) < 130) ||
+                          undefined
+                        }
+                        style={
+                          isTimeline
+                            ? ({
+                                ...place(hovered, hovered + slotMinutes),
+                                '--free': `${toPx(freeUntil(specialist.id, hovered) - hovered) - 4}px`,
+                              } as CSSProperties)
+                            : place(hovered, hovered + slotMinutes)
+                        }
+                        aria-hidden='true'
+                      >
+                        {/* A time cursor, not a card: a thin line in the master's colour where the
                         visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
-                    <span className={styles.ghostChip}>
-                      <Plus weight='bold' aria-hidden />
-                      {formatClock(hover.minutes)}
-                      {isTimeline && (
-                        <span className={styles.ghostChipWho}>
-                          {face(specialist, styles.cardFace)}
-                          {specialist.name.split(' ')[0]}
+                        <span className={styles.ghostChip}>
+                          <Plus weight='bold' aria-hidden />
+                          {formatClock(hovered)}
+                          {isTimeline && (
+                            <span className={styles.ghostChipWho}>
+                              {face(specialist, styles.cardFace)}
+                              {specialist.name.split(' ')[0]}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                  </span>
+                      </span>
+                    )}
+                  />
                 )}
                 {view.size > 0 &&
                   (() => {
@@ -1255,7 +1314,7 @@ export const DayCalendar = ({
                   !bookings.some((booking) => booking.specialistId === specialist.id) &&
                   !timeOff.some((item) => item.specialistId === specialist.id) &&
                   (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
-                    <span className={styles.laneEmpty} onPointerEnter={() => setHover(null)}>
+                    <span className={styles.laneEmpty} onPointerEnter={() => hoverStore.set(null)}>
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       {dayOf(specialist) === null || specialist.isOnLeave
@@ -1266,7 +1325,7 @@ export const DayCalendar = ({
                     <button
                       type='button'
                       className={styles.laneEmpty}
-                      onPointerEnter={() => setHover(null)}
+                      onPointerEnter={() => hoverStore.set(null)}
                       data-action
                       onClick={() => onCreateBooking(specialist.id, null)}
                     >
@@ -1303,7 +1362,7 @@ export const DayCalendar = ({
                     <div
                       key={item.id}
                       className={styles.timeOff}
-                      onPointerEnter={() => setHover(null)}
+                      onPointerEnter={() => hoverStore.set(null)}
                       style={place(parseClock(item.from), parseClock(item.to))}
                     >
                       <span className={styles.blockTime}>
@@ -1429,7 +1488,7 @@ export const DayCalendar = ({
                           onPointerDown={(event) => drag.handlePointerDown(event, booking)}
                           // The empty-slot preview must not peek out from under a card the pointer
                           // moved onto.
-                          onPointerEnter={() => setHover(null)}
+                          onPointerEnter={() => hoverStore.set(null)}
                           onClick={() => {
                             if (!drag.consumeClick()) onSelectBooking(booking)
                           }}
