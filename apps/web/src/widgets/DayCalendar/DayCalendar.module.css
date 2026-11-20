@@ -3040,3 +3040,10 @@
     white-space: nowrap;
   }
 }
+
+/* Phones: the masters' track stands centred over the centred floating toolbar. */
+@media (max-width: 639px) {
+  :root .viewBar {
+    justify-content: center;
+  }
+}
