@@ -153,3 +153,16 @@
     margin-top: var(--space-3);
   }
 }
+
+/* Wider screens too: the schedule's head line sits close under the cabinet bar. */
+.content:has([data-schedule-board]) {
+  margin-top: var(--space-3);
+}
+
+/* Under the schedule the page keeps a small margin, not the section gap: the day fills the
+   window to that margin and nothing else follows it. */
+@media (min-width: 640px) {
+  .page:has([data-schedule-board]) {
+    padding-bottom: var(--space-4);
+  }
+}
