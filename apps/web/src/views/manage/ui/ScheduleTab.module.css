@@ -305,3 +305,10 @@
     gap: var(--space-2);
   }
 }
+
+/* From 640px the head is one line (day and numbers, then the toolbar): a tight gap to the day. */
+@media (min-width: 640px) {
+  .content {
+    gap: var(--space-3);
+  }
+}
