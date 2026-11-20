@@ -2981,3 +2981,62 @@
 .grid[data-layout="columns"] {
   padding-bottom: var(--foot-lift, 0px);
 }
+
+/* ——— Compact columns on phones ———
+   The hours take 40px instead of 56, the masters' heads a first name and the fact under a 26pt
+   face in 44pt, and a column 140px, so two masters fit side by side on a phone. */
+@media (max-width: 639px) {
+  .grid[data-layout="columns"] {
+    grid-template-columns: 40px repeat(var(--columns), minmax(140px, 1fr));
+  }
+
+  .grid[data-layout="columns"] :is(.corner, .columnHead) {
+    min-height: 44px;
+  }
+
+  .grid[data-layout="columns"] .columnHead {
+    gap: 6px;
+    padding: 4px var(--space-2);
+  }
+
+  :root .grid[data-layout="columns"] .columnHead .face {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .grid[data-layout="columns"] .master {
+    font-size: var(--text-footnote);
+  }
+
+  .grid[data-layout="columns"] .lastName {
+    display: none;
+  }
+
+  .grid[data-layout="columns"] .hour {
+    right: 6px;
+  }
+
+  .toNow[data-layout="columns"][data-side="before"] {
+    top: calc(44px + var(--space-2));
+  }
+}
+
+@media (max-width: 639px) {
+  /* The red time of now fits the 40px hours. */
+  .grid[data-layout="columns"] .axis .nowLabel {
+    right: 2px;
+    padding-inline: 4px;
+  }
+
+  /* On a 140px column the time comes first: the state keeps its glyph, its word goes to screen
+     readers only. */
+  .grid[data-layout="columns"] .stateWord {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

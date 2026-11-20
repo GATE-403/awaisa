@@ -1152,7 +1152,13 @@ export const DayCalendar = ({
                   />
                 </span>
                 <span className={styles.headText}>
-                  <span className={styles.master}>{specialist.name}</span>
+                  <span className={styles.master}>
+                    {specialist.name.split(' ')[0]}
+                    <span className={styles.lastName}>
+                      {specialist.name.split(' ').slice(1).join(' ') &&
+                        ` ${specialist.name.split(' ').slice(1).join(' ')}`}
+                    </span>
+                  </span>
                   <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
                     {roleLine(specialist)}
                   </span>
@@ -1530,7 +1536,7 @@ export const DayCalendar = ({
                               </span>
                               <span className={styles.blockState} data-tone={state.tone}>
                                 <StateGlyph label={state.label} />
-                                {state.label}
+                                <span className={styles.stateWord}>{state.label}</span>
                               </span>
                             </span>
                           )}
