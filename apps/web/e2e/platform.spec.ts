@@ -153,7 +153,11 @@ test.describe('Platform: a new business goes live', () => {
       })
     }).toPass({ timeout: 15000 })
     await page.mouse.click(point.x, point.y)
-    const sheet = page.getByRole('dialog', { name: 'Новая запись' })
+    // The sheet, not the «Новая запись» toast for the client's booking (a dialog of that name too,
+    // which may come down at any moment while the cabinet polls for new bookings).
+    const sheet = page
+      .getByRole('dialog', { name: 'Новая запись' })
+      .and(page.locator(':not([data-type])'))
     await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
     await sheet.getByLabel('Имя').fill('E2E Гость')
     await sheet.getByLabel('Телефон').fill(randomClientPhone())
