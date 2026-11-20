@@ -255,7 +255,7 @@
   pointer-events: none;
 }
 
-.knob[data-today] {
+.knob[data-on-today] {
   background: var(--color-danger-strong);
 }
 
