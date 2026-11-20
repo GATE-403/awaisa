@@ -56,3 +56,72 @@
     transition: none;
   }
 }
+
+/* Dark: the popup is a dark card (the surface, #1C1C1E) drawn with a light hairline, like a
+   macOS popover — the grey elevated fill merged with the grey rows inside it. The arrow carries
+   the same line on its two outer edges. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .popup {
+    background: var(--color-surface);
+    box-shadow:
+      inset 0 0 0 1px var(--color-border),
+      var(--shadow-lg);
+  }
+
+  :root:not([data-theme="light"]) .arrow {
+    border: 0 solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  :root:not([data-theme="light"]) .arrow[data-side="right"] {
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+  }
+
+  :root:not([data-theme="light"]) .arrow[data-side="left"] {
+    border-top-width: 1px;
+    border-right-width: 1px;
+  }
+
+  :root:not([data-theme="light"]) .arrow[data-side="top"] {
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+  }
+
+  :root:not([data-theme="light"]) .arrow[data-side="bottom"] {
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+}
+
+[data-theme="dark"] .popup {
+  background: var(--color-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border),
+    var(--shadow-lg);
+}
+
+[data-theme="dark"] .arrow {
+  border: 0 solid var(--color-border);
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .arrow[data-side="right"] {
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+[data-theme="dark"] .arrow[data-side="left"] {
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+[data-theme="dark"] .arrow[data-side="top"] {
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+[data-theme="dark"] .arrow[data-side="bottom"] {
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
