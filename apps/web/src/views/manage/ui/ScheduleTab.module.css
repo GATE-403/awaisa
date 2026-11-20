@@ -217,3 +217,8 @@
   padding: 0;
   border: none;
 }
+
+/* Wide, the board stands on the window's foot too: no shadow line under it. */
+.panel[data-wide] {
+  box-shadow: none;
+}
