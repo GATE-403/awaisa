@@ -234,3 +234,15 @@
       calc(100% - 28px) 100%;
   }
 }
+
+/* A plain Select in a Settings row opens from anywhere on the row, like iOS: its hit area covers
+   the row that holds it (the row is made the positioning parent). */
+:where(:has(> .trigger[data-variant="plain"])) {
+  position: relative;
+}
+
+.trigger[data-variant="plain"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}

@@ -289,3 +289,13 @@
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
+
+/* A plain Select in a row opens from anywhere on the row: the row, not the control's wrapper, is
+   the box its hit area covers (the kit's Select stretches a ::before over its positioned parent). */
+.row:has([data-variant="plain"]) {
+  position: relative;
+}
+
+.rowControl:has(> [data-variant="plain"]) {
+  position: static;
+}

@@ -1,43 +1,50 @@
-/* The message as a chat bubble: what the client will get, not a grey block of text. */
-.bubble {
-  align-self: flex-start;
-  max-width: 96%;
-  padding: var(--space-3) var(--space-4);
-  border-radius: 20px 20px 20px 6px;
-  background: var(--color-sheet-surface);
+/* The message as plain text, the way the client reads it. */
+.message {
+  padding: var(--space-1) var(--space-4) 0;
+  line-height: var(--text-body-line-height);
+  white-space: pre-line;
   user-select: text;
 }
 
-.message {
-  line-height: var(--text-body-line-height);
-  white-space: pre-line;
-}
-
+/* The link: its own Settings row, the short address in the link colour. */
 .link {
-  margin-top: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
   overflow: hidden;
   color: var(--color-link);
-  font-size: var(--text-footnote);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* «Отправить в WhatsApp» wide, Telegram and copy as the thin-glyph capsule beside it. */
+.linkText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.link svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+/* «Отправить клиентам» and the glyph capsule on one line. */
 .send {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-left: var(--space-4);
 }
 
-.send .primary {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
+.sendLabel {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
 }
 
 .send svg {
-  flex-shrink: 0;
   width: 20px;
   height: 20px;
 }

@@ -1,9 +1,8 @@
 'use client'
 
-import { ButtonLink } from '@awaisa/ui/Button'
 import { Select } from '@awaisa/ui/Select'
 import { useToast } from '@awaisa/ui/Toast'
-import { Copy, TelegramLogo, WhatsappLogo } from '@phosphor-icons/react/ssr'
+import { ArrowUpRight, Copy, TelegramLogo, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { formatClock } from '@/entities/business'
 import type { AdminSchedule, Catalog } from '@/shared/api/types'
@@ -91,7 +90,7 @@ export const ShareWindowsSheet = ({
     ? `Свободное время на «${service.name}» · ${day}`
     : `Свободное время · ${day}`
   const body = [heading, ...lines].join('\n')
-  // Shown in the bubble without the query: «awaisa.kg/kings-barbershop/book».
+  // Shown without the query: «awaisa.kg/kings-barbershop/book».
   const shortLink =
     typeof window === 'undefined' ? `${slug}/book` : `${window.location.host}/${slug}/book`
   const text = `${body}\n\nЗапись онлайн: ${link}`
@@ -139,23 +138,32 @@ export const ShareWindowsSheet = ({
         />
       ) : (
         <>
-          {/* The message as the client will get it: a chat bubble, the link as a short label. */}
-          <section className={styles.bubble} aria-label='Текст сообщения'>
-            <p className={styles.message}>{body}</p>
-            <p className={styles.link}>{shortLink}</p>
+          {/* The message as the client will read it — plain text, no box — then the link on a
+              row of its own, then the ways to send it as one capsule of thin glyphs. */}
+          <p className={styles.message} aria-label='Текст сообщения'>
+            {body}
+          </p>
+          <section className={sheet.list} aria-label='Ссылка на запись'>
+            <a className={sheet.row} href={link} target='_blank' rel='noreferrer'>
+              <span className={sheet.rowLabel}>Ссылка</span>
+              <span className={styles.link}>
+                <span className={styles.linkText}>{shortLink}</span>
+                <ArrowUpRight aria-hidden />
+              </span>
+            </a>
           </section>
-          {/* One way to send that most people use, wide; the rest as thin glyphs beside it. */}
           <div className={styles.send}>
-            <ButtonLink
-              className={styles.primary}
-              href={`https://wa.me/?text=${encodeURIComponent(text)}`}
-              target='_blank'
-              rel='noreferrer'
-            >
-              <WhatsappLogo aria-hidden />
-              Отправить в WhatsApp
-            </ButtonLink>
-            <GlyphGroup label='Другие способы'>
+            <span className={styles.sendLabel}>Отправить клиентам</span>
+            <GlyphGroup label='Отправить клиентам'>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+                target='_blank'
+                rel='noreferrer'
+                title='WhatsApp'
+              >
+                <WhatsappLogo aria-hidden />
+                <span className={styles.srOnly}>WhatsApp</span>
+              </a>
               <a
                 href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(body)}`}
                 target='_blank'
