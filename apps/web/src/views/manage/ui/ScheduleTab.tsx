@@ -463,7 +463,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         </div>
       )}
 
-      <div className={styles.panel} data-wide={isWide || undefined}>
+      <div className={styles.panel} data-wide={isWide || undefined} data-schedule-board>
         <DayStrip
           variant='compact'
           days={days}

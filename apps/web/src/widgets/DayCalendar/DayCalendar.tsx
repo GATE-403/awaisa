@@ -147,7 +147,7 @@ const blockState = (
 }
 
 // Room left under the day before the window's foot.
-const BOTTOM_GAP_PX = 12
+const BOTTOM_GAP_PX = 0
 
 // How much of the page lies under an element: its ancestors' bottom padding, borders and margins,
 // and whatever comes after it further down (siblings beside it are not counted). Fixed and
