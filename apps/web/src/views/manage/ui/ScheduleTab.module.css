@@ -227,7 +227,15 @@
     padding-inline: var(--space-3) 0;
     overflow-x: auto;
     scrollbar-width: none;
-    mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 20px), transparent);
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--space-3);
+  }
+
+  /* The row settles on a capsule's start, so none rests cut in half at the edge. */
+  .dayStatus > section,
+  .dayStatus > section > * {
+    scroll-snap-align: start;
   }
 
   .dayStatus::-webkit-scrollbar {
