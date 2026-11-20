@@ -2976,3 +2976,8 @@
     display: none;
   }
 }
+
+/* The columns' last hour can scroll out from under a bar floating over the day's foot too. */
+.grid[data-layout="columns"] {
+  padding-bottom: var(--foot-lift, 0px);
+}

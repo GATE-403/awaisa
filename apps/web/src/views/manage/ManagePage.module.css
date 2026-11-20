@@ -137,3 +137,11 @@
 .page:has([data-schedule-board][data-wide]) {
   padding-bottom: 0;
 }
+
+/* Phones: the schedule runs to the window's foot under the floating toolbar — the page's own
+   padding there would only push it up. */
+@media (max-width: 639px) {
+  .page:has([data-schedule-board]) {
+    padding-bottom: 0;
+  }
+}
