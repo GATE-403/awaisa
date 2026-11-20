@@ -141,8 +141,17 @@ const settledBox = async (locator: Locator) => {
   return box
 }
 
+// The cabinet's «Новая запись» toasts come down over the top of the page (on phones over the day
+// strip) and pause while the pointer rests on them; a person swipes one away, a test waits them out
+// with the pointer off them.
+const waitForToastsToLeave = async (page: Page) => {
+  await page.mouse.move(0, 0)
+  await expect(page.locator('[role="dialog"][data-type]')).toHaveCount(0, { timeout: 20_000 })
+}
+
 export {
   editStep,
+  waitForToastsToLeave,
   settledBox,
   revealNextSlot,
   API_URL,
