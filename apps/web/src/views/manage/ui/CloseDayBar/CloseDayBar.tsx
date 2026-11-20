@@ -38,8 +38,16 @@ export const CloseDayBar = ({
   if (openHere === 0 && openElsewhere === 0) return null
 
   return (
-    <section className={styles.bar} aria-label='Неотмеченные визиты'>
-      <CircleDashed weight='bold' className={styles.dot} aria-hidden />
+    <section
+      className={styles.bar}
+      aria-label='Неотмеченные визиты'
+      data-glyph-inside={(openHere > 0 && visitsHere.length > 0 && onOpen) || undefined}
+    >
+      {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
+          the capsule's own rounded start. */}
+      {!(openHere > 0 && visitsHere.length > 0 && onOpen) && (
+        <CircleDashed weight='bold' className={styles.dot} aria-hidden />
+      )}
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
@@ -50,6 +58,7 @@ export const CloseDayBar = ({
               className={styles.who}
               trigger={
                 <>
+                  <CircleDashed weight='bold' className={styles.dot} aria-hidden />
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
                     <span className={styles.long}>
