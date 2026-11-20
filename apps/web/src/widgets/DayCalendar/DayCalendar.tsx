@@ -560,7 +560,10 @@ export const DayCalendar = ({
     const measure = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        const covered = box.getBoundingClientRect().bottom - (window.innerHeight - cover)
+        // Under the phone toolbar the masters' track sits 8px over it (the controls keep 12px
+        // from the day's own foot), like one stack of floating bars.
+        const covered =
+          box.getBoundingClientRect().bottom - (window.innerHeight - cover) - (footCover ? 4 : 0)
         const lift = `${Math.max(0, Math.round(covered))}px`
         if (box.style.getPropertyValue('--foot-lift') !== lift) {
           box.style.setProperty('--foot-lift', lift)
@@ -568,10 +571,15 @@ export const DayCalendar = ({
       })
     }
     measure()
+    // The day's own height is fitted after this runs (and again when the bars above change):
+    // measure whenever the box changes size, not only on scroll.
+    const observer = new ResizeObserver(measure)
+    observer.observe(box)
     window.addEventListener('scroll', measure, { passive: true })
     window.addEventListener('resize', measure)
     return () => {
       cancelAnimationFrame(frame)
+      observer.disconnect()
       window.removeEventListener('scroll', measure)
       window.removeEventListener('resize', measure)
       box.style.removeProperty('--foot-lift')
