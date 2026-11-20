@@ -115,6 +115,7 @@ export const Header = () => {
 
   return (
     <header
+      data-site-header
       ref={headerRef}
       className={styles.header}
       data-scrolled={isScrolled || undefined}

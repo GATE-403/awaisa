@@ -85,20 +85,38 @@
 
 .groupHeader {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
   padding: 0 var(--space-4);
 }
 
 .groupLink {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
   padding: 0;
   border: none;
+  white-space: nowrap;
   background: transparent;
   color: var(--color-link);
   font: inherit;
   font-size: var(--text-footnote);
   cursor: pointer;
+}
+
+.groupLink svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* An invisible 44pt target around the small link. */
+.groupLink::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -4px;
 }
 
 .group {

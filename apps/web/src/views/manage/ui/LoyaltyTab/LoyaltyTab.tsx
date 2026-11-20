@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
@@ -73,7 +72,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
 
       <section className={sheet.group} aria-label='Бонусы'>
         <SectionCaption>Бонусы</SectionCaption>
-        <div className={sheet.list}>
+        <div className={styles.list}>
           <label className={sheet.row}>
             <span className={sheet.rowLabel}>Начислять бонусы</span>
             <Switch
@@ -156,10 +155,9 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       <section className={sheet.group} aria-label='Сертификаты'>
         <div className={sheet.groupHeader}>
           <SectionCaption isInset={false}>Сертификаты</SectionCaption>
-          <Button size='sm' variant='secondary' onClick={() => setIsIssuing(true)}>
-            <Plus weight='bold' aria-hidden />
-            Выпустить
-          </Button>
+          <button type='button' className={sheet.groupLink} onClick={() => setIsIssuing(true)}>
+            <Plus weight='bold' aria-hidden /> Выпустить
+          </button>
         </div>
         {data.certificates.length === 0 ? (
           <p className={sheet.groupFooter}>

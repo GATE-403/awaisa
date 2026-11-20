@@ -26,8 +26,8 @@
 
 .description {
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
 .actions {

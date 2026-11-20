@@ -8,6 +8,7 @@ import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { useUpdatesSeen } from '@/shared/lib/hooks/useUpdatesSeen'
+import { rememberUpdatesFrom } from '@/shared/lib/updatesFrom'
 import styles from './CabinetBar.module.css'
 
 interface CabinetBarProps {
@@ -19,6 +20,9 @@ interface CabinetBarProps {
    * row, instead of a large title on the page. */
   nav?: ReactNode
   logoUrl?: string | null
+  /** Where «‹» leads, when not the cabinet's own list or the profile (a page opened from the
+   * cabinet goes back to that business and tab). */
+  back?: { href: string; label: string }
 }
 
 // The cabinet's own window toolbar (macOS 26): back to the list, the business once scrolled, tools.
@@ -28,6 +32,7 @@ export const CabinetBar = ({
   isPublished = true,
   nav,
   logoUrl = null,
+  back,
 }: CabinetBarProps) => {
   const isScrolled = useIsScrolled()
   const { customer } = useSession()
@@ -60,12 +65,12 @@ export const CabinetBar = ({
     >
       <div className={styles.inner}>
         <NextLink
-          href={slug ? '/manage' : '/bookings'}
+          href={back?.href ?? (slug ? '/manage' : '/bookings')}
           className={styles.back}
           aria-label={nav ? 'Все бизнесы' : undefined}
         >
           <CaretLeft weight='bold' aria-hidden />
-          {!nav && (slug ? 'Все бизнесы' : 'Профиль')}
+          {!nav && (back?.label ?? (slug ? 'Все бизнесы' : 'Профиль'))}
         </NextLink>
         {nav ? (
           <h1 className={styles.business}>
@@ -98,6 +103,9 @@ export const CabinetBar = ({
             {/* What changed in Awaisa; a dot until this device has read the newest entry. */}
             <NextLink
               href='/updates'
+              onClick={() =>
+                rememberUpdatesFrom(`${window.location.pathname}${window.location.search}`)
+              }
               className={styles.icon}
               data-unread={hasUnread || undefined}
               aria-label={hasUnread ? 'Что нового — есть обновления' : 'Что нового'}
