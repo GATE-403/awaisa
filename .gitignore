@@ -45,3 +45,4 @@ dist-ux/
 tests/ux/test-results/
 reports/ux/*
 !reports/ux/README.md
+.next-lh/

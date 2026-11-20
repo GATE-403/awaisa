@@ -15,7 +15,6 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
-import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useMyBookings } from '@/views/bookings/model/useMyBookings'
@@ -147,7 +146,6 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
               >
                 {bookings.length === 0 ? (
                   <EmptyState
-                    icon={<Mascot />}
                     title='Запишитесь к мастеру'
                     text='Найдите салон и выберите время — запись появится здесь'
                     action={

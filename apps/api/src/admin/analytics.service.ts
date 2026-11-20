@@ -81,7 +81,11 @@ export class AnalyticsService {
         `SELECT sp."id", sp."name", sp."role", sp."commission_percent" AS "percent",
              COUNT(b."id") FILTER (WHERE ${DONE})::int AS "visits",
              COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
-             COALESCE(SUM(s."duration_minutes") FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes"
+             COALESCE(SUM(s."duration_minutes") FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes",
+             (SELECT COUNT(*) FROM "reviews" r WHERE r."specialist_id" = sp."id"
+                AND r."created_at" >= $2 AND r."created_at" < $3)::int AS "reviews",
+             (SELECT round(avg(r."rating")::numeric, 1) FROM "reviews" r WHERE r."specialist_id" = sp."id"
+                AND r."created_at" >= $2 AND r."created_at" < $3)::float AS "rating"
            FROM "specialists" sp
            LEFT JOIN "bookings" b ON b."specialist_id" = sp."id"
              AND b."starts_at" >= $2 AND b."starts_at" < $3
@@ -192,6 +196,9 @@ export class AnalyticsService {
         role: String(row.role ?? ''),
         visits: toNumber(row.visits),
         revenue: toNumber(row.revenue),
+        // What clients said about this master in the period.
+        reviews: toNumber(row.reviews),
+        rating: row.rating === null ? null : toNumber(row.rating),
         percent: row.percent === null ? null : toNumber(row.percent),
         // What the master is owed for the period: their share of what their visits earned.
         payout:

@@ -159,13 +159,9 @@
   box-shadow: var(--focus-ring);
 }
 
-/* The thread sits on one card like the cabinet's other lists. */
 .thread {
   margin: 0;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  padding: 0;
 }
 
 /* In the reply row: «Изменить» to the right of the place's name. */
@@ -173,14 +169,100 @@
   margin: 0 0 0 auto;
 }
 
+/* The reply typed in the thread beside the place's face, bare like the sign-in's number: no box,
+   no fill, just the words and a round send button once there is something to send. */
+.composer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+/* The ☺ leads the field: its glyph starts where the review's words start, and it is as tall as
+   one line of the field, so the glyph, the words and the place's face share the first line's centre
+   (also when the reply runs to several lines: everything stays with the first line). */
+.composer > button:first-child {
+  height: 34px;
+  margin-left: -5px;
+}
+
+.composerField {
+  flex: 1;
+  min-width: 0;
+  max-height: 240px;
+  padding: 6px 0;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-input);
+  line-height: 1.4;
+  resize: none;
+  field-sizing: content;
+}
+
+.composerField::placeholder {
+  color: var(--color-muted-foreground);
+}
+
+/* No ring around a borderless field (Threads): the caret and the lit send button show focus. */
+.composerField:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.send {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.send:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.send svg {
+  width: 16px;
+  height: 16px;
+}
+
+.send:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* A 44pt target around the 32pt button. */
+.send::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
+/* Not every review was loaded: one quiet line says so under the list. */
+.more {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-align: center;
+}
+
+/* Questions stand on the page like the reviews: hairlines between them, no card. */
 .questions {
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  padding: 0;
   list-style: none;
 }
 
@@ -211,4 +293,530 @@
   font-size: var(--text-body);
   white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+/* «★ 4,2 · 138 отзывов» at the end of the tabs' line: the figure bold, the words muted. */
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  white-space: nowrap;
+}
+
+.rating svg {
+  width: 13px;
+  height: 13px;
+  color: var(--color-rating);
+}
+
+.rating b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* The field with its quick replies under it. */
+.composerWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+/* Quick replies under the focused field: no panel («фон можно убрать»), compact footnote rows
+   with an «insert» glyph and hairlines, the row under the pointer or keyboard lit in the accent:
+   enough to read as choices («не понятно что их можно нажать»). */
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin-left: calc(-1 * var(--space-2));
+}
+
+.suggestion {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Hairlines between rows, inset like Settings, hidden beside the lit row. */
+.suggestion + .suggestion::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: var(--space-2);
+  left: calc(var(--space-2) + 20px);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.suggestion svg {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.suggestionText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion:focus-visible,
+.suggestion:focus {
+  outline: none;
+  box-shadow: none;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+}
+
+.suggestion:focus svg,
+.suggestion:focus::before,
+.suggestion:focus + .suggestion::before {
+  color: inherit;
+  opacity: 0;
+}
+
+.suggestion:focus svg {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .suggestion:hover {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  .suggestion:hover svg {
+    color: inherit;
+  }
+
+  .suggestion:hover::before,
+  .suggestion:hover + .suggestion::before {
+    opacity: 0;
+  }
+}
+
+@media (pointer: coarse) {
+  .suggestion {
+    min-height: 44px;
+  }
+}
+
+/* With the list open the place's face stays beside the field, not in the middle of the list. */
+@media (hover: hover) {
+  .suggestion:hover {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}
+
+@media (pointer: coarse) {
+  .suggestion {
+    min-height: 44px;
+    line-height: 44px;
+  }
+}
+
+/* «Автоответ» beside a reply the job sent, before «Изменить». */
+.autoMark {
+  margin-left: auto;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+}
+
+.autoMark + .replyEdit {
+  margin-left: 0;
+}
+
+/* A reply template in the settings sheet: text with pills, the buttons that insert them under it
+   while it is focused, and (for the automatic reply) how it will read. */
+.templateRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.template {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Grows with the words; long ones wrap instead of running off the edge. No ring around it: the
+   row it sits in lights up instead (a box drawn on every click read as a bug). */
+.templateField {
+  min-height: 24px;
+  color: var(--color-foreground);
+  font-size: var(--text-input);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  outline: none;
+  cursor: text;
+}
+
+.templateField:focus,
+.templateField:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.templateField:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-muted-foreground);
+}
+
+/* «Имя клиента», «Мастер», «Услуга» inside the text: an accent-tinted capsule, removed whole. */
+.pill {
+  display: inline-block;
+  margin: 0 1px;
+  padding: 0 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font-size: 0.9em;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+  white-space: nowrap;
+  user-select: all;
+}
+
+.tokens {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.template:focus-within .tokens {
+  display: flex;
+}
+
+.tokenButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.tokenButton svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-link);
+}
+
+.templatePreview {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.templatePreview::before {
+  content: "Например: ";
+}
+
+.quickRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The row being typed in is lit like a selected Settings row (for a click and for Tab alike:
+   an editable field is always «focus-visible», so a ring would show on every click); a mouse over
+   a row shows it is editable. */
+.quickRow:focus-within,
+.templateRow:focus-within {
+  background: var(--color-fill);
+}
+
+@media (hover: hover) {
+  .quickRow:hover,
+  .templateRow:hover {
+    background: color-mix(in srgb, var(--color-fill) 60%, transparent);
+  }
+
+  .tokenButton:hover {
+    background: color-mix(in srgb, var(--color-fill) 60%, var(--color-foreground) 8%);
+  }
+
+  .quickRemove:hover {
+    color: var(--color-danger-text);
+  }
+}
+
+.quickRemove {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: calc(-1 * var(--space-3)) 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.quickRemove svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* `button.` outweighs the sheet's own `.row`, which spreads its children to both edges. */
+button.quickAdd {
+  justify-content: flex-start;
+  gap: var(--space-2);
+  color: var(--color-link);
+}
+
+.quickAdd svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* «Ответить всем» in the header's glyph capsule: how many quiet good ratings wait, as a small
+   accent count on the glyph's corner, like a badge on a toolbar button. */
+.glyphCount {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  z-index: 1;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  /* A ring of the page colour parts it from the glyph and the capsule. */
+  box-shadow: 0 0 0 2px var(--color-background);
+}
+
+.followUpAction {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+/* A 44pt target around the small links. */
+.followUpAction::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
+}
+
+.followUpAction:focus-visible {
+  outline: none;
+  border-radius: var(--radius-full);
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .followUpAction:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Under a poor review: settle it with the person, then mark it. */
+.followUp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-1);
+}
+
+.followUpAction svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Settled: the words in the label colour (green text fails contrast), the tick in green. */
+.followUpAction[aria-pressed="true"] {
+  color: var(--color-foreground);
+}
+
+.followUpAction[aria-pressed="true"] svg {
+  color: var(--color-success);
+}
+
+/* «Написать клиенту»: the apology as plain text in its group. */
+.message {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-input);
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.message:focus-visible {
+  outline: none;
+  box-shadow: inset var(--focus-ring);
+}
+
+/* One wide accent capsule and the other ways beside it, like a visit's inspector on phones. */
+.contactActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.contactPrimary {
+  flex: 1;
+  gap: var(--space-2);
+}
+
+.contactPrimary svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* The tabs, the rating and the glyphs stay in reach while the feed scrolls: pinned under the
+   cabinet bar (its bottom edge is `--toast-top`), on the page colour so reviews never show
+   through. */
+.toolbar {
+  position: sticky;
+  top: var(--toast-top, 0px);
+  z-index: 20;
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-4));
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-background);
+}
+
+/* Pinned: the page colour and a hairline across the whole window, not a box as wide as the
+   column. Two spread shadows draw them (the page colour on top, the hairline peeking 0.5px under
+   it) and the clip keeps them to the toolbar's height; shadows never widen the page. Phones: the
+   toolbar already spans the screen, a plain hairline is enough. */
+.toolbar[data-stuck] {
+  box-shadow: 0 0.5px 0 var(--color-border);
+}
+
+/* The clip would also cut the glyphs floating at a phone's foot, so only where they stay here. */
+@media (min-width: 640px) {
+  .toolbar[data-stuck] {
+    box-shadow:
+      0 0 0 100vmax var(--color-background),
+      0 0.5px 0 100vmax var(--color-border);
+    clip-path: inset(0 -100vmax -1px);
+  }
+}
+
+.headerTools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Phones: the header is the tabs alone, scrolling sideways; the glyphs float at the foot and the
+   rating stays on wider screens (and on the place's page), so the header is one line, not three. */
+@media (max-width: 639px) {
+  .toolbar > header {
+    flex-wrap: nowrap;
+  }
+
+  .toolbar > header > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .rating {
+    display: none;
+  }
+
+  /* The glyphs float over the window's foot in the material, like the schedule's toolbar, so
+     the pinned header is the tabs alone and they scroll the whole width. */
+  .headerTools:has([role="group"]) {
+    position: fixed;
+    /* In the corner: the centre belongs to «Ещё N отзывов» on the list's fade. */
+    right: var(--space-4);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    z-index: 40;
+    width: max-content;
+    padding: var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-material);
+    backdrop-filter: var(--blur-material);
+    box-shadow:
+      inset 0 0 0 0.5px var(--color-material-border),
+      var(--shadow-material),
+      var(--shadow-lg);
+  }
+
+  .headerTools [role="group"] {
+    padding: 0;
+    background: transparent;
+  }
+
+  .headerTools [role="group"] :is(button, a) {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* The last review scrolls out from under the floating capsule. */
+  .page {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+.thread [data-reply]:has(.composer) {
+  align-items: start;
+}
+
+.thread [data-reply]:has(.composer) > :first-child {
+  margin-top: 1px;
 }

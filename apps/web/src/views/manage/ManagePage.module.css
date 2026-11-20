@@ -35,6 +35,9 @@
   width: 100%;
   min-width: 0;
   max-width: 840px;
+  /* One centred column: pressed to the left of a wide window, its centred empty states read as
+     off-centre («почему заглушка не по центру»). */
+  margin-inline: auto;
 }
 
 .main[data-wide] {

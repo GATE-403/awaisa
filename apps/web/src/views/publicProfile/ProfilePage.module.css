@@ -1,4 +1,7 @@
 .page {
+  /* As tall as the skeleton before it (a screen), so a short profile does not pull the footer
+     up into view when it streams in (Lighthouse layout shift 0.22 on phones). */
+  min-height: 100svh;
   padding: 0 0 var(--section-gap);
   /* A soft wash of the profile's colour behind the head, fading into the page. */
   background: radial-gradient(

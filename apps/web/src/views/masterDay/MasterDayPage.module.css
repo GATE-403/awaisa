@@ -242,3 +242,37 @@ li + li > .place {
   height: 12px;
   color: var(--color-tertiary-foreground);
 }
+
+/* «Ваши отзывы» under the day: a caption with the average, then the business page's thread. */
+.reviews {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-6);
+}
+
+.reviewsCaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.reviewsScore {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.reviewsScore svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-rating);
+}
+
+.reviewList {
+  margin: 0;
+  padding: 0;
+}

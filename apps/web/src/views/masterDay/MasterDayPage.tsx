@@ -21,6 +21,7 @@ import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './MasterDayPage.module.css'
+import { MasterReviews } from './ui/MasterReviews'
 import { VisitPhotoButton } from './ui/VisitPhotoButton'
 
 interface MasterDayPageProps {
@@ -268,6 +269,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 })}
               </ol>
             )}
+            <MasterReviews slug={slug} businessName={day.business.name} />
           </>
         )}
       </Container>

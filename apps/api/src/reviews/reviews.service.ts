@@ -24,9 +24,12 @@ import { WorkPhotosService } from '../media/work-photos.service.js'
 import { reviewRequestMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { RankingsService } from '../rankings/rankings.service.js'
+import { reviewKeyboard } from '../telegram/review-replies.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { reviewText } from '../telegram/telegram-messages.js'
 import { Review } from './review.entity.js'
+import { ReviewRepliesService } from './review-replies.service.js'
+import { fillReplyTemplate } from './review-reply-text.js'
 import type { CreateReviewInput } from './reviews.schemas.js'
 
 type Access = { token: string | null; signature: string | null; customer: Customer | null }
@@ -46,6 +49,8 @@ type ReviewRow = {
   visitDate?: Date
   customerPhone?: string
   photos?: string[] | null
+  isAutoReply?: boolean
+  resolvedAt?: Date | null
 }
 
 type ReviewerRow = ReviewRow & {
@@ -59,6 +64,8 @@ const REQUEST_AFTER_HOURS = 2
 const REQUEST_WITHIN_HOURS = 24
 const SIGNATURE_LENGTH = 22
 const MAX_REVIEW_PHOTOS = 3
+// Buttons under a review in Telegram: a few quick replies keep the message short.
+const TELEGRAM_QUICK_REPLIES = 3
 
 // Shown publicly as «Айгерим С.»: a first name and an initial, never the full name.
 const toAuthorName = (name: string) => {
@@ -97,6 +104,7 @@ export class ReviewsService {
     private readonly rankings: RankingsService,
     private readonly storage: StorageService,
     private readonly workPhotos: WorkPhotosService,
+    private readonly replies: ReviewRepliesService,
   ) {}
 
   /** The prefix of a reviewer's public key: secret, so the key never gives the phone away. */
@@ -118,7 +126,7 @@ export class ReviewsService {
       `SELECT r."id", r."rating", r."comment", r."author_name" AS "authorName", r."reply",
          r."replied_at" AS "repliedAt", r."created_at" AS "createdAt",
          sp."name" AS "specialistName", s."name" AS "serviceName", r."service_id" AS "serviceId",
-         c."avatar_url" AS "authorAvatarUrl",
+         c."avatar_url" AS "authorAvatarUrl", r."is_auto_reply" AS "isAutoReply", r."resolved_at" AS "resolvedAt",
          COALESCE((SELECT array_agg(rp."url" ORDER BY rp."created_at") FROM "review_photos" rp
            WHERE rp."review_id" = r."id"), '{}') AS "photos",
          bz."slug", bz."name" AS "businessName", bz."cover_url" AS "coverUrl"
@@ -194,9 +202,26 @@ export class ReviewsService {
       [booking.specialistId],
     )
     const view = await this.bookings.getView(bookingId)
+    // A poor rating asks for a person's answer today: the message links straight to it.
+    const answerUrl = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/manage/${view.business.slug}?tab=reviews`
+    // Answered from the chat itself: the place's quick replies (filled with this client's name) as
+    // buttons, «Свой ответ», and the cabinet.
+    const { quickReplies } = await this.replies.getSettings({ id: booking.businessId })
+    const context = {
+      authorName: review.authorName,
+      specialistName: view.specialistName,
+      serviceName: view.serviceName,
+    }
     void this.telegram.notifyBusiness(
       booking.businessId,
-      reviewText(view.business.name, { ...review, specialistName: view.specialistName }),
+      reviewText(view.business.name, { ...review, specialistName: view.specialistName }, answerUrl),
+      reviewKeyboard(
+        review.id,
+        quickReplies
+          .slice(0, TELEGRAM_QUICK_REPLIES)
+          .map((template) => fillReplyTemplate(template, context)),
+        answerUrl,
+      ),
     )
 
     return {
@@ -264,9 +289,22 @@ export class ReviewsService {
   async reply(business: Business, id: string, text: string) {
     const review = await this.reviews.findOneBy({ id, businessId: business.id })
     if (!review) throw new NotFoundException('Отзыв не найден')
-    await this.reviews.update({ id }, { reply: text || null, repliedAt: text ? new Date() : null })
+    await this.reviews.update(
+      { id },
+      { reply: text || null, repliedAt: text ? new Date() : null, isAutoReply: false },
+    )
 
     return { id, reply: text || null }
+  }
+
+  /** «Решено»: the owner has settled a poor review with the client (or takes the mark back). */
+  async setResolved(business: Business, id: string, isResolved: boolean) {
+    const review = await this.reviews.findOneBy({ id, businessId: business.id })
+    if (!review) throw new NotFoundException('Отзыв не найден')
+    const resolvedAt = isResolved ? new Date() : null
+    await this.reviews.update({ id }, { resolvedAt })
+
+    return { id, resolvedAt: resolvedAt?.toISOString() ?? null }
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
@@ -321,7 +359,10 @@ export class ReviewsService {
       `SELECT COUNT(*)::int AS "count", COALESCE(round(avg("rating")::numeric, 1), 0)::float AS "average",
          COUNT(*) FILTER (WHERE "rating" = 5)::int AS "r5", COUNT(*) FILTER (WHERE "rating" = 4)::int AS "r4",
          COUNT(*) FILTER (WHERE "rating" = 3)::int AS "r3", COUNT(*) FILTER (WHERE "rating" = 2)::int AS "r2",
-         COUNT(*) FILTER (WHERE "rating" = 1)::int AS "r1"
+         COUNT(*) FILTER (WHERE "rating" = 1)::int AS "r1",
+         COUNT(*) FILTER (WHERE "reply" IS NULL)::int AS "unanswered",
+         COUNT(*) FILTER (WHERE "reply" IS NULL AND "comment" = '' AND "rating" = 5)::int AS "quietFive",
+         COUNT(*) FILTER (WHERE "reply" IS NULL AND "comment" = '' AND "rating" >= 4)::int AS "quietFour"
        FROM "reviews" WHERE "business_id" = $1${byService}`,
       params,
     )) as Record<string, number>[]
@@ -330,7 +371,7 @@ export class ReviewsService {
          r."replied_at" AS "repliedAt", r."created_at" AS "createdAt",
          sp."name" AS "specialistName", s."name" AS "serviceName", r."service_id" AS "serviceId",
          b."starts_at" AS "visitDate", b."customer_phone" AS "customerPhone",
-         c."avatar_url" AS "authorAvatarUrl",
+         c."avatar_url" AS "authorAvatarUrl", r."is_auto_reply" AS "isAutoReply", r."resolved_at" AS "resolvedAt",
          COALESCE((SELECT array_agg(rp."url" ORDER BY rp."created_at") FROM "review_photos" rp
            WHERE rp."review_id" = r."id"), '{}') AS "photos"
        FROM "reviews" r
@@ -342,8 +383,15 @@ export class ReviewsService {
          serviceId
            ? ' AND r."service_id" = $3 AND ($4::text IS NULL OR r."specialist_id" = $4)'
            : ''
+       }${
+         // The cabinet answers reviews: besides the latest ones it gets older ones still waiting
+         // for a reply, up to the same number again, so «Без ответа» is never cut to a handful.
+         isManage
+           ? ` AND (r."reply" IS NULL OR r."id" IN (SELECT "id" FROM "reviews"
+               WHERE "business_id" = $1 ORDER BY "created_at" DESC LIMIT $2))`
+           : ''
        }
-       ORDER BY r."created_at" DESC LIMIT $2`,
+       ORDER BY r."created_at" DESC LIMIT ${isManage ? '$2 * 2' : '$2'}`,
       serviceId ? [business.id, limit, serviceId, specialistId ?? null] : [business.id, limit],
     )) as ReviewRow[]
 
@@ -351,6 +399,15 @@ export class ReviewsService {
       count: totals?.count ?? 0,
       average: totals?.average ?? 0,
       distribution: [5, 4, 3, 2, 1].map((stars) => ({ stars, count: totals?.[`r${stars}`] ?? 0 })),
+      ...(isManage
+        ? {
+            unanswered: totals?.unanswered ?? 0,
+            quietUnanswered: {
+              fiveStars: totals?.quietFive ?? 0,
+              fourAndUp: totals?.quietFour ?? 0,
+            },
+          }
+        : {}),
       items: rows.map((row) => ({
         ...toView(row, row.customerPhone ? this.reviewerId(row.customerPhone) : null),
         // The platform's three most active clients wear a laurel wreath on their face.
@@ -359,6 +416,8 @@ export class ReviewsService {
           ? {
               customerPhone: row.customerPhone ?? '',
               visitDate: row.visitDate ? new Date(row.visitDate).toISOString() : null,
+              isAutoReply: Boolean(row.isAutoReply),
+              resolvedAt: row.resolvedAt ? new Date(row.resolvedAt).toISOString() : null,
             }
           : {}),
       })),

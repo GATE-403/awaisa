@@ -11,11 +11,22 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, LessThan, Repository } from 'typeorm'
 import { readLoginStartParam } from '../auth/telegram-login.js'
 import { TelegramLoginService } from '../auth/telegram-login.service.js'
+import { CacheService } from '../cache/cache.service.js'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
+import { DEFAULT_QUICK_REPLIES, fillReplyTemplate } from '../reviews/review-reply-text.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
+import { reviewDigestText } from './review-digest.js'
+import {
+  ALREADY_ANSWERED,
+  NOT_YOURS,
+  parseReviewCallback,
+  REPLY_PLACEHOLDER,
+  repliedText,
+  replyPromptText,
+} from './review-replies.js'
 import { TelegramChat } from './telegram-chat.entity.js'
 import { TelegramLinkCode } from './telegram-link-code.entity.js'
 import {
@@ -36,11 +47,20 @@ import {
 type Update = {
   update_id: number
   message?: {
+    message_id?: number
     text?: string
     chat: { id: number }
+    /** A reply to one of the bot's messages (the «write your reply» prompt). */
+    reply_to_message?: { message_id: number }
     from?: { id?: number; username?: string; first_name?: string }
     /** «Поделиться номером»: `user_id` is whose number it is (a forwarded contact differs). */
     contact?: { phone_number: string; user_id?: number }
+  }
+  /** A press on an inline button (a quick reply or «Свой ответ» under a review). */
+  callback_query?: {
+    id: string
+    data?: string
+    message?: { message_id: number; chat: { id: number } }
   }
 }
 
@@ -50,6 +70,9 @@ const API_URL = 'https://api.telegram.org'
 const LINK_TTL_MS = 15 * 60_000
 const POLL_TIMEOUT_SECONDS = 30
 const RETRY_DELAY_MS = 5_000
+// Messages, and presses on the inline buttons under a review.
+const ALLOWED_UPDATES = ['message', 'callback_query']
+const MAX_REPLY_LENGTH = 1000
 
 // The owners' bot: links chats to a business and sends them what happens there.
 // Without TELEGRAM_BOT_TOKEN messages are logged, like the console SMS driver.
@@ -66,6 +89,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     private readonly clientMessages: ClientMessagesService,
     private readonly telegramLogin: TelegramLoginService,
     private readonly runtime: RuntimeService,
+    private readonly cache: CacheService,
   ) {}
 
   get isAvailable() {
@@ -86,7 +110,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       await this.call('setWebhook', {
         url: webhookUrl,
         secret_token: this.config.get('TELEGRAM_WEBHOOK_SECRET', { infer: true }),
-        allowed_updates: ['message'],
+        allowed_updates: ALLOWED_UPDATES,
       }).catch((error: unknown) => this.logger.warn(`setWebhook failed: ${String(error)}`))
       return
     }
@@ -141,18 +165,27 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
   }
 
   /** Sends to every chat linked to the business; never throws, like `sendSafely` for SMS. */
-  async notifyBusiness(businessId: string, html: string) {
+  async notifyBusiness(businessId: string, html: string, replyMarkup?: ReplyMarkup) {
     try {
       const chats = await this.chats.findBy({ businessId })
-      await Promise.all(chats.map((chat) => this.send(chat.chatId, html)))
+      await Promise.all(chats.map((chat) => this.send(chat.chatId, html, replyMarkup)))
     } catch (error) {
       this.logger.warn(`Telegram notify failed: ${String(error)}`)
     }
   }
 
   async handleUpdate(update: Update) {
+    if (update.callback_query) return this.handleButton(update.callback_query)
     const message = update.message
     if (message?.contact) return this.signInWithContact(message)
+    if (message?.reply_to_message && message.text) {
+      const isReviewReply = await this.replyFromPrompt(
+        String(message.chat.id),
+        message.reply_to_message.message_id,
+        message.text,
+      )
+      if (isReviewReply) return
+    }
     const text = message?.text?.trim()
     if (!message || !text) return
     const chatId = String(message.chat.id)
@@ -227,6 +260,178 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     for (const row of rows) {
       await this.notifyBusiness(row.businessId, unclosedText(row.count))
     }
+  }
+
+  // Mondays at 10:00 Bishkek (04:00 UTC): last week's reviews in numbers, and what still waits.
+  @Cron('0 4 * * 1')
+  async sendReviewDigest() {
+    const rows = (await this.dataSource.query(
+      `WITH linked AS (SELECT DISTINCT "business_id" FROM "telegram_chats")
+       SELECT b."id" AS "businessId", b."name" AS "business", b."slug",
+         COUNT(r."id") FILTER (WHERE r."created_at" >= now() - interval '7 days')::int AS "count",
+         AVG(r."rating") FILTER (WHERE r."created_at" >= now() - interval '7 days') AS "average",
+         AVG(r."rating") FILTER (WHERE r."created_at" >= now() - interval '14 days'
+           AND r."created_at" < now() - interval '7 days') AS "previousAverage",
+         COUNT(r."id") FILTER (WHERE r."reply" IS NULL AND r."rating" <= 3
+           AND r."resolved_at" IS NULL)::int AS "poorOpen",
+         COUNT(r."id") FILTER (WHERE r."reply" IS NULL)::int AS "unanswered",
+         (SELECT json_build_object('name', sp."name", 'average', AVG(w."rating"), 'count', COUNT(*))
+          FROM "reviews" w JOIN "specialists" sp ON sp."id" = w."specialist_id"
+          WHERE w."business_id" = b."id" AND w."created_at" >= now() - interval '7 days'
+          GROUP BY sp."id", sp."name" HAVING COUNT(*) >= 2
+          ORDER BY AVG(w."rating") DESC, COUNT(*) DESC LIMIT 1) AS "bestMaster"
+       FROM "businesses" b
+       JOIN linked l ON l."business_id" = b."id"
+       LEFT JOIN "reviews" r ON r."business_id" = b."id"
+       GROUP BY b."id", b."name", b."slug"`,
+    )) as {
+      businessId: string
+      business: string
+      slug: string
+      count: number
+      average: string | null
+      previousAverage: string | null
+      poorOpen: number
+      unanswered: number
+      bestMaster: { name: string; average: number | string; count: number | string } | null
+    }[]
+    const web = this.config.get('PUBLIC_WEB_URL', { infer: true })
+    for (const row of rows) {
+      const text = reviewDigestText({
+        business: row.business,
+        count: row.count,
+        average: row.average === null ? null : Number(row.average),
+        previousAverage: row.previousAverage === null ? null : Number(row.previousAverage),
+        bestMaster: row.bestMaster
+          ? {
+              name: row.bestMaster.name,
+              average: Number(row.bestMaster.average),
+              count: Number(row.bestMaster.count),
+            }
+          : null,
+        poorOpen: row.poorOpen,
+        unanswered: row.unanswered,
+        cabinetUrl: `${web}/manage/${row.slug}?tab=reviews`,
+      })
+      if (text) await this.notifyBusiness(row.businessId, text)
+    }
+  }
+
+  /** A button under a review: publish a quick reply, or ask for the owner's own words. */
+  private async handleButton(query: NonNullable<Update['callback_query']>) {
+    const action = parseReviewCallback(query.data)
+    const chatId = query.message ? String(query.message.chat.id) : null
+    if (!action || !chatId) return this.answerButton(query.id)
+    const review = await this.reviewForChat(chatId, action.reviewId)
+    if (!review) return this.answerButton(query.id, NOT_YOURS)
+    if (review.reply) return this.answerButton(query.id, ALREADY_ANSWERED)
+
+    if (action.kind === 'own') {
+      await this.answerButton(query.id)
+      const messageId = await this.send(chatId, replyPromptText(review.authorName, review.rating), {
+        force_reply: true,
+        input_field_placeholder: REPLY_PLACEHOLDER,
+      })
+      if (messageId === null) return
+      await this.dataSource.query(
+        `INSERT INTO "telegram_reply_prompts" ("chat_id", "message_id", "review_id")
+         VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+        [chatId, messageId, review.id],
+      )
+      return
+    }
+
+    const [settings] = (await this.dataSource.query(
+      'SELECT "quick_replies" AS "quickReplies" FROM "review_reply_settings" WHERE "business_id" = $1',
+      [review.businessId],
+    )) as { quickReplies: string[] }[]
+    const template = (settings?.quickReplies ?? DEFAULT_QUICK_REPLIES)[action.index]
+    if (!template) return this.answerButton(query.id)
+    const text = fillReplyTemplate(template, review)
+    if (!(await this.saveReply(review.id, text)))
+      return this.answerButton(query.id, ALREADY_ANSWERED)
+    await this.answerButton(query.id, 'Ответ опубликован')
+    // The buttons go, so the same review is not answered twice from an old message.
+    if (query.message) {
+      await this.call('editMessageReplyMarkup', {
+        chat_id: chatId,
+        message_id: query.message.message_id,
+        reply_markup: { inline_keyboard: [] },
+      }).catch(() => undefined)
+    }
+    await this.send(chatId, repliedText(text))
+  }
+
+  /** The owner's reply to the bot's «write your reply» prompt; false when it is not one. */
+  private async replyFromPrompt(chatId: string, promptId: number, text: string) {
+    const [prompt] = (await this.dataSource.query(
+      `SELECT "review_id" AS "reviewId" FROM "telegram_reply_prompts"
+       WHERE "chat_id" = $1 AND "message_id" = $2`,
+      [chatId, promptId],
+    )) as { reviewId: string }[]
+    if (!prompt) return false
+    const review = await this.reviewForChat(chatId, prompt.reviewId)
+    if (!review) return true
+    const reply = text.trim().slice(0, MAX_REPLY_LENGTH)
+    if (!reply) return true
+    if (!(await this.saveReply(review.id, reply))) {
+      await this.send(chatId, ALREADY_ANSWERED)
+      return true
+    }
+    await this.dataSource.query('DELETE FROM "telegram_reply_prompts" WHERE "review_id" = $1', [
+      review.id,
+    ])
+    await this.send(chatId, repliedText(reply))
+    return true
+  }
+
+  /** The review, only when this chat is linked to the business it belongs to. */
+  private async reviewForChat(chatId: string, reviewId: string) {
+    const [review] = (await this.dataSource.query(
+      `SELECT r."id", r."business_id" AS "businessId", r."author_name" AS "authorName",
+         r."rating", r."reply", COALESCE(sp."name", '') AS "specialistName",
+         COALESCE(s."name", '') AS "serviceName"
+       FROM "reviews" r
+       LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
+       LEFT JOIN "services" s ON s."id" = r."service_id"
+       WHERE r."id" = $1 AND EXISTS (
+         SELECT 1 FROM "telegram_chats" c WHERE c."chat_id" = $2 AND c."business_id" = r."business_id"
+       )`,
+      [reviewId, chatId],
+    )) as {
+      id: string
+      businessId: string
+      authorName: string
+      rating: number
+      reply: string | null
+      specialistName: string
+      serviceName: string
+    }[]
+
+    return review ? { ...review, rating: Number(review.rating) } : null
+  }
+
+  /** The owner's words as the review's reply, only if nobody answered meanwhile. */
+  private async saveReply(reviewId: string, text: string) {
+    const result: unknown = await this.dataSource.query(
+      `UPDATE "reviews" SET "reply" = $1, "replied_at" = now(), "is_auto_reply" = false
+       WHERE "id" = $2 AND "reply" IS NULL RETURNING "id"`,
+      [text, reviewId],
+    )
+    const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
+    const isSaved = Array.isArray(rows) && rows.length > 0
+    // The public page shows replies; the bot's writes do not pass the cache interceptor.
+    if (isSaved) await this.cache.bump(['catalog'])
+
+    return isSaved
+  }
+
+  private async answerButton(queryId: string, text?: string) {
+    if (!this.token()) return
+    await this.call('answerCallbackQuery', {
+      callback_query_id: queryId,
+      ...(text ? { text } : {}),
+    }).catch(() => undefined)
   }
 
   private async link(
@@ -325,7 +530,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       const updates = (await this.call('getUpdates', {
         offset,
         timeout: POLL_TIMEOUT_SECONDS,
-        allowed_updates: ['message'],
+        allowed_updates: ALLOWED_UPDATES,
       })) as Update[]
       let next = offset
       for (const update of updates) {
@@ -342,18 +547,24 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
   }
 
+  /** Sends one message; its id (for prompts to be replied to), or null when it was not sent. */
   private async send(chatId: string, html: string, replyMarkup?: ReplyMarkup) {
     if (!this.token()) {
       this.logger.log(`Telegram to ${chatId}: ${html}`)
-      return
+      return null
     }
-    await this.call('sendMessage', {
+    const sent = (await this.call('sendMessage', {
       chat_id: chatId,
       text: html,
       parse_mode: 'HTML',
       link_preview_options: { is_disabled: true },
       ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
-    }).catch((error: unknown) => this.logger.warn(`Telegram send failed: ${String(error)}`))
+    }).catch((error: unknown) => {
+      this.logger.warn(`Telegram send failed: ${String(error)}`)
+      return null
+    })) as { message_id?: number } | null
+
+    return sent?.message_id ?? null
   }
 
   private token() {

@@ -287,6 +287,8 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                       <span className={styles.rowTitle}>{master.name}</span>
                       <span className={styles.rowMeta}>
                         {visits(master.visits)} · {formatMoney(master.revenue)}
+                        {master.rating !== null &&
+                          ` · ★ ${master.rating.toFixed(1).replace('.', ',')} (${master.reviews})`}
                       </span>
                     </span>
                     <span className={styles.rowValue}>

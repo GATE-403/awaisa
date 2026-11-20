@@ -80,9 +80,10 @@
   display: none;
 }
 
-/* Wide screens: a phone-wide side panel docked to the right, the site dimmed beside it —
-   like a drawer over a store page. One column, the same action bar as on phones at its foot. */
-@media (min-width: 1024px) {
+/* Tablets and wider: a phone-wide side panel docked to the right, the site dimmed beside it,
+   like a drawer over a store page. One column, the same action bar as on phones at its foot.
+   Tablets used to get the phone sheet stretched across the screen («выглядит неуклюже»). */
+@media (min-width: 768px) {
   .page {
     /* The phone layout, phone-wide: the same sheet people know from their phones. */
     --page-gutter: 16px;
@@ -511,7 +512,7 @@ label:has([data-checked]) .serviceNote {
   pointer-events: none;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .bar::before {
     position: absolute;
     bottom: calc(-1 * var(--space-4));

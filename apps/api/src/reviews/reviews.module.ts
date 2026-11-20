@@ -7,6 +7,7 @@ import { MediaModule } from '../media/media.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { Review } from './review.entity.js'
+import { ReviewRepliesService } from './review-replies.service.js'
 import { ReviewsController } from './reviews.controller.js'
 import { ReviewsService } from './reviews.service.js'
 
@@ -21,6 +22,6 @@ import { ReviewsService } from './reviews.service.js'
     TelegramModule,
   ],
   controllers: [ReviewsController],
-  providers: [ReviewsService],
+  providers: [ReviewsService, ReviewRepliesService],
 })
 export class ReviewsModule {}

@@ -1,4 +1,4 @@
-import type { AdminBooking, MasterDay, MasterPlace } from '@awaisa/contracts'
+import type { AdminBooking, MasterDay, MasterPlace, MasterReviews } from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -52,6 +52,45 @@ export class MasterController {
        ORDER BY bz."name"`,
       [customer.phone],
     )
+  }
+
+  /** What clients said about this master: their own reviews only, the latest twenty. */
+  @Get('master/:slug/reviews')
+  @UseGuards(MasterGuard)
+  async getReviews(@CurrentMaster() master: Specialist): Promise<MasterReviews> {
+    const [[totals], items] = await Promise.all([
+      this.dataSource.query(
+        `SELECT COUNT(*)::int AS "count", round(avg("rating")::numeric, 1)::float AS "average"
+         FROM "reviews" WHERE "specialist_id" = $1`,
+        [master.id],
+      ) as Promise<{ count: number; average: number | null }[]>,
+      this.dataSource.query(
+        `SELECT r."id", r."author_name" AS "authorName", r."rating", r."comment", r."reply",
+           r."replied_at" AS "repliedAt", COALESCE(s."name", '') AS "serviceName",
+           r."service_id" AS "serviceId", r."created_at" AS "createdAt"
+         FROM "reviews" r LEFT JOIN "services" s ON s."id" = r."service_id"
+         WHERE r."specialist_id" = $1
+         ORDER BY r."created_at" DESC LIMIT 20`,
+        [master.id],
+      ) as Promise<
+        (Omit<MasterReviews['items'][number], 'createdAt' | 'repliedAt' | 'specialistName'> & {
+          createdAt: Date
+          repliedAt: Date | null
+        })[]
+      >,
+    ])
+
+    return {
+      count: totals?.count ?? 0,
+      average: totals?.average ?? null,
+      items: items.map((item) => ({
+        ...item,
+        rating: Number(item.rating),
+        specialistName: master.name,
+        repliedAt: item.repliedAt ? new Date(item.repliedAt).toISOString() : null,
+        createdAt: new Date(item.createdAt).toISOString(),
+      })),
+    }
   }
 
   @Get('master/:slug/day')

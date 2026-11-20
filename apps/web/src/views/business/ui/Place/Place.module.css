@@ -563,15 +563,6 @@
   }
 }
 
-.nothing {
-  padding: var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-  text-align: center;
-}
-
 @media (hover: hover) {
   .serviceRow:hover {
     background: var(--color-fill);

@@ -97,7 +97,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
           </div>
 
           <section aria-labelledby='insights-steps' aria-busy={insights.isLoading}>
-            <SectionCaption id='insights-steps'>
+            <SectionCaption as='h2' id='insights-steps'>
               Шаги
               <span className={styles.count}>{started ? devicesText(started) : null}</span>
             </SectionCaption>
@@ -138,7 +138,9 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
           </section>
 
           <section aria-labelledby='insights-signals'>
-            <SectionCaption id='insights-signals'>Где спотыкаются</SectionCaption>
+            <SectionCaption as='h2' id='insights-signals'>
+              Где спотыкаются
+            </SectionCaption>
             {insights.signals?.items.length ? (
               <ul className={styles.list}>
                 {insights.signals.items.map((item) => (
@@ -166,7 +168,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
           </section>
 
           <section aria-labelledby='insights-devices'>
-            <SectionCaption id='insights-devices'>
+            <SectionCaption as='h2' id='insights-devices'>
               Кто приходит
               <span className={styles.count}>{devices ? devicesText(devices) : null}</span>
             </SectionCaption>
@@ -176,7 +178,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
               <div className={styles.dimensions}>
                 {dimensions.map(({ key, items }) => (
                   <div key={key} className={styles.dimension}>
-                    <h4 className={styles.dimensionTitle}>{SEGMENT_LABELS[key].title}</h4>
+                    <h3 className={styles.dimensionTitle}>{SEGMENT_LABELS[key].title}</h3>
                     <ul className={styles.list}>
                       {items.map((item) => {
                         const share = Math.round((item.sessions / devices) * 1000) / 10

@@ -23,8 +23,8 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  min-height: 60px;
-  padding: var(--space-3) var(--space-4);
+  min-height: 52px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-xl);
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
@@ -77,8 +77,8 @@
 }
 
 .icon svg {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
 }
 
 .content {
@@ -95,9 +95,27 @@
 }
 
 .description {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Phones: a toast is a slim notification over the content it covers, one line of detail (the
+   whole text is what it opens, or already on screen). Large ones covered the cabinet's tabs and
+   the first row («тостеры закрывают сильно пространство»). */
+@media (max-width: 639px) {
+  .toast {
+    min-height: 44px;
+    border-radius: var(--radius-lg);
+  }
+
+  .description {
+    -webkit-line-clamp: 1;
+  }
 }
 
 .action {
