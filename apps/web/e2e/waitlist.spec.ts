@@ -89,7 +89,10 @@ test.describe('Waitlist', () => {
       await expect(waiting.getByText('E2E Ожидание')).toBeVisible()
       await waiting.getByRole('button', { name: 'Записать' }).first().click()
       await expect(
-        page.getByRole('dialog', { name: 'Новая запись' }).getByLabel('Имя'),
+        page
+          .getByRole('dialog', { name: 'Новая запись' })
+          .and(page.locator(':not([data-type])'))
+          .getByLabel('Имя'),
       ).toHaveValue('E2E Ожидание')
       await page.keyboard.press('Escape')
 
