@@ -1,7 +1,7 @@
 'use client'
 
 import { Toast as BaseToast } from '@base-ui/react/toast'
-import type { ReactNode } from 'react'
+import { type PointerEvent, type ReactNode, useRef } from 'react'
 import styles from './Toast.module.css'
 
 type ToastType = 'success' | 'error' | 'info'
@@ -72,8 +72,23 @@ const TOAST_ICONS: Record<ToastType, () => ReactNode> = {
 const isToastType = (value: unknown): value is ToastType =>
   value === 'success' || value === 'error' || value === 'info'
 
+// A tap opens the toast; a swipe only dismisses it. The press point tells them apart (a swiped
+// toast may still get a click when the finger lifts).
+const TAP_SLOP_PX = 8
+
 const ToastList = () => {
   const { toasts, close } = BaseToast.useToastManager()
+  const pressRef = useRef<{ x: number; y: number } | null>(null)
+
+  const handlePointerDown = (event: PointerEvent) => {
+    pressRef.current = { x: event.clientX, y: event.clientY }
+  }
+
+  const isTap = (event: { clientX: number; clientY: number }) => {
+    const press = pressRef.current
+    if (!press) return true
+    return Math.hypot(event.clientX - press.x, event.clientY - press.y) < TAP_SLOP_PX
+  }
 
   return toasts.map((toast) => {
     const Icon = TOAST_ICONS[isToastType(toast.type) ? toast.type : 'info']
@@ -83,14 +98,24 @@ const ToastList = () => {
       <BaseToast.Root
         key={toast.id}
         toast={toast}
-        swipeDirection='up'
+        swipeDirection={['up', 'left', 'right']}
         className={styles.toast}
         data-openable={onOpen ? '' : undefined}
+        onPointerDown={handlePointerDown}
+        onClick={(event) => {
+          // The covering button takes no pointer (Base UI does not start a swipe on a button), so
+          // a tap on the toast lands here; the button stays for the keyboard and screen readers.
+          if (!onOpen || !isTap(event)) return
+          if ((event.target as HTMLElement).closest('button:not([data-open])')) return
+          close(toast.id)
+          onOpen()
+        }}
       >
         {onOpen && (
           <button
             type='button'
             className={styles.open}
+            data-open
             aria-label='Открыть'
             onClick={() => {
               close(toast.id)
