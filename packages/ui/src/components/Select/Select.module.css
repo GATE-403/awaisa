@@ -158,3 +158,79 @@
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--color-foreground) 28%, transparent) transparent;
 }
+
+/* ——— Rows read as a list ———
+   A hairline between options, inset like Settings rows, gone beside the highlighted row so the
+   accent fill stays clean. */
+.item {
+  position: relative;
+}
+
+.item + .item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: var(--space-2);
+  left: var(--space-3);
+  height: 0.5px;
+  background: var(--color-border);
+  pointer-events: none;
+}
+
+.item[data-highlighted]::before,
+.item[data-highlighted] + .item::before {
+  opacity: 0;
+}
+
+/* More above or below: the list fades at an edge while there is more to scroll that way (a scroll
+   timeline drives the fades; a list that fits never fades). */
+@property --select-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --select-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes select-fade-top {
+  from {
+    --select-fade-top: 0px;
+  }
+
+  to {
+    --select-fade-top: 28px;
+  }
+}
+
+@keyframes select-fade-bottom {
+  from {
+    --select-fade-bottom: 28px;
+  }
+
+  to {
+    --select-fade-bottom: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .list {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--select-fade-top),
+      #000 calc(100% - var(--select-fade-bottom)),
+      transparent 100%
+    );
+    animation:
+      select-fade-top linear both,
+      select-fade-bottom linear both;
+    animation-timeline: scroll(self), scroll(self);
+    animation-range:
+      0 28px,
+      calc(100% - 28px) 100%;
+  }
+}
