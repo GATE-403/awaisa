@@ -51,8 +51,12 @@
 }
 
 .popup {
+  /* The list scrolls inside the popup: a column whose list may shrink, capped at about eight
+     rows — a long list (31 days, years) used to grow past the popup's own fill. */
+  display: flex;
+  flex-direction: column;
   min-width: var(--anchor-width);
-  max-height: var(--available-height);
+  max-height: min(var(--available-height), 320px);
   padding: 5px;
   border-radius: var(--radius-md);
   background: var(--color-material);
@@ -73,7 +77,9 @@
 }
 
 .list {
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   outline: none;
 }
 
@@ -132,4 +138,23 @@
 .trigger[data-variant="plain"]:focus-visible {
   border-radius: var(--radius-xs);
   box-shadow: var(--focus-ring);
+}
+
+/* A solid list: where the material's blur is off (Android) the page showed through the options.
+   The highlighted row is its own focus mark — no ring around the accent fill. */
+.popup {
+  background: var(--color-elevated);
+  backdrop-filter: none;
+}
+
+.item:focus,
+.item:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* A thin scrollbar with no track, like macOS overlay bars — the classic grey track read heavy. */
+.list {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-foreground) 28%, transparent) transparent;
 }
