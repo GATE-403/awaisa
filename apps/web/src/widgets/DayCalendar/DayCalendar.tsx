@@ -114,7 +114,7 @@ type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
 const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
   Ждём: Clock,
   Сейчас: HourglassMedium,
-  Отметить: CircleDashed,
+  'Не отмечен': CircleDashed,
   Пришёл: CheckCircle,
   'Не пришёл': UserMinus,
   Отменена: Prohibit,
@@ -139,7 +139,7 @@ const blockState = (
   if (booking.outcome === 'arrived') return { tone: 'success', label: 'Пришёл' }
   if (booking.outcome === 'no_show') return { tone: 'danger', label: 'Не пришёл' }
   if (isPast || (nowMinutes !== null && to <= nowMinutes)) {
-    return { tone: 'warning', label: 'Отметить' }
+    return { tone: 'warning', label: 'Не отмечен' }
   }
   if (nowMinutes !== null && from <= nowMinutes) return { tone: 'accent', label: 'Сейчас' }
 
@@ -1323,25 +1323,46 @@ export const DayCalendar = ({
                     }
                     // One press marks an ended visit arrived, right on its card (shown on hover;
                     // always on touch screens) — the sheet stays for anything more.
-                    const quickMark = state.tone === 'warning' &&
+                    // An ended visit nobody marked asks its question on the card itself: both
+                    // answers as capsules at its foot, always shown (where the phone was).
+                    const isMarkable =
+                      state.tone === 'warning' &&
                       onMarkArrived &&
-                      size !== 'compact' && (
+                      onMarkNoShow &&
+                      (isTimeline ? length >= 190 : size === 'tall')
+                    const quickMark = isMarkable && (
+                      <fieldset
+                        className={styles.markBar}
+                        data-layout={layout}
+                        style={
+                          isTimeline
+                            ? { left: (box.left ?? 0) + 16 }
+                            : { top: (box.top ?? 0) + (box.height ?? 0) - 46 }
+                        }
+                      >
+                        <legend className={styles.srOnlyText}>
+                          Пришёл ли {booking.customerName}?
+                        </legend>
                         <button
                           type='button'
-                          className={styles.quickMark}
-                          style={
-                            isTimeline
-                              ? { left: (box.left ?? 0) + (box.width ?? 0) - 10 }
-                              : { top: (box.top ?? 0) + (box.height ?? 0) - 8, right: 12 }
-                          }
-                          data-layout={layout}
+                          className={styles.markButton}
+                          data-answer='arrived'
                           onClick={() => onMarkArrived(booking)}
                         >
                           <Check weight='bold' aria-hidden />
                           Пришёл
-                          <span className={styles.srOnlyText}>: {booking.customerName}</span>
                         </button>
-                      )
+                        <button
+                          type='button'
+                          className={styles.markButton}
+                          data-answer='no-show'
+                          onClick={() => onMarkNoShow(booking)}
+                        >
+                          <X weight='bold' aria-hidden />
+                          Не пришёл
+                        </button>
+                      </fieldset>
+                    )
                     return (
                       <Fragment key={booking.id}>
                         <button
@@ -1350,6 +1371,7 @@ export const DayCalendar = ({
                           data-cancelled={booking.status === 'cancelled' || undefined}
                           data-outcome={booking.outcome ?? undefined}
                           data-tone={state.tone}
+                          data-markable={isMarkable || undefined}
                           data-ended={
                             isPast || (nowMinutes !== null && to <= nowMinutes) || undefined
                           }

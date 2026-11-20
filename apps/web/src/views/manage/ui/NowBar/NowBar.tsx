@@ -1,7 +1,6 @@
 'use client'
 
-import { Bell, Phone } from '@phosphor-icons/react/ssr'
-import type { CSSProperties } from 'react'
+import { Bell, Clock, HourglassMedium, Phone } from '@phosphor-icons/react/ssr'
 import { useSyncExternalStore } from 'react'
 import { parseClock } from '@/entities/business'
 import type { AdminBooking } from '@/shared/api/types'
@@ -45,9 +44,6 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   })
   const next = live.find((booking) => parseClock(booking.time) > nowMinutes)
   const wait = next ? parseClock(next.time) - nowMinutes : 0
-  const progress = current
-    ? Math.min(1, (nowMinutes - parseClock(current.time)) / current.durationMinutes)
-    : 0
   const left = current
     ? Math.max(0, parseClock(current.time) + current.durationMinutes - nowMinutes)
     : 0
@@ -68,12 +64,12 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           type='button'
           className={styles.pill}
           data-kind='now'
-          style={{ '--progress': progress } as CSSProperties}
           onClick={() => onOpen(current)}
         >
-          <span className={styles.live}>Сейчас</span>
+          <HourglassMedium weight='bold' className={styles.glyph} aria-hidden />
+          <span className={styles.srOnly}>Сейчас: </span>
           <span className={styles.who}>{current.customerName}</span>
-          <span className={styles.meta}>ещё {pluralize(left, ['минута', 'минуты', 'минут'])}</span>
+          <span className={styles.meta}>ещё {left} мин</span>
         </button>
       )}
       {next && (
@@ -84,9 +80,10 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             data-soon={wait <= SOON_MINUTES || undefined}
             onClick={() => onOpen(next)}
           >
-            <span className={styles.label}>Далее</span>
+            <Clock weight='bold' className={styles.glyph} aria-hidden />
+            <span className={styles.srOnly}>Далее: </span>
             <span className={styles.who}>
-              {next.time} · {next.customerName}
+              {next.time} {next.customerName}
             </span>
             <span className={styles.meta}>{formatWait(wait)}</span>
           </button>
