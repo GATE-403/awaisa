@@ -252,3 +252,25 @@
     display: none;
   }
 }
+
+/* With the glyph inside the trigger, the trigger starts at the capsule's own edge: its hover and
+   focus fill is an orange shade that follows the capsule's rounded start, never a grey oval. */
+.bar[data-glyph-inside] {
+  padding-left: 2px;
+}
+
+.bar .who {
+  min-height: 32px;
+  padding: 0 var(--space-2) 0 10px;
+}
+
+.bar .who:focus-visible,
+.bar .who[data-popup-open] {
+  background: color-mix(in srgb, var(--system-orange) 14%, transparent);
+}
+
+@media (hover: hover) {
+  .bar .who:hover {
+    background: color-mix(in srgb, var(--system-orange) 14%, transparent);
+  }
+}
