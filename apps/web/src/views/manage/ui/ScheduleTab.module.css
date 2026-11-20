@@ -295,3 +295,13 @@
     row-gap: 0;
   }
 }
+
+@media (max-width: 639px) {
+  .content > :first-child {
+    min-height: 0;
+  }
+
+  .content {
+    gap: var(--space-2);
+  }
+}
