@@ -286,21 +286,51 @@
   opacity: 0.6;
 }
 
-.bookAgain {
-  align-self: flex-start;
+/* «Записать снова» shares the row with the glyph capsule, as tall as it, pushed to the end. */
+.actions .bookAgain {
+  order: 2;
+  min-height: 40px;
+  margin-left: auto;
+}
+
+.actions .bookAgain svg {
+  width: 16px;
+  height: 16px;
+}
+
+.status {
+  margin-bottom: calc(var(--space-1) * -1);
 }
 
 @media (max-width: 639px) {
-  .status,
-  .bookAgain {
+  .status {
+    order: 0;
     align-self: center;
   }
 
-  .status {
+  /* Phones: the wide capsule is «Записать снова»; the call is back among the glyphs. */
+  .actions .bookAgain {
     order: 0;
+    flex: 1;
+    min-height: var(--control-height-md);
+    margin-left: 0;
   }
 
-  .bookAgain {
-    order: 8;
+  .actions[data-book-again] .callGlyph {
+    display: inline-flex;
+  }
+
+  /* One line beside the four glyphs: the label alone, no glyph. */
+  .actions .bookAgain {
+    padding-inline: var(--space-3);
+    white-space: nowrap;
+  }
+
+  .actions .bookAgain svg {
+    display: none;
+  }
+
+  .status {
+    margin-bottom: 0;
   }
 }
