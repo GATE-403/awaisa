@@ -179,3 +179,24 @@
   font-size: var(--text-footnote);
   font-variant-numeric: tabular-nums;
 }
+
+/* «На всю ширину»: the board leaves the cabinet's column and runs edge to edge of the window
+   (the page's scrollbar left out), square at its sides; «Обычный вид» brings it back. */
+.panel[data-wide] {
+  position: relative;
+  left: 50%;
+  width: calc(100vw - var(--scrollbar-width, 0px));
+  border-radius: 0;
+  translate: -50% 0;
+}
+
+/* The toggle only matters with room to grow: phones already use the whole width. */
+.wideToggle {
+  display: contents;
+}
+
+@media (max-width: 1023px) {
+  .wideToggle {
+    display: none;
+  }
+}
