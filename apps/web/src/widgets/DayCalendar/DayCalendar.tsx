@@ -147,7 +147,40 @@ const blockState = (
 }
 
 // Room left under the day before the window's foot.
-const BOTTOM_GAP_PX = 24
+const BOTTOM_GAP_PX = 12
+
+// How much of the page lies under an element: its ancestors' bottom padding, borders and margins,
+// and whatever comes after it further down (siblings beside it are not counted). Fixed and
+// absolute layers float over the page and take no room.
+const spaceBelow = (element: HTMLElement) => {
+  let total = 0
+  let node: HTMLElement | null = element
+  while (node && node !== document.body) {
+    const bottom = node.getBoundingClientRect().bottom
+    const nodeStyle = getComputedStyle(node)
+    total += Number.parseFloat(nodeStyle.marginBottom) || 0
+    for (let sibling = node.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
+      const style = getComputedStyle(sibling)
+      if (style.position === 'fixed' || style.position === 'absolute' || style.display === 'none') {
+        continue
+      }
+      const rect = sibling.getBoundingClientRect()
+      if (rect.top < bottom - 1) continue
+      total +=
+        rect.height +
+        (Number.parseFloat(style.marginTop) || 0) +
+        (Number.parseFloat(style.marginBottom) || 0)
+    }
+    const parent: HTMLElement | null = node.parentElement
+    if (!parent) break
+    const parentStyle = getComputedStyle(parent)
+    total +=
+      (Number.parseFloat(parentStyle.paddingBottom) || 0) +
+      (Number.parseFloat(parentStyle.borderBottomWidth) || 0)
+    node = parent
+  }
+  return total
+}
 
 type Place = (from: number, to: number) => CSSProperties
 
@@ -423,8 +456,14 @@ export const DayCalendar = ({
     const scroller = scrollerRef.current
     if (!scroller) return
     const fit = () => {
-      const top = scroller.getBoundingClientRect().top + window.scrollY
-      const fill = `${Math.max(420, window.innerHeight - top - BOTTOM_GAP_PX - bottomInset)}px`
+      const box = scroller.getBoundingClientRect()
+      const top = box.top + window.scrollY
+      // Whatever sits under the board (the page's own padding, a footer) would make the page scroll:
+      // the board ends that much above the window's foot, so the page fits the window exactly and
+      // the board takes the rest of its height.
+      const below = spaceBelow(scroller)
+      const height = window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX) - bottomInset
+      const fill = `${Math.max(420, Math.floor(height))}px`
       if (scroller.style.height === fill) return
       scroller.style.height = fill
       scroller.style.maxHeight = fill
