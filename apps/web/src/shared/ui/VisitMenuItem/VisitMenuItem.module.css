@@ -1,0 +1,54 @@
+/* A macOS menu row: one line, regular weight, compact with a mouse (44pt stays on touch). */
+.item {
+  width: min(360px, calc(100vw - 48px));
+}
+
+.item > span:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.time {
+  flex-shrink: 0;
+  width: 3em;
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.name {
+  flex-shrink: 0;
+  font-weight: var(--font-weight-regular);
+}
+
+.meta {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  text-overflow: ellipsis;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .item {
+    min-height: 32px;
+    border-radius: 6px;
+  }
+
+  /* The row under the pointer in the accent, its words in white, as macOS highlights a menu. */
+  .item[data-highlighted] {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  .item[data-highlighted] :is(.time, .meta) {
+    color: color-mix(in srgb, var(--color-primary-foreground) 80%, transparent);
+  }
+}

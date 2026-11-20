@@ -1413,7 +1413,7 @@
   --ink: color-mix(in srgb, var(--tint) 62%, black);
 
   border-radius: 7px;
-  background: color-mix(in srgb, var(--tint) 20%, var(--color-surface));
+  background: color-mix(in srgb, var(--tint) 26%, var(--color-surface));
   box-shadow: none;
   color: var(--ink);
 }
@@ -1465,7 +1465,7 @@
   :root:not([data-theme="light"]) .grid .booking {
     --ink: color-mix(in srgb, var(--tint) 65%, white);
 
-    background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+    background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
   }
 
   :root:not([data-theme="light"]) .grid .booking[data-tone="warning"] .blockState {
@@ -1476,7 +1476,7 @@
 [data-theme="dark"] .grid .booking {
   --ink: color-mix(in srgb, var(--tint) 65%, white);
 
-  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
+  background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
 }
 
 [data-theme="dark"] .grid .booking[data-tone="warning"] .blockState {
@@ -1575,10 +1575,10 @@
   display: none;
 }
 
-/* A card answers the pointer: a deeper fill and a soft lift — ended ones too. */
+/* A card answers the pointer with a deeper fill only — no glow around it. */
 :root .grid .booking:not([data-cancelled]):hover {
-  background: color-mix(in srgb, var(--tint) 30%, var(--color-surface));
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--tint) 22%, transparent);
+  background: color-mix(in srgb, var(--tint) 36%, var(--color-surface));
+  box-shadow: none;
 }
 
 :root .grid .booking[data-ended]:not([data-cancelled]):hover {
@@ -1776,24 +1776,6 @@
 .edgeHint:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
-}
-
-/* A visit picked from the list flashes once where it landed. */
-.booking[data-flash] {
-  animation: flash 1.6s var(--ease-standard);
-}
-
-@keyframes flash {
-  0%,
-  60% {
-    box-shadow:
-      0 0 0 3px var(--tint),
-      0 6px 18px color-mix(in srgb, var(--tint) 40%, transparent);
-  }
-
-  100% {
-    box-shadow: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2000,103 +1982,923 @@
   line-height: 18px;
 }
 
-/* Who is beyond the edge, opened by pointing at the tab (or tabbing into it). */
-.edgeList {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  min-width: 200px;
-  max-height: 240px;
-  padding: var(--space-1);
-  overflow-y: auto;
-  border-radius: var(--radius-lg);
-  background: var(--color-elevated);
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.08),
-    var(--shadow-md);
-  opacity: 0;
-  visibility: hidden;
-  translate: 0 -4px;
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    translate var(--duration-fast) var(--ease-standard),
-    visibility 0s linear var(--duration-fast);
-}
-
-.edgeTab[data-side="after"] .edgeList {
-  right: 0;
-  left: auto;
-}
-
-/* The gap between the tab and the list stays hoverable. */
-.edgeList::before {
-  content: "";
-  position: absolute;
-  inset: -8px 0 auto;
-  height: 8px;
-}
-
-.edgeTab:focus-within .edgeList {
-  opacity: 1;
-  visibility: visible;
-  translate: none;
-  transition-delay: 0s;
-}
-
-.edgeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 36px;
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  text-align: left;
-  cursor: pointer;
-}
-
-.edgeRow:focus-visible {
-  outline: none;
-  background: var(--color-fill);
-}
-
-.edgeRowTime {
-  color: var(--color-muted-foreground);
-  font-variant-numeric: tabular-nums;
-}
-
-.edgeRowName {
-  overflow: hidden;
-  font-weight: var(--font-weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (hover: hover) {
-  .edgeTab:hover .edgeList {
-    opacity: 1;
-    visibility: visible;
-    translate: none;
-    transition-delay: 0s;
-  }
-
   .grid .edgeTab .edgeHint:hover {
-    background: color-mix(in srgb, var(--color-link) 8%, var(--color-elevated));
-  }
-
-  .edgeRow:hover {
-    background: var(--color-fill);
+    background: var(--color-primary-hover);
   }
 }
 
 /* Above the cards of the lanes below, so the left tab's list opens over them. */
 .grid[data-layout="timeline"] .laneTag:has(> .edgeTab) {
   z-index: 6;
+}
+
+/* ——— The day a shade grey, the masters' heads and hours on the panel's white ——— */
+.grid {
+  --day-bg: color-mix(in srgb, var(--color-background) 60%, var(--color-surface));
+}
+
+.grid[data-layout] {
+  background-color: var(--day-bg);
+}
+
+.grid .column,
+.grid[data-layout="timeline"] .column {
+  background: transparent;
+}
+
+/* ——— Edge tabs: filled in the accent so they read as a way to go, not a note ——— */
+.grid .edgeTab .edgeHint {
+  background: var(--color-primary);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  cursor: pointer;
+}
+
+.grid .edgeTab .edgeMore {
+  background: rgb(255 255 255 / 0.24);
+}
+
+.grid .edgeTab .edgeHint:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* On the columns the tabs hang from the masters' row and stand on the view's foot, centred. */
+.grid[data-layout="columns"] .edgeBand {
+  top: var(--view-inset);
+  left: auto;
+  width: 100%;
+  height: var(--view-size, 100%);
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab {
+  position: absolute;
+  right: auto;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab[data-side="before"] {
+  top: 0;
+}
+
+.grid[data-layout="columns"] .edgeBand > .edgeTab[data-side="after"] {
+  top: auto;
+  bottom: 0;
+}
+
+.grid[data-layout="columns"] .edgeTab .edgeHint,
+.grid[data-layout="columns"] .edgeTab .edgeHint[data-side="after"] {
+  padding: 0 var(--space-3);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.grid[data-layout="columns"] .edgeTab[data-side="after"] .edgeHint {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.grid .edgeTab[data-side="after"] .edgeHint {
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+}
+
+/* The columns' cards fade under the masters' row and at the view's foot, like the timeline's. */
+@supports (animation-timeline: view(block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .grid[data-layout="columns"] .booking:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both;
+      animation-timeline: view(block var(--view-inset) 0px), view(block var(--view-inset) 0px);
+      animation-range:
+        entry 0px entry 48px,
+        exit calc(100% - 48px) exit 100%;
+    }
+  }
+}
+
+/* The columns' heads carry the same load ring and fact as the timeline's lanes. */
+.columnHead .laneRing {
+  padding: 2px;
+}
+
+.columnHead .laneRole {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ——— Phones ——— */
+
+/* The lane's first line never reaches under the right tab. */
+.grid[data-layout="timeline"] .laneTag {
+  max-width: calc(var(--view-size, 100vw) - var(--space-3));
+}
+
+.grid[data-layout="timeline"] .laneTag[data-has-after] {
+  max-width: calc(var(--view-size, 100vw) - 96px);
+}
+
+.laneName {
+  flex-shrink: 0;
+}
+
+.laneWho,
+.laneRole {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  /* Phones keep only the fact: «Нурсултан · свободен с 15:00». */
+  .laneRoleName {
+    display: none;
+  }
+
+  .laneTag .laneRole::before {
+    content: "· ";
+  }
+
+  .laneTag .laneRole:has(> .laneRoleName:only-child)::before {
+    content: none;
+  }
+
+  .laneRole:has(> .laneRoleName:only-child) > .laneRoleName {
+    display: inline;
+  }
+
+  /* No zoom capsule (two fingers zoom), so the masters' track has the whole foot; the chosen face
+     stays a face — its name and note would not fit. */
+  .zoomPill {
+    display: none;
+  }
+
+  /* The tab keeps to the time: the list still opens on a tap. */
+  .grid .edgeTab .edgeMore {
+    display: none;
+  }
+
+  .viewBar {
+    right: var(--space-3);
+  }
+}
+
+/* ——— Cards stand apart ———
+   Back-to-back visits used to touch, and a soft fill on a soft fill hid where one ended. A clear
+   3px edge (the day shows through it) parts neighbours and keeps cards off the board's sides, and
+   a hairline of the master's colour draws each card's outline. */
+.grid[data-layout] .booking {
+  border: 4px solid transparent;
+  border-radius: 10px;
+  background-clip: padding-box;
+  outline: 0.5px solid color-mix(in srgb, var(--tint) 45%, transparent);
+  outline-offset: -3.5px;
+}
+
+.grid[data-layout] .booking[data-ended] {
+  outline-color: color-mix(in srgb, var(--tint) 28%, transparent);
+}
+
+/* The live visit is solid already. */
+.grid[data-layout] .booking[data-tone="accent"] {
+  outline-color: transparent;
+}
+
+/* The masters' track may run the board's width (the zoom keeps the right corner), so the chosen
+   face opens into its name and note in full instead of being cut. */
+.viewBar {
+  right: 168px;
+  max-width: none;
+  pointer-events: none;
+}
+
+.viewBar .track {
+  pointer-events: auto;
+}
+
+@media (max-width: 639px) {
+  .viewBar {
+    right: var(--space-3);
+  }
+}
+
+/* ——— One ink per card ———
+   Orange and red words on a blue or violet card clashed: the state word takes the card's own
+   ink, and its colour lives only in its glyph (see «State glyphs» below). */
+:root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+}
+
+/* «✓ Пришёл» on the card speaks in the card's ink too, on a white capsule. */
+.grid .quickMark {
+  color: color-mix(in srgb, var(--tint) 42%, black);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .grid .quickMark {
+    color: color-mix(in srgb, var(--tint) 65%, white);
+  }
+}
+
+[data-theme="dark"] .grid .quickMark {
+  color: color-mix(in srgb, var(--tint) 65%, white);
+}
+
+/* Over a floating bar at the window's foot, the corner controls rise by what it covers. */
+.frame .viewBar,
+.frame .zoomPill,
+.frame .toNow[data-layout="columns"][data-side="after"] {
+  bottom: calc(var(--space-3) + var(--foot-lift, 0px));
+}
+
+/* Room under the last lane for the floating masters' track (and what the bar covers), so the
+   last lane can always scroll out from under it. */
+.grid[data-layout="timeline"] {
+  padding-bottom: calc(64px + var(--foot-lift, 0px));
+}
+
+/* Phones: the track keeps to faces, so every master stays one tap away — a chosen face opening
+   into its name pushed the others out of reach. The chosen one rides the raised knob; its name and
+   «свободен с …» already lead its lane. */
+@media (max-width: 639px) {
+  .viewBar .trackMaster[aria-pressed="true"] .trackLabel {
+    grid-template-columns: 0fr;
+  }
+
+  .viewBar .trackMaster[aria-pressed="true"] .trackLabelInner {
+    padding: 0;
+  }
+}
+
+/* Air around the day: the first and last hours keep 12px from the board's sides (the hour lines
+   move with them), so a visit at opening never sits flush against the edge. */
+.grid[data-layout="timeline"] {
+  padding-inline: var(--space-3);
+  background-position: var(--space-3) 0;
+}
+
+/* The now-line sits on the grid itself (absolute, measured from its padding edge): shift it by
+   the same air as the lanes and hours. */
+.grid[data-layout="timeline"] > .nowLine {
+  margin-left: var(--space-3);
+}
+
+/* ——— Motion ———
+   The day lays itself out: lane after lane (40ms apart), sliding in from the side the day moved
+   to — later days from the right, earlier ones from the left — or rising a little on first open.
+   Only opacity and translate, once, and nothing under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .grid section.column {
+    animation: lane-in 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(min(var(--enter-i, 0), 6) * 40ms);
+  }
+
+  .grid section.column[data-enter="next"] {
+    --enter-x: 20px;
+  }
+
+  .grid section.column[data-enter="prev"] {
+    --enter-x: -20px;
+  }
+
+  .grid section.column[data-enter="first"] {
+    --enter-y: 8px;
+  }
+}
+
+@keyframes lane-in {
+  from {
+    opacity: 0;
+    translate: var(--enter-x, 0) var(--enter-y, 0);
+  }
+}
+
+/* «Пришёл» lands: the card's fill eases into its new tone and the check pops in — one after
+   another down the day when «Все пришли» marked many (45ms apart, eight at most waiting). */
+@media (prefers-reduced-motion: no-preference) {
+  .grid .booking[data-just-marked] {
+    animation: mark-fill 420ms var(--ease-standard) backwards;
+    animation-delay: calc(min(var(--mark-i, 0), 8) * 45ms);
+  }
+
+  .grid .booking[data-just-marked] .blockState svg {
+    animation: mark-pop 420ms var(--ease-spring) backwards;
+    animation-delay: calc(min(var(--mark-i, 0), 8) * 45ms + 80ms);
+  }
+}
+
+@keyframes mark-fill {
+  from {
+    opacity: 0.55;
+    scale: 0.97;
+  }
+}
+
+@keyframes mark-pop {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+/* With the scroll-driven edge fade on, a marked card runs both: the fade and its own landing. */
+@supports (animation-timeline: view(inline)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .grid[data-layout="timeline"] .booking[data-just-marked]:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both,
+        mark-fill 420ms var(--ease-standard) backwards;
+      animation-timeline: view(inline), view(inline), auto;
+      animation-range:
+        entry 0px entry 56px,
+        exit calc(100% - 56px) exit 100%,
+        normal;
+      animation-delay: 0s, 0s, calc(min(var(--mark-i, 0), 8) * 45ms);
+    }
+
+    .grid[data-layout="columns"] .booking[data-just-marked]:not([data-dragging]) {
+      animation:
+        recede-in linear both,
+        recede-out linear both,
+        mark-fill 420ms var(--ease-standard) backwards;
+      animation-timeline:
+        view(block var(--view-inset) 0px), view(block var(--view-inset) 0px), auto;
+      animation-range:
+        entry 0px entry 48px,
+        exit calc(100% - 48px) exit 100%,
+        normal;
+      animation-delay: 0s, 0s, calc(min(var(--mark-i, 0), 8) * 45ms);
+    }
+  }
+}
+
+/* ——— «Найти место» ———
+   Where the chosen service fits: dashed accent blocks over the free stretches, the visits stepping
+   back while the search is on. A tap books that master from the gap's start. */
+.fitSlot {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px dashed color-mix(in srgb, var(--color-primary) 55%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+  overflow: clip;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.fitSlot svg {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  margin-top: 2px;
+}
+
+.fitSlot[data-layout="timeline"] {
+  top: 32px;
+  bottom: 10px;
+}
+
+.grid[data-layout="timeline"] section.column:first-of-type .fitSlot {
+  top: 50px;
+}
+
+.fitSlot[data-layout="columns"] {
+  right: var(--space-1);
+  left: var(--space-1);
+}
+
+.fitSlot:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .fitSlot:hover {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  }
+}
+
+/* The visits step back (their opacity belongs to the edge fade): a paler fill, faded words. */
+:root .grid[data-fit] .booking,
+:root .grid[data-fit] .booking[data-tone] {
+  background: color-mix(in srgb, var(--tint) 8%, var(--color-surface));
+}
+
+.grid[data-fit] .booking > * {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fitSlot {
+    animation: fit-in 260ms var(--ease-standard) backwards;
+  }
+}
+
+@keyframes fit-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ——— The slot preview as a time cursor ———
+   A whole card for a visit that does not exist yet read as a real booking. Now: a 2px line in the
+   master's colour where it would start and one small raised capsule on it. */
+:root .grid .ghost,
+:root .grid[data-layout="timeline"] .ghost {
+  overflow: visible;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+}
+
+:root .grid .ghost::before {
+  content: "";
+  position: absolute;
+  border-radius: var(--radius-full);
+  background: var(--tint);
+}
+
+:root .grid[data-layout="timeline"] .ghost::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+:root .grid[data-layout="columns"] .ghost::before {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+}
+
+.ghostChip {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 var(--space-3) 0 var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow:
+    0 0 0 0.5px rgb(0 0 0 / 0.06),
+    var(--shadow-sm);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.grid[data-layout="columns"] .ghostChip {
+  top: -14px;
+  left: var(--space-2);
+}
+
+.ghostChip svg {
+  width: 12px;
+  height: 12px;
+  color: var(--tint);
+}
+
+.ghostChipWho {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+.grid .ghostChipWho .cardFace {
+  width: 18px;
+  height: 18px;
+  font-size: 8px;
+}
+
+/* ——— No outline on the cards: the clear 3px edge alone parts them ——— */
+:root .grid[data-layout] .booking,
+:root .grid[data-layout] .booking[data-ended] {
+  outline: none;
+}
+
+/* ——— The timeline's grid ———
+   The hours ride a row of their own pinned to the top; each master is a rounded lane of the day's
+   grey on the page's darker grey, parted by a 6px gap instead of a line; hour lines run inside the
+   lanes, with a short tick at each half hour along the lane's foot, like a ruler. */
+.grid[data-layout="timeline"] {
+  grid-template-rows: 28px minmax(124px, 174px);
+  row-gap: 6px;
+  background-color: var(--color-background);
+  background-image: none;
+}
+
+:root .grid[data-layout="timeline"] .axis {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  height: 28px;
+  background: var(--color-background);
+}
+
+:root .grid[data-layout="timeline"] .hour {
+  top: 7px;
+}
+
+:root .grid[data-layout="timeline"] section.column {
+  border: none;
+  border-radius: 14px;
+  background-color: var(--day-bg);
+  background-image:
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 100%,
+    0 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 7px,
+    var(--hour-px) 100%;
+}
+
+/* With the hours above, the first lane is like the others again. */
+:root
+  .grid[data-layout="timeline"]
+  section.column:first-of-type
+  :is(.booking, .timeOff, .ghost, .dropPreview, .fitSlot) {
+  top: 32px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .laneTag {
+  margin-top: 2px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .laneEmpty {
+  margin-top: 4px;
+}
+
+:root .grid[data-layout="timeline"] section.column:first-of-type .edgeBand > .edgeTab {
+  top: 2px;
+}
+
+/* What has passed sits a shade darker, like Calendar: today up to now, a past day whole. */
+.past {
+  position: absolute;
+  z-index: 0;
+  background: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  pointer-events: none;
+}
+
+.grid[data-layout="timeline"] .past {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-radius: 14px 0 0 14px;
+}
+
+.grid[data-layout="columns"] .past {
+  top: 0;
+  right: 0;
+  left: 0;
+}
+
+/* The now-line and its time stay over the pinned hours. */
+.grid[data-layout="timeline"] > .nowLine {
+  z-index: 7;
+}
+
+/* ——— Lines run the whole day ———
+   The hour lines are drawn on the grid itself too, so they carry on through the gaps between
+   lanes and the room under the last one (no breaks, no blank foot); a fainter line marks every
+   half hour, in the lanes and around them alike. */
+.grid[data-layout="timeline"] {
+  --hour-line: var(--color-border);
+  --half-line: color-mix(in srgb, var(--color-border) 40%, transparent);
+
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--space-3) + var(--hour-px) / 2) 0,
+    var(--space-3) 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+}
+
+:root .grid[data-layout="timeline"] section.column {
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 0,
+    0 0;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+}
+
+/* The sticky hours keep their own lines under the labels, so the ruler is not a blank band. */
+:root .grid[data-layout="timeline"] .axis {
+  background-color: var(--color-background);
+  background-image: linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-size: var(--hour-px) 100%;
+  background-repeat: repeat-x;
+}
+
+/* A visit just gone to (an edge tab, the unmarked list) is the active card for a moment: a ring
+   of its master's colour hugging the fill, a deeper fill and its own shadow — then it settles.
+   Drawn with outline and colour, not an animation, so the edge fade's animations never cancel it. */
+:root .grid .booking {
+  transition:
+    outline-color 600ms var(--ease-standard),
+    background-color 600ms var(--ease-standard),
+    scale 120ms var(--ease-standard);
+}
+
+:root .grid .booking[data-flash],
+:root .grid .booking[data-flash][data-tone] {
+  outline: 2px solid var(--tint);
+  outline-offset: -4px;
+  background: color-mix(in srgb, var(--tint) 42%, var(--color-surface));
+  z-index: 4;
+  transition-duration: 150ms;
+}
+
+:root .grid .booking[data-tone="accent"][data-flash] {
+  outline-color: color-mix(in srgb, var(--tint) 60%, black);
+  background: color-mix(in srgb, var(--tint) 92%, black);
+}
+
+/* ——— One layer of lines ———
+   The lines were drawn twice — on each lane and on the gaps — and one translucent line over two
+   greys read as two shades, broken at every gap. Now one layer over the whole day draws them once:
+   above the lanes' fill, under the cards (later in the tree) and the lanes' own labels. */
+:root .grid[data-layout="timeline"],
+:root .grid[data-layout="timeline"] section.column {
+  background-image: none;
+}
+
+.grid[data-layout="timeline"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: var(--space-3);
+  bottom: 0;
+  left: var(--space-3);
+  z-index: 1;
+  background-image:
+    linear-gradient(90deg, var(--half-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hour-line) 1px, transparent 1px);
+  background-position:
+    calc(var(--hour-px) / 2) 0,
+    0 0;
+  background-repeat: repeat-x;
+  background-size:
+    var(--hour-px) 100%,
+    var(--hour-px) 100%;
+  pointer-events: none;
+}
+
+/* Over the lines: the lane's name, the empty lane's capsule, the slot preview. */
+.grid[data-layout="timeline"] :is(.laneTag, .ghost) {
+  z-index: 2;
+}
+
+/* The lanes' own hour lines would draw a second, darker line over the layer's — off on the
+   timeline (the dashed quarter lines from 3× stay). */
+.grid[data-layout="timeline"] .line {
+  display: none;
+}
+
+/* ——— State glyphs instead of dots ———
+   The colour of a state now lives in its glyph (12pt, beside the word in the card's ink); a narrow
+   card keeps the glyph alone. */
+:root .grid .booking .blockState::before,
+:root .grid .booking[data-narrow] .blockState::before {
+  content: none;
+}
+
+:root .grid .booking .blockState {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+:root .grid .booking .blockState svg,
+.stateGlyph svg {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+}
+
+:root .grid .booking[data-narrow] .blockState svg {
+  display: inline-block;
+}
+
+:root .grid .booking[data-tone="warning"] .blockState svg,
+.stateGlyph[data-tone="warning"] {
+  color: var(--system-orange);
+}
+
+:root .grid .booking[data-tone="danger"] .blockState svg,
+.stateGlyph[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.stateGlyph {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.stateGlyph[data-tone="success"] {
+  color: var(--color-success-text, var(--system-green));
+}
+
+/* Cards always above the line layer (z 1): live ones at 2, a cancelled one at 1 — under the live
+   visit that took its time, still over the lines (at 0 the lines crossed it). */
+:root .grid[data-layout] .booking {
+  z-index: 2;
+}
+
+:root .grid[data-layout] .booking[data-cancelled] {
+  z-index: 1;
+}
+
+/* The visit under way shows its progress in its own fill, not a bar: the part already done a
+   shade deeper, from the start edge to now — left to right on the timeline, top down in the
+   columns. Both shades keep the white words AA. */
+:root .grid .booking[data-tone="accent"] {
+  background: linear-gradient(
+    var(--progress-direction, 180deg),
+    color-mix(in srgb, var(--tint) 72%, black) var(--progress, 0%),
+    color-mix(in srgb, var(--tint) 92%, black) var(--progress, 0%)
+  );
+}
+
+:root .grid[data-layout="timeline"] .booking[data-tone="accent"] {
+  --progress-direction: 90deg;
+}
+
+:root .grid .booking[data-tone="accent"] .progressTrack {
+  display: none;
+}
+
+/* ——— The visit under way, settled ———
+   The progress fill is drawn inside the card's clear edge only and never repeats (it spilled
+   into the edge as a dark strip), hovering deepens both shades instead of swapping the gradient
+   for a flat colour (the card blinked), and every line on it is white (the phone faded out). */
+:root .grid .booking[data-tone="accent"],
+:root .grid .booking[data-tone="accent"]:hover {
+  background-clip: padding-box;
+  background-origin: padding-box;
+  background-repeat: no-repeat;
+}
+
+:root .grid .booking[data-tone="accent"]:hover {
+  background-image: linear-gradient(
+    var(--progress-direction, 180deg),
+    color-mix(in srgb, var(--tint) 64%, black) var(--progress, 0%),
+    color-mix(in srgb, var(--tint) 84%, black) var(--progress, 0%)
+  );
+}
+
+:root
+  .grid
+  .booking[data-tone="accent"]
+  :is(
+    .blockTop,
+    .blockRange,
+    .blockState,
+    .blockTitle,
+    .blockService,
+    .blockFooter,
+    .footerNote,
+    .footerTime
+  ) {
+  color: var(--color-primary-foreground);
+  opacity: 1;
+}
+
+:root .grid .booking[data-tone="accent"] .blockFooter {
+  border-top-color: color-mix(in srgb, var(--color-primary-foreground) 30%, transparent);
+}
+
+/* ——— An ended visit nobody marked asks its question ———
+   «Не отмечен» with a dashed circle, and both answers as capsules at the card's foot where the
+   phone was — always shown, so what happened is never a guess. */
+.markBar {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.markBar[data-layout="timeline"] {
+  bottom: 18px;
+}
+
+.markBar[data-layout="columns"] {
+  left: var(--space-3);
+}
+
+.markButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-elevated);
+  box-shadow: 0 0 0 0.5px var(--color-border);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.markButton svg {
+  width: 12px;
+  height: 12px;
+}
+
+.markButton[data-answer="arrived"] svg {
+  color: var(--color-success-text, var(--color-success));
+}
+
+.markButton[data-answer="no-show"] svg {
+  color: var(--color-danger);
+}
+
+/* A 44pt target around each 28pt capsule. */
+.markButton::before {
+  content: "";
+  position: absolute;
+  inset: -8px -2px;
+}
+
+.markButton:active {
+  scale: 0.96;
+}
+
+.markButton:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .markButton:hover {
+    background: var(--color-fill-hover);
+  }
+}
+
+/* The phone gives its line to the question (it stays in the inspector). */
+:root .grid .booking[data-markable] .blockFooter {
+  visibility: hidden;
+}
+
+/* The now-line's time rides with the pinned hours: scrolled down to the lower masters, the red
+   capsule stays at the top of the view instead of leaving a bare line through the ruler. */
+.grid[data-layout="timeline"] > .nowLine .nowLabel {
+  position: sticky;
+  top: 6px;
+  display: block;
+  width: max-content;
+  margin-top: 6px;
+}
+
+/* The time of «now» is small white text: on the system red it read 3.6:1, the strong red keeps
+   it at AA (the line itself stays the system red). */
+.grid .nowLabel {
+  background: var(--color-danger-strong);
 }

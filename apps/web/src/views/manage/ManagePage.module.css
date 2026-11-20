@@ -131,3 +131,9 @@
     display: none;
   }
 }
+
+/* «На всю ширину»: the schedule's board runs to the window's foot as well as its sides — no page
+   padding under it (scoped to this page, which leaves the active tree with the route). */
+.page:has([data-schedule-board][data-wide]) {
+  padding-bottom: 0;
+}

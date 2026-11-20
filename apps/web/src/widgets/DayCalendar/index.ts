@@ -2,3 +2,4 @@
 
 export * from './calendarLayout'
 export * from './DayCalendar'
+export * from './freeGaps'

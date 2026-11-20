@@ -1,3 +1,4 @@
+import type { ScheduleLoad } from '@awaisa/contracts'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -115,6 +116,36 @@ export class AdminService {
     )) as { date: string; count: number }[]
 
     return { total: rows.reduce((sum, row) => sum + row.count, 0), days: rows }
+  }
+
+  // How full each day of a stretch is, for the day strip: booked minutes of confirmed visits
+  // against the open minutes of the business hours times its active masters (masters' own hours
+  // and leaves are left out — the strip shows a share, not a promise).
+  async getLoad(business: Business, from: string, days: number) {
+    return (await this.timeOff.manager.query(
+      `WITH "days" AS (
+         SELECT d::date AS "day" FROM generate_series($2::date, $2::date + ($3::int - 1), interval '1 day') AS d
+       ), "booked" AS (
+         SELECT ("starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date AS "day",
+           SUM(EXTRACT(EPOCH FROM ("ends_at" - "starts_at")) / 60)::int AS "minutes"
+         FROM "bookings"
+         WHERE "business_id" = $1 AND "status" = 'confirmed'
+           AND "starts_at" >= ($2::date - interval '6 hours') AT TIME ZONE 'UTC'
+           AND "starts_at" < ($2::date + $3::int - interval '6 hours') AT TIME ZONE 'UTC'
+         GROUP BY 1
+       ), "masters" AS (
+         SELECT COUNT(*)::int AS "count" FROM "specialists" WHERE "business_id" = $1 AND "is_active"
+       )
+       SELECT to_char("days"."day", 'YYYY-MM-DD') AS "date",
+         COALESCE("booked"."minutes", 0)::int AS "minutes",
+         COALESCE((wh."closes_minutes" - wh."opens_minutes") * "masters"."count", 0)::int AS "capacity"
+       FROM "days" CROSS JOIN "masters"
+       LEFT JOIN "booked" ON "booked"."day" = "days"."day"
+       LEFT JOIN "working_hours" AS wh
+         ON wh."business_id" = $1 AND wh."weekday" = EXTRACT(ISODOW FROM "days"."day")::int - 1
+       ORDER BY 1`,
+      [business.id, from, days],
+    )) as ScheduleLoad
   }
 
   // «Все пришли»: every ended visit of the day without an outcome counts as arrived, paid the

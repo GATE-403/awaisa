@@ -1,9 +1,11 @@
 'use client'
 
-import { type CSSProperties, useId } from 'react'
+import { type CSSProperties, type ReactNode, useId } from 'react'
 import styles from './SegmentedControl.module.css'
 
-type Segment<Value extends string> = { value: Value; label: string }
+// With an `icon` the segment shows only the glyph; its label stays for screen readers and comes up
+// as a tooltip on pointing.
+type Segment<Value extends string> = { value: Value; label: string; icon?: ReactNode }
 
 interface SegmentedControlProps<Value extends string> {
   label: string
@@ -38,7 +40,12 @@ export const SegmentedControl = <Value extends string>({
       <legend className={styles.legend}>{label}</legend>
       <span className={styles.knob} aria-hidden='true' />
       {items.map((item) => (
-        <label key={item.value} className={styles.segment}>
+        <label
+          key={item.value}
+          className={styles.segment}
+          title={item.icon ? item.label : undefined}
+          data-icon={item.icon ? '' : undefined}
+        >
           <input
             type='radio'
             name={name}
@@ -47,7 +54,14 @@ export const SegmentedControl = <Value extends string>({
             onChange={() => onChange(item.value)}
             className={styles.input}
           />
-          {item.label}
+          {item.icon ? (
+            <>
+              {item.icon}
+              <span className={styles.iconLabel}>{item.label}</span>
+            </>
+          ) : (
+            item.label
+          )}
         </label>
       ))}
     </fieldset>

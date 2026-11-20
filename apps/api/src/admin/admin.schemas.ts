@@ -9,6 +9,11 @@ const TIME_SCHEMA = z
 
 const scheduleQuerySchema = z.object({ date: DATE_SCHEMA })
 
+const scheduleLoadQuerySchema = z.object({
+  from: DATE_SCHEMA,
+  days: z.coerce.number().int().min(1).max(42),
+})
+
 const createTimeOffSchema = z
   .object({
     specialistId: z.string().trim().min(1).max(64),
@@ -76,9 +81,12 @@ type StaffBookingInput = z.infer<typeof staffBookingSchema>
 
 type ScheduleQuery = z.infer<typeof scheduleQuerySchema>
 
+type ScheduleLoadQuery = z.infer<typeof scheduleLoadQuerySchema>
+
 type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
 export type {
+  ScheduleLoadQuery,
   AnalyticsQuery,
   CloseDayInput,
   ReopenInput,
@@ -97,6 +105,7 @@ export {
   createTimeOffSchema,
   moveBookingSchema,
   recentBookingsQuerySchema,
+  scheduleLoadQuerySchema,
   scheduleQuerySchema,
   staffBookingSchema,
 }

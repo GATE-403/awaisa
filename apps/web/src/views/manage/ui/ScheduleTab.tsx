@@ -1,36 +1,54 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
+import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { Popover } from '@awaisa/ui/Popover'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
-import { BellRinging, Coffee, Plus } from '@phosphor-icons/react/ssr'
+import {
+  ArrowsInLineHorizontal,
+  ArrowsOutLineHorizontal,
+  BellRinging,
+  Coffee,
+  Columns,
+  MagnifyingGlass,
+  Plus,
+  Rows,
+  ShareNetwork,
+  X,
+} from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { formatPrice, getDaysAround } from '@/entities/booking'
+import { type ReactNode, useEffect, useState } from 'react'
+import { formatDuration, formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   closeDay,
   getManagedWaitlist,
+  getScheduleLoad,
   getUnclosedVisits,
   removeManagedWaitlist,
   reopenVisits,
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
+import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
-import { useScheduleLayout } from '@/views/manage/model/useScheduleLayout'
+import { useScheduleLayout, useScheduleWide } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
+import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
 import { NewBookingDialog } from '@/views/manage/ui/NewBookingDialog/NewBookingDialog'
 import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
+import { ShareWindowsSheet } from '@/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
 import { WaitlistSheet } from '@/views/manage/ui/WaitlistSheet/WaitlistSheet'
 import { type CalendarLayout, DayCalendar } from '@/widgets/DayCalendar'
@@ -53,9 +71,10 @@ type Draft = {
 
 const DAYS_SHOWN = 14
 
-const LAYOUTS: { value: CalendarLayout; label: string }[] = [
-  { value: 'columns', label: 'Колонки' },
-  { value: 'timeline', label: 'Лента' },
+// Glyphs, named in a tooltip: a column per master, or a row per master.
+const LAYOUTS: { value: CalendarLayout; label: string; icon: ReactNode }[] = [
+  { value: 'columns', label: 'Колонки', icon: <Columns aria-hidden /> },
+  { value: 'timeline', label: 'Лента', icon: <Rows aria-hidden /> },
 ]
 
 // «Чт, 19 ноября»: the day in the toolbar's one line.
@@ -69,11 +88,10 @@ const dayTitleFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
-// The «Все пришли» bar's height and its margin over the window's foot.
-const CLOSE_BAR_SPACE_PX = 72
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
+  const { isWide, setWide } = useScheduleWide()
   const [zoom, setZoom] = useState(1)
   // A visit picked from «N визитов прошли без отметки»: the calendar scrolls to it and flashes it.
   const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
@@ -93,6 +111,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const linkedBookingId = searchParams.get('booking')
   const [selectedDay, setSelectedDay] = useState<string | null>(linkedDate)
   const [isClosingTime, setIsClosingTime] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+  const [loads, setLoads] = useState<ReadonlyMap<string, number>>(new Map())
+  // «Найти место»: the service whose gaps light up on the day.
+  const [fitServiceId, setFitServiceId] = useState<string | null>(null)
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [clientPhone, setClientPhone] = useState<string | null>(null)
@@ -103,6 +125,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
   const isPast = date !== null && today !== null && date < today.dayKey
+  const stripFrom = days[0]?.key
+  const stripLength = days.length
   const {
     schedule,
     error,
@@ -126,6 +150,21 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     0,
   )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
+  const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
+  // The selected visit's card on the board, for the inspector to point at.
+  const selectedCard =
+    selected && typeof document !== 'undefined'
+      ? document.querySelector(`[data-booking-id="${selected.id}"]`)
+      : null
+  const fitService = catalog.services.find((service) => service.id === fitServiceId) ?? null
+  const fit = fitService
+    ? {
+        minutes: fitService.durationMinutes,
+        specialistIds: catalog.specialists
+          .filter((master) => master.serviceIds.includes(fitService.id))
+          .map((master) => master.id),
+      }
+    : null
   // The day as a title, its numbers in one line under it with the figures in bold.
   const summary = (
     <>
@@ -154,7 +193,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
-  const isCloseBarShown = hasMasters && !isCloseBarHidden && unclosed.total > 0
   // Who those are: the day's ended visits with no outcome yet, in time order.
   const unmarkedHere = (schedule?.bookings ?? [])
     .filter(
@@ -184,6 +222,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     router.replace(`/manage/${slug}?tab=schedule`, { scroll: false })
   }, [linkedBookingId, schedule, slug])
 
+  // The wide board spans the window minus the page's own scrollbar, measured while it is on.
+  useEffect(() => {
+    if (!isWide) return
+    const root = document.documentElement
+    const measure = () =>
+      root.style.setProperty('--scrollbar-width', `${window.innerWidth - root.clientWidth}px`)
+    measure()
+    window.addEventListener('resize', measure)
+    return () => {
+      window.removeEventListener('resize', measure)
+      root.style.removeProperty('--scrollbar-width')
+    }
+  }, [isWide])
+
   // Re-read after every schedule change: marking a visit may close a day, booking someone in
   // takes them off the waitlist.
   useEffect(() => {
@@ -195,9 +247,21 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     getUnclosedVisits(slug, controller.signal)
       .then(setUnclosed)
       .catch(() => undefined)
+    // How full each day of the strip is (a thin bar under every date).
+    if (stripFrom) {
+      getScheduleLoad(slug, stripFrom, stripLength, controller.signal)
+        .then((rows) =>
+          setLoads(
+            new Map(
+              rows.map((row) => [row.date, row.capacity > 0 ? row.minutes / row.capacity : 0]),
+            ),
+          ),
+        )
+        .catch(() => undefined)
+    }
 
     return () => controller.abort()
-  }, [slug, schedule])
+  }, [slug, schedule, stripFrom, stripLength])
 
   // A waiting client goes straight into the new-booking sheet: their service, name and number,
   // the freed time if they were texted one, their master or the first who does the service.
@@ -305,7 +369,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         }
         actions={
           hasMasters && (
-            <>
+            <div className={styles.toolbar} data-wide>
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -315,22 +379,64 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               />
               {!isPast && (
                 <>
-                  <Button variant='secondary' size='sm' onClick={() => setIsClosingTime(true)}>
-                    <Coffee weight='bold' aria-hidden />
-                    Перерыв
-                  </Button>
+                  {/* Secondary tools as one capsule of thin glyphs (named in tooltips). */}
+                  <GlyphGroup label='Инструменты дня'>
+                    <span className={styles.wideToggle}>
+                      <GlyphButton
+                        icon={
+                          isWide ? (
+                            <ArrowsInLineHorizontal aria-hidden />
+                          ) : (
+                            <ArrowsOutLineHorizontal aria-hidden />
+                          )
+                        }
+                        label={isWide ? 'Обычный вид' : 'На всю ширину'}
+                        aria-pressed={isWide}
+                        onClick={() => setWide(!isWide)}
+                      />
+                    </span>
+                    <GlyphButton
+                      icon={<Coffee aria-hidden />}
+                      label='Перерыв'
+                      onClick={() => setIsClosingTime(true)}
+                    />
+                    <GlyphButton
+                      icon={<ShareNetwork aria-hidden />}
+                      label='Поделиться свободными окнами'
+                      onClick={() => setIsSharing(true)}
+                      disabled={!schedule}
+                    />
+                    <Menu label='Найти место под услугу' trigger={<MagnifyingGlass aria-hidden />}>
+                      {catalog.services
+                        .filter((service) => service.isActive !== false)
+                        .map((service) => (
+                          <MenuItem
+                            key={service.id}
+                            onClick={() => setFitServiceId(service.id)}
+                            icon={
+                              <span className={styles.menuMeta}>
+                                {formatDuration(service.durationMinutes)}
+                              </span>
+                            }
+                          >
+                            {service.name}
+                          </MenuItem>
+                        ))}
+                    </Menu>
+                  </GlyphGroup>
                   <Button
                     size='sm'
+                    className={styles.iconOnPhone}
                     onClick={() =>
                       setDraft({ specialistId: schedule?.specialists[0]?.id ?? '', time: null })
                     }
                   >
                     <Plus weight='bold' aria-hidden />
-                    Новая запись
+                    <span className={styles.buttonLabel}>Новая запись</span>
                   </Button>
                 </>
               )}
-            </>
+            </div>
           )
         }
       />
@@ -344,17 +450,49 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         </div>
       )}
 
-      <div className={styles.panel}>
+      {fitService && !isPast && (
+        // While the gaps for a service are lit, one capsule names it and turns the search off.
+        <div className={styles.fitBar}>
+          <span className={styles.fitText}>
+            Места для «{fitService.name}» · {formatDuration(fitService.durationMinutes)}
+          </span>
+          <Button variant='outline' size='sm' onClick={() => setFitServiceId(null)}>
+            <X weight='bold' aria-hidden />
+            Готово
+          </Button>
+        </div>
+      )}
+
+      <div className={styles.panel} data-wide={isWide || undefined} data-schedule-board>
         <DayStrip
           variant='compact'
           days={days}
           value={date}
           onChange={setSelectedDay}
           marks={marks}
+          loads={loads}
         />
-        {schedule && hasMasters && today && date === today.dayKey && (
-          <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
-        )}
+        {/* One slim row of what needs eyes now: the visit under way, the next one, and the
+            visits left unmarked (the one thing asking for action, in orange). */}
+        <div className={styles.dayStatus}>
+          {schedule && hasMasters && today && date === today.dayKey && (
+            <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
+          )}
+          {hasMasters && !isCloseBarHidden && (
+            <CloseDayBar
+              openHere={openHere}
+              openElsewhere={unclosed.total - openHere}
+              visitsHere={unmarkedHere}
+              onOpen={(booking) => {
+                setFocusedBookingId(null)
+                requestAnimationFrame(() => setFocusedBookingId(booking.id))
+              }}
+              onCloseDay={handleCloseDay}
+              onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
+              onDismiss={() => setIsCloseBarHidden(true)}
+            />
+          )}
+        </div>
         {!schedule && !error && <Skeleton className={styles.skeleton} />}
 
         {schedule && !hasMasters && (
@@ -386,40 +524,62 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
-            bottomInset={isCloseBarShown ? CLOSE_BAR_SPACE_PX : 0}
+            dayKey={schedule.date}
+            fit={isPast ? null : fit}
+            onMarkNoShow={
+              today && date && date <= today.dayKey
+                ? (booking) => void markOutcome(booking.id, { outcome: 'no_show' })
+                : undefined
+            }
+            onCancelBooking={(booking) => void cancelBooking(booking.id)}
+            onSwipeDay={(step) => {
+              const index = days.findIndex((day) => day.key === date)
+              const next = days[index + step]
+              if (next) setSelectedDay(next.key)
+            }}
           />
         )}
       </div>
 
-      {hasMasters && !isCloseBarHidden && (
-        <CloseDayBar
-          openHere={openHere}
-          openElsewhere={unclosed.total - openHere}
-          visitsHere={unmarkedHere}
-          onOpen={(booking) => {
-            setFocusedBookingId(null)
-            requestAnimationFrame(() => setFocusedBookingId(booking.id))
-          }}
-          onCloseDay={handleCloseDay}
-          onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
-          onDismiss={() => setIsCloseBarHidden(true)}
-        />
-      )}
-
-      {selected && (
-        <BookingDetailsDialog
-          slug={slug}
-          key={selected.id}
-          booking={selected}
-          onClose={() => setSelected(null)}
-          onCancel={cancelBooking}
-          onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
-          onOpenClient={(phone) => {
-            setSelected(null)
-            setClientPhone(phone)
-          }}
-        />
-      )}
+      {selected &&
+        // With a mouse the visit opens as an inspector beside its card; on touch screens (or when
+        // the card is not on the board) as a compact sheet.
+        (isFinePointer && selectedCard ? (
+          <Popover
+            open
+            onOpenChange={(open) => {
+              if (!open) setSelected(null)
+            }}
+            anchor={selectedCard}
+            label={`Запись: ${selected.customerName}, ${selected.time}`}
+          >
+            <BookingInspector
+              key={selected.id}
+              slug={slug}
+              booking={selected}
+              onClose={() => setSelected(null)}
+              onCancel={cancelBooking}
+              onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
+              onOpenClient={(phone) => {
+                setSelected(null)
+                setClientPhone(phone)
+              }}
+            />
+          </Popover>
+        ) : (
+          <BookingDetailsDialog
+            slug={slug}
+            key={selected.id}
+            booking={selected}
+            onClose={() => setSelected(null)}
+            onCancel={cancelBooking}
+            onOutcome={today && date && date <= today.dayKey ? markOutcome : undefined}
+            onOpenClient={(phone) => {
+              setSelected(null)
+              setClientPhone(phone)
+            }}
+          />
+        ))}
 
       {clientPhone && (
         <ClientSheet
@@ -451,6 +611,19 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           onBook={handleBookFromWaitlist}
           onRemove={(entry) => void handleRemoveFromWaitlist(entry)}
           onClose={() => setIsWaitlistOpen(false)}
+        />
+      )}
+
+      {isSharing && schedule && (
+        <ShareWindowsSheet
+          slug={slug}
+          schedule={schedule}
+          catalog={catalog}
+          dayHours={dayHours}
+          dayLabel={dayTitle.toLowerCase()}
+          nowMinutes={today && date === today.dayKey ? today.minutes : null}
+          slotMinutes={business.slotMinutes}
+          onClose={() => setIsSharing(false)}
         />
       )}
 

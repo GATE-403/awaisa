@@ -1,9 +1,8 @@
 'use client'
 
-import { Bell, Phone } from '@phosphor-icons/react/ssr'
-import type { CSSProperties } from 'react'
+import { Bell, Clock, HourglassMedium, Phone } from '@phosphor-icons/react/ssr'
 import { useSyncExternalStore } from 'react'
-import { addMinutes, parseClock } from '@/entities/business'
+import { parseClock } from '@/entities/business'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import styles from './NowBar.module.css'
@@ -45,9 +44,6 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   })
   const next = live.find((booking) => parseClock(booking.time) > nowMinutes)
   const wait = next ? parseClock(next.time) - nowMinutes : 0
-  const progress = current
-    ? Math.min(1, (nowMinutes - parseClock(current.time)) / current.durationMinutes)
-    : 0
   const left = current
     ? Math.max(0, parseClock(current.time) + current.durationMinutes - nowMinutes)
     : 0
@@ -60,48 +56,36 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   }
 
   return (
+    // One slim row over the day: who is in the chair and who is next, as capsules that open their
+    // visit — the day's own cards say the rest.
     <section className={styles.bar} aria-label='Сейчас'>
       {current && (
-        <div className={styles.tile} data-kind='now'>
-          <button type='button' className={styles.open} onClick={() => onOpen(current)}>
-            {/* How much of the visit is left, as a ring with the minutes inside. */}
-            <span
-              className={styles.ring}
-              style={{ '--progress': progress } as CSSProperties}
-              role='img'
-              aria-label={`Осталось ${pluralize(left, ['минута', 'минуты', 'минут'])}`}
-            >
-              <span className={styles.ringValue}>{left}</span>
-              <span className={styles.ringUnit}>мин</span>
-            </span>
-            <span className={styles.text}>
-              <span className={styles.caption}>
-                <span className={styles.live}>Сейчас</span>
-                до {addMinutes(current.time, current.durationMinutes)}
-              </span>
-              <span className={styles.who}>{current.customerName}</span>
-              <span className={styles.what}>
-                {current.serviceName} · {current.specialistName}
-              </span>
-            </span>
-          </button>
-        </div>
+        <button
+          type='button'
+          className={styles.pill}
+          data-kind='now'
+          onClick={() => onOpen(current)}
+        >
+          <HourglassMedium weight='bold' className={styles.glyph} aria-hidden />
+          <span className={styles.srOnly}>Сейчас: </span>
+          <span className={styles.who}>{current.customerName}</span>
+          <span className={styles.meta}>ещё {left} мин</span>
+        </button>
       )}
       {next && (
-        <div className={styles.tile} data-soon={wait <= SOON_MINUTES || undefined}>
-          <button type='button' className={styles.open} onClick={() => onOpen(next)}>
-            <span className={styles.text}>
-              <span className={styles.caption}>
-                <span className={styles.label}>Следующий</span>
-                <span className={styles.wait}>{formatWait(wait)}</span>
-              </span>
-              <span className={styles.who}>
-                <span className={styles.time}>{next.time}</span> {next.customerName}
-              </span>
-              <span className={styles.what}>
-                {next.serviceName} · {next.specialistName}
-              </span>
+        <span className={styles.nextWrap}>
+          <button
+            type='button'
+            className={styles.pill}
+            data-soon={wait <= SOON_MINUTES || undefined}
+            onClick={() => onOpen(next)}
+          >
+            <Clock weight='bold' className={styles.glyph} aria-hidden />
+            <span className={styles.srOnly}>Далее: </span>
+            <span className={styles.who}>
+              {next.time} {next.customerName}
             </span>
+            <span className={styles.meta}>{formatWait(wait)}</span>
           </button>
           {next.customerPhone && (
             <a
@@ -110,15 +94,20 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
               aria-label={`Позвонить: ${next.customerName}`}
               title='Позвонить'
             >
-              <Phone weight='fill' aria-hidden />
+              <Phone aria-hidden />
             </a>
           )}
-        </div>
+        </span>
       )}
       {permission === 'default' && (
-        <button type='button' className={styles.notify} onClick={enableNotifications}>
-          <Bell weight='bold' aria-hidden />
-          Уведомлять о записях
+        <button
+          type='button'
+          className={styles.notify}
+          onClick={enableNotifications}
+          title='Уведомлять о новых записях'
+        >
+          <Bell aria-hidden />
+          <span className={styles.srOnly}>Уведомлять о записях</span>
         </button>
       )}
     </section>
