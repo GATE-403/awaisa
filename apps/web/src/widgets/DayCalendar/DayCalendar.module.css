@@ -2783,3 +2783,40 @@
 :root .grid .booking[data-tone="accent"] .progressTrack {
   display: none;
 }
+
+/* ——— The visit under way, settled ———
+   The progress fill is drawn inside the card's clear edge only and never repeats (it spilled
+   into the edge as a dark strip), hovering deepens both shades instead of swapping the gradient
+   for a flat colour (the card blinked), and every line on it is white (the phone faded out). */
+:root .grid .booking[data-tone="accent"],
+:root .grid .booking[data-tone="accent"]:hover {
+  background-clip: padding-box;
+  background-origin: padding-box;
+  background-repeat: no-repeat;
+}
+
+:root .grid .booking[data-tone="accent"]:hover {
+  background-image: linear-gradient(
+    var(--progress-direction, 180deg),
+    color-mix(in srgb, var(--tint) 64%, black) var(--progress, 0%),
+    color-mix(in srgb, var(--tint) 84%, black) var(--progress, 0%)
+  );
+}
+
+:root .grid .booking[data-tone="accent"] :is(
+    .blockTop,
+    .blockRange,
+    .blockState,
+    .blockTitle,
+    .blockService,
+    .blockFooter,
+    .footerNote,
+    .footerTime
+  ) {
+  color: var(--color-primary-foreground);
+  opacity: 1;
+}
+
+:root .grid .booking[data-tone="accent"] .blockFooter {
+  border-top-color: color-mix(in srgb, var(--color-primary-foreground) 30%, transparent);
+}
