@@ -281,3 +281,10 @@
     display: none;
   }
 }
+
+/* «33 визита в другие дни» on phones (no «Ещё»), so «Показать» stays inside the row. */
+@media (max-width: 479px) {
+  .elsewhereLong {
+    display: none;
+  }
+}

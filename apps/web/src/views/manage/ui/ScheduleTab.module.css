@@ -185,15 +185,10 @@
   translate: -50% 0;
 }
 
-/* The toggle only matters with room to grow: phones already use the whole width. */
+/* On every screen: on a phone it gives the day the page's gutters and square corners — every
+   pixel counts there. */
 .wideToggle {
   display: contents;
-}
-
-@media (max-width: 1023px) {
-  .wideToggle {
-    display: none;
-  }
 }
 
 /* The day's status row: «Сейчас», «Далее» and the unmarked visits as capsules on one line. */

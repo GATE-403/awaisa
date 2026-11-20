@@ -88,7 +88,8 @@ export const CloseDayBar = ({
       ) : (
         <>
           <span className={styles.text}>
-            Ещё <strong>{visits(openElsewhere)}</strong> в другие дни
+            <span className={styles.elsewhereLong}>Ещё </span>
+            <strong>{visits(openElsewhere)}</strong> в другие дни
           </span>
           <Button size='sm' variant='secondary' onClick={onShowOther}>
             Показать
