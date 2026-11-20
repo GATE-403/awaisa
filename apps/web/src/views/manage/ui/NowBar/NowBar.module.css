@@ -179,3 +179,25 @@
     background: var(--color-fill-hover);
   }
 }
+
+/* Notifications: a bell glyph, named in its tooltip. */
+.notify {
+  position: relative;
+  justify-content: center;
+  width: 36px;
+  margin-left: 0;
+  padding: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.notify::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+}
+
+.notify svg {
+  width: 18px;
+  height: 18px;
+}

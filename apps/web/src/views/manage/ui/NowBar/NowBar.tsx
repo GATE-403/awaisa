@@ -100,9 +100,14 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
         </span>
       )}
       {permission === 'default' && (
-        <button type='button' className={styles.notify} onClick={enableNotifications}>
+        <button
+          type='button'
+          className={styles.notify}
+          onClick={enableNotifications}
+          title='Уведомлять о новых записях'
+        >
           <Bell aria-hidden />
-          Уведомлять о записях
+          <span className={styles.srOnly}>Уведомлять о записях</span>
         </button>
       )}
     </section>

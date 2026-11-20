@@ -88,8 +88,6 @@ const dayTitleFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 // Two weeks back: enough to close yesterday's and last week's visits.
 const PAST_DAYS = 14
-// The «Все пришли» bar's height and its margin over the window's foot.
-const CLOSE_BAR_SPACE_PX = 72
 
 export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTabProps) => {
   const { layout, setLayout } = useScheduleLayout()
@@ -195,7 +193,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const marks = new Set(unclosed.days.map((day) => day.date))
   const firstUnclosed = unclosed.days.find((day) => day.date !== date)
   const openHere = unclosed.days.find((day) => day.date === date)?.count ?? 0
-  const isCloseBarShown = hasMasters && !isCloseBarHidden && unclosed.total > 0
   // Who those are: the day's ended visits with no outcome yet, in time order.
   const unmarkedHere = (schedule?.bookings ?? [])
     .filter(
@@ -475,9 +472,27 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           marks={marks}
           loads={loads}
         />
-        {schedule && hasMasters && today && date === today.dayKey && (
-          <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
-        )}
+        {/* One slim row of what needs eyes now: the visit under way, the next one, and the
+            visits left unmarked (the one thing asking for action, in orange). */}
+        <div className={styles.dayStatus}>
+          {schedule && hasMasters && today && date === today.dayKey && (
+            <NowBar bookings={schedule.bookings} nowMinutes={today.minutes} onOpen={setSelected} />
+          )}
+          {hasMasters && !isCloseBarHidden && (
+            <CloseDayBar
+              openHere={openHere}
+              openElsewhere={unclosed.total - openHere}
+              visitsHere={unmarkedHere}
+              onOpen={(booking) => {
+                setFocusedBookingId(null)
+                requestAnimationFrame(() => setFocusedBookingId(booking.id))
+              }}
+              onCloseDay={handleCloseDay}
+              onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
+              onDismiss={() => setIsCloseBarHidden(true)}
+            />
+          )}
+        </div>
         {!schedule && !error && <Skeleton className={styles.skeleton} />}
 
         {schedule && !hasMasters && (
@@ -509,7 +524,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             onRemoveTimeOff={removeTimeOff}
             onCreateBooking={handleCreate}
             onMoveBooking={moveBooking}
-            bottomInset={isCloseBarShown ? CLOSE_BAR_SPACE_PX : 0}
             dayKey={schedule.date}
             fit={isPast ? null : fit}
             onMarkNoShow={
@@ -526,24 +540,6 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           />
         )}
       </div>
-      {/* On a short screen the day keeps its least height and the page scrolls: room under it,
-          so the floating bar never sits over the day's foot (the masters and the zoom). */}
-      {isCloseBarShown && <div className={styles.barSpace} aria-hidden='true' />}
-
-      {hasMasters && !isCloseBarHidden && (
-        <CloseDayBar
-          openHere={openHere}
-          openElsewhere={unclosed.total - openHere}
-          visitsHere={unmarkedHere}
-          onOpen={(booking) => {
-            setFocusedBookingId(null)
-            requestAnimationFrame(() => setFocusedBookingId(booking.id))
-          }}
-          onCloseDay={handleCloseDay}
-          onShowOther={() => setSelectedDay((firstUnclosed ?? unclosed.days[0])?.date ?? null)}
-          onDismiss={() => setIsCloseBarHidden(true)}
-        />
-      )}
 
       {selected &&
         // With a mouse the visit opens as an inspector beside its card; on touch screens (or when
