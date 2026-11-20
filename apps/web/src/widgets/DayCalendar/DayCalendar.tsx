@@ -204,6 +204,9 @@ const blockState = (
 
 // Room left under the day before the window's foot.
 const BOTTOM_GAP_PX = 0
+// The least height of the day: low enough that a short phone (iPhone SE) keeps the whole board,
+// with its masters' track, on screen.
+const MIN_DAY_PX = 260
 
 // How much of the page lies under an element: its ancestors' bottom padding, borders and margins,
 // and whatever comes after it further down (siblings beside it are not counted). Fixed and
@@ -519,7 +522,7 @@ export const DayCalendar = ({
       // the board takes the rest of its height.
       const below = spaceBelow(scroller)
       const height = window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX) - bottomInset
-      const fill = `${Math.max(420, Math.floor(height))}px`
+      const fill = `${Math.max(MIN_DAY_PX, Math.floor(height))}px`
       if (scroller.style.height === fill) return
       scroller.style.height = fill
       scroller.style.maxHeight = fill
@@ -1331,7 +1334,9 @@ export const DayCalendar = ({
                     >
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                      свободен весь день
+                      <span>
+                        свободен<span className={styles.laneNoteLong}> весь день</span>
+                      </span>
                       <span className={styles.laneBook}>
                         <Plus weight='bold' aria-hidden />
                         Записать
@@ -1427,14 +1432,14 @@ export const DayCalendar = ({
                       state.tone === 'warning' &&
                       onMarkArrived &&
                       onMarkNoShow &&
-                      (isTimeline ? length >= 190 : size === 'tall')
+                      (isTimeline ? length >= 100 : size === 'tall')
                     const quickMark = isMarkable && (
                       <fieldset
                         className={styles.markBar}
                         data-layout={layout}
                         style={
                           isTimeline
-                            ? { left: (box.left ?? 0) + 16 }
+                            ? { left: (box.left ?? 0) + 12, width: length - 24 }
                             : { top: (box.top ?? 0) + (box.height ?? 0) - 46 }
                         }
                       >
@@ -1445,19 +1450,21 @@ export const DayCalendar = ({
                           type='button'
                           className={styles.markButton}
                           data-answer='arrived'
+                          title='Пришёл'
                           onClick={() => onMarkArrived(booking)}
                         >
                           <Check weight='bold' aria-hidden />
-                          Пришёл
+                          <span className={styles.markLabel}>Пришёл</span>
                         </button>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='no-show'
+                          title='Не пришёл'
                           onClick={() => onMarkNoShow(booking)}
                         >
                           <X weight='bold' aria-hidden />
-                          Не пришёл
+                          <span className={styles.markLabel}>Не пришёл</span>
                         </button>
                       </fieldset>
                     )

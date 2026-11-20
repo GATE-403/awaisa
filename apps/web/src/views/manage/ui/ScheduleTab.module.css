@@ -222,3 +222,33 @@
 .panel[data-wide] {
   box-shadow: none;
 }
+
+/* Phones: «Сейчас», «Далее» and the visits to mark share one line that scrolls sideways — two
+   wrapped rows of capsules took a fifth of the screen over the day. What asks for action (the
+   orange capsule) leads. */
+@media (max-width: 639px) {
+  .dayStatus {
+    flex-wrap: nowrap;
+    padding-inline: var(--space-3) 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(90deg, #000 calc(100% - 20px), transparent);
+  }
+
+  .dayStatus::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dayStatus::after {
+    content: "";
+    flex: 0 0 var(--space-3);
+  }
+
+  .dayStatus > section {
+    flex: 0 0 auto;
+  }
+
+  .dayStatus > section[aria-label="Неотмеченные визиты"] {
+    order: -1;
+  }
+}

@@ -274,3 +274,10 @@
     background: color-mix(in srgb, var(--system-orange) 14%, transparent);
   }
 }
+
+/* Phones: «◌ 5 визитов ⌄ · ✓ Все пришли» — the orange glyph already says «без отметки». */
+@media (max-width: 479px) {
+  .short {
+    display: none;
+  }
+}

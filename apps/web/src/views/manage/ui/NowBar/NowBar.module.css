@@ -201,3 +201,14 @@
   width: 18px;
   height: 18px;
 }
+
+/* Phones: one line with the other capsules; the call lives in the visit's own sheet. */
+@media (max-width: 639px) {
+  .bar {
+    flex-wrap: nowrap;
+  }
+
+  .call {
+    display: none;
+  }
+}
