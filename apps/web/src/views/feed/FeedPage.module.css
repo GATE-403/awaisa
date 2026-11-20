@@ -17,70 +17,6 @@
   white-space: nowrap;
 }
 
-.filters {
-  position: absolute;
-  top: calc(env(safe-area-inset-top) + var(--space-1));
-  right: 0;
-  left: 0;
-  z-index: 3;
-  display: flex;
-  gap: var(--space-4);
-  overflow-x: auto;
-  padding: 0 var(--page-gutter);
-  scrollbar-width: none;
-}
-
-.filters::-webkit-scrollbar {
-  display: none;
-}
-
-/* Text tabs over the photo, like a short-video feed: white words with a soft shadow, the chosen
-   one full white with a short bar under it — no plates covering the work. */
-.chip {
-  position: relative;
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 44px;
-  padding: 0 var(--space-1);
-  border: none;
-  background: none;
-  color: var(--color-muted-foreground);
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.chip[aria-current="page"],
-.chip[aria-pressed="true"] {
-  color: var(--color-foreground);
-}
-
-.chip[aria-current="page"]::after,
-.chip[aria-pressed="true"]::after {
-  content: "";
-  position: absolute;
-  right: 30%;
-  bottom: 6px;
-  left: 30%;
-  height: 2px;
-  border-radius: var(--radius-full);
-  background: var(--color-foreground);
-}
-
-.chip svg {
-  width: 14px;
-  height: 14px;
-}
-
-.chip:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
 /* The heart a double tap leaves where the finger was: it pops, floats up a little and fades. */
 .burst {
   position: absolute;
@@ -220,7 +156,7 @@
    (container units), so the one in play is as tall as the screen allows. */
 .stage {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 52px);
+  top: calc(env(safe-area-inset-top) + 32px);
   right: 0;
   bottom: calc(var(--tabbar-height, 60px) + env(safe-area-inset-bottom) + var(--space-3));
   left: 0;
@@ -378,7 +314,7 @@
 /* Once a card has gone: how to bring it back. */
 .hint {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 40px);
+  top: calc(env(safe-area-inset-top) + var(--space-2));
   left: 0;
   right: 0;
   z-index: 4;
@@ -515,18 +451,13 @@
     height: calc(100dvh - var(--header-height, 64px));
   }
 
-  .filters {
-    top: var(--space-2);
-    justify-content: center;
-  }
-
   .stage {
-    top: 60px;
+    top: 36px;
     bottom: var(--space-5);
   }
 
   .hint {
-    top: 44px;
+    top: var(--space-3);
   }
 }
 

@@ -1,0 +1,57 @@
+.search {
+  position: relative;
+  display: flex;
+  flex: 1 1 100%;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: var(--space-4);
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted-foreground);
+  pointer-events: none;
+}
+
+.search input.input {
+  width: 100%;
+  height: var(--control-height-md);
+  padding-right: calc(var(--space-2) + 32px);
+  padding-left: calc(var(--space-4) + 24px);
+  border: none;
+  background: var(--color-fill);
+  box-shadow: none;
+}
+
+.search input.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clear {
+  position: absolute;
+  right: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-foreground);
+  color: var(--color-background);
+  cursor: pointer;
+}
+
+/* An invisible 44pt target around the small clear button. */
+.clear::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.clear svg {
+  width: 12px;
+  height: 12px;
+}

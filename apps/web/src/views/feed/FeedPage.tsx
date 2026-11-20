@@ -1,12 +1,12 @@
 'use client'
 
-import { CaretLeft, CaretRight, NavigationArrow } from '@phosphor-icons/react/ssr'
+import { CaretLeft, CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
 import { useFavorites } from '@/features/favorites'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
-import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { knownPosition } from '@/shared/lib/geo'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
 import { useFeedLikes } from './model/useFeedLikes'
@@ -44,9 +44,10 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   // The side the last card was swiped to: it waits there and comes back from there.
   const [flyDir, setFlyDir] = useState<1 | -1>(-1)
   const [point, setPoint] = useState<{ lat: number; lng: number } | null>(null)
-  const [isLocating, setIsLocating] = useState(false)
   const [reported, setReported] = useState<string[]>([])
   const loadingRef = useRef(false)
+  // Once the person has turned a card, a late «nearest first» answer no longer reshuffles the deck.
+  const touchedRef = useRef(false)
   const gesture = useRef<{
     x: number
     y: number
@@ -64,6 +65,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const current = shown[active]
 
   const turn = (step: number) => {
+    touchedRef.current = true
     setActive((index) => Math.min(shown.length - 1, Math.max(0, index + step)))
   }
 
@@ -129,24 +131,25 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     if (item.service && !favorites.isFavorite(item.service.id)) favorites.toggle(item.service.id)
   }
 
-  const showNearby = () => {
-    if (point || !navigator.geolocation) return
-    setIsLocating(true)
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const next = { lat: position.coords.latitude, lng: position.coords.longitude }
-        const page = await getFeed({ kind, business, start, ...next }).catch(() => null)
-        setIsLocating(false)
-        if (!page) return
-        setPoint(next)
-        setItems(page.items)
-        setNextOffset(page.nextOffset)
-        setActive(0)
-      },
-      () => setIsLocating(false),
-      { timeout: 10_000, maximumAge: 300_000 },
-    )
-  }
+  // No filters on the deck: the work nearest to where the person is comes first, when that is
+  // already known (a granted location or a picked district) — never a permission prompt.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once, for the deck the page opened with
+  useEffect(() => {
+    if (start || business) return
+    let isCancelled = false
+    knownPosition().then(async (next) => {
+      if (!next || isCancelled) return
+      const page = await getFeed({ kind, business, start, ...next }).catch(() => null)
+      if (!page || isCancelled || touchedRef.current) return
+      setPoint(next)
+      setItems(page.items)
+      setNextOffset(page.nextOffset)
+      setActive(0)
+    })
+    return () => {
+      isCancelled = true
+    }
+  }, [])
 
   // A swipe either way sends the card in play off that side and the next one comes up, like
   // dealing from a deck; a pull up brings the last card back. A tap stays a tap (double tap likes).
@@ -268,40 +271,6 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   return (
     <main className={styles.page}>
       <h1 className={styles.visuallyHidden}>Образы</h1>
-      <nav className={styles.filters} aria-label='Категории работ'>
-        {!business && (
-          <NextLink
-            href='/feed'
-            className={styles.chip}
-            aria-current={!kind ? 'page' : undefined}
-            scroll={false}
-          >
-            Все
-          </NextLink>
-        )}
-        <button
-          type='button'
-          className={styles.chip}
-          aria-pressed={point !== null}
-          onClick={showNearby}
-          disabled={isLocating}
-        >
-          <NavigationArrow weight='fill' aria-hidden />
-          {isLocating ? 'Ищем…' : 'Рядом'}
-        </button>
-        {!business &&
-          BUSINESS_KINDS.filter((item) => item.value !== 'other').map((item) => (
-            <NextLink
-              key={item.value}
-              href={`/feed?kind=${item.value}`}
-              className={styles.chip}
-              aria-current={kind === item.value ? 'page' : undefined}
-              scroll={false}
-            >
-              {item.label}
-            </NextLink>
-          ))}
-      </nav>
 
       <div
         className={styles.stage}

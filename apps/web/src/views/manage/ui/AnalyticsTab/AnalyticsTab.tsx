@@ -242,7 +242,10 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             </Stat>
           </div>
 
-          <div className={styles.pairs}>
+          <div
+            className={styles.pairs}
+            data-uneven={isUneven(report.services.length, report.masters.length) || undefined}
+          >
             <div className={forms.group}>
               <SectionCaption>Услуги</SectionCaption>
               {report.services.length === 0 ? (
@@ -262,9 +265,13 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                         </span>
                       </span>
                       <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
-                      <span className={styles.meter} aria-hidden='true'>
-                        <span style={{ width: `${(service.revenue / servicesRevenue) * 100}%` }} />
-                      </span>
+                      {service.revenue > 0 && (
+                        <span className={styles.meter} aria-hidden='true'>
+                          <span
+                            style={{ width: `${(service.revenue / servicesRevenue) * 100}%` }}
+                          />
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ol>
@@ -285,9 +292,11 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
                     <span className={styles.rowValue}>
                       {master.load}%<span className={styles.srOnly}> загрузки</span>
                     </span>
-                    <span className={styles.meter} data-tone='load' aria-hidden='true'>
-                      <span style={{ width: `${master.load}%` }} />
-                    </span>
+                    {master.load > 0 && (
+                      <span className={styles.meter} data-tone='load' aria-hidden='true'>
+                        <span style={{ width: `${master.load}%` }} />
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -302,7 +311,16 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
             </div>
           </div>
 
-          <div className={styles.pairs}>
+          <div
+            className={styles.pairs}
+            data-uneven={
+              isUneven(
+                report.masters.filter((master) => master.payout !== null && master.revenue > 0)
+                  .length,
+                report.clients.length,
+              ) || undefined
+            }
+          >
             <PayrollGroup masters={report.masters} />
             <div className={forms.group}>
               <SectionCaption>
@@ -347,6 +365,10 @@ export const AnalyticsTab = ({ slug, business }: AnalyticsTabProps) => {
     </section>
   )
 }
+
+// Two lists share a row only when they are about the same length (an empty one counts as one line).
+const isUneven = (first: number, second: number) =>
+  Math.abs(Math.max(first, 1) - Math.max(second, 1)) > 2
 
 interface PayrollGroupProps {
   masters: AnalyticsReport['masters']

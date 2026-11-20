@@ -111,13 +111,11 @@ test.describe('«Образы» feed', () => {
     }
   })
 
-  test('the feed opens with categories and an empty state for a quiet kind', async ({ page }) => {
+  test('the feed is a deck with no filters over it, a kind link still narrows it', async ({
+    page,
+  }) => {
     await page.goto('/feed?kind=health')
-    await expect(page.getByRole('navigation', { name: 'Категории работ' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Здоровье' })).toHaveAttribute(
-      'aria-current',
-      'page',
-    )
     await expect(page.getByRole('feed', { name: 'Образы' })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Категории работ' })).toHaveCount(0)
   })
 })
