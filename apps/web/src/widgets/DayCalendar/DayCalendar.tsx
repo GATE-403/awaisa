@@ -89,6 +89,9 @@ interface DayCalendarProps {
   focusedBookingId?: string | null
   /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
   bottomInset?: number
+  /** A bar floating over the window's foot that the day runs under (the phone toolbar): the day
+      keeps its height, its corner controls rise above the bar and its content scrolls out from under. */
+  footCover?: number
   /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
   dayKey?: string
   /** «Найти место»: light up the gaps where a service this long fits (only these masters). */
@@ -288,6 +291,7 @@ export const DayCalendar = ({
   onMarkArrived,
   focusedBookingId = null,
   bottomInset = 0,
+  footCover = 0,
   dayKey,
   fit = null,
   onMarkNoShow,
@@ -521,7 +525,10 @@ export const DayCalendar = ({
       // the board ends that much above the window's foot, so the page fits the window exactly and
       // the board takes the rest of its height.
       const below = spaceBelow(scroller)
-      const height = window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX) - bottomInset
+      // A bar floating over the window's foot covers the page's own padding there, so the larger
+      // of the two counts, not both (the toolbar on phones; 8px of air above it).
+      const height =
+        window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX, bottomInset ? bottomInset + 8 : 0)
       const fill = `${Math.max(MIN_DAY_PX, Math.floor(height))}px`
       if (scroller.style.height === fill) return
       scroller.style.height = fill
@@ -544,7 +551,8 @@ export const DayCalendar = ({
   useEffect(() => {
     const box = frameRef.current
     if (!box) return
-    if (!bottomInset) {
+    const cover = bottomInset || footCover
+    if (!cover) {
       box.style.removeProperty('--foot-lift')
       return
     }
@@ -552,7 +560,7 @@ export const DayCalendar = ({
     const measure = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        const covered = box.getBoundingClientRect().bottom - (window.innerHeight - bottomInset)
+        const covered = box.getBoundingClientRect().bottom - (window.innerHeight - cover)
         const lift = `${Math.max(0, Math.round(covered))}px`
         if (box.style.getPropertyValue('--foot-lift') !== lift) {
           box.style.setProperty('--foot-lift', lift)
@@ -568,7 +576,7 @@ export const DayCalendar = ({
       window.removeEventListener('resize', measure)
       box.style.removeProperty('--foot-lift')
     }
-  }, [bottomInset])
+  }, [bottomInset, footCover])
 
   // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
   useEffect(() => {

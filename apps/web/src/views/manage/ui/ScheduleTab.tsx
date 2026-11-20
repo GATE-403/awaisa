@@ -18,7 +18,7 @@ import {
   X,
 } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { formatDuration, formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -151,6 +151,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
+  const isPhone = useMediaQuery('(max-width: 639px)')
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  // On phones the toolbar floats over the window's foot like the tab bar: the day ends above it.
+  const [barSpace, setBarSpace] = useState(0)
   // The selected visit's card on the board, for the inspector to point at.
   const selectedCard =
     selected && typeof document !== 'undefined'
@@ -221,6 +225,24 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     setSelected(booking)
     router.replace(`/manage/${slug}?tab=schedule`, { scroll: false })
   }, [linkedBookingId, schedule, slug])
+
+  useEffect(() => {
+    const bar = toolbarRef.current
+    if (!isPhone || !bar) {
+      setBarSpace(0)
+      return
+    }
+    const measure = () =>
+      setBarSpace(Math.max(0, Math.round(window.innerHeight - bar.getBoundingClientRect().top)))
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(bar)
+    window.addEventListener('resize', measure)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [isPhone, hasMasters])
 
   // The wide board spans the window minus the page's own scrollbar, measured while it is on.
   useEffect(() => {
@@ -369,7 +391,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         }
         actions={
           hasMasters && (
-            <div className={styles.toolbar} data-wide>
+            <div className={styles.toolbar} data-wide ref={toolbarRef}>
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -504,6 +526,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
         {schedule && hasMasters && (
           <DayCalendar
+            footCover={barSpace}
             specialists={schedule.specialists}
             bookings={schedule.bookings}
             timeOff={schedule.timeOff}
