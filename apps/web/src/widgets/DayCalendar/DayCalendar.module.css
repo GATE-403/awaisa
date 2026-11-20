@@ -2186,29 +2186,13 @@
 }
 
 /* ——— One ink per card ———
-   Orange and red words on a blue or violet card clashed. The state word takes the card's own
-   ink; its colour lives only in a small dot before it (Calendar marks events the same way). */
+   Orange and red words on a blue or violet card clashed: the state word takes the card's own
+   ink, and its colour lives only in its glyph (see «State glyphs» below). */
 :root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   color: inherit;
-}
-
-:root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState::before {
-  content: "";
-  flex-shrink: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-}
-
-:root .grid .booking[data-tone="warning"] .blockState::before {
-  background: var(--system-orange);
-}
-
-:root .grid .booking[data-tone="danger"] .blockState::before {
-  background: var(--color-danger);
 }
 
 /* «✓ Пришёл» on the card speaks in the card's ink too, on a white capsule. */
@@ -2803,7 +2787,10 @@
   );
 }
 
-:root .grid .booking[data-tone="accent"] :is(
+:root
+  .grid
+  .booking[data-tone="accent"]
+  :is(
     .blockTop,
     .blockRange,
     .blockState,
