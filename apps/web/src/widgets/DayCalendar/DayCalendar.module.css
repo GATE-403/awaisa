@@ -2896,3 +2896,9 @@
   width: max-content;
   margin-top: 6px;
 }
+
+/* The time of «now» is small white text: on the system red it read 3.6:1, the strong red keeps
+   it at AA (the line itself stays the system red). */
+.grid .nowLabel {
+  background: var(--color-danger-strong);
+}

@@ -53,7 +53,8 @@ export const DayStrip = ({
     knob.style.setProperty('--w', `${selected.offsetWidth}px`)
     knob.style.setProperty('--h', `${selected.offsetHeight}px`)
     knob.style.setProperty('--y', `${selected.offsetTop}px`)
-    knob.toggleAttribute('data-today', selected.hasAttribute('data-today'))
+    // Not `data-today`: that names the day buttons, and a knob carrying it matched them too.
+    knob.toggleAttribute('data-on-today', selected.hasAttribute('data-today'))
   }, [value, days])
 
   return (
