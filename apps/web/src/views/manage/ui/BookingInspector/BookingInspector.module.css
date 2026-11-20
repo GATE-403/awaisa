@@ -206,44 +206,46 @@
     margin-top: var(--space-1);
   }
 
+  /* One wide accent «Позвонить» and the rest as the thin-glyph capsule beside it. */
   .actions {
     order: 7;
+    align-items: center;
+    gap: var(--space-2);
     width: 100%;
     margin-top: var(--space-4);
   }
 
-  .actions > span {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    width: 100%;
-    padding: 0;
-    background: none;
+  .callPrimary {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--control-height-md);
+    border-radius: var(--radius-full);
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
   }
 
-  .actions > span > :is(a, button) {
-    flex-direction: column;
-    gap: 4px;
-    width: auto;
-    height: 56px;
-    border-radius: var(--radius-lg);
-    background: none;
-    color: var(--color-link);
+  .callPrimary:active {
+    scale: 0.97;
   }
 
-  .actions > span > :is(a, button) svg {
-    width: 24px;
-    height: 24px;
+  .callPrimary:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 
-  .actionLabel {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-    color: var(--color-muted-foreground);
-    font-size: var(--text-xs);
-    font-weight: var(--font-weight-regular);
+  .callPrimary svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .actions .callGlyph {
+    display: none;
   }
 
   .inspector > :last-child:not(.actions) {
@@ -251,5 +253,12 @@
     width: 100%;
     margin-top: var(--space-4);
     text-align: left;
+  }
+}
+
+/* With a mouse the call stays a glyph in the capsule. */
+@media (hover: hover) and (pointer: fine) and (min-width: 640px) {
+  .callPrimary {
+    display: none;
   }
 }

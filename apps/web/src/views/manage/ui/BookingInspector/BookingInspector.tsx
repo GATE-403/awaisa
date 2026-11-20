@@ -95,8 +95,17 @@ export const BookingInspector = ({
       <div className={styles.actions}>
         {/* A capsule of thin glyphs with a mouse; on phones four labelled tiles, like the
             actions under a contact in iOS. The labels name the buttons either way. */}
+        {/* Phones: calling is the one main action, a wide accent capsule. */}
+        <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
+          <Phone weight='bold' aria-hidden />
+          Позвонить
+        </a>
         <GlyphGroup label='Связаться с клиентом'>
-          <a href={`tel:${booking.customerPhone}`} title={formatPhone(booking.customerPhone)}>
+          <a
+            className={styles.callGlyph}
+            href={`tel:${booking.customerPhone}`}
+            title={formatPhone(booking.customerPhone)}
+          >
             <Phone aria-hidden />
             <span className={styles.actionLabel}>Позвонить</span>
           </a>
