@@ -56,6 +56,7 @@ export const BookingInspector = ({
 }: BookingInspectorProps) => {
   const isTouch = useMediaQuery('(pointer: coarse)')
   const isCancelled = booking.status === 'cancelled'
+  const canBookAgain = isCancelled && onBookAgain !== undefined
   const digits = booking.customerPhone.replace(/\D/g, '')
   const total = booking.price - (booking.discount?.amount ?? 0)
   const day = capitalizeFirst(dayFormatter.format(new Date(`${booking.date}T12:00:00`)))
@@ -118,14 +119,27 @@ export const BookingInspector = ({
       </p>
       {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
 
-      <div className={styles.actions}>
+      <div className={styles.actions} data-book-again={canBookAgain || undefined}>
         {/* A capsule of thin glyphs with a mouse; on phones four labelled tiles, like the
             actions under a contact in iOS. The labels name the buttons either way. */}
         {/* Phones: calling is the one main action, a wide accent capsule. */}
-        <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
-          <Phone weight='bold' aria-hidden />
-          Позвонить
-        </a>
+        {/* A cancelled visit's one action is to book it again, in the same row as the ways to
+            reach the client (on phones it takes the wide capsule; the call joins the glyphs). */}
+        {canBookAgain ? (
+          <Button
+            variant={isTouch ? 'primary' : 'secondary'}
+            className={styles.bookAgain}
+            onClick={() => onBookAgain(booking)}
+          >
+            <ArrowCounterClockwise aria-hidden />
+            Записать снова
+          </Button>
+        ) : (
+          <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
+            <Phone weight='bold' aria-hidden />
+            Позвонить
+          </a>
+        )}
         <GlyphGroup label='Связаться с клиентом'>
           <a
             className={styles.callGlyph}
@@ -169,18 +183,6 @@ export const BookingInspector = ({
           </Menu>
         </GlyphGroup>
       </div>
-
-      {isCancelled && onBookAgain && (
-        <Button
-          size='sm'
-          variant='secondary'
-          className={styles.bookAgain}
-          onClick={() => onBookAgain(booking)}
-        >
-          <ArrowCounterClockwise aria-hidden />
-          Записать снова
-        </Button>
-      )}
 
       {!isCancelled && onOutcome && (
         <VisitOutcomeSection
