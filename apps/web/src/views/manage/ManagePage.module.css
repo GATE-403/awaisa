@@ -145,3 +145,11 @@
     padding-bottom: 0;
   }
 }
+
+/* Phones: the schedule's one-line head sits close under the tabs — the toolbar floats at the
+   foot now, so the air kept for a second row was empty. */
+@media (max-width: 639px) {
+  .content:has([data-schedule-board]) {
+    margin-top: var(--space-3);
+  }
+}
