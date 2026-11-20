@@ -308,6 +308,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     })
   }
 
+  // «Записать снова» on a cancelled visit: the same client, service, master and time.
+  const handleBookCancelledAgain = (booking: AdminBooking) => {
+    setSelected(null)
+    setDraft({
+      specialistId: booking.specialistId,
+      time: booking.time,
+      initial: {
+        serviceId: booking.serviceId,
+        name: booking.customerName,
+        phone: booking.customerPhone,
+      },
+    })
+  }
+
   // «Записать снова» from the client's card: their usual service, its first master, this day.
   const handleBookAgain = (client: { name: string; phone: string; serviceName: string | null }) => {
     const service = catalog.services.find((item) => item.name === client.serviceName) ?? null
@@ -590,6 +604,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 setSelected(null)
                 setClientPhone(phone)
               }}
+              onBookAgain={isPast ? undefined : handleBookCancelledAgain}
             />
           </Popover>
         ) : (
@@ -604,6 +619,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               setSelected(null)
               setClientPhone(phone)
             }}
+            onBookAgain={isPast ? undefined : handleBookCancelledAgain}
           />
         ))}
 
