@@ -140,9 +140,7 @@ export const ShareWindowsSheet = ({
         <>
           {/* The message as the client will read it — plain text, no box — then the link on a
               row of its own, then the ways to send it as one capsule of thin glyphs. */}
-          <p className={styles.message} aria-label='Текст сообщения'>
-            {body}
-          </p>
+          <p className={styles.message}>{body}</p>
           <section className={sheet.list} aria-label='Ссылка на запись'>
             <a className={sheet.row} href={link} target='_blank' rel='noreferrer'>
               <span className={sheet.rowLabel}>Ссылка</span>

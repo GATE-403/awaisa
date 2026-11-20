@@ -18,7 +18,7 @@ import {
   X,
 } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { formatDuration, formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -155,7 +155,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const isPhone = useMediaQuery('(max-width: 639px)')
   // The schedule fits the window and never scrolls the page: no empty scrollbar gutter beside it.
   useRootFlag('fitted-page')
-  const toolbarRef = useRef<HTMLDivElement>(null)
+  // A callback ref: the toolbar mounts only once there are masters, after the first render.
+  const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null)
   // On phones the toolbar floats over the window's foot like the tab bar: the day ends above it.
   const [barSpace, setBarSpace] = useState(0)
   // The selected visit's card on the board, for the inspector to point at.
@@ -230,7 +231,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   }, [linkedBookingId, schedule, slug])
 
   useEffect(() => {
-    const bar = toolbarRef.current
+    const bar = toolbar
     if (!isPhone || !bar) {
       setBarSpace(0)
       return
@@ -245,7 +246,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       observer.disconnect()
       window.removeEventListener('resize', measure)
     }
-  }, [isPhone, hasMasters])
+  }, [isPhone, toolbar])
 
   // The wide board spans the window minus the page's own scrollbar, measured while it is on.
   useEffect(() => {
@@ -408,7 +409,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         }
         actions={
           hasMasters && (
-            <div className={styles.toolbar} data-wide ref={toolbarRef}>
+            <div className={styles.toolbar} data-wide ref={setToolbar}>
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
