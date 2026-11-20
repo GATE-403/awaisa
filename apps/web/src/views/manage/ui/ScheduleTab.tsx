@@ -32,6 +32,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
+import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
@@ -152,6 +153,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
   const isPhone = useMediaQuery('(max-width: 639px)')
+  // The schedule fits the window and never scrolls the page: no empty scrollbar gutter beside it.
+  useRootFlag('fitted-page')
   const toolbarRef = useRef<HTMLDivElement>(null)
   // On phones the toolbar floats over the window's foot like the tab bar: the day ends above it.
   const [barSpace, setBarSpace] = useState(0)
