@@ -127,21 +127,26 @@ test.describe('Platform: a new business goes live', () => {
     // Below the master's last booking, wherever the day has it: a fixed spot meets the client's
     // booking after noon. The day scrolls in its own box, so bring that spot into view first.
     const column = page.getByRole('button', { name: 'Новая запись к мастеру Азамат' })
-    const freeY = await column.evaluate((element) => {
+    // Bring the free spot to the middle of the day's own box (the page into view first), then click
+    // that point of the screen: clicking the tall column itself scrolled it to its top, where the
+    // sticky masters' row covered the spot.
+    await column.scrollIntoViewIfNeeded()
+    const point = await column.evaluate(async (element) => {
       const box = element.getBoundingClientRect()
       const bottoms = [
         ...(element.parentElement?.querySelectorAll('[class*="booking"]') ?? []),
       ].map((block) => block.getBoundingClientRect().bottom - box.top)
-      // Clear of the sticky masters' row, which covers the column's top once it scrolls into view.
-      const y = Math.min(box.height - 30, Math.max(140, ...bottoms) + 40)
+      const y = Math.min(box.height - 30, Math.max(60, ...bottoms) + 40)
       const scroller = element.closest<HTMLElement>('[class*="scroller"]')
       if (scroller) {
         const view = scroller.getBoundingClientRect()
         scroller.scrollTop += box.top + y - view.top - scroller.clientHeight / 2
       }
-      return y
+      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
+      const after = element.getBoundingClientRect()
+      return { x: after.left + 24, y: after.top + y }
     })
-    await column.click({ position: { x: 24, y: freeY } })
+    await page.mouse.click(point.x, point.y)
     const sheet = page.getByRole('dialog', { name: 'Новая запись' })
     await expect(sheet.getByRole('combobox', { name: 'Время' })).toBeVisible()
     await sheet.getByLabel('Имя').fill('E2E Гость')
