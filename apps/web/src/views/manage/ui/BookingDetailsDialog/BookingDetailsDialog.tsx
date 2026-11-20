@@ -11,6 +11,7 @@ interface BookingDetailsDialogProps {
   /** Set once the visit's day has come: staff can mark it. */
   onOutcome?: (id: string, input: OutcomeInput) => Promise<AdminBooking | null>
   onOpenClient: (phone: string) => void
+  onBookAgain?: (booking: AdminBooking) => void
 }
 
 // On touch screens the visit opens as a compact sheet with the same inspector the desktop shows in
@@ -22,6 +23,7 @@ export const BookingDetailsDialog = ({
   onCancel,
   onOutcome,
   onOpenClient,
+  onBookAgain,
 }: BookingDetailsDialogProps) => (
   <Sheet
     title='Запись'
@@ -35,6 +37,7 @@ export const BookingDetailsDialog = ({
       onCancel={onCancel}
       onOutcome={onOutcome}
       onOpenClient={onOpenClient}
+      onBookAgain={onBookAgain}
       onClose={onClose}
     />
   </Sheet>

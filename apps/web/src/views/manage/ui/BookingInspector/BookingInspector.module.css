@@ -105,10 +105,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.inspector[data-cancelled] :is(.what, .when) {
-  text-decoration: line-through;
-}
-
 .actions {
   display: flex;
 }
@@ -260,5 +256,51 @@
 @media (hover: hover) and (pointer: fine) and (min-width: 640px) {
   .callPrimary {
     display: none;
+  }
+}
+
+/* ——— Cancelled ———
+   One quiet line on top instead of a red pill and struck-through lines. */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+}
+
+.status svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-danger);
+}
+
+.lostPrice {
+  color: var(--color-muted-foreground);
+}
+
+/* The face steps back with the visit. */
+.inspector[data-cancelled] .head > :first-child {
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.bookAgain {
+  align-self: flex-start;
+}
+
+@media (max-width: 639px) {
+  .status,
+  .bookAgain {
+    align-self: center;
+  }
+
+  .status {
+    order: 0;
+  }
+
+  .bookAgain {
+    order: 8;
   }
 }

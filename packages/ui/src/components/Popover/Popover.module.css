@@ -6,9 +6,9 @@
 .popup {
   position: relative;
   width: min(352px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
   max-height: min(var(--available-height), 640px);
-  overflow-y: auto;
-  padding: var(--space-4);
   border-radius: var(--radius-xl);
   background: var(--color-elevated);
   box-shadow:
@@ -25,6 +25,15 @@
 .popup[data-ending-style] {
   opacity: 0;
   scale: 0.94;
+}
+
+.body {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4);
+  border-radius: inherit;
 }
 
 /* The arrow to what it is about: a small square of the popup's own colour, turned. */
