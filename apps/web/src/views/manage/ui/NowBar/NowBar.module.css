@@ -147,3 +147,35 @@
     margin-left: 0;
   }
 }
+
+/* Simple and quiet: both capsules on the same neutral fill, told apart by their state glyph —
+   the visit under way an hourglass in green (as on its card), the next one a clock. */
+.pill[data-kind="now"] {
+  background: var(--color-fill);
+}
+
+.glyph {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--color-muted-foreground);
+}
+
+.pill[data-kind="now"] .glyph {
+  color: var(--color-success-text, var(--color-success));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .pill[data-kind="now"]:hover {
+    background: var(--color-fill-hover);
+  }
+}
