@@ -1,12 +1,14 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
+import { ButtonLink } from '@awaisa/ui/Button'
+import { Select } from '@awaisa/ui/Select'
 import { useToast } from '@awaisa/ui/Toast'
-import { ShareNetwork } from '@phosphor-icons/react/ssr'
+import { Copy, TelegramLogo, WhatsappLogo } from '@phosphor-icons/react/ssr'
+import { useState } from 'react'
 import { formatClock } from '@/entities/business'
 import type { AdminSchedule, Catalog } from '@/shared/api/types'
-import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { freeGaps } from '@/widgets/DayCalendar'
@@ -27,9 +29,14 @@ interface ShareWindowsSheetProps {
 }
 
 const SHORTEST_FALLBACK = 30
+const ANY_SERVICE = 'any'
 
-// The day's free time as a ready message for WhatsApp or an Instagram story: a line per master
-// with their free stretches (long enough for their quickest service), then the booking link.
+type Window = { from: number; to: number; names: string[] }
+
+// The day's free time as a ready message for clients: windows in the order of the day, each with
+// the masters free then (a client asks «when», not «with whom»), for any service or one chosen —
+// then only the windows it fits and a link straight to it — and sent in one tap to WhatsApp or
+// Telegram, or copied.
 export const ShareWindowsSheet = ({
   slug,
   schedule,
@@ -41,35 +48,53 @@ export const ShareWindowsSheet = ({
   onClose,
 }: ShareWindowsSheetProps) => {
   const toast = useToast()
-  const isTouch = useMediaQuery('(pointer: coarse)')
-  const lines = schedule.specialists.flatMap((specialist) => {
-    if (specialist.isOnLeave) return []
-    const durations = catalog.services
-      .filter(
-        (service) =>
-          service.isActive !== false &&
-          catalog.specialists.some(
-            (master) => master.id === specialist.id && master.serviceIds.includes(service.id),
-          ),
-      )
-      .map((service) => service.durationMinutes)
+  const [serviceId, setServiceId] = useState<string>(ANY_SERVICE)
+  const services = catalog.services.filter((service) => service.isActive !== false)
+  const service = services.find((item) => item.id === serviceId) ?? null
+
+  const windows = new Map<string, Window>()
+  for (const specialist of schedule.specialists) {
+    if (specialist.isOnLeave) continue
+    const master = catalog.specialists.find((item) => item.id === specialist.id)
+    const theirs = services.filter((item) => master?.serviceIds.includes(item.id))
+    if (service && !theirs.some((item) => item.id === service.id)) continue
+    const durations = theirs.map((item) => item.durationMinutes)
+    const minMinutes = service
+      ? service.durationMinutes
+      : durations.length > 0
+        ? Math.min(...durations)
+        : SHORTEST_FALLBACK
     const gaps = freeGaps({
       day: specialist.hours === undefined ? dayHours : specialist.hours,
       bookings: schedule.bookings.filter((booking) => booking.specialistId === specialist.id),
       timeOff: schedule.timeOff.filter((item) => item.specialistId === specialist.id),
       from: nowMinutes,
       slotMinutes,
-      minMinutes: durations.length > 0 ? Math.min(...durations) : SHORTEST_FALLBACK,
+      minMinutes,
     })
-    if (gaps.length === 0) return []
-    const times = gaps.map(({ from, to }) => `${formatClock(from)}–${formatClock(to)}`)
-    return [`${specialist.name.split(' ')[0]} — ${times.join(', ')}`]
-  })
-  const link =
-    typeof window === 'undefined'
-      ? `/${slug}/book?date=${schedule.date}`
-      : `${window.location.origin}/${slug}/book?date=${schedule.date}`
-  const text = [`Свободное время · ${dayLabel}`, ...lines, '', `Запись онлайн: ${link}`].join('\n')
+    for (const gap of gaps) {
+      const key = `${gap.from}-${gap.to}`
+      const entry = windows.get(key) ?? { from: gap.from, to: gap.to, names: [] }
+      entry.names.push(specialist.name.split(' ')[0])
+      windows.set(key, entry)
+    }
+  }
+  const lines = [...windows.values()]
+    .sort((first, second) => first.from - second.from || first.to - second.to)
+    .map(({ from, to, names }) => `${formatClock(from)}–${formatClock(to)} — ${names.join(', ')}`)
+
+  const day = nowMinutes !== null ? `сегодня, ${dayLabel.split(', ').pop()}` : dayLabel
+  const query = `${service ? `service=${service.id}&` : ''}date=${schedule.date}`
+  const path = `/${slug}/book?${query}`
+  const link = typeof window === 'undefined' ? path : `${window.location.origin}${path}`
+  const heading = service
+    ? `Свободное время на «${service.name}» · ${day}`
+    : `Свободное время · ${day}`
+  const body = [heading, ...lines].join('\n')
+  // Shown in the bubble without the query: «awaisa.kg/kings-barbershop/book».
+  const shortLink =
+    typeof window === 'undefined' ? `${slug}/book` : `${window.location.host}/${slug}/book`
+  const text = `${body}\n\nЗапись онлайн: ${link}`
 
   const handleCopy = async () => {
     try {
@@ -80,39 +105,73 @@ export const ShareWindowsSheet = ({
     }
   }
 
-  const handleShare = async () => {
-    try {
-      await navigator.share({ text })
-    } catch {
-      // Closing the share sheet is not an error.
-    }
-  }
-
   return (
     <Sheet
       title='Свободные окна'
       onClose={onClose}
-      action={
-        lines.length > 0 ? { label: 'Скопировать', onClick: () => void handleCopy() } : undefined
-      }
+      cancelLabel={null}
+      action={{ label: 'Готово', onClick: onClose }}
     >
+      <section className={sheet.list} aria-label='Для какой услуги'>
+        <div className={sheet.row}>
+          <span className={sheet.rowLabel}>Услуга</span>
+          <Select
+            aria-label='Услуга'
+            variant='plain'
+            value={serviceId}
+            items={[
+              { value: ANY_SERVICE, label: 'Любая' },
+              ...services.map((item) => ({ value: item.id, label: item.name })),
+            ]}
+            onValueChange={(value) => value && setServiceId(value)}
+          />
+        </div>
+      </section>
+
       {lines.length === 0 ? (
-        <EmptyState variant='inline' text='На этот день свободного времени нет.' />
+        <EmptyState
+          variant='inline'
+          text={
+            service
+              ? 'На этот день окна под эту услугу нет.'
+              : 'На этот день свободного времени нет.'
+          }
+        />
       ) : (
         <>
-          <section className={sheet.group} aria-label='Текст сообщения'>
-            <p className={styles.message}>{text}</p>
+          {/* The message as the client will get it: a chat bubble, the link as a short label. */}
+          <section className={styles.bubble} aria-label='Текст сообщения'>
+            <p className={styles.message}>{body}</p>
+            <p className={styles.link}>{shortLink}</p>
           </section>
-          <p className={sheet.groupFooter}>
-            Окна не короче самой быстрой услуги мастера. Отправьте клиентам в WhatsApp или выложите
-            в сторис.
-          </p>
-          {isTouch && typeof navigator !== 'undefined' && 'share' in navigator && (
-            <Button size='lg' onClick={() => void handleShare()}>
-              <ShareNetwork aria-hidden />
-              Поделиться
-            </Button>
-          )}
+          {/* One way to send that most people use, wide; the rest as thin glyphs beside it. */}
+          <div className={styles.send}>
+            <ButtonLink
+              className={styles.primary}
+              href={`https://wa.me/?text=${encodeURIComponent(text)}`}
+              target='_blank'
+              rel='noreferrer'
+            >
+              <WhatsappLogo aria-hidden />
+              Отправить в WhatsApp
+            </ButtonLink>
+            <GlyphGroup label='Другие способы'>
+              <a
+                href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(body)}`}
+                target='_blank'
+                rel='noreferrer'
+                title='Telegram'
+              >
+                <TelegramLogo aria-hidden />
+                <span className={styles.srOnly}>Telegram</span>
+              </a>
+              <GlyphButton
+                icon={<Copy aria-hidden />}
+                label='Скопировать'
+                onClick={() => void handleCopy()}
+              />
+            </GlyphGroup>
+          </div>
         </>
       )}
     </Sheet>
