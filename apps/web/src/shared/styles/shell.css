@@ -73,6 +73,13 @@ html {
   scroll-padding-top: calc(var(--header-height) + var(--business-bar-height) + var(--space-4));
 }
 
+/* A client page opened from the cabinet («Что нового» from its megaphone) keeps the cabinet's
+   chrome: the page draws `CabinetBar` and sets this flag, so the site's own header, tab bar and
+   footer step aside. */
+:root[data-cabinet-chrome] :is([data-site-header], [data-site-tabbar], [data-site-footer]) {
+  display: none;
+}
+
 body {
   overscroll-behavior-y: none;
 }

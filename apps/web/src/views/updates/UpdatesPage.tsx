@@ -3,6 +3,7 @@ import { UPDATES, type UpdateAudience } from '@/shared/config/updates'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from './UpdatesPage.module.css'
+import { BackToCabinet } from './ui/BackToCabinet'
 import { MarkUpdatesSeen } from './ui/MarkUpdatesSeen'
 
 const AUDIENCE_LABELS: Record<UpdateAudience, string | null> = {
@@ -30,6 +31,7 @@ const groupByDay = () => {
 // title and a line or two, with a link to try it.
 export const UpdatesPage = () => (
   <main className={styles.page}>
+    <BackToCabinet />
     <MarkUpdatesSeen />
     <div className={styles.column}>
       <header className={styles.head}>

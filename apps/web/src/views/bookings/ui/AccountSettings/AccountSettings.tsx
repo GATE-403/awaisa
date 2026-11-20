@@ -179,17 +179,16 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         )}
       </div>
 
-      {/* Destructive, as on iOS: a red row, and a confirmation by the row before it happens. */}
-      <div className={styles.list}>
+      {/* Destructive and quiet: a red glyph and the word right on the page — no group, no tile —
+          and a confirmation by it before it happens. */}
+      <div className={styles.signOut}>
         <Menu
           label='Выйти'
           className={styles.danger}
           trigger={
             <>
-              <span className={styles.glyph} data-tone='red' aria-hidden>
-                <SignOut weight='bold' />
-              </span>
-              <span className={styles.label}>Выйти</span>
+              <SignOut aria-hidden />
+              Выйти
             </>
           }
         >
@@ -201,10 +200,10 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             Выйти из аккаунта
           </MenuItem>
         </Menu>
+        <p className={styles.footnote}>
+          Записи, сделанные на этом телефоне, останутся на нём и после выхода.
+        </p>
       </div>
-      <p className={styles.footnote}>
-        Записи, сделанные на этом телефоне, останутся на нём и после выхода.
-      </p>
 
       {isTuning && <PreferencesSheet initial={preferences} onClose={() => setIsTuning(false)} />}
       {isNaming && (

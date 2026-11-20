@@ -1,11 +1,7 @@
-/* A quiet card like the passes under it: what to rate on two lines, then five stars in a row. */
+/* Right on the page, no card: what to rate on two lines, then five stars in a row. */
 .card {
   display: flex;
   flex-direction: column;
-  padding: var(--space-4) var(--space-4) var(--space-2);
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .title {

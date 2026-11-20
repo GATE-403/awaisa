@@ -1,13 +1,12 @@
 'use client'
 
-import { Input } from '@awaisa/ui/Input'
-import { MagnifyingGlass, X } from '@phosphor-icons/react/ssr'
 import { useEffect, useRef, useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { pluralize } from '@/shared/lib/plural'
+import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './Place.module.css'
@@ -124,27 +123,7 @@ export const ServicesBrowser = ({
         </div>
 
         {catalog.services.length >= SEARCH_FROM && (
-          <label className={styles.search}>
-            <MagnifyingGlass weight='bold' aria-hidden className={styles.searchIcon} />
-            <Input
-              type='search'
-              aria-label='Найти услугу'
-              placeholder='Найти услугу'
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className={styles.searchInput}
-            />
-            {query && (
-              <button
-                type='button'
-                className={styles.searchClear}
-                onClick={() => setQuery('')}
-                aria-label='Очистить поиск'
-              >
-                <X weight='bold' aria-hidden />
-              </button>
-            )}
-          </label>
+          <SearchField value={query} onChange={setQuery} placeholder='Найти услугу' />
         )}
         {/* Only the category tabs stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (

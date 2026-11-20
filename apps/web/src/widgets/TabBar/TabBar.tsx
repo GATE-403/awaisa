@@ -30,7 +30,12 @@ export const TabBar = () => {
   const activeIndex = items.findIndex((item) => isActivePath(pathname, item.href))
 
   return (
-    <nav aria-label='Нижнее меню' className={styles.tabBar} data-tucked={isTucked || undefined}>
+    <nav
+      aria-label='Нижнее меню'
+      data-site-tabbar
+      className={styles.tabBar}
+      data-tucked={isTucked || undefined}
+    >
       {/* One highlight that slides to the chosen tab, like iOS's tab bar — not a fill per tab. */}
       <span
         className={styles.indicator}

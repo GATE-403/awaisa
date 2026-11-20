@@ -17,6 +17,7 @@ interface HoursTabProps {
 
 type DayDraft = { isOpen: boolean; from: string; to: string }
 
+const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 const STEPS = [15, 30, 60].map((value) => ({ value, label: `${value} мин` }))
 const TIME_ITEMS = TIME_OPTIONS.map((time) => ({ value: time, label: time }))
 
@@ -33,11 +34,19 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
   const [slotMinutes, setSlotMinutes] = useState(business.slotMinutes)
   const [isSaving, setIsSaving] = useState(false)
   const invalidDay = days.findIndex((day) => day.isOpen && day.from >= day.to)
+  const hasChanges =
+    slotMinutes !== business.slotMinutes ||
+    JSON.stringify(days) !== JSON.stringify(toDrafts(business.hours))
 
   const updateDay = (weekday: number, patch: Partial<DayDraft>) =>
     setDays((current) =>
       current.map((day, index) => (index === weekday ? { ...day, ...patch } : day)),
     )
+
+  const handleReset = () => {
+    setDays(toDrafts(business.hours))
+    setSlotMinutes(business.slotMinutes)
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -65,18 +74,21 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
 
       <div className={styles.group}>
         <SectionCaption>Часы работы</SectionCaption>
+        {/* Settings rows: the day on the left, its hours as plain pop-up values and the switch on
+            the right, like iOS. */}
         <ul className={styles.list}>
           {days.map((day, weekday) => (
             <li key={WEEKDAYS_FULL[weekday]} className={styles.hoursRow}>
-              <Switch
-                aria-label={`${WEEKDAYS_FULL[weekday]}: рабочий день`}
-                checked={day.isOpen}
-                onCheckedChange={(isOpen) => updateDay(weekday, { isOpen })}
-              />
-              <span className={styles.dayName}>{WEEKDAYS_FULL[weekday]}</span>
+              <span className={styles.dayName}>
+                <span className={styles.dayFull}>{WEEKDAYS_FULL[weekday]}</span>
+                <span className={styles.dayShort} aria-hidden='true'>
+                  {WEEKDAYS_SHORT[weekday]}
+                </span>
+              </span>
               {day.isOpen ? (
                 <span className={styles.timeRange}>
                   <Select
+                    variant='plain'
                     aria-label={`${WEEKDAYS_FULL[weekday]}: открытие`}
                     items={TIME_ITEMS}
                     value={day.from}
@@ -86,6 +98,7 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
                     –
                   </span>
                   <Select
+                    variant='plain'
                     aria-label={`${WEEKDAYS_FULL[weekday]}: закрытие`}
                     items={TIME_ITEMS}
                     value={day.to}
@@ -95,6 +108,11 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
               ) : (
                 <span className={styles.cellMuted}>Выходной</span>
               )}
+              <Switch
+                aria-label={`${WEEKDAYS_FULL[weekday]}: рабочий день`}
+                checked={day.isOpen}
+                onCheckedChange={(isOpen) => updateDay(weekday, { isOpen })}
+              />
             </li>
           ))}
         </ul>
@@ -108,26 +126,34 @@ export const HoursTab = ({ slug, business, run }: HoursTabProps) => {
       <div className={styles.group}>
         <SectionCaption>Запись</SectionCaption>
         <div className={styles.list}>
-          <label className={styles.settingRow}>
+          <div className={styles.settingRow}>
             <span className={styles.rowBody}>
               <span className={styles.rowTitle}>Шаг записи</span>
               <span className={styles.rowMeta}>Как часто начинаются слоты: 10:00, 10:30…</span>
             </span>
             <Select
+              variant='plain'
               aria-label='Шаг записи'
               items={STEPS}
               value={slotMinutes}
               onValueChange={(value) => value && setSlotMinutes(value)}
             />
-          </label>
+          </div>
         </div>
       </div>
 
-      <div className={styles.formActions}>
-        <Button type='submit' disabled={isSaving || invalidDay !== -1}>
-          Сохранить график
-        </Button>
-      </div>
+      {/* The cabinet's one way to save: the floating bar, only while something changed. */}
+      {hasChanges && (
+        <section className={styles.saveBar} aria-label='Несохранённые изменения'>
+          <span className={styles.saveText}>Есть несохранённые изменения</span>
+          <Button type='button' variant='secondary' size='sm' onClick={handleReset}>
+            Отменить
+          </Button>
+          <Button type='submit' size='sm' disabled={isSaving || invalidDay !== -1}>
+            Сохранить
+          </Button>
+        </section>
+      )}
     </form>
   )
 }

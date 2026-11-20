@@ -1,15 +1,7 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
-import { Input } from '@awaisa/ui/Input'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import {
-  CaretRight,
-  DownloadSimple,
-  MagnifyingGlass,
-  NotePencil,
-  PaperPlaneTilt,
-} from '@phosphor-icons/react/ssr'
+import { CaretRight, DownloadSimple, NotePencil, PaperPlaneTilt } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
@@ -20,6 +12,8 @@ import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { pluralize } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { ImportSheet } from '@/views/manage/ui/ImportSheet/ImportSheet'
@@ -79,16 +73,18 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
         }
         actions={
           canSeeMoney && (
-            <>
-              <Button size='sm' variant='secondary' onClick={() => setIsImporting(true)}>
-                <DownloadSimple weight='bold' aria-hidden />
-                Импорт
-              </Button>
-              <Button size='sm' variant='secondary' onClick={() => setIsMailing(true)}>
-                <PaperPlaneTilt weight='bold' aria-hidden />
-                Рассылка
-              </Button>
-            </>
+            <GlyphGroup label='Клиентская база'>
+              <GlyphButton
+                icon={<DownloadSimple aria-hidden />}
+                label='Импорт'
+                onClick={() => setIsImporting(true)}
+              />
+              <GlyphButton
+                icon={<PaperPlaneTilt aria-hidden />}
+                label='Рассылка'
+                onClick={() => setIsMailing(true)}
+              />
+            </GlyphGroup>
           )
         }
       />
@@ -102,17 +98,12 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
       {isMailing && (
         <MailingSheet slug={slug} businessName={businessName} onClose={() => setIsMailing(false)} />
       )}
-      <label className={styles.search}>
-        <MagnifyingGlass weight='bold' aria-hidden className={styles.searchIcon} />
-        <Input
-          type='search'
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder='Имя или номер'
-          aria-label='Поиск клиента'
-          className={styles.searchInput}
-        />
-      </label>
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        placeholder='Имя или номер'
+        label='Поиск клиента'
+      />
 
       {error && <p className={styles.error}>{error}</p>}
       {!clients && !error && <Skeleton className={styles.skeleton} />}
