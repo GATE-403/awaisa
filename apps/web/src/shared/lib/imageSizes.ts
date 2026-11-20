@@ -39,17 +39,28 @@ const fluidImage = (url: string, widths = [640, 960, 1280, 1600]) => {
 
 const GRID_WIDTHS = [240, 360, 480, 640, 840]
 
+const GRID_SIZES = '(max-width: 767px) 50vw, (max-width: 1099px) 33vw, 300px'
+
+interface GridImageOptions {
+  /** The cell's width per breakpoint; one grid column by default. */
+  sizes?: string
+  widths?: number[]
+}
+
 /**
  * A catalog card's picture: candidates by width and the grid's own column sizes (2 / 3 / 4
  * columns), so a phone with a dense screen takes ~480px for a 180px card instead of 840px.
  */
-const gridImage = (url: string) => {
-  const first = resize(url, GRID_WIDTHS[0] ?? 240)
+const gridImage = (
+  url: string,
+  { sizes = GRID_SIZES, widths = GRID_WIDTHS }: GridImageOptions = {},
+) => {
+  const first = resize(url, widths[0] ?? 240)
   if (first === url) return { src: url }
   return {
     src: resize(url, 480),
-    srcSet: GRID_WIDTHS.map((width) => `${resize(url, width)} ${width}w`).join(', '),
-    sizes: '(max-width: 767px) 50vw, (max-width: 1099px) 33vw, 300px',
+    srcSet: widths.map((width) => `${resize(url, width)} ${width}w`).join(', '),
+    sizes,
   }
 }
 

@@ -179,7 +179,9 @@ export const Header = () => {
             ) : (
               <UserCircle weight='regular' aria-hidden />
             )}
-            <span aria-hidden='true'>{customer?.name || 'Профиль'}</span>
+            <span className={styles.accountName} aria-hidden='true'>
+              {customer?.name || 'Профиль'}
+            </span>
           </NextLink>
         </nav>
       </div>

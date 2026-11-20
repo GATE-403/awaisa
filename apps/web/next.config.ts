@@ -1,6 +1,7 @@
 import path from 'node:path'
 import type { NextConfig } from 'next'
 import { API_URL, CLIENT_API_PREFIX } from './src/shared/config/api'
+import { EMOJI_DATA_URL, EMOJIBASE_VERSION } from './src/shared/ui/EmojiPicker/config'
 
 const nextConfig: NextConfig = {
   // E2E builds into its own folder so `next build` never touches a running `next dev`'s files.
@@ -15,6 +16,11 @@ const nextConfig: NextConfig = {
   ],
   rewrites: async () => [
     { source: `${CLIENT_API_PREFIX}/:path*`, destination: `${API_URL}/:path*` },
+    // The emoji picker's data through our origin (`shared/ui/EmojiPicker/config.ts`).
+    {
+      source: `${EMOJI_DATA_URL}/:path*`,
+      destination: `https://cdn.jsdelivr.net/npm/emojibase-data@${EMOJIBASE_VERSION}/:path*`,
+    },
   ],
   output: 'standalone',
   outputFileTracingRoot: path.join(import.meta.dirname, '../../'),

@@ -18,6 +18,17 @@ const maskPhoneInput = (value: string) => {
   return `+${KG_CODE} ${groups.join(' ')}`
 }
 
+// The number typed after a fixed «+996» (the sign-in screen): «0555123456», «555 12 34 56» or a
+// pasted or autofilled «+996 555 123 456» all become «+996 555 123 456».
+const maskLocalPhoneInput = (value: string) => {
+  const digits = value.replace(/\D/g, '')
+  const local =
+    digits.length > KG_LOCAL_DIGITS && digits.startsWith(KG_CODE)
+      ? digits.slice(KG_CODE.length)
+      : digits
+  return maskPhoneInput(local)
+}
+
 // What is wrong with a typed phone before it is sent, or null when it is a whole Kyrgyz number
 // (+996 and 9 digits) — a half-typed number must not go out as a sign-in request.
 const phoneProblem = (value: string): string | null => {
@@ -41,4 +52,4 @@ const phoneProblem = (value: string): string | null => {
 const maskAmountInput = (digits: string) =>
   digits ? Number(digits).toLocaleString('ru-RU').replace(/\s/g, ' ') : ''
 
-export { maskAmountInput, maskPhoneInput, phoneProblem }
+export { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem }

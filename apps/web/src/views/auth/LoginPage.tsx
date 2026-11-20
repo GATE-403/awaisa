@@ -6,12 +6,13 @@ import { Input } from '@awaisa/ui/Input'
 import { OtpField } from '@awaisa/ui/OtpField'
 import { CaretLeft, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { type FormEvent, useEffect } from 'react'
+import { type FormEvent, useEffect, useRef } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { maskLocalPhoneInput } from '@/shared/lib/inputMasks'
 import { TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
+import { STEP_TURN } from '@/views/auth/config/scene'
 import { CODE_LENGTH, useLoginForm } from '@/views/auth/model/useLoginForm'
 import { useTelegramLogin } from '@/views/auth/model/useTelegramLogin'
 import { GradientFlow } from '@/views/auth/ui/GradientFlow/GradientFlow'
@@ -28,15 +29,21 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
 // It opens on slow living colour behind the mascot and ends with a wave of light.
 export const LoginPage = () => {
   const form = useLoginForm()
+  const phoneInputRef = useRef<HTMLInputElement>(null)
   const telegram = useTelegramLogin(form.finishSignIn)
   const isWaitingForTelegram = form.step === 'phone' && telegram.isWaiting
   const { reset } = form
+
+  // Each step turns the prism a little further, so the light moves with the person.
+  const turn = isWaitingForTelegram ? 1 : STEP_TURN[form.step]
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: only when the page is hidden or left
   useEffect(() => () => reset(), [])
 
   return (
-    <main className={styles.page}>
+    // A dark scene in either theme, every step: the light through a prism needs a dark wall.
+    <main className={styles.page} data-scene='dark' data-signed-in={form.isSignedIn || undefined}>
+      <GradientFlow turn={turn} flare={form.isSignedIn ? 1 : 0} />
       <div className={styles.topBar}>
         {form.step === 'code' || isWaitingForTelegram ? (
           <button
@@ -83,27 +90,41 @@ export const LoginPage = () => {
         {form.step === 'phone' && !isWaitingForTelegram && (
           <form className={styles.welcome} onSubmit={handleSubmit(() => form.sendCode())}>
             <div className={styles.hero}>
-              <GradientFlow />
-              <span className={styles.badge} aria-hidden='true'>
-                <Mascot />
-              </span>
+              <Mascot className={styles.mark} />
               <h1 className={styles.headline}>
                 Запись к мастерам.
-                <span className={styles.headlineMuted}> Без звонков.</span>
+                <span className={styles.headlineSecond}> Без звонков.</span>
               </h1>
+              {/* The number is typed right on the colour in big digits, no box around it. Still
+                  a real tel input (keyboard, contact autofill, paste, the label); «+996» is
+                  already there and the caret starts after it. */}
+              <Field label='Номер телефона' error={form.error} className={styles.number}>
+                <span className={styles.numberRow}>
+                  <span
+                    className={styles.numberPrefix}
+                    aria-hidden='true'
+                    onPointerDown={(event) => {
+                      event.preventDefault()
+                      phoneInputRef.current?.focus()
+                    }}
+                  >
+                    +996
+                  </span>
+                  <Input
+                    ref={phoneInputRef}
+                    type='tel'
+                    inputMode='tel'
+                    autoComplete='tel'
+                    placeholder='555 123 456'
+                    value={form.phone.replace(/^\+996\s?/, '')}
+                    onValueChange={(value) => form.setPhone(maskLocalPhoneInput(value))}
+                    className={styles.numberInput}
+                    autoFocus
+                  />
+                </span>
+              </Field>
             </div>
             <div className={styles.actions}>
-              <Field label='Номер телефона' error={form.error} className={styles.field}>
-                <Input
-                  type='tel'
-                  inputMode='tel'
-                  autoComplete='tel'
-                  placeholder='+996 555 123 456'
-                  value={form.phone}
-                  onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
-                  autoFocus
-                />
-              </Field>
               <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
                 {form.isSubmitting ? 'Отправляем…' : 'Получить код'}
               </Button>

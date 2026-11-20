@@ -11,15 +11,12 @@
   animation: dim 1900ms var(--ease-standard) both;
 }
 
-/* The screen dims under the wave, then settles nearly black behind the greeting, so the light's
-   trace and the white words stand out in either theme. */
+/* The screen stays light while the beam flares behind the blur, then settles nearly black behind
+   the greeting, so the white words stand out. */
 @keyframes dim {
-  from {
+  from,
+  40% {
     background: transparent;
-  }
-
-  30% {
-    background: color-mix(in srgb, black 45%, transparent);
   }
 }
 

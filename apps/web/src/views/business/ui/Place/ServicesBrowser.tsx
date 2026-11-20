@@ -6,6 +6,7 @@ import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { pluralize } from '@/shared/lib/plural'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -164,9 +165,10 @@ export const ServicesBrowser = ({
           </p>
         )}
         {groups.length === 0 && (
-          <p className={styles.nothing}>
-            Ничего не нашли — попробуйте другое слово или раздел «Все».
-          </p>
+          <EmptyState
+            variant='inline'
+            text='Ничего не нашли: попробуйте другое слово или раздел «Все».'
+          />
         )}
         {groups.map(({ category: group, services }) => (
           <div key={group.id} className={styles.group}>

@@ -35,8 +35,10 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
               type='button'
               className={styles.photoButton}
               onClick={() => setOpenIndex(index)}
-              aria-label={`Открыть фото ${index + 1} из ${business.photos.length}`}
             >
+              <span className={styles.srOnly}>
+                Открыть фото {index + 1} из {business.photos.length}
+              </span>
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
               <img src={url} alt='' loading='lazy' decoding='async' className={styles.photoImage} />
               {index === 4 && hiddenCount > 0 && (

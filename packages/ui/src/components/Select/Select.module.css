@@ -31,8 +31,10 @@
   cursor: not-allowed;
 }
 
+/* Unlike an input's ::placeholder, this is real text on the button, and the tertiary label
+   (25-30%) read 2.7:1 in the dark (Lighthouse color-contrast); the secondary label passes AA. */
 .value[data-placeholder] {
-  color: var(--color-tertiary-foreground);
+  color: var(--color-muted-foreground);
 }
 
 .triggerIcon {

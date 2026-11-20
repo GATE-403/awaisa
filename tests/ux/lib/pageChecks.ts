@@ -43,6 +43,13 @@ const checkLayout = (page: Page) =>
       const style = getComputedStyle(element)
       return style.visibility !== 'hidden' && Number(style.opacity) > 0.05
     }
+    // Seen at all: no ancestor faded out (a control's own opacity is checked by `isShown`).
+    const isOpaqueUp = (element: Element) => {
+      for (let node = element.parentElement; node; node = node.parentElement) {
+        if (Number(getComputedStyle(node).opacity) <= 0.05) return false
+      }
+      return true
+    }
     const isPinned = (element: Element) => {
       for (let node: Element | null = element; node; node = node.parentElement) {
         const position = getComputedStyle(node).position
@@ -123,6 +130,9 @@ const checkLayout = (page: Page) =>
     const covered: LayoutResult['covered'] = []
     for (const element of scope.querySelectorAll(controls)) {
       if (covered.length >= 8 || skip(element) || !isShown(element)) continue
+      // Put away on purpose (a floating pill tucked while the page scrolls: transparent and taking
+      // no pointer): nobody can press it, so nothing covers it either.
+      if (getComputedStyle(element).pointerEvents === 'none' || !isOpaqueUp(element)) continue
       const rect = element.getBoundingClientRect()
       const x = rect.left + rect.width / 2
       const y = rect.top + rect.height / 2

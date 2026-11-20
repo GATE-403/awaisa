@@ -147,9 +147,10 @@ const colors: Record<'light' | 'dark', ColorScheme> = {
     border: 'rgb(84 84 88 / 0.6)',
     borderStrong: palette.dark.gray3,
     control: palette.dark.gray4,
-    // Button fill with white text: a touch deeper than the dark system blue.
-    primary: '#0a84ff',
-    primaryHover: '#0a99ff',
+    // Button fill with white text: the light theme's accent. The dark system blue #0a84ff gave
+    // white labels only 3.6:1 (Lighthouse color-contrast); this keeps them at 4.8:1, hover 5.2:1.
+    primary: '#0a6cf0',
+    primaryHover: '#0a66e6',
     primaryForeground: palette.white,
     primarySubtle: 'rgb(0 145 255 / 0.2)',
     primarySubtleHover: 'rgb(0 145 255 / 0.28)',

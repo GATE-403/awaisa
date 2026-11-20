@@ -89,7 +89,12 @@ export const OffersFeed = ({
             <Fragment key={offer.id}>
               {work && position !== null && (
                 <li className={styles.work} data-big={isBigWork(position) || undefined}>
-                  <WorkTile item={work} kind={kind} isBig={isBigWork(position)} />
+                  <WorkTile
+                    item={work}
+                    kind={kind}
+                    isBig={isBigWork(position)}
+                    isPriority={position === 0}
+                  />
                 </li>
               )}
               <li>

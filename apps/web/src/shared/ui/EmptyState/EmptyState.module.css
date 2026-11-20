@@ -1,70 +1,70 @@
-.root[data-variant="card"] {
+/* One look for every empty place: right on whatever it stands on (no card, «пустые заглушки … сделать
+   дизайн для них»), centred, the mascot in a quiet tone over a title3 and muted body text. */
+.root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-12) var(--space-6);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  gap: var(--space-1);
+  padding: var(--space-10) var(--space-4);
   text-align: center;
 }
 
-.root[data-variant="inline"] {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-2);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+/* Compact: where results would be. The same centred words, less air. */
+.root[data-size="inline"] {
+  padding: var(--space-6) var(--space-4);
 }
 
-.root[data-variant="inline"][data-centered] {
-  align-items: center;
-  text-align: center;
-}
-
-/* On a dark stage the card is the stage itself: no surface, light words. */
 .root[data-on-dark] {
   justify-content: center;
   height: 100%;
-  background: none;
-  box-shadow: none;
   color: #fff;
 }
 
 .icon {
   display: grid;
   place-items: center;
-  margin-bottom: var(--space-1);
-  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  color: color-mix(in srgb, var(--color-foreground) 22%, transparent);
 }
 
 .icon > svg {
-  width: 56px;
+  width: 44px;
   height: auto;
 }
 
 .title {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
+  color: var(--color-foreground);
+  font-size: var(--text-title3);
+  line-height: 1.25;
   font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
 }
 
 .text {
-  max-width: 40ch;
+  max-width: 34ch;
   color: var(--color-muted-foreground);
-  font-size: var(--text-sm);
-  line-height: var(--text-sm-line-height);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  text-wrap: balance;
+}
+
+.root[data-size="inline"] .text {
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.root[data-on-dark] .icon {
+  color: rgb(255 255 255 / 0.3);
 }
 
 .root[data-on-dark] .text {
   color: rgb(255 255 255 / 0.7);
 }
 
-.root:has(> :last-child:not(.text)) .text {
-  margin-bottom: var(--space-2);
+.action {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
 }
 
 .root a:not([data-variant]) {

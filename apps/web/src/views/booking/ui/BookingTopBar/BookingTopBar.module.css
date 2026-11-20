@@ -128,7 +128,7 @@
   }
 }
 
-/* iOS grabber: the sheet can be pulled down. Phones and tablets only — on desktop it is a panel. */
+/* iOS grabber: the sheet can be pulled down. Phones only: from 768px it is a side panel. */
 .grabber {
   position: absolute;
   top: 5px;
@@ -140,7 +140,7 @@
   translate: -50% 0;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .grabber {
     display: none;
   }

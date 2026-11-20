@@ -174,4 +174,5 @@ export const useLoginForm = () => {
   }
 }
 
+export type { LoginStep }
 export { CODE_LENGTH }
