@@ -32,6 +32,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
+import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
@@ -151,6 +152,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   )
   const dayHours = date ? (findDay(business.hours, weekdayOf(date)) ?? null) : null
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
+  const isPhone = useMediaQuery('(max-width: 639px)')
+  // The schedule fits the window and never scrolls the page: no empty scrollbar gutter beside it.
+  useRootFlag('fitted-page')
+  // A callback ref: the toolbar mounts only once there are masters, after the first render.
+  const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null)
+  // On phones the toolbar floats over the window's foot like the tab bar: the day ends above it.
+  const [barSpace, setBarSpace] = useState(0)
   // The selected visit's card on the board, for the inspector to point at.
   const selectedCard =
     selected && typeof document !== 'undefined'
@@ -222,6 +230,24 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     router.replace(`/manage/${slug}?tab=schedule`, { scroll: false })
   }, [linkedBookingId, schedule, slug])
 
+  useEffect(() => {
+    const bar = toolbar
+    if (!isPhone || !bar) {
+      setBarSpace(0)
+      return
+    }
+    const measure = () =>
+      setBarSpace(Math.max(0, Math.round(window.innerHeight - bar.getBoundingClientRect().top)))
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(bar)
+    window.addEventListener('resize', measure)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', measure)
+    }
+  }, [isPhone, toolbar])
+
   // The wide board spans the window minus the page's own scrollbar, measured while it is on.
   useEffect(() => {
     if (!isWide) return
@@ -279,6 +305,20 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         serviceId: entry.service.id,
         name: entry.customerName,
         phone: entry.customerPhone,
+      },
+    })
+  }
+
+  // «Записать снова» on a cancelled visit: the same client, service, master and time.
+  const handleBookCancelledAgain = (booking: AdminBooking) => {
+    setSelected(null)
+    setDraft({
+      specialistId: booking.specialistId,
+      time: booking.time,
+      initial: {
+        serviceId: booking.serviceId,
+        name: booking.customerName,
+        phone: booking.customerPhone,
       },
     })
   }
@@ -369,7 +409,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         }
         actions={
           hasMasters && (
-            <div className={styles.toolbar} data-wide>
+            <div className={styles.toolbar} data-wide ref={setToolbar}>
               <SegmentedControl
                 label='Вид расписания'
                 size='sm'
@@ -504,6 +544,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
         {schedule && hasMasters && (
           <DayCalendar
+            footCover={barSpace}
             specialists={schedule.specialists}
             bookings={schedule.bookings}
             timeOff={schedule.timeOff}
@@ -564,6 +605,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 setSelected(null)
                 setClientPhone(phone)
               }}
+              onBookAgain={isPast ? undefined : handleBookCancelledAgain}
             />
           </Popover>
         ) : (
@@ -578,6 +620,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               setSelected(null)
               setClientPhone(phone)
             }}
+            onBookAgain={isPast ? undefined : handleBookCancelledAgain}
           />
         ))}
 

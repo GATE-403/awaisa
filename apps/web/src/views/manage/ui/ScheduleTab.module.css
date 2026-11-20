@@ -185,15 +185,10 @@
   translate: -50% 0;
 }
 
-/* The toggle only matters with room to grow: phones already use the whole width. */
+/* On every screen: on a phone it gives the day the page's gutters and square corners — every
+   pixel counts there. */
 .wideToggle {
   display: contents;
-}
-
-@media (max-width: 1023px) {
-  .wideToggle {
-    display: none;
-  }
 }
 
 /* The day's status row: «Сейчас», «Далее» and the unmarked visits as capsules on one line. */
@@ -221,4 +216,99 @@
 /* Wide, the board stands on the window's foot too: no shadow line under it. */
 .panel[data-wide] {
   box-shadow: none;
+}
+
+/* Phones: «Сейчас», «Далее» and the visits to mark share one line that scrolls sideways — two
+   wrapped rows of capsules took a fifth of the screen over the day. What asks for action (the
+   orange capsule) leads. */
+@media (max-width: 639px) {
+  .dayStatus {
+    flex-wrap: nowrap;
+    padding-inline: var(--space-3) 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 20px), transparent);
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--space-3);
+  }
+
+  /* The row settles on a capsule's start, so none rests cut in half at the edge. */
+  .dayStatus > section,
+  .dayStatus > section > * {
+    scroll-snap-align: start;
+  }
+
+  .dayStatus::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dayStatus::after {
+    content: "";
+    flex: 0 0 var(--space-3);
+  }
+
+  .dayStatus > section {
+    flex: 0 0 auto;
+  }
+
+  .dayStatus > section[aria-label="Неотмеченные визиты"] {
+    order: -1;
+  }
+}
+
+/* Phones: the toolbar floats over the window's foot in the tab bar's material — the view switch,
+   the day's tools and «+» in one glass capsule — so the day takes the line it used to fill. The
+   day ends above it (`bottomInset`, measured). */
+@media (max-width: 639px) {
+  .toolbar.toolbar {
+    position: fixed;
+    right: 0;
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    left: 0;
+    z-index: 40;
+    width: max-content;
+    max-width: calc(100% - var(--space-6));
+    margin: 0 auto;
+    padding: var(--space-1);
+    gap: var(--space-1);
+    border-radius: var(--radius-full);
+    background: var(--color-material);
+    backdrop-filter: var(--blur-material);
+    box-shadow:
+      inset 0 0 0 0.5px var(--color-material-border),
+      var(--shadow-material),
+      var(--shadow-lg);
+  }
+
+  .toolbar.toolbar > :first-child {
+    margin-right: 0;
+  }
+}
+
+/* With the toolbar floating, the head is one line: no empty row under it, a tighter gap. */
+@media (max-width: 639px) {
+  .content {
+    gap: var(--space-3);
+  }
+
+  .content > :first-child {
+    row-gap: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .content > :first-child {
+    min-height: 0;
+  }
+
+  .content {
+    gap: var(--space-2);
+  }
+}
+
+/* From 640px the head is one line (day and numbers, then the toolbar): a tight gap to the day. */
+@media (min-width: 640px) {
+  .content {
+    gap: var(--space-3);
+  }
 }

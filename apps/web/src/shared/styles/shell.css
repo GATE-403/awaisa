@@ -176,6 +176,12 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* A page that fits the window and never scrolls (the cabinet's schedule, `useRootFlag`) keeps no
+   gutter: with classic scrollbars it showed as an empty strip at the window's edge. */
+:root[data-fitted-page] {
+  scrollbar-gutter: auto;
+}
+
 /* Picture cards (`data-card`): one response everywhere. With a mouse the picture slowly zooms
    inside its frame and the card settles on a deeper shadow; a press sinks it at once, on touch
    too. No lift: in sideways shelves a raised card would be clipped at the top. */

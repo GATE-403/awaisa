@@ -30,10 +30,12 @@ import {
   type CSSProperties,
   Fragment,
   type MouseEvent,
+  type ReactNode,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
@@ -87,6 +89,9 @@ interface DayCalendarProps {
   focusedBookingId?: string | null
   /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
   bottomInset?: number
+  /** A bar floating over the window's foot that the day runs under (the phone toolbar): the day
+      keeps its height, its corner controls rise above the bar and its content scrolls out from under. */
+  footCover?: number
   /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
   dayKey?: string
   /** «Найти место»: light up the gaps where a service this long fits (only these masters). */
@@ -105,6 +110,60 @@ interface DayCalendarProps {
 }
 
 type Hover = { specialistId: string; minutes: number }
+
+// Where the pointer hovers, outside React state: a pointer crossing slots used to re-render the
+// whole day (every card) on each slot. Only the one lane's time cursor subscribes to it now.
+type HoverStore = {
+  get: () => Hover | null
+  set: (next: Hover | null) => void
+  subscribe: (onChange: () => void) => () => void
+}
+
+const createHoverStore = (): HoverStore => {
+  let value: Hover | null = null
+  const listeners = new Set<() => void>()
+  return {
+    get: () => value,
+    set: (next) => {
+      if (
+        next === value ||
+        (next &&
+          value &&
+          next.specialistId === value.specialistId &&
+          next.minutes === value.minutes)
+      ) {
+        return
+      }
+      value = next
+      for (const listener of listeners) listener()
+    },
+    subscribe: (onChange) => {
+      listeners.add(onChange)
+      return () => {
+        listeners.delete(onChange)
+      }
+    },
+  }
+}
+
+interface SlotCursorProps {
+  store: HoverStore
+  specialistId: string
+  render: (minutes: number) => ReactNode
+}
+
+// One lane's time cursor: it alone re-renders as the pointer moves through that lane.
+const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
+  const minutes = useSyncExternalStore(
+    store.subscribe,
+    () => {
+      const hover = store.get()
+      return hover?.specialistId === specialistId ? hover.minutes : null
+    },
+    () => null,
+  )
+  return minutes === null ? null : render(minutes)
+}
 
 type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
 
@@ -148,6 +207,9 @@ const blockState = (
 
 // Room left under the day before the window's foot.
 const BOTTOM_GAP_PX = 0
+// The least height of the day: low enough that a short phone (iPhone SE) keeps the whole board,
+// with its masters' track, on screen.
+const MIN_DAY_PX = 260
 
 // How much of the page lies under an element: its ancestors' bottom padding, borders and margins,
 // and whatever comes after it further down (siblings beside it are not counted). Fixed and
@@ -229,6 +291,7 @@ export const DayCalendar = ({
   onMarkArrived,
   focusedBookingId = null,
   bottomInset = 0,
+  footCover = 0,
   dayKey,
   fit = null,
   onMarkNoShow,
@@ -239,7 +302,7 @@ export const DayCalendar = ({
   onCreateBooking,
   onMoveBooking,
 }: DayCalendarProps) => {
-  const [hover, setHover] = useState<Hover | null>(null)
+  const [hoverStore] = useState(createHoverStore)
   // A right click opens the visit's menu with a mouse; on touch screens a long press drags.
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
   // What the right click landed on: a visit, or a free spot in a master's lane.
@@ -462,8 +525,11 @@ export const DayCalendar = ({
       // the board ends that much above the window's foot, so the page fits the window exactly and
       // the board takes the rest of its height.
       const below = spaceBelow(scroller)
-      const height = window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX) - bottomInset
-      const fill = `${Math.max(420, Math.floor(height))}px`
+      // A bar floating over the window's foot covers the page's own padding there, so the larger
+      // of the two counts, not both (the toolbar on phones; 8px of air above it).
+      const height =
+        window.innerHeight - top - Math.max(below, BOTTOM_GAP_PX, bottomInset ? bottomInset + 8 : 0)
+      const fill = `${Math.max(MIN_DAY_PX, Math.floor(height))}px`
       if (scroller.style.height === fill) return
       scroller.style.height = fill
       scroller.style.maxHeight = fill
@@ -485,7 +551,8 @@ export const DayCalendar = ({
   useEffect(() => {
     const box = frameRef.current
     if (!box) return
-    if (!bottomInset) {
+    const cover = bottomInset || footCover
+    if (!cover) {
       box.style.removeProperty('--foot-lift')
       return
     }
@@ -493,7 +560,10 @@ export const DayCalendar = ({
     const measure = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        const covered = box.getBoundingClientRect().bottom - (window.innerHeight - bottomInset)
+        // Under the phone toolbar the masters' track sits 8px over it (the controls keep 12px
+        // from the day's own foot), like one stack of floating bars.
+        const covered =
+          box.getBoundingClientRect().bottom - (window.innerHeight - cover) - (footCover ? 4 : 0)
         const lift = `${Math.max(0, Math.round(covered))}px`
         if (box.style.getPropertyValue('--foot-lift') !== lift) {
           box.style.setProperty('--foot-lift', lift)
@@ -501,15 +571,20 @@ export const DayCalendar = ({
       })
     }
     measure()
+    // The day's own height is fitted after this runs (and again when the bars above change):
+    // measure whenever the box changes size, not only on scroll.
+    const observer = new ResizeObserver(measure)
+    observer.observe(box)
     window.addEventListener('scroll', measure, { passive: true })
     window.addEventListener('resize', measure)
     return () => {
       cancelAnimationFrame(frame)
+      observer.disconnect()
       window.removeEventListener('scroll', measure)
       window.removeEventListener('resize', measure)
       box.style.removeProperty('--foot-lift')
     }
-  }, [bottomInset])
+  }, [bottomInset, footCover])
 
   // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
   useEffect(() => {
@@ -1085,7 +1160,13 @@ export const DayCalendar = ({
                   />
                 </span>
                 <span className={styles.headText}>
-                  <span className={styles.master}>{specialist.name}</span>
+                  <span className={styles.master}>
+                    {specialist.name.split(' ')[0]}
+                    <span className={styles.lastName}>
+                      {specialist.name.split(' ').slice(1).join(' ') &&
+                        ` ${specialist.name.split(' ').slice(1).join(' ')}`}
+                    </span>
+                  </span>
                   <span className={styles.role} data-off={dayOf(specialist) === null || undefined}>
                     {roleLine(specialist)}
                   </span>
@@ -1135,7 +1216,7 @@ export const DayCalendar = ({
                 }
                 aria-label={specialist.name}
                 data-specialist-id={specialist.id}
-                onPointerLeave={() => setHover(null)}
+                onPointerLeave={() => hoverStore.set(null)}
               >
                 <button
                   type='button'
@@ -1148,13 +1229,11 @@ export const DayCalendar = ({
                   onPointerMove={(event) => {
                     if (event.pointerType !== 'mouse' || drag.dragged) return
                     const minutes = minutesAt(event)
-                    if (isTaken(specialist.id, minutes)) {
-                      if (hover) setHover(null)
-                      return
-                    }
-                    if (hover?.specialistId !== specialist.id || hover.minutes !== minutes) {
-                      setHover({ specialistId: specialist.id, minutes })
-                    }
+                    hoverStore.set(
+                      isTaken(specialist.id, minutes)
+                        ? null
+                        : { specialistId: specialist.id, minutes },
+                    )
                   }}
                 />
                 {fit &&
@@ -1183,37 +1262,42 @@ export const DayCalendar = ({
                       </span>
                     </button>
                   ))}
-                {!drag.dragged && hover?.specialistId === specialist.id && (
-                  <span
-                    className={styles.ghost}
-                    data-narrow={
-                      (isTimeline &&
-                        toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) < 130) ||
-                      undefined
-                    }
-                    style={
-                      isTimeline
-                        ? ({
-                            ...place(hover.minutes, hover.minutes + slotMinutes),
-                            '--free': `${toPx(freeUntil(specialist.id, hover.minutes) - hover.minutes) - 4}px`,
-                          } as CSSProperties)
-                        : place(hover.minutes, hover.minutes + slotMinutes)
-                    }
-                    aria-hidden='true'
-                  >
-                    {/* A time cursor, not a card: a thin line in the master's colour where the
+                {!drag.dragged && (
+                  <SlotCursor
+                    store={hoverStore}
+                    specialistId={specialist.id}
+                    render={(hovered) => (
+                      <span
+                        className={styles.ghost}
+                        data-narrow={
+                          (isTimeline && toPx(freeUntil(specialist.id, hovered) - hovered) < 130) ||
+                          undefined
+                        }
+                        style={
+                          isTimeline
+                            ? ({
+                                ...place(hovered, hovered + slotMinutes),
+                                '--free': `${toPx(freeUntil(specialist.id, hovered) - hovered) - 4}px`,
+                              } as CSSProperties)
+                            : place(hovered, hovered + slotMinutes)
+                        }
+                        aria-hidden='true'
+                      >
+                        {/* A time cursor, not a card: a thin line in the master's colour where the
                         visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
-                    <span className={styles.ghostChip}>
-                      <Plus weight='bold' aria-hidden />
-                      {formatClock(hover.minutes)}
-                      {isTimeline && (
-                        <span className={styles.ghostChipWho}>
-                          {face(specialist, styles.cardFace)}
-                          {specialist.name.split(' ')[0]}
+                        <span className={styles.ghostChip}>
+                          <Plus weight='bold' aria-hidden />
+                          {formatClock(hovered)}
+                          {isTimeline && (
+                            <span className={styles.ghostChipWho}>
+                              {face(specialist, styles.cardFace)}
+                              {specialist.name.split(' ')[0]}
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </span>
-                  </span>
+                      </span>
+                    )}
+                  />
                 )}
                 {view.size > 0 &&
                   (() => {
@@ -1255,7 +1339,7 @@ export const DayCalendar = ({
                   !bookings.some((booking) => booking.specialistId === specialist.id) &&
                   !timeOff.some((item) => item.specialistId === specialist.id) &&
                   (isPast || dayOf(specialist) === null || specialist.isOnLeave ? (
-                    <span className={styles.laneEmpty} onPointerEnter={() => setHover(null)}>
+                    <span className={styles.laneEmpty} onPointerEnter={() => hoverStore.set(null)}>
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       {dayOf(specialist) === null || specialist.isOnLeave
@@ -1266,13 +1350,15 @@ export const DayCalendar = ({
                     <button
                       type='button'
                       className={styles.laneEmpty}
-                      onPointerEnter={() => setHover(null)}
+                      onPointerEnter={() => hoverStore.set(null)}
                       data-action
                       onClick={() => onCreateBooking(specialist.id, null)}
                     >
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
-                      свободен весь день
+                      <span>
+                        свободен<span className={styles.laneNoteLong}> весь день</span>
+                      </span>
                       <span className={styles.laneBook}>
                         <Plus weight='bold' aria-hidden />
                         Записать
@@ -1303,7 +1389,7 @@ export const DayCalendar = ({
                     <div
                       key={item.id}
                       className={styles.timeOff}
-                      onPointerEnter={() => setHover(null)}
+                      onPointerEnter={() => hoverStore.set(null)}
                       style={place(parseClock(item.from), parseClock(item.to))}
                     >
                       <span className={styles.blockTime}>
@@ -1368,14 +1454,14 @@ export const DayCalendar = ({
                       state.tone === 'warning' &&
                       onMarkArrived &&
                       onMarkNoShow &&
-                      (isTimeline ? length >= 190 : size === 'tall')
+                      (isTimeline ? length >= 100 : size === 'tall')
                     const quickMark = isMarkable && (
                       <fieldset
                         className={styles.markBar}
                         data-layout={layout}
                         style={
                           isTimeline
-                            ? { left: (box.left ?? 0) + 16 }
+                            ? { left: (box.left ?? 0) + 12, width: length - 24 }
                             : { top: (box.top ?? 0) + (box.height ?? 0) - 46 }
                         }
                       >
@@ -1386,19 +1472,21 @@ export const DayCalendar = ({
                           type='button'
                           className={styles.markButton}
                           data-answer='arrived'
+                          title='Пришёл'
                           onClick={() => onMarkArrived(booking)}
                         >
                           <Check weight='bold' aria-hidden />
-                          Пришёл
+                          <span className={styles.markLabel}>Пришёл</span>
                         </button>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='no-show'
+                          title='Не пришёл'
                           onClick={() => onMarkNoShow(booking)}
                         >
                           <X weight='bold' aria-hidden />
-                          Не пришёл
+                          <span className={styles.markLabel}>Не пришёл</span>
                         </button>
                       </fieldset>
                     )
@@ -1429,7 +1517,7 @@ export const DayCalendar = ({
                           onPointerDown={(event) => drag.handlePointerDown(event, booking)}
                           // The empty-slot preview must not peek out from under a card the pointer
                           // moved onto.
-                          onPointerEnter={() => setHover(null)}
+                          onPointerEnter={() => hoverStore.set(null)}
                           onClick={() => {
                             if (!drag.consumeClick()) onSelectBooking(booking)
                           }}
@@ -1456,7 +1544,7 @@ export const DayCalendar = ({
                               </span>
                               <span className={styles.blockState} data-tone={state.tone}>
                                 <StateGlyph label={state.label} />
-                                {state.label}
+                                <span className={styles.stateWord}>{state.label}</span>
                               </span>
                             </span>
                           )}

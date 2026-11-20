@@ -40,7 +40,9 @@ const Popover = ({
       >
         <BasePopover.Popup className={cx(styles.popup, className)} aria-label={label}>
           <BasePopover.Arrow className={styles.arrow} />
-          {children}
+          {/* The content scrolls inside its own box: the popup itself never clips or scrolls, so
+              the arrow hanging off its edge stays whole and adds no scrollbar. */}
+          <div className={styles.body}>{children}</div>
         </BasePopover.Popup>
       </BasePopover.Positioner>
     </BasePopover.Portal>

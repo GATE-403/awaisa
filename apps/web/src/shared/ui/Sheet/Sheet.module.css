@@ -289,3 +289,16 @@
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
+
+/* A plain Select in a sheet row opens from anywhere on the row, like iOS: its trigger stretches
+   an invisible ::before over the row. Only here — in the kit itself the same rule covered whatever
+   held the trigger (the catalog's tabs, under its sort menu). */
+.row:has(button[data-variant="plain"]) {
+  position: relative;
+}
+
+.row button[data-variant="plain"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
