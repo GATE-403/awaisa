@@ -1,5 +1,6 @@
 import {
   getBusiness,
+  getCertificateSale,
   listPromotions,
   listQuestions,
   listReviews,
@@ -10,6 +11,7 @@ import {
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
+import { GiftCertificateSection } from '@/views/business/ui/Place/GiftCertificateSection'
 import { MastersSection } from '@/views/business/ui/Place/MastersSection'
 import { NextSlotCard } from '@/views/business/ui/Place/NextSlotCard'
 import { PhotosSection } from '@/views/business/ui/Place/PhotosSection'
@@ -34,10 +36,11 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
     listPromotions(slug),
     listQuestions(slug),
   ])
-  const [similar, servicePhotos, subscriptionPlans] = await Promise.all([
+  const [similar, servicePhotos, subscriptionPlans, certificateSale] = await Promise.all([
     listSimilarPlaces(slug),
     listServicePhotos(slug),
     listSubscriptionPlans(slug),
+    getCertificateSale(slug),
   ])
   const quickest = catalog.services.find((service) => service.isPopular) ?? catalog.services[0]
 
@@ -62,6 +65,9 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
             <MastersSection business={business} specialists={catalog.specialists} />
             <ReviewsSection business={business} reviews={reviews} />
             <PhotosSection business={business} />
+            {certificateSale.amounts.length > 0 && (
+              <GiftCertificateSection business={business} amounts={certificateSale.amounts} />
+            )}
             <QuestionsSection business={business} questions={questions} />
           </div>
           <div className={styles.aside}>

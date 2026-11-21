@@ -70,6 +70,7 @@ test.describe('Loyalty', () => {
           revenue: number
           servicesRevenue: number
           productsRevenue: number
+          certificatesRevenue: number
         }
       const report = async () =>
         (await (await page.request.get(`${manage}/analytics?days=7`)).json()).loyalty as {
@@ -93,7 +94,10 @@ test.describe('Loyalty', () => {
       )
       expect(moneyAfter.subscriptionsSold).toBeGreaterThanOrEqual(moneyBefore.subscriptionsSold + 1)
       expect(moneyAfter.revenue).toBe(
-        moneyAfter.servicesRevenue + moneyAfter.productsRevenue + moneyAfter.subscriptionsRevenue,
+        moneyAfter.servicesRevenue +
+          moneyAfter.productsRevenue +
+          moneyAfter.subscriptionsRevenue +
+          moneyAfter.certificatesRevenue,
       )
       const loyaltyAfter = await report()
       expect(loyaltyAfter.subscriptionsRevenue).toBeGreaterThanOrEqual(

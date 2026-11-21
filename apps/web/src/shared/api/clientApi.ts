@@ -30,6 +30,9 @@ import type {
   CashMovementInput,
   CashShift,
   Category,
+  CertificateOrderCreated,
+  CertificateOrderInput,
+  CertificateSaleSettings,
   CheckoutLink,
   ClientCard,
   ClientList,
@@ -866,6 +869,13 @@ const issueCertificate = (
   input: { amount: number; recipient: string; phone: string; expiresOn: string | null },
 ) => post<GiftCertificate>(`${manage(slug)}/loyalty/certificates`, input)
 
+const setCertificateSale = (slug: string, input: CertificateSaleSettings) =>
+  send<CertificateSaleSettings>('PUT', `${manage(slug)}/loyalty/certificate-sale`, input)
+
+// «Подарочный сертификат» on the place's page: the order waits for its payment on /pay.
+const orderCertificate = (slug: string, input: CertificateOrderInput) =>
+  post<CertificateOrderCreated>(`/businesses/${encodeURIComponent(slug)}/certificate-orders`, input)
+
 const getClientLoyalty = (slug: string, phone: string, signal?: AbortSignal) =>
   request<ClientLoyalty>(`${manage(slug)}/loyalty/clients/${encodeURIComponent(phone)}`, { signal })
 
@@ -1033,6 +1043,8 @@ export {
   getOnlineSubscriptionPlans,
   orderSubscription,
   issueCertificate,
+  orderCertificate,
+  setCertificateSale,
   saveSubscriptionPlan,
   sellSubscription,
   importClients,
