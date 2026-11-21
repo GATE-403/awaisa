@@ -50,8 +50,9 @@ const daysIn = (month: number, year: string) =>
   new Date(Date.UTC(Number(year === NO_YEAR ? 2024 : year), month, 0)).getUTCDate()
 
 const parse = (value: string) => {
-  const [year = NO_YEAR, month = '', day = ''] = value.split('-')
-  return { year, month: Number(month) || null, day: Number(day) || null }
+  // An empty value splits into [''], so the year needs its own fallback, not a default.
+  const [year, month = '', day = ''] = value.split('-')
+  return { year: year || NO_YEAR, month: Number(month) || null, day: Number(day) || null }
 }
 
 const describeBirthday = (value: string) => {

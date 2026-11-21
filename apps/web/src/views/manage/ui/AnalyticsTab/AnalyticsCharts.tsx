@@ -91,9 +91,12 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
 
   return (
     <div className={styles.revenue}>
-      <div className={styles.chart} aria-hidden='true'>
+      {/* Not aria-hidden: Recharts makes the chart a focusable application (arrows move the
+          tooltip), and a focusable element hidden from screen readers is a trap. */}
+      <div className={styles.chart}>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart
+            title='Выручка по периодам'
             data={rows}
             barGap={2}
             barCategoryGap='18%'
