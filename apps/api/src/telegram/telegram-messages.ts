@@ -62,14 +62,21 @@ const movedByClientText = (
   ].join('\n')
 }
 
+// Ratings up to this one are not answered automatically: the owner is asked to answer in person.
+const ANSWER_IN_PERSON_UP_TO = 3
+
 const reviewText = (
   business: string,
   review: { rating: number; comment: string; authorName: string; specialistName: string },
+  answerUrl?: string,
 ) =>
   [
     `${stars(review.rating)} <b>Новый отзыв</b> · ${escapeHtml(business)}`,
     `${escapeHtml(review.authorName)} о мастере ${escapeHtml(review.specialistName)}`,
     review.comment ? `«${escapeHtml(review.comment)}»` : '',
+    answerUrl && review.rating <= ANSWER_IN_PERSON_UP_TO
+      ? `<b>Ответьте клиенту сегодня:</b> <a href="${escapeHtml(answerUrl)}">открыть отзывы</a>`
+      : '',
   ]
     .filter(Boolean)
     .join('\n')

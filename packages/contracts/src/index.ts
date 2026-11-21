@@ -399,7 +399,29 @@ type ProfileLinkKind = 'instagram' | 'telegram' | 'tiktok' | 'website'
 /** A link on a public profile, built by the API from a handle: never an arbitrary URL. */
 type ProfileLink = { kind: ProfileLinkKind; label: string; text: string; url: string }
 
-type ManagedReview = Review & { customerPhone: string; visitDate: string | null }
+type ManagedReview = Review & {
+  customerPhone: string
+  visitDate: string | null
+  /** The reply was sent by the automatic reply to good reviews, not written by the owner. */
+  isAutoReply?: boolean
+  /** A poor review the owner has settled with the client (ISO), else null. */
+  resolvedAt?: string | null
+}
+
+/**
+ * `GET|PUT /manage/:slug/reviews/settings`: answering without writing each reply by hand. Templates
+ * take `{имя}` (the client's first name), `{мастер}` (the master's first name) and `{услуга}`.
+ */
+type ReviewReplySettings = {
+  autoReply: {
+    isEnabled: boolean
+    /** Reviews from this rating up get the automatic reply (an hour after they arrive). */
+    minRating: 4 | 5
+    template: string
+  }
+  /** Offered above the reply field, up to six. */
+  quickReplies: string[]
+}
 
 // «Вопросы» on a business page: asked by a signed-in client, answered by the place.
 type BusinessQuestion = {
@@ -418,6 +440,24 @@ type ReviewSummary<Item = Review> = {
   average: number
   distribution: { stars: number; count: number }[]
   items: Item[]
+  /** The cabinet only: reviews still without the owner's reply (all of them, not just loaded). */
+  unanswered?: number
+  /** The cabinet only: unanswered reviews without words, from 5 ★ and from 4 ★ up, answered in bulk. */
+  quietUnanswered?: { fiveStars: number; fourAndUp: number }
+}
+
+/** `POST /manage/:slug/reviews/bulk-reply`: how many unanswered reviews without words got it. */
+type BulkReplyResult = { count: number }
+
+/** `PUT /manage/:slug/reviews/:id/resolved`. */
+type ReviewResolution = { id: string; resolvedAt: string | null }
+
+/** `GET /master/:slug/reviews`: what clients said about the signed-in master. */
+type MasterReviews = {
+  count: number
+  average: number | null
+  /** The latest twenty, newest first. */
+  items: Review[]
 }
 
 type VisitReview = { visit: Booking; canReview: boolean }
@@ -449,6 +489,9 @@ type Customer = {
   businesses?: { slug: string; name: string; role: 'owner' | 'staff' }[]
   masterOf?: { slug: string; name: string }[]
 }
+
+/** `GET /session`: the signed-in account, or null for a guest (200 either way). */
+type Session = { customer: Customer | null }
 
 type OtpChannel = 'telegram' | 'sms'
 
@@ -842,6 +885,9 @@ type AnalyticsReport = {
     visits: number
     revenue: number
     load: number
+    /** Reviews of this master in the period and their average (null without reviews). */
+    reviews: number
+    rating: number | null
     percent: number | null
     payout: number | null
   }[]
@@ -1180,6 +1226,11 @@ export type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  Session,
+  ReviewReplySettings,
+  BulkReplyResult,
+  ReviewResolution,
+  MasterReviews,
   OtpChannel,
   OtpRequest,
   Service,

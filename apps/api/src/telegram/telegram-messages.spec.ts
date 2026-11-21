@@ -36,4 +36,13 @@ describe('Telegram messages', () => {
       }),
     ).toMatch(/^★★★★☆ .*«Супер»/s)
   })
+
+  it('asks for an answer in person on a poor rating only', () => {
+    const review = { comment: 'Долго ждал', authorName: 'Даян', specialistName: 'Айгерим' }
+    const url = 'https://awaisa.kg/manage/a?tab=reviews'
+    expect(reviewText('A', { ...review, rating: 2 }, url)).toContain(
+      `<a href="${url}">открыть отзывы</a>`,
+    )
+    expect(reviewText('A', { ...review, rating: 5 }, url)).not.toContain('Ответьте')
+  })
 })

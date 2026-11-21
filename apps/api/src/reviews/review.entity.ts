@@ -32,6 +32,14 @@ export class Review {
   @Column({ name: 'replied_at', type: 'timestamptz', nullable: true })
   repliedAt: Date | null
 
+  /** Sent by the automatic reply to good reviews, not written by the owner. */
+  @Column({ name: 'is_auto_reply', type: 'boolean', default: false })
+  isAutoReply: boolean
+
+  /** A poor review the owner has settled with the client. */
+  @Column({ name: 'resolved_at', type: 'timestamptz', nullable: true })
+  resolvedAt: Date | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

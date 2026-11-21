@@ -40,7 +40,8 @@ type Entry = {
   key: string
   place: number
   href: string
-  label: string
+  /** Said after the row to screen readers: what a tap does. */
+  action?: string
   name: string
   subtitle: string
   average: number
@@ -52,7 +53,7 @@ const toMasterEntry = (master: LeaderboardMaster): Entry => ({
   key: master.id,
   place: master.place,
   href: `/${master.business.slug}/book?specialist=${master.id}`,
-  label: `${master.place}-е место: ${master.name}, ${master.business.name}. Записаться`,
+  action: 'Записаться',
   name: master.name,
   subtitle: master.business.name,
   average: master.average,
@@ -64,7 +65,6 @@ const toPlaceEntry = (place: LeaderboardPlace): Entry => ({
   key: place.slug,
   place: place.place,
   href: `/${place.slug}`,
-  label: `${place.place}-е место: ${place.name}`,
   name: place.name,
   subtitle: place.address ?? '',
   average: place.average,
@@ -131,7 +131,6 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
         {entries.length === 0 ? (
           <EmptyState
             variant='inline'
-            isCentered
             text='Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок станет больше.'
           />
         ) : (
@@ -141,14 +140,20 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
             <ol className={styles.list}>
               {entries.map((entry) => (
                 <li key={entry.key} data-place={entry.place <= 3 ? entry.place : undefined}>
-                  <NextLink href={entry.href} className={styles.row} aria-label={entry.label}>
+                  {/* No aria-label: the row's own words are its name (WCAG 2.5.3), the rest is
+                      screen-reader text after them. */}
+                  <NextLink href={entry.href} className={styles.row}>
                     <span className={styles.place} data-place={entry.place}>
-                      {entry.place}
+                      {/* Read as one word «1-е место»: a hidden «-е место» after the visible
+                          number was read as «1 -е место». */}
+                      <span aria-hidden>{entry.place}</span>
+                      <span className={styles.srOnly}>{entry.place}-е место</span>
                     </span>
                     {entry.face}
                     <span className={styles.who}>
                       <span className={styles.name}>{entry.name}</span>
                       <span className={styles.where}>{entry.subtitle}</span>
+                      {entry.action && <span className={styles.srOnly}>{entry.action}</span>}
                     </span>
                     <span className={styles.rating}>
                       <span className={styles.ratingValue}>

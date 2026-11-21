@@ -83,6 +83,7 @@
 }
 
 .place {
+  position: relative;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
@@ -91,6 +92,7 @@
 }
 
 .who {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -184,4 +186,13 @@
 /* The trail sits close above the head: the column's gap is for sections, not for it. */
 .crumbs {
   margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

@@ -75,6 +75,13 @@ const css = [
     ...toColorVariables(colors.dark),
     ...toVariables('system', systemColors.dark),
   ]),
+  // One screen that is dark in either theme (the sign-in's light scene): its controls and text
+  // take the dark colours, the rest of the app keeps the person's theme.
+  block("[data-scene='dark']", [
+    '  color-scheme: dark;',
+    ...toColorVariables(colors.dark),
+    ...toVariables('system', systemColors.dark),
+  ]),
   // Touch devices that are not iOS (Android): live blur under sticky bars is recomputed on every
   // scrolled frame and stutters on mid-range phones, so panes there are solid. iOS keeps glass.
   `@supports not (-webkit-touch-callout: none) {\n@media (pointer: coarse) {\n${block(A11Y_ROOT, [

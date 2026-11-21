@@ -15,6 +15,8 @@ interface ReviewItemProps {
   meta?: ReactNode
   /** Beside the owner's reply, or in its place (the cabinet's «Ответить» / «Изменить»). */
   replyAction?: ReactNode
+  /** Under the review's words: what the cabinet can do about it («Написать клиенту», «Решено»). */
+  actions?: ReactNode
   /** The author's public profile (`/u/<id>`): the name links to it. */
   authorHref?: string
 }
@@ -33,6 +35,7 @@ export const ReviewItem = ({
   businessName,
   meta,
   replyAction,
+  actions,
   authorHref,
 }: ReviewItemProps) => (
   <li className={styles.review}>
@@ -76,6 +79,7 @@ export const ReviewItem = ({
         {review.photos && review.photos.length > 0 && (
           <ReviewPhotos photos={review.photos} authorName={review.authorName} />
         )}
+        {actions}
       </div>
     </div>
     {review.reply ? (
