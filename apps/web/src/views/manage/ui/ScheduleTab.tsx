@@ -42,6 +42,7 @@ import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { useAdminSchedule } from '@/views/manage/model/useAdminSchedule'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
+import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { useScheduleLayout, useScheduleWide } from '@/views/manage/model/useScheduleLayout'
 import { BookingDetailsDialog } from '@/views/manage/ui/BookingDetailsDialog/BookingDetailsDialog'
 import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
@@ -100,6 +101,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
+  const canSell = useHasFeature('cashdesk')
   const toast = useToast()
   const [unclosed, setUnclosed] = useState<{
     total: number
@@ -450,11 +452,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                       onClick={() => setIsSharing(true)}
                       disabled={!schedule}
                     />
-                    <GlyphButton
-                      icon={<ShoppingBag aria-hidden />}
-                      label='Продать товар'
-                      onClick={() => setSale({ booking: null })}
-                    />
+                    {canSell && (
+                      <GlyphButton
+                        icon={<ShoppingBag aria-hidden />}
+                        label='Продать товар'
+                        onClick={() => setSale({ booking: null })}
+                      />
+                    )}
                     <Menu label='Найти место под услугу' trigger={<MagnifyingGlass aria-hidden />}>
                       {catalog.services
                         .filter((service) => service.isActive !== false)
@@ -615,10 +619,14 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 setClientPhone(phone)
               }}
               onBookAgain={isPast ? undefined : handleBookCancelledAgain}
-              onSellProducts={(booking) => {
-                setSelected(null)
-                setSale({ booking })
-              }}
+              onSellProducts={
+                canSell
+                  ? (booking) => {
+                      setSelected(null)
+                      setSale({ booking })
+                    }
+                  : undefined
+              }
             />
           </Popover>
         ) : (
@@ -634,10 +642,14 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               setClientPhone(phone)
             }}
             onBookAgain={isPast ? undefined : handleBookCancelledAgain}
-            onSellProducts={(booking) => {
-              setSelected(null)
-              setSale({ booking })
-            }}
+            onSellProducts={
+              canSell
+                ? (booking) => {
+                    setSelected(null)
+                    setSale({ booking })
+                  }
+                : undefined
+            }
           />
         ))}
 
