@@ -11,17 +11,22 @@ import { DEFAULT_CENTER, isDarkTheme, TILE_OPTIONS, TILE_URL } from './mapTiles'
 
 interface LocationPickerProps {
   value: Point | null
-  onChange: (point: Point) => void
+  /** `user` when the person moved the map (a drag, «Я здесь»), `target` after a `target` move. */
+  onChange: (point: Point, source: 'user' | 'target') => void
+  /** A point to fly to (an address picked from the search); a new object each time it moves. */
+  target?: Point | null
 }
 
 const PICK_ZOOM = 16
 
 // Like dropping a pin in Maps: the map moves under a fixed pin, so no exact tap is needed.
-export const LocationPicker = ({ value, onChange }: LocationPickerProps) => {
+export const LocationPicker = ({ value, onChange, target = null }: LocationPickerProps) => {
   const { theme } = useTheme()
   const containerRef = useRef<HTMLElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
   const onChangeRef = useRef(onChange)
+  // The next move is ours (flying to a picked address), not the person's.
+  const isTargetMoveRef = useRef(false)
 
   useEffect(() => {
     onChangeRef.current = onChange
@@ -42,10 +47,15 @@ export const LocationPicker = ({ value, onChange }: LocationPickerProps) => {
       map.getContainer().dataset.dark = String(isDarkTheme(theme))
       map.on('moveend', () => {
         const center = map.getCenter()
-        onChangeRef.current({
-          latitude: Math.round(center.lat * 1e6) / 1e6,
-          longitude: Math.round(center.lng * 1e6) / 1e6,
-        })
+        const source = isTargetMoveRef.current ? 'target' : 'user'
+        isTargetMoveRef.current = false
+        onChangeRef.current(
+          {
+            latitude: Math.round(center.lat * 1e6) / 1e6,
+            longitude: Math.round(center.lng * 1e6) / 1e6,
+          },
+          source,
+        )
       })
       mapRef.current = map
     })
@@ -56,6 +66,13 @@ export const LocationPicker = ({ value, onChange }: LocationPickerProps) => {
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !target) return
+    isTargetMoveRef.current = true
+    map.setView([target.latitude, target.longitude], PICK_ZOOM)
+  }, [target])
 
   const locate = () => {
     navigator.geolocation?.getCurrentPosition(
