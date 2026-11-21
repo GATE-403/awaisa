@@ -5,6 +5,8 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { AdminModule } from './admin/admin.module.js'
 import { AuthModule } from './auth/auth.module.js'
+import { BillingModule } from './billing/billing.module.js'
+import { BillingCoreModule } from './billing/billing-core.module.js'
 import { BookingsModule } from './bookings/bookings.module.js'
 import { BusinessesModule } from './businesses/businesses.module.js'
 import { CacheModule } from './cache/cache.module.js'
@@ -15,6 +17,7 @@ import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
+import { FiscalModule } from './fiscal/fiscal.module.js'
 import { GeoModule } from './geo/geo.module.js'
 import { HealthController } from './health/health.controller.js'
 import { ImportModule } from './import/import.module.js'
@@ -56,6 +59,8 @@ import { WalletModule } from './wallet/wallet.module.js'
       }),
     }),
     DatabaseModule,
+    BillingCoreModule,
+    BillingModule,
     CatalogModule,
     BusinessesModule,
     BookingsModule,
@@ -75,6 +80,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     InventoryModule,
     PayrollModule,
     CashDeskModule,
+    FiscalModule,
     ImportModule,
     RecommendationsModule,
     TelemetryModule,

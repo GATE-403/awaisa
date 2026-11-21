@@ -57,12 +57,17 @@ type Env = {
   VAPID_PRIVATE_KEY?: string
   /** Who push services may contact: `mailto:` or an https address; the site's address by default. */
   VAPID_SUBJECT?: string
+  /** Expo push service access token (enhanced push security); without it app pushes are only logged. */
+  EXPO_ACCESS_TOKEN?: string
   PAYMENT_DRIVER: PaymentDriver
   FREEDOMPAY_MERCHANT_ID?: string
   FREEDOMPAY_SECRET_KEY?: string
   FREEDOMPAY_API_URL: string
   FREEDOMPAY_CURRENCY: string
   FREEDOMPAY_TESTING_MODE: boolean
+  FISCAL_DRIVER: FiscalDriver
+  /** eKassa's API address (the test server until the business goes live). */
+  EKASSA_API_URL: string
   /** Addresses and map points for branches: Photon (OpenStreetMap) or off. */
   GEOCODER: 'photon' | 'off'
   PHOTON_URL: string
@@ -81,6 +86,10 @@ type WhatsappDriver = 'meta' | 'log' | 'off'
 // Prepayments: `test` is a built-in checkout for development and e2e; `none` turns deposits off;
 // `freedompay` takes real cards through Freedom Pay (Kyrgyzstan).
 type PaymentDriver = 'none' | 'test' | 'freedompay'
+
+// Fiscal receipts: `log` numbers them itself and writes them to the log (the default outside
+// production), `off` issues none (the default in production), `ekassa` sends them to eKassa.
+type FiscalDriver = 'log' | 'off' | 'ekassa'
 
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 const MIN_SECRET_LENGTH = 32
@@ -228,6 +237,19 @@ const parsePaymentDriver = (
   }
   if (driver === 'test' && nodeEnv === 'production') {
     throw new Error('PAYMENT_DRIVER=test must not be used in production')
+  }
+
+  return driver
+}
+
+const parseFiscalDriver = (value: unknown, nodeEnv: Env['NODE_ENV']): FiscalDriver => {
+  const driver = optionalString(value)
+  if (!driver) return nodeEnv === 'production' ? 'off' : 'log'
+  if (driver !== 'log' && driver !== 'off' && driver !== 'ekassa') {
+    throw new Error('FISCAL_DRIVER must be log, off or ekassa')
+  }
+  if (driver === 'log' && nodeEnv === 'production') {
+    throw new Error('FISCAL_DRIVER=log must not be used in production')
   }
 
   return driver
@@ -391,6 +413,11 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     FREEDOMPAY_CURRENCY: optionalString(config.FREEDOMPAY_CURRENCY) ?? 'KGS',
     // Test payments on Freedom Pay's side (their test cards), still through the real API.
     FREEDOMPAY_TESTING_MODE: optionalString(config.FREEDOMPAY_TESTING_MODE) === 'true',
+    FISCAL_DRIVER: parseFiscalDriver(config.FISCAL_DRIVER, nodeEnv),
+    EKASSA_API_URL: (optionalString(config.EKASSA_API_URL) ?? 'https://test.ekassa.kg/api').replace(
+      /\/$/,
+      '',
+    ),
     RECS_INTERLEAVE: parseInterleave(config.RECS_INTERLEAVE),
     GEOCODER: optionalString(config.GEOCODER) === 'off' ? 'off' : 'photon',
     PHOTON_URL: (optionalString(config.PHOTON_URL) ?? 'https://photon.komoot.io').replace(
@@ -410,8 +437,9 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ...parseStorage(config),
     ...parseWallet(config),
     ...parseVapid(config, publicWebUrl),
+    EXPO_ACCESS_TOKEN: optionalString(config.EXPO_ACCESS_TOKEN),
   }
 }
 
-export type { Env, PaymentDriver, SmsDriver, StorageDriver, WhatsappDriver }
+export type { Env, FiscalDriver, PaymentDriver, SmsDriver, StorageDriver, WhatsappDriver }
 export { validateEnv }

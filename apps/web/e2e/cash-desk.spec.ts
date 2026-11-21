@@ -22,6 +22,7 @@ type Desk = {
 type Money = {
   servicesRevenue: number
   productsRevenue: number
+  subscriptionsRevenue: number
   materialsCost: number
   productsCost: number
   expenses: number
@@ -196,7 +197,8 @@ test.describe('Cash desk', () => {
       expect(report.expensesByCategory).toContainEqual({ category: CATEGORY, amount: 1500 })
       expect(report.profit).toBeCloseTo(
         report.servicesRevenue +
-          report.productsRevenue -
+          report.productsRevenue +
+          report.subscriptionsRevenue -
           report.materialsCost -
           report.productsCost -
           report.expenses,

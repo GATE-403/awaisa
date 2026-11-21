@@ -10,12 +10,15 @@ import type {
   AnalyticsReport,
   Availability,
   AvatarUpload,
+  BillingCheckoutInput,
+  BillingExtendInput,
   BirthdayGreeting,
   Booking,
   BookingTelegramLink,
   Branch,
   BranchInput,
   BulkReplyResult,
+  BusinessBilling,
   BusinessCard,
   BusinessLink,
   BusinessPage,
@@ -33,6 +36,7 @@ import type {
   ClientNote,
   ClientSegment,
   ClientSort,
+  ClientSubscription,
   ClosedDay,
   CloseShiftInput,
   CoverUpload,
@@ -50,6 +54,9 @@ import type {
   ExpenseList,
   FeedLikes,
   FeedPage,
+  FiscalReceipt,
+  FiscalSettings,
+  FiscalSettingsInput,
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
@@ -82,6 +89,7 @@ import type {
   MyLoyalty,
   NextFree,
   Offer,
+  OnlineSubscriptionPlan,
   OpenShiftInput,
   OtpRequest,
   OutcomeInput,
@@ -95,6 +103,7 @@ import type {
   PublicProfile,
   PushConfig,
   PushSubscriptionInput,
+  PushTokenInput,
   RecentBooking,
   Recommendation,
   ReviewAccess,
@@ -191,14 +200,23 @@ const post = <Result>(path: string, body?: unknown) =>
 const getAvailability = (
   {
     branchId,
+    extraServiceIds,
     ...params
-  }: { serviceId: string; specialistId: string; date: string; branchId?: string },
+  }: {
+    serviceId: string
+    specialistId: string
+    date: string
+    branchId?: string
+    /** Services done after `serviceId` in the same visit: the time fits all of them. */
+    extraServiceIds?: string[]
+  },
   signal?: AbortSignal,
-) =>
-  request<Availability>(
-    `/availability?${new URLSearchParams(branchId ? { ...params, branchId } : params)}`,
-    { signal },
-  )
+) => {
+  const query = new URLSearchParams(params)
+  if (branchId) query.set('branchId', branchId)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
+  return request<Availability>(`/availability?${query}`, { signal })
+}
 
 const getMyProfileSettings = (signal?: AbortSignal) =>
   request<ProfileSettings>('/me/profile', { signal })
@@ -505,6 +523,11 @@ const savePushSubscription = (subscription: PushSubscriptionInput) =>
 const deletePushSubscription = (endpoint: string) =>
   send<void>('DELETE', '/me/push-subscriptions', { endpoint })
 
+// The app's own pushes: its Expo token, handed over through the native bridge.
+const savePushToken = (input: PushTokenInput) => post<void>('/me/push-tokens', input)
+
+const deletePushToken = (input: PushTokenInput) => send<void>('DELETE', '/me/push-tokens', input)
+
 const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<AnalyticsReport>(
     `${manage(slug)}/analytics?${new URLSearchParams({ days: String(days) })}`,
@@ -757,11 +780,22 @@ const getTelegramLink = (id: string, token: string | null) =>
   })
 
 const getPriceQuote = (
-  params: { serviceId: string; date: string; time: string; code?: string; phone?: string },
+  {
+    extraServiceIds,
+    ...params
+  }: {
+    serviceId: string
+    extraServiceIds?: string[]
+    date: string
+    time: string
+    code?: string
+    phone?: string
+  },
   signal?: AbortSignal,
 ) => {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) if (value) query.set(key, value)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
   return request<PriceQuote>(`/promotions/quote?${query}`, { signal })
 }
 
@@ -837,6 +871,21 @@ const createSale = (slug: string, input: SaleInput) => post<Sale>(`${manage(slug
 const cancelSale = (slug: string, saleId: string) =>
   post<Sale>(`${manage(slug)}/sales/${saleId}/cancel`)
 
+const getFiscalSettings = (slug: string, signal?: AbortSignal) =>
+  request<FiscalSettings>(`${manage(slug)}/fiscal`, { signal })
+
+const saveFiscalSettings = (slug: string, input: FiscalSettingsInput) =>
+  send<FiscalSettings>('PUT', `${manage(slug)}/fiscal`, input)
+
+const listVisitReceipts = (slug: string, bookingId: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?bookingId=${bookingId}`, { signal })
+
+const listFailedReceipts = (slug: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?status=failed`, { signal })
+
+const retryReceipt = (slug: string, receiptId: string) =>
+  post<FiscalReceipt>(`${manage(slug)}/fiscal/receipts/${receiptId}/retry`)
+
 const listExpenses = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<ExpenseList>(`${manage(slug)}/expenses?days=${days}`, { signal })
 
@@ -871,6 +920,16 @@ const sellSubscription = (slug: string, phone: string, planId: string) =>
 
 const getMyLoyalty = (signal?: AbortSignal) => request<MyLoyalty>('/me/loyalty', { signal })
 
+// Subscriptions sold online: the place's plans, buying one, and the client's own at a place.
+const getOnlineSubscriptionPlans = (slug: string, signal?: AbortSignal) =>
+  request<OnlineSubscriptionPlan[]>(`/businesses/${slug}/subscription-plans`, { signal })
+
+const orderSubscription = (slug: string, planId: string) =>
+  post<CheckoutLink>(`/businesses/${slug}/subscription-plans/${planId}/order`, {})
+
+const getMySubscriptionsAt = (slug: string, signal?: AbortSignal) =>
+  request<ClientSubscription[]>(`/me/subscriptions/${slug}`, { signal })
+
 const getMailings = (slug: string, signal?: AbortSignal) =>
   request<MailingsOverview>(`${manage(slug)}/mailings`, { signal })
 
@@ -893,6 +952,15 @@ const sendMailing = (
 const setBirthdayGreeting = (slug: string, text: string | null) =>
   send<BirthdayGreeting>('PUT', `${manage(slug)}/mailings/birthday`, { text })
 
+const getBilling = (slug: string, signal?: AbortSignal) =>
+  request<BusinessBilling>(`${manage(slug)}/billing`, { signal })
+
+const checkoutBilling = (slug: string, input: BillingCheckoutInput) =>
+  post<CheckoutLink>(`${manage(slug)}/billing/checkout`, input)
+
+const extendBilling = (slug: string, input: BillingExtendInput) =>
+  post<BusinessBilling>(`${manage(slug)}/billing/extend`, input)
+
 const getTeam = (slug: string, signal?: AbortSignal) =>
   request<TeamMember[]>(`${manage(slug)}/members`, { signal })
 
@@ -903,6 +971,9 @@ const removeTeamMember = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/members/${id}`)
 
 export {
+  checkoutBilling,
+  extendBilling,
+  getBilling,
   getFunnelReport,
   getFunnelSegments,
   getFunnelSignals,
@@ -919,6 +990,9 @@ export {
   getClientLoyalty,
   getLoyalty,
   getMyLoyalty,
+  getMySubscriptionsAt,
+  getOnlineSubscriptionPlans,
+  orderSubscription,
   issueCertificate,
   saveSubscriptionPlan,
   sellSubscription,
@@ -947,6 +1021,11 @@ export {
   addCashMovement,
   closeCashShift,
   listVisitSales,
+  getFiscalSettings,
+  saveFiscalSettings,
+  listVisitReceipts,
+  listFailedReceipts,
+  retryReceipt,
   createSale,
   cancelSale,
   listExpenses,
@@ -1035,6 +1114,8 @@ export {
   getPushConfig,
   savePushSubscription,
   deletePushSubscription,
+  savePushToken,
+  deletePushToken,
   getAvailability,
   getMyProfileSettings,
   getProfile,

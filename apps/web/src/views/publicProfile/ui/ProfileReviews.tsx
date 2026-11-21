@@ -5,8 +5,8 @@ import { useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { ReviewPhotos, Stars } from '@/entities/review'
 import type { PublicProfile } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
-import { pluralWord } from '@/shared/lib/plural'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from '../ProfilePage.module.css'
 
@@ -24,6 +24,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 
 // Three reviews as a thread on the page, the rest behind «Ещё N» on a fade.
 export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => {
+  const t = useT()
   const [isAll, setIsAll] = useState(false)
   const hidden = Math.max(0, reviews.length - FIRST)
 
@@ -32,7 +33,7 @@ export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => 
       hiddenCount={hidden}
       isOpen={isAll}
       onToggle={() => setIsAll((value) => !value)}
-      label={pluralWord(hidden, ['отзыв', 'отзыва', 'отзывов'])}
+      label={t.count(hidden, ['отзыв', 'отзыва', 'отзывов']).replace(/^\d+ /, '')}
     >
       <ul className={styles.reviews}>
         {reviews.slice(0, isAll ? reviews.length : FIRST).map((review) => (

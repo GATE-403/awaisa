@@ -4,6 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
 import { X } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
 import { type FormEvent, useEffect, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -15,6 +16,7 @@ import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { usePlanAccess } from '@/views/manage/model/usePlanAccess'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import own from './TeamTab.module.css'
@@ -29,6 +31,8 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
   const [team, setTeam] = useState<TeamMember[] | null>(null)
   const [phone, setPhone] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const access = usePlanAccess()
+  const canAdd = access === null || access.features.includes('team')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -98,26 +102,36 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
           ))}
         </ul>
       )}
-      <form className={sheet.group} onSubmit={add} aria-label='Добавить администратора'>
-        <SectionCaption className={own.addCaption}>Добавить администратора</SectionCaption>
-        {/* On phones the number and «Добавить» float at the window's foot, under the thumb. */}
-        <FloatingToolbar className={own.add}>
-          <Input
-            type='tel'
-            inputMode='tel'
-            aria-label='Телефон администратора'
-            placeholder='+996 555 123 456'
-            value={phone}
-            onValueChange={(value) => setPhone(maskPhoneInput(value))}
-          />
-          <Button type='submit' disabled={phone.replace(/\D/g, '').length < 9 || isAdding}>
-            Добавить
-          </Button>
-        </FloatingToolbar>
-        <RowNote className={own.addNote}>
-          Он войдёт по SMS на этот номер и сразу увидит кабинет.
+      {!canAdd && (
+        <RowNote>
+          Администраторы доступны на тарифе «{access?.upgradeTitle ?? 'Бизнес'}».{' '}
+          <NextLink href={`/manage/${slug}?tab=billing`} className={own.planLink}>
+            Открыть тариф ›
+          </NextLink>
         </RowNote>
-      </form>
+      )}
+      {canAdd && (
+        <form className={sheet.group} onSubmit={add} aria-label='Добавить администратора'>
+          <SectionCaption className={own.addCaption}>Добавить администратора</SectionCaption>
+          {/* On phones the number and «Добавить» float at the window's foot, under the thumb. */}
+          <FloatingToolbar className={own.add}>
+            <Input
+              type='tel'
+              inputMode='tel'
+              aria-label='Телефон администратора'
+              placeholder='+996 555 123 456'
+              value={phone}
+              onValueChange={(value) => setPhone(maskPhoneInput(value))}
+            />
+            <Button type='submit' disabled={phone.replace(/\D/g, '').length < 9 || isAdding}>
+              Добавить
+            </Button>
+          </FloatingToolbar>
+          <RowNote className={own.addNote}>
+            Он войдёт по SMS на этот номер и сразу увидит кабинет.
+          </RowNote>
+        </form>
+      )}
     </section>
   )
 }

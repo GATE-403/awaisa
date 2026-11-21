@@ -12,6 +12,7 @@ import { Business } from '../businesses/business.entity.js'
 import { Service } from '../catalog/service.entity.js'
 import { Specialist } from '../catalog/specialist.entity.js'
 import { Customer } from '../customers/customer.entity.js'
+import type { BookingExtra } from './booking-extra.entity.js'
 
 type BookingStatus = 'confirmed' | 'cancelled'
 
@@ -102,6 +103,9 @@ export class Booking {
   @Column({ name: 'outcome_at', type: 'timestamptz', nullable: true })
   outcomeAt: Date | null
 
+  /** Services done in the same visit after `service`, in order; filled by the view query. */
+  extras?: BookingExtra[]
+
   /** Filled by the view query (left join), not a column. */
   review?: { rating: number; comment: string; reply: string | null }
 
@@ -138,6 +142,10 @@ export class Booking {
 
   @Column({ name: 'cancelled_by', type: 'varchar', length: 8, nullable: true })
   cancelledBy: 'client' | 'salon' | null
+
+  /** The client's subscription that pays this visit; drawn when the salon marks «Пришёл». */
+  @Column({ name: 'subscription_id', type: 'uuid', nullable: true })
+  subscriptionId: string | null
 
   /** Where it was booked: `online` (the site), `staff` (the cabinet) or `import`. */
   @Column({ type: 'varchar', length: 8, default: 'online' })

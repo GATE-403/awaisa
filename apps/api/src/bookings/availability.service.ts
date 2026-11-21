@@ -9,8 +9,9 @@ import type { Service } from '../catalog/service.entity.js'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { buildSlots } from './availability.js'
 import { Booking } from './booking.entity.js'
-import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD } from './booking-rules.js'
+import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD, MAX_EXTRA_SERVICES } from './booking-rules.js'
 import type { AvailabilityQuery } from './bookings.schemas.js'
+import { mastersForAll, noMasterMessage, visitCost, visitLength } from './visit-services.js'
 
 /** Free time: which slots a service has on a day, and the first free time for many places at once. */
 @Injectable()
@@ -23,9 +24,23 @@ export class AvailabilityService {
     private readonly businesses: BusinessesService,
   ) {}
 
-  async getAvailability({ serviceId, specialistId, date, branchId }: AvailabilityQuery) {
+  async getAvailability({
+    serviceId,
+    specialistId,
+    date,
+    branchId,
+    extraServiceIds = [],
+  }: Omit<AvailabilityQuery, 'extraServiceIds'> & { extraServiceIds?: string[] }) {
     const now = new Date()
-    const request = await this.resolveRequest(serviceId, specialistId, date, now, null, branchId)
+    const request = await this.resolveRequest(
+      serviceId,
+      specialistId,
+      date,
+      now,
+      null,
+      branchId,
+      extraServiceIds,
+    )
     const slots = await this.buildSlotsFor(request, date, now)
 
     return { date, slots: slots.map(({ time, isAvailable }) => ({ time, isAvailable })) }
@@ -67,6 +82,10 @@ export class AvailabilityService {
     return Object.fromEntries(rows.map(({ id }, index) => [id, times[index] ?? null]))
   }
 
+  /**
+   * What a booking asks for: its services (the first, then the ones done after it in the same
+   * visit), their length and price added up, and the masters who do every one of them.
+   */
   async resolveRequest(
     serviceId: string,
     specialistId: string,
@@ -74,6 +93,7 @@ export class AvailabilityService {
     now: Date,
     staffBusinessId: string | null = null,
     branchId?: string,
+    extraServiceIds: string[] = [],
   ) {
     const today = toBusinessParts(now).dateKey
     if (date < today || date > addDays(today, BOOKING_DAYS_AHEAD - 1)) {
@@ -84,12 +104,17 @@ export class AvailabilityService {
     if (staffBusinessId !== null && service.businessId !== staffBusinessId) {
       throw new NotFoundException('Услуга не найдена')
     }
+    const extras = await this.resolveExtras(service, extraServiceIds)
+    const services = [service, ...extras]
     const business = await this.businesses.findById(service.businessId)
     // Staff can book clients in before the page is published.
     if (!business.isPublished && staffBusinessId === null) {
       throw new BadRequestException('Запись временно недоступна')
     }
-    const offering = await this.catalogService.getSpecialistsForService(serviceId)
+    const offerings = await this.catalogService.getSpecialistsForServices(
+      services.map((item) => item.id),
+    )
+    const offering = mastersForAll(services.map((item) => offerings.get(item.id) ?? []))
     const inBranch = offering.filter(
       (specialist) => !branchId || specialist.branchId === null || specialist.branchId === branchId,
     )
@@ -99,16 +124,41 @@ export class AvailabilityService {
         : offering.filter((specialist) => specialist.id === specialistId)
     ).map((specialist) => specialist.id)
     if (specialistIds.length === 0) {
-      throw new BadRequestException(
-        specialistId === ANY_SPECIALIST_ID
-          ? 'В этом филиале нет мастеров на эту услугу'
-          : 'Этот мастер не выполняет выбранную услугу',
-      )
+      throw new BadRequestException(noMasterMessage(specialistId, extras.length > 0))
     }
     const branchOf = (id: string) =>
       offering.find((specialist) => specialist.id === id)?.branchId ?? null
 
-    return { service, specialistIds, branchOf, slotMinutes: business.slotMinutes }
+    return {
+      service,
+      services,
+      durationMinutes: visitLength(services),
+      price: visitCost(services),
+      specialistIds,
+      branchOf,
+      slotMinutes: business.slotMinutes,
+    }
+  }
+
+  /** The services done after the first in one visit: active, of the same place, each once. */
+  private async resolveExtras(service: Service, extraServiceIds: string[]) {
+    if (extraServiceIds.length === 0) return []
+    const ids = [...new Set(extraServiceIds)]
+    if (ids.length !== extraServiceIds.length || ids.includes(service.id)) {
+      throw new BadRequestException('Каждую услугу можно выбрать один раз')
+    }
+    if (ids.length > MAX_EXTRA_SERVICES) {
+      throw new BadRequestException(`За один визит можно до ${MAX_EXTRA_SERVICES + 1} услуг`)
+    }
+    const found = await this.catalogService.getActiveServices(ids)
+    const byId = new Map(found.map((item) => [item.id, item]))
+    return ids.map((id) => {
+      const extra = byId.get(id)
+      if (!extra || extra.businessId !== service.businessId) {
+        throw new NotFoundException('Услуга не найдена')
+      }
+      return extra
+    })
   }
 
   /**
@@ -215,9 +265,10 @@ export class AvailabilityService {
   async buildSlotsFor(
     {
       service,
+      durationMinutes,
       specialistIds,
       slotMinutes,
-    }: { service: Service; specialistIds: string[]; slotMinutes: number },
+    }: { service: Service; durationMinutes: number; specialistIds: string[]; slotMinutes: number },
     date: string,
     now: Date,
     /** A booking being moved does not block its own new time. */
@@ -247,7 +298,7 @@ export class AvailabilityService {
       window,
       slotMinutes,
       now,
-      durationMinutes: service.durationMinutes,
+      durationMinutes,
       specialistIds,
       busy: [...busy, ...blocked, ...offHours],
     })

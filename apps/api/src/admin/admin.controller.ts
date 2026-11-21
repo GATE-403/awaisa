@@ -27,6 +27,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
@@ -108,6 +109,7 @@ export class AdminController {
   }
 
   @OwnerOnly()
+  @RequiresFeature('analytics')
   @Get('analytics')
   getAnalytics(
     @CurrentBusiness() business: Business,
@@ -129,6 +131,7 @@ export class AdminController {
   }
 
   @OwnerOnly()
+  @RequiresFeature('analytics')
   @Put('analytics/goal')
   setAnalyticsGoal(
     @CurrentBusiness() business: Business,

@@ -185,6 +185,18 @@ export const MasterStatsSheet = ({
                   <span className={styles.sheetValue}>{formatMoney(line.amount)}</span>
                 </div>
               ))}
+              {pay.productsSold > 0 && (
+                <div className={sheet.row}>
+                  <span className={styles.payLabel}>
+                    Товары
+                    <span className={sheet.rowHint}>
+                      продал на {formatMoney(pay.productsSold)}
+                      {pay.products === 0 && ' · без процента'}
+                    </span>
+                  </span>
+                  <span className={styles.sheetValue}>{formatMoney(pay.products)}</span>
+                </div>
+              )}
               {pay.salaryKind && (
                 <div className={sheet.row}>
                   <span className={styles.payLabel}>

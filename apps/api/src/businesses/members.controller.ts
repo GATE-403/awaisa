@@ -16,6 +16,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { z } from 'zod'
 import { CurrentCustomer } from '../auth/auth.guard.js'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
@@ -45,6 +46,7 @@ export class MembersController {
     return this.members(business.id)
   }
 
+  @RequiresFeature('team')
   @Post()
   async add(
     @CurrentBusiness() business: Business,
