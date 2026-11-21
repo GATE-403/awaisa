@@ -13,6 +13,7 @@ import type {
   LeaderboardPlace,
   MapPlace,
   Offer,
+  OnlineSubscriptionPlan,
   PaymentPage,
   PopularService,
   PublicPromotion,
@@ -205,6 +206,20 @@ const getPaymentPage = async (id: string, signature: string): Promise<PaymentPag
   return response.json()
 }
 
+// Subscriptions sold online on the business page; refreshed with the business when the owner saves.
+const listSubscriptionPlans = async (slug: string): Promise<OnlineSubscriptionPlan[]> => {
+  'use cache'
+  cacheTag(businessTag(slug))
+
+  const { data, isStale } = await readApi<OnlineSubscriptionPlan[]>(
+    `/businesses/${encodeURIComponent(slug)}/subscription-plans`,
+    { fallback: [] },
+  )
+  if (isStale) cacheLife('seconds')
+  else cacheLife('minutes')
+  return data
+}
+
 // Open promotions for the business page; refreshed with the business when the owner saves.
 const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   'use cache'
@@ -260,6 +275,7 @@ export {
   listSimilarPlaces,
   listFeed,
   listPromotions,
+  listSubscriptionPlans,
   getPaymentPage,
   listMapPlaces,
   getBusiness,

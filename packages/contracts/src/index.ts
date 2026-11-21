@@ -209,6 +209,8 @@ type Booking = {
   review?: { rating: number; comment: string; reply: string | null } | null
   /** The salon marked «Не пришёл»: nothing to rate. */
   isNoShow?: boolean
+  /** Paid by the client's subscription: the visit is drawn from it when the salon marks «Пришёл». */
+  isBySubscription?: boolean
   business: BookingBusiness
 }
 
@@ -218,7 +220,22 @@ type BookingPayment = {
   dueAt: string | null
 }
 
-// The pay page (`GET /payments/:id?s=`).
+/** An order paid on /pay that is not a booking's deposit (a gift certificate, …). */
+type PaymentOrder = {
+  kind: string
+  /** «Подарочный сертификат на 3 000 сом». */
+  title: string
+  /** One line under it: «Для Айгуль · от Нурлана». */
+  details: string
+  business: { name: string; slug: string }
+  /** Until when the order waits for its payment; null once paid or gone. */
+  dueAt: string | null
+  status: 'pending' | 'paid' | 'expired'
+  /** What the paid page says: «Код отправили вам и получателю по SMS». */
+  doneText: string
+}
+
+// The pay page (`GET /payments/:id?s=`): a booking's deposit or another order.
 type PaymentPage = {
   id: string
   amount: number
@@ -236,7 +253,8 @@ type PaymentPage = {
     paymentStatus: BookingPayment['status'] | null
     dueAt: string | null
     business: { name: string; slug: string }
-  }
+  } | null
+  order: PaymentOrder | null
 }
 
 type Review = {
@@ -552,6 +570,21 @@ type SubscriptionPlan = {
   price: number
   validDays: number
   isActive: boolean
+  /** Sold on the place's page and in the booking form. */
+  isOnline: boolean
+}
+
+// A plan sold online, as the place's page shows it (`GET /businesses/:slug/subscription-plans`).
+type OnlineSubscriptionPlan = {
+  id: string
+  title: string
+  serviceId: string | null
+  serviceName: string | null
+  visits: number
+  price: number
+  validDays: number
+  /** What the visits cost one by one (null = any service); the client saves the difference. */
+  fullPrice: number | null
 }
 
 type SubscriptionPlanInput = Omit<SubscriptionPlan, 'id' | 'serviceName'>
@@ -766,6 +799,10 @@ type CreateBookingInput = {
   promoCode?: string
   /** Who invited this client (`?ref=` from a profile link). */
   ref?: string
+  /** Pay with the signed-in client's subscription (drawn when the salon marks «Пришёл»). */
+  subscriptionId?: string
+  /** Buy this online plan and book: the booking waits for the payment like a deposit. */
+  subscriptionPlanId?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -1413,9 +1450,10 @@ type PaymentsConfig = { isAvailable: boolean; driver: string }
 /** How clients hear about their visits: `isWhatsappOn` when WhatsApp comes before SMS. */
 type ClientMessagingConfig = { isWhatsappOn: boolean }
 
-type TestPaymentResult = { bookingId: string; paymentStatus: string | null }
+/** `bookingId` is null when the payment was for another order (a gift certificate). */
+type TestPaymentResult = { bookingId: string | null; paymentStatus: string | null }
 
-type PaymentSync = { bookingId: string; status: string; paymentStatus: string | null }
+type PaymentSync = { bookingId: string | null; status: string; paymentStatus: string | null }
 
 type CheckoutLink = { url: string }
 
@@ -1454,6 +1492,7 @@ type PushSubscriptionInput = {
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
 export type {
+  PaymentOrder,
   PushConfig,
   PushMessage,
   PushSubscriptionInput,
@@ -1600,6 +1639,7 @@ export type {
   JoinWaitlistInput,
   ManagedWaitlistEntry,
   PaymentPage,
+  OnlineSubscriptionPlan,
   PriceQuote,
   Promotion,
   PromotionInput,

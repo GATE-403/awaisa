@@ -15,24 +15,30 @@ import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './PayPage.module.css'
 
+// What the payment is at: the booking's place, or the order's.
+const businessOf = (payment: PaymentPage) =>
+  payment.booking?.business ?? payment.order?.business ?? { name: '', slug: '' }
+
 interface PayPageProps {
   payment: PaymentPage | null
   signature: string
 }
 
-// The deposit checkout. With PAYMENT_DRIVER=test this page is the acquirer; a real one sends the
-// client to its own form and back to /bookings?paid=<booking>.
+// The checkout of a deposit or an order (a gift certificate). With PAYMENT_DRIVER=test this page
+// is the acquirer; a real one sends the client to its own form and back here. A paid deposit
+// goes on to /bookings?paid=<booking>; a paid order says so right here.
 export const PayPage = ({ payment, signature }: PayPageProps) => {
   const router = useRouter()
   const [isPaying, setIsPaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDone, setIsDone] = useState(false)
   const [isChecking, setIsChecking] = useState(
     payment?.driver === 'freedompay' && payment.status === 'pending',
   )
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: once per visit
   useEffect(() => {
-    if (payment) trackStep('checkout_open', payment.booking.business.slug)
+    if (payment) trackStep('checkout_open', businessOf(payment).slug)
   }, [])
 
   // Back from Freedom Pay's page: ask how the payment went before showing «pay» again.
@@ -41,10 +47,13 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     if (!payment || payment.driver !== 'freedompay' || payment.status !== 'pending') return
     syncPayment(payment.id, signature)
       .then((result) => {
-        if (result.status === 'succeeded') {
-          trackStep('paid', payment.booking.business.slug)
-          router.replace(`/bookings?paid=${result.bookingId}`)
-        } else setIsChecking(false)
+        if (result.status !== 'succeeded') {
+          setIsChecking(false)
+          return
+        }
+        trackStep('paid', businessOf(payment).slug)
+        if (result.bookingId) router.replace(`/bookings?paid=${result.bookingId}`)
+        else setIsDone(true)
       })
       .catch(() => setIsChecking(false))
   }, [])
@@ -71,12 +80,21 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     )
   }
 
-  const { booking } = payment
-  const isPaid = payment.status === 'succeeded' || booking.paymentStatus === 'paid'
-  const isExpired = booking.paymentStatus === 'expired' || payment.status === 'failed'
+  const { booking, order } = payment
+  const business = businessOf(payment)
+  const isPaid =
+    isDone ||
+    payment.status === 'succeeded' ||
+    booking?.paymentStatus === 'paid' ||
+    order?.status === 'paid'
+  const isExpired =
+    booking?.paymentStatus === 'expired' ||
+    order?.status === 'expired' ||
+    payment.status === 'failed'
+  const dueAt = booking?.dueAt ?? order?.dueAt ?? null
 
   const handlePay = async () => {
-    const slug = booking.business.slug
+    const slug = business.slug
     setIsPaying(true)
     setError(null)
     trackStep('pay_click', slug)
@@ -84,7 +102,11 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
       const result = await completeTestPayment(payment.id, signature)
       haptic('success')
       trackStep('paid', slug)
-      router.replace(`/bookings?paid=${result.bookingId}`)
+      if (result.bookingId) router.replace(`/bookings?paid=${result.bookingId}`)
+      else {
+        setIsDone(true)
+        setIsPaying(false)
+      }
     } catch (payError) {
       haptic('error')
       trackStep('pay_failed', slug)
@@ -98,25 +120,45 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
       <Container size='sm' className={styles.content}>
         <div className={styles.card}>
           <div className={styles.place}>
-            <BusinessTile name={booking.business.name} size='md' />
+            <BusinessTile name={business.name} size='md' />
             <div>
-              <p className={styles.placeName}>{booking.business.name}</p>
+              <p className={styles.placeName}>{business.name}</p>
               <p className={styles.placeMeta}>
-                {booking.serviceName} · {formatDayLong(booking.date)}, {booking.time}
+                {booking
+                  ? `${booking.serviceName} · ${formatDayLong(booking.date)}, ${booking.time}`
+                  : order?.title}
               </p>
             </div>
           </div>
 
           <div className={styles.amount}>
-            <p className={styles.amountLabel}>Предоплата</p>
+            <p className={styles.amountLabel}>{booking ? 'Предоплата' : 'К оплате'}</p>
             <p className={styles.amountValue}>{formatPrice(payment.amount)}</p>
-            <p className={styles.amountNote}>
-              Остальное — {formatPrice(Math.max(booking.price - payment.amount, 0))} в салоне.
-              Вернём, если отмените за сутки.
-            </p>
+            {booking ? (
+              <p className={styles.amountNote}>
+                Остальное: {formatPrice(Math.max(booking.price - payment.amount, 0))} в салоне.
+                Вернём, если отмените за сутки.
+              </p>
+            ) : (
+              order?.details && <p className={styles.amountNote}>{order.details}</p>
+            )}
           </div>
 
-          {isPaid ? (
+          {isPaid && order ? (
+            <div className={styles.state}>
+              <CheckCircle
+                weight='fill'
+                className={styles.stateIcon}
+                data-tone='success'
+                aria-hidden
+              />
+              <p className={styles.stateTitle}>Оплачено. Сертификат готов</p>
+              <p className={styles.text}>{order.doneText}</p>
+              <ButtonLink render={<NextLink href={`/${business.slug}`} />} size='lg' fullWidth>
+                На страницу места
+              </ButtonLink>
+            </div>
+          ) : isPaid ? (
             <div className={styles.state}>
               <CheckCircle
                 weight='fill'
@@ -129,6 +171,20 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 Мои записи
               </ButtonLink>
             </div>
+          ) : isExpired && order ? (
+            <div className={styles.state}>
+              <WarningCircle
+                weight='fill'
+                className={styles.stateIcon}
+                data-tone='danger'
+                aria-hidden
+              />
+              <p className={styles.stateTitle}>Время на оплату вышло</p>
+              <p className={styles.text}>Деньги не списаны. Оформите сертификат снова.</p>
+              <ButtonLink render={<NextLink href={`/${business.slug}#gift`} />} size='lg' fullWidth>
+                К сертификатам
+              </ButtonLink>
+            </div>
           ) : isExpired ? (
             <div className={styles.state}>
               <WarningCircle
@@ -139,11 +195,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               />
               <p className={styles.stateTitle}>Время на оплату вышло</p>
               <p className={styles.text}>Запись снята, время освободилось. Выберите его снова.</p>
-              <ButtonLink
-                render={<NextLink href={`/${booking.business.slug}/book`} />}
-                size='lg'
-                fullWidth
-              >
+              <ButtonLink render={<NextLink href={`/${business.slug}/book`} />} size='lg' fullWidth>
                 Записаться снова
               </ButtonLink>
             </div>
@@ -160,7 +212,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                     // biome-ignore lint/a11y/useAnchorContent: content comes from ButtonLink children via render
                     <a
                       href={payment.checkoutUrl}
-                      onClick={() => trackStep('pay_click', booking.business.slug)}
+                      onClick={() => trackStep('pay_click', business.slug)}
                     />
                   }
                 >
@@ -176,15 +228,15 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               {payment.driver === 'freedompay' && (
                 <p className={styles.text}>Оплата картой через Freedom Pay.</p>
               )}
-              {booking.dueAt && (
+              {dueAt && (
                 <p className={styles.text}>
-                  Время держим до{' '}
-                  {new Date(booking.dueAt).toLocaleTimeString('ru-RU', {
+                  {booking ? 'Время держим до ' : 'Оплатите до '}
+                  {new Date(dueAt).toLocaleTimeString('ru-RU', {
                     hour: '2-digit',
                     minute: '2-digit',
                     timeZone: 'Asia/Bishkek',
                   })}
-                  , потом оно освободится.
+                  {booking ? ', потом оно освободится.' : '.'}
                 </p>
               )}
               {error && (

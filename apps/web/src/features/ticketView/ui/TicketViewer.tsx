@@ -126,9 +126,11 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 </span>
               )}
               <span className={styles.note}>
-                {booking.payment
-                  ? `${describeDeposit(booking.payment)}${booking.payment.status === 'paid' ? ', остальное в салоне' : ''}`
-                  : 'оплата в салоне — наличными или картой'}
+                {booking.isBySubscription
+                  ? 'по абонементу: визит спишется, когда мастер отметит его'
+                  : booking.payment
+                    ? `${describeDeposit(booking.payment)}${booking.payment.status === 'paid' ? ', остальное в салоне' : ''}`
+                    : 'оплата в салоне — наличными или картой'}
               </span>
             </dd>
           </div>

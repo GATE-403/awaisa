@@ -117,6 +117,7 @@ export const BookingInspector = ({
         {day}, {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
         {formatDuration(booking.durationMinutes)}
         {booking.discount && ` · ${booking.discount.title}`}
+        {booking.isBySubscription && ' · по абонементу'}
         {booking.payment &&
           ` · предоплата ${formatPrice(booking.payment.amount)}, ${PAYMENT_STATUS_TEXT[booking.payment.status].toLowerCase()}`}
       </p>

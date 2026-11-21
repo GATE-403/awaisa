@@ -139,6 +139,10 @@ export class Booking {
   @Column({ name: 'cancelled_by', type: 'varchar', length: 8, nullable: true })
   cancelledBy: 'client' | 'salon' | null
 
+  /** The client's subscription that pays this visit; drawn when the salon marks «Пришёл». */
+  @Column({ name: 'subscription_id', type: 'uuid', nullable: true })
+  subscriptionId: string | null
+
   /** Where it was booked: `online` (the site), `staff` (the cabinet) or `import`. */
   @Column({ type: 'varchar', length: 8, default: 'online' })
   source: 'online' | 'staff' | 'import'
