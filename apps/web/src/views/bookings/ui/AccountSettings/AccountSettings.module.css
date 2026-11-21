@@ -33,7 +33,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(var(--space-4) + 29px + var(--space-3));
+  left: calc(var(--space-4) + 24px + var(--space-3));
   height: 0.5px;
   background: var(--color-border);
 }
@@ -54,13 +54,13 @@
   cursor: pointer;
 }
 
-/* Centred in a box as wide as the rows' glyph tiles, so the glyph and the word sit in the same
-   columns as the tiles and labels above. */
+/* Centred in a box as wide as the rows' glyphs, so the glyph and the word sit in the same
+   columns as the glyphs and labels above. */
 .danger svg {
   box-sizing: content-box;
   width: 20px;
   height: 20px;
-  padding-inline: calc((29px - 20px) / 2);
+  padding-inline: calc((24px - 20px) / 2);
 }
 
 div.row {
@@ -85,7 +85,7 @@ div.row {
   color: var(--color-tertiary-foreground);
 }
 
-/* «Выйти» on the page itself: the glyph lines up with the rows' tiles above (16pt in). */
+/* «Выйти» on the page itself: the glyph lines up with the rows' glyphs above (16pt in). */
 .signOut {
   display: flex;
   flex-direction: column;
@@ -114,41 +114,15 @@ div.row {
   cursor: pointer;
 }
 
-/* A coloured glyph tile per row, like iOS Settings; the hairlines start after it. */
+/* A thin glyph per row, all in one quiet colour, no tile («не даём фон иконкам, не добавляем
+   цвета»), like the cabinet's settings; the hairlines start after it. */
 .glyph {
-  display: inline-flex;
+  display: inline-grid;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 29px;
-  height: 29px;
-  border-radius: 7px;
-  color: #fff;
-}
-
-.glyph svg {
-  width: 17px;
-  height: 17px;
-}
-
-.glyph[data-tone="gray"] {
-  background: var(--color-muted-foreground);
-}
-
-.glyph[data-tone="green"] {
-  background: var(--color-success);
-}
-
-.glyph[data-tone="blue"] {
-  background: var(--color-primary);
-}
-
-.glyph[data-tone="orange"] {
-  background: var(--color-rating);
-}
-
-.glyph[data-tone="red"] {
-  background: var(--color-danger);
+  place-items: center;
+  width: 24px;
+  color: var(--color-muted-foreground);
+  font-size: 22px;
 }
 
 .footnote {

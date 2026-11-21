@@ -933,10 +933,6 @@ button.heatmapCell:active {
   font-variant-numeric: tabular-nums;
 }
 
-.masterSchedule {
-  align-self: center;
-}
-
 /* A pay row: what it is over how it was counted («2 визита · 40% от 2 500 сом»). */
 .payLabel {
   min-width: 0;
