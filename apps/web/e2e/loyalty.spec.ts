@@ -62,6 +62,23 @@ test.describe('Loyalty', () => {
       ).toBe(true)
       expect((await loyaltyOf()).bonusBalance).toBe(Math.round((1000 * percent) / 100))
 
+      // A sold subscription is revenue the day it is sold, in «Прибыль» and «Акции и лояльность».
+      const money = async () =>
+        (await (await page.request.get(`${manage}/money?days=7`)).json()) as {
+          subscriptionsRevenue: number
+          subscriptionsSold: number
+          revenue: number
+          servicesRevenue: number
+          productsRevenue: number
+        }
+      const report = async () =>
+        (await (await page.request.get(`${manage}/analytics?days=7`)).json()).loyalty as {
+          subscriptionsSold: number
+          subscriptionsRevenue: number
+        }
+      const moneyBefore = await money()
+      const loyaltyBefore = await report()
+
       // A subscription pays the next visit whole; undo gives the visit back.
       await page.request.post(
         `${manage}/loyalty/clients/${encodeURIComponent(phone)}/subscriptions`,
@@ -69,6 +86,21 @@ test.describe('Loyalty', () => {
       )
       const [subscription] = (await loyaltyOf()).subscriptions
       expect(subscription).toMatchObject({ title: 'E2E Абонемент', visitsLeft: 3 })
+      // Other workers may sell at the same place, so at least this sale is counted.
+      const moneyAfter = await money()
+      expect(moneyAfter.subscriptionsRevenue).toBeGreaterThanOrEqual(
+        moneyBefore.subscriptionsRevenue + 2000,
+      )
+      expect(moneyAfter.subscriptionsSold).toBeGreaterThanOrEqual(moneyBefore.subscriptionsSold + 1)
+      expect(moneyAfter.revenue).toBe(
+        moneyAfter.servicesRevenue + moneyAfter.productsRevenue + moneyAfter.subscriptionsRevenue,
+      )
+      const loyaltyAfter = await report()
+      expect(loyaltyAfter.subscriptionsRevenue).toBeGreaterThanOrEqual(
+        loyaltyBefore.subscriptionsRevenue + 2000,
+      )
+      await page.goto(`/manage/${SLUG}?tab=analytics`)
+      await expect(page.getByText('Абонементы', { exact: true })).toBeVisible()
       const second = await createPastVisit('E2E Лояльность', phone, 1, 40)
       const paid = await (
         await outcome(second.booking.id, { outcome: 'arrived', subscriptionId: subscription.id })
