@@ -181,7 +181,7 @@ export class ProfilesService {
          JOIN "businesses" bz ON bz."id" = r."business_id" AND bz."is_published"
          LEFT JOIN "services" s ON s."id" = r."service_id"
          LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
-         WHERE b."customer_phone" = $1
+         WHERE b."customer_phone" = $1 AND r."anonymized_at" IS NULL
          ORDER BY r."created_at" DESC LIMIT 30`,
         [person.phone],
       ),
@@ -378,7 +378,7 @@ export class ProfilesService {
     const [guest] = await this.query(
       `SELECT b."customer_phone" AS "phone", b."customer_name" AS "name"
        FROM "reviews" r JOIN "bookings" b ON b."id" = r."booking_id"
-       WHERE ${publicIdSql('b."customer_phone"', '$2')} = $1
+       WHERE ${publicIdSql('b."customer_phone"', '$2')} = $1 AND r."anonymized_at" IS NULL
        ORDER BY r."created_at" DESC LIMIT 1`,
       [id, salt],
     )
