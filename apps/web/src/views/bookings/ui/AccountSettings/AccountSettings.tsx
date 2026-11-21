@@ -8,6 +8,7 @@ import {
   ChartBar,
   CircleHalf,
   DownloadSimple,
+  Flag,
   Phone,
   PlusCircle,
   SignOut,
@@ -240,6 +241,16 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
               <ChartBar />
             </span>
             <span className={styles.label}>{t('Воронки')}</span>
+            <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          </NextLink>
+        )}
+        {/* Platform admins: what viewers reported and what was decided about it. */}
+        {customer.isAdmin && (
+          <NextLink href='/moderation' className={styles.row}>
+            <span className={styles.glyph} aria-hidden>
+              <Flag />
+            </span>
+            <span className={styles.label}>Модерация</span>
             <CaretRight className={styles.chevron} weight='bold' aria-hidden />
           </NextLink>
         )}

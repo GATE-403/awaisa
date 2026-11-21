@@ -1,0 +1,39 @@
+/* A quiet glyph at the end of a line; its hit area is 44pt without growing the line. */
+:where(.trigger) {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.trigger::before {
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2));
+  content: "";
+}
+
+.trigger svg {
+  width: 16px;
+  height: 16px;
+}
+
+.trigger[data-popup-open],
+.trigger:hover {
+  color: var(--color-foreground);
+}
+
+.trigger:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

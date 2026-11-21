@@ -11,12 +11,14 @@ import { CacheService, type CacheTag } from './cache.service.js'
 import { CACHED, type CachedOptions } from './cached.decorator.js'
 
 // Changes that make the public catalog stale (an owner's edit, a new business, a review, a
-// reported or added work photo); any other write may change free time.
+// reported or added work photo, a moderator's decision); any other write may change free time.
 const CATALOG_WRITES = [
   /^\/manage\//,
   /^\/businesses\/?$/,
   /^\/bookings\/[^/]+\/review$/,
   /^\/feed\/[^/]+\/report$/,
+  /^\/reports$/,
+  /^\/moderation\//,
   /^\/master\/[^/]+\/photos$/,
 ]
 

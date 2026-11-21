@@ -46,5 +46,40 @@ const MenuItem = ({ icon, variant = 'default', className, children, ...props }: 
 
 const MenuSeparator = () => <BaseMenu.Separator className={styles.separator} />
 
-export type { MenuItemProps, MenuProps }
-export { Menu, MenuItem, MenuSeparator }
+interface MenuGroupProps {
+  /** A quiet caption over the group's rows («Пожаловаться»). */
+  label: string
+  children: ReactNode
+}
+
+const MenuGroup = ({ label, children }: MenuGroupProps) => (
+  <BaseMenu.Group>
+    <BaseMenu.GroupLabel className={styles.groupLabel}>{label}</BaseMenu.GroupLabel>
+    {children}
+  </BaseMenu.Group>
+)
+
+interface MenuSubmenuProps {
+  label: ReactNode
+  icon?: ReactNode
+  variant?: 'default' | 'danger'
+  children: ReactNode
+}
+
+// A row that opens its own menu beside it, like a submenu on macOS (a tap opens it on phones).
+const MenuSubmenu = ({ label, icon, variant = 'default', children }: MenuSubmenuProps) => (
+  <BaseMenu.SubmenuRoot>
+    <BaseMenu.SubmenuTrigger className={styles.item} data-variant={variant}>
+      <span>{label}</span>
+      {icon && <span className={styles.icon}>{icon}</span>}
+    </BaseMenu.SubmenuTrigger>
+    <BaseMenu.Portal>
+      <BaseMenu.Positioner className={styles.positioner} sideOffset={4} alignOffset={-6}>
+        <BaseMenu.Popup className={styles.popup}>{children}</BaseMenu.Popup>
+      </BaseMenu.Positioner>
+    </BaseMenu.Portal>
+  </BaseMenu.SubmenuRoot>
+)
+
+export type { MenuGroupProps, MenuItemProps, MenuProps, MenuSubmenuProps }
+export { Menu, MenuGroup, MenuItem, MenuSeparator, MenuSubmenu }

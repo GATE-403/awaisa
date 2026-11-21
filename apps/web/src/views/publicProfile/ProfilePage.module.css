@@ -99,6 +99,48 @@
   margin-top: var(--space-3);
 }
 
+/* The report flag: a round secondary capsule as tall as «Поделиться» beside it. */
+:where(.report) {
+  position: relative;
+}
+
+.report {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-sm);
+  height: var(--control-height-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.report::before {
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2));
+  content: "";
+}
+
+.report svg {
+  width: 16px;
+  height: 16px;
+}
+
+.report:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .report:hover {
+    background: var(--color-fill-hover);
+  }
+}
+
 .section {
   display: flex;
   flex-direction: column;
