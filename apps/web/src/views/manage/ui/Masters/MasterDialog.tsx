@@ -2,13 +2,16 @@ import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
-import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
+import { getMasterPay } from '@/shared/api/clientApi'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { describePayScheme } from '@/views/manage/lib/payText'
+import payStyles from './MasterPaySheet.module.css'
 
 interface MasterDialogProps {
   master: Specialist | null
@@ -20,6 +23,9 @@ interface MasterDialogProps {
   onPhotoChange?: (file: File | null) => Promise<boolean>
   /** Only for saved masters: opens their week and days away. */
   onOpenSchedule?: () => void
+  /** Only for saved masters, owners only: opens «Зарплата» (the row reads the scheme from `slug`). */
+  onOpenPay?: () => void
+  slug?: string
 }
 
 const FORM_ID = 'master-form'
@@ -32,6 +38,8 @@ export const MasterDialog = ({
   onSave,
   onPhotoChange,
   onOpenSchedule,
+  onOpenPay,
+  slug,
 }: MasterDialogProps) => {
   const [branchId, setBranchId] = useState<string | null>(master?.branchId ?? null)
   const fileInput = useRef<HTMLInputElement>(null)
@@ -40,17 +48,25 @@ export const MasterDialog = ({
   const [name, setName] = useState(master?.name ?? '')
   const [role, setRole] = useState(master?.role ?? '')
   const [phone, setPhone] = useState(master?.phone ? maskPhoneInput(master.phone) : '')
-  const [percent, setPercent] = useState(
-    master?.commissionPercent === null || master?.commissionPercent === undefined
-      ? ''
-      : String(master.commissionPercent),
-  )
+  const [paySummary, setPaySummary] = useState<string | null>(null)
   const [serviceIds, setServiceIds] = useState<string[]>(
     master?.serviceIds ?? services.map((service) => service.id),
   )
   const [isActive, setIsActive] = useState(master?.isActive ?? true)
   const [isSaving, setIsSaving] = useState(false)
   const allSelected = serviceIds.length === services.length
+
+  const masterId = master?.id
+  const canOpenPay = Boolean(onOpenPay)
+  useEffect(() => {
+    if (!canOpenPay || !slug || !masterId) return
+    const controller = new AbortController()
+    getMasterPay(slug, masterId, controller.signal)
+      .then((scheme) => setPaySummary(describePayScheme(scheme)))
+      // The row still opens the sheet, which says what went wrong.
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [canOpenPay, slug, masterId])
 
   const toggleService = (id: string, checked: boolean) =>
     setServiceIds((current) => (checked ? [...current, id] : current.filter((item) => item !== id)))
@@ -85,7 +101,6 @@ export const MasterDialog = ({
       isActive,
       branchId,
       phone: phone.trim(),
-      commissionPercent: percent === '' ? null : Math.min(100, Number(percent)),
     })
     setIsSaving(false)
     if (saved) onClose()
@@ -153,20 +168,6 @@ export const MasterDialog = ({
             />
           </div>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Процент мастера</span>
-            <span className={sheet.rowControl}>
-              <Input
-                variant='plain'
-                inputMode='numeric'
-                aria-label='Процент мастера'
-                placeholder='Не задан'
-                value={percent}
-                onValueChange={(value) => setPercent(value.replace(/\D/g, '').slice(0, 3))}
-              />
-              {percent !== '' && <span className={sheet.suffix}>%</span>}
-            </span>
-          </label>
-          <label className={sheet.row}>
             <span className={sheet.rowLabel}>Телефон для входа</span>
             <Input
               variant='plain'
@@ -226,6 +227,15 @@ export const MasterDialog = ({
         )}
 
         <div className={sheet.list}>
+          {onOpenPay && (
+            <button type='button' className={sheet.row} onClick={onOpenPay}>
+              <span className={sheet.rowLabel}>Зарплата</span>
+              <span className={sheet.rowControl}>
+                <span className={payStyles.summary}>{paySummary ?? ''}</span>
+                <span className={sheet.suffix}>›</span>
+              </span>
+            </button>
+          )}
           {onOpenSchedule && (
             <button type='button' className={sheet.row} onClick={onOpenSchedule}>
               <span className={sheet.rowLabel}>График и отпуск</span>
