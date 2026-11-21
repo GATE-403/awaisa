@@ -9,5 +9,6 @@ import { MailingsService } from './mailings.service.js'
   imports: [AuthModule, BusinessesModule, NotificationsModule],
   controllers: [MailingsController],
   providers: [MailingsService],
+  exports: [MailingsService],
 })
 export class MailingsModule {}

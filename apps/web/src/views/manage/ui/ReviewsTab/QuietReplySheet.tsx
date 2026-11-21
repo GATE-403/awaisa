@@ -7,9 +7,8 @@ import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { fillReplyTemplate, SAMPLE_REVIEW } from '@/views/manage/lib/replyTemplate'
-import { REVIEW_WORDS } from './config'
-import styles from './ReviewsTab.module.css'
-import { TemplateField } from './TemplateField'
+import { TemplateField } from '@/views/manage/ui/TemplateField/TemplateField'
+import { REVIEW_WORDS, TEMPLATE_TOKENS } from './config'
 
 interface QuietReplySheetProps {
   /** Unanswered reviews without words: rated 5, and rated 4 or 5. */
@@ -80,17 +79,14 @@ export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietRepl
         <section className={sheet.group} aria-label='Текст ответа'>
           <SectionCaption>Ответ</SectionCaption>
           <div className={sheet.list}>
-            <div className={styles.templateRow}>
-              <TemplateField
-                label='Текст ответа'
-                value={text}
-                onChange={setText}
-                placeholder='Напишите текст ответа'
-              />
-              <p className={styles.templatePreview}>
-                {fillReplyTemplate(text, SAMPLE_REVIEW) || 'Напишите текст ответа'}
-              </p>
-            </div>
+            <TemplateField
+              label='Текст ответа'
+              value={text}
+              onChange={setText}
+              placeholder='Напишите текст ответа'
+              tokens={TEMPLATE_TOKENS}
+              preview={fillReplyTemplate(text, SAMPLE_REVIEW) || 'Напишите текст ответа'}
+            />
           </div>
           <p className={sheet.groupFooter}>
             Имя клиента, мастер и услуга подставятся в каждый ответ.

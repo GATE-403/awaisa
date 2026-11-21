@@ -139,6 +139,10 @@ export class Booking {
   @Column({ name: 'cancelled_by', type: 'varchar', length: 8, nullable: true })
   cancelledBy: 'client' | 'salon' | null
 
+  /** Where it was booked: `online` (the site), `staff` (the cabinet) or `import`. */
+  @Column({ type: 'varchar', length: 8, default: 'online' })
+  source: 'online' | 'staff' | 'import'
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

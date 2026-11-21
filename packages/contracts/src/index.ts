@@ -890,6 +890,12 @@ type AnalyticsReport = {
     rating: number | null
     percent: number | null
     payout: number | null
+    /** What the master's visits earned in the period before, for «why it changed». */
+    previousRevenue: number
+    /** Of the master's clients from the retention window, the share who came back to them. */
+    retention: number | null
+    /** Their most booked services in the period, up to three. */
+    topServices: { name: string; visits: number }[]
   }[]
   clients: {
     phone: string
@@ -900,7 +906,48 @@ type AnalyticsReport = {
     isNew: boolean
   }[]
   heatmap: { weekday: number; hour: number; visits: number }[]
+  /** What needs the owner now, each with where to act on it (nothing when all is fine). */
+  attention: {
+    /** Ended visits of the last 30 days nobody marked, and the earliest such day. */
+    unmarked: { count: number; firstDate: string | null }
+    /** Clients whose last visit was over `days` ago with nothing booked (the mailing's segment). */
+    lapsed: { count: number; days: number }
+    /** Tomorrow's free working time across the masters, in minutes (null when it is a day off). */
+    freeTomorrow: { minutes: number; date: string } | null
+    /** Stock items at or under their warning level. */
+    lowStock: { count: number; names: string[] }
+  }
+  /** Money that did not come: no-shows, and client cancellations under 24 hours before. */
+  losses: {
+    noShows: { count: number; amount: number }
+    lateCancellations: { count: number; amount: number }
+    /** Clients with two or more no-shows in half a year. */
+    repeatNoShows: { phone: string; name: string; count: number }[]
+  }
+  /** Who comes back: clients of the window `days`..2×`days` ago who returned within `days`. */
+  retention: { days: number; clients: number; returned: number; rate: number | null }
+  /** Where the period's visits were booked: online, by the staff, imported; and per branch. */
+  sources: {
+    online: number
+    staff: number
+    import: number
+    branches: { id: string; name: string; visits: number; revenue: number }[]
+  }
+  /** What each promotion brought in the period, and what loyalty paid. */
+  promotions: { id: string; title: string; visits: number; revenue: number; discount: number }[]
+  loyalty: { bonusSpent: number; certificateSpent: number; subscriptionVisits: number }
+  /** The calendar month so far against the owner's goal (goal null when none is set). */
+  month: {
+    label: string
+    revenue: number
+    goal: number | null
+    projected: number
+    daysLeft: number
+  }
 }
+
+/** `PUT /manage/:slug/analytics/goal`: the month's revenue goal, null to clear it. */
+type AnalyticsGoal = { goal: number | null }
 
 // «Сообщить, когда освободится»: a client waits for a full day (see apps/api/src/waitlist).
 type WaitlistEntry = {
@@ -1194,6 +1241,7 @@ export type {
   VisitReview,
   AnalyticsDays,
   AnalyticsReport,
+  AnalyticsGoal,
   Offer,
   PopularService,
   Branch,
