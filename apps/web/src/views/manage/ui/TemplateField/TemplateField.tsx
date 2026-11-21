@@ -2,27 +2,30 @@
 
 import { Plus } from '@phosphor-icons/react/ssr'
 import { type ClipboardEvent, type KeyboardEvent, useEffect, useRef } from 'react'
-import { TEMPLATE_TOKENS } from './config'
-import styles from './ReviewsTab.module.css'
+import styles from './TemplateField.module.css'
+
+type TemplateToken = { key: string; label: string }
 
 interface TemplateFieldProps {
-  /** The template as stored: plain text with `{имя}`, `{мастер}`, `{услуга}`. */
+  /** The template as stored: plain text with `{key}` placeholders (`{имя}`, `{ссылка}` …). */
   value: string
   onChange: (value: string) => void
   label: string
+  /** The placeholders this template takes, shown as pills and offered as buttons under it. */
+  tokens: readonly TemplateToken[]
   placeholder?: string
+  /** How it will read («Например: …»); with it the field is a Settings row of its own. */
+  preview?: string
 }
-
-const TOKEN_PATTERN = /\{(имя|мастер|услуга)\}/giu
 
 const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 // Stored text → the field's HTML: placeholders become pills nobody has to decode («что за {имя}»).
-const toHtml = (value: string) =>
+const toHtml = (value: string, tokens: readonly TemplateToken[]) =>
   escapeHtml(value)
-    .replace(TOKEN_PATTERN, (_, name: string) => {
-      const token = TEMPLATE_TOKENS.find((item) => item.key === name.toLowerCase())
+    .replace(/\{([^{}\s]+)\}/gu, (_, name: string) => {
+      const token = tokens.find((item) => item.key === name.toLowerCase())
       return token
         ? `<span class="${styles.pill}" contenteditable="false" data-token="${token.key}">${token.label}</span>`
         : `{${name}}`
@@ -42,11 +45,19 @@ const fromNode = (node: Node): string => {
 const fromField = (field: HTMLElement) =>
   [...field.childNodes].map(fromNode).join('').replace(/ /g, ' ')
 
-// A reply template typed like ordinary text, the client's name, the master and the service as
-// pills inserted from the buttons under it (at the caret) and removed whole with Backspace. It
-// grows with the text; Enter makes a new line. Stored as plain text with `{имя}` and the rest,
-// which the API fills in.
-export const TemplateField = ({ value, onChange, label, placeholder }: TemplateFieldProps) => {
+// One editor for every message template in the cabinet (review replies, mailings): typed like
+// ordinary text, the placeholders as pills inserted from the buttons under it (at the caret) and
+// removed whole with Backspace. It grows with the text; Enter makes a new line. Stored as plain
+// text with `{имя}` and the rest, which the API fills in. With a `preview` it is a Settings row
+// that shows how the message will read.
+export const TemplateField = ({
+  value,
+  onChange,
+  label,
+  tokens,
+  placeholder,
+  preview,
+}: TemplateFieldProps) => {
   const fieldRef = useRef<HTMLDivElement>(null)
   // The last text this field reported, so a re-render from its own typing never resets the caret.
   const reported = useRef<string | null>(null)
@@ -54,9 +65,9 @@ export const TemplateField = ({ value, onChange, label, placeholder }: TemplateF
   useEffect(() => {
     const field = fieldRef.current
     if (!field || value === reported.current) return
-    field.innerHTML = toHtml(value)
+    field.innerHTML = toHtml(value, tokens)
     reported.current = value
-  }, [value])
+  }, [value, tokens])
 
   const report = () => {
     const field = fieldRef.current
@@ -109,7 +120,7 @@ export const TemplateField = ({ value, onChange, label, placeholder }: TemplateF
     report()
   }
 
-  return (
+  const field = (
     <div className={styles.template}>
       {/* biome-ignore lint/a11y/useSemanticElements: a textbox with pills needs contenteditable */}
       <div
@@ -127,7 +138,7 @@ export const TemplateField = ({ value, onChange, label, placeholder }: TemplateF
         onPaste={handlePaste}
       />
       <div className={styles.tokens}>
-        {TEMPLATE_TOKENS.map((token) => (
+        {tokens.map((token) => (
           <button
             key={token.key}
             type='button'
@@ -143,4 +154,15 @@ export const TemplateField = ({ value, onChange, label, placeholder }: TemplateF
       </div>
     </div>
   )
+
+  if (preview === undefined) return field
+
+  return (
+    <div className={styles.templateRow}>
+      {field}
+      <p className={styles.templatePreview}>{preview}</p>
+    </div>
+  )
 }
+
+export type { TemplateToken }

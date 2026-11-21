@@ -7,9 +7,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
   ResponsiveContainer,
   Tooltip,
   type TooltipContentProps,
@@ -73,11 +70,13 @@ const RevenueTooltip = ({ active, payload }: TooltipContentProps<ValueType, Name
 interface RevenueChartProps {
   buckets: Bucket[]
   previous: Bucket[]
+  /** A column clicked: its bucket's key (a day's date for daily columns). */
+  onBucketClick?: (key: string) => void
 }
 
 // This period as solid columns, the one before as hatched ones behind each: the comparison is
 // the picture itself; the tooltip carries exact values, a hidden table carries all of them.
-const RevenueChart = ({ buckets, previous }: RevenueChartProps) => {
+const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) => {
   const animate = useAnimate()
   const rows: RevenueRow[] = buckets.map((bucket, index) => ({
     ...bucket,
@@ -85,6 +84,10 @@ const RevenueChart = ({ buckets, previous }: RevenueChartProps) => {
     previousTitle: previous[index]?.title ?? '',
   }))
   const labelEvery = Math.ceil(rows.length / 8)
+  const openBucket = (index: number) => {
+    const row = rows[index]
+    if (row) onBucketClick?.(row.key)
+  }
 
   return (
     <div className={styles.revenue}>
@@ -142,6 +145,8 @@ const RevenueChart = ({ buckets, previous }: RevenueChartProps) => {
             />
             <Bar
               dataKey='previous'
+              onClick={(_, index) => openBucket(index)}
+              cursor={onBucketClick ? 'pointer' : undefined}
               fill='url(#revenue-hatch)'
               radius={[6, 6, 2, 2]}
               isAnimationActive={animate}
@@ -149,6 +154,8 @@ const RevenueChart = ({ buckets, previous }: RevenueChartProps) => {
             />
             <Bar
               dataKey='revenue'
+              onClick={(_, index) => openBucket(index)}
+              cursor={onBucketClick ? 'pointer' : undefined}
               fill='var(--color-primary)'
               radius={[6, 6, 2, 2]}
               isAnimationActive={animate}
@@ -168,51 +175,75 @@ const RevenueChart = ({ buckets, previous }: RevenueChartProps) => {
           Прошлый
         </span>
       </div>
-      <table className={styles.srOnly}>
-        <caption>Выручка по периодам и тот же отрезок в прошлом периоде</caption>
-        <thead>
-          <tr>
-            <th scope='col'>Период</th>
-            <th scope='col'>Выручка</th>
-            <th scope='col'>Визиты</th>
-            <th scope='col'>Прошлый период</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.key}>
-              <th scope='row'>{row.title}</th>
-              <td>{formatMoney(row.revenue)}</td>
-              <td>{row.visits}</td>
-              <td>{formatMoney(row.previous)}</td>
+      {/* A table keeps its content's width whatever it is told, so a block hides it: the table
+          itself stretched the page sideways on phones. */}
+      <div className={styles.srOnly}>
+        <table>
+          <caption>Выручка по периодам и тот же отрезок в прошлом периоде</caption>
+          <thead>
+            <tr>
+              <th scope='col'>Период</th>
+              <th scope='col'>Выручка</th>
+              <th scope='col'>Визиты</th>
+              <th scope='col'>Прошлый период</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.key}>
+                <th scope='row'>{row.title}</th>
+                <td>{formatMoney(row.revenue)}</td>
+                <td>{row.visits}</td>
+                <td>{formatMoney(row.previous)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
 
 interface SparklineProps {
   values: number[]
+  /** The point under the pointer (its index), or null when it leaves: the stat shows that day. */
+  onActiveChange?: (index: number | null) => void
 }
 
-// One series, no axis: the shape of the period under a number (the number carries the value).
-const Sparkline = ({ values }: SparklineProps) => {
+type ChartPointer = { activeTooltipIndex?: number | string | null } | null
+
+// One series, no axis: the shape of the period under a number. Scrubbed like a stock chart:
+// pointing at it (or a finger along it) puts that day's figure in the number above, with a cursor
+// line and a dot on the curve; leaving brings the period's figure back.
+const Sparkline = ({ values, onActiveChange }: SparklineProps) => {
   const animate = useAnimate()
   if (values.length < 2) return null
   const data = values.map((value, index) => ({ index, value }))
+  const handleMove = (state: ChartPointer) => {
+    const index = state?.activeTooltipIndex
+    onActiveChange?.(index === undefined || index === null ? null : Number(index))
+  }
 
   return (
-    <div className={styles.sparkline} aria-hidden='true'>
+    <div className={styles.sparkline}>
       <ResponsiveContainer width='100%' height='100%'>
-        <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
+        <AreaChart
+          data={data}
+          margin={{ top: 6, right: 6, bottom: 0, left: 6 }}
+          onMouseMove={handleMove}
+          onMouseLeave={() => onActiveChange?.(null)}
+        >
           <defs>
             <linearGradient id='spark-fill' x1='0' y1='0' x2='0' y2='1'>
               <stop offset='0%' stopColor='var(--color-primary)' stopOpacity={0.28} />
               <stop offset='100%' stopColor='var(--color-primary)' stopOpacity={0} />
             </linearGradient>
           </defs>
+          <Tooltip
+            content={() => null}
+            cursor={{ stroke: 'var(--color-border-strong)', strokeDasharray: '3 3' }}
+            isAnimationActive={false}
+          />
           <Area
             dataKey='value'
             type='monotone'
@@ -220,6 +251,12 @@ const Sparkline = ({ values }: SparklineProps) => {
             strokeWidth={2}
             fill='url(#spark-fill)'
             dot={false}
+            activeDot={{
+              r: 4,
+              fill: 'var(--color-primary)',
+              stroke: 'var(--color-background)',
+              strokeWidth: 2,
+            }}
             isAnimationActive={animate}
             animationDuration={800}
           />
@@ -229,65 +266,4 @@ const Sparkline = ({ values }: SparklineProps) => {
   )
 }
 
-type PaymentPart = { label: string; value: number }
-
-const PAYMENT_COLORS: Record<string, string> = {
-  Наличные: 'var(--color-success)',
-  Карта: 'var(--color-primary)',
-  Перевод: 'var(--color-rating)',
-  'Не отмечено': 'var(--color-tertiary-foreground)',
-}
-
-interface PaymentsDonutProps {
-  parts: PaymentPart[]
-}
-
-// How the money came in, as a ring of shares beside its legend (names, sums and percents).
-const PaymentsDonut = ({ parts }: PaymentsDonutProps) => {
-  const animate = useAnimate()
-  const total = parts.reduce((sum, part) => sum + part.value, 0)
-
-  return (
-    <div className={styles.payments}>
-      <div className={styles.donut} aria-hidden='true'>
-        <ResponsiveContainer width='100%' height='100%'>
-          <PieChart>
-            <Pie
-              data={parts}
-              dataKey='value'
-              nameKey='label'
-              innerRadius='68%'
-              outerRadius='100%'
-              paddingAngle={parts.length > 1 ? 3 : 0}
-              cornerRadius={4}
-              stroke='none'
-              startAngle={90}
-              endAngle={-270}
-              isAnimationActive={animate}
-              animationDuration={700}
-            >
-              {parts.map((part) => (
-                <Cell key={part.label} fill={PAYMENT_COLORS[part.label]} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <dl className={styles.paymentList}>
-        {parts.map((part) => (
-          <div key={part.label} className={styles.payment}>
-            <dt>
-              <i style={{ background: PAYMENT_COLORS[part.label] }} aria-hidden='true' />
-              {part.label}
-              <span className={styles.share}>{Math.round((part.value / total) * 100)}%</span>
-            </dt>
-            <dd>{formatMoney(part.value)}</dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  )
-}
-
-export type { PaymentPart }
-export { PaymentsDonut, RevenueChart, Sparkline }
+export { RevenueChart, Sparkline }

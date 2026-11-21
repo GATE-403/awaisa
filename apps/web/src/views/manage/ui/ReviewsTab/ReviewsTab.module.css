@@ -446,106 +446,6 @@
   margin-left: 0;
 }
 
-/* A reply template in the settings sheet: text with pills, the buttons that insert them under it
-   while it is focused, and (for the automatic reply) how it will read. */
-.templateRow {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-.template {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
-/* Grows with the words; long ones wrap instead of running off the edge. No ring around it: the
-   row it sits in lights up instead (a box drawn on every click read as a bug). */
-.templateField {
-  min-height: 24px;
-  color: var(--color-foreground);
-  font-size: var(--text-input);
-  line-height: 1.45;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  outline: none;
-  cursor: text;
-}
-
-.templateField:focus,
-.templateField:focus-visible {
-  outline: none;
-  box-shadow: none;
-}
-
-.templateField:empty::before {
-  content: attr(data-placeholder);
-  color: var(--color-muted-foreground);
-}
-
-/* «Имя клиента», «Мастер», «Услуга» inside the text: an accent-tinted capsule, removed whole. */
-.pill {
-  display: inline-block;
-  margin: 0 1px;
-  padding: 0 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-  font-size: 0.9em;
-  font-weight: var(--font-weight-medium);
-  line-height: 1.6;
-  white-space: nowrap;
-  user-select: all;
-}
-
-.tokens {
-  display: none;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.template:focus-within .tokens {
-  display: flex;
-}
-
-.tokenButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 30px;
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-.tokenButton svg {
-  width: 12px;
-  height: 12px;
-  color: var(--color-link);
-}
-
-.templatePreview {
-  margin: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.templatePreview::before {
-  content: "Например: ";
-}
-
 .quickRow {
   display: flex;
   align-items: flex-start;
@@ -558,19 +458,13 @@
 /* The row being typed in is lit like a selected Settings row (for a click and for Tab alike:
    an editable field is always «focus-visible», so a ring would show on every click); a mouse over
    a row shows it is editable. */
-.quickRow:focus-within,
-.templateRow:focus-within {
+.quickRow:focus-within {
   background: var(--color-fill);
 }
 
 @media (hover: hover) {
-  .quickRow:hover,
-  .templateRow:hover {
+  .quickRow:hover {
     background: color-mix(in srgb, var(--color-fill) 60%, transparent);
-  }
-
-  .tokenButton:hover {
-    background: color-mix(in srgb, var(--color-fill) 60%, var(--color-foreground) 8%);
   }
 
   .quickRemove:hover {
@@ -756,14 +650,8 @@ button.quickAdd {
   }
 }
 
-.headerTools {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* Phones: the header is the tabs alone, scrolling sideways; the glyphs float at the foot and the
-   rating stays on wider screens (and on the place's page), so the header is one line, not three. */
+/* Phones: the header is the tabs alone, scrolling sideways; the glyphs float at the foot (in a
+   FloatingToolbar, in the corner: the middle is «Ещё N отзывов»'s) and the rating stays on wider screens (and on the place's page), so the header is one line, not three. */
 @media (max-width: 639px) {
   .toolbar > header {
     flex-wrap: nowrap;
@@ -778,38 +666,9 @@ button.quickAdd {
     display: none;
   }
 
-  /* The glyphs float over the window's foot in the material, like the schedule's toolbar, so
-     the pinned header is the tabs alone and they scroll the whole width. */
-  .headerTools:has([role="group"]) {
-    position: fixed;
-    /* In the corner: the centre belongs to «Ещё N отзывов» on the list's fade. */
-    right: var(--space-4);
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
-    z-index: 40;
-    width: max-content;
-    padding: var(--space-1);
-    border-radius: var(--radius-full);
-    background: var(--color-material);
-    backdrop-filter: var(--blur-material);
-    box-shadow:
-      inset 0 0 0 0.5px var(--color-material-border),
-      var(--shadow-material),
-      var(--shadow-lg);
-  }
-
-  .headerTools [role="group"] {
-    padding: 0;
-    background: transparent;
-  }
-
-  .headerTools [role="group"] :is(button, a) {
-    width: 44px;
-    height: 44px;
-  }
-
   /* The last review scrolls out from under the floating capsule. */
   .page {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: var(--floating-toolbar-space);
   }
 }
 

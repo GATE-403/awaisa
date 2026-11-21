@@ -18,6 +18,7 @@ import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { DEFAULT_QUICK_REPLIES, fillReplyTemplate } from '../reviews/review-reply-text.js'
 import { RuntimeService } from '../runtime/runtime.service.js'
+import { businessWeekText } from './business-digest.js'
 import { reviewDigestText } from './review-digest.js'
 import {
   ALREADY_ANSWERED,
@@ -262,9 +263,84 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
   }
 
-  // Mondays at 10:00 Bishkek (04:00 UTC): last week's reviews in numbers, and what still waits.
+  // Mondays at 10:00 Bishkek (04:00 UTC): the week in one message — the money, visits, the best
+  // master, no-shows and what waits, then the week's reviews.
   @Cron('0 4 * * 1')
-  async sendReviewDigest() {
+  async sendWeeklyDigest() {
+    const weeks = await this.businessWeeks()
+    const reviews = await this.reviewDigests()
+    for (const businessId of new Set([...weeks.keys(), ...reviews.keys()])) {
+      const parts = [weeks.get(businessId), reviews.get(businessId)].filter(Boolean)
+      if (parts.length > 0) await this.notifyBusiness(businessId, parts.join('\n\n'))
+    }
+  }
+
+  /** Each linked business's week in numbers (`businessWeekText`), keyed by business. */
+  private async businessWeeks() {
+    const done = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
+    const earned = `COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))`
+    const rows = (await this.dataSource.query(
+      `WITH linked AS (SELECT DISTINCT "business_id" FROM "telegram_chats")
+       SELECT bz."id" AS "businessId", bz."name" AS "business", bz."slug",
+         COALESCE(SUM(${earned}) FILTER (WHERE ${done} AND b."starts_at" >= now() - interval '7 days'), 0)::int AS "revenue",
+         COALESCE(SUM(${earned}) FILTER (WHERE ${done} AND b."starts_at" < now() - interval '7 days'), 0)::int AS "previousRevenue",
+         COUNT(b."id") FILTER (WHERE ${done} AND b."starts_at" >= now() - interval '7 days')::int AS "visits",
+         COUNT(b."id") FILTER (WHERE b."outcome" = 'no_show' AND b."starts_at" >= now() - interval '7 days')::int AS "noShows",
+         COALESCE(SUM(s."price" - COALESCE(b."discount_amount", 0)) FILTER (WHERE b."outcome" = 'no_show'
+           AND b."starts_at" >= now() - interval '7 days'), 0)::int AS "noShowAmount",
+         (SELECT COUNT(*) FROM "bookings" u WHERE u."business_id" = bz."id" AND u."status" = 'confirmed'
+            AND u."outcome" IS NULL AND u."ends_at" < now() AND u."starts_at" >= now() - interval '30 days')::int
+           AS "unmarked",
+         (SELECT json_build_object('name', sp."name", 'revenue', SUM(COALESCE(m."paid_amount", ms."price" - COALESCE(m."discount_amount", 0))))
+            FROM "bookings" m JOIN "services" ms ON ms."id" = m."service_id"
+            JOIN "specialists" sp ON sp."id" = m."specialist_id"
+            WHERE m."business_id" = bz."id" AND m."status" = 'confirmed'
+              AND m."outcome" IS DISTINCT FROM 'no_show' AND m."starts_at" >= now() - interval '7 days'
+              AND m."starts_at" < now()
+            GROUP BY sp."id", sp."name"
+            ORDER BY SUM(COALESCE(m."paid_amount", ms."price" - COALESCE(m."discount_amount", 0))) DESC
+            LIMIT 1) AS "bestMaster"
+       FROM "businesses" bz
+       JOIN linked l ON l."business_id" = bz."id"
+       LEFT JOIN "bookings" b ON b."business_id" = bz."id"
+         AND b."starts_at" >= now() - interval '14 days' AND b."starts_at" < now()
+       LEFT JOIN "services" s ON s."id" = b."service_id"
+       GROUP BY bz."id", bz."name", bz."slug"`,
+    )) as {
+      businessId: string
+      business: string
+      slug: string
+      revenue: number
+      previousRevenue: number
+      visits: number
+      noShows: number
+      noShowAmount: number
+      unmarked: number
+      bestMaster: { name: string; revenue: number | string } | null
+    }[]
+    const web = this.config.get('PUBLIC_WEB_URL', { infer: true })
+    const texts = new Map<string, string>()
+    for (const row of rows) {
+      const text = businessWeekText({
+        business: row.business,
+        revenue: row.revenue,
+        previousRevenue: row.previousRevenue,
+        visits: row.visits,
+        bestMaster: row.bestMaster
+          ? { name: row.bestMaster.name, revenue: Number(row.bestMaster.revenue) }
+          : null,
+        noShows: { count: row.noShows, amount: row.noShowAmount },
+        unmarked: row.unmarked,
+        analyticsUrl: `${web}/manage/${row.slug}?tab=analytics`,
+      })
+      if (text) texts.set(row.businessId, text)
+    }
+
+    return texts
+  }
+
+  /** Each linked business's week of reviews (`reviewDigestText`), keyed by business. */
+  private async reviewDigests() {
     const rows = (await this.dataSource.query(
       `WITH linked AS (SELECT DISTINCT "business_id" FROM "telegram_chats")
        SELECT b."id" AS "businessId", b."name" AS "business", b."slug",
@@ -296,6 +372,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
       bestMaster: { name: string; average: number | string; count: number | string } | null
     }[]
     const web = this.config.get('PUBLIC_WEB_URL', { infer: true })
+    const texts = new Map<string, string>()
     for (const row of rows) {
       const text = reviewDigestText({
         business: row.business,
@@ -313,8 +390,10 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
         unanswered: row.unanswered,
         cabinetUrl: `${web}/manage/${row.slug}?tab=reviews`,
       })
-      if (text) await this.notifyBusiness(row.businessId, text)
+      if (text) texts.set(row.businessId, text)
     }
+
+    return texts
   }
 
   /** A button under a review: publish a quick reply, or ask for the owner's own words. */

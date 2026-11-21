@@ -113,9 +113,9 @@ export class ImportService {
         const created = await this.query(
           `INSERT INTO "bookings" ("business_id", "service_id", "specialist_id", "starts_at", "ends_at",
              "customer_name", "customer_phone", "comment", "status", "cancel_token_hash", "branch_id",
-             "sms_confirmation", "reminder_minutes")
+             "sms_confirmation", "reminder_minutes", "source")
            SELECT $1::uuid, $2::varchar, $3::varchar, $4::timestamptz, $5::timestamptz, $6::varchar, $7::varchar,
-             $8::text, 'confirmed', $9::varchar, $10::uuid, $11::boolean, $12::int
+             $8::text, 'confirmed', $9::varchar, $10::uuid, $11::boolean, $12::int, 'import'
            WHERE NOT EXISTS (SELECT 1 FROM "bookings" WHERE "business_id" = $1
              AND "customer_phone" = $7::varchar AND "starts_at" = $4::timestamptz AND "status" = 'confirmed')
            RETURNING "id"`,

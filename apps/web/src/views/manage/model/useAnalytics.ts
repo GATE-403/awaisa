@@ -24,5 +24,9 @@ export const useAnalytics = (slug: string, days: AnalyticsDays) => {
   // The previous period stays on screen while the next one loads, so the layout doesn't jump.
   const isLoading = report === null || report.period.days !== days
 
-  return { report, error, isLoading }
+  // The goal is saved apart from the report; the month line follows it at once.
+  const setGoal = (goal: number | null) =>
+    setReport((current) => current && { ...current, month: { ...current.month, goal } })
+
+  return { report, error, isLoading, setGoal }
 }

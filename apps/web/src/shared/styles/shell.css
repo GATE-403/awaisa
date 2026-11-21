@@ -25,6 +25,8 @@
   --business-bar-height: 48px;
   /* Room for the floating «Продолжить запись» pill while it is on screen. */
   --resume-space: 0px;
+  /* Room a page leaves at its foot for a section's FloatingToolbar on phones. */
+  --floating-toolbar-space: calc(72px + env(safe-area-inset-bottom));
   --page-gutter: var(--space-4);
   --section-gap: var(--space-10);
 }
