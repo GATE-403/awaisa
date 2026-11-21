@@ -20,8 +20,9 @@ import { toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { waitlistFreedMessage } from '../notifications/messages.js'
-import { SmsService } from '../notifications/sms.service.js'
+import { whatsappWaitlistFreed } from '../notifications/whatsapp-messages.js'
 import type { JoinWaitlistInput } from './waitlist.schemas.js'
 import { WaitlistEntry } from './waitlist-entry.entity.js'
 
@@ -51,7 +52,7 @@ export class WaitlistService {
     private readonly availability: AvailabilityService,
     private readonly catalog: CatalogService,
     private readonly businesses: BusinessesService,
-    private readonly sms: SmsService,
+    private readonly clientMessages: ClientMessagesService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -255,10 +256,17 @@ export class WaitlistService {
         ...(entry.branchId ? { branch: entry.branchId } : {}),
       })
       const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/${view.business.slug}/book?${params}`
-      void this.sms.sendSafely(
-        entry.customerPhone,
-        waitlistFreedMessage(view.business.name, view.service.name, entry.date, time, link),
-      )
+      void this.clientMessages.send(entry.customerPhone, {
+        text: waitlistFreedMessage(view.business.name, view.service.name, entry.date, time, link),
+        link: { label: 'Записаться', url: link },
+        whatsapp: whatsappWaitlistFreed(
+          view.business.name,
+          view.service.name,
+          entry.date,
+          time,
+          link,
+        ),
+      })
     }
     this.logger.log(`Waitlist: ${ids.size} notified`)
   }

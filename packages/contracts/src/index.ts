@@ -1261,6 +1261,9 @@ type CreatedId = { id: string }
 
 type PaymentsConfig = { isAvailable: boolean; driver: string }
 
+/** How clients hear about their visits: `isWhatsappOn` when WhatsApp comes before SMS. */
+type ClientMessagingConfig = { isWhatsappOn: boolean }
+
 type TestPaymentResult = { bookingId: string; paymentStatus: string | null }
 
 type PaymentSync = { bookingId: string; status: string; paymentStatus: string | null }
@@ -1320,6 +1323,7 @@ export type {
   MailingSent,
   PaymentSync,
   PaymentsConfig,
+  ClientMessagingConfig,
   ReviewPhotos,
   ReviewReply,
   SearchCorrection,
