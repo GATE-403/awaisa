@@ -301,6 +301,8 @@ const listFeed = async (
 
 // A tagged work photo per service (the newest wins), for the place's service cards.
 const listServicePhotos = async (slug: string): Promise<Record<string, string>> => {
+  // A failed read inside a cache scope fails the build even when caught here.
+  if (slug === PRERENDER_SLUG) return {}
   const page = await listFeed(undefined, slug, undefined).catch(() => null)
   const photos: Record<string, string> = {}
   for (const item of page?.items ?? []) {
