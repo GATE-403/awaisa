@@ -2,6 +2,7 @@ import type { ConfigService } from '@nestjs/config'
 import type { ModuleRef } from '@nestjs/core'
 import type { DataSource } from 'typeorm'
 import { describe, expect, it, vi } from 'vitest'
+import type { BillingService } from '../billing/billing.service.js'
 import type { Env } from '../config/env.js'
 import type { PaymentsService } from './payments.service.js'
 import { SubscriptionOrdersService } from './subscription-orders.service.js'
@@ -22,7 +23,7 @@ const order = (status: string, bookingId: string | null = null) => ({
 
 type Answer = (sql: string) => unknown[]
 
-const setup = (answer: Answer) => {
+const setup = (answer: Answer, { hasLoyalty = true } = {}) => {
   const query = vi.fn(async (sql: string, _params: unknown[] = []) => answer(sql))
   const transaction = vi.fn(async (work: (manager: { query: typeof query }) => unknown) =>
     work({ query }),
@@ -35,14 +36,16 @@ const setup = (answer: Answer) => {
   }
   const bookingPayments = { onSubscriptionPaid: vi.fn(async () => undefined) }
   const moduleRef = { get: () => bookingPayments } as unknown as ModuleRef
+  const billing = { hasFeature: vi.fn(async () => hasLoyalty) }
   const config = { get: () => 'x'.repeat(32) } as unknown as ConfigService<Env, true>
   const service = new SubscriptionOrdersService(
     { query, transaction } as unknown as DataSource,
     payments as unknown as PaymentsService,
     config,
     moduleRef,
+    billing as unknown as BillingService,
   )
-  return { service, query, payments, bookingPayments }
+  return { service, query, payments, bookingPayments, billing }
 }
 
 const issuedRows =
@@ -127,5 +130,38 @@ describe('SubscriptionOrdersService.onPaid', () => {
     const { service, payments } = setup(() => [])
     service.onModuleInit()
     expect(payments.registerOrder).toHaveBeenCalledWith('subscription', expect.any(Object))
+  })
+
+  it('still issues a paid order after the plan lost «loyalty»: the money came', async () => {
+    const { service, billing } = setup(issuedRows('pending'), { hasLoyalty: false })
+
+    expect(await service.onPaid('order-1')).toEqual({ subscriptionId: 'sub-1', bookingId: null })
+    expect(billing.hasFeature).not.toHaveBeenCalled()
+  })
+})
+
+describe('SubscriptionOrdersService: online sale needs the «loyalty» plan feature', () => {
+  const plans = (sql: string) => {
+    if (sql.includes('FROM "businesses" WHERE "slug"')) return [{ id: 'biz-1' }]
+    if (sql.includes('FROM "subscription_plans"'))
+      return [{ id: 'plan-1', business_id: 'biz-1', title: '5 стрижек', price: 6000 }]
+    return []
+  }
+
+  it('shows and sells online plans while the plan has «loyalty»', async () => {
+    const { service, billing } = setup(plans)
+
+    expect(await service.listOnline('studio')).toHaveLength(1)
+    await expect(service.findOnlinePlan('biz-1', 'plan-1')).resolves.toMatchObject({ id: 'plan-1' })
+    expect(billing.hasFeature).toHaveBeenCalledWith('biz-1', 'loyalty')
+  })
+
+  it('shows none and refuses to sell (also with a booking) without it', async () => {
+    const { service } = setup(plans, { hasLoyalty: false })
+
+    expect(await service.listOnline('studio')).toEqual([])
+    await expect(service.findOnlinePlan('biz-1', 'plan-1')).rejects.toThrow(
+      'Абонемент не продаётся онлайн',
+    )
   })
 })
