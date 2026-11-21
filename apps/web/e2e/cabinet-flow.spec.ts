@@ -10,7 +10,10 @@ test.describe('Way into the cabinet and out of it', () => {
     // The tab bar on phones, the header with a mouse: one tap either way.
     await page.getByRole('link', { name: 'Кабинет' }).locator('visible=true').first().click()
     await expect(page).toHaveURL(/\/manage$/)
+    // The row in the list itself: right after the move the map's own rows («Awaisa Studio …»,
+    // links to booking) may still be on screen and match a looser query.
     await page
+      .getByRole('article', { name: 'Awaisa Studio', exact: true })
       .getByRole('link', { name: /Awaisa Studio/ })
       .first()
       .click()
