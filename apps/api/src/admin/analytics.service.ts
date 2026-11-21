@@ -10,6 +10,7 @@ import {
   weekdayOf,
 } from '../common/business-time.js'
 import { MailingsService } from '../mailings/mailings.service.js'
+import { PayrollService } from '../payroll/payroll.service.js'
 
 type Totals = {
   visits: number
@@ -71,6 +72,7 @@ export class AnalyticsService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly mailings: MailingsService,
+    private readonly payroll: PayrollService,
   ) {}
 
   async setGoal(business: Business, goal: number | null) {
@@ -101,6 +103,7 @@ export class AnalyticsService {
       upcoming,
       hours,
       insights,
+      pay,
     ] = await Promise.all([
       this.totals(id, from, now),
       this.totals(id, previousFrom, from),
@@ -169,6 +172,7 @@ export class AnalyticsService {
         [id],
       ),
       this.insights(business, from, previousFrom, now),
+      this.payroll.forPeriod(id, firstDay, today),
     ])
 
     // Open minutes in the period, the same for every master: the base for their load.
@@ -239,11 +243,9 @@ export class AnalyticsService {
         reviews: toNumber(row.reviews),
         rating: row.rating === null ? null : toNumber(row.rating),
         percent: row.percent === null ? null : toNumber(row.percent),
-        // What the master is owed for the period: their share of what their visits earned.
-        payout:
-          row.percent === null
-            ? null
-            : Math.round((toNumber(row.revenue) * toNumber(row.percent)) / 100),
+        // What the master is owed for the period by their scheme (payroll.ts), and how.
+        payout: pay.get(String(row.id))?.total ?? null,
+        pay: pay.get(String(row.id)) ?? null,
         load:
           openMinutes === 0
             ? 0

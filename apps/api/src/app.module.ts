@@ -23,6 +23,7 @@ import { LoyaltyModule } from './loyalty/loyalty.module.js'
 import { MailingsModule } from './mailings/mailings.module.js'
 import { MasterModule } from './master/master.module.js'
 import { MediaModule } from './media/media.module.js'
+import { PayrollModule } from './payroll/payroll.module.js'
 import { ProfilesModule } from './profiles/profiles.module.js'
 import { PromotionsModule } from './promotions/promotions.module.js'
 import { PushModule } from './push/push.module.js'
@@ -72,6 +73,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     LoyaltyModule,
     MailingsModule,
     InventoryModule,
+    PayrollModule,
     CashDeskModule,
     ImportModule,
     RecommendationsModule,

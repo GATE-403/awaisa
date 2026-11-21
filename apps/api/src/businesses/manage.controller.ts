@@ -70,11 +70,21 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @CurrentRole() role: MemberRole,
   ): Promise<BusinessPage> {
+    const catalog = await this.catalog.getCatalog(business.id, { includeInactive: true })
     return {
       // The cabinet hides money and setup from administrators; the API refuses them too.
       role,
       business: await this.businesses.toFullView(business, { includeInactive: true }),
-      catalog: await this.catalog.getCatalog(business.id, { includeInactive: true }),
+      // Masters' pay is the owner's: administrators do not get it either.
+      catalog:
+        role === 'owner'
+          ? catalog
+          : {
+              ...catalog,
+              specialists: catalog.specialists.map(
+                ({ commissionPercent: _hidden, ...specialist }) => specialist,
+              ),
+            },
     }
   }
 

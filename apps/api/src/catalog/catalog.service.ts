@@ -35,6 +35,7 @@ type CatalogView = {
   specialists: (Pick<Specialist, 'id' | 'name' | 'role' | 'rating'> & {
     serviceIds: string[]
     isActive?: boolean
+    commissionPercent?: number | null
   })[]
 }
 
@@ -252,7 +253,10 @@ export class CatalogService {
       isActive: input.isActive,
       branchId: input.branchId,
       phone: input.phone ? normalizePhone(input.phone) : null,
-      commissionPercent: input.commissionPercent,
+      commissionPercent:
+        input.commissionPercent === undefined
+          ? (existing.commissionPercent ?? null)
+          : input.commissionPercent,
       services,
     })
 

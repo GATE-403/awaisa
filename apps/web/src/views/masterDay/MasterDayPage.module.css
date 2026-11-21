@@ -277,6 +277,16 @@ li + li > .place {
   padding: 0;
 }
 
+/* The month's pay, said about the summary above. */
+.monthPay {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.monthPay b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
 /* «На этом устройстве»: on the page's own left edge, like «Ваши отзывы» above it. */
 .alerts {
   margin-top: var(--space-6);

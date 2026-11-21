@@ -64,6 +64,7 @@ import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { PAGE_SECTIONS } from '@/views/manage/manageTabs'
 import { HoursSheet } from '@/views/manage/ui/Hours/HoursSheet'
 import { MasterDialog } from '@/views/manage/ui/Masters/MasterDialog'
+import { MasterPaySheet } from '@/views/manage/ui/Masters/MasterPaySheet'
 import { MasterScheduleSheet } from '@/views/manage/ui/Masters/MasterScheduleSheet'
 import { PhotosSection } from '@/views/manage/ui/PhotosSection/PhotosSection'
 import { CategoryDialog } from '@/views/manage/ui/Services/CategoryDialog'
@@ -121,6 +122,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const [editingService, setEditingService] = useState<Service | 'new' | null>(null)
   const [editingMaster, setEditingMaster] = useState<Specialist | 'new' | null>(null)
   const [schedulingMaster, setSchedulingMaster] = useState<Specialist | null>(null)
+  const [payingMaster, setPayingMaster] = useState<Specialist | null>(null)
   const [isEditingHours, setIsEditingHours] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const masters = catalog.specialists.filter((master) => master.isActive !== false)
@@ -591,6 +593,15 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                     file ? 'Фото обновлено' : 'Фото удалено',
                   )
           }
+          slug={slug}
+          onOpenPay={
+            editingMaster === 'new'
+              ? undefined
+              : () => {
+                  setPayingMaster(editingMaster)
+                  setEditingMaster(null)
+                }
+          }
           onOpenSchedule={
             editingMaster === 'new'
               ? undefined
@@ -605,6 +616,14 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         <CategoryDialog
           onClose={() => setIsAddingCategory(false)}
           onSave={(name) => run(() => createCategory(slug, name), 'Категория добавлена')}
+        />
+      )}
+      {payingMaster && (
+        <MasterPaySheet
+          slug={slug}
+          master={payingMaster}
+          services={catalog.services}
+          onClose={() => setPayingMaster(null)}
         />
       )}
       {schedulingMaster && (

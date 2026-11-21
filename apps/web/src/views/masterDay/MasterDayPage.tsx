@@ -20,6 +20,7 @@ import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { DayStrip } from '@/widgets/DayStrip'
 import styles from './MasterDayPage.module.css'
@@ -33,6 +34,20 @@ interface MasterDayPageProps {
 type Choice = 'pending' | VisitOutcome
 
 const DAYS_SHOWN = 14
+const MONTHS = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+]
 const PAST_DAYS = 7
 const FORBIDDEN = 403
 const OUTCOMES: { value: Choice; label: string }[] = [
@@ -174,16 +189,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               </div>
               <div className={styles.summaryItem}>
                 <span className={styles.summaryValue}>
-                  {formatPrice(
-                    day.master.commissionPercent === null
-                      ? total
-                      : Math.round((total * day.master.commissionPercent) / 100),
-                  )}
+                  {formatPrice(day.pay === null ? total : day.pay.day)}
                 </span>
                 <span className={styles.summaryLabel}>
-                  {day.master.commissionPercent === null
+                  {day.pay === null
                     ? 'за день'
-                    : `ваши ${day.master.commissionPercent}%`}
+                    : day.pay.percent === null
+                      ? 'заработали'
+                      : `ваши ${day.pay.percent}%`}
                 </span>
               </div>
               <div className={styles.summaryItem}>
@@ -193,6 +206,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 <span className={styles.summaryLabel}>график</span>
               </div>
             </div>
+
+            {/* The month only when it says more than the day (on the month's first working day they match). */}
+            {day.pay !== null && day.pay.month !== day.pay.day && (
+              <RowNote className={styles.monthPay}>
+                За {MONTHS[Number(day.pay.monthFrom.slice(5, 7)) - 1]} заработано{' '}
+                <b>{formatPrice(day.pay.month)}</b>
+              </RowNote>
+            )}
 
             {isToday && (current || next) && (
               <div className={styles.now} aria-live='polite'>

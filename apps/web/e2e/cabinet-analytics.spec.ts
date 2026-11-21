@@ -46,7 +46,8 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
     await row.click()
     const sheet = page.getByRole('dialog', { name: 'Азамат' })
     await expect(sheet).toContainText(`2 визита · ${money(2500)}`)
-    await expect(sheet.getByText('К выплате · 40%')).toBeVisible()
+    await expect(sheet.getByText(`40% от ${money(2500)}`)).toBeVisible()
+    await expect(sheet.getByText('Начислено')).toBeVisible()
     await expect(sheet).toContainText(money(1000))
     await expect(sheet).toContainText('Стрижка')
     await sheet.getByRole('button', { name: 'Закрыть' }).click()
@@ -60,9 +61,11 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
     )
     const path = await download.path()
     const csv = await readFile(path, 'utf8')
-    expect(csv).toContain('"Мастер";"Визиты";"Выручка";"Процент";"К выплате"')
-    expect(csv).toContain('"Азамат";"2";"2500";"40";"1000"')
-    expect(csv).toContain('"Бекзат";"1";"1000";"";""')
+    expect(csv).toContain(
+      '"Мастер";"Визиты";"Выручка";"Процент";"С услуг";"Оклад";"Минимум";"Начислено";"Выплачено";"К выплате"',
+    )
+    expect(csv).toContain('"Азамат";"2";"2500";"40";"1000";"0";"";"1000";"0";"1000"')
+    expect(csv).toContain('"Бекзат";"1";"1000";"";"";"";"";"";"";""')
     expect(csv).toContain(`"${paid.date}";"1500";"1"`)
   })
 
