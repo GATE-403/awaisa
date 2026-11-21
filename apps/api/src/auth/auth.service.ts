@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto'
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -140,6 +141,11 @@ export class AuthService {
 
   /** A verified number signs in: the customer is created when new, and a session opens. */
   async openSession(phone: string) {
+    const blocked = (await this.customers.query(
+      'SELECT 1 FROM "moderated_people" WHERE "phone" = $1 AND "blocked_at" IS NOT NULL',
+      [phone],
+    )) as unknown[]
+    if (blocked.length > 0) throw new ForbiddenException('Этот номер заблокирован модератором')
     await this.customers.upsert(
       { phone },
       { conflictPaths: ['phone'], skipUpdateIfNoValuesChanged: true },

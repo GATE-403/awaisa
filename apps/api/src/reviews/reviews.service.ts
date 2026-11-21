@@ -140,7 +140,7 @@ export class ReviewsService {
        LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
        LEFT JOIN "services" s ON s."id" = r."service_id"
        WHERE left(encode(sha256(convert_to($2 || b."customer_phone", 'UTF8')), 'hex'), 20) = $1
-         AND r."anonymized_at" IS NULL
+         AND NOT r."is_hidden" AND r."anonymized_at" IS NULL
        ORDER BY r."created_at" DESC LIMIT 50`,
       [id, this.reviewerSalt()],
     )) as ReviewerRow[]
@@ -369,7 +369,7 @@ export class ReviewsService {
          COUNT(*) FILTER (WHERE "reply" IS NULL)::int AS "unanswered",
          COUNT(*) FILTER (WHERE "reply" IS NULL AND "comment" = '' AND "rating" = 5)::int AS "quietFive",
          COUNT(*) FILTER (WHERE "reply" IS NULL AND "comment" = '' AND "rating" >= 4)::int AS "quietFour"
-       FROM "reviews" WHERE "business_id" = $1${byService}`,
+       FROM "reviews" WHERE "business_id" = $1${byService}${isManage ? '' : ' AND NOT "is_hidden"'}`,
       params,
     )) as Record<string, number>[]
     const rows = (await this.dataSource.query(
@@ -386,7 +386,7 @@ export class ReviewsService {
        LEFT JOIN "customers" c ON c."phone" = b."customer_phone"
        LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
        LEFT JOIN "services" s ON s."id" = r."service_id"
-       WHERE r."business_id" = $1${
+       WHERE r."business_id" = $1${isManage ? '' : ' AND NOT r."is_hidden"'}${
          serviceId
            ? ' AND r."service_id" = $3 AND ($4::text IS NULL OR r."specialist_id" = $4)'
            : ''

@@ -1,13 +1,13 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
-import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { Menu, MenuItem, MenuSubmenu } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatCircle, DotsThree, Flag, Heart, ShareFat } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useState } from 'react'
 import { useNextSlot } from '@/entities/booking'
-import { reportFeedItem } from '@/shared/api/clientApi'
+import { ReportReasons, useReport } from '@/features/report'
 import type { FeedItem } from '@/shared/api/types'
 import { type Translate, useT } from '@/shared/i18n'
 import styles from '../FeedPage.module.css'
@@ -65,11 +65,7 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
     }
   }
 
-  const report = async () => {
-    onReported()
-    await reportFeedItem(item.id).catch(() => undefined)
-    toast.show({ title: t('Спасибо, проверим фото'), type: 'info' })
-  }
+  const report = useReport('photo', item.id, onReported)
 
   return (
     <div className={styles.actions}>
@@ -89,13 +85,13 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
         <MenuItem icon={<ShareFat weight='bold' aria-hidden />} onClick={() => void share()}>
           {t('Поделиться')}
         </MenuItem>
-        <MenuItem
+        <MenuSubmenu
+          label={t('Пожаловаться')}
           variant='danger'
           icon={<Flag weight='bold' aria-hidden />}
-          onClick={() => void report()}
         >
-          {t('Пожаловаться')}
-        </MenuItem>
+          <ReportReasons onPick={(reason) => void report(reason)} />
+        </MenuSubmenu>
       </Menu>
       <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
         {service ? t('Записаться') : t('Выбрать услугу')}
