@@ -117,6 +117,17 @@
   outline: none;
 }
 
+/* The same stretched target as a button (the cabinet opens a sheet from it). */
+.nameButton {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
 .nameLink::after {
   content: "";
   position: absolute;

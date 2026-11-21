@@ -12,6 +12,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -28,7 +29,12 @@ import {
 import { Specialist } from '../catalog/specialist.entity.js'
 import { type ImageKind, processImage } from './images.js'
 import { StorageService } from './storage.service.js'
-import { type UpdateWorkPhotoInput, updateWorkPhotoSchema } from './work-photos.schemas.js'
+import {
+  type ReorderWorkPhotosInput,
+  reorderWorkPhotosSchema,
+  type UpdateWorkPhotoInput,
+  updateWorkPhotoSchema,
+} from './work-photos.schemas.js'
 import { WorkPhotosService } from './work-photos.service.js'
 
 type UploadedImage = { buffer: Buffer; mimetype: string }
@@ -112,6 +118,15 @@ export class ManageMediaController {
 
   @Get('work-photos')
   listPhotos(@CurrentBusiness() business: Business): Promise<WorkPhoto[]> {
+    return this.workPhotos.listForBusiness(business.id)
+  }
+
+  @Put('work-photos/order')
+  async reorderPhotos(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: reorderWorkPhotosSchema }) body: ReorderWorkPhotosInput,
+  ): Promise<WorkPhoto[]> {
+    await this.workPhotos.reorder(business.id, body.ids)
     return this.workPhotos.listForBusiness(business.id)
   }
 

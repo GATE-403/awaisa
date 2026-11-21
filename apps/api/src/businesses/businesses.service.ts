@@ -298,8 +298,9 @@ export class BusinessesService {
     const [branches, photos] = await Promise.all([
       this.listBranches(business.id, includeInactive),
       this.businesses.manager.query(
+        // The owner's order (the first five lead the page), else newest first.
         `SELECT "url" FROM "work_photos" WHERE "business_id" = $1 AND NOT "is_hidden"
-         ORDER BY "created_at" DESC LIMIT 30`,
+         ORDER BY "position" ASC NULLS FIRST, "created_at" DESC LIMIT 30`,
         [business.id],
       ) as Promise<{ url: string }[]>,
     ])

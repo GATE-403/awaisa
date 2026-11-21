@@ -963,6 +963,16 @@ type AnalyticsReport = {
 /** `PUT /manage/:slug/analytics/goal`: the month's revenue goal, null to clear it. */
 type AnalyticsGoal = { goal: number | null }
 
+// The owner's page at a glance, like a professional account's insights: distinct devices that
+// opened it and online bookings, this stretch of days and the one before.
+type PageStats = {
+  days: number
+  views: number
+  bookings: number
+  previousViews: number
+  previousBookings: number
+}
+
 // «Сообщить, когда освободится»: a client waits for a full day (see apps/api/src/waitlist).
 type WaitlistEntry = {
   id: string
@@ -1259,6 +1269,7 @@ export type {
   AnalyticsDays,
   AnalyticsReport,
   AnalyticsGoal,
+  PageStats,
   Offer,
   PopularService,
   Branch,
