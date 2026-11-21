@@ -290,6 +290,10 @@ export class LoyaltyService {
 
     if (extras.certificateCode && covered < visit.due) {
       const certificate = await this.findCertificate(visit.businessId, extras.certificateCode)
+      // Already drawn on for this visit (the outcome saved again): `covered` counts it.
+      if (await this.hasCertificateUse(certificate.id, visit.id)) {
+        return this.applyBonuses(visit, extras, covered, method)
+      }
       if (certificate.expiresOn && certificate.expiresOn < today()) {
         throw new BadRequestException('Срок сертификата истёк')
       }
@@ -309,20 +313,34 @@ export class LoyaltyService {
       if (covered >= visit.due) method = method ?? 'certificate'
     }
 
-    if (extras.bonusAmount && extras.bonusAmount > 0 && covered < visit.due) {
+    return this.applyBonuses(visit, extras, covered, method)
+  }
+
+  private async applyBonuses(
+    visit: VisitToSettle,
+    extras: VisitExtras,
+    alreadyCovered: number,
+    method: 'subscription' | 'certificate' | null,
+  ) {
+    let covered = alreadyCovered
+    // Bonuses this visit already spent are in `covered`: saving the outcome again spends no more
+    // (and must not ask the balance for them a second time).
+    const isSpent = Boolean(extras.bonusAmount) && (await this.hasBonusSpend(visit.id))
+    if (extras.bonusAmount && extras.bonusAmount > 0 && covered < visit.due && !isSpent) {
       const amount = Math.min(extras.bonusAmount, visit.due - covered)
       const [balance] = await this.query(
         'SELECT COALESCE(SUM("amount"), 0)::int AS "balance" FROM "bonus_transactions" WHERE "business_id" = $1 AND "phone" = $2',
         [visit.businessId, visit.phone],
       )
       if (toNumber(balance?.balance) < amount) throw new BadRequestException('Бонусов не хватает')
-      await this.query(
+      const spent = await this.query(
         `INSERT INTO "bonus_transactions" ("business_id", "phone", "amount", "kind", "booking_id", "note")
          VALUES ($1, $2, $3, 'spend', $4, 'Оплата визита')
-         ON CONFLICT ("booking_id", "kind") WHERE "booking_id" IS NOT NULL DO NOTHING`,
+         ON CONFLICT ("booking_id", "kind") WHERE "booking_id" IS NOT NULL DO NOTHING
+         RETURNING "id"`,
         [visit.businessId, visit.phone, -amount, visit.id],
       )
-      covered += amount
+      if (spent.length > 0) covered += amount
     }
 
     return { covered: Math.min(covered, visit.due), method }
@@ -382,6 +400,22 @@ export class LoyaltyService {
     )
     if (toNumber(row?.subscriptions) > 0) return Number.POSITIVE_INFINITY
     return toNumber(row?.certificates) + toNumber(row?.bonuses)
+  }
+
+  private async hasBonusSpend(bookingId: string) {
+    const rows = await this.query(
+      `SELECT 1 FROM "bonus_transactions" WHERE "booking_id" = $1 AND "kind" = 'spend'`,
+      [bookingId],
+    )
+    return rows.length > 0
+  }
+
+  private async hasCertificateUse(certificateId: string, bookingId: string) {
+    const rows = await this.query(
+      'SELECT 1 FROM "certificate_uses" WHERE "certificate_id" = $1 AND "booking_id" = $2',
+      [certificateId, bookingId],
+    )
+    return rows.length > 0
   }
 
   private async hasSubscriptionUse(bookingId: string) {

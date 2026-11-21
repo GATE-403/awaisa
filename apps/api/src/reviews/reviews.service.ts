@@ -21,8 +21,9 @@ import type { Customer } from '../customers/customer.entity.js'
 import { processImage } from '../media/images.js'
 import { StorageService } from '../media/storage.service.js'
 import { WorkPhotosService } from '../media/work-photos.service.js'
+import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { reviewRequestMessage } from '../notifications/messages.js'
-import { SmsService } from '../notifications/sms.service.js'
+import { whatsappReviewRequest } from '../notifications/whatsapp-messages.js'
 import { RankingsService } from '../rankings/rankings.service.js'
 import { reviewKeyboard } from '../telegram/review-replies.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
@@ -98,7 +99,7 @@ export class ReviewsService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly bookings: BookingsService,
     private readonly businesses: BusinessesService,
-    private readonly sms: SmsService,
+    private readonly clientMessages: ClientMessagesService,
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
     private readonly rankings: RankingsService,
@@ -331,15 +332,14 @@ export class ReviewsService {
     this.logger.log(`Asking ${due.length} client(s) for a review`)
     const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
     await Promise.all(
-      due.map((row) =>
-        this.sms.sendSafely(
-          row.phone,
-          reviewRequestMessage(
-            row.businessName,
-            `${webUrl}/review/${row.id}?s=${this.signature(row.id)}`,
-          ),
-        ),
-      ),
+      due.map((row) => {
+        const link = `${webUrl}/review/${row.id}?s=${this.signature(row.id)}`
+        return this.clientMessages.send(row.phone, {
+          text: reviewRequestMessage(row.businessName, link),
+          link: { label: 'Оценить', url: link },
+          whatsapp: whatsappReviewRequest(row.businessName, link),
+        })
+      }),
     )
   }
 
