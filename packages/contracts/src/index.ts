@@ -725,7 +725,8 @@ type SpecialistInput = Pick<Specialist, 'name' | 'role' | 'serviceIds'> & {
   branchId: string | null
   /** The number the master signs in with for «Мой день»; empty = no access. */
   phone: string
-  commissionPercent: number | null
+  /** Kept for older callers: «Зарплата» saves the whole scheme through `MasterPayScheme`. */
+  commissionPercent?: number | null
 }
 
 type MasterPlace = {
@@ -739,7 +740,9 @@ type MasterPlace = {
 type MasterDay = {
   date: string
   business: { slug: string; name: string }
-  master: { id: string; name: string; role: string; commissionPercent: number | null }
+  master: { id: string; name: string; role: string }
+  /** What the master earned: this day, and the month so far (null when no pay is set). */
+  pay: MasterDayPay | null
   hours: { opensMinutes: number; closesMinutes: number } | null
   leaveReason: string | null
   bookings: AdminBooking[]
@@ -867,6 +870,76 @@ type FeedPage = { items: FeedItem[]; nextOffset: number | null }
 
 type AnalyticsDays = 7 | 30 | 90 | 365
 
+type PayRateKind = 'percent' | 'fixed'
+type SalaryKind = 'month' | 'day'
+
+/** How a master is paid; every part is optional and they add up. */
+type MasterPayScheme = {
+  /** Percent of what the services' visits earned (paid money, or the price minus the discount). */
+  percent: number | null
+  /** A different percent, or a fixed sum per visit, for some services. */
+  rates: { serviceId: string; kind: PayRateKind; value: number }[]
+  /** A fixed salary per month (counted per calendar day) or per working day of the schedule. */
+  salary: { kind: SalaryKind; amount: number } | null
+  /** Guaranteed per month (counted per calendar day): pay is the larger of it and the earned. */
+  minimum: number | null
+}
+
+type MasterPayout = {
+  id: string
+  specialistId: string
+  amount: number
+  /** The period it pays for, YYYY-MM-DD. */
+  from: string
+  to: string
+  paidOn: string
+  note: string
+}
+
+type MasterPayoutInput = Omit<MasterPayout, 'id'>
+
+type MasterPayLine = {
+  serviceId: string
+  name: string
+  visits: number
+  /** What the visits earned. */
+  base: number
+  /** The rate used; null = no percent set for this service. */
+  kind: PayRateKind | null
+  rate: number | null
+  amount: number
+}
+
+type MasterPay = {
+  /** From the services. */
+  services: number
+  lines: MasterPayLine[]
+  salary: number
+  salaryKind: SalaryKind | null
+  /** Working days of the schedule in the period (what a daily salary counts). */
+  workDays: number
+  /** The minimum for the period, null = none. */
+  minimum: number | null
+  /** services + salary */
+  earned: number
+  /** max(earned, minimum) */
+  total: number
+  /** Paid out for periods that touch this one. */
+  paid: number
+  /** total - paid, never below zero. */
+  due: number
+  payouts: MasterPayout[]
+}
+
+type MasterDayPay = {
+  /** The day's services (and a daily salary on a working day). */
+  day: number
+  /** The month of the day, up to the day or today: everything, salary and minimum included. */
+  month: number
+  monthFrom: string
+  monthTo: string
+}
+
 type AnalyticsReport = {
   period: { days: AnalyticsDays; from: string; to: string }
   totals: {
@@ -902,8 +975,12 @@ type AnalyticsReport = {
     /** Reviews of this master in the period and their average (null without reviews). */
     reviews: number
     rating: number | null
+    /** The percent of the services in the master's scheme (null = none). */
     percent: number | null
+    /** What the master is owed for the period (`pay.total`), null when no pay is set. */
     payout: number | null
+    /** How the pay was counted and what was paid out (null when no pay is set). */
+    pay: MasterPay | null
     /** What the master's visits earned in the period before, for «why it changed». */
     previousRevenue: number
     /** Of the master's clients from the retention window, the share who came back to them. */
@@ -1296,6 +1373,14 @@ export type {
   VisitReview,
   AnalyticsDays,
   AnalyticsReport,
+  MasterDayPay,
+  MasterPay,
+  MasterPayLine,
+  MasterPayout,
+  MasterPayoutInput,
+  MasterPayScheme,
+  PayRateKind,
+  SalaryKind,
   AnalyticsGoal,
   PageStats,
   SettingsSummary,

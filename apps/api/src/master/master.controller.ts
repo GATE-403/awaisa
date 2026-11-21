@@ -29,6 +29,7 @@ import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Specialist } from '../catalog/specialist.entity.js'
 import { businessDateTimeToUtc } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { PayrollService } from '../payroll/payroll.service.js'
 import { CurrentMaster, MasterGuard } from './master.guard.js'
 
 @Controller()
@@ -39,6 +40,7 @@ export class MasterController {
     private readonly salonBookings: SalonBookingsService,
     private readonly businesses: BusinessesService,
     private readonly masterSchedule: MasterScheduleService,
+    private readonly payroll: PayrollService,
   ) {}
 
   /** Where the signed-in customer works as a master (for «Мой день» entry points). */
@@ -101,24 +103,22 @@ export class MasterController {
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
   ): Promise<MasterDay> {
     const window = await this.businesses.getOpeningWindow(business.id, query.date)
-    const [days, leaves, bookings] = await Promise.all([
+    const [days, leaves, bookings, pay] = await Promise.all([
       this.masterSchedule.daysFor([master.id], query.date, window),
       this.masterSchedule.leavesOn([master.id], query.date),
       this.salonBookings.getAdminViews(business.id, {
         dayStart: businessDateTimeToUtc(query.date, 0),
         dayEnd: businessDateTimeToUtc(query.date, 24 * 60),
       }),
+      // Only the master's own pay: never the others'.
+      this.payroll.forMasterDay(business.id, master.id, query.date),
     ])
 
     return {
       date: query.date,
       business: { slug: business.slug, name: business.name },
-      master: {
-        id: master.id,
-        name: master.name,
-        role: master.role,
-        commissionPercent: master.commissionPercent,
-      },
+      master: { id: master.id, name: master.name, role: master.role },
+      pay,
       hours: window ? clampToWindow(days.get(master.id) ?? null, window) : null,
       leaveReason: leaves[0] ? leaves[0].reason || 'Отпуск' : null,
       bookings: bookings.filter((booking) => booking.specialistId === master.id),

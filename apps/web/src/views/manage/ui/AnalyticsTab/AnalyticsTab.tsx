@@ -23,6 +23,7 @@ import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { ScrollArea } from '@/shared/ui/ScrollArea/ScrollArea'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
+import { plainPercent } from '@/views/manage/lib/payText'
 import { useAnalytics } from '@/views/manage/model/useAnalytics'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
@@ -135,13 +136,29 @@ const toCsv = (report: AnalyticsReport) => {
     ['Дата', 'Выручка', 'Визиты', 'Отмены'],
     ...report.daily.map((day) => [day.date, day.revenue, day.visits, day.cancelled]),
     [],
-    ['Мастер', 'Визиты', 'Выручка', 'Процент', 'К выплате'],
+    [
+      'Мастер',
+      'Визиты',
+      'Выручка',
+      'Процент',
+      'С услуг',
+      'Оклад',
+      'Минимум',
+      'Начислено',
+      'Выплачено',
+      'К выплате',
+    ],
     ...report.masters.map((master) => [
       master.name,
       master.visits,
       master.revenue,
       master.percent ?? '',
-      master.payout ?? '',
+      master.pay?.services ?? '',
+      master.pay?.salary ?? '',
+      master.pay?.minimum ?? '',
+      master.pay?.total ?? '',
+      master.pay?.paid ?? '',
+      master.pay?.due ?? '',
     ]),
     [],
     ['Клиент', 'Телефон', 'Визиты', 'Потратил', 'Последний визит', 'Новый'],
@@ -178,7 +195,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   const [isGoalOpen, setIsGoalOpen] = useState(false)
   // A promotion started from the heatmap's quiet hour.
   const [promotionDraft, setPromotionDraft] = useState<Partial<PromotionInput> | null>(null)
-  const { report, error, isLoading, setGoal } = useAnalytics(slug, days)
+  const { report, error, isLoading, setGoal, reload } = useAnalytics(slug, days)
   const openMaster = report?.masters.find((master) => master.id === openMasterId)
 
   const totals = report?.totals
@@ -495,6 +512,9 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
         <MasterStatsSheet
           master={openMaster}
           periodLabel={PREVIOUS[report.period.days]}
+          slug={slug}
+          period={report.period}
+          onPayoutsChange={reload}
           onClose={() => setOpenMasterId(null)}
         />
       )}
@@ -545,11 +565,12 @@ interface MastersGroupProps {
 }
 
 // The team in one list: visits, money, rating, how full their hours were and what they are owed
-// (their percent of what their visits earned). Pay used to be a second list of the same people.
+// by their pay scheme, less what was paid out. Pay used to be a second list of the same people.
 const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
-  const paid = masters.filter((master) => master.payout !== null && master.revenue > 0)
-  const total = paid.reduce((sum, master) => sum + (master.payout ?? 0), 0)
-  const isPercentMissing = masters.some((master) => master.percent === null)
+  const paid = masters.filter((master) => master.pay !== null && master.pay.total > 0)
+  const due = paid.reduce((sum, master) => sum + (master.pay?.due ?? 0), 0)
+  const paidOut = paid.reduce((sum, master) => sum + (master.pay?.paid ?? 0), 0)
+  const isPayMissing = masters.some((master) => master.pay === null)
 
   return (
     <section className={styles.group} aria-labelledby='analytics-masters'>
@@ -575,10 +596,8 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
                     {master.rating !== null &&
                       ` · ★ ${master.rating.toFixed(1).replace('.', ',')} (${master.reviews})`}
                   </span>
-                  {master.payout !== null && master.revenue > 0 && (
-                    <span className={styles.rowMeta}>
-                      к выплате <b>{formatMoney(master.payout)}</b> · {master.percent}%
-                    </span>
+                  {master.pay !== null && master.pay.total > 0 && (
+                    <PayLine pay={master.pay} percent={master.percent} />
                   )}
                 </span>
                 <span className={styles.rowValue}>
@@ -598,15 +617,44 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
       <p className={styles.footnote}>
         {paid.length > 0 ? (
           <>
-            Итого к выплате <b>{formatMoney(total)}</b>
-            {isPercentMissing ? ', у части мастеров процент не задан. ' : '. '}
+            Итого к выплате <b>{formatMoney(due)}</b>
+            {paidOut > 0 && (
+              <>
+                , выплачено <b>{formatMoney(paidOut)}</b>
+              </>
+            )}
+            {isPayMissing ? ', у части мастеров зарплата не задана. ' : '. '}
           </>
         ) : (
-          'Укажите процент мастера в его карточке, и здесь появится, сколько кому выплатить. '
+          'Задайте зарплату в карточке мастера на «Странице», и здесь появится, сколько кому выплатить. '
         )}
         Загрузка: доля рабочих часов, занятых визитами.
       </p>
     </section>
+  )
+}
+
+interface PayLineProps {
+  pay: NonNullable<AnalyticsReport['masters'][number]['pay']>
+  percent: number | null
+}
+
+// «к выплате 1 000 сом · 40%» while one percent decides it, «выплачено» once it is settled.
+const PayLine = ({ pay, percent }: PayLineProps) => {
+  const plain = plainPercent(pay, percent)
+  if (pay.due === 0) {
+    return (
+      <span className={styles.rowMeta}>
+        выплачено <b>{formatMoney(pay.paid)}</b>
+      </span>
+    )
+  }
+  return (
+    <span className={styles.rowMeta}>
+      к выплате <b>{formatMoney(pay.due)}</b>
+      {pay.paid > 0 && ` · выплачено ${formatMoney(pay.paid)}`}
+      {plain !== null && pay.paid === 0 && ` · ${plain}%`}
+    </span>
   )
 }
 
