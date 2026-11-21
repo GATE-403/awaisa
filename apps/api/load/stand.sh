@@ -48,6 +48,8 @@ for _ in $(seq 1 30); do curl -sf localhost:4400/health >/dev/null && break; sle
 echo "API on :4400 — $(curl -s localhost:4400/health)"
 
 if [ "${2:-}" = web ]; then
+  # A fresh checkout has no generated tokens.css yet; the web build imports it.
+  pnpm --dir "$WEB_DIR/../../packages/tokens" build >/dev/null
   (cd "$WEB_DIR" && API_URL=http://localhost:4400 NEXT_DIST_DIR=.next-e2e TZ=UTC pnpm exec next build >"$STATE/web-build.log" 2>&1)
   (cd "$WEB_DIR" && API_URL=http://localhost:4400 NEXT_DIST_DIR=.next-e2e TZ=UTC \
     exec pnpm exec next start -p 3400 </dev/null >"$STATE/web.log" 2>&1) &
