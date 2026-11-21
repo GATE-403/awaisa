@@ -4,11 +4,11 @@ import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { haptic } from '@/shared/lib/nativeBridge'
+import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
-import { AUDIENCE_NOTES, DENIED_HINT, INSTALL_HINT } from '../../config/copy'
+import { APP_DENIED_HINT, AUDIENCE_NOTES, DENIED_HINT, INSTALL_HINT } from '../../config/copy'
 import { usePushAlerts } from '../../model/usePushAlerts'
 
 interface PushAlertsGroupProps {
@@ -26,6 +26,8 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
   const [isBusy, setIsBusy] = useState(false)
 
   if (state === 'checking' || state === 'unsupported') return null
+
+  const deniedHint = getNativeApp() ? APP_DENIED_HINT : DENIED_HINT
 
   const handleChange = async (isOn: boolean) => {
     setIsBusy(true)
@@ -63,7 +65,7 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
               />
             </label>
           </div>
-          <RowNote>{state === 'denied' ? DENIED_HINT : AUDIENCE_NOTES[audience]}</RowNote>
+          <RowNote>{state === 'denied' ? deniedHint : AUDIENCE_NOTES[audience]}</RowNote>
         </>
       )}
     </section>
