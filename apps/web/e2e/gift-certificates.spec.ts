@@ -33,10 +33,10 @@ test.describe('Gift certificates online', () => {
       const group = page.getByRole('region', { name: 'Сертификаты онлайн' })
       await group.getByRole('switch').click()
       const amountsSheet = page.getByRole('dialog', { name: 'Суммы' })
-      await expect(amountsSheet.getByLabel('Сумма 1, сом')).toHaveValue('1 000')
+      await expect(amountsSheet.getByLabel('Сумма 1, сом')).toHaveValue(/^1\s000$/)
       await amountsSheet.getByRole('button', { name: 'Готово' }).click()
       await expect(
-        group.getByRole('button', { name: /Суммы\s+1 000 · 3 000 · 5 000 сом/ }),
+        group.getByRole('button', { name: /Суммы\s+1\s000 · 3\s000 · 5\s000 сом/ }),
       ).toBeVisible()
 
       // The guest picks an amount on the place's page and fills who it is for.
