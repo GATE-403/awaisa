@@ -8,7 +8,10 @@ import type { AnalyticsDays, AnalyticsReport } from '@/shared/api/types'
 export const useAnalytics = (slug: string, days: AnalyticsDays) => {
   const [report, setReport] = useState<AnalyticsReport | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Bumped after a payout is marked or undone, so the masters' pay is read again.
+  const [version, setVersion] = useState(0)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `version` only asks for a fresh read
   useEffect(() => {
     const controller = new AbortController()
     setError(null)
@@ -19,7 +22,7 @@ export const useAnalytics = (slug: string, days: AnalyticsDays) => {
       })
 
     return () => controller.abort()
-  }, [slug, days])
+  }, [slug, days, version])
 
   // The previous period stays on screen while the next one loads, so the layout doesn't jump.
   const isLoading = report === null || report.period.days !== days
@@ -28,5 +31,7 @@ export const useAnalytics = (slug: string, days: AnalyticsDays) => {
   const setGoal = (goal: number | null) =>
     setReport((current) => current && { ...current, month: { ...current.month, goal } })
 
-  return { report, error, isLoading, setGoal }
+  const reload = () => setVersion((current) => current + 1)
+
+  return { report, error, isLoading, setGoal, reload }
 }

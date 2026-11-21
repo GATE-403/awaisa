@@ -61,6 +61,9 @@ import type {
   ManagedWaitlistEntry,
   MapPlace,
   MasterDay,
+  MasterPayout,
+  MasterPayoutInput,
+  MasterPayScheme,
   MasterPlace,
   MasterReviews,
   MasterSchedule,
@@ -422,6 +425,18 @@ const addMasterLeave = (
 
 const removeMasterLeave = (slug: string, id: string, leaveId: string) =>
   send<void>('DELETE', `${manage(slug)}/specialists/${id}/leaves/${leaveId}`)
+
+const getMasterPay = (slug: string, id: string, signal?: AbortSignal) =>
+  request<MasterPayScheme>(`${manage(slug)}/specialists/${id}/pay`, { signal })
+
+const setMasterPay = (slug: string, id: string, scheme: MasterPayScheme) =>
+  send<MasterPayScheme>('PUT', `${manage(slug)}/specialists/${id}/pay`, scheme)
+
+const addMasterPayout = (slug: string, input: MasterPayoutInput) =>
+  post<MasterPayout>(`${manage(slug)}/payouts`, input)
+
+const removeMasterPayout = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/payouts/${id}`)
 
 const getMasterPlaces = (signal?: AbortSignal) => request<MasterPlace[]>('/me/master', { signal })
 
@@ -910,6 +925,10 @@ export {
   setMasterHours,
   addMasterLeave,
   removeMasterLeave,
+  getMasterPay,
+  setMasterPay,
+  addMasterPayout,
+  removeMasterPayout,
   setBookingOutcome,
   getClients,
   getClient,
