@@ -173,6 +173,7 @@ export class AdminService {
     }[]
 
     const ids = list.map((row) => row.id)
+    await this.loyalty.usePlannedSubscriptions(ids)
     await this.loyalty.earnForVisits(ids)
     await this.inventory.useForVisits(ids)
     await this.fiscal.syncVisits(business.id, ids)
@@ -218,6 +219,7 @@ export class AdminService {
         text: rescheduleMessage(view, this.bookings.linkTo(view.id)),
         link: this.bookings.manageButton(view.id),
         whatsapp: whatsappReschedule(view, this.bookings.linkTo(view.id)),
+        billing: { businessId: business.id, isOptional: false },
       })
     }, UNDO_WINDOW_SECONDS * 1000).unref()
 
@@ -237,6 +239,7 @@ export class AdminService {
         void this.clientMessages.send(customerPhone, {
           text: salonCancellationMessage(view, webUrl),
           whatsapp: whatsappSalonCancellation(view, webUrl),
+          billing: { businessId: business.id, isOptional: false },
         })
       }, UNDO_WINDOW_SECONDS * 1000).unref()
     }

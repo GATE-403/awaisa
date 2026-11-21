@@ -6,6 +6,7 @@ import {
   listReviews,
   listServicePhotos,
   listSimilarPlaces,
+  listSubscriptionPlans,
 } from '@/shared/api/serverApi'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
@@ -21,6 +22,7 @@ import { QuestionsSection } from '@/views/business/ui/Place/QuestionsSection'
 import { ReviewsSection } from '@/views/business/ui/Place/ReviewsSection'
 import { ServicesBrowser } from '@/views/business/ui/Place/ServicesBrowser'
 import { SimilarPlaces } from '@/views/business/ui/Place/SimilarPlaces'
+import { SubscriptionsSection } from '@/views/business/ui/Place/SubscriptionsSection'
 import { VisitSection } from '@/views/business/ui/Place/VisitSection'
 
 interface BusinessHomePageProps {
@@ -34,9 +36,10 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
     listPromotions(slug),
     listQuestions(slug),
   ])
-  const [similar, servicePhotos, certificateSale] = await Promise.all([
+  const [similar, servicePhotos, subscriptionPlans, certificateSale] = await Promise.all([
     listSimilarPlaces(slug),
     listServicePhotos(slug),
+    listSubscriptionPlans(slug),
     getCertificateSale(slug),
   ])
   const quickest = catalog.services.find((service) => service.isPopular) ?? catalog.services[0]
@@ -58,6 +61,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
         <div className={styles.body}>
           <div className={styles.main}>
             <ServicesBrowser business={business} catalog={catalog} servicePhotos={servicePhotos} />
+            <SubscriptionsSection business={business} plans={subscriptionPlans} />
             <MastersSection business={business} specialists={catalog.specialists} />
             <ReviewsSection business={business} reviews={reviews} />
             <PhotosSection business={business} />

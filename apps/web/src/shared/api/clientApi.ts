@@ -8,12 +8,15 @@ import type {
   AnalyticsReport,
   Availability,
   AvatarUpload,
+  BillingCheckoutInput,
+  BillingExtendInput,
   BirthdayGreeting,
   Booking,
   BookingTelegramLink,
   Branch,
   BranchInput,
   BulkReplyResult,
+  BusinessBilling,
   BusinessCard,
   BusinessLink,
   BusinessPage,
@@ -34,6 +37,7 @@ import type {
   ClientNote,
   ClientSegment,
   ClientSort,
+  ClientSubscription,
   ClosedDay,
   CloseShiftInput,
   CoverUpload,
@@ -86,6 +90,7 @@ import type {
   MyLoyalty,
   NextFree,
   Offer,
+  OnlineSubscriptionPlan,
   OpenShiftInput,
   OtpRequest,
   OutcomeInput,
@@ -919,6 +924,16 @@ const sellSubscription = (slug: string, phone: string, planId: string) =>
 
 const getMyLoyalty = (signal?: AbortSignal) => request<MyLoyalty>('/me/loyalty', { signal })
 
+// Subscriptions sold online: the place's plans, buying one, and the client's own at a place.
+const getOnlineSubscriptionPlans = (slug: string, signal?: AbortSignal) =>
+  request<OnlineSubscriptionPlan[]>(`/businesses/${slug}/subscription-plans`, { signal })
+
+const orderSubscription = (slug: string, planId: string) =>
+  post<CheckoutLink>(`/businesses/${slug}/subscription-plans/${planId}/order`, {})
+
+const getMySubscriptionsAt = (slug: string, signal?: AbortSignal) =>
+  request<ClientSubscription[]>(`/me/subscriptions/${slug}`, { signal })
+
 const getMailings = (slug: string, signal?: AbortSignal) =>
   request<MailingsOverview>(`${manage(slug)}/mailings`, { signal })
 
@@ -941,6 +956,15 @@ const sendMailing = (
 const setBirthdayGreeting = (slug: string, text: string | null) =>
   send<BirthdayGreeting>('PUT', `${manage(slug)}/mailings/birthday`, { text })
 
+const getBilling = (slug: string, signal?: AbortSignal) =>
+  request<BusinessBilling>(`${manage(slug)}/billing`, { signal })
+
+const checkoutBilling = (slug: string, input: BillingCheckoutInput) =>
+  post<CheckoutLink>(`${manage(slug)}/billing/checkout`, input)
+
+const extendBilling = (slug: string, input: BillingExtendInput) =>
+  post<BusinessBilling>(`${manage(slug)}/billing/extend`, input)
+
 const getTeam = (slug: string, signal?: AbortSignal) =>
   request<TeamMember[]>(`${manage(slug)}/members`, { signal })
 
@@ -951,6 +975,9 @@ const removeTeamMember = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/members/${id}`)
 
 export {
+  checkoutBilling,
+  extendBilling,
+  getBilling,
   getFunnelReport,
   getFunnelSegments,
   getFunnelSignals,
@@ -967,6 +994,9 @@ export {
   getClientLoyalty,
   getLoyalty,
   getMyLoyalty,
+  getMySubscriptionsAt,
+  getOnlineSubscriptionPlans,
+  orderSubscription,
   issueCertificate,
   orderCertificate,
   setCertificateSale,

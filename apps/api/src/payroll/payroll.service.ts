@@ -20,6 +20,7 @@ type SchemeRow = {
   salaryKind: SalaryKind | null
   salaryAmount: number | null
   minimum: number | null
+  productsPercent: number | null
   hasOwnHours: boolean
 }
 
@@ -65,13 +66,14 @@ export class PayrollService {
       await this.checkServices(manager, businessId, input)
       await manager.query(
         `UPDATE "specialists" SET "commission_percent" = $2, "salary_kind" = $3,
-           "salary_amount" = $4, "pay_minimum" = $5 WHERE "id" = $1`,
+           "salary_amount" = $4, "pay_minimum" = $5, "products_percent" = $6 WHERE "id" = $1`,
         [
           specialistId,
           input.percent,
           input.salary?.kind ?? null,
           input.salary?.amount ?? null,
           input.minimum,
+          input.productsPercent,
         ],
       )
       await manager.query('DELETE FROM "master_service_rates" WHERE "specialist_id" = $1', [
@@ -103,7 +105,7 @@ export class PayrollService {
     const result = new Map<string, MasterPay>()
     if (ids.length === 0) return result
     const days = daysBetween(from, to)
-    const [rates, visits, businessWeekdays, ownHours, leaves, payouts] = await Promise.all([
+    const [rates, visits, sold, businessWeekdays, ownHours, leaves, payouts] = await Promise.all([
       this.rateRows(ids),
       this.query(
         // A visit of several services is a line per service, sharing the visit's money by price.
@@ -114,6 +116,15 @@ export class PayrollService {
            JOIN "services" ls ON ls."id" = l."service_id"
            WHERE b."business_id" = $1 AND b."specialist_id" = ANY($2) AND ${DONE}
              AND b."starts_at" >= $3 AND b."starts_at" < LEAST($4, now())`,
+        [businessId, ids, businessDateTimeToUtc(from, 0), businessDateTimeToUtc(addDays(to, 1), 0)],
+      ),
+      // Products the master sold at the counter; an undone sale is not theirs to earn on.
+      this.query(
+        `SELECT x."seller_specialist_id" AS "specialistId", SUM(x."total") AS "total"
+           FROM "sales" x
+           WHERE x."business_id" = $1 AND x."seller_specialist_id" = ANY($2)
+             AND x."cancelled_at" IS NULL AND x."created_at" >= $3 AND x."created_at" < $4
+           GROUP BY 1`,
         [businessId, ids, businessDateTimeToUtc(from, 0), businessDateTimeToUtc(addDays(to, 1), 0)],
       ),
       this.query('SELECT "weekday" FROM "working_hours" WHERE "business_id" = $1', [businessId]),
@@ -159,6 +170,7 @@ export class PayrollService {
               earned: Number(visit.earned),
             }),
           ),
+        productsSold: Number(sold.find((item) => item.specialistId === row.id)?.total ?? 0),
         days: lived,
         workDays,
       })
@@ -197,12 +209,15 @@ export class PayrollService {
     if (!dayPay) return null
     return {
       // A monthly salary and the minimum belong to the month, not to one day.
-      day: dayPay.services + (dayPay.salaryKind === 'day' ? dayPay.salary : 0),
+      day: dayPay.services + dayPay.products + (dayPay.salaryKind === 'day' ? dayPay.salary : 0),
       month: period.get(specialistId)?.total ?? 0,
       monthFrom,
       monthTo,
       percent:
-        scheme.rates.length === 0 && scheme.salary === null && scheme.minimum === null
+        scheme.rates.length === 0 &&
+        scheme.salary === null &&
+        scheme.minimum === null &&
+        scheme.productsPercent === null
           ? scheme.percent
           : null,
     }
@@ -267,7 +282,8 @@ export class PayrollService {
   private async schemeRows(businessId: string, ids?: string[]): Promise<SchemeRow[]> {
     const rows = await this.query(
       `SELECT "id", "commission_percent" AS "percent", "salary_kind" AS "salaryKind",
-           "salary_amount" AS "salaryAmount", "pay_minimum" AS "minimum", "has_own_hours" AS "hasOwnHours"
+           "salary_amount" AS "salaryAmount", "pay_minimum" AS "minimum",
+           "products_percent" AS "productsPercent", "has_own_hours" AS "hasOwnHours"
          FROM "specialists"
          WHERE "business_id" = $1 AND ${ids ? '"id" = ANY($2)' : '"is_active"'}`,
       ids ? [businessId, ids] : [businessId],
@@ -278,6 +294,7 @@ export class PayrollService {
       salaryKind: (row.salaryKind as SalaryKind | null) ?? null,
       salaryAmount: row.salaryAmount === null ? null : Number(row.salaryAmount),
       minimum: row.minimum === null ? null : Number(row.minimum),
+      productsPercent: row.productsPercent === null ? null : Number(row.productsPercent),
       hasOwnHours: Boolean(row.hasOwnHours),
     }))
   }
@@ -311,6 +328,7 @@ export class PayrollService {
           ? { kind: row.salaryKind, amount: row.salaryAmount }
           : null,
       minimum: row.minimum,
+      productsPercent: row.productsPercent,
     }
   }
 

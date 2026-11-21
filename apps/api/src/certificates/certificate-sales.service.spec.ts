@@ -1,5 +1,6 @@
 import type { ConfigService } from '@nestjs/config'
 import type { DataSource } from 'typeorm'
+import type { BillingService } from '../billing/billing.service.js'
 import type { PaymentsService } from '../bookings/payments.service.js'
 import type { Env } from '../config/env.js'
 import type { LoyaltyService } from '../loyalty/loyalty.service.js'
@@ -23,7 +24,7 @@ const paidOrder = {
 
 type Answer = (sql: string, params: unknown[]) => unknown[]
 
-const setup = (answer: Answer, { isAvailable = true } = {}) => {
+const setup = (answer: Answer, { isAvailable = true, hasLoyalty = true } = {}) => {
   const query = vi.fn(async (sql: string, params: unknown[] = []) => answer(sql, params))
   const payments = {
     isAvailable,
@@ -49,6 +50,7 @@ const setup = (answer: Answer, { isAvailable = true } = {}) => {
     clientMessages as unknown as ClientMessagesService,
     telegram as unknown as TelegramBotService,
     config,
+    { hasFeature: vi.fn(async () => hasLoyalty) } as unknown as BillingService,
   )
   return { service, query, payments, loyalty, clientMessages, telegram }
 }
@@ -190,6 +192,15 @@ describe('CertificateSalesService.createOrder', () => {
     await expect(
       service.createOrder('awaisa-studio', { ...input, amount: 2000 }, null),
     ).rejects.toThrow('Выберите сумму')
+  })
+
+  it('sells nothing on a plan without loyalty', async () => {
+    const { service } = setup((sql) => (sql.includes('FROM "businesses"') ? [business] : []), {
+      hasLoyalty: false,
+    })
+
+    await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('не продаются')
+    await expect(service.saleFor('awaisa-studio')).resolves.toBeNull()
   })
 
   it('sells nothing while payments are off', async () => {

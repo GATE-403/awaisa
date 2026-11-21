@@ -128,12 +128,14 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 </span>
               )}
               <span className={styles.note}>
-                {booking.payment
-                  ? `${t('Предоплата {amount} {status}', {
-                      amount: formatPrice(booking.payment.amount),
-                      status: t(PAYMENT_STATUS_TEXT[booking.payment.status]),
-                    })}${booking.payment.status === 'paid' ? t(', остальное в салоне') : ''}`
-                  : t('оплата в салоне — наличными или картой')}
+                {booking.isBySubscription
+                  ? t('по абонементу: визит спишется, когда мастер отметит его')
+                  : booking.payment
+                    ? `${t('Предоплата {amount} {status}', {
+                        amount: formatPrice(booking.payment.amount),
+                        status: t(PAYMENT_STATUS_TEXT[booking.payment.status]),
+                      })}${booking.payment.status === 'paid' ? t(', остальное в салоне') : ''}`
+                    : t('оплата в салоне — наличными или картой')}
               </span>
             </dd>
           </div>
