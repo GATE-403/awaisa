@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { LightWave } from '@/shared/ui/LightWave/LightWave'
 import styles from './SignInTransition.module.css'
 
 interface SignInTransitionProps {
@@ -11,7 +10,7 @@ interface SignInTransitionProps {
   onDone: () => void
 }
 
-// The wave takes 1.5 s; the greeting rises as it passes the middle and stays a moment.
+// The beam's flare takes about a second; the greeting rises after it and stays a moment.
 const LEAVE_AFTER_WAVE = 2300
 const LEAVE_QUICKLY = 900
 
@@ -36,8 +35,8 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
 
   return (
     <output className={styles.overlay} aria-live='polite'>
-      {/* The wave from the top edge, then its light keeps passing faintly under the greeting. */}
-      <LightWave afterglow />
+      {/* No light of its own: the sign-in's prism beam flares and sweeps behind this blur
+          (`GradientFlow flare`); a second wave on top read as another effect («не сочетается»). */}
       <span className={styles.greeting}>
         {firstName ? (
           <>

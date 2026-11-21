@@ -92,7 +92,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
   const coverPicture = business.coverUrl ? (
     // biome-ignore lint/performance/noImgElement: already resized WebP from our API
-    <img src={business.coverUrl} alt='Обложка' className={styles.coverImage} />
+    <img src={business.coverUrl} alt='Обложка' className={styles.coverImage} fetchPriority='high' />
   ) : null
 
   const logo = (
@@ -241,20 +241,20 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         catalog={catalog}
         run={run}
         renderHeading={(count) => (
-          <h3 className={styles.sectionTitle}>
+          <h2 className={styles.sectionTitle}>
             Работы <span className={styles.count}>{count}</span>
-          </h3>
+          </h2>
         )}
       />
 
       <section className={styles.section} aria-label='Мастера'>
-        <h3 className={styles.sectionTitle}>
+        <h2 className={styles.sectionTitle}>
           Мастера <span className={styles.count}>{masters.length}</span>
           <NextLink href={settingsHref('masters')} scroll={false} className={styles.more}>
             Все
             <CaretRight weight='bold' aria-hidden />
           </NextLink>
-        </h3>
+        </h2>
         <ul className={styles.faces}>
           <li>
             <NextLink
@@ -281,7 +281,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       </section>
 
       <section className={styles.section} aria-label='Часы работы'>
-        <h3 className={styles.sectionTitle}>Часы</h3>
+        <h2 className={styles.sectionTitle}>Часы</h2>
         <NextLink href={settingsHref('hours')} scroll={false} className={styles.hoursRow}>
           <span className={styles.hoursText}>{formatWeekSchedule(business.hours)}</span>
           <span className={styles.hoursAction}>

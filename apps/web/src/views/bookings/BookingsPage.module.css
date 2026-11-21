@@ -1,4 +1,7 @@
 .page {
+  /* As tall as the skeleton before it (a screen), so short records does not pull the footer
+     up into view when it streams in (Lighthouse layout shift 0.22 on phones). */
+  min-height: 100svh;
   padding: var(--space-6) 0 var(--section-gap);
 }
 

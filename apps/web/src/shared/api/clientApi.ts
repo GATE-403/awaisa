@@ -12,6 +12,7 @@ import type {
   BookingTelegramLink,
   Branch,
   BranchInput,
+  BulkReplyResult,
   BusinessCard,
   BusinessLink,
   BusinessPage,
@@ -56,6 +57,7 @@ import type {
   MapPlace,
   MasterDay,
   MasterPlace,
+  MasterReviews,
   MasterSchedule,
   MovedBooking,
   MyLoyalty,
@@ -76,9 +78,12 @@ import type {
   ReviewerProfile,
   ReviewPhotos,
   ReviewReply,
+  ReviewReplySettings,
+  ReviewResolution,
   ReviewSummary,
   ScheduleLoad,
   ServiceInput,
+  Session,
   SlugCheck,
   SpecialistInput,
   SpecialistPhotoUpload,
@@ -288,7 +293,7 @@ const checkTelegramLogin = (token: string) =>
 
 const logout = () => post<void>('/auth/logout')
 
-const getMe = (signal?: AbortSignal) => request<Customer>('/me', { signal })
+const getSession = (signal?: AbortSignal) => request<Session>('/session', { signal })
 
 const updateMe = (name: string) =>
   request<Customer>('/me', { method: 'PATCH', body: JSON.stringify({ name }) })
@@ -355,6 +360,21 @@ const getManagedReviews = (slug: string, signal?: AbortSignal) =>
 
 const replyToReview = (slug: string, id: string, text: string) =>
   send<ReviewReply>('PUT', `${manage(slug)}/reviews/${id}/reply`, { text })
+
+const getReviewReplySettings = (slug: string, signal?: AbortSignal) =>
+  request<ReviewReplySettings>(`${manage(slug)}/reviews/settings`, { signal })
+
+const saveReviewReplySettings = (slug: string, settings: ReviewReplySettings) =>
+  send<ReviewReplySettings>('PUT', `${manage(slug)}/reviews/settings`, settings)
+
+const replyToQuietReviews = (slug: string, input: { minRating: 4 | 5; template: string }) =>
+  post<BulkReplyResult>(`${manage(slug)}/reviews/bulk-reply`, input)
+
+const setReviewResolved = (slug: string, id: string, isResolved: boolean) =>
+  send<ReviewResolution>('PUT', `${manage(slug)}/reviews/${id}/resolved`, { isResolved })
+
+const getMasterReviews = (slug: string, signal?: AbortSignal) =>
+  request<MasterReviews>(`/master/${encodeURIComponent(slug)}/reviews`, { signal })
 
 const setBookingOutcome = (slug: string, id: string, input: OutcomeInput) =>
   send<AdminBooking>('PATCH', `${manage(slug)}/bookings/${id}/outcome`, input)
@@ -862,6 +882,11 @@ export {
   createReview,
   getManagedReviews,
   replyToReview,
+  getReviewReplySettings,
+  saveReviewReplySettings,
+  replyToQuietReviews,
+  setReviewResolved,
+  getMasterReviews,
   getTelegramStatus,
   createTelegramLink,
   removeTelegramChat,
@@ -873,7 +898,7 @@ export {
   listPlaceReviews,
   getBooking,
   getManagedBusiness,
-  getMe,
+  getSession,
   getMyBookings,
   getMyBusinesses,
   getNextFree,

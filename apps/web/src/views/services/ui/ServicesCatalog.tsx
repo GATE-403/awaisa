@@ -46,16 +46,21 @@ export const ServicesCatalog = ({ business, catalog, servicePhotos }: ServicesCa
       <CategoryNav items={groups.map(({ id, name }) => ({ id, name }))} />
 
       <Container className={styles.groups}>
-        {groups.map((category) => (
+        {groups.map((category, groupIndex) => (
           <section key={category.id} id={category.id} aria-labelledby={`${category.id}-title`}>
             <h2 id={`${category.id}-title`} className={styles.groupTitle}>
               {category.name}
               <span className={styles.groupCount}>{category.services.length}</span>
             </h2>
             <ul className={styles.cards}>
-              {category.services.map((service) => (
+              {category.services.map((service, index) => (
                 <li key={service.id}>
-                  <OfferCard offer={toOffer(service)} isHit={service.isPopular} isPlaceHidden />
+                  <OfferCard
+                    offer={toOffer(service)}
+                    isHit={service.isPopular}
+                    isPlaceHidden
+                    isPriority={groupIndex === 0 && index < 4}
+                  />
                 </li>
               ))}
             </ul>

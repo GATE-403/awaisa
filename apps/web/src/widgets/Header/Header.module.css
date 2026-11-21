@@ -114,7 +114,9 @@
 
 /* Phones: map and profile live in the tab bar, so the header keeps only the logo and search. */
 
-.action svg {
+/* The action's own glyph only: a descendant rule also sized the mascot inside the account face
+   (an avatar's drawn fallback), which then filled and overflowed its circle. */
+.action > svg {
   width: 22px;
   height: 22px;
 }
@@ -270,11 +272,13 @@
     display: flex;
   }
 
-  .action[data-mobile] span {
+  .action[data-mobile] > span {
     display: inline;
   }
 
-  .action[data-account] span {
+  /* The name only: a bare `span` here also hit the face's own spans, which lost their centring
+     and pushed the mascot into the circle's top-left corner. */
+  .action[data-account] .accountName {
     display: inline;
     max-width: 72px;
     overflow: hidden;
@@ -351,7 +355,7 @@
 }
 
 @media (max-width: 1023px) {
-  .action:not([data-account]) span {
+  .action:not([data-account]) > span {
     display: none;
   }
 }

@@ -74,10 +74,9 @@ test.describe('Reviews after a visit', () => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto(`/manage/${SLUG}?tab=reviews`)
     const item = page.getByRole('listitem').filter({ hasText: comment })
-    await item.getByRole('button', { name: 'Ответить' }).click()
-    const sheet = page.getByRole('dialog', { name: 'Ответ на отзыв' })
-    await sheet.getByLabel('Ответ').fill('Спасибо, ждём снова!')
-    await sheet.getByRole('button', { name: 'Готово' }).click()
+    // The reply is typed right under the review and sent with the round button.
+    await item.getByLabel('Ответ на отзыв').fill('Спасибо, ждём снова!')
+    await item.getByRole('button', { name: 'Отправить ответ' }).click()
     await expect(page.getByText('Ответ опубликован')).toBeVisible()
     await expect(item).toContainText('Спасибо, ждём снова!')
   })

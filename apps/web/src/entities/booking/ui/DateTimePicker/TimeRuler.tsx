@@ -3,6 +3,7 @@
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './TimeRuler.module.css'
 
 interface TimeRulerProps {
@@ -56,6 +57,8 @@ export const TimeRuler = ({
   )
   const chosenIndex = time ? slots.findIndex((slot) => slot.time === time) : -1
   const [centered, setCentered] = useState(chosenIndex >= 0 ? chosenIndex : firstFree)
+  // The tick under the needle as the scroll last saw it, for one detent per tick crossed.
+  const centeredRef = useRef(centered)
   const startIndex = chosenIndex >= 0 ? chosenIndex : firstFree
   const slotsKey = slots.map((slot) => slot.time).join()
 
@@ -68,6 +71,7 @@ export const TimeRuler = ({
     if (hasShown.current) track.scrollTo({ left: startIndex * TICK_WIDTH, behavior: 'smooth' })
     else track.scrollLeft = startIndex * TICK_WIDTH
     hasShown.current = true
+    centeredRef.current = startIndex
     setCentered(startIndex)
   }, [slotsKey])
 
@@ -91,8 +95,13 @@ export const TimeRuler = ({
     if (!track) return
     // Where the dial is between ticks, for the magnet (CSS only, no re-render per frame).
     track.style.setProperty('--pos', `${track.scrollLeft / TICK_WIDTH}`)
-    const index = Math.round(track.scrollLeft / TICK_WIDTH)
-    setCentered(Math.min(slots.length - 1, Math.max(0, index)))
+    const index = Math.min(slots.length - 1, Math.max(0, Math.round(track.scrollLeft / TICK_WIDTH)))
+    // A detent under the finger on every free time, like the system's time wheel (in the app).
+    if (index !== centeredRef.current && isHolding.current && slots[index]?.isAvailable) {
+      haptic('selection')
+    }
+    centeredRef.current = index
+    setCentered(index)
     // Settled between two ticks (a mouse wheel, a jerky scroll): pull to the nearest one.
     window.clearTimeout(settleTimer.current)
     settleTimer.current = window.setTimeout(settle, 140)

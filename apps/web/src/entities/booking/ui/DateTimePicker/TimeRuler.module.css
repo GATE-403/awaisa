@@ -45,7 +45,9 @@
   margin: 0;
   border: none;
   align-items: flex-end;
-  height: 108px;
+  /* Room for the hour labels, the pointer and a gap under it: the tallest bar (hover and the
+     magnet together) stops 8px below the pointer instead of running into it. */
+  height: 120px;
   /* The first and last ticks can reach the needle in the middle. */
   padding-inline: calc(50% - 22px);
   overflow-x: auto;
@@ -116,10 +118,10 @@
   --d: calc(var(--pos, 0) - var(--idx, 0));
   --near: max(0, 1.5 - max(var(--d), -1 * var(--d)));
 
-  width: 10px;
+  width: 12px;
   height: 18px;
   translate: calc(clamp(-1, var(--d), 1) * var(--near) * 4px) 0;
-  scale: 1 calc(1 + var(--near) * 0.08);
+  scale: 1 calc(1 + var(--near) * 0.06);
   transform-origin: bottom center;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
@@ -129,18 +131,20 @@
 }
 
 .tick[data-free] .bar {
+  /* Wider bars read as something to aim at; the finger's target stays the 44px tick. */
+  width: 16px;
   height: 60px;
   background: color-mix(in srgb, var(--color-foreground) 55%, transparent);
 }
 
 .tick[aria-pressed="true"] .bar {
-  width: 12px;
+  width: 18px;
   background: var(--color-foreground);
 }
 
 @media (hover: hover) {
   .tick[data-free]:hover .bar {
-    height: 68px;
+    height: 64px;
   }
 }
 
@@ -160,7 +164,7 @@
 
 /* The tick under the pointer: full colour and wider, so it reads as the one offered. */
 .tick[data-centered][data-free] .bar {
-  width: 14px;
+  width: 22px;
   background: var(--color-foreground);
 }
 

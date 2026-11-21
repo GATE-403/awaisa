@@ -6,7 +6,15 @@ import { type CSSProperties, useRef, useState } from 'react'
 import { formatDuration, formatPrice } from '@/entities/booking'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { FeedItem } from '@/shared/api/types'
+import { gridImage } from '@/shared/lib/imageSizes'
 import styles from '../FeedPage.module.css'
+
+// The card in play is nearly the phone's width and at most ~520px on a desktop stage; the
+// photo used to come at its full upload size whatever the screen.
+const DECK_IMAGE = {
+  sizes: '(max-width: 767px) 92vw, 520px',
+  widths: [480, 640, 840, 1080, 1280],
+}
 
 interface FeedCardProps {
   item: FeedItem
@@ -94,10 +102,11 @@ export const FeedCard = ({
       <div className={styles.media} onPointerDown={handlePointerDown} onPointerUp={handlePointerUp}>
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
         <img
-          src={item.url}
+          {...gridImage(item.url, DECK_IMAGE)}
           alt={service ? `Работа: ${service.name}` : `Работа в ${business.name}`}
           className={styles.photo}
           loading='eager'
+          fetchPriority={isActive ? 'high' : undefined}
           decoding='async'
           draggable={false}
         />

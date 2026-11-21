@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useSyncExternalStore } from 'react'
-import { getMe, logout as logoutRequest } from '@/shared/api/clientApi'
+import { getSession, logout as logoutRequest } from '@/shared/api/clientApi'
 import type { Customer } from '@/shared/api/types'
 
 type SessionState =
@@ -25,8 +25,8 @@ const setCustomer = (customer: Customer | null) =>
   setState(customer ? { status: 'signedIn', customer } : GUEST)
 
 const refreshSession = () => {
-  request ??= getMe()
-    .then(setCustomer)
+  request ??= getSession()
+    .then((session) => setCustomer(session.customer))
     .catch(() => setState(GUEST))
     .finally(() => {
       request = null
