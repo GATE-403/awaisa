@@ -1,6 +1,5 @@
 'use client'
 
-import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { Select } from '@awaisa/ui/Select'
 import {
   CalendarCheck,
@@ -95,23 +94,23 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
 
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsNaming(true)}>
-          <span className={styles.glyph} data-tone='gray' aria-hidden>
-            <User weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <User />
           </span>
           <span className={styles.label}>Имя</span>
           <span className={styles.value}>{customer.name || 'Указать'}</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </button>
         <div className={styles.row}>
-          <span className={styles.glyph} data-tone='green' aria-hidden>
-            <Phone weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <Phone />
           </span>
           <span className={styles.label}>Телефон</span>
           <span className={styles.value}>{formatPhone(customer.phone)}</span>
         </div>
         <div className={styles.row}>
-          <span className={styles.glyph} data-tone='blue' aria-hidden>
-            <CircleHalf weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <CircleHalf />
           </span>
           <span className={styles.label}>Оформление</span>
           <Select
@@ -127,8 +126,8 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       <SectionCaption className={styles.caption}>Подборка</SectionCaption>
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsTuning(true)}>
-          <span className={styles.glyph} data-tone='orange' aria-hidden>
-            <Sparkle weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <Sparkle />
           </span>
           <span className={styles.label}>Для вас</span>
           <span className={styles.value}>{tasteSummary}</span>
@@ -143,8 +142,8 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       <div className={styles.list}>
         {places.length > 0 && (
           <NextLink href='/master' className={styles.row}>
-            <span className={styles.glyph} data-tone='green' aria-hidden>
-              <CalendarCheck weight='fill' />
+            <span className={styles.glyph} aria-hidden>
+              <CalendarCheck />
             </span>
             <span className={styles.label}>Мой день</span>
             <span className={styles.value}>
@@ -154,15 +153,15 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           </NextLink>
         )}
         <NextLink href='/manage' className={styles.row}>
-          <span className={styles.glyph} data-tone='blue' aria-hidden>
-            <Storefront weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <Storefront />
           </span>
           <span className={styles.label}>Мои бизнесы</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </NextLink>
         <NextLink href='/business/new' className={styles.row}>
-          <span className={styles.glyph} data-tone='orange' aria-hidden>
-            <PlusCircle weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <PlusCircle />
           </span>
           <span className={styles.label}>Подключить бизнес</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
@@ -170,8 +169,8 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         {/* Platform admins: where people drop out of each scenario, on which devices. */}
         {customer.isAdmin && (
           <NextLink href='/insights' className={styles.row}>
-            <span className={styles.glyph} data-tone='gray' aria-hidden>
-              <ChartBar weight='fill' />
+            <span className={styles.glyph} aria-hidden>
+              <ChartBar />
             </span>
             <span className={styles.label}>Воронки</span>
             <CaretRight className={styles.chevron} weight='bold' aria-hidden />
@@ -179,27 +178,14 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         )}
       </div>
 
-      {/* Destructive and quiet: a red glyph and the word right on the page — no group, no tile —
-          and a confirmation by it before it happens. */}
+      {/* Destructive and quiet: a red glyph and the word right on the page, no group, no tile.
+          It signs out at once: a menu of one «Выйти из аккаунта» under «Выйти» was a second tap
+          asking the same thing («доп подтверждение сделано плохо»), and signing in again is easy. */}
       <div className={styles.signOut}>
-        <Menu
-          label='Выйти'
-          className={styles.danger}
-          trigger={
-            <>
-              <SignOut aria-hidden />
-              Выйти
-            </>
-          }
-        >
-          <MenuItem
-            variant='danger'
-            icon={<SignOut aria-hidden />}
-            onClick={() => void handleSignOut()}
-          >
-            Выйти из аккаунта
-          </MenuItem>
-        </Menu>
+        <button type='button' className={styles.danger} onClick={() => void handleSignOut()}>
+          <SignOut aria-hidden />
+          Выйти
+        </button>
         <p className={styles.footnote}>
           Записи, сделанные на этом телефоне, останутся на нём и после выхода.
         </p>
