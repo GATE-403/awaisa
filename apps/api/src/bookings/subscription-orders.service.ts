@@ -11,6 +11,7 @@ import { ModuleRef } from '@nestjs/core'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
+import { BillingService } from '../billing/billing.service.js'
 import type { Env } from '../config/env.js'
 import { BookingPaymentsService } from './booking-payments.service.js'
 import { PAYMENT_HOLD_MINUTES } from './booking-rules.js'
@@ -57,7 +58,16 @@ export class SubscriptionOrdersService implements OnModuleInit {
     private readonly config: ConfigService<Env, true>,
     // Resolved when a payment comes: BookingPaymentsService needs BookingsService, which needs this.
     private readonly moduleRef: ModuleRef,
+    private readonly billing: BillingService,
   ) {}
+
+  /**
+   * Selling subscriptions online is part of the «loyalty» plan feature: without it the page shows
+   * none and nothing can be bought. Subscriptions already bought are drawn at visits regardless.
+   */
+  private isSaleOpen(businessId: string) {
+    return this.billing.hasFeature(businessId, 'loyalty')
+  }
 
   onModuleInit() {
     this.payments.registerOrder(KIND, {
@@ -75,6 +85,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
       [slug],
     )
     if (!business) throw new NotFoundException('Бизнес не найден')
+    if (!(await this.isSaleOpen(String(business.id)))) return []
     const rows = await this.query(
       `SELECT p."id", p."title", p."service_id" AS "serviceId", s."name" AS "serviceName",
          s."price" AS "servicePrice", p."visits", p."price", p."valid_days" AS "validDays"
@@ -107,7 +118,8 @@ export class SubscriptionOrdersService implements OnModuleInit {
        WHERE p."id" = $1 AND p."business_id" = $2 AND p."is_active" AND p."is_online" AND p."price" > 0`,
       [planId, businessId],
     )
-    if (!plan) throw new NotFoundException('Абонемент не продаётся онлайн')
+    const isOpen = plan ? await this.isSaleOpen(businessId) : false
+    if (!plan || !isOpen) throw new NotFoundException('Абонемент не продаётся онлайн')
     return plan
   }
 
