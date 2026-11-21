@@ -7,6 +7,7 @@ const scheme = (parts: Partial<MasterPayScheme>): MasterPayScheme => ({
   rates: [],
   salary: null,
   minimum: null,
+  productsPercent: null,
   ...parts,
 })
 
@@ -15,6 +16,41 @@ const beard = { serviceId: 'beard', serviceName: 'Борода', earned: 500 }
 const november = daysBetween('2026-11-01', '2026-11-30')
 
 describe('calculatePay', () => {
+  it('adds the percent of the products the master sold to the services', () => {
+    const pay = calculatePay({
+      scheme: scheme({ percent: 40, productsPercent: 10 }),
+      visits: [cut],
+      productsSold: 2_550,
+      days: november,
+      workDays: 0,
+    })
+    expect(pay.services).toBe(400)
+    expect(pay.products).toBe(255)
+    expect(pay.productsSold).toBe(2_550)
+    expect(pay.earned).toBe(655)
+    expect(pay.total).toBe(655)
+  })
+
+  it('pays nothing for products without a products percent, and counts them toward the minimum', () => {
+    const none = calculatePay({
+      scheme: scheme({ percent: 40 }),
+      visits: [],
+      productsSold: 5_000,
+      days: november,
+      workDays: 0,
+    })
+    expect(none.products).toBe(0)
+    expect(none.productsSold).toBe(5_000)
+    const withMinimum = calculatePay({
+      scheme: scheme({ productsPercent: 20, minimum: 3_000 }),
+      visits: [],
+      productsSold: 20_000,
+      days: november,
+      workDays: 0,
+    })
+    expect(withMinimum.total).toBe(4_000)
+  })
+
   it('takes the percent of what the visits earned, rounded once', () => {
     const pay = calculatePay({
       scheme: scheme({ percent: 40 }),
@@ -138,6 +174,7 @@ describe('calculatePay', () => {
     expect(pay.total).toBe(0)
     expect(hasScheme(scheme({}))).toBe(false)
     expect(hasScheme(scheme({ minimum: 0 }))).toBe(true)
+    expect(hasScheme(scheme({ productsPercent: 5 }))).toBe(true)
   })
 })
 

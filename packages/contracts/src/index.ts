@@ -1128,6 +1128,8 @@ type MasterPayScheme = {
   salary: { kind: SalaryKind; amount: number } | null
   /** Guaranteed per month (counted per calendar day): pay is the larger of it and the earned. */
   minimum: number | null
+  /** Percent of the products the master sold at the counter («Продал» in a sale). */
+  productsPercent: number | null
 }
 
 type MasterPayout = {
@@ -1159,13 +1161,17 @@ type MasterPay = {
   /** From the services. */
   services: number
   lines: MasterPayLine[]
+  /** From the products they sold: `productsSold` at `productsPercent`. */
+  products: number
+  /** What the products they sold came to (sales not cancelled). */
+  productsSold: number
   salary: number
   salaryKind: SalaryKind | null
   /** Working days of the schedule in the period (what a daily salary counts). */
   workDays: number
   /** The minimum for the period, null = none. */
   minimum: number | null
-  /** services + salary */
+  /** services + products + salary */
   earned: number
   /** max(earned, minimum) */
   total: number
@@ -1177,7 +1183,7 @@ type MasterPay = {
 }
 
 type MasterDayPay = {
-  /** The day's services (and a daily salary on a working day). */
+  /** The day's services and products sold (and a daily salary on a working day). */
   day: number
   /** The month of the day, up to the day or today: everything, salary and minimum included. */
   month: number
