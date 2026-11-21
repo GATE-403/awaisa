@@ -21,6 +21,7 @@ import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
+import { whatsappConfirmation, whatsappReschedule } from '../notifications/whatsapp-messages.js'
 import { PromotionsService } from '../promotions/promotions.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
@@ -163,11 +164,11 @@ export class BookingsService {
           }
         }
         if (input.smsConfirmation) {
-          void this.clientMessages.send(
-            phone,
-            confirmationMessage(view, this.linkTo(view.id)),
-            this.manageButton(view.id),
-          )
+          void this.clientMessages.send(phone, {
+            text: confirmationMessage(view, this.linkTo(view.id)),
+            link: this.manageButton(view.id),
+            whatsapp: whatsappConfirmation(view, this.linkTo(view.id)),
+          })
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
         if (!staffBusinessId) {
@@ -246,11 +247,11 @@ export class BookingsService {
 
     const view = await this.getView(id)
     if (booking.smsConfirmation) {
-      void this.clientMessages.send(
-        booking.customerPhone,
-        rescheduleMessage(view, this.linkTo(view.id)),
-        this.manageButton(view.id),
-      )
+      void this.clientMessages.send(booking.customerPhone, {
+        text: rescheduleMessage(view, this.linkTo(view.id)),
+        link: this.manageButton(view.id),
+        whatsapp: whatsappReschedule(view, this.linkTo(view.id)),
+      })
     }
     const before = toBusinessParts(booking.startsAt)
     void this.telegram.notifyBusiness(
