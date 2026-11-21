@@ -148,9 +148,6 @@ export const CalendarFeedSheet = ({
         <div className={styles.actions}>
           {url ? (
             <>
-              <ButtonLink href={toWebcal(url)} size='sm' className={styles.primary}>
-                Подписаться
-              </ButtonLink>
               <GlyphGroup label='Ещё'>
                 <GlyphButton
                   icon={<GoogleLogo />}
@@ -169,6 +166,10 @@ export const CalendarFeedSheet = ({
                   onClick={() => void handleIssue()}
                 />
               </GlyphGroup>
+              {/* The sheet's main action comes last: nothing follows it. */}
+              <ButtonLink href={toWebcal(url)} size='sm' className={styles.primary}>
+                Подписаться
+              </ButtonLink>
             </>
           ) : (
             <Button
