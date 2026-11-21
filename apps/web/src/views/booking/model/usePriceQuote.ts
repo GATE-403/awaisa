@@ -10,6 +10,8 @@ const MIN_PHONE_DIGITS = 9
 
 type QuoteRequest = {
   serviceId: string | null
+  /** Services done after the first in the same visit. */
+  extraServiceIds?: string[]
   date: string | null
   time: string | null
   code: string | null
@@ -19,7 +21,15 @@ type QuoteRequest = {
 
 // The price this visit will actually cost: the API applies the best promotion (hours, first
 // visit, the client's code). A code the business does not have comes back as `codeError`.
-export const usePriceQuote = ({ serviceId, date, time, code, phone }: QuoteRequest) => {
+export const usePriceQuote = ({
+  serviceId,
+  extraServiceIds = [],
+  date,
+  time,
+  code,
+  phone,
+}: QuoteRequest) => {
+  const extras = extraServiceIds.join(',')
   const [quote, setQuote] = useState<PriceQuote | null>(null)
   const [codeError, setCodeError] = useState<string | null>(null)
   const digits = phone.replace(/\D/g, '')
@@ -32,7 +42,14 @@ export const usePriceQuote = ({ serviceId, date, time, code, phone }: QuoteReque
     }
     const controller = new AbortController()
     getPriceQuote(
-      { serviceId, date, time, code: code ?? undefined, phone: phoneParam || undefined },
+      {
+        serviceId,
+        extraServiceIds: extras ? extras.split(',') : undefined,
+        date,
+        time,
+        code: code ?? undefined,
+        phone: phoneParam || undefined,
+      },
       controller.signal,
     )
       .then((result) => {
@@ -47,7 +64,7 @@ export const usePriceQuote = ({ serviceId, date, time, code, phone }: QuoteReque
         }
       })
     return () => controller.abort()
-  }, [serviceId, date, time, code, phoneParam])
+  }, [serviceId, extras, date, time, code, phoneParam])
 
   return { quote, codeError }
 }

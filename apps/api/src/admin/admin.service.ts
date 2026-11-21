@@ -6,6 +6,7 @@ import { In, Repository } from 'typeorm'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
+import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -156,7 +157,7 @@ export class AdminService {
   // price in cash. The ids come back so the toast can undo exactly these.
   async closeDay(business: Business, date: string) {
     const rows = (await this.timeOff.manager.query(
-      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = s."price" - COALESCE(b."discount_amount", 0),
+      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = ${visitPrice()} - COALESCE(b."discount_amount", 0),
          "payment_method" = 'cash', "outcome_at" = now()
        FROM "services" AS s
        WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'

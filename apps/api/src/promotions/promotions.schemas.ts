@@ -35,6 +35,17 @@ const promotionSchema = z
 
 const quoteQuerySchema = z.object({
   serviceId: z.string().trim().min(1).max(64),
+  // Services done after the first in the same visit, comma-separated.
+  extraServiceIds: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.string().max(64)).max(3)),
   date: DATE,
   time: z.string().regex(/^\d{2}:\d{2}$/),
   code: z.string().trim().max(40).optional(),
@@ -42,7 +53,7 @@ const quoteQuerySchema = z.object({
 })
 
 type PromotionInput = z.infer<typeof promotionSchema>
-type QuoteQuery = z.infer<typeof quoteQuerySchema>
+type QuoteQuery = z.output<typeof quoteQuerySchema>
 
 export type { PromotionInput, QuoteQuery }
 export { promotionSchema, quoteQuerySchema }
