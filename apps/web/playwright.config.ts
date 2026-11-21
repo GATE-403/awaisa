@@ -1,8 +1,9 @@
 import { generateKeyPairSync } from 'node:crypto'
 import { defineConfig, devices } from '@playwright/test'
 
-const WEB_PORT = 3210
-const API_PORT = 4210
+// Another worktree may run its own pair: E2E_WEB_PORT / E2E_API_PORT move this one aside.
+const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 3210)
+const API_PORT = Number(process.env.E2E_API_PORT ?? 4210)
 const BASE_URL = process.env.E2E_BASE_URL ?? `http://localhost:${WEB_PORT}`
 const API_URL = process.env.E2E_API_URL ?? `http://localhost:${API_PORT}`
 
@@ -60,6 +61,8 @@ export default defineConfig({
             BOOKING_RATE_LIMIT_PER_MINUTE: '100',
             AUTH_RATE_LIMIT_PER_MINUTE: '1000',
             SMS_DRIVER: 'console',
+            // Fiscal receipts are numbered by the API itself and only logged.
+            FISCAL_DRIVER: 'log',
             // The cache under test is the real one: Redis when it runs (pnpm db:up), else memory.
             REDIS_URL: process.env.E2E_REDIS_URL ?? 'redis://localhost:6379',
             // Servers run on UTC like CI and production; the browser is in Bishkek (timezoneId).

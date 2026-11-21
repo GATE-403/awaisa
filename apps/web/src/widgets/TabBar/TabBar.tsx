@@ -11,12 +11,14 @@ import {
   isStandalonePath,
   NAV_ITEMS,
 } from '@/shared/config/navigation'
+import { useT } from '@/shared/i18n'
 import { useCabinetEntry } from '@/shared/lib/hooks/useCabinetEntry'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './TabBar.module.css'
 
 export const TabBar = () => {
+  const t = useT()
   const pathname = useChromePathname()
   const { customer } = useSession()
   // Reading down a long page, the bar steps aside like Safari's toolbar; any scroll up brings it
@@ -40,7 +42,7 @@ export const TabBar = () => {
 
   return (
     <nav
-      aria-label='Нижнее меню'
+      aria-label={t('Нижнее меню')}
       data-site-tabbar
       className={styles.tabBar}
       data-tucked={isTucked || undefined}
@@ -64,7 +66,7 @@ export const TabBar = () => {
           >
             {href === '/bookings' && customer ? (
               <PersonAvatar
-                name={customer.name || 'Профиль'}
+                name={customer.name || t('Профиль')}
                 src={customer.avatarUrl ?? undefined}
                 size='sm'
                 className={styles.avatar}
@@ -73,7 +75,7 @@ export const TabBar = () => {
             ) : (
               <Icon className={styles.icon} weight={isActive ? 'fill' : 'regular'} aria-hidden />
             )}
-            <span className={styles.label}>{label}</span>
+            <span className={styles.label}>{t(label)}</span>
           </NextLink>
         )
       })}

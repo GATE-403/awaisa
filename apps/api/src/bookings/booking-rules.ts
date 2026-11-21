@@ -16,7 +16,11 @@ const PAYMENT_HOLD_MINUTES = 15
 // (or whenever the salon cancels); later cancellations keep it.
 const DEPOSIT_REFUND_HOURS = 24
 
+// One visit takes up to four services (the first and three after it), all by one master.
+const MAX_EXTRA_SERVICES = 3
+
 export {
+  MAX_EXTRA_SERVICES,
   DEPOSIT_REFUND_HOURS,
   PAYMENT_HOLD_MINUTES,
   ANY_SPECIALIST_ID,

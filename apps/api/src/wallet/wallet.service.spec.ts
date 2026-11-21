@@ -23,6 +23,7 @@ const booking: BookingView = {
   serviceName: 'Мужская стрижка',
   price: 900,
   durationMinutes: 45,
+  services: [{ id: 's1', name: 'Мужская стрижка', price: 900, durationMinutes: 45 }],
   specialistId: 'm1',
   specialistName: 'Тимур',
   date: '2026-11-10',

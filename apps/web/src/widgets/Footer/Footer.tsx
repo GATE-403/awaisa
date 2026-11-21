@@ -3,6 +3,7 @@ import NextLink from 'next/link'
 import { LanguageSwitcher } from '@/features/language'
 import { ThemeSwitcher } from '@/features/theme'
 import { PLATFORM } from '@/shared/config/platform'
+import { T } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './Footer.module.css'
 import { FooterColumn } from './FooterColumn'
@@ -42,14 +43,14 @@ export const Footer = () => (
         {COLUMNS.map((column) => (
           <FooterColumn key={column.title} className={styles.column}>
             <summary className={styles.columnTitle}>
-              {column.title}
+              <T>{column.title}</T>
               <CaretDown className={styles.caret} weight='bold' aria-hidden />
             </summary>
             <ul className={styles.links}>
               {column.links.map((link) => (
                 <li key={link.href}>
                   <NextLink href={link.href} className={styles.link}>
-                    {link.label}
+                    <T>{link.label}</T>
                   </NextLink>
                 </li>
               ))}
@@ -60,7 +61,7 @@ export const Footer = () => (
 
       <div className={styles.bottom}>
         <p className={styles.legal}>
-          <span className={styles.name}>{PLATFORM.name}</span> · {PLATFORM.tagline}
+          <span className={styles.name}>{PLATFORM.name}</span> · <T>{PLATFORM.tagline}</T>
         </p>
         <div className={styles.settings}>
           <LanguageSwitcher />

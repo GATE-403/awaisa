@@ -7,6 +7,7 @@ import { formatPrice, useStoredBookings } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { knownPosition } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { StoryRow, StoryTile } from '@/shared/ui/StoryTile/StoryTile'
@@ -38,6 +39,27 @@ const storyNote = (reason: string) => {
   if (lead.startsWith('Часто выбирают')) return 'Популярное'
   if (lead.startsWith('Часто берут')) return 'Берут вместе'
   return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
+}
+
+// Reasons come from the API in Russian; the short ones the cards show are read here per language.
+// Shortened first (above), so a card's length rules stay the Russian ones.
+const REASON_PATTERNS: [RegExp, string, string][] = [
+  [/^Пора снова · (\d+) нед\.$/, 'Пора снова · {weeks} нед.', 'weeks'],
+  [/^Рядом · ([\d,]+) км$/, 'Рядом · {km} км', 'km'],
+  [/^Рядом · (\d+) м$/, 'Рядом · {meters} м', 'meters'],
+  [/^Сегодня с (.+)$/, 'Сегодня с {time}', 'time'],
+  [/^Завтра с (.+)$/, 'Завтра с {time}', 'time'],
+  [/^Сегодня (\d.*)$/, 'Сегодня {time}', 'time'],
+  [/^Завтра (\d.*)$/, 'Завтра {time}', 'time'],
+  [/^Рейтинг (.+)$/, 'Рейтинг {rating}', 'rating'],
+]
+
+const translateReason = (t: Translate, reason: string) => {
+  for (const [pattern, key, name] of REASON_PATTERNS) {
+    const match = reason.match(pattern)
+    if (match) return t(key, { [name]: match[1] ?? '' })
+  }
+  return t(reason)
 }
 
 // What every event about a card carries: the answer it came from, so the list can be rebuilt.
@@ -85,6 +107,7 @@ export const ForYouShelf = ({
   headAction,
   variant = 'cards',
 }: ForYouShelfProps = {}) => {
+  const t = useT()
   const trackRef = useRef<HTMLUListElement>(null)
   const preferences = usePreferences()
   const { bookings: stored, isReady } = useStoredBookings()
@@ -177,8 +200,8 @@ export const ForYouShelf = ({
         <button type='button' className={styles.prompt} onClick={() => setIsAsking(true)}>
           <Sparkle weight='fill' aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
-            <span className={styles.promptTitle}>Подберём для вас</span>
-            <span className={styles.promptMeta}>3 вопроса — и подборка услуг рядом</span>
+            <span className={styles.promptTitle}>{t('Подберём для вас')}</span>
+            <span className={styles.promptMeta}>{t('3 вопроса — и подборка услуг рядом')}</span>
           </span>
         </button>
         {sheet}
@@ -193,12 +216,12 @@ export const ForYouShelf = ({
     <section className={styles.shelf} data-inline={isInline || undefined} aria-labelledby={titleId}>
       <div className={styles.head}>
         <h2 id={titleId} className={styles.title}>
-          {title}
+          {t(title)}
         </h2>
         {isTunable && (
           <button type='button' className={styles.tune} onClick={() => setIsAsking(true)}>
             <Sliders weight='bold' aria-hidden />
-            Настроить
+            {t('Настроить')}
           </button>
         )}
         {headAction}
@@ -212,7 +235,7 @@ export const ForYouShelf = ({
               label={item.name}
               details={`${item.businessName}, ${formatPrice(item.price)}`}
               imageUrl={item.coverUrl}
-              note={storyNote(item.reason)}
+              note={translateReason(t, storyNote(item.reason))}
               isEager={position < 5}
               onOpen={() => trackPickClick({ ...pickOf(item), surface, position })}
             />
@@ -242,7 +265,9 @@ export const ForYouShelf = ({
                     decoding='async'
                   />
                 )}
-                <span className={styles.reason}>{shortReason(item.reason)}</span>
+                <span className={styles.reason}>
+                  {translateReason(t, shortReason(item.reason))}
+                </span>
                 <span className={styles.caption}>
                   <span className={styles.name}>{item.name}</span>
                   <span className={styles.meta}>

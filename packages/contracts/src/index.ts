@@ -187,13 +187,26 @@ type Availability = {
 
 type BookingStatus = 'confirmed' | 'cancelled'
 
+// One service of a visit; a visit may have several, done one after another by one master.
+type BookingService = {
+  id: string
+  name: string
+  price: number
+  durationMinutes: number
+}
+
 type Booking = {
   id: string
   status: BookingStatus
+  /** The visit's first service. */
   serviceId: string
+  /** Every service's name joined with « + » («Маникюр + Педикюр»). */
   serviceName: string
+  /** The whole visit: every service added up. */
   price: number
   durationMinutes: number
+  /** Every service of the visit in order, the first one included. Missing in old device copies. */
+  services?: BookingService[]
   specialistId: string
   specialistName: string
   date: string
@@ -785,6 +798,8 @@ type SlugCheck = { available: boolean; reason?: string }
 
 type CreateBookingInput = {
   serviceId: string
+  /** Services done in the same visit after `serviceId`, by the same master, one after another. */
+  extraServiceIds?: string[]
   specialistId: string
   date: string
   time: string
@@ -879,7 +894,7 @@ type StockReceiveInput = {
   expense?: { branchId: string | null } | null
 }
 
-/** Money that changes hands at the counter (no fiscal receipts). */
+/** Money that changes hands at the counter. */
 type SalePaymentMethod = 'cash' | 'card' | 'transfer'
 
 type SaleItem = { itemId: string | null; name: string; quantity: number; price: number }
@@ -898,6 +913,8 @@ type Sale = {
   total: number
   items: SaleItem[]
   isCancelled: boolean
+  /** The latest fiscal receipt of the sale (its refund once cancelled); null without receipts. */
+  receipt: FiscalReceipt | null
 }
 
 type SaleInput = {
@@ -955,6 +972,84 @@ type CashDesk = {
 }
 
 type OpenShiftInput = { branchId: string; openingCash: number }
+
+/**
+ * Fiscal receipts (apps/api/src/fiscal): `log` writes them to the log and numbers them itself
+ * (outside production), `off` issues none, `ekassa` sends them to the business's own eKassa.
+ */
+type FiscalDriverName = 'log' | 'off' | 'ekassa'
+
+/** Общий режим, единый налог, патент (a patent needs no cash register). */
+type TaxRegime = 'general' | 'single' | 'patent'
+
+type FiscalSettings = {
+  /** What the platform runs; `off` hides receipts everywhere. */
+  driver: FiscalDriverName
+  isEnabled: boolean
+  inn: string | null
+  taxRegime: TaxRegime
+  isVatPayer: boolean
+  /** Percent; VAT counts only for a VAT payer. */
+  vatRate: number
+  /** Sales tax (НсП) percent on services and on goods. */
+  salesTaxServices: number
+  salesTaxGoods: number
+  /** The business's own login at the provider (eKassa); the password never comes back. */
+  login: string | null
+  hasPassword: boolean
+}
+
+type FiscalSettingsInput = Omit<FiscalSettings, 'driver' | 'hasPassword'> & {
+  /** A new password; omitted or null keeps the saved one. */
+  password?: string | null
+}
+
+type FiscalReceiptStatus = 'pending' | 'sending' | 'issued' | 'failed' | 'cancelled'
+
+type FiscalReceiptLine = {
+  name: string
+  kind: 'service' | 'goods'
+  quantity: number
+  price: number
+  sum: number
+  vatRate: number
+  vatAmount: number
+  salesTaxRate: number
+  salesTaxAmount: number
+}
+
+type FiscalReceipt = {
+  id: string
+  kind: 'sale' | 'refund'
+  status: FiscalReceiptStatus
+  /** The visit or the sale it is for. */
+  bookingId: string | null
+  saleId: string | null
+  /** A refund's original receipt. */
+  refundOf: string | null
+  /** A sale receipt that a refund has cancelled. */
+  isRefunded: boolean
+  businessName: string
+  address: string | null
+  inn: string | null
+  taxRegime: TaxRegime
+  payment: 'cash' | 'cashless'
+  lines: FiscalReceiptLine[]
+  total: number
+  vatAmount: number
+  salesTaxAmount: number
+  fiscalNumber: string | null
+  fiscalSign: string | null
+  /** The provider's or the tax office's page of this receipt; the QR leads there. */
+  providerUrl: string | null
+  /** Our own page of the receipt, signed, for the client. */
+  viewUrl: string
+  /** Issued by the `log` driver: never reached the tax office. */
+  isTest: boolean
+  error: string | null
+  issuedAt: string | null
+  createdAt: string
+}
 type CashMovementInput = { kind: 'in' | 'out'; amount: number; reason: string }
 type CloseShiftInput = { countedCash: number; note?: string | null }
 
@@ -1000,6 +1095,9 @@ type MoneyReport = {
   period: { days: AnalyticsDays; from: string; to: string }
   servicesRevenue: number
   productsRevenue: number
+  /** Subscriptions sold in the period, counted the day they were sold. */
+  subscriptionsRevenue: number
+  subscriptionsSold: number
   revenue: number
   /** Materials visits used and the cost of products sold. */
   materialsCost: number
@@ -1212,7 +1310,14 @@ type AnalyticsReport = {
   }
   /** What each promotion brought in the period, and what loyalty paid. */
   promotions: { id: string; title: string; visits: number; revenue: number; discount: number }[]
-  loyalty: { bonusSpent: number; certificateSpent: number; subscriptionVisits: number }
+  loyalty: {
+    bonusSpent: number
+    certificateSpent: number
+    subscriptionVisits: number
+    /** Subscriptions sold in the period and what they brought in. */
+    subscriptionsSold: number
+    subscriptionsRevenue: number
+  }
   /** The calendar month so far against the owner's goal (goal null when none is set). */
   month: {
     label: string
@@ -1252,6 +1357,10 @@ type SettingsSummary = {
   stockItems: number
   /** Items at or under their warning level. */
   lowStock: number
+  /** Fiscal receipts switched on in «Касса». */
+  isFiscalOn: boolean
+  /** Receipts the provider kept refusing: the owner sends them again. */
+  failedReceipts: number
 }
 
 // The owner's page at a glance, like a professional account's insights: distinct devices that
@@ -1479,8 +1588,14 @@ type UploadedPhoto = { url: string }
 
 type SearchCorrection = { query: string; corrected: string | null }
 
-/** Web Push: the server's public VAPID key; `isAvailable` false hides the feature. */
-type PushConfig = { isAvailable: boolean; publicKey: string | null }
+/**
+ * Web Push: the server's public VAPID key; `isAvailable` false hides the feature in browsers.
+ * `isNativeAvailable`: the app's own pushes (Expo) can be sent, so the switch shows in the app.
+ */
+type PushConfig = { isAvailable: boolean; publicKey: string | null; isNativeAvailable: boolean }
+
+/** The app's Expo push token (`ExponentPushToken[…]`), saved for the signed-in person. */
+type PushTokenInput = { token: string }
 
 /** A browser's push subscription (`PushSubscription.toJSON()`), saved for the signed-in person. */
 type PushSubscriptionInput = {
@@ -1496,6 +1611,7 @@ export type {
   PushConfig,
   PushMessage,
   PushSubscriptionInput,
+  PushTokenInput,
   DeviceProfile,
   FunnelEvent,
   FunnelEventMeta,
@@ -1619,6 +1735,7 @@ export type {
   BookingStatus,
   Catalog,
   Category,
+  BookingService,
   CreateBookingInput,
   BookingPayment,
   CreatedBooking,
@@ -1664,6 +1781,13 @@ export type {
   OpenShiftInput,
   CashMovementInput,
   CloseShiftInput,
+  FiscalDriverName,
+  TaxRegime,
+  FiscalSettings,
+  FiscalSettingsInput,
+  FiscalReceiptStatus,
+  FiscalReceiptLine,
+  FiscalReceipt,
   ExpenseCategory,
   Expense,
   ExpenseInput,

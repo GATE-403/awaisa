@@ -31,7 +31,7 @@ test.describe('Subscriptions online', () => {
     const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
     const master = business.catalog.specialists[0]
     const serviceId: string = master.serviceIds[0]
-    const title = `E2E Абонемент онлайн ${Date.now()}`
+    const title = `E2E Онлайн-абонемент ${Date.now()}`
     const manage = `/api/manage/${SLUG}`
 
     // The owner sells a plan online from the cabinet (which also refreshes the public page).
@@ -82,13 +82,13 @@ test.describe('Subscriptions online', () => {
 
       // 2. The booking form offers it under «Оплата»; the visit is booked by the subscription.
       await client.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}`)
-      await expect(
-        bookingSteps(client).datetime.getByRole('group', { name: 'День' }),
-      ).toBeVisible()
+      await expect(bookingSteps(client).datetime.getByRole('group', { name: 'День' })).toBeVisible()
       await pickFirstFreeSlot(client)
       await client.getByRole('combobox', { name: 'Оплата' }).click()
       await client.getByRole('option', { name: 'Абонементом · осталось 3' }).click()
-      await expect(client.getByText('По абонементу').filter({ visible: true }).first()).toBeVisible()
+      await expect(
+        client.getByText('По абонементу').filter({ visible: true }).first(),
+      ).toBeVisible()
       await submitBooking(client)
       await expect(client.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
       const booked = (await (await client.request.get('/api/me/bookings')).json()) as {
@@ -168,7 +168,7 @@ test.describe('Subscriptions online', () => {
     test.skip(isMobile, 'Runs once: it adds a plan to the business')
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const manage = `/api/manage/${SLUG}`
-    const title = `E2E Абонемент в салоне ${Date.now()}`
+    const title = `E2E Салонный абонемент ${Date.now()}`
     const plans = await (
       await page.request.post(`${manage}/loyalty/plans`, {
         data: { title, serviceId: null, visits: 5, price: 3000, validDays: 60, isActive: true },

@@ -6,6 +6,7 @@ import { In, Repository } from 'typeorm'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { SalonBookingsService } from '../bookings/salon-bookings.service.js'
+import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
@@ -18,6 +19,7 @@ import {
   toBusinessParts,
 } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
+import { FiscalService } from '../fiscal/fiscal.service.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
@@ -61,6 +63,7 @@ export class AdminService {
     private readonly config: ConfigService<Env, true>,
     private readonly loyalty: LoyaltyService,
     private readonly inventory: InventoryService,
+    private readonly fiscal: FiscalService,
   ) {}
 
   async getSchedule(business: Business, date: string) {
@@ -156,7 +159,7 @@ export class AdminService {
   // price in cash. The ids come back so the toast can undo exactly these.
   async closeDay(business: Business, date: string) {
     const rows = (await this.timeOff.manager.query(
-      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = s."price" - COALESCE(b."discount_amount", 0),
+      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = ${visitPrice()} - COALESCE(b."discount_amount", 0),
          "payment_method" = 'cash', "outcome_at" = now()
        FROM "services" AS s
        WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'
@@ -173,6 +176,7 @@ export class AdminService {
     await this.loyalty.usePlannedSubscriptions(ids)
     await this.loyalty.earnForVisits(ids)
     await this.inventory.useForVisits(ids)
+    await this.fiscal.syncVisits(business.id, ids)
 
     return { ids }
   }
@@ -186,6 +190,7 @@ export class AdminService {
     )
     await this.loyalty.revertVisits(ids)
     await this.inventory.revertVisits(ids)
+    await this.fiscal.syncVisits(business.id, ids)
   }
 
   async createBooking(business: Business, input: StaffBookingInput) {

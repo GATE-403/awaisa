@@ -2,6 +2,7 @@
 
 import { CaretDown, CaretUp } from '@phosphor-icons/react/ssr'
 import type { ReactNode } from 'react'
+import { useT } from '@/shared/i18n'
 import styles from './MoreFade.module.css'
 
 interface MoreFadeProps {
@@ -30,6 +31,7 @@ export const MoreFade = ({
   surface = 'page',
   isLessFloating = true,
 }: MoreFadeProps) => {
+  const t = useT()
   if (hiddenCount <= 0 && !isOpen) return <>{children}</>
 
   return (
@@ -43,12 +45,12 @@ export const MoreFade = ({
           onClick={onToggle}
           aria-expanded
         >
-          Скрыть
+          {t('Скрыть')}
           <CaretUp weight='bold' aria-hidden />
         </button>
       ) : (
         <button type='button' className={styles.more} onClick={onToggle} aria-expanded={false}>
-          Ещё {hiddenCount} {label}
+          {t('Ещё {count} {label}', { count: hiddenCount, label })}
           <CaretDown weight='bold' aria-hidden />
         </button>
       )}

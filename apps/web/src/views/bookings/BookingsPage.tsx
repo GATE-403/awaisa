@@ -11,8 +11,8 @@ import { FavoritesShelf, useFavorites } from '@/features/favorites'
 import { ForYouShelf } from '@/features/forYou'
 import { WaitlistList } from '@/features/waitlist'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
-import { pluralWord } from '@/shared/lib/plural'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
@@ -39,6 +39,7 @@ const PROFILE_TABS = ['upcoming', 'history', 'favorites', 'settings'] as const
 type ProfileTab = (typeof PROFILE_TABS)[number]
 
 export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
+  const t = useT()
   const today = useToday()
   const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } =
     useMyBookings(initialAccountBookings)
@@ -74,8 +75,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('paid')) return
     toast.show({
-      title: 'Предоплата внесена',
-      description: 'Вы записаны — ждём вас',
+      title: t('Предоплата внесена'),
+      description: t('Вы записаны — ждём вас'),
       type: 'success',
     })
     router.replace('/bookings', { scroll: false })
@@ -97,10 +98,10 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
             {/* The whole profile in four tabs: what is ahead, what has been, what was saved, and
                 the account's settings — one place to look, no long page to scroll. */}
             <TextTabs
-              label='Профиль'
+              label={t('Профиль')}
               items={[
                 {
-                  label: 'Предстоящие',
+                  label: t('Предстоящие'),
                   count: upcoming.length,
                   isActive: view === 'upcoming',
                   onSelect: () => setTab('upcoming'),
@@ -108,7 +109,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                   controls: 'panel-upcoming',
                 },
                 {
-                  label: 'История',
+                  label: t('История'),
                   count: history.length,
                   isActive: view === 'history',
                   onSelect: () => setTab('history'),
@@ -116,7 +117,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                   controls: 'panel-history',
                 },
                 {
-                  label: 'Избранное',
+                  label: t('Избранное'),
                   count: favoriteIds.length || undefined,
                   isActive: view === 'favorites',
                   onSelect: () => setTab('favorites'),
@@ -126,7 +127,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 ...(isSignedIn
                   ? [
                       {
-                        label: 'Настройки',
+                        label: t('Настройки'),
                         isActive: view === 'settings',
                         onSelect: () => setTab('settings'),
                         id: 'tab-settings',
@@ -146,11 +147,11 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
               >
                 {bookings.length === 0 ? (
                   <EmptyState
-                    title='Запишитесь к мастеру'
-                    text='Найдите салон и выберите время — запись появится здесь'
+                    title={t('Запишитесь к мастеру')}
+                    text={t('Найдите салон и выберите время — запись появится здесь')}
                     action={
                       <ButtonLink render={<NextLink href='/' />} size='lg'>
-                        Найти, куда записаться
+                        {t('Найти, куда записаться')}
                       </ButtonLink>
                     }
                   />
@@ -159,11 +160,9 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                     hiddenCount={Math.max(0, upcoming.length - UPCOMING_FIRST)}
                     isOpen={isAllUpcoming}
                     onToggle={() => setIsAllUpcoming((value) => !value)}
-                    label={pluralWord(upcoming.length - UPCOMING_FIRST, [
-                      'запись',
-                      'записи',
-                      'записей',
-                    ])}
+                    label={t
+                      .count(upcoming.length - UPCOMING_FIRST, ['запись', 'записи', 'записей'])
+                      .replace(/^\d+ /, '')}
                     surface='card'
                   >
                     <div className={styles.upcoming}>
@@ -172,7 +171,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                           <UpcomingBooking
                             key={booking.id}
                             booking={booking}
-                            countdown={getCountdown(booking, today)}
+                            countdown={getCountdown(booking, today, t)}
                             isCancelling={cancellingId === booking.id}
                             onCancel={() => cancel(booking.id)}
                             onMoved={replace}
@@ -183,12 +182,15 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                   </MoreFade>
                 ) : (
                   <p className={styles.panelEmpty}>
-                    Впереди ничего нет. <NextLink href='/'>Найти, куда записаться ›</NextLink>
+                    {t('Впереди ничего нет.')}{' '}
+                    <NextLink href='/'>{t('Найти, куда записаться ›')}</NextLink>
                   </p>
                 )}
                 {/* Nothing ahead: what to book next, picked for this person — here it is useful,
                     not at the foot of the profile. */}
-                {upcoming.length === 0 && <ForYouShelf title='Куда записаться' surface='profile' />}
+                {upcoming.length === 0 && (
+                  <ForYouShelf title={t('Куда записаться')} surface='profile' />
+                )}
                 <WaitlistList />
                 <LoyaltyCard />
               </div>
@@ -208,7 +210,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                     onRated={replace}
                   />
                 ) : (
-                  <p className={styles.panelEmpty}>Здесь появятся прошедшие визиты.</p>
+                  <p className={styles.panelEmpty}>{t('Здесь появятся прошедшие визиты.')}</p>
                 )}
               </div>
             )}
