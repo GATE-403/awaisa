@@ -218,7 +218,22 @@ type BookingPayment = {
   dueAt: string | null
 }
 
-// The pay page (`GET /payments/:id?s=`).
+/** An order paid on /pay that is not a booking's deposit (a gift certificate, …). */
+type PaymentOrder = {
+  kind: string
+  /** «Подарочный сертификат на 3 000 сом». */
+  title: string
+  /** One line under it: «Для Айгуль · от Нурлана». */
+  details: string
+  business: { name: string; slug: string }
+  /** Until when the order waits for its payment; null once paid or gone. */
+  dueAt: string | null
+  status: 'pending' | 'paid' | 'expired'
+  /** What the paid page says: «Код отправили вам и получателю по SMS». */
+  doneText: string
+}
+
+// The pay page (`GET /payments/:id?s=`): a booking's deposit or another order.
 type PaymentPage = {
   id: string
   amount: number
@@ -236,7 +251,8 @@ type PaymentPage = {
     paymentStatus: BookingPayment['status'] | null
     dueAt: string | null
     business: { name: string; slug: string }
-  }
+  } | null
+  order: PaymentOrder | null
 }
 
 type Review = {
@@ -567,10 +583,30 @@ type ClientSubscription = {
 }
 
 // The cabinet's «Лояльность» tab.
+/** Gift certificates sold on the place's page: on or off and the amounts offered. */
+type CertificateSaleSettings = { isOnline: boolean; amounts: number[] }
+
+/** What the place's page offers (`GET /businesses/:slug/certificate-sale`); null when off. */
+type CertificateSale = { amounts: number[] } | null
+
+type CertificateOrderInput = {
+  amount: number
+  buyerName: string
+  /** Ignored when signed in: the account's number is used. */
+  buyerPhone: string
+  recipientName: string
+  /** Optional: the code is texted there too. */
+  recipientPhone: string
+  message: string
+}
+
+type CertificateOrderCreated = { id: string; checkoutUrl: string }
+
 type LoyaltyOverview = {
   bonusPercent: number | null
   plans: SubscriptionPlan[]
   certificates: GiftCertificate[]
+  certificateSale: CertificateSaleSettings
 }
 
 // A client's card in the cabinet.
@@ -963,6 +999,8 @@ type MoneyReport = {
   period: { days: AnalyticsDays; from: string; to: string }
   servicesRevenue: number
   productsRevenue: number
+  /** Gift certificates bought online, on the day they were paid. */
+  certificatesRevenue: number
   revenue: number
   /** Materials visits used and the cost of products sold. */
   materialsCost: number
@@ -1413,9 +1451,10 @@ type PaymentsConfig = { isAvailable: boolean; driver: string }
 /** How clients hear about their visits: `isWhatsappOn` when WhatsApp comes before SMS. */
 type ClientMessagingConfig = { isWhatsappOn: boolean }
 
-type TestPaymentResult = { bookingId: string; paymentStatus: string | null }
+/** `bookingId` is null when the payment was for another order (a gift certificate). */
+type TestPaymentResult = { bookingId: string | null; paymentStatus: string | null }
 
-type PaymentSync = { bookingId: string; status: string; paymentStatus: string | null }
+type PaymentSync = { bookingId: string | null; status: string; paymentStatus: string | null }
 
 type CheckoutLink = { url: string }
 
@@ -1454,6 +1493,11 @@ type PushSubscriptionInput = {
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
 export type {
+  CertificateOrderCreated,
+  CertificateOrderInput,
+  CertificateSale,
+  CertificateSaleSettings,
+  PaymentOrder,
   PushConfig,
   PushMessage,
   PushSubscriptionInput,

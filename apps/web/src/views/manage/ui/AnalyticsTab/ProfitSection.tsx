@@ -15,7 +15,7 @@ interface ProfitSectionProps {
 
 type Line = { key: string; title: string; meta?: string; amount: number }
 
-// «Прибыль»: what came in (services, products) and what went out (materials, products' cost,
+// «Прибыль»: what came in (services, products, certificates sold online) and what went out (materials, products' cost,
 // expenses by category), the profit at the top. Right on the page, rows with hairlines.
 const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
   const sold = money.products.reduce((sum, product) => sum + product.quantity, 0)
@@ -27,6 +27,8 @@ const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
       meta: sold > 0 ? `продано ${formatCount(sold)} шт.` : undefined,
       amount: money.productsRevenue,
     },
+    // Paid online on that day; spending them on visits later is not counted again.
+    { key: 'certificates', title: 'Сертификаты', amount: money.certificatesRevenue },
     { key: 'materials', title: 'Материалы на визиты', amount: -money.materialsCost },
     { key: 'productsCost', title: 'Себестоимость товаров', amount: -money.productsCost },
     ...money.expensesByCategory.map((item) => ({
@@ -84,6 +86,7 @@ const moneyCsvRows = (money: MoneyReport | null): (string | number)[][] =>
         ['Прибыль', 'Сумма'],
         ['Выручка: услуги', money.servicesRevenue],
         ['Выручка: товары', money.productsRevenue],
+        ['Выручка: сертификаты', money.certificatesRevenue],
         ['Материалы на визиты', money.materialsCost],
         ['Себестоимость товаров', money.productsCost],
         ['Расходы', money.expenses],

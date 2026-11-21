@@ -2,6 +2,8 @@ import { randomInt } from 'node:crypto'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { normalizeAmounts } from '../certificates/certificate-sale.js'
+import type { CertificateSaleInput } from '../certificates/certificates.schemas.js'
 import { toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { CertificateInput, PlanInput } from './loyalty.schemas.js'
@@ -62,6 +64,30 @@ export class LoyaltyService {
       percent,
     ])
     return this.getSettings(businessId)
+  }
+
+  /** «Продавать сертификаты онлайн» and the amounts the place's page offers. */
+  async getCertificateSale(businessId: string) {
+    const [row] = await this.query(
+      'SELECT "certificates_online", "certificate_amounts" FROM "businesses" WHERE "id" = $1',
+      [businessId],
+    )
+    return {
+      isOnline: Boolean(row?.certificates_online),
+      amounts: ((row?.certificate_amounts as number[] | undefined) ?? []).map(Number),
+    }
+  }
+
+  async setCertificateSale(businessId: string, input: CertificateSaleInput) {
+    const amounts = normalizeAmounts(input.amounts)
+    if (input.isOnline && amounts.length === 0) {
+      throw new BadRequestException('Добавьте хотя бы одну сумму')
+    }
+    await this.query(
+      'UPDATE "businesses" SET "certificates_online" = $2, "certificate_amounts" = $3 WHERE "id" = $1',
+      [businessId, input.isOnline, amounts],
+    )
+    return this.getCertificateSale(businessId)
   }
 
   async listPlans(businessId: string) {
@@ -131,7 +157,12 @@ export class LoyaltyService {
     return rows.map(this.toCertificate)
   }
 
-  async issueCertificate(businessId: string, input: CertificateInput) {
+  /** `db` lets a caller issue it inside its own transaction (an order paid online). */
+  async issueCertificate(
+    businessId: string,
+    input: CertificateInput,
+    db: Pick<DataSource, 'query'> = this.dataSource,
+  ) {
     const phone = input.phone ? normalizePhone(input.phone) : null
     if (input.phone && !phone) throw new BadRequestException('Проверьте номер телефона')
     // Codes are random; a clash with an existing one (unique per business) is simply retried.
@@ -140,7 +171,7 @@ export class LoyaltyService {
         { length: CODE_LENGTH },
         () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)],
       ).join('')
-      const rows = await this.query(
+      const rows: Row[] = await db.query(
         `INSERT INTO "gift_certificates" ("business_id", "code", "amount", "balance", "recipient", "phone", "expires_on")
          VALUES ($1, $2, $3, $3, $4, $5, $6)
          ON CONFLICT ("business_id", "code") DO NOTHING
