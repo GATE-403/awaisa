@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
 import { RateVisitSheet } from '@/features/rateVisit'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import type { Today } from '@/views/bookings/bookingsUtils'
 import styles from './RateRecent.module.css'
 
@@ -43,6 +44,7 @@ const tokenOf = (id: string) =>
 
 /** «Как прошло?» — the latest visit without a review, rated with one tap on a star. */
 export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
+  const t = useT()
   const [dismissed, setDismissed] = useState<string[] | null>(null)
   const [picked, setPicked] = useState(0)
 
@@ -68,7 +70,8 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
 
   if (!visit || !today) return null
 
-  const when = whenLabel(visit.date, today)
+  const whenKey = whenLabel(visit.date, today)
+  const when = whenKey ? t(whenKey) : null
   const firstName = visit.specialistName.split(' ')[0]
 
   const handleDismiss = () => {
@@ -84,21 +87,21 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
   return (
     <section className={styles.card} aria-labelledby='rate-recent-title'>
       <h2 id='rate-recent-title' className={styles.title}>
-        Как прошло?
+        {t('Как прошло?')}
       </h2>
       <p className={styles.meta}>
         {[visit.serviceName, firstName, visit.business.name, when].filter(Boolean).join(' · ')}
       </p>
       <div className={styles.row}>
         <fieldset className={styles.stars}>
-          <legend className={styles.legend}>Оценка визита</legend>
+          <legend className={styles.legend}>{t('Оценка визита')}</legend>
           {[1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
               type='button'
               className={styles.star}
               data-on={value <= picked || undefined}
-              aria-label={`${value} из 5`}
+              aria-label={t('{value} из 5', { value })}
               onClick={() => setPicked(value)}
             >
               <Star weight={value <= picked ? 'fill' : 'regular'} aria-hidden />
@@ -106,7 +109,7 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
           ))}
         </fieldset>
         <button type='button' className={styles.later} onClick={handleDismiss}>
-          Не сейчас
+          {t('Не сейчас')}
         </button>
       </div>
       {picked > 0 && (
