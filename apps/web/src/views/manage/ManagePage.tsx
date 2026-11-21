@@ -190,7 +190,9 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                 {data && tab === 'branches' && (
                   <BranchesTab slug={slug} branches={data.business.branches} run={run} />
                 )}
-                {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
+                {data && tab === 'notifications' && (
+                  <NotificationsTab slug={slug} specialists={data.catalog.specialists} />
+                )}
                 {data && !lockedFeature && tab === 'promotions' && (
                   <PromotionsTab slug={slug} catalog={data.catalog} />
                 )}
