@@ -6,6 +6,7 @@ import { CacheService } from '../cache/cache.service.js'
 import { Customer } from '../customers/customer.entity.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage } from '../notifications/messages.js'
+import { whatsappConfirmation } from '../notifications/whatsapp-messages.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { newBookingText } from '../telegram/telegram-messages.js'
 import { Booking } from './booking.entity.js'
@@ -57,11 +58,11 @@ export class BookingPaymentsService {
     const booking = await this.bookings.findOneByOrFail({ id: bookingId })
     const view = await this.bookingsService.getView(bookingId)
     if (booking.smsConfirmation) {
-      void this.clientMessages.send(
-        booking.customerPhone,
-        confirmationMessage(view, this.bookingsService.linkTo(view.id)),
-        this.bookingsService.manageButton(view.id),
-      )
+      void this.clientMessages.send(booking.customerPhone, {
+        text: confirmationMessage(view, this.bookingsService.linkTo(view.id)),
+        link: this.bookingsService.manageButton(view.id),
+        whatsapp: whatsappConfirmation(view, this.bookingsService.linkTo(view.id)),
+      })
     }
     void this.telegram.notifyBusiness(
       booking.businessId,

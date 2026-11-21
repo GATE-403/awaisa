@@ -8,6 +8,7 @@ import { visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from './client-messages.service.js'
 import { reminderMessage } from './messages.js'
+import { whatsappReminder } from './whatsapp-messages.js'
 
 type DueReminder = {
   id: string
@@ -61,22 +62,19 @@ export class RemindersService {
           row.id,
           this.config.get('AUTH_SECRET', { infer: true }),
         )
-        const message = reminderMessage(
-          {
-            business: { name: row.business_name, slug: row.business_slug },
-            serviceName: row.service_name,
-            specialistName: row.specialist_name,
-            date: dateKey,
-            time: formatMinutes(minutes),
-          },
-          isToday,
-          link,
-        )
+        const booking = {
+          business: { name: row.business_name, slug: row.business_slug },
+          serviceName: row.service_name,
+          specialistName: row.specialist_name,
+          date: dateKey,
+          time: formatMinutes(minutes),
+        }
 
-        // Telegram when the client linked it (a «Перенести или отменить» button), else SMS.
-        return this.messages.send(row.customer_phone, message, {
-          label: 'Перенести или отменить',
-          url: link,
+        // Telegram when the client linked it (a «Перенести или отменить» button), then WhatsApp, else SMS.
+        return this.messages.send(row.customer_phone, {
+          text: reminderMessage(booking, isToday, link),
+          link: { label: 'Перенести или отменить', url: link },
+          whatsapp: whatsappReminder(booking, isToday, link),
         })
       }),
     )
