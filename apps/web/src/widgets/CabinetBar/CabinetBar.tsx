@@ -49,7 +49,8 @@ export const CabinetBar = ({
   const router = useRouter()
   const { customer } = useSession()
   // Read after mount: the page is the same for everyone on the server.
-  const [entry, setEntry] = useState<string | null>(null)
+  // undefined until read, so «‹» never shows one word and then another.
+  const [entry, setEntry] = useState<string | null | undefined>(undefined)
   const { hasUnread } = useUpdatesSeen()
   const barRef = useRef<HTMLDivElement>(null)
   const isCompact = Boolean(nav)
@@ -72,7 +73,7 @@ export const CabinetBar = ({
 
   useEffect(() => {
     const saved = readCabinetFrom()
-    if (saved) setEntry(getSafeRedirect(saved))
+    setEntry(saved ? getSafeRedirect(saved) : null)
   }, [])
 
   const backHref = back?.href ?? entry ?? '/bookings'
@@ -92,7 +93,7 @@ export const CabinetBar = ({
           aria-label={nav ? `Назад: ${backLabel}` : undefined}
         >
           <CaretLeft weight='bold' aria-hidden />
-          {!nav && backLabel}
+          {!nav && (back || entry !== undefined) && backLabel}
         </NextLink>
         {nav && slug ? (
           <h1 className={styles.business}>
