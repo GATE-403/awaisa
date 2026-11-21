@@ -1,4 +1,4 @@
-/* An inset group of Settings rows; hairlines start after the glyph tile. */
+/* An inset group of Settings rows; hairlines start after the glyph. */
 .list {
   margin: 0;
   padding: 0;
@@ -23,7 +23,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(var(--space-4) + 29px + var(--space-3));
+  left: calc(var(--space-4) + 24px + var(--space-3));
   height: 0.5px;
   background: var(--color-border);
 }
@@ -54,38 +54,20 @@
   }
 }
 
+/* A thin glyph in one quiet colour, no tile («не даём фон иконкам, не добавляем цвета»);
+   WhatsApp keeps its own round mark, the one colour brands are allowed. */
 .glyph {
-  display: inline-flex;
+  display: inline-grid;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 29px;
-  height: 29px;
-  border-radius: 7px;
-  color: #fff;
+  place-items: center;
+  width: 24px;
+  color: var(--color-muted-foreground);
+  font-size: 22px;
 }
 
-.glyph svg {
-  width: 17px;
-  height: 17px;
-}
-
-.glyph[data-tone="call"] {
-  background: var(--color-success);
-}
-
-/* WhatsApp's own green: its mark (a green disc) melts into the tile, leaving the white glyph. */
-.glyph[data-tone="whatsapp"] {
-  background: #25d366;
-}
-
-.glyph[data-tone="whatsapp"] svg {
-  width: 29px;
-  height: 29px;
-}
-
-.glyph[data-tone="sms"] {
-  background: var(--color-primary);
+.glyph[data-brand="whatsapp"] svg {
+  width: 24px;
+  height: 24px;
 }
 
 .label {

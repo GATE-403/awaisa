@@ -23,7 +23,7 @@ const routeOf = (business: Business, latitude: number | null, longitude: number 
     ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
     : business.mapUrl || null
 
-// Settings-style facts: a coloured glyph, a small label, the value — hours, address, phone.
+// Settings-style facts: a quiet glyph, a small label, the value — hours, address, phone.
 export const VisitSection = ({ business }: VisitSectionProps) => {
   const today = useToday()
   const todayWeekday = today ? weekdayOf(today.dayKey) : null
@@ -51,8 +51,8 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
         return (
           <div key={branch.id} className={styles.branch}>
             <div className={styles.info}>
-              <span className={styles.glyph} data-tone='blue' aria-hidden>
-                <MapPin weight='fill' />
+              <span className={styles.glyph} aria-hidden>
+                <MapPin />
               </span>
               <span className={styles.infoText}>
                 <span className={styles.infoLabel}>{isSeveral ? branch.name : 'Адрес'}</span>
@@ -75,8 +75,8 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
             </div>
             {phone && (
               <a href={`tel:${phone}`} className={styles.info}>
-                <span className={styles.glyph} data-tone='green' aria-hidden>
-                  <Phone weight='fill' />
+                <span className={styles.glyph} aria-hidden>
+                  <Phone />
                 </span>
                 <span className={styles.infoText}>
                   <span className={styles.infoLabel}>Телефон</span>
@@ -91,8 +91,8 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
       {/* Today is what matters; the week opens on demand. */}
       <details className={styles.hoursBlock}>
         <summary className={styles.info}>
-          <span className={styles.glyph} data-tone='orange' aria-hidden>
-            <Clock weight='fill' />
+          <span className={styles.glyph} aria-hidden>
+            <Clock />
           </span>
           <span className={styles.infoText}>
             <span className={styles.infoLabel}>Часы</span>

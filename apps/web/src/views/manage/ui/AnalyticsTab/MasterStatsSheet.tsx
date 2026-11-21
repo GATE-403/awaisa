@@ -1,9 +1,8 @@
 'use client'
 
-import { Button, ButtonLink } from '@awaisa/ui/Button'
+import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
-import NextLink from 'next/link'
 import { useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -298,18 +297,6 @@ export const MasterStatsSheet = ({
           </section>
         )}
 
-        {pay && (pay.due > 0 || payout) && (
-          <Button
-            className={styles.masterSchedule}
-            onClick={() => void markPaid()}
-            disabled={isSaving}
-          >
-            {payout
-              ? `Выплатить ${payout.amount || '0'} сом`
-              : `Отметить выплату ${formatMoney(pay.due)}`}
-          </Button>
-        )}
-
         {master.topServices.length > 0 && (
           <section className={sheet.group} aria-labelledby='master-top-services'>
             <SectionCaption id='master-top-services'>Чаще всего</SectionCaption>
@@ -324,13 +311,14 @@ export const MasterStatsSheet = ({
           </section>
         )}
 
-        <ButtonLink
-          variant='secondary'
-          render={<NextLink href='?tab=schedule' />}
-          className={styles.masterSchedule}
-        >
-          Открыть расписание
-        </ButtonLink>
+        {pay && (pay.due > 0 || payout) && (
+          // The sheet's one main action, last and as wide as the groups above it.
+          <Button fullWidth onClick={() => void markPaid()} disabled={isSaving}>
+            {payout
+              ? `Выплатить ${payout.amount || '0'} сом`
+              : `Отметить выплату ${formatMoney(pay.due)}`}
+          </Button>
+        )}
       </div>
     </Sheet>
   )
