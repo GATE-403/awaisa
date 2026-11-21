@@ -11,6 +11,8 @@ import {
 } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { JsonLd } from '@/shared/lib/seo/JsonLd'
+import { placesJsonLd, siteJsonLd } from '@/shared/lib/seo/siteJsonLd'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import { CatalogSkeleton } from './ui/CatalogSkeleton/CatalogSkeleton'
@@ -70,6 +72,9 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
 
   return (
     <NextFreeProvider slugs={slugs}>
+      {isBrowsing && businesses.length > 0 && (
+        <JsonLd data={placesJsonLd(kindLabel ?? 'Места для записи', businesses)} />
+      )}
       <div className={styles.contained}>
         {/* Picked for this client (or, with nothing known, popular and free soon) leads the page. */}
         {isBrowsing && !kind && <FirstVisitNote />}
@@ -108,6 +113,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
 // A marketplace, not a landing: search, categories, offers, then the places themselves.
 export const CatalogPage = ({ searchParams }: CatalogPageProps) => (
   <main className={styles.page}>
+    <JsonLd data={siteJsonLd()} />
     <Suspense fallback={<CatalogSkeleton />}>
       <CatalogContent searchParams={searchParams} />
     </Suspense>

@@ -23,6 +23,15 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "scheme": "awaisa"
+    "scheme": "awaisa",
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#0a6cf0",
+          "defaultChannel": "bookings"
+        }
+      ]
+    ]
   }
 }
