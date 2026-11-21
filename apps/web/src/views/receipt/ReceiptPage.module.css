@@ -1,0 +1,22 @@
+.page {
+  padding: var(--space-6) 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 28rem;
+}
+
+.title {
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+  text-align: center;
+}
+
+.check {
+  align-self: center;
+}

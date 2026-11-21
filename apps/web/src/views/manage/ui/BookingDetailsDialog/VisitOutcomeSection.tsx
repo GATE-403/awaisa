@@ -5,10 +5,11 @@ import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
-import { getClientLoyalty, listVisitSales } from '@/shared/api/clientApi'
+import { getClientLoyalty, listVisitReceipts, listVisitSales } from '@/shared/api/clientApi'
 import type {
   AdminBooking,
   ClientLoyalty,
+  FiscalReceipt,
   OutcomeInput,
   PaymentMethod,
   Sale,
@@ -18,6 +19,8 @@ import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { describeReceipt } from '@/views/manage/lib/cashFormat'
+import { ReceiptSheet } from '@/views/manage/ui/ReceiptSheet/ReceiptSheet'
 import styles from './BookingDetailsDialog.module.css'
 
 interface VisitOutcomeSectionProps {
@@ -45,6 +48,10 @@ const PAID_BY: Partial<Record<PaymentMethod, string>> = {
   certificate: 'Оплачено сертификатом',
 }
 
+// The receipt goes out right after the save; look again shortly while it is on its way.
+const RECEIPT_RECHECK_MS = 2000
+const RECEIPT_RECHECKS = 3
+
 const METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'cash', label: 'Наличные' },
   { value: 'card', label: 'Карта' },
@@ -64,6 +71,8 @@ export const VisitOutcomeSection = ({
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [sales, setSales] = useState<Sale[]>([])
+  const [receipt, setReceipt] = useState<FiscalReceipt | null>(null)
+  const [isReceiptOpen, setIsReceiptOpen] = useState(false)
   const [certificateCode, setCertificateCode] = useState('')
   const [isCertificateOpen, setIsCertificateOpen] = useState(false)
   const due = booking.price - (booking.discount?.amount ?? 0)
@@ -87,6 +96,30 @@ export const VisitOutcomeSection = ({
       .then(setLoyalty)
       .catch(() => undefined)
     return () => controller.abort()
+  }, [isArrived, current])
+
+  // The visit's fiscal receipt (the latest: a refund once the payment changed).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reload after each saved outcome
+  useEffect(() => {
+    if (!isArrived) return
+    const controller = new AbortController()
+    let timer = 0
+    const load = async (checksLeft: number) => {
+      const [latest] = await listVisitReceipts(slug, booking.id, controller.signal)
+      setReceipt(latest ?? null)
+      const isOnItsWay = latest?.status === 'pending' || latest?.status === 'sending'
+      if (isOnItsWay && checksLeft > 0) {
+        timer = window.setTimeout(
+          () => void load(checksLeft - 1).catch(() => undefined),
+          RECEIPT_RECHECK_MS,
+        )
+      }
+    }
+    load(RECEIPT_RECHECKS).catch(() => undefined)
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
   }, [isArrived, current])
 
   // Products already sold with this visit.
@@ -161,6 +194,19 @@ export const VisitOutcomeSection = ({
                   }
                 />
               </div>
+              {receipt && (
+                <button type='button' className={sheet.row} onClick={() => setIsReceiptOpen(true)}>
+                  <span className={sheet.rowLabel}>Чек</span>
+                  <span
+                    className={describeReceipt(receipt).isAlert ? styles.rowAlert : styles.rowLink}
+                  >
+                    {receipt.status === 'issued'
+                      ? `${receipt.kind === 'refund' ? 'Возврат ' : ''}№${receipt.fiscalNumber}`
+                      : describeReceipt(receipt).text}{' '}
+                    ›
+                  </span>
+                </button>
+              )}
               {sales.flatMap((sale) =>
                 sale.items.map((item) => (
                   <div key={`${sale.id}-${item.name}`} className={sheet.row}>
@@ -270,6 +316,14 @@ export const VisitOutcomeSection = ({
         <p className={sheet.groupFooter}>
           Клиенту начислится {loyalty.bonusPercent}% бонусами от оплаты деньгами.
         </p>
+      )}
+      {isReceiptOpen && receipt && (
+        <ReceiptSheet
+          slug={slug}
+          receipt={receipt}
+          onClose={() => setIsReceiptOpen(false)}
+          onChange={setReceipt}
+        />
       )}
       {current.outcome === 'no_show' && (
         <p className={sheet.groupFooter}>Неявка видна в карточке клиента и в аналитике.</p>

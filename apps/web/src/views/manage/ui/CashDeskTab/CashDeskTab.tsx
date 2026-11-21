@@ -43,9 +43,15 @@ import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
-import { expenseCategoryLabel, formatCount, METHOD_LABEL } from '@/views/manage/lib/cashFormat'
+import {
+  describeReceipt,
+  expenseCategoryLabel,
+  formatCount,
+  METHOD_LABEL,
+} from '@/views/manage/lib/cashFormat'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import forms from '@/views/manage/ui/manageForms.module.css'
+import { ReceiptSheet } from '@/views/manage/ui/ReceiptSheet/ReceiptSheet'
 import { SaleSheet } from '@/views/manage/ui/SaleSheet/SaleSheet'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import styles from './CashDeskTab.module.css'
@@ -61,6 +67,10 @@ interface CashDeskTabProps {
 type CashView = 'shift' | 'sales' | 'expenses'
 
 const EXPENSE_DAYS = 30
+// A receipt goes to the provider right after the sale; the list looks again shortly while one
+// made just now is still on its way (later retries are minutes apart, not worth watching).
+const RECEIPT_RECHECK_MS = 2000
+const RECEIPT_FRESH_MS = 30_000
 
 const timeFormat = new Intl.DateTimeFormat('ru-RU', {
   hour: '2-digit',
@@ -98,6 +108,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
   const [shiftSheet, setShiftSheet] = useState<'open' | 'move' | 'close' | null>(null)
   const [isSelling, setIsSelling] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | 'new' | null>(null)
+  const [openReceipt, setOpenReceipt] = useState<Sale['receipt']>(null)
   const shift = desk?.open.find((item) => item.branchId === branchId) ?? null
   const branchName = branches.find((branch) => branch.id === branchId)?.name
   const closed = desk?.closed.filter((item) => item.branchId === branchId) ?? []
@@ -111,6 +122,17 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
     },
     [slug],
   )
+
+  useEffect(() => {
+    const isWaiting = desk?.sales.some(
+      (sale) =>
+        (sale.receipt?.status === 'pending' || sale.receipt?.status === 'sending') &&
+        Date.now() - Date.parse(sale.receipt.createdAt) < RECEIPT_FRESH_MS,
+    )
+    if (!isWaiting) return
+    const timer = window.setTimeout(() => void reload().catch(() => undefined), RECEIPT_RECHECK_MS)
+    return () => window.clearTimeout(timer)
+  }, [desk, reload])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -348,12 +370,24 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                       ]
                         .filter(Boolean)
                         .join(' · ')}
+                      {sale.receipt && (
+                        <>
+                          {' · '}
+                          <span
+                            className={
+                              describeReceipt(sale.receipt).isAlert ? styles.alert : undefined
+                            }
+                          >
+                            {describeReceipt(sale.receipt).text}
+                          </span>
+                        </>
+                      )}
                     </span>
                   </span>
                   <span className={styles.amount} data-struck={sale.isCancelled || undefined}>
                     {formatPrice(sale.total)}
                   </span>
-                  {sale.isCancelled ? (
+                  {sale.isCancelled && !sale.receipt ? (
                     <span className={styles.moreSpace} aria-hidden='true' />
                   ) : (
                     <Menu
@@ -361,9 +395,16 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                       className={styles.more}
                       trigger={<DotsThree weight='bold' aria-hidden />}
                     >
-                      <MenuItem variant='danger' onClick={() => handleCancelSale(sale)}>
-                        Отменить продажу
-                      </MenuItem>
+                      {sale.receipt && (
+                        <MenuItem onClick={() => setOpenReceipt(sale.receipt)}>
+                          {sale.receipt.kind === 'refund' ? 'Чек возврата' : 'Чек'}
+                        </MenuItem>
+                      )}
+                      {!sale.isCancelled && (
+                        <MenuItem variant='danger' onClick={() => handleCancelSale(sale)}>
+                          Отменить продажу
+                        </MenuItem>
+                      )}
                     </Menu>
                   )}
                 </li>
@@ -436,6 +477,15 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
           onCloseShift={(countedCash, note) =>
             shift ? handleCloseShift(shift, countedCash, note) : Promise.resolve(false)
           }
+        />
+      )}
+
+      {openReceipt && (
+        <ReceiptSheet
+          slug={slug}
+          receipt={openReceipt}
+          onClose={() => setOpenReceipt(null)}
+          onChange={() => void reload()}
         />
       )}
 
