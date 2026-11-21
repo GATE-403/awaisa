@@ -27,9 +27,14 @@ import type {
 // owners' edits refresh their business at once through updateTag (see revalidate.ts). Reads go
 // through readApi: with the API down, a page is drawn from the last good answer, cached for
 // seconds only (`isStale`) so it heals as soon as the API is back.
+// The slug `generateStaticParams` gives the build (`app/[slug]/layout.tsx`): no business has it
+// (slugs are lowercase letters, digits and hyphens), and the build may run where the API is not.
+const PRERENDER_SLUG = '__prerender'
+
 const fetchBusiness = async (slug: string): Promise<BusinessPage | null> => {
   'use cache'
   cacheTag(BUSINESSES_TAG, businessTag(slug))
+  if (slug === PRERENDER_SLUG) return null
 
   const { data, isStale } = await readApi<BusinessPage | null>(
     `/businesses/${encodeURIComponent(slug)}`,
@@ -305,6 +310,7 @@ const listServicePhotos = async (slug: string): Promise<Record<string, string>> 
 }
 
 export {
+  PRERENDER_SLUG,
   fetchBusiness as findBusiness,
   listAllBusinesses,
   listLeaderboard,

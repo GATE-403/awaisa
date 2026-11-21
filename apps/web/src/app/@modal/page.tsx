@@ -1,5 +1,5 @@
-// The catalog («/»): no booking open. Without it a soft navigation to «/» would keep whatever the
-// slot showed before (the catch-all does not match the root).
+// The catalog («/»): no booking open. Other paths the slot has no page for keep what it showed,
+// and `BookingModalGate` hides a sheet whose address is gone.
 const NoModal = () => null
 
 export default NoModal
