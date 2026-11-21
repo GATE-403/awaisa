@@ -404,6 +404,8 @@ export const DayCalendar = ({
   // What stays under the pointer (or in the middle) while the zoom changes.
   const anchorRef = useRef<{ minutes: number; x: number } | null>(null)
   const perMinuteRef = useRef(perMinute)
+  // Switching from the columns is not a zoom: their scale is another axis altogether.
+  const wasTimelineRef = useRef(isTimeline)
   const zoomRef = useRef(zoom)
   const onZoomRef = useRef(onZoomChange)
 
@@ -416,8 +418,10 @@ export const DayCalendar = ({
   useLayoutEffect(() => {
     const scroller = scrollerRef.current
     const previous = perMinuteRef.current
+    const wasTimeline = wasTimelineRef.current
     perMinuteRef.current = perMinute
-    if (!scroller || !isTimeline || previous === perMinute) return
+    wasTimelineRef.current = isTimeline
+    if (!scroller || !isTimeline || !wasTimeline || previous === perMinute) return
     const visible = scroller.clientWidth
     const anchor = anchorRef.current ?? {
       minutes: (scroller.scrollLeft + visible / 2) / previous,
