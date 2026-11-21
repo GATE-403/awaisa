@@ -34,25 +34,37 @@ export const TextTabs = ({ label, items, size = 'md' }: TextTabsProps) => {
   const isFirstRef = useRef(true)
 
   // A row wider than the screen keeps the chosen tab in view («если я на табе, она должна быть
-  // видна всегда»): scrolled sideways only (never the page), at once on open, smoothly after.
+  // видна всегда»): scrolled sideways only (never the page), at once on open and when the row's
+  // width changes (a phone turned, a window narrowed), smoothly when another tab is chosen.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the chosen tab is what moves it
   useEffect(() => {
     const row = rowRef.current
-    const active = row?.querySelector<HTMLElement>('[aria-current="page"]')
-    if (!row || !active) return
-    const gap = 16
-    const left =
-      active.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft
-    const right = left + active.offsetWidth
-    const isHidden = left - gap < row.scrollLeft || right + gap > row.scrollLeft + row.clientWidth
-    if (isHidden) {
-      const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!row) return
+    const reveal = (behavior: ScrollBehavior) => {
+      const active = row.querySelector<HTMLElement>('[aria-current="page"]')
+      if (!active) return
+      const gap = 16
+      const left =
+        active.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft
+      const right = left + active.offsetWidth
+      const isHidden = left - gap < row.scrollLeft || right + gap > row.scrollLeft + row.clientWidth
+      if (!isHidden) return
       row.scrollTo({
         left: Math.max(0, left - (row.clientWidth - active.offsetWidth) / 2),
-        behavior: isFirstRef.current || isReduced ? 'auto' : 'smooth',
+        behavior,
       })
     }
+    const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    reveal(isFirstRef.current || isReduced ? 'auto' : 'smooth')
     isFirstRef.current = false
+    let width = row.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (row.clientWidth === width) return
+      width = row.clientWidth
+      reveal('auto')
+    })
+    observer.observe(row)
+    return () => observer.disconnect()
   }, [activeIndex])
   const content = items.map((item) => {
     const inner = (

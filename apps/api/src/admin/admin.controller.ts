@@ -10,6 +10,7 @@ import type {
   PageStats,
   RecentBooking,
   ScheduleLoad,
+  SettingsSummary,
   UnclosedDays,
 } from '@awaisa/contracts'
 import {
@@ -59,6 +60,7 @@ import {
 } from './admin.schemas.js'
 import { AdminService } from './admin.service.js'
 import { AnalyticsService } from './analytics.service.js'
+import { SettingsSummaryService } from './settings-summary.service.js'
 
 /** «За неделю» on the owner's page. */
 const PAGE_STATS_DAYS = 7
@@ -70,6 +72,7 @@ export class AdminController {
     private readonly admin: AdminService,
     private readonly salonBookings: SalonBookingsService,
     private readonly analytics: AnalyticsService,
+    private readonly settingsSummary: SettingsSummaryService,
   ) {}
 
   @Post('bookings/close-day')
@@ -111,6 +114,12 @@ export class AdminController {
     @Query({ schema: analyticsQuerySchema }) query: AnalyticsQuery,
   ): Promise<AnalyticsReport> {
     return this.analytics.getReport(business, query.days)
+  }
+
+  @OwnerOnly()
+  @Get('settings-summary')
+  getSettingsSummary(@CurrentBusiness() business: Business): Promise<SettingsSummary> {
+    return this.settingsSummary.get(business)
   }
 
   @OwnerOnly()

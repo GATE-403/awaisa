@@ -1,21 +1,27 @@
-/* Phones: iOS Settings — inset groups on the page, 44pt rows, hairlines inset past the glyph. */
+/* Phones: rows right on the page (no cards, «убери лишние обёртки фона»), 44pt, hairlines inset
+   past the glyph; the search floats at the window's foot. */
 .nav {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  min-width: 0;
 }
 
 .group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
+}
+
+/* (doubled: over the caption's own inset rule) */
+.group > .caption.caption {
+  padding-inline: 0;
 }
 
 .list {
-  overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .list li + li .row::before {
@@ -23,7 +29,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(var(--space-4) + 29px + var(--space-3));
+  left: calc(24px + var(--space-3));
   height: 0.5px;
   background: var(--color-border);
 }
@@ -34,55 +40,70 @@
   align-items: center;
   gap: var(--space-3);
   min-height: var(--control-height-md);
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) 0;
   color: var(--color-foreground);
   font-size: var(--text-body);
+  text-decoration: none;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-.row:hover {
-  background: var(--color-fill);
+@media (hover: hover) {
+  .row:hover .label {
+    color: var(--color-link);
+  }
 }
 
 .row:focus-visible {
   outline: none;
-  box-shadow: inset var(--focus-ring);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
 }
 
+/* A thin glyph, all in one quiet colour, no tile behind it («убери фон от иконок», «иконки
+   сделай одного цвета»). */
 .glyph {
   display: inline-grid;
   flex-shrink: 0;
   place-items: center;
-  width: 29px;
-  height: 29px;
-  border-radius: 7px;
-  color: var(--color-primary-foreground);
-  font-size: 17px;
-}
-
-.glyph[data-tone="blue"] {
-  background: var(--color-primary);
-}
-
-.glyph[data-tone="green"] {
-  background: var(--color-success);
-}
-
-.glyph[data-tone="orange"] {
-  background: var(--color-rating);
-}
-
-.glyph[data-tone="red"] {
-  background: var(--color-danger);
-}
-
-.glyph[data-tone="gray"] {
-  background: var(--color-muted-foreground);
+  width: 24px;
+  color: var(--color-muted-foreground);
+  font-size: 22px;
 }
 
 .label {
-  flex: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   min-width: 0;
+  white-space: nowrap;
+}
+
+/* The row keeps to its column: the name and its place end in an ellipsis rather than spill. */
+.labelText,
+.place {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.place {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* What is inside, on the row's right like iOS Settings; red when it asks for action. */
+.value {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 50%;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value[data-alert] {
+  color: var(--color-danger-text);
 }
 
 .chevron {
@@ -92,29 +113,36 @@
   color: var(--color-tertiary-foreground);
 }
 
-/* Wide screens: macOS System Settings sidebar — no card, small rows, the open one on a fill. */
+/* Phones: the search floats across the window's foot (16pt in), like the clients' search. */
+@media (max-width: 639px) {
+  .search.search {
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+    max-width: none;
+  }
+
+  .search > * {
+    flex: 1;
+  }
+}
+
+/* Wide screens: macOS System Settings sidebar — small rows, the open one on a fill. */
 @media (min-width: 1024px) {
   .nav {
     gap: var(--space-5);
   }
 
-  .group {
-    gap: var(--space-1);
+  .search {
+    margin-bottom: calc(-1 * var(--space-2));
   }
 
   /* In the sidebar the group names are quiet labels, not iOS captions. */
-  .group > .caption[data-inset] {
+  .group > .caption.caption {
     padding: 0 var(--space-2);
     font-size: var(--text-xs);
     font-weight: var(--font-weight-semibold);
     text-transform: none;
-  }
-
-  .list {
-    overflow: visible;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
   }
 
   .list li + li .row::before {
@@ -128,32 +156,41 @@
     border-radius: var(--radius-md);
   }
 
+  .row:hover {
+    background: var(--color-fill);
+  }
+
+  .row:hover .label {
+    color: inherit;
+  }
+
   .row[aria-current="page"] {
     background: var(--color-fill);
     font-weight: var(--font-weight-semibold);
   }
 
+  .row[aria-current="page"] .glyph {
+    color: var(--color-foreground);
+  }
+
   .glyph {
-    width: 24px;
-    height: 24px;
-    border-radius: 6px;
-    font-size: 14px;
+    width: 20px;
+    font-size: 18px;
   }
 
   .chevron {
     display: none;
   }
+
+  .value {
+    font-size: var(--text-footnote);
+  }
 }
 
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
-   our 44pt rule). `:where` keeps the control's own position if it has one. */
-:where(.row) {
-  position: relative;
-}
-
+/* A 44pt tap target around the smaller row, invisible (WCAG 2.5.8 and our 44pt rule). */
 .row::after {
   content: "";
   position: absolute;
   inset-block: min(0px, calc((100% - 44px) / 2));
-  inset-inline: min(0px, calc((100% - 44px) / 2));
+  inset-inline: 0;
 }

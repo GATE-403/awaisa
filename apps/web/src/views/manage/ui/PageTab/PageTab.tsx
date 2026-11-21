@@ -10,11 +10,13 @@ import {
   ShareNetwork,
   Trash,
 } from '@phosphor-icons/react/ssr'
+import { useSearchParams } from 'next/navigation'
 import {
   type ChangeEvent,
   type CSSProperties,
   type ReactNode,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -28,6 +30,7 @@ import {
 } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import {
+  createCategory,
   createService,
   createSpecialist,
   removeCover,
@@ -56,12 +59,15 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
-import { HoursSheet } from '@/views/manage/ui/HoursTab/HoursSheet'
-import { MasterDialog } from '@/views/manage/ui/MastersTab/MasterDialog'
-import { MasterScheduleSheet } from '@/views/manage/ui/MastersTab/MasterScheduleSheet'
+import { PAGE_SECTIONS } from '@/views/manage/manageTabs'
+import { HoursSheet } from '@/views/manage/ui/Hours/HoursSheet'
+import { MasterDialog } from '@/views/manage/ui/Masters/MasterDialog'
+import { MasterScheduleSheet } from '@/views/manage/ui/Masters/MasterScheduleSheet'
 import { PhotosSection } from '@/views/manage/ui/PhotosSection/PhotosSection'
-import { ServiceDialog } from '@/views/manage/ui/ServicesTab/ServiceDialog'
+import { CategoryDialog } from '@/views/manage/ui/Services/CategoryDialog'
+import { ServiceDialog } from '@/views/manage/ui/Services/ServiceDialog'
 import { EditPageSheet } from './EditPageSheet'
 import { PageChecklist } from './PageChecklist'
 import { PageInsights } from './PageInsights'
@@ -104,7 +110,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const [isEditing, setIsEditing] = useState(false)
   const [photos, setPhotos] = useState<WorkPhoto[] | null>(null)
   const photoCount = photos?.length ?? null
-  const [section, setSection] = useState<PageSection>('works')
+  const searchParams = useSearchParams()
+  // Old links to «Услуги», «Мастера» and «График» open that tab of the page.
+  const [section, setSection] = useState<PageSection>(
+    () => PAGE_SECTIONS[searchParams.get('tab') ?? ''] ?? 'works',
+  )
+  const [isAddingCategory, setIsAddingCategory] = useState(false)
+  const linkedSection = PAGE_SECTIONS[searchParams.get('tab') ?? '']
   // Services, masters and hours are changed in sheets right here, never in another tab.
   const [editingService, setEditingService] = useState<Service | 'new' | null>(null)
   const [editingMaster, setEditingMaster] = useState<Specialist | 'new' | null>(null)
@@ -113,6 +125,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const [isSharing, setIsSharing] = useState(false)
   const masters = catalog.specialists.filter((master) => master.isActive !== false)
   const services = catalog.services.filter((service) => service.isActive !== false)
+  // The owner also sees what is switched off, marked, so it can be switched back on here.
+  const serviceGroups = catalog.categories
+    .map((category) => ({
+      category,
+      items: catalog.services.filter((service) => service.categoryId === category.id),
+    }))
+    .filter((group) => group.items.length > 0)
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes) : null
   const todayWeekday = today ? weekdayOf(today.dayKey) : null
   const kindLabel = BUSINESS_KINDS.find((kind) => kind.value === business.kind)?.label
@@ -142,6 +161,12 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     setSection('works')
     document.getElementById(PHOTO_INPUT_ID)?.click()
   }
+
+  // A link that names a section while the page is open («Запуск записи» → «Добавьте мастеров»)
+  // switches to that tab here too.
+  useEffect(() => {
+    if (linkedSection) setSection(linkedSection)
+  }, [linkedSection])
 
   const upload = (kind: 'cover' | 'logo') => async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -431,28 +456,55 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         aria-labelledby='page-tab-services'
         hidden={section !== 'services'}
       >
-        {services.length === 0 ? (
+        {serviceGroups.length === 0 ? (
           <EmptyState
             variant='inline'
             title='Добавьте услуги'
             text='С ценой и длительностью: по ним клиенты записываются.'
           />
         ) : (
-          <ul className={styles.services}>
-            {services.map((service) => (
-              <li key={service.id}>
-                <OfferCard
-                  offer={toOffer(service)}
-                  isHit={service.isPopular}
-                  linkLabel={`Изменить «${service.name}»`}
-                  actionLabel='Изменить'
-                  onSelect={() => setEditingService(service)}
-                  isPlaceHidden
-                />
-              </li>
+          <div className={styles.serviceGroups}>
+            {serviceGroups.map(({ category, items }) => (
+              <section key={category.id} className={styles.serviceGroup} aria-label={category.name}>
+                {serviceGroups.length > 1 && (
+                  <SectionCaption as='h3' isInset={false}>
+                    {category.name} <span className={styles.captionCount}>{items.length}</span>
+                  </SectionCaption>
+                )}
+                <ul className={styles.services}>
+                  {items.map((service) => (
+                    <li
+                      key={service.id}
+                      className={service.isActive === false ? styles.inactive : undefined}
+                    >
+                      <OfferCard
+                        offer={toOffer(service)}
+                        isHit={service.isPopular}
+                        linkLabel={`Изменить «${service.name}»${service.isActive === false ? ', скрыта' : ''}`}
+                        actionLabel='Изменить'
+                        onSelect={() => setEditingService(service)}
+                        action={
+                          service.isActive === false ? (
+                            <span className={styles.offMark}>Скрыта</span>
+                          ) : undefined
+                        }
+                        isPlaceHidden
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
             ))}
-          </ul>
+          </div>
         )}
+        <button
+          type='button'
+          className={styles.addCategory}
+          onClick={() => setIsAddingCategory(true)}
+        >
+          <Plus weight='bold' aria-hidden />
+          Категория
+        </button>
       </div>
 
       <div
@@ -461,7 +513,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         aria-labelledby='page-tab-masters'
         hidden={section !== 'masters'}
       >
-        {masters.length === 0 ? (
+        {catalog.specialists.length === 0 ? (
           <EmptyState
             variant='inline'
             title='Добавьте мастеров'
@@ -469,9 +521,14 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           />
         ) : (
           <ul className={styles.masters}>
-            {masters.map((master) => (
-              <li key={master.id}>
-                <MasterCard specialist={master} onSelect={() => setEditingMaster(master)} />
+            {catalog.specialists.map((master) => (
+              <li
+                key={master.id}
+                className={master.isActive === false ? styles.inactive : undefined}
+              >
+                <MasterCard specialist={master} onSelect={() => setEditingMaster(master)}>
+                  {master.isActive === false && <span className={styles.offMark}>Не работает</span>}
+                </MasterCard>
               </li>
             ))}
           </ul>
@@ -544,6 +601,12 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           }
         />
       )}
+      {isAddingCategory && (
+        <CategoryDialog
+          onClose={() => setIsAddingCategory(false)}
+          onSave={(name) => run(() => createCategory(slug, name), 'Категория добавлена')}
+        />
+      )}
       {schedulingMaster && (
         <MasterScheduleSheet
           slug={slug}
@@ -564,6 +627,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         <HoursSheet
           slug={slug}
           hours={business.hours}
+          slotMinutes={business.slotMinutes}
           run={run}
           onClose={() => setIsEditingHours(false)}
         />

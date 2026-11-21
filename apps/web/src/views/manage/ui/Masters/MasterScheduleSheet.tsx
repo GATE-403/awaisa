@@ -18,6 +18,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { MasterSchedule, Specialist, WorkingDay } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { DateField } from '@/shared/ui/DateField/DateField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -237,21 +238,21 @@ export const MasterScheduleSheet = ({
               <div className={styles.leaveForm}>
                 <label htmlFor={fromId} className={styles.dateField}>
                   <span>С</span>
-                  <input
+                  <DateField
                     id={fromId}
-                    type='date'
+                    label='Отпуск с'
                     value={leave.startsOn}
-                    onChange={(event) => setLeave({ ...leave, startsOn: event.target.value })}
+                    onChange={(startsOn) => setLeave({ ...leave, startsOn })}
                   />
                 </label>
                 <label htmlFor={toId} className={styles.dateField}>
                   <span>По</span>
-                  <input
+                  <DateField
                     id={toId}
-                    type='date'
+                    label='Отпуск по'
                     value={leave.endsOn}
                     min={leave.startsOn || undefined}
-                    onChange={(event) => setLeave({ ...leave, endsOn: event.target.value })}
+                    onChange={(endsOn) => setLeave({ ...leave, endsOn })}
                   />
                 </label>
                 <Input

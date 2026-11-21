@@ -194,3 +194,12 @@
 .content:has([data-page-tab]) {
   margin-top: 0;
 }
+
+/* Phones: a settings section's actions float at the foot (`SectionHeader isFloatingOnPhone`);
+   the section pads its end so its last row scrolls out from under them. */
+@media (max-width: 639px) {
+  .layout[data-settings]:not([data-root]) .main,
+  .layout[data-root] .sidebar {
+    padding-bottom: var(--floating-toolbar-space);
+  }
+}

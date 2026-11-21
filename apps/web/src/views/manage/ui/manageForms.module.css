@@ -95,8 +95,13 @@
 }
 
 .masterRow {
-  grid-template-columns: 40px minmax(0, 1fr) auto 16px;
+  grid-template-columns: auto minmax(0, 1fr) auto 16px;
   cursor: pointer;
+}
+
+/* The chevron keeps the last column also when the row has no value before it. */
+.masterRow > .chevron {
+  grid-column: -2;
 }
 
 .hoursRow {
@@ -326,26 +331,23 @@
 }
 
 /* Leading glyph in a row, like the coloured icons in Settings. */
+/* A thin glyph in the rows' one quiet colour, no tile behind it; a branch without a pin fainter. */
 .rowIcon {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  background: var(--system-red);
-  color: var(--color-primary-foreground);
-}
-
-.rowIcon[data-missing] {
-  background: var(--color-fill);
+  width: 24px;
   color: var(--color-muted-foreground);
 }
 
+.rowIcon[data-missing] {
+  color: var(--color-tertiary-foreground);
+}
+
 .rowIcon svg {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
 }
 
 .listFooter {
@@ -365,4 +367,51 @@
   .section {
     gap: var(--space-4);
   }
+}
+
+/* Cabinet sections lie right on the page, no cards around groups («убери лишние обёртки фона»,
+   like «Аналитика»): rows sit on the page with hairlines running the column's width, captions,
+   footers and rows on one left edge. Sheets keep their grouped look (this is for `.section`). */
+.section .list {
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.section .list > * + *::before {
+  left: 0;
+}
+
+.section .list > :is(label, div, li > *),
+.section .list :is(.settingRow, .fieldRow, .masterRow, .serviceRow) {
+  padding-inline: 0;
+}
+
+.section .listFooter,
+.section .groupEmpty {
+  padding-inline: 0;
+}
+
+/* (doubled: over the caption's own inset rule; the sheet's group head is used on pages too) */
+.section.section [data-inset],
+.section.section [class*="groupHeader"] {
+  padding-inline: 0;
+}
+
+/* Rows on the page take no fill under the pointer or a press (a fill cut flush at the text's edges
+   «выглядит плохо по краям»): the title takes the link colour, a press dims the row a little. */
+.section .list :is(.serviceRow, .masterRow, .settingRow),
+.section .list :is(.serviceRow, .masterRow, .settingRow):is(:hover, :active) {
+  background: none;
+}
+
+@media (hover: hover) {
+  .section .list :is(.serviceRow, .masterRow):hover .rowTitle {
+    color: var(--color-link);
+  }
+}
+
+.section .list :is(.serviceRow, .masterRow):active {
+  opacity: 0.6;
 }
