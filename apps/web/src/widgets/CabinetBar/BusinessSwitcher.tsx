@@ -10,8 +10,11 @@ import {
   SquaresFour,
 } from '@phosphor-icons/react/ssr'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
+import { getMyBusinesses } from '@/shared/api/clientApi'
+import type { BusinessLink } from '@/shared/api/types'
 import styles from './CabinetBar.module.css'
 
 interface BusinessSwitcherProps {
@@ -28,16 +31,32 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
   const router = useRouter()
   const { customer } = useSession()
   const memberships = customer?.businesses ?? []
-  // A platform admin may be in a business that is not theirs: it still heads the list.
-  const businesses = memberships.some((business) => business.slug === slug)
-    ? memberships
-    : [{ slug, name: title ?? slug }, ...memberships]
+  // The whole list (every business for a platform admin) is loaded the first time the menu opens;
+  // until then the session's memberships.
+  const [loaded, setLoaded] = useState<BusinessLink[] | null>(null)
+  const known: { slug: string; name: string; logoUrl?: string | null }[] = loaded ?? memberships
+  // This business heads the list (an admin may be in one that is not theirs).
+  const current = known.find((business) => business.slug === slug) ?? {
+    slug,
+    name: title ?? slug,
+    logoUrl,
+  }
+  const businesses = [current, ...known.filter((business) => business.slug !== slug)]
+
+  const load = (isOpen: boolean) => {
+    if (!isOpen || loaded) return
+    getMyBusinesses()
+      .then(setLoaded)
+      // The session's list stays: the menu works without the fresh one.
+      .catch(() => undefined)
+  }
   const masterOf = customer?.masterOf ?? []
   const isAdmin = Boolean(customer?.isAdmin)
 
   return (
     <Menu
       align='start'
+      onOpenChange={load}
       label={`${title ?? 'Бизнес'}: другие бизнесы и разделы`}
       className={styles.switcher}
       trigger={
@@ -60,11 +79,11 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
             if (business.slug !== slug) router.push(`/manage/${business.slug}`)
           }}
         >
-          <BusinessTile name={business.name} size='xs' />
+          <BusinessTile name={business.name} logoUrl={business.logoUrl} size='xs' />
           <span className={styles.switcherName}>{business.name}</span>
         </MenuItem>
       ))}
-      {(isAdmin || memberships.length > 1) && (
+      {businesses.length > 1 && (
         <MenuItem icon={<SquaresFour aria-hidden />} onClick={() => router.push('/manage')}>
           Все бизнесы
         </MenuItem>

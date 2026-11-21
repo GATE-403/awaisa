@@ -13,6 +13,8 @@ interface MenuProps {
   className?: string
   /** Which edge of the trigger the menu lines up with (`end` by default, for buttons on the right). */
   align?: 'start' | 'center' | 'end'
+  /** Called when the menu opens or closes (e.g. to load its items on first open). */
+  onOpenChange?: (isOpen: boolean) => void
 }
 
 interface MenuItemProps extends Omit<ComponentProps<typeof BaseMenu.Item>, 'className'> {
@@ -22,8 +24,8 @@ interface MenuItemProps extends Omit<ComponentProps<typeof BaseMenu.Item>, 'clas
 }
 
 // iOS pull-down menu: a few actions next to the button that opened them, no sheet over the page.
-const Menu = ({ trigger, label, children, className, align = 'end' }: MenuProps) => (
-  <BaseMenu.Root>
+const Menu = ({ trigger, label, children, className, align = 'end', onOpenChange }: MenuProps) => (
+  <BaseMenu.Root onOpenChange={(isOpen) => onOpenChange?.(isOpen)}>
     <BaseMenu.Trigger className={className} aria-label={label}>
       {trigger}
     </BaseMenu.Trigger>
