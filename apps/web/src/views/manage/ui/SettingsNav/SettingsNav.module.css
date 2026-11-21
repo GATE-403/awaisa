@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  min-width: 0;
 }
 
 .group {
@@ -71,9 +72,17 @@
 
 .label {
   display: flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   flex-direction: column;
+  min-width: 0;
   white-space: nowrap;
+}
+
+/* The row keeps to its column: the name and its place end in an ellipsis rather than spill. */
+.labelText,
+.place {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .place {
@@ -84,8 +93,9 @@
 
 /* What is inside, on the row's right like iOS Settings; red when it asks for action. */
 .value {
-  flex-shrink: 1;
+  flex: 0 1 auto;
   min-width: 0;
+  max-width: 50%;
   overflow: hidden;
   color: var(--color-muted-foreground);
   text-overflow: ellipsis;

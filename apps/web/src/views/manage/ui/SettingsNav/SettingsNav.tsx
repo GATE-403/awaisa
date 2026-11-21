@@ -123,6 +123,14 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
     return () => controller.abort()
   }, [slug])
 
+  // The field floats at a phone's foot over the keyboard: the results sit at the top of the page,
+  // so the page goes back up to them as soon as the query changes (they were out of view).
+  const search = (value: string) => {
+    setQuery(value)
+    if (window.matchMedia('(max-width: 639px)').matches)
+      window.scrollTo({ top: 0, behavior: 'instant' })
+  }
+
   const branches = business.branches.filter((branch) => branch.isActive !== false).length
   const values: Partial<Record<ManageTab, Value>> = {
     branches: { text: String(branches) },
@@ -156,10 +164,13 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
     }),
   }
 
+  // By the start of words, each typed word somewhere («або» finds «абонемент», not «работы»).
+  const typed = needle.split(/\s+/).filter(Boolean)
   const results = needle
-    ? [...SETTINGS_ENTRIES, ...PAGE_ENTRIES].filter((entry) =>
-        normalize(`${entry.label} ${entry.words}`).includes(needle),
-      )
+    ? [...SETTINGS_ENTRIES, ...PAGE_ENTRIES].filter((entry) => {
+        const words = normalize(`${entry.label} ${entry.words}`).split(/[\s«»().,-]+/)
+        return typed.every((part) => words.some((word) => word.startsWith(part)))
+      })
     : null
 
   const row = (entry: Pick<SearchEntry, 'tab' | 'label' | 'tone' | 'place'>) => {
@@ -177,7 +188,7 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
             <Glyph />
           </span>
           <span className={styles.label}>
-            {entry.label}
+            <span className={styles.labelText}>{entry.label}</span>
             {entry.place && <span className={styles.place}>{entry.place}</span>}
           </span>
           {value && (
@@ -197,7 +208,7 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
       <FloatingToolbar className={styles.search}>
         <SearchField
           value={query}
-          onChange={setQuery}
+          onChange={search}
           placeholder='Поиск'
           label='Поиск по настройкам'
         />
