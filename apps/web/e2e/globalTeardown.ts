@@ -24,6 +24,9 @@ const CLEANUP_SQL = `
   DELETE FROM "promotions" WHERE "title" LIKE 'E2E %';
   DELETE FROM "mailings" WHERE "text" LIKE 'E2E %';
   DELETE FROM "gift_certificates" WHERE "recipient" LIKE 'E2E %';
+  DELETE FROM "payments" WHERE "kind" = 'subscription' AND "order_id" IN (
+    SELECT "id" FROM "subscription_orders" WHERE "title" LIKE 'E2E %');
+  DELETE FROM "subscription_orders" WHERE "title" LIKE 'E2E %';
   DELETE FROM "client_subscriptions" WHERE "title" LIKE 'E2E %';
   DELETE FROM "subscription_plans" WHERE "title" LIKE 'E2E %';
   DELETE FROM "businesses" WHERE "name" LIKE 'E2E %';

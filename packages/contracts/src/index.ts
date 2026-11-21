@@ -224,6 +224,8 @@ type Booking = {
   review?: { rating: number; comment: string; reply: string | null } | null
   /** The salon marked «Не пришёл»: nothing to rate. */
   isNoShow?: boolean
+  /** Paid by the client's subscription: the visit is drawn from it when the salon marks «Пришёл». */
+  isBySubscription?: boolean
   business: BookingBusiness
 }
 
@@ -583,6 +585,21 @@ type SubscriptionPlan = {
   price: number
   validDays: number
   isActive: boolean
+  /** Sold on the place's page and in the booking form. */
+  isOnline: boolean
+}
+
+// A plan sold online, as the place's page shows it (`GET /businesses/:slug/subscription-plans`).
+type OnlineSubscriptionPlan = {
+  id: string
+  title: string
+  serviceId: string | null
+  serviceName: string | null
+  visits: number
+  price: number
+  validDays: number
+  /** What the visits cost one by one (null = any service); the client saves the difference. */
+  fullPrice: number | null
 }
 
 type SubscriptionPlanInput = Omit<SubscriptionPlan, 'id' | 'serviceName'>
@@ -799,6 +816,10 @@ type CreateBookingInput = {
   promoCode?: string
   /** Who invited this client (`?ref=` from a profile link). */
   ref?: string
+  /** Pay with the signed-in client's subscription (drawn when the salon marks «Пришёл»). */
+  subscriptionId?: string
+  /** Buy this online plan and book: the booking waits for the payment like a deposit. */
+  subscriptionPlanId?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -1836,6 +1857,7 @@ export type {
   JoinWaitlistInput,
   ManagedWaitlistEntry,
   PaymentPage,
+  OnlineSubscriptionPlan,
   PriceQuote,
   Promotion,
   PromotionInput,

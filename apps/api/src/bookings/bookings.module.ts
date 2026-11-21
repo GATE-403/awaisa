@@ -22,6 +22,8 @@ import { Payment } from './payment.entity.js'
 import { PaymentsController } from './payments.controller.js'
 import { PaymentsService } from './payments.service.js'
 import { SalonBookingsService } from './salon-bookings.service.js'
+import { SubscriptionOrdersController } from './subscription-orders.controller.js'
+import { SubscriptionOrdersService } from './subscription-orders.service.js'
 
 @Module({
   imports: [
@@ -37,13 +39,14 @@ import { SalonBookingsService } from './salon-bookings.service.js'
     PushModule,
     FiscalModule,
   ],
-  controllers: [BookingsController, PaymentsController],
+  controllers: [BookingsController, PaymentsController, SubscriptionOrdersController],
   providers: [
     AvailabilityService,
     BookingsService,
     SalonBookingsService,
     BookingPaymentsService,
     PaymentsService,
+    SubscriptionOrdersService,
   ],
   exports: [AvailabilityService, BookingsService, SalonBookingsService, PaymentsService],
 })

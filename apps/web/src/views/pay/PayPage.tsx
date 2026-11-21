@@ -39,6 +39,14 @@ const GIFT_COPY: OrderCopy = {
 }
 
 const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
+  subscription: {
+    doneTitle: 'Оплачено. Абонемент ваш',
+    doneHref: () => '/bookings',
+    doneLabel: 'Мои абонементы и записи',
+    expiredText: 'Деньги не списаны. Оформите абонемент снова.',
+    retryHref: (slug) => `/${slug}#subscriptions`,
+    retryLabel: 'К абонементам',
+  },
   billing: {
     doneTitle: 'Оплачено',
     doneHref: (slug) => `/manage/${slug}?tab=billing`,
@@ -54,7 +62,7 @@ interface PayPageProps {
   signature: string
 }
 
-// The checkout of a deposit or an order (a gift certificate, the business's plan). With PAYMENT_DRIVER=test this page
+// The checkout of a deposit or an order (a gift certificate, a subscription, the business's plan). With PAYMENT_DRIVER=test this page
 // is the acquirer; a real one sends the client to its own form and back here. A paid deposit
 // goes on to /bookings?paid=<booking>; a paid order says so right here.
 export const PayPage = ({ payment, signature }: PayPageProps) => {
