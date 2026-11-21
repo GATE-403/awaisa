@@ -182,11 +182,12 @@ export class PayrollService {
     const [year = 2000, month = 1] = date.split('-').map(Number)
     const monthEnd = `${date.slice(0, 8)}${String(new Date(Date.UTC(year, month, 0)).getUTCDate()).padStart(2, '0')}`
     const monthTo = monthEnd < today ? monthEnd : today
-    const [day, period] = await Promise.all([
+    const [day, period, scheme] = await Promise.all([
       this.forPeriod(businessId, date, date, [specialistId]),
       monthFrom <= monthTo
         ? this.forPeriod(businessId, monthFrom, monthTo, [specialistId])
         : Promise.resolve(new Map<string, MasterPay>()),
+      this.getScheme(businessId, specialistId),
     ])
     const dayPay = day.get(specialistId)
     if (!dayPay) return null
@@ -196,6 +197,10 @@ export class PayrollService {
       month: period.get(specialistId)?.total ?? 0,
       monthFrom,
       monthTo,
+      percent:
+        scheme.rates.length === 0 && scheme.salary === null && scheme.minimum === null
+          ? scheme.percent
+          : null,
     }
   }
 

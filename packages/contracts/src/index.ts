@@ -938,6 +938,8 @@ type MasterDayPay = {
   month: number
   monthFrom: string
   monthTo: string
+  /** The master's percent when it alone decides the pay («ваши 40%»), else null. */
+  percent: number | null
 }
 
 type AnalyticsReport = {
