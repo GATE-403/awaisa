@@ -2,6 +2,7 @@ import type { AnalyticsDays, AnalyticsReport, PageStats } from '@awaisa/contract
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { lineShare, visitLines, visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   addDays,
@@ -26,7 +27,7 @@ type Totals = {
 // when nobody marked the payment.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
 // The price minus the discount the visit was booked with.
-const PRICE = `(s."price" - COALESCE(b."discount_amount", 0))`
+const PRICE = `(${visitPrice()} - COALESCE(b."discount_amount", 0))`
 const EARNED = `COALESCE(b."paid_amount", ${PRICE})`
 
 // What the visit used from the stock, at the unit cost of the day it was written off.
@@ -110,19 +111,23 @@ export class AnalyticsService {
       this.daily(id, from, now),
       this.daily(id, previousFrom, from),
       this.query(
-        `SELECT s."id", s."name", COUNT(*)::int AS "visits", SUM(${EARNED})::int AS "revenue",
-             COALESCE(SUM(${MATERIALS}), 0)::int AS "materialsCost"
+        // Every service of a visit of several counts, with its share of the visit's money.
+        `SELECT ls."id", ls."name", COUNT(*)::int AS "visits",
+             round(SUM(${EARNED} * ${lineShare()}))::int AS "revenue",
+             COALESCE(round(SUM(${MATERIALS} * ${lineShare()})), 0)::int AS "materialsCost"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           JOIN LATERAL ${visitLines()} l ON true
+           JOIN "services" ls ON ls."id" = l."service_id"
            WHERE b."business_id" = $1 AND ${DONE}
              AND b."starts_at" >= $2 AND b."starts_at" < $3
-           GROUP BY s."id" ORDER BY "revenue" DESC, "visits" DESC LIMIT 8`,
+           GROUP BY ls."id" ORDER BY "revenue" DESC, "visits" DESC LIMIT 8`,
         [id, from, now],
       ),
       this.query(
         `SELECT sp."id", sp."name", sp."role", sp."commission_percent" AS "percent",
              COUNT(b."id") FILTER (WHERE ${DONE})::int AS "visits",
              COALESCE(SUM(${EARNED}) FILTER (WHERE ${DONE}), 0)::int AS "revenue",
-             COALESCE(SUM(s."duration_minutes") FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes",
+             COALESCE(SUM(EXTRACT(EPOCH FROM b."ends_at" - b."starts_at") / 60) FILTER (WHERE ${DONE}), 0)::int AS "bookedMinutes",
              (SELECT COUNT(*) FROM "reviews" r WHERE r."specialist_id" = sp."id"
                 AND r."created_at" >= $2 AND r."created_at" < $3)::int AS "reviews",
              (SELECT round(avg(r."rating")::numeric, 1) FROM "reviews" r WHERE r."specialist_id" = sp."id"
@@ -310,11 +315,12 @@ export class AnalyticsService {
       ),
       this.query(
         `SELECT "id", "name", "visits" FROM (
-           SELECT b."specialist_id" AS "id", s."name", COUNT(*)::int AS "visits",
-             row_number() OVER (PARTITION BY b."specialist_id" ORDER BY COUNT(*) DESC, s."name") AS "place"
-           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           SELECT b."specialist_id" AS "id", ls."name", COUNT(*)::int AS "visits",
+             row_number() OVER (PARTITION BY b."specialist_id" ORDER BY COUNT(*) DESC, ls."name") AS "place"
+           FROM "bookings" b JOIN LATERAL ${visitLines()} l ON true
+           JOIN "services" ls ON ls."id" = l."service_id"
            WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
-           GROUP BY b."specialist_id", s."name"
+           GROUP BY b."specialist_id", ls."name"
          ) t WHERE "place" <= 3 ORDER BY "id", "place"`,
         [id, from, now],
       ),

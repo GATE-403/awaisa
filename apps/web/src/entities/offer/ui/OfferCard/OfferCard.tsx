@@ -6,6 +6,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { addDayKey, formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint, useNextFree } from '@/entities/business'
 import type { Offer } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { gridImage } from '@/shared/lib/imageSizes'
 import styles from './OfferCard.module.css'
@@ -44,6 +45,7 @@ export const OfferCard = ({
   actionLabel = 'Записаться',
   onSelect,
 }: OfferCardProps) => {
+  const t = useT()
   const today = useToday()
   const nextFree = useNextFree()
   const slot = nextFree?.[offer.slug]
@@ -94,7 +96,7 @@ export const OfferCard = ({
           <span className={styles.discountBadge}>−{offer.discountPercent}%</span>
         ) : null}
         {isHit && (
-          <span className={styles.badge} role='img' aria-label='Хит' title='Хит'>
+          <span className={styles.badge} role='img' aria-label={t('Хит')} title={t('Хит')}>
             <Fire weight='fill' aria-hidden />
           </span>
         )}
@@ -136,13 +138,13 @@ export const OfferCard = ({
               worth a line here («Завтра» and «Нет окон рядом» said little and crowded it). */}
           {(slotText || (slot && when === 'Сегодня')) && (
             <span className={styles.slot} data-state={slotText ? 'soon' : 'today'}>
-              {slotText ?? `Сегодня с ${slot?.time}`}
+              {slotText ?? t('Сегодня с {time}', { time: slot?.time ?? '' })}
             </span>
           )}
         </div>
         {/* What a tap does, said on the card: a service books, a place card opens the place. */}
         <span className={styles.book} aria-hidden>
-          {actionLabel}
+          {t(actionLabel)}
         </span>
       </div>
     </article>

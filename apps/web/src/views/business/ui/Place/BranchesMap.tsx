@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { pickTint } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from './BranchesMap.module.css'
 
 const MapView = dynamic(
@@ -17,6 +18,7 @@ interface BranchesMapProps {
 }
 
 export const BranchesMap = ({ business }: BranchesMapProps) => {
+  const t = useT()
   const router = useRouter()
   const markers = business.branches.flatMap((branch) =>
     branch.latitude !== null && branch.longitude !== null
@@ -38,7 +40,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
       <MapView
         markers={markers}
         fitKey={business.slug}
-        label={`${business.name} на карте`}
+        label={t('{name} на карте', { name: business.name })}
         className={styles.map}
         isStatic
         onSelect={(id) =>
@@ -46,7 +48,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
         }
       />
       <NextLink href='/map' className={styles.mapLink}>
-        Открыть на карте
+        {t('Открыть на карте')}
       </NextLink>
     </div>
   )

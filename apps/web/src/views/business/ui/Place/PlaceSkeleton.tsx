@@ -1,3 +1,4 @@
+import { T } from '@/shared/i18n'
 import { Block, Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from './Place.module.css'
@@ -49,7 +50,9 @@ export const PlaceSkeleton = () => (
         <div className={styles.main}>
           <section className={styles.section}>
             <div className={styles.sectionHead}>
-              <p className={styles.sectionTitle}>Услуги и цены</p>
+              <p className={styles.sectionTitle}>
+                <T>Услуги и цены</T>
+              </p>
             </div>
             <p className={skeleton.tabs}>
               <TextLine chars={5} />

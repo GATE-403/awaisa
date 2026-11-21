@@ -10,6 +10,8 @@ type ManageTab =
   | 'promotions'
   | 'loyalty'
   | 'stock'
+  /** «Касса» in settings: fiscal receipts (the main «Касса» tab is `cash`). */
+  | 'fiscal'
   | 'team'
   | 'masters'
   | 'branches'
@@ -45,6 +47,7 @@ const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
       { value: 'promotions', label: 'Акции', tone: 'red' },
       { value: 'loyalty', label: 'Лояльность', tone: 'green' },
       { value: 'stock', label: 'Склад', tone: 'blue' },
+      { value: 'fiscal', label: 'Касса', tone: 'gray' },
     ],
   },
 ]

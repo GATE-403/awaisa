@@ -16,6 +16,7 @@ import { BillingTab } from '@/views/manage/ui/BillingTab/BillingTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { CashDeskTab } from '@/views/manage/ui/CashDeskTab/CashDeskTab'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
+import { FiscalTab } from '@/views/manage/ui/FiscalTab/FiscalTab'
 import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
 import { PageTab } from '@/views/manage/ui/PageTab/PageTab'
@@ -199,6 +200,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                 {data && !lockedFeature && tab === 'stock' && (
                   <StockTab slug={slug} catalog={data.catalog} />
                 )}
+                {tab === 'fiscal' && <FiscalTab slug={slug} />}
                 {data && tab === 'team' && <TeamTab slug={slug} />}
                 {data && tab === 'billing' && <BillingTab slug={slug} />}
                 {data && tab === 'page' && (

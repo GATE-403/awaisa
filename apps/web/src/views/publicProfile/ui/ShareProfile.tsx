@@ -4,6 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ShareNetwork, UserPlus } from '@phosphor-icons/react/ssr'
 import { inviteUrl } from '@/features/invite'
+import { useT } from '@/shared/i18n'
 
 interface ShareProfileProps {
   name: string
@@ -16,13 +17,14 @@ interface ShareProfileProps {
 // The share sheet on phones, the link copied elsewhere. On one's own profile it is an invitation:
 // a friend who books through it counts toward «Привёл друга».
 export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
+  const t = useT()
   const toast = useToast()
 
   const share = async () => {
     const url = isOwn ? inviteUrl(address) : `${window.location.origin}/u/${address}`
     const text = isOwn
-      ? 'Записывайся к мастерам через Awaisa — вот мой профиль'
-      : `${name} в Awaisa`
+      ? t('Записывайся к мастерам через Awaisa — вот мой профиль')
+      : t('{name} в Awaisa', { name })
     try {
       if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
         await navigator.share({ title: text, text, url })
@@ -30,19 +32,19 @@ export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
       }
       await navigator.clipboard.writeText(url)
       toast.show({
-        title: isOwn ? 'Ссылка-приглашение скопирована' : 'Ссылка на профиль скопирована',
+        title: isOwn ? t('Ссылка-приглашение скопирована') : t('Ссылка на профиль скопирована'),
         type: 'success',
       })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: 'Не получилось поделиться', type: 'error' })
+      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
     }
   }
 
   return (
     <Button variant='secondary' size='sm' onClick={share}>
       {isOwn ? <UserPlus weight='bold' aria-hidden /> : <ShareNetwork weight='bold' aria-hidden />}
-      {isOwn ? 'Пригласить' : 'Поделиться'}
+      {isOwn ? t('Пригласить') : t('Поделиться')}
     </Button>
   )
 }

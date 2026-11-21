@@ -11,8 +11,8 @@ import { RecentVisits } from '@/features/rebook'
 import { listOffersPage, searchBusinesses } from '@/shared/api/clientApi'
 import type { BusinessCard, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useMyPlace } from '@/shared/lib/myPlace'
-import { pluralize } from '@/shared/lib/plural'
 import { trackStep } from '@/shared/lib/telemetry'
 import styles from './HeaderSearch.module.css'
 
@@ -65,6 +65,7 @@ const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
 
 // The store's search field lives in the header, like on a marketplace: type, see places, press Enter.
 export const HeaderSearch = () => {
+  const t = useT()
   const myPlace = useMyPlace()
   const [isPicking, setIsPicking] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
@@ -169,9 +170,9 @@ export const HeaderSearch = () => {
           <span className={styles.field}>
             {!query && (
               <span className={styles.hint} aria-hidden>
-                Найти{' '}
+                {t('Найти')}{' '}
                 <span key={hintIndex} className={styles.hintWord}>
-                  {HINTS[hintIndex]}
+                  {t(HINTS[hintIndex] ?? '')}
                 </span>
               </span>
             )}
@@ -188,7 +189,7 @@ export const HeaderSearch = () => {
                 setIsOpen(true)
                 trackStep('search_open')
               }}
-              aria-label='Поиск салонов и мастеров'
+              aria-label={t('Поиск салонов и мастеров')}
               aria-describedby={isOpen ? listId : undefined}
               enterKeyHint='search'
               autoComplete='off'
@@ -198,7 +199,7 @@ export const HeaderSearch = () => {
             <button
               type='button'
               className={styles.clear}
-              aria-label='Очистить поиск'
+              aria-label={t('Очистить поиск')}
               onClick={() => {
                 setDraft('')
                 setSuggestions([])
@@ -214,20 +215,24 @@ export const HeaderSearch = () => {
               type='button'
               className={styles.where}
               onClick={() => setIsPicking(true)}
-              aria-label={myPlace ? `Место: ${myPlace.label}. Изменить` : 'Указать, где вы'}
+              aria-label={
+                myPlace
+                  ? t('Место: {place}. Изменить', { place: t(myPlace.label) })
+                  : t('Указать, где вы')
+              }
             >
               <NavigationArrow weight='fill' aria-hidden />
-              <span className={styles.whereLabel}>{myPlace?.label ?? 'Где вы?'}</span>
+              <span className={styles.whereLabel}>{myPlace ? t(myPlace.label) : t('Где вы?')}</span>
             </button>
           )}
-          <button type='submit' className={styles.submit} aria-label='Найти'>
+          <button type='submit' className={styles.submit} aria-label={t('Найти')}>
             <MagnifyingGlass weight='bold' aria-hidden />
           </button>
         </form>
         {/* Phones, like iOS search: «Отмена» beside the field while the suggestions are open. */}
         {isOpen && (
           <button type='button' className={styles.cancel} onClick={cancel}>
-            Отмена
+            {t('Отмена')}
           </button>
         )}
       </search>
@@ -236,10 +241,10 @@ export const HeaderSearch = () => {
       {isOpen && (
         <div id={listId} className={styles.panel}>
           {hasQuery ? (
-            <section aria-label='Подсказки'>
+            <section aria-label={t('Подсказки')}>
               {services.length > 0 && (
                 <>
-                  <p className={styles.heading}>Услуги</p>
+                  <p className={styles.heading}>{t('Услуги')}</p>
                   <ul className={styles.list}>
                     {services.map((service) => (
                       <li key={service.name}>
@@ -252,8 +257,8 @@ export const HeaderSearch = () => {
                           <span className={styles.placeText}>
                             <span className={styles.placeName}>{service.name}</span>
                             <span className={styles.placeMeta}>
-                              от {formatPrice(service.minPrice)} ·{' '}
-                              {pluralize(service.places, ['место', 'места', 'мест'])}
+                              {t('от {price}', { price: formatPrice(service.minPrice) })} ·{' '}
+                              {t.count(service.places, ['место', 'места', 'мест'])}
                             </span>
                           </span>
                         </button>
@@ -264,7 +269,9 @@ export const HeaderSearch = () => {
               )}
               {(suggestions.length > 0 || services.length === 0) && (
                 <p className={styles.heading}>
-                  {suggestions.length > 0 ? 'Места' : 'Нажмите Enter, чтобы искать по услугам'}
+                  {suggestions.length > 0
+                    ? t('Места')
+                    : t('Нажмите Enter, чтобы искать по услугам')}
                 </p>
               )}
               <ul className={styles.list}>
@@ -282,7 +289,7 @@ export const HeaderSearch = () => {
                       <span className={styles.placeText}>
                         <span className={styles.placeName}>{business.name}</span>
                         <span className={styles.placeMeta}>
-                          {[getKindLabel(business.kind), business.address]
+                          {[t(getKindLabel(business.kind)), business.address]
                             .filter(Boolean)
                             .join(' · ')}
                         </span>
@@ -293,7 +300,7 @@ export const HeaderSearch = () => {
                 <li>
                   <button type='button' className={styles.all} onClick={() => search(trimmed)}>
                     <ArrowRight weight='bold' aria-hidden />
-                    Все услуги и места по «{trimmed}»
+                    {t('Все услуги и места по «{query}»', { query: trimmed })}
                   </button>
                 </li>
               </ul>
@@ -301,14 +308,15 @@ export const HeaderSearch = () => {
           ) : (
             <>
               <RecentVisits onSelect={close} />
-              <section aria-label='Часто ищут'>
-                <p className={styles.heading}>Часто ищут</p>
+              <section aria-label={t('Часто ищут')}>
+                <p className={styles.heading}>{t('Часто ищут')}</p>
                 <ul className={styles.list}>
                   {QUICK_SEARCHES.map((item) => (
                     <li key={item}>
                       <button type='button' className={styles.quick} onClick={() => search(item)}>
                         <MagnifyingGlass className={styles.quickIcon} aria-hidden />
-                        {item}
+                        {/* Shown in the chosen language; the search itself stays Russian, like the menus. */}
+                        {t(item)}
                       </button>
                     </li>
                   ))}

@@ -131,6 +131,7 @@ test.describe('Design', () => {
       'reviews',
       'page',
       'settings',
+      'fiscal',
       'billing',
     ]) {
       await page.goto(`/manage/${SLUG}?tab=${tab}`)

@@ -9,6 +9,7 @@ import type {
   BusinessKind,
   BusinessPage,
   FeedPage,
+  FiscalReceipt,
   LeaderboardMaster,
   LeaderboardPlace,
   MapPlace,
@@ -230,6 +231,17 @@ const getPaymentPage = async (id: string, signature: string): Promise<PaymentPag
   return response.json()
 }
 
+// A fiscal receipt by the client's signed link; never cached (it changes while it is sent).
+const getReceiptPage = async (id: string, signature: string): Promise<FiscalReceipt | null> => {
+  const response = await fetch(
+    `${API_URL}/fiscal/receipts/${encodeURIComponent(id)}?${new URLSearchParams({ s: signature })}`,
+    { cache: 'no-store', signal: AbortSignal.timeout(API_TIMEOUT_MS) },
+  ).catch(() => null)
+  if (!response?.ok) return null
+
+  return response.json()
+}
+
 // Open promotions for the business page; refreshed with the business when the owner saves.
 const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   'use cache'
@@ -287,6 +299,7 @@ export {
   listFeed,
   listPromotions,
   getPaymentPage,
+  getReceiptPage,
   listMapPlaces,
   getBusiness,
   listBusinesses,
