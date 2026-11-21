@@ -44,11 +44,11 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
     return () => controller.abort()
   }, [slug])
 
-  const run = async (action: () => Promise<unknown>, title: string) => {
+  const run = async (action: () => Promise<unknown>, title: string, description?: string) => {
     try {
       const next = await action()
       setItems(Array.isArray(next) ? next : await getStock(slug))
-      toast.show({ title, type: 'success' })
+      toast.show({ title, description, type: 'success' })
       return true
     } catch (error) {
       toast.show({ title: 'Не сохранилось', description: getErrorMessage(error), type: 'error' })
@@ -64,7 +64,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
     <section className={styles.section} aria-label='Склад'>
       <SectionHeader
         title='Склад'
-        description='Расходники списываются, когда визит отмечен «Пришёл».'
+        description='Расходники списываются, когда визит отмечен «Пришёл», товары при продаже.'
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
@@ -94,10 +94,14 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
                     <span className={styles.rowTitle}>{item.name}</span>
                     <span className={styles.rowMeta}>
                       {[
-                        `${formatPrice(item.unitCost)} за ${item.unit}`,
+                        item.isForSale && item.salePrice !== null
+                          ? `продажа ${formatPrice(item.salePrice)}`
+                          : `${formatPrice(item.unitCost)} за ${item.unit}`,
                         item.materials.length > 0
                           ? `в ${item.materials.length} усл.`
-                          : 'не привязана к услугам',
+                          : item.isForSale
+                            ? 'товар'
+                            : 'не привязана к услугам',
                       ].join(' · ')}
                     </span>
                   </span>
@@ -131,8 +135,16 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
           onReceive={
             editing === 'new'
               ? undefined
-              : (quantity, unitCost) =>
-                  run(() => receiveStock(slug, editing.id, quantity, unitCost), 'Приход записан')
+              : (quantity, asExpense) =>
+                  run(
+                    () =>
+                      receiveStock(slug, editing.id, {
+                        quantity,
+                        expense: asExpense ? { branchId: null } : null,
+                      }),
+                    'Приход записан',
+                    asExpense ? 'Сумма закупки в «Расходах».' : undefined,
+                  )
           }
           onAdjust={
             editing === 'new'

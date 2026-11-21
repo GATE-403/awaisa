@@ -2,6 +2,7 @@ type ManageTab =
   | 'schedule'
   | 'clients'
   | 'analytics'
+  | 'cash'
   | 'reviews'
   | 'services'
   | 'promotions'
@@ -50,6 +51,8 @@ const MAIN_TABS: TabItem[] = [
   { value: 'schedule', label: 'Расписание' },
   { value: 'clients', label: 'Клиенты' },
   { value: 'analytics', label: 'Аналитика' },
+  // The counter is daily work (shifts, sales), so it sits beside the schedule, not in settings.
+  { value: 'cash', label: 'Касса' },
   { value: 'reviews', label: 'Отзывы' },
   // The public page itself, edited in place: the business's profile, not a settings row.
   { value: 'page', label: 'Страница' },
@@ -77,8 +80,9 @@ const toManageTab = (value: string | null): ManageTab => {
 const isSettingsTab = (tab: ManageTab) =>
   tab === 'settings' || SETTINGS_TABS.some((item) => item.value === tab)
 
-// What an administrator («staff») may open: the day's work, not money or setup.
-const STAFF_TABS: ManageTab[] = ['schedule', 'clients', 'reviews']
+// What an administrator («staff») may open: the day's work, not money or setup. The counter
+// is the day's work too (shifts and sales); its expenses stay the owner's.
+const STAFF_TABS: ManageTab[] = ['schedule', 'clients', 'cash', 'reviews']
 
 const isTabAllowed = (tab: ManageTab, role: 'owner' | 'staff') =>
   role === 'owner' || STAFF_TABS.includes(tab)
