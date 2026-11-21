@@ -123,7 +123,7 @@ test.describe('Design', () => {
   test('the cabinet keeps the design rules', async ({ page }, testInfo) => {
     test.setTimeout(120_000)
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
-    for (const tab of ['schedule', 'clients', 'analytics', 'cash', 'reviews', 'page', 'settings']) {
+    for (const tab of ['schedule', 'clients', 'analytics', 'cash', 'reviews', 'page', 'settings', 'billing']) {
       await page.goto(`/manage/${SLUG}?tab=${tab}`)
       await expect(page.locator('[data-page-skeleton]')).toHaveCount(0, { timeout: 15_000 })
       await page.waitForTimeout(500)

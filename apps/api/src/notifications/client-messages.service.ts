@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { BillingService } from '../billing/billing.service.js'
 import type { Env } from '../config/env.js'
 import { clientStartParam, readClientStartParam } from './client-telegram.js'
 import { SmsService } from './sms.service.js'
@@ -17,6 +18,11 @@ type ClientMessage = {
   link?: { label: string; url: string }
   /** The approved WhatsApp template it maps to; without one WhatsApp is skipped. */
   whatsapp?: WhatsappMessage
+  /**
+   * The business whose month of SMS this counts against. Optional messages (reminders, review
+   * requests, «Пора снова», the waitlist) are not sent by SMS past the plan's SMS and packs.
+   */
+  billing?: { businessId: string; isOptional: boolean }
 }
 
 const API_URL = 'https://api.telegram.org'
@@ -36,6 +42,7 @@ export class ClientMessagesService {
     private readonly sms: SmsService,
     private readonly whatsapp: WhatsappService,
     private readonly config: ConfigService<Env, true>,
+    private readonly plans: BillingService,
   ) {}
 
   /** The «Напоминать в Telegram» link for a booking, or null without a bot. */
@@ -94,7 +101,7 @@ export class ClientMessagesService {
   }
 
   /** Telegram when linked (the link as a button), then WhatsApp, else the SMS text. */
-  async send(phone: string, { text, link, whatsapp }: ClientMessage) {
+  async send(phone: string, { text, link, whatsapp, billing }: ClientMessage) {
     try {
       const chatId = await this.chatFor(phone)
       if (chatId && this.token()) {
@@ -108,6 +115,13 @@ export class ClientMessagesService {
       // The same countries as SMS: a number we would not text gets no WhatsApp either.
       if (whatsapp && this.whatsapp.isEnabled() && this.sms.canSendTo(phone)) {
         if (await this.whatsapp.send(phone, whatsapp)) return
+      }
+      if (billing && this.sms.canSendTo(phone)) {
+        const hasSms = await this.plans.takeSms(billing.businessId, billing)
+        if (!hasSms) {
+          this.logger.log(`SMS skipped: the month's SMS of business ${billing.businessId} ran out`)
+          return
+        }
       }
       await this.sms.sendSafely(phone, text)
     } catch (error) {

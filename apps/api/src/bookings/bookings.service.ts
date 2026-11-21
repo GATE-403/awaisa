@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Brackets, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
+import { BillingService } from '../billing/billing.service.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
@@ -54,6 +55,7 @@ export class BookingsService {
     readonly _loyalty: LoyaltyService,
     readonly _inventory: InventoryService,
     private readonly availability: AvailabilityService,
+    private readonly billing: BillingService,
   ) {}
 
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
@@ -94,8 +96,14 @@ export class BookingsService {
       code: input.promoCode ?? null,
     })
     // Online bookings of a service with a deposit hold the slot until the client pays.
+    // Deposits are a paid-plan feature: a place back on the free plan books without one.
+    const isDepositOn =
+      !staffBusinessId &&
+      Boolean(service.deposit) &&
+      this.payments.isAvailable &&
+      (await this.billing.hasFeature(service.businessId, 'deposits'))
     const deposit =
-      !staffBusinessId && service.deposit && this.payments.isAvailable
+      isDepositOn && service.deposit
         ? Math.min(service.deposit, service.price - (discount?.amount ?? 0)) || null
         : null
     const candidates = slot.specialistId
@@ -170,6 +178,7 @@ export class BookingsService {
             text: confirmationMessage(view, this.linkTo(view.id)),
             link: this.manageButton(view.id),
             whatsapp: whatsappConfirmation(view, this.linkTo(view.id)),
+            billing: { businessId: service.businessId, isOptional: false },
           })
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
@@ -254,6 +263,7 @@ export class BookingsService {
         text: rescheduleMessage(view, this.linkTo(view.id)),
         link: this.manageButton(view.id),
         whatsapp: whatsappReschedule(view, this.linkTo(view.id)),
+        billing: { businessId: booking.businessId, isOptional: false },
       })
     }
     const before = toBusinessParts(booking.startsAt)
