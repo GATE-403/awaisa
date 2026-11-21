@@ -59,4 +59,11 @@ describe('promotion pricing', () => {
     expect(bestDiscount([rule({ startsOn: '2026-11-17' })], input)).toBeNull()
     expect(bestDiscount([rule({ isActive: false })], input)).toBeNull()
   })
+
+  it('a visit of several services: counts the ones the promotion covers', () => {
+    const visit = { ...input, extras: [{ serviceId: 'beard', price: 500 }] }
+    expect(bestDiscount([rule({})], visit)?.amount).toBe(400)
+    expect(bestDiscount([rule({ serviceIds: ['beard'] })], visit)?.amount).toBe(100)
+    expect(bestDiscount([rule({ serviceIds: ['color'] })], visit)).toBeNull()
+  })
 })

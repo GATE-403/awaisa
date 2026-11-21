@@ -1,6 +1,6 @@
 import { parseClock } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import type { Translate } from '@/shared/i18n'
 
 type Today = { dayKey: string; minutes: number }
 
@@ -17,14 +17,14 @@ const isUpcoming = (booking: Booking, today: Today | null) => {
   return parseClock(booking.time) + booking.durationMinutes > today.minutes
 }
 
-const getCountdown = (booking: Booking, today: Today | null) => {
+const getCountdown = (booking: Booking, today: Today | null, t: Translate) => {
   if (!today) return booking.time
   const days = daysBetween(today.dayKey, booking.date)
   // The card shows the time already; the countdown only says which day.
-  if (days === 0) return 'Сегодня'
-  if (days === 1) return 'Завтра'
+  if (days === 0) return t('Сегодня')
+  if (days === 1) return t('Завтра')
 
-  return `Через ${pluralize(days, ['день', 'дня', 'дней'])}`
+  return t('Через {days}', { days: t.count(days, ['день', 'дня', 'дней']) })
 }
 
 export type { Today }

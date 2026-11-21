@@ -1,8 +1,11 @@
-// The Russian text is the key: untranslated strings simply stay Russian. `{name}` is filled in.
-// Kyrgyz covers the booking path first — the way from a service to «Вы записаны».
-type Entry = [ky: string, en: string]
+import { CATALOG, CATALOG_COUNTED } from './areas/catalog'
+import { PLACE, PLACE_COUNTED } from './areas/place'
+import { PROFILE, PROFILE_COUNTED } from './areas/profile'
+import type { CountedEntry, Entry } from './areas/types'
 
-const DICTIONARY: Record<string, Entry> = {
+// The Russian text is the key: untranslated strings simply stay Russian. `{name}` is filled in.
+// This file holds the booking path; the client screens keep their strings in `areas/`.
+const BOOKING: Record<string, Entry> = {
   // Actions and the bar
   Записаться: ['Жазылуу', 'Book'],
   'Записываем…': ['Жазып жатабыз…', 'Booking…'],
@@ -22,6 +25,10 @@ const DICTIONARY: Record<string, Entry> = {
   'Показать, что выбрано': ['Тандалганды көрсөтүү', 'Show what is chosen'],
   'Онлайн-запись': ['Онлайн жазылуу', 'Online booking'],
   'Что делаем?': ['Эмне кылабыз?', 'What are we doing?'],
+  'Что ещё сделать?': ['Дагы эмне кылабыз?', 'What else?'],
+  'Тот же мастер, сразу после': ['Ошол эле чебер, дароо кийин', 'Same master, right after'],
+  'Ещё услуга': ['Дагы кызмат', 'Add a service'],
+  'Услуги визита': ['Визиттин кызматтары', 'Services of the visit'],
   'К кому записаться?': ['Кимге жазыласыз?', 'Who would you like?'],
   'Когда удобно?': ['Качан ыңгайлуу?', 'When suits you?'],
   'Как вас записать?': ['Сизди кантип жазабыз?', 'Whose name is it?'],
@@ -209,9 +216,20 @@ const DICTIONARY: Record<string, Entry> = {
 }
 
 // Counted words: Kyrgyz does not change the noun after a number; English has one/other.
-const COUNTED: Record<string, [ky: string, enOne: string, enOther: string]> = {
+const BOOKING_COUNTED: Record<string, CountedEntry> = {
   свободных: ['бош', 'free', 'free'],
   отзывов: ['пикир', 'review', 'reviews'],
 }
 
-export { COUNTED, DICTIONARY }
+const AREAS = { BOOKING, CATALOG, PLACE, PROFILE }
+
+const DICTIONARY: Record<string, Entry> = { ...CATALOG, ...PLACE, ...PROFILE, ...BOOKING }
+
+const COUNTED: Record<string, CountedEntry> = {
+  ...CATALOG_COUNTED,
+  ...PLACE_COUNTED,
+  ...PROFILE_COUNTED,
+  ...BOOKING_COUNTED,
+}
+
+export { AREAS, COUNTED, DICTIONARY }

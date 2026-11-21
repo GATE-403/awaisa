@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getWalletConfig, getWalletLinks } from '@/shared/api/clientApi'
+import { useT } from '@/shared/i18n'
 import styles from './WalletButton.module.css'
 
 interface WalletButtonProps {
@@ -33,6 +34,7 @@ const LABELS: Record<WalletKind, string> = {
 
 // A real pass, not a picture of one: Wallet brings it to the lock screen before the visit.
 export const WalletButton = ({ bookingId }: WalletButtonProps) => {
+  const t = useT()
   const toast = useToast()
   const [kind, setKind] = useState<WalletKind | null>(null)
   const [isOpening, setIsOpening] = useState(false)
@@ -59,7 +61,7 @@ export const WalletButton = ({ bookingId }: WalletButtonProps) => {
       const url = links[kind]
       if (url) window.location.assign(url)
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsOpening(false)
     }
@@ -68,7 +70,7 @@ export const WalletButton = ({ bookingId }: WalletButtonProps) => {
   return (
     <button type='button' className={styles.button} onClick={open} disabled={isOpening}>
       <Wallet weight='fill' aria-hidden />
-      {LABELS[kind]}
+      {t(LABELS[kind])}
     </button>
   )
 }

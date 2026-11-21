@@ -11,6 +11,7 @@ const robots = (): MetadataRoute.Robots => ({
     disallow: [
       ...APP_ONLY_PAGES.flatMap((page) => [`${page}$`, `${page}/`, `${page}?`]),
       '/pay/',
+      '/receipt/',
       '/review/',
       '/v/',
       '/api/',

@@ -3,8 +3,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm'
 // Gift certificates bought by clients on the place's page: the owner turns the sale on and picks
 // the amounts, an order waits for its payment and the certificate is issued only once it is paid.
 // Payments stop being only a booking's deposit: `kind` and `order_id` name what else they pay for.
-export class CertificateOrders1798600000000 implements MigrationInterface {
-  name = 'CertificateOrders1798600000000'
+export class CertificateOrders1798750000000 implements MigrationInterface {
+  name = 'CertificateOrders1798750000000'
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -45,21 +45,18 @@ export class CertificateOrders1798600000000 implements MigrationInterface {
 
     await queryRunner.query(
       `ALTER TABLE "payments" ALTER COLUMN "booking_id" DROP NOT NULL,
-         ADD "kind" varchar(16) NOT NULL DEFAULT 'booking',
-         ADD "order_id" uuid`,
+         ADD COLUMN IF NOT EXISTS "kind" varchar(16) NOT NULL DEFAULT 'booking',
+         ADD COLUMN IF NOT EXISTS "order_id" uuid`,
     )
+    // Subscriptions and plans sold online add the same columns: whichever migration runs first.
     await queryRunner.query(
-      'CREATE INDEX "payments_order" ON "payments" ("kind", "order_id") WHERE "order_id" IS NOT NULL',
+      'CREATE INDEX IF NOT EXISTS "payments_order" ON "payments" ("kind", "order_id") WHERE "order_id" IS NOT NULL',
     )
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('DROP INDEX "payments_order"')
-    await queryRunner.query(`DELETE FROM "payments" WHERE "booking_id" IS NULL`)
-    await queryRunner.query(
-      `ALTER TABLE "payments" DROP COLUMN "order_id", DROP COLUMN "kind",
-         ALTER COLUMN "booking_id" SET NOT NULL`,
-    )
+    // The payments columns stay: other kinds of orders (subscriptions, plans) use them too.
+    await queryRunner.query(`DELETE FROM "payments" WHERE "kind" = 'certificate'`)
     await queryRunner.query('DROP TABLE "certificate_orders"')
     await queryRunner.query(
       `ALTER TABLE "businesses" DROP COLUMN "certificate_amounts", DROP COLUMN "certificates_online"`,

@@ -24,6 +24,7 @@ import { TicketViewer } from '@/features/ticketView'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getCheckoutUrl } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { trackStep } from '@/shared/lib/telemetry'
 import styles from './UpcomingBooking.module.css'
 
@@ -44,9 +45,11 @@ export const UpcomingBooking = ({
   onCancel,
   onMoved,
 }: UpcomingBookingProps) => {
+  const t = useT()
   const [isMoving, setIsMoving] = useState(false)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
-  const { day, month } = getDateParts(booking.date)
+  const { day } = getDateParts(booking.date)
+  const month = t.monthShort(booking.date)
   const code = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase()
   const isAwaitingPayment = booking.status === 'confirmed' && booking.payment?.status === 'pending'
   const toast = useToast()
@@ -58,14 +61,22 @@ export const UpcomingBooking = ({
       const { url } = await getCheckoutUrl(booking.id, token)
       window.location.assign(url)
     } catch (payError) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(payError), type: 'error' })
+      toast.show({
+        title: t('Не получилось'),
+        description: getErrorMessage(payError),
+        type: 'error',
+      })
     }
   }
 
   return (
     <div className={styles.item}>
       {/* A compact pass: when, what, where. The full ticket opens on tap. */}
-      <article className={styles.card} data-status={booking.status} aria-label={`Запись ${code}`}>
+      <article
+        className={styles.card}
+        data-status={booking.status}
+        aria-label={t('Запись {code}', { code })}
+      >
         <button
           type='button'
           className={styles.open}
@@ -73,7 +84,7 @@ export const UpcomingBooking = ({
             setIsTicketOpen(true)
             trackStep('ticket_open', booking.business.slug)
           }}
-          aria-label='Показать талон'
+          aria-label={t('Показать талон')}
         />
         <span className={styles.leaf} aria-hidden='true'>
           <span className={styles.leafMonth}>{month}</span>
@@ -84,9 +95,9 @@ export const UpcomingBooking = ({
             {booking.time}
             <span className={styles.countdown} data-pending={isAwaitingPayment || undefined}>
               {booking.status === 'cancelled'
-                ? 'Отменена'
+                ? t('Отменена')
                 : isAwaitingPayment
-                  ? 'Ждёт оплаты'
+                  ? t('Ждёт оплаты')
                   : countdown}
             </span>
           </span>
@@ -95,13 +106,17 @@ export const UpcomingBooking = ({
             {booking.specialistName} · {booking.business.name}
           </span>
         </span>
-        <Menu label='Ещё' className={styles.more} trigger={<DotsThree weight='bold' aria-hidden />}>
+        <Menu
+          label={t('Ещё')}
+          className={styles.more}
+          trigger={<DotsThree weight='bold' aria-hidden />}
+        >
           {booking.business.mapUrl && (
             <MenuItem
               icon={<MapPin aria-hidden />}
               onClick={() => window.open(booking.business.mapUrl ?? '', '_blank', 'noreferrer')}
             >
-              Маршрут
+              {t('Маршрут')}
             </MenuItem>
           )}
           {booking.status === 'confirmed' && (
@@ -111,7 +126,7 @@ export const UpcomingBooking = ({
               disabled={isCancelling}
               onClick={onCancel}
             >
-              {isCancelling ? 'Отменяем…' : 'Отменить запись'}
+              {isCancelling ? t('Отменяем…') : t('Отменить запись')}
             </MenuItem>
           )}
         </Menu>
@@ -121,7 +136,7 @@ export const UpcomingBooking = ({
             {isAwaitingPayment ? (
               <button type='button' className={styles.link} onClick={() => void handlePay()}>
                 <CreditCard weight='bold' aria-hidden />
-                Оплатить {formatPrice(booking.payment?.amount ?? 0)}
+                {t('Оплатить {amount}', { amount: formatPrice(booking.payment?.amount ?? 0) })}
               </button>
             ) : (
               <>
@@ -134,14 +149,15 @@ export const UpcomingBooking = ({
                   }}
                 >
                   <ArrowsClockwise weight='bold' aria-hidden />
-                  Перенести
+                  {t('Перенести')}
                 </button>
                 <button
                   type='button'
                   className={styles.link}
                   onClick={() => downloadCalendarFile(booking, booking.business)}
                 >
-                  <CalendarPlus weight='bold' aria-hidden />В календарь
+                  <CalendarPlus weight='bold' aria-hidden />
+                  {t('В календарь')}
                 </button>
               </>
             )}
