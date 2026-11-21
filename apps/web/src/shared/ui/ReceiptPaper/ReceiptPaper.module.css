@@ -1,0 +1,142 @@
+/* A receipt as paper: one column of footnote text, figures in tabular numbers on the right. */
+.paper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
+}
+
+.paper[data-surface="sheet"] {
+  background: var(--color-sheet-surface);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+  text-align: center;
+}
+
+.seller {
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.kind {
+  margin-top: var(--space-2);
+  color: var(--color-foreground);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) 0 0;
+  border-top: 0.5px dashed var(--color-border);
+  list-style: none;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--space-3);
+}
+
+.lineName {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lineCount {
+  grid-column: 1;
+  color: var(--color-muted-foreground);
+}
+
+.lineSum {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+}
+
+.totals,
+.fiscal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.totals {
+  padding-top: var(--space-3);
+  border-top: 0.5px dashed var(--color-border);
+}
+
+.totals > div,
+.fiscal > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--color-muted-foreground);
+}
+
+.totals dd,
+.fiscal dd {
+  margin: 0;
+}
+
+.totals > .total {
+  color: var(--color-foreground);
+  font-size: var(--text-title3);
+  font-weight: 600;
+}
+
+.foot {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 0.5px dashed var(--color-border);
+}
+
+.fiscal {
+  flex: 1;
+  min-width: 0;
+}
+
+.fiscal dd {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.qr {
+  flex: none;
+  width: 6rem;
+  aspect-ratio: 1;
+  border-radius: var(--radius-xs);
+  background: var(--color-fill);
+}
+
+.state {
+  margin: 0;
+  padding-top: var(--space-3);
+  border-top: 0.5px dashed var(--color-border);
+  color: var(--color-muted-foreground);
+  text-align: center;
+}
+
+.state[data-tone="danger"] {
+  color: var(--color-danger-text);
+}

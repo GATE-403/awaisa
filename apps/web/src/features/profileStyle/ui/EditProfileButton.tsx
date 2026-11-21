@@ -4,11 +4,13 @@ import { Button } from '@awaisa/ui/Button'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useSession } from '@/entities/session'
+import { useT } from '@/shared/i18n'
 import { useMyProfile } from '../model/useMyProfile'
 import { ProfileStyleSheet } from './ProfileStyleSheet/ProfileStyleSheet'
 
 // «Оформление» on one's own page: the look is edited where it is seen, then the page redraws.
 export const EditProfileButton = () => {
+  const t = useT()
   const router = useRouter()
   const session = useSession()
   const myProfile = useMyProfile(session.status === 'signedIn')
@@ -23,13 +25,13 @@ export const EditProfileButton = () => {
         onClick={() => setIsOpen(true)}
         disabled={!myProfile.settings}
       >
-        Оформление
+        {t('Оформление')}
       </Button>
       {isOpen && myProfile.settings && customer && (
         <ProfileStyleSheet
           settings={myProfile.settings}
           profile={myProfile.profile}
-          name={customer.name || 'Вы'}
+          name={customer.name || t('Вы')}
           avatarUrl={customer.avatarUrl ?? null}
           onSave={async (input) => {
             await myProfile.save(input)

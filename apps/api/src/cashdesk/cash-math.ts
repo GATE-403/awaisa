@@ -14,8 +14,9 @@ type SaleLine = { quantity: number; price: number; unitCost: number }
 type ProfitParts = {
   servicesRevenue: number
   productsRevenue: number
-  /** Gift certificates paid online (optional: older callers have none). */
-  certificatesRevenue?: number
+  subscriptionsRevenue: number
+  /** Gift certificates paid online. */
+  certificatesRevenue: number
   materialsCost: number
   productsCost: number
   expenses: number
@@ -64,7 +65,8 @@ const profitOf = (parts: ProfitParts) =>
   roundMoney(
     parts.servicesRevenue +
       parts.productsRevenue +
-      (parts.certificatesRevenue ?? 0) -
+      parts.subscriptionsRevenue +
+      parts.certificatesRevenue -
       parts.materialsCost -
       parts.productsCost -
       parts.expenses,

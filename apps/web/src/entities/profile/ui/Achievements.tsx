@@ -1,5 +1,9 @@
+'use client'
+
 import type { CSSProperties } from 'react'
 import type { PublicProfile } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
+import { achievementTitle } from '../lib/achievementTitle'
 import styles from './Achievements.module.css'
 
 // Each achievement its own colour and emoji, like medals in 2GIS: a lit coin when earned, a quiet
@@ -27,40 +31,49 @@ interface AchievementsProps {
   items: PublicProfile['achievements']
 }
 
-export const Achievements = ({ items }: AchievementsProps) => (
-  <ul className={styles.grid}>
-    {items.map((item) => {
-      const look = LOOK[item.id] ?? { emoji: '🏅', color: 'var(--system-blue)' }
-      return (
-        <li
-          key={item.id}
-          className={styles.item}
-          data-earned={item.earned || undefined}
-          style={{ '--medal': look.color } as CSSProperties}
-        >
-          <span className={styles.medal} aria-hidden>
-            <span className={styles.emoji}>{look.emoji}</span>
-          </span>
-          <span className={styles.title}>{item.title}</span>
-          <span className={styles.description}>
-            {item.earned ? item.description : `${item.progress.current} из ${item.progress.target}`}
-          </span>
-          {!item.earned && (
-            <span
-              className={styles.track}
-              aria-hidden
-              style={
-                {
-                  '--done': `${Math.round((item.progress.current / item.progress.target) * 100)}%`,
-                } as CSSProperties
-              }
-            />
-          )}
-          <span className={styles.srOnly}>
-            {item.earned ? 'Получено' : `Цель: ${item.description}`}
-          </span>
-        </li>
-      )
-    })}
-  </ul>
-)
+export const Achievements = ({ items }: AchievementsProps) => {
+  const t = useT()
+
+  return (
+    <ul className={styles.grid}>
+      {items.map((item) => {
+        const look = LOOK[item.id] ?? { emoji: '🏅', color: 'var(--system-blue)' }
+        return (
+          <li
+            key={item.id}
+            className={styles.item}
+            data-earned={item.earned || undefined}
+            style={{ '--medal': look.color } as CSSProperties}
+          >
+            <span className={styles.medal} aria-hidden>
+              <span className={styles.emoji}>{look.emoji}</span>
+            </span>
+            <span className={styles.title}>{achievementTitle(item.title, t)}</span>
+            <span className={styles.description}>
+              {item.earned
+                ? t(item.description)
+                : t('{current} из {total}', {
+                    current: item.progress.current,
+                    total: item.progress.target,
+                  })}
+            </span>
+            {!item.earned && (
+              <span
+                className={styles.track}
+                aria-hidden
+                style={
+                  {
+                    '--done': `${Math.round((item.progress.current / item.progress.target) * 100)}%`,
+                  } as CSSProperties
+                }
+              />
+            )}
+            <span className={styles.srOnly}>
+              {item.earned ? t('Получено') : t('Цель: {goal}', { goal: t(item.description) })}
+            </span>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}

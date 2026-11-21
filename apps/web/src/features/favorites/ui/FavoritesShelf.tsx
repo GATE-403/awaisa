@@ -7,6 +7,7 @@ import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { listOffersByIds } from '@/shared/api/clientApi'
 import type { Offer } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { useFavorites } from '../model/useFavorites'
 import { FavoriteButton } from './FavoriteButton'
@@ -20,6 +21,7 @@ interface FavoritesShelfProps {
 }
 
 export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
+  const t = useT()
   const { ids } = useFavorites()
   const [offers, setOffers] = useState<Offer[] | null>(null)
   const key = ids.join(',')
@@ -46,17 +48,18 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
     <section className={styles.shelf} aria-labelledby='favorites-title'>
       <div className={styles.head} data-hidden={layout === 'grid' || undefined}>
         <h2 id='favorites-title' className={styles.title}>
-          Избранное
+          {t('Избранное')}
         </h2>
         {shown.length > 0 && <span className={styles.count}>{shown.length}</span>}
       </div>
       {offers !== null && shown.length === 0 ? (
         <EmptyState
           icon={<Heart weight='fill' className={styles.heart} />}
-          title='Сохраняйте услуги'
+          title={t('Сохраняйте услуги')}
           text={
             <>
-              Нажмите ♡ на услуге в <NextLink href='/'>каталоге</NextLink> — она появится здесь.
+              {t('Нажмите ♡ на услуге в')} <NextLink href='/'>{t('каталоге')}</NextLink>
+              {t(' — она появится здесь.')}
             </>
           }
         />

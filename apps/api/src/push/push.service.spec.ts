@@ -30,6 +30,7 @@ const booking = {
 
 const recipient = (id: string, audience: 'member' | 'master') => ({
   id,
+  kind: 'web',
   endpoint: `https://push.example/${id}`,
   p256dh: 'key',
   auth: 'auth',
@@ -43,6 +44,15 @@ const setup = (keys: Record<string, string | undefined>, rows: unknown[]) => {
   const service = new PushService(repository as never, dataSource as never, config as never)
   return { service, repository, dataSource }
 }
+
+const appRecipient = (id: string, audience: 'member' | 'master') => ({
+  id,
+  kind: 'expo',
+  endpoint: `ExponentPushToken[${id}]`,
+  p256dh: null,
+  auth: null,
+  audience,
+})
 
 const KEYS = {
   VAPID_PUBLIC_KEY: 'public',
@@ -58,7 +68,11 @@ describe('PushService', () => {
   it('is hidden without keys and only logs', async () => {
     const { service } = setup({}, [recipient('s1', 'member')])
 
-    expect(service.config).toEqual({ isAvailable: false, publicKey: null })
+    expect(service.config).toEqual({
+      isAvailable: false,
+      publicKey: null,
+      isNativeAvailable: false,
+    })
     await service.notifyBooking('created', booking, 'business-1')
     expect(sendNotification).not.toHaveBeenCalled()
   })
@@ -104,5 +118,70 @@ describe('PushService', () => {
     dataSource.query.mockRejectedValue(new Error('database down'))
 
     await expect(service.notifyBooking('created', booking, 'business-1')).resolves.toBeUndefined()
+  })
+})
+
+describe('PushService in the app', () => {
+  const fetchMock = vi.fn()
+
+  beforeEach(() => {
+    sendNotification.mockReset()
+    fetchMock.mockReset()
+    vi.stubGlobal('fetch', fetchMock)
+  })
+
+  it('only logs without an access token', async () => {
+    const { service } = setup({}, [appRecipient('a1', 'member')])
+
+    await service.notifyBooking('created', booking, 'business-1')
+
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('sends the app the same text in one batch and forgets a dead token', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: [
+            { status: 'ok', id: 't1' },
+            { status: 'error', message: 'gone', details: { error: 'DeviceNotRegistered' } },
+          ],
+        }),
+      ),
+    )
+    const { service, repository } = setup({ ...KEYS, EXPO_ACCESS_TOKEN: 'expo-secret' }, [
+      recipient('s1', 'member'),
+      appRecipient('a1', 'member'),
+      appRecipient('a2', 'master'),
+    ])
+    sendNotification.mockResolvedValue({ statusCode: 201 })
+
+    expect(service.config.isNativeAvailable).toBe(true)
+    await service.notifyBooking('created', booking, 'business-1')
+
+    expect(sendNotification).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('https://exp.host/--/api/v2/push/send')
+    expect((init.headers as Record<string, string>).authorization).toBe('Bearer expo-secret')
+    const messages = JSON.parse(init.body as string)
+    expect(messages.map((message: { to: string }) => message.to)).toEqual([
+      'ExponentPushToken[a1]',
+      'ExponentPushToken[a2]',
+    ])
+    expect(messages[0].data.url).toBe('/manage/old-school?tab=schedule&date=2026-11-26&booking=b1')
+    expect(messages[1].data.url).toBe('/master/old-school?date=2026-11-26')
+    expect(messages[0].title).toBe('Новая запись')
+    expect(repository.delete).toHaveBeenCalledWith(expect.objectContaining({ kind: 'expo' }))
+  })
+
+  it('never throws when the Expo service is down', async () => {
+    fetchMock.mockRejectedValue(new Error('network'))
+    const { service, repository } = setup({ EXPO_ACCESS_TOKEN: 'expo-secret' }, [
+      appRecipient('a1', 'member'),
+    ])
+
+    await expect(service.notifyBooking('created', booking, 'business-1')).resolves.toBeUndefined()
+    expect(repository.delete).not.toHaveBeenCalled()
   })
 })

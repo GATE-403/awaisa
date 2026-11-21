@@ -5,11 +5,12 @@ import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
 import { type CSSProperties, useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
-import { formatDuration, formatPrice, useNextSlot } from '@/entities/booking'
+import { formatPrice, useNextSlot } from '@/entities/booking'
 import { pickTint } from '@/entities/business'
 import { useBookingDraft } from '@/features/bookingDraft'
 import type { Business, Service } from '@/shared/api/types'
 import { isBookingPath } from '@/shared/config/navigation'
+import { type Translate, useT } from '@/shared/i18n'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './Place.module.css'
 
@@ -20,15 +21,16 @@ interface NextSlotCardProps {
 
 const subscribeNoop = () => () => {}
 
-const getSlotText = (slot: ReturnType<typeof useNextSlot>) => {
-  if (slot === undefined) return 'Ищем ближайшее окно…'
-  if (slot === null) return 'Окна появятся скоро'
+const getSlotText = (t: Translate, slot: ReturnType<typeof useNextSlot>) => {
+  if (slot === undefined) return t('Ищем ближайшее окно…')
+  if (slot === null) return t('Окна появятся скоро')
 
-  return `${slot.dayLabel} в ${slot.time}`
+  return `${t(slot.dayLabel)}, ${slot.time}`
 }
 
 // The quickest way in: the first free time for the most booked service, with any master.
 export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
+  const t = useT()
   const slot = useNextSlot(service.id)
   const draft = useBookingDraft()
   const isTucked = useTuckOnScroll()
@@ -70,25 +72,24 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
     // «Продолжить запись», tucking away while the page scrolls down.
     <aside
       className={styles.slotCard}
-      aria-label='Ближайшее окно'
+      aria-label={t('Ближайшее окно')}
       data-tucked={isTucked || isHeadBookVisible || undefined}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
       <NextLink href={href} className={styles.slotLink}>
         {/* Said before what the card shows, not instead of it: the name keeps the visible
             words (WCAG 2.5.3), so voice control finds «Сегодня, 18:30». */}
-        <span className={styles.srOnly}>{slot ? 'Записаться на ' : 'Записаться: '}</span>
+        <span className={styles.srOnly}>{slot ? t('Записаться на ') : t('Записаться: ')}</span>
         <span className={styles.slotText}>
           <span
             className={styles.slotWhen}
             aria-live='polite'
             data-loading={slot === undefined || undefined}
           >
-            {slot ? `${slot.dayLabel}, ${slot.time}` : getSlotText(slot)}
+            {getSlotText(t, slot)}
           </span>
           <span className={styles.slotMeta}>
-            {service.name} · {formatDuration(service.durationMinutes)} ·{' '}
-            {formatPrice(service.price)}
+            {service.name} · {t.duration(service.durationMinutes)} · {formatPrice(service.price)}
           </span>
         </span>
         <span className={styles.slotArrow} aria-hidden>

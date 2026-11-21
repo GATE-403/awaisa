@@ -16,6 +16,7 @@ import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
 import { DatabaseModule } from './database/database.module.js'
+import { FiscalModule } from './fiscal/fiscal.module.js'
 import { GeoModule } from './geo/geo.module.js'
 import { HealthController } from './health/health.controller.js'
 import { ImportModule } from './import/import.module.js'
@@ -77,6 +78,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     InventoryModule,
     PayrollModule,
     CashDeskModule,
+    FiscalModule,
     ImportModule,
     RecommendationsModule,
     TelemetryModule,

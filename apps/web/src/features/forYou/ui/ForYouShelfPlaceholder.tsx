@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { T } from '@/shared/i18n'
 import { Picture } from '@/shared/ui/Placeholder/Placeholder'
 import styles from './ForYou.module.css'
 
@@ -18,7 +19,9 @@ export const ForYouShelfPlaceholder = ({
   // Not a named region: tests and screen readers find the real shelf «Для вас», not this stand-in.
   <div className={styles.shelf} aria-busy='true'>
     <div className={styles.head}>
-      <p className={styles.title}>{title}</p>
+      <p className={styles.title}>
+        <T>{title}</T>
+      </p>
       {headAction}
     </div>
     <ul

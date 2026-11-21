@@ -1,11 +1,11 @@
-import { formatPrice } from '@/entities/booking'
 import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
-import { pluralWord } from '@/shared/lib/plural'
+import { T } from '@/shared/i18n'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './ServicesPage.module.css'
 import { ServicesCatalog } from './ui/ServicesCatalog'
+import { ServicesFacts } from './ui/ServicesFacts'
 
 interface ServicesPageProps {
   slug: string
@@ -29,24 +29,17 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
       />
       <Container className={styles.hero}>
         <h1 className={styles.title}>
-          Услуги и цены<span className={styles.titleMuted}> в {business.name}</span>
+          <T>Услуги и цены</T>
+          <span className={styles.titleMuted}>
+            <T vars={{ name: business.name }}>{' в {name}'}</T>
+          </span>
         </h1>
         {/* The facts that decide, bold numbers in one quiet line — like the place's head. */}
-        <p className={styles.facts}>
-          <span>
-            <strong>{catalog.services.length}</strong>{' '}
-            {pluralWord(catalog.services.length, ['услуга', 'услуги', 'услуг'])}
-          </span>
-          {Number.isFinite(minPrice) && (
-            <span>
-              от <strong>{formatPrice(minPrice)}</strong>
-            </span>
-          )}
-          <span>
-            <strong>{catalog.specialists.length}</strong>{' '}
-            {pluralWord(catalog.specialists.length, ['мастер', 'мастера', 'мастеров'])}
-          </span>
-        </p>
+        <ServicesFacts
+          servicesCount={catalog.services.length}
+          mastersCount={catalog.specialists.length}
+          minPrice={minPrice}
+        />
       </Container>
       <ServicesCatalog business={business} catalog={catalog} servicePhotos={servicePhotos} />
     </main>

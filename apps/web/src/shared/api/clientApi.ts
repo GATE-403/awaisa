@@ -51,6 +51,9 @@ import type {
   ExpenseList,
   FeedLikes,
   FeedPage,
+  FiscalReceipt,
+  FiscalSettings,
+  FiscalSettingsInput,
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
@@ -96,6 +99,7 @@ import type {
   PublicProfile,
   PushConfig,
   PushSubscriptionInput,
+  PushTokenInput,
   RecentBooking,
   Recommendation,
   ReviewAccess,
@@ -192,14 +196,23 @@ const post = <Result>(path: string, body?: unknown) =>
 const getAvailability = (
   {
     branchId,
+    extraServiceIds,
     ...params
-  }: { serviceId: string; specialistId: string; date: string; branchId?: string },
+  }: {
+    serviceId: string
+    specialistId: string
+    date: string
+    branchId?: string
+    /** Services done after `serviceId` in the same visit: the time fits all of them. */
+    extraServiceIds?: string[]
+  },
   signal?: AbortSignal,
-) =>
-  request<Availability>(
-    `/availability?${new URLSearchParams(branchId ? { ...params, branchId } : params)}`,
-    { signal },
-  )
+) => {
+  const query = new URLSearchParams(params)
+  if (branchId) query.set('branchId', branchId)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
+  return request<Availability>(`/availability?${query}`, { signal })
+}
 
 const getMyProfileSettings = (signal?: AbortSignal) =>
   request<ProfileSettings>('/me/profile', { signal })
@@ -502,6 +515,11 @@ const savePushSubscription = (subscription: PushSubscriptionInput) =>
 const deletePushSubscription = (endpoint: string) =>
   send<void>('DELETE', '/me/push-subscriptions', { endpoint })
 
+// The app's own pushes: its Expo token, handed over through the native bridge.
+const savePushToken = (input: PushTokenInput) => post<void>('/me/push-tokens', input)
+
+const deletePushToken = (input: PushTokenInput) => send<void>('DELETE', '/me/push-tokens', input)
+
 const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<AnalyticsReport>(
     `${manage(slug)}/analytics?${new URLSearchParams({ days: String(days) })}`,
@@ -754,11 +772,22 @@ const getTelegramLink = (id: string, token: string | null) =>
   })
 
 const getPriceQuote = (
-  params: { serviceId: string; date: string; time: string; code?: string; phone?: string },
+  {
+    extraServiceIds,
+    ...params
+  }: {
+    serviceId: string
+    extraServiceIds?: string[]
+    date: string
+    time: string
+    code?: string
+    phone?: string
+  },
   signal?: AbortSignal,
 ) => {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) if (value) query.set(key, value)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
   return request<PriceQuote>(`/promotions/quote?${query}`, { signal })
 }
 
@@ -840,6 +869,21 @@ const createSale = (slug: string, input: SaleInput) => post<Sale>(`${manage(slug
 
 const cancelSale = (slug: string, saleId: string) =>
   post<Sale>(`${manage(slug)}/sales/${saleId}/cancel`)
+
+const getFiscalSettings = (slug: string, signal?: AbortSignal) =>
+  request<FiscalSettings>(`${manage(slug)}/fiscal`, { signal })
+
+const saveFiscalSettings = (slug: string, input: FiscalSettingsInput) =>
+  send<FiscalSettings>('PUT', `${manage(slug)}/fiscal`, input)
+
+const listVisitReceipts = (slug: string, bookingId: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?bookingId=${bookingId}`, { signal })
+
+const listFailedReceipts = (slug: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?status=failed`, { signal })
+
+const retryReceipt = (slug: string, receiptId: string) =>
+  post<FiscalReceipt>(`${manage(slug)}/fiscal/receipts/${receiptId}/retry`)
 
 const listExpenses = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<ExpenseList>(`${manage(slug)}/expenses?days=${days}`, { signal })
@@ -953,6 +997,11 @@ export {
   addCashMovement,
   closeCashShift,
   listVisitSales,
+  getFiscalSettings,
+  saveFiscalSettings,
+  listVisitReceipts,
+  listFailedReceipts,
+  retryReceipt,
   createSale,
   cancelSale,
   listExpenses,
@@ -1039,6 +1088,8 @@ export {
   getPushConfig,
   savePushSubscription,
   deletePushSubscription,
+  savePushToken,
+  deletePushToken,
   getAvailability,
   getMyProfileSettings,
   getProfile,

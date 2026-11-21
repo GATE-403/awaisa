@@ -20,6 +20,7 @@ import { useSession } from '@/entities/session'
 import { INTERESTS, PreferencesSheet, usePreferences } from '@/features/forYou'
 import { getMasterPlaces } from '@/shared/api/clientApi'
 import type { MasterPlace } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
 import type { Theme } from '@/shared/lib/theme'
@@ -42,6 +43,7 @@ interface AccountSettingsProps {
 
 export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps) => {
   const session = useSession()
+  const t = useT()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [places, setPlaces] = useState<MasterPlace[]>([])
@@ -66,20 +68,24 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
   const tasteSummary = preferences
     ? [
         preferences.gender === 'female'
-          ? 'Женщине'
+          ? t('Женщине')
           : preferences.gender === 'male'
-            ? 'Мужчине'
+            ? t('Мужчине')
             : null,
         preferences.interests
           .slice(0, 2)
-          .map((value) => INTERESTS.find((item) => item.value === value)?.label.toLowerCase())
+          .map((value) => INTERESTS.find((item) => item.value === value)?.label)
+          .filter((label): label is string => Boolean(label))
+          .map((label) => t(label).toLowerCase())
           .filter(Boolean)
           .join(', ') || null,
-        preferences.budget ? `до ${preferences.budget.toLocaleString('ru-RU')}` : null,
+        preferences.budget
+          ? t('до {amount}', { amount: preferences.budget.toLocaleString('ru-RU') })
+          : null,
       ]
         .filter(Boolean)
-        .join(' · ') || 'Без предпочтений'
-    : 'Не настроено'
+        .join(' · ') || t('Без предпочтений')
+    : t('Не настроено')
 
   const handleSignOut = async () => {
     await session.signOut()
@@ -89,7 +95,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
   return (
     <section className={styles.settings} aria-labelledby='settings-title'>
       <h2 id='settings-title' className={styles.title} data-hidden={isTitleHidden || undefined}>
-        Настройки
+        {t('Настройки')}
       </h2>
 
       <div className={styles.list}>
@@ -97,57 +103,59 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <User />
           </span>
-          <span className={styles.label}>Имя</span>
-          <span className={styles.value}>{customer.name || 'Указать'}</span>
+          <span className={styles.label}>{t('Имя')}</span>
+          <span className={styles.value}>{customer.name || t('Указать')}</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </button>
         <div className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <Phone />
           </span>
-          <span className={styles.label}>Телефон</span>
+          <span className={styles.label}>{t('Телефон')}</span>
           <span className={styles.value}>{formatPhone(customer.phone)}</span>
         </div>
         <div className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <CircleHalf />
           </span>
-          <span className={styles.label}>Оформление</span>
+          <span className={styles.label}>{t('Оформление')}</span>
           <Select
             variant='plain'
-            aria-label='Оформление'
-            items={THEMES}
+            aria-label={t('Оформление')}
+            items={THEMES.map((item) => ({ ...item, label: t(item.label) }))}
             value={theme}
             onValueChange={(value) => value && setTheme(value as Theme)}
           />
         </div>
       </div>
 
-      <SectionCaption className={styles.caption}>Подборка</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Подборка')}</SectionCaption>
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsTuning(true)}>
           <span className={styles.glyph} aria-hidden>
             <Sparkle />
           </span>
-          <span className={styles.label}>Для вас</span>
+          <span className={styles.label}>{t('Для вас')}</span>
           <span className={styles.value}>{tasteSummary}</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </button>
       </div>
       <p className={styles.footnote}>
-        Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи.
+        {t('Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи.')}
       </p>
 
-      <SectionCaption className={styles.caption}>Бизнес</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Бизнес')}</SectionCaption>
       <div className={styles.list}>
         {places.length > 0 && (
           <NextLink href='/master' className={styles.row}>
             <span className={styles.glyph} aria-hidden>
               <CalendarCheck />
             </span>
-            <span className={styles.label}>Мой день</span>
+            <span className={styles.label}>{t('Мой день')}</span>
             <span className={styles.value}>
-              {places.length === 1 ? places[0]?.businessName : `${places.length} места`}
+              {places.length === 1
+                ? places[0]?.businessName
+                : t('{count} места', { count: places.length })}
             </span>
             <CaretRight className={styles.chevron} weight='bold' aria-hidden />
           </NextLink>
@@ -156,14 +164,14 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <Storefront />
           </span>
-          <span className={styles.label}>Мои бизнесы</span>
+          <span className={styles.label}>{t('Мои бизнесы')}</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </NextLink>
         <NextLink href='/business/new' className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <PlusCircle />
           </span>
-          <span className={styles.label}>Подключить бизнес</span>
+          <span className={styles.label}>{t('Подключить бизнес')}</span>
           <CaretRight className={styles.chevron} weight='bold' aria-hidden />
         </NextLink>
         {/* Platform admins: where people drop out of each scenario, on which devices. */}
@@ -172,7 +180,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <span className={styles.glyph} aria-hidden>
               <ChartBar />
             </span>
-            <span className={styles.label}>Воронки</span>
+            <span className={styles.label}>{t('Воронки')}</span>
             <CaretRight className={styles.chevron} weight='bold' aria-hidden />
           </NextLink>
         )}
@@ -184,10 +192,10 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       <div className={styles.signOut}>
         <button type='button' className={styles.danger} onClick={() => void handleSignOut()}>
           <SignOut aria-hidden />
-          Выйти
+          {t('Выйти')}
         </button>
         <p className={styles.footnote}>
-          Записи, сделанные на этом телефоне, останутся на нём и после выхода.
+          {t('Записи, сделанные на этом телефоне, останутся на нём и после выхода.')}
         </p>
       </div>
 

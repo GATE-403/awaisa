@@ -10,6 +10,7 @@ import type {
   BusinessPage,
   CertificateSale,
   FeedPage,
+  FiscalReceipt,
   LeaderboardMaster,
   LeaderboardPlace,
   MapPlace,
@@ -60,6 +61,31 @@ const listBusinesses = async (
   if (isStale) cacheLife('seconds')
   else cacheLife('minutes')
   return data
+}
+
+// Every published place for the sitemap: the list answers 60 a page at most.
+const SITEMAP_PAGE_SIZE = 60
+const SITEMAP_MAX_PAGES = 50
+
+const listAllBusinesses = async (): Promise<BusinessCard[]> => {
+  'use cache'
+  cacheTag(BUSINESSES_TAG)
+
+  const all: BusinessCard[] = []
+  let hasStale = false
+  for (let page = 0; page < SITEMAP_MAX_PAGES; page += 1) {
+    const params = new URLSearchParams({
+      offset: String(page * SITEMAP_PAGE_SIZE),
+      limit: String(SITEMAP_PAGE_SIZE),
+    })
+    const { data, isStale } = await readApi<BusinessCard[]>(`/businesses?${params}`)
+    hasStale ||= isStale
+    all.push(...data)
+    if (data.length < SITEMAP_PAGE_SIZE) break
+  }
+  if (hasStale) cacheLife('seconds')
+  else cacheLife('hours')
+  return all
 }
 
 const listPopularServices = async (kind: BusinessKind | undefined): Promise<PopularService[]> => {
@@ -206,6 +232,17 @@ const getPaymentPage = async (id: string, signature: string): Promise<PaymentPag
   return response.json()
 }
 
+// A fiscal receipt by the client's signed link; never cached (it changes while it is sent).
+const getReceiptPage = async (id: string, signature: string): Promise<FiscalReceipt | null> => {
+  const response = await fetch(
+    `${API_URL}/fiscal/receipts/${encodeURIComponent(id)}?${new URLSearchParams({ s: signature })}`,
+    { cache: 'no-store', signal: AbortSignal.timeout(API_TIMEOUT_MS) },
+  ).catch(() => null)
+  if (!response?.ok) return null
+
+  return response.json()
+}
+
 // Open promotions for the business page; refreshed with the business when the owner saves.
 const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   'use cache'
@@ -269,6 +306,7 @@ const listServicePhotos = async (slug: string): Promise<Record<string, string>> 
 
 export {
   fetchBusiness as findBusiness,
+  listAllBusinesses,
   listLeaderboard,
   listPlacesLeaderboard,
   listServicePhotos,
@@ -277,6 +315,7 @@ export {
   listPromotions,
   getCertificateSale,
   getPaymentPage,
+  getReceiptPage,
   listMapPlaces,
   getBusiness,
   listBusinesses,

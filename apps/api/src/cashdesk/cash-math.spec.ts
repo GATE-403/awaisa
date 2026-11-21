@@ -92,6 +92,8 @@ describe('profit', () => {
       profitOf({
         servicesRevenue: 100000,
         productsRevenue: 8000,
+        subscriptionsRevenue: 0,
+        certificatesRevenue: 0,
         materialsCost: 6000,
         productsCost: 4000,
         expenses: 50000,
@@ -99,11 +101,26 @@ describe('profit', () => {
     ).toBe(48000)
   })
 
-  it('counts gift certificates bought online as revenue', () => {
+  it('counts subscriptions sold as revenue the day they were sold', () => {
     expect(
       profitOf({
         servicesRevenue: 10000,
         productsRevenue: 0,
+        subscriptionsRevenue: 12000,
+        certificatesRevenue: 0,
+        materialsCost: 1000,
+        productsCost: 0,
+        expenses: 5000,
+      }),
+    ).toBe(16000)
+  })
+
+  it('counts gift certificates paid online as revenue', () => {
+    expect(
+      profitOf({
+        servicesRevenue: 10000,
+        productsRevenue: 0,
+        subscriptionsRevenue: 0,
         certificatesRevenue: 3000,
         materialsCost: 1000,
         productsCost: 0,
@@ -117,6 +134,8 @@ describe('profit', () => {
       profitOf({
         servicesRevenue: 10000,
         productsRevenue: 0,
+        subscriptionsRevenue: 0,
+        certificatesRevenue: 0,
         materialsCost: 0,
         productsCost: 0,
         expenses: 40000,

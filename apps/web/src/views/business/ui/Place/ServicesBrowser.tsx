@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
-import { pluralize } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -31,16 +31,20 @@ const POPULAR_LIMIT = 3
 // What people book most: the catalog's card with the fire mark. Its free time comes from the
 // place's one next-free answer (NextFreeProvider), not a request per card; «Ближайшее окно»
 // links straight to a time.
-const PopularCard = ({ offer, isHit }: ServiceCardProps) => (
-  <li>
-    <OfferCard
-      offer={offer}
-      isHit={isHit}
-      isPlaceHidden
-      linkLabel={`Часто выбирают: ${offer.name}`}
-    />
-  </li>
-)
+const PopularCard = ({ offer, isHit }: ServiceCardProps) => {
+  const t = useT()
+
+  return (
+    <li>
+      <OfferCard
+        offer={offer}
+        isHit={isHit}
+        isPlaceHidden
+        linkLabel={t('Часто выбирают: {name}', { name: offer.name })}
+      />
+    </li>
+  )
+}
 
 // The heart of the page: the menu. Popular first, then every service by category, with a filter
 // and a search for long menus; every row books that service.
@@ -49,6 +53,7 @@ export const ServicesBrowser = ({
   catalog,
   servicePhotos = {},
 }: ServicesBrowserProps) => {
+  const t = useT()
   const [category, setCategory] = useState(ALL)
   const [query, setQuery] = useState('')
   // The tabs row continues the business bar: the bar drops its hairline (one line under both).
@@ -116,23 +121,23 @@ export const ServicesBrowser = ({
       <section id='services' className={styles.section} aria-labelledby='place-services'>
         <div className={styles.sectionHead}>
           <h2 id='place-services' className={styles.sectionTitle}>
-            Услуги и цены
+            {t('Услуги и цены')}
           </h2>
           <span className={styles.sectionCount}>
-            {pluralize(catalog.services.length, ['услуга', 'услуги', 'услуг'])}
+            {t.count(catalog.services.length, ['услуга', 'услуги', 'услуг'])}
           </span>
         </div>
 
         {catalog.services.length >= SEARCH_FROM && (
-          <SearchField value={query} onChange={setQuery} placeholder='Найти услугу' />
+          <SearchField value={query} onChange={setQuery} placeholder={t('Найти услугу')} />
         )}
         {/* Only the category tabs stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (
           <div ref={menuHeadRef} className={styles.menuHead} data-stuck={isStuck || undefined}>
             {/* The app's one tab style; each tab says how many services it holds. */}
             <TextTabs
-              label='Разделы услуг'
-              items={[{ id: ALL, name: 'Все' }, ...catalog.categories].map((item) => ({
+              label={t('Разделы услуг')}
+              items={[{ id: ALL, name: t('Все') }, ...catalog.categories].map((item) => ({
                 label: item.name,
                 isActive: category === item.id,
                 onSelect: () => setCategory(item.id),
@@ -147,7 +152,7 @@ export const ServicesBrowser = ({
 
         {hasPopular && (
           <div className={styles.group}>
-            <SectionCaption>Часто выбирают</SectionCaption>
+            <SectionCaption>{t('Часто выбирают')}</SectionCaption>
             <ul className={styles.serviceGrid}>
               {popular.map((service, index) => (
                 <PopularCard key={service.id} offer={toOffer(service)} isHit={index === 0} />
@@ -157,17 +162,18 @@ export const ServicesBrowser = ({
         )}
         {needle && groups.length > 0 && (
           <p className={styles.found} aria-live='polite'>
-            Нашли{' '}
-            {pluralize(
-              groups.reduce((sum, group) => sum + group.services.length, 0),
-              ['услугу', 'услуги', 'услуг'],
-            )}
+            {t('Нашли {count}', {
+              count: t.count(
+                groups.reduce((sum, group) => sum + group.services.length, 0),
+                ['услугу', 'услуги', 'услуг'],
+              ),
+            })}
           </p>
         )}
         {groups.length === 0 && (
           <EmptyState
             variant='inline'
-            text='Ничего не нашли: попробуйте другое слово или раздел «Все».'
+            text={t('Ничего не нашли: попробуйте другое слово или раздел «Все».')}
           />
         )}
         {groups.map(({ category: group, services }) => (
@@ -175,7 +181,7 @@ export const ServicesBrowser = ({
             {/* With «Часто выбирают» above, the rest always gets a heading so the two lists read apart. */}
             {(catalog.categories.length > 1 || needle || hasPopular) && (
               <SectionCaption>
-                {catalog.categories.length > 1 ? group.name : 'Все услуги'}
+                {catalog.categories.length > 1 ? group.name : t('Все услуги')}
               </SectionCaption>
             )}
             <ul className={styles.serviceGrid}>
