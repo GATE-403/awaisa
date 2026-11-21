@@ -156,7 +156,21 @@ test.describe('Schedule: more on a visit and the day', () => {
 
     // Two visits beyond the right edge: the nearest one's time and «+1».
     const tab = board(page).getByRole('button', { name: `${late.time} +1 — 2 записи позже` })
-    await tab.click()
+    // The tab sits flush with the view's right edge, so a pixel of it may lie past the edge (CI's
+    // Linux scrollbars): a plain click would scroll the day to show it whole, and the visits it
+    // points to would come into view and take it away. A person presses what they see: the
+    // tab's middle, once the lanes have slid into place.
+    let box = await tab.boundingBox()
+    await expect
+      .poll(async () => {
+        const next = await tab.boundingBox()
+        const isStill = Boolean(box && next && Math.abs(next.x - box.x) < 0.5)
+        box = next
+        return isStill
+      })
+      .toBe(true)
+    if (!box) throw new Error('The edge tab is not on screen')
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
     await page.getByRole('menuitem', { name: new RegExp(last.name) }).click()
     await expect(visitCard(page, last.name)).toBeInViewport()
     await expect(visitCard(page, last.name)).toHaveAttribute('data-flash', '')
