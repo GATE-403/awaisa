@@ -191,7 +191,7 @@
 }
 
 .open[data-open] {
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
 
 .unpublished {
@@ -370,7 +370,7 @@
 }
 
 .weekStatus[data-open] {
-  color: color-mix(in srgb, var(--color-success) 80%, var(--color-foreground));
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
 
 .weekSummary {
