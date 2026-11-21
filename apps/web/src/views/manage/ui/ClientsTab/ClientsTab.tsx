@@ -36,6 +36,7 @@ import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
+import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { ImportSheet } from '@/views/manage/ui/ImportSheet/ImportSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
@@ -94,6 +95,9 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 // with hairlines, each one tap target to the client's card; long groups come thirty at a time.
 export const ClientsTab = ({ slug, businessName, specialists, branches }: ClientsTabProps) => {
   const canSeeMoney = useCanSeeMoney()
+  const canImport = useHasFeature('import')
+  const canMail = useHasFeature('mailings')
+  const canSell = useHasFeature('cashdesk')
   const isFar = useIsScrolledPast()
   const searchRef = useRef<HTMLDivElement>(null)
   const isStuck = useIsStuck(searchRef)
@@ -175,25 +179,27 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
                 className={styles.toTop}
                 onClick={scrollToTop}
               />
-              {canSeeMoney && (
-                <>
-                  <GlyphButton
-                    icon={<DownloadSimple />}
-                    label='Импорт'
-                    onClick={() => setIsImporting(true)}
-                  />
-                  <GlyphButton
-                    icon={<PaperPlaneTilt />}
-                    label='Рассылка'
-                    onClick={() => setMailing(mailingSegment ?? 'lapsed')}
-                  />
-                </>
+              {canSeeMoney && canImport && (
+                <GlyphButton
+                  icon={<DownloadSimple />}
+                  label='Импорт'
+                  onClick={() => setIsImporting(true)}
+                />
               )}
-              <GlyphButton
-                icon={<ShoppingBag />}
-                label='Продать товар'
-                onClick={() => setIsSelling(true)}
-              />
+              {canSeeMoney && canMail && (
+                <GlyphButton
+                  icon={<PaperPlaneTilt />}
+                  label='Рассылка'
+                  onClick={() => setMailing(mailingSegment ?? 'lapsed')}
+                />
+              )}
+              {canSell && (
+                <GlyphButton
+                  icon={<ShoppingBag />}
+                  label='Продать товар'
+                  onClick={() => setIsSelling(true)}
+                />
+              )}
             </GlyphGroup>
           }
         </FloatingToolbar>

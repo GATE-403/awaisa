@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Brackets, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
+import { BillingService } from '../billing/billing.service.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
@@ -58,6 +59,7 @@ export class BookingsService {
     readonly _inventory: InventoryService,
     private readonly availability: AvailabilityService,
     private readonly subscriptionOrders: SubscriptionOrdersService,
+    private readonly billing: BillingService,
   ) {}
 
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
@@ -127,12 +129,18 @@ export class BookingsService {
           code: input.promoCode ?? null,
         })
     // Online bookings of services with a deposit hold the slot until the client pays; a visit of
-    // several services asks for each one's deposit, never more than the visit costs.
+    // several services asks for each one's deposit, never more than the visit costs. Deposits are
+    // a paid-plan feature: a place back on the free plan books without one.
     const deposits = services.reduce((sum, item) => sum + (item.deposit ?? 0), 0)
-    const deposit =
-      !staffBusinessId && !isBySubscription && deposits > 0 && this.payments.isAvailable
-        ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
-        : null
+    const isDepositOn =
+      !staffBusinessId &&
+      !isBySubscription &&
+      deposits > 0 &&
+      this.payments.isAvailable &&
+      (await this.billing.hasFeature(service.businessId, 'deposits'))
+    const deposit = isDepositOn
+      ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
+      : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
@@ -228,6 +236,7 @@ export class BookingsService {
             text: confirmationMessage(view, this.linkTo(view.id)),
             link: this.manageButton(view.id),
             whatsapp: whatsappConfirmation(view, this.linkTo(view.id)),
+            billing: { businessId: service.businessId, isOptional: false },
           })
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
@@ -313,6 +322,7 @@ export class BookingsService {
         text: rescheduleMessage(view, this.linkTo(view.id)),
         link: this.manageButton(view.id),
         whatsapp: whatsappReschedule(view, this.linkTo(view.id)),
+        billing: { businessId: booking.businessId, isOptional: false },
       })
     }
     const before = toBusinessParts(booking.startsAt)

@@ -181,8 +181,8 @@ export class SubscriptionOrdersService implements OnModuleInit {
       dueAt: status === 'pending' ? (row.dueAt as Date).toISOString() : null,
       status,
       doneText: isBooked
-        ? 'Абонемент ваш, вы записаны. Он в профиле, в «Бонусы и абонементы».'
-        : 'Абонемент ваш. Он в профиле, в «Бонусы и абонементы».',
+        ? 'Вы записаны, визит по абонементу. Он в профиле, в «Бонусы и абонементы».'
+        : 'Он в профиле, в «Бонусы и абонементы».',
     }
   }
 

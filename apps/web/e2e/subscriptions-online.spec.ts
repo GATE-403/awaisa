@@ -76,7 +76,7 @@ test.describe('Subscriptions online', () => {
       // Nothing is issued before the money comes.
       expect((await mine()).some((item) => item.title === title)).toBe(false)
       await client.getByRole('button', { name: /^Оплатить/ }).click()
-      await expect(client.getByText(/Абонемент ваш/)).toBeVisible()
+      await expect(client.getByText('Оплачено. Абонемент ваш')).toBeVisible()
       const [bought] = (await mine()).filter((item) => item.title === title)
       expect(bought).toMatchObject({ visitsLeft: 3 })
 

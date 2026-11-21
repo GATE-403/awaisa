@@ -90,6 +90,7 @@ export class BookingPaymentsService {
         text: confirmationMessage(view, this.bookingsService.linkTo(view.id)),
         link: this.bookingsService.manageButton(view.id),
         whatsapp: whatsappConfirmation(view, this.bookingsService.linkTo(view.id)),
+        billing: { businessId: booking.businessId, isOptional: false },
       })
     }
     void this.telegram.notifyBusiness(
