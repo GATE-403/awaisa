@@ -23,5 +23,6 @@ import { WaitlistEntry } from './waitlist-entry.entity.js'
   ],
   controllers: [WaitlistController, ManageWaitlistController],
   providers: [WaitlistService],
+  exports: [WaitlistService],
 })
 export class WaitlistModule {}
