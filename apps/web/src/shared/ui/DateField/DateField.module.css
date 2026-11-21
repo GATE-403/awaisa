@@ -1,0 +1,70 @@
+.field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  min-height: var(--control-height-md);
+}
+
+.text {
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  white-space: nowrap;
+}
+
+.text[data-empty] {
+  color: var(--color-muted-foreground);
+}
+
+/* The system picker sits over the words, invisible: a tap anywhere opens it. */
+.native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.native::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  cursor: pointer;
+}
+
+/* Focus shows on the words, since the input itself is invisible. */
+.field:has(.native:focus-visible) .text {
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+.clear {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.clear::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
+.clear svg {
+  width: 10px;
+  height: 10px;
+}

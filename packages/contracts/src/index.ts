@@ -963,6 +963,34 @@ type AnalyticsReport = {
 /** `PUT /manage/:slug/analytics/goal`: the month's revenue goal, null to clear it. */
 type AnalyticsGoal = { goal: number | null }
 
+// A place from the address search (the branch sheet): what goes into «Адрес», the district and
+// city under it, and the point for the map.
+type GeoPlace = {
+  address: string
+  area: string
+  latitude: number
+  longitude: number
+}
+
+/** The address at a map point, or null where the provider knows none. */
+type GeoReverse = { place: GeoPlace | null }
+
+// What each settings row says on its right, like iOS Settings.
+type SettingsSummary = {
+  /** People with access to the cabinet, the owner included. */
+  team: number
+  telegramChats: number
+  /** Switched on and within their dates today. */
+  activePromotions: number
+  /** null = bonuses off. */
+  bonusPercent: number | null
+  /** Subscription plans on sale. */
+  plans: number
+  stockItems: number
+  /** Items at or under their warning level. */
+  lowStock: number
+}
+
 // The owner's page at a glance, like a professional account's insights: distinct devices that
 // opened it and online bookings, this stretch of days and the one before.
 type PageStats = {
@@ -1270,6 +1298,9 @@ export type {
   AnalyticsReport,
   AnalyticsGoal,
   PageStats,
+  SettingsSummary,
+  GeoPlace,
+  GeoReverse,
   Offer,
   PopularService,
   Branch,

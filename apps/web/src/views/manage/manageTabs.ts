@@ -22,21 +22,15 @@ type SettingsTone = 'blue' | 'green' | 'orange' | 'red' | 'gray'
 
 type SettingsItem = TabItem & { tone: SettingsTone }
 
-// Setting the business up, grouped like macOS System Settings: the place, the people, the sales.
+// Setting the business up, grouped like macOS System Settings: the place and its people, the
+// sales. Services, masters and hours live on «Страница», where clients see them (old links to
+// them land there, `toManageTab`); the settings search still finds them.
 const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
   {
     label: 'Бизнес',
     items: [
       { value: 'branches', label: 'Филиалы', tone: 'green' },
-      { value: 'hours', label: 'График', tone: 'orange' },
       { value: 'notifications', label: 'Уведомления', tone: 'red' },
-    ],
-  },
-  {
-    label: 'Услуги и команда',
-    items: [
-      { value: 'services', label: 'Услуги', tone: 'blue' },
-      { value: 'masters', label: 'Мастера', tone: 'orange' },
       { value: 'team', label: 'Сотрудники', tone: 'gray' },
     ],
   },
@@ -67,9 +61,18 @@ const ALL_TABS: TabItem[] = [
   { value: 'settings', label: 'Настройки' },
 ]
 
-// «Настройки → Профиль» became the «Страница» tab; old links still land there.
-const toManageTab = (value: string | null): ManageTab =>
-  ALL_TABS.find((tab) => tab.value === (value === 'profile' ? 'page' : value))?.value ?? 'schedule'
+/** Sections that moved to «Страница» (its tab of the same name opens): old links land there. */
+const PAGE_SECTIONS: Partial<Record<string, 'services' | 'masters' | 'hours'>> = {
+  services: 'services',
+  masters: 'masters',
+  hours: 'hours',
+}
+
+// «Настройки → Профиль» became the «Страница» tab, and so did services, masters and hours.
+const toManageTab = (value: string | null): ManageTab => {
+  if (value === 'profile' || (value && PAGE_SECTIONS[value])) return 'page'
+  return ALL_TABS.find((tab) => tab.value === value)?.value ?? 'schedule'
+}
 
 const isSettingsTab = (tab: ManageTab) =>
   tab === 'settings' || SETTINGS_TABS.some((item) => item.value === tab)
@@ -81,4 +84,12 @@ const isTabAllowed = (tab: ManageTab, role: 'owner' | 'staff') =>
   role === 'owner' || STAFF_TABS.includes(tab)
 
 export type { ManageTab, SettingsItem, SettingsTone }
-export { isSettingsTab, isTabAllowed, MAIN_TABS, SETTINGS_GROUPS, SETTINGS_TABS, toManageTab }
+export {
+  isSettingsTab,
+  isTabAllowed,
+  MAIN_TABS,
+  PAGE_SECTIONS,
+  SETTINGS_GROUPS,
+  SETTINGS_TABS,
+  toManageTab,
+}

@@ -16,6 +16,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -102,11 +103,11 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
             </div>
           )}
         </div>
-        <p className={sheet.groupFooter}>
+        <RowNote>
           {data.bonusPercent !== null
             ? `Клиент получает ${data.bonusPercent}% от оплаты деньгами и тратит их на следующих визитах: 1 бонус = 1 сом.`
-            : 'Возвращайте клиенту часть оплаты бонусами — он придёт снова, чтобы их потратить.'}
-        </p>
+            : 'Возвращайте клиенту часть оплаты бонусами: он придёт снова, чтобы их потратить.'}
+        </RowNote>
       </section>
 
       <section className={sheet.group} aria-label='Абонементы'>
@@ -117,9 +118,9 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           </button>
         </div>
         {data.plans.length === 0 ? (
-          <p className={sheet.groupFooter}>
+          <RowNote>
             Например, «5 стрижек за 4»: клиент платит сразу, визиты списываются в «Итоге визита».
-          </p>
+          </RowNote>
         ) : (
           <ul className={styles.list}>
             {data.plans.map((plan) => (
@@ -160,9 +161,9 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           </button>
         </div>
         {data.certificates.length === 0 ? (
-          <p className={sheet.groupFooter}>
+          <RowNote>
             Подарочный сертификат на сумму: клиент тратит его частями, остаток виден по коду.
-          </p>
+          </RowNote>
         ) : (
           <ul className={styles.list}>
             {data.certificates.map((certificate) => (

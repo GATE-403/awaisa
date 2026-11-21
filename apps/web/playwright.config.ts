@@ -51,6 +51,8 @@ export default defineConfig({
             // Servers run on UTC like CI and production; the browser is in Bishkek (timezoneId).
             TZ: 'UTC',
             OTP_TEST_CODE: '111111',
+            // No calls to the address service from tests: the branch sheet works without it.
+            GEOCODER: 'off',
             ADMIN_PHONES: '+996700000001,+996700000002',
             // The owners' bot without a token: messages are logged, the webhook is driven by tests.
             TELEGRAM_BOT_USERNAME: 'awaisa_e2e_bot',

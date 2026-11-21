@@ -11,6 +11,8 @@ import { addTeamMember, getTeam, removeTeamMember } from '@/shared/api/clientApi
 import type { TeamMember } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -97,8 +99,9 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
         </ul>
       )}
       <form className={sheet.group} onSubmit={add} aria-label='Добавить администратора'>
-        <SectionCaption>Добавить администратора</SectionCaption>
-        <div className={own.add}>
+        <SectionCaption className={own.addCaption}>Добавить администратора</SectionCaption>
+        {/* On phones the number and «Добавить» float at the window's foot, under the thumb. */}
+        <FloatingToolbar className={own.add}>
           <Input
             type='tel'
             inputMode='tel'
@@ -110,8 +113,10 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
           <Button type='submit' disabled={phone.replace(/\D/g, '').length < 9 || isAdding}>
             Добавить
           </Button>
-        </div>
-        <p className={sheet.groupFooter}>Он войдёт по SMS на этот номер и сразу увидит кабинет.</p>
+        </FloatingToolbar>
+        <RowNote className={own.addNote}>
+          Он войдёт по SMS на этот номер и сразу увидит кабинет.
+        </RowNote>
       </form>
     </section>
   )

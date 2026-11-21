@@ -3,6 +3,7 @@
 import { Input } from '@awaisa/ui/Input'
 import { type FormEvent, useState } from 'react'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
+import { DateField } from '@/shared/ui/DateField/DateField'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -90,18 +91,18 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
                 />
               </span>
             </label>
-            <label className={sheet.row}>
+            <div className={sheet.row}>
               <span className={sheet.rowLabel}>Действует до</span>
               <span className={sheet.rowControl}>
-                <Input
-                  variant='plain'
-                  type='date'
-                  aria-label='Действует до'
+                <DateField
+                  label='Действует до'
+                  placeholder='Без срока'
                   value={expiresOn}
-                  onValueChange={setExpiresOn}
+                  onChange={setExpiresOn}
+                  isClearable
                 />
               </span>
-            </label>
+            </div>
           </div>
           <p className={sheet.groupFooter}>
             Код из 8 символов покажем сразу. С номером сертификат виден в карточке клиента.

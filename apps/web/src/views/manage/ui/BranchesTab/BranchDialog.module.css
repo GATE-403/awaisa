@@ -1,0 +1,54 @@
+/* A found address: the street over its district and city, the whole row a tap that picks it. */
+.place {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.placeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-block: var(--space-2);
+}
+
+.placeAddress {
+  overflow: hidden;
+  font-size: var(--text-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeArea {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+@media (hover: hover) {
+  .place:hover .placeAddress {
+    color: var(--color-link);
+  }
+}
+
+/* «Подставить адрес» as link text inside the note under the map. */
+.useAddress {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.useAddress::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -4px;
+}

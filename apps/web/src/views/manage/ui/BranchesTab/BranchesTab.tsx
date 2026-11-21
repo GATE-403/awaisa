@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createBranch, deleteBranch, updateBranch } from '@/shared/api/clientApi'
 import type { Branch, BranchInput } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { BookingLinks } from './BookingLinks'
@@ -30,6 +31,7 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
       <SectionHeader
         title='Филиалы'
         description='Каждый адрес — своя метка на карте. Клиент выбирает ближайший при записи.'
+        isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             Добавить филиал
@@ -42,7 +44,7 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
           <li key={branch.id}>
             <button type='button' className={styles.masterRow} onClick={() => setEditing(branch)}>
               <span className={styles.rowIcon} data-missing={branch.latitude === null || undefined}>
-                <MapPin weight='fill' aria-hidden />
+                <MapPin aria-hidden />
               </span>
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>
@@ -61,9 +63,7 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
           </li>
         ))}
       </ul>
-      <p className={styles.listFooter}>
-        Без метки филиал не виден на карте. Мастера без филиала принимают во всех.
-      </p>
+      <RowNote>Без метки филиал не виден на карте. Мастера без филиала принимают во всех.</RowNote>
 
       <BookingLinks slug={slug} branches={branches} />
 

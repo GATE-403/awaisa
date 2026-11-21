@@ -11,6 +11,7 @@ import { NotificationsModule } from '../notifications/notifications.module.js'
 import { AdminController } from './admin.controller.js'
 import { AdminService } from './admin.service.js'
 import { AnalyticsService } from './analytics.service.js'
+import { SettingsSummaryService } from './settings-summary.service.js'
 import { TimeOff } from './time-off.entity.js'
 
 @Module({
@@ -26,6 +27,6 @@ import { TimeOff } from './time-off.entity.js'
     MailingsModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService, AnalyticsService],
+  providers: [AdminService, AnalyticsService, SettingsSummaryService],
 })
 export class AdminModule {}

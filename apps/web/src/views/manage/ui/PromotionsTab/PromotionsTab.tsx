@@ -76,6 +76,7 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
       <SectionHeader
         title='Акции'
         description='Скидки не суммируются — клиент получает самую большую.'
+        isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             <Plus weight='bold' aria-hidden />

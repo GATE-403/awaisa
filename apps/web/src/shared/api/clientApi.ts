@@ -45,6 +45,8 @@ import type {
   FunnelSegment,
   FunnelSegmentsReport,
   FunnelSignalsReport,
+  GeoPlace,
+  GeoReverse,
   GiftCertificate,
   ImportReport,
   JoinWaitlistInput,
@@ -88,6 +90,7 @@ import type {
   ScheduleLoad,
   ServiceInput,
   Session,
+  SettingsSummary,
   SlugCheck,
   SpecialistInput,
   SpecialistPhotoUpload,
@@ -565,6 +568,19 @@ const updateWorkPhoto = (slug: string, id: string, input: WorkPhotoInput) =>
 const reorderWorkPhotos = (slug: string, ids: string[]) =>
   send<WorkPhoto[]>('PUT', `${manage(slug)}/work-photos/order`, { ids })
 
+// Address search for the branch sheet (`/geo`, Photon behind our API).
+const searchAddress = (query: string, signal?: AbortSignal) =>
+  request<GeoPlace[]>(`/geo/search?${new URLSearchParams({ q: query })}`, { signal })
+
+const reverseAddress = (point: { latitude: number; longitude: number }, signal?: AbortSignal) =>
+  request<GeoReverse>(
+    `/geo/reverse?${new URLSearchParams({ lat: String(point.latitude), lng: String(point.longitude) })}`,
+    { signal },
+  )
+
+const getSettingsSummary = (slug: string, signal?: AbortSignal) =>
+  request<SettingsSummary>(`${manage(slug)}/settings-summary`, { signal })
+
 const getPageStats = (slug: string, signal?: AbortSignal) =>
   request<PageStats>(`${manage(slug)}/page-stats`, { signal })
 
@@ -829,6 +845,9 @@ export {
   getWorkPhotos,
   reorderWorkPhotos,
   getPageStats,
+  getSettingsSummary,
+  searchAddress,
+  reverseAddress,
   updateWorkPhoto,
   addVisitPhoto,
   getFeed,
