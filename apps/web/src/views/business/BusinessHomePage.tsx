@@ -65,7 +65,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
             <MastersSection business={business} specialists={catalog.specialists} />
             <ReviewsSection business={business} reviews={reviews} />
             <PhotosSection business={business} />
-            {certificateSale && (
+            {certificateSale.amounts.length > 0 && (
               <GiftCertificateSection business={business} amounts={certificateSale.amounts} />
             )}
             <QuestionsSection business={business} questions={questions} />

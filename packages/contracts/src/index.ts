@@ -618,8 +618,11 @@ type ClientSubscription = {
 /** Gift certificates sold on the place's page: on or off and the amounts offered. */
 type CertificateSaleSettings = { isOnline: boolean; amounts: number[] }
 
-/** What the place's page offers (`GET /businesses/:slug/certificate-sale`); null when off. */
-type CertificateSale = { amounts: number[] } | null
+/**
+ * What the place's page offers (`GET /businesses/:slug/certificate-sale`); no amounts when it
+ * sells none. Never null: Nest sends a null answer as an empty body, which is not JSON.
+ */
+type CertificateSale = { amounts: number[] }
 
 type CertificateOrderInput = {
   amount: number

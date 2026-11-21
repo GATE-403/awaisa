@@ -64,10 +64,10 @@ export class CertificateSalesService implements OnModuleInit {
     })
   }
 
-  /** What the place's page offers; null when it sells none (or payments are off). */
+  /** What the place's page offers; no amounts when it sells none (or payments are off). */
   async saleFor(slug: string): Promise<CertificateSale> {
     const business = await this.findBusiness(slug)
-    return business ? { amounts: business.amounts } : null
+    return { amounts: business?.amounts ?? [] }
   }
 
   async createOrder(

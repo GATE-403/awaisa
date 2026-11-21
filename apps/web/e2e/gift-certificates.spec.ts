@@ -29,6 +29,9 @@ test.describe('Gift certificates online', () => {
       expect(
         (await page.request.put(saleUrl, { data: { isOnline: false, amounts: [] } })).ok(),
       ).toBe(true)
+      // Off, the place's page gets an empty list, never an empty body.
+      const off = await fetch(`${API_URL}/businesses/${SLUG}/certificate-sale`)
+      expect(await off.json()).toEqual({ amounts: [] })
       await page.goto(`/manage/${SLUG}?tab=loyalty`)
       const group = page.getByRole('region', { name: 'Сертификаты онлайн' })
       await group.getByRole('switch').click()
