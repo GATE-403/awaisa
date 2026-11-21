@@ -17,6 +17,7 @@ import {
   parseTime,
   toBusinessParts,
 } from '../common/business-time.js'
+import { FiscalService } from '../fiscal/fiscal.service.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { Booking } from './booking.entity.js'
@@ -53,6 +54,7 @@ export class SalonBookingsService {
     private readonly businesses: BusinessesService,
     private readonly loyalty: LoyaltyService,
     private readonly inventory: InventoryService,
+    private readonly fiscal: FiscalService,
   ) {}
 
   async restoreBySalon(businessId: string, id: string) {
@@ -135,6 +137,8 @@ export class SalonBookingsService {
       await this.loyalty.earnForVisits([id])
       await this.inventory.useForVisits([id])
     }
+    // Money taken at the visit gets its receipt (or the old one refunded); never fails the save.
+    await this.fiscal.syncVisits(businessId, [id])
 
     return toAdminView(
       await bookingViewQuery(this.bookings).where('booking.id = :id', { id }).getOneOrFail(),

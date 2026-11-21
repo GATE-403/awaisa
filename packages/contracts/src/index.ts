@@ -842,7 +842,7 @@ type StockReceiveInput = {
   expense?: { branchId: string | null } | null
 }
 
-/** Money that changes hands at the counter (no fiscal receipts). */
+/** Money that changes hands at the counter. */
 type SalePaymentMethod = 'cash' | 'card' | 'transfer'
 
 type SaleItem = { itemId: string | null; name: string; quantity: number; price: number }
@@ -861,6 +861,8 @@ type Sale = {
   total: number
   items: SaleItem[]
   isCancelled: boolean
+  /** The latest fiscal receipt of the sale (its refund once cancelled); null without receipts. */
+  receipt: FiscalReceipt | null
 }
 
 type SaleInput = {
@@ -918,6 +920,84 @@ type CashDesk = {
 }
 
 type OpenShiftInput = { branchId: string; openingCash: number }
+
+/**
+ * Fiscal receipts (apps/api/src/fiscal): `log` writes them to the log and numbers them itself
+ * (outside production), `off` issues none, `ekassa` sends them to the business's own eKassa.
+ */
+type FiscalDriverName = 'log' | 'off' | 'ekassa'
+
+/** Общий режим, единый налог, патент (a patent needs no cash register). */
+type TaxRegime = 'general' | 'single' | 'patent'
+
+type FiscalSettings = {
+  /** What the platform runs; `off` hides receipts everywhere. */
+  driver: FiscalDriverName
+  isEnabled: boolean
+  inn: string | null
+  taxRegime: TaxRegime
+  isVatPayer: boolean
+  /** Percent; VAT counts only for a VAT payer. */
+  vatRate: number
+  /** Sales tax (НсП) percent on services and on goods. */
+  salesTaxServices: number
+  salesTaxGoods: number
+  /** The business's own login at the provider (eKassa); the password never comes back. */
+  login: string | null
+  hasPassword: boolean
+}
+
+type FiscalSettingsInput = Omit<FiscalSettings, 'driver' | 'hasPassword'> & {
+  /** A new password; omitted or null keeps the saved one. */
+  password?: string | null
+}
+
+type FiscalReceiptStatus = 'pending' | 'sending' | 'issued' | 'failed' | 'cancelled'
+
+type FiscalReceiptLine = {
+  name: string
+  kind: 'service' | 'goods'
+  quantity: number
+  price: number
+  sum: number
+  vatRate: number
+  vatAmount: number
+  salesTaxRate: number
+  salesTaxAmount: number
+}
+
+type FiscalReceipt = {
+  id: string
+  kind: 'sale' | 'refund'
+  status: FiscalReceiptStatus
+  /** The visit or the sale it is for. */
+  bookingId: string | null
+  saleId: string | null
+  /** A refund's original receipt. */
+  refundOf: string | null
+  /** A sale receipt that a refund has cancelled. */
+  isRefunded: boolean
+  businessName: string
+  address: string | null
+  inn: string | null
+  taxRegime: TaxRegime
+  payment: 'cash' | 'cashless'
+  lines: FiscalReceiptLine[]
+  total: number
+  vatAmount: number
+  salesTaxAmount: number
+  fiscalNumber: string | null
+  fiscalSign: string | null
+  /** The provider's or the tax office's page of this receipt; the QR leads there. */
+  providerUrl: string | null
+  /** Our own page of the receipt, signed, for the client. */
+  viewUrl: string
+  /** Issued by the `log` driver: never reached the tax office. */
+  isTest: boolean
+  error: string | null
+  issuedAt: string | null
+  createdAt: string
+}
 type CashMovementInput = { kind: 'in' | 'out'; amount: number; reason: string }
 type CloseShiftInput = { countedCash: number; note?: string | null }
 
@@ -1215,6 +1295,10 @@ type SettingsSummary = {
   stockItems: number
   /** Items at or under their warning level. */
   lowStock: number
+  /** Fiscal receipts switched on in «Касса». */
+  isFiscalOn: boolean
+  /** Receipts the provider kept refusing: the owner sends them again. */
+  failedReceipts: number
 }
 
 // The owner's page at a glance, like a professional account's insights: distinct devices that
@@ -1624,6 +1708,13 @@ export type {
   OpenShiftInput,
   CashMovementInput,
   CloseShiftInput,
+  FiscalDriverName,
+  TaxRegime,
+  FiscalSettings,
+  FiscalSettingsInput,
+  FiscalReceiptStatus,
+  FiscalReceiptLine,
+  FiscalReceipt,
   ExpenseCategory,
   Expense,
   ExpenseInput,

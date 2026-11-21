@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module.js'
 import { BookingsModule } from '../bookings/bookings.module.js'
 import { BusinessesModule } from '../businesses/businesses.module.js'
 import { CatalogModule } from '../catalog/catalog.module.js'
+import { FiscalModule } from '../fiscal/fiscal.module.js'
 import { InventoryModule } from '../inventory/inventory.module.js'
 import { LoyaltyModule } from '../loyalty/loyalty.module.js'
 import { MailingsModule } from '../mailings/mailings.module.js'
@@ -27,6 +28,7 @@ import { TimeOff } from './time-off.entity.js'
     InventoryModule,
     MailingsModule,
     PayrollModule,
+    FiscalModule,
   ],
   controllers: [AdminController],
   providers: [AdminService, AnalyticsService, SettingsSummaryService],

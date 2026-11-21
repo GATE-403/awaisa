@@ -15,6 +15,7 @@ import { AnalyticsTab } from '@/views/manage/ui/AnalyticsTab/AnalyticsTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { CashDeskTab } from '@/views/manage/ui/CashDeskTab/CashDeskTab'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
+import { FiscalTab } from '@/views/manage/ui/FiscalTab/FiscalTab'
 import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
 import { PageTab } from '@/views/manage/ui/PageTab/PageTab'
@@ -177,6 +178,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
               {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}
               {data && tab === 'loyalty' && <LoyaltyTab slug={slug} catalog={data.catalog} />}
               {data && tab === 'stock' && <StockTab slug={slug} catalog={data.catalog} />}
+              {tab === 'fiscal' && <FiscalTab slug={slug} />}
               {data && tab === 'team' && <TeamTab slug={slug} />}
               {data && tab === 'page' && (
                 <PageTab slug={slug} business={data.business} catalog={data.catalog} run={run} />
