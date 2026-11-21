@@ -286,3 +286,13 @@ li + li > .place {
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
 }
+
+/* «На этом устройстве»: on the page's own left edge, like «Ваши отзывы» above it. */
+.alerts {
+  margin-top: var(--space-6);
+}
+
+.alerts [data-inset],
+.alertsList > label {
+  padding-inline: 0;
+}

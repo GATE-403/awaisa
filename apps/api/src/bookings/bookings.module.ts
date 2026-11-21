@@ -9,6 +9,7 @@ import { InventoryModule } from '../inventory/inventory.module.js'
 import { LoyaltyModule } from '../loyalty/loyalty.module.js'
 import { NotificationsModule } from '../notifications/notifications.module.js'
 import { PromotionsModule } from '../promotions/promotions.module.js'
+import { PushModule } from '../push/push.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { AvailabilityService } from './availability.service.js'
 import { Booking } from './booking.entity.js'
@@ -31,6 +32,7 @@ import { SalonBookingsService } from './salon-bookings.service.js'
     LoyaltyModule,
     InventoryModule,
     TelegramModule,
+    PushModule,
   ],
   controllers: [BookingsController, PaymentsController],
   providers: [

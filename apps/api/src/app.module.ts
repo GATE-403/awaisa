@@ -25,6 +25,7 @@ import { MediaModule } from './media/media.module.js'
 import { PayrollModule } from './payroll/payroll.module.js'
 import { ProfilesModule } from './profiles/profiles.module.js'
 import { PromotionsModule } from './promotions/promotions.module.js'
+import { PushModule } from './push/push.module.js'
 import { QuestionsModule } from './questions/questions.module.js'
 import { RankingsModule } from './rankings/rankings.module.js'
 import { RecommendationsModule } from './recommendations/recommendations.module.js'
@@ -79,6 +80,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     RankingsModule,
     ReferralsModule,
     TelegramModule,
+    PushModule,
     ClientsModule,
     MasterModule,
   ],
