@@ -146,3 +146,13 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* The card as a button (the cabinet opens the master's sheet from it). */
+.card[data-button] {
+  width: 100%;
+  padding: 0;
+  border: none;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}

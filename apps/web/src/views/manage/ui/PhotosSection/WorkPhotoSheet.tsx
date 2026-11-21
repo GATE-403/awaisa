@@ -16,6 +16,10 @@ interface WorkPhotoSheetProps {
   onClose: () => void
   onSave: (input: WorkPhotoInput) => Promise<boolean>
   onDelete: () => void
+  /** Several photos just uploaded, tagged in turn: «Фото 1 из 3», «Далее» until the last. */
+  step?: { index: number; total: number }
+  /** Puts the photo first in «Работы» (the first five lead the page); absent when it is first. */
+  onMakeFirst?: () => void
 }
 
 const NONE = 'none'
@@ -28,7 +32,10 @@ export const WorkPhotoSheet = ({
   onClose,
   onSave,
   onDelete,
+  step,
+  onMakeFirst,
 }: WorkPhotoSheetProps) => {
+  const isLastStep = !step || step.index >= step.total
   const [serviceId, setServiceId] = useState(photo.serviceId ?? NONE)
   const [specialistId, setSpecialistId] = useState(photo.specialistId ?? NONE)
   const [isShown, setIsShown] = useState(!photo.isHidden)
@@ -50,9 +57,13 @@ export const WorkPhotoSheet = ({
 
   return (
     <Sheet
-      title='Фото работы'
+      title={step ? `Фото ${step.index} из ${step.total}` : 'Фото работы'}
       onClose={onClose}
-      action={{ label: 'Готово', onClick: () => void save(), disabled: isSaving }}
+      action={{
+        label: isLastStep ? 'Готово' : 'Далее',
+        onClick: () => void save(),
+        disabled: isSaving,
+      }}
     >
       <div className={sheet.form}>
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
@@ -100,6 +111,15 @@ export const WorkPhotoSheet = ({
               <span className={sheet.rowLabel}>Показывать клиентам</span>
               <Switch checked={isShown} onCheckedChange={setIsShown} />
             </label>
+            {onMakeFirst && (
+              <button
+                type='button'
+                className={`${sheet.row} ${styles.rowAction}`}
+                onClick={onMakeFirst}
+              >
+                Поставить первой
+              </button>
+            )}
           </div>
           <p className={sheet.groupFooter}>
             {photo.reports > 0 && photo.isHidden

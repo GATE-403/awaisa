@@ -7,6 +7,7 @@ import type {
   ClosedDay,
   CreatedTimeOff,
   MovedBooking,
+  PageStats,
   RecentBooking,
   ScheduleLoad,
   UnclosedDays,
@@ -59,6 +60,9 @@ import {
 import { AdminService } from './admin.service.js'
 import { AnalyticsService } from './analytics.service.js'
 
+/** «За неделю» on the owner's page. */
+const PAGE_STATS_DAYS = 7
+
 @Controller('manage/:slug')
 @UseGuards(BusinessAccessGuard)
 export class AdminController {
@@ -107,6 +111,12 @@ export class AdminController {
     @Query({ schema: analyticsQuerySchema }) query: AnalyticsQuery,
   ): Promise<AnalyticsReport> {
     return this.analytics.getReport(business, query.days)
+  }
+
+  @OwnerOnly()
+  @Get('page-stats')
+  getPageStats(@CurrentBusiness() business: Business): Promise<PageStats> {
+    return this.analytics.pageStats(business, PAGE_STATS_DAYS)
   }
 
   @OwnerOnly()

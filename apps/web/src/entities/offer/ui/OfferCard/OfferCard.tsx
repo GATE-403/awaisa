@@ -24,6 +24,10 @@ interface OfferCardProps {
   isPlaceHidden?: boolean
   /** One of the first cards on screen: its picture loads at once, not lazily. */
   isPriority?: boolean
+  /** What the capsule at the foot says a tap does: «Записаться», or «Изменить» in the cabinet. */
+  actionLabel?: string
+  /** In the cabinet: the card is a button that opens the service's sheet, not a link. */
+  onSelect?: () => void
 }
 
 // A service card: the service, where (the place's name), the price and when — and «Записаться» on
@@ -37,6 +41,8 @@ export const OfferCard = ({
   slotText,
   isPlaceHidden = false,
   isPriority = false,
+  actionLabel = 'Записаться',
+  onSelect,
 }: OfferCardProps) => {
   const today = useToday()
   const nextFree = useNextFree()
@@ -98,9 +104,20 @@ export const OfferCard = ({
       <div className={styles.body}>
         <h3 className={styles.name}>
           {/* The whole card opens the booking through this link (stretched over the card). */}
-          <NextLink href={href} className={styles.nameLink} aria-label={linkLabel}>
-            {offer.name}
-          </NextLink>
+          {onSelect ? (
+            <button
+              type='button'
+              className={`${styles.nameLink} ${styles.nameButton}`}
+              aria-label={linkLabel}
+              onClick={onSelect}
+            >
+              {offer.name}
+            </button>
+          ) : (
+            <NextLink href={href} className={styles.nameLink} aria-label={linkLabel}>
+              {offer.name}
+            </NextLink>
+          )}
         </h3>
         {!isPlaceHidden && (
           <p className={styles.place}>
@@ -125,7 +142,7 @@ export const OfferCard = ({
         </div>
         {/* What a tap does, said on the card: a service books, a place card opens the place. */}
         <span className={styles.book} aria-hidden>
-          Записаться
+          {actionLabel}
         </span>
       </div>
     </article>

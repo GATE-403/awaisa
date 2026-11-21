@@ -1,0 +1,169 @@
+'use client'
+
+import { Button } from '@awaisa/ui/Button'
+import { useToast } from '@awaisa/ui/Toast'
+import { Copy, DownloadSimple, ShareNetwork } from '@phosphor-icons/react/ssr'
+import { useEffect, useState } from 'react'
+import type { Branch } from '@/shared/api/types'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
+import { Sheet } from '@/shared/ui/Sheet/Sheet'
+import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import styles from './PageTab.module.css'
+
+interface ShareSheetProps {
+  slug: string
+  businessName: string
+  branches: Branch[]
+  onClose: () => void
+}
+
+type QrMatrix = { size: number; dark: boolean[] }
+
+/** The printed QR's side in px: sharp on a counter card or a sticker. */
+const QR_PNG_SIZE = 1024
+
+// «Поделиться»: the page's QR for the counter (downloaded as a PNG to print), its link for an
+// Instagram bio, and with several branches a booking link per branch (the client lands with that
+// branch chosen). On a phone the system share sheet is one tap away too.
+export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheetProps) => {
+  const toast = useToast()
+  const [origin, setOrigin] = useState('')
+  const [qr, setQr] = useState<QrMatrix | null>(null)
+  const pageUrl = `${origin}/${slug}`
+  const activeBranches = branches.filter((branch) => branch.isActive !== false)
+  const canShare = typeof navigator !== 'undefined' && 'share' in navigator
+
+  useEffect(() => {
+    setOrigin(window.location.origin)
+  }, [])
+
+  // The encoder is loaded with the sheet, so the cabinet never ships it otherwise.
+  useEffect(() => {
+    if (!origin) return
+    let isCurrent = true
+    import('qrcode').then((QRCode) => {
+      const { modules } = QRCode.create(`${origin}/${slug}`, { errorCorrectionLevel: 'M' })
+      if (isCurrent) setQr({ size: modules.size, dark: Array.from(modules.data, Boolean) })
+    })
+    return () => {
+      isCurrent = false
+    }
+  }, [origin, slug])
+
+  const copy = async (url: string, title: string) => {
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.show({ title, type: 'success' })
+    } catch {
+      toast.show({ title: 'Не получилось скопировать', type: 'error' })
+    }
+  }
+
+  const download = async () => {
+    const QRCode = await import('qrcode')
+    const href = await QRCode.toDataURL(pageUrl, { width: QR_PNG_SIZE, margin: 2 })
+    const link = document.createElement('a')
+    link.href = href
+    link.download = `${slug}-qr.png`
+    link.click()
+  }
+
+  const share = async () => {
+    try {
+      await navigator.share({ title: businessName, url: pageUrl })
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return
+      toast.show({ title: 'Не получилось поделиться', type: 'error' })
+    }
+  }
+
+  // One path of unit squares: crisp at any size, no image to load.
+  const path = qr
+    ? qr.dark
+        .map((isDark, index) =>
+          isDark ? `M${index % qr.size} ${Math.floor(index / qr.size)}h1v1h-1z` : '',
+        )
+        .join('')
+    : ''
+
+  return (
+    <Sheet title='Поделиться' onClose={onClose} cancelLabel='Закрыть'>
+      <div className={sheet.form}>
+        <figure className={styles.qr}>
+          {qr ? (
+            <svg
+              viewBox={`-2 -2 ${qr.size + 4} ${qr.size + 4}`}
+              className={styles.qrCode}
+              role='img'
+              aria-label={`QR-код страницы ${businessName}`}
+              shapeRendering='crispEdges'
+            >
+              <rect x={-2} y={-2} width={qr.size + 4} height={qr.size + 4} fill='#fff' />
+              <path d={path} fill='#000' />
+            </svg>
+          ) : (
+            <span className={styles.qrCode} />
+          )}
+          <figcaption className={styles.qrCaption}>
+            <span className={styles.qrUrl}>{pageUrl.replace(/^https?:\/\//, '')}</span>
+            Наведите камеру, чтобы открыть страницу. Распечатайте для стойки или витрины.
+          </figcaption>
+        </figure>
+        {/* One line: the link copied as the main action, the QR and the system share as glyphs. */}
+        <div className={styles.shareActions}>
+          <Button
+            type='button'
+            size='sm'
+            className={styles.shareCopy}
+            onClick={() => void copy(pageUrl, 'Ссылка на страницу скопирована')}
+          >
+            <Copy weight='bold' aria-hidden />
+            Скопировать ссылку
+          </Button>
+          <GlyphGroup label='Ещё'>
+            <GlyphButton
+              icon={<DownloadSimple />}
+              label='Скачать QR'
+              onClick={() => void download()}
+            />
+            {canShare && (
+              <GlyphButton icon={<ShareNetwork />} label='Отправить' onClick={() => void share()} />
+            )}
+          </GlyphGroup>
+        </div>
+
+        {activeBranches.length > 1 && (
+          <section className={sheet.group} aria-label='Ссылки на запись'>
+            <SectionCaption>Запись по филиалам</SectionCaption>
+            <div className={sheet.list}>
+              {activeBranches.map((branch) => (
+                <button
+                  key={branch.id}
+                  type='button'
+                  className={`${sheet.row} ${styles.sheetLink}`}
+                  onClick={() =>
+                    void copy(
+                      `${pageUrl}/book?branch=${branch.id}`,
+                      `Ссылка на запись в «${branch.name}» скопирована`,
+                    )
+                  }
+                >
+                  <span className={sheet.rowLabel}>{branch.name}</span>
+                  <span className={styles.sheetValue}>
+                    Скопировать
+                    <Copy aria-hidden />
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className={sheet.groupFooter}>
+              Клиент попадёт в запись сразу с этим филиалом. Ссылку на страницу поставьте в шапку
+              Instagram и в 2ГИС.
+            </p>
+          </section>
+        )}
+      </div>
+    </Sheet>
+  )
+}
