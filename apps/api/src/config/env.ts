@@ -23,6 +23,13 @@ type Env = {
   TWILIO_FROM?: string
   TWILIO_MESSAGING_SERVICE_SID?: string
   OTP_TEST_CODE?: string
+  WHATSAPP_DRIVER: WhatsappDriver
+  WHATSAPP_TOKEN?: string
+  WHATSAPP_PHONE_NUMBER_ID?: string
+  WHATSAPP_API_VERSION: string
+  WHATSAPP_LANGUAGE: string
+  WHATSAPP_VERIFY_TOKEN?: string
+  WHATSAPP_APP_SECRET?: string
   TELEGRAM_GATEWAY_TOKEN?: string
   TELEGRAM_BOT_TOKEN?: string
   TELEGRAM_BOT_USERNAME?: string
@@ -61,6 +68,10 @@ type Env = {
 type StorageDriver = 'local' | 's3'
 
 type SmsDriver = 'console' | 'twilio'
+
+// Client messages in WhatsApp: `meta` sends templates through the Cloud API, `log` only writes
+// them to the log (the default outside production), `off` leaves those messages to SMS.
+type WhatsappDriver = 'meta' | 'log' | 'off'
 
 // Prepayments: `test` is a built-in checkout for development and e2e; `none` turns deposits off;
 // `freedompay` takes real cards through Freedom Pay (Kyrgyzstan).
@@ -164,6 +175,33 @@ const parseTwilio = (config: Record<string, unknown>, driver: SmsDriver) => {
   }
 
   return twilio
+}
+
+const parseWhatsapp = (config: Record<string, unknown>, nodeEnv: Env['NODE_ENV']) => {
+  const whatsapp = {
+    WHATSAPP_TOKEN: optionalString(config.WHATSAPP_TOKEN),
+    WHATSAPP_PHONE_NUMBER_ID: optionalString(config.WHATSAPP_PHONE_NUMBER_ID),
+    WHATSAPP_API_VERSION: optionalString(config.WHATSAPP_API_VERSION) ?? 'v23.0',
+    WHATSAPP_LANGUAGE: optionalString(config.WHATSAPP_LANGUAGE) ?? 'ru',
+    WHATSAPP_VERIFY_TOKEN: optionalString(config.WHATSAPP_VERIFY_TOKEN),
+    WHATSAPP_APP_SECRET: optionalString(config.WHATSAPP_APP_SECRET),
+  }
+  const requested = optionalString(config.WHATSAPP_DRIVER)
+  if (requested && requested !== 'meta' && requested !== 'log' && requested !== 'off') {
+    throw new Error('WHATSAPP_DRIVER must be meta, log or off')
+  }
+  const hasCredentials = whatsapp.WHATSAPP_TOKEN && whatsapp.WHATSAPP_PHONE_NUMBER_ID
+  const driver: WhatsappDriver =
+    (requested as WhatsappDriver | undefined) ??
+    (hasCredentials ? 'meta' : nodeEnv === 'production' ? 'off' : 'log')
+  if (driver === 'meta' && !hasCredentials) {
+    throw new Error('WHATSAPP_DRIVER=meta needs WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID')
+  }
+  if (!/^v\d+\.\d+$/.test(whatsapp.WHATSAPP_API_VERSION)) {
+    throw new Error('WHATSAPP_API_VERSION must look like v23.0')
+  }
+
+  return { WHATSAPP_DRIVER: driver, ...whatsapp }
 }
 
 const parsePaymentDriver = (
@@ -340,6 +378,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ),
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
+    ...parseWhatsapp(config, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),
     // The owners' bot (BotFather): a separate token from the Gateway that sends sign-in codes.
     TELEGRAM_BOT_TOKEN: optionalString(config.TELEGRAM_BOT_TOKEN),
@@ -352,5 +391,5 @@ const validateEnv = (config: Record<string, unknown>): Env => {
   }
 }
 
-export type { Env, PaymentDriver, SmsDriver, StorageDriver }
+export type { Env, PaymentDriver, SmsDriver, StorageDriver, WhatsappDriver }
 export { validateEnv }

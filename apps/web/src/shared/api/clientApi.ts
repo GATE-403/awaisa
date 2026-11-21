@@ -24,6 +24,7 @@ import type {
   ClientCard,
   ClientList,
   ClientLoyalty,
+  ClientMessagingConfig,
   ClientNote,
   ClientSegment,
   ClientSort,
@@ -683,6 +684,9 @@ const getManagedWaitlist = (slug: string, signal?: AbortSignal) =>
 const removeManagedWaitlist = (slug: string, id: string) =>
   request<void>(`${manage(slug)}/waitlist/${id}`, { method: 'DELETE' })
 
+const getClientMessagingConfig = (signal?: AbortSignal) =>
+  request<ClientMessagingConfig>('/notifications/config', { signal })
+
 const getPaymentConfig = (signal?: AbortSignal) =>
   request<PaymentsConfig>('/payments/config', { signal })
 
@@ -870,6 +874,7 @@ export {
   getCheckoutUrl,
   getTelegramLink,
   getPaymentConfig,
+  getClientMessagingConfig,
   getManagedWaitlist,
   removeManagedWaitlist,
   getMyWaitlist,
