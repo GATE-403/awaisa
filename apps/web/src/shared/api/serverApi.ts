@@ -61,6 +61,31 @@ const listBusinesses = async (
   return data
 }
 
+// Every published place for the sitemap: the list answers 60 a page at most.
+const SITEMAP_PAGE_SIZE = 60
+const SITEMAP_MAX_PAGES = 50
+
+const listAllBusinesses = async (): Promise<BusinessCard[]> => {
+  'use cache'
+  cacheTag(BUSINESSES_TAG)
+
+  const all: BusinessCard[] = []
+  let hasStale = false
+  for (let page = 0; page < SITEMAP_MAX_PAGES; page += 1) {
+    const params = new URLSearchParams({
+      offset: String(page * SITEMAP_PAGE_SIZE),
+      limit: String(SITEMAP_PAGE_SIZE),
+    })
+    const { data, isStale } = await readApi<BusinessCard[]>(`/businesses?${params}`)
+    hasStale ||= isStale
+    all.push(...data)
+    if (data.length < SITEMAP_PAGE_SIZE) break
+  }
+  if (hasStale) cacheLife('seconds')
+  else cacheLife('hours')
+  return all
+}
+
 const listPopularServices = async (kind: BusinessKind | undefined): Promise<PopularService[]> => {
   'use cache'
   cacheTag(BUSINESSES_TAG)
@@ -254,6 +279,7 @@ const listServicePhotos = async (slug: string): Promise<Record<string, string>> 
 
 export {
   fetchBusiness as findBusiness,
+  listAllBusinesses,
   listLeaderboard,
   listPlacesLeaderboard,
   listServicePhotos,
