@@ -126,7 +126,8 @@ export class CertificateSalesService implements OnModuleInit {
     const status = String(row.status) as PaymentOrder['status']
     return {
       kind: KIND,
-      title: `Подарочный сертификат на ${formatSom(Number(row.amount))}`,
+      // A no-break space keeps «3 000 сом» on one line on the pay page.
+      title: `Подарочный сертификат на ${formatSom(Number(row.amount)).replace(/ /g, '\u00a0')}`,
       details: orderDetails(String(row.recipient_name), String(row.buyer_name)),
       business: { name: String(row.business_name), slug: String(row.business_slug) },
       dueAt: status === 'pending' ? new Date(String(row.due_at)).toISOString() : null,

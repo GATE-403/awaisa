@@ -88,7 +88,7 @@ export const GiftCertificateSheet = ({
       title='Сертификат'
       onClose={onClose}
       action={{
-        label: isPaying ? 'Оплачиваем…' : `Оплатить ${formatPrice(amount)}`,
+        label: isPaying ? 'Секунду…' : 'Оплатить',
         form: FORM_ID,
         disabled: isPaying,
       }}

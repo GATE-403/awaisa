@@ -5,7 +5,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
 import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
+import { formatAmount, formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   deleteSubscriptionPlan,
@@ -16,6 +16,7 @@ import {
   setBonusPercent,
   setCertificateSale,
 } from '@/shared/api/clientApi'
+import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
@@ -80,13 +81,19 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
 
   const sale = data.certificateSale
 
+  // The place's page shows the block: it must not wait for its cache to run out.
+  const saveSale = async (input: { isOnline: boolean; amounts: number[] }) => {
+    await setCertificateSale(slug, input)
+    void refreshBusiness(slug)
+  }
+
   const handleOnlineChange = (isOnline: boolean) => {
     if (isOnline && sale.amounts.length === 0) {
       setIsEditingAmounts(true)
       return
     }
     void run(
-      () => setCertificateSale(slug, { isOnline, amounts: sale.amounts }),
+      () => saveSale({ isOnline, amounts: sale.amounts }),
       isOnline ? 'Сертификаты продаются онлайн' : 'Онлайн-продажа выключена',
     )
   }
@@ -189,10 +196,14 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
               <Switch checked={sale.isOnline} onCheckedChange={handleOnlineChange} />
             </label>
             {sale.isOnline && (
-              <button type='button' className={sheet.row} onClick={() => setIsEditingAmounts(true)}>
+              <button
+                type='button'
+                className={`${sheet.row} ${own.amountsRow}`}
+                onClick={() => setIsEditingAmounts(true)}
+              >
                 <span className={sheet.rowLabel}>Суммы</span>
                 <span className={own.amounts}>
-                  {sale.amounts.map((amount) => formatPrice(amount)).join(' · ')}
+                  {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} сом
                 </span>
                 <CaretRight className={styles.chevron} weight='bold' aria-hidden />
               </button>
@@ -272,7 +283,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           onClose={() => setIsEditingAmounts(false)}
           onSave={(amounts) =>
             run(
-              () => setCertificateSale(slug, { isOnline: true, amounts }),
+              () => saveSale({ isOnline: true, amounts }),
               sale.isOnline ? 'Суммы сохранены' : 'Сертификаты продаются онлайн',
             )
           }
