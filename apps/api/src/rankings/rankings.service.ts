@@ -132,6 +132,7 @@ export class RankingsService {
        written AS (
          SELECT b."customer_phone" AS "phone", COUNT(*) * 15 AS "xp"
          FROM "reviews" r JOIN "bookings" b ON b."id" = r."booking_id"
+         WHERE r."anonymized_at" IS NULL
          GROUP BY b."customer_phone"
        )
        SELECT v."phone" FROM visits v LEFT JOIN written w ON w."phone" = v."phone"

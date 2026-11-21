@@ -1,6 +1,8 @@
 import { CLIENT_API_PREFIX } from '@/shared/config/api'
 import { toApiError } from './apiError'
 import type {
+  AccountDeleted,
+  AccountExport,
   AdminBooking,
   AdminSchedule,
   AnalyticsDays,
@@ -322,6 +324,10 @@ const getSession = (signal?: AbortSignal) => request<Session>('/session', { sign
 
 const updateMe = (name: string) =>
   request<Customer>('/me', { method: 'PATCH', body: JSON.stringify({ name }) })
+
+const exportMyData = () => request<AccountExport>('/me/export')
+
+const deleteMyAccount = () => request<AccountDeleted>('/me', { method: 'DELETE' })
 
 const getMyBookings = (signal?: AbortSignal) => request<Booking[]>('/me/bookings', { signal })
 
@@ -993,6 +999,8 @@ export {
   getScheduleLoad,
   getUnclosedVisits,
   getMasterPlaces,
+  exportMyData,
+  deleteMyAccount,
   getMasterDay,
   setMasterOutcome,
   getMasterSchedule,
