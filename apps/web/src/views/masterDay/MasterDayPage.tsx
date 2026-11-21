@@ -183,7 +183,11 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                   {formatPrice(day.pay === null ? total : day.pay.day)}
                 </span>
                 <span className={styles.summaryLabel}>
-                  {day.pay === null ? 'за день' : 'заработали'}
+                  {day.pay === null
+                    ? 'за день'
+                    : day.pay.percent === null
+                      ? 'заработали'
+                      : `ваши ${day.pay.percent}%`}
                 </span>
               </div>
               <div className={styles.summaryItem}>
