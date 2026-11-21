@@ -7,6 +7,7 @@ import { formatDayLong } from '@/entities/booking'
 import { getRecentBookings } from '@/shared/api/clientApi'
 import type { AdminBooking } from '@/shared/api/types'
 import { playChime } from '@/shared/lib/chime'
+import { isAlreadyNotified } from '@/shared/lib/pushWorker'
 
 const POLL_MS = 20_000
 
@@ -56,11 +57,11 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
             type: 'info',
             onOpen: open,
           })
-          if (
-            document.hidden &&
-            'Notification' in window &&
-            Notification.permission === 'granted'
-          ) {
+          const canNotify =
+            document.hidden && 'Notification' in window && Notification.permission === 'granted'
+          // A push has already shown this booking (the same tag): one notice is enough.
+          const isShown = canNotify && (await isAlreadyNotified(booking.id).catch(() => false))
+          if (canNotify && !isShown) {
             const notification = new Notification('Новая запись', {
               body: describe(booking),
               tag: booking.id,
