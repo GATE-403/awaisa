@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { connection } from 'next/server'
 import { Suspense } from 'react'
 import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
 import { BookingPage, BookingSkeleton } from '@/views/booking'
@@ -13,6 +14,9 @@ export const generateMetadata = async ({
 }
 
 const BookingWithBusiness = async ({ slug }: { slug: string }) => {
+  // Drawn per request: the form opens on what the link asks for (`?service=`, `?specialist=`,
+  // `?time=`), which a cached page could only show after scripts load.
+  await connection()
   const [{ business, catalog }, servicePhotos] = await Promise.all([
     getBusiness(slug),
     listServicePhotos(slug),

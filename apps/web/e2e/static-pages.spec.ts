@@ -17,11 +17,27 @@ test.describe('Cached place pages', () => {
     isMobile,
   }) => {
     test.skip(isMobile, 'Server output, the same on every device')
-    for (const path of [`/${SLUG}`, `/${SLUG}/services`, `/${SLUG}/book`]) {
+    for (const path of [`/${SLUG}`, `/${SLUG}/services`]) {
       await expect
         .poll(() => cacheStatus(request, path), { message: path, timeout: 15_000 })
         .toBe('HIT')
     }
+
+    // The cached HTML is the whole page: the header's search is there before any script runs.
+    const html = await (await request.get(`/${SLUG}`)).text()
+    expect(html).toContain('Поиск салонов и мастеров')
+  })
+
+  test('the booking is drawn per request, with the form in its HTML', async ({
+    request,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'Server output, the same on every device')
+    const path = `/${SLUG}/book`
+    await request.get(path)
+    const response = await request.get(path)
+    expect(response.headers()['x-nextjs-cache']).toBeUndefined()
+    expect(await response.text()).toContain('data-booking-screen')
   })
 
   test('a place unknown to the platform ends as a 404', async ({ request, isMobile }) => {

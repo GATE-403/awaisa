@@ -11,7 +11,6 @@ import {
   UserCircle,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
@@ -26,6 +25,7 @@ import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { useT } from '@/shared/i18n'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
+import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
 import { Logo } from '@/shared/ui/Logo/Logo'
 import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
@@ -37,18 +37,22 @@ const ACTIONS = [
   { href: '/business', label: 'Для бизнеса', icon: Storefront },
 ]
 
+interface HeaderContentProps {
+  /** The kind the catalog shows (`?kind=` on «/»), to mark its chip. */
+  catalogKind: string | null
+}
+
 // A marketplace header: logo, «Каталог», the search field, labelled actions; categories below.
-export const Header = () => {
+const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
   const t = useT()
   const pathname = useChromePathname()
-  const searchParams = useSearchParams()
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
   const _isSignedIn = status === 'signedIn'
   const accountLabel = customer
     ? t('Записи и профиль: {name}', { name: customer.name || customer.phone })
     : t('Записи и профиль')
-  const currentKind = pathname === '/' ? searchParams.get('kind') : null
+  const currentKind = pathname === '/' ? catalogKind : null
   const headerRef = useRef<HTMLElement>(null)
   // The cabinet and sign-in are screens of their own: no site navigation there.
   const isCabinet = isCabinetPath(pathname) || isStandalonePath(pathname)
@@ -226,3 +230,10 @@ export const Header = () => {
     </header>
   )
 }
+
+// The query is read only on the catalog, so the header stays in the cached HTML of other pages.
+export const Header = () => (
+  <CatalogQuery>
+    {(query) => <HeaderContent catalogKind={query?.get('kind') ?? null} />}
+  </CatalogQuery>
+)
