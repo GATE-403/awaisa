@@ -253,9 +253,15 @@
   }
 }
 
+/* (doubled: the schedule's status row strips its children's padding, which put the glyph of
+   «Ещё N визитов в другие дни» right on the capsule's rounded start, cut off) */
+.bar.bar {
+  padding: 0 2px 0 var(--space-3);
+}
+
 /* With the glyph inside the trigger, the trigger starts at the capsule's own edge: its hover and
    focus fill is an orange shade that follows the capsule's rounded start, never a grey oval. */
-.bar[data-glyph-inside] {
+.bar.bar[data-glyph-inside] {
   padding-left: 2px;
 }
 
