@@ -180,32 +180,26 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
 
         {day && (
           <>
-            <div className={styles.summary}>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>{live.length}</span>
-                <span className={styles.summaryLabel}>
-                  {pluralWord(live.length, ['запись', 'записи', 'записей'])}
-                </span>
-              </div>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue}>
-                  {formatPrice(day.pay === null ? total : day.pay.day)}
-                </span>
-                <span className={styles.summaryLabel}>
-                  {day.pay === null
-                    ? 'за день'
-                    : day.pay.percent === null
-                      ? 'заработали'
-                      : `ваши ${day.pay.percent}%`}
-                </span>
-              </div>
-              <div className={styles.summaryItem}>
-                <span className={styles.summaryValue} data-small=''>
+            {/* The day's facts as one footnote line with bold figures, like the quiet profile
+                (three tiles parted by lines read as a dashboard: «не соответствует философии»). */}
+            <p className={styles.facts}>
+              <b>{live.length}</b> {pluralWord(live.length, ['запись', 'записи', 'записей'])}
+              {' · '}
+              <b>{formatPrice(day.pay === null ? total : day.pay.day)}</b>{' '}
+              <span>
+                {day.pay === null
+                  ? 'за день'
+                  : day.pay.percent === null
+                    ? 'заработали'
+                    : `ваши ${day.pay.percent}%`}
+              </span>
+              {hoursLine && (
+                <>
+                  {' · '}
                   {hoursLine}
-                </span>
-                <span className={styles.summaryLabel}>график</span>
-              </div>
-            </div>
+                </>
+              )}
+            </p>
 
             {day.pay !== null && (
               <RowNote className={styles.monthPay}>
@@ -270,16 +264,6 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                             <ChatText aria-hidden />«{booking.comment}»
                           </span>
                         )}
-                        {canMark && !isCancelled && (
-                          <span className={styles.outcome}>
-                            <SegmentedControl
-                              label={`Итог визита ${booking.time}`}
-                              value={booking.outcome ?? 'pending'}
-                              items={OUTCOMES}
-                              onChange={(choice) => void handleOutcome(booking, choice)}
-                            />
-                          </span>
-                        )}
                         {booking.outcome === 'arrived' && (
                           <VisitPhotoButton slug={slug} bookingId={booking.id} />
                         )}
@@ -292,6 +276,16 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                         >
                           <Phone weight='fill' aria-hidden />
                         </a>
+                      )}
+                      {canMark && !isCancelled && (
+                        <span className={styles.outcome}>
+                          <SegmentedControl
+                            label={`Итог визита ${booking.time}`}
+                            value={booking.outcome ?? 'pending'}
+                            items={OUTCOMES}
+                            onChange={(choice) => void handleOutcome(booking, choice)}
+                          />
+                        </span>
                       )}
                     </li>
                   )

@@ -22,53 +22,17 @@
   border-radius: var(--radius-xl);
 }
 
-.summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-.summaryItem {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 0;
-  padding: var(--space-3) var(--space-2);
-  text-align: center;
-}
-
-.summaryItem + .summaryItem::before {
-  content: "";
-  position: absolute;
-  top: var(--space-3);
-  bottom: var(--space-3);
-  left: 0;
-  width: 0.5px;
-  background: var(--color-border);
-}
-
-.summaryValue {
-  font-size: var(--text-lg);
-  line-height: var(--text-lg-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
-}
-
-.summaryValue[data-small] {
+.facts {
+  margin: 0;
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
-  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caption);
 }
 
-.summaryLabel {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-caption);
+.facts b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
 .now {
@@ -173,8 +137,14 @@
 }
 
 .outcome {
+  grid-column: 1 / -1;
   display: flex;
-  margin-top: var(--space-2);
+}
+
+/* Across the whole visit, so the three outcomes fit a phone's width (beside the call button they
+   ran out of their track). */
+.outcome > * {
+  width: 100%;
 }
 
 .photoButton {
@@ -277,7 +247,7 @@ li + li > .place {
   padding: 0;
 }
 
-/* The month's pay, said about the summary above. */
+/* The month's pay, said about the day's facts above. */
 .monthPay {
   margin-top: calc(-1 * var(--space-2));
 }
