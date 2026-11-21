@@ -14,6 +14,8 @@ type SaleLine = { quantity: number; price: number; unitCost: number }
 type ProfitParts = {
   servicesRevenue: number
   productsRevenue: number
+  /** Gift certificates paid online (optional: older callers have none). */
+  certificatesRevenue?: number
   materialsCost: number
   productsCost: number
   expenses: number
@@ -61,7 +63,8 @@ const shortages = (
 const profitOf = (parts: ProfitParts) =>
   roundMoney(
     parts.servicesRevenue +
-      parts.productsRevenue -
+      parts.productsRevenue +
+      (parts.certificatesRevenue ?? 0) -
       parts.materialsCost -
       parts.productsCost -
       parts.expenses,

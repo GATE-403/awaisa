@@ -1,4 +1,5 @@
 import type {
+  CertificateSaleSettings,
   ClientLoyalty,
   GiftCertificate,
   LoyaltyOverview,
@@ -25,6 +26,10 @@ import {
   CurrentBusiness,
   OwnerOnly,
 } from '../businesses/business-access.guard.js'
+import {
+  type CertificateSaleInput,
+  certificateSaleSchema,
+} from '../certificates/certificates.schemas.js'
 import type { Customer } from '../customers/customer.entity.js'
 import {
   type CertificateInput,
@@ -45,12 +50,23 @@ export class ManageLoyaltyController {
 
   @Get()
   async overview(@CurrentBusiness() business: Business): Promise<LoyaltyOverview> {
-    const [settings, plans, certificates] = await Promise.all([
+    const [settings, plans, certificates, certificateSale] = await Promise.all([
       this.loyalty.getSettings(business.id),
       this.loyalty.listPlans(business.id),
       this.loyalty.listCertificates(business.id),
+      this.loyalty.getCertificateSale(business.id),
     ])
-    return { ...settings, plans, certificates }
+    return { ...settings, plans, certificates, certificateSale }
+  }
+
+  // «Продавать сертификаты онлайн» and the amounts on the place's page.
+  @OwnerOnly()
+  @Put('certificate-sale')
+  setCertificateSale(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: certificateSaleSchema }) body: CertificateSaleInput,
+  ): Promise<CertificateSaleSettings> {
+    return this.loyalty.setCertificateSale(business.id, body)
   }
 
   @OwnerOnly()

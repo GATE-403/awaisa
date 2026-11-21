@@ -11,6 +11,7 @@ import { CacheModule } from './cache/cache.module.js'
 import { RateLimitStorage } from './cache/rate-limit.storage.js'
 import { CashDeskModule } from './cashdesk/cashdesk.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
+import { CertificatesModule } from './certificates/certificates.module.js'
 import { ClientsModule } from './clients/clients.module.js'
 import { type Env, validateEnv } from './config/env.js'
 import { CustomersModule } from './customers/customers.module.js'
@@ -71,6 +72,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     WaitlistModule,
     PromotionsModule,
     LoyaltyModule,
+    CertificatesModule,
     MailingsModule,
     InventoryModule,
     PayrollModule,

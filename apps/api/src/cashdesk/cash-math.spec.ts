@@ -99,6 +99,19 @@ describe('profit', () => {
     ).toBe(48000)
   })
 
+  it('counts gift certificates bought online as revenue', () => {
+    expect(
+      profitOf({
+        servicesRevenue: 10000,
+        productsRevenue: 0,
+        certificatesRevenue: 3000,
+        materialsCost: 1000,
+        productsCost: 0,
+        expenses: 2000,
+      }),
+    ).toBe(10000)
+  })
+
   it('goes below zero when expenses outweigh revenue', () => {
     expect(
       profitOf({
