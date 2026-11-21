@@ -156,6 +156,7 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           surface='success'
           title={t('Вам может понравиться')}
           seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
+          likeServiceId={booking.serviceId}
           excludeServiceId={booking.serviceId}
           isInline
         />
