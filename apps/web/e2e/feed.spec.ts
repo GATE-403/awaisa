@@ -98,10 +98,15 @@ test.describe('«Образы» feed', () => {
       await expect(guest).toHaveURL(new RegExp(`/${SLUG}/book\\?service=${service.id}`))
       await guest.close()
 
-      // Three reports take it out of the feed until the owner looks.
+      // Three reports from different devices take it out of the feed until someone looks.
+      const viewers = await browser.newContext()
       for (let report = 0; report < 3; report += 1) {
-        expect((await page.request.post(`/api/feed/${photoId}/report`)).status()).toBe(204)
+        const response = await viewers.request.post(`/api/feed/${photoId}/report`, {
+          data: { reason: 'spam', session: `e2e-feed-${photoId}-${report}` },
+        })
+        expect(response.status()).toBe(204)
       }
+      await viewers.close()
       const feed = await (await page.request.get(`/api/feed?business=${SLUG}`)).json()
       expect(feed.items.some((item: { id: string }) => item.id === photoId)).toBe(false)
       const hidden: WorkPhoto[] = await (await page.request.get(`${manage}/work-photos`)).json()

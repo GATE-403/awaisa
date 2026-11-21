@@ -153,6 +153,14 @@ export class ProfilesService {
     const id = this.idOf(person.phone)
     const isOwn = viewer?.phone === person.phone
     if (!person.isPublic && !isOwn) throw new NotFoundException('Профиль скрыт')
+    // Hidden by a moderator: gone for everyone else; blocked: gone for the person too.
+    const [moderated] = await this.query(
+      'SELECT "hidden_at" AS "hiddenAt", "blocked_at" AS "blockedAt" FROM "moderated_people" WHERE "phone" = $1',
+      [person.phone],
+    )
+    if (moderated?.blockedAt || (moderated?.hiddenAt && !isOwn)) {
+      throw new NotFoundException('Профиль скрыт')
+    }
 
     // Only the owner sees how many recent visits still wait for their stars.
     const awaitingReview = isOwn ? await this.awaitingReview(person.phone) : 0
@@ -181,7 +189,7 @@ export class ProfilesService {
          JOIN "businesses" bz ON bz."id" = r."business_id" AND bz."is_published"
          LEFT JOIN "services" s ON s."id" = r."service_id"
          LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
-         WHERE b."customer_phone" = $1 AND r."anonymized_at" IS NULL
+         WHERE b."customer_phone" = $1 AND NOT r."is_hidden" AND r."anonymized_at" IS NULL
          ORDER BY r."created_at" DESC LIMIT 30`,
         [person.phone],
       ),

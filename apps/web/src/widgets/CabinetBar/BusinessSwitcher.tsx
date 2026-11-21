@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   CaretDown,
   Check,
+  Flag,
   Funnel,
   Plus,
   SquaresFour,
@@ -106,6 +107,11 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
       {isAdmin && (
         <MenuItem icon={<Funnel aria-hidden />} onClick={() => router.push('/insights')}>
           Воронки
+        </MenuItem>
+      )}
+      {isAdmin && (
+        <MenuItem icon={<Flag aria-hidden />} onClick={() => router.push('/moderation')}>
+          Модерация
         </MenuItem>
       )}
       <MenuItem icon={<Plus aria-hidden />} onClick={() => router.push('/business/new')}>
