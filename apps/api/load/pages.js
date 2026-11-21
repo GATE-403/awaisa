@@ -1,6 +1,6 @@
 // The site's pages as a browser asks for them (the server-rendered HTML; pictures, scripts and
 // the API calls the page makes afterwards are not counted): catalog, a place, its menu, the
-// map and the leaderboard, at a rising rate. Run: pnpm --filter api load:pages (load/README.md).
+// map, «Образы» and the leaderboard, at a rising rate. Run: pnpm --filter api load:pages (load/README.md).
 // WEB is the Next server's origin (`next start` of a production build, not `next dev`).
 import { check } from 'k6'
 import http from 'k6/http'
@@ -8,7 +8,7 @@ import http from 'k6/http'
 const WEB = __ENV.WEB || 'http://host.docker.internal:3400'
 const BASE = __ENV.BASE || 'http://host.docker.internal:4400'
 const MAX_RATE = Number(__ENV.MAX_RATE || 400)
-const PAGES = ['catalog', 'place', 'services', 'map', 'top']
+const PAGES = ['catalog', 'place', 'services', 'map', 'feed', 'top']
 
 export const options = {
   scenarios: {
@@ -51,6 +51,7 @@ export default ({ slugs }) => {
     ['place', `/${slug}`],
     ['services', `/${slug}/services`],
     ['map', '/map'],
+    ['feed', '/feed'],
     ['top', '/top'],
   ])
   const response = http.get(`${WEB}${path}`, { tags: { name }, timeout: '15s' })
