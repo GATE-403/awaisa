@@ -30,6 +30,8 @@ interface BookingInspectorProps {
   onOpenClient: (phone: string) => void
   /** A cancelled visit on a day still ahead: book the same client, service and master again. */
   onBookAgain?: (booking: AdminBooking) => void
+  /** «Добавить товар» in «Итог визита». */
+  onSellProducts?: (booking: AdminBooking) => void
   onClose: () => void
 }
 
@@ -52,6 +54,7 @@ export const BookingInspector = ({
   onOutcome,
   onOpenClient,
   onBookAgain,
+  onSellProducts,
   onClose,
 }: BookingInspectorProps) => {
   const isTouch = useMediaQuery('(pointer: coarse)')
@@ -189,6 +192,7 @@ export const BookingInspector = ({
           slug={slug}
           booking={booking}
           onChange={(input) => onOutcome(booking.id, input)}
+          onSellProducts={onSellProducts ? () => onSellProducts(booking) : undefined}
           isCompact
           controlSize={isTouch ? 'md' : 'sm'}
         />

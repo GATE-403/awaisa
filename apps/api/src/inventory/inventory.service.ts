@@ -19,7 +19,8 @@ export class InventoryService {
   async list(businessId: string) {
     const items = await this.query(
       `SELECT i."id", i."name", i."unit", i."quantity", i."unit_cost" AS "unitCost",
-         i."min_quantity" AS "minQuantity",
+         i."min_quantity" AS "minQuantity", i."is_for_sale" AS "isForSale",
+         i."sale_price" AS "salePrice",
          COALESCE((SELECT json_agg(json_build_object('serviceId', m."service_id", 'amount', m."amount"))
            FROM "service_materials" m WHERE m."item_id" = i."id"), '[]') AS "materials"
        FROM "stock_items" i WHERE i."business_id" = $1 ORDER BY i."name"`,
@@ -36,6 +37,8 @@ export class InventoryService {
         unitCost: toNumber(row.unitCost),
         minQuantity,
         isLow: minQuantity !== null && quantity <= minQuantity,
+        isForSale: Boolean(row.isForSale),
+        salePrice: row.salePrice === null ? null : toNumber(row.salePrice),
         materials: ((row.materials ?? []) as { serviceId: string; amount: number }[]).map(
           (item) => ({
             serviceId: item.serviceId,
@@ -48,9 +51,18 @@ export class InventoryService {
 
   async create(businessId: string, input: StockItemInput) {
     const [item] = await this.query(
-      `INSERT INTO "stock_items" ("business_id", "name", "unit", "unit_cost", "min_quantity")
-       VALUES ($1, $2, $3, $4, $5) RETURNING "id"`,
-      [businessId, input.name, input.unit, input.unitCost, input.minQuantity],
+      `INSERT INTO "stock_items" ("business_id", "name", "unit", "unit_cost", "min_quantity",
+         "is_for_sale", "sale_price")
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"`,
+      [
+        businessId,
+        input.name,
+        input.unit,
+        input.unitCost,
+        input.minQuantity,
+        input.isForSale,
+        input.isForSale ? input.salePrice : null,
+      ],
     )
     await this.setMaterials(businessId, String(item.id), input.materials)
     return this.list(businessId)
@@ -58,9 +70,19 @@ export class InventoryService {
 
   async update(businessId: string, id: string, input: StockItemInput) {
     const rows = await this.query(
-      `UPDATE "stock_items" SET "name" = $3, "unit" = $4, "unit_cost" = $5, "min_quantity" = $6
+      `UPDATE "stock_items" SET "name" = $3, "unit" = $4, "unit_cost" = $5, "min_quantity" = $6,
+         "is_for_sale" = $7, "sale_price" = $8
        WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
-      [id, businessId, input.name, input.unit, input.unitCost, input.minQuantity],
+      [
+        id,
+        businessId,
+        input.name,
+        input.unit,
+        input.unitCost,
+        input.minQuantity,
+        input.isForSale,
+        input.isForSale ? input.salePrice : null,
+      ],
     )
     if (this.rows(rows).length === 0) throw new NotFoundException('Позиция не найдена')
     await this.setMaterials(businessId, id, input.materials)
@@ -74,21 +96,40 @@ export class InventoryService {
     ])
   }
 
-  /** A delivery: the quantity grows, the unit cost may change. */
-  async receive(businessId: string, id: string, quantity: number, unitCost?: number) {
+  /**
+   * A delivery: the quantity grows, the unit cost may change. With `expense` what it cost is
+   * also recorded as an expense («Закупка материалов») in the same step.
+   */
+  async receive(
+    businessId: string,
+    id: string,
+    quantity: number,
+    unitCost?: number,
+    expense?: { branchId: string | null; createdBy: string | null } | null,
+  ) {
     const rows = await this.query(
       `UPDATE "stock_items" SET "quantity" = "quantity" + $3,
          "unit_cost" = COALESCE($4, "unit_cost")
-       WHERE "id" = $1 AND "business_id" = $2 RETURNING "unit_cost"`,
+       WHERE "id" = $1 AND "business_id" = $2 RETURNING "unit_cost", "name"`,
       [id, businessId, quantity, unitCost ?? null],
     )
     const [item] = this.rows(rows)
     if (!item) throw new NotFoundException('Позиция не найдена')
-    await this.query(
+    const cost = quantity * toNumber(item.unit_cost)
+    const [movement] = await this.query(
       `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "cost")
-       VALUES ($1, $2, $3, 'receive', $4)`,
-      [businessId, id, quantity, quantity * toNumber(item.unit_cost)],
+       VALUES ($1, $2, $3, 'receive', $4) RETURNING "id"`,
+      [businessId, id, quantity, cost],
     )
+    if (expense && cost > 0) {
+      await this.query(
+        `INSERT INTO "expenses" ("business_id", "branch_id", "category", "amount", "date", "note",
+           "stock_movement_id", "created_by")
+         SELECT $1, (SELECT b."id" FROM "branches" b WHERE b."id" = $2 AND b."business_id" = $1),
+           'materials', $3, (now() AT TIME ZONE 'UTC' + interval '6 hours')::date, $4, $5, $6`,
+        [businessId, expense.branchId, cost, String(item.name), movement?.id, expense.createdBy],
+      )
+    }
     return this.list(businessId)
   }
 

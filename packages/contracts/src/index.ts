@@ -817,6 +817,9 @@ type StockItem = {
   isLow: boolean
   /** How much one visit of a service uses. */
   materials: { serviceId: string; amount: number }[]
+  /** Sold to clients at the counter, at `salePrice`. */
+  isForSale: boolean
+  salePrice: number | null
 }
 
 type StockItemInput = {
@@ -825,6 +828,150 @@ type StockItemInput = {
   unitCost: number
   minQuantity: number | null
   materials: { serviceId: string; amount: number }[]
+  isForSale?: boolean
+  salePrice?: number | null
+}
+
+/** A stock delivery; `expense` also records what it cost as an expense («Закупка материалов»). */
+type StockReceiveInput = {
+  quantity: number
+  unitCost?: number
+  expense?: { branchId: string | null } | null
+}
+
+/** Money that changes hands at the counter (no fiscal receipts). */
+type SalePaymentMethod = 'cash' | 'card' | 'transfer'
+
+type SaleItem = { itemId: string | null; name: string; quantity: number; price: number }
+
+type Sale = {
+  id: string
+  createdAt: string
+  branchId: string | null
+  bookingId: string | null
+  customerPhone: string | null
+  customerName: string | null
+  /** The master who sold it, for a commission later. */
+  sellerId: string | null
+  sellerName: string | null
+  paymentMethod: SalePaymentMethod
+  total: number
+  items: SaleItem[]
+  isCancelled: boolean
+}
+
+type SaleInput = {
+  /** Sold together with this visit: its branch, client and master by default. */
+  bookingId?: string | null
+  branchId?: string | null
+  customerPhone?: string | null
+  customerName?: string | null
+  sellerId?: string | null
+  paymentMethod: SalePaymentMethod
+  items: { itemId: string; quantity: number }[]
+}
+
+type CashMovement = {
+  id: string
+  kind: 'in' | 'out'
+  amount: number
+  reason: string
+  createdAt: string
+}
+
+/** One branch's till for a shift: what should be in it now (or was at closing). */
+type CashShift = {
+  id: string
+  branchId: string
+  openedAt: string
+  openedBy: string | null
+  openingCash: number
+  closedAt: string | null
+  closedBy: string | null
+  countedCash: number | null
+  note: string | null
+  /** Cash paid for visits of the branch on the shift's days. */
+  visitsCash: number
+  /** Cash paid for products during the shift. */
+  salesCash: number
+  cashIn: number
+  cashOut: number
+  /** Opening + visits + sales + in − out. */
+  expectedCash: number
+  /** Counted − expected, once closed. */
+  difference: number | null
+  movements: CashMovement[]
+}
+
+type CashDesk = {
+  /** The open shift per branch (none: the business works without shifts). */
+  open: CashShift[]
+  /** Closed shifts, newest first (10). */
+  closed: CashShift[]
+  /** Today's sales, newest first. */
+  sales: Sale[]
+  /** What can be sold now. */
+  products: StockItem[]
+}
+
+type OpenShiftInput = { branchId: string; openingCash: number }
+type CashMovementInput = { kind: 'in' | 'out'; amount: number; reason: string }
+type CloseShiftInput = { countedCash: number; note?: string | null }
+
+/** Preset categories; anything else is the owner's own word. */
+type ExpenseCategory =
+  | 'rent'
+  | 'materials'
+  | 'salaries'
+  | 'utilities'
+  | 'marketing'
+  | 'other'
+  | (string & {})
+
+type Expense = {
+  id: string
+  category: ExpenseCategory
+  amount: number
+  /** YYYY-MM-DD, business time. */
+  date: string
+  branchId: string | null
+  note: string | null
+  /** Recorded from a stock delivery. */
+  isFromStock: boolean
+}
+
+type ExpenseInput = {
+  category: ExpenseCategory
+  amount: number
+  date: string
+  branchId: string | null
+  note: string | null
+}
+
+type ExpenseList = {
+  items: Expense[]
+  /** Custom categories the business used, beside the presets. */
+  categories: string[]
+  total: number
+}
+
+/** «Прибыль» in analytics: what came in, what went out. */
+type MoneyReport = {
+  period: { days: AnalyticsDays; from: string; to: string }
+  servicesRevenue: number
+  productsRevenue: number
+  revenue: number
+  /** Materials visits used and the cost of products sold. */
+  materialsCost: number
+  productsCost: number
+  expenses: number
+  /** Revenue − materials − products cost − expenses. */
+  profit: number
+  previousProfit: number
+  profitChange: number | null
+  expensesByCategory: { category: ExpenseCategory; amount: number }[]
+  products: { name: string; quantity: number; revenue: number }[]
+  daily: { date: string; revenue: number; expenses: number; profit: number }[]
 }
 
 /** Rows count from 1 without the header line. */
@@ -1379,5 +1526,21 @@ export type {
   WorkPhotoInput,
   StockItem,
   StockItemInput,
+  StockReceiveInput,
+  SalePaymentMethod,
+  SaleItem,
+  Sale,
+  SaleInput,
+  CashMovement,
+  CashShift,
+  CashDesk,
+  OpenShiftInput,
+  CashMovementInput,
+  CloseShiftInput,
+  ExpenseCategory,
+  Expense,
+  ExpenseInput,
+  ExpenseList,
+  MoneyReport,
   WaitlistEntry,
 }

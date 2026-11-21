@@ -19,6 +19,9 @@ import type {
   BusinessPage,
   BusinessProfile,
   BusinessQuestion,
+  CashDesk,
+  CashMovementInput,
+  CashShift,
   Category,
   CheckoutLink,
   ClientCard,
@@ -29,6 +32,7 @@ import type {
   ClientSegment,
   ClientSort,
   ClosedDay,
+  CloseShiftInput,
   CoverUpload,
   CreateBookingInput,
   CreateBusinessInput,
@@ -39,6 +43,9 @@ import type {
   CreatedTimeOff,
   CreateTimeOffInput,
   Customer,
+  Expense,
+  ExpenseInput,
+  ExpenseList,
   FeedLikes,
   FeedPage,
   FunnelFlow,
@@ -65,10 +72,12 @@ import type {
   MasterPlace,
   MasterReviews,
   MasterSchedule,
+  MoneyReport,
   MovedBooking,
   MyLoyalty,
   NextFree,
   Offer,
+  OpenShiftInput,
   OtpRequest,
   OutcomeInput,
   PageStats,
@@ -90,6 +99,8 @@ import type {
   ReviewReplySettings,
   ReviewResolution,
   ReviewSummary,
+  Sale,
+  SaleInput,
   ScheduleLoad,
   ServiceInput,
   Session,
@@ -99,6 +110,7 @@ import type {
   SpecialistPhotoUpload,
   StockItem,
   StockItemInput,
+  StockReceiveInput,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
@@ -777,11 +789,46 @@ const saveStockItem = (slug: string, input: StockItemInput, id?: string) =>
 const deleteStockItem = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/stock/${id}`)
 
-const receiveStock = (slug: string, id: string, quantity: number, unitCost?: number) =>
-  post<StockItem[]>(`${manage(slug)}/stock/${id}/receive`, { quantity, unitCost })
+const receiveStock = (slug: string, id: string, input: StockReceiveInput) =>
+  post<StockItem[]>(`${manage(slug)}/stock/${id}/receive`, input)
 
 const adjustStock = (slug: string, id: string, quantity: number) =>
   post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
+
+// «Касса»: shifts of a branch's till, sales of products, expenses and the profit.
+const getCashDesk = (slug: string, signal?: AbortSignal) =>
+  request<CashDesk>(`${manage(slug)}/cash`, { signal })
+
+const openCashShift = (slug: string, input: OpenShiftInput) =>
+  post<CashShift>(`${manage(slug)}/cash/shifts`, input)
+
+const addCashMovement = (slug: string, shiftId: string, input: CashMovementInput) =>
+  post<CashShift>(`${manage(slug)}/cash/shifts/${shiftId}/movements`, input)
+
+const closeCashShift = (slug: string, shiftId: string, input: CloseShiftInput) =>
+  post<CashShift>(`${manage(slug)}/cash/shifts/${shiftId}/close`, input)
+
+const listVisitSales = (slug: string, bookingId: string, signal?: AbortSignal) =>
+  request<Sale[]>(`${manage(slug)}/sales?bookingId=${bookingId}`, { signal })
+
+const createSale = (slug: string, input: SaleInput) => post<Sale>(`${manage(slug)}/sales`, input)
+
+const cancelSale = (slug: string, saleId: string) =>
+  post<Sale>(`${manage(slug)}/sales/${saleId}/cancel`)
+
+const listExpenses = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
+  request<ExpenseList>(`${manage(slug)}/expenses?days=${days}`, { signal })
+
+const saveExpense = (slug: string, input: ExpenseInput, id?: string) =>
+  id
+    ? send<Expense>('PUT', `${manage(slug)}/expenses/${id}`, input)
+    : post<Expense>(`${manage(slug)}/expenses`, input)
+
+const deleteExpense = (slug: string, id: string) =>
+  send<void>('DELETE', `${manage(slug)}/expenses/${id}`)
+
+const getMoneyReport = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
+  request<MoneyReport>(`${manage(slug)}/money?days=${days}`, { signal })
 
 const uploadAvatar = (file: File) => upload<AvatarUpload>('/me/avatar', file)
 
@@ -874,6 +921,17 @@ export {
   deleteStockItem,
   receiveStock,
   adjustStock,
+  getCashDesk,
+  openCashShift,
+  addCashMovement,
+  closeCashShift,
+  listVisitSales,
+  createSale,
+  cancelSale,
+  listExpenses,
+  saveExpense,
+  deleteExpense,
+  getMoneyReport,
   setBonusPercent,
   createPromotion,
   deletePromotion,
