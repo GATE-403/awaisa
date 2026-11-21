@@ -77,7 +77,10 @@ test.describe('Business plans', () => {
     expect((await page.request.get(`${manage}/cash`)).status()).toBe(200)
   })
 
-  test('platform admins extend a plan by hand; owners cannot', async ({ page, isMobile }, testInfo) => {
+  test('platform admins extend a plan by hand; owners cannot', async ({
+    page,
+    isMobile,
+  }, testInfo) => {
     test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page)
     const manage = `/api/manage/${business.slug}`
@@ -115,9 +118,13 @@ test.describe('Business plans', () => {
   }) => {
     test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page, { ownerPhone: randomClientPhone() })
-    expect((await page.request.post(`/api/manage/${business.slug}/billing/checkout`, {
-      data: { kind: 'sms', packKey: 'sms500' },
-    })).status()).toBe(200)
+    expect(
+      (
+        await page.request.post(`/api/manage/${business.slug}/billing/checkout`, {
+          data: { kind: 'sms', packKey: 'sms500' },
+        })
+      ).status(),
+    ).toBe(200)
     const manage = `/api/manage/${business.slug}`
     // The trial's SMS are 300 per master; this month already used them up.
     await withDb((client) =>
