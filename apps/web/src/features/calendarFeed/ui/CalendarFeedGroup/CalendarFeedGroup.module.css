@@ -1,0 +1,47 @@
+.row:hover:not(:disabled) > span:first-child {
+  color: var(--color-link);
+}
+
+.row:active:not(:disabled) {
+  opacity: 0.6;
+}
+
+.value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted-foreground);
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* One line: the wide accent «Подписаться» and the glyph capsule, one height (40, 44 on phones),
+   like «Поделиться» on the cabinet's page. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.actions .primary {
+  flex: 1;
+  height: 40px;
+  min-height: 40px;
+}
+
+@media (max-width: 639px) {
+  .actions .primary {
+    height: 44px;
+    min-height: 44px;
+  }
+}
