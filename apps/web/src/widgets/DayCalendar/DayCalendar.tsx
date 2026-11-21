@@ -44,6 +44,7 @@ import { formatPhone } from '@/shared/lib/formatPhone'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { pluralWord } from '@/shared/lib/plural'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
+import { blockState } from './blockState'
 import {
   type CalendarLayout,
   COMPACT_BLOCK_PX,
@@ -165,8 +166,6 @@ const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
   return minutes === null ? null : render(minutes)
 }
 
-type BlockTone = 'plain' | 'accent' | 'warning' | 'success' | 'danger' | 'muted'
-
 // A visit's state as its own glyph, never a bare dot: waiting — a clock; under way — an
 // hourglass; ended unmarked — a dashed circle, a tick still to be put; came — a ticked circle;
 // did not come — a person taken away; cancelled — a struck circle; deposit not paid — a card.
@@ -183,26 +182,6 @@ const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
 const StateGlyph = ({ label }: { label: string }) => {
   const Glyph = STATE_GLYPHS[label]
   return Glyph ? <Glyph weight='bold' aria-hidden /> : null
-}
-
-// What a visit needs from the salon right now, read at a glance from the first chip.
-const blockState = (
-  booking: AdminBooking,
-  from: number,
-  to: number,
-  nowMinutes: number | null,
-  isPast: boolean,
-): { tone: BlockTone; label: string } => {
-  if (booking.status === 'cancelled') return { tone: 'muted', label: 'Отменена' }
-  if (booking.payment?.status === 'pending') return { tone: 'muted', label: 'Ждёт оплату' }
-  if (booking.outcome === 'arrived') return { tone: 'success', label: 'Пришёл' }
-  if (booking.outcome === 'no_show') return { tone: 'danger', label: 'Не пришёл' }
-  if (isPast || (nowMinutes !== null && to <= nowMinutes)) {
-    return { tone: 'warning', label: 'Не отмечен' }
-  }
-  if (nowMinutes !== null && from <= nowMinutes) return { tone: 'accent', label: 'Сейчас' }
-
-  return { tone: 'plain', label: 'Ждём' }
 }
 
 // Room left under the day before the window's foot.
