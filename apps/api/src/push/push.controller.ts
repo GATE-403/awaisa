@@ -5,6 +5,8 @@ import type { Customer } from '../customers/customer.entity.js'
 import {
   type SubscribeInput,
   subscribeSchema,
+  type TokenInput,
+  tokenSchema,
   type UnsubscribeInput,
   unsubscribeSchema,
 } from './push.schemas.js'
@@ -38,5 +40,27 @@ export class PushController {
     @Body({ schema: unsubscribeSchema }) body: UnsubscribeInput,
   ) {
     await this.push.unsubscribe(customer.id, body.endpoint)
+  }
+
+  // The Expo app's token, handed over by the web page inside it through the native bridge.
+  @Post('me/push-tokens')
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
+  async saveToken(
+    @CurrentCustomer() customer: Customer,
+    @Body({ schema: tokenSchema }) body: TokenInput,
+    @Headers('user-agent') userAgent: string | undefined,
+  ) {
+    await this.push.saveExpoToken(customer.id, body.token, userAgent ?? '')
+  }
+
+  @Delete('me/push-tokens')
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
+  async deleteToken(
+    @CurrentCustomer() customer: Customer,
+    @Body({ schema: tokenSchema }) body: TokenInput,
+  ) {
+    await this.push.deleteExpoToken(customer.id, body.token)
   }
 }
