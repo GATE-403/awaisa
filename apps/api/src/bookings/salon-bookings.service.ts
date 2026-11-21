@@ -97,17 +97,26 @@ export class SalonBookingsService {
     let covered = 0
     let coveredBy: 'subscription' | 'certificate' | null = null
     if (isArrived) {
-      const settled = await this.loyalty.applyToVisit(
-        {
-          id,
-          businessId,
-          phone: booking.customerPhone,
-          serviceId: booking.serviceId,
-          lines: services.map((service) => ({ serviceId: service.id, price: service.price })),
-          due,
-        },
-        input,
-      )
+      const visit = {
+        id,
+        businessId,
+        phone: booking.customerPhone,
+        serviceId: booking.serviceId,
+        lines: services.map((service) => ({ serviceId: service.id, price: service.price })),
+        due,
+      }
+      // Booked to be paid by a subscription: «Пришёл» alone draws the visit from it; one that
+      // ran out or expired meanwhile leaves the visit to be paid as usual.
+      const planned =
+        input.subscriptionId === undefined && booking.subscriptionId && !input.paidAmount
+          ? await this.loyalty
+              .applyToVisit(visit, { ...input, subscriptionId: booking.subscriptionId })
+              .catch((error: unknown) => {
+                if (error instanceof BadRequestException) return null
+                throw error
+              })
+          : null
+      const settled = planned ?? (await this.loyalty.applyToVisit(visit, input))
       covered = settled.covered
       coveredBy = settled.method
     } else {

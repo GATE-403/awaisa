@@ -43,6 +43,10 @@ import { PlaceReviews } from '@/views/booking/ui/PlaceReviews/PlaceReviews'
 import { PromoCodeField } from '@/views/booking/ui/PromoCodeField/PromoCodeField'
 import { QuickSlots } from '@/views/booking/ui/QuickSlots/QuickSlots'
 import { ServicePicker } from '@/views/booking/ui/ServicePicker/ServicePicker'
+import {
+  SubscriptionPaymentNote,
+  SubscriptionPaymentRow,
+} from '@/views/booking/ui/SubscriptionPayment/SubscriptionPayment'
 import styles from './BookingPage.module.css'
 
 interface BookingPageProps {
@@ -386,6 +390,18 @@ export const BookingPage = ({
     },
   }
 
+  const payment = form.subscriptionPayment
+  const isPaymentShown = payment.hasOptions && !form.isForOther
+  // Buying needs the client's own number: a guest signs in by SMS and comes back to the form.
+  const choosePayment = (choice: typeof payment.choice) => {
+    if (choice.startsWith('plan:') && !payment.isSignedIn) {
+      const back = `${window.location.pathname}${window.location.search}`
+      window.location.assign(`/login?next=${encodeURIComponent(back)}`)
+      return
+    }
+    payment.setChoice(choice)
+  }
+
   const summaryProps = {
     service: form.service,
     specialistLabel,
@@ -413,6 +429,14 @@ export const BookingPage = ({
       business.address ??
       null,
     onStepOpen: openStep,
+    paidWith: payment.subscription
+      ? { label: t('По абонементу'), total: null }
+      : payment.plan
+        ? {
+            label: t('Абонемент «{title}»', { title: payment.plan.title }),
+            total: payment.plan.price,
+          }
+        : null,
   }
 
   // A note, a code and the SMS options: under the contacts while they are typed, and on their
@@ -461,16 +485,31 @@ export const BookingPage = ({
             <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
           </button>
         )}
-        <PromoCodeField
-          className={styles.fieldRow}
-          code={form.promoCode}
-          error={form.promoCodeError}
-          quote={form.quote}
-          isWaitingForTime={!form.time}
-          onApply={form.applyPromoCode}
-          onClear={form.clearPromoCode}
-        />
+        {isPaymentShown && (
+          <SubscriptionPaymentRow
+            className={styles.fieldRow}
+            labelClassName={styles.extraLabel}
+            choice={payment.choice}
+            subscriptions={payment.subscriptions}
+            plans={payment.plans}
+            onChange={choosePayment}
+          />
+        )}
+        {!form.isPaidBySubscription && (
+          <PromoCodeField
+            className={styles.fieldRow}
+            code={form.promoCode}
+            error={form.promoCodeError}
+            quote={form.quote}
+            isWaitingForTime={!form.time}
+            onApply={form.applyPromoCode}
+            onClear={form.clearPromoCode}
+          />
+        )}
       </div>
+      {isPaymentShown && (
+        <SubscriptionPaymentNote subscription={payment.subscription} plan={payment.plan} />
+      )}
       <NotifyOptions
         phone={form.accountPhone ?? (form.phone.trim() || null)}
         smsConfirmation={form.smsConfirmation}

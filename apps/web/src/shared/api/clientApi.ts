@@ -34,6 +34,7 @@ import type {
   ClientNote,
   ClientSegment,
   ClientSort,
+  ClientSubscription,
   ClosedDay,
   CloseShiftInput,
   CoverUpload,
@@ -86,6 +87,7 @@ import type {
   MyLoyalty,
   NextFree,
   Offer,
+  OnlineSubscriptionPlan,
   OpenShiftInput,
   OtpRequest,
   OutcomeInput,
@@ -912,6 +914,16 @@ const sellSubscription = (slug: string, phone: string, planId: string) =>
 
 const getMyLoyalty = (signal?: AbortSignal) => request<MyLoyalty>('/me/loyalty', { signal })
 
+// Subscriptions sold online: the place's plans, buying one, and the client's own at a place.
+const getOnlineSubscriptionPlans = (slug: string, signal?: AbortSignal) =>
+  request<OnlineSubscriptionPlan[]>(`/businesses/${slug}/subscription-plans`, { signal })
+
+const orderSubscription = (slug: string, planId: string) =>
+  post<CheckoutLink>(`/businesses/${slug}/subscription-plans/${planId}/order`, {})
+
+const getMySubscriptionsAt = (slug: string, signal?: AbortSignal) =>
+  request<ClientSubscription[]>(`/me/subscriptions/${slug}`, { signal })
+
 const getMailings = (slug: string, signal?: AbortSignal) =>
   request<MailingsOverview>(`${manage(slug)}/mailings`, { signal })
 
@@ -972,6 +984,9 @@ export {
   getClientLoyalty,
   getLoyalty,
   getMyLoyalty,
+  getMySubscriptionsAt,
+  getOnlineSubscriptionPlans,
+  orderSubscription,
   issueCertificate,
   saveSubscriptionPlan,
   sellSubscription,

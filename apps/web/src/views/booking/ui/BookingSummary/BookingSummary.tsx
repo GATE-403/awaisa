@@ -34,6 +34,11 @@ interface BookingSummaryProps {
   address?: string | null
   /** The «Ваша запись» sheet shows this ticket (the cards of the stack) over the money rows. */
   ticket?: ReactNode
+  /**
+   * Paid by a subscription: its own (`total` null: nothing to pay, the label is said instead)
+   * or one bought with the visit (`total` is its price, paid now). No discount or deposit then.
+   */
+  paidWith?: { label: string; total: number | null } | null
 }
 
 // The button names the next thing to do (a bare «Далее» left people unsure that a time was still
@@ -81,10 +86,12 @@ export const BookingSummary = ({
   submitLabel,
   address = null,
   ticket,
+  paidWith = null,
 }: BookingSummaryProps) => {
   const t = useT()
-  const total = quote?.total ?? service?.price ?? null
-  const discount = quote?.discount ?? null
+  const total = paidWith ? paidWith.total : (quote?.total ?? service?.price ?? null)
+  const discount = paidWith ? null : (quote?.discount ?? null)
+  const deposit = paidWith ? null : (service?.deposit ?? null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const whenLabel = dayKey && time ? `${t.dayLong(dayKey)}, ${time}` : null
   const details = [
@@ -100,12 +107,13 @@ export const BookingSummary = ({
           },
         ]
       : []),
-    { label: t('Итого'), value: total !== null ? formatPrice(total) : null },
-    ...(service?.deposit
+    { label: t('Итого'), value: total !== null ? formatPrice(total) : (paidWith?.label ?? null) },
+    ...(paidWith ? [{ label: t('Оплата'), value: paidWith.label }] : []),
+    ...(deposit
       ? [
           {
             label: t('Предоплата'),
-            value: t('{amount} картой при записи', { amount: formatPrice(service.deposit) }),
+            value: t('{amount} картой при записи', { amount: formatPrice(deposit) }),
           },
         ]
       : []),
@@ -122,10 +130,10 @@ export const BookingSummary = ({
         step: STEPS.indexOf(firstIncompleteStep) + 1,
         total: STEPS.length,
       })
-    : service?.deposit
+    : deposit
       ? t('{when} · предоплата {amount}', {
           when: whenLabel ?? '',
-          amount: formatPrice(service.deposit),
+          amount: formatPrice(deposit),
         })
       : address
         ? `${shortWhen} · ${address}`
@@ -141,7 +149,7 @@ export const BookingSummary = ({
             {discount && service && (
               <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
             )}
-            {total !== null ? formatPrice(total) : t('Онлайн-запись')}
+            {total !== null ? formatPrice(total) : (paidWith?.label ?? t('Онлайн-запись'))}
             {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span
@@ -254,15 +262,16 @@ export const BookingSummary = ({
         <span>{t('Итого')}</span>
         <span>
           {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
-          {total !== null ? formatPrice(total) : '—'}
+          {total !== null ? formatPrice(total) : (paidWith?.label ?? '—')}
         </span>
       </div>
+      {paidWith && <p className={styles.deposit}>{paidWith.label}</p>}
       {/* Said before the click: the deposit is paid right after, the rest at the salon. */}
-      {service?.deposit ? (
+      {deposit ? (
         <p className={styles.deposit}>
           {t(
             'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
-            { amount: formatPrice(service.deposit) },
+            { amount: formatPrice(deposit) },
           )}
         </p>
       ) : null}

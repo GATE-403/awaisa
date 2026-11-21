@@ -3,7 +3,8 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
+import { getPaymentConfig } from '@/shared/api/clientApi'
 import type { Service, SubscriptionPlan, SubscriptionPlanInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
@@ -32,10 +33,21 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
   const [price, setPrice] = useState(plan ? String(plan.price) : '')
   const [validDays, setValidDays] = useState(plan?.validDays ?? 90)
   const [isActive, setIsActive] = useState(plan?.isActive ?? true)
+  const [isOnline, setIsOnline] = useState(plan?.isOnline ?? false)
+  // Sold online only through the acquirer: without one the switch is not drawn.
+  const [canPayOnline, setCanPayOnline] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const isValid = title.trim() !== '' && Number(visits) >= 1 && price !== ''
   const service = services.find((item) => item.id === serviceId)
   const fullPrice = service ? service.price * Number(visits || 0) : null
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getPaymentConfig(controller.signal)
+      .then((config) => setCanPayOnline(config.isAvailable))
+      .catch(() => setCanPayOnline(false))
+    return () => controller.abort()
+  }, [])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -48,6 +60,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
       price: Number(price),
       validDays,
       isActive,
+      isOnline: isOnline && canPayOnline,
     })
     setIsSaving(false)
     if (saved) onClose()
@@ -131,11 +144,23 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               <span className={sheet.rowLabel}>Продаётся</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
+            {canPayOnline && isActive && (
+              <label className={sheet.row}>
+                <span className={sheet.rowLabel}>Продавать онлайн</span>
+                <Switch checked={isOnline} onCheckedChange={setIsOnline} />
+              </label>
+            )}
           </div>
           {fullPrice !== null && price !== '' && Number(price) < fullPrice && (
             <p className={sheet.groupFooter}>
               По отдельности {Number(visits)} визитов стоят {fullPrice.toLocaleString('ru-RU')} сом
               — клиент экономит {(fullPrice - Number(price)).toLocaleString('ru-RU')} сом.
+            </p>
+          )}
+          {canPayOnline && isActive && isOnline && (
+            <p className={sheet.groupFooter}>
+              Клиенты купят его на странице места и при записи, оплатив картой. Абонемент появится у
+              клиента после оплаты.
             </p>
           )}
         </section>
