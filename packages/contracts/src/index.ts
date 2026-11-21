@@ -1409,10 +1409,36 @@ type AccountExport = {
     createdAt: string
   }[]
   loyalty: MyLoyalty
+  certificates: {
+    business: { slug: string; name: string }
+    code: string
+    amount: number
+    balance: number
+    expiresOn: string | null
+    createdAt: string
+  }[]
+  subscriptionOrders: {
+    business: { slug: string; name: string }
+    title: string
+    visits: number
+    amount: number
+    status: string
+    createdAt: string
+    paidAt: string | null
+  }[]
+  receipts: {
+    business: { slug: string; name: string }
+    kind: 'sale' | 'refund'
+    status: string
+    total: number
+    fiscalNumber: string | null
+    url: string | null
+    issuedAt: string | null
+  }[]
   waitlist: WaitlistEntry[]
   favorites: { master: { id: string; name: string; business: string } | null }
   notifications: {
-    push: { userAgent: string; createdAt: string; lastSuccessAt: string | null }[]
+    push: { kind: string; userAgent: string; createdAt: string; lastSuccessAt: string | null }[]
     telegram: { isLinked: boolean; linkedAt: string | null }
     businessChats: { business: string; username: string; createdAt: string }[]
   }

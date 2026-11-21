@@ -48,7 +48,7 @@ test.describe('Account data: export and deletion', () => {
     expect(data.bookings.map((item: { id: string }) => item.id)).toContain(booking.id)
     expect(data.reviews.map((item: { comment: string }) => item.comment)).toContain(comment)
     // Nothing that opens the account or a visit: no tokens, no hashes.
-    expect(JSON.stringify(data)).not.toMatch(/token|hash|cancelToken/i)
+    expect(JSON.stringify(data)).not.toMatch(/token|hash|p256dh|endpoint/i)
 
     await page.goto('/bookings?tab=settings')
     const download = page.getByRole('button', { name: /Скачать мои данные/ })

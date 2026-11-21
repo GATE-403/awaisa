@@ -39,6 +39,32 @@ export class AccountService {
   ) {}
 
   async export(customer: Customer): Promise<AccountExport> {
+    const [certificates, subscriptionOrders, receipts] = await Promise.all([
+      this.query(
+        `SELECT bz."slug", bz."name", g."code", g."amount", g."balance", to_char(g."expires_on", 'YYYY-MM-DD') AS "expiresOn",
+           g."created_at" AS "createdAt"
+         FROM "gift_certificates" g JOIN "businesses" bz ON bz."id" = g."business_id"
+         WHERE g."phone" = $1 ORDER BY g."created_at" DESC`,
+        [customer.phone],
+      ),
+      this.query(
+        `SELECT bz."slug", bz."name", o."title", o."visits", o."amount", o."status",
+           o."created_at" AS "createdAt", o."paid_at" AS "paidAt"
+         FROM "subscription_orders" o JOIN "businesses" bz ON bz."id" = o."business_id"
+         WHERE o."customer_id" = $1 OR o."phone" = $2 ORDER BY o."created_at" DESC`,
+        [customer.id, customer.phone],
+      ),
+      // Fiscal receipts of one's own visits (the address on the tax site, not internal ids).
+      this.query(
+        `SELECT bz."slug", bz."name", f."kind", f."status", f."total", f."fiscal_number" AS "fiscalNumber",
+           f."provider_url" AS "url", f."issued_at" AS "issuedAt"
+         FROM "fiscal_receipts" f
+         JOIN "bookings" b ON b."id" = f."booking_id"
+         JOIN "businesses" bz ON bz."id" = f."business_id"
+         WHERE b."customer_phone" = $1 ORDER BY f."created_at" DESC`,
+        [customer.phone],
+      ),
+    ])
     const [bookings, reviews, questions, loyalty, waitlist, master, push, telegram, chats, refs] =
       await Promise.all([
         this.bookings.listForCustomer(customer),
@@ -74,7 +100,7 @@ export class AccountService {
             )
           : Promise.resolve([]),
         this.query(
-          `SELECT "user_agent" AS "userAgent", "created_at" AS "createdAt",
+          `SELECT "kind", "user_agent" AS "userAgent", "created_at" AS "createdAt",
              "last_success_at" AS "lastSuccessAt"
            FROM "push_subscriptions" WHERE "customer_id" = $1 ORDER BY "created_at"`,
           [customer.id],
@@ -138,6 +164,32 @@ export class AccountService {
         createdAt: iso(row.createdAt) ?? '',
       })),
       loyalty,
+      certificates: certificates.map((row) => ({
+        business: { slug: String(row.slug), name: String(row.name) },
+        code: String(row.code),
+        amount: Number(row.amount),
+        balance: Number(row.balance),
+        expiresOn: row.expiresOn ? String(row.expiresOn).slice(0, 10) : null,
+        createdAt: iso(row.createdAt) ?? '',
+      })),
+      subscriptionOrders: subscriptionOrders.map((row) => ({
+        business: { slug: String(row.slug), name: String(row.name) },
+        title: String(row.title),
+        visits: Number(row.visits),
+        amount: Number(row.amount),
+        status: String(row.status),
+        createdAt: iso(row.createdAt) ?? '',
+        paidAt: iso(row.paidAt),
+      })),
+      receipts: receipts.map((row) => ({
+        business: { slug: String(row.slug), name: String(row.name) },
+        kind: row.kind === 'refund' ? ('refund' as const) : ('sale' as const),
+        status: String(row.status),
+        total: Number(row.total),
+        fiscalNumber: (row.fiscalNumber as string | null) ?? null,
+        url: (row.url as string | null) ?? null,
+        issuedAt: iso(row.issuedAt),
+      })),
       waitlist,
       favorites: {
         master: favoriteMaster
@@ -150,6 +202,7 @@ export class AccountService {
       },
       notifications: {
         push: push.map((row) => ({
+          kind: String(row.kind ?? 'web'),
           userAgent: String(row.userAgent ?? ''),
           createdAt: iso(row.createdAt) ?? '',
           lastSuccessAt: iso(row.lastSuccessAt),
@@ -224,6 +277,11 @@ export class AccountService {
       await manager.query('UPDATE "bookings" SET "customer_id" = NULL WHERE "customer_id" = $1', [
         customer.id,
       ])
+      // Online subscription purchases are the businesses' sales too: kept, no longer the account's.
+      await manager.query(
+        'UPDATE "subscription_orders" SET "customer_id" = NULL WHERE "customer_id" = $1',
+        [customer.id],
+      )
       await manager.query(
         `UPDATE "waitlist_entries" SET "status" = 'cancelled'
          WHERE ("customer_id" = $1 OR "customer_phone" = $2) AND "status" IN ('waiting', 'notified')`,
@@ -239,7 +297,7 @@ export class AccountService {
         [customer.phone],
       )
       await manager.query('DELETE FROM "otp_codes" WHERE "phone" = $1', [customer.phone])
-      // Sessions, push subscriptions, staff memberships and link codes go with it (ON DELETE CASCADE).
+      // Sessions, push subscriptions (web and Expo), staff memberships and link codes go with it (ON DELETE CASCADE).
       await manager.query('DELETE FROM "customers" WHERE "id" = $1', [customer.id])
 
       return [...new Set(anonymized.map((row) => String(row.slug)))]
