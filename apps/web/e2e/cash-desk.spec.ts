@@ -6,7 +6,13 @@ const SLUG = 'awaisa-studio'
 const PRODUCT = 'E2E Шампунь'
 const CATEGORY = 'E2E Касса'
 
-type Item = { id: string; name: string; quantity: number }
+type Item = {
+  id: string
+  name: string
+  quantity: number
+  isForSale: boolean
+  salePrice: number | null
+}
 type Shift = { id: string; branchId: string; expectedCash: number; difference: number | null }
 type Desk = {
   open: Shift[]
@@ -62,30 +68,47 @@ test.describe('Cash desk', () => {
     )) {
       await page.request.post(`${manage}/sales/${leftover.id}/cancel`)
     }
-    const expenses = (await (await page.request.get(`${manage}/expenses?days=7`)).json()) as {
-      items: { id: string; category: string }[]
-    }
-    for (const leftover of expenses.items.filter((item) => item.category === CATEGORY)) {
+    const listExpenses = async () =>
+      (
+        (await (await page.request.get(`${manage}/expenses?days=7`)).json()) as {
+          items: { id: string; category: string; amount: number; note: string | null }[]
+        }
+      ).items
+    for (const leftover of (await listExpenses()).filter(
+      (item) => item.category === CATEGORY || item.note === PRODUCT,
+    )) {
       await page.request.delete(`${manage}/expenses/${leftover.id}`)
     }
 
     try {
-      // A product on the shelf: ten bottles bought at 300, sold at 650.
-      const created = await page.request.post(`${manage}/stock`, {
-        data: {
-          name: PRODUCT,
-          unit: 'шт',
-          unitCost: 300,
-          minQuantity: null,
-          materials: [],
-          isForSale: true,
-          salePrice: 650,
-        },
-      })
-      expect(created.ok()).toBe(true)
-      const item = await product()
-      await page.request.post(`${manage}/stock/${item?.id}/receive`, { data: { quantity: 10 } })
-      expect((await product())?.quantity).toBe(10)
+      // A product set up in «Склад»: bought at 300, sold at 650; ten arrive and their cost
+      // goes to the expenses in the same step.
+      await page.goto(`/manage/${SLUG}?tab=stock`)
+      await page
+        .getByRole('button', { name: /Позиция|Добавить позицию/ })
+        .first()
+        .click()
+      const newItem = page.getByRole('dialog', { name: 'Новый расходник' })
+      await newItem.getByLabel('Название').fill(PRODUCT)
+      await newItem.getByRole('combobox', { name: 'Единица' }).click()
+      await page.getByRole('option', { name: 'шт', exact: true }).click()
+      await newItem.getByLabel('Цена за единицу, сом').fill('300')
+      await newItem.getByRole('switch', { name: 'Продаётся клиентам' }).click()
+      await newItem.getByLabel('Цена продажи, сом').fill('650')
+      await newItem.getByRole('button', { name: 'Сохранить' }).click()
+      await page.getByRole('button', { name: new RegExp(PRODUCT) }).click()
+      const itemSheet = page.getByRole('dialog', { name: 'Товар' })
+      await itemSheet.getByLabel('Приход').fill('10')
+      await expect(
+        itemSheet.getByRole('switch', { name: /Записать в расходы · 3 000 сом/ }),
+      ).toBeChecked()
+      await itemSheet.getByRole('button', { name: 'Принять' }).click()
+      await expect(page.getByText('Сумма закупки в «Расходах».')).toBeVisible()
+      await itemSheet.getByRole('button', { name: 'Отмена' }).click()
+      expect(await product()).toMatchObject({ quantity: 10, isForSale: true, salePrice: 650 })
+      expect(await listExpenses()).toContainEqual(
+        expect.objectContaining({ category: 'materials', amount: 3000, note: PRODUCT }),
+      )
 
       // The shift opens with the counted cash.
       await page.goto(`/manage/${SLUG}?tab=cash`)
@@ -133,14 +156,25 @@ test.describe('Cash desk', () => {
       await expense.getByRole('button', { name: 'Сохранить' }).click()
       await expect(page.getByRole('button', { name: new RegExp(CATEGORY) })).toBeVisible()
 
-      // The till expects the opening cash, the visit's cash and both sales; 100 short at closing.
+      // 200 taken out of the till for water, with the reason.
+      await page.getByRole('tab', { name: 'Смена', exact: true }).click()
+      await page.getByRole('button', { name: 'Внести или изъять' }).click()
+      const move = page.getByRole('dialog', { name: 'Деньги в кассе' })
+      await move.getByLabel('Сумма, сом').fill('200')
+      await move.getByLabel('Причина').fill('E2E вода')
+      await move.getByRole('button', { name: 'Записать' }).click()
+      await expect(page.getByText('Изъято', { exact: true }).first()).toBeVisible()
+      await expect(page.getByText('E2E вода')).toBeVisible()
+
+      // The till expects the opening cash, the visit's cash and both sales, minus what was
+      // taken out; 100 short at closing.
       const shift = (await desk()).open.find((item) => item.branchId === branchId)
       expect(shift).toBeTruthy()
-      expect(shift?.expectedCash).toBeGreaterThanOrEqual(5000 + visitPaid + 1300 + 650)
-      await page.getByRole('tab', { name: 'Смена', exact: true }).click()
+      expect(shift?.expectedCash).toBeGreaterThanOrEqual(5000 + visitPaid + 1300 + 650 - 200)
       await page.getByRole('button', { name: 'Закрыть смену' }).click()
       const closeSheet = page.getByRole('dialog', { name: 'Закрыть смену' })
       await expect(closeSheet.getByText('Наличные за товары')).toBeVisible()
+      await expect(closeSheet.getByText('Изъято')).toBeVisible()
       await closeSheet
         .getByLabel('Пересчитано наличных, сом')
         .fill(String((shift?.expectedCash ?? 0) - 100))
@@ -180,6 +214,19 @@ test.describe('Cash desk', () => {
       await expect(page.getByText('Продажа отменена')).toBeVisible()
       expect((await product())?.quantity).toBe(8)
       expect((await money()).products.find((row) => row.name === PRODUCT)?.quantity).toBe(2)
+
+      // The expense is deleted by holding its button; the profit no longer counts it.
+      await page.getByRole('tab', { name: 'Расходы' }).click()
+      await page.getByRole('button', { name: new RegExp(CATEGORY) }).click()
+      await page
+        .getByRole('dialog', { name: 'Расход' })
+        .getByRole('button', { name: /Удалить расход/ })
+        .click({ delay: 1300 })
+      await expect(page.getByText('Расход удалён')).toBeVisible()
+      await expect(page.getByRole('button', { name: new RegExp(CATEGORY) })).toHaveCount(0)
+      expect(
+        (await money()).expensesByCategory.find((row) => row.category === CATEGORY),
+      ).toBeUndefined()
     } finally {
       for (const open of (await desk()).open.filter((shift) => shift.branchId === branchId)) {
         await page.request.post(`${manage}/cash/shifts/${open.id}/close`, {

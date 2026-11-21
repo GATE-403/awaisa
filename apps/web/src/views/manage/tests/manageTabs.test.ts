@@ -27,11 +27,11 @@ describe('isTabAllowed', () => {
     }
   })
 
-  it('gives an administrator the day only: schedule, clients and reviews', () => {
+  it('gives an administrator the day only: schedule, clients, the cash desk and reviews', () => {
     const allowed = [...MAIN_TABS, ...SETTINGS_TABS, { value: 'settings' as const }]
       .filter((tab) => isTabAllowed(tab.value, 'staff'))
       .map((tab) => tab.value)
-    expect(allowed).toEqual(['schedule', 'clients', 'reviews'])
+    expect(allowed).toEqual(['schedule', 'clients', 'cash', 'reviews'])
   })
 })
 
