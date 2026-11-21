@@ -1,8 +1,10 @@
 'use client'
 
+import { useToast } from '@awaisa/ui/Toast'
 import { Bell, Clock, HourglassMedium, Phone } from '@phosphor-icons/react/ssr'
 import { useSyncExternalStore } from 'react'
 import { parseClock } from '@/entities/business'
+import { INSTALL_HINT, usePushAlerts } from '@/features/pushAlerts'
 import type { AdminBooking } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import styles from './NowBar.module.css'
@@ -34,7 +36,9 @@ const formatWait = (minutes: number) => {
 // of the visit is done) and who is next (with the countdown and a call button). A tile opens
 // its booking.
 export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
+  const toast = useToast()
   const permission = useSyncExternalStore(subscribeNoop, getPermission, () => 'denied')
+  const push = usePushAlerts()
   const live = bookings
     .filter((booking) => booking.status === 'confirmed')
     .sort((first, second) => first.time.localeCompare(second.time))
@@ -51,8 +55,26 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   // Nothing in the chair and nothing ahead: no row at all — the calendar under it says enough.
   if (!current && !next) return null
 
-  const enableNotifications = () => {
-    void Notification.requestPermission()
+  // With Web Push on the server the bell subscribes this device (pushes with the cabinet closed);
+  // without it, it only lets the open tab show system notices, as before.
+  const isPushOffered = push.state === 'off' || push.state === 'install'
+  const isBellShown = isPushOffered || (push.state === 'unsupported' && permission === 'default')
+
+  const enableNotifications = async () => {
+    if (push.state === 'install') {
+      toast.show({ title: 'Уведомления на iPhone', description: INSTALL_HINT, type: 'info' })
+      return
+    }
+    if (push.state !== 'off') {
+      void Notification.requestPermission()
+      return
+    }
+    try {
+      const isOn = await push.enable()
+      if (isOn) toast.show({ title: 'Уведомления включены', type: 'success' })
+    } catch {
+      toast.show({ title: 'Не получилось включить уведомления', type: 'error' })
+    }
   }
 
   return (
@@ -99,11 +121,11 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           )}
         </span>
       )}
-      {permission === 'default' && (
+      {isBellShown && (
         <button
           type='button'
           className={styles.notify}
-          onClick={enableNotifications}
+          onClick={() => void enableNotifications()}
           title='Уведомлять о новых записях'
         >
           <Bell aria-hidden />

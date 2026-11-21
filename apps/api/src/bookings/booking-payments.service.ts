@@ -6,6 +6,7 @@ import { CacheService } from '../cache/cache.service.js'
 import { Customer } from '../customers/customer.entity.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage } from '../notifications/messages.js'
+import { PushService } from '../push/push.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { newBookingText } from '../telegram/telegram-messages.js'
 import { Booking } from './booking.entity.js'
@@ -22,6 +23,7 @@ export class BookingPaymentsService {
     private readonly payments: PaymentsService,
     private readonly clientMessages: ClientMessagesService,
     private readonly telegram: TelegramBotService,
+    private readonly push: PushService,
     private readonly cache: CacheService,
   ) {}
 
@@ -70,6 +72,7 @@ export class BookingPaymentsService {
         customerPhone: booking.customerPhone,
       }),
     )
+    void this.push.notifyBooking('created', view, booking.businessId)
 
     return view
   }

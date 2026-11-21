@@ -22,6 +22,7 @@ import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage, rescheduleMessage } from '../notifications/messages.js'
 import { PromotionsService } from '../promotions/promotions.service.js'
+import { PushService } from '../push/push.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
 import { AvailabilityService } from './availability.service.js'
@@ -45,6 +46,7 @@ export class BookingsService {
     readonly _businesses: BusinessesService,
     private readonly clientMessages: ClientMessagesService,
     private readonly telegram: TelegramBotService,
+    private readonly push: PushService,
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
     private readonly promotions: PromotionsService,
@@ -175,6 +177,7 @@ export class BookingsService {
             service.businessId,
             newBookingText(view.business.name, view.date, { ...view, customerPhone: phone }),
           )
+          void this.push.notifyBooking('created', view, service.businessId)
         }
 
         return { ...view, cancelToken, customerPhone: phone, comment: input.comment }
@@ -253,13 +256,12 @@ export class BookingsService {
       )
     }
     const before = toBusinessParts(booking.startsAt)
+    const previous = `${before.dateKey} ${formatMinutes(before.minutes)}`
     void this.telegram.notifyBusiness(
       booking.businessId,
-      movedByClientText(view.business.name, view.date, {
-        ...view,
-        previous: `${before.dateKey} ${formatMinutes(before.minutes)}`,
-      }),
+      movedByClientText(view.business.name, view.date, { ...view, previous }),
     )
+    void this.push.notifyBooking('moved', { ...view, previous }, booking.businessId)
 
     return view
   }
@@ -360,6 +362,7 @@ export class BookingsService {
           booking.businessId,
           cancelledText(view.business.name, view.date, view),
         )
+        await this.push.notifyBooking('cancelled', view, booking.businessId)
       })().catch(() => undefined)
     }, UNDO_WINDOW_SECONDS * 1000).unref()
   }
