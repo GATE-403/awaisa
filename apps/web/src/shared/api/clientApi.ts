@@ -96,6 +96,7 @@ import type {
   PublicProfile,
   PushConfig,
   PushSubscriptionInput,
+  PushTokenInput,
   RecentBooking,
   Recommendation,
   ReviewAccess,
@@ -501,6 +502,11 @@ const savePushSubscription = (subscription: PushSubscriptionInput) =>
 
 const deletePushSubscription = (endpoint: string) =>
   send<void>('DELETE', '/me/push-subscriptions', { endpoint })
+
+// The app's own pushes: its Expo token, handed over through the native bridge.
+const savePushToken = (input: PushTokenInput) => post<void>('/me/push-tokens', input)
+
+const deletePushToken = (input: PushTokenInput) => send<void>('DELETE', '/me/push-tokens', input)
 
 const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<AnalyticsReport>(
@@ -1042,6 +1048,8 @@ export {
   getPushConfig,
   savePushSubscription,
   deletePushSubscription,
+  savePushToken,
+  deletePushToken,
   getAvailability,
   getMyProfileSettings,
   getProfile,
