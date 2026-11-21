@@ -187,13 +187,26 @@ type Availability = {
 
 type BookingStatus = 'confirmed' | 'cancelled'
 
+// One service of a visit; a visit may have several, done one after another by one master.
+type BookingService = {
+  id: string
+  name: string
+  price: number
+  durationMinutes: number
+}
+
 type Booking = {
   id: string
   status: BookingStatus
+  /** The visit's first service. */
   serviceId: string
+  /** Every service's name joined with « + » («Маникюр + Педикюр»). */
   serviceName: string
+  /** The whole visit: every service added up. */
   price: number
   durationMinutes: number
+  /** Every service of the visit in order, the first one included. Missing in old device copies. */
+  services?: BookingService[]
   specialistId: string
   specialistName: string
   date: string
@@ -752,6 +765,8 @@ type SlugCheck = { available: boolean; reason?: string }
 
 type CreateBookingInput = {
   serviceId: string
+  /** Services done in the same visit after `serviceId`, by the same master, one after another. */
+  extraServiceIds?: string[]
   specialistId: string
   date: string
   time: string
@@ -1597,6 +1612,7 @@ export type {
   BookingStatus,
   Catalog,
   Category,
+  BookingService,
   CreateBookingInput,
   BookingPayment,
   CreatedBooking,
