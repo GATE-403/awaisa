@@ -4,13 +4,14 @@ import { pluralize } from '@/shared/lib/plural'
 const money = new Intl.NumberFormat('ru-RU')
 const som = (value: number) => `${money.format(value)} сом`
 
-/** One line for the «Зарплата» row: «40% · 2 ставки · оклад 30 000 в месяц · минимум 20 000». */
+/** One line for the «Зарплата» row: «40% · 2 ставки · 5% с товаров · оклад 30 000 в месяц · минимум 20 000». */
 const describePayScheme = (scheme: MasterPayScheme) => {
   const parts = [
     scheme.percent === null ? null : `${scheme.percent}%`,
     scheme.rates.length === 0
       ? null
       : pluralize(scheme.rates.length, ['ставка', 'ставки', 'ставок']),
+    scheme.productsPercent === null ? null : `${scheme.productsPercent}% с товаров`,
     scheme.salary === null
       ? null
       : `оклад ${money.format(scheme.salary.amount)} ${scheme.salary.kind === 'month' ? 'в месяц' : 'в день'}`,
@@ -23,6 +24,7 @@ const describePayScheme = (scheme: MasterPayScheme) => {
 const plainPercent = (pay: MasterPay, percent: number | null) =>
   percent !== null &&
   pay.salary === 0 &&
+  pay.products === 0 &&
   pay.minimum === null &&
   pay.lines.every((line) => line.kind === 'percent' && line.rate === percent)
     ? percent

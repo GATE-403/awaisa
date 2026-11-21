@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { Cron } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { BillingService, PlanRequiredException } from '../billing/billing.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { toBusinessParts } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
@@ -39,6 +40,7 @@ export class MailingsService {
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly sms: SmsService,
     private readonly config: ConfigService<Env, true>,
+    private readonly billing: BillingService,
   ) {}
 
   async preview(businessId: string, segment: Segment, days: number) {
@@ -57,6 +59,13 @@ export class MailingsService {
     )
     if (recent) throw new ConflictException('Эта рассылка уже уходила сегодня — повторите завтра')
     const recipients = (await this.recipients(business.id, segment, days)).slice(0, MAX_RECIPIENTS)
+    // A mailing goes whole or not at all: past the month's SMS and packs it is refused.
+    const left = await this.billing.smsLeft(business.id)
+    if (left !== null && recipients.length > left) {
+      throw new PlanRequiredException(
+        `В этом месяце осталось ${left} SMS, а рассылка на ${recipients.length}. Пакет SMS можно купить в «Тарифе»`,
+      )
+    }
     const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/${business.slug}/book`
     await this.query(
       `INSERT INTO "mailings" ("business_id", "segment", "lapsed_days", "text", "recipients")
@@ -64,6 +73,7 @@ export class MailingsService {
       [business.id, segment, segment === 'lapsed' ? days : null, text, recipients.length],
     )
     for (const recipient of recipients) {
+      await this.billing.takeSms(business.id, { isOptional: false })
       void this.sms.sendSafely(recipient.phone, renderMailing(text, recipient.name, link))
     }
     this.logger.log(`Mailing «${segment}» for ${business.slug}: ${recipients.length}`)
@@ -124,6 +134,8 @@ export class MailingsService {
           [business.id, recipient.phone, year],
         )
         if (!claimed) continue
+        const hasSms = await this.billing.takeSms(String(business.id), { isOptional: true })
+        if (!hasSms) continue
         void this.sms.sendSafely(
           recipient.phone,
           renderMailing(

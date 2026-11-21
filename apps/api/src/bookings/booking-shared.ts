@@ -35,6 +35,8 @@ type BookingView = {
   review: { rating: number; comment: string; reply: string | null } | null
   /** The salon marked «Не пришёл»: such a visit is never asked to be rated. */
   isNoShow: boolean
+  /** Paid by the client's subscription, drawn when the salon marks «Пришёл». */
+  isBySubscription: boolean
   business: {
     slug: string
     name: string
@@ -124,6 +126,7 @@ const toView = (booking: Booking): BookingView => {
           }
         : null,
     isNoShow: booking.outcome === 'no_show',
+    isBySubscription: Boolean(booking.subscriptionId),
     review: booking.review
       ? {
           rating: booking.review.rating,

@@ -154,6 +154,8 @@ type BusinessPage = {
   catalog: Catalog
   /** Cabinet only: the viewer's role; staff (administrators) see no money or setup. */
   role?: 'owner' | 'staff'
+  /** Cabinet only: the business's plan now and what it opens. */
+  access?: PlanAccess
 }
 
 type TeamMember = { id: string; phone: string; name: string; role: 'owner' | 'admin' }
@@ -222,6 +224,8 @@ type Booking = {
   review?: { rating: number; comment: string; reply: string | null } | null
   /** The salon marked «Не пришёл»: nothing to rate. */
   isNoShow?: boolean
+  /** Paid by the client's subscription: the visit is drawn from it when the salon marks «Пришёл». */
+  isBySubscription?: boolean
   business: BookingBusiness
 }
 
@@ -581,6 +585,21 @@ type SubscriptionPlan = {
   price: number
   validDays: number
   isActive: boolean
+  /** Sold on the place's page and in the booking form. */
+  isOnline: boolean
+}
+
+// A plan sold online, as the place's page shows it (`GET /businesses/:slug/subscription-plans`).
+type OnlineSubscriptionPlan = {
+  id: string
+  title: string
+  serviceId: string | null
+  serviceName: string | null
+  visits: number
+  price: number
+  validDays: number
+  /** What the visits cost one by one (null = any service); the client saves the difference. */
+  fullPrice: number | null
 }
 
 type SubscriptionPlanInput = Omit<SubscriptionPlan, 'id' | 'serviceName'>
@@ -817,6 +836,10 @@ type CreateBookingInput = {
   promoCode?: string
   /** Who invited this client (`?ref=` from a profile link). */
   ref?: string
+  /** Pay with the signed-in client's subscription (drawn when the salon marks «Пришёл»). */
+  subscriptionId?: string
+  /** Buy this online plan and book: the booking waits for the payment like a deposit. */
+  subscriptionPlanId?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -1166,6 +1189,8 @@ type MasterPayScheme = {
   salary: { kind: SalaryKind; amount: number } | null
   /** Guaranteed per month (counted per calendar day): pay is the larger of it and the earned. */
   minimum: number | null
+  /** Percent of the products the master sold at the counter («Продал» in a sale). */
+  productsPercent: number | null
 }
 
 type MasterPayout = {
@@ -1197,13 +1222,17 @@ type MasterPay = {
   /** From the services. */
   services: number
   lines: MasterPayLine[]
+  /** From the products they sold: `productsSold` at `productsPercent`. */
+  products: number
+  /** What the products they sold came to (sales not cancelled). */
+  productsSold: number
   salary: number
   salaryKind: SalaryKind | null
   /** Working days of the schedule in the period (what a daily salary counts). */
   workDays: number
   /** The minimum for the period, null = none. */
   minimum: number | null
-  /** services + salary */
+  /** services + products + salary */
   earned: number
   /** max(earned, minimum) */
   total: number
@@ -1215,7 +1244,7 @@ type MasterPay = {
 }
 
 type MasterDayPay = {
-  /** The day's services (and a daily salary on a working day). */
+  /** The day's services and products sold (and a daily salary on a working day). */
   day: number
   /** The month of the day, up to the day or today: everything, salary and minimum included. */
   month: number
@@ -1607,12 +1636,105 @@ type PushSubscriptionInput = {
 /** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
+// Plans for businesses («Настройки → Тариф»). Plans are rows: prices and limits are data.
+type PlanFeature =
+  | 'cashdesk'
+  | 'inventory'
+  | 'analytics'
+  | 'loyalty'
+  | 'promotions'
+  | 'mailings'
+  | 'import'
+  | 'payroll'
+  | 'team'
+  | 'deposits'
+
+type BillingPlan = {
+  key: string
+  title: string
+  description: string
+  monthlyPrice: number
+  /** Masters the monthly price covers; each further active master adds `extraMasterPrice`. */
+  includedMasters: number
+  extraMasterPrice: number
+  /** null: no limit. */
+  maxMasters: number | null
+  maxBranches: number | null
+  /** SMS a month on top of `smsPerMaster` × masters; null: no limit. */
+  smsPerMonth: number | null
+  smsPerMaster: number
+  features: PlanFeature[]
+  trialDays: number
+}
+
+/** lifetime: the plan of businesses from before plans; expired: back on the free plan. */
+type PlanStatus = 'lifetime' | 'active' | 'trial' | 'free' | 'expired'
+
+/** What the cabinet needs to lock sections: the plan now and its features. */
+type PlanAccess = {
+  planKey: string
+  title: string
+  status: PlanStatus
+  /** When the trial or the paid period ends; null for lifetime and free. */
+  endsAt: string | null
+  features: PlanFeature[]
+  /** The plan that opens locked features («Доступно на тарифе «Бизнес»»). */
+  upgradeTitle: string | null
+}
+
+type SmsPack = { key: string; size: number; price: number }
+
+type BillingPrice = { months: number; amount: number }
+
+type BillingOrderView = { id: string; title: string; amount: number; paidAt: string }
+
+// `GET /manage/:slug/billing` (owners).
+type BusinessBilling = {
+  access: PlanAccess
+  plans: BillingPlan[]
+  smsPacks: SmsPack[]
+  usage: {
+    masters: number
+    branches: number
+    /** SMS sent this month (Bishkek time). */
+    smsSent: number
+    /** The month's SMS on the current plan; null: no limit. */
+    smsAllowance: number | null
+    /** Bought SMS still left (packs). */
+    smsExtra: number
+  }
+  /** What paying the paid plan costs now, for 1 and 12 months, with today's masters. */
+  prices: BillingPrice[]
+  /** The plan these prices are for (the cheapest public paid one). */
+  paidPlanKey: string | null
+  orders: BillingOrderView[]
+  /** Whether payments can be taken (PAYMENT_DRIVER is not «none»). */
+  isPaymentAvailable: boolean
+}
+
+type BillingCheckoutInput =
+  | { kind: 'plan'; planKey: string; months: number }
+  | { kind: 'sms'; packKey: string }
+
+/** Platform admins: extend by months, or make lifetime. */
+type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
+
 export type {
   CertificateOrderCreated,
   CertificateOrderInput,
   CertificateSale,
   CertificateSaleSettings,
   PaymentOrder,
+  BillingCheckoutInput,
+  BillingExtendInput,
+  BillingOrderView,
+  BillingPlan,
+  BillingPrice,
+  BusinessBilling,
+  PlanAccess,
+  PlanFeature,
+  PlanStatus,
+  SmsPack,
   PushConfig,
   PushMessage,
   PushSubscriptionInput,
@@ -1761,6 +1883,7 @@ export type {
   JoinWaitlistInput,
   ManagedWaitlistEntry,
   PaymentPage,
+  OnlineSubscriptionPlan,
   PriceQuote,
   Promotion,
   PromotionInput,

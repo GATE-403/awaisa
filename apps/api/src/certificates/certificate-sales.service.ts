@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { BillingService } from '../billing/billing.service.js'
 import { PaymentsService } from '../bookings/payments.service.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
@@ -53,6 +54,7 @@ export class CertificateSalesService implements OnModuleInit {
     private readonly clientMessages: ClientMessagesService,
     private readonly telegram: TelegramBotService,
     private readonly config: ConfigService<Env, true>,
+    private readonly billing: BillingService,
   ) {}
 
   onModuleInit() {
@@ -227,6 +229,8 @@ export class CertificateSalesService implements OnModuleInit {
     )
     const amounts = ((row?.amounts as number[] | undefined) ?? []).map(Number)
     if (!row || amounts.length === 0) return null
+    // Selling online is part of loyalty: a plan without it sells nothing (the cabinet locks it too).
+    if (!(await this.billing.hasFeature(String(row.id), 'loyalty'))) return null
     return { id: String(row.id), name: String(row.name), amounts }
   }
 

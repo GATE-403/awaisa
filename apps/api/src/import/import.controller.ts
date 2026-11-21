@@ -1,5 +1,6 @@
 import type { ImportReport } from '@awaisa/contracts'
 import { Body, Controller, Post, UseGuards } from '@nestjs/common'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -14,6 +15,7 @@ import {
 } from './import.schemas.js'
 import { ImportService } from './import.service.js'
 
+@RequiresFeature('import')
 @Controller('manage/:slug/import')
 @UseGuards(BusinessAccessGuard)
 @OwnerOnly()

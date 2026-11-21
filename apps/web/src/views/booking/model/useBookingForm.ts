@@ -25,6 +25,7 @@ import { haptic } from '@/shared/lib/nativeBridge'
 import { trackFormError } from '@/shared/lib/telemetry'
 import { combineServices, getAddableServices, getMastersForAll } from '../lib/visitServices'
 import { usePriceQuote } from './usePriceQuote'
+import { useSubscriptionPayment } from './useSubscriptionPayment'
 
 type ReminderChoice = 60 | 120 | 1440 | null
 
@@ -193,6 +194,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     code: promoCode,
     phone: accountPhone ?? phone,
   })
+  const subscriptionPayment = useSubscriptionPayment(business.slug, serviceId)
+  const isPaidBySubscription = Boolean(subscriptionPayment.subscription || subscriptionPayment.plan)
   const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
@@ -508,8 +511,11 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         branchId,
         smsConfirmation,
         reminderMinutes,
-        promoCode: promoCode && !codeError ? promoCode : undefined,
+        promoCode: promoCode && !codeError && !isPaidBySubscription ? promoCode : undefined,
         ref: readRef(),
+        // Paid by a subscription: one's own at this place, or one bought now with the visit.
+        subscriptionId: isForOther ? undefined : subscriptionPayment.subscription?.id,
+        subscriptionPlanId: isForOther ? undefined : subscriptionPayment.plan?.id,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       // Someone else's name and number are not the guest's own next time.
@@ -603,6 +609,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     reminderMinutes,
     setReminderMinutes,
     quote,
+    subscriptionPayment,
+    isPaidBySubscription,
     promoCode,
     promoCodeError: codeError,
     applyPromoCode: (code: string) => setPromoCode(code.trim().toUpperCase() || null),
