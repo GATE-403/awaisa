@@ -3,15 +3,10 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { MapPin, Phone } from '@phosphor-icons/react/ssr'
 import { type ReactNode, useRef, useState } from 'react'
-import {
-  describeDeposit,
-  formatDayLong,
-  formatDuration,
-  formatPrice,
-  Ticket,
-} from '@/entities/booking'
+import { formatPrice, PAYMENT_STATUS_TEXT, Ticket } from '@/entities/booking'
 import { addMinutes } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -33,6 +28,7 @@ const toFileName = (booking: Booking) =>
 const getBookingCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
 export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => {
+  const t = useT()
   const code = getBookingCode(booking.id)
   const toast = useToast()
   const ticketRef = useRef<HTMLDivElement>(null)
@@ -55,7 +51,10 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
       // can share files too, but their sheet offers «Копировать» first, so they get a real file.
       const isTouch = window.matchMedia('(pointer: coarse)').matches
       if (isTouch && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: `Талон: ${booking.serviceName}` })
+        await navigator.share({
+          files: [file],
+          title: t('Талон: {service}', { service: booking.serviceName }),
+        })
       } else {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
@@ -70,7 +69,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
       haptic('success')
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: 'Не получилось сохранить талон', type: 'error' })
+      toast.show({ title: t('Не получилось сохранить талон'), type: 'error' })
     } finally {
       setIsSaving(false)
     }
@@ -78,11 +77,11 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
 
   return (
     <Sheet
-      title='Талон'
-      cancelLabel='Закрыть'
+      title={t('Талон')}
+      cancelLabel={t('Закрыть')}
       onClose={onClose}
       action={{
-        label: isSaving ? 'Сохраняем…' : 'Скачать',
+        label: isSaving ? t('Сохраняем…') : t('Скачать'),
         onClick: download,
         disabled: isSaving,
       }}
@@ -91,59 +90,65 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
         <div ref={ticketRef} className={styles.ticket}>
           <Ticket booking={booking} />
         </div>
-        <p className={styles.hint}>Покажите на ресепшене. «Скачать» сохранит картинкой.</p>
+        <p className={styles.hint}>{t('Покажите на ресепшене. «Скачать» сохранит картинкой.')}</p>
         {extra}
       </div>
 
       {/* Everything about the visit, not just what fits on the ticket. */}
-      <section className={sheet.group} aria-label='О визите'>
-        <SectionCaption>О визите</SectionCaption>
+      <section className={sheet.group} aria-label={t('О визите')}>
+        <SectionCaption>{t('О визите')}</SectionCaption>
         <dl className={`${sheet.list} ${styles.details}`}>
           <div className={styles.detail}>
-            <dt>Когда</dt>
+            <dt>{t('Когда')}</dt>
             <dd>
-              {formatDayLong(booking.date)}, {booking.time}–
+              {t.dayLong(booking.date)}, {booking.time}–
               {addMinutes(booking.time, booking.durationMinutes)}
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>Услуга</dt>
+            <dt>{t('Услуга')}</dt>
             <dd>
-              {booking.serviceName} · {formatDuration(booking.durationMinutes)}
+              {booking.serviceName} · {t.duration(booking.durationMinutes)}
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>Мастер</dt>
+            <dt>{t('Мастер')}</dt>
             <dd>{booking.specialistName}</dd>
           </div>
           <div className={styles.detail}>
-            <dt>Стоимость</dt>
+            <dt>{t('Стоимость')}</dt>
             <dd>
               {formatPrice(booking.price - (booking.discount?.amount ?? 0))}
               {booking.discount && (
                 <span className={styles.note}>
-                  со скидкой «{booking.discount.title}» −{formatPrice(booking.discount.amount)}
+                  {t('со скидкой «{title}» −{amount}', {
+                    title: booking.discount.title,
+                    amount: formatPrice(booking.discount.amount),
+                  })}
                 </span>
               )}
               <span className={styles.note}>
                 {booking.payment
-                  ? `${describeDeposit(booking.payment)}${booking.payment.status === 'paid' ? ', остальное в салоне' : ''}`
-                  : 'оплата в салоне — наличными или картой'}
+                  ? `${t('Предоплата {amount} {status}', {
+                      amount: formatPrice(booking.payment.amount),
+                      status: t(PAYMENT_STATUS_TEXT[booking.payment.status]),
+                    })}${booking.payment.status === 'paid' ? t(', остальное в салоне') : ''}`
+                  : t('оплата в салоне — наличными или картой')}
               </span>
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>Номер</dt>
+            <dt>{t('Номер')}</dt>
             <dd className={styles.code}>{code}</dd>
           </div>
           <div className={styles.detail}>
-            <dt>Статус</dt>
-            <dd>{booking.status === 'cancelled' ? 'Отменена' : 'Подтверждена'}</dd>
+            <dt>{t('Статус')}</dt>
+            <dd>{booking.status === 'cancelled' ? t('Отменена') : t('Подтверждена')}</dd>
           </div>
         </dl>
       </section>
 
-      <section className={sheet.group} aria-label='Где'>
+      <section className={sheet.group} aria-label={t('Где')}>
         <SectionCaption>{booking.business.name}</SectionCaption>
         <div className={sheet.list}>
           {booking.business.address && (
@@ -160,7 +165,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 <MapPin weight='regular' aria-hidden />
                 {booking.business.address}
               </span>
-              <span className={styles.rowAction}>Маршрут</span>
+              <span className={styles.rowAction}>{t('Маршрут')}</span>
             </a>
           )}
           {booking.business.phone && (
@@ -169,7 +174,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 <Phone weight='regular' aria-hidden />
                 {formatPhone(booking.business.phone)}
               </span>
-              <span className={styles.rowAction}>Позвонить</span>
+              <span className={styles.rowAction}>{t('Позвонить')}</span>
             </a>
           )}
         </div>

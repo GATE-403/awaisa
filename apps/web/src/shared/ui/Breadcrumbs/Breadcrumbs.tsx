@@ -1,4 +1,5 @@
 import NextLink from 'next/link'
+import { T } from '@/shared/i18n'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import styles from './Breadcrumbs.module.css'
@@ -28,12 +29,12 @@ export const Breadcrumbs = ({ items, align = 'start', className }: BreadcrumbsPr
             <li key={item.href} className={styles.item}>
               {isLast ? (
                 <span className={styles.current} aria-current='page'>
-                  {item.label}
+                  <T>{item.label}</T>
                 </span>
               ) : (
                 <>
                   <NextLink href={item.href} className={styles.link}>
-                    {item.label}
+                    <T>{item.label}</T>
                   </NextLink>
                   <span className={styles.separator} aria-hidden>
                     ›

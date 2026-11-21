@@ -23,6 +23,7 @@ import {
   isStandalonePath,
 } from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { Logo } from '@/shared/ui/Logo/Logo'
@@ -38,14 +39,15 @@ const ACTIONS = [
 
 // A marketplace header: logo, «Каталог», the search field, labelled actions; categories below.
 export const Header = () => {
+  const t = useT()
   const pathname = useChromePathname()
   const searchParams = useSearchParams()
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
   const _isSignedIn = status === 'signedIn'
   const accountLabel = customer
-    ? `Записи и профиль: ${customer.name || customer.phone}`
-    : 'Записи и профиль'
+    ? t('Записи и профиль: {name}', { name: customer.name || customer.phone })
+    : t('Записи и профиль')
   const currentKind = pathname === '/' ? searchParams.get('kind') : null
   const headerRef = useRef<HTMLElement>(null)
   // The cabinet and sign-in are screens of their own: no site navigation there.
@@ -122,7 +124,7 @@ export const Header = () => {
       }
     >
       <div className={styles.inner}>
-        <NextLink href='/' className={styles.home} aria-label='На главную'>
+        <NextLink href='/' className={styles.home} aria-label={t('На главную')}>
           <Logo />
         </NextLink>
         <NextLink
@@ -131,25 +133,25 @@ export const Header = () => {
           aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
         >
           <Compass weight='fill' aria-hidden />
-          Каталог
+          {t('Каталог')}
         </NextLink>
         {!isSlim && (
           <div className={styles.search}>
             <HeaderSearch />
           </div>
         )}
-        <nav className={styles.actions} aria-label='Основное меню'>
+        <nav className={styles.actions} aria-label={t('Основное меню')}>
           {actions.map(({ href, label, icon: Icon }) => (
             <NextLink
               key={href}
               href={href}
               className={styles.action}
               data-mobile={href === '/map' || undefined}
-              aria-label={label}
+              aria-label={t(label)}
               aria-current={isActivePath(pathname, href) ? 'page' : undefined}
             >
               <Icon weight={isActivePath(pathname, href) ? 'fill' : 'regular'} aria-hidden />
-              <span>{label}</span>
+              <span>{t(label)}</span>
             </NextLink>
           ))}
           <NextLink
@@ -162,7 +164,7 @@ export const Header = () => {
             {/* Signed in, the profile is the person's own face (their photo or initials). */}
             {customer ? (
               <PersonAvatar
-                name={customer.name || 'Профиль'}
+                name={customer.name || t('Профиль')}
                 src={customer.avatarUrl ?? undefined}
                 size='sm'
                 className={styles.accountAvatar}
@@ -172,14 +174,14 @@ export const Header = () => {
               <UserCircle weight='regular' aria-hidden />
             )}
             <span className={styles.accountName} aria-hidden='true'>
-              {customer?.name || 'Профиль'}
+              {customer?.name || t('Профиль')}
             </span>
           </NextLink>
         </nav>
       </div>
 
       {hasCategories && (
-        <nav className={styles.categories} aria-label='Категории'>
+        <nav className={styles.categories} aria-label={t('Категории')}>
           <div className={styles.categoriesInner}>
             <ul className={styles.categoryList}>
               <li>
@@ -189,7 +191,7 @@ export const Header = () => {
                   aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
                 >
                   <SquaresFour weight='duotone' aria-hidden />
-                  Все
+                  {t('Все')}
                 </NextLink>
               </li>
               {BUSINESS_KINDS.map((kind) => {
@@ -202,7 +204,7 @@ export const Header = () => {
                       aria-current={currentKind === kind.value ? 'page' : undefined}
                     >
                       <Icon weight='duotone' aria-hidden />
-                      {kind.label}
+                      {t(kind.label)}
                     </NextLink>
                   </li>
                 )
@@ -210,12 +212,12 @@ export const Header = () => {
             </ul>
             {/* On tablets only «Бишкек» shows, so the last categories are not hidden under it;
                 the name stays whole and still holds the visible word (WCAG 2.5.3). */}
-            <NextLink href='/map' className={styles.city} aria-label='Бишкек · рядом на карте'>
+            <NextLink href='/map' className={styles.city} aria-label={t('Бишкек · рядом на карте')}>
               <MapPin weight='fill' aria-hidden />
-              Бишкек
+              {t('Бишкек')}
               <span className={styles.cityMore}>
                 {' · '}
-                <span className={styles.cityLink}>рядом на карте</span>
+                <span className={styles.cityLink}>{t('рядом на карте')}</span>
               </span>
             </NextLink>
           </div>

@@ -11,6 +11,7 @@ import {
 } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { T } from '@/shared/i18n'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { placesJsonLd, siteJsonLd } from '@/shared/lib/seo/siteJsonLd'
 import styles from './CatalogPage.module.css'
@@ -85,7 +86,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
             variant='stories'
             headAction={
               <NextLink href='/top' className={styles.topLink}>
-                Рейтинг ›
+                <T>Рейтинг ›</T>
               </NextLink>
             }
           />

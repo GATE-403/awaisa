@@ -3,6 +3,7 @@
 import { CaretLeft, CaretRight, X } from '@phosphor-icons/react/ssr'
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useT } from '@/shared/i18n'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import styles from './PhotoViewer.module.css'
 
@@ -19,6 +20,7 @@ interface PhotoViewerProps {
 // own momentum (scroll snap), arrows and keys with a mouse, ✕ or Escape to close.
 export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerProps) => {
   usePageScrollLock()
+  const t = useT()
   const trackRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const [index, setIndex] = useState(startIndex)
@@ -53,19 +55,19 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
       className={styles.viewer}
       role='dialog'
       aria-modal='true'
-      aria-label={`${label}: фото ${index + 1} из ${photos.length}`}
+      aria-label={`${label}: ${t('фото {index} из {total}', { index: index + 1, total: photos.length })}`}
       onKeyDown={handleKey}
     >
       <div className={styles.bar}>
         <span className={styles.counter} aria-hidden>
-          {index + 1} из {photos.length}
+          {t('{index} из {total}', { index: index + 1, total: photos.length })}
         </span>
         <button
           ref={closeRef}
           type='button'
           className={styles.close}
           onClick={onClose}
-          aria-label='Закрыть'
+          aria-label={t('Закрыть')}
         >
           <X weight='bold' aria-hidden />
         </button>
@@ -76,7 +78,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
             {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
             <img
               src={url}
-              alt={`${label}, фото ${photoIndex + 1}`}
+              alt={`${label}, ${t('фото {index}', { index: photoIndex + 1 })}`}
               className={styles.image}
               loading={Math.abs(photoIndex - startIndex) <= 1 ? 'eager' : 'lazy'}
               decoding='async'
@@ -90,7 +92,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
           className={styles.arrow}
           data-side='left'
           onClick={() => go(index - 1)}
-          aria-label='Предыдущее фото'
+          aria-label={t('Предыдущее фото')}
         >
           <CaretLeft weight='bold' aria-hidden />
         </button>
@@ -101,7 +103,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
           className={styles.arrow}
           data-side='right'
           onClick={() => go(index + 1)}
-          aria-label='Следующее фото'
+          aria-label={t('Следующее фото')}
         >
           <CaretRight weight='bold' aria-hidden />
         </button>

@@ -1,7 +1,10 @@
+'use client'
+
 import NextLink from 'next/link'
 import { BusinessCard, NextFreeProvider } from '@/entities/business'
 import type { Business, BusinessCard as BusinessCardData } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import styles from './Place.module.css'
 
 interface SimilarPlacesProps {
@@ -14,6 +17,8 @@ const SHOWN = 10
 // «Похожие места» at the foot of a place: others of the same kind, as the catalog shows them —
 // somewhere to go next when this one is full or far.
 export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
+  const t = useT()
+  const kind = getKindLabel(business.kind)
   const others = places.filter((place) => place.slug !== business.slug).slice(0, SHOWN)
   if (others.length === 0) return null
 
@@ -22,14 +27,16 @@ export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
       <div className={styles.similarInner}>
         <div className={styles.sectionHead}>
           <h2 id='place-similar' className={styles.sectionTitle}>
-            Похожие места
+            {t('Похожие места')}
             <span className={styles.similarMuted}>
               {' '}
-              Ещё {getKindLabel(business.kind).toLowerCase() || 'места'} рядом.
+              {kind
+                ? t('Ещё {kind} рядом.', { kind: t(kind).toLowerCase() })
+                : t('Ещё места рядом.')}
             </span>
           </h2>
           <NextLink href={`/?kind=${business.kind}`} className={styles.sectionLink}>
-            Смотреть все ›
+            {t('Смотреть все ›')}
           </NextLink>
         </div>
         <NextFreeProvider slugs={others.map((place) => place.slug)}>
