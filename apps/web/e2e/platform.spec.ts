@@ -86,7 +86,9 @@ test.describe('Platform: a new business goes live', () => {
     const clientPage = await client.newPage()
     await clientPage.goto('/')
     const search = clientPage.getByRole('searchbox', { name: 'Поиск салонов и мастеров' })
-    await search.fill(name)
+    // By the unique part of the name: other specs of the run leave many «E2E …» places, and
+    // a search for «E2E Барбер …» would list them all with this one somewhere down the list.
+    await search.fill(suffix)
     await search.press('Enter')
     await clientPage.getByRole('link', { name: new RegExp(name) }).click()
     await expect(clientPage).toHaveURL(new RegExp(`/${slug}$`))

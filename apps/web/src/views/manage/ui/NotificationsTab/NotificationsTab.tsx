@@ -2,6 +2,7 @@
 
 import { PushAlertsGroup } from '@/features/pushAlerts'
 import forms from '@/views/manage/ui/manageForms.module.css'
+import { ClientChannelNote } from '@/views/manage/ui/NotificationsTab/ClientChannelNote'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TelegramSection } from '@/views/manage/ui/TelegramSection/TelegramSection'
 
@@ -20,5 +21,6 @@ export const NotificationsTab = ({ slug }: NotificationsTabProps) => (
       slug={slug}
       fallback={<p className={forms.groupEmpty}>Telegram-бот ещё не подключён к платформе.</p>}
     />
+    <ClientChannelNote />
   </section>
 )

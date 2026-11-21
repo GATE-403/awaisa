@@ -173,6 +173,11 @@
     color: var(--color-foreground);
   }
 
+  /* The muted value on the chosen row's fill read 4.2:1, under AA for its 13px. */
+  .row[aria-current="page"] .value:not([data-alert]) {
+    color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+  }
+
   .glyph {
     width: 20px;
     font-size: 18px;

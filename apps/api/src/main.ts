@@ -21,6 +21,8 @@ const bootstrap = async () => {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule.forRole(role), {
     logger: createLogger(),
+    // `req.rawBody` for webhooks signed over their exact bytes (WhatsApp's X-Hub-Signature-256).
+    rawBody: true,
   })
   const config = app.get<ConfigService<Env, true>>(ConfigService)
 
