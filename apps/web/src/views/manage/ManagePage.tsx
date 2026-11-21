@@ -148,7 +148,9 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                   refreshKey={alertsVersion}
                 />
               )}
-              {data && tab === 'analytics' && <AnalyticsTab slug={slug} business={data.business} />}
+              {data && tab === 'analytics' && (
+                <AnalyticsTab slug={slug} business={data.business} catalog={data.catalog} />
+              )}
               {data && tab === 'clients' && (
                 <ClientsTab slug={slug} businessName={data.business.name} />
               )}

@@ -76,7 +76,8 @@ test.describe('Cabinet analytics', () => {
       expect(row.payout).toBe(Math.round(row.revenue * 0.4))
 
       await page.goto('/manage/awaisa-studio?tab=analytics')
-      await expect(page.getByText('Зарплата мастерам')).toBeVisible()
+      // Pay sits in the masters' list now: «к выплате» on the row and the total under it.
+      await expect(page.getByText(/^Итого к выплате/)).toBeVisible()
     } finally {
       await save(master.commissionPercent ?? null)
     }

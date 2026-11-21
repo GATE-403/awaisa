@@ -13,9 +13,9 @@ import {
   MAX_QUICK_REPLIES,
   SAMPLE_REVIEW,
 } from '@/views/manage/lib/replyTemplate'
-import { AUTO_REPLY_RATINGS } from './config'
+import { TemplateField } from '@/views/manage/ui/TemplateField/TemplateField'
+import { AUTO_REPLY_RATINGS, TEMPLATE_TOKENS } from './config'
 import styles from './ReviewsTab.module.css'
-import { TemplateField } from './TemplateField'
 
 interface ReplySettingsSheetProps {
   settings: ReviewReplySettings
@@ -86,17 +86,14 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
               </div>
             )}
             {auto.isEnabled && (
-              <div className={styles.templateRow}>
-                <TemplateField
-                  label='Текст автоответа'
-                  value={auto.template}
-                  onChange={(template) => setAuto({ template })}
-                  placeholder='Напишите текст ответа'
-                />
-                <p className={styles.templatePreview}>
-                  {fillReplyTemplate(auto.template, SAMPLE_REVIEW) || 'Напишите текст ответа'}
-                </p>
-              </div>
+              <TemplateField
+                label='Текст автоответа'
+                value={auto.template}
+                onChange={(template) => setAuto({ template })}
+                placeholder='Напишите текст ответа'
+                tokens={TEMPLATE_TOKENS}
+                preview={fillReplyTemplate(auto.template, SAMPLE_REVIEW) || 'Напишите текст ответа'}
+              />
             )}
           </div>
           <p className={sheet.groupFooter}>
@@ -118,6 +115,7 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
                   onChange={(next) =>
                     setQuick(quickReplies.map((item, at) => (at === index ? next : item)))
                   }
+                  tokens={TEMPLATE_TOKENS}
                   placeholder='Текст ответа'
                 />
                 <button

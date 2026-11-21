@@ -1,4 +1,4 @@
-import type { AnalyticsDays } from '@awaisa/contracts'
+import type { AnalyticsDays, AnalyticsReport } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -9,6 +9,7 @@ import {
   toBusinessParts,
   weekdayOf,
 } from '../common/business-time.js'
+import { MailingsService } from '../mailings/mailings.service.js'
 
 type Totals = {
   visits: number
@@ -36,15 +37,51 @@ const LOCAL = `("b"."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')`
 
 const toNumber = (value: unknown) => Number(value ?? 0)
 
+// «Давно не были»: the same segment and days as the mailing sheet opens with, so the count here
+// is the count the mailing will reach.
+const LAPSED_DAYS = 60
+// A client «comes back» when they book again within six weeks (barbers and nails run on 3–5).
+const RETURN_DAYS = 42
+// A late cancellation: the client cancelled under a day before the visit (the deposit rule).
+const LATE_CANCEL_HOURS = 24
+// A client's own cancellation under LATE_CANCEL_HOURS before the visit.
+const LATE = `b."status" = 'cancelled' AND b."cancelled_by" = 'client'
+  AND b."cancelled_at" > b."starts_at" - make_interval(hours => ${LATE_CANCEL_HOURS})`
+const MONTHS = [
+  'январь',
+  'февраль',
+  'март',
+  'апрель',
+  'май',
+  'июнь',
+  'июль',
+  'август',
+  'сентябрь',
+  'октябрь',
+  'ноябрь',
+  'декабрь',
+]
+
 const change = (current: number, previous: number) =>
   previous === 0 ? null : Math.round(((current - previous) / previous) * 100)
 
 // What an owner looks at in a booking system's reports: money, visits, clients, who is busy.
 @Injectable()
 export class AnalyticsService {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly mailings: MailingsService,
+  ) {}
 
-  async getReport(business: Business, days: number) {
+  async setGoal(business: Business, goal: number | null) {
+    await this.query('UPDATE "businesses" SET "revenue_goal" = $2 WHERE "id" = $1', [
+      business.id,
+      goal,
+    ])
+    return { goal }
+  }
+
+  async getReport(business: Business, days: number): Promise<AnalyticsReport> {
     const now = new Date()
     const today = toBusinessParts(now).dateKey
     const firstDay = addDays(today, -(days - 1))
@@ -63,6 +100,7 @@ export class AnalyticsService {
       heatmap,
       upcoming,
       hours,
+      insights,
     ] = await Promise.all([
       this.totals(id, from, now),
       this.totals(id, previousFrom, from),
@@ -130,6 +168,7 @@ export class AnalyticsService {
            FROM "working_hours" WHERE "business_id" = $1`,
         [id],
       ),
+      this.insights(business, from, previousFrom, now),
     ])
 
     // Open minutes in the period, the same for every master: the base for their load.
@@ -209,6 +248,9 @@ export class AnalyticsService {
           openMinutes === 0
             ? 0
             : Math.min(100, Math.round((toNumber(row.bookedMinutes) / openMinutes) * 100)),
+        previousRevenue: insights.previousByMaster.get(String(row.id)) ?? 0,
+        retention: insights.retentionByMaster.get(String(row.id)) ?? null,
+        topServices: insights.topServices.get(String(row.id)) ?? [],
       })),
       clients: allClients.slice(0, 20),
       heatmap: heatmap.map((row) => ({
@@ -216,6 +258,288 @@ export class AnalyticsService {
         hour: toNumber(row.hour),
         visits: toNumber(row.visits),
       })),
+      attention: insights.attention,
+      losses: insights.losses,
+      retention: insights.retention,
+      sources: insights.sources,
+      promotions: insights.promotions,
+      loyalty: insights.loyalty,
+      month: insights.month,
+    }
+  }
+
+  /**
+   * The parts that say what to do: what needs the owner now, money that did not come, who comes
+   * back, where bookings come from, what promotions and loyalty brought, the month's goal.
+   */
+  private async insights(business: Business, from: Date, previousFrom: Date, now: Date) {
+    const id = business.id
+    const today = toBusinessParts(now).dateKey
+    const tomorrow = addDays(today, 1)
+    const monthStart = `${today.slice(0, 8)}01`
+    const [year = 2000, month = 1, dayOfMonth = 1] = today.split('-').map(Number)
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate()
+    const day = 24 * 60 * 60_000
+    const retentionFrom = new Date(now.getTime() - 2 * RETURN_DAYS * day)
+    const retentionTo = new Date(now.getTime() - RETURN_DAYS * day)
+
+    const [
+      previousMasters,
+      topServices,
+      retentionRows,
+      unmarked,
+      lapsed,
+      tomorrowRows,
+      lowStock,
+      losses,
+      repeatNoShows,
+      sources,
+      branches,
+      promotions,
+      loyalty,
+      monthRows,
+    ] = await Promise.all([
+      this.query(
+        `SELECT b."specialist_id" AS "id", COALESCE(SUM(${EARNED}), 0)::int AS "revenue"
+           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           GROUP BY 1`,
+        [id, previousFrom, from],
+      ),
+      this.query(
+        `SELECT "id", "name", "visits" FROM (
+           SELECT b."specialist_id" AS "id", s."name", COUNT(*)::int AS "visits",
+             row_number() OVER (PARTITION BY b."specialist_id" ORDER BY COUNT(*) DESC, s."name") AS "place"
+           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           GROUP BY b."specialist_id", s."name"
+         ) t WHERE "place" <= 3 ORDER BY "id", "place"`,
+        [id, from, now],
+      ),
+      // Each client's first visit in the window, and whether they came again within RETURN_DAYS
+      // (anywhere here, and to the same master).
+      this.query(
+        `WITH first AS (
+           SELECT DISTINCT ON (b."customer_phone") b."customer_phone" AS "phone",
+             b."specialist_id" AS "master", b."starts_at" AS "at"
+           FROM "bookings" b
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           ORDER BY b."customer_phone", b."starts_at"
+         )
+         SELECT f."master", COUNT(*)::int AS "clients",
+           COUNT(*) FILTER (WHERE EXISTS (
+             SELECT 1 FROM "bookings" n WHERE n."business_id" = $1 AND n."customer_phone" = f."phone"
+               AND n."status" = 'confirmed' AND n."outcome" IS DISTINCT FROM 'no_show'
+               AND n."starts_at" > f."at" AND n."starts_at" <= f."at" + make_interval(days => $4)
+           ))::int AS "returned",
+           COUNT(*) FILTER (WHERE EXISTS (
+             SELECT 1 FROM "bookings" n WHERE n."business_id" = $1 AND n."customer_phone" = f."phone"
+               AND n."specialist_id" = f."master"
+               AND n."status" = 'confirmed' AND n."outcome" IS DISTINCT FROM 'no_show'
+               AND n."starts_at" > f."at" AND n."starts_at" <= f."at" + make_interval(days => $4)
+           ))::int AS "returnedToMaster"
+         FROM first f GROUP BY f."master"`,
+        [id, retentionFrom, retentionTo, RETURN_DAYS],
+      ),
+      this.query(
+        `SELECT COUNT(*)::int AS "count", to_char(MIN(${LOCAL}), 'YYYY-MM-DD') AS "firstDate"
+           FROM "bookings" b
+           WHERE b."business_id" = $1 AND b."status" = 'confirmed' AND b."outcome" IS NULL
+             AND b."ends_at" < $2 AND b."starts_at" >= $3`,
+        [id, now, new Date(now.getTime() - 30 * day)],
+      ),
+      this.mailings.preview(id, 'lapsed', LAPSED_DAYS),
+      this.query(
+        `SELECT
+           (SELECT "closes_minutes" - "opens_minutes" FROM "working_hours"
+              WHERE "business_id" = $1 AND "weekday" = $4) AS "open",
+           (SELECT COUNT(*) FROM "specialists" WHERE "business_id" = $1 AND "is_active")::int AS "masters",
+           (SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (b."ends_at" - b."starts_at")) / 60), 0)::int
+              FROM "bookings" b WHERE b."business_id" = $1 AND b."status" = 'confirmed'
+                AND b."starts_at" >= $2 AND b."starts_at" < $3) AS "booked"`,
+        [
+          id,
+          businessDateTimeToUtc(tomorrow, 0),
+          businessDateTimeToUtc(tomorrow, 24 * 60),
+          weekdayOf(tomorrow),
+        ],
+      ),
+      this.query(
+        `SELECT "name" FROM "stock_items"
+           WHERE "business_id" = $1 AND "min_quantity" IS NOT NULL AND "quantity" <= "min_quantity"
+           ORDER BY "quantity" / NULLIF("min_quantity", 0), "name"`,
+        [id],
+      ),
+      this.query(
+        `SELECT
+           COUNT(*) FILTER (WHERE b."outcome" = 'no_show')::int AS "noShows",
+           COALESCE(SUM(${PRICE}) FILTER (WHERE b."outcome" = 'no_show'), 0)::int AS "noShowAmount",
+           COUNT(*) FILTER (WHERE ${LATE})::int AS "late",
+           COALESCE(SUM(${PRICE}) FILTER (WHERE ${LATE}), 0)::int AS "lateAmount"
+         FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+         WHERE b."business_id" = $1 AND b."starts_at" >= $2 AND b."starts_at" < $3`,
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT b."customer_phone" AS "phone", MAX(b."customer_name") AS "name", COUNT(*)::int AS "count"
+           FROM "bookings" b
+           WHERE b."business_id" = $1 AND b."status" = 'confirmed' AND b."outcome" = 'no_show'
+             AND b."starts_at" >= $2
+           GROUP BY 1 HAVING COUNT(*) >= 2 ORDER BY 3 DESC, 2 LIMIT 10`,
+        [id, new Date(now.getTime() - 182 * day)],
+      ),
+      this.query(
+        `SELECT b."source", COUNT(*)::int AS "visits"
+           FROM "bookings" b
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           GROUP BY 1`,
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT br."id", br."name", COUNT(b."id")::int AS "visits",
+             COALESCE(SUM(${EARNED}), 0)::int AS "revenue"
+           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           JOIN "branches" br ON br."id" = b."branch_id"
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           GROUP BY br."id", br."name" ORDER BY "revenue" DESC`,
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT p."id", p."title", COUNT(b."id")::int AS "visits",
+             COALESCE(SUM(${EARNED}), 0)::int AS "revenue",
+             COALESCE(SUM(b."discount_amount"), 0)::int AS "discount"
+           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           JOIN "promotions" p ON p."id" = b."promotion_id"
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3
+           GROUP BY p."id", p."title" ORDER BY "revenue" DESC`,
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT
+           (SELECT COALESCE(SUM(ABS(t."amount")), 0) FROM "bonus_transactions" t
+              WHERE t."business_id" = $1 AND t."kind" = 'spend'
+                AND t."created_at" >= $2 AND t."created_at" < $3)::int AS "bonusSpent",
+           (SELECT COALESCE(SUM(u."amount"), 0) FROM "certificate_uses" u
+              JOIN "gift_certificates" g ON g."id" = u."certificate_id"
+              WHERE g."business_id" = $1 AND u."created_at" >= $2 AND u."created_at" < $3)::int
+             AS "certificateSpent",
+           (SELECT COUNT(*) FROM "subscription_uses" u
+              JOIN "client_subscriptions" c ON c."id" = u."subscription_id"
+              WHERE c."business_id" = $1 AND u."created_at" >= $2 AND u."created_at" < $3)::int
+             AS "subscriptionVisits"`,
+        [id, from, now],
+      ),
+      this.query(
+        `SELECT COALESCE(SUM(${EARNED}), 0)::int AS "revenue"
+           FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           WHERE b."business_id" = $1 AND ${DONE} AND b."starts_at" >= $2 AND b."starts_at" < $3`,
+        [id, businessDateTimeToUtc(monthStart, 0), now],
+      ),
+    ])
+
+    const retentionByMaster = new Map<string, number | null>()
+    let retentionClients = 0
+    let retentionReturned = 0
+    for (const row of retentionRows) {
+      const clients = toNumber(row.clients)
+      retentionClients += clients
+      retentionReturned += toNumber(row.returned)
+      // Under three clients a share says nothing.
+      retentionByMaster.set(
+        String(row.master),
+        clients < 3 ? null : Math.round((toNumber(row.returnedToMaster) / clients) * 100),
+      )
+    }
+    const topByMaster = new Map<string, { name: string; visits: number }[]>()
+    for (const row of topServices) {
+      const list = topByMaster.get(String(row.id)) ?? []
+      list.push({ name: String(row.name), visits: toNumber(row.visits) })
+      topByMaster.set(String(row.id), list)
+    }
+    const tomorrowRow = tomorrowRows[0]
+    const open =
+      tomorrowRow?.open === null || tomorrowRow?.open === undefined
+        ? null
+        : toNumber(tomorrowRow.open)
+    const bySource = new Map(sources.map((row) => [String(row.source), toNumber(row.visits)]))
+    const monthRevenue = toNumber(monthRows[0]?.revenue)
+    const loss = losses[0]
+    const bonus = loyalty[0]
+
+    return {
+      previousByMaster: new Map(
+        previousMasters.map((row) => [String(row.id), toNumber(row.revenue)]),
+      ),
+      retentionByMaster,
+      topServices: topByMaster,
+      attention: {
+        unmarked: {
+          count: toNumber(unmarked[0]?.count),
+          firstDate: (unmarked[0]?.firstDate as string | null) ?? null,
+        },
+        lapsed: { count: lapsed.count, days: LAPSED_DAYS },
+        freeTomorrow:
+          open === null || open <= 0
+            ? null
+            : {
+                minutes: Math.max(
+                  0,
+                  open * toNumber(tomorrowRow?.masters) - toNumber(tomorrowRow?.booked),
+                ),
+                date: tomorrow,
+              },
+        lowStock: {
+          count: lowStock.length,
+          names: lowStock.slice(0, 3).map((row) => String(row.name)),
+        },
+      },
+      losses: {
+        noShows: { count: toNumber(loss?.noShows), amount: toNumber(loss?.noShowAmount) },
+        lateCancellations: { count: toNumber(loss?.late), amount: toNumber(loss?.lateAmount) },
+        repeatNoShows: repeatNoShows.map((row) => ({
+          phone: String(row.phone),
+          name: String(row.name ?? ''),
+          count: toNumber(row.count),
+        })),
+      },
+      retention: {
+        days: RETURN_DAYS,
+        clients: retentionClients,
+        returned: retentionReturned,
+        rate:
+          retentionClients < 3 ? null : Math.round((retentionReturned / retentionClients) * 100),
+      },
+      sources: {
+        online: bySource.get('online') ?? 0,
+        staff: bySource.get('staff') ?? 0,
+        import: bySource.get('import') ?? 0,
+        branches: branches.map((row) => ({
+          id: String(row.id),
+          name: String(row.name),
+          visits: toNumber(row.visits),
+          revenue: toNumber(row.revenue),
+        })),
+      },
+      promotions: promotions.map((row) => ({
+        id: String(row.id),
+        title: String(row.title),
+        visits: toNumber(row.visits),
+        revenue: toNumber(row.revenue),
+        discount: toNumber(row.discount),
+      })),
+      loyalty: {
+        bonusSpent: toNumber(bonus?.bonusSpent),
+        certificateSpent: toNumber(bonus?.certificateSpent),
+        subscriptionVisits: toNumber(bonus?.subscriptionVisits),
+      },
+      month: {
+        label: MONTHS[month - 1] ?? '',
+        revenue: monthRevenue,
+        goal: business.revenueGoal ?? null,
+        // The month so far at this pace, to its end.
+        projected: Math.round((monthRevenue / dayOfMonth) * daysInMonth),
+        daysLeft: daysInMonth - dayOfMonth,
+      },
     }
   }
 

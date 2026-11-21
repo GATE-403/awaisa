@@ -15,6 +15,8 @@ import styles from './PromotionSheet.module.css'
 
 interface PromotionSheetProps {
   promotion: Promotion | null
+  /** A new promotion's starting values (analytics' quiet hour: weekday and hours). */
+  draft?: Partial<PromotionInput>
   services: Service[]
   onClose: () => void
   onSave: (input: PromotionInput) => Promise<boolean>
@@ -44,18 +46,23 @@ const TIMES = Array.from({ length: 49 }, (_, index) => index * 30).map((minutes)
 
 export const PromotionSheet = ({
   promotion,
+  draft,
   services,
   onClose,
   onSave,
   onDelete,
 }: PromotionSheetProps) => {
-  const [kind, setKind] = useState<PromotionKind>(promotion?.kind ?? 'happy_hours')
-  const [title, setTitle] = useState(promotion?.title ?? DEFAULT_TITLE.happy_hours)
+  const [kind, setKind] = useState<PromotionKind>(promotion?.kind ?? draft?.kind ?? 'happy_hours')
+  const [title, setTitle] = useState(promotion?.title ?? draft?.title ?? DEFAULT_TITLE.happy_hours)
   const [percent, setPercent] = useState(String(promotion?.percent ?? 20))
   const [code, setCode] = useState(promotion?.code ?? '')
-  const [weekdays, setWeekdays] = useState<number[]>(promotion?.weekdays ?? [0, 1, 2, 3, 4])
-  const [fromMinutes, setFromMinutes] = useState(promotion?.fromMinutes ?? 10 * 60)
-  const [toMinutes, setToMinutes] = useState(promotion?.toMinutes ?? 12 * 60)
+  const [weekdays, setWeekdays] = useState<number[]>(
+    promotion?.weekdays ?? draft?.weekdays ?? [0, 1, 2, 3, 4],
+  )
+  const [fromMinutes, setFromMinutes] = useState(
+    promotion?.fromMinutes ?? draft?.fromMinutes ?? 10 * 60,
+  )
+  const [toMinutes, setToMinutes] = useState(promotion?.toMinutes ?? draft?.toMinutes ?? 12 * 60)
   const [serviceIds, setServiceIds] = useState<string[] | null>(promotion?.serviceIds ?? null)
   const [endsOn, setEndsOn] = useState(promotion?.endsOn ?? '')
   const [isActive, setIsActive] = useState(promotion?.isActive ?? true)

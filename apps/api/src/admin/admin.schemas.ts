@@ -73,6 +73,13 @@ const analyticsQuerySchema = z.object({
 
 type AnalyticsQuery = z.infer<typeof analyticsQuerySchema>
 
+// The month's revenue goal in som; null clears it.
+const analyticsGoalSchema = z.object({
+  goal: z.number().int().min(1000).max(100_000_000).nullable(),
+})
+
+type AnalyticsGoalInput = z.infer<typeof analyticsGoalSchema>
+
 const recentBookingsQuerySchema = z.object({ since: z.iso.datetime({ offset: true }) })
 
 type RecentBookingsQuery = z.infer<typeof recentBookingsQuerySchema>
@@ -87,6 +94,7 @@ type CreateTimeOffInput = z.infer<typeof createTimeOffSchema>
 
 export type {
   ScheduleLoadQuery,
+  AnalyticsGoalInput,
   AnalyticsQuery,
   CloseDayInput,
   ReopenInput,
@@ -98,6 +106,7 @@ export type {
   StaffBookingInput,
 }
 export {
+  analyticsGoalSchema,
   analyticsQuerySchema,
   closeDaySchema,
   reopenSchema,
