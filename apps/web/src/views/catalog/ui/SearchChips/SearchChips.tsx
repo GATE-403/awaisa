@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
 import type { BusinessKind, PopularService } from '@/shared/api/types'
+import { T } from '@/shared/i18n'
 import chip from '@/shared/ui/Chip/Chip.module.css'
 import styles from './SearchChips.module.css'
 
@@ -14,7 +15,9 @@ export const SearchChips = ({ kind, services }: SearchChipsProps) => {
 
   return (
     <nav className={styles.row} aria-label='Часто ищут'>
-      <span className={styles.label}>Часто ищут</span>
+      <span className={styles.label}>
+        <T>Часто ищут</T>
+      </span>
       {services.map((service) => (
         <NextLink
           key={service.name}

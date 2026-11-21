@@ -73,9 +73,22 @@ test.describe('User flow: booking', () => {
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
     await expect(primaryAction(page)).toHaveText('Записаться')
+    const booked = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'POST' &&
+        new URL(response.url()).pathname === '/api/bookings',
+    )
+    // «Вам может понравиться» stays near what was just booked: the shelf asks with `like=`.
+    const shelf = page.waitForRequest(
+      (request) =>
+        new URL(request.url()).pathname === '/api/recommendations' &&
+        new URL(request.url()).searchParams.has('like'),
+    )
     await submitBooking(page)
 
     await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    const { serviceId } = (await (await booked).json()) as { serviceId: string }
+    expect(new URL((await shelf).url()).searchParams.get('like')).toBe(serviceId)
     // No toast over the success screen: it says in plain words what to do next.
     await expect(page.getByText(new RegExp(`Приходите к ${time}`))).toBeVisible()
     await expect(page.getByRole('article', { name: /^Запись / })).toContainText(time)

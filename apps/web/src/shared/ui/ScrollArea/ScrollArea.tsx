@@ -2,6 +2,7 @@
 
 import { CaretDown, CaretUp } from '@phosphor-icons/react/ssr'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { useT } from '@/shared/i18n'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import styles from './ScrollArea.module.css'
 
@@ -33,6 +34,7 @@ export const ScrollArea = ({
   rows = DEFAULT_ROWS,
   className,
 }: ScrollAreaProps) => {
+  const t = useT()
   const boxRef = useRef<HTMLElement>(null)
   const isTouch = useMediaQuery('(pointer: coarse)')
   const [below, setBelow] = useState(0)
@@ -134,7 +136,7 @@ export const ScrollArea = ({
       )}
       {isTouch && isOpen && isLong && (
         <button type='button' className={styles.less} onClick={fold} aria-expanded>
-          Свернуть
+          {t('Свернуть')}
           <CaretUp weight='bold' aria-hidden />
         </button>
       )}

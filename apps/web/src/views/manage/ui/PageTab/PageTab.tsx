@@ -62,6 +62,7 @@ import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { PAGE_SECTIONS } from '@/views/manage/manageTabs'
+import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { HoursSheet } from '@/views/manage/ui/Hours/HoursSheet'
 import { MasterDialog } from '@/views/manage/ui/Masters/MasterDialog'
 import { MasterPaySheet } from '@/views/manage/ui/Masters/MasterPaySheet'
@@ -105,6 +106,7 @@ const SECTIONS: { value: PageSection; label: string }[] = [
 // week's hours. The logo and the cover change from their own buttons.
 export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const today = useToday()
+  const hasPayroll = useHasFeature('payroll')
   const coverInput = useRef<HTMLInputElement>(null)
   const logoInput = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState<'cover' | 'logo' | null>(null)
@@ -582,7 +584,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           onClose={() => setEditingMaster(null)}
           onSave={saveMaster}
           onPhotoChange={
-            editingMaster === 'new'
+            editingMaster === 'new' || !hasPayroll
               ? undefined
               : (file) =>
                   run(

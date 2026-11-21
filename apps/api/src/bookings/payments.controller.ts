@@ -54,15 +54,22 @@ export class PaymentsController {
     @Query('s') signature: string | undefined,
   ): Promise<PaymentPage> {
     const payment = await this.payments.findSigned(id, requireSignature(signature))
-    const view = await this.bookings.getView(payment.bookingId)
-
-    return {
+    const base = {
       id: payment.id,
       amount: payment.amount,
       status: payment.status,
       driver: this.payments.driver,
       // Freedom Pay's page for this payment; the test driver pays right on /pay.
       checkoutUrl: payment.checkoutUrl,
+    }
+    if (!payment.bookingId) {
+      return { ...base, booking: null, order: await this.payments.describeOrder(payment) }
+    }
+    const view = await this.bookings.getView(payment.bookingId)
+
+    return {
+      ...base,
+      order: null,
       booking: {
         id: view.id,
         serviceName: view.serviceName,
@@ -85,6 +92,10 @@ export class PaymentsController {
     @Query('s') signature: string | undefined,
   ): Promise<TestPaymentResult> {
     const { payment } = await this.payments.completeTest(id, requireSignature(signature))
+    if (!payment.bookingId) {
+      await this.payments.onOrderPaid(payment)
+      return { bookingId: null, paymentStatus: null }
+    }
     const view = await this.bookingPayments.onPaid(payment.bookingId)
 
     return { bookingId: view.id, paymentStatus: view.payment?.status ?? null }
@@ -99,6 +110,10 @@ export class PaymentsController {
   ): Promise<PaymentSync> {
     const payment = await this.payments.findSigned(id, requireSignature(signature))
     await this.payments.sync(payment)
+    if (!payment.bookingId) {
+      await this.payments.onOrderPaid(payment)
+      return { bookingId: null, status: payment.status, paymentStatus: null }
+    }
     const view =
       payment.status === 'succeeded'
         ? await this.bookingPayments.onPaid(payment.bookingId)
@@ -120,7 +135,8 @@ export class PaymentsController {
       Object.entries(body ?? {}).map(([key, value]) => [key, String(value ?? '')]),
     )
     const { reply, paid } = await this.payments.handleFreedomPayResult(params)
-    if (paid) await this.bookingPayments.onPaid(paid.bookingId)
+    if (paid?.bookingId) await this.bookingPayments.onPaid(paid.bookingId)
+    else if (paid) await this.payments.onOrderPaid(paid)
 
     return reply
   }

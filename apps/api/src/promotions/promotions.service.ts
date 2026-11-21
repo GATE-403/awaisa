@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { QueryFailedError, Repository } from 'typeorm'
+import { In, QueryFailedError, Repository } from 'typeorm'
 import { Service } from '../catalog/service.entity.js'
 import { toBusinessParts, weekdayOf } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
@@ -23,6 +23,8 @@ type PriceRequest = {
   businessId: string
   serviceId: string
   price: number
+  /** Services done after the first in the same visit. */
+  extras?: { serviceId: string; price: number }[]
   date: string
   minutes: number
   phone: string | null
@@ -137,6 +139,7 @@ export class PromotionsService {
     return bestDiscount(rules, {
       serviceId: request.serviceId,
       price: request.price,
+      extras: request.extras,
       date: request.date,
       weekday: weekdayOf(request.date),
       minutes: request.minutes,
@@ -149,24 +152,43 @@ export class PromotionsService {
 
   /** The booking form asks before the client commits: price, discount, whether the code works. */
   async quote(
-    query: { serviceId: string; date: string; time: string; code?: string; phone?: string },
+    query: {
+      serviceId: string
+      extraServiceIds?: string[]
+      date: string
+      time: string
+      code?: string
+      phone?: string
+    },
     accountPhone: string | null,
   ) {
     const service = await this.services.findOneBy({ id: query.serviceId, isActive: true })
     if (!service) throw new NotFoundException('Услуга не найдена')
+    const extraIds = query.extraServiceIds ?? []
+    const found =
+      extraIds.length > 0
+        ? await this.services.findBy({
+            id: In(extraIds),
+            isActive: true,
+            businessId: service.businessId,
+          })
+        : []
+    const extras = extraIds.flatMap((id) => found.filter((item) => item.id === id))
+    const price = service.price + extras.reduce((sum, item) => sum + item.price, 0)
     const [hours = 0, minutes = 0] = query.time.split(':').map(Number)
     const phone = accountPhone ?? (query.phone ? normalizePhone(query.phone) : null)
     const discount = await this.discountFor({
       businessId: service.businessId,
       serviceId: service.id,
       price: service.price,
+      extras: extras.map((item) => ({ serviceId: item.id, price: item.price })),
       date: query.date,
       minutes: hours * 60 + minutes,
       phone,
       code: query.code ?? null,
     })
 
-    return { price: service.price, discount, total: service.price - (discount?.amount ?? 0) }
+    return { price, discount, total: price - (discount?.amount ?? 0) }
   }
 
   private async isFirstVisit(businessId: string, phone: string) {

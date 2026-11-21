@@ -9,6 +9,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { addReviewPhoto, createReview } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Review, ReviewAccess } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 import { StarRating } from '../StarRating/StarRating'
@@ -42,6 +43,7 @@ export const RateVisitForm = ({
   specialistId,
   onRated,
 }: RateVisitFormProps) => {
+  const t = useT()
   const router = useRouter()
   const toast = useToast()
   const commentId = useId()
@@ -91,7 +93,7 @@ export const RateVisitForm = ({
     event.preventDefault()
     // The button stays active: a tap without stars explains what is missing instead.
     if (rating === 0) {
-      setError('Поставьте оценку — от одной до пяти звёзд')
+      setError(t('Поставьте оценку — от одной до пяти звёзд'))
       trackFormError('rating')
       return
     }
@@ -106,7 +108,7 @@ export const RateVisitForm = ({
           uploaded = (await addReviewPhoto(bookingId, access, photo.file)).photos
         } catch (photoError) {
           toast.show({
-            title: 'Фото не загрузилось',
+            title: t('Фото не загрузилось'),
             description: getErrorMessage(photoError),
             type: 'error',
           })
@@ -118,11 +120,13 @@ export const RateVisitForm = ({
       const isLiked = rating >= 4 && Boolean(specialistId)
       const href = rebookHref && (isLiked ? `${rebookHref}&specialist=${specialistId}` : rebookHref)
       toast.show({
-        title: 'Спасибо за отзыв',
+        title: t('Спасибо за отзыв'),
         type: 'success',
         action: href
           ? {
-              label: isLiked ? `Снова к ${firstName(specialistName)}` : 'Другой мастер',
+              label: isLiked
+                ? t('Снова к {name}', { name: firstName(specialistName) })
+                : t('Другой мастер'),
               onClick: () => router.push(href),
             }
           : undefined,
@@ -139,7 +143,7 @@ export const RateVisitForm = ({
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <p className={styles.question}>Как вам у мастера {specialistName}?</p>
+      <p className={styles.question}>{t('Как вам у мастера {name}?', { name: specialistName })}</p>
       <StarRating
         value={rating}
         onChange={(value) => {
@@ -149,7 +153,7 @@ export const RateVisitForm = ({
         }}
       />
       <label htmlFor={commentId} className={styles.label}>
-        Расскажите подробнее <span className={styles.optional}>— по желанию</span>
+        {t('Расскажите подробнее')} <span className={styles.optional}>{t('— по желанию')}</span>
       </label>
       <textarea
         id={commentId}
@@ -158,17 +162,17 @@ export const RateVisitForm = ({
         onChange={(event) => setComment(event.target.value)}
         maxLength={1000}
         rows={4}
-        placeholder='Что понравилось, что можно лучше'
+        placeholder={t('Что понравилось, что можно лучше')}
       />
       <div className={styles.photos}>
         {photos.map((photo, index) => (
           <span key={photo.preview} className={styles.thumb}>
             {/* biome-ignore lint/performance/noImgElement: a local preview (blob: URL) */}
-            <img src={photo.preview} alt={`Фото ${index + 1}`} />
+            <img src={photo.preview} alt={t('Фото {number}', { number: index + 1 })} />
             <button
               type='button'
               className={styles.removePhoto}
-              aria-label={`Убрать фото ${index + 1}`}
+              aria-label={t('Убрать фото {number}', { number: index + 1 })}
               onClick={() => handleRemovePhoto(photo.preview)}
             >
               <X weight='bold' aria-hidden />
@@ -184,7 +188,7 @@ export const RateVisitForm = ({
             onClick={() => fileInput.current?.click()}
           >
             <Camera aria-hidden />
-            {photos.length === 0 ? 'Добавить фото' : 'Ещё фото'}
+            {photos.length === 0 ? t('Добавить фото') : t('Ещё фото')}
           </Button>
         )}
         <input
@@ -194,7 +198,7 @@ export const RateVisitForm = ({
           multiple
           hidden
           onChange={handlePick}
-          aria-label='Фото к отзыву'
+          aria-label={t('Фото к отзыву')}
         />
       </div>
       {error && (
@@ -203,7 +207,7 @@ export const RateVisitForm = ({
         </p>
       )}
       <Button type='submit' size='lg' disabled={isSending} className={styles.submit}>
-        {isSending ? 'Отправляем…' : 'Отправить отзыв'}
+        {isSending ? t('Отправляем…') : t('Отправить отзыв')}
       </Button>
     </form>
   )

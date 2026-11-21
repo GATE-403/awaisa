@@ -2,6 +2,7 @@ import { CaretRight, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { PersonAvatar } from '@/entities/business'
 import type { BusinessKind, FeedItem } from '@/shared/api/types'
+import { T } from '@/shared/i18n'
 import { gridImage } from '@/shared/lib/imageSizes'
 import styles from './WorkTile.module.css'
 
@@ -51,7 +52,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
       {/* The visible words name the link (WCAG 2.5.3): «Образ … Смотреть». */}
       <span className={styles.kind}>
         <Sparkle weight='fill' aria-hidden />
-        Образ
+        <T>Образ</T>
       </span>
       <span className={styles.caption}>
         <span className={styles.author}>
@@ -69,7 +70,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
         </span>
         {item.service && <span className={styles.name}>{item.service.name}</span>}
         <span className={styles.watch}>
-          Смотреть
+          <T>Смотреть</T>
           <CaretRight weight='bold' aria-hidden />
         </span>
       </span>

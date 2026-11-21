@@ -10,6 +10,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './HoldButton.module.css'
 
@@ -36,6 +37,7 @@ export const HoldButton = ({
   holdMs = 1000,
   disabled = false,
 }: HoldButtonProps) => {
+  const t = useT()
   const hintId = useId()
   const timerRef = useRef(0)
   const hintTimerRef = useRef(0)
@@ -124,10 +126,10 @@ export const HoldButton = ({
       <span className={styles.fill} aria-hidden />
       <span className={styles.label}>
         {icon}
-        {isHintShown ? 'Удерживайте' : children}
+        {isHintShown ? t('Удерживайте') : children}
       </span>
       <span id={hintId} className={styles.srOnly}>
-        Удерживайте, чтобы подтвердить
+        {t('Удерживайте, чтобы подтвердить')}
       </span>
     </button>
   )

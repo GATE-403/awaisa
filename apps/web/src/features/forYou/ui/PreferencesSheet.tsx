@@ -3,6 +3,7 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { Check } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -33,6 +34,7 @@ const BUDGETS: { value: BudgetChoice; label: string }[] = [
 // Three quick questions, all optional: who it is for, what they like, how much a visit may cost.
 // The answers stay on the device and shape «Для вас»; they can be changed any time.
 export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) => {
+  const t = useT()
   const toast = useToast()
   const [gender, setGender] = useState<GenderChoice>(initial?.gender ?? 'any')
   const [interests, setInterests] = useState<Interest[]>(initial?.interests ?? [])
@@ -53,28 +55,37 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
       budget: budget === 'any' ? null : Number(budget),
     })
     toast.show({
-      title: 'Подборка обновлена',
-      description: 'Смотрите «Для вас» в профиле',
+      title: t('Подборка обновлена'),
+      description: t('Смотрите «Для вас» в профиле'),
       type: 'success',
     })
     onClose()
   }
 
   return (
-    <Sheet title='Подберём для вас' onClose={onClose} action={{ label: 'Готово', onClick: save }}>
+    <Sheet
+      title={t('Подберём для вас')}
+      onClose={onClose}
+      action={{ label: t('Готово'), onClick: save }}
+    >
       <div className={sheet.form}>
         <section className={sheet.group}>
-          <SectionCaption>Для кого</SectionCaption>
-          <SegmentedControl label='Для кого' value={gender} items={GENDERS} onChange={setGender} />
+          <SectionCaption>{t('Для кого')}</SectionCaption>
+          <SegmentedControl
+            label={t('Для кого')}
+            value={gender}
+            items={GENDERS.map((item) => ({ ...item, label: t(item.label) }))}
+            onChange={setGender}
+          />
         </section>
 
         <section className={sheet.group}>
-          <SectionCaption>Что интересно</SectionCaption>
+          <SectionCaption>{t('Что интересно')}</SectionCaption>
           {/* Two columns of checkmark rows: nine choices in five rows. */}
           <div className={styles.interestGrid}>
             {shown.map((item) => (
               <label key={item.value} className={styles.interestCell}>
-                {item.label}
+                {t(item.label)}
                 <input
                   type='checkbox'
                   checked={interests.includes(item.value)}
@@ -87,16 +98,17 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         </section>
 
         <section className={sheet.group}>
-          <SectionCaption>Бюджет за визит, сом</SectionCaption>
+          <SectionCaption>{t('Бюджет за визит, сом')}</SectionCaption>
           <SegmentedControl
-            label='Бюджет за визит'
+            label={t('Бюджет за визит')}
             value={budget}
-            items={BUDGETS}
+            items={BUDGETS.map((item) => ({ ...item, label: t(item.label) }))}
             onChange={setBudget}
           />
           <p className={sheet.groupFooter}>
-            Ответы остаются на этом телефоне и вместе с вашими визитами решают, что попадёт в «Для
-            вас».
+            {t(
+              'Ответы остаются на этом телефоне и вместе с вашими визитами решают, что попадёт в «Для вас».',
+            )}
           </p>
         </section>
       </div>

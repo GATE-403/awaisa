@@ -2,6 +2,7 @@
 
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@awaisa/ui/Dialog'
 import { type ReactNode, useEffect, useState } from 'react'
+import { useT } from '@/shared/i18n'
 import styles from './Sheet.module.css'
 import { useSheetDrag } from './useSheetDrag'
 
@@ -23,6 +24,7 @@ interface SheetProps {
 // iOS form sheet: «Отмена» on the left, the title in the middle, the confirming action on the right.
 // Pull the top bar down to dismiss it, like an iOS sheet.
 export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', children }: SheetProps) => {
+  const t = useT()
   const dragHandlers = useSheetDrag(onClose)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -42,7 +44,7 @@ export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', ch
         <header className={styles.bar} {...dragHandlers}>
           <span className={styles.grabber} aria-hidden='true' />
           {cancelLabel ? (
-            <DialogClose className={styles.barButton}>{cancelLabel}</DialogClose>
+            <DialogClose className={styles.barButton}>{t(cancelLabel)}</DialogClose>
           ) : (
             <span />
           )}

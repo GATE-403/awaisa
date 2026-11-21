@@ -11,6 +11,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -26,6 +27,7 @@ import {
 import { PayrollService } from './payroll.service.js'
 
 // Pay is the owner's: staff see neither the schemes nor the payouts.
+@RequiresFeature('payroll')
 @Controller('manage/:slug')
 @UseGuards(BusinessAccessGuard)
 @OwnerOnly()

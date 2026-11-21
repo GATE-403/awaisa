@@ -1,6 +1,7 @@
 import NextLink from 'next/link'
 import type { CSSProperties } from 'react'
 import { ForYouShelfPlaceholder } from '@/features/forYou'
+import { T } from '@/shared/i18n'
 import { Block, Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import pageStyles from '../../CatalogPage.module.css'
 import resultStyles from '../CatalogResults/CatalogResults.module.css'
@@ -20,13 +21,15 @@ export const CatalogSkeleton = () => (
     <ForYouShelfPlaceholder
       headAction={
         <NextLink href='/top' className={pageStyles.topLink}>
-          Рейтинг ›
+          <T>Рейтинг ›</T>
         </NextLink>
       }
     />
     {/* «Часто ищут» — wide screens only, like the real row. */}
     <div className={chipStyles.row} aria-hidden='true'>
-      <span className={chipStyles.label}>Часто ищут</span>
+      <span className={chipStyles.label}>
+        <T>Часто ищут</T>
+      </span>
       {[12, 9, 14, 10, 11].map((chars) => (
         <Block key={chars} className={styles.chip} style={{ '--chars': chars } as CSSProperties} />
       ))}

@@ -1,3 +1,4 @@
+import { T } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import tabs from '@/shared/ui/TextTabs/TextTabs.module.css'
@@ -17,7 +18,7 @@ export const ServicesSkeleton = () => (
   >
     <Container className={styles.hero}>
       <p className={styles.title}>
-        Услуги и цены{' '}
+        <T>Услуги и цены</T>{' '}
         <span className={styles.titleMuted}>
           <TextLine chars={7} />
         </span>
