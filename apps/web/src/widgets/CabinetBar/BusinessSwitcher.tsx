@@ -86,6 +86,7 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
           </MenuItem>
         ))}
       </div>
+      <MenuSeparator />
       {businesses.length > 1 && (
         <MenuItem icon={<SquaresFour aria-hidden />} onClick={() => router.push('/manage')}>
           Все бизнесы
