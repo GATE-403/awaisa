@@ -201,7 +201,8 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               )}
             </p>
 
-            {day.pay !== null && (
+            {/* The month only when it says more than the day (on the month's first working day they match). */}
+            {day.pay !== null && day.pay.month !== day.pay.day && (
               <RowNote className={styles.monthPay}>
                 За {MONTHS[Number(day.pay.monthFrom.slice(5, 7)) - 1]} заработано{' '}
                 <b>{formatPrice(day.pay.month)}</b>
