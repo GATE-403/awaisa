@@ -75,3 +75,8 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+/* A button row lies on the cabinet's page like the label rows around it (no inset). */
+button.amountsRow {
+  padding-inline: 0;
+}
