@@ -832,12 +832,12 @@ button.heatmapCell:active {
 .goalEdit {
   position: relative;
   flex: none;
-  font-size: var(--text-footnote);
   padding: 0;
   border: none;
   background: transparent;
   color: var(--color-link);
   font: inherit;
+  font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
