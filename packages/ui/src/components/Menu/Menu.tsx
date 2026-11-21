@@ -11,6 +11,8 @@ interface MenuProps {
   label: string
   children: ReactNode
   className?: string
+  /** Which edge of the trigger the menu lines up with (`end` by default, for buttons on the right). */
+  align?: 'start' | 'center' | 'end'
 }
 
 interface MenuItemProps extends Omit<ComponentProps<typeof BaseMenu.Item>, 'className'> {
@@ -20,13 +22,13 @@ interface MenuItemProps extends Omit<ComponentProps<typeof BaseMenu.Item>, 'clas
 }
 
 // iOS pull-down menu: a few actions next to the button that opened them, no sheet over the page.
-const Menu = ({ trigger, label, children, className }: MenuProps) => (
+const Menu = ({ trigger, label, children, className, align = 'end' }: MenuProps) => (
   <BaseMenu.Root>
     <BaseMenu.Trigger className={className} aria-label={label}>
       {trigger}
     </BaseMenu.Trigger>
     <BaseMenu.Portal>
-      <BaseMenu.Positioner className={styles.positioner} sideOffset={6} align='end'>
+      <BaseMenu.Positioner className={styles.positioner} sideOffset={6} align={align}>
         <BaseMenu.Popup className={styles.popup}>{children}</BaseMenu.Popup>
       </BaseMenu.Positioner>
     </BaseMenu.Portal>

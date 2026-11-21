@@ -178,6 +178,62 @@
   white-space: nowrap;
 }
 
+/* The business is a pull-down: tile, name and a small caret, pressed like the bar's glyphs. */
+.switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--control-height-md);
+  margin-left: calc(-1 * var(--space-1));
+  padding: 0 var(--space-2) 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .switcher:hover {
+    background: var(--color-fill);
+  }
+}
+
+.switcher[data-popup-open] {
+  background: var(--color-fill);
+}
+
+.switcher:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.switcherCaret {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.switcherItem > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.switcherName {
+  overflow: hidden;
+  max-width: 220px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .nav {
   order: 1;
   width: 100%;
@@ -207,4 +263,10 @@
     margin: 0;
     padding: 0;
   }
+}
+
+/* A glyph whose menu is open stays pressed. */
+.group :is(button, a)[data-popup-open] {
+  background: var(--color-fill-hover);
+  color: var(--color-foreground);
 }
