@@ -1,5 +1,6 @@
+import { clearLastNotificationResponseAsync, useLastNotificationResponse } from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Linking, StyleSheet } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview'
@@ -9,7 +10,8 @@ import { LoadingView } from './common/components/LoadingView/LoadingView'
 import { useAndroidBackHandler } from './common/hooks/useAndroidBackHandler'
 import { useThemeColors } from './common/hooks/useThemeColors'
 import { playHaptic } from './common/utils/haptics'
-import { parseNativeMessage } from './common/utils/nativeBridge'
+import { parseNativeMessage, toWebScript } from './common/utils/nativeBridge'
+import { getNotificationPath, getPushState } from './common/utils/pushNotifications'
 import { NATIVE_APP_SCRIPT, WEB_ORIGIN, WEB_URL } from './constants/webApp'
 
 // react-native-webview types props as `WebViewProps & P` with `P = undefined`, which TS 6 reduces to `never`.
@@ -20,16 +22,41 @@ export const App = () => {
   const webViewRef = useRef<AppWebView>(null)
   const [canGoBack, setCanGoBack] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Where the WebView starts: the site, or the screen a tapped push opened the app with.
+  const [sourceUri, setSourceUri] = useState(WEB_URL)
+  const isLoadedRef = useRef(false)
+  const notificationResponse = useLastNotificationResponse()
   const themeColors = useThemeColors()
   const goBack = useCallback(() => webViewRef.current?.goBack(), [])
   const backgroundStyle = { backgroundColor: themeColors.background }
 
   useAndroidBackHandler(canGoBack, goBack)
 
+  // A tapped booking push opens its day in the cabinet or «Мой день»; also when it launched the app.
+  useEffect(() => {
+    const path = getNotificationPath(notificationResponse)
+    if (!path) return
+    const url = `${WEB_ORIGIN}${path}`
+    if (isLoadedRef.current) {
+      webViewRef.current?.injectJavaScript(`window.location.assign(${JSON.stringify(url)}); true;`)
+    } else {
+      setSourceUri(url)
+    }
+    // Handled once: the next launch starts on the site, not on this push again.
+    void clearLastNotificationResponseAsync()
+  }, [notificationResponse])
+
+  const answerPush = async (shouldAsk: boolean) => {
+    const state = await getPushState(shouldAsk)
+    webViewRef.current?.injectJavaScript(toWebScript(state))
+  }
+
   const handleMessage = (event: WebViewMessageEvent) => {
     const message = parseNativeMessage(event.nativeEvent.data)
     if (message?.type === 'openExternal') void Linking.openURL(message.url)
     if (message?.type === 'haptic') void playHaptic(message.style)
+    if (message?.type === 'pushStatus') void answerPush(false)
+    if (message?.type === 'pushEnable') void answerPush(true)
   }
 
   const handleNavigationStateChange = (navigation: WebViewNavigation) => {
@@ -56,11 +83,14 @@ export const App = () => {
         <AppWebView
           ref={webViewRef}
           style={[styles.container, backgroundStyle, error && styles.hidden]}
-          source={{ uri: WEB_URL }}
+          source={{ uri: sourceUri }}
           injectedJavaScriptBeforeContentLoaded={NATIVE_APP_SCRIPT}
           onMessage={handleMessage}
           onNavigationStateChange={handleNavigationStateChange}
           onShouldStartLoadWithRequest={handleShouldStartLoad}
+          onLoadEnd={() => {
+            isLoadedRef.current = true
+          }}
           onError={(event) => setError(event.nativeEvent.description)}
           onHttpError={(event) => setError(`HTTP ${event.nativeEvent.statusCode}`)}
           renderLoading={() => <LoadingView />}

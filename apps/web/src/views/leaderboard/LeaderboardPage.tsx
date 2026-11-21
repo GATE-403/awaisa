@@ -1,11 +1,12 @@
 import type { BusinessKind, LeaderboardMaster, LeaderboardPlace } from '@/shared/api/types'
 import { Breadcrumbs } from '@/shared/ui/Breadcrumbs/Breadcrumbs'
+import type { BoardView } from './config/boards'
 import styles from './LeaderboardPage.module.css'
 import { LeaderboardBoard } from './ui/LeaderboardBoard'
 
 interface LeaderboardPageProps {
   kind: BusinessKind
-  view: 'masters' | 'places'
+  view: BoardView
   masters: LeaderboardMaster[]
   places: LeaderboardPlace[]
 }

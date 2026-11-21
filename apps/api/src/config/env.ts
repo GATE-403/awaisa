@@ -57,6 +57,8 @@ type Env = {
   VAPID_PRIVATE_KEY?: string
   /** Who push services may contact: `mailto:` or an https address; the site's address by default. */
   VAPID_SUBJECT?: string
+  /** Expo push service access token (enhanced push security); without it app pushes are only logged. */
+  EXPO_ACCESS_TOKEN?: string
   PAYMENT_DRIVER: PaymentDriver
   FREEDOMPAY_MERCHANT_ID?: string
   FREEDOMPAY_SECRET_KEY?: string
@@ -410,6 +412,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ...parseStorage(config),
     ...parseWallet(config),
     ...parseVapid(config, publicWebUrl),
+    EXPO_ACCESS_TOKEN: optionalString(config.EXPO_ACCESS_TOKEN),
   }
 }
 
