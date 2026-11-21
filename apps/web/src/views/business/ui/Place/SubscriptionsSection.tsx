@@ -46,7 +46,7 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
                 </span>
                 <span className={own.money}>
                   <span className={own.price}>{formatPrice(plan.price)}</span>
-                  {saving > 0 && <span className={own.saving}>−{formatPrice(saving)}</span>}
+                  {saving > 0 && <span className={own.saving}>выгода {formatPrice(saving)}</span>}
                 </span>
                 <CaretRight className={own.chevron} weight='bold' aria-hidden />
               </button>

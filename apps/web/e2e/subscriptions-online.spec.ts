@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
-import { API_URL, pickFirstFreeSlot, submitBooking } from './helpers'
+import { API_URL, bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
 import { withDb } from './visits'
 
 const SLUG = 'awaisa-studio'
@@ -48,7 +48,7 @@ test.describe('Subscriptions online', () => {
       .click()
     await planSheet.getByLabel('Визитов').fill('3')
     await planSheet.getByLabel('Цена абонемента, сом').fill(String(PRICE))
-    await planSheet.getByLabel('Продавать онлайн').click()
+    await planSheet.getByRole('switch', { name: 'Продавать онлайн' }).click()
     await planSheet.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('button', { name: new RegExp(title) })).toContainText('Онлайн')
     const overview = await (await page.request.get(`${manage}/loyalty`)).json()
@@ -82,10 +82,13 @@ test.describe('Subscriptions online', () => {
 
       // 2. The booking form offers it under «Оплата»; the visit is booked by the subscription.
       await client.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}`)
+      await expect(
+        bookingSteps(client).datetime.getByRole('group', { name: 'День' }),
+      ).toBeVisible()
       await pickFirstFreeSlot(client)
       await client.getByRole('combobox', { name: 'Оплата' }).click()
       await client.getByRole('option', { name: 'Абонементом · осталось 3' }).click()
-      await expect(client.getByText('По абонементу').first()).toBeVisible()
+      await expect(client.getByText('По абонементу').filter({ visible: true }).first()).toBeVisible()
       await submitBooking(client)
       await expect(client.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
       const booked = (await (await client.request.get('/api/me/bookings')).json()) as {
