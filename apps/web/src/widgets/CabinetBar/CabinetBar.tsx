@@ -1,18 +1,28 @@
 'use client'
 
-import { ArrowSquareOut, CaretLeft, Megaphone, UserCircle } from '@phosphor-icons/react/ssr'
+import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import {
+  ArrowSquareOut,
+  CaretLeft,
+  Compass,
+  Megaphone,
+  UserCircle,
+} from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { type ReactNode, useEffect, useRef } from 'react'
-import { BusinessTile } from '@/entities/business'
+import { useRouter } from 'next/navigation'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
+import { getBackLabel, readCabinetFrom } from '@/shared/lib/cabinetFrom'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { useUpdatesSeen } from '@/shared/lib/hooks/useUpdatesSeen'
+import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 import { rememberUpdatesFrom } from '@/shared/lib/updatesFrom'
+import { BusinessSwitcher } from './BusinessSwitcher'
 import styles from './CabinetBar.module.css'
 
 interface CabinetBarProps {
-  /** Inside a cabinet; without it the bar is the list's («‹ Профиль», no page link). */
+  /** Inside a cabinet; without it the bar is the list's (no page link, no switcher). */
   slug?: string
   title: string | null
   isPublished?: boolean
@@ -20,12 +30,13 @@ interface CabinetBarProps {
    * row, instead of a large title on the page. */
   nav?: ReactNode
   logoUrl?: string | null
-  /** Where «‹» leads, when not the cabinet's own list or the profile (a page opened from the
-   * cabinet goes back to that business and tab). */
+  /** Where «‹» leads, when not back out of the business side (a page opened from the cabinet
+   * goes back to that business and tab). */
   back?: { href: string; label: string }
 }
 
-// The cabinet's own window toolbar (macOS 26): back to the list, the business once scrolled, tools.
+// The cabinet's own window toolbar (macOS 26): «‹» back to where the person came in from (the
+// catalog, the profile…), the business as a switcher to the rest of their business side, tools.
 export const CabinetBar = ({
   slug,
   title,
@@ -35,7 +46,10 @@ export const CabinetBar = ({
   back,
 }: CabinetBarProps) => {
   const isScrolled = useIsScrolled()
+  const router = useRouter()
   const { customer } = useSession()
+  // Read after mount: the page is the same for everyone on the server.
+  const [entry, setEntry] = useState<string | null>(null)
   const { hasUnread } = useUpdatesSeen()
   const barRef = useRef<HTMLDivElement>(null)
   const isCompact = Boolean(nav)
@@ -56,6 +70,14 @@ export const CabinetBar = ({
     }
   }, [isCompact])
 
+  useEffect(() => {
+    const saved = readCabinetFrom()
+    if (saved) setEntry(getSafeRedirect(saved))
+  }, [])
+
+  const backHref = back?.href ?? entry ?? '/bookings'
+  const backLabel = back?.label ?? getBackLabel(backHref)
+
   return (
     <div
       ref={barRef}
@@ -65,20 +87,21 @@ export const CabinetBar = ({
     >
       <div className={styles.inner}>
         <NextLink
-          href={back?.href ?? (slug ? '/manage' : '/bookings')}
+          href={backHref}
           className={styles.back}
-          aria-label={nav ? 'Все бизнесы' : undefined}
+          aria-label={nav ? `Назад: ${backLabel}` : undefined}
         >
           <CaretLeft weight='bold' aria-hidden />
-          {!nav && (back?.label ?? (slug ? 'Все бизнесы' : 'Профиль'))}
+          {!nav && backLabel}
         </NextLink>
-        {nav ? (
+        {nav && slug ? (
           <h1 className={styles.business}>
-            {title && <BusinessTile name={title} logoUrl={logoUrl} size='sm' />}
-            <span className={styles.businessName}>
-              {title}
-              {!isPublished && <span className={styles.hidden}> · скрыта</span>}
-            </span>
+            <BusinessSwitcher
+              slug={slug}
+              title={title}
+              logoUrl={logoUrl}
+              isPublished={isPublished}
+            />
           </h1>
         ) : (
           <p className={styles.title} aria-hidden={!isScrolled}>
@@ -114,13 +137,19 @@ export const CabinetBar = ({
               <Megaphone aria-hidden />
             </NextLink>
             <ThemeToggle />
-            <NextLink
-              href='/bookings'
+            {/* The way out to the client side: one's own profile and bookings, or the catalog. */}
+            <Menu
+              label={customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль'}
               className={styles.icon}
-              aria-label={customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль'}
+              trigger={<UserCircle weight='fill' aria-hidden />}
             >
-              <UserCircle weight='fill' aria-hidden />
-            </NextLink>
+              <MenuItem icon={<UserCircle aria-hidden />} onClick={() => router.push('/bookings')}>
+                Профиль и записи
+              </MenuItem>
+              <MenuItem icon={<Compass aria-hidden />} onClick={() => router.push('/')}>
+                Каталог
+              </MenuItem>
+            </Menu>
           </span>
         </div>
       </div>
