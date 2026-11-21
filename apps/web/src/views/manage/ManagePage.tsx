@@ -14,15 +14,12 @@ import { useManagedBusiness } from '@/views/manage/model/useManagedBusiness'
 import { AnalyticsTab } from '@/views/manage/ui/AnalyticsTab/AnalyticsTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
-import { HoursTab } from '@/views/manage/ui/HoursTab/HoursTab'
 import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
-import { MastersTab } from '@/views/manage/ui/MastersTab/MastersTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
 import { PageTab } from '@/views/manage/ui/PageTab/PageTab'
 import { PromotionsTab } from '@/views/manage/ui/PromotionsTab/PromotionsTab'
 import { ReviewsTab } from '@/views/manage/ui/ReviewsTab/ReviewsTab'
 import { ScheduleTab } from '@/views/manage/ui/ScheduleTab'
-import { ServicesTab } from '@/views/manage/ui/ServicesTab/ServicesTab'
 import { SettingsNav } from '@/views/manage/ui/SettingsNav/SettingsNav'
 import { SetupProgress } from '@/views/manage/ui/SetupProgress/SetupProgress'
 import { StockTab } from '@/views/manage/ui/StockTab/StockTab'
@@ -49,7 +46,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const allowed = isTabAllowed(requested, role) ? requested : 'schedule'
   const isSettings = isSettingsTab(allowed)
   // The settings root opens the first section beside the sidebar; phones show only the list.
-  const tab = allowed === 'settings' ? 'services' : allowed
+  const tab = allowed === 'settings' ? 'branches' : allowed
   const alertsVersion = useNewBookingAlerts(slug, data !== null)
 
   if (error) {
@@ -116,7 +113,14 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
           >
             {isSettings && (
               <aside className={styles.sidebar}>
-                <SettingsNav slug={slug} current={allowed === 'settings' ? null : tab} />
+                {data && (
+                  <SettingsNav
+                    slug={slug}
+                    current={tab}
+                    business={data.business}
+                    catalog={data.catalog}
+                  />
+                )}
               </aside>
             )}
             <div
@@ -157,28 +161,8 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
               {data && tab === 'reviews' && (
                 <ReviewsTab slug={slug} businessName={data.business.name} />
               )}
-              {data && tab === 'services' && (
-                <ServicesTab slug={slug} catalog={data.catalog} run={run} />
-              )}
-              {data && tab === 'masters' && (
-                <MastersTab
-                  slug={slug}
-                  catalog={data.catalog}
-                  branches={data.business.branches}
-                  businessHours={data.business.hours}
-                  run={run}
-                />
-              )}
               {data && tab === 'branches' && (
                 <BranchesTab slug={slug} branches={data.business.branches} run={run} />
-              )}
-              {data && tab === 'hours' && (
-                <HoursTab
-                  key={JSON.stringify([data.business.hours, data.business.slotMinutes])}
-                  slug={slug}
-                  business={data.business}
-                  run={run}
-                />
               )}
               {data && tab === 'notifications' && <NotificationsTab slug={slug} />}
               {data && tab === 'promotions' && <PromotionsTab slug={slug} catalog={data.catalog} />}

@@ -15,6 +15,7 @@ import {
 } from '@/shared/api/clientApi'
 import type { Catalog, StockItem } from '@/shared/api/types'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -64,8 +65,9 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
       <SectionHeader
         title='Склад'
         description='Расходники списываются, когда визит отмечен «Пришёл».'
+        isFloatingOnPhone
         actions={
-          <Button size='sm' variant='secondary' onClick={() => setEditing('new')}>
+          <Button size='sm' onClick={() => setEditing('new')}>
             <Plus weight='bold' aria-hidden />
             Позиция
           </Button>
@@ -107,10 +109,10 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
               </li>
             ))}
           </ul>
-          <p className={sheet.groupFooter}>
+          <RowNote>
             {low.length > 0 ? `Заканчивается: ${low.map((item) => item.name).join(', ')}. ` : ''}
             На складе на {formatPrice(Math.round(value ?? 0))}.
-          </p>
+          </RowNote>
         </section>
       )}
 

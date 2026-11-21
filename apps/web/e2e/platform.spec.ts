@@ -6,11 +6,13 @@ import { bookingSteps, pickFirstFreeSlot, submitBooking, waitForToastsToLeave } 
 const TINY_PNG =
   'iVBORw0KGgoAAAANSUhEUgAAABAAAAAKCAIAAAAy3EnLAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAFUlEQVQYlWNgKHxMGmIY1fB4KIYSAN5g1IFgp8jzAAAAAElFTkSuQmCC'
 
-// Settings sections sit in a sidebar from 1024px; phones go back to the list first.
+// Settings open from the cabinet's «Настройки»: a sidebar beside the section from 1024px, the
+// list alone on phones; either way the row is in the «Настройки» navigation.
 const openSettings = async (page: Page, name: string) => {
-  if ((page.viewportSize()?.width ?? 0) < 1024) {
-    await page.getByRole('link', { name: 'Назад к настройкам' }).click()
-  }
+  await page
+    .getByRole('navigation', { name: 'Разделы кабинета' })
+    .getByRole('link', { name: 'Настройки' })
+    .click()
   await page.getByRole('navigation', { name: 'Настройки' }).getByRole('link', { name }).click()
 }
 
@@ -51,7 +53,8 @@ test.describe('Platform: a new business goes live', () => {
     await serviceDialog.getByRole('button', { name: 'Сохранить' }).click()
     await expect(page.getByRole('button', { name: /Стрижка/ })).toBeVisible()
 
-    await openSettings(page, 'Мастера')
+    // Services, masters and hours live on «Страница»: its «Мастера» tab.
+    await page.getByRole('tab', { name: /Мастера/ }).click()
     await page.getByRole('button', { name: 'Добавить мастера' }).first().click()
     const masterDialog = page.getByRole('dialog')
     await masterDialog.getByLabel('Имя').fill('Азамат')

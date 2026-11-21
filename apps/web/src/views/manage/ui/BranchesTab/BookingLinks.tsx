@@ -4,6 +4,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { Copy } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import links from './BookingLinks.module.css'
@@ -57,7 +58,7 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
             <li key={item.id} className={links.row}>
               <span className={links.text}>
                 <span className={links.title}>{item.title}</span>
-                <span className={links.url}>{url}</span>
+                <span className={links.url}>{url.replace(/^https?:\/\//, '')}</span>
               </span>
               <button
                 type='button'
@@ -65,17 +66,17 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
                 onClick={() => handleCopy(url)}
                 aria-label={`Скопировать ссылку: ${item.title}`}
               >
-                <Copy weight='bold' aria-hidden />
-                Копировать
+                <Copy aria-hidden />
+                Скопировать
               </button>
             </li>
           )
         })}
       </ul>
-      <p className={links.footer}>
-        Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа — клиент сразу
+      <RowNote>
+        Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа: клиент сразу
         попадёт в запись в нужный филиал.
-      </p>
+      </RowNote>
     </div>
   )
 }
