@@ -78,6 +78,8 @@ import type {
   Promotion,
   PromotionInput,
   PublicProfile,
+  PushConfig,
+  PushSubscriptionInput,
   RecentBooking,
   Recommendation,
   ReviewAccess,
@@ -459,6 +461,15 @@ const createTelegramLink = (slug: string) => post<TelegramLink>(`${manage(slug)}
 
 const removeTelegramChat = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/telegram/${id}`)
+
+// Web Push for the business side: the server's key, then this browser's subscription.
+const getPushConfig = (signal?: AbortSignal) => request<PushConfig>('/push/config', { signal })
+
+const savePushSubscription = (subscription: PushSubscriptionInput) =>
+  post<void>('/me/push-subscriptions', subscription)
+
+const deletePushSubscription = (endpoint: string) =>
+  send<void>('DELETE', '/me/push-subscriptions', { endpoint })
 
 const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<AnalyticsReport>(
@@ -931,6 +942,9 @@ export {
   getTelegramStatus,
   createTelegramLink,
   removeTelegramChat,
+  getPushConfig,
+  savePushSubscription,
+  deletePushSubscription,
   getAvailability,
   getMyProfileSettings,
   getProfile,

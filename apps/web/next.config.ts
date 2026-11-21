@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
     // Profile and bookings are one page now.
     { source: '/profile', destination: '/bookings', permanent: false },
   ],
+  // The push worker is always fetched fresh, so a fix to it reaches every device at once.
+  headers: async () => [
+    {
+      source: '/sw.js',
+      headers: [
+        { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        { key: 'Service-Worker-Allowed', value: '/' },
+      ],
+    },
+  ],
   rewrites: async () => [
     { source: `${CLIENT_API_PREFIX}/:path*`, destination: `${API_URL}/:path*` },
     // The emoji picker's data through our origin (`shared/ui/EmojiPicker/config.ts`).

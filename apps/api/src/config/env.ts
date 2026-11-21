@@ -45,6 +45,11 @@ type Env = {
   WALLET_WWDR_PEM?: string
   GOOGLE_WALLET_ISSUER_ID?: string
   GOOGLE_WALLET_SERVICE_ACCOUNT?: string
+  /** Web Push (VAPID) for owners and masters; without the pair the feature is hidden. */
+  VAPID_PUBLIC_KEY?: string
+  VAPID_PRIVATE_KEY?: string
+  /** Who push services may contact: `mailto:` or an https address; the site's address by default. */
+  VAPID_SUBJECT?: string
   PAYMENT_DRIVER: PaymentDriver
   FREEDOMPAY_MERCHANT_ID?: string
   FREEDOMPAY_SECRET_KEY?: string
@@ -252,6 +257,21 @@ const parseWallet = (config: Record<string, unknown>) => ({
   GOOGLE_WALLET_SERVICE_ACCOUNT: decodeSecret(config.GOOGLE_WALLET_SERVICE_ACCOUNT),
 })
 
+// Both keys or neither: half a pair would only fail on the first push.
+const parseVapid = (config: Record<string, unknown>, publicWebUrl: string) => {
+  const publicKey = optionalString(config.VAPID_PUBLIC_KEY)
+  const privateKey = optionalString(config.VAPID_PRIVATE_KEY)
+  if (Boolean(publicKey) !== Boolean(privateKey)) {
+    throw new Error('VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY go together')
+  }
+  const subject = optionalString(config.VAPID_SUBJECT) ?? (publicKey ? publicWebUrl : undefined)
+  if (subject && !/^(mailto:|https?:\/\/)/.test(subject)) {
+    throw new Error('VAPID_SUBJECT must be a mailto: or https:// address')
+  }
+
+  return { VAPID_PUBLIC_KEY: publicKey, VAPID_PRIVATE_KEY: privateKey, VAPID_SUBJECT: subject }
+}
+
 // Split processes must share Redis: the worker's writes (released payment holds, waitlist) bump
 // cache tags the api instances have to see, and rate limits must count across every instance.
 const parseRole = (config: Record<string, unknown>) => {
@@ -284,6 +304,10 @@ const parseInterleave = (value: unknown): Env['RECS_INTERLEAVE'] => {
 const validateEnv = (config: Record<string, unknown>): Env => {
   const nodeEnv = parseNodeEnv(config.NODE_ENV)
   const webOrigins = parseOrigins(config.WEB_ORIGIN)
+  const publicWebUrl = (optionalString(config.PUBLIC_WEB_URL) ?? webOrigins[0] ?? '').replace(
+    /\/$/,
+    '',
+  )
   const smsDriver = parseSmsDriver(config)
 
   return {
@@ -317,10 +341,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
       config.AUTH_RATE_LIMIT_PER_MINUTE,
       5,
     ),
-    PUBLIC_WEB_URL: (optionalString(config.PUBLIC_WEB_URL) ?? webOrigins[0] ?? '').replace(
-      /\/$/,
-      '',
-    ),
+    PUBLIC_WEB_URL: publicWebUrl,
     AUTH_SECRET: parseAuthSecret(config.AUTH_SECRET, nodeEnv),
     ADMIN_PHONES: parseAdminPhones(config.ADMIN_PHONES),
     SMS_DRIVER: smsDriver,
@@ -349,6 +370,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     ALERT_TELEGRAM_CHAT_ID: optionalString(config.ALERT_TELEGRAM_CHAT_ID),
     ...parseStorage(config),
     ...parseWallet(config),
+    ...parseVapid(config, publicWebUrl),
   }
 }
 
