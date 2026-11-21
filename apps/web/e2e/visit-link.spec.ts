@@ -59,8 +59,12 @@ test.describe('Client flow from outside the site', () => {
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
     await expect(ticket).toContainText(booking.serviceName)
 
-    await ticket.getByRole('button', { name: 'Ещё' }).click()
-    await page.getByRole('menuitem', { name: 'Отменить запись' }).click()
+    // Under load the menu opened right after the redirect can be closed by the page settling
+    // around it (seen as «not stable», then «detached»); a person taps «Ещё» again, so does the test.
+    await expect(async () => {
+      await ticket.getByRole('button', { name: 'Ещё' }).click()
+      await page.getByRole('menuitem', { name: 'Отменить запись' }).click({ timeout: 2000 })
+    }).toPass({ timeout: 20_000 })
     await expect(ticket.getByText('Отменена')).toBeVisible()
   })
 
