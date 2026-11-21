@@ -68,6 +68,7 @@ test.describe('Master pay', () => {
         rates: [{ serviceId: beard.id, kind: 'fixed', value: 300 }],
         salary: null,
         minimum: 100_000,
+        productsPercent: null,
       },
     )
 
@@ -178,5 +179,76 @@ test.describe('Master pay', () => {
     } finally {
       await staffContext.close()
     }
+  })
+
+  test('a master earns their percent of the products they sold; an undone sale is not counted', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000)
+    const business = await createOwnBusiness(page, {
+      services: [{ name: 'Стрижка', durationMinutes: 60, price: 1000 }],
+      masters: ['Азамат'],
+    })
+    const [azamat] = business.masters
+    if (!azamat) throw new Error('A master expected')
+    const manage = `/api/manage/${business.slug}`
+    // A visit, so the analytics has a period to show (no services percent: it earns him nothing).
+    await createVisit({
+      slug: business.slug,
+      serviceId: business.services[0]?.id ?? '',
+      specialistId: azamat.id,
+      daysBack: 1,
+    })
+
+    // A shampoo for sale, three on the shelf.
+    const created = await (
+      await page.request.post(`${manage}/stock`, {
+        data: { name: 'E2E Шампунь', unit: 'шт', unitCost: 400, isForSale: true, salePrice: 1000 },
+      })
+    ).json()
+    const itemId = (created as { id: string; name: string }[]).find(
+      (item) => item.name === 'E2E Шампунь',
+    )?.id
+    if (!itemId) throw new Error('The shampoo expected in the stock')
+    expect(
+      (
+        await page.request.post(`${manage}/stock/${itemId}/receive`, { data: { quantity: 3 } })
+      ).ok(),
+    ).toBe(true)
+
+    // The owner gives Азамат 10% of the products in the pay sheet.
+    await page.goto(`/manage/${business.slug}?tab=masters`)
+    await page
+      .getByRole('button', { name: /Азамат/ })
+      .first()
+      .click()
+    await page.getByRole('button', { name: /^Зарплата/ }).click()
+    const sheet = page.getByRole('dialog', { name: 'Зарплата' })
+    await sheet.getByLabel('Процент с продаж').fill('10')
+    await expect(sheet).toContainText('которые мастер продал в «Кассе»')
+    await sheet.getByRole('button', { name: 'Сохранить' }).click()
+    await expect(page.getByText('Зарплата Азамат сохранена')).toBeVisible()
+
+    // Two sold by Азамат, one more sold and undone.
+    const sell = (quantity: number) =>
+      page.request.post(`${manage}/sales`, {
+        data: { sellerId: azamat.id, paymentMethod: 'cash', items: [{ itemId, quantity }] },
+      })
+    expect((await sell(2)).ok()).toBe(true)
+    const undone = await (await sell(1)).json()
+    expect((await page.request.post(`${manage}/sales/${undone.id}/cancel`)).ok()).toBe(true)
+
+    const report = await (await page.request.get(`${manage}/analytics?days=7`)).json()
+    const row = report.masters.find((item: { id: string }) => item.id === azamat.id)
+    expect(row.pay).toMatchObject({ productsSold: 2000, products: 200, earned: 200, total: 200 })
+
+    await page.goto(`/manage/${business.slug}?tab=analytics`)
+    await page
+      .getByRole('region', { name: 'Мастера за период' })
+      .getByRole('button', { name: /Азамат/ })
+      .click()
+    await expect(page.getByRole('dialog', { name: 'Азамат' })).toContainText(
+      `продал на ${money(2000)}`,
+    )
   })
 })

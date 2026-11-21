@@ -6,6 +6,8 @@ type PayVisit = { serviceId: string; serviceName: string; earned: number }
 type PayInput = {
   scheme: MasterPayScheme
   visits: PayVisit[]
+  /** What the products the master sold came to in the period (none by default). */
+  productsSold?: number
   /** Every day of the period, YYYY-MM-DD. */
   days: string[]
   /** Days of the period the master works by the schedule. */
@@ -15,6 +17,8 @@ type PayInput = {
 type PayResult = {
   services: number
   lines: MasterPayLine[]
+  products: number
+  productsSold: number
   salary: number
   workDays: number
   minimum: number | null
@@ -44,7 +48,8 @@ const hasScheme = (scheme: MasterPayScheme) =>
   scheme.percent !== null ||
   scheme.rates.length > 0 ||
   scheme.salary !== null ||
-  scheme.minimum !== null
+  scheme.minimum !== null ||
+  scheme.productsPercent !== null
 
 /** The days of `days` the master works: open by their week (or the business's), not on leave. */
 const countWorkDays = (days: string[], schedule: ScheduleInput) =>
@@ -56,10 +61,16 @@ const countWorkDays = (days: string[], schedule: ScheduleInput) =>
 
 /**
  * A master's pay for a period: each service's visits at its own rate (a fixed sum per visit or a
- * percent of what they earned, else the master's percent), plus the salary; never less than the
- * minimum. Sums are kept exact and rounded once, so one percent gives what it always gave.
+ * percent of what they earned, else the master's percent), the percent of the products they sold,
+ * plus the salary; never less than the minimum. Sums are kept exact and rounded once, so one percent gives what it always gave.
  */
-const calculatePay = ({ scheme, visits, days, workDays }: PayInput): PayResult => {
+const calculatePay = ({
+  scheme,
+  visits,
+  productsSold = 0,
+  days,
+  workDays,
+}: PayInput): PayResult => {
   const rates = new Map(scheme.rates.map((rate) => [rate.serviceId, rate]))
   const byService = new Map<string, { name: string; visits: number; base: number }>()
   for (const visit of visits) {
@@ -86,17 +97,20 @@ const calculatePay = ({ scheme, visits, days, workDays }: PayInput): PayResult =
   lines.sort((first, second) => second.amount - first.amount || second.base - first.base)
 
   const services = Math.round(exact)
+  const products = Math.round((productsSold * (scheme.productsPercent ?? 0)) / 100)
   const salary = !scheme.salary
     ? 0
     : scheme.salary.kind === 'day'
       ? scheme.salary.amount * workDays
       : Math.round(monthlyShare(scheme.salary.amount, days))
   const minimum = scheme.minimum === null ? null : Math.round(monthlyShare(scheme.minimum, days))
-  const earned = services + salary
+  const earned = services + products + salary
 
   return {
     services,
     lines,
+    products,
+    productsSold,
     salary,
     workDays,
     minimum,
