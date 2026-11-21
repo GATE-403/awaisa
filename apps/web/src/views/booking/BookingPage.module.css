@@ -528,3 +528,9 @@ label:has([data-checked]) .serviceNote {
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
+
+/* «+ Ещё услуга»: a content-width capsule under the stack, on the step's left edge. */
+.addService {
+  display: flex;
+  margin-top: var(--space-3);
+}

@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
-import { CaretRight, Check, MapPin, UsersThree } from '@phosphor-icons/react/ssr'
+import { CaretRight, Check, MapPin, Plus, UsersThree } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import {
   ANY_SPECIALIST_ID,
@@ -233,6 +233,7 @@ export const BookingPage = ({
 
   const openStep = (step: BookingStepId | 'branch') => {
     setIsReviewRequested(false)
+    form.closeAddService()
     window.clearTimeout(foldTimer.current)
     setIsContactsDone(false)
     if (step === 'branch') {
@@ -398,7 +399,13 @@ export const BookingPage = ({
           onSubmit: () => form.selectTime(rulerTime),
           submitLabel: t('Выбрать {time}', { time: rulerTime }),
         }
-      : { onSubmit: form.submit, submitLabel: undefined }),
+      : {
+          onSubmit: () => {
+            form.closeAddService()
+            form.submit()
+          },
+          submitLabel: undefined,
+        }),
     quote: form.quote,
     place: { name: business.name, coverUrl: business.coverUrl },
     address:
@@ -592,7 +599,51 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {!isBranchOpen && activeStep === 'service' && (
+                {/* One more service in the same visit, by the same master right after: a quiet
+                    capsule under the stack, never in the way of the one-tap first choice. */}
+                {!isBranchOpen &&
+                  !form.isAddingService &&
+                  activeStep !== 'service' &&
+                  form.addableServices.length > 0 && (
+                    <div className={styles.addService}>
+                      <Button
+                        variant='secondary'
+                        size='md'
+                        onClick={() => {
+                          setIsReviewRequested(false)
+                          setIsContactsDone(false)
+                          form.openAddService()
+                        }}
+                      >
+                        <Plus aria-hidden />
+                        {t('Ещё услуга')}
+                      </Button>
+                    </div>
+                  )}
+
+                {!isBranchOpen && form.isAddingService && form.service && (
+                  <BookingStep
+                    id='service-more'
+                    eyebrow={t('Тот же мастер, сразу после')}
+                    title={t('Что ещё сделать?')}
+                  >
+                    <ServicePicker
+                      services={[...form.chosenServices, ...form.addableServices]}
+                      categories={catalog.categories}
+                      value={form.serviceId}
+                      chosenIds={form.chosenServiceIds}
+                      onChange={form.addService}
+                      onRemove={form.removeService}
+                      onReselect={form.closeAddService}
+                      photos={servicePhotos}
+                      coverUrl={business.coverUrl}
+                      businessName={business.name}
+                      soonLabel={() => null}
+                    />
+                  </BookingStep>
+                )}
+
+                {!isBranchOpen && !form.isAddingService && activeStep === 'service' && (
                   <BookingStep
                     id='service'
                     eyebrow={stepEyebrow('service')}
@@ -612,7 +663,7 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {!isBranchOpen && activeStep === 'specialist' && (
+                {!isBranchOpen && !form.isAddingService && activeStep === 'specialist' && (
                   <BookingStep
                     id='specialist'
                     eyebrow={stepEyebrow('specialist')}
@@ -627,7 +678,7 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {!isBranchOpen && activeStep === 'datetime' && (
+                {!isBranchOpen && !form.isAddingService && activeStep === 'datetime' && (
                   <BookingStep
                     id='datetime'
                     eyebrow={stepEyebrow('datetime')}
@@ -662,101 +713,104 @@ export const BookingPage = ({
                   </BookingStep>
                 )}
 
-                {!isBranchOpen && activeStep === 'contacts' && !isContactsFolded && (
-                  <BookingStep
-                    id='contacts'
-                    eyebrow={stepEyebrow('contacts')}
-                    title={t('Как вас записать?')}
-                  >
-                    <div className={styles.fields}>
-                      {/* Said before the name and number are asked for: what is paid now, when it
+                {!isBranchOpen &&
+                  !form.isAddingService &&
+                  activeStep === 'contacts' &&
+                  !isContactsFolded && (
+                    <BookingStep
+                      id='contacts'
+                      eyebrow={stepEyebrow('contacts')}
+                      title={t('Как вас записать?')}
+                    >
+                      <div className={styles.fields}>
+                        {/* Said before the name and number are asked for: what is paid now, when it
                           comes back and where to go. The side panel has no summary card for it. */}
-                      {form.service?.deposit ? (
-                        <p className={styles.terms} ref={trackDepositShown}>
-                          {t('Предоплата {amount} — вернём, если отмените за сутки', {
-                            amount: formatPrice(form.service.deposit),
-                          })}
-                          {summaryProps.address ? ` · ${summaryProps.address}` : ''}
-                        </p>
-                      ) : null}
-                      {/* Settings-style rows: the label on the left, the value typed on the right. */}
-                      <div className={styles.group}>
-                        <Field
-                          label={t('Имя')}
-                          error={form.errors.name && t(form.errors.name)}
-                          className={styles.fieldRow}
-                        >
-                          <Input
-                            variant='plain'
-                            value={form.name}
-                            onValueChange={form.setName}
-                            autoComplete='name'
-                            enterKeyHint={form.accountPhone ? 'done' : 'next'}
-                            // Enter moves on to the number: one keyboard, no hunting for the field.
-                            onKeyDown={(event) => {
-                              if (event.key !== 'Enter') return
-                              event.preventDefault()
-                              const phoneInput = document.querySelector<HTMLInputElement>(
-                                '#step-contacts input[type="tel"]',
-                              )
-                              if (phoneInput) phoneInput.focus()
-                              else foldContacts()
-                            }}
-                            placeholder={t(
-                              form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
-                            )}
-                          />
-                        </Field>
-                        {form.accountPhone ? null : (
+                        {form.service?.deposit ? (
+                          <p className={styles.terms} ref={trackDepositShown}>
+                            {t('Предоплата {amount} — вернём, если отмените за сутки', {
+                              amount: formatPrice(form.service.deposit),
+                            })}
+                            {summaryProps.address ? ` · ${summaryProps.address}` : ''}
+                          </p>
+                        ) : null}
+                        {/* Settings-style rows: the label on the left, the value typed on the right. */}
+                        <div className={styles.group}>
                           <Field
-                            label={t('Телефон')}
-                            error={form.errors.phone && t(form.errors.phone)}
+                            label={t('Имя')}
+                            error={form.errors.name && t(form.errors.name)}
                             className={styles.fieldRow}
                           >
                             <Input
                               variant='plain'
-                              type='tel'
-                              inputMode='tel'
-                              autoComplete='tel'
-                              enterKeyHint='done'
+                              value={form.name}
+                              onValueChange={form.setName}
+                              autoComplete='name'
+                              enterKeyHint={form.accountPhone ? 'done' : 'next'}
+                              // Enter moves on to the number: one keyboard, no hunting for the field.
                               onKeyDown={(event) => {
                                 if (event.key !== 'Enter') return
                                 event.preventDefault()
-                                foldContacts()
+                                const phoneInput = document.querySelector<HTMLInputElement>(
+                                  '#step-contacts input[type="tel"]',
+                                )
+                                if (phoneInput) phoneInput.focus()
+                                else foldContacts()
                               }}
-                              value={form.phone}
-                              onValueChange={(value) => {
-                                const masked = maskPhoneInput(value)
-                                form.setPhone(masked)
-                                // A whole number (+996 and nine digits) with a name: the card folds,
-                                // like a code field moving on once full.
-                                if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
-                                  window.clearTimeout(foldTimer.current)
-                                  foldTimer.current = window.setTimeout(
-                                    () => setIsContactsDone(true),
-                                    450,
-                                  )
-                                }
-                              }}
-                              placeholder='+996 555 123 456'
+                              placeholder={t(
+                                form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
+                              )}
                             />
                           </Field>
+                          {form.accountPhone ? null : (
+                            <Field
+                              label={t('Телефон')}
+                              error={form.errors.phone && t(form.errors.phone)}
+                              className={styles.fieldRow}
+                            >
+                              <Input
+                                variant='plain'
+                                type='tel'
+                                inputMode='tel'
+                                autoComplete='tel'
+                                enterKeyHint='done'
+                                onKeyDown={(event) => {
+                                  if (event.key !== 'Enter') return
+                                  event.preventDefault()
+                                  foldContacts()
+                                }}
+                                value={form.phone}
+                                onValueChange={(value) => {
+                                  const masked = maskPhoneInput(value)
+                                  form.setPhone(masked)
+                                  // A whole number (+996 and nine digits) with a name: the card folds,
+                                  // like a code field moving on once full.
+                                  if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
+                                    window.clearTimeout(foldTimer.current)
+                                    foldTimer.current = window.setTimeout(
+                                      () => setIsContactsDone(true),
+                                      450,
+                                    )
+                                  }
+                                }}
+                                placeholder='+996 555 123 456'
+                              />
+                            </Field>
+                          )}
+                        </div>
+                        {/* Mum or a child: their name and number, the visit stays in this account. */}
+                        {form.canBookForOther && (
+                          <button
+                            type='button'
+                            className={styles.forOther}
+                            onClick={() => form.setForOther(!form.isForOther)}
+                          >
+                            {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
+                          </button>
                         )}
                       </div>
-                      {/* Mum or a child: their name and number, the visit stays in this account. */}
-                      {form.canBookForOther && (
-                        <button
-                          type='button'
-                          className={styles.forOther}
-                          onClick={() => form.setForOther(!form.isForOther)}
-                        >
-                          {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
-                        </button>
-                      )}
-                    </div>
-                    {contactExtras}
-                  </BookingStep>
-                )}
+                      {contactExtras}
+                    </BookingStep>
+                  )}
 
                 {!isBranchOpen && isContactsFolded && (
                   <BookingStep id='ready' title={t('Всё готово')}>

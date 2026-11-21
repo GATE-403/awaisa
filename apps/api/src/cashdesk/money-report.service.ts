@@ -2,6 +2,7 @@ import type { AnalyticsDays, MoneyReport } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { changeOf, profitOf, roundMoney } from './cash-math.js'
@@ -11,7 +12,7 @@ type Row = Record<string, unknown>
 // The same rules as «Аналитика»'s revenue: a visit counts unless it was a no-show and earns
 // what was paid, or the price minus its discount when nobody marked the payment.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = `COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))`
+const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
 const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
   WHERE m."booking_id" = b."id" AND m."kind" = 'use')`
 const LOCAL_VISIT = `(b."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`

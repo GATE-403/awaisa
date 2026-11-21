@@ -24,6 +24,8 @@ type PromotionRule = {
 type PricingInput = {
   serviceId: string
   price: number
+  /** Services done after the first in the same visit; a promotion counts the ones it covers. */
+  extras?: { serviceId: string; price: number }[]
   /** The visit's day and start (business time). */
   date: string
   weekday: number
@@ -40,9 +42,14 @@ const normalizeCode = (code: string | null | undefined) => {
   return value === '' ? null : value
 }
 
+/** What of the visit a rule discounts: every service, or only those it names. */
+const coveredPrice = (rule: PromotionRule, input: PricingInput) =>
+  [{ serviceId: input.serviceId, price: input.price }, ...(input.extras ?? [])]
+    .filter((line) => !rule.serviceIds || rule.serviceIds.includes(line.serviceId))
+    .reduce((sum, line) => sum + line.price, 0)
+
 const applies = (rule: PromotionRule, input: PricingInput) => {
   if (!rule.isActive) return false
-  if (rule.serviceIds && !rule.serviceIds.includes(input.serviceId)) return false
   if (rule.startsOn && input.date < rule.startsOn) return false
   if (rule.endsOn && input.date > rule.endsOn) return false
   if (rule.kind === 'promo_code')
@@ -59,7 +66,7 @@ const bestDiscount = (rules: PromotionRule[], input: PricingInput): Discount | n
   let best: Discount | null = null
   for (const rule of rules) {
     if (!applies(rule, input)) continue
-    const amount = Math.round((input.price * rule.percent) / 100)
+    const amount = Math.round((coveredPrice(rule, input) * rule.percent) / 100)
     if (amount > 0 && (!best || amount > best.amount)) {
       best = { promotionId: rule.id, title: rule.title, percent: rule.percent, amount }
     }
