@@ -1227,6 +1227,48 @@ type PageStats = {
   previousBookings: number
 }
 
+// «Скачать мои данные» (`GET /me/export`): everything the platform keeps about the account,
+// without other people's data or service hashes. The web adds the device's own favourites.
+type AccountExport = {
+  exportedAt: string
+  profile: {
+    name: string
+    phone: string
+    avatarUrl: string | null
+    handle: string | null
+    status: string
+    statusEmoji: string
+    about: string
+    accent: string | null
+    socialLinks: Partial<Record<'instagram' | 'telegram' | 'tiktok' | 'website', string>>
+    featuredBadges: string[]
+    isPublic: boolean
+    showPlaces: boolean
+    createdAt: string
+  }
+  bookings: Booking[]
+  reviews: (Review & { business: { slug: string; name: string } })[]
+  questions: {
+    business: { slug: string; name: string }
+    text: string
+    answer: string | null
+    createdAt: string
+  }[]
+  loyalty: MyLoyalty
+  waitlist: WaitlistEntry[]
+  favorites: { master: { id: string; name: string; business: string } | null }
+  notifications: {
+    push: { userAgent: string; createdAt: string; lastSuccessAt: string | null }[]
+    telegram: { isLinked: boolean; linkedAt: string | null }
+    businessChats: { business: string; username: string; createdAt: string }[]
+  }
+  referrals: { invitedBy: boolean; friendsInvited: number }
+}
+
+// «Удалить аккаунт» (`DELETE /me`): the places whose public pages showed the account's reviews,
+// so the web refreshes them at once.
+type AccountDeleted = { slugs: string[]; cancelledBookings: number }
+
 // «Сообщить, когда освободится»: a client waits for a full day (see apps/api/src/waitlist).
 type WaitlistEntry = {
   id: string
@@ -1630,4 +1672,6 @@ export type {
   ExpenseList,
   MoneyReport,
   WaitlistEntry,
+  AccountExport,
+  AccountDeleted,
 }
