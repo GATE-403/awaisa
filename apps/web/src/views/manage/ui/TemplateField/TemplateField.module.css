@@ -56,13 +56,17 @@
 }
 
 .tokens {
-  display: none;
+  display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+  /* Kept in place, only unseen, while the field is not focused: folding it on blur made a sheet
+     shorter under the pointer, so the first tap on «Готово» landed beside it (on phones, on the
+     backdrop). */
+  visibility: hidden;
 }
 
 .template:focus-within .tokens {
-  display: flex;
+  visibility: visible;
 }
 
 .tokenButton {
