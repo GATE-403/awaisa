@@ -1,3 +1,4 @@
+import { T } from '@/shared/i18n'
 import { Block, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import tabs from '@/shared/ui/TextTabs/TextTabs.module.css'
 import styles from '../LeaderboardPage.module.css'
@@ -23,7 +24,9 @@ export const LeaderboardSkeleton = () => (
         <p className={styles.title}>
           <TextLine chars={14} />
         </p>
-        <p className={styles.lead}>По отзывам клиентов в Awaisa</p>
+        <p className={styles.lead}>
+          <T>По отзывам клиентов в Awaisa</T>
+        </p>
       </header>
       <div className={styles.controls}>
         <Block className={skeleton.switch} />

@@ -17,6 +17,12 @@ const WEEKDAYS_FULL = [
 ]
 const DAYS_IN_WEEK = 7
 
+/** `useT()`'s `t`, so callers get the words in the chosen language; Russian when left out. */
+type Say = (text: string, vars?: Record<string, string | number>) => string
+
+const russian: Say = (text, vars) =>
+  text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars?.[key] ?? match))
+
 const formatClock = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 
@@ -34,29 +40,45 @@ const weekdayOf = (dayKey: string) => {
 const findDay = (hours: WorkingDay[], weekday: number) =>
   hours.find((day) => day.weekday === weekday)
 
-const getOpeningStatus = (hours: WorkingDay[], dayKey: string, minutes: number): OpeningStatus => {
+const getOpeningStatus = (
+  hours: WorkingDay[],
+  dayKey: string,
+  minutes: number,
+  t: Say = russian,
+): OpeningStatus => {
   const weekday = weekdayOf(dayKey)
   const today = findDay(hours, weekday)
   if (today && minutes >= today.opensMinutes && minutes < today.closesMinutes) {
-    return { isOpen: true, label: `Открыто до ${formatClock(today.closesMinutes)}` }
+    return {
+      isOpen: true,
+      label: t('Открыто до {time}', { time: formatClock(today.closesMinutes) }),
+    }
   }
   if (today && minutes < today.opensMinutes) {
-    return { isOpen: false, label: `Откроемся в ${formatClock(today.opensMinutes)}` }
+    return {
+      isOpen: false,
+      label: t('Откроемся в {time}', { time: formatClock(today.opensMinutes) }),
+    }
   }
 
   for (let offset = 1; offset <= DAYS_IN_WEEK; offset += 1) {
     const next = findDay(hours, (weekday + offset) % DAYS_IN_WEEK)
     if (!next) continue
-    const when = offset === 1 ? 'завтра' : WEEKDAYS_SHORT[next.weekday]?.toLowerCase()
+    const time = formatClock(next.opensMinutes)
+    if (offset === 1) return { isOpen: false, label: t('Откроемся завтра в {time}', { time }) }
+    const short = WEEKDAYS_SHORT[next.weekday] ?? ''
+    // Russian reads «откроемся пт в 10:00»; other languages keep their own capitals («Opens Fri»).
+    const translated = t(short)
+    const day = translated === short ? short.toLowerCase() : translated
 
-    return { isOpen: false, label: `Откроемся ${when} в ${formatClock(next.opensMinutes)}` }
+    return { isOpen: false, label: t('Откроемся {day} в {time}', { day, time }) }
   }
 
-  return { isOpen: false, label: 'Сейчас не принимаем' }
+  return { isOpen: false, label: t('Сейчас не принимаем') }
 }
 
 // "Ежедневно 10:00–20:00" or "Пн–Пт 10:00–19:00, Сб 11:00–16:00".
-const formatWeekSchedule = (hours: WorkingDay[]) => {
+const formatWeekSchedule = (hours: WorkingDay[], t: Say = russian) => {
   const groups: { from: number; to: number; range: string }[] = []
 
   for (let weekday = 0; weekday < DAYS_IN_WEEK; weekday += 1) {
@@ -68,16 +90,16 @@ const formatWeekSchedule = (hours: WorkingDay[]) => {
     else groups.push({ from: weekday, to: weekday, range })
   }
 
-  if (groups.length === 0) return 'Запись временно закрыта'
+  if (groups.length === 0) return t('Запись временно закрыта')
   const [only] = groups
   if (groups.length === 1 && only && only.from === 0 && only.to === DAYS_IN_WEEK - 1) {
-    return `Ежедневно ${only.range}`
+    return t('Ежедневно {range}', { range: only.range })
   }
 
   return groups
     .map(({ from, to, range }) => {
-      const days =
-        from === to ? WEEKDAYS_SHORT[from] : `${WEEKDAYS_SHORT[from]}–${WEEKDAYS_SHORT[to]}`
+      const first = t(WEEKDAYS_SHORT[from] ?? '')
+      const days = from === to ? first : `${first}–${t(WEEKDAYS_SHORT[to] ?? '')}`
       return `${days} ${range}`
     })
     .join(', ')

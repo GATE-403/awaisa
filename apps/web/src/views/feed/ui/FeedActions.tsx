@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useNextSlot } from '@/entities/booking'
 import { reportFeedItem } from '@/shared/api/clientApi'
 import type { FeedItem } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import styles from '../FeedPage.module.css'
 import { WorkReviewsSheet } from './WorkReviewsSheet'
 
@@ -21,15 +22,16 @@ interface FeedActionsProps {
 
 const ANY = 'any'
 
-const compact = (count: number) =>
+const compact = (t: Translate, count: number) =>
   count >= 1000
-    ? `${(count / 1000).toFixed(1).replace('.', ',').replace(',0', '')} тыс.`
+    ? t('{count} тыс.', { count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })
     : `${count}`
 
 // Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Записаться»
 // with the first free time, and ♥ with its count.
 export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsProps) => {
   const toast = useToast()
+  const t = useT()
   const [isReviewsOpen, setIsReviewsOpen] = useState(false)
   // The cached feed may not include this device's like yet: count it once, on top. (Rendered
   // with the work's id as its key, so this is read once per work.)
@@ -57,7 +59,7 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
         return
       }
       await navigator.clipboard.writeText(url)
-      toast.show({ title: 'Ссылка скопирована', type: 'success' })
+      toast.show({ title: t('Ссылка скопирована'), type: 'success' })
     } catch {
       // The share sheet was closed: nothing to do.
     }
@@ -66,13 +68,13 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
   const report = async () => {
     onReported()
     await reportFeedItem(item.id).catch(() => undefined)
-    toast.show({ title: 'Спасибо, проверим фото', type: 'info' })
+    toast.show({ title: t('Спасибо, проверим фото'), type: 'info' })
   }
 
   return (
     <div className={styles.actions}>
       <Menu
-        label='Ещё'
+        label={t('Ещё')}
         className={styles.roundButton}
         trigger={<DotsThree weight='bold' aria-hidden />}
       >
@@ -81,28 +83,28 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
             icon={<ChatCircle weight='bold' aria-hidden />}
             onClick={() => setIsReviewsOpen(true)}
           >
-            {`Отзывы${item.reviewsCount ? ` · ${compact(item.reviewsCount)}` : ''}`}
+            {`${t('Отзывы')}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
           </MenuItem>
         )}
         <MenuItem icon={<ShareFat weight='bold' aria-hidden />} onClick={() => void share()}>
-          Поделиться
+          {t('Поделиться')}
         </MenuItem>
         <MenuItem
           variant='danger'
           icon={<Flag weight='bold' aria-hidden />}
           onClick={() => void report()}
         >
-          Пожаловаться
+          {t('Пожаловаться')}
         </MenuItem>
       </Menu>
       <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
-        {service ? 'Записаться' : 'Выбрать услугу'}
+        {service ? t('Записаться') : t('Выбрать услугу')}
         {/* The second line is always there (its time arrives a moment later), so the button never
             jumps from one line to two when a card comes in. */}
         {service && (
           <span className={styles.slot}>
             <span className={styles.visuallyHidden}> · </span>
-            {slot ? `${slot.dayLabel} ${slot.time}` : '\u00a0'}
+            {slot ? `${t(slot.dayLabel)} ${slot.time}` : '\u00a0'}
           </span>
         )}
       </ButtonLink>
@@ -110,14 +112,14 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
         type='button'
         className={styles.roundButton}
         aria-pressed={isLiked}
-        aria-label={`Нравится: ${likes}`}
+        aria-label={t('Нравится: {count}', { count: likes })}
         data-liked={isLiked || undefined}
         onClick={() => onLike(!isLiked)}
       >
         <Heart weight={isLiked ? 'fill' : 'regular'} aria-hidden />
         {likes > 0 && (
           <span className={styles.count} aria-hidden>
-            {compact(likes)}
+            {compact(t, likes)}
           </span>
         )}
       </button>

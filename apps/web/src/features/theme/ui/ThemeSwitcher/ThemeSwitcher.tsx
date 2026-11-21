@@ -1,5 +1,6 @@
 'use client'
 
+import { useT } from '@/shared/i18n'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
 import type { Theme } from '@/shared/lib/theme'
 import styles from './ThemeSwitcher.module.css'
@@ -11,10 +12,11 @@ const OPTIONS: { value: Theme; label: string }[] = [
 ]
 
 export const ThemeSwitcher = () => {
+  const t = useT()
   const { theme, setTheme } = useTheme()
 
   return (
-    <fieldset aria-label='Тема оформления' className={styles.switcher}>
+    <fieldset aria-label={t('Тема оформления')} className={styles.switcher}>
       {OPTIONS.map(({ value, label }) => (
         <button
           key={value}
@@ -23,7 +25,7 @@ export const ThemeSwitcher = () => {
           className={styles.option}
           onClick={() => setTheme(value)}
         >
-          {label}
+          {t(label)}
         </button>
       ))}
     </fieldset>

@@ -1,4 +1,5 @@
 import { CaretRight, ChatCircle, Phone } from '@phosphor-icons/react/ssr'
+import { T } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import styles from './ContactRows.module.css'
@@ -22,7 +23,9 @@ export const ContactRows = ({ phone, surface = 'sheet' }: ContactRowsProps) => {
           <span className={styles.glyph} aria-hidden>
             <Phone />
           </span>
-          <span className={styles.label}>Позвонить</span>
+          <span className={styles.label}>
+            <T>Позвонить</T>
+          </span>
           <span className={styles.value}>{formatPhone(phone)}</span>
         </a>
       </li>

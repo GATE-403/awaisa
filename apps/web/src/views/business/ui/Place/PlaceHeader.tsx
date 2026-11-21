@@ -3,9 +3,10 @@ import { type CSSProperties, ViewTransition } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { Business, Catalog, ReviewSummary } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { T } from '@/shared/i18n'
 import { fluidImage } from '@/shared/lib/imageSizes'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { AddressLine } from './AddressLine'
+import { Counted } from './Counted'
 import { OpenStatus } from './OpenStatus'
 import styles from './Place.module.css'
 import { PlaceActions } from './PlaceActions'
@@ -72,7 +73,9 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
         <div className={styles.identityText}>
           <h1 className={styles.name}>{business.name}</h1>
           <p className={styles.handle}>
-            <span>{getKindLabel(business.kind)}</span>
+            <span>
+              <T>{getKindLabel(business.kind)}</T>
+            </span>
             {address && <AddressLine address={address} />}
           </p>
           <p className={styles.stats}>
@@ -80,18 +83,24 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
               <span className={styles.statRating}>
                 <Star weight='fill' aria-hidden className={styles.factStar} />
                 <strong>{rating.toFixed(1)}</strong>
-                {reviews.count > 0 &&
-                  ` · ${pluralize(reviews.count, ['отзыв', 'отзыва', 'отзывов'])}`}
+                {reviews.count > 0 && (
+                  <>
+                    {' · '}
+                    <Counted count={reviews.count} forms={['отзыв', 'отзыва', 'отзывов']} />
+                  </>
+                )}
               </span>
             )}
             {services > 0 && (
               <a href='#services' className={styles.stat}>
-                <strong>{services}</strong> {pluralWord(services, ['услуга', 'услуги', 'услуг'])}
+                <strong>{services}</strong>{' '}
+                <Counted count={services} forms={['услуга', 'услуги', 'услуг']} isWordOnly />
               </a>
             )}
             {masters > 0 && (
               <a href='#masters' className={styles.stat}>
-                <strong>{masters}</strong> {pluralWord(masters, ['мастер', 'мастера', 'мастеров'])}
+                <strong>{masters}</strong>{' '}
+                <Counted count={masters} forms={['мастер', 'мастера', 'мастеров']} isWordOnly />
               </a>
             )}
           </p>
