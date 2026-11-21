@@ -14,7 +14,7 @@ import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
-import { useSession } from '@/entities/session'
+import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
 import { KIND_ICONS } from '@/shared/config/kindStyles'
 import {
   getBusinessSlug,
@@ -51,19 +51,11 @@ export const Header = () => {
   // The cabinet and sign-in are screens of their own: no site navigation there.
   const isCabinet = isCabinetPath(pathname) || isStandalonePath(pathname)
   // Owners get a straight way into their cabinet instead of the pitch for businesses.
-  const owned = customer?.businesses ?? []
   const actions =
-    owned.length > 0 || customer?.isAdmin
+    customer && hasCabinet(customer)
       ? ACTIONS.map((action) =>
           action.href === '/business'
-            ? {
-                href:
-                  owned.length === 1 && !customer?.isAdmin
-                    ? `/manage/${owned[0]?.slug}`
-                    : '/manage',
-                label: 'Кабинет',
-                icon: action.icon,
-              }
+            ? { href: getCabinetHref(customer), label: 'Кабинет', icon: action.icon }
             : action,
         )
       : ACTIONS
