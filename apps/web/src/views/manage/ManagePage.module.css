@@ -169,3 +169,14 @@
     padding-bottom: var(--space-4);
   }
 }
+
+/* «Страница»: its cover runs the window's width (100vw), which a classic scrollbar would push a
+   few pixels past the edge; the sliver is clipped, never scrolled to. */
+.page:has([data-page-tab]) {
+  overflow-x: clip;
+}
+
+/* …and starts right under the cabinet bar, like the public page's under the business bar. */
+.content:has([data-page-tab]) {
+  margin-top: 0;
+}

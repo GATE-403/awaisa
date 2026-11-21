@@ -11,6 +11,9 @@ const FEED_PAGE = 12
 /** Reports from different viewers that take a photo out of the feed until the owner looks. */
 const REPORTS_TO_HIDE = 3
 
+/** The owner's order; photos never arranged (null) first, newest first. */
+const BY_PLACE = 'w."position" ASC NULLS FIRST, w."created_at" DESC'
+
 const text = (value: unknown) => (value === null || value === undefined ? null : String(value))
 
 /**
@@ -29,7 +32,7 @@ export class WorkPhotosService {
        FROM "work_photos" w
        LEFT JOIN "services" s ON s."id" = w."service_id"
        LEFT JOIN "specialists" sp ON sp."id" = w."specialist_id"
-       WHERE w."business_id" = $1 ORDER BY w."created_at" DESC`,
+       WHERE w."business_id" = $1 ORDER BY ${BY_PLACE}`,
       [businessId],
     )
     return rows.map((row) => ({
@@ -78,6 +81,16 @@ export class WorkPhotosService {
       [id, businessId, input.serviceId, input.specialistId, input.isHidden],
     )
     if (this.rows(rows).length === 0) throw new NotFoundException('Фото не найдено')
+  }
+
+  /** The owner's order of every photo of the place: `ids` first to last; others keep theirs. */
+  async reorder(businessId: string, ids: string[]) {
+    await this.query(
+      `UPDATE "work_photos" w SET "position" = o."position"
+       FROM unnest($2::uuid[]) WITH ORDINALITY AS o("id", "position")
+       WHERE w."id" = o."id" AND w."business_id" = $1`,
+      [businessId, ids],
+    )
   }
 
   /**

@@ -1,8 +1,8 @@
-/* The public page's own column, edited in place. */
+/* The business page laid out like a profile in Instagram, in the public page's own column. */
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
+  gap: var(--space-5);
   width: 100%;
   min-width: 0;
   max-width: 640px;
@@ -10,57 +10,37 @@
   padding-bottom: var(--space-20);
 }
 
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-3);
-}
-
-.toolbarNote {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.statusDot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-tertiary-foreground);
-}
-
-.statusDot[data-on] {
-  background: var(--color-success);
-}
-
 .head {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  margin-top: calc(var(--space-8) * -1 + var(--space-4));
+  gap: var(--space-3);
 }
 
 .cover {
   position: relative;
-  aspect-ratio: 16 / 7;
+  /* The public page's cover: the window's whole width with square edges, no shadow. 100vw also
+     counts a classic scrollbar; the cabinet clips the sliver (`overflow-x: clip` on its page). */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  aspect-ratio: 3 / 1.2;
+  max-height: 340px;
   overflow: hidden;
-  border-radius: var(--radius-2xl);
   background: color-mix(in srgb, var(--place-tint) 14%, var(--color-surface));
-  box-shadow: var(--shadow-sm);
 }
 
-/* No cover yet: a quiet dashed frame that says what goes there. */
+@media (min-width: 768px) {
+  .cover {
+    aspect-ratio: 4 / 1;
+  }
+}
+
+/* No cover yet: the same band in the place's colour that says what goes there. */
 .cover[data-empty] {
   display: grid;
   place-items: center;
-  box-shadow: inset 0 0 0 1px var(--color-border-strong);
   background-image: radial-gradient(
     70% 90% at 50% 0%,
-    color-mix(in srgb, var(--place-tint) 18%, transparent),
+    color-mix(in srgb, var(--place-tint) 22%, transparent),
     transparent
   );
 }
@@ -114,11 +94,6 @@
 .coverAdd svg {
   width: 16px;
   height: 16px;
-}
-
-.identity {
-  display: flex;
-  margin: -44px 0 var(--space-2) var(--space-4);
 }
 
 .logoButton {
@@ -176,109 +151,30 @@
   box-shadow: var(--focus-ring);
 }
 
-/* Text typed in place: it looks like the page until pointed at, then shows it can change. */
-.name,
-.description {
-  width: calc(100% + var(--space-2));
-  min-width: 0;
+/* The logo over the cover's edge, «Редактировать» and the glyphs at the row's end under the
+   cover, where the public page keeps its quick actions. */
+.profileRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: -44px;
+  padding-left: var(--space-1);
+}
+
+/* The bio: lines set close, like a profile's. */
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bio p {
   margin: 0;
-  padding: 2px var(--space-2);
-  margin-left: calc(var(--space-2) * -1);
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-foreground);
-  font: inherit;
-  transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
 .name {
-  font-family: var(--font-display);
-  font-size: var(--text-title1);
-  line-height: var(--text-title1-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
-}
-
-.description {
-  margin-top: var(--space-2);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-  field-sizing: content;
-  max-width: calc(100% + var(--space-2));
-  min-height: 2lh;
-  resize: none;
-}
-
-.name:hover,
-.description:hover {
-  background: var(--color-fill);
-}
-
-.name:focus-visible,
-.description:focus-visible {
-  outline: none;
-  background: var(--color-surface);
-  box-shadow: inset 0 0 0 1.5px var(--color-primary);
-}
-
-.handle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-/* The kind reads as text with a small chevron, like the handle line of the public page. */
-.kind {
-  min-height: 32px;
-  padding-inline: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.street {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-4);
-  margin: var(--space-1) 0 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.facts strong {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-}
-
-.open {
-  color: var(--color-muted-foreground);
-}
-
-.open[data-open] {
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
-}
-
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin: 0;
+  margin: 0 0 2px;
   font-family: var(--font-display);
   font-size: var(--text-title2);
   line-height: var(--text-title2-line-height);
@@ -286,111 +182,521 @@
   letter-spacing: var(--tracking-title);
 }
 
-.count {
+.line,
+.open,
+.unpublished {
   color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
-}
-
-.more {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  min-height: var(--control-height-md);
-  margin-left: auto;
-  color: var(--color-link);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-regular);
-  letter-spacing: normal;
-}
-
-.more svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* Masters as small round faces with first names, «+» first. */
-.faces {
-  display: flex;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  list-style: none;
-  scrollbar-width: none;
-}
-
-.face {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  min-width: 64px;
-  color: var(--color-foreground);
   font-size: var(--text-footnote);
-  text-align: center;
+  line-height: var(--text-footnote-line-height);
 }
 
-.addFace {
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-full);
+.open[data-open] {
+  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
+}
+
+.unpublished {
+  color: var(--color-danger-text);
+}
+
+.bio .description {
+  margin-top: var(--space-1);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  white-space: pre-line;
+}
+
+.addBio {
+  position: relative;
+  align-self: flex-start;
+  margin-top: var(--space-1);
+  padding: 0;
+  border: none;
+  background: none;
   color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
 }
 
-.face[data-add] {
-  color: var(--color-link);
+.addBio::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) 0;
 }
 
-.addFace svg {
-  width: 20px;
-  height: 20px;
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.hoursRow {
+/* As tall as the glyph capsule beside it (40). */
+.actions .edit {
+  min-height: 40px;
+}
+
+/* The tabs, and the open tab's one action at the row's end. */
+.sections {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 52px;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-foreground);
+  margin-top: var(--space-2);
 }
 
-.hoursText {
-  font-size: var(--text-body);
-}
-
-.hoursAction {
+.sectionAction {
+  position: relative;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sectionAction::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -8px;
+}
+
+.sectionAction svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* The tabs take what is left and scroll sideways rather than push the action out. */
+.sections > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Phones: «Редактировать», the glyphs beside it and the tab's action move into the floating
+   capsule at the window's foot; with a mouse that capsule is not drawn. */
+@media (max-width: 639px) {
+  .actions,
+  .sectionAction {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .page .phoneTools {
+    display: none;
+  }
+}
+
+/* Phones: the floating bar runs the screen's width (16pt in), the glyphs on the left and the
+   open tab's action filling the rest as one accent capsule with its word. */
+@media (max-width: 639px) {
+  .page .phoneTools {
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+    max-width: none;
+    gap: var(--space-1);
+  }
+
+  /* As tall as the glyphs beside it (44), over the kit's `sm` height. */
+  .page .phoneAction {
+    flex: 1;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .phoneAction svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.sectionAction:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+/* «Мастера»: the booking form's picture cards (`MasterCard`), three a row, four from 640px. */
+.masters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .masters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* «Время»: today's status large, the week in a line, then the week as a chart on the page. */
+.hours[hidden] {
+  display: none;
+}
+
+.weekHours {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.weekHead {
+  display: flex;
+  flex-direction: column;
   gap: 2px;
+}
+
+.weekHead p {
+  margin: 0;
+}
+
+.weekStatus {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+}
+
+.weekStatus[data-open] {
+  color: color-mix(in srgb, var(--color-success) 80%, var(--color-foreground));
+}
+
+.weekSummary {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.weekChart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.weekDay {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 28px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+}
+
+.weekDayName {
+  font-weight: var(--font-weight-semibold);
+}
+
+/* One shared scale for the week: the day's open hours filled on a quiet track. */
+.weekTrack {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.weekBar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--from) * 100%);
+  width: calc((var(--to) - var(--from)) * 100%);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+.weekRange {
+  position: relative;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.weekDay[data-off] .weekRange {
+  color: var(--color-muted-foreground);
+}
+
+/* Today: its name, hours and bar in full. */
+.weekDay[data-today] {
+  color: var(--color-foreground);
+}
+
+.weekDay[data-today] .weekDayName {
   color: var(--color-link);
 }
 
-.hoursAction svg {
-  width: 12px;
-  height: 12px;
+.weekDay[data-today] .weekBar {
+  background: var(--color-primary);
 }
 
-@media (hover: hover) {
-  .hoursRow:hover {
-    background: color-mix(in srgb, var(--color-fill) 60%, var(--color-surface));
-  }
+.weekScale {
+  display: flex;
+  justify-content: space-between;
+  margin: calc(-1 * var(--space-2)) 0 0;
+  padding: 0 calc(96px + var(--space-3)) 0 calc(28px + var(--space-3));
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The edit sheet: the bio as a borderless note, «Часы» as a row that opens its settings. */
+.sheetText {
+  width: 100%;
+  min-height: 3lh;
+  padding: var(--space-3) 0;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  field-sizing: content;
+  resize: none;
+}
+
+.sheetText:focus-visible {
+  outline: none;
+}
+
+.sheetLink {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sheetValue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  color: var(--color-muted-foreground);
+}
+
+.sheetValue svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .coverButton,
-  .coverAdd,
-  .name,
-  .description {
+  .coverAdd {
     transition: none;
+  }
+}
+
+/* «За 7 дней: 18 записей · 120 просмотров ›»: one footnote line of bold figures, to «Аналитика». */
+.insights {
+  position: relative;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0 var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-decoration: none;
+}
+
+.insights strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.insights svg {
+  width: 10px;
+  height: 10px;
+}
+
+.insights::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -4px;
+}
+
+@media (hover: hover) {
+  .insights:hover {
+    color: var(--color-link);
+  }
+}
+
+.insights:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+/* Running promotions as the clients see them, a row of small capsules, «+ Акция» last. */
+.promotions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.promotion {
+  display: inline-flex;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger-text);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.promotion[data-add] {
+  background: var(--color-fill);
+  color: var(--color-link);
+}
+
+.promotion svg {
+  width: 12px;
+  height: 12px;
+}
+
+.promotion:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* What the page still lacks: one quiet line and the action on the first thing missing. */
+.checklist {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.checklistAction {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.checklistAction::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
+}
+
+.checklistAction svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* «Услуги»: the catalog's cards as the clients see them, two a row, three from 640px. */
+.services {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .services {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* «Поделиться»: the QR on its white plate (black on white whatever the theme: cameras read it
+   so), its caption, then the download and send capsules. */
+.qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.qrCode {
+  display: block;
+  width: min(220px, 60vw);
+  aspect-ratio: 1;
+  border-radius: var(--radius-lg);
+  background: var(--color-fill);
+}
+
+.qrCaption {
+  max-width: 280px;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-align: center;
+}
+
+.qrUrl {
+  display: block;
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* One line: the wide accent «Скопировать ссылку» and the glyph capsule, one height (40, 44 on
+   phones), like «Поделиться свободными окнами». */
+.shareActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.shareActions .shareCopy {
+  flex: 1;
+  height: 40px;
+  min-height: 40px;
+}
+
+@media (max-width: 639px) {
+  .shareActions .shareCopy {
+    height: 44px;
+    min-height: 44px;
   }
 }

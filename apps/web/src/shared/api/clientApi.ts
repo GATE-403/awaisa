@@ -66,6 +66,7 @@ import type {
   Offer,
   OtpRequest,
   OutcomeInput,
+  PageStats,
   PaymentSync,
   PaymentsConfig,
   PriceQuote,
@@ -553,6 +554,13 @@ const getWorkPhotos = (slug: string, signal?: AbortSignal) =>
 const updateWorkPhoto = (slug: string, id: string, input: WorkPhotoInput) =>
   send<WorkPhoto[]>('PATCH', `${manage(slug)}/work-photos/${id}`, input)
 
+// «Работы» in the owner's order: every photo's id, first to last.
+const reorderWorkPhotos = (slug: string, ids: string[]) =>
+  send<WorkPhoto[]>('PUT', `${manage(slug)}/work-photos/order`, { ids })
+
+const getPageStats = (slug: string, signal?: AbortSignal) =>
+  request<PageStats>(`${manage(slug)}/page-stats`, { signal })
+
 const removePhoto = (slug: string, id: string) =>
   send<WorkPhoto[]>('DELETE', `${manage(slug)}/work-photos/${id}`)
 
@@ -812,6 +820,8 @@ export {
   uploadAvatar,
   removeAvatar,
   getWorkPhotos,
+  reorderWorkPhotos,
+  getPageStats,
   updateWorkPhoto,
   addVisitPhoto,
   getFeed,
