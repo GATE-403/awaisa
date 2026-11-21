@@ -13,6 +13,7 @@ import { PushModule } from '../push/push.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { AvailabilityService } from './availability.service.js'
 import { Booking } from './booking.entity.js'
+import { BookingExtra } from './booking-extra.entity.js'
 import { BookingPaymentsService } from './booking-payments.service.js'
 import { BookingsController } from './bookings.controller.js'
 import { BookingsService } from './bookings.service.js'
@@ -23,7 +24,7 @@ import { SalonBookingsService } from './salon-bookings.service.js'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Booking, TimeOff, Customer, Payment]),
+    TypeOrmModule.forFeature([Booking, BookingExtra, TimeOff, Customer, Payment]),
     CatalogModule,
     AuthModule,
     BusinessesModule,

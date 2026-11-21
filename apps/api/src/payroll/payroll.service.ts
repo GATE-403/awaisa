@@ -9,6 +9,7 @@ import type {
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
+import { lineShare, visitLines, visitPrice } from '../bookings/visit-sql.js'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { calculatePay, countWorkDays, daysBetween, hasScheme, type PayVisit } from './payroll.js'
 import type { PayoutInput, PaySchemeInput } from './payroll.schemas.js'
@@ -26,7 +27,7 @@ type SchemeRow = {
 // discounts, certificates, subscriptions and bonuses lower it) or the price minus the discount
 // when nobody marked the payment. Keep it equal to `DONE` / `EARNED` in analytics.service.ts.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = `COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))`
+const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
 
 const toPayout = (row: Record<string, unknown>): MasterPayout => ({
   id: String(row.id),
@@ -105,9 +106,12 @@ export class PayrollService {
     const [rates, visits, businessWeekdays, ownHours, leaves, payouts] = await Promise.all([
       this.rateRows(ids),
       this.query(
-        `SELECT b."specialist_id" AS "specialistId", s."id" AS "serviceId",
-             s."name" AS "serviceName", ${EARNED}::int AS "earned"
+        // A visit of several services is a line per service, sharing the visit's money by price.
+        `SELECT b."specialist_id" AS "specialistId", ls."id" AS "serviceId",
+             ls."name" AS "serviceName", (${EARNED} * ${lineShare()})::float AS "earned"
            FROM "bookings" b JOIN "services" s ON s."id" = b."service_id"
+           JOIN LATERAL ${visitLines()} l ON true
+           JOIN "services" ls ON ls."id" = l."service_id"
            WHERE b."business_id" = $1 AND b."specialist_id" = ANY($2) AND ${DONE}
              AND b."starts_at" >= $3 AND b."starts_at" < LEAST($4, now())`,
         [businessId, ids, businessDateTimeToUtc(from, 0), businessDateTimeToUtc(addDays(to, 1), 0)],

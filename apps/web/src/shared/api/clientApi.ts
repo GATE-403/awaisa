@@ -190,14 +190,23 @@ const post = <Result>(path: string, body?: unknown) =>
 const getAvailability = (
   {
     branchId,
+    extraServiceIds,
     ...params
-  }: { serviceId: string; specialistId: string; date: string; branchId?: string },
+  }: {
+    serviceId: string
+    specialistId: string
+    date: string
+    branchId?: string
+    /** Services done after `serviceId` in the same visit: the time fits all of them. */
+    extraServiceIds?: string[]
+  },
   signal?: AbortSignal,
-) =>
-  request<Availability>(
-    `/availability?${new URLSearchParams(branchId ? { ...params, branchId } : params)}`,
-    { signal },
-  )
+) => {
+  const query = new URLSearchParams(params)
+  if (branchId) query.set('branchId', branchId)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
+  return request<Availability>(`/availability?${query}`, { signal })
+}
 
 const getMyProfileSettings = (signal?: AbortSignal) =>
   request<ProfileSettings>('/me/profile', { signal })
@@ -757,11 +766,22 @@ const getTelegramLink = (id: string, token: string | null) =>
   })
 
 const getPriceQuote = (
-  params: { serviceId: string; date: string; time: string; code?: string; phone?: string },
+  {
+    extraServiceIds,
+    ...params
+  }: {
+    serviceId: string
+    extraServiceIds?: string[]
+    date: string
+    time: string
+    code?: string
+    phone?: string
+  },
   signal?: AbortSignal,
 ) => {
   const query = new URLSearchParams()
   for (const [key, value] of Object.entries(params)) if (value) query.set(key, value)
+  if (extraServiceIds?.length) query.set('extraServiceIds', extraServiceIds.join(','))
   return request<PriceQuote>(`/promotions/quote?${query}`, { signal })
 }
 
