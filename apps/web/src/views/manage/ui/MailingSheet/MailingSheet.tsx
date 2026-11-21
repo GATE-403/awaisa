@@ -24,6 +24,8 @@ import styles from './MailingSheet.module.css'
 interface MailingSheetProps {
   slug: string
   businessName: string
+  /** The segment it opens on (a clients tab's «Позвать»); «Давно не были» by default. */
+  initialSegment?: MailingSegment
   onClose: () => void
 }
 
@@ -53,11 +55,16 @@ const MAILING_TOKENS = [
 const smsParts = (text: string) => (text.length <= 70 ? 1 : Math.ceil(text.length / 67))
 
 // A mailing in three choices: whom, what, send. The count is known before sending.
-export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps) => {
+export const MailingSheet = ({
+  slug,
+  businessName,
+  initialSegment = 'lapsed',
+  onClose,
+}: MailingSheetProps) => {
   const toast = useToast()
-  const [segment, setSegment] = useState<MailingSegment>('lapsed')
+  const [segment, setSegment] = useState<MailingSegment>(initialSegment)
   const [days, setDays] = useState(60)
-  const [text, setText] = useState(templates(businessName).lapsed)
+  const [text, setText] = useState(templates(businessName)[initialSegment])
   const [preview, setPreview] = useState<{ count: number; names: string[] } | null>(null)
   const [overview, setOverview] = useState<MailingsOverview | null>(null)
   const [isSending, setIsSending] = useState(false)
