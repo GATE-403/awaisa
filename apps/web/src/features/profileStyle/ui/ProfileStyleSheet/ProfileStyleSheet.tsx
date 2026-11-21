@@ -6,9 +6,16 @@ import { useToast } from '@awaisa/ui/Toast'
 import { Check } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
-import { ACCENTS, achievementLook, profileStyle, STATUS_EMOJI } from '@/entities/profile'
+import {
+  ACCENTS,
+  achievementLook,
+  achievementTitle,
+  profileStyle,
+  STATUS_EMOJI,
+} from '@/entities/profile'
 import { getErrorMessage } from '@/shared/api/apiError'
 import type { ProfileLinkKind, ProfileSettings, PublicProfile } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -41,6 +48,7 @@ export const ProfileStyleSheet = ({
   onSave,
   onClose,
 }: ProfileStyleSheetProps) => {
+  const t = useT()
   const toast = useToast()
   const [accent, setAccent] = useState(settings.accent)
   const [status, setStatus] = useState(settings.status)
@@ -85,11 +93,11 @@ export const ProfileStyleSheet = ({
         isPublic,
         showPlaces,
       })
-      toast.show({ title: 'Профиль обновлён', type: 'success' })
+      toast.show({ title: t('Профиль обновлён'), type: 'success' })
       onClose()
     } catch (error) {
       toast.show({
-        title: 'Не получилось сохранить',
+        title: t('Не получилось сохранить'),
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -99,9 +107,13 @@ export const ProfileStyleSheet = ({
 
   return (
     <Sheet
-      title='Профиль'
+      title={t('Профиль')}
       onClose={onClose}
-      action={{ label: isSaving ? 'Сохраняем…' : 'Готово', onClick: save, disabled: isSaving }}
+      action={{
+        label: isSaving ? t('Сохраняем…') : t('Готово'),
+        onClick: save,
+        disabled: isSaving,
+      }}
     >
       <div className={styles.preview} style={profileStyle(accent)} aria-hidden>
         <PersonAvatar name={name} src={avatarUrl ?? undefined} size='xl' className={styles.face} />
@@ -112,7 +124,7 @@ export const ProfileStyleSheet = ({
           </p>
         )}
         <p className={styles.previewLevel}>
-          Уровень {profile?.level.level ?? 1}
+          {t('Уровень {level}', { level: profile?.level.level ?? 1 })}
           {featured.map((id) => (
             <span key={id} className={styles.previewBadge}>
               {achievementLook(id).emoji}
@@ -123,8 +135,8 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>Цвет</SectionCaption>
-        <div className={styles.accents} role='radiogroup' aria-label='Цвет профиля'>
+        <SectionCaption>{t('Цвет')}</SectionCaption>
+        <div className={styles.accents} role='radiogroup' aria-label={t('Цвет профиля')}>
           {Object.entries(ACCENTS).map(([key, item]) => (
             <label key={key} className={styles.accentOption} style={profileStyle(key)}>
               <input
@@ -133,7 +145,7 @@ export const ProfileStyleSheet = ({
                 className={styles.input}
                 checked={accent === key}
                 onChange={() => setAccent(key)}
-                aria-label={item.label}
+                aria-label={t(item.label)}
               />
               <Check className={styles.check} weight='bold' aria-hidden />
             </label>
@@ -142,8 +154,8 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>Статус</SectionCaption>
-        <div className={styles.emojis} role='radiogroup' aria-label='Эмодзи статуса'>
+        <SectionCaption>{t('Статус')}</SectionCaption>
+        <div className={styles.emojis} role='radiogroup' aria-label={t('Эмодзи статуса')}>
           <label className={styles.emojiOption} data-none=''>
             <input
               type='radio'
@@ -151,7 +163,7 @@ export const ProfileStyleSheet = ({
               className={styles.input}
               checked={statusEmoji === ''}
               onChange={() => setStatusEmoji('')}
-              aria-label='Без эмодзи'
+              aria-label={t('Без эмодзи')}
             />
             <span aria-hidden>—</span>
           </label>
@@ -163,7 +175,7 @@ export const ProfileStyleSheet = ({
                 className={styles.input}
                 checked={statusEmoji === emoji}
                 onChange={() => setStatusEmoji(emoji)}
-                aria-label={`Эмодзи ${emoji}`}
+                aria-label={t('Эмодзи {emoji}', { emoji })}
               />
               <span aria-hidden>{emoji}</span>
             </label>
@@ -173,8 +185,8 @@ export const ProfileStyleSheet = ({
           <label className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label='Статус'
-              placeholder='Статус, например «Хожу к Азамату с 2024»'
+              aria-label={t('Статус')}
+              placeholder={t('Статус, например «Хожу к Азамату с 2024»')}
               value={status}
               maxLength={80}
               onValueChange={setStatus}
@@ -184,14 +196,14 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>Адрес профиля</SectionCaption>
+        <SectionCaption>{t('Адрес профиля')}</SectionCaption>
         <div className={sheet.list}>
           <label className={sheet.row}>
             <span className={styles.addressPrefix}>awaisa.kg/u/</span>
             <Input
               variant='plain'
-              aria-label='Адрес профиля'
-              placeholder='ваш-ник'
+              aria-label={t('Адрес профиля')}
+              placeholder={t('ваш-ник')}
               value={handle}
               maxLength={20}
               autoCapitalize='none'
@@ -202,17 +214,17 @@ export const ProfileStyleSheet = ({
           </label>
         </div>
         <p className={sheet.groupFooter}>
-          Латиница, цифры, «_» и «.», от 3 символов — короткая ссылка для био и сторис.
+          {t('Латиница, цифры, «_» и «.», от 3 символов — короткая ссылка для био и сторис.')}
         </p>
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>О себе</SectionCaption>
+        <SectionCaption>{t('О себе')}</SectionCaption>
         <div className={sheet.list}>
           <textarea
             className={styles.about}
-            aria-label='О себе'
-            placeholder='Пара строк: что любите, к кому ходите'
+            aria-label={t('О себе')}
+            placeholder={t('Пара строк: что любите, к кому ходите')}
             value={about}
             maxLength={160}
             rows={3}
@@ -222,16 +234,16 @@ export const ProfileStyleSheet = ({
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>Ссылки</SectionCaption>
+        <SectionCaption>{t('Ссылки')}</SectionCaption>
         <div className={sheet.list}>
           {LINK_FIELDS.map(({ kind, label, placeholder }) => (
             <label key={kind} className={sheet.row}>
-              <span className={sheet.rowLabel}>{label}</span>
+              <span className={sheet.rowLabel}>{t(label)}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={label}
-                  placeholder={placeholder}
+                  aria-label={t(label)}
+                  placeholder={t(placeholder)}
                   value={links[kind] ?? ''}
                   maxLength={200}
                   inputMode={kind === 'website' ? 'url' : 'text'}
@@ -244,12 +256,14 @@ export const ProfileStyleSheet = ({
             </label>
           ))}
         </div>
-        <p className={sheet.groupFooter}>Ник или ссылка — покажем значками на вашей странице.</p>
+        <p className={sheet.groupFooter}>
+          {t('Ник или ссылка — покажем значками на вашей странице.')}
+        </p>
       </div>
 
       {earned.length > 0 && (
         <div className={sheet.group}>
-          <SectionCaption>Витрина</SectionCaption>
+          <SectionCaption>{t('Витрина')}</SectionCaption>
           <div className={styles.showcase}>
             {earned.map((item) => {
               const isOn = featured.includes(item.id)
@@ -263,19 +277,19 @@ export const ProfileStyleSheet = ({
                   onClick={() => toggleFeatured(item.id)}
                 >
                   <span aria-hidden>{achievementLook(item.id).emoji}</span>
-                  {item.title}
+                  {achievementTitle(item.title, t)}
                 </button>
               )
             })}
           </div>
-          <p className={sheet.groupFooter}>До трёх достижений — рядом с вашим уровнем.</p>
+          <p className={sheet.groupFooter}>{t('До трёх достижений — рядом с вашим уровнем.')}</p>
         </div>
       )}
 
       {masters.length > 0 && (
         <div className={sheet.group}>
-          <SectionCaption>Мой мастер</SectionCaption>
-          <div className={styles.masters} role='radiogroup' aria-label='Мой мастер'>
+          <SectionCaption>{t('Мой мастер')}</SectionCaption>
+          <div className={styles.masters} role='radiogroup' aria-label={t('Мой мастер')}>
             <label className={styles.masterOption}>
               <input
                 type='radio'
@@ -283,12 +297,12 @@ export const ProfileStyleSheet = ({
                 className={styles.input}
                 checked={favoriteMasterId === null}
                 onChange={() => setFavoriteMasterId(null)}
-                aria-label='Не показывать'
+                aria-label={t('Не показывать')}
               />
               <span className={styles.masterNone} aria-hidden>
                 —
               </span>
-              <span className={styles.masterName}>Никто</span>
+              <span className={styles.masterName}>{t('Никто')}</span>
             </label>
             {masters.map((master) => (
               <label key={master.id} className={styles.masterOption}>
@@ -311,17 +325,18 @@ export const ProfileStyleSheet = ({
       <div className={sheet.group}>
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Открытый профиль</span>
+            <span className={sheet.rowLabel}>{t('Открытый профиль')}</span>
             <Switch checked={isPublic} onCheckedChange={setIsPublic} />
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Мастера и места</span>
+            <span className={sheet.rowLabel}>{t('Мастера и места')}</span>
             <Switch checked={showPlaces} onCheckedChange={setShowPlaces} />
           </label>
         </div>
         <p className={sheet.groupFooter}>
-          Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения — за визиты и
-          отзывы.
+          {t(
+            'Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения — за визиты и отзывы.',
+          )}
         </p>
       </div>
     </Sheet>

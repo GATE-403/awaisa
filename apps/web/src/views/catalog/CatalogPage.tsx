@@ -11,6 +11,7 @@ import {
 } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { T } from '@/shared/i18n'
 import styles from './CatalogPage.module.css'
 import { CatalogResults } from './ui/CatalogResults/CatalogResults'
 import { CatalogSkeleton } from './ui/CatalogSkeleton/CatalogSkeleton'
@@ -80,7 +81,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
             variant='stories'
             headAction={
               <NextLink href='/top' className={styles.topLink}>
-                Рейтинг ›
+                <T>Рейтинг ›</T>
               </NextLink>
             }
           />

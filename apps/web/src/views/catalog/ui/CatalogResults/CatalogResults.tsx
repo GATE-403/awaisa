@@ -5,8 +5,8 @@ import NextLink from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
-import { pluralize } from '@/shared/lib/plural'
 import { trackStep } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -49,6 +49,7 @@ export const CatalogResults = ({
   kind,
   query,
 }: CatalogResultsProps) => {
+  const t = useT()
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
@@ -88,10 +89,10 @@ export const CatalogResults = ({
     // While more pages wait, the count says «24+» rather than a total it does not know yet.
     {
       value: 'services' as const,
-      label: 'Услуги',
+      label: t('Услуги'),
       count: feed.hasMore ? `${feed.offers.length}+` : feed.offers.length,
     },
-    { value: 'places' as const, label: 'Места', count: businesses.length },
+    { value: 'places' as const, label: t('Места'), count: businesses.length },
   ]
 
   return (
@@ -100,23 +101,24 @@ export const CatalogResults = ({
         {/* Browsing everything, the tabs say it all; a search or a kind keeps its heading. */}
         <div className={styles.titleBlock}>
           <h2 id='results-title' className={styles.title} data-quiet={!canReset || undefined}>
-            {title}
+            {/* A search's title is what was typed; a kind's or the default one is ours. */}
+            {query ? title : t(title)}
           </h2>
           {searchedFor && (
             // Like a big search engine: say what was searched instead, without making a fuss.
-            <p className={styles.searchedFor}>Вы искали «{searchedFor}»</p>
+            <p className={styles.searchedFor}>{t('Вы искали «{query}»', { query: searchedFor })}</p>
           )}
         </div>
         {canReset && (
           <NextLink href='/' className={styles.reset}>
-            Сбросить
+            {t('Сбросить')}
           </NextLink>
         )}
       </div>
       <div className={styles.toolbar}>
         {/* Two big text tabs, like «Shop by» on apple.com: first where, then what. */}
         <TextTabs
-          label='Что показать'
+          label={t('Что показать')}
           size='lg'
           items={views.map((item) => ({
             label: item.label,
@@ -128,8 +130,8 @@ export const CatalogResults = ({
         {view === 'services' && offers.length > 1 && (
           <Select
             variant='plain'
-            aria-label='Сортировка'
-            items={FEED_SORTS}
+            aria-label={t('Сортировка')}
+            items={FEED_SORTS.map((item) => ({ ...item, label: t(item.label) }))}
             value={sort}
             onValueChange={(value) => value && setSort(value as FeedSort)}
             className={styles.sort}
@@ -141,12 +143,12 @@ export const CatalogResults = ({
         (businesses.length === 0 ? (
           <EmptyState
             variant='inline'
-            text='Мест не нашли — попробуйте другую категорию или услугу.'
+            text={t('Мест не нашли — попробуйте другую категорию или услугу.')}
           />
         ) : (
           <ul
             className={styles.places}
-            aria-label={pluralize(businesses.length, ['место', 'места', 'мест'])}
+            aria-label={t.count(businesses.length, ['место', 'места', 'мест'])}
           >
             {shownPlaces.map((business) => (
               <li key={business.slug}>
@@ -161,7 +163,7 @@ export const CatalogResults = ({
 
       {view === 'services' &&
         (feed.offers.length === 0 ? (
-          <EmptyState variant='inline' text='Услуг не нашли — попробуйте другое слово.' />
+          <EmptyState variant='inline' text={t('Услуг не нашли — попробуйте другое слово.')} />
         ) : (
           <OffersFeed
             offers={feed.offers}

@@ -6,6 +6,7 @@ import { ChatCircleText, NavigationArrow, Phone, ShareNetwork } from '@phosphor-
 import NextLink from 'next/link'
 import { type ComponentType, useEffect } from 'react'
 import type { Business } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { trackStep } from '@/shared/lib/telemetry'
 import styles from './Place.module.css'
 
@@ -36,6 +37,7 @@ const directionsOf = (business: Business) => {
 // One primary action (book) and quiet secondary ones beside it.
 export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const toast = useToast()
+  const t = useT()
   const directions = directionsOf(business)
 
   useEffect(() => {
@@ -49,23 +51,23 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
       return
     }
     await navigator.clipboard.writeText(url)
-    toast.show({ title: 'Ссылка скопирована', type: 'success' })
+    toast.show({ title: t('Ссылка скопирована'), type: 'success' })
   }
 
   const actions: Action[] = [
-    business.phone ? { label: 'Позвонить', icon: Phone, href: `tel:${business.phone}` } : null,
+    business.phone ? { label: t('Позвонить'), icon: Phone, href: `tel:${business.phone}` } : null,
     business.whatsapp
       ? {
-          label: 'Написать',
+          label: t('Написать'),
           icon: ChatCircleText,
           href: toWhatsappHref(business.whatsapp),
           isExternal: true,
         }
       : null,
     directions
-      ? { label: 'Маршрут', icon: NavigationArrow, href: directions, isExternal: true }
+      ? { label: t('Маршрут'), icon: NavigationArrow, href: directions, isExternal: true }
       : null,
-    { label: 'Поделиться', icon: ShareNetwork, onClick: handleShare },
+    { label: t('Поделиться'), icon: ShareNetwork, onClick: handleShare },
   ].filter((action) => action !== null)
 
   return (
@@ -106,7 +108,7 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
         // just below looked like the button did nothing.
         render={<NextLink href={`/${business.slug}/book`} />}
       >
-        Записаться
+        {t('Записаться')}
       </ButtonLink>
     </div>
   )
