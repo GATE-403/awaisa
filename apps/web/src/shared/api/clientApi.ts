@@ -22,9 +22,11 @@ import type {
   Category,
   CheckoutLink,
   ClientCard,
-  ClientListItem,
+  ClientList,
   ClientLoyalty,
   ClientNote,
+  ClientSegment,
+  ClientSort,
   ClosedDay,
   CoverUpload,
   CreateBookingInput,
@@ -381,10 +383,15 @@ const getMasterReviews = (slug: string, signal?: AbortSignal) =>
 const setBookingOutcome = (slug: string, id: string, input: OutcomeInput) =>
   send<AdminBooking>('PATCH', `${manage(slug)}/bookings/${id}/outcome`, input)
 
-const getClients = (slug: string, query: string, signal?: AbortSignal) =>
-  request<ClientListItem[]>(`${manage(slug)}/clients?${new URLSearchParams({ q: query })}`, {
-    signal,
-  })
+const getClients = (
+  slug: string,
+  params: { q: string; segment: ClientSegment; sort: ClientSort; limit: number },
+  signal?: AbortSignal,
+) =>
+  request<ClientList>(
+    `${manage(slug)}/clients?${new URLSearchParams({ ...params, limit: String(params.limit) })}`,
+    { signal },
+  )
 
 const getClient = (slug: string, phone: string, signal?: AbortSignal) =>
   request<ClientCard>(`${manage(slug)}/clients/${encodeURIComponent(phone)}`, { signal })

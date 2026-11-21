@@ -609,6 +609,20 @@ type ClientListItem = {
   lastVisit: string | null
   nextVisit: string | null
   hasNote: boolean
+  /** YYYY-MM-DD from the client's card. */
+  birthday: string | null
+}
+
+/** The groups an owner acts on (see apps/api/src/clients/client-segments.ts). */
+type ClientSegment = 'all' | 'upcoming' | 'new' | 'regular' | 'lapsed' | 'noShows' | 'birthday'
+type ClientSort = 'recent' | 'spent' | 'visits' | 'name'
+
+/** `GET /manage/:slug/clients?q&segment&sort`: up to 200 of one segment, and every segment's size. */
+type ClientList = {
+  items: ClientListItem[]
+  counts: Record<ClientSegment, number>
+  /** How many days without a visit make «давно не были». */
+  lapsedDays: number
 }
 
 type ClientCard = {
@@ -1223,6 +1237,9 @@ export type {
   MasterSchedule,
   ClientCard,
   ClientListItem,
+  ClientList,
+  ClientSegment,
+  ClientSort,
   ClientLoyalty,
   ClientSubscription,
   GiftCertificate,

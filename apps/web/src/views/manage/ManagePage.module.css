@@ -170,6 +170,20 @@
   }
 }
 
+/* Phones: the cabinet is dense, like Settings — 8pt under the bar, 16pt between blocks. The 20 and
+   24 of wide screens left a screen's worth of air over a list («много свободного места»). */
+@media (max-width: 639px) {
+  .content {
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .layout,
+  .main {
+    gap: var(--space-4);
+  }
+}
+
 /* «Страница»: its cover runs the window's width (100vw), which a classic scrollbar would push a
    few pixels past the edge; the sliver is clipped, never scrolled to. */
 .page:has([data-page-tab]) {
