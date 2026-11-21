@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ReviewItem } from '@/entities/review'
+import { ReportMenu } from '@/features/report'
 import type { Business, Review } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
@@ -18,8 +19,11 @@ const FIRST = 3
 export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
   const t = useT()
   const [isAll, setIsAll] = useState(false)
-  const shown = isAll ? items.length : FIRST
-  const hidden = Math.max(0, items.length - FIRST)
+  // A reported review leaves the thread at once for whoever reported it.
+  const [reported, setReported] = useState<string[]>([])
+  const visible = items.filter((review) => !reported.includes(review.id))
+  const shown = isAll ? visible.length : FIRST
+  const hidden = Math.max(0, visible.length - FIRST)
 
   return (
     <>
@@ -31,12 +35,20 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
         label={t.count(hidden, ['отзыв', 'отзыва', 'отзывов']).slice(String(hidden).length + 1)}
       >
         <ul className={styles.reviews}>
-          {items.slice(0, shown).map((review) => (
+          {visible.slice(0, shown).map((review) => (
             <ReviewItem
               key={review.id}
               review={review}
               businessName={business.name}
               authorHref={review.authorId ? `/u/${review.authorId}` : undefined}
+              headAction={
+                <ReportMenu
+                  targetType='review'
+                  targetId={review.id}
+                  label={t('Пожаловаться на отзыв: {name}', { name: review.authorName })}
+                  onReported={() => setReported((ids) => [...ids, review.id])}
+                />
+              }
             />
           ))}
         </ul>

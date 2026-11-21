@@ -51,6 +51,12 @@
   gap: var(--space-2);
 }
 
+.headAction {
+  display: inline-flex;
+  align-self: center;
+  margin-inline-start: auto;
+}
+
 .author {
   display: inline-flex;
   align-items: center;

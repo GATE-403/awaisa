@@ -8,8 +8,6 @@ type Row = Record<string, unknown>
 
 const MAX_PHOTOS = 30
 const FEED_PAGE = 12
-/** Reports from different viewers that take a photo out of the feed until the owner looks. */
-const REPORTS_TO_HIDE = 3
 
 /** The owner's order; photos never arranged (null) first, newest first. */
 const BY_PLACE = 'w."position" ASC NULLS FIRST, w."created_at" DESC'
@@ -73,6 +71,13 @@ export class WorkPhotosService {
 
   async update(businessId: string, id: string, input: UpdateWorkPhotoInput) {
     await this.assertTags(businessId, input.serviceId, input.specialistId)
+    const [current] = await this.query(
+      'SELECT "is_moderated" AS "isModerated" FROM "work_photos" WHERE "id" = $1 AND "business_id" = $2',
+      [id, businessId],
+    )
+    if (current?.isModerated && !input.isHidden) {
+      throw new BadRequestException('Фото скрыто модератором Awaisa, показать его снова нельзя')
+    }
     const rows = await this.query(
       `UPDATE "work_photos" SET "service_id" = $3, "specialist_id" = $4, "is_hidden" = $5,
          -- Shown again by the owner: past reports are settled.
@@ -81,6 +86,14 @@ export class WorkPhotosService {
       [id, businessId, input.serviceId, input.specialistId, input.isHidden],
     )
     if (this.rows(rows).length === 0) throw new NotFoundException('Фото не найдено')
+    if (!input.isHidden) {
+      // Shown again by the owner: the reports so far are settled for the moderators too.
+      await this.query(
+        `UPDATE "reports" SET "resolved_at" = now()
+         WHERE "target_type" = 'photo' AND "target_id" = $1 AND "resolved_at" IS NULL`,
+        [id],
+      )
+    }
   }
 
   /** The owner's order of every photo of the place: `ids` first to last; others keep theirs. */
@@ -104,6 +117,12 @@ export class WorkPhotosService {
     )
     const [row] = this.rows(rows)
     if (!row) throw new NotFoundException('Фото не найдено')
+    // Nothing left to moderate: its reports leave the queue.
+    await this.query(
+      `UPDATE "reports" SET "resolved_at" = now()
+       WHERE "target_type" = 'photo' AND "target_id" = $1 AND "resolved_at" IS NULL`,
+      [id],
+    )
     const url = String(row.url)
     const [used] = await this.query('SELECT 1 FROM "review_photos" WHERE "url" = $1 LIMIT 1', [url])
     return used ? null : url
@@ -141,16 +160,6 @@ export class WorkPhotosService {
     const [row] = this.rows(rows)
     if (!row) throw new NotFoundException('Фото не найдено')
     return { likes: Number(row.likes) }
-  }
-
-  async report(id: string) {
-    const rows = await this.query(
-      `UPDATE "work_photos" SET "reports" = "reports" + 1,
-         "is_hidden" = "is_hidden" OR "reports" + 1 >= ${REPORTS_TO_HIDE}
-       WHERE "id" = $1 RETURNING "id"`,
-      [id],
-    )
-    if (this.rows(rows).length === 0) throw new NotFoundException('Фото не найдено')
   }
 
   /**

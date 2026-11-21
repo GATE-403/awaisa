@@ -48,6 +48,10 @@
   color: var(--color-danger-text);
 }
 
+.item[data-popup-open] {
+  background: var(--color-fill);
+}
+
 .item[data-highlighted] {
   background: var(--color-fill);
 }
@@ -64,6 +68,12 @@
 .icon svg {
   width: 20px;
   height: 20px;
+}
+
+.groupLabel {
+  padding: var(--space-2) var(--space-3) var(--space-1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
 }
 
 .separator {

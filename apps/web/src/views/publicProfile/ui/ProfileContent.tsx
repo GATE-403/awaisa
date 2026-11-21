@@ -6,6 +6,7 @@ import type { ComponentType } from 'react'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { Achievements, achievementLook, achievementTitle } from '@/entities/profile'
 import { EditProfileButton } from '@/features/profileStyle'
+import { ReportMenu } from '@/features/report'
 import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
 import { type Translate, useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
@@ -191,7 +192,16 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
             isOwn={profile.isOwn}
           />
           <StoryButton address={profile.handle ?? profile.id} />
-          {profile.isOwn && <EditProfileButton />}
+          {profile.isOwn ? (
+            <EditProfileButton />
+          ) : (
+            <ReportMenu
+              targetType='profile'
+              targetId={profile.id}
+              label={t('Пожаловаться на профиль: {name}', { name: profile.name })}
+              className={styles.report}
+            />
+          )}
         </div>
       </header>
 

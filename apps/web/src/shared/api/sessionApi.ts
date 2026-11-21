@@ -12,6 +12,8 @@ import type {
   FunnelSegmentsReport,
   FunnelSignalsReport,
   MasterPlace,
+  ModerationLog,
+  ModerationQueue,
   PublicProfile,
   VisitReview,
 } from './types'
@@ -72,6 +74,14 @@ const getInsightsOnServer = async (days: number) => {
   return { funnel, signals, segments }
 }
 
+const getModerationOnServer = async () => {
+  const [queue, log] = await Promise.all([
+    orNull(withSession<ModerationQueue>('/moderation/queue')),
+    orNull(withSession<ModerationLog>('/moderation/decisions?limit=50')),
+  ])
+  return { queue, log }
+}
+
 const getMyBusinessesOnServer = () => orNull(withSession<BusinessLink[]>('/me/businesses'))
 
 const getManagedBusinessOnServer = (slug: string) =>
@@ -96,6 +106,7 @@ export {
   getInsightsOnServer,
   getManagedBusinessOnServer,
   getMasterPlacesOnServer,
+  getModerationOnServer,
   getMyBookingsOnServer,
   getMyBusinessesOnServer,
   getProfileOnServer,
