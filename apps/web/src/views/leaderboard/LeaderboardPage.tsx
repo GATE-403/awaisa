@@ -144,8 +144,10 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
                       screen-reader text after them. */}
                   <NextLink href={entry.href} className={styles.row}>
                     <span className={styles.place} data-place={entry.place}>
-                      {entry.place}
-                      <span className={styles.srOnly}>-е место</span>
+                      {/* Read as one word «1-е место»: a hidden «-е место» after the visible
+                          number was read as «1 -е место». */}
+                      <span aria-hidden>{entry.place}</span>
+                      <span className={styles.srOnly}>{entry.place}-е место</span>
                     </span>
                     {entry.face}
                     <span className={styles.who}>
