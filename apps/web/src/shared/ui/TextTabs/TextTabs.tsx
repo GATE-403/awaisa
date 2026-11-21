@@ -1,4 +1,7 @@
+'use client'
+
 import NextLink from 'next/link'
+import { useEffect, useRef } from 'react'
 import styles from './TextTabs.module.css'
 
 type TextTab = {
@@ -26,6 +29,31 @@ interface TextTabsProps {
 // app: links when the view is in the URL, buttons (role=tab) when it is local state.
 export const TextTabs = ({ label, items, size = 'md' }: TextTabsProps) => {
   const isButtons = items.some((item) => !item.href)
+  const rowRef = useRef<HTMLDivElement & HTMLElement>(null)
+  const activeIndex = items.findIndex((item) => item.isActive)
+  const isFirstRef = useRef(true)
+
+  // A row wider than the screen keeps the chosen tab in view («если я на табе, она должна быть
+  // видна всегда»): scrolled sideways only (never the page), at once on open, smoothly after.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the chosen tab is what moves it
+  useEffect(() => {
+    const row = rowRef.current
+    const active = row?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!row || !active) return
+    const gap = 16
+    const left =
+      active.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft
+    const right = left + active.offsetWidth
+    const isHidden = left - gap < row.scrollLeft || right + gap > row.scrollLeft + row.clientWidth
+    if (isHidden) {
+      const isReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      row.scrollTo({
+        left: Math.max(0, left - (row.clientWidth - active.offsetWidth) / 2),
+        behavior: isFirstRef.current || isReduced ? 'auto' : 'smooth',
+      })
+    }
+    isFirstRef.current = false
+  }, [activeIndex])
   const content = items.map((item) => {
     const inner = (
       <>
@@ -64,13 +92,13 @@ export const TextTabs = ({ label, items, size = 'md' }: TextTabsProps) => {
   })
 
   return isButtons ? (
-    <div className={styles.tabs} data-size={size}>
+    <div ref={rowRef} className={styles.tabs} data-size={size}>
       <div className={styles.list} role='tablist' aria-label={label}>
         {content}
       </div>
     </div>
   ) : (
-    <nav aria-label={label} className={styles.tabs} data-size={size}>
+    <nav ref={rowRef} aria-label={label} className={styles.tabs} data-size={size}>
       <div className={styles.list}>{content}</div>
     </nav>
   )

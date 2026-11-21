@@ -1,30 +1,63 @@
-import { EyeSlash, Plus } from '@phosphor-icons/react/ssr'
-import { type ChangeEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import { addPhoto, getWorkPhotos, removePhoto, updateWorkPhoto } from '@/shared/api/clientApi'
+'use client'
+
+import { EyeSlash } from '@phosphor-icons/react/ssr'
+import { type ChangeEvent, type DragEvent, useEffect, useState } from 'react'
+import {
+  addPhoto,
+  getWorkPhotos,
+  removePhoto,
+  reorderWorkPhotos,
+  updateWorkPhoto,
+} from '@/shared/api/clientApi'
 import type { Catalog, WorkPhoto } from '@/shared/api/types'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './PhotosSection.module.css'
 import { WorkPhotoSheet } from './WorkPhotoSheet'
 
 interface PhotosSectionProps {
   slug: string
   catalog: Catalog
-  /** The heading the page draws over the mosaic, with the count of photos. */
-  renderHeading: (count: number) => ReactNode
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
+  /** Every change of the list: the page counts the photos and pictures its services with them. */
+  onPhotosChange?: (photos: WorkPhoto[]) => void
+  /** The file input's id: the page's own «Добавить» opens it. */
+  inputId: string
 }
 
 const MAX_PHOTOS = 30
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
-// «Работы» as the client sees them: a mosaic of square photos, «+» first. Each is tagged with its
-// service and master, so the feed books exactly that from the photo.
-export const PhotosSection = ({ slug, catalog, run, renderHeading }: PhotosSectionProps) => {
-  const photoInput = useRef<HTMLInputElement>(null)
+const moveTo = (ids: string[], id: string, index: number) => {
+  const rest = ids.filter((item) => item !== id)
+  rest.splice(index, 0, id)
+  return rest
+}
+
+// «Работы» like a profile's grid in Instagram: square photos three a row, nearly touching; the page
+// adds to it from its own «Добавить». Several photos go up at once and are tagged one after another
+// («Фото 1 из 3»): each names its service and master, so the feed books exactly that. The first five
+// lead the public page, so the order is the owner's: dragged with a mouse, «Поставить первой» in a
+// photo's sheet on a phone.
+export const PhotosSection = ({
+  slug,
+  catalog,
+  run,
+  onPhotosChange,
+  inputId,
+}: PhotosSectionProps) => {
   const [isBusy, setIsBusy] = useState(false)
   const [photos, setPhotos] = useState<WorkPhoto[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
+  // Photos just uploaded, tagged in turn.
+  const [queue, setQueue] = useState<string[]>([])
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [order, setOrder] = useState<string[] | null>(null)
   const open = photos.find((photo) => photo.id === openId) ?? null
+  const queueIndex = openId ? queue.indexOf(openId) : -1
+  const shown = order
+    ? order.flatMap((id) => photos.find((photo) => photo.id === id) ?? [])
+    : photos
 
   useEffect(() => {
     const controller = new AbortController()
@@ -34,42 +67,87 @@ export const PhotosSection = ({ slug, catalog, run, renderHeading }: PhotosSecti
     return () => controller.abort()
   }, [slug])
 
-  const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] ?? null
+  useEffect(() => {
+    onPhotosChange?.(photos)
+  }, [photos, onPhotosChange])
+
+  const handlePhotos = async (event: ChangeEvent<HTMLInputElement>) => {
+    const room = MAX_PHOTOS - photos.length
+    const files = Array.from(event.target.files ?? []).slice(0, room)
     event.target.value = ''
-    if (!file) return
+    if (files.length === 0) return
     setIsBusy(true)
-    let added: WorkPhoto | null = null
-    await run(async () => {
-      const next = await addPhoto(slug, file)
-      added = next.find((photo) => !photos.some((known) => known.id === photo.id)) ?? null
-      setPhotos(next)
-    }, 'Фото добавлено')
+    const known = new Set(photos.map((photo) => photo.id))
+    const added: string[] = []
+    await run(
+      async () => {
+        for (const file of files) {
+          const next = await addPhoto(slug, file)
+          for (const photo of next) {
+            if (!known.has(photo.id)) {
+              known.add(photo.id)
+              added.push(photo.id)
+            }
+          }
+          setPhotos(next)
+        }
+      },
+      files.length > 1 ? `Добавлено фото: ${files.length}` : 'Фото добавлено',
+    )
     setIsBusy(false)
-    // Right away: what is on it, like tagging a photo after taking it.
-    if (added) setOpenId((added as WorkPhoto).id)
+    // Right away: what is on each, like tagging photos after taking them.
+    const [first] = added
+    if (!first) return
+    setQueue(added)
+    setOpenId(first)
+  }
+
+  const closeSheet = () => {
+    const next = queueIndex >= 0 ? queue[queueIndex + 1] : undefined
+    if (next) {
+      setOpenId(next)
+      return
+    }
+    setQueue([])
+    setOpenId(null)
+  }
+
+  const saveOrder = (ids: string[]) =>
+    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), 'Порядок сохранён')
+
+  const handleDragOver = (event: DragEvent, overId: string) => {
+    if (!draggedId || draggedId === overId) return
+    event.preventDefault()
+    const ids = order ?? photos.map((photo) => photo.id)
+    setOrder(moveTo(ids, draggedId, ids.indexOf(overId)))
+  }
+
+  const handleDragEnd = async () => {
+    const ids = order
+    const isMoved = ids && ids.join() !== photos.map((photo) => photo.id).join()
+    setDraggedId(null)
+    if (isMoved) await saveOrder(ids)
+    setOrder(null)
   }
 
   return (
     <section className={styles.group} aria-label='Работы'>
-      {renderHeading(photos.length)}
-      <ul className={styles.strip}>
-        {photos.length < MAX_PHOTOS && (
-          <li>
-            <button
-              type='button'
-              className={styles.add}
-              onClick={() => photoInput.current?.click()}
-              disabled={isBusy}
-              aria-label='Добавить фото'
-              data-busy={isBusy || undefined}
-            >
-              <Plus weight='bold' aria-hidden />
-            </button>
-          </li>
-        )}
-        {photos.map((photo, index) => (
-          <li key={photo.id} className={styles.tile} data-hidden={photo.isHidden || undefined}>
+      <ul className={styles.strip} aria-busy={isBusy}>
+        {shown.map((photo, index) => (
+          <li
+            key={photo.id}
+            className={styles.tile}
+            data-hidden={photo.isHidden || undefined}
+            data-dragged={draggedId === photo.id || undefined}
+            draggable
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = 'move'
+              setDraggedId(photo.id)
+            }}
+            onDragOver={(event) => handleDragOver(event, photo.id)}
+            onDrop={(event) => event.preventDefault()}
+            onDragEnd={() => void handleDragEnd()}
+          >
             <button
               type='button'
               className={styles.tileButton}
@@ -77,7 +155,13 @@ export const PhotosSection = ({ slug, catalog, run, renderHeading }: PhotosSecti
               onClick={() => setOpenId(photo.id)}
             >
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-              <img src={photo.url} alt='' className={styles.image} loading='lazy' />
+              <img
+                src={photo.url}
+                alt=''
+                className={styles.image}
+                loading='lazy'
+                draggable={false}
+              />
               {photo.isHidden ? (
                 <span className={styles.badge}>
                   <EyeSlash weight='bold' aria-hidden />
@@ -89,12 +173,23 @@ export const PhotosSection = ({ slug, catalog, run, renderHeading }: PhotosSecti
           </li>
         ))}
       </ul>
+      {photos.length === 0 && (
+        <EmptyState
+          variant='inline'
+          title='Покажите свои работы'
+          text='Клиенты записываются с фото: добавьте до 30 штук, можно сразу несколько.'
+        />
+      )}
+      {photos.length > 1 && (
+        <p className={styles.hint}>Первые пять фото видны на странице первыми.</p>
+      )}
       <input
-        ref={photoInput}
+        id={inputId}
         type='file'
         accept={ACCEPT}
+        multiple
         hidden
-        onChange={handlePhoto}
+        onChange={handlePhotos}
         aria-label='Файл фото'
       />
       {open && (
@@ -103,9 +198,22 @@ export const PhotosSection = ({ slug, catalog, run, renderHeading }: PhotosSecti
           photo={open}
           services={catalog.services}
           specialists={catalog.specialists}
-          onClose={() => setOpenId(null)}
+          step={queue.length > 1 ? { index: queueIndex + 1, total: queue.length } : undefined}
+          onClose={closeSheet}
           onSave={(input) =>
             run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), 'Сохранено')
+          }
+          onMakeFirst={
+            photos[0]?.id === open.id
+              ? undefined
+              : () =>
+                  void saveOrder(
+                    moveTo(
+                      photos.map((photo) => photo.id),
+                      open.id,
+                      0,
+                    ),
+                  )
           }
           onDelete={() =>
             void run(async () => setPhotos(await removePhoto(slug, open.id)), 'Фото удалено')

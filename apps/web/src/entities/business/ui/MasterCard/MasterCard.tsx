@@ -23,6 +23,8 @@ interface MasterCardProps {
   meta?: ReactNode
   /** The picture's width in CSS px, for the sized `srcSet`. */
   imageWidth?: number
+  /** In the cabinet: the card is a button that opens the master's sheet. */
+  onSelect?: () => void
 }
 
 // A master as a 3:4 picture card — the photo, or the white mascot on their own colour — with
@@ -37,6 +39,7 @@ export const MasterCard = ({
   title,
   meta,
   imageWidth = 180,
+  onSelect,
 }: MasterCardProps) => {
   const cardClass = className ? `${styles.card} ${className}` : styles.card
   const body = (
@@ -89,6 +92,14 @@ export const MasterCard = ({
     'data-any': specialist ? undefined : '',
     'data-picture-frame': specialist?.photoUrl ? '' : undefined,
     style: specialist ? ({ '--tint': pickTint(specialist.name) } as CSSProperties) : undefined,
+  }
+
+  if (onSelect) {
+    return (
+      <button type='button' {...props} data-button='' onClick={onSelect}>
+        {body}
+      </button>
+    )
   }
 
   return href ? (

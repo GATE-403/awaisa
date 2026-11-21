@@ -13,64 +13,41 @@
   transition: opacity var(--duration-normal) var(--ease-standard);
 }
 
-/* The page's «Работы» mosaic: square tiles, three a row on phones, five from 640px. */
+/* Instagram's grid: square photos three a row that nearly touch, square edges; on phones the
+   grid runs from edge to edge of the screen (out of the page's gutter). */
 .strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-1);
-  margin: 0;
+  gap: 2px;
+  margin: 0 calc(-1 * var(--page-gutter));
   padding: 0;
   list-style: none;
 }
 
 @media (min-width: 640px) {
   .strip {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-1);
+    margin-inline: 0;
   }
+}
+
+.strip[aria-busy="true"] {
+  opacity: 0.6;
+}
+
+.strip:empty {
+  display: none;
 }
 
 .strip > li {
   display: grid;
 }
 
-.tile,
-.add {
+.tile {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: var(--radius-md);
-}
-
-.tile {
   background: var(--color-fill);
-  box-shadow: inset 0 0 0 0.5px var(--color-border);
-}
-
-.add {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 1px dashed var(--color-border-strong);
-  background: transparent;
-  color: var(--color-link);
-  cursor: pointer;
-}
-
-.add svg {
-  width: 22px;
-  height: 22px;
-}
-
-.add[data-busy] {
-  opacity: 0.5;
-}
-
-@media (hover: hover) {
-  .add:not(:disabled):hover {
-    background: var(--color-fill);
-  }
 }
 
 .tileButton {
@@ -116,8 +93,38 @@
 .preview {
   display: block;
   width: 100%;
-  max-height: 320px;
-  object-fit: cover;
+  height: auto;
+  /* The whole photo, never cropped: letterboxed on the fill when it is tall. */
+  max-height: min(60vh, 520px);
+  object-fit: contain;
   border-radius: var(--radius-xl);
   background: var(--color-fill);
+}
+
+/* A command row in the photo's sheet («Поставить первой»): text in the link colour. */
+.rowAction {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* Dragged with a mouse: the tile being moved is lifted out of the grid's flow, dimmed. */
+.tile[data-dragged] {
+  opacity: 0.4;
+}
+
+.tile[draggable="true"] {
+  cursor: grab;
 }

@@ -1,4 +1,4 @@
-import type { AnalyticsDays, AnalyticsReport } from '@awaisa/contracts'
+import type { AnalyticsDays, AnalyticsReport, PageStats } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -603,6 +603,38 @@ export class AnalyticsService {
         cancelled: toNumber(row?.cancelled),
       }
     })
+  }
+
+  /**
+   * «За неделю» on the owner's page: devices that opened it (the `business` funnel step) and
+   * online bookings made, over `days` and the same stretch before.
+   */
+  async pageStats(business: Business, days: number): Promise<PageStats> {
+    const [row] = await this.query(
+      `SELECT
+         (SELECT COUNT(DISTINCT "session") FROM "funnel_events"
+           WHERE "slug" = $1 AND "step" = 'business'
+             AND "created_at" >= now() - make_interval(days => $3))::int AS "views",
+         (SELECT COUNT(DISTINCT "session") FROM "funnel_events"
+           WHERE "slug" = $1 AND "step" = 'business'
+             AND "created_at" >= now() - make_interval(days => $3 * 2)
+             AND "created_at" < now() - make_interval(days => $3))::int AS "previousViews",
+         (SELECT COUNT(*) FROM "bookings"
+           WHERE "business_id" = $2 AND "source" = 'online' AND "status" = 'confirmed'
+             AND "created_at" >= now() - make_interval(days => $3))::int AS "bookings",
+         (SELECT COUNT(*) FROM "bookings"
+           WHERE "business_id" = $2 AND "source" = 'online' AND "status" = 'confirmed'
+             AND "created_at" >= now() - make_interval(days => $3 * 2)
+             AND "created_at" < now() - make_interval(days => $3))::int AS "previousBookings"`,
+      [business.slug, business.id, days],
+    )
+    return {
+      days,
+      views: toNumber(row?.views),
+      bookings: toNumber(row?.bookings),
+      previousViews: toNumber(row?.previousViews),
+      previousBookings: toNumber(row?.previousBookings),
+    }
   }
 
   private query(sql: string, params: unknown[]) {

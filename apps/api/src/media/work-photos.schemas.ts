@@ -8,6 +8,11 @@ const updateWorkPhotoSchema = z.object({
   isHidden: z.boolean(),
 })
 
+// Every photo of the place, first to last («Работы» arranged by dragging).
+const reorderWorkPhotosSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(30),
+})
+
 const feedQuerySchema = z.object({
   kind: z.string().trim().max(32).optional(),
   business: z.string().trim().max(64).optional(),
@@ -27,7 +32,8 @@ const likeSchema = z.object({
 
 type LikeInput = z.infer<typeof likeSchema>
 type UpdateWorkPhotoInput = z.infer<typeof updateWorkPhotoSchema>
+type ReorderWorkPhotosInput = z.infer<typeof reorderWorkPhotosSchema>
 type FeedQuery = z.infer<typeof feedQuerySchema>
 
-export type { FeedQuery, LikeInput, UpdateWorkPhotoInput }
-export { feedQuerySchema, likeSchema, updateWorkPhotoSchema }
+export type { FeedQuery, LikeInput, ReorderWorkPhotosInput, UpdateWorkPhotoInput }
+export { feedQuerySchema, likeSchema, reorderWorkPhotosSchema, updateWorkPhotoSchema }
