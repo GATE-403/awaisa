@@ -635,6 +635,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
       {draft && schedule && date && (
         <NewBookingDialog
+          slug={slug}
           date={date}
           dayLabel={dayLabel}
           time={draft.time}

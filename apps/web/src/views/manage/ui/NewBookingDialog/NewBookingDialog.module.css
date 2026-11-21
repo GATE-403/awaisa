@@ -1,0 +1,82 @@
+/* Clients who were here before, right under the row being typed in: a face, the name and
+   «+996 … · 7 визитов» (no-shows in red); a tap fills the name and the number. */
+.suggestions {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion {
+  gap: var(--space-3);
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--color-foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestion:active {
+  background: var(--color-fill);
+}
+
+.suggestionText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding-block: var(--space-2);
+}
+
+.suggestionName,
+.suggestionMeta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestionName {
+  font-size: var(--text-body);
+}
+
+.suggestionMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.noShows {
+  color: var(--color-danger-text);
+}
+
+@media (hover: hover) {
+  .suggestion:hover .suggestionName {
+    color: var(--color-link);
+  }
+}
+
+/* The comment grows with its words (up to six lines, then scrolls inside). */
+.comment {
+  width: 100%;
+  max-height: calc(6lh + 2 * var(--space-3));
+  padding: var(--space-3) 0;
+  border: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  field-sizing: content;
+  resize: none;
+}
+
+.comment::placeholder {
+  color: var(--color-tertiary-foreground);
+}
+
+/* Like the plain fields above it: the caret is the focus, no ring around the row. */
+.comment:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
