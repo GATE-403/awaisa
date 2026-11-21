@@ -200,7 +200,7 @@ describe('CertificateSalesService.createOrder', () => {
     })
 
     await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('не продаются')
-    await expect(service.saleFor('awaisa-studio')).resolves.toBeNull()
+    await expect(service.saleFor('awaisa-studio')).resolves.toEqual({ amounts: [] })
   })
 
   it('sells nothing while payments are off', async () => {

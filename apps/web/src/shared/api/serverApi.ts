@@ -274,14 +274,14 @@ const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   return data
 }
 
-// «Подарочный сертификат» on the business page: the amounts on sale, or null when it sells none.
+// «Подарочный сертификат» on the business page: the amounts on sale, none when it sells none.
 const getCertificateSale = async (slug: string): Promise<CertificateSale> => {
   'use cache'
   cacheTag(businessTag(slug))
 
   const { data, isStale } = await readApi<CertificateSale>(
     `/businesses/${encodeURIComponent(slug)}/certificate-sale`,
-    { fallback: null },
+    { fallback: { amounts: [] } },
   )
   if (isStale) cacheLife('seconds')
   else cacheLife('minutes')
