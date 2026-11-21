@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { isBookingPath } from '../../lib/bookingPath'
+import { getBusinessSlug, isBookingPath } from '@/shared/config/navigation'
 
 interface BookingModalGateProps {
   slug: string
@@ -16,7 +16,8 @@ interface BookingModalGateProps {
 // while the address is its own.
 export const BookingModalGate = ({ slug, children }: BookingModalGateProps) => {
   const pathname = usePathname()
-  if (!isBookingPath(pathname, slug)) return null
+  const isOwnAddress = isBookingPath(pathname) && getBusinessSlug(pathname) === slug
+  if (!isOwnAddress) return null
 
   return children
 }
