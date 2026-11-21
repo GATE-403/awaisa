@@ -6,11 +6,11 @@ import type { Business } from '../businesses/business.entity.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import { ClientRecord } from './client-record.entity.js'
-import type { UpdateClientInput } from './clients.schemas.js'
+import { LAPSED_DAYS, segmentClients } from './client-segments.js'
+import type { ClientsQuery, UpdateClientInput } from './clients.schemas.js'
 
 type Row = Record<string, unknown>
 
-const LIST_LIMIT = 200
 const HISTORY_LIMIT = 50
 
 // A visit is a confirmed booking that has started and was not a no-show; it earns what was paid
@@ -29,8 +29,13 @@ export class ClientsService {
     @InjectRepository(ClientRecord) private readonly records: Repository<ClientRecord>,
   ) {}
 
-  async list(business: Business, query: string) {
-    const search = `%${query.replace(/[%_]/g, '')}%`
+  /**
+   * Everyone who booked or was imported, matching the search, cut to one segment in the asked
+   * order (`client-segments.ts`), with every segment's size for the tabs. Grouped in SQL, cut in
+   * code: a business's base is thousands of rows at most.
+   */
+  async list(business: Business, { q, segment, sort, limit }: ClientsQuery) {
+    const search = `%${q.replace(/[%_]/g, '')}%`
     const rows = (await this.dataSource.query(
       `SELECT b."customer_phone" AS "phone",
          (ARRAY_AGG(b."customer_name" ORDER BY b."starts_at" DESC))[1] AS "name",
@@ -40,7 +45,7 @@ export class ClientsService {
          MAX(b."starts_at") FILTER (WHERE ${VISIT}) AS "lastVisit",
          MIN(b."starts_at") FILTER (WHERE b."status" = 'confirmed' AND b."starts_at" > now()) AS "nextVisit",
          BOOL_OR(cr."note" <> '') AS "hasNote",
-         MAX(b."starts_at") AS "sortAt"
+         to_char(MAX(cr."birthday"), 'YYYY-MM-DD') AS "birthday"
        FROM "bookings" b
        JOIN "services" s ON s."id" = b."service_id"
        LEFT JOIN "client_records" cr ON cr."business_id" = b."business_id" AND cr."phone" = b."customer_phone"
@@ -50,18 +55,17 @@ export class ClientsService {
          OR (ARRAY_AGG(b."customer_name" ORDER BY b."starts_at" DESC))[1] ILIKE $2
        UNION ALL
        -- Imported clients who have not booked here yet.
-       SELECT cr."phone", cr."name", 0, 0, 0, NULL, NULL, cr."note" <> '', NULL
+       SELECT cr."phone", cr."name", 0, 0, 0, NULL, NULL, cr."note" <> '',
+         to_char(cr."birthday", 'YYYY-MM-DD')
        FROM "client_records" cr
        WHERE cr."business_id" = $1 AND cr."name" IS NOT NULL
          AND NOT EXISTS (SELECT 1 FROM "bookings" x
            WHERE x."business_id" = cr."business_id" AND x."customer_phone" = cr."phone")
-         AND ($2 = '%%' OR cr."phone" ILIKE $2 OR cr."name" ILIKE $2)
-       ORDER BY "sortAt" DESC NULLS LAST, "name"
-       LIMIT ${LIST_LIMIT}`,
+         AND ($2 = '%%' OR cr."phone" ILIKE $2 OR cr."name" ILIKE $2)`,
       [business.id, search],
     )) as Row[]
 
-    return rows.map((row) => ({
+    const clients = rows.map((row) => ({
       phone: String(row.phone),
       name: String(row.name ?? ''),
       visits: toNumber(row.visits),
@@ -70,7 +74,18 @@ export class ClientsService {
       lastVisit: toDate(row.lastVisit),
       nextVisit: toDate(row.nextVisit),
       hasNote: Boolean(row.hasNote),
+      birthday: (row.birthday as string | null) ?? null,
     }))
+    const now = new Date()
+    const { items, counts } = segmentClients(
+      clients,
+      segment,
+      sort,
+      now,
+      toBusinessParts(now).dateKey,
+    )
+
+    return { items: items.slice(0, limit), counts, lapsedDays: LAPSED_DAYS }
   }
 
   async get(business: Business, rawPhone: string) {

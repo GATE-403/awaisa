@@ -11,6 +11,8 @@ interface GlyphButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>,
   icon: ReactNode
   /** Said by screen readers and shown as a tooltip. */
   label: string
+  /** Folded away (and out of reach) until it is wanted; it unfolds smoothly when it comes. */
+  isHidden?: boolean
 }
 
 // One fill capsule of thin glyph buttons, like the cabinet toolbar's (a macOS 26 toolbar group):
@@ -23,8 +25,21 @@ export const GlyphGroup = ({ children, label }: GlyphGroupProps) => (
   </span>
 )
 
-export const GlyphButton = ({ icon, label, type = 'button', ...props }: GlyphButtonProps) => (
-  <button type={type} aria-label={label} title={label} {...props}>
+export const GlyphButton = ({
+  icon,
+  label,
+  isHidden,
+  type = 'button',
+  ...props
+}: GlyphButtonProps) => (
+  <button
+    type={type}
+    aria-label={label}
+    title={label}
+    data-hidden={isHidden || undefined}
+    inert={isHidden}
+    {...props}
+  >
     {icon}
   </button>
 )

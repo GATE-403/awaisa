@@ -359,3 +359,10 @@
   color: var(--color-danger-text);
   font-weight: var(--font-weight-semibold);
 }
+
+/* Phones: blocks of a section 16pt apart (24 from 640px). */
+@media (max-width: 639px) {
+  .section {
+    gap: var(--space-4);
+  }
+}
