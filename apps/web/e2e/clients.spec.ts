@@ -11,7 +11,8 @@ test.describe('Visit outcomes and the client base', () => {
     test.setTimeout(90_000)
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const phone = randomClientPhone()
-    const name = `E2E Клиент ${testInfo.project.name}`
+    // Unique per attempt: a retry or a repeat must not find the row an earlier attempt left.
+    const name = `E2E Клиент ${testInfo.project.name} ${Math.random().toString(36).slice(2, 7)}`
     const paid = await createPastVisit(name, phone)
     const missed = await createPastVisit(name, phone)
 
