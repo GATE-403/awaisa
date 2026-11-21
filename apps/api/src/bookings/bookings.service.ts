@@ -121,6 +121,7 @@ export class BookingsService {
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
             depositAmount: deposit,
+            source: staffBusinessId ? 'staff' : 'online',
             promotionId: discount?.promotionId ?? null,
             discountAmount: discount?.amount ?? null,
             discountTitle: discount?.title ?? null,

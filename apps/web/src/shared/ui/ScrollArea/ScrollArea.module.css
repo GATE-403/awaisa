@@ -1,0 +1,178 @@
+.area {
+  /* The box reaches 12px past the column on both sides and pads them back, so the rows' text sits
+     on the column's edges while a row's own fill (a pointer's hover) can spill out evenly: a scroll
+     box clips whatever leaves it, and a hover cut flush on one side read as a layout bug. */
+  margin-inline: calc(-1 * var(--space-3));
+  padding-inline: var(--space-3);
+}
+
+/* Only a list longer than its rows scrolls (ScrollArea.tsx measures it and sets the height). A box
+   that could move by a pixel or two caught the wheel and held the page still under the pointer. */
+.area[data-scrolls] {
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  /* No scrollbar: it took room from the figures at the rows' right edge (they no longer lined up
+     with the blocks around) and the fades and «Ещё N» already say there is more. */
+  scrollbar-width: none;
+  /* It comes to rest on a row's edge, never half a row with an orphaned hairline above it. */
+  scroll-snap-type: y proximity;
+}
+
+.area::-webkit-scrollbar {
+  display: none;
+}
+
+.area[data-scrolls] :where(li) {
+  scroll-snap-align: start;
+}
+
+/* The last row snaps to the bottom edge: snapping it to the top left the list a few pixels short
+   of its end, so its last row never showed whole and «Ещё 1» stayed. */
+.area[data-scrolls] :where(li:last-child) {
+  scroll-snap-align: end;
+}
+
+.area:focus-visible {
+  outline: none;
+  border-radius: var(--radius-md);
+  box-shadow: inset var(--focus-ring);
+}
+
+/* More above or below: the box fades at an edge while there is more to scroll that way (a scroll
+   timeline drives the fades, so a list that fits never fades). The same as the kit's Select. */
+@property --scroll-area-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-area-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-area-fade-top {
+  from {
+    --scroll-area-fade-top: 0px;
+  }
+
+  to {
+    --scroll-area-fade-top: 32px;
+  }
+}
+
+@keyframes scroll-area-fade-bottom {
+  from {
+    --scroll-area-fade-bottom: 32px;
+  }
+
+  to {
+    --scroll-area-fade-bottom: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .area[data-scrolls] {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--scroll-area-fade-top),
+      #000 calc(100% - var(--scroll-area-fade-bottom)),
+      transparent 100%
+    );
+    animation:
+      scroll-area-fade-top linear both,
+      scroll-area-fade-bottom linear both;
+    animation-timeline: scroll(self), scroll(self);
+    animation-range:
+      0 32px,
+      calc(100% - 32px) 100%;
+  }
+}
+
+/* Touch screens: folded under a fixed fade instead of scrolling inside (the page keeps the finger). */
+.area[data-folded] {
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
+}
+
+/* «Свернуть» under the opened list: a quiet text capsule, centred. */
+.less {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-height-sm);
+  margin: var(--space-2) auto 0;
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.less svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+/* «Ещё 14 клиентов ⌄» on the fade: the same elevated capsule as MoreFade's, a little smaller so
+   it sits on the cut row without hiding the rows above. The box itself stays the keyboard's way
+   to scroll (arrows, Page Down), so the capsule takes no Tab stop of its own. */
+.wrap {
+  position: relative;
+}
+
+.more {
+  position: absolute;
+  bottom: var(--space-1);
+  left: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-height-sm);
+  padding: 0 var(--space-4);
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--color-elevated);
+  box-shadow:
+    inset 0 0 0 0.5px var(--color-border),
+    var(--shadow-lg);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  cursor: pointer;
+  translate: -50% 0;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.more svg {
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+.more:active {
+  scale: 0.97;
+}
+
+/* A 44pt target around the 36pt capsule. */
+.more::before {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .more {
+    transition: none;
+  }
+}

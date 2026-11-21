@@ -1,6 +1,7 @@
 import type {
   AdminBooking,
   AdminSchedule,
+  AnalyticsGoal,
   AnalyticsReport,
   Booking,
   ClosedDay,
@@ -20,6 +21,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common'
@@ -31,7 +33,9 @@ import {
   OwnerOnly,
 } from '../businesses/business-access.guard.js'
 import {
+  type AnalyticsGoalInput,
   type AnalyticsQuery,
+  analyticsGoalSchema,
   analyticsQuerySchema,
   type CloseDayInput,
   type CreateTimeOffInput,
@@ -103,6 +107,15 @@ export class AdminController {
     @Query({ schema: analyticsQuerySchema }) query: AnalyticsQuery,
   ): Promise<AnalyticsReport> {
     return this.analytics.getReport(business, query.days)
+  }
+
+  @OwnerOnly()
+  @Put('analytics/goal')
+  setAnalyticsGoal(
+    @CurrentBusiness() business: Business,
+    @Body({ schema: analyticsGoalSchema }) body: AnalyticsGoalInput,
+  ): Promise<AnalyticsGoal> {
+    return this.analytics.setGoal(business, body.goal)
   }
 
   @Get('schedule')

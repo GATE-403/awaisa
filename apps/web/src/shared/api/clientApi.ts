@@ -4,6 +4,7 @@ import type {
   AdminBooking,
   AdminSchedule,
   AnalyticsDays,
+  AnalyticsGoal,
   AnalyticsReport,
   Availability,
   AvatarUpload,
@@ -456,6 +457,9 @@ const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =
     },
   )
 
+const setAnalyticsGoal = (slug: string, goal: number | null) =>
+  send<AnalyticsGoal>('PUT', `${manage(slug)}/analytics/goal`, { goal })
+
 const searchBusinesses = (query: string, signal?: AbortSignal) =>
   request<BusinessCard[]>(`/businesses?${new URLSearchParams({ q: query })}`, { signal })
 
@@ -857,6 +861,7 @@ export {
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
+  setAnalyticsGoal,
   closeDay,
   reopenVisits,
   moveMyBooking,

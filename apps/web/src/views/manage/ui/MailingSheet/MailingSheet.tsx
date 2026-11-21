@@ -18,6 +18,7 @@ import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { TemplateField } from '@/views/manage/ui/TemplateField/TemplateField'
 import styles from './MailingSheet.module.css'
 
 interface MailingSheetProps {
@@ -42,6 +43,12 @@ const templates = (name: string): Record<MailingSegment, string> => ({
   all: `{имя}, новости ${name}: {ссылка}`,
 })
 
+// The placeholders a mailing takes, as pills in the shared template editor (the same as replies).
+const MAILING_TOKENS = [
+  { key: 'имя', label: 'Имя клиента' },
+  { key: 'ссылка', label: 'Ссылка на запись' },
+] as const
+
 /** Cyrillic SMS: 70 characters in one part, 67 per part when longer. */
 const smsParts = (text: string) => (text.length <= 70 ? 1 : Math.ceil(text.length / 67))
 
@@ -54,10 +61,13 @@ export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps)
   const [preview, setPreview] = useState<{ count: number; names: string[] } | null>(null)
   const [overview, setOverview] = useState<MailingsOverview | null>(null)
   const [isSending, setIsSending] = useState(false)
-  // The link and the name take room: count with a typical length.
+  // How it reads for one client; the SMS parts are counted with the link as it is sent.
   const sample = text
     .replaceAll('{имя}', 'Айгерим')
-    .replaceAll('{ссылка}', 'https://awaisa.kg/x/book')
+    .replaceAll('{ссылка}', `awaisa.kg/${slug}/book`)
+  const sent = text
+    .replaceAll('{имя}', 'Айгерим')
+    .replaceAll('{ссылка}', `https://awaisa.kg/${slug}/book`)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -161,18 +171,18 @@ export const MailingSheet = ({ slug, businessName, onClose }: MailingSheetProps)
         <section className={sheet.group} aria-label='Текст'>
           <SectionCaption>Текст</SectionCaption>
           <div className={sheet.list}>
-            <textarea
-              aria-label='Текст рассылки'
-              className={styles.text}
+            <TemplateField
+              label='Текст рассылки'
               value={text}
-              onChange={(event) => setText(event.target.value)}
-              maxLength={400}
-              rows={4}
+              onChange={setText}
+              tokens={MAILING_TOKENS}
+              placeholder='Напишите текст рассылки'
+              preview={sample}
             />
           </div>
           <p className={sheet.groupFooter}>
-            {'{имя}'} — имя клиента, {'{ссылка}'} — запись к вам. ≈ {sample.length} символов,{' '}
-            {pluralize(smsParts(sample), ['SMS', 'SMS', 'SMS'])} на клиента.
+            ≈ {sent.length} символов, {pluralize(smsParts(sent), ['SMS', 'SMS', 'SMS'])} на клиента.
+            Имя и ссылка на запись подставятся каждому.
           </p>
         </section>
 

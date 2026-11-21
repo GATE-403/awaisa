@@ -55,6 +55,10 @@ export class Business {
   @Column({ name: 'is_published', type: 'boolean', default: true })
   isPublished: boolean
 
+  /** The owner's revenue goal for a month, in som (analytics), or null. */
+  @Column({ name: 'revenue_goal', type: 'int', nullable: true })
+  revenueGoal: number | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 

@@ -1,7 +1,9 @@
+/* The report lies right on the page: no cards, tiles or fills behind its parts («убрать лишние
+   обёртки фона»). Groups are told apart by their captions and the air between them. */
 .report {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-10);
   transition: opacity var(--duration-normal) var(--ease-standard);
 }
 
@@ -23,50 +25,206 @@
   color: var(--color-muted-foreground);
 }
 
-/* The hero card: the one number the tab leads with, then its chart. */
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+.label {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
 }
 
-.heroHead {
+/* The period and the CSV glyph (a FloatingToolbar: in the header with a mouse, floating at the
+   foot on phones). With a mouse the glyph shrinks to the period's small size: one height, 36pt. */
+@media (min-width: 640px) {
+  .tools [role="group"] :is(button, a) {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Phones: the last group scrolls out from under the floating tools, and the groups sit closer
+   («слишком много свободного места уходит впустую»): 24pt between them instead of 40, rows of
+   44pt with their detail on one line. */
+@media (max-width: 639px) {
+  .page {
+    padding-bottom: var(--floating-toolbar-space);
+  }
+
+  .report {
+    gap: var(--space-6);
+  }
+
+  /* The header is only the period's dates here (its tools float): no 44pt row for one line. */
+  .page > header {
+    min-height: 0;
+  }
+
+  .pairs {
+    gap: var(--space-6);
+  }
+
+  .attentionRow {
+    min-height: 44px;
+    padding: var(--space-1) 0;
+  }
+}
+
+/* A group: its caption, then its content flush with the caption's left edge. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* ——— Выручка ——— */
+
+.revenue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.revenueTop {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 900px) {
+  .revenueTop {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+.revenueHead {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
 }
 
-.heroValue {
+.revenueValue {
+  font-family: var(--font-display);
   font-size: var(--text-4xl);
   line-height: var(--text-4xl-line-height);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
 }
 
-.heroMeta {
+@media (min-width: 768px) {
+  .revenueValue {
+    font-size: var(--text-display);
+    line-height: var(--text-display-line-height);
+  }
+}
+
+.revenueMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-footnote);
 }
 
-.heroFooter {
-  padding-top: var(--space-3);
-  border-top: 0.5px solid var(--color-border);
-  color: var(--color-muted-foreground);
+/* What is booked ahead and the money after materials: plain figures beside the headline. */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-8);
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: var(--text-footnote);
 }
 
-.heroFooter strong {
-  color: var(--color-foreground);
+.fact dd {
+  margin: 0;
+}
+
+.factValue {
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* How people paid: one thin bar of shares over a legend with the percent and the sum. */
+.payments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.paymentsBar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+}
+
+.paymentsBar span {
+  min-width: 6px;
+  border-radius: var(--radius-full);
+}
+
+.paymentsLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  margin: 0;
+  padding: 0;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  list-style: none;
+}
+
+.paymentsLegend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.paymentsLegend b {
   font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
+
+.paymentsLegend i {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.payments [data-part="cash"] {
+  background: var(--color-success);
+}
+
+.payments [data-part="card"] {
+  background: var(--color-primary);
+}
+
+.payments [data-part="transfer"] {
+  background: var(--color-rating);
+}
+
+.payments [data-part="unmarked"] {
+  background: color-mix(in srgb, var(--color-foreground) 24%, transparent);
+}
+
+/* ——— Визиты и клиенты: four figures in a row, no tiles ——— */
 
 .stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  gap: var(--space-6) var(--space-5);
 }
 
 @media (min-width: 768px) {
@@ -80,38 +238,63 @@
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
-  padding: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+}
+
+.statHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
 }
 
 .statLabel {
-  letter-spacing: var(--tracking-caption);
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
   font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-caption);
 }
 
-.statValue {
-  overflow: hidden;
-  font-size: var(--text-xl);
-  line-height: var(--text-xl-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: var(--tracking-title);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.delta {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
+.statDay {
   color: var(--color-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
+}
+
+.statValue {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The change: arrow, sign and number, never colour alone. */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-2) 2px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.delta[data-direction="up"] {
+  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+}
+
+.delta[data-direction="down"] {
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
 }
 
 .deltaIcon {
@@ -132,106 +315,7 @@
   font-size: var(--text-footnote);
 }
 
-/* Column chart: hairline grid, thin columns rounded at the data end, square at the baseline. */
-/* Rows in the inset lists: title and meta left, value right, a share meter under them. */
-.clientRow {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-@media (hover: hover) {
-  .clientRow:hover {
-    background: var(--color-fill);
-  }
-}
-
-.row,
-.clientRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-  min-height: 56px;
-  padding: var(--space-3) var(--space-4);
-}
-
-.rowText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.rowTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  overflow: hidden;
-  font-size: var(--text-md);
-  line-height: var(--text-md-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rowMeta {
-  letter-spacing: var(--tracking-caption);
-  overflow: hidden;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rowValue {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.meter {
-  grid-column: 1 / -1;
-  height: 4px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-}
-
-.meter span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--color-primary);
-}
-
-.badge {
-  flex-shrink: 0;
-  padding: 1px var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  font-weight: var(--font-weight-semibold);
-}
-
-.groupFooter {
-  padding: 0 var(--space-4);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.cardHint {
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-/* New vs returning: a thin segmented bar, fully rounded, 2px surface gap between parts. */
+/* New vs returning: a thin segmented bar, 2px gap between parts. */
 .split {
   display: flex;
   flex-direction: column;
@@ -259,13 +343,13 @@
 }
 
 .splitLegend {
-  letter-spacing: var(--tracking-caption);
   display: flex;
   flex-wrap: wrap;
   gap: 0 var(--space-3);
   color: var(--color-muted-foreground);
   font-size: var(--text-xs);
   line-height: var(--text-xs-line-height);
+  letter-spacing: var(--tracking-caption);
 }
 
 .splitLegend span {
@@ -281,11 +365,181 @@
   border-radius: 50%;
 }
 
-/* Heatmap: one hue in five steps, from the neutral fill to the full accent. */
+/* ——— Lists: rows on the page with hairlines between them, like the reviews thread ——— */
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li {
+  position: relative;
+}
+
+.rows > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: 56px;
+  padding: var(--space-3) 0;
+}
+
+/* A row that opens something (a client's card, a master's period) is one tap target. No fill under
+   the pointer: it crossed the share lines above and below the row («некрасивый дизайн»). The
+   title takes the link colour instead, a chevron at the end says it opens, a press dims it. */
+.clientRow {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.clientRow:has(.rowChevron) {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.clientRow:active {
+  opacity: 0.6;
+}
+
+.clientRow:focus-visible,
+.attentionRow:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  :is(.clientRow, .attentionRow):hover .rowTitle {
+    color: var(--color-link);
+  }
+}
+
+.attentionRow:active {
+  opacity: 0.6;
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow: hidden;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  letter-spacing: var(--tracking-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.rowValue {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* A share meter lies on the row's bottom hairline: the hairline is its track and the share is
+   drawn over it, so a row ends in one line, not a grey track beside a hairline («двойные линии»).
+   Never drawn for zero. */
+.meter {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: 1;
+  height: 2px;
+  pointer-events: none;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+}
+
+.badge {
+  flex-shrink: 0;
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--color-primary-subtle);
+  color: var(--color-link);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.footnote {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.footnote b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Pairs of groups side by side on wide screens, only when both show about as much. */
+.pairs {
+  display: grid;
+  gap: var(--space-10) var(--space-10);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .pairs:not([data-uneven]) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ——— Heatmap: one hue in five steps, from the neutral fill to the full accent ——— */
+
 .heatmapWrap {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.cardHint {
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .heatmapScroll {
@@ -324,16 +578,57 @@
   background: var(--color-fill);
 }
 
+.heatmapSlot {
+  padding: 0;
+}
+
+/* Each hour is a button: pointing, tapping or the arrows read it out in the line above. */
+button.heatmapCell {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+button.heatmapCell:hover,
+button.heatmapCell[aria-pressed="true"] {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 1px;
+}
+
+button.heatmapCell:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+button.heatmapCell:active {
+  scale: 0.94;
+}
+
+/* The picked hour's day and hour light up beside the grid. */
+.heatmapHour[data-active],
+.heatmapDay[data-active] {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.hintMuted {
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
 .heatmapCell[data-level="1"] {
-  background: color-mix(in oklab, var(--color-primary) 25%, var(--color-surface));
+  background: color-mix(in oklab, var(--color-primary) 25%, var(--color-background));
 }
 
 .heatmapCell[data-level="2"] {
-  background: color-mix(in oklab, var(--color-primary) 50%, var(--color-surface));
+  background: color-mix(in oklab, var(--color-primary) 50%, var(--color-background));
 }
 
 .heatmapCell[data-level="3"] {
-  background: color-mix(in oklab, var(--color-primary) 75%, var(--color-surface));
+  background: color-mix(in oklab, var(--color-primary) 75%, var(--color-background));
 }
 
 .heatmapCell[data-level="4"] {
@@ -363,13 +658,14 @@
   margin-left: var(--space-1);
 }
 
-@media (forced-colors: active) {
-  .bar,
-  .meter span,
-  .split [data-part],
-  .heatmapCell:not([data-level="0"]) {
-    background: CanvasText;
-  }
+.chartPlaceholder {
+  height: 252px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+}
+
+.sparkPlaceholder {
+  height: 36px;
 }
 
 .srOnly {
@@ -381,151 +677,262 @@
   white-space: nowrap;
 }
 
+@media (forced-colors: active) {
+  .meter span,
+  .split [data-part],
+  .payments [data-part],
+  .heatmapCell:not([data-level="0"]) {
+    background: CanvasText;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .bar,
-  .report {
+  .report,
+  button.heatmapCell {
     transition: none;
   }
 }
 
-/* Weight: the hero leads with a display-size figure, a tinted change pill and a side column. */
-.hero {
+/* ——— «Требует внимания»: the whole row one tap target — a thin glyph in its colour (no tinted
+   disc), what it is, the action named at its end ——— */
+
+.attentionRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-2) 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.heroTop {
-  display: grid;
-  gap: var(--space-6);
+.attentionIcon {
+  display: flex;
+  flex: none;
+  color: var(--attention-tone);
 }
 
-@media (min-width: 900px) {
-  .heroTop {
-    grid-template-columns: minmax(0, 1fr) 300px;
-    align-items: start;
-  }
+.attentionIcon svg {
+  width: 20px;
+  height: 20px;
 }
 
-.heroLabel {
-  color: var(--color-muted-foreground);
+.attentionIcon[data-tone="orange"] {
+  --attention-tone: var(--color-rating);
+}
+
+.attentionIcon[data-tone="red"] {
+  --attention-tone: var(--color-danger);
+}
+
+.attentionIcon[data-tone="blue"] {
+  --attention-tone: var(--color-primary);
+}
+
+.attentionIcon[data-tone="gray"] {
+  --attention-tone: var(--color-muted-foreground);
+}
+
+.attentionRow .rowText {
+  flex: 1;
+}
+
+.attentionAction,
+.goalSet,
+.heatmapAction {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
-.heroValue {
-  font-family: var(--font-display);
+.attentionAction svg,
+.goalSet svg,
+.heatmapAction svg {
+  width: 12px;
+  height: 12px;
 }
 
-@media (min-width: 768px) {
-  .heroValue {
-    font-size: var(--text-display);
-    line-height: var(--text-display-line-height);
+/* A 44pt target around the short link text. */
+.goalSet::before,
+.heatmapAction::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
+}
+
+:is(.goalSet, .heatmapAction, .goalEdit, .footnoteLink):focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  :is(.goalSet, .heatmapAction, .goalEdit, .footnoteLink):hover {
+    text-decoration: underline;
   }
 }
 
-.heroMeta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-}
+/* ——— Why the money moved, the month's goal ——— */
 
-.heroSide {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-fill);
-}
-
-.ahead {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.reasons {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
-.aheadValue {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-tight);
+.goalSet {
+  align-self: flex-start;
 }
 
-.payments {
+.goal {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-/* The change as a tinted capsule: arrow, sign and number, never colour alone. */
-.delta {
-  padding: 2px var(--space-2) 2px 6px;
+.goalText {
+  margin: 0;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.goalText b {
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.goalHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.goalHead .goalText {
+  flex: 1;
+}
+
+.goalEdit {
+  position: relative;
+  flex: none;
+  font-size: var(--text-footnote);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-link);
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.goalEdit::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
+}
+
+/* One thin bar: the accent while the pace reaches the goal, orange when it falls short. */
+.goalBar {
+  height: 4px;
+  overflow: hidden;
   border-radius: var(--radius-full);
   background: var(--color-fill);
 }
 
-.delta[data-direction="up"] {
-  background: color-mix(in srgb, var(--color-success) 16%, transparent);
+.goalBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-rating);
 }
 
-.delta[data-direction="down"] {
-  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+.goalBar[data-on-pace] span {
+  background: var(--color-primary);
 }
 
-.stat {
-  gap: var(--space-2);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
+.strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
-.statHead {
+.rowChevron {
+  width: 12px;
+  height: 12px;
+  color: var(--color-tertiary-foreground);
+}
+
+.footnoteLink {
+  color: var(--color-link);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Sources share the payments' bar look, in their own colours. */
+.payments [data-source="online"] {
+  background: var(--color-primary);
+}
+
+.payments [data-source="staff"] {
+  background: var(--system-teal);
+}
+
+.payments [data-source="import"] {
+  background: color-mix(in srgb, var(--color-foreground) 24%, transparent);
+}
+
+.heatmapAction {
+  align-self: flex-start;
+}
+
+/* ——— A master's period in a sheet: the quiet profile head ——— */
+
+.masterHead {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-2);
+  gap: var(--space-2);
+  text-align: center;
 }
 
-.statValue {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: var(--text-2xl-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-tight);
+.masterFacts {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
 }
 
-.chartPlaceholder {
-  height: 252px;
-  border-radius: var(--radius-md);
-  background: var(--color-fill);
+.masterFacts b {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
 }
 
-.sparkPlaceholder {
-  height: 36px;
+.masterChange {
+  margin: 0;
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
 }
 
-/* Pairs of sections side by side on wide screens. */
-.pairs {
-  display: grid;
-  gap: var(--space-6);
-  align-items: start;
+.sheetValue {
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Side by side only when both halves hold about as much; a one-row list beside a long one left a
-   hole under it. */
-@media (min-width: 1024px) {
-  .pairs:not([data-uneven]) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.masterSchedule {
+  align-self: center;
 }

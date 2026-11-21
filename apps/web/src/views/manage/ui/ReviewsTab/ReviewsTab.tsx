@@ -31,6 +31,7 @@ import type {
 } from '@/shared/api/types'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -262,7 +263,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
             />
           }
           actions={
-            <span className={styles.headerTools}>
+            <FloatingToolbar align='end'>
               {data && data.count > 0 && (
                 <p className={styles.rating}>
                   <Star weight='fill' aria-hidden />
@@ -293,7 +294,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                   />
                 </GlyphGroup>
               )}
-            </span>
+            </FloatingToolbar>
           }
         />
       </div>
