@@ -22,7 +22,8 @@
 }
 
 .count {
-  color: var(--color-muted-foreground);
+  /* Not --color-muted-foreground: on the chip's fill and the count's own tint it read 4.2:1. */
+  color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
   font-variant-numeric: tabular-nums;
 }
 
