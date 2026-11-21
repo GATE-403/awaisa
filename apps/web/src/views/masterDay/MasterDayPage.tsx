@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
+import { CalendarFeedGroup } from '@/features/calendarFeed'
 import { PushAlertsGroup } from '@/features/pushAlerts'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getMasterDay, setMasterOutcome } from '@/shared/api/clientApi'
@@ -296,6 +297,10 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
             <MasterReviews slug={slug} businessName={day.business.name} />
             <div className={styles.alerts}>
               <PushAlertsGroup audience='master' listClassName={styles.alertsList} />
+              <CalendarFeedGroup
+                scope={{ kind: 'master', slug }}
+                listClassName={styles.alertsList}
+              />
             </div>
           </>
         )}

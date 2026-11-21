@@ -1682,6 +1682,25 @@ type PushSubscriptionInput = {
 /** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
+/**
+ * A secret calendar subscription (ICS). The address is shown only when it is made: the API keeps
+ * its hash, so a device that lost it asks for a new one, which switches the old one off.
+ */
+type CalendarFeed = {
+  isActive: boolean
+  createdAt: string | null
+  /** The last time a calendar app read it: proof the subscription works. */
+  lastReadAt: string | null
+  /** A business feed may show one master only; null = every master (always null for a master). */
+  specialistId: string | null
+  /** The owner's choice for the whole business: whole numbers instead of «+996 ••• ••• 456». */
+  isPhoneShown: boolean
+}
+
+type CalendarFeedLink = { url: string; feed: CalendarFeed }
+
+type CalendarFeedInput = { specialistId: string | null }
+
 // Plans for businesses («Настройки → Тариф»). Plans are rows: prices and limits are data.
 type PlanFeature =
   | 'cashdesk'
@@ -1772,6 +1791,9 @@ export type {
   BillingPlan,
   BillingPrice,
   BusinessBilling,
+  CalendarFeed,
+  CalendarFeedInput,
+  CalendarFeedLink,
   PaymentOrder,
   PlanAccess,
   PlanFeature,
