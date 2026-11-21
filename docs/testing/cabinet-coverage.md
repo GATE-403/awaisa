@@ -1,6 +1,6 @@
 # Кабинет: функция → тест
 
-Карта функций кабинета владельца (`/manage`, `/manage/<slug>`, `/master`, `/insights`) и тесты, которые их проверяют. e2e лежат в `apps/web/e2e`, unit-тесты API рядом с кодом в `apps/api/src` (`*.spec.ts`).
+Карта функций кабинета владельца (`/manage`, `/manage/<slug>`, `/master`, `/insights`) и тесты, которые их проверяют. e2e лежат в `apps/web/e2e`, unit-тесты API рядом с кодом в `apps/api/src` (`*.spec.ts`), unit-тесты web в `<слайс>/tests/*.test.ts` (Vitest, `pnpm --filter web test`, запускаются и в `pnpm test`).
 
 Новые e2e работают на бизнесе, который тест создаёт сам (`e2e/business.ts`: `createOwnBusiness`, `createVisit`). Такой бизнес называется `E2E Место …`, общий сид не меняется, глобальный teardown его удаляет. Поэтому каждая спека проходит сама по себе на свежем засеянном базе.
 
@@ -20,6 +20,10 @@
 | Чужой аккаунт не открывает расписание | клиент | `account.spec.ts` › non-staff accounts cannot open the schedule |
 | Адрес бизнеса не может совпасть со своим разделом сайта (`RESERVED_SLUGS` ⊇ `APP_SEGMENTS` и папки `app/`) | | unit `businesses/business-rules.spec.ts` |
 | Доступность всех вкладок кабинета (axe, WCAG 2.1 AA) | В | `cabinet-a11y.spec.ts` |
+| Доступность открытых листов (новая запись, инспектор, клиент, рассылка, импорт, акция, «Редактировать», услуга, мастер, ответы на отзывы) и всех вкладок в тёмной теме | В | `cabinet-a11y-sheets.spec.ts` |
+| Администратор не видит денег: выручка дня, траты клиента, «Рассылка», «Импорт», чек-лист запуска (владелец на тех же данных видит) | В, А | `cabinet-staff-money.spec.ts` |
+| Вкладки: старые ссылки ведут на «Страницу», администратору только Расписание · Клиенты · Отзывы | | unit web `views/manage/tests/manageTabs.test.ts` |
+| «‹» кабинета помнит, откуда вошли (без входа, новой страницы и «Что нового») | | unit web `shared/lib/tests/cabinetFrom.test.ts` |
 
 ## Расписание
 
@@ -41,6 +45,16 @@
 | Ждут окна: лист и «Записать» | `waitlist.spec.ts` |
 | Подсказки клиентов в новой записи | `client-suggestions.spec.ts` (PR #87) |
 | Схемы: перерыв (конец позже начала), перенос, итог визита, «Вернуть» | unit `admin/admin.schemas.spec.ts` |
+| NowBar: кто в кресле и кто следующий, «Сейчас» с прогрессом, «Не отмечен» (часы браузера зафиксированы) | `cabinet-schedule-now.spec.ts` › NowBar names who is in the chair |
+| «Сейчас ←/→» возвращает к текущему времени | `cabinet-schedule-now.spec.ts` › «Сейчас ←» |
+| «Найти место под услугу»: подсвеченные окна, запись к мастеру с начала окна, «Готово» | `cabinet-schedule-now.spec.ts` › «Найти место под услугу»; unit web `widgets/DayCalendar/tests/freeGaps.test.ts` |
+| «⋯» в инспекторе: карточка клиента, копирование номера, отмена с «Вернуть» | `cabinet-schedule-extra.spec.ts` › «⋯» in the inspector |
+| «Записать снова» у отменённого визита впереди | `cabinet-schedule-extra.spec.ts` › a cancelled visit ahead |
+| Масштаб ленты − / + (мышь), на телефоне капсулы нет | `cabinet-schedule-extra.spec.ts` › the timeline zooms |
+| Вкладки у краёв ленты «‹ 12:30 +2» | `cabinet-schedule-extra.spec.ts` › an edge tab |
+| Колонки → Лента на будущем дне открывает начало дня | `cabinet-schedule-extra.spec.ts` › switching to «Лента» |
+| Свайп дня и перетаскивание долгим нажатием на телефоне | `cabinet-schedule-extra.spec.ts` › a sideways swipe / a long press drags |
+| Состояния карточки (Ждём, Сейчас, Не отмечен, Пришёл, Не пришёл, Отменена, Ждёт оплату), загрузка мастера и первое свободное время, диапазон дня, шаг делений масштаба | unit web `widgets/DayCalendar/tests/blockState.test.ts`, `calendarLayout.test.ts` |
 
 ## Клиенты
 
@@ -51,6 +65,10 @@
 | День рождения в карточке: с годом и без года | `cabinet-clients.spec.ts` › a birthday with its year / without a year |
 | Импорт CSV клиентов и записей | `import.spec.ts`; unit `import/import-rows.spec.ts` |
 | Рассылка «давно не были», раз в день, поздравления | `mailings.spec.ts`; unit `mailings/mailing-text.spec.ts`, `mailings/birthday.spec.ts` |
+| «Записать снова» из карточки, история с «Ещё», «Продать абонемент» | `cabinet-clients-ui.spec.ts` |
+| «Позвать N клиентов» открывает рассылку на группе «Давно не были» | `cabinet-clients-ui.spec.ts` › «Позвать» |
+| Разбор CSV (разделители, кавычки, Windows-1251, BOM), поиск колонок | unit web `views/manage/tests/csv.test.ts` |
+| Маски телефона и суммы | unit web `shared/lib/tests/inputMasks.test.ts` |
 
 ## Аналитика
 
@@ -61,6 +79,9 @@
 | Строка мастера открывает его лист; CSV с теми же числами | `cabinet-analytics.spec.ts` › a master row opens their period |
 | Цель месяца: лист, линия против выручки, «Убрать цель» | `cabinet-analytics.spec.ts` › the month’s goal; unit `admin/admin.schemas.spec.ts` |
 | Материалы и маржа | `inventory.spec.ts` |
+| «Требует внимания», «Потери», «Откуда записи», удержание, акции и лояльность: точные числа на собранной истории и строки на вкладке | `cabinet-analytics-report.spec.ts` |
+| Столбец выручки открывает день в расписании | `cabinet-analytics-ui.spec.ts` › a revenue column |
+| Тепловая карта: чтение часа, «Скидка на …» открывает акцию с днём и часами | `cabinet-analytics-ui.spec.ts` › the heatmap |
 
 ## Отзывы и вопросы
 
@@ -73,6 +94,8 @@
 | Шаблоны ответов | unit `reviews/review-reply-text.spec.ts` |
 | Вопросы: ответ, правка, удаление | `questions.spec.ts` |
 | Telegram: подключить и отключить чат | `reviews.spec.ts` › Telegram for owners; unit `telegram/*.spec.ts` |
+| Кнопки отзыва в Telegram: быстрый ответ и «Свой ответ» публикуются один раз и только из чата этого бизнеса | `cabinet-telegram-reviews.spec.ts` |
+| Быстрые ответы в поле дают те же слова, что автоответ на сервере | unit web `views/manage/tests/replyTemplate.test.ts` |
 
 ## Страница
 
@@ -90,6 +113,11 @@
 | «Пора прийти снова» у услуги | `return-visit.spec.ts` |
 | График и отпуск мастера | `master-schedule.spec.ts`; unit `catalog/master-hours.spec.ts` |
 | Предоплата у услуги | `prepayment.spec.ts` |
+| Обложка: добавить, заменить, удалить | `cabinet-page-ui.spec.ts` |
+| «Редактировать»: вид и контакты (телефон, WhatsApp) на публичной странице | `cabinet-page-ui.spec.ts` |
+| «+ Акция» и капсулы акций на «Странице» | `cabinet-page-ui.spec.ts` |
+| Фото мастера; выключенный мастер уходит со страницы и из записи; цена услуги с карточки | `cabinet-page-ui.spec.ts` |
+| Описание акции одной строкой | unit web `shared/lib/tests/promotionText.test.ts` |
 
 ## Настройки
 
@@ -105,6 +133,12 @@
 | Лояльность | `loyalty.spec.ts` |
 | Склад | `inventory.spec.ts` |
 | Уведомления в Telegram | `reviews.spec.ts` |
+| Правка и удаление акции, плана абонемента, позиции склада (удержание кнопки) | `cabinet-settings-edit.spec.ts` |
+| История рассылок | `cabinet-settings-edit.spec.ts` |
+| Владелец не может закрыть доступ себе | `cabinet-settings-edit.spec.ts` |
+| Поиск сертификата по коду с остатком | `cabinet-settings-edit.spec.ts` |
+| Лояльность при откате: повторное сохранение ничего не списывает дважды, неявка и «Ждём» возвращают бонусы, сертификат, визит абонемента и материалы; «Все пришли» и «Вернуть» | `cabinet-loyalty-rollback.spec.ts` |
+| Текст предоплаты | unit web `entities/booking/tests/paymentText.test.ts` |
 
 ## «Мой день» и «Воронки»
 
@@ -114,11 +148,13 @@
 | «Пришёл» в интерфейсе, «Ваши отзывы», чужой визит не виден | `master-day.spec.ts` › a master marks their own visit «Пришёл» |
 | Номер не мастера: «Нет доступа», 403 на отзывы | `master-day.spec.ts` › a number that is not a master here |
 | Воронки: срез по устройствам, остальным «не найдено» | `insights.spec.ts` |
+| «ваши N%» за день, без процента вся сумма; «Фото работы» с пришедшего визита с тегами | `master-day-extra.spec.ts` |
 
 ## Не покрыто и почему
 
-- «Найти место под услугу» и NowBar зависят от текущего времени суток: тест был бы флаки.
-- Автоответ на отзывы срабатывает по крону раз в 10 минут после часа ожидания: проверена только логика шаблона (unit).
+- Кроны (автоответ на отзывы, напоминание о неотмеченных в 20:00, дайджесты, напоминания): выбор строк сделан сырым SQL, unit без базы проверял бы только мок, а ждать тик крона в e2e слишком долго. Тексты сообщений покрыты unit-тестами, минутные кроны работают в `prepayment` и `waitlist`.
+- Отправку подсказки «Свой ответ» ботом без токена не проверить: тест кладёт сохранённую подсказку сам и проверяет путь ответа.
 - Перетаскивание фото работ мышью: HTML5 drag-and-drop в Playwright ненадёжен; тот же `PUT work-photos/order` проверен через «Поставить первой».
-- «Скачать QR» и системное меню «Поделиться»: загрузка файла и `navigator.share`.
-- «Написать клиенту» только собирает ссылку WhatsApp или SMS.
+- «Скачать QR», системное меню «Поделиться», «Написать клиенту» (только собирает ссылку), скраб спарклайна (нет стабильной цели под указателем).
+- Поиск сертификата в интерфейсе: такого экрана нет, проверен API.
+- Администратор получает `spent` клиентов в ответе API: прячет только интерфейс (см. описание PR).

@@ -26,7 +26,8 @@ const maskLocalPhoneInput = (value: string) => {
     digits.length > KG_LOCAL_DIGITS && digits.startsWith(KG_CODE)
       ? digits.slice(KG_CODE.length)
       : digits
-  return maskPhoneInput(local)
+  // With the code in front, so maskPhoneInput never reads a local «996…» as the country code.
+  return maskPhoneInput(`${KG_CODE}${local}`)
 }
 
 // What is wrong with a typed phone before it is sent, or null when it is a whole Kyrgyz number
