@@ -2,13 +2,19 @@ import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
 import { formatDuration, formatPrice, useAvailability } from '@/entities/booking'
-import type { Catalog, CreateBookingInput, Specialist } from '@/shared/api/types'
+import { PersonAvatar } from '@/entities/business'
+import type { Catalog, ClientListItem, CreateBookingInput, Specialist } from '@/shared/api/types'
+import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
+import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import styles from './NewBookingDialog.module.css'
+import { useClientSuggestions } from './useClientSuggestions'
 
 interface NewBookingDialogProps {
+  slug: string
   date: string
   dayLabel: string
   time: string | null
@@ -24,8 +30,13 @@ interface NewBookingDialogProps {
 const FORM_ID = 'new-booking-form'
 
 const MIN_PHONE_DIGITS = 9
+const MIN_NAME_QUERY = 2
+const MIN_PHONE_QUERY = 3
+
+type ClientField = 'name' | 'phone'
 
 export const NewBookingDialog = ({
+  slug,
   date,
   dayLabel,
   time,
@@ -42,6 +53,16 @@ export const NewBookingDialog = ({
   const [name, setName] = useState(initial?.name ?? '')
   const [phone, setPhone] = useState(initial ? maskPhoneInput(initial.phone) : '')
   const [comment, setComment] = useState('')
+  // The field being typed in: clients who were here before are offered right under it.
+  const [typing, setTyping] = useState<ClientField | null>(null)
+  const localDigits = phone.replace(/\D/g, '').replace(/^996/, '')
+  const query =
+    typing === 'name' && name.trim().length >= MIN_NAME_QUERY
+      ? name.trim()
+      : typing === 'phone' && localDigits.length >= MIN_PHONE_QUERY
+        ? localDigits
+        : ''
+  const suggestions = useClientSuggestions(slug, query)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const offered = catalog.services.filter(
     (service) =>
@@ -75,6 +96,57 @@ export const NewBookingDialog = ({
         : service
           ? `${service.name}: ${formatDuration(service.durationMinutes)}, ${formatPrice(service.price)}. Клиенту придёт SMS с подтверждением.`
           : ''
+
+  const pickClient = (client: ClientListItem) => {
+    if (client.name) setName(client.name)
+    setPhone(maskPhoneInput(client.phone))
+    setTyping(null)
+  }
+
+  const typeName = (value: string) => {
+    setName(value)
+    setTyping('name')
+  }
+
+  const typePhone = (value: string) => {
+    setPhone(maskPhoneInput(value))
+    setTyping('phone')
+  }
+
+  // Under the row being typed in, like contacts offered while writing a number on a phone.
+  const renderSuggestions = (field: ClientField) =>
+    typing === field &&
+    suggestions.length > 0 && (
+      <ul className={styles.suggestions} aria-label='Были у вас'>
+        {suggestions.map((client) => (
+          <li key={client.phone}>
+            <button
+              type='button'
+              className={`${sheet.row} ${styles.suggestion}`}
+              onClick={() => pickClient(client)}
+            >
+              <PersonAvatar name={client.name || client.phone.slice(-2)} size='sm' />
+              <span className={styles.suggestionText}>
+                <span className={styles.suggestionName}>
+                  {client.name || formatPhone(client.phone)}
+                </span>
+                <span className={styles.suggestionMeta}>
+                  {formatPhone(client.phone)}
+                  {client.visits > 0 &&
+                    ` · ${pluralize(client.visits, ['визит', 'визита', 'визитов'])}`}
+                  {client.noShows > 0 && (
+                    <span className={styles.noShows}>
+                      {' · не пришёл '}
+                      {pluralize(client.noShows, ['раз', 'раза', 'раз'])}
+                    </span>
+                  )}
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    )
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -164,12 +236,13 @@ export const NewBookingDialog = ({
                   variant='plain'
                   placeholder='Как зовут'
                   value={name}
-                  onValueChange={setName}
+                  onValueChange={typeName}
                   maxLength={120}
                   autoComplete='off'
                 />
               </span>
             </label>
+            {renderSuggestions('name')}
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>Телефон</span>
               <span className={sheet.rowControl}>
@@ -179,20 +252,24 @@ export const NewBookingDialog = ({
                   inputMode='tel'
                   placeholder='+996 555 123 456'
                   value={phone}
-                  onValueChange={(value) => setPhone(maskPhoneInput(value))}
+                  onValueChange={typePhone}
                   maxLength={32}
                   autoComplete='off'
                 />
               </span>
             </label>
+            {renderSuggestions('phone')}
+            {/* Several lines: it grows with the words instead of running off the row. */}
             <div className={`${sheet.row} ${sheet.textRow}`}>
-              <Input
-                variant='plain'
+              <textarea
+                className={styles.comment}
                 aria-label='Комментарий'
-                placeholder='Комментарий — необязательно'
+                placeholder='Комментарий, если нужен'
                 value={comment}
-                onValueChange={setComment}
+                onChange={(event) => setComment(event.target.value)}
+                onFocus={() => setTyping(null)}
                 maxLength={500}
+                rows={1}
               />
             </div>
           </div>
