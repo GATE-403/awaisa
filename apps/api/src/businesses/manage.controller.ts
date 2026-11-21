@@ -21,6 +21,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { BillingService } from '../billing/billing.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Env } from '../config/env.js'
@@ -63,6 +64,7 @@ export class ManageController {
     private readonly masterSchedule: MasterScheduleService,
     private readonly sms: SmsService,
     private readonly config: ConfigService<Env, true>,
+    private readonly billing: BillingService,
   ) {}
 
   @Get()
@@ -74,6 +76,7 @@ export class ManageController {
     return {
       // The cabinet hides money and setup from administrators; the API refuses them too.
       role,
+      access: await this.billing.accessView(business.id),
       business: await this.businesses.toFullView(business, { includeInactive: true }),
       // Masters' pay is the owner's: administrators do not get it either.
       catalog:
@@ -90,10 +93,11 @@ export class ManageController {
 
   @OwnerOnly()
   @Post('branches')
-  createBranch(
+  async createBranch(
     @CurrentBusiness() business: Business,
     @Body({ schema: branchSchema }) body: BranchInput,
   ): Promise<Branch> {
+    if (body.isActive !== false) await this.billing.assertRoom(business.id, 'branches')
     return this.businesses.saveBranch(business, body)
   }
 
@@ -161,21 +165,23 @@ export class ManageController {
 
   @OwnerOnly()
   @Post('services')
-  createService(
+  async createService(
     @CurrentBusiness() business: Business,
     @Body({ schema: serviceSchema }) body: ServiceInput,
   ): Promise<CreatedId> {
+    if (body.deposit) await this.billing.assertFeature(business.id, 'deposits')
     return this.catalog.createService(business.id, body)
   }
 
   @OwnerOnly()
   @Put('services/:id')
   @HttpCode(204)
-  updateService(
+  async updateService(
     @CurrentBusiness() business: Business,
     @Param('id') id: string,
     @Body({ schema: serviceSchema }) body: ServiceInput,
   ) {
+    if (body.deposit) await this.billing.assertFeature(business.id, 'deposits')
     return this.catalog.updateService(business.id, id, body)
   }
 
@@ -185,6 +191,7 @@ export class ManageController {
     @CurrentBusiness() business: Business,
     @Body({ schema: specialistSchema }) body: SpecialistInput,
   ): Promise<CreatedId> {
+    if (body.isActive !== false) await this.billing.assertRoom(business.id, 'masters')
     const saved = await this.catalog.saveSpecialist(business.id, body)
     this.inviteMaster(business, saved)
     return { id: saved.id }

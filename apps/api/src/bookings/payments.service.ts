@@ -1,3 +1,4 @@
+import type { PaymentOrder } from '@awaisa/contracts'
 import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -18,6 +19,19 @@ import { isPaymentSignature, paymentSignature } from './payment-signature.js'
 type Checkout = { paymentId: string; url: string }
 
 type CheckoutDetails = { description: string; phone: string }
+
+/** What a payment pays for: a booking's deposit, or an order of a registered kind. */
+type PaymentTarget = { bookingId: string } | { kind: string; orderId: string }
+
+/**
+ * A kind of order paid through the same acquirer (a gift certificate, a subscription): the
+ * module that sells it registers how to describe it on /pay and what to do once it is paid.
+ */
+type OrderHandler = {
+  describe: (orderId: string) => Promise<PaymentOrder>
+  /** Called once per successful payment; must be safe to call again for the same order. */
+  onPaid: (orderId: string) => Promise<void>
+}
 
 // Freedom Pay calls this script with the result; its name takes part in the signatures.
 const RESULT_SCRIPT = 'result'
@@ -43,13 +57,67 @@ export class PaymentsService {
     return this.driver !== 'none'
   }
 
-  async createCheckout(
-    bookingId: string,
+  private readonly orders = new Map<string, OrderHandler>()
+
+  /** A module selling something else through these payments registers its kind (onModuleInit). */
+  registerOrder(kind: string, handler: OrderHandler) {
+    if (kind === 'booking') throw new Error('«booking» is the deposit kind')
+    this.orders.set(kind, handler)
+  }
+
+  createCheckout(bookingId: string, amount: number, details: CheckoutDetails) {
+    return this.createCheckoutFor({ bookingId }, amount, details)
+  }
+
+  createOrderCheckout(kind: string, orderId: string, amount: number, details: CheckoutDetails) {
+    return this.createCheckoutFor({ kind, orderId }, amount, details)
+  }
+
+  /** How /pay shows an order that is not a booking. */
+  describeOrder(payment: Payment) {
+    return this.handlerFor(payment).describe(payment.orderId ?? '')
+  }
+
+  /** A successful payment of an order that is not a booking: its module takes it from here. */
+  async onOrderPaid(payment: Payment) {
+    if (payment.status !== 'succeeded') return
+    await this.handlerFor(payment).onPaid(payment.orderId ?? '')
+  }
+
+  /** Fails the pending attempts of orders that ran out of time. */
+  async failPendingOrders(kind: string, orderIds: string[]) {
+    if (orderIds.length === 0) return
+    await this.payments
+      .createQueryBuilder()
+      .update()
+      .set({ status: 'failed' })
+      .where('kind = :kind AND order_id IN (:...ids) AND status = :status', {
+        kind,
+        ids: orderIds,
+        status: 'pending',
+      })
+      .execute()
+  }
+
+  private handlerFor(payment: Payment) {
+    const handler = this.orders.get(payment.kind)
+    if (!handler || !payment.orderId) throw new NotFoundException('Платёж не найден')
+    return handler
+  }
+
+  private async createCheckoutFor(
+    target: PaymentTarget,
     amount: number,
     details: CheckoutDetails,
   ): Promise<Checkout> {
     const payment = await this.payments.save(
-      this.payments.create({ bookingId, amount, provider: this.driver }),
+      this.payments.create({
+        ...('bookingId' in target
+          ? { bookingId: target.bookingId, kind: 'booking', orderId: null }
+          : { bookingId: null, kind: target.kind, orderId: target.orderId }),
+        amount,
+        provider: this.driver,
+      }),
     )
     if (this.driver !== 'freedompay')
       return { paymentId: payment.id, url: this.payPagePath(payment.id) }
@@ -248,3 +316,5 @@ export class PaymentsService {
     return this.config.get('AUTH_SECRET', { infer: true })
   }
 }
+
+export type { OrderHandler }

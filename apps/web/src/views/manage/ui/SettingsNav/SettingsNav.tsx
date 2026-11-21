@@ -5,6 +5,7 @@ import {
   Bell,
   CaretRight,
   Clock,
+  CreditCard,
   Gift,
   IdentificationBadge,
   MapPin,
@@ -26,6 +27,7 @@ import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { type ManageTab, SETTINGS_GROUPS, type SettingsTone } from '@/views/manage/manageTabs'
+import { usePlanAccess } from '@/views/manage/model/usePlanAccess'
 import styles from './SettingsNav.module.css'
 
 interface SettingsNavProps {
@@ -58,6 +60,7 @@ const ICONS: Partial<Record<ManageTab, Icon>> = {
   loyalty: Gift,
   stock: Package,
   fiscal: Receipt,
+  billing: CreditCard,
 }
 
 // Words people look for a setting by, beside its name.
@@ -69,6 +72,7 @@ const KEYWORDS: Partial<Record<ManageTab, string>> = {
   loyalty: 'бонусы абонемент сертификат кэшбэк',
   stock: 'склад материалы расход остаток приход',
   fiscal: 'чеки ккм фискальный инн ндс нсп налог ekassa гнс',
+  billing: 'тариф оплата подписка смс пакет пробный период',
 }
 
 // What lives on «Страница» now, still found by the search.
@@ -114,6 +118,7 @@ const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е')
 // state of the business reads without opening anything.
 export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavProps) => {
   const [summary, setSummary] = useState<SettingsSummary | null>(null)
+  const access = usePlanAccess()
   const [query, setQuery] = useState('')
   const needle = normalize(query.trim())
 
@@ -140,6 +145,12 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
     services: { text: String(catalog.services.filter((item) => item.isActive !== false).length) },
     masters: { text: String(catalog.specialists.filter((item) => item.isActive !== false).length) },
     hours: { text: formatWeekSchedule(business.hours) },
+    ...(access && {
+      billing: {
+        text: access.status === 'trial' ? `${access.title} · пробный` : access.title,
+        isAlert: access.status === 'expired',
+      },
+    }),
     ...(summary && {
       notifications: { text: summary.telegramChats > 0 ? 'Telegram' : 'Выкл.' },
       ...(summary.team > 0 && { team: { text: String(summary.team) } }),

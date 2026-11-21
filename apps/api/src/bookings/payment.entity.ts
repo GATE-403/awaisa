@@ -1,13 +1,21 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-// One attempt to pay a booking's deposit through the configured acquirer.
+// One attempt to pay through the configured acquirer: a booking's deposit (`kind` 'booking'),
+// or an order of another kind (a gift certificate) named by `orderId`.
 @Entity('payments')
 export class Payment {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column({ name: 'booking_id', type: 'uuid' })
-  bookingId: string
+  /** The booking whose deposit this pays; null for orders of other kinds. */
+  @Column({ name: 'booking_id', type: 'uuid', nullable: true })
+  bookingId: string | null
+
+  @Column({ type: 'varchar', length: 16, default: 'booking' })
+  kind: string
+
+  @Column({ name: 'order_id', type: 'uuid', nullable: true })
+  orderId: string | null
 
   @Column({ type: 'int' })
   amount: number

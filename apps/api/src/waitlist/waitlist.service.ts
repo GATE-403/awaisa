@@ -266,6 +266,7 @@ export class WaitlistService {
           time,
           link,
         ),
+        billing: { businessId: entry.businessId, isOptional: true },
       })
     }
     this.logger.log(`Waitlist: ${ids.size} notified`)

@@ -132,6 +132,7 @@ test.describe('Design', () => {
       'page',
       'settings',
       'fiscal',
+      'billing',
     ]) {
       await page.goto(`/manage/${SLUG}?tab=${tab}`)
       await expect(page.locator('[data-page-skeleton]')).toHaveCount(0, { timeout: 15_000 })
