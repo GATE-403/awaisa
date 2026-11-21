@@ -142,6 +142,11 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
     paint()
     if (!start || start.isSideways === null) return
     swallowClick.current = true
+    // A drag released off where it began makes no click: the swallower must not eat the next
+    // real tap (after pulling the stack open, the first «Изменить» did nothing).
+    window.setTimeout(() => {
+      swallowClick.current = false
+    }, 0)
     if (!start.isSideways) {
       if (start.pull > 0.33) {
         setIsFanned(true)
