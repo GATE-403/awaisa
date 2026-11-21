@@ -42,9 +42,11 @@ export const BusinessPickerCard = ({ business }: BusinessPickerCardProps) => {
         </span>
         <span className={styles.text}>
           <span className={styles.name}>
-            {business.name}
+            <span className={styles.nameText}>{business.name}</span>
             <span className={styles.status} data-hidden={!business.isPublished || undefined}>
-              {business.isPublished ? 'Открыта' : 'Скрыта'}
+              <span className={styles.statusText}>
+                {business.isPublished ? 'Открыта' : 'Скрыта'}
+              </span>
             </span>
           </span>
           <span className={styles.meta}>
