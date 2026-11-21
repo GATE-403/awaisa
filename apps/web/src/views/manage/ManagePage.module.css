@@ -169,3 +169,17 @@
     padding-bottom: var(--space-4);
   }
 }
+
+/* Phones: the cabinet is dense, like Settings — 8pt under the bar, 16pt between blocks. The 20 and
+   24 of wide screens left a screen's worth of air over a list («много свободного места»). */
+@media (max-width: 639px) {
+  .content {
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .layout,
+  .main {
+    gap: var(--space-4);
+  }
+}
