@@ -259,10 +259,13 @@ li + li > .place {
 
 /* «На этом устройстве»: on the page's own left edge, like «Ваши отзывы» above it. */
 .alerts {
+  display: grid;
+  gap: var(--space-6);
   margin-top: var(--space-6);
 }
 
 .alerts [data-inset],
-.alertsList > label {
+.alertsList > label,
+.alertsList > button {
   padding-inline: 0;
 }

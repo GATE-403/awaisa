@@ -11,6 +11,7 @@ import { BookingsModule } from './bookings/bookings.module.js'
 import { BusinessesModule } from './businesses/businesses.module.js'
 import { CacheModule } from './cache/cache.module.js'
 import { RateLimitStorage } from './cache/rate-limit.storage.js'
+import { CalendarModule } from './calendar/calendar.module.js'
 import { CashDeskModule } from './cashdesk/cashdesk.module.js'
 import { CatalogModule } from './catalog/catalog.module.js'
 import { CertificatesModule } from './certificates/certificates.module.js'
@@ -93,6 +94,7 @@ import { WalletModule } from './wallet/wallet.module.js'
     PushModule,
     ClientsModule,
     MasterModule,
+    CalendarModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

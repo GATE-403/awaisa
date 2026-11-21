@@ -1,6 +1,8 @@
 import { CLIENT_API_PREFIX } from '@/shared/config/api'
 import { toApiError } from './apiError'
 import type {
+  AccountDeleted,
+  AccountExport,
   AdminBooking,
   AdminSchedule,
   AnalyticsDays,
@@ -22,6 +24,8 @@ import type {
   BusinessPage,
   BusinessProfile,
   BusinessQuestion,
+  CalendarFeed,
+  CalendarFeedLink,
   CashDesk,
   CashMovementInput,
   CashShift,
@@ -344,6 +348,10 @@ const getSession = (signal?: AbortSignal) => request<Session>('/session', { sign
 const updateMe = (name: string) =>
   request<Customer>('/me', { method: 'PATCH', body: JSON.stringify({ name }) })
 
+const exportMyData = () => request<AccountExport>('/me/export')
+
+const deleteMyAccount = () => request<AccountDeleted>('/me', { method: 'DELETE' })
+
 const getMyBookings = (signal?: AbortSignal) => request<Booking[]>('/me/bookings', { signal })
 
 const cancelMyBooking = (id: string) => request<Booking>(`/me/bookings/${id}`, { method: 'DELETE' })
@@ -512,6 +520,24 @@ const removeTelegramChat = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/telegram/${id}`)
 
 // Web Push for the business side: the server's key, then this browser's subscription.
+// Calendar subscriptions: `scope` is a master's own day or a member's view of the business.
+type CalendarScope = { kind: 'master' | 'business'; slug: string }
+
+const calendarPath = ({ kind, slug }: CalendarScope) =>
+  `/${kind === 'master' ? 'master' : 'manage'}/${encodeURIComponent(slug)}/calendar`
+
+const getCalendarFeed = (scope: CalendarScope, signal?: AbortSignal) =>
+  request<CalendarFeed>(calendarPath(scope), { signal })
+
+const issueCalendarFeed = (scope: CalendarScope, specialistId: string | null = null) =>
+  post<CalendarFeedLink>(calendarPath(scope), scope.kind === 'business' ? { specialistId } : {})
+
+const setCalendarFeedMaster = (slug: string, specialistId: string | null) =>
+  send<CalendarFeed>('PATCH', calendarPath({ kind: 'business', slug }), { specialistId })
+
+const setCalendarPhones = (slug: string, isShown: boolean) =>
+  send<CalendarFeed>('PUT', `${calendarPath({ kind: 'business', slug })}/phones`, { isShown })
+
 const getPushConfig = (signal?: AbortSignal) => request<PushConfig>('/push/config', { signal })
 
 const savePushSubscription = (subscription: PushSubscriptionInput) =>
@@ -1084,7 +1110,13 @@ export {
   getScheduleLoad,
   getUnclosedVisits,
   getMasterPlaces,
+  exportMyData,
+  deleteMyAccount,
   getMasterDay,
+  getCalendarFeed,
+  issueCalendarFeed,
+  setCalendarFeedMaster,
+  setCalendarPhones,
   setMasterOutcome,
   getMasterSchedule,
   setMasterHours,
@@ -1162,3 +1194,5 @@ export {
   updateMe,
   verifyOtp,
 }
+
+export type { CalendarScope }
