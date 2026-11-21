@@ -7,33 +7,9 @@ import type { BusinessKind, LeaderboardMaster, LeaderboardPlace } from '@/shared
 import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
+import { BOARDS, type BoardView, boardHref } from '../config/boards'
 import styles from '../LeaderboardPage.module.css'
 import { BoardViewSwitch } from './BoardViewSwitch'
-
-// What each board is called, in the order of the tabs.
-const BOARDS: { kind: BusinessKind; tab: string; masters: string; places: string }[] = [
-  { kind: 'barber', tab: 'Барберы', masters: 'Лучшие барберы', places: 'Лучшие барбершопы' },
-  { kind: 'beauty', tab: 'Стилисты', masters: 'Лучшие стилисты', places: 'Лучшие салоны' },
-  {
-    kind: 'nails',
-    tab: 'Ногти',
-    masters: 'Лучшие мастера маникюра',
-    places: 'Лучшие ногтевые студии',
-  },
-  { kind: 'spa', tab: 'Массаж', masters: 'Лучшие массажисты', places: 'Лучшие SPA' },
-  { kind: 'health', tab: 'Здоровье', masters: 'Лучшие специалисты', places: 'Лучшие клиники' },
-  { kind: 'other', tab: 'Тату', masters: 'Лучшие тату-мастера', places: 'Лучшие тату-студии' },
-]
-
-type View = 'masters' | 'places'
-
-const hrefOf = (view: View, kind: BusinessKind) => {
-  const params = new URLSearchParams()
-  if (view === 'places') params.set('view', 'places')
-  if (kind !== 'barber') params.set('kind', kind)
-  const query = params.toString()
-  return query ? `/top?${query}` : '/top'
-}
 
 const formatScore = (value: number) => value.toLocaleString('ru-RU', { minimumFractionDigits: 1 })
 
@@ -82,7 +58,7 @@ const toPlaceEntry = (place: LeaderboardPlace): Entry => ({
 
 interface LeaderboardBoardProps {
   kind: BusinessKind
-  view: View
+  view: BoardView
   masters: LeaderboardMaster[]
   places: LeaderboardPlace[]
 }
@@ -103,7 +79,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
       <div className={styles.controls}>
         <BoardViewSwitch
           view={view}
-          hrefs={{ masters: hrefOf('masters', kind), places: hrefOf('places', kind) }}
+          hrefs={{ masters: boardHref('masters', kind), places: boardHref('places', kind) }}
         />
         {/* Kinds as the app's text tabs: only the chosen one underlined. */}
         <div className={styles.kinds}>
@@ -111,7 +87,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
             label={t('Вид')}
             items={BOARDS.map((item) => ({
               label: t(item.tab),
-              href: hrefOf(view, item.kind),
+              href: boardHref(view, item.kind),
               isActive: item.kind === kind,
             }))}
           />

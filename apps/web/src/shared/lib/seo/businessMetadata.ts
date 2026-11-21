@@ -13,6 +13,14 @@ const BASE_OPEN_GRAPH = {
   locale: 'ru_RU',
 } as const
 
+// The site's generated share image (`app/opengraph-image.tsx`), for pages that set their own
+// openGraph: it replaces the layout's whole, the image included.
+const PLATFORM_OG_IMAGE = {
+  url: absoluteUrl('/opengraph-image'),
+  alt: PLATFORM.name,
+  ...OG_IMAGE_SIZE,
+}
+
 const truncate = (text: string, limit: number) => {
   const clean = text.replace(/\s+/g, ' ').trim()
   if (clean.length <= limit) return clean
@@ -66,4 +74,10 @@ const buildBusinessMetadata = ({
   }
 }
 
-export { BASE_OPEN_GRAPH, buildBusinessMetadata, describeBusiness, OG_IMAGE_SIZE }
+export {
+  BASE_OPEN_GRAPH,
+  buildBusinessMetadata,
+  describeBusiness,
+  OG_IMAGE_SIZE,
+  PLATFORM_OG_IMAGE,
+}

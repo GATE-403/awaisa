@@ -432,6 +432,8 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
     loyalty.bonusSpent > 0 && `бонусами оплачено ${formatMoney(loyalty.bonusSpent)}`,
     loyalty.certificateSpent > 0 && `сертификатами ${formatMoney(loyalty.certificateSpent)}`,
     loyalty.subscriptionVisits > 0 && `по абонементам ${visits(loyalty.subscriptionVisits)}`,
+    loyalty.subscriptionsSold > 0 &&
+      `продано абонементов: ${loyalty.subscriptionsSold} на ${formatMoney(loyalty.subscriptionsRevenue)}`,
   ].filter(Boolean)
   if (promotions.length === 0 && loyaltyParts.length === 0) return null
 

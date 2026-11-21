@@ -233,7 +233,13 @@ test.describe('Analytics: what to do and why', () => {
     expect(report.promotions).toEqual([
       expect.objectContaining({ title: 'E2E Код', visits: 1, revenue: 800, discount: 200 }),
     ])
-    expect(report.loyalty).toEqual({ bonusSpent: 0, certificateSpent: 300, subscriptionVisits: 0 })
+    expect(report.loyalty).toEqual({
+      bonusSpent: 0,
+      certificateSpent: 300,
+      subscriptionVisits: 0,
+      subscriptionsSold: 0,
+      subscriptionsRevenue: 0,
+    })
 
     // The tab says the same and each attention row leads to what it asks for.
     await page.goto(`/manage/${business.slug}?tab=analytics`)

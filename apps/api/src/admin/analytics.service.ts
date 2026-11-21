@@ -428,7 +428,13 @@ export class AnalyticsService {
            (SELECT COUNT(*) FROM "subscription_uses" u
               JOIN "client_subscriptions" c ON c."id" = u."subscription_id"
               WHERE c."business_id" = $1 AND u."created_at" >= $2 AND u."created_at" < $3)::int
-             AS "subscriptionVisits"`,
+             AS "subscriptionVisits",
+           (SELECT COUNT(*) FROM "client_subscriptions" c
+              WHERE c."business_id" = $1 AND c."created_at" >= $2 AND c."created_at" < $3)::int
+             AS "subscriptionsSold",
+           (SELECT COALESCE(SUM(c."price_paid"), 0) FROM "client_subscriptions" c
+              WHERE c."business_id" = $1 AND c."created_at" >= $2 AND c."created_at" < $3)::int
+             AS "subscriptionsRevenue"`,
         [id, from, now],
       ),
       this.query(
@@ -533,6 +539,8 @@ export class AnalyticsService {
         bonusSpent: toNumber(bonus?.bonusSpent),
         certificateSpent: toNumber(bonus?.certificateSpent),
         subscriptionVisits: toNumber(bonus?.subscriptionVisits),
+        subscriptionsSold: toNumber(bonus?.subscriptionsSold),
+        subscriptionsRevenue: toNumber(bonus?.subscriptionsRevenue),
       },
       month: {
         label: MONTHS[month - 1] ?? '',
