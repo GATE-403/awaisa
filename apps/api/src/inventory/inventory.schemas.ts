@@ -12,12 +12,17 @@ const stockItemSchema = z.object({
     .array(z.object({ serviceId: z.string().trim().min(1).max(64), amount: AMOUNT }))
     .max(200)
     .default([]),
+  /** Sold to clients at the counter as well. */
+  isForSale: z.boolean().default(false),
+  salePrice: AMOUNT.nullable().default(null),
 })
 
 const receiveSchema = z.object({
   quantity: z.number().gt(0).max(1_000_000),
   // A new delivery may change the price per unit.
   unitCost: AMOUNT.optional(),
+  // Also record what the delivery cost as an expense («Закупка материалов»).
+  expense: z.object({ branchId: z.uuid().nullable() }).nullish(),
 })
 
 const adjustSchema = z.object({ quantity: AMOUNT })

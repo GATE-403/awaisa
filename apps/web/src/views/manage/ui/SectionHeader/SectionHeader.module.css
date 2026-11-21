@@ -60,3 +60,10 @@
     min-height: 44px;
   }
 }
+
+/* A capsule of glyphs keeps its own width beside the wide action (as on «Страница»). */
+@media (max-width: 639px) {
+  .floating.floating > [role="group"] {
+    flex: 0 0 auto;
+  }
+}
