@@ -6,6 +6,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
 import type { Promotion, PromotionInput, PromotionKind, Service } from '@/shared/api/types'
+import { DateField } from '@/shared/ui/DateField/DateField'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
@@ -244,18 +245,18 @@ export const PromotionSheet = ({
 
         <section className={sheet.group} aria-label='Срок'>
           <div className={sheet.list}>
-            <label className={sheet.row}>
+            <div className={sheet.row}>
               <span className={sheet.rowLabel}>До даты</span>
               <span className={sheet.rowControl}>
-                <Input
-                  variant='plain'
-                  type='date'
-                  aria-label='Действует до'
+                <DateField
+                  label='Действует до'
+                  placeholder='Без срока'
                   value={endsOn}
-                  onValueChange={setEndsOn}
+                  onChange={setEndsOn}
+                  isClearable
                 />
               </span>
-            </label>
+            </div>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>Включена</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />

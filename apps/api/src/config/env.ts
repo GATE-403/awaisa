@@ -51,6 +51,9 @@ type Env = {
   FREEDOMPAY_API_URL: string
   FREEDOMPAY_CURRENCY: string
   FREEDOMPAY_TESTING_MODE: boolean
+  /** Addresses and map points for branches: Photon (OpenStreetMap) or off. */
+  GEOCODER: 'photon' | 'off'
+  PHOTON_URL: string
   /** Team-draft interleaving of «Для вас» with another scorer; null = off (docs/recsys/experiments.md). */
   RECS_INTERLEAVE: { algorithm: Algorithm; percent: number } | null
 }
@@ -330,6 +333,11 @@ const validateEnv = (config: Record<string, unknown>): Env => {
     // Test payments on Freedom Pay's side (their test cards), still through the real API.
     FREEDOMPAY_TESTING_MODE: optionalString(config.FREEDOMPAY_TESTING_MODE) === 'true',
     RECS_INTERLEAVE: parseInterleave(config.RECS_INTERLEAVE),
+    GEOCODER: optionalString(config.GEOCODER) === 'off' ? 'off' : 'photon',
+    PHOTON_URL: (optionalString(config.PHOTON_URL) ?? 'https://photon.komoot.io').replace(
+      /\/$/,
+      '',
+    ),
     ...parseTwilio(config, smsDriver),
     OTP_TEST_CODE: parseTestCode(config.OTP_TEST_CODE, nodeEnv),
     TELEGRAM_GATEWAY_TOKEN: optionalString(config.TELEGRAM_GATEWAY_TOKEN),

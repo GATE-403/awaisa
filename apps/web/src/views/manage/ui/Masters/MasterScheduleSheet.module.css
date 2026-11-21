@@ -88,20 +88,11 @@
   font-size: var(--text-footnote);
 }
 
-.dateField input {
-  min-height: var(--control-height-md);
+.dateField > :last-child {
+  justify-content: flex-start;
   padding: 0 var(--space-3);
-  border: none;
   border-radius: var(--radius-md);
   background: var(--color-fill);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-input);
-}
-
-.dateField input:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
 }
 
 .reason,

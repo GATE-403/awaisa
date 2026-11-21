@@ -1,14 +1,16 @@
 import { Input } from '@awaisa/ui/Input'
 import { Switch } from '@awaisa/ui/Switch'
 import dynamic from 'next/dynamic'
-import { type FormEvent, useState } from 'react'
-import type { Branch, BranchInput } from '@/shared/api/types'
+import { type FormEvent, useRef, useState } from 'react'
+import { reverseAddress, searchAddress } from '@/shared/api/clientApi'
+import type { Branch, BranchInput, GeoPlace } from '@/shared/api/types'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import type { Point } from '@/shared/ui/MapView/MapView'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import styles from './BranchDialog.module.css'
 
 // Leaflet needs the browser.
 const LocationPicker = dynamic(
@@ -25,6 +27,9 @@ interface BranchDialogProps {
 }
 
 const FORM_ID = 'branch-form'
+const SEARCH_DELAY_MS = 350
+const REVERSE_DELAY_MS = 500
+const MIN_QUERY = 3
 
 export const BranchDialog = ({
   branch,
@@ -43,6 +48,78 @@ export const BranchDialog = ({
       : null,
   )
   const [isSaving, setIsSaving] = useState(false)
+  // The address and the pin are one thing: a picked address moves the pin, a moved pin fills an
+  // empty address or offers its own («не писать каждый раз отдельно»).
+  const [places, setPlaces] = useState<GeoPlace[]>([])
+  const [target, setTarget] = useState<Point | null>(null)
+  const [pinPlace, setPinPlace] = useState<GeoPlace | null>(null)
+  const addressRef = useRef(address)
+  const searchTimer = useRef<number | undefined>(undefined)
+  const searchAbort = useRef<AbortController | null>(null)
+  const reverseTimer = useRef<number | undefined>(undefined)
+  const reverseAbort = useRef<AbortController | null>(null)
+
+  const changeAddress = (value: string) => {
+    setAddress(value)
+    addressRef.current = value
+    window.clearTimeout(searchTimer.current)
+    searchAbort.current?.abort()
+    if (value.trim().length < MIN_QUERY) {
+      setPlaces([])
+      return
+    }
+    searchTimer.current = window.setTimeout(() => {
+      const controller = new AbortController()
+      searchAbort.current = controller
+      searchAddress(value.trim(), controller.signal)
+        .then(setPlaces)
+        // No suggestions when the service is away: the owner types the address as before.
+        .catch(() => undefined)
+    }, SEARCH_DELAY_MS)
+  }
+
+  const pickPlace = (place: GeoPlace) => {
+    const next = { latitude: place.latitude, longitude: place.longitude }
+    setAddress(place.address)
+    addressRef.current = place.address
+    setPlaces([])
+    setPinPlace(null)
+    setPoint(next)
+    setTarget(next)
+  }
+
+  const changePoint = (next: Point, source: 'user' | 'target') => {
+    setPoint(next)
+    if (source === 'target') return
+    window.clearTimeout(reverseTimer.current)
+    reverseAbort.current?.abort()
+    reverseTimer.current = window.setTimeout(() => {
+      const controller = new AbortController()
+      reverseAbort.current = controller
+      reverseAddress(next, controller.signal)
+        .then(({ place }) => {
+          if (!place) {
+            setPinPlace(null)
+            return
+          }
+          if (!addressRef.current.trim()) {
+            setAddress(place.address)
+            addressRef.current = place.address
+            setPinPlace(null)
+            return
+          }
+          setPinPlace(place.address === addressRef.current.trim() ? null : place)
+        })
+        .catch(() => undefined)
+    }, REVERSE_DELAY_MS)
+  }
+
+  const applyPinAddress = () => {
+    if (!pinPlace) return
+    setAddress(pinPlace.address)
+    addressRef.current = pinPlace.address
+    setPinPlace(null)
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -94,9 +171,9 @@ export const BranchDialog = ({
                 variant='plain'
                 placeholder='ул. Токтогула, 125'
                 value={address}
-                onValueChange={setAddress}
+                onValueChange={changeAddress}
                 maxLength={200}
-                autoComplete='street-address'
+                autoComplete='off'
               />
             </span>
           </label>
@@ -115,14 +192,45 @@ export const BranchDialog = ({
           </label>
         </div>
 
+        {places.length > 0 && (
+          <section className={sheet.group} aria-label='Найденные адреса'>
+            <ul className={sheet.list}>
+              {places.map((place) => (
+                <li key={`${place.address}-${place.latitude}`}>
+                  <button
+                    type='button'
+                    className={`${sheet.row} ${styles.place}`}
+                    onClick={() => pickPlace(place)}
+                  >
+                    <span className={styles.placeText}>
+                      <span className={styles.placeAddress}>{place.address}</span>
+                      {place.area && <span className={styles.placeArea}>{place.area}</span>}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className={sheet.groupFooter}>Выберите адрес, и метка встанет на карте сама.</p>
+          </section>
+        )}
+
         <section className={sheet.group} aria-label='Метка на карте'>
           <SectionCaption>Метка на карте</SectionCaption>
-          <LocationPicker value={point} onChange={setPoint} />
-          <p className={sheet.groupFooter}>
-            {point
-              ? 'Передвиньте карту, чтобы метка указала на вход.'
-              : 'Передвиньте карту к вашему адресу — так клиенты найдут вас рядом.'}
-          </p>
+          <LocationPicker value={point} onChange={changePoint} target={target} />
+          {pinPlace ? (
+            <p className={sheet.groupFooter}>
+              По метке: {pinPlace.address}.{' '}
+              <button type='button' className={styles.useAddress} onClick={applyPinAddress}>
+                Подставить адрес
+              </button>
+            </p>
+          ) : (
+            <p className={sheet.groupFooter}>
+              {point
+                ? 'Передвиньте карту, чтобы метка указала на вход: адрес подставится сам.'
+                : 'Начните вводить адрес или передвиньте карту: адрес и метка заполнят друг друга.'}
+            </p>
+          )}
         </section>
 
         <div className={sheet.list}>
