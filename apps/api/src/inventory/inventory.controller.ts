@@ -11,12 +11,14 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
+import { CurrentCustomer } from '../auth/auth.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
   CurrentBusiness,
   OwnerOnly,
 } from '../businesses/business-access.guard.js'
+import type { Customer } from '../customers/customer.entity.js'
 import {
   type AdjustInput,
   adjustSchema,
@@ -66,8 +68,15 @@ export class InventoryController {
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
     @Body({ schema: receiveSchema }) body: ReceiveInput,
+    @CurrentCustomer() customer: Customer | null,
   ): Promise<StockItem[]> {
-    return this.inventory.receive(business.id, id, body.quantity, body.unitCost)
+    return this.inventory.receive(
+      business.id,
+      id,
+      body.quantity,
+      body.unitCost,
+      body.expense ? { branchId: body.expense.branchId, createdBy: customer?.id ?? null } : null,
+    )
   }
 
   @Post(':id/adjust')

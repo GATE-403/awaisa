@@ -13,6 +13,7 @@ import type {
   AnalyticsReport,
   Business,
   Catalog,
+  MoneyReport,
   PromotionInput,
 } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -25,6 +26,7 @@ import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { plainPercent } from '@/views/manage/lib/payText'
 import { useAnalytics } from '@/views/manage/model/useAnalytics'
+import { useMoneyReport } from '@/views/manage/model/useMoneyReport'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
 import forms from '@/views/manage/ui/manageForms.module.css'
@@ -43,6 +45,7 @@ import {
 } from './Insights'
 import { type HeatmapCell, LoadHeatmap } from './LoadHeatmap'
 import { MasterStatsSheet } from './MasterStatsSheet'
+import { moneyCsvRows, ProfitSection } from './ProfitSection'
 
 // Recharts is loaded with the tab, never with the rest of the cabinet.
 const chartsModule = () => import('./AnalyticsCharts')
@@ -130,7 +133,7 @@ const Stat = ({ label, value, delta, trend, children }: StatProps) => {
   )
 }
 
-const toCsv = (report: AnalyticsReport) => {
+const toCsv = (report: AnalyticsReport, money: MoneyReport | null) => {
   const quote = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`
   const rows = [
     ['Дата', 'Выручка', 'Визиты', 'Отмены'],
@@ -170,6 +173,7 @@ const toCsv = (report: AnalyticsReport) => {
       client.lastVisit,
       client.isNew ? 'да' : 'нет',
     ]),
+    ...moneyCsvRows(money),
   ]
   return `﻿${rows.map((row) => row.map(quote).join(';')).join('\n')}`
 }
@@ -196,6 +200,13 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   // A promotion started from the heatmap's quiet hour.
   const [promotionDraft, setPromotionDraft] = useState<Partial<PromotionInput> | null>(null)
   const { report, error, isLoading, setGoal, reload } = useAnalytics(slug, days)
+  const money = useMoneyReport(slug, days)
+  // Sales and expenses count even in a period without visits.
+  const profit = money &&
+    money.period.days === days &&
+    (money.revenue > 0 || money.expenses > 0) && (
+      <ProfitSection money={money} delta={<Delta value={money.profitChange} />} />
+    )
   const openMaster = report?.masters.find((master) => master.id === openMasterId)
 
   const totals = report?.totals
@@ -245,7 +256,9 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
   const handleExport = () => {
     if (!report) return
-    const url = URL.createObjectURL(new Blob([toCsv(report)], { type: 'text/csv;charset=utf-8' }))
+    const url = URL.createObjectURL(
+      new Blob([toCsv(report, money)], { type: 'text/csv;charset=utf-8' }),
+    )
     const link = document.createElement('a')
     link.href = url
     link.download = `${slug}-${report.period.from}-${report.period.to}.csv`
@@ -293,6 +306,8 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
         />
       )}
 
+      {isEmpty && profit}
+
       {report && totals && !isEmpty && (
         <div className={styles.report} data-loading={isLoading || undefined} aria-busy={isLoading}>
           <AttentionList attention={report.attention} onCallBack={() => setIsMailingOpen(true)} />
@@ -337,6 +352,8 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
             />
             <PaymentsSplit payments={totals.payments} />
           </section>
+
+          {profit}
 
           <section className={styles.group} aria-labelledby='analytics-visits'>
             <SectionCaption id='analytics-visits' isInset={false}>

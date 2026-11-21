@@ -1060,6 +1060,8 @@ const main = async (isAdding = false) => {
         }
       }
 
+      await writeCounter(client, businessId, seedBusiness.kind, branchIds, masters)
+
       // Masters are rated by their real reviews, as the API does after each one.
       await client.query(
         `UPDATE "specialists" sp SET "rating" = r."avg"
@@ -1081,6 +1083,110 @@ const main = async (isAdding = false) => {
     throw error
   } finally {
     await client.end()
+  }
+}
+
+/** Products sold at the counter, by kind: name, sale price, unit cost. */
+const PRODUCTS: Record<BusinessSeed['kind'], [string, number, number][]> = {
+  barber: [
+    ['Воск для укладки', 900, 450],
+    ['Масло для бороды', 1200, 600],
+    ['Шампунь для мужчин', 750, 380],
+  ],
+  beauty: [
+    ['Шампунь для окрашенных волос', 1100, 550],
+    ['Маска для волос', 1400, 700],
+    ['Термозащита', 950, 470],
+  ],
+  nails: [
+    ['Масло для кутикулы', 450, 200],
+    ['Крем для рук', 650, 300],
+    ['Пилка для ногтей', 250, 90],
+  ],
+  spa: [
+    ['Массажное масло', 1300, 600],
+    ['Соль для ванны', 700, 300],
+  ],
+  health: [
+    ['Зубная паста', 450, 220],
+    ['Ирригатор, насадки', 900, 500],
+  ],
+  other: [
+    ['Заживляющий крем', 800, 350],
+    ['Подарочный набор', 1500, 800],
+  ],
+}
+
+/**
+ * The counter of a demo place: products for sale with a few weeks of sales, and the month's
+ * expenses (rent, utilities, marketing, a purchase), so «Касса» and the profit have numbers.
+ * Its own arithmetic instead of `random()`, so the rest of the demo stays the same as before.
+ */
+const writeCounter = async (
+  client: pg.Client,
+  businessId: string,
+  kind: BusinessSeed['kind'],
+  branchIds: string[],
+  masters: { id: string }[],
+) => {
+  const products: { id: string; name: string; price: number; cost: number }[] = []
+  for (const [index, [name, price, cost]] of PRODUCTS[kind].entries()) {
+    const { rows } = await client.query(
+      `INSERT INTO "stock_items" ("business_id", "name", "unit", "quantity", "unit_cost", "min_quantity",
+         "is_for_sale", "sale_price")
+       VALUES ($1, $2, 'шт', $3, $4, 3, true, $5) RETURNING "id"`,
+      [businessId, name, 12 + index * 4, cost, price],
+    )
+    products.push({ id: rows[0].id as string, name, price, cost })
+  }
+  const branchId = branchIds[0] ?? null
+  for (let day = 1; day <= 28; day += 1) {
+    if (day % 3 !== 0) continue
+    const product = products[(day / 3) % products.length]
+    if (!product) continue
+    const quantity = 1 + (day % 2)
+    const createdAt = new Date(toUtc(dayKey(-day), 15 * 60).getTime())
+    const { rows } = await client.query(
+      `INSERT INTO "sales" ("business_id", "branch_id", "seller_specialist_id", "payment_method", "total",
+         "cost", "created_at")
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "id"`,
+      [
+        businessId,
+        branchId,
+        masters[day % Math.max(masters.length, 1)]?.id ?? null,
+        day % 2 === 0 ? 'cash' : 'card',
+        product.price * quantity,
+        product.cost * quantity,
+        createdAt,
+      ],
+    )
+    await client.query(
+      `INSERT INTO "sale_items" ("sale_id", "item_id", "name", "quantity", "price", "unit_cost")
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [rows[0].id, product.id, product.name, quantity, product.price, product.cost],
+    )
+    await client.query(
+      `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "sale_id", "cost", "created_at")
+       VALUES ($1, $2, $3, 'sale', $4, $5, $6)`,
+      [businessId, product.id, -quantity, rows[0].id, product.cost * quantity, createdAt],
+    )
+  }
+  const rent = 30000 + masters.length * 5000
+  const expenses: [string, number, number, string | null][] = [
+    ['rent', rent, -2, 'Аренда за месяц'],
+    ['rent', rent, -32, 'Аренда за месяц'],
+    ['utilities', 4200, -5, 'Свет и вода'],
+    ['utilities', 3900, -35, 'Свет и вода'],
+    ['marketing', 6000, -10, 'Реклама в Instagram'],
+    ['materials', 8500, -14, 'Закупка расходников'],
+    ['Уборка', 2500, -20, null],
+  ]
+  for (const [category, amount, offset, note] of expenses) {
+    await client.query(
+      `INSERT INTO "expenses" ("business_id", "branch_id", "category", "amount", "date", "note")
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [businessId, branchId, category, amount, dayKey(offset), note],
+    )
   }
 }
 

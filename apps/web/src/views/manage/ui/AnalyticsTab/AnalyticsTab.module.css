@@ -948,3 +948,8 @@ button.heatmapCell:active {
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
 }
+
+/* «Прибыль» below zero reads as a loss in the danger colour, the sign says it too. */
+.factValue[data-negative] {
+  color: var(--color-danger-text);
+}

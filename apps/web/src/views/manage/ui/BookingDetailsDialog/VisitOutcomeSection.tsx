@@ -5,8 +5,14 @@ import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { useEffect, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
-import { getClientLoyalty } from '@/shared/api/clientApi'
-import type { AdminBooking, ClientLoyalty, OutcomeInput, PaymentMethod } from '@/shared/api/types'
+import { getClientLoyalty, listVisitSales } from '@/shared/api/clientApi'
+import type {
+  AdminBooking,
+  ClientLoyalty,
+  OutcomeInput,
+  PaymentMethod,
+  Sale,
+} from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -22,6 +28,8 @@ interface VisitOutcomeSectionProps {
   isCompact?: boolean
   /** The segmented control's size (compact defaults to the small one). */
   controlSize?: 'sm' | 'md'
+  /** «Товары · Добавить»: sell products with this visit (paid together with it). */
+  onSellProducts?: () => void
 }
 
 type OutcomeChoice = 'pending' | 'arrived' | 'no_show'
@@ -51,9 +59,11 @@ export const VisitOutcomeSection = ({
   onChange,
   isCompact = false,
   controlSize = isCompact ? 'sm' : 'md',
+  onSellProducts,
 }: VisitOutcomeSectionProps) => {
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
+  const [sales, setSales] = useState<Sale[]>([])
   const [certificateCode, setCertificateCode] = useState('')
   const [isCertificateOpen, setIsCertificateOpen] = useState(false)
   const due = booking.price - (booking.discount?.amount ?? 0)
@@ -78,6 +88,16 @@ export const VisitOutcomeSection = ({
       .catch(() => undefined)
     return () => controller.abort()
   }, [isArrived, current])
+
+  // Products already sold with this visit.
+  useEffect(() => {
+    if (!isArrived || !onSellProducts) return
+    const controller = new AbortController()
+    listVisitSales(slug, booking.id, controller.signal)
+      .then((items) => setSales(items.filter((sale) => !sale.isCancelled)))
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [isArrived, onSellProducts, slug, booking.id])
 
   const save = async (input: OutcomeInput) => {
     const updated = await onChange(input)
@@ -141,6 +161,24 @@ export const VisitOutcomeSection = ({
                   }
                 />
               </div>
+              {sales.flatMap((sale) =>
+                sale.items.map((item) => (
+                  <div key={`${sale.id}-${item.name}`} className={sheet.row}>
+                    <span className={sheet.rowLabel}>
+                      {item.quantity === 1 ? item.name : `${item.name} × ${item.quantity}`}
+                    </span>
+                    <span className={styles.rowValue}>
+                      {formatPrice(item.quantity * item.price)}
+                    </span>
+                  </div>
+                )),
+              )}
+              {onSellProducts && (
+                <button type='button' className={sheet.row} onClick={onSellProducts}>
+                  <span className={sheet.rowLabel}>Товары</span>
+                  <span className={styles.rowLink}>Добавить ›</span>
+                </button>
+              )}
               {/* A certificate is rare: a row that opens its field only when asked. */}
               {isCertificateOpen ? (
                 <div className={sheet.row}>
