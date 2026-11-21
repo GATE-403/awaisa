@@ -322,13 +322,15 @@ export class ReviewsService {
          AND b."ends_at" <= now() - make_interval(hours => $1)
          AND b."ends_at" > now() - make_interval(hours => $2)
          AND NOT EXISTS (SELECT 1 FROM "reviews" r WHERE r."booking_id" = b."id")
-       RETURNING b."id", b."customer_phone" AS "phone", bz."name" AS "businessName"`,
+       RETURNING b."id", b."customer_phone" AS "phone", bz."name" AS "businessName",
+         b."business_id" AS "businessId"`,
       [REQUEST_AFTER_HOURS, REQUEST_WITHIN_HOURS],
     )
     const due = (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
       id: string
       phone: string
       businessName: string
+      businessId: string
     }[]
     if (due.length === 0) return
 
@@ -341,6 +343,7 @@ export class ReviewsService {
           text: reviewRequestMessage(row.businessName, link),
           link: { label: 'Оценить', url: link },
           whatsapp: whatsappReviewRequest(row.businessName, link),
+          billing: { businessId: row.businessId, isOptional: true },
         })
       }),
     )

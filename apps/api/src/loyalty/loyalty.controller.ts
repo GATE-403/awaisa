@@ -19,6 +19,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -38,6 +39,7 @@ import {
 } from './loyalty.schemas.js'
 import { LoyaltyService } from './loyalty.service.js'
 
+@RequiresFeature('loyalty')
 @Controller('manage/:slug/loyalty')
 @UseGuards(BusinessAccessGuard)
 export class ManageLoyaltyController {

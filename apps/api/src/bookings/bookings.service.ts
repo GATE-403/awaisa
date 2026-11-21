@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Brackets, Repository } from 'typeorm'
 import { TimeOff } from '../admin/time-off.entity.js'
+import { BillingService } from '../billing/billing.service.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { CatalogService } from '../catalog/catalog.service.js'
 import { MasterScheduleService } from '../catalog/master-schedule.service.js'
@@ -28,10 +29,13 @@ import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
 import { AvailabilityService } from './availability.service.js'
 import { Booking } from './booking.entity.js'
+import { BookingExtra } from './booking-extra.entity.js'
 import { PAYMENT_HOLD_MINUTES, UNDO_WINDOW_SECONDS } from './booking-rules.js'
 import { type BookingView, bookingViewQuery, isOverlapError, toView } from './booking-shared.js'
 import type { CreateBookingInput } from './bookings.schemas.js'
 import { PaymentsService } from './payments.service.js'
+import { coversService } from './subscription-orders.js'
+import { SubscriptionOrdersService } from './subscription-orders.service.js'
 
 const MAX_CUSTOMER_BOOKINGS = 50
 
@@ -51,9 +55,11 @@ export class BookingsService {
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
     private readonly promotions: PromotionsService,
-    readonly _loyalty: LoyaltyService,
+    private readonly loyalty: LoyaltyService,
     readonly _inventory: InventoryService,
     private readonly availability: AvailabilityService,
+    private readonly subscriptionOrders: SubscriptionOrdersService,
+    private readonly billing: BillingService,
   ) {}
 
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
@@ -73,8 +79,9 @@ export class BookingsService {
       now,
       staffBusinessId,
       input.branchId,
+      input.extraServiceIds,
     )
-    const { service, specialistIds, branchOf } = request
+    const { service, services, specialistIds, branchOf } = request
     const minutes = parseTime(input.time)
     const slot = (await this.availability.buildSlotsFor(request, input.date, now)).find(
       (item) => item.time === formatMinutes(minutes),
@@ -82,30 +89,66 @@ export class BookingsService {
     if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
 
     const startsAt = businessDateTimeToUtc(input.date, minutes)
-    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000)
+    const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
     const cancelToken = randomBytes(24).toString('base64url')
-    const discount = await this.promotions.discountFor({
-      businessId: service.businessId,
-      serviceId: service.id,
-      price: service.price,
-      date: input.date,
-      minutes,
-      phone,
-      code: input.promoCode ?? null,
-    })
-    // Online bookings of a service with a deposit hold the slot until the client pays.
-    const deposit =
-      !staffBusinessId && service.deposit && this.payments.isAvailable
-        ? Math.min(service.deposit, service.price - (discount?.amount ?? 0)) || null
-        : null
+    const extras = services.slice(1)
+    // Paid by the client's own subscription, or by one bought with this booking: it covers the
+    // visit's service it is for (any service of a visit of several); the rest is paid as usual.
+    const isOwnNumber = Boolean(customer && !isForOther && !staffBusinessId)
+    if ((input.subscriptionId || input.subscriptionPlanId) && !isOwnNumber) {
+      throw new BadRequestException('Войдите, чтобы записаться по абонементу')
+    }
+    const coversVisit = (planServiceId: string | null) =>
+      services.some((item) => coversService(planServiceId, item.id))
+    const subscription = input.subscriptionId
+      ? (await this.loyalty.subscriptionsAt(service.businessId, phone)).find(
+          (item) => item.id === input.subscriptionId && coversVisit(item.serviceId),
+        )
+      : null
+    if (input.subscriptionId && !subscription) {
+      throw new BadRequestException('Абонемент не подходит: закончился, истёк или на другую услугу')
+    }
+    const plan = input.subscriptionPlanId
+      ? await this.subscriptionOrders.findOnlinePlan(service.businessId, input.subscriptionPlanId)
+      : null
+    if (plan && !coversVisit(plan.service_id === null ? null : String(plan.service_id))) {
+      throw new BadRequestException('Этот абонемент на другую услугу')
+    }
+    const planPrice = plan ? Number(plan.price) : null
+    const isBySubscription = Boolean(subscription || plan)
+    const discount = isBySubscription
+      ? null
+      : await this.promotions.discountFor({
+          businessId: service.businessId,
+          serviceId: service.id,
+          price: service.price,
+          extras: extras.map((extra) => ({ serviceId: extra.id, price: extra.price })),
+          date: input.date,
+          minutes,
+          phone,
+          code: input.promoCode ?? null,
+        })
+    // Online bookings of services with a deposit hold the slot until the client pays; a visit of
+    // several services asks for each one's deposit, never more than the visit costs. Deposits are
+    // a paid-plan feature: a place back on the free plan books without one.
+    const deposits = services.reduce((sum, item) => sum + (item.deposit ?? 0), 0)
+    const isDepositOn =
+      !staffBusinessId &&
+      !isBySubscription &&
+      deposits > 0 &&
+      this.payments.isAvailable &&
+      (await this.billing.hasFeature(service.businessId, 'deposits'))
+    const deposit = isDepositOn
+      ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
+      : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
 
     for (const candidateId of candidates) {
       try {
-        const saved = await this.bookings.save(
-          this.bookings.create({
+        const saved = await this.saveVisit(
+          {
             businessId: service.businessId,
             serviceId: service.id,
             specialistId: candidateId,
@@ -123,24 +166,47 @@ export class BookingsService {
               (await this.defaultBranchId(service.businessId)),
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
-            depositAmount: deposit,
+            // «Купить абонемент и записаться» holds the slot like a deposit, for the plan's price.
+            depositAmount: deposit ?? planPrice,
+            subscriptionId: subscription?.id ?? null,
             source: staffBusinessId ? 'staff' : 'online',
             promotionId: discount?.promotionId ?? null,
             discountAmount: discount?.amount ?? null,
             discountTitle: discount?.title ?? null,
-            paymentStatus: deposit ? 'pending' : null,
-            paymentDueAt: deposit ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
+            paymentStatus: deposit || plan ? 'pending' : null,
+            paymentDueAt:
+              deposit || plan ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
             // Booked inside the reminder window: the confirmation already does the reminder's job.
             reminderSentAt:
               input.reminderMinutes !== null &&
               startsAt.getTime() - now.getTime() <= input.reminderMinutes * 60_000
                 ? now
                 : null,
-          }),
+          },
+          extras.map((extra) => extra.id),
         )
         const view = await this.getView(saved.id)
         if (customer && !customer.name && !isForOther) {
           await this.customers.update({ id: customer.id }, { name: input.name })
+        }
+        // The subscription is paid first; the booking is confirmed once it is issued.
+        if (plan) {
+          const order = await this.subscriptionOrders
+            .order(plan, { customerId: customer?.id ?? null, phone }, saved.id)
+            .catch(async (error: unknown) => {
+              await this.bookings.update(
+                { id: saved.id },
+                { status: 'cancelled', cancelledAt: new Date(), paymentStatus: 'expired' },
+              )
+              throw error
+            })
+          return {
+            ...view,
+            cancelToken,
+            customerPhone: phone,
+            comment: input.comment,
+            checkoutUrl: order.checkoutUrl,
+          }
         }
         // A deposit first: the confirmation and the owner's message wait for the payment.
         if (deposit) {
@@ -170,6 +236,7 @@ export class BookingsService {
             text: confirmationMessage(view, this.linkTo(view.id)),
             link: this.manageButton(view.id),
             whatsapp: whatsappConfirmation(view, this.linkTo(view.id)),
+            billing: { businessId: service.businessId, isOptional: false },
           })
         }
         // Staff who book a client in already know; the owner's chat hears about the rest.
@@ -222,6 +289,7 @@ export class BookingsService {
       now,
       null,
       booking.branchId ?? undefined,
+      await this.extraServiceIdsOf(id),
     )
     const slot = (await this.availability.buildSlotsFor(request, target.date, now, id)).find(
       (item) => item.time === target.time,
@@ -229,7 +297,7 @@ export class BookingsService {
     if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
 
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
-    const endsAt = new Date(startsAt.getTime() + request.service.durationMinutes * 60_000)
+    const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
     try {
       await this.bookings.update(
         { id },
@@ -254,6 +322,7 @@ export class BookingsService {
         text: rescheduleMessage(view, this.linkTo(view.id)),
         link: this.manageButton(view.id),
         whatsapp: whatsappReschedule(view, this.linkTo(view.id)),
+        billing: { businessId: booking.businessId, isOptional: false },
       })
     }
     const before = toBusinessParts(booking.startsAt)
@@ -435,6 +504,33 @@ export class BookingsService {
     }
 
     return booking
+  }
+
+  /** The booking and the services done after its first one, in one transaction. */
+  private saveVisit(fields: Partial<Booking>, extraServiceIds: string[]) {
+    return this.bookings.manager.transaction(async (manager) => {
+      const saved = await manager.save(Booking, manager.create(Booking, fields))
+      if (extraServiceIds.length > 0) {
+        await manager.insert(
+          BookingExtra,
+          extraServiceIds.map((serviceId, index) => ({
+            bookingId: saved.id,
+            position: index + 1,
+            serviceId,
+          })),
+        )
+      }
+      return saved
+    })
+  }
+
+  /** The services a visit has after its first one, in order. */
+  async extraServiceIdsOf(bookingId: string) {
+    const rows = (await this.bookings.manager.query(
+      'SELECT "service_id" AS "id" FROM "booking_extras" WHERE "booking_id" = $1 ORDER BY "position"',
+      [bookingId],
+    )) as { id: string }[]
+    return rows.map((row) => row.id)
   }
 
   async getView(id: string): Promise<BookingView> {

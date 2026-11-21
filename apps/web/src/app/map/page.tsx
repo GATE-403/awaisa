@@ -7,6 +7,8 @@ import { MapPage } from '@/views/map'
 export const metadata: Metadata = {
   title: 'Карта',
   description: 'Салоны и мастера рядом с вами — на карте, со свободным временем.',
+  // Kinds are views of this one page.
+  alternates: { canonical: '/map' },
 }
 
 // The first list comes from the server cache; «Рядом со мной» re-sorts it on the client.

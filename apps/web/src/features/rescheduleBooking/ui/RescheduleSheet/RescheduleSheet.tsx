@@ -4,16 +4,11 @@ import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { ArrowRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import {
-  DateTimePicker,
-  formatDayLong,
-  formatDayShort,
-  getUpcomingDays,
-  useAvailability,
-} from '@/entities/booking'
+import { DateTimePicker, getUpcomingDays, useAvailability } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { moveMyBooking } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackStep } from '@/shared/lib/telemetry'
@@ -33,6 +28,7 @@ const DAYS_SHOWN = 14
 // Same master, same service, another time — chosen with the very picker of the booking form
 // (day cards with «Сегодня / Завтра», «Выберите время · N свободных», free times only).
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
+  const t = useT()
   const toast = useToast()
   const today = useToday()
   const [date, setDate] = useState(booking.date)
@@ -56,7 +52,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
       const moved = await moveMyBooking(booking.id, token, { date, time })
       haptic('success')
       toast.show({
-        title: `Перенесено: ${formatDayLong(moved.date)}, ${moved.time}`,
+        title: t('Перенесено: {day}, {time}', { day: t.dayLong(moved.date), time: moved.time }),
         type: 'success',
       })
       trackStep('reschedule_done', booking.business.slug)
@@ -64,7 +60,11 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
       onClose()
     } catch (moveError) {
       haptic('error')
-      toast.show({ title: 'Не получилось', description: getErrorMessage(moveError), type: 'error' })
+      toast.show({
+        title: t('Не получилось'),
+        description: getErrorMessage(moveError),
+        type: 'error',
+      })
       setTime(null)
       reload()
     } finally {
@@ -73,7 +73,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
   }
 
   return (
-    <Sheet title='Перенести запись' onClose={onClose}>
+    <Sheet title={t('Перенести запись')} onClose={onClose}>
       {/* Before and after side by side, so the change reads at a glance. */}
       <div className={styles.change}>
         <p className={styles.service}>
@@ -81,15 +81,15 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
         </p>
         <div className={styles.compare}>
           <span className={styles.was}>
-            <span className={styles.caption}>Сейчас</span>
+            <span className={styles.caption}>{t('Сейчас')}</span>
             <span className={styles.wasTime}>{booking.time}</span>
-            <span className={styles.date}>{formatDayShort(booking.date)}</span>
+            <span className={styles.date}>{t.dayShort(booking.date)}</span>
           </span>
           <ArrowRight weight='bold' aria-hidden className={styles.arrow} />
           <span className={styles.will} data-empty={!time || undefined}>
-            <span className={styles.caption}>Станет</span>
+            <span className={styles.caption}>{t('Станет')}</span>
             <span className={styles.willTime}>{time ?? '—:—'}</span>
-            <span className={styles.date}>{formatDayShort(date)}</span>
+            <span className={styles.date}>{t.dayShort(date)}</span>
           </span>
         </div>
       </div>
@@ -111,7 +111,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
       />
 
       <Button size='lg' onClick={handleMove} disabled={!time || isMoving} className={styles.submit}>
-        {time ? `Перенести на ${time}` : 'Выберите время'}
+        {time ? t('Перенести на {time}', { time }) : t('Выберите время')}
       </Button>
     </Sheet>
   )

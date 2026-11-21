@@ -1,0 +1,186 @@
+import { expect, type Page, test } from '@playwright/test'
+import { randomClientPhone } from './account'
+import { bishkekDay, createOwnBusiness, type OwnBusiness } from './business'
+import { API_URL, bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
+
+// One visit of several services by one master: manicure and pedicure in one booking.
+const setUpNails = async (page: Page) => {
+  const business = await createOwnBusiness(page, {
+    services: [
+      { name: 'Маникюр', durationMinutes: 60, price: 1200 },
+      { name: 'Педикюр', durationMinutes: 90, price: 1500 },
+      { name: 'Брови', durationMinutes: 30, price: 800 },
+    ],
+    masters: ['Айда', 'Бермет'],
+  })
+  const byName = (name: string) => {
+    const found = business.services.find((service) => service.name === name)
+    if (!found) throw new Error(`${name} expected`)
+    return found
+  }
+  const [aida, bermet] = business.masters
+  if (!aida || !bermet) throw new Error('Two masters expected')
+  // Бермет does no pedicure: a visit of manicure and pedicure is Айда's alone.
+  const updated = await page.request.put(`/api/manage/${business.slug}/specialists/${bermet.id}`, {
+    data: {
+      name: bermet.name,
+      role: 'Мастер',
+      serviceIds: [byName('Маникюр').id, byName('Брови').id],
+    },
+  })
+  expect(updated.ok()).toBe(true)
+  return {
+    business,
+    manicure: byName('Маникюр'),
+    pedicure: byName('Педикюр'),
+    aida,
+    bermet,
+  }
+}
+
+const firstFreeTime = async (query: string) => {
+  for (let offset = 1; offset <= 7; offset += 1) {
+    const date = bishkekDay(offset)
+    const answer = await (await fetch(`${API_URL}/availability?${query}&date=${date}`)).json()
+    const slot = (answer.slots as { time: string; isAvailable: boolean }[]).find(
+      (item) => item.isAvailable,
+    )
+    if (slot) return { date, time: slot.time }
+  }
+  throw new Error('No free time for the visit')
+}
+
+const scheduleOf = async (page: Page, business: OwnBusiness, date: string) =>
+  (await (await page.request.get(`/api/manage/${business.slug}/schedule?date=${date}`)).json()) as {
+    bookings: { id: string; serviceName: string; price: number; durationMinutes: number }[]
+  }
+
+test.describe('A visit of several services', () => {
+  test('a client adds pedicure to a manicure and books both as one visit; the owner sees one block', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(90_000)
+    const { business } = await setUpNails(page)
+
+    const guestContext = await browser.newContext()
+    const guest = await guestContext.newPage()
+    try {
+      await guest.goto(`/${business.slug}/book`)
+      const steps = bookingSteps(guest)
+      await steps.service.getByRole('radio', { name: /^Маникюр/ }).click()
+
+      // The visit can grow: the service step opens again with the chosen one checked.
+      await guest.getByRole('button', { name: 'Ещё услуга' }).click()
+      const more = guest.locator('#step-service-more')
+      await expect(more.getByRole('heading', { name: 'Что ещё сделать?' })).toBeVisible()
+      await expect(more.getByRole('checkbox', { name: /^Маникюр/ })).toBeChecked()
+      await more.getByRole('checkbox', { name: /^Педикюр/ }).click()
+
+      // Only Айда does both, so the master is chosen; the card says the whole visit.
+      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(steps.service).toContainText('2 ч 30 мин')
+      await expect(steps.specialist).toContainText('Айда')
+      const time = await pickFirstFreeSlot(guest)
+
+      await steps.contacts.getByLabel('Имя').fill('E2E Две услуги')
+      await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+      await submitBooking(guest)
+      await expect(guest.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+
+      const stored = await guest.evaluate(() =>
+        JSON.parse(window.localStorage.getItem('awaisa:bookings:v2') ?? '[]'),
+      )
+      const booking = stored[0]?.snapshot
+      expect(booking).toMatchObject({
+        serviceName: 'Маникюр + Педикюр',
+        price: 2700,
+        durationMinutes: 150,
+        time,
+      })
+
+      // The owner's day: one block of 2 h 30 min carrying both services.
+      const day = await scheduleOf(page, business, booking.date)
+      const visits = day.bookings.filter((item) => item.id === booking.id)
+      expect(visits).toEqual([
+        expect.objectContaining({
+          serviceName: 'Маникюр + Педикюр',
+          price: 2700,
+          durationMinutes: 150,
+        }),
+      ])
+      await page.goto(`/manage/${business.slug}?tab=schedule&date=${booking.date}`)
+      await expect(
+        page.locator('[data-schedule-board]').getByText('Маникюр + Педикюр'),
+      ).toHaveCount(1)
+    } finally {
+      await guestContext.close()
+    }
+  })
+
+  test('the API keeps one master for every service and counts the whole visit', async ({
+    page,
+  }) => {
+    const { manicure, pedicure, aida, bermet } = await setUpNails(page)
+    const visit = `serviceId=${manicure.id}&extraServiceIds=${pedicure.id}`
+
+    // Бермет does no pedicure; «any master» is Айда.
+    const refused = await fetch(
+      `${API_URL}/availability?${visit}&specialistId=${bermet.id}&date=${bishkekDay(1)}`,
+    )
+    expect(refused.status).toBe(400)
+    expect((await refused.json()).message).toBe('Этот мастер не делает все выбранные услуги')
+    const { date, time } = await firstFreeTime(`${visit}&specialistId=any`)
+
+    const quote = await (
+      await fetch(`${API_URL}/promotions/quote?${visit}&date=${date}&time=${time}`)
+    ).json()
+    expect(quote).toMatchObject({ price: 2700, total: 2700 })
+
+    const created = await fetch(`${API_URL}/bookings`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        serviceId: manicure.id,
+        extraServiceIds: [pedicure.id],
+        specialistId: 'any',
+        date,
+        time,
+        name: 'E2E Две услуги',
+        phone: randomClientPhone(),
+        smsConfirmation: false,
+      }),
+    })
+    expect(created.status).toBe(201)
+    const booking = await created.json()
+    expect(booking).toMatchObject({
+      specialistId: aida.id,
+      serviceName: 'Маникюр + Педикюр',
+      price: 2700,
+      durationMinutes: 150,
+      services: [
+        expect.objectContaining({ id: manicure.id, price: 1200 }),
+        expect.objectContaining({ id: pedicure.id, price: 1500 }),
+      ],
+    })
+    expect(new Date(booking.endsAt).getTime() - new Date(booking.startsAt).getTime()).toBe(
+      150 * 60_000,
+    )
+
+    // The same service twice, or one of another place, is refused.
+    const twice = await fetch(`${API_URL}/bookings`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        serviceId: manicure.id,
+        extraServiceIds: [manicure.id],
+        specialistId: 'any',
+        date,
+        time,
+        name: 'E2E Две услуги',
+        phone: randomClientPhone(),
+      }),
+    })
+    expect(twice.status).toBe(400)
+  })
+})

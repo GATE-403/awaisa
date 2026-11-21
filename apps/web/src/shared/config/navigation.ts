@@ -34,6 +34,8 @@ const APP_SEGMENTS = new Set([
   'top',
   // Signed checkout links for deposits.
   'pay',
+  // Signed links to a fiscal receipt.
+  'receipt',
   // Signed SMS links to a visit.
   'v',
   'ui',

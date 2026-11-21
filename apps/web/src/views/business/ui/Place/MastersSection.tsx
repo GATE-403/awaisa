@@ -1,6 +1,7 @@
 import NextLink from 'next/link'
 import { MasterCard } from '@/entities/business'
 import type { Business, Specialist } from '@/shared/api/types'
+import { T } from '@/shared/i18n'
 import styles from './Place.module.css'
 
 interface MastersSectionProps {
@@ -17,14 +18,14 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
     <section id='masters' className={styles.section} aria-labelledby='place-masters'>
       <div className={styles.sectionHead}>
         <h2 id='place-masters' className={styles.sectionTitle}>
-          Мастера
+          <T>Мастера</T>
         </h2>
         <span className={styles.sectionCount}>{specialists.length}</span>
         <NextLink
           href={business.kind === 'barber' ? '/top' : `/top?kind=${business.kind}`}
           className={styles.sectionLink}
         >
-          Рейтинг ›
+          <T>Рейтинг ›</T>
         </NextLink>
       </div>
       <ul className={styles.masters} data-edge-fade=''>

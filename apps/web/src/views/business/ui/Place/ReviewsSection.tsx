@@ -1,6 +1,7 @@
 import { Star } from '@phosphor-icons/react/ssr'
 import type { Business, ReviewSummary } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { T } from '@/shared/i18n'
+import { Counted } from './Counted'
 import styles from './Place.module.css'
 import { ReviewThread } from './ReviewThread'
 
@@ -19,9 +20,11 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
     <section id='reviews' className={styles.section} aria-labelledby='place-reviews'>
       <div className={styles.sectionHead}>
         <h2 id='place-reviews' className={styles.sectionTitle}>
-          Отзывы
+          <T>Отзывы</T>
         </h2>
-        <span className={styles.sectionCount}>{reviews.items.length} последних</span>
+        <span className={styles.sectionCount}>
+          <T vars={{ count: reviews.items.length }}>{'{count} последних'}</T>
+        </span>
       </div>
       {/* The score first, like an app's ratings: the average large, how it splits by stars. */}
       <div className={styles.reviewSummary}>
@@ -41,7 +44,7 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
             ))}
           </span>
           <span className={styles.reviewTotal}>
-            {pluralize(reviews.count, ['оценка', 'оценки', 'оценок'])}
+            <Counted count={reviews.count} forms={['оценка', 'оценки', 'оценок']} />
           </span>
         </div>
         <ul className={styles.reviewBars} aria-label='Как распределились оценки'>

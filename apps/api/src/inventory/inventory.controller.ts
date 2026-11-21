@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CurrentCustomer } from '../auth/auth.guard.js'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -29,6 +30,7 @@ import {
 } from './inventory.schemas.js'
 import { InventoryService } from './inventory.service.js'
 
+@RequiresFeature('inventory')
 @Controller('manage/:slug/stock')
 @UseGuards(BusinessAccessGuard)
 @OwnerOnly()

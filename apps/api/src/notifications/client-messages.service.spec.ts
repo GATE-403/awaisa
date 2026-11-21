@@ -1,5 +1,6 @@
 import type { ConfigService } from '@nestjs/config'
 import type { DataSource } from 'typeorm'
+import type { BillingService } from '../billing/billing.service.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from './client-messages.service.js'
 import type { SmsService } from './sms.service.js'
@@ -30,6 +31,7 @@ const setup = ({
   isWhatsappAccepted = true,
   canSend = true,
   botToken = undefined as string | undefined,
+  hasSms = true,
 } = {}) => {
   const dataSource = {
     query: vi.fn(async () => (chatId ? [{ chatId }] : [])),
@@ -45,13 +47,15 @@ const setup = ({
   const config = {
     get: (key: string) => (key === 'TELEGRAM_BOT_TOKEN' ? botToken : 'secret'),
   } as unknown as ConfigService<Env, true>
+  const billing = { takeSms: vi.fn(async () => hasSms) }
   const service = new ClientMessagesService(
     dataSource,
     sms as unknown as SmsService,
     whatsapp as unknown as WhatsappService,
     config,
+    billing as unknown as BillingService,
   )
-  return { service, sms, whatsapp }
+  return { service, sms, whatsapp, billing }
 }
 
 describe('ClientMessagesService.send', () => {
@@ -123,5 +127,19 @@ describe('ClientMessagesService.send', () => {
     const { service, whatsapp } = setup()
     whatsapp.send.mockRejectedValueOnce(new Error('boom'))
     await expect(service.send(PHONE, message)).resolves.toBeUndefined()
+  })
+
+  it('skips an optional SMS once the business has used its month of SMS', async () => {
+    const { service, sms, billing } = setup({ isWhatsappOn: false, hasSms: false })
+    await service.send(PHONE, { ...message, billing: { businessId: 'b1', isOptional: true } })
+    expect(billing.takeSms).toHaveBeenCalledWith('b1', { businessId: 'b1', isOptional: true })
+    expect(sms.sendSafely).not.toHaveBeenCalled()
+  })
+
+  it('counts a visit confirmation against the month, and sends it', async () => {
+    const { service, sms, billing } = setup({ isWhatsappOn: false })
+    await service.send(PHONE, { ...message, billing: { businessId: 'b1', isOptional: false } })
+    expect(billing.takeSms).toHaveBeenCalled()
+    expect(sms.sendSafely).toHaveBeenCalledWith(PHONE, message.text)
   })
 })

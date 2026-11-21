@@ -2,6 +2,7 @@ import type { AnalyticsDays, MoneyReport } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { changeOf, profitOf, roundMoney } from './cash-math.js'
@@ -11,16 +12,18 @@ type Row = Record<string, unknown>
 // The same rules as «Аналитика»'s revenue: a visit counts unless it was a no-show and earns
 // what was paid, or the price minus its discount when nobody marked the payment.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = `COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))`
+const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
 const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
   WHERE m."booking_id" = b."id" AND m."kind" = 'use')`
 const LOCAL_VISIT = `(b."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 const LOCAL_SALE = `(x."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
+const LOCAL_SUBSCRIPTION = `(c."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 
 const toNumber = (value: unknown) => Number(value ?? 0)
 
 /**
- * «Прибыль»: revenue from services and products, minus the materials visits used, what the
+ * «Прибыль»: revenue from services, products and subscriptions sold (a visit paid by a
+ * subscription earns 0, so its money is counted once, on the day of the sale), minus the materials visits used, what the
  * sold products cost and the expenses, over a period and the same stretch before.
  */
 @Injectable()
@@ -56,7 +59,11 @@ export class MoneyReportService {
       period: { days: days as AnalyticsDays, from: firstDay, to: today },
       servicesRevenue: current.servicesRevenue,
       productsRevenue: current.productsRevenue,
-      revenue: roundMoney(current.servicesRevenue + current.productsRevenue),
+      subscriptionsRevenue: current.subscriptionsRevenue,
+      subscriptionsSold: current.subscriptionsSold,
+      revenue: roundMoney(
+        current.servicesRevenue + current.productsRevenue + current.subscriptionsRevenue,
+      ),
       materialsCost: current.materialsCost,
       productsCost: current.productsCost,
       expenses: current.expenses,
@@ -97,6 +104,12 @@ export class MoneyReportService {
          (SELECT COALESCE(SUM(x."cost"), 0) FROM "sales" x
            WHERE x."business_id" = $1 AND x."cancelled_at" IS NULL
              AND x."created_at" >= $2 AND x."created_at" < $3) AS "productsCost",
+         (SELECT COALESCE(SUM(c."price_paid"), 0) FROM "client_subscriptions" c
+           WHERE c."business_id" = $1 AND c."created_at" >= $2 AND c."created_at" < $3
+         ) AS "subscriptionsRevenue",
+         (SELECT COUNT(*) FROM "client_subscriptions" c
+           WHERE c."business_id" = $1 AND c."created_at" >= $2 AND c."created_at" < $3
+         ) AS "subscriptionsSold",
          (SELECT COALESCE(SUM("amount"), 0) FROM "expenses"
            WHERE "business_id" = $1 AND "date" BETWEEN $4 AND $5) AS "expenses"`,
       [businessId, from, to, firstDay, lastDay],
@@ -106,6 +119,8 @@ export class MoneyReportService {
       productsRevenue: toNumber(row?.productsRevenue),
       materialsCost: toNumber(row?.materialsCost),
       productsCost: toNumber(row?.productsCost),
+      subscriptionsRevenue: toNumber(row?.subscriptionsRevenue),
+      subscriptionsSold: toNumber(row?.subscriptionsSold),
       expenses: toNumber(row?.expenses),
     }
   }
@@ -126,16 +141,24 @@ export class MoneyReportService {
          FROM "sales" x WHERE x."business_id" = $1 AND x."cancelled_at" IS NULL
            AND x."created_at" >= $2 AND x."created_at" < $3
          GROUP BY 1
+       ), subscribed AS (
+         SELECT to_char(${LOCAL_SUBSCRIPTION}, 'YYYY-MM-DD') AS "date", SUM(c."price_paid") AS "revenue"
+         FROM "client_subscriptions" c WHERE c."business_id" = $1
+           AND c."created_at" >= $2 AND c."created_at" < $3
+         GROUP BY 1
        ), spent AS (
          SELECT to_char("date", 'YYYY-MM-DD') AS "date", SUM("amount") AS "amount"
          FROM "expenses" WHERE "business_id" = $1 AND "date" BETWEEN $4 AND $5
          GROUP BY 1
        )
-       SELECT d."date", COALESCE(v."revenue", 0) + COALESCE(o."revenue", 0) AS "revenue",
+       SELECT d."date",
+         COALESCE(v."revenue", 0) + COALESCE(o."revenue", 0) + COALESCE(a."revenue", 0) AS "revenue",
          COALESCE(v."cost", 0) + COALESCE(o."cost", 0) AS "cost", COALESCE(e."amount", 0) AS "expenses"
-       FROM (SELECT "date" FROM visits UNION SELECT "date" FROM sold UNION SELECT "date" FROM spent) d
+       FROM (SELECT "date" FROM visits UNION SELECT "date" FROM sold
+         UNION SELECT "date" FROM subscribed UNION SELECT "date" FROM spent) d
        LEFT JOIN visits v ON v."date" = d."date"
        LEFT JOIN sold o ON o."date" = d."date"
+       LEFT JOIN subscribed a ON a."date" = d."date"
        LEFT JOIN spent e ON e."date" = d."date"`,
       [businessId, from, to, firstDay, lastDay],
     )

@@ -2,10 +2,11 @@
 
 import { useEffect } from 'react'
 import { LANGUAGES } from '@/shared/config/languages'
-import { setLanguage, useLanguage } from '@/shared/i18n'
+import { setLanguage, useLanguage, useT } from '@/shared/i18n'
 import styles from './LanguageSwitcher.module.css'
 
 export const LanguageSwitcher = () => {
+  const t = useT()
   const language = useLanguage()
 
   useEffect(() => {
@@ -13,7 +14,7 @@ export const LanguageSwitcher = () => {
   }, [language])
 
   return (
-    <nav aria-label='Язык' className={styles.switcher}>
+    <nav aria-label={t('Язык')} className={styles.switcher}>
       {LANGUAGES.map(({ code, label }) => (
         <button
           key={code}

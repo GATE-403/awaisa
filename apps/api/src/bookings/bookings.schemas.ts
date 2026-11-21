@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { MAX_EXTRA_SERVICES } from './booking-rules.js'
 
 const ID_SCHEMA = z.string().trim().min(1).max(64)
 
@@ -14,10 +15,23 @@ const availabilityQuerySchema = z.object({
   date: DATE_SCHEMA,
   // With «any master», only masters of this branch (or of every branch) are considered.
   branchId: z.uuid().optional(),
+  // Services done after `serviceId` in the same visit, comma-separated.
+  extraServiceIds: z
+    .string()
+    .optional()
+    .transform((value) =>
+      (value ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(ID_SCHEMA).max(MAX_EXTRA_SERVICES)),
 })
 
 const createBookingSchema = z.object({
   serviceId: ID_SCHEMA,
+  /** Services done after `serviceId` in the same visit, by the same master, in this order. */
+  extraServiceIds: z.array(ID_SCHEMA).max(MAX_EXTRA_SERVICES).default([]),
   specialistId: ID_SCHEMA,
   date: DATE_SCHEMA,
   time: TIME_SCHEMA,
@@ -38,6 +52,10 @@ const createBookingSchema = z.object({
   promoCode: z.string().trim().max(40).optional(),
   /** Who invited this client (a profile handle or public id from a `?ref=` link). */
   ref: z.string().trim().max(40).optional(),
+  /** Paid by the signed-in client's subscription at this place. */
+  subscriptionId: z.uuid().optional(),
+  /** «Купить абонемент и записаться»: an online plan bought with this booking. */
+  subscriptionPlanId: z.uuid().optional(),
 })
 
 const nextFreeQuerySchema = z.object({
@@ -59,7 +77,7 @@ type MoveByClientInput = z.infer<typeof moveBookingSchema>
 
 const bookingTokenSchema = z.string().trim().min(16).max(128)
 
-type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>
+type AvailabilityQuery = z.output<typeof availabilityQuerySchema>
 
 type CreateBookingInput = z.infer<typeof createBookingSchema>
 

@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, In, Repository } from 'typeorm'
+import { BillingService } from '../billing/billing.service.js'
 import { Category } from '../catalog/category.entity.js'
 import { Service } from '../catalog/service.entity.js'
 import {
@@ -113,6 +114,7 @@ export class BusinessesService {
     @InjectRepository(Branch) private readonly branches: Repository<Branch>,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly search: SearchService,
+    private readonly billing: BillingService,
   ) {}
 
   async listCatalog({
@@ -473,6 +475,8 @@ export class BusinessesService {
           role: 'owner',
         }),
       )
+      // A new business tries the paid plan first, then pays or stays on the free one.
+      await this.billing.startTrial(business.id, manager)
       await manager.save(
         Array.from({ length: 7 }, (_, weekday) =>
           manager.create(WorkingHours, { businessId: business.id, weekday, ...DEFAULT_HOURS }),

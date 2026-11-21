@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import type { Business, Review } from '@/shared/api/types'
-import { pluralWord } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './Place.module.css'
 
@@ -16,6 +16,7 @@ const FIRST = 3
 
 // Three reviews to read, the rest a tap away: the score card above already says how it splits.
 export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
+  const t = useT()
   const [isAll, setIsAll] = useState(false)
   const shown = isAll ? items.length : FIRST
   const hidden = Math.max(0, items.length - FIRST)
@@ -27,7 +28,7 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
         hiddenCount={hidden}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={pluralWord(hidden, ['отзыв', 'отзыва', 'отзывов'])}
+        label={t.count(hidden, ['отзыв', 'отзыва', 'отзывов']).slice(String(hidden).length + 1)}
       >
         <ul className={styles.reviews}>
           {items.slice(0, shown).map((review) => (

@@ -154,6 +154,8 @@ type BusinessPage = {
   catalog: Catalog
   /** Cabinet only: the viewer's role; staff (administrators) see no money or setup. */
   role?: 'owner' | 'staff'
+  /** Cabinet only: the business's plan now and what it opens. */
+  access?: PlanAccess
 }
 
 type TeamMember = { id: string; phone: string; name: string; role: 'owner' | 'admin' }
@@ -187,13 +189,26 @@ type Availability = {
 
 type BookingStatus = 'confirmed' | 'cancelled'
 
+// One service of a visit; a visit may have several, done one after another by one master.
+type BookingService = {
+  id: string
+  name: string
+  price: number
+  durationMinutes: number
+}
+
 type Booking = {
   id: string
   status: BookingStatus
+  /** The visit's first service. */
   serviceId: string
+  /** Every service's name joined with « + » («Маникюр + Педикюр»). */
   serviceName: string
+  /** The whole visit: every service added up. */
   price: number
   durationMinutes: number
+  /** Every service of the visit in order, the first one included. Missing in old device copies. */
+  services?: BookingService[]
   specialistId: string
   specialistName: string
   date: string
@@ -209,6 +224,8 @@ type Booking = {
   review?: { rating: number; comment: string; reply: string | null } | null
   /** The salon marked «Не пришёл»: nothing to rate. */
   isNoShow?: boolean
+  /** Paid by the client's subscription: the visit is drawn from it when the salon marks «Пришёл». */
+  isBySubscription?: boolean
   business: BookingBusiness
 }
 
@@ -218,7 +235,22 @@ type BookingPayment = {
   dueAt: string | null
 }
 
-// The pay page (`GET /payments/:id?s=`).
+/** An order paid on /pay that is not a booking's deposit (a gift certificate, …). */
+type PaymentOrder = {
+  kind: string
+  /** «Подарочный сертификат на 3 000 сом». */
+  title: string
+  /** One line under it: «Для Айгуль · от Нурлана». */
+  details: string
+  business: { name: string; slug: string }
+  /** Until when the order waits for its payment; null once paid or gone. */
+  dueAt: string | null
+  status: 'pending' | 'paid' | 'expired'
+  /** What the paid page says: «Код отправили вам и получателю по SMS». */
+  doneText: string
+}
+
+// The pay page (`GET /payments/:id?s=`): a booking's deposit or another order.
 type PaymentPage = {
   id: string
   amount: number
@@ -236,7 +268,8 @@ type PaymentPage = {
     paymentStatus: BookingPayment['status'] | null
     dueAt: string | null
     business: { name: string; slug: string }
-  }
+  } | null
+  order: PaymentOrder | null
 }
 
 type Review = {
@@ -552,6 +585,21 @@ type SubscriptionPlan = {
   price: number
   validDays: number
   isActive: boolean
+  /** Sold on the place's page and in the booking form. */
+  isOnline: boolean
+}
+
+// A plan sold online, as the place's page shows it (`GET /businesses/:slug/subscription-plans`).
+type OnlineSubscriptionPlan = {
+  id: string
+  title: string
+  serviceId: string | null
+  serviceName: string | null
+  visits: number
+  price: number
+  validDays: number
+  /** What the visits cost one by one (null = any service); the client saves the difference. */
+  fullPrice: number | null
 }
 
 type SubscriptionPlanInput = Omit<SubscriptionPlan, 'id' | 'serviceName'>
@@ -752,6 +800,8 @@ type SlugCheck = { available: boolean; reason?: string }
 
 type CreateBookingInput = {
   serviceId: string
+  /** Services done in the same visit after `serviceId`, by the same master, one after another. */
+  extraServiceIds?: string[]
   specialistId: string
   date: string
   time: string
@@ -766,6 +816,10 @@ type CreateBookingInput = {
   promoCode?: string
   /** Who invited this client (`?ref=` from a profile link). */
   ref?: string
+  /** Pay with the signed-in client's subscription (drawn when the salon marks «Пришёл»). */
+  subscriptionId?: string
+  /** Buy this online plan and book: the booking waits for the payment like a deposit. */
+  subscriptionPlanId?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -842,7 +896,7 @@ type StockReceiveInput = {
   expense?: { branchId: string | null } | null
 }
 
-/** Money that changes hands at the counter (no fiscal receipts). */
+/** Money that changes hands at the counter. */
 type SalePaymentMethod = 'cash' | 'card' | 'transfer'
 
 type SaleItem = { itemId: string | null; name: string; quantity: number; price: number }
@@ -861,6 +915,8 @@ type Sale = {
   total: number
   items: SaleItem[]
   isCancelled: boolean
+  /** The latest fiscal receipt of the sale (its refund once cancelled); null without receipts. */
+  receipt: FiscalReceipt | null
 }
 
 type SaleInput = {
@@ -918,6 +974,84 @@ type CashDesk = {
 }
 
 type OpenShiftInput = { branchId: string; openingCash: number }
+
+/**
+ * Fiscal receipts (apps/api/src/fiscal): `log` writes them to the log and numbers them itself
+ * (outside production), `off` issues none, `ekassa` sends them to the business's own eKassa.
+ */
+type FiscalDriverName = 'log' | 'off' | 'ekassa'
+
+/** Общий режим, единый налог, патент (a patent needs no cash register). */
+type TaxRegime = 'general' | 'single' | 'patent'
+
+type FiscalSettings = {
+  /** What the platform runs; `off` hides receipts everywhere. */
+  driver: FiscalDriverName
+  isEnabled: boolean
+  inn: string | null
+  taxRegime: TaxRegime
+  isVatPayer: boolean
+  /** Percent; VAT counts only for a VAT payer. */
+  vatRate: number
+  /** Sales tax (НсП) percent on services and on goods. */
+  salesTaxServices: number
+  salesTaxGoods: number
+  /** The business's own login at the provider (eKassa); the password never comes back. */
+  login: string | null
+  hasPassword: boolean
+}
+
+type FiscalSettingsInput = Omit<FiscalSettings, 'driver' | 'hasPassword'> & {
+  /** A new password; omitted or null keeps the saved one. */
+  password?: string | null
+}
+
+type FiscalReceiptStatus = 'pending' | 'sending' | 'issued' | 'failed' | 'cancelled'
+
+type FiscalReceiptLine = {
+  name: string
+  kind: 'service' | 'goods'
+  quantity: number
+  price: number
+  sum: number
+  vatRate: number
+  vatAmount: number
+  salesTaxRate: number
+  salesTaxAmount: number
+}
+
+type FiscalReceipt = {
+  id: string
+  kind: 'sale' | 'refund'
+  status: FiscalReceiptStatus
+  /** The visit or the sale it is for. */
+  bookingId: string | null
+  saleId: string | null
+  /** A refund's original receipt. */
+  refundOf: string | null
+  /** A sale receipt that a refund has cancelled. */
+  isRefunded: boolean
+  businessName: string
+  address: string | null
+  inn: string | null
+  taxRegime: TaxRegime
+  payment: 'cash' | 'cashless'
+  lines: FiscalReceiptLine[]
+  total: number
+  vatAmount: number
+  salesTaxAmount: number
+  fiscalNumber: string | null
+  fiscalSign: string | null
+  /** The provider's or the tax office's page of this receipt; the QR leads there. */
+  providerUrl: string | null
+  /** Our own page of the receipt, signed, for the client. */
+  viewUrl: string
+  /** Issued by the `log` driver: never reached the tax office. */
+  isTest: boolean
+  error: string | null
+  issuedAt: string | null
+  createdAt: string
+}
 type CashMovementInput = { kind: 'in' | 'out'; amount: number; reason: string }
 type CloseShiftInput = { countedCash: number; note?: string | null }
 
@@ -963,6 +1097,9 @@ type MoneyReport = {
   period: { days: AnalyticsDays; from: string; to: string }
   servicesRevenue: number
   productsRevenue: number
+  /** Subscriptions sold in the period, counted the day they were sold. */
+  subscriptionsRevenue: number
+  subscriptionsSold: number
   revenue: number
   /** Materials visits used and the cost of products sold. */
   materialsCost: number
@@ -1030,6 +1167,8 @@ type MasterPayScheme = {
   salary: { kind: SalaryKind; amount: number } | null
   /** Guaranteed per month (counted per calendar day): pay is the larger of it and the earned. */
   minimum: number | null
+  /** Percent of the products the master sold at the counter («Продал» in a sale). */
+  productsPercent: number | null
 }
 
 type MasterPayout = {
@@ -1061,13 +1200,17 @@ type MasterPay = {
   /** From the services. */
   services: number
   lines: MasterPayLine[]
+  /** From the products they sold: `productsSold` at `productsPercent`. */
+  products: number
+  /** What the products they sold came to (sales not cancelled). */
+  productsSold: number
   salary: number
   salaryKind: SalaryKind | null
   /** Working days of the schedule in the period (what a daily salary counts). */
   workDays: number
   /** The minimum for the period, null = none. */
   minimum: number | null
-  /** services + salary */
+  /** services + products + salary */
   earned: number
   /** max(earned, minimum) */
   total: number
@@ -1079,7 +1222,7 @@ type MasterPay = {
 }
 
 type MasterDayPay = {
-  /** The day's services (and a daily salary on a working day). */
+  /** The day's services and products sold (and a daily salary on a working day). */
   day: number
   /** The month of the day, up to the day or today: everything, salary and minimum included. */
   month: number
@@ -1175,7 +1318,14 @@ type AnalyticsReport = {
   }
   /** What each promotion brought in the period, and what loyalty paid. */
   promotions: { id: string; title: string; visits: number; revenue: number; discount: number }[]
-  loyalty: { bonusSpent: number; certificateSpent: number; subscriptionVisits: number }
+  loyalty: {
+    bonusSpent: number
+    certificateSpent: number
+    subscriptionVisits: number
+    /** Subscriptions sold in the period and what they brought in. */
+    subscriptionsSold: number
+    subscriptionsRevenue: number
+  }
   /** The calendar month so far against the owner's goal (goal null when none is set). */
   month: {
     label: string
@@ -1215,6 +1365,10 @@ type SettingsSummary = {
   stockItems: number
   /** Items at or under their warning level. */
   lowStock: number
+  /** Fiscal receipts switched on in «Касса». */
+  isFiscalOn: boolean
+  /** Receipts the provider kept refusing: the owner sends them again. */
+  failedReceipts: number
 }
 
 // The owner's page at a glance, like a professional account's insights: distinct devices that
@@ -1455,9 +1609,10 @@ type PaymentsConfig = { isAvailable: boolean; driver: string }
 /** How clients hear about their visits: `isWhatsappOn` when WhatsApp comes before SMS. */
 type ClientMessagingConfig = { isWhatsappOn: boolean }
 
-type TestPaymentResult = { bookingId: string; paymentStatus: string | null }
+/** `bookingId` is null when the payment was for another order (a gift certificate). */
+type TestPaymentResult = { bookingId: string | null; paymentStatus: string | null }
 
-type PaymentSync = { bookingId: string; status: string; paymentStatus: string | null }
+type PaymentSync = { bookingId: string | null; status: string; paymentStatus: string | null }
 
 type CheckoutLink = { url: string }
 
@@ -1483,8 +1638,14 @@ type UploadedPhoto = { url: string }
 
 type SearchCorrection = { query: string; corrected: string | null }
 
-/** Web Push: the server's public VAPID key; `isAvailable` false hides the feature. */
-type PushConfig = { isAvailable: boolean; publicKey: string | null }
+/**
+ * Web Push: the server's public VAPID key; `isAvailable` false hides the feature in browsers.
+ * `isNativeAvailable`: the app's own pushes (Expo) can be sent, so the switch shows in the app.
+ */
+type PushConfig = { isAvailable: boolean; publicKey: string | null; isNativeAvailable: boolean }
+
+/** The app's Expo push token (`ExponentPushToken[…]`), saved for the signed-in person. */
+type PushTokenInput = { token: string }
 
 /** A browser's push subscription (`PushSubscription.toJSON()`), saved for the signed-in person. */
 type PushSubscriptionInput = {
@@ -1495,10 +1656,105 @@ type PushSubscriptionInput = {
 /** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
+// Plans for businesses («Настройки → Тариф»). Plans are rows: prices and limits are data.
+type PlanFeature =
+  | 'cashdesk'
+  | 'inventory'
+  | 'analytics'
+  | 'loyalty'
+  | 'promotions'
+  | 'mailings'
+  | 'import'
+  | 'payroll'
+  | 'team'
+  | 'deposits'
+
+type BillingPlan = {
+  key: string
+  title: string
+  description: string
+  monthlyPrice: number
+  /** Masters the monthly price covers; each further active master adds `extraMasterPrice`. */
+  includedMasters: number
+  extraMasterPrice: number
+  /** null: no limit. */
+  maxMasters: number | null
+  maxBranches: number | null
+  /** SMS a month on top of `smsPerMaster` × masters; null: no limit. */
+  smsPerMonth: number | null
+  smsPerMaster: number
+  features: PlanFeature[]
+  trialDays: number
+}
+
+/** lifetime: the plan of businesses from before plans; expired: back on the free plan. */
+type PlanStatus = 'lifetime' | 'active' | 'trial' | 'free' | 'expired'
+
+/** What the cabinet needs to lock sections: the plan now and its features. */
+type PlanAccess = {
+  planKey: string
+  title: string
+  status: PlanStatus
+  /** When the trial or the paid period ends; null for lifetime and free. */
+  endsAt: string | null
+  features: PlanFeature[]
+  /** The plan that opens locked features («Доступно на тарифе «Бизнес»»). */
+  upgradeTitle: string | null
+}
+
+type SmsPack = { key: string; size: number; price: number }
+
+type BillingPrice = { months: number; amount: number }
+
+type BillingOrderView = { id: string; title: string; amount: number; paidAt: string }
+
+// `GET /manage/:slug/billing` (owners).
+type BusinessBilling = {
+  access: PlanAccess
+  plans: BillingPlan[]
+  smsPacks: SmsPack[]
+  usage: {
+    masters: number
+    branches: number
+    /** SMS sent this month (Bishkek time). */
+    smsSent: number
+    /** The month's SMS on the current plan; null: no limit. */
+    smsAllowance: number | null
+    /** Bought SMS still left (packs). */
+    smsExtra: number
+  }
+  /** What paying the paid plan costs now, for 1 and 12 months, with today's masters. */
+  prices: BillingPrice[]
+  /** The plan these prices are for (the cheapest public paid one). */
+  paidPlanKey: string | null
+  orders: BillingOrderView[]
+  /** Whether payments can be taken (PAYMENT_DRIVER is not «none»). */
+  isPaymentAvailable: boolean
+}
+
+type BillingCheckoutInput =
+  | { kind: 'plan'; planKey: string; months: number }
+  | { kind: 'sms'; packKey: string }
+
+/** Platform admins: extend by months, or make lifetime. */
+type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
+
 export type {
+  BillingCheckoutInput,
+  BillingExtendInput,
+  BillingOrderView,
+  BillingPlan,
+  BillingPrice,
+  BusinessBilling,
+  PaymentOrder,
+  PlanAccess,
+  PlanFeature,
+  PlanStatus,
+  SmsPack,
   PushConfig,
   PushMessage,
   PushSubscriptionInput,
+  PushTokenInput,
   DeviceProfile,
   FunnelEvent,
   FunnelEventMeta,
@@ -1622,6 +1878,7 @@ export type {
   BookingStatus,
   Catalog,
   Category,
+  BookingService,
   CreateBookingInput,
   BookingPayment,
   CreatedBooking,
@@ -1642,6 +1899,7 @@ export type {
   JoinWaitlistInput,
   ManagedWaitlistEntry,
   PaymentPage,
+  OnlineSubscriptionPlan,
   PriceQuote,
   Promotion,
   PromotionInput,
@@ -1666,6 +1924,13 @@ export type {
   OpenShiftInput,
   CashMovementInput,
   CloseShiftInput,
+  FiscalDriverName,
+  TaxRegime,
+  FiscalSettings,
+  FiscalSettingsInput,
+  FiscalReceiptStatus,
+  FiscalReceiptLine,
+  FiscalReceipt,
   ExpenseCategory,
   Expense,
   ExpenseInput,

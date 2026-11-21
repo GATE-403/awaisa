@@ -9,7 +9,7 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { askQuestion } from '@/shared/api/clientApi'
 import type { Business, QuestionList } from '@/shared/api/types'
-import { pluralWord } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -26,6 +26,7 @@ const ASK_FORM = 'ask-question'
 // What people asked before booking and what the place answered: parking, children, cards.
 export const QuestionsSection = ({ business, questions }: QuestionsSectionProps) => {
   const toast = useToast()
+  const t = useT()
   const session = useSession()
   const [isAll, setIsAll] = useState(false)
   const [isAsking, setIsAsking] = useState(false)
@@ -38,15 +39,15 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
   const handleAsk = async (event: React.FormEvent) => {
     event.preventDefault()
     if (text.trim().length < 3) {
-      setError('Напишите вопрос')
+      setError(t('Напишите вопрос'))
       return
     }
     setIsSending(true)
     try {
       await askQuestion(business.slug, text.trim())
       toast.show({
-        title: 'Вопрос отправлен',
-        description: 'Ответ появится здесь, когда место ответит',
+        title: t('Вопрос отправлен'),
+        description: t('Ответ появится здесь, когда место ответит'),
         type: 'success',
       })
       setText('')
@@ -62,7 +63,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
     <section id='questions' className={styles.section} aria-labelledby='place-questions'>
       <div className={styles.head}>
         <h2 id='place-questions' className={styles.title}>
-          Вопросы
+          {t('Вопросы')}
         </h2>
         {questions.count > 0 && <span className={styles.count}>{questions.count}</span>}
         {isSignedIn ? (
@@ -72,7 +73,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
             className={styles.ask}
             onClick={() => setIsAsking(true)}
           >
-            Задать вопрос
+            {t('Задать вопрос')}
           </Button>
         ) : (
           <ButtonLink
@@ -81,21 +82,23 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
             size='sm'
             className={styles.ask}
           >
-            Задать вопрос
+            {t('Задать вопрос')}
           </ButtonLink>
         )}
       </div>
       {questions.items.length === 0 ? (
         <EmptyState
           variant='inline'
-          text='Спросите о парковке, оплате или детях — место ответит здесь.'
+          text={t('Спросите о парковке, оплате или детях — место ответит здесь.')}
         />
       ) : (
         <MoreFade
           hiddenCount={hidden}
           isOpen={isAll}
           onToggle={() => setIsAll((value) => !value)}
-          label={pluralWord(hidden, ['вопрос', 'вопроса', 'вопросов'])}
+          label={t
+            .count(hidden, ['вопрос', 'вопроса', 'вопросов'])
+            .slice(String(hidden).length + 1)}
         >
           <ul className={styles.list}>
             {questions.items.slice(0, isAll ? undefined : FIRST).map((question) => (
@@ -120,13 +123,13 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
       )}
       {isAsking && (
         <Sheet
-          title='Вопрос'
+          title={t('Вопрос')}
           onClose={() => setIsAsking(false)}
-          action={{ label: isSending ? 'Отправляем…' : 'Отправить', form: ASK_FORM }}
+          action={{ label: isSending ? t('Отправляем…') : t('Отправить'), form: ASK_FORM }}
         >
           <form id={ASK_FORM} className={styles.form} onSubmit={handleAsk} noValidate>
             <textarea
-              aria-label={`Вопрос для ${business.name}`}
+              aria-label={t('Вопрос для {name}', { name: business.name })}
               className={styles.textarea}
               value={text}
               onChange={(event) => {
@@ -135,7 +138,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
               }}
               maxLength={500}
               rows={4}
-              placeholder='Есть парковка? Можно оплатить картой?'
+              placeholder={t('Есть парковка? Можно оплатить картой?')}
             />
             {error && (
               <p className={styles.error} role='alert'>
@@ -143,7 +146,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
               </p>
             )}
             <p className={styles.hint}>
-              Вопрос увидят после ответа места — с вашим именем, без номера.
+              {t('Вопрос увидят после ответа места — с вашим именем, без номера.')}
             </p>
           </form>
         </Sheet>
