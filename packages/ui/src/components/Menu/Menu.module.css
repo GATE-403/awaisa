@@ -6,6 +6,10 @@
 /* Solid and lifted: a menu over busy content must stay readable. */
 .popup {
   min-width: 220px;
+  /* A long menu (every business for a platform admin) scrolls inside the room it has. */
+  max-height: min(480px, var(--available-height));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
   border-radius: var(--radius-lg);
   background: var(--color-elevated);

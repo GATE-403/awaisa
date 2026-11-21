@@ -3,7 +3,7 @@
 import NextLink from 'next/link'
 import type { CSSProperties } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
-import { useSession } from '@/entities/session'
+import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
 import {
   isActivePath,
   isBookingPath,
@@ -11,6 +11,7 @@ import {
   isStandalonePath,
   NAV_ITEMS,
 } from '@/shared/config/navigation'
+import { useCabinetEntry } from '@/shared/lib/hooks/useCabinetEntry'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './TabBar.module.css'
@@ -21,9 +22,17 @@ export const TabBar = () => {
   // Reading down a long page, the bar steps aside like Safari's toolbar; any scroll up brings it
   // back. Pages that do not scroll the window (map, «Образы») keep it.
   const isTucked = useTuckOnScroll()
-  // Owners do not need the pitch for businesses: their cabinet is one tap away in the profile.
-  const isOwner = (customer?.businesses?.length ?? 0) > 0 || Boolean(customer?.isAdmin)
-  const items = isOwner ? NAV_ITEMS.filter((item) => item.href !== '/business') : NAV_ITEMS
+  // Notes where someone enters the cabinet from, for its «‹» (the tab bar is always mounted).
+  useCabinetEntry()
+  // Owners do not need the pitch for businesses: their tab leads straight into the cabinet.
+  const items =
+    customer && hasCabinet(customer)
+      ? NAV_ITEMS.map((item) =>
+          item.href === '/business'
+            ? { ...item, href: getCabinetHref(customer), label: 'Кабинет' }
+            : item,
+        )
+      : NAV_ITEMS
 
   if (isBookingPath(pathname) || isCabinetPath(pathname) || isStandalonePath(pathname)) return null
 
