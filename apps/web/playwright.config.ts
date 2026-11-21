@@ -1,3 +1,4 @@
+import { generateKeyPairSync } from 'node:crypto'
 import { defineConfig, devices } from '@playwright/test'
 
 const WEB_PORT = 3210
@@ -6,6 +7,19 @@ const BASE_URL = process.env.E2E_BASE_URL ?? `http://localhost:${WEB_PORT}`
 const API_URL = process.env.E2E_API_URL ?? `http://localhost:${API_PORT}`
 
 process.env.E2E_API_URL = API_URL
+
+// A throwaway VAPID pair per run (P-256, base64url like `web-push generate-vapid-keys`), so the
+// API under test offers Web Push without a key in the repository.
+const vapidKeys = () => {
+  const { privateKey } = generateKeyPairSync('ec', { namedCurve: 'prime256v1' })
+  const { d = '', x = '', y = '' } = privateKey.export({ format: 'jwk' })
+  const point = Buffer.concat([
+    Buffer.from([4]),
+    Buffer.from(x, 'base64url'),
+    Buffer.from(y, 'base64url'),
+  ])
+  return { VAPID_PUBLIC_KEY: point.toString('base64url'), VAPID_PRIVATE_KEY: d }
+}
 
 export default defineConfig({
   testDir: './e2e',
@@ -58,6 +72,8 @@ export default defineConfig({
             TELEGRAM_BOT_USERNAME: 'awaisa_e2e_bot',
             TELEGRAM_WEBHOOK_SECRET: 'e2e-webhook-secret',
             TELEGRAM_BOT_TOKEN: '',
+            ...vapidKeys(),
+            VAPID_SUBJECT: 'mailto:e2e@awaisa.kg',
           },
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

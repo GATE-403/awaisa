@@ -4,10 +4,12 @@ import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import { ChatText, Phone } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatPrice, getDaysAround } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
+import { PushAlertsGroup } from '@/features/pushAlerts'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getMasterDay, setMasterOutcome } from '@/shared/api/clientApi'
 import type { AdminBooking, MasterDay, VisitOutcome } from '@/shared/api/types'
@@ -67,12 +69,19 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
   const session = useRequireSession()
   const toast = useToast()
   const today = useToday()
-  const [selectedDay, setSelectedDay] = useState<string | null>(null)
+  // A push about a booking links to its day (`?date=`), as the cabinet's schedule does.
+  const linkedDate = useSearchParams().get('date')
+  const [selectedDay, setSelectedDay] = useState<string | null>(linkedDate)
   const [day, setDay] = useState<MasterDay | null>(null)
   const [error, setError] = useState<{ message: string; isForbidden: boolean } | null>(null)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
   const isSignedIn = session.status === 'signedIn'
+
+  // A tapped notice for another day takes an already open page there.
+  useEffect(() => {
+    if (linkedDate) setSelectedDay(linkedDate)
+  }, [linkedDate])
 
   useEffect(() => {
     if (!date || !isSignedIn) return
@@ -290,6 +299,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               </ol>
             )}
             <MasterReviews slug={slug} businessName={day.business.name} />
+            <div className={styles.alerts}>
+              <PushAlertsGroup audience='master' listClassName={styles.alertsList} />
+            </div>
           </>
         )}
       </Container>

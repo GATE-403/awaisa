@@ -1294,7 +1294,22 @@ type UploadedPhoto = { url: string }
 
 type SearchCorrection = { query: string; corrected: string | null }
 
+/** Web Push: the server's public VAPID key; `isAvailable` false hides the feature. */
+type PushConfig = { isAvailable: boolean; publicKey: string | null }
+
+/** A browser's push subscription (`PushSubscription.toJSON()`), saved for the signed-in person. */
+type PushSubscriptionInput = {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+}
+
+/** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
+type PushMessage = { title: string; body: string; url: string; tag: string }
+
 export type {
+  PushConfig,
+  PushMessage,
+  PushSubscriptionInput,
   DeviceProfile,
   FunnelEvent,
   FunnelEventMeta,
