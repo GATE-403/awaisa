@@ -14,7 +14,7 @@ import NextLink from 'next/link'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { profileStyle } from '@/entities/profile'
-import { useSession } from '@/entities/session'
+import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
 import { useMyProfile } from '@/features/profileStyle'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { removeAvatar, uploadAvatar } from '@/shared/api/clientApi'
@@ -67,9 +67,8 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   const displayName = customer.name || 'Без имени'
   const businesses = customer.businesses ?? []
   const masterOf = customer.masterOf ?? []
-  const hasCabinet = businesses.length > 0 || customer.isAdmin
-  const cabinetHref =
-    businesses.length === 1 && !customer.isAdmin ? `/manage/${businesses[0]?.slug}` : '/manage'
+  const isCabinetShown = hasCabinet(customer)
+  const cabinetHref = getCabinetHref(customer)
   const cabinetName =
     businesses.length === 1 ? businesses[0]?.name : `${businesses.length || 'Все'} бизнесы`
 
@@ -181,7 +180,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
       {myProfile.profile && <p className={styles.level}>Уровень {myProfile.profile.level.level}</p>}
 
       {/* Small secondary capsules of one height, centred on the column's axis under the face. */}
-      {(hasCabinet || masterOf.length > 0 || myProfile.settings) && (
+      {(isCabinetShown || masterOf.length > 0 || myProfile.settings) && (
         <div className={styles.shortcuts}>
           {myProfile.settings && (
             <ButtonLink
@@ -195,7 +194,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
               Мой профиль
             </ButtonLink>
           )}
-          {hasCabinet && (
+          {isCabinetShown && (
             <ButtonLink variant='secondary' size='sm' render={<NextLink href={cabinetHref} />}>
               <Storefront aria-hidden />
               Кабинет

@@ -102,7 +102,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--color-muted-foreground);
+  font: inherit;
+  cursor: pointer;
 }
 
 .icon svg {
@@ -178,6 +183,123 @@
   white-space: nowrap;
 }
 
+/* The business is a pull-down: tile, name and a small caret, pressed like the bar's glyphs. */
+.switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--control-height-md);
+  margin-left: calc(-1 * var(--space-1));
+  padding: 0 var(--space-2) 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+@media (hover: hover) {
+  .switcher:hover {
+    background: var(--color-fill);
+  }
+}
+
+.switcher[data-popup-open] {
+  background: var(--color-fill);
+}
+
+.switcher:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.switcherCaret {
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  color: var(--color-muted-foreground);
+}
+
+/* Five and a half rows that scroll on their own, like the kit Select's list: the edge fades while
+   there is more that way and a thin scrollbar shows, a hairline parts it from the actions under
+   it. A half row cut off alone did not say what scrolls («не понятно, что скролится»). */
+.switcherList {
+  max-height: calc(44px * 5.5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+@property --switcher-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --switcher-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes switcher-fade-top {
+  from {
+    --switcher-fade-top: 0px;
+  }
+
+  to {
+    --switcher-fade-top: 32px;
+  }
+}
+
+@keyframes switcher-fade-bottom {
+  from {
+    --switcher-fade-bottom: 32px;
+  }
+
+  to {
+    --switcher-fade-bottom: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .switcherList {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--switcher-fade-top),
+      #000 calc(100% - var(--switcher-fade-bottom)),
+      transparent 100%
+    );
+    animation:
+      switcher-fade-top linear both,
+      switcher-fade-bottom linear both;
+    animation-timeline: scroll(self), scroll(self);
+    animation-range:
+      0 32px,
+      calc(100% - 32px) 100%;
+  }
+}
+
+.switcherItem > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.switcherName {
+  overflow: hidden;
+  max-width: 220px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .nav {
   order: 1;
   width: 100%;
@@ -207,4 +329,10 @@
     margin: 0;
     padding: 0;
   }
+}
+
+/* A glyph whose menu is open stays pressed. */
+.group :is(button, a)[data-popup-open] {
+  background: var(--color-fill-hover);
+  color: var(--color-foreground);
 }
