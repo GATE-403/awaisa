@@ -100,6 +100,8 @@ test.describe('Calendar subscription', () => {
         'href',
         /^webcal:\/\/.+\/api\/calendar\/[\w-]{43}\.ics$/,
       )
+      await test.step('sheet design', () =>
+        expectGoodDesign(masterPage, '[role="dialog"]:not([data-type])'))
       const firstUrl = (await subscribe.getAttribute('href'))?.replace('webcal://', 'http://') ?? ''
 
       const feed = await readFeed(masterPage, firstUrl)
@@ -207,6 +209,7 @@ test.describe('Calendar subscription', () => {
       'href',
       /^webcal:/,
     )
+    await test.step('sheet', () => expectGoodDesign(page, '[role="dialog"]:not([data-type])'))
     await page.request.delete(`/api/manage/${SLUG}/calendar`)
   })
 })

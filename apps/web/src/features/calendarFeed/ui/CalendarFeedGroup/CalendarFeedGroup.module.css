@@ -25,8 +25,8 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* One line: the wide accent «Подписаться» and the glyph capsule, one height (40, 44 on phones),
-   like «Поделиться» on the cabinet's page. */
+/* One line: the glyph capsule, then the wide accent «Подписаться» as the sheet's last action,
+   one height (40, 44 on phones), like the cabinet page's floating actions. */
 .actions {
   display: flex;
   align-items: center;
