@@ -8,12 +8,15 @@ import type {
   AnalyticsReport,
   Availability,
   AvatarUpload,
+  BillingCheckoutInput,
+  BillingExtendInput,
   BirthdayGreeting,
   Booking,
   BookingTelegramLink,
   Branch,
   BranchInput,
   BulkReplyResult,
+  BusinessBilling,
   BusinessCard,
   BusinessLink,
   BusinessPage,
@@ -943,6 +946,15 @@ const sendMailing = (
 const setBirthdayGreeting = (slug: string, text: string | null) =>
   send<BirthdayGreeting>('PUT', `${manage(slug)}/mailings/birthday`, { text })
 
+const getBilling = (slug: string, signal?: AbortSignal) =>
+  request<BusinessBilling>(`${manage(slug)}/billing`, { signal })
+
+const checkoutBilling = (slug: string, input: BillingCheckoutInput) =>
+  post<CheckoutLink>(`${manage(slug)}/billing/checkout`, input)
+
+const extendBilling = (slug: string, input: BillingExtendInput) =>
+  post<BusinessBilling>(`${manage(slug)}/billing/extend`, input)
+
 const getTeam = (slug: string, signal?: AbortSignal) =>
   request<TeamMember[]>(`${manage(slug)}/members`, { signal })
 
@@ -953,6 +965,9 @@ const removeTeamMember = (slug: string, id: string) =>
   send<void>('DELETE', `${manage(slug)}/members/${id}`)
 
 export {
+  checkoutBilling,
+  extendBilling,
+  getBilling,
   getFunnelReport,
   getFunnelSegments,
   getFunnelSignals,

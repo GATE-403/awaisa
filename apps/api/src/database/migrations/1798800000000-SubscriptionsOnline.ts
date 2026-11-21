@@ -3,8 +3,8 @@ import type { MigrationInterface, QueryRunner } from 'typeorm'
 // Subscriptions sold on the place's page: a plan may be sold online, an order waits for its
 // payment and only a paid order becomes the client's subscription. A booking may be planned to
 // be paid by a subscription (drawn when the salon marks «Пришёл»).
-export class SubscriptionsOnline1798650000000 implements MigrationInterface {
-  name = 'SubscriptionsOnline1798650000000'
+export class SubscriptionsOnline1798800000000 implements MigrationInterface {
+  name = 'SubscriptionsOnline1798800000000'
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(

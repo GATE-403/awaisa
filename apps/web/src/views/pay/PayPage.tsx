@@ -19,12 +19,50 @@ import styles from './PayPage.module.css'
 const businessOf = (payment: PaymentPage) =>
   payment.booking?.business ?? payment.order?.business ?? { name: '', slug: '' }
 
+type OrderCopy = {
+  doneTitle: string
+  doneHref: (slug: string) => string
+  doneLabel: string
+  expiredText: string
+  retryHref: (slug: string) => string
+  retryLabel: string
+}
+
+// What a paid or expired order says and where it leads, per order kind.
+const GIFT_COPY: OrderCopy = {
+  doneTitle: 'Оплачено. Сертификат готов',
+  doneHref: (slug) => `/${slug}`,
+  doneLabel: 'На страницу места',
+  expiredText: 'Деньги не списаны. Оформите сертификат снова.',
+  retryHref: (slug) => `/${slug}#gift`,
+  retryLabel: 'К сертификатам',
+}
+
+const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
+  subscription: {
+    doneTitle: 'Оплачено. Абонемент ваш',
+    doneHref: () => '/bookings',
+    doneLabel: 'Мои абонементы и записи',
+    expiredText: 'Деньги не списаны. Оформите абонемент снова.',
+    retryHref: (slug) => `/${slug}#subscriptions`,
+    retryLabel: 'К абонементам',
+  },
+  billing: {
+    doneTitle: 'Оплачено',
+    doneHref: (slug) => `/manage/${slug}?tab=billing`,
+    doneLabel: 'Вернуться в кабинет',
+    expiredText: 'Деньги не списаны. Оплатите снова в «Тарифе».',
+    retryHref: (slug) => `/manage/${slug}?tab=billing`,
+    retryLabel: 'К тарифу',
+  },
+}
+
 interface PayPageProps {
   payment: PaymentPage | null
   signature: string
 }
 
-// The checkout of a deposit or an order (a gift certificate). With PAYMENT_DRIVER=test this page
+// The checkout of a deposit or an order (a gift certificate, a subscription, the business's plan). With PAYMENT_DRIVER=test this page
 // is the acquirer; a real one sends the client to its own form and back here. A paid deposit
 // goes on to /bookings?paid=<booking>; a paid order says so right here.
 export const PayPage = ({ payment, signature }: PayPageProps) => {
@@ -92,6 +130,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     order?.status === 'expired' ||
     payment.status === 'failed'
   const dueAt = booking?.dueAt ?? order?.dueAt ?? null
+  const copy = (order && ORDER_COPY[order.kind]) ?? GIFT_COPY
 
   const handlePay = async () => {
     const slug = business.slug
@@ -152,10 +191,14 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='success'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Оплачено. Сертификат готов</p>
+              <p className={styles.stateTitle}>{copy.doneTitle}</p>
               <p className={styles.text}>{order.doneText}</p>
-              <ButtonLink render={<NextLink href={`/${business.slug}`} />} size='lg' fullWidth>
-                На страницу места
+              <ButtonLink
+                render={<NextLink href={copy.doneHref(business.slug)} />}
+                size='lg'
+                fullWidth
+              >
+                {copy.doneLabel}
               </ButtonLink>
             </div>
           ) : isPaid ? (
@@ -180,9 +223,13 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 aria-hidden
               />
               <p className={styles.stateTitle}>Время на оплату вышло</p>
-              <p className={styles.text}>Деньги не списаны. Оформите сертификат снова.</p>
-              <ButtonLink render={<NextLink href={`/${business.slug}#gift`} />} size='lg' fullWidth>
-                К сертификатам
+              <p className={styles.text}>{copy.expiredText}</p>
+              <ButtonLink
+                render={<NextLink href={copy.retryHref(business.slug)} />}
+                size='lg'
+                fullWidth
+              >
+                {copy.retryLabel}
               </ButtonLink>
             </div>
           ) : isExpired ? (

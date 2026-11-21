@@ -5,6 +5,7 @@ import type {
   MailingsOverview,
 } from '@awaisa/contracts'
 import { Body, Controller, Get, Post, Put, Query, UseGuards } from '@nestjs/common'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -21,6 +22,7 @@ import {
 } from './mailings.schemas.js'
 import { MailingsService } from './mailings.service.js'
 
+@RequiresFeature('mailings')
 @Controller('manage/:slug/mailings')
 @OwnerOnly()
 @UseGuards(BusinessAccessGuard)

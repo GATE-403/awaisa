@@ -20,6 +20,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CurrentCustomer } from '../auth/auth.guard.js'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -49,6 +50,7 @@ import { MoneyReportService } from './money-report.service.js'
 
 // The counter is the day's work: staff open and close shifts and sell. Expenses and the profit
 // are money, so owner only.
+@RequiresFeature('cashdesk')
 @Controller('manage/:slug')
 @UseGuards(BusinessAccessGuard)
 export class CashDeskController {

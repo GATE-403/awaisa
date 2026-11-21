@@ -30,6 +30,8 @@ const CLEANUP_SQL = `
   DELETE FROM "client_subscriptions" WHERE "title" LIKE 'E2E %';
   DELETE FROM "subscription_plans" WHERE "title" LIKE 'E2E %';
   DELETE FROM "businesses" WHERE "name" LIKE 'E2E %';
+  DELETE FROM "payments" WHERE "kind" = 'billing'
+    AND "order_id" NOT IN (SELECT "id" FROM "plan_orders");
   DELETE FROM "time_off" WHERE "reason" LIKE 'E2E %';
   DELETE FROM "otp_codes" WHERE "phone" IN (SELECT "phone" FROM "customers" WHERE "name" LIKE 'E2E %');
   DELETE FROM "customers" WHERE "name" LIKE 'E2E %';
