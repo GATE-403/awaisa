@@ -13,6 +13,7 @@ import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useManagedBusiness } from '@/views/manage/model/useManagedBusiness'
 import { AnalyticsTab } from '@/views/manage/ui/AnalyticsTab/AnalyticsTab'
 import { BranchesTab } from '@/views/manage/ui/BranchesTab/BranchesTab'
+import { CashDeskTab } from '@/views/manage/ui/CashDeskTab/CashDeskTab'
 import { ClientsTab } from '@/views/manage/ui/ClientsTab/ClientsTab'
 import { LoyaltyTab } from '@/views/manage/ui/LoyaltyTab/LoyaltyTab'
 import { NotificationsTab } from '@/views/manage/ui/NotificationsTab/NotificationsTab'
@@ -155,8 +156,16 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
               {data && tab === 'analytics' && (
                 <AnalyticsTab slug={slug} business={data.business} catalog={data.catalog} />
               )}
+              {data && tab === 'cash' && (
+                <CashDeskTab slug={slug} business={data.business} catalog={data.catalog} />
+              )}
               {data && tab === 'clients' && (
-                <ClientsTab slug={slug} businessName={data.business.name} />
+                <ClientsTab
+                  slug={slug}
+                  businessName={data.business.name}
+                  specialists={data.catalog.specialists}
+                  branches={data.business.branches.filter((branch) => branch.isActive !== false)}
+                />
               )}
               {data && tab === 'reviews' && (
                 <ReviewsTab slug={slug} businessName={data.business.name} />

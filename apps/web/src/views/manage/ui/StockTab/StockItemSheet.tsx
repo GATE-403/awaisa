@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
+import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
 import type { Service, StockItem, StockItemInput } from '@/shared/api/types'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
@@ -17,7 +18,8 @@ interface StockItemSheetProps {
   services: Service[]
   onClose: () => void
   onSave: (input: StockItemInput) => Promise<boolean>
-  onReceive?: (quantity: number, unitCost?: number) => Promise<boolean>
+  /** `asExpense`: also record what the delivery cost in «Расходы». */
+  onReceive?: (quantity: number, asExpense: boolean) => Promise<boolean>
   onAdjust?: (quantity: number) => Promise<boolean>
   onDelete?: () => void
 }
@@ -59,10 +61,15 @@ export const StockItemSheet = ({
       (item?.materials ?? []).map((entry) => [entry.serviceId, maskDecimal(String(entry.amount))]),
     ),
   )
+  const [isForSale, setIsForSale] = useState(item?.isForSale ?? false)
+  const [salePrice, setSalePrice] = useState(
+    item?.salePrice === null || item?.salePrice === undefined ? '' : String(item.salePrice),
+  )
   const [received, setReceived] = useState('')
+  const [isReceivedExpense, setIsReceivedExpense] = useState(true)
   const [counted, setCounted] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-  const isValid = name.trim() !== '' && unitCost !== ''
+  const isValid = name.trim() !== '' && unitCost !== '' && (!isForSale || salePrice !== '')
   const example = services.find((service) => parseDecimal(amounts[service.id] ?? '') > 0)
   const exampleCost = example
     ? Math.round(parseDecimal(amounts[example.id] ?? '') * parseDecimal(unitCost))
@@ -80,6 +87,8 @@ export const StockItemSheet = ({
       materials: Object.entries(amounts)
         .map(([serviceId, amount]) => ({ serviceId, amount: parseDecimal(amount) }))
         .filter((entry) => entry.amount > 0),
+      isForSale,
+      salePrice: isForSale ? parseDecimal(salePrice) : null,
     })
     setIsSaving(false)
     if (saved) onClose()
@@ -87,7 +96,7 @@ export const StockItemSheet = ({
 
   const receive = async () => {
     if (!onReceive || parseDecimal(received) <= 0) return
-    if (await onReceive(parseDecimal(received))) setReceived('')
+    if (await onReceive(parseDecimal(received), isReceivedExpense)) setReceived('')
   }
 
   const adjust = async () => {
@@ -97,7 +106,7 @@ export const StockItemSheet = ({
 
   return (
     <Sheet
-      title={item ? 'Расходник' : 'Новый расходник'}
+      title={item ? (item.isForSale ? 'Товар' : 'Расходник') : 'Новый расходник'}
       onClose={onClose}
       action={{ label: 'Сохранить', form: FORM_ID, disabled: !isValid || isSaving }}
     >
@@ -155,6 +164,36 @@ export const StockItemSheet = ({
           </label>
         </div>
 
+        <section className={sheet.group} aria-label='Продажа'>
+          <div className={sheet.list}>
+            <label className={sheet.row}>
+              <span className={sheet.rowLabel}>Продаётся клиентам</span>
+              <Switch checked={isForSale} onCheckedChange={setIsForSale} />
+            </label>
+            {isForSale && (
+              <label className={sheet.row}>
+                <span className={sheet.rowLabel}>Цена продажи</span>
+                <span className={sheet.rowControl}>
+                  <Input
+                    variant='plain'
+                    aria-label='Цена продажи, сом'
+                    inputMode='decimal'
+                    placeholder='0'
+                    value={salePrice}
+                    onValueChange={(value) => setSalePrice(maskDecimal(value))}
+                  />
+                  <span className={sheet.suffix}>сом</span>
+                </span>
+              </label>
+            )}
+          </div>
+          <p className={sheet.groupFooter}>
+            {isForSale
+              ? 'Продаётся в «Кассе» и в итоге визита, остаток уменьшается сам.'
+              : 'Шампунь, воск, масло: продавайте с визитом или отдельно.'}
+          </p>
+        </section>
+
         {item && (
           <section className={sheet.group} aria-label='Остаток'>
             <SectionCaption>
@@ -181,6 +220,16 @@ export const StockItemSheet = ({
                   Принять
                 </Button>
               </div>
+              {parseDecimal(received) > 0 && (
+                <label className={sheet.row}>
+                  <span className={sheet.rowLabel}>
+                    Записать в расходы ·{' '}
+                    {maskAmountInput(String(Math.round(parseDecimal(received) * item.unitCost)))}{' '}
+                    сом
+                  </span>
+                  <Switch checked={isReceivedExpense} onCheckedChange={setIsReceivedExpense} />
+                </label>
+              )}
               <div className={sheet.row}>
                 <span className={sheet.rowControl}>
                   <Input

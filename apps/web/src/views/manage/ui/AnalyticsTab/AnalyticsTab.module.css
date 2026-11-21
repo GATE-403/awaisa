@@ -936,3 +936,8 @@ button.heatmapCell:active {
 .masterSchedule {
   align-self: center;
 }
+
+/* «Прибыль» below zero reads as a loss in the danger colour, the sign says it too. */
+.factValue[data-negative] {
+  color: var(--color-danger-text);
+}

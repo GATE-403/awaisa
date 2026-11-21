@@ -15,6 +15,10 @@ const CLEANUP_SQL = `
   DELETE FROM "business_questions" WHERE "author_name" LIKE 'E2E %';
   DELETE FROM "work_photos" WHERE "booking_id" IN (
     SELECT "id" FROM "bookings" WHERE "customer_name" LIKE 'E2E %');
+  DELETE FROM "sales" WHERE "customer_name" LIKE 'E2E %' OR "id" IN (
+    SELECT "sale_id" FROM "sale_items" WHERE "name" LIKE 'E2E %');
+  DELETE FROM "cash_shifts" WHERE "note" LIKE 'E2E %';
+  DELETE FROM "expenses" WHERE "note" LIKE 'E2E %' OR "category" LIKE 'E2E %';
   DELETE FROM "bookings" WHERE "customer_name" LIKE 'E2E %';
   DELETE FROM "stock_items" WHERE "name" LIKE 'E2E %';
   DELETE FROM "promotions" WHERE "title" LIKE 'E2E %';

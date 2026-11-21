@@ -1,0 +1,137 @@
+/* Phones: the last rows scroll out from under the floating actions. */
+@media (max-width: 639px) {
+  .page {
+    padding-bottom: var(--floating-toolbar-space);
+  }
+}
+
+/* The section's tabs, with the branch on their right while the shift is shown. */
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.head > :first-child {
+  min-width: 0;
+}
+
+/* A figure at the row's end: money lines up on the right edge. */
+.amount {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-foreground);
+  white-space: nowrap;
+}
+
+.amount[data-strong] {
+  font-weight: 600;
+}
+
+.amount[data-tone="danger"] {
+  color: var(--color-danger-text);
+}
+
+.amount[data-tone="success"] {
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
+}
+
+.amount[data-struck] {
+  color: var(--color-muted-foreground);
+  text-decoration: line-through;
+}
+
+/* A quiet time column before a row's title. */
+.time {
+  flex-shrink: 0;
+  min-width: 3rem;
+  color: var(--color-muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-cancelled] .time,
+[data-cancelled] :is(.amount) {
+  color: var(--color-muted-foreground);
+}
+
+/* «⋯» at a row's end: a 44pt target around a small glyph. */
+.more {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: calc(var(--space-1) * -1);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-muted-foreground);
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.more::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.more:hover,
+.more[data-popup-open] {
+  color: var(--color-foreground);
+  background: var(--color-fill);
+}
+
+.more:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Sheets: a value on the right of a Settings row, and the segmented control on its own. */
+.value {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted-foreground);
+}
+
+.value[data-strong] {
+  color: var(--color-foreground);
+  font-weight: 600;
+}
+
+.segment {
+  display: flex;
+  justify-content: center;
+}
+
+.footer[data-tone="danger"] {
+  color: var(--color-danger-text);
+}
+
+.footer[data-tone="success"] {
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
+}
+
+/* Rows with a time, a body, a figure and «⋯»: one line, the body takes the room left
+   (doubled class: over the cabinet's two-column row grid). */
+.row.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* A cancelled sale keeps the «⋯» column, so the figures line up on one right edge. */
+.moreSpace {
+  flex-shrink: 0;
+  width: 28px;
+  margin-right: calc(var(--space-1) * -1);
+}

@@ -15,6 +15,7 @@ import {
   Plus,
   Rows,
   ShareNetwork,
+  ShoppingBag,
   X,
 } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -48,6 +49,7 @@ import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { CloseDayBar } from '@/views/manage/ui/CloseDayBar/CloseDayBar'
 import { NewBookingDialog } from '@/views/manage/ui/NewBookingDialog/NewBookingDialog'
 import { NowBar } from '@/views/manage/ui/NowBar/NowBar'
+import { SaleSheet } from '@/views/manage/ui/SaleSheet/SaleSheet'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { ShareWindowsSheet } from '@/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet'
 import { TimeOffDialog } from '@/views/manage/ui/TimeOffDialog/TimeOffDialog'
@@ -119,6 +121,8 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [clientPhone, setClientPhone] = useState<string | null>(null)
+  // Selling products: on its own (null) or with a visit, from its «Итог визита».
+  const [sale, setSale] = useState<{ booking: AdminBooking | null } | null>(null)
   const [waitlist, setWaitlist] = useState<ManagedWaitlistEntry[]>([])
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false)
   // «✕» on the bar: hidden until the cabinet is opened again.
@@ -446,6 +450,11 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                       onClick={() => setIsSharing(true)}
                       disabled={!schedule}
                     />
+                    <GlyphButton
+                      icon={<ShoppingBag aria-hidden />}
+                      label='Продать товар'
+                      onClick={() => setSale({ booking: null })}
+                    />
                     <Menu label='Найти место под услугу' trigger={<MagnifyingGlass aria-hidden />}>
                       {catalog.services
                         .filter((service) => service.isActive !== false)
@@ -606,6 +615,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 setClientPhone(phone)
               }}
               onBookAgain={isPast ? undefined : handleBookCancelledAgain}
+              onSellProducts={(booking) => {
+                setSelected(null)
+                setSale({ booking })
+              }}
             />
           </Popover>
         ) : (
@@ -621,6 +634,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               setClientPhone(phone)
             }}
             onBookAgain={isPast ? undefined : handleBookCancelledAgain}
+            onSellProducts={(booking) => {
+              setSelected(null)
+              setSale({ booking })
+            }}
           />
         ))}
 
@@ -630,6 +647,21 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           phone={clientPhone}
           onClose={() => setClientPhone(null)}
           onBook={isPast ? undefined : handleBookAgain}
+        />
+      )}
+
+      {sale && (
+        <SaleSheet
+          slug={slug}
+          specialists={catalog.specialists}
+          branches={business.branches.filter((branch) => branch.isActive !== false)}
+          booking={sale.booking}
+          method={
+            sale.booking?.paymentMethod === 'card' || sale.booking?.paymentMethod === 'transfer'
+              ? sale.booking.paymentMethod
+              : 'cash'
+          }
+          onClose={() => setSale(null)}
         />
       )}
 
