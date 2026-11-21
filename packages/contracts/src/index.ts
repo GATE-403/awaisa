@@ -1451,6 +1451,15 @@ type AccountExport = {
     createdAt: string
     paidAt: string | null
   }[]
+  /** Gift certificates bought online, for someone else or oneself. */
+  certificateOrders: {
+    business: { slug: string; name: string }
+    amount: number
+    recipientName: string
+    status: string
+    createdAt: string
+    paidAt: string | null
+  }[]
   receipts: {
     business: { slug: string; name: string }
     kind: 'sale' | 'refund'
