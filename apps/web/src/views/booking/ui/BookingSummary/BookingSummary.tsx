@@ -130,16 +130,14 @@ export const BookingSummary = ({
         step: STEPS.indexOf(firstIncompleteStep) + 1,
         total: STEPS.length,
       })
-    : paidWith
-      ? `${shortWhen} · ${paidWith.label}`
-      : deposit
-        ? t('{when} · предоплата {amount}', {
-            when: whenLabel ?? '',
-            amount: formatPrice(deposit),
-          })
-        : address
-          ? `${shortWhen} · ${address}`
-          : whenLabel
+    : deposit
+      ? t('{when} · предоплата {amount}', {
+          when: whenLabel ?? '',
+          amount: formatPrice(deposit),
+        })
+      : address
+        ? `${shortWhen} · ${address}`
+        : whenLabel
 
   if (variant === 'bar') {
     return (
