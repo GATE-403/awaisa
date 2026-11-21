@@ -18,6 +18,7 @@ const payScheme = z
       .nullable()
       .default(null),
     minimum: SUM.nullable().default(null),
+    productsPercent: z.number().int().min(0).max(100).nullable().default(null),
   })
   .refine(
     (scheme) =>

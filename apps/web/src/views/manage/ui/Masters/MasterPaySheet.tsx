@@ -36,6 +36,7 @@ type Draft = {
   salaryKind: SalaryKind | 'none'
   salary: string
   minimum: string
+  productsPercent: string
 }
 
 const SALARY_ITEMS: { value: SalaryKind | 'none'; label: string }[] = [
@@ -60,6 +61,7 @@ const toDraft = (scheme: MasterPayScheme): Draft => ({
   salaryKind: scheme.salary?.kind ?? 'none',
   salary: toText(scheme.salary?.amount ?? null),
   minimum: toText(scheme.minimum),
+  productsPercent: scheme.productsPercent === null ? '' : String(scheme.productsPercent),
 })
 
 const toScheme = (draft: Draft): MasterPayScheme => {
@@ -76,11 +78,12 @@ const toScheme = (draft: Draft): MasterPayScheme => {
         ? null
         : { kind: draft.salaryKind, amount: salary },
     minimum: toNumber(draft.minimum),
+    productsPercent: toNumber(draft.productsPercent),
   }
 }
 
 // How a master is paid, in one sheet of Settings rows: the percent of the services, other rates
-// for some services, a salary per month or per working day, and a minimum per month. The parts
+// for some services, the percent of the products they sell, a salary per month or per working day, and a minimum per month. The parts
 // add up; the pay is never below the minimum.
 export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPaySheetProps) => {
   const toast = useToast()
@@ -93,6 +96,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
     ? offered.filter((service) => !draft.rates.some((rate) => rate.serviceId === service.id))
     : []
   const percentError = draft && (toNumber(draft.percent) ?? 0) > 100
+  const productsError = draft && (toNumber(draft.productsPercent) ?? 0) > 100
   const rateError = draft?.rates.some(
     (rate) => rate.kind === 'percent' && (toNumber(rate.value) ?? 0) > 100,
   )
@@ -152,7 +156,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
       onClose()
       return
     }
-    if (percentError || rateError) return
+    if (percentError || rateError || productsError) return
     setIsSaving(true)
     try {
       await setMasterPay(slug, master.id, toScheme(draft))
@@ -267,6 +271,33 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               {percentError || rateError
                 ? 'Процент не может быть больше 100.'
                 : 'Процент считается от оплаченного деньгами, как в «Аналитике»: скидки, сертификаты, абонементы и бонусы его уменьшают. Без отметки об оплате: от цены со скидкой.'}
+            </p>
+          </section>
+
+          <section className={sheet.group} aria-labelledby='pay-products'>
+            <SectionCaption id='pay-products'>С товаров</SectionCaption>
+            <div className={sheet.list}>
+              <label className={sheet.row}>
+                <span className={sheet.rowLabel}>Процент с продаж</span>
+                <span className={sheet.rowControl}>
+                  <Input
+                    variant='plain'
+                    inputMode='numeric'
+                    aria-label='Процент с продаж'
+                    placeholder='Нет'
+                    value={draft.productsPercent}
+                    onValueChange={(value) =>
+                      update({ productsPercent: digits(value).slice(0, 3) })
+                    }
+                  />
+                  {draft.productsPercent !== '' && <span className={sheet.suffix}>%</span>}
+                </span>
+              </label>
+            </div>
+            <p className={sheet.groupFooter}>
+              {productsError
+                ? 'Процент не может быть больше 100.'
+                : 'От суммы товаров, которые мастер продал в «Кассе» (поле «Продал»). Отменённые продажи не считаются.'}
             </p>
           </section>
 

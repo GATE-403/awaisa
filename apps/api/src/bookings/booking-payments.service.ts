@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { ModuleRef } from '@nestjs/core'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
@@ -14,6 +15,7 @@ import { Booking } from './booking.entity.js'
 import { DEPOSIT_REFUND_HOURS, UNDO_WINDOW_SECONDS } from './booking-rules.js'
 import { BookingsService } from './bookings.service.js'
 import { PaymentsService } from './payments.service.js'
+import { SubscriptionOrdersService } from './subscription-orders.service.js'
 
 /** Deposits on bookings: the pay link, a payment coming through, and releasing unpaid holds. */
 @Injectable()
@@ -26,6 +28,7 @@ export class BookingPaymentsService {
     private readonly telegram: TelegramBotService,
     private readonly push: PushService,
     private readonly cache: CacheService,
+    private readonly moduleRef: ModuleRef,
   ) {}
 
   /** The pay page for a booking still waiting for its deposit (to pay again from the ticket). */
@@ -33,7 +36,11 @@ export class BookingPaymentsService {
     const booking = await this.bookingsService.findAccessible(id, token, customer)
     if (!booking) throw new NotFoundException('Запись не найдена')
     if (booking.paymentStatus !== 'pending') throw new BadRequestException('Оплата не нужна')
-    const url = await this.payments.checkoutFor(id)
+    const url =
+      (await this.payments.checkoutFor(id)) ??
+      (await this.moduleRef
+        .get(SubscriptionOrdersService, { strict: false })
+        .checkoutForBooking(id))
     if (!url) throw new NotFoundException('Платёж не найден')
 
     return { url }
@@ -57,6 +64,25 @@ export class BookingPaymentsService {
       return this.bookingsService.getView(bookingId)
     }
 
+    return this.announce(bookingId)
+  }
+
+  /**
+   * «Купить абонемент и записаться»: the subscription was paid for and issued, so the held booking
+   * is final and paid by it (no deposit left on it). A hold that already ran out stays released:
+   * the client keeps the subscription and books again.
+   */
+  async onSubscriptionPaid(bookingId: string, subscriptionId: string) {
+    const result = await this.bookings.update(
+      { id: bookingId, paymentStatus: 'pending', status: 'confirmed' },
+      { paymentStatus: null, paymentDueAt: null, depositAmount: null, subscriptionId },
+    )
+    if (!result.affected) return this.bookingsService.getView(bookingId)
+
+    return this.announce(bookingId)
+  }
+
+  private async announce(bookingId: string) {
     const booking = await this.bookings.findOneByOrFail({ id: bookingId })
     const view = await this.bookingsService.getView(bookingId)
     if (booking.smsConfirmation) {
@@ -64,6 +90,7 @@ export class BookingPaymentsService {
         text: confirmationMessage(view, this.bookingsService.linkTo(view.id)),
         link: this.bookingsService.manageButton(view.id),
         whatsapp: whatsappConfirmation(view, this.bookingsService.linkTo(view.id)),
+        billing: { businessId: booking.businessId, isOptional: false },
       })
     }
     void this.telegram.notifyBusiness(

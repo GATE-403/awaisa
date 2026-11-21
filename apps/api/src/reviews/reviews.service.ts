@@ -17,6 +17,7 @@ import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { saltOf } from '../common/public-id.js'
 import type { Env } from '../config/env.js'
+import { anonymizeReview } from '../customers/account-erasure.js'
 import type { Customer } from '../customers/customer.entity.js'
 import { processImage } from '../media/images.js'
 import { StorageService } from '../media/storage.service.js'
@@ -52,6 +53,7 @@ type ReviewRow = {
   photos?: string[] | null
   isAutoReply?: boolean
   resolvedAt?: Date | null
+  isAnonymous?: boolean
 }
 
 type ReviewerRow = ReviewRow & {
@@ -138,6 +140,7 @@ export class ReviewsService {
        LEFT JOIN "specialists" sp ON sp."id" = r."specialist_id"
        LEFT JOIN "services" s ON s."id" = r."service_id"
        WHERE left(encode(sha256(convert_to($2 || b."customer_phone", 'UTF8')), 'hex'), 20) = $1
+         AND r."anonymized_at" IS NULL
        ORDER BY r."created_at" DESC LIMIT 50`,
       [id, this.reviewerSalt()],
     )) as ReviewerRow[]
@@ -319,13 +322,15 @@ export class ReviewsService {
          AND b."ends_at" <= now() - make_interval(hours => $1)
          AND b."ends_at" > now() - make_interval(hours => $2)
          AND NOT EXISTS (SELECT 1 FROM "reviews" r WHERE r."booking_id" = b."id")
-       RETURNING b."id", b."customer_phone" AS "phone", bz."name" AS "businessName"`,
+       RETURNING b."id", b."customer_phone" AS "phone", bz."name" AS "businessName",
+         b."business_id" AS "businessId"`,
       [REQUEST_AFTER_HOURS, REQUEST_WITHIN_HOURS],
     )
     const due = (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
       id: string
       phone: string
       businessName: string
+      businessId: string
     }[]
     if (due.length === 0) return
 
@@ -338,6 +343,7 @@ export class ReviewsService {
           text: reviewRequestMessage(row.businessName, link),
           link: { label: 'Оценить', url: link },
           whatsapp: whatsappReviewRequest(row.businessName, link),
+          billing: { businessId: row.businessId, isOptional: true },
         })
       }),
     )
@@ -371,6 +377,7 @@ export class ReviewsService {
          r."replied_at" AS "repliedAt", r."created_at" AS "createdAt",
          sp."name" AS "specialistName", s."name" AS "serviceName", r."service_id" AS "serviceId",
          b."starts_at" AS "visitDate", b."customer_phone" AS "customerPhone",
+         r."anonymized_at" IS NOT NULL AS "isAnonymous",
          c."avatar_url" AS "authorAvatarUrl", r."is_auto_reply" AS "isAutoReply", r."resolved_at" AS "resolvedAt",
          COALESCE((SELECT array_agg(rp."url" ORDER BY rp."created_at") FROM "review_photos" rp
            WHERE rp."review_id" = r."id"), '{}') AS "photos"
@@ -409,9 +416,14 @@ export class ReviewsService {
           }
         : {}),
       items: rows.map((row) => ({
-        ...toView(row, row.customerPhone ? this.reviewerId(row.customerPhone) : null),
-        // The platform's three most active clients wear a laurel wreath on their face.
-        authorRank: (row.customerPhone && clientRanks.get(row.customerPhone)) || null,
+        ...anonymizeReview(
+          {
+            ...toView(row, row.customerPhone ? this.reviewerId(row.customerPhone) : null),
+            // The platform's three most active clients wear a laurel wreath on their face.
+            authorRank: (row.customerPhone && clientRanks.get(row.customerPhone)) || null,
+          },
+          Boolean(row.isAnonymous),
+        ),
         ...(isManage
           ? {
               customerPhone: row.customerPhone ?? '',

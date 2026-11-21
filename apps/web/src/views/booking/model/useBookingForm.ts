@@ -23,7 +23,9 @@ import { distanceKm, knownPosition } from '@/shared/lib/geo'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackFormError } from '@/shared/lib/telemetry'
+import { combineServices, getAddableServices, getMastersForAll } from '../lib/visitServices'
 import { usePriceQuote } from './usePriceQuote'
+import { useSubscriptionPayment } from './useSubscriptionPayment'
 
 type ReminderChoice = 60 | 120 | 1440 | null
 
@@ -75,6 +77,10 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       ? searchParams.get('time')
       : null
   const [serviceId, setServiceId] = useState(presetService?.id ?? null)
+  // Services done after the first in the same visit, by the same master, in this order.
+  const [extraServiceIds, setExtraServiceIds] = useState<string[]>([])
+  // «+ Ещё услуга»: the service step opens again to add one to the visit.
+  const [isAddingService, setIsAddingService] = useState(false)
   const [chosenSpecialistId, setSpecialistId] = useState(
     searchParams.get('specialist') === ANY_SPECIALIST_ID && presetService
       ? ANY_SPECIALIST_ID
@@ -115,7 +121,19 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [editingStep, setEditingStep] = useState<BookingStepId | null>(null)
   // Steps the client folded or unfolded by hand win over the automatic behaviour.
   const [folded, setFolded] = useState<Partial<Record<BookingStepId, boolean>>>({})
-  const service = findService(catalog, serviceId)
+  const firstService = findService(catalog, serviceId)
+  const chosenServices = firstService
+    ? [
+        firstService,
+        ...extraServiceIds.flatMap((id) => {
+          const extra = findService(catalog, id)
+          return extra ? [extra] : []
+        }),
+      ]
+    : []
+  const chosenServiceIds = chosenServices.map((item) => item.id)
+  // The whole visit as one service: «Маникюр + Педикюр», the price and length added up.
+  const service = combineServices(chosenServices)
   // A service is offered at a branch when someone there does it (a master of that branch or one
   // who works at every branch).
   const servesBranch = (id: string, branch: string | undefined) =>
@@ -128,10 +146,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       ? catalog.services.filter((item) => presetSpecialist.serviceIds.includes(item.id))
       : catalog.services
   ).filter((item) => servesBranch(item.id, branchId))
-  // Masters of the chosen branch, plus those who work at every branch.
-  const specialists = getSpecialistsForService(catalog, serviceId).filter(
-    (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
-  )
+  // Masters of the chosen branch (plus those who work at every branch) who do every service.
+  const specialists = getMastersForAll(catalog.specialists, chosenServiceIds, branchId)
+  const addableServices = getAddableServices({
+    services,
+    masters: catalog.specialists,
+    chosenIds: chosenServiceIds,
+    specialistId: chosenSpecialistId,
+    branchId,
+  })
   // One master for the service: nothing to choose, so the step is filled in.
   // «Any master» from a link means that very master when the service has only one.
   const specialistId =
@@ -144,10 +167,16 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     isClosed: !findDay(business.hours, weekdayOf(day.key)),
   }))
   const openDays = days.filter((day) => !day.isClosed)
-  const autoDayKey = `${serviceId}|${specialistId}`
+  const autoDayKey = `${chosenServiceIds.join(',')}|${specialistId}`
   const skips = autoDay.key === autoDayKey ? autoDay.skips : 0
   const dayKey = selectedDayKey ?? openDays[skips]?.key ?? openDays[0]?.key ?? null
-  const availability = useAvailability(serviceId, specialistId, dayKey, branchId)
+  const availability = useAvailability(
+    serviceId,
+    specialistId,
+    dayKey,
+    branchId,
+    chosenServiceIds.slice(1),
+  )
   const isAutoDayFull =
     selectedDayKey === null &&
     !availability.isLoading &&
@@ -159,11 +188,14 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const accountPhone = isForOther ? null : (session.customer?.phone ?? null)
   const { quote, codeError } = usePriceQuote({
     serviceId,
+    extraServiceIds: chosenServiceIds.slice(1),
     date: dayKey,
     time,
     code: promoCode,
     phone: accountPhone ?? phone,
   })
+  const subscriptionPayment = useSubscriptionPayment(business.slug, serviceId)
+  const isPaidBySubscription = Boolean(subscriptionPayment.subscription || subscriptionPayment.plan)
   const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
@@ -316,6 +348,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // and the link's preset; the name and phone stay — they are the same person.
   const startOver = () => {
     setServiceId(null)
+    setExtraServiceIds([])
+    setIsAddingService(false)
     setSpecialistId(null)
     setSelectedDayKey(null)
     setTime(null)
@@ -334,9 +368,10 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
 
   const selectService = (id: string) => {
     setFolded((current) => ({ ...current, service: undefined }))
-    const nextSpecialists = getSpecialistsForService(catalog, id).filter(
-      (specialist) => !branchId || !specialist.branchId || specialist.branchId === branchId,
-    )
+    // Another first service starts the visit over: the ones added to it went with the old one.
+    setExtraServiceIds([])
+    setIsAddingService(false)
+    const nextSpecialists = getMastersForAll(catalog.specialists, [id], branchId)
     const keepsSpecialist =
       chosenSpecialistId === ANY_SPECIALIST_ID ||
       nextSpecialists.some((item) => item.id === chosenSpecialistId)
@@ -347,6 +382,37 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (!keepsSpecialist) setSpecialistId(null)
     setEditingStep(null)
     scrollToStep(hasSpecialist ? 'datetime' : 'specialist', true)
+  }
+
+  // The visit gains a service done right after the others; a master who does not do it lets go.
+  const addService = (id: string) => {
+    const nextIds = [...chosenServiceIds, id]
+    const keepsSpecialist =
+      chosenSpecialistId === ANY_SPECIALIST_ID ||
+      getMastersForAll(catalog.specialists, nextIds, branchId).some(
+        (item) => item.id === chosenSpecialistId,
+      )
+    setExtraServiceIds(nextIds.slice(1))
+    setIsAddingService(false)
+    setTime(null)
+    setSubmitError(null)
+    if (!keepsSpecialist) setSpecialistId(null)
+    setEditingStep(null)
+    scrollToStep(keepsSpecialist && chosenSpecialistId ? 'datetime' : 'specialist', true)
+  }
+
+  const removeService = (id: string) => {
+    setExtraServiceIds((current) => current.filter((item) => item !== id))
+    setIsAddingService(false)
+    setTime(null)
+    setEditingStep(null)
+    scrollToStep('datetime', true)
+  }
+
+  const openAddService = () => {
+    setIsAddingService(true)
+    setEditingStep(null)
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const selectSpecialist = (id: string) => {
@@ -365,9 +431,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (id === branchId) return
     setBranchId(id)
     setSubmitError(null)
-    const keepsService = serviceId !== null && servesBranch(serviceId, id)
+    const keepsService =
+      chosenServiceIds.length > 0 &&
+      getMastersForAll(catalog.specialists, chosenServiceIds, id).length > 0
     if (!keepsService) {
       setServiceId(null)
+      setExtraServiceIds([])
       setSpecialistId(null)
       setTime(null)
       return
@@ -407,6 +476,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     time: string
   }) => {
     setServiceId(pick.serviceId)
+    setExtraServiceIds([])
     setSpecialistId(pick.specialistId)
     setSelectedDayKey(pick.dayKey)
     setTime(pick.time)
@@ -430,6 +500,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     try {
       const { cancelToken, checkoutUrl, ...booking } = await createBooking({
         serviceId,
+        extraServiceIds: chosenServiceIds.slice(1),
         specialistId,
         date: dayKey,
         time,
@@ -440,8 +511,11 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         branchId,
         smsConfirmation,
         reminderMinutes,
-        promoCode: promoCode && !codeError ? promoCode : undefined,
+        promoCode: promoCode && !codeError && !isPaidBySubscription ? promoCode : undefined,
         ref: readRef(),
+        // Paid by a subscription: one's own at this place, or one bought now with the visit.
+        subscriptionId: isForOther ? undefined : subscriptionPayment.subscription?.id,
+        subscriptionPlanId: isForOther ? undefined : subscriptionPayment.plan?.id,
       })
       saveBooking({ id: booking.id, token: cancelToken, snapshot: booking })
       // Someone else's name and number are not the guest's own next time.
@@ -495,6 +569,14 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     service,
     services,
     serviceId,
+    chosenServices,
+    chosenServiceIds,
+    addableServices,
+    isAddingService,
+    openAddService,
+    closeAddService: () => setIsAddingService(false),
+    addService,
+    removeService,
     specialists,
     specialistId,
     days,
@@ -527,6 +609,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     reminderMinutes,
     setReminderMinutes,
     quote,
+    subscriptionPayment,
+    isPaidBySubscription,
     promoCode,
     promoCodeError: codeError,
     applyPromoCode: (code: string) => setPromoCode(code.trim().toUpperCase() || null),

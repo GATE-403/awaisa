@@ -17,6 +17,7 @@ type DueReturn = {
   specialist_name: string
   business_name: string
   business_slug: string
+  business_id: string
 }
 
 // Texted in the daytime only: a nudge to book is not worth waking anyone up.
@@ -68,7 +69,8 @@ export class ReturnVisitsService {
             AND later."status" = 'confirmed'
         )
       RETURNING b."customer_phone", b."service_id", b."specialist_id", s."name" AS service_name,
-        sp."name" AS specialist_name, bz."name" AS business_name, bz."slug" AS business_slug
+        sp."name" AS specialist_name, bz."name" AS business_name, bz."slug" AS business_slug,
+        b."business_id"
       `,
       [DUE_WINDOW_DAYS],
     )
@@ -95,6 +97,7 @@ export class ReturnVisitsService {
           row.specialist_name,
           link,
         ),
+        billing: { businessId: row.business_id, isOptional: true },
       })
     }
     this.logger.log(`Return-visit reminders: ${seen.size}`)

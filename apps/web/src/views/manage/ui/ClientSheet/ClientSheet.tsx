@@ -18,6 +18,7 @@ import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
+import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { BirthdayField } from './BirthdayField'
 import { ClientLoyaltySection } from './ClientLoyaltySection'
 import styles from './ClientSheet.module.css'
@@ -74,6 +75,7 @@ const visitStatus = (item: ClientCard['history'][number]) => {
 // private notes. Contacts are one tap away.
 export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientSheetProps) => {
   const canSeeMoney = useCanSeeMoney()
+  const hasLoyalty = useHasFeature('loyalty')
   const toast = useToast()
   const noteId = useId()
   const [card, setCard] = useState<ClientCard | null>(null)
@@ -203,7 +205,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
             </div>
           </section>
 
-          <ClientLoyaltySection slug={slug} phone={card.phone} />
+          {hasLoyalty && <ClientLoyaltySection slug={slug} phone={card.phone} />}
 
           {history.length > 0 && (
             <section className={sheet.group} aria-label='История'>

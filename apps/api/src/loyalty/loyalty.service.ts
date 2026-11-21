@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm'
 import { toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
 import type { CertificateInput, PlanInput } from './loyalty.schemas.js'
+import { type SettledVisit, subscriptionCovers } from './visit-cover.js'
 
 type Row = Record<string, unknown>
 
@@ -16,12 +17,11 @@ type VisitExtras = {
   bonusAmount?: number | null
 }
 
-type VisitToSettle = {
+type VisitToSettle = SettledVisit & {
   id: string
   businessId: string
   phone: string
   serviceId: string
-  due: number
 }
 
 // Codes people read aloud at the desk: no 0/O, 1/I/L.
@@ -67,7 +67,7 @@ export class LoyaltyService {
   async listPlans(businessId: string) {
     const rows = await this.query(
       `SELECT p."id", p."title", p."service_id" AS "serviceId", s."name" AS "serviceName",
-         p."visits", p."price", p."valid_days" AS "validDays", p."is_active" AS "isActive"
+         p."visits", p."price", p."valid_days" AS "validDays", p."is_active" AS "isActive", p."is_online" AS "isOnline"
        FROM "subscription_plans" p LEFT JOIN "services" s ON s."id" = p."service_id"
        WHERE p."business_id" = $1 ORDER BY p."created_at" DESC`,
       [businessId],
@@ -81,6 +81,7 @@ export class LoyaltyService {
       price: toNumber(row.price),
       validDays: toNumber(row.validDays),
       isActive: Boolean(row.isActive),
+      isOnline: Boolean(row.isOnline),
     }))
   }
 
@@ -93,11 +94,13 @@ export class LoyaltyService {
       input.price,
       input.validDays,
       input.isActive,
+      // A free plan has nothing to pay online.
+      input.isOnline && input.price > 0,
     ]
     if (id) {
       const updated = await this.query(
         `UPDATE "subscription_plans" SET "title" = $3, "service_id" = $4, "visits" = $5, "price" = $6,
-           "valid_days" = $7, "is_active" = $8
+           "valid_days" = $7, "is_active" = $8, "is_online" = $9
          WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
         [id, businessId, ...values],
       )
@@ -105,7 +108,7 @@ export class LoyaltyService {
     } else {
       await this.query(
         `INSERT INTO "subscription_plans" ("business_id", "title", "service_id", "visits", "price",
-           "valid_days", "is_active") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+           "valid_days", "is_active", "is_online") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         [businessId, ...values],
       )
     }
@@ -256,6 +259,11 @@ export class LoyaltyService {
       .filter((row) => row.bonusBalance > 0 || row.subscriptions.length > 0)
   }
 
+  /** The live subscriptions of a number at one place (the booking form's «Оплатить абонементом»). */
+  async subscriptionsAt(businessId: string, phone: string) {
+    return (await this.forClient(businessId, phone)).subscriptions
+  }
+
   // ---------- Visits ----------
 
   /**
@@ -264,7 +272,7 @@ export class LoyaltyService {
    * used at most once per visit, so saving the outcome again does not spend twice.
    */
   async applyToVisit(visit: VisitToSettle, extras: VisitExtras) {
-    let covered = await this.alreadyCovered(visit.id)
+    let covered = await this.alreadyCovered(visit)
     let method: 'subscription' | 'certificate' | null = null
 
     if (extras.subscriptionId) {
@@ -272,19 +280,33 @@ export class LoyaltyService {
         `WITH sub AS (
            UPDATE "client_subscriptions" SET "visits_left" = "visits_left" - 1
            WHERE "id" = $1 AND "business_id" = $2 AND "phone" = $3 AND "visits_left" > 0
-             AND "expires_on" >= $4 AND ("service_id" IS NULL OR "service_id" = $5)
+             AND "expires_on" >= $4 AND ("service_id" IS NULL OR "service_id" = ANY($5))
              AND NOT EXISTS (SELECT 1 FROM "subscription_uses" WHERE "booking_id" = $6)
            RETURNING "id")
          INSERT INTO "subscription_uses" ("subscription_id", "booking_id")
          SELECT "id", $6 FROM sub RETURNING "id"`,
-        [extras.subscriptionId, visit.businessId, visit.phone, today(), visit.serviceId, visit.id],
+        [
+          extras.subscriptionId,
+          visit.businessId,
+          visit.phone,
+          today(),
+          visit.lines?.map((line) => line.serviceId) ?? [visit.serviceId],
+          visit.id,
+        ],
       )
       if (used.length === 0 && !(await this.hasSubscriptionUse(visit.id))) {
         throw new BadRequestException(
           'Абонемент не подходит: закончился, истёк или на другую услугу',
         )
       }
-      covered = visit.due
+      // Used just now: add what it pays; used before, `covered` already counts it.
+      if (used.length > 0) {
+        const [plan] = await this.query(
+          'SELECT "service_id" AS "serviceId" FROM "client_subscriptions" WHERE "id" = $1',
+          [extras.subscriptionId],
+        )
+        covered += subscriptionCovers(visit, (plan?.serviceId as string | null) ?? null)
+      }
       method = 'subscription'
     }
 
@@ -346,6 +368,41 @@ export class LoyaltyService {
     return { covered: Math.min(covered, visit.due), method }
   }
 
+  /**
+   * «Все пришли»: visits booked to be paid by a subscription draw a visit from it and are paid
+   * by it; one whose subscription ran out meanwhile stays paid in cash, as marked.
+   */
+  async usePlannedSubscriptions(bookingIds: string[]) {
+    if (bookingIds.length === 0) return
+    const planned = await this.query(
+      `SELECT b."id", b."business_id" AS "businessId", b."customer_phone" AS "phone",
+         b."service_id" AS "serviceId", b."subscription_id" AS "subscriptionId"
+       FROM "bookings" b WHERE b."id" = ANY($1) AND b."subscription_id" IS NOT NULL`,
+      [bookingIds],
+    )
+    for (const row of planned) {
+      const visit = {
+        id: String(row.id),
+        businessId: String(row.businessId),
+        phone: String(row.phone),
+        serviceId: String(row.serviceId),
+        due: 0,
+      }
+      const isDrawn = await this.applyToVisit(visit, { subscriptionId: String(row.subscriptionId) })
+        .then(() => true)
+        .catch((error: unknown) => {
+          if (error instanceof BadRequestException) return false
+          throw error
+        })
+      if (isDrawn) {
+        await this.query(
+          `UPDATE "bookings" SET "paid_amount" = 0, "payment_method" = 'subscription' WHERE "id" = $1`,
+          [visit.id],
+        )
+      }
+    }
+  }
+
   /** The visit is no longer «arrived»: everything it drew on comes back, earned bonuses go. */
   async revertVisits(bookingIds: string[]) {
     if (bookingIds.length === 0) return
@@ -390,16 +447,23 @@ export class LoyaltyService {
     )
   }
 
-  private async alreadyCovered(bookingId: string) {
+  private async alreadyCovered(visit: VisitToSettle) {
+    const bookingId = visit.id
     const [row] = await this.query(
       `SELECT
          (SELECT COUNT(*) FROM "subscription_uses" WHERE "booking_id" = $1)::int AS "subscriptions",
+         (SELECT cs."service_id" FROM "subscription_uses" su
+            JOIN "client_subscriptions" cs ON cs."id" = su."subscription_id"
+            WHERE su."booking_id" = $1 LIMIT 1) AS "planServiceId",
          (SELECT COALESCE(SUM("amount"), 0) FROM "certificate_uses" WHERE "booking_id" = $1)::int AS "certificates",
          (SELECT COALESCE(-SUM("amount"), 0) FROM "bonus_transactions" WHERE "booking_id" = $1 AND "kind" = 'spend')::int AS "bonuses"`,
       [bookingId],
     )
-    if (toNumber(row?.subscriptions) > 0) return Number.POSITIVE_INFINITY
-    return toNumber(row?.certificates) + toNumber(row?.bonuses)
+    const subscription =
+      toNumber(row?.subscriptions) > 0
+        ? subscriptionCovers(visit, (row?.planServiceId as string | null) ?? null)
+        : 0
+    return subscription + toNumber(row?.certificates) + toNumber(row?.bonuses)
   }
 
   private async hasBonusSpend(bookingId: string) {

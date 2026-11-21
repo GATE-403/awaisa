@@ -13,6 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -51,6 +52,7 @@ export class PromotionsController {
   }
 }
 
+@RequiresFeature('promotions')
 @Controller('manage/:slug/promotions')
 @OwnerOnly()
 @UseGuards(BusinessAccessGuard)

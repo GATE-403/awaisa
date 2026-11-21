@@ -14,6 +14,7 @@ import {
   saveSubscriptionPlan,
   setBonusPercent,
 } from '@/shared/api/clientApi'
+import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
 import { pluralize } from '@/shared/lib/plural'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
@@ -53,6 +54,8 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
   const run = async (action: () => Promise<unknown>, title: string) => {
     try {
       await action()
+      // Plans sold online show on the public page: refresh it at once.
+      void refreshBusiness(slug)
       toast.show({ title, type: 'success' })
       await load()
       return true
@@ -136,6 +139,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                     <span className={styles.rowMeta}>
                       {[
                         !plan.isActive && 'Не продаётся',
+                        plan.isActive && plan.isOnline && 'Онлайн',
                         pluralize(plan.visits, ['визит', 'визита', 'визитов']),
                         plan.serviceName ?? 'любая услуга',
                         `${plan.validDays} дн.`,

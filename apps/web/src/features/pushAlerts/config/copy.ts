@@ -4,9 +4,12 @@ const INSTALL_HINT =
 
 const DENIED_HINT = 'Уведомления запрещены в настройках браузера для этого сайта: разрешите их там.'
 
+// In the app the answer lives in the phone's settings, not a browser's.
+const APP_DENIED_HINT = 'Уведомления запрещены в настройках телефона для Awaisa: разрешите их там.'
+
 const AUDIENCE_NOTES = {
   business: 'Новые записи, переносы и отмены клиентов, даже когда кабинет закрыт.',
   master: 'Новые записи к вам, переносы и отмены, даже когда страница закрыта.',
 }
 
-export { AUDIENCE_NOTES, DENIED_HINT, INSTALL_HINT }
+export { APP_DENIED_HINT, AUDIENCE_NOTES, DENIED_HINT, INSTALL_HINT }
