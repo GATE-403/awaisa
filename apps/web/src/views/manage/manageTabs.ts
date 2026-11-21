@@ -1,3 +1,5 @@
+import type { PlanFeature } from '@/shared/api/types'
+
 type ManageTab =
   | 'schedule'
   | 'clients'
@@ -14,6 +16,7 @@ type ManageTab =
   | 'hours'
   | 'page'
   | 'notifications'
+  | 'billing'
   /** The settings list itself: on phones the iOS Settings root, on wide screens the first section. */
   | 'settings'
 
@@ -33,6 +36,7 @@ const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
       { value: 'branches', label: 'Филиалы', tone: 'green' },
       { value: 'notifications', label: 'Уведомления', tone: 'red' },
       { value: 'team', label: 'Сотрудники', tone: 'gray' },
+      { value: 'billing', label: 'Тариф', tone: 'blue' },
     ],
   },
   {
@@ -87,8 +91,21 @@ const STAFF_TABS: ManageTab[] = ['schedule', 'clients', 'cash', 'reviews']
 const isTabAllowed = (tab: ManageTab, role: 'owner' | 'staff') =>
   role === 'owner' || STAFF_TABS.includes(tab)
 
+// Sections the free plan does not open: they show «Доступно на тарифе …» instead.
+const TAB_FEATURES: Partial<Record<ManageTab, PlanFeature>> = {
+  analytics: 'analytics',
+  cash: 'cashdesk',
+  promotions: 'promotions',
+  loyalty: 'loyalty',
+  stock: 'inventory',
+}
+
+/** The plan feature a section needs, or null when every plan has it. */
+const tabFeature = (tab: ManageTab) => TAB_FEATURES[tab] ?? null
+
 export type { ManageTab, SettingsItem, SettingsTone }
 export {
+  tabFeature,
   isSettingsTab,
   isTabAllowed,
   MAIN_TABS,

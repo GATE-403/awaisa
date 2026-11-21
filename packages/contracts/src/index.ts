@@ -154,6 +154,8 @@ type BusinessPage = {
   catalog: Catalog
   /** Cabinet only: the viewer's role; staff (administrators) see no money or setup. */
   role?: 'owner' | 'staff'
+  /** Cabinet only: the business's plan now and what it opens. */
+  access?: PlanAccess
 }
 
 type TeamMember = { id: string; phone: string; name: string; role: 'owner' | 'admin' }
@@ -218,7 +220,22 @@ type BookingPayment = {
   dueAt: string | null
 }
 
-// The pay page (`GET /payments/:id?s=`).
+/** An order paid on /pay that is not a booking's deposit (a gift certificate, …). */
+type PaymentOrder = {
+  kind: string
+  /** «Подарочный сертификат на 3 000 сом». */
+  title: string
+  /** One line under it: «Для Айгуль · от Нурлана». */
+  details: string
+  business: { name: string; slug: string }
+  /** Until when the order waits for its payment; null once paid or gone. */
+  dueAt: string | null
+  status: 'pending' | 'paid' | 'expired'
+  /** What the paid page says: «Код отправили вам и получателю по SMS». */
+  doneText: string
+}
+
+// The pay page (`GET /payments/:id?s=`): a booking's deposit or another order.
 type PaymentPage = {
   id: string
   amount: number
@@ -236,7 +253,8 @@ type PaymentPage = {
     paymentStatus: BookingPayment['status'] | null
     dueAt: string | null
     business: { name: string; slug: string }
-  }
+  } | null
+  order: PaymentOrder | null
 }
 
 type Review = {
@@ -1413,9 +1431,10 @@ type PaymentsConfig = { isAvailable: boolean; driver: string }
 /** How clients hear about their visits: `isWhatsappOn` when WhatsApp comes before SMS. */
 type ClientMessagingConfig = { isWhatsappOn: boolean }
 
-type TestPaymentResult = { bookingId: string; paymentStatus: string | null }
+/** `bookingId` is null when the payment was for another order (a gift certificate). */
+type TestPaymentResult = { bookingId: string | null; paymentStatus: string | null }
 
-type PaymentSync = { bookingId: string; status: string; paymentStatus: string | null }
+type PaymentSync = { bookingId: string | null; status: string; paymentStatus: string | null }
 
 type CheckoutLink = { url: string }
 
@@ -1453,7 +1472,101 @@ type PushSubscriptionInput = {
 /** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
+// Plans for businesses («Настройки → Тариф»). Plans are rows: prices and limits are data.
+type PlanFeature =
+  | 'cashdesk'
+  | 'inventory'
+  | 'analytics'
+  | 'loyalty'
+  | 'promotions'
+  | 'mailings'
+  | 'import'
+  | 'payroll'
+  | 'team'
+  | 'deposits'
+
+type BillingPlan = {
+  key: string
+  title: string
+  description: string
+  monthlyPrice: number
+  /** Masters the monthly price covers; each further active master adds `extraMasterPrice`. */
+  includedMasters: number
+  extraMasterPrice: number
+  /** null: no limit. */
+  maxMasters: number | null
+  maxBranches: number | null
+  /** SMS a month on top of `smsPerMaster` × masters; null: no limit. */
+  smsPerMonth: number | null
+  smsPerMaster: number
+  features: PlanFeature[]
+  trialDays: number
+}
+
+/** lifetime: the plan of businesses from before plans; expired: back on the free plan. */
+type PlanStatus = 'lifetime' | 'active' | 'trial' | 'free' | 'expired'
+
+/** What the cabinet needs to lock sections: the plan now and its features. */
+type PlanAccess = {
+  planKey: string
+  title: string
+  status: PlanStatus
+  /** When the trial or the paid period ends; null for lifetime and free. */
+  endsAt: string | null
+  features: PlanFeature[]
+  /** The plan that opens locked features («Доступно на тарифе «Бизнес»»). */
+  upgradeTitle: string | null
+}
+
+type SmsPack = { key: string; size: number; price: number }
+
+type BillingPrice = { months: number; amount: number }
+
+type BillingOrderView = { id: string; title: string; amount: number; paidAt: string }
+
+// `GET /manage/:slug/billing` (owners).
+type BusinessBilling = {
+  access: PlanAccess
+  plans: BillingPlan[]
+  smsPacks: SmsPack[]
+  usage: {
+    masters: number
+    branches: number
+    /** SMS sent this month (Bishkek time). */
+    smsSent: number
+    /** The month's SMS on the current plan; null: no limit. */
+    smsAllowance: number | null
+    /** Bought SMS still left (packs). */
+    smsExtra: number
+  }
+  /** What paying the paid plan costs now, for 1 and 12 months, with today's masters. */
+  prices: BillingPrice[]
+  /** The plan these prices are for (the cheapest public paid one). */
+  paidPlanKey: string | null
+  orders: BillingOrderView[]
+  /** Whether payments can be taken (PAYMENT_DRIVER is not «none»). */
+  isPaymentAvailable: boolean
+}
+
+type BillingCheckoutInput =
+  | { kind: 'plan'; planKey: string; months: number }
+  | { kind: 'sms'; packKey: string }
+
+/** Platform admins: extend by months, or make lifetime. */
+type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
+
 export type {
+  BillingCheckoutInput,
+  BillingExtendInput,
+  BillingOrderView,
+  BillingPlan,
+  BillingPrice,
+  BusinessBilling,
+  PaymentOrder,
+  PlanAccess,
+  PlanFeature,
+  PlanStatus,
+  SmsPack,
   PushConfig,
   PushMessage,
   PushSubscriptionInput,

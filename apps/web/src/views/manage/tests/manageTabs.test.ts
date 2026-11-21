@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { isSettingsTab, isTabAllowed, MAIN_TABS, SETTINGS_TABS, toManageTab } from '../manageTabs'
+import {
+  isSettingsTab,
+  isTabAllowed,
+  MAIN_TABS,
+  SETTINGS_TABS,
+  tabFeature,
+  toManageTab,
+} from '../manageTabs'
 
 describe('toManageTab', () => {
   it('opens the tab a link names', () => {
@@ -40,5 +47,19 @@ describe('isSettingsTab', () => {
     expect(isSettingsTab('settings')).toBe(true)
     expect(SETTINGS_TABS.every((tab) => isSettingsTab(tab.value))).toBe(true)
     expect(MAIN_TABS.some((tab) => isSettingsTab(tab.value))).toBe(false)
+  })
+})
+
+describe('tabFeature', () => {
+  it('names the plan feature of paid sections and nothing for the rest', () => {
+    expect(tabFeature('cash')).toBe('cashdesk')
+    expect(tabFeature('stock')).toBe('inventory')
+    expect(tabFeature('analytics')).toBe('analytics')
+    expect(tabFeature('schedule')).toBeNull()
+    expect(tabFeature('billing')).toBeNull()
+  })
+
+  it('opens «Тариф» from the link in the reminders', () => {
+    expect(toManageTab('billing')).toBe('billing')
   })
 })

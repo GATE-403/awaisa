@@ -9,6 +9,7 @@ import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 
 interface ServiceDialogProps {
   service: Service | null
@@ -43,7 +44,9 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
   const [price, setPrice] = useState(service ? String(service.price) : '')
   const [rebookDays, setRebookDays] = useState<number | null>(service?.rebookDays ?? null)
   const [deposit, setDeposit] = useState(service?.deposit ? String(service.deposit) : '')
-  const [canTakeDeposits, setCanTakeDeposits] = useState(false)
+  const [isPaymentOn, setIsPaymentOn] = useState(false)
+  const hasDeposits = useHasFeature('deposits')
+  const canTakeDeposits = isPaymentOn && hasDeposits
   const [description, setDescription] = useState(service?.description ?? '')
   const [isPopular, setIsPopular] = useState(service?.isPopular ?? false)
   const [isActive, setIsActive] = useState(service?.isActive ?? true)
@@ -57,7 +60,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
   useEffect(() => {
     const controller = new AbortController()
     getPaymentConfig(controller.signal)
-      .then((config) => setCanTakeDeposits(config.isAvailable))
+      .then((config) => setIsPaymentOn(config.isAvailable))
       .catch(() => undefined)
     return () => controller.abort()
   }, [])
