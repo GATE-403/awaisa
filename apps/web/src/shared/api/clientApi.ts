@@ -86,6 +86,10 @@ import type {
   MasterPlace,
   MasterReviews,
   MasterSchedule,
+  ModerationDecision,
+  ModerationDecisionInput,
+  ModerationLog,
+  ModerationQueue,
   MoneyReport,
   MovedBooking,
   MyLoyalty,
@@ -108,6 +112,7 @@ import type {
   PushTokenInput,
   RecentBooking,
   Recommendation,
+  ReportInput,
   ReviewAccess,
   ReviewerProfile,
   ReviewPhotos,
@@ -720,7 +725,18 @@ const getRecommendations = (
   return request<Recommendation[]>(`/recommendations?${params}`, { signal })
 }
 
-const reportFeedItem = (id: string) => post<void>(`/feed/${id}/report`, {})
+/** A viewer's report: a work photo, a review or a profile, with its reason. */
+const reportContent = (input: ReportInput) => post<void>('/reports', input)
+
+// Platform admins: what was reported, what to do with it and what was decided.
+const getModerationQueue = (signal?: AbortSignal) =>
+  request<ModerationQueue>('/moderation/queue', { signal })
+
+const getModerationLog = (signal?: AbortSignal) =>
+  request<ModerationLog>('/moderation/decisions?limit=50', { signal })
+
+const decideModeration = (input: ModerationDecisionInput) =>
+  post<ModerationDecision>('/moderation/decisions', input)
 
 const uploadSpecialistPhoto = (slug: string, id: string, file: File) =>
   upload<SpecialistPhotoUpload>(`${manage(slug)}/specialists/${id}/photo`, file)
@@ -996,6 +1012,9 @@ export {
   getBilling,
   getFunnelReport,
   getFunnelSegments,
+  getModerationLog,
+  getModerationQueue,
+  decideModeration,
   getFunnelSignals,
   listOffersByIds,
   listOffersPage,
@@ -1028,7 +1047,7 @@ export {
   updateWorkPhoto,
   addVisitPhoto,
   getFeed,
-  reportFeedItem,
+  reportContent,
   getRecommendations,
   importBookings,
   getStock,

@@ -1682,6 +1682,66 @@ type PushSubscriptionInput = {
 /** What the service worker shows; `tag` is the booking id, so one booking never shows twice. */
 type PushMessage = { title: string; body: string; url: string; tag: string }
 
+/** What can be reported: a work photo, a review, a person's public profile (`/u/<id>`). */
+type ReportTargetType = 'photo' | 'review' | 'profile'
+
+type ReportReason = 'spam' | 'offensive' | 'fake' | 'explicit' | 'other'
+
+/** A report from a viewer: the device session counts when they are not signed in. */
+type ReportInput = {
+  targetType: ReportTargetType
+  targetId: string
+  reason: ReportReason
+  session?: string
+}
+
+type ModerationAction = 'keep' | 'hide' | 'delete' | 'block'
+
+/** What the moderator sees of the reported thing (the parts that apply to its type). */
+type ModerationPreview = {
+  title: string
+  text: string | null
+  imageUrl: string | null
+  rating: number | null
+  /** Where it lives on the site, to open it. */
+  href: string | null
+  business: { slug: string; name: string } | null
+}
+
+/** One reported thing in the queue, most reported first. */
+type ModerationItem = {
+  targetType: ReportTargetType
+  targetId: string
+  reports: number
+  reasons: { reason: ReportReason; count: number }[]
+  lastReportedAt: string
+  isHidden: boolean
+  isKept: boolean
+  /** Null when the thing is gone (deleted elsewhere); the queue still lets it be settled. */
+  preview: ModerationPreview | null
+}
+
+type ModerationQueue = { items: ModerationItem[] }
+
+type ModerationDecisionInput = {
+  targetType: ReportTargetType
+  targetId: string
+  action: ModerationAction
+}
+
+type ModerationDecision = {
+  id: string
+  targetType: ReportTargetType
+  targetId: string
+  action: ModerationAction
+  reports: number
+  preview: ModerationPreview | null
+  adminName: string
+  createdAt: string
+}
+
+type ModerationLog = { items: ModerationDecision[] }
+
 /**
  * A secret calendar subscription (ICS). The address is shown only when it is made: the API keeps
  * its hash, so a device that lost it asks for a new one, which switches the old one off.
@@ -1785,6 +1845,16 @@ type BillingCheckoutInput =
 type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
 
 export type {
+  ModerationAction,
+  ModerationDecision,
+  ModerationDecisionInput,
+  ModerationItem,
+  ModerationLog,
+  ModerationPreview,
+  ModerationQueue,
+  ReportInput,
+  ReportReason,
+  ReportTargetType,
   BillingCheckoutInput,
   BillingExtendInput,
   BillingOrderView,

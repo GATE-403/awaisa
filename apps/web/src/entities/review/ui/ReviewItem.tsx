@@ -22,6 +22,8 @@ interface ReviewItemProps {
   actions?: ReactNode
   /** The author's public profile (`/u/<id>`): the name links to it. */
   authorHref?: string
+  /** At the end of the name line: a quiet glyph for the viewer (the report flag). */
+  headAction?: ReactNode
 }
 
 const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -46,6 +48,7 @@ export const ReviewItem = ({
   replyAction,
   actions,
   authorHref,
+  headAction,
 }: ReviewItemProps) => {
   const t = useT()
 
@@ -86,6 +89,7 @@ export const ReviewItem = ({
             <span className={styles.date}>
               {dateFormatters[t.language].format(new Date(review.createdAt))}
             </span>
+            {headAction && <span className={styles.headAction}>{headAction}</span>}
           </div>
           <Stars rating={review.rating} />
           {meta && <div className={styles.meta}>{meta}</div>}

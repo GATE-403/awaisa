@@ -6,7 +6,6 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
@@ -67,12 +66,6 @@ export class FeedController {
     @Body({ schema: likeSchema }) body: LikeInput,
   ): Promise<FeedLikes> {
     return this.workPhotos.like(id, body.session, false)
-  }
-
-  @Post('feed/:id/report')
-  @HttpCode(204)
-  report(@Param('id', ParseUUIDPipe) id: string) {
-    return this.workPhotos.report(id)
   }
 
   /** A master adds a photo of a visit right after it: the service and master come from it. */
