@@ -270,6 +270,11 @@
   color: var(--color-link);
 }
 
+/* A receipt the provider refused: it waits for someone to send it again. */
+.rowAlert {
+  color: var(--color-danger-text);
+}
+
 /* A product sold with the visit: its sum on the right like the paid amount. */
 .rowValue {
   margin-left: auto;
