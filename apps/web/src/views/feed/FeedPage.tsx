@@ -6,6 +6,7 @@ import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } fr
 import { useFavorites } from '@/features/favorites'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { knownPosition } from '@/shared/lib/geo'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
@@ -35,6 +36,7 @@ const FLICK_WINDOW_MS = 90
 // A swipe brings the next card in; each is a service with its price, the first free time and
 // «Записаться».
 export const FeedPage = ({ kind, business, start, initialPage, isPending }: FeedPageProps) => {
+  const t = useT()
   const [items, setItems] = useState<FeedItem[]>(initialPage?.items ?? [])
   const [nextOffset, setNextOffset] = useState(initialPage?.nextOffset ?? null)
   const [active, setActive] = useState(0)
@@ -270,7 +272,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.visuallyHidden}>Образы</h1>
+      <h1 className={styles.visuallyHidden}>{t('Образы')}</h1>
 
       <div
         className={styles.stage}
@@ -281,11 +283,11 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (
           <EmptyState
-            title='Образов пока нет'
-            text='Здесь появятся фото работ мастеров — с ценой и записью в один тап.'
+            title={t('Образов пока нет')}
+            text={t('Здесь появятся фото работ мастеров — с ценой и записью в один тап.')}
             action={
               <NextLink href='/' className={styles.emptyLink}>
-                Открыть каталог ›
+                {t('Открыть каталог ›')}
               </NextLink>
             }
           />
@@ -296,7 +298,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         <div
           className={styles.deck}
           role='feed'
-          aria-label='Образы'
+          aria-label={t('Образы')}
           aria-busy={isPending || undefined}
         >
           {shown.map((item, index) => {
@@ -336,7 +338,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='left'
-            aria-label='Предыдущая работа'
+            aria-label={t('Предыдущая работа')}
             disabled={active === 0}
             onClick={() => turn(-1)}
           >
@@ -346,7 +348,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='right'
-            aria-label='Следующая работа'
+            aria-label={t('Следующая работа')}
             disabled={active >= shown.length - 1}
             onClick={() => turn(1)}
           >
@@ -357,7 +359,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       {active > 0 && (
         <p className={styles.hint} aria-hidden>
-          Потяните вверх — вернуть прошлую
+          {t('Потяните вверх — вернуть прошлую')}
         </p>
       )}
     </main>

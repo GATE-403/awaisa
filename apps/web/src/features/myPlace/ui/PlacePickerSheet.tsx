@@ -3,6 +3,7 @@
 import { Check, NavigationArrow } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { BISHKEK_AREAS } from '@/shared/config/areas'
+import { useT } from '@/shared/i18n'
 import { type MyPlace, saveMyPlace, useMyPlace } from '@/shared/lib/myPlace'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -17,6 +18,7 @@ interface PlacePickerSheetProps {
 // «Где вы?» — the browser's location in one tap, or a district by name for those who do not
 // share it (or do not know how). The choice stays on the device for the map, branches and picks.
 export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) => {
+  const t = useT()
   const current = useMyPlace()
   const [state, setState] = useState<'idle' | 'locating' | 'denied'>('idle')
 
@@ -41,7 +43,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
   }
 
   return (
-    <Sheet title='Где вы?' cancelLabel='Закрыть' onClose={onClose}>
+    <Sheet title={t('Где вы?')} cancelLabel={t('Закрыть')} onClose={onClose}>
       <div className={sheet.group}>
         <div className={sheet.list}>
           <button
@@ -51,18 +53,18 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
             disabled={state === 'locating'}
           >
             <NavigationArrow weight='fill' aria-hidden className={styles.locateIcon} />
-            <span>{state === 'locating' ? 'Определяем…' : 'Определить автоматически'}</span>
+            <span>{state === 'locating' ? t('Определяем…') : t('Определить автоматически')}</span>
           </button>
         </div>
         <p className={sheet.groupFooter}>
           {state === 'denied'
-            ? 'Телефон не дал узнать место — выберите район ниже.'
-            : 'Телефон спросит разрешение. Можно и без него — выберите район.'}
+            ? t('Телефон не дал узнать место — выберите район ниже.')
+            : t('Телефон спросит разрешение. Можно и без него — выберите район.')}
         </p>
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>Район Бишкека</SectionCaption>
+        <SectionCaption>{t('Район Бишкека')}</SectionCaption>
         <div className={sheet.list}>
           {BISHKEK_AREAS.map((area) => {
             const isChosen = current?.source === 'area' && current.label === area.label
@@ -93,7 +95,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
                 onClose()
               }}
             >
-              Не учитывать место
+              {t('Не учитывать место')}
             </button>
           </div>
         </div>

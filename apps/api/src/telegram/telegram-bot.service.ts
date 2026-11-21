@@ -11,6 +11,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, LessThan, Repository } from 'typeorm'
 import { readLoginStartParam } from '../auth/telegram-login.js'
 import { TelegramLoginService } from '../auth/telegram-login.service.js'
+import { visitNames, visitPrice } from '../bookings/visit-sql.js'
 import { CacheService } from '../cache/cache.service.js'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
@@ -278,7 +279,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
   /** Each linked business's week in numbers (`businessWeekText`), keyed by business. */
   private async businessWeeks() {
     const done = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
-    const earned = `COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))`
+    const earned = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
     const rows = (await this.dataSource.query(
       `WITH linked AS (SELECT DISTINCT "business_id" FROM "telegram_chats")
        SELECT bz."id" AS "businessId", bz."name" AS "business", bz."slug",
@@ -286,19 +287,19 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
          COALESCE(SUM(${earned}) FILTER (WHERE ${done} AND b."starts_at" < now() - interval '7 days'), 0)::int AS "previousRevenue",
          COUNT(b."id") FILTER (WHERE ${done} AND b."starts_at" >= now() - interval '7 days')::int AS "visits",
          COUNT(b."id") FILTER (WHERE b."outcome" = 'no_show' AND b."starts_at" >= now() - interval '7 days')::int AS "noShows",
-         COALESCE(SUM(s."price" - COALESCE(b."discount_amount", 0)) FILTER (WHERE b."outcome" = 'no_show'
+         COALESCE(SUM(${visitPrice()} - COALESCE(b."discount_amount", 0)) FILTER (WHERE b."outcome" = 'no_show'
            AND b."starts_at" >= now() - interval '7 days'), 0)::int AS "noShowAmount",
          (SELECT COUNT(*) FROM "bookings" u WHERE u."business_id" = bz."id" AND u."status" = 'confirmed'
             AND u."outcome" IS NULL AND u."ends_at" < now() AND u."starts_at" >= now() - interval '30 days')::int
            AS "unmarked",
-         (SELECT json_build_object('name', sp."name", 'revenue', SUM(COALESCE(m."paid_amount", ms."price" - COALESCE(m."discount_amount", 0))))
+         (SELECT json_build_object('name', sp."name", 'revenue', SUM(COALESCE(m."paid_amount", ${visitPrice('m', 'ms')} - COALESCE(m."discount_amount", 0))))
             FROM "bookings" m JOIN "services" ms ON ms."id" = m."service_id"
             JOIN "specialists" sp ON sp."id" = m."specialist_id"
             WHERE m."business_id" = bz."id" AND m."status" = 'confirmed'
               AND m."outcome" IS DISTINCT FROM 'no_show' AND m."starts_at" >= now() - interval '7 days'
               AND m."starts_at" < now()
             GROUP BY sp."id", sp."name"
-            ORDER BY SUM(COALESCE(m."paid_amount", ms."price" - COALESCE(m."discount_amount", 0))) DESC
+            ORDER BY SUM(COALESCE(m."paid_amount", ${visitPrice('m', 'ms')} - COALESCE(m."discount_amount", 0))) DESC
             LIMIT 1) AS "bestMaster"
        FROM "businesses" bz
        JOIN linked l ON l."business_id" = bz."id"
@@ -572,7 +573,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
   private async dayDigest(businessId: string) {
     const today = toBusinessParts(new Date()).dateKey
     const rows = (await this.dataSource.query(
-      `SELECT bz."name" AS "business", b."starts_at" AS "startsAt", s."name" AS "serviceName",
+      `SELECT bz."name" AS "business", b."starts_at" AS "startsAt", ${visitNames()} AS "serviceName",
          sp."name" AS "specialistName", b."customer_name" AS "customerName"
        FROM "businesses" bz
        LEFT JOIN "bookings" b ON b."business_id" = bz."id" AND b."status" = 'confirmed'

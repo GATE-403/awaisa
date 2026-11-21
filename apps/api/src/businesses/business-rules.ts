@@ -24,6 +24,7 @@ const RESERVED_SLUGS = new Set([
   'master',
   'map',
   'pay',
+  'receipt',
   'offers',
   'popular-services',
   'me',

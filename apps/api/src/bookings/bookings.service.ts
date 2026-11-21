@@ -29,6 +29,7 @@ import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { cancelledText, movedByClientText, newBookingText } from '../telegram/telegram-messages.js'
 import { AvailabilityService } from './availability.service.js'
 import { Booking } from './booking.entity.js'
+import { BookingExtra } from './booking-extra.entity.js'
 import { PAYMENT_HOLD_MINUTES, UNDO_WINDOW_SECONDS } from './booking-rules.js'
 import { type BookingView, bookingViewQuery, isOverlapError, toView } from './booking-shared.js'
 import type { CreateBookingInput } from './bookings.schemas.js'
@@ -75,8 +76,9 @@ export class BookingsService {
       now,
       staffBusinessId,
       input.branchId,
+      input.extraServiceIds,
     )
-    const { service, specialistIds, branchOf } = request
+    const { service, services, specialistIds, branchOf } = request
     const minutes = parseTime(input.time)
     const slot = (await this.availability.buildSlotsFor(request, input.date, now)).find(
       (item) => item.time === formatMinutes(minutes),
@@ -84,36 +86,39 @@ export class BookingsService {
     if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
 
     const startsAt = businessDateTimeToUtc(input.date, minutes)
-    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000)
+    const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
     const cancelToken = randomBytes(24).toString('base64url')
+    const extras = services.slice(1)
     const discount = await this.promotions.discountFor({
       businessId: service.businessId,
       serviceId: service.id,
       price: service.price,
+      extras: extras.map((extra) => ({ serviceId: extra.id, price: extra.price })),
       date: input.date,
       minutes,
       phone,
       code: input.promoCode ?? null,
     })
-    // Online bookings of a service with a deposit hold the slot until the client pays.
-    // Deposits are a paid-plan feature: a place back on the free plan books without one.
+    // Online bookings of services with a deposit hold the slot until the client pays; a visit of
+    // several services asks for each one's deposit, never more than the visit costs. Deposits are
+    // a paid-plan feature: a place back on the free plan books without one.
+    const deposits = services.reduce((sum, item) => sum + (item.deposit ?? 0), 0)
     const isDepositOn =
       !staffBusinessId &&
-      Boolean(service.deposit) &&
+      deposits > 0 &&
       this.payments.isAvailable &&
       (await this.billing.hasFeature(service.businessId, 'deposits'))
-    const deposit =
-      isDepositOn && service.deposit
-        ? Math.min(service.deposit, service.price - (discount?.amount ?? 0)) || null
-        : null
+    const deposit = isDepositOn
+      ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
+      : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
 
     for (const candidateId of candidates) {
       try {
-        const saved = await this.bookings.save(
-          this.bookings.create({
+        const saved = await this.saveVisit(
+          {
             businessId: service.businessId,
             serviceId: service.id,
             specialistId: candidateId,
@@ -144,7 +149,8 @@ export class BookingsService {
               startsAt.getTime() - now.getTime() <= input.reminderMinutes * 60_000
                 ? now
                 : null,
-          }),
+          },
+          extras.map((extra) => extra.id),
         )
         const view = await this.getView(saved.id)
         if (customer && !customer.name && !isForOther) {
@@ -231,6 +237,7 @@ export class BookingsService {
       now,
       null,
       booking.branchId ?? undefined,
+      await this.extraServiceIdsOf(id),
     )
     const slot = (await this.availability.buildSlotsFor(request, target.date, now, id)).find(
       (item) => item.time === target.time,
@@ -238,7 +245,7 @@ export class BookingsService {
     if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
 
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
-    const endsAt = new Date(startsAt.getTime() + request.service.durationMinutes * 60_000)
+    const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
     try {
       await this.bookings.update(
         { id },
@@ -445,6 +452,33 @@ export class BookingsService {
     }
 
     return booking
+  }
+
+  /** The booking and the services done after its first one, in one transaction. */
+  private saveVisit(fields: Partial<Booking>, extraServiceIds: string[]) {
+    return this.bookings.manager.transaction(async (manager) => {
+      const saved = await manager.save(Booking, manager.create(Booking, fields))
+      if (extraServiceIds.length > 0) {
+        await manager.insert(
+          BookingExtra,
+          extraServiceIds.map((serviceId, index) => ({
+            bookingId: saved.id,
+            position: index + 1,
+            serviceId,
+          })),
+        )
+      }
+      return saved
+    })
+  }
+
+  /** The services a visit has after its first one, in order. */
+  async extraServiceIdsOf(bookingId: string) {
+    const rows = (await this.bookings.manager.query(
+      'SELECT "service_id" AS "id" FROM "booking_extras" WHERE "booking_id" = $1 ORDER BY "position"',
+      [bookingId],
+    )) as { id: string }[]
+    return rows.map((row) => row.id)
   }
 
   async getView(id: string): Promise<BookingView> {

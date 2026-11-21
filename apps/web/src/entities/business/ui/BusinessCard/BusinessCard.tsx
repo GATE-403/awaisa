@@ -3,9 +3,9 @@ import { type CSSProperties, ViewTransition } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business/ui/BusinessTile/BusinessTile'
 import type { BusinessCard as BusinessCardData } from '@/shared/api/types'
 import { gridImage } from '@/shared/lib/imageSizes'
-import { pluralize } from '@/shared/lib/plural'
 import styles from './BusinessCard.module.css'
 import { LiveStatus } from './LiveStatus'
+import { ServicesCount } from './ServicesCount'
 
 // Only what the card shows: the catalog hands its list to a client component, so every other
 // field (the week's hours, the description) would be serialized into the page for nothing.
@@ -84,9 +84,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => (
         {business.rating ? (
           <span className={styles.rating}>★ {business.rating.toLocaleString('ru-RU')}</span>
         ) : null}
-        <span className={styles.services}>
-          {pluralize(business.servicesCount, ['услуга', 'услуги', 'услуг'])}
-        </span>
+        <ServicesCount count={business.servicesCount} className={styles.services} />
         <span className={styles.address}>{business.address}</span>
       </span>
       <LiveStatus slug={business.slug} />

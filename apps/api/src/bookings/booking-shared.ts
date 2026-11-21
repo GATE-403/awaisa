@@ -1,15 +1,22 @@
 import { QueryFailedError, type Repository } from 'typeorm'
+import type { Service } from '../catalog/service.entity.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { Review } from '../reviews/review.entity.js'
 import type { Booking } from './booking.entity.js'
+import { BookingExtra } from './booking-extra.entity.js'
+
+type VisitService = { id: string; name: string; price: number; durationMinutes: number }
 
 type BookingView = {
   id: string
   status: Booking['status']
   serviceId: string
+  /** Every service's name joined with « + ». */
   serviceName: string
+  /** The whole visit: every service added up. */
   price: number
   durationMinutes: number
+  services: VisitService[]
   specialistId: string
   specialistName: string
   date: string
@@ -70,16 +77,33 @@ const toAdminView = (booking: Booking): AdminBookingView => ({
   paymentMethod: booking.paymentMethod,
 })
 
+const toVisitService = (service: Service): VisitService => ({
+  id: service.id,
+  name: service.name,
+  price: service.price,
+  durationMinutes: service.durationMinutes,
+})
+
+/** Every service of the visit in order: the booking's own first, then the ones added to it. */
+const visitServices = (booking: Booking): VisitService[] => [
+  ...(booking.service ? [toVisitService(booking.service)] : []),
+  ...[...(booking.extras ?? [])]
+    .sort((left, right) => left.position - right.position)
+    .flatMap((extra) => (extra.service ? [toVisitService(extra.service)] : [])),
+]
+
 const toView = (booking: Booking): BookingView => {
   const { dateKey, minutes } = toBusinessParts(booking.startsAt)
+  const services = visitServices(booking)
 
   return {
     id: booking.id,
     status: booking.status,
     serviceId: booking.serviceId,
-    serviceName: booking.service?.name ?? '',
-    price: booking.service?.price ?? 0,
-    durationMinutes: booking.service?.durationMinutes ?? 0,
+    serviceName: services.map((service) => service.name).join(' + '),
+    price: services.reduce((sum, service) => sum + service.price, 0),
+    durationMinutes: services.reduce((sum, service) => sum + service.durationMinutes, 0),
+    services,
     specialistId: booking.specialistId,
     specialistName: booking.specialist?.name ?? '',
     date: dateKey,
@@ -123,10 +147,12 @@ const bookingViewQuery = (bookings: Repository<Booking>) =>
   bookings
     .createQueryBuilder('booking')
     .leftJoinAndSelect('booking.service', 'service')
+    .leftJoinAndMapMany('booking.extras', BookingExtra, 'extra', 'extra.bookingId = booking.id')
+    .leftJoinAndSelect('extra.service', 'extraService')
     .leftJoinAndSelect('booking.specialist', 'specialist')
     .leftJoinAndSelect('booking.business', 'business')
     .leftJoinAndSelect('booking.branch', 'branch')
     .leftJoinAndMapOne('booking.review', Review, 'review', 'review.bookingId = booking.id')
 
-export type { AdminBookingView, BookingView }
-export { bookingViewQuery, isOverlapError, toAdminView, toView }
+export type { AdminBookingView, BookingView, VisitService }
+export { bookingViewQuery, isOverlapError, toAdminView, toView, visitServices }

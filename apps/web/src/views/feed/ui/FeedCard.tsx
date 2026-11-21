@@ -3,9 +3,10 @@
 import { Heart } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type CSSProperties, useRef, useState } from 'react'
-import { formatDuration, formatPrice } from '@/entities/booking'
+import { formatPrice } from '@/entities/booking'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { FeedItem } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { gridImage } from '@/shared/lib/imageSizes'
 import styles from '../FeedPage.module.css'
 
@@ -34,8 +35,11 @@ type Burst = { id: number; x: number; y: number }
 const DOUBLE_TAP_MS = 300
 const TAP_SLOP = 12
 
-const distanceText = (km: number | null) =>
-  km === null ? '' : km < 1 ? ` · ${Math.round(km * 1000)} м` : ` · ${km} км`
+const distanceText = (t: Translate, km: number | null) => {
+  if (km === null) return ''
+  if (km < 1) return ` · ${t('{count} м', { count: Math.round(km * 1000) })}`
+  return ` · ${t('{count} км', { count: km })}`
+}
 
 // One look as a card of the hand: the picture is the card, who made it, the service and its price
 // at its foot. The card in the middle is the one in play; the ones at the sides only peek.
@@ -47,6 +51,7 @@ export const FeedCard = ({
   onDoubleTap,
   onSelect,
 }: FeedCardProps) => {
+  const t = useT()
   const [bursts, setBursts] = useState<Burst[]>([])
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null)
   const pointerStart = useRef<{ x: number; y: number } | null>(null)
@@ -103,7 +108,11 @@ export const FeedCard = ({
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
         <img
           {...gridImage(item.url, DECK_IMAGE)}
-          alt={service ? `Работа: ${service.name}` : `Работа в ${business.name}`}
+          alt={
+            service
+              ? t('Работа: {name}', { name: service.name })
+              : t('Работа в {name}', { name: business.name })
+          }
           className={styles.photo}
           loading='eager'
           fetchPriority={isActive ? 'high' : undefined}
@@ -131,7 +140,11 @@ export const FeedCard = ({
           <NextLink
             href={masterHref}
             className={styles.bylineFace}
-            aria-label={specialist ? `Записаться к мастеру ${specialist.name}` : business.name}
+            aria-label={
+              specialist
+                ? t('Записаться к мастеру {name}', { name: specialist.name })
+                : business.name
+            }
           >
             {specialist ? (
               <PersonAvatar
@@ -148,7 +161,7 @@ export const FeedCard = ({
             {specialist && <span className={styles.metaDot}>·</span>}
             <NextLink href={`/${business.slug}`} className={styles.place}>
               {business.name}
-              {distanceText(item.distanceKm)}
+              {distanceText(t, item.distanceKm)}
             </NextLink>
           </span>
         </p>
@@ -157,7 +170,7 @@ export const FeedCard = ({
           <p className={styles.meta}>
             <strong>{formatPrice(service.price)}</strong>
             <span className={styles.metaDot}>·</span>
-            {formatDuration(service.durationMinutes)}
+            {t.duration(service.durationMinutes)}
           </p>
         )}
       </div>

@@ -11,6 +11,7 @@ import {
   MapPin,
   Package,
   Percent,
+  Receipt,
   Scissors,
   Storefront,
   UsersThree,
@@ -58,6 +59,7 @@ const ICONS: Partial<Record<ManageTab, Icon>> = {
   promotions: Percent,
   loyalty: Gift,
   stock: Package,
+  fiscal: Receipt,
   billing: CreditCard,
 }
 
@@ -69,6 +71,7 @@ const KEYWORDS: Partial<Record<ManageTab, string>> = {
   promotions: 'скидка промокод акция счастливые часы первый визит',
   loyalty: 'бонусы абонемент сертификат кэшбэк',
   stock: 'склад материалы расход остаток приход',
+  fiscal: 'чеки ккм фискальный инн ндс нсп налог ekassa гнс',
   billing: 'тариф оплата подписка смс пакет пробный период',
 }
 
@@ -172,6 +175,13 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
               isAlert: true,
             }
           : { text: summary.stockItems > 0 ? String(summary.stockItems) : 'Пусто' },
+      fiscal:
+        summary.failedReceipts > 0
+          ? {
+              text: `${summary.failedReceipts} не ${summary.failedReceipts === 1 ? 'прошёл' : 'прошли'}`,
+              isAlert: true,
+            }
+          : { text: summary.isFiscalOn ? 'Чеки' : 'Выкл.' },
     }),
   }
 

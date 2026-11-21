@@ -8,11 +8,12 @@ import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getMyLoyalty } from '@/shared/api/clientApi'
 import type { MyLoyalty } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import styles from './LoyaltyCard.module.css'
 
 // «Бонусы и абонементы»: what the signed-in client has to spend, per place.
 export const LoyaltyCard = () => {
+  const t = useT()
   const session = useSession()
   const [places, setPlaces] = useState<MyLoyalty>([])
   const isSignedIn = session.status === 'signedIn'
@@ -31,7 +32,7 @@ export const LoyaltyCard = () => {
   return (
     <section className={styles.section} aria-labelledby='loyalty-title'>
       <h2 id='loyalty-title' className={styles.title}>
-        Бонусы и абонементы
+        {t('Бонусы и абонементы')}
       </h2>
       <ul className={styles.list}>
         {places.map((place) => (
@@ -44,9 +45,9 @@ export const LoyaltyCard = () => {
                   {[
                     ...place.subscriptions.map(
                       (item) =>
-                        `${item.title}: ${pluralize(item.visitsLeft, ['визит', 'визита', 'визитов'])}`,
+                        `${item.title}: ${t.count(item.visitsLeft, ['визит', 'визита', 'визитов'])}`,
                     ),
-                  ].join(' · ') || 'Потратьте на следующем визите'}
+                  ].join(' · ') || t('Потратьте на следующем визите')}
                 </span>
               </span>
               {place.bonusBalance > 0 && (

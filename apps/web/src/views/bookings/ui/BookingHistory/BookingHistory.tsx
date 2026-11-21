@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { getDateParts, parseBookings, readRaw } from '@/entities/booking'
 import { RateVisitSheet } from '@/features/rateVisit'
 import type { Booking } from '@/shared/api/types'
-import { pluralWord } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './BookingHistory.module.css'
 
@@ -24,6 +24,7 @@ const FIRST = 5
 const getCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
 export const BookingHistory = ({ bookings, canForget, onForget, onRated }: BookingHistoryProps) => {
+  const t = useT()
   const [rated, setRated] = useState<Record<string, number>>({})
   const [rating, setRating] = useState<Booking | null>(null)
   const [isAll, setIsAll] = useState(false)
@@ -38,18 +39,24 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
         hiddenCount={Math.max(0, bookings.length - FIRST)}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={pluralWord(bookings.length - FIRST, ['запись', 'записи', 'записей'])}
+        label={t
+          .count(bookings.length - FIRST, ['запись', 'записи', 'записей'])
+          .replace(/^\d+ /, '')}
         surface='card'
       >
         <ul className={styles.list}>
           {shown.map((booking) => {
-            const { day, month } = getDateParts(booking.date)
+            const { day } = getDateParts(booking.date)
+            const month = t.monthShort(booking.date)
             const isCancelled = booking.status === 'cancelled'
             const stars = rated[booking.id] ?? booking.review?.rating ?? null
 
             return (
               <li key={booking.id}>
-                <article className={styles.row} aria-label={`Запись ${getCode(booking.id)}`}>
+                <article
+                  className={styles.row}
+                  aria-label={t('Запись {code}', { code: getCode(booking.id) })}
+                >
                   <span className={styles.leaf} aria-hidden='true'>
                     <span className={styles.leafMonth}>{month}</span>
                     <span className={styles.leafDay}>{day}</span>
@@ -59,9 +66,9 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                     {/* The status leads: cut at the end of a narrow row, it used to go first. */}
                     <span className={styles.meta}>
                       {isCancelled ? (
-                        <span className={styles.cancelled}>Отменена</span>
+                        <span className={styles.cancelled}>{t('Отменена')}</span>
                       ) : (
-                        'Состоялась'
+                        t('Состоялась')
                       )}
                       {` · ${booking.time} · ${booking.business.name}`}
                     </span>
@@ -71,7 +78,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                       <span
                         className={styles.stars}
                         role='img'
-                        aria-label={`Ваша оценка: ${stars} из 5`}
+                        aria-label={t('Ваша оценка: {stars} из 5', { stars })}
                       >
                         <Star weight='fill' aria-hidden />
                         {stars}
@@ -83,7 +90,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         className={styles.rate}
                         onClick={() => setRating(booking)}
                       >
-                        Оценить
+                        {t('Оценить')}
                       </button>
                     )}
                     {isCancelled && canForget(booking.id) && (
@@ -91,16 +98,16 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         type='button'
                         className={styles.textButton}
                         onClick={() => onForget(booking.id)}
-                        aria-label='Убрать из списка'
+                        aria-label={t('Убрать из списка')}
                       >
-                        Убрать
+                        {t('Убрать')}
                       </button>
                     )}
                     <NextLink
                       href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
                       className={styles.again}
                     >
-                      Снова
+                      {t('Снова')}
                     </NextLink>
                   </span>
                 </article>

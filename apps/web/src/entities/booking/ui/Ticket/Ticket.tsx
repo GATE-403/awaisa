@@ -1,3 +1,5 @@
+'use client'
+
 import type { ReactNode } from 'react'
 import {
   CURRENCY,
@@ -6,6 +8,7 @@ import {
   getDateParts,
 } from '@/entities/booking/lib/bookingUtils'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { Barcode } from './Barcode'
 import styles from './Ticket.module.css'
@@ -33,15 +36,25 @@ export const Ticket = ({
   headerAction,
   isDraft = false,
 }: TicketProps) => {
+  const t = useT()
+  const weekdayName = booking.date ? t.weekdayLong(booking.date) : ''
   const { day, month, weekday } = booking.date
-    ? getDateParts(booking.date)
-    : { day: '—', month: '', weekday: 'Дата не выбрана' }
+    ? {
+        day: getDateParts(booking.date).day,
+        month: t.monthShort(booking.date),
+        weekday: weekdayName.charAt(0).toUpperCase() + weekdayName.slice(1),
+      }
+    : { day: '—', month: '', weekday: t('Дата не выбрана') }
   const code = isDraft ? '—' : getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
   const price = booking.price - (booking.discount?.amount ?? 0)
   const isDepositPaid = booking.payment?.status === 'paid'
   const toPay = isDepositPaid ? Math.max(0, price - (booking.payment?.amount ?? 0)) : price
-  const payLabel = isCancelled ? 'Оплата не нужна' : isDepositPaid ? 'В салоне' : 'К оплате'
+  const payLabel = isCancelled
+    ? t('Оплата не нужна')
+    : isDepositPaid
+      ? t('В салоне')
+      : t('К оплате')
 
   return (
     <article
@@ -49,7 +62,7 @@ export const Ticket = ({
       data-status={booking.status}
       data-draft={isDraft || undefined}
       data-interactive={onOpen ? '' : undefined}
-      aria-label={isDraft ? 'Ваша запись' : `Запись ${code}`}
+      aria-label={isDraft ? t('Ваша запись') : t('Запись {code}', { code })}
     >
       <div className={styles.ticket}>
         {onOpen && (
@@ -58,7 +71,7 @@ export const Ticket = ({
             type='button'
             className={styles.open}
             onClick={onOpen}
-            aria-label='Показать талон'
+            aria-label={t('Показать талон')}
           />
         )}
         <div className={styles.main}>
@@ -66,11 +79,13 @@ export const Ticket = ({
             <Mascot className={styles.brandMark} />
             <span>{booking.business.name}</span>
             {isCancelled ? (
-              <span className={styles.status}>Отменена</span>
+              <span className={styles.status}>{t('Отменена')}</span>
             ) : headerAction ? (
               <span className={styles.headerAction}>{headerAction}</span>
             ) : (
-              <span className={styles.kind}>{isDraft ? 'Черновик' : 'Электронный талон'}</span>
+              <span className={styles.kind}>
+                {isDraft ? t('Черновик') : t('Электронный талон')}
+              </span>
             )}
           </header>
 
@@ -106,7 +121,7 @@ export const Ticket = ({
             </span>
           </div>
           <div className={styles.stubInfo}>
-            <span className={styles.stubLabel}>Номер</span>
+            <span className={styles.stubLabel}>{t('Номер')}</span>
             {onCodeClick ? (
               <button type='button' className={styles.code} onClick={() => onCodeClick(code)}>
                 {code}

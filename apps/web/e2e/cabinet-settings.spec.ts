@@ -40,6 +40,8 @@ test.describe('Cabinet «Настройки»', () => {
       plans: 0,
       stockItems: 2,
       lowStock: 1,
+      isFiscalOn: false,
+      failedReceipts: 0,
     })
 
     await page.goto(`/manage/${business.slug}?tab=settings`)
@@ -51,6 +53,7 @@ test.describe('Cabinet «Настройки»', () => {
     await expect(row('Сотрудники')).toContainText('2')
     await expect(row('Уведомления')).toContainText('Выкл.')
     await expect(row('Филиалы')).toContainText('1')
+    await expect(row('Касса')).toContainText('Выкл.')
 
     // An administrator runs the day, not the settings.
     const staffContext = await browser.newContext()

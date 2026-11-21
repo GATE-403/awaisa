@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { visitNames } from '../bookings/visit-sql.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
@@ -43,7 +44,7 @@ export class RemindersService {
         AND b."reminder_minutes" IS NOT NULL
         AND b."payment_status" IS DISTINCT FROM 'pending'
         AND b."starts_at" > now() AND b."starts_at" <= now() + make_interval(mins => b."reminder_minutes")
-      RETURNING b."id", b."customer_phone", b."starts_at", s."name" AS service_name, sp."name" AS specialist_name,
+      RETURNING b."id", b."customer_phone", b."starts_at", ${visitNames()} AS service_name, sp."name" AS specialist_name,
         bz."name" AS business_name, bz."slug" AS business_slug, b."business_id"
       `,
     )

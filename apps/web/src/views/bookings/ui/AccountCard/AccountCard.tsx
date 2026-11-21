@@ -19,8 +19,8 @@ import { useMyProfile } from '@/features/profileStyle'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { removeAvatar, uploadAvatar } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import { pluralWord } from '@/shared/lib/plural'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './AccountCard.module.css'
 
@@ -37,6 +37,7 @@ const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 // owners, «Мой день» for masters, and settings.
 export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   const session = useSession()
+  const t = useT()
   const toast = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -45,32 +46,38 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   const customer = session.customer
   const places = new Set(bookings.map((booking) => booking.business.slug)).size
   // Bold number, quiet word.
+  const countWord = (count: number, forms: [string, string, string]) =>
+    t.count(count, forms).replace(/^\d+ /, '')
   const stats = [
-    visits > 0 && { value: visits, label: pluralWord(visits, ['визит', 'визита', 'визитов']) },
-    places > 0 && { value: places, label: pluralWord(places, ['место', 'места', 'мест']) },
+    visits > 0 && { value: visits, label: countWord(visits, ['визит', 'визита', 'визитов']) },
+    places > 0 && { value: places, label: countWord(places, ['место', 'места', 'мест']) },
   ].filter((stat): stat is { value: number; label: string } => Boolean(stat))
 
   if (session.status === 'loading') return <div className={styles.placeholder} />
 
   if (!customer) {
     return (
-      <section className={styles.header} aria-label='Профиль' style={look}>
-        <h1 className={styles.name}>Ваши записи</h1>
-        <p className={styles.handle}>Только на этом телефоне — войдите, будут везде</p>
+      <section className={styles.header} aria-label={t('Профиль')} style={look}>
+        <h1 className={styles.name}>{t('Ваши записи')}</h1>
+        <p className={styles.handle}>{t('Только на этом телефоне — войдите, будут везде')}</p>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
-          Войти
+          {t('Войти')}
         </ButtonLink>
       </section>
     )
   }
 
-  const displayName = customer.name || 'Без имени'
+  const displayName = customer.name || t('Без имени')
   const businesses = customer.businesses ?? []
   const masterOf = customer.masterOf ?? []
   const isCabinetShown = hasCabinet(customer)
   const cabinetHref = getCabinetHref(customer)
   const cabinetName =
-    businesses.length === 1 ? businesses[0]?.name : `${businesses.length || 'Все'} бизнесы`
+    businesses.length === 1
+      ? businesses[0]?.name
+      : businesses.length
+        ? t('{count} бизнесы', { count: businesses.length })
+        : t('Все бизнесы')
 
   const setAvatar = async (file: File | null) => {
     setIsUploading(true)
@@ -84,7 +91,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
       }
     } catch (error) {
       toast.show({
-        title: 'Фото не сохранилось',
+        title: t('Фото не сохранилось'),
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -126,18 +133,18 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   )
 
   return (
-    <section className={styles.header} aria-label='Профиль'>
+    <section className={styles.header} aria-label={t('Профиль')}>
       {customer.avatarUrl ? (
-        <Menu label='Фото профиля' className={styles.faceButton} trigger={face}>
+        <Menu label={t('Фото профиля')} className={styles.faceButton} trigger={face}>
           <MenuItem icon={<Camera aria-hidden />} onClick={() => fileInput.current?.click()}>
-            Выбрать фото
+            {t('Выбрать фото')}
           </MenuItem>
           <MenuItem
             variant='danger'
             icon={<Trash aria-hidden />}
             onClick={() => void setAvatar(null)}
           >
-            Удалить фото
+            {t('Удалить фото')}
           </MenuItem>
         </Menu>
       ) : (
@@ -145,7 +152,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
           type='button'
           className={styles.faceButton}
           onClick={() => fileInput.current?.click()}
-          aria-label='Добавить фото профиля'
+          aria-label={t('Добавить фото профиля')}
         >
           {face}
         </button>
@@ -155,7 +162,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
         type='file'
         accept={ACCEPT}
         hidden
-        aria-label='Файл фото профиля'
+        aria-label={t('Файл фото профиля')}
         onChange={handleFile}
       />
 
@@ -177,7 +184,11 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
         </p>
       )}
 
-      {myProfile.profile && <p className={styles.level}>Уровень {myProfile.profile.level.level}</p>}
+      {myProfile.profile && (
+        <p className={styles.level}>
+          {t('Уровень {level}', { level: myProfile.profile.level.level })}
+        </p>
+      )}
 
       {/* Small secondary capsules of one height, centred on the column's axis under the face. */}
       {(isCabinetShown || masterOf.length > 0 || myProfile.settings) && (
@@ -191,13 +202,13 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
               }
             >
               <IdentificationBadge aria-hidden />
-              Мой профиль
+              {t('Мой профиль')}
             </ButtonLink>
           )}
           {isCabinetShown && (
             <ButtonLink variant='secondary' size='sm' render={<NextLink href={cabinetHref} />}>
               <Storefront aria-hidden />
-              Кабинет
+              {t('Кабинет')}
               <span className={styles.srOnly}> · {cabinetName}</span>
             </ButtonLink>
           )}
@@ -212,7 +223,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
               }
             >
               <CalendarCheck aria-hidden />
-              Мой день
+              {t('Мой день')}
             </ButtonLink>
           )}
         </div>
