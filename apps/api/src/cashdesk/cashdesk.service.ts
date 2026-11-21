@@ -16,6 +16,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { FiscalService } from '../fiscal/fiscal.service.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import {
   cashDifference,
@@ -46,14 +47,16 @@ const toNullableNumber = (value: unknown) =>
 
 /**
  * The counter: shifts of a branch's till, cash put in and taken out, and products sold with a
- * visit or on their own. No fiscal receipts: this is the business's own accounting. A business
- * that never opens a shift sells and marks visits as before; sales then belong to no shift.
+ * visit or on their own. A sale gets its fiscal receipt and a cancelled one its refund through
+ * the fiscal queue, after the sale is saved (`FiscalService`). A business that never opens a
+ * shift sells and marks visits as before; sales then belong to no shift.
  */
 @Injectable()
 export class CashDeskService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly inventory: InventoryService,
+    private readonly fiscal: FiscalService,
   ) {}
 
   async desk(businessId: string): Promise<CashDesk> {
@@ -164,7 +167,7 @@ export class CashDeskService {
        ORDER BY s."created_at" DESC LIMIT 200`,
       [businessId, where.bookingId ?? null, where.from ?? null, where.to ?? null],
     )
-    return rows.map((row) => this.toSale(row))
+    return this.withReceipts(rows.map((row) => this.toSale(row)))
   }
 
   /**
@@ -269,6 +272,7 @@ export class CashDeskService {
       }
       return id
     })
+    await this.fiscal.syncSale(businessId, saleId)
     return this.findSale(businessId, saleId)
   }
 
@@ -310,6 +314,7 @@ export class CashDeskService {
         )
       }
     })
+    await this.fiscal.syncSale(businessId, saleId)
     return this.findSale(businessId, saleId)
   }
 
@@ -324,7 +329,13 @@ export class CashDeskService {
       [saleId, businessId],
     )
     if (!row) throw new NotFoundException('Продажа не найдена')
-    return this.toSale(row)
+    const [sale] = await this.withReceipts([this.toSale(row)])
+    return sale as Sale
+  }
+
+  private async withReceipts(sales: Sale[]) {
+    const receipts = await this.fiscal.latestForSales(sales.map((sale) => sale.id))
+    return sales.map((sale) => ({ ...sale, receipt: receipts.get(sale.id) ?? null }))
   }
 
   private async findShift(businessId: string, shiftId: string) {
@@ -463,6 +474,7 @@ export class CashDeskService {
         price: toNumber(item.price),
       })),
       isCancelled: row.cancelled_at !== null && row.cancelled_at !== undefined,
+      receipt: null,
     }
   }
 

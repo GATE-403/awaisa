@@ -28,7 +28,11 @@ export class SettingsSummaryService {
            WHERE "business_id" = $1 AND "is_active")::int AS "plans",
          (SELECT COUNT(*) FROM "stock_items" WHERE "business_id" = $1)::int AS "stockItems",
          (SELECT COUNT(*) FROM "stock_items" WHERE "business_id" = $1
-             AND "min_quantity" IS NOT NULL AND "quantity" <= "min_quantity")::int AS "lowStock"`,
+             AND "min_quantity" IS NOT NULL AND "quantity" <= "min_quantity")::int AS "lowStock",
+         COALESCE((SELECT "is_enabled" FROM "fiscal_settings" WHERE "business_id" = $1), false)
+           AS "isFiscalOn",
+         (SELECT COUNT(*) FROM "fiscal_receipts"
+           WHERE "business_id" = $1 AND "status" = 'failed')::int AS "failedReceipts"`,
       [business.id, today],
     )) as Record<string, unknown>[]
 
@@ -43,6 +47,8 @@ export class SettingsSummaryService {
       plans: Number(row?.plans ?? 0),
       stockItems: Number(row?.stockItems ?? 0),
       lowStock: Number(row?.lowStock ?? 0),
+      isFiscalOn: row?.isFiscalOn === true,
+      failedReceipts: Number(row?.failedReceipts ?? 0),
     }
   }
 }

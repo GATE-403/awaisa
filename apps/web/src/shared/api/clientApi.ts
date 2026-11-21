@@ -48,6 +48,9 @@ import type {
   ExpenseList,
   FeedLikes,
   FeedPage,
+  FiscalReceipt,
+  FiscalSettings,
+  FiscalSettingsInput,
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
@@ -857,6 +860,21 @@ const createSale = (slug: string, input: SaleInput) => post<Sale>(`${manage(slug
 const cancelSale = (slug: string, saleId: string) =>
   post<Sale>(`${manage(slug)}/sales/${saleId}/cancel`)
 
+const getFiscalSettings = (slug: string, signal?: AbortSignal) =>
+  request<FiscalSettings>(`${manage(slug)}/fiscal`, { signal })
+
+const saveFiscalSettings = (slug: string, input: FiscalSettingsInput) =>
+  send<FiscalSettings>('PUT', `${manage(slug)}/fiscal`, input)
+
+const listVisitReceipts = (slug: string, bookingId: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?bookingId=${bookingId}`, { signal })
+
+const listFailedReceipts = (slug: string, signal?: AbortSignal) =>
+  request<FiscalReceipt[]>(`${manage(slug)}/fiscal/receipts?status=failed`, { signal })
+
+const retryReceipt = (slug: string, receiptId: string) =>
+  post<FiscalReceipt>(`${manage(slug)}/fiscal/receipts/${receiptId}/retry`)
+
 const listExpenses = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =>
   request<ExpenseList>(`${manage(slug)}/expenses?days=${days}`, { signal })
 
@@ -967,6 +985,11 @@ export {
   addCashMovement,
   closeCashShift,
   listVisitSales,
+  getFiscalSettings,
+  saveFiscalSettings,
+  listVisitReceipts,
+  listFailedReceipts,
+  retryReceipt,
   createSale,
   cancelSale,
   listExpenses,
