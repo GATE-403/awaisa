@@ -5,14 +5,27 @@ import { DataSource } from 'typeorm'
 import type { Env } from '../config/env.js'
 import { clientStartParam, readClientStartParam } from './client-telegram.js'
 import { SmsService } from './sms.service.js'
+import { WhatsappService } from './whatsapp.service.js'
+import type { WhatsappMessage } from './whatsapp-messages.js'
 
 type Button = { text: string; url: string }
+
+/** One message about a visit, in every shape a channel needs. */
+type ClientMessage = {
+  /** The SMS text (and Telegram's, without the link when it becomes a button). */
+  text: string
+  link?: { label: string; url: string }
+  /** The approved WhatsApp template it maps to; without one WhatsApp is skipped. */
+  whatsapp?: WhatsappMessage
+}
 
 const API_URL = 'https://api.telegram.org'
 
 /**
  * What reaches a client about their visit: Telegram when their number is linked to a chat
- * (free, with buttons), otherwise SMS. Never throws, like `SmsService.sendSafely`.
+ * (free, with buttons), then WhatsApp when it is on, otherwise SMS; a message WhatsApp refuses
+ * goes by SMS. Never throws, like `SmsService.sendSafely`. Callers check the client's SMS
+ * opt-out before calling, so it covers every channel.
  */
 @Injectable()
 export class ClientMessagesService {
@@ -21,6 +34,7 @@ export class ClientMessagesService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly sms: SmsService,
+    private readonly whatsapp: WhatsappService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -79,8 +93,8 @@ export class ClientMessagesService {
     return (await this.chatFor(phone)) !== null
   }
 
-  /** Telegram when linked (the link as a button), else the SMS text. */
-  async send(phone: string, text: string, link?: { label: string; url: string }) {
+  /** Telegram when linked (the link as a button), then WhatsApp, else the SMS text. */
+  async send(phone: string, { text, link, whatsapp }: ClientMessage) {
     try {
       const chatId = await this.chatFor(phone)
       if (chatId && this.token()) {
@@ -90,6 +104,10 @@ export class ClientMessagesService {
           : []
         const body = buttons.length && link ? text.replace(link.url, '').trim() : text
         if (await this.sendTelegram(chatId, body, buttons)) return
+      }
+      // The same countries as SMS: a number we would not text gets no WhatsApp either.
+      if (whatsapp && this.whatsapp.isEnabled() && this.sms.canSendTo(phone)) {
+        if (await this.whatsapp.send(phone, whatsapp)) return
       }
       await this.sms.sendSafely(phone, text)
     } catch (error) {
@@ -141,3 +159,5 @@ export class ClientMessagesService {
     return this.config.get('AUTH_SECRET', { infer: true })
   }
 }
+
+export type { ClientMessage }

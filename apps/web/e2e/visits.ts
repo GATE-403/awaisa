@@ -63,8 +63,21 @@ const createPastVisit = async (
     // The booking was made `offset` days ahead; moving it back by offset + days lands `days` ago.
     // A real visit may sit at that hour: try other hours until one is free.
     const pastDate = await withDb(async (client) => {
-      for (let attempt = 0; attempt < 12; attempt += 1) {
-        const minutes = daysBack === undefined ? Math.floor(Math.random() * 50) : -attempt * 30
+      // On a set day the seed's visits may fill the master's hours: walk away from the booked
+      // time both ways in half hours, out to the night if need be, where nothing ever sits.
+      // The visit stays on its day: only shifts that keep it between 00:00 and 24:00.
+      const [hours = 0, mins = 0] = String(slot.time).split(':').map(Number)
+      const start = hours * 60 + mins
+      const length = Number(booking.durationMinutes) || 60
+      const shifts = Array.from(
+        { length: 97 },
+        (_, index) => Math.ceil(index / 2) * (index % 2 === 0 ? 1 : -1) * 30,
+      ).filter((shift) => start - shift >= 0 && start - shift + length <= 24 * 60)
+      const attempts = daysBack === undefined ? 12 : shifts.length
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        // The interval is subtracted: a positive shift moves the visit earlier.
+        const minutes =
+          daysBack === undefined ? Math.floor(Math.random() * 50) : (shifts[attempt] ?? 0)
         try {
           const { rows } = await client.query(
             `UPDATE "bookings" SET "starts_at" = "starts_at" - make_interval(days => $2, mins => $3),

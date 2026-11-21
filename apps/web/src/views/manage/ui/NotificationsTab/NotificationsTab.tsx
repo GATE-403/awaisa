@@ -1,6 +1,7 @@
 'use client'
 
 import forms from '@/views/manage/ui/manageForms.module.css'
+import { ClientChannelNote } from '@/views/manage/ui/NotificationsTab/ClientChannelNote'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { TelegramSection } from '@/views/manage/ui/TelegramSection/TelegramSection'
 
@@ -23,5 +24,6 @@ export const NotificationsTab = ({ slug }: NotificationsTabProps) => (
         </p>
       }
     />
+    <ClientChannelNote />
   </section>
 )
