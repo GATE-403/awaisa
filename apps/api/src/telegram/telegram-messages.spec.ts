@@ -1,4 +1,10 @@
-import { dayText, escapeHtml, newBookingText, reviewText } from './telegram-messages.js'
+import {
+  dayText,
+  escapeHtml,
+  newBookingText,
+  photoModeratedText,
+  reviewText,
+} from './telegram-messages.js'
 
 const booking = {
   time: '14:30',
@@ -19,6 +25,14 @@ describe('Telegram messages', () => {
     expect(text).toContain('12 ноября, <b>14:30</b>')
     expect(text).toContain('Мастер: Айгерим')
     expect(text).toContain('+996555123456')
+  })
+
+  it('a photo taken down by a moderator names the place, the service and what happened', () => {
+    const hidden = photoModeratedText('Барбер <1>', 'Fade', 'hide', 'https://awaisa.kg/manage/b')
+    expect(hidden).toContain('скрыто модератором')
+    expect(hidden).toContain('Барбер &lt;1&gt;')
+    expect(hidden).toContain('Услуга: Fade.')
+    expect(photoModeratedText('A', null, 'delete', 'https://x')).toContain('удалено модератором')
   })
 
   it('the day digest counts bookings in Russian', () => {

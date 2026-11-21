@@ -88,6 +88,25 @@ const questionText = (business: string, authorName: string, text: string) =>
     'Ответьте в кабинете: Отзывы → Вопросы.',
   ].join('\n')
 
+/** A moderator took a work photo off the place's page: the owner hears why it is gone. */
+const photoModeratedText = (
+  business: string,
+  serviceName: string | null,
+  action: 'hide' | 'delete',
+  cabinetUrl: string,
+) =>
+  [
+    `🚫 <b>Фото работы ${action === 'hide' ? 'скрыто' : 'удалено'} модератором</b> · ${escapeHtml(business)}`,
+    serviceName ? `Услуга: ${escapeHtml(serviceName)}.` : null,
+    'На него пожаловались клиенты, модератор Awaisa проверил жалобы.',
+    action === 'hide'
+      ? 'Клиенты его не видят, показать снова из кабинета нельзя.'
+      : 'Фото больше нет на странице.',
+    `Остальные работы: <a href="${escapeHtml(cabinetUrl)}">кабинет</a>.`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
 const dayText = (business: string, date: string, bookings: BookingLine[], title = 'Сегодня') => {
   if (bookings.length === 0) {
     return `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)}\nЗаписей нет.`
@@ -151,6 +170,7 @@ export {
   loginKnownText,
   movedByClientText,
   newBookingText,
+  photoModeratedText,
   questionText,
   reviewText,
   unclosedText,

@@ -9,6 +9,10 @@ const CLEANUP_SQL = `
   DELETE FROM "telegram_chats" WHERE "username" LIKE 'e2e%';
   DELETE FROM "client_records" WHERE "note" LIKE 'E2E %' OR "name" LIKE 'E2E %';
   DELETE FROM "waitlist_entries" WHERE "customer_name" LIKE 'E2E %';
+  DELETE FROM "reports" WHERE "reporter" LIKE 's:e2e-%' OR "customer_id" IN (
+    SELECT "id" FROM "customers" WHERE "name" LIKE 'E2E %');
+  DELETE FROM "moderation_decisions" WHERE "admin_id" IN (
+    SELECT "id" FROM "customers" WHERE "name" LIKE 'E2E %');
   DELETE FROM "funnel_events" WHERE "session" LIKE 'e2e-%';
   DELETE FROM "funnel_sessions" WHERE "session" LIKE 'e2e-%';
   DELETE FROM "app_errors" WHERE "message" LIKE 'E2E %';

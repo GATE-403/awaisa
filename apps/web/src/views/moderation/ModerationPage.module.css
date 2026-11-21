@@ -1,0 +1,131 @@
+.page {
+  padding: 0 0 var(--section-gap);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-top: var(--space-6);
+}
+
+/* Right on the page, hairlines between rows: no card around the queue. */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item,
+.logRow {
+  display: grid;
+  align-items: start;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.item {
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+}
+
+.item + .item,
+.logRow + .logRow {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.item[aria-busy="true"] {
+  opacity: 0.55;
+}
+
+.thumb {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--color-fill);
+  object-fit: cover;
+}
+
+.face {
+  width: 56px;
+  height: 56px;
+}
+
+.itemBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemTitle {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--text-body-line-height);
+  overflow-wrap: anywhere;
+}
+
+.itemLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .itemLink:hover {
+    color: var(--color-link);
+  }
+}
+
+.itemLink:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.meta,
+.time {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  letter-spacing: var(--tracking-caption);
+}
+
+.quote {
+  margin: var(--space-1) 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  margin: 0;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.state[data-state="hidden"] {
+  color: var(--color-danger-text);
+}
+
+.state[data-state="kept"] {
+  color: var(--color-muted-foreground);
+}
+
+.logRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.time {
+  white-space: nowrap;
+}
+
+/* Phones: the decisions go under the words, on their left edge. */
+@media (max-width: 639px) {
+  .item > [role="group"] {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
