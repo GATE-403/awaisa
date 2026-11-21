@@ -29,6 +29,7 @@ import type {
   ReviewReplySettings,
   ReviewSummary,
 } from '@/shared/api/types'
+import { useIsStuck } from '@/shared/lib/hooks/useIsStuck'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
@@ -87,7 +88,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
   const isOwner = useCanSeeMoney()
   const toolbarRef = useRef<HTMLDivElement>(null)
   // Pinned under the cabinet bar the toolbar takes its material and a hairline.
-  const [isStuck, setIsStuck] = useState(false)
+  const isStuck = useIsStuck(toolbarRef)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -107,28 +108,6 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
 
     return () => controller.abort()
   }, [slug])
-
-  // Read on scroll, not by an IntersectionObserver: the cabinet bar sets its height (the sticky
-  // top) after mount, so a margin worked out at mount went stale.
-  useEffect(() => {
-    const toolbar = toolbarRef.current
-    if (!toolbar) return
-    let frame = 0
-    const check = () => {
-      frame = 0
-      const top = Number.parseFloat(getComputedStyle(toolbar).top) || 0
-      setIsStuck(window.scrollY > 0 && toolbar.getBoundingClientRect().top <= top + 1)
-    }
-    const handleScroll = () => {
-      if (!frame) frame = requestAnimationFrame(check)
-    }
-    check()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      cancelAnimationFrame(frame)
-    }
-  }, [])
 
   const openQuestions = questions?.filter((question) => !question.answer).length ?? 0
   // The server's count: the cabinet loads the latest reviews and older ones without a reply, not all.

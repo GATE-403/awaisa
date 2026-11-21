@@ -23,7 +23,28 @@
   cursor: pointer;
   transition:
     background-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+    color var(--duration-fast) var(--ease-standard),
+    width var(--duration-normal) var(--ease-standard),
+    opacity var(--duration-normal) var(--ease-standard),
+    scale var(--duration-normal) var(--ease-spring);
+}
+
+/* A glyph that comes and goes (`isHidden`: «Наверх» past the first screen) folds to nothing and
+   unfolds again: the capsule grows by its width while the glyph fades and pops in, so a new
+   action arrives instead of jumping in. Doubled class: over any context's own width rule. */
+.group.group.group :is(button, a)[data-hidden] {
+  width: 0;
+  opacity: 0;
+  scale: 0.5;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group :is(button, a) {
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
 }
 
 .group :is(button, a) svg {
