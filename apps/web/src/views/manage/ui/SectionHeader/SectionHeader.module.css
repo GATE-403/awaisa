@@ -42,3 +42,21 @@
     flex: 1 1 100%;
   }
 }
+
+/* Phones: the section's actions float across the window's foot (16pt in), each a full-height
+   capsule sharing the width, like the page's «+ Добавить». */
+@media (max-width: 639px) {
+  .floating.floating {
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+    max-width: none;
+  }
+
+  /* Over the kit's `sm` height. */
+  .floating.floating > * {
+    flex: 1;
+    height: 44px;
+    min-height: 44px;
+  }
+}

@@ -88,6 +88,7 @@ import type {
   ScheduleLoad,
   ServiceInput,
   Session,
+  SettingsSummary,
   SlugCheck,
   SpecialistInput,
   SpecialistPhotoUpload,
@@ -565,6 +566,9 @@ const updateWorkPhoto = (slug: string, id: string, input: WorkPhotoInput) =>
 const reorderWorkPhotos = (slug: string, ids: string[]) =>
   send<WorkPhoto[]>('PUT', `${manage(slug)}/work-photos/order`, { ids })
 
+const getSettingsSummary = (slug: string, signal?: AbortSignal) =>
+  request<SettingsSummary>(`${manage(slug)}/settings-summary`, { signal })
+
 const getPageStats = (slug: string, signal?: AbortSignal) =>
   request<PageStats>(`${manage(slug)}/page-stats`, { signal })
 
@@ -829,6 +833,7 @@ export {
   getWorkPhotos,
   reorderWorkPhotos,
   getPageStats,
+  getSettingsSummary,
   updateWorkPhoto,
   addVisitPhoto,
   getFeed,

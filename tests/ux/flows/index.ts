@@ -470,7 +470,7 @@ const flows: Flow[] = [
       // Toasts are dialogs too (Base UI): the sheet is the one with the form.
       const dialog = page.getByRole('dialog').filter({ has: page.getByLabel('Имя') })
       await dialog.getByLabel('Имя').waitFor()
-      await ux.step('Новый мастер', [`${WEB}/views/manage/ui/MastersTab`, `${WEB}/shared/ui/Sheet`])
+      await ux.step('Новый мастер', [`${WEB}/views/manage/ui/Masters`, `${WEB}/shared/ui/Sheet`])
       await ux.fill(dialog.getByLabel('Имя'), 'Азамат')
       await ux.tap(dialog.getByRole('button', { name: 'Сохранить' }))
       await expect(dialog).toBeHidden()
