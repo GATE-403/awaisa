@@ -5,8 +5,9 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { toBusinessParts } from '../common/business-time.js'
 import type { Env } from '../config/env.js'
+import { ClientMessagesService } from './client-messages.service.js'
 import { returnVisitMessage } from './messages.js'
-import { SmsService } from './sms.service.js'
+import { whatsappReturnVisit } from './whatsapp-messages.js'
 
 type DueReturn = {
   customer_phone: string
@@ -37,7 +38,7 @@ export class ReturnVisitsService {
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    private readonly sms: SmsService,
+    private readonly messages: ClientMessagesService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -76,7 +77,7 @@ export class ReturnVisitsService {
     ) as DueReturn[]
     if (due.length === 0) return
 
-    // One SMS per client and service even if several old visits came due together.
+    // One message per client and service even if several old visits came due together.
     const seen = new Set<string>()
     const web = this.config.get('PUBLIC_WEB_URL', { infer: true })
     for (const row of due) {
@@ -84,15 +85,17 @@ export class ReturnVisitsService {
       if (seen.has(key)) continue
       seen.add(key)
       const params = new URLSearchParams({ service: row.service_id, specialist: row.specialist_id })
-      void this.sms.sendSafely(
-        row.customer_phone,
-        returnVisitMessage(
+      const link = `${web}/${row.business_slug}/book?${params}`
+      void this.messages.send(row.customer_phone, {
+        text: returnVisitMessage(row.business_name, row.service_name, row.specialist_name, link),
+        link: { label: 'Записаться', url: link },
+        whatsapp: whatsappReturnVisit(
           row.business_name,
           row.service_name,
           row.specialist_name,
-          `${web}/${row.business_slug}/book?${params}`,
+          link,
         ),
-      )
+      })
     }
     this.logger.log(`Return-visit reminders: ${seen.size}`)
   }
