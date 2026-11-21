@@ -963,6 +963,9 @@ type MoneyReport = {
   period: { days: AnalyticsDays; from: string; to: string }
   servicesRevenue: number
   productsRevenue: number
+  /** Subscriptions sold in the period, counted the day they were sold. */
+  subscriptionsRevenue: number
+  subscriptionsSold: number
   revenue: number
   /** Materials visits used and the cost of products sold. */
   materialsCost: number
@@ -1175,7 +1178,14 @@ type AnalyticsReport = {
   }
   /** What each promotion brought in the period, and what loyalty paid. */
   promotions: { id: string; title: string; visits: number; revenue: number; discount: number }[]
-  loyalty: { bonusSpent: number; certificateSpent: number; subscriptionVisits: number }
+  loyalty: {
+    bonusSpent: number
+    certificateSpent: number
+    subscriptionVisits: number
+    /** Subscriptions sold in the period and what they brought in. */
+    subscriptionsSold: number
+    subscriptionsRevenue: number
+  }
   /** The calendar month so far against the owner's goal (goal null when none is set). */
   month: {
     label: string
