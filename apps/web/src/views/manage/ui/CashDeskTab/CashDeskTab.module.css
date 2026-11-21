@@ -31,6 +31,10 @@
   font-weight: 600;
 }
 
+.alert {
+  color: var(--color-danger-text);
+}
+
 .amount[data-tone="danger"] {
   color: var(--color-danger-text);
 }

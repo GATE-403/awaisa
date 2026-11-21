@@ -1,0 +1,19 @@
+/* One line under the receipt: the main action wide, the rest as glyphs of the same height. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.actions .main {
+  flex: 1;
+  height: 40px;
+  min-height: 40px;
+}
+
+@media (max-width: 639px) {
+  .actions .main {
+    height: 44px;
+    min-height: 44px;
+  }
+}

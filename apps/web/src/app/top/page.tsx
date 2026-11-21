@@ -1,24 +1,18 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { listLeaderboard, listPlacesLeaderboard } from '@/shared/api/serverApi'
-import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { LeaderboardPage, LeaderboardSkeleton } from '@/views/leaderboard'
+import { boardMetadata, LeaderboardPage, LeaderboardSkeleton, readBoard } from '@/views/leaderboard'
 
-export const metadata: Metadata = {
-  title: 'Рейтинг мастеров и мест',
-  description: 'Лучшие барберы и мастера Бишкека по отзывам клиентов — и запись к ним онлайн.',
-}
+export const generateMetadata = async ({ searchParams }: PageProps<'/top'>): Promise<Metadata> =>
+  boardMetadata(await searchParams)
 
 // The board for the kind in the URL (barbers by default), from the server cache.
 const LeaderboardWithData = async ({
-  kindParam,
-  viewParam,
+  query,
 }: {
-  kindParam: unknown
-  viewParam: unknown
+  query: Record<string, string | string[] | undefined>
 }) => {
-  const kind = BUSINESS_KINDS.find((item) => item.value === kindParam)?.value ?? 'barber'
-  const view = viewParam === 'places' ? 'places' : 'masters'
+  const { kind, view } = readBoard(query)
   const [masters, places] = await Promise.all([
     view === 'masters' ? listLeaderboard(kind).catch(() => []) : Promise.resolve([]),
     view === 'places' ? listPlacesLeaderboard(kind).catch(() => []) : Promise.resolve([]),
@@ -30,7 +24,7 @@ const LeaderboardWithData = async ({
 const TopRoute = ({ searchParams }: PageProps<'/top'>) => (
   <Suspense fallback={<LeaderboardSkeleton />}>
     {searchParams.then((query) => (
-      <LeaderboardWithData kindParam={query.kind} viewParam={query.view} />
+      <LeaderboardWithData query={query} />
     ))}
   </Suspense>
 )

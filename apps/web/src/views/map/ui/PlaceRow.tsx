@@ -1,9 +1,12 @@
+'use client'
+
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { addDayKey, formatPrice } from '@/entities/booking'
 import { BusinessTile, useNextFree } from '@/entities/business'
 import type { MapPlace } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from '@/views/map/MapPage.module.css'
@@ -16,6 +19,7 @@ interface PlaceRowProps {
 }
 
 export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
+  const t = useT()
   const today = useToday()
   const nextFree = useNextFree()
   const slot = nextFree?.[place.slug]
@@ -58,13 +62,15 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
           <span className={styles.rowMeta}>
             {slot && when ? (
               <span className={styles.free} data-today={when === 'сегодня' || undefined}>
-                {when === 'сегодня' ? 'Сегодня' : 'Завтра'} с {slot.time}
+                {when === 'сегодня'
+                  ? t('Сегодня с {time}', { time: slot.time })
+                  : t('Завтра с {time}', { time: slot.time })}
               </span>
             ) : (
-              <span>от {formatPrice(place.minPrice)}</span>
+              <span>{t('от {price}', { price: formatPrice(place.minPrice) })}</span>
             )}
             {' · '}
-            {place.address || place.branchName || getKindLabel(place.kind)}
+            {place.address || place.branchName || t(getKindLabel(place.kind))}
           </span>
         </span>
         {place.distanceKm !== null && (

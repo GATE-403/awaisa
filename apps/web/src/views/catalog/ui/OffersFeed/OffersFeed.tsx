@@ -5,6 +5,7 @@ import { useNextFree } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { FavoriteButton } from '@/features/favorites'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { Picture } from '@/shared/ui/Placeholder/Placeholder'
 import { WorkTile } from '../WorkTile/WorkTile'
@@ -55,6 +56,7 @@ export const OffersFeed = ({
   isLoading = false,
   onEndReached,
 }: OffersFeedProps) => {
+  const t = useT()
   const nextFree = useNextFree()
   const end = useEndReached(() => onEndReached?.(), hasMore && !isLoading)
   const sorted =
@@ -118,7 +120,7 @@ export const OffersFeed = ({
           ))}
       </ul>
       {hasMore && <div ref={end} className={styles.sentinel} aria-hidden />}
-      {isLoading && <output className={styles.loadingNote}>Загружаем ещё…</output>}
+      {isLoading && <output className={styles.loadingNote}>{t('Загружаем ещё…')}</output>}
     </div>
   )
 }

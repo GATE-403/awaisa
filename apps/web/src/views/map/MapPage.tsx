@@ -18,8 +18,8 @@ import { NextFreeProvider } from '@/entities/business'
 import { PlacePickerSheet } from '@/features/myPlace'
 import type { BusinessKind, MapPlace } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useMyPlace } from '@/shared/lib/myPlace'
-import { pluralize } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import type { Point } from '@/shared/ui/MapView/MapView'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -54,6 +54,7 @@ interface MapPageProps {
 }
 
 export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPageProps) => {
+  const t = useT()
   const myPlace = useMyPlace()
   // The place picked by hand or the browser's location — kept on the device for next time.
   const location: Point | null = myPlace ? { latitude: myPlace.lat, longitude: myPlace.lng } : null
@@ -274,28 +275,33 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             <button
               type='button'
               className={styles.grabber}
-              aria-label={`${DETENT_LABEL[detent]}. Изменить высоту списка`}
+              aria-label={t('{state}. Изменить высоту списка', { state: t(DETENT_LABEL[detent]) })}
               onClick={() => settle(NEXT_DETENT[detent])}
             />
             <h1 id='map-title' className={styles.title}>
-              Рядом.
-              <span className={styles.titleMuted}> Выберите место на карте или в списке.</span>
+              {t('Рядом.')}
+              <span className={styles.titleMuted}>
+                {' '}
+                {t('Выберите место на карте или в списке.')}
+              </span>
             </h1>
             <TextTabs
-              label='Виды бизнеса'
-              items={[{ value: undefined, label: 'Все' }, ...BUSINESS_KINDS].map((item) => ({
+              label={t('Виды бизнеса')}
+              items={[{ value: undefined, label: t('Все') }, ...BUSINESS_KINDS].map((item) => ({
                 href: item.value ? `/map?kind=${item.value}` : '/map',
-                label: item.label,
+                label: t(item.label),
                 isActive: kind === item.value,
               }))}
             />
             <div className={styles.toolbar}>
               <p className={styles.count} aria-live='polite'>
                 {isLoading
-                  ? 'Ищем…'
+                  ? t('Ищем…')
                   : location
-                    ? `${pluralize(places.length, ['место', 'места', 'мест'])}, ближайшие сверху`
-                    : pluralize(places.length, ['место', 'места', 'мест'])}
+                    ? t('{count}, ближайшие сверху', {
+                        count: t.count(places.length, ['место', 'места', 'мест']),
+                      })
+                    : t.count(places.length, ['место', 'места', 'мест'])}
               </p>
               {/* Where the visitor is: the browser's location or a district by name — the list
                   is sorted from there and the map shows the spot. */}
@@ -305,12 +311,12 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
                 onClick={() => setIsPicking(true)}
               >
                 <NavigationArrow weight='fill' aria-hidden />
-                {myPlace ? myPlace.label : 'Где вы?'}
+                {myPlace ? t(myPlace.label) : t('Где вы?')}
               </Button>
             </div>
             {!location && (
               <p className={styles.hint}>
-                Укажите, где вы, — покажем ближайшие места и точку на карте.
+                {t('Укажите, где вы, — покажем ближайшие места и точку на карте.')}
               </p>
             )}
             {error && (
@@ -327,8 +333,8 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
               variant='inline'
               text={
                 <>
-                  Здесь пока нет мест на карте. Попробуйте другой вид или{' '}
-                  <NextLink href='/'>каталог</NextLink>.
+                  {t('Здесь пока нет мест на карте. Попробуйте другой вид или')}{' '}
+                  <NextLink href='/'>{t('каталог')}</NextLink>.
                 </>
               }
             />
@@ -361,7 +367,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             }}
           >
             <MapTrifold weight='fill' aria-hidden />
-            Карта
+            {t('Карта')}
           </button>
         )}
         <div className={styles.mapArea}>
@@ -371,7 +377,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             userLocation={location}
             onSelect={select}
             fitKey={`${kind ?? 'all'}|${location?.latitude ?? ''}|${places.length}`}
-            label='Карта салонов и мастеров'
+            label={t('Карта салонов и мастеров')}
           />
         </div>
       </div>

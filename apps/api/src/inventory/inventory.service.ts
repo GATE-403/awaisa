@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { visitLines } from '../bookings/visit-sql.js'
 import type { StockItemInput } from './inventory.schemas.js'
 
 type Row = Record<string, unknown>
@@ -168,16 +169,21 @@ export class InventoryService {
     }
   }
 
-  /** Arrived visits write off their service's materials, once per visit and item. */
+  /**
+   * Arrived visits write off their services' materials (every service of a visit of several),
+   * once per visit and item: an item two services use goes out as one movement of both amounts.
+   */
   async useForVisits(bookingIds: string[]) {
     if (bookingIds.length === 0) return
     const used = await this.query(
       `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "booking_id", "cost")
-       SELECT b."business_id", m."item_id", -m."amount", 'use', b."id", m."amount" * i."unit_cost"
+       SELECT b."business_id", m."item_id", -SUM(m."amount"), 'use', b."id", SUM(m."amount") * i."unit_cost"
        FROM "bookings" b
-       JOIN "service_materials" m ON m."service_id" = b."service_id"
+       JOIN LATERAL ${visitLines('b')} l ON true
+       JOIN "service_materials" m ON m."service_id" = l."service_id"
        JOIN "stock_items" i ON i."id" = m."item_id"
        WHERE b."id" = ANY($1) AND b."outcome" = 'arrived'
+       GROUP BY b."id", b."business_id", m."item_id", i."unit_cost"
        ON CONFLICT ("booking_id", "item_id") WHERE "kind" = 'use' DO NOTHING
        RETURNING "item_id", "delta"`,
       [bookingIds],

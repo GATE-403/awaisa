@@ -2,6 +2,7 @@ import type { PaymentMethod, VisitOutcome } from '@awaisa/contracts'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, Repository } from 'typeorm'
+import { visitNames, visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
@@ -16,7 +17,7 @@ const HISTORY_LIMIT = 50
 // A visit is a confirmed booking that has started and was not a no-show; it earns what was paid
 // (or the price, when nobody marked the payment).
 const VISIT = `b."status" = 'confirmed' AND b."starts_at" <= now() AND b."outcome" IS DISTINCT FROM 'no_show'`
-const EARNED = 'COALESCE(b."paid_amount", s."price" - COALESCE(b."discount_amount", 0))'
+const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
 
 const toNumber = (value: unknown) => Number(value ?? 0)
 const toDate = (value: unknown) => (value ? new Date(value as string).toISOString() : null)
@@ -93,7 +94,8 @@ export class ClientsService {
     const history = (await this.dataSource.query(
       `SELECT b."id", b."starts_at" AS "startsAt", b."status", b."outcome", b."paid_amount" AS "paidAmount",
          b."payment_method" AS "paymentMethod", b."customer_name" AS "name",
-         s."name" AS "serviceName", (s."price" - COALESCE(b."discount_amount", 0)) AS "price",
+         ${visitNames()} AS "serviceName",
+         (${visitPrice()} - COALESCE(b."discount_amount", 0)) AS "price",
          sp."name" AS "specialistName",
          r."rating", r."comment" AS "reviewComment"
        FROM "bookings" b

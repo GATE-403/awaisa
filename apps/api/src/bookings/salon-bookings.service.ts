@@ -17,6 +17,7 @@ import {
   parseTime,
   toBusinessParts,
 } from '../common/business-time.js'
+import { FiscalService } from '../fiscal/fiscal.service.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { Booking } from './booking.entity.js'
@@ -26,8 +27,10 @@ import {
   isOverlapError,
   toAdminView,
   toView,
+  visitServices,
 } from './booking-shared.js'
 import { BookingsService } from './bookings.service.js'
+import { mastersForAll, visitCost } from './visit-services.js'
 
 const MAX_RECENT_BOOKINGS = 20
 
@@ -53,6 +56,7 @@ export class SalonBookingsService {
     private readonly businesses: BusinessesService,
     private readonly loyalty: LoyaltyService,
     private readonly inventory: InventoryService,
+    private readonly fiscal: FiscalService,
   ) {}
 
   async restoreBySalon(businessId: string, id: string) {
@@ -66,12 +70,7 @@ export class SalonBookingsService {
     businessId: string,
     where: { dayStart: Date; dayEnd: Date },
   ): Promise<AdminBookingView[]> {
-    const bookings = await this.bookings
-      .createQueryBuilder('booking')
-      .leftJoinAndSelect('booking.service', 'service')
-      .leftJoinAndSelect('booking.specialist', 'specialist')
-      .leftJoinAndSelect('booking.business', 'business')
-      .leftJoinAndSelect('booking.branch', 'branch')
+    const bookings = await bookingViewQuery(this.bookings)
       .where('booking.businessId = :businessId', { businessId })
       .andWhere('booking.startsAt < :dayEnd AND booking.endsAt > :dayStart', where)
       .orderBy('booking.startsAt', 'ASC')
@@ -92,7 +91,8 @@ export class SalonBookingsService {
       throw new BadRequestException('Отметить визит можно в его день или позже')
     }
     const isArrived = input.outcome === 'arrived'
-    const due = booking.service ? booking.service.price - (booking.discountAmount ?? 0) : 0
+    const services = visitServices(booking)
+    const due = visitCost(services) - (booking.discountAmount ?? 0)
     // Subscriptions, certificates and bonuses pay part or all of it; money pays the rest.
     let covered = 0
     let coveredBy: 'subscription' | 'certificate' | null = null
@@ -102,6 +102,7 @@ export class SalonBookingsService {
         businessId,
         phone: booking.customerPhone,
         serviceId: booking.serviceId,
+        lines: services.map((service) => ({ serviceId: service.id, price: service.price })),
         due,
       }
       // Booked to be paid by a subscription: «Пришёл» alone draws the visit from it; one that
@@ -144,6 +145,8 @@ export class SalonBookingsService {
       await this.loyalty.earnForVisits([id])
       await this.inventory.useForVisits([id])
     }
+    // Money taken at the visit gets its receipt (or the old one refunded); never fails the save.
+    await this.fiscal.syncVisits(businessId, [id])
 
     return toAdminView(
       await bookingViewQuery(this.bookings).where('booking.id = :id', { id }).getOneOrFail(),
@@ -152,17 +155,12 @@ export class SalonBookingsService {
 
   /** Bookings clients made after `since`, for the cabinet's new-booking alerts. */
   async listCreatedSince(businessId: string, since: Date) {
-    const bookings = await this.bookings
-      .createQueryBuilder('booking')
-      .leftJoinAndSelect('booking.service', 'service')
-      .leftJoinAndSelect('booking.specialist', 'specialist')
-      .leftJoinAndSelect('booking.business', 'business')
-      .leftJoinAndSelect('booking.branch', 'branch')
+    const bookings = await bookingViewQuery(this.bookings)
       .where('booking.businessId = :businessId', { businessId })
       .andWhere('booking.createdAt > :since', { since })
       .andWhere("booking.status = 'confirmed'")
       .orderBy('booking.createdAt', 'ASC')
-      .limit(MAX_RECENT_BOOKINGS)
+      .take(MAX_RECENT_BOOKINGS)
       .getMany()
 
     return bookings.map((booking) => ({
@@ -186,12 +184,24 @@ export class SalonBookingsService {
     if (!booking) throw new NotFoundException('Запись не найдена')
     if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
 
-    const offering = await this.catalogService.getSpecialistsForService(booking.serviceId)
+    const serviceIds = [
+      booking.serviceId,
+      ...(await this.bookingsService.extraServiceIdsOf(booking.id)),
+    ]
+    const offerings = await this.catalogService.getSpecialistsForServices(serviceIds)
+    const offering = mastersForAll(serviceIds.map((serviceId) => offerings.get(serviceId) ?? []))
     if (!offering.some((specialist) => specialist.id === target.specialistId)) {
-      throw new BadRequestException('Этот мастер не выполняет эту услугу')
+      throw new BadRequestException(
+        serviceIds.length > 1
+          ? 'Этот мастер не делает все услуги визита'
+          : 'Этот мастер не выполняет эту услугу',
+      )
     }
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
-    const endsAt = new Date(startsAt.getTime() + (booking.service?.durationMinutes ?? 0) * 60_000)
+    // The visit keeps its length: every service of it one after another.
+    const endsAt = new Date(
+      startsAt.getTime() + (booking.endsAt.getTime() - booking.startsAt.getTime()),
+    )
     if (startsAt.getTime() < Date.now()) throw new BadRequestException('Нельзя перенести в прошлое')
     const blocked = await this.timeOff
       .createQueryBuilder('timeOff')
