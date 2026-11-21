@@ -34,10 +34,15 @@ test.describe('Staff roles', () => {
         (await staff.request.put(`/api/manage/${SLUG}/hours`, { data: { days: [] } })).status(),
       ).toBe(403)
       expect((await staff.request.get(`/api/manage/${SLUG}/members`)).status()).toBe(403)
+      // The counter is the day's work: shifts and sales yes, expenses and the profit no.
+      expect((await staff.request.get(`/api/manage/${SLUG}/cash`)).status()).toBe(200)
+      expect((await staff.request.get(`/api/manage/${SLUG}/expenses?days=30`)).status()).toBe(403)
+      expect((await staff.request.get(`/api/manage/${SLUG}/money?days=30`)).status()).toBe(403)
 
       await staff.goto(`/manage/${SLUG}?tab=analytics`)
       const tabs = staff.getByRole('navigation', { name: 'Разделы кабинета' })
       await expect(tabs.getByRole('link', { name: 'Расписание' })).toBeVisible()
+      await expect(tabs.getByRole('link', { name: 'Касса' })).toBeVisible()
       await expect(tabs.getByRole('link', { name: 'Аналитика' })).toHaveCount(0)
       await expect(tabs.getByRole('link', { name: 'Настройки' })).toHaveCount(0)
 

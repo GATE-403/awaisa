@@ -8,6 +8,7 @@ import {
   DownloadSimple,
   NotePencil,
   PaperPlaneTilt,
+  ShoppingBag,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useRef, useState } from 'react'
@@ -15,7 +16,14 @@ import { formatPrice } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClients } from '@/shared/api/clientApi'
-import type { ClientList, ClientSegment, ClientSort, MailingSegment } from '@/shared/api/types'
+import type {
+  Branch,
+  ClientList,
+  ClientSegment,
+  ClientSort,
+  MailingSegment,
+  Specialist,
+} from '@/shared/api/types'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useIsScrolledPast } from '@/shared/lib/hooks/useIsScrolledPast'
@@ -32,11 +40,15 @@ import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { ImportSheet } from '@/views/manage/ui/ImportSheet/ImportSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
 import forms from '@/views/manage/ui/manageForms.module.css'
+import { SaleSheet } from '@/views/manage/ui/SaleSheet/SaleSheet'
 import styles from './ClientsTab.module.css'
 
 interface ClientsTabProps {
   slug: string
   businessName: string
+  /** For a sale of products from the toolbar: who sold it, at which branch. */
+  specialists: Specialist[]
+  branches: Branch[]
 }
 
 const SEARCH_DELAY_MS = 250
@@ -78,7 +90,7 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 // those who stopped coming, those who do not show up, birthdays. Each group says what to do with
 // it in one line («Позвать 12 клиентов ›» opens the mailing on that group). Rows lie on the page
 // with hairlines, each one tap target to the client's card; long groups come thirty at a time.
-export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
+export const ClientsTab = ({ slug, businessName, specialists, branches }: ClientsTabProps) => {
   const canSeeMoney = useCanSeeMoney()
   const isFar = useIsScrolledPast()
   const searchRef = useRef<HTMLDivElement>(null)
@@ -92,6 +104,7 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
   const [openPhone, setOpenPhone] = useState<string | null>(null)
   const [mailing, setMailing] = useState<MailingSegment | null>(null)
   const [isImporting, setIsImporting] = useState(false)
+  const [isSelling, setIsSelling] = useState(false)
   const [version, setVersion] = useState(0)
   const items = list?.items ?? []
   const counts = list?.counts
@@ -151,7 +164,7 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
             placeholder='Имя или номер'
             label='Поиск клиента'
           />
-          {(canSeeMoney || isFar) && (
+          {
             <GlyphGroup label='Клиентская база'>
               <GlyphButton
                 icon={<ArrowUp />}
@@ -174,8 +187,13 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
                   />
                 </>
               )}
+              <GlyphButton
+                icon={<ShoppingBag />}
+                label='Продать товар'
+                onClick={() => setIsSelling(true)}
+              />
             </GlyphGroup>
-          )}
+          }
         </FloatingToolbar>
       </div>
       <div className={styles.controls}>
@@ -281,6 +299,14 @@ export const ClientsTab = ({ slug, businessName }: ClientsTabProps) => {
           slug={slug}
           onClose={() => setIsImporting(false)}
           onImported={() => setVersion((current) => current + 1)}
+        />
+      )}
+      {isSelling && (
+        <SaleSheet
+          slug={slug}
+          specialists={specialists}
+          branches={branches}
+          onClose={() => setIsSelling(false)}
         />
       )}
       {mailing && (
