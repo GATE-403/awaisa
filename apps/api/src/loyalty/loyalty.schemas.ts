@@ -14,6 +14,7 @@ const planSchema = z.object({
   price: z.number().int().min(0).max(10_000_000),
   validDays: z.number().int().min(1).max(730),
   isActive: z.boolean().default(true),
+  isOnline: z.boolean().default(false),
 })
 
 const certificateSchema = z.object({

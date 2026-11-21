@@ -170,6 +170,7 @@ export class AdminService {
     }[]
 
     const ids = list.map((row) => row.id)
+    await this.loyalty.usePlannedSubscriptions(ids)
     await this.loyalty.earnForVisits(ids)
     await this.inventory.useForVisits(ids)
 

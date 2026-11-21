@@ -32,6 +32,8 @@ import { PAYMENT_HOLD_MINUTES, UNDO_WINDOW_SECONDS } from './booking-rules.js'
 import { type BookingView, bookingViewQuery, isOverlapError, toView } from './booking-shared.js'
 import type { CreateBookingInput } from './bookings.schemas.js'
 import { PaymentsService } from './payments.service.js'
+import { coversService } from './subscription-orders.js'
+import { SubscriptionOrdersService } from './subscription-orders.service.js'
 
 const MAX_CUSTOMER_BOOKINGS = 50
 
@@ -51,9 +53,10 @@ export class BookingsService {
     private readonly config: ConfigService<Env, true>,
     private readonly payments: PaymentsService,
     private readonly promotions: PromotionsService,
-    readonly _loyalty: LoyaltyService,
+    private readonly loyalty: LoyaltyService,
     readonly _inventory: InventoryService,
     private readonly availability: AvailabilityService,
+    private readonly subscriptionOrders: SubscriptionOrdersService,
   ) {}
 
   /** `staffBusinessId` is set when a member books a client in from the cabinet. */
@@ -84,18 +87,39 @@ export class BookingsService {
     const startsAt = businessDateTimeToUtc(input.date, minutes)
     const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000)
     const cancelToken = randomBytes(24).toString('base64url')
-    const discount = await this.promotions.discountFor({
-      businessId: service.businessId,
-      serviceId: service.id,
-      price: service.price,
-      date: input.date,
-      minutes,
-      phone,
-      code: input.promoCode ?? null,
-    })
+    // Paid by the client's own subscription, or by one bought with this booking.
+    const isOwnNumber = Boolean(customer && !isForOther && !staffBusinessId)
+    if ((input.subscriptionId || input.subscriptionPlanId) && !isOwnNumber) {
+      throw new BadRequestException('Войдите, чтобы записаться по абонементу')
+    }
+    const subscription = input.subscriptionId
+      ? (await this.loyalty.subscriptionsAt(service.businessId, phone)).find(
+          (item) => item.id === input.subscriptionId && coversService(item.serviceId, service.id),
+        )
+      : null
+    if (input.subscriptionId && !subscription) {
+      throw new BadRequestException('Абонемент не подходит: закончился, истёк или на другую услугу')
+    }
+    const plan = input.subscriptionPlanId
+      ? await this.subscriptionOrders.findOnlinePlan(service.businessId, input.subscriptionPlanId)
+      : null
+    if (plan) this.subscriptionOrders.assertCovers(plan, service.id)
+    const planPrice = plan ? Number(plan.price) : null
+    const isBySubscription = Boolean(subscription || plan)
+    const discount = isBySubscription
+      ? null
+      : await this.promotions.discountFor({
+          businessId: service.businessId,
+          serviceId: service.id,
+          price: service.price,
+          date: input.date,
+          minutes,
+          phone,
+          code: input.promoCode ?? null,
+        })
     // Online bookings of a service with a deposit hold the slot until the client pays.
     const deposit =
-      !staffBusinessId && service.deposit && this.payments.isAvailable
+      !staffBusinessId && !isBySubscription && service.deposit && this.payments.isAvailable
         ? Math.min(service.deposit, service.price - (discount?.amount ?? 0)) || null
         : null
     const candidates = slot.specialistId
@@ -123,13 +147,16 @@ export class BookingsService {
               (await this.defaultBranchId(service.businessId)),
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
-            depositAmount: deposit,
+            // «Купить абонемент и записаться» holds the slot like a deposit, for the plan's price.
+            depositAmount: deposit ?? planPrice,
+            subscriptionId: subscription?.id ?? null,
             source: staffBusinessId ? 'staff' : 'online',
             promotionId: discount?.promotionId ?? null,
             discountAmount: discount?.amount ?? null,
             discountTitle: discount?.title ?? null,
-            paymentStatus: deposit ? 'pending' : null,
-            paymentDueAt: deposit ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
+            paymentStatus: deposit || plan ? 'pending' : null,
+            paymentDueAt:
+              deposit || plan ? new Date(now.getTime() + PAYMENT_HOLD_MINUTES * 60_000) : null,
             // Booked inside the reminder window: the confirmation already does the reminder's job.
             reminderSentAt:
               input.reminderMinutes !== null &&
@@ -141,6 +168,25 @@ export class BookingsService {
         const view = await this.getView(saved.id)
         if (customer && !customer.name && !isForOther) {
           await this.customers.update({ id: customer.id }, { name: input.name })
+        }
+        // The subscription is paid first; the booking is confirmed once it is issued.
+        if (plan) {
+          const order = await this.subscriptionOrders
+            .order(plan, { customerId: customer?.id ?? null, phone }, saved.id)
+            .catch(async (error: unknown) => {
+              await this.bookings.update(
+                { id: saved.id },
+                { status: 'cancelled', cancelledAt: new Date(), paymentStatus: 'expired' },
+              )
+              throw error
+            })
+          return {
+            ...view,
+            cancelToken,
+            customerPhone: phone,
+            comment: input.comment,
+            checkoutUrl: order.checkoutUrl,
+          }
         }
         // A deposit first: the confirmation and the owner's message wait for the payment.
         if (deposit) {

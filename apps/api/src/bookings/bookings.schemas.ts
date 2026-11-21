@@ -38,6 +38,10 @@ const createBookingSchema = z.object({
   promoCode: z.string().trim().max(40).optional(),
   /** Who invited this client (a profile handle or public id from a `?ref=` link). */
   ref: z.string().trim().max(40).optional(),
+  /** Paid by the signed-in client's subscription at this place. */
+  subscriptionId: z.uuid().optional(),
+  /** «Купить абонемент и записаться»: an online plan bought with this booking. */
+  subscriptionPlanId: z.uuid().optional(),
 })
 
 const nextFreeQuerySchema = z.object({
