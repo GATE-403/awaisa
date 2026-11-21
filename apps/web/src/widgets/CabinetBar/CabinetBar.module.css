@@ -225,6 +225,13 @@
   color: var(--color-muted-foreground);
 }
 
+/* Five and a half rows: the half row cut at the foot says there is more. */
+.switcherList {
+  max-height: calc(44px * 5.5);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .switcherItem > span:first-child {
   display: flex;
   align-items: center;

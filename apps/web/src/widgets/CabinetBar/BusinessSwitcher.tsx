@@ -70,19 +70,22 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
         </>
       }
     >
-      {businesses.map((business) => (
-        <MenuItem
-          key={business.slug}
-          className={styles.switcherItem}
-          icon={business.slug === slug ? <Check weight='bold' aria-hidden /> : undefined}
-          onClick={() => {
-            if (business.slug !== slug) router.push(`/manage/${business.slug}`)
-          }}
-        >
-          <BusinessTile name={business.name} logoUrl={business.logoUrl} size='xs' />
-          <span className={styles.switcherName}>{business.name}</span>
-        </MenuItem>
-      ))}
+      {/* Only the businesses scroll (all of them for an admin); the actions under them stay put. */}
+      <div className={styles.switcherList}>
+        {businesses.map((business) => (
+          <MenuItem
+            key={business.slug}
+            className={styles.switcherItem}
+            icon={business.slug === slug ? <Check weight='bold' aria-hidden /> : undefined}
+            onClick={() => {
+              if (business.slug !== slug) router.push(`/manage/${business.slug}`)
+            }}
+          >
+            <BusinessTile name={business.name} logoUrl={business.logoUrl} size='xs' />
+            <span className={styles.switcherName}>{business.name}</span>
+          </MenuItem>
+        ))}
+      </div>
       {businesses.length > 1 && (
         <MenuItem icon={<SquaresFour aria-hidden />} onClick={() => router.push('/manage')}>
           Все бизнесы
