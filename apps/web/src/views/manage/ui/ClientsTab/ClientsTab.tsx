@@ -44,6 +44,8 @@ const SEARCH_DELAY_MS = 250
 const PAGE = 30
 const BATCH = 200
 const CLIENT_WORDS: [string, string, string] = ['клиент', 'клиента', 'клиентов']
+// Whom «Позвать» calls: «1 клиента», «3 клиентов», «12 клиентов».
+const CALLED_WORDS: [string, string, string] = ['клиента', 'клиентов', 'клиентов']
 
 const SEGMENTS: { value: ClientSegment; label: string }[] = [
   { value: 'all', label: 'Все' },
@@ -321,7 +323,7 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
           ? `Не были больше ${lapsedDays} дней. `
           : 'День рождения в ближайшую неделю. '}
         <button type='button' className={styles.noteAction} onClick={onCall}>
-          Позвать {clients}
+          Позвать {pluralize(count, CALLED_WORDS)}
           <CaretRight weight='bold' aria-hidden />
         </button>
       </p>

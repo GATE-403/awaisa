@@ -20,8 +20,12 @@ import {
 import type { Env } from '../config/env.js'
 import { InventoryService } from '../inventory/inventory.service.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
+import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { rescheduleMessage, salonCancellationMessage } from '../notifications/messages.js'
-import { SmsService } from '../notifications/sms.service.js'
+import {
+  whatsappReschedule,
+  whatsappSalonCancellation,
+} from '../notifications/whatsapp-messages.js'
 import type { CreateTimeOffInput, MoveBookingInput, StaffBookingInput } from './admin.schemas.js'
 import { TimeOff } from './time-off.entity.js'
 
@@ -53,7 +57,7 @@ export class AdminService {
     private readonly catalog: CatalogService,
     private readonly masterSchedule: MasterScheduleService,
     private readonly businesses: BusinessesService,
-    private readonly sms: SmsService,
+    private readonly clientMessages: ClientMessagesService,
     private readonly config: ConfigService<Env, true>,
     private readonly loyalty: LoyaltyService,
     private readonly inventory: InventoryService,
@@ -205,10 +209,11 @@ export class AdminService {
     setTimeout(async () => {
       if ((await this.salonBookings.getStartsAt(id))?.getTime() !== movedTo) return
       if (await this.bookings.isCancelled(id)) return
-      void this.sms.sendSafely(
-        customerPhone,
-        rescheduleMessage(view, this.bookings.linkTo(view.id)),
-      )
+      void this.clientMessages.send(customerPhone, {
+        text: rescheduleMessage(view, this.bookings.linkTo(view.id)),
+        link: this.bookings.manageButton(view.id),
+        whatsapp: whatsappReschedule(view, this.bookings.linkTo(view.id)),
+      })
     }, UNDO_WINDOW_SECONDS * 1000).unref()
 
     return { ...view, previous }
@@ -224,7 +229,10 @@ export class AdminService {
       setTimeout(async () => {
         if (!(await this.bookings.isCancelled(id))) return
         const webUrl = this.config.get('PUBLIC_WEB_URL', { infer: true })
-        void this.sms.sendSafely(customerPhone, salonCancellationMessage(view, webUrl))
+        void this.clientMessages.send(customerPhone, {
+          text: salonCancellationMessage(view, webUrl),
+          whatsapp: whatsappSalonCancellation(view, webUrl),
+        })
       }, UNDO_WINDOW_SECONDS * 1000).unref()
     }
 
