@@ -39,7 +39,7 @@ export class AccountService {
   ) {}
 
   async export(customer: Customer): Promise<AccountExport> {
-    const [certificates, subscriptionOrders, receipts] = await Promise.all([
+    const [certificates, subscriptionOrders, certificateOrders, receipts] = await Promise.all([
       this.query(
         `SELECT bz."slug", bz."name", g."code", g."amount", g."balance", to_char(g."expires_on", 'YYYY-MM-DD') AS "expiresOn",
            g."created_at" AS "createdAt"
@@ -52,6 +52,13 @@ export class AccountService {
            o."created_at" AS "createdAt", o."paid_at" AS "paidAt"
          FROM "subscription_orders" o JOIN "businesses" bz ON bz."id" = o."business_id"
          WHERE o."customer_id" = $1 OR o."phone" = $2 ORDER BY o."created_at" DESC`,
+        [customer.id, customer.phone],
+      ),
+      this.query(
+        `SELECT bz."slug", bz."name", o."amount", o."recipient_name" AS "recipientName", o."status",
+           o."created_at" AS "createdAt", o."paid_at" AS "paidAt"
+         FROM "certificate_orders" o JOIN "businesses" bz ON bz."id" = o."business_id"
+         WHERE o."customer_id" = $1 OR o."buyer_phone" = $2 ORDER BY o."created_at" DESC`,
         [customer.id, customer.phone],
       ),
       // Fiscal receipts of one's own visits (the address on the tax site, not internal ids).
@@ -177,6 +184,14 @@ export class AccountService {
         title: String(row.title),
         visits: Number(row.visits),
         amount: Number(row.amount),
+        status: String(row.status),
+        createdAt: iso(row.createdAt) ?? '',
+        paidAt: iso(row.paidAt),
+      })),
+      certificateOrders: certificateOrders.map((row) => ({
+        business: { slug: String(row.slug), name: String(row.name) },
+        amount: Number(row.amount),
+        recipientName: String(row.recipientName ?? ''),
         status: String(row.status),
         createdAt: iso(row.createdAt) ?? '',
         paidAt: iso(row.paidAt),

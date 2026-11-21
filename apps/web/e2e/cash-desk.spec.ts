@@ -23,6 +23,7 @@ type Money = {
   servicesRevenue: number
   productsRevenue: number
   subscriptionsRevenue: number
+  certificatesRevenue: number
   materialsCost: number
   productsCost: number
   expenses: number
@@ -198,7 +199,8 @@ test.describe('Cash desk', () => {
       expect(report.profit).toBeCloseTo(
         report.servicesRevenue +
           report.productsRevenue +
-          report.subscriptionsRevenue -
+          report.subscriptionsRevenue +
+          report.certificatesRevenue -
           report.materialsCost -
           report.productsCost -
           report.expenses,

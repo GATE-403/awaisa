@@ -15,6 +15,8 @@ type ProfitParts = {
   servicesRevenue: number
   productsRevenue: number
   subscriptionsRevenue: number
+  /** Gift certificates paid online. */
+  certificatesRevenue: number
   materialsCost: number
   productsCost: number
   expenses: number
@@ -63,7 +65,8 @@ const profitOf = (parts: ProfitParts) =>
   roundMoney(
     parts.servicesRevenue +
       parts.productsRevenue +
-      parts.subscriptionsRevenue -
+      parts.subscriptionsRevenue +
+      parts.certificatesRevenue -
       parts.materialsCost -
       parts.productsCost -
       parts.expenses,

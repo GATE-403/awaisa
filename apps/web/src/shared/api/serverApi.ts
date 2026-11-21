@@ -8,6 +8,7 @@ import type {
   BusinessCard,
   BusinessKind,
   BusinessPage,
+  CertificateSale,
   FeedPage,
   FiscalReceipt,
   LeaderboardMaster,
@@ -273,6 +274,20 @@ const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   return data
 }
 
+// «Подарочный сертификат» on the business page: the amounts on sale, none when it sells none.
+const getCertificateSale = async (slug: string): Promise<CertificateSale> => {
+  'use cache'
+  cacheTag(businessTag(slug))
+
+  const { data, isStale } = await readApi<CertificateSale>(
+    `/businesses/${encodeURIComponent(slug)}/certificate-sale`,
+    { fallback: { amounts: [] } },
+  )
+  if (isStale) cacheLife('seconds')
+  else cacheLife('minutes')
+  return data
+}
+
 // The first page of «Работы»; the feed loads the rest on the client as it scrolls.
 const listFeed = async (
   kind: BusinessKind | undefined,
@@ -313,6 +328,7 @@ export {
   listSimilarPlaces,
   listFeed,
   listPromotions,
+  getCertificateSale,
   listSubscriptionPlans,
   getPaymentPage,
   getReceiptPage,

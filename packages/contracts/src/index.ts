@@ -615,10 +615,33 @@ type ClientSubscription = {
 }
 
 // The cabinet's «Лояльность» tab.
+/** Gift certificates sold on the place's page: on or off and the amounts offered. */
+type CertificateSaleSettings = { isOnline: boolean; amounts: number[] }
+
+/**
+ * What the place's page offers (`GET /businesses/:slug/certificate-sale`); no amounts when it
+ * sells none. Never null: Nest sends a null answer as an empty body, which is not JSON.
+ */
+type CertificateSale = { amounts: number[] }
+
+type CertificateOrderInput = {
+  amount: number
+  buyerName: string
+  /** Ignored when signed in: the account's number is used. */
+  buyerPhone: string
+  recipientName: string
+  /** Optional: the code is texted there too. */
+  recipientPhone: string
+  message: string
+}
+
+type CertificateOrderCreated = { id: string; checkoutUrl: string }
+
 type LoyaltyOverview = {
   bonusPercent: number | null
   plans: SubscriptionPlan[]
   certificates: GiftCertificate[]
+  certificateSale: CertificateSaleSettings
 }
 
 // A client's card in the cabinet.
@@ -1100,6 +1123,8 @@ type MoneyReport = {
   /** Subscriptions sold in the period, counted the day they were sold. */
   subscriptionsRevenue: number
   subscriptionsSold: number
+  /** Gift certificates bought online, on the day they were paid. */
+  certificatesRevenue: number
   revenue: number
   /** Materials visits used and the cost of products sold. */
   materialsCost: number
@@ -1422,6 +1447,15 @@ type AccountExport = {
     title: string
     visits: number
     amount: number
+    status: string
+    createdAt: string
+    paidAt: string | null
+  }[]
+  /** Gift certificates bought online, for someone else or oneself. */
+  certificateOrders: {
+    business: { slug: string; name: string }
+    amount: number
+    recipientName: string
     status: string
     createdAt: string
     paidAt: string | null
@@ -1845,6 +1879,11 @@ type BillingCheckoutInput =
 type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
 
 export type {
+  CertificateOrderCreated,
+  CertificateOrderInput,
+  CertificateSale,
+  CertificateSaleSettings,
+  PaymentOrder,
   ModerationAction,
   ModerationDecision,
   ModerationDecisionInput,
@@ -1864,7 +1903,6 @@ export type {
   CalendarFeed,
   CalendarFeedInput,
   CalendarFeedLink,
-  PaymentOrder,
   PlanAccess,
   PlanFeature,
   PlanStatus,

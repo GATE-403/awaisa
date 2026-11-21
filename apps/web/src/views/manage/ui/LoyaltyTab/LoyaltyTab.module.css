@@ -33,3 +33,50 @@
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-regular);
 }
+
+.remove {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: var(--space-1);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+
+.remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* An invisible 44pt target around the small glyph. */
+.remove::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+.remove:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.amounts {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  text-align: right;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* A button row lies on the cabinet's page like the label rows around it (no inset). */
+button.amountsRow {
+  padding-inline: 0;
+}

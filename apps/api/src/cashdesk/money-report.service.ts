@@ -17,6 +17,7 @@ const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
   WHERE m."booking_id" = b."id" AND m."kind" = 'use')`
 const LOCAL_VISIT = `(b."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 const LOCAL_SALE = `(x."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
+const LOCAL_CERTIFICATE = `(g."paid_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 const LOCAL_SUBSCRIPTION = `(c."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 
 const toNumber = (value: unknown) => Number(value ?? 0)
@@ -61,8 +62,12 @@ export class MoneyReportService {
       productsRevenue: current.productsRevenue,
       subscriptionsRevenue: current.subscriptionsRevenue,
       subscriptionsSold: current.subscriptionsSold,
+      certificatesRevenue: current.certificatesRevenue,
       revenue: roundMoney(
-        current.servicesRevenue + current.productsRevenue + current.subscriptionsRevenue,
+        current.servicesRevenue +
+          current.productsRevenue +
+          current.subscriptionsRevenue +
+          current.certificatesRevenue,
       ),
       materialsCost: current.materialsCost,
       productsCost: current.productsCost,
@@ -110,6 +115,9 @@ export class MoneyReportService {
          (SELECT COUNT(*) FROM "client_subscriptions" c
            WHERE c."business_id" = $1 AND c."created_at" >= $2 AND c."created_at" < $3
          ) AS "subscriptionsSold",
+         (SELECT COALESCE(SUM(g."amount"), 0) FROM "certificate_orders" g
+           WHERE g."business_id" = $1 AND g."status" = 'paid'
+             AND g."paid_at" >= $2 AND g."paid_at" < $3) AS "certificatesRevenue",
          (SELECT COALESCE(SUM("amount"), 0) FROM "expenses"
            WHERE "business_id" = $1 AND "date" BETWEEN $4 AND $5) AS "expenses"`,
       [businessId, from, to, firstDay, lastDay],
@@ -121,6 +129,9 @@ export class MoneyReportService {
       productsCost: toNumber(row?.productsCost),
       subscriptionsRevenue: toNumber(row?.subscriptionsRevenue),
       subscriptionsSold: toNumber(row?.subscriptionsSold),
+      // Money in on the day a gift certificate was paid online; spending it later is not
+      // counted again (a visit's paid amount leaves out what the certificate covered).
+      certificatesRevenue: toNumber(row?.certificatesRevenue),
       expenses: toNumber(row?.expenses),
     }
   }
@@ -146,19 +157,27 @@ export class MoneyReportService {
          FROM "client_subscriptions" c WHERE c."business_id" = $1
            AND c."created_at" >= $2 AND c."created_at" < $3
          GROUP BY 1
+       ), gifted AS (
+         SELECT to_char(${LOCAL_CERTIFICATE}, 'YYYY-MM-DD') AS "date", SUM(g."amount") AS "revenue"
+         FROM "certificate_orders" g WHERE g."business_id" = $1 AND g."status" = 'paid'
+           AND g."paid_at" >= $2 AND g."paid_at" < $3
+         GROUP BY 1
        ), spent AS (
          SELECT to_char("date", 'YYYY-MM-DD') AS "date", SUM("amount") AS "amount"
          FROM "expenses" WHERE "business_id" = $1 AND "date" BETWEEN $4 AND $5
          GROUP BY 1
        )
        SELECT d."date",
-         COALESCE(v."revenue", 0) + COALESCE(o."revenue", 0) + COALESCE(a."revenue", 0) AS "revenue",
+         COALESCE(v."revenue", 0) + COALESCE(o."revenue", 0) + COALESCE(a."revenue", 0)
+           + COALESCE(g."revenue", 0) AS "revenue",
          COALESCE(v."cost", 0) + COALESCE(o."cost", 0) AS "cost", COALESCE(e."amount", 0) AS "expenses"
        FROM (SELECT "date" FROM visits UNION SELECT "date" FROM sold
-         UNION SELECT "date" FROM subscribed UNION SELECT "date" FROM spent) d
+         UNION SELECT "date" FROM subscribed UNION SELECT "date" FROM gifted
+         UNION SELECT "date" FROM spent) d
        LEFT JOIN visits v ON v."date" = d."date"
        LEFT JOIN sold o ON o."date" = d."date"
        LEFT JOIN subscribed a ON a."date" = d."date"
+       LEFT JOIN gifted g ON g."date" = d."date"
        LEFT JOIN spent e ON e."date" = d."date"`,
       [businessId, from, to, firstDay, lastDay],
     )

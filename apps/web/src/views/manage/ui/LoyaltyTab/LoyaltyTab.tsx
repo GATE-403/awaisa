@@ -5,14 +5,16 @@ import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
 import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
+import { formatAmount, formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   deleteSubscriptionPlan,
   getLoyalty,
+  getPaymentConfig,
   issueCertificate,
   saveSubscriptionPlan,
   setBonusPercent,
+  setCertificateSale,
 } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
@@ -22,6 +24,7 @@ import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
+import { CertificateAmountsSheet } from './CertificateAmountsSheet'
 import { CertificateSheet } from './CertificateSheet'
 import own from './LoyaltyTab.module.css'
 import { PlanSheet } from './PlanSheet'
@@ -40,6 +43,8 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
   const [data, setData] = useState<LoyaltyOverview | null>(null)
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | 'new' | null>(null)
   const [isIssuing, setIsIssuing] = useState(false)
+  const [isEditingAmounts, setIsEditingAmounts] = useState(false)
+  const [canSellOnline, setCanSellOnline] = useState(false)
 
   const load = () =>
     getLoyalty(slug)
@@ -50,6 +55,15 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
   useEffect(() => {
     void load()
   }, [slug])
+
+  // Selling online needs an acquirer: without one the switch is not offered.
+  useEffect(() => {
+    const controller = new AbortController()
+    getPaymentConfig(controller.signal)
+      .then((config) => setCanSellOnline(config.isAvailable))
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [])
 
   const run = async (action: () => Promise<unknown>, title: string) => {
     try {
@@ -66,6 +80,25 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
   }
 
   if (!data) return null
+
+  const sale = data.certificateSale
+
+  // The place's page shows the block: it must not wait for its cache to run out.
+  const saveSale = async (input: { isOnline: boolean; amounts: number[] }) => {
+    await setCertificateSale(slug, input)
+    void refreshBusiness(slug)
+  }
+
+  const handleOnlineChange = (isOnline: boolean) => {
+    if (isOnline && sale.amounts.length === 0) {
+      setIsEditingAmounts(true)
+      return
+    }
+    void run(
+      () => saveSale({ isOnline, amounts: sale.amounts }),
+      isOnline ? 'Сертификаты продаются онлайн' : 'Онлайн-продажа выключена',
+    )
+  }
 
   return (
     <section className={styles.section} aria-label='Лояльность'>
@@ -157,6 +190,36 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         )}
       </section>
 
+      {(canSellOnline || sale.isOnline) && (
+        <section className={sheet.group} aria-label='Сертификаты онлайн'>
+          <SectionCaption>Сертификаты онлайн</SectionCaption>
+          <div className={styles.list}>
+            <label className={sheet.row}>
+              <span className={sheet.rowLabel}>Продавать сертификаты онлайн</span>
+              <Switch checked={sale.isOnline} onCheckedChange={handleOnlineChange} />
+            </label>
+            {sale.isOnline && (
+              <button
+                type='button'
+                className={`${sheet.row} ${own.amountsRow}`}
+                onClick={() => setIsEditingAmounts(true)}
+              >
+                <span className={sheet.rowLabel}>Суммы</span>
+                <span className={own.amounts}>
+                  {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} сом
+                </span>
+                <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+              </button>
+            )}
+          </div>
+          <RowNote>
+            {sale.isOnline
+              ? 'Клиенты покупают на странице места и платят картой. Сертификат появится ниже после оплаты, код придёт покупателю и получателю.'
+              : 'Подарочный сертификат на странице места: клиент выбирает сумму, платит картой и получает код.'}
+          </RowNote>
+        </section>
+      )}
+
       <section className={sheet.group} aria-label='Сертификаты'>
         <div className={sheet.groupHeader}>
           <SectionCaption isInset={false}>Сертификаты</SectionCaption>
@@ -214,6 +277,18 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
             editingPlan === 'new'
               ? undefined
               : () => void run(() => deleteSubscriptionPlan(slug, editingPlan.id), 'Удалено')
+          }
+        />
+      )}
+      {isEditingAmounts && (
+        <CertificateAmountsSheet
+          amounts={sale.amounts}
+          onClose={() => setIsEditingAmounts(false)}
+          onSave={(amounts) =>
+            run(
+              () => saveSale({ isOnline: true, amounts }),
+              sale.isOnline ? 'Суммы сохранены' : 'Сертификаты продаются онлайн',
+            )
           }
         />
       )}
