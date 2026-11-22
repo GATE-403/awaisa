@@ -16,7 +16,7 @@ test.describe('«Что нового»', () => {
   test('the cabinet marks news until it is read', async ({ page }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto('/manage/awaisa-studio')
-    const unread = page.getByRole('link', { name: 'Что нового — есть обновления' })
+    const unread = page.getByRole('link', { name: 'Что нового: есть обновления' })
     await expect(unread).toBeVisible()
 
     await unread.click()
