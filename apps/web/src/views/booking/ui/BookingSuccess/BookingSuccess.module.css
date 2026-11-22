@@ -64,10 +64,8 @@
   width: 100%;
   margin-top: var(--space-5);
   border-radius: var(--radius-xl);
-  /* Printed like a receipt from a terminal once the check has popped: fed out from a slot at its
-     top edge, revealed downward with a little stutter of the paper feed. The clip reaches 40px
-     past the ticket so its shadow is never cut. */
-  animation: print 1100ms cubic-bezier(0.3, 0.7, 0.2, 1) 350ms both;
+  /* No entrance of its own: printed from a slot, it read as a picture still loading («как будто
+     подгружается как изображение»). It is simply there under «Вы записаны». */
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
@@ -125,34 +123,6 @@
 .keepLink {
   color: var(--color-link);
   font-weight: var(--font-weight-semibold);
-}
-
-@keyframes print {
-  from {
-    clip-path: inset(-40px -40px 100% -40px);
-    translate: 0 -28px;
-  }
-
-  35% {
-    clip-path: inset(-40px -40px 62% -40px);
-    translate: 0 -16px;
-  }
-
-  45% {
-    clip-path: inset(-40px -40px 55% -40px);
-    translate: 0 -12px;
-  }
-
-  to {
-    clip-path: inset(-40px);
-    translate: 0 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ticket {
-    animation: none;
-  }
 }
 
 /* After the ticket: picks for this client, then a quiet way into the catalog. */
@@ -243,10 +213,6 @@
 
   .nextStep {
     animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 320ms backwards;
-  }
-
-  .ticket {
-    animation-delay: 380ms;
   }
 }
 

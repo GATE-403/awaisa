@@ -130,6 +130,15 @@
     deal 420ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 40ms) backwards;
 }
 
+/* Already there when the stack mounted: no landing (the placeholder showed them in place). */
+.card[data-mounted] {
+  animation: none;
+}
+
+.stack[data-dealt] .card[data-mounted] {
+  animation: deal 420ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 40ms) backwards;
+}
+
 @keyframes deal {
   from {
     translate: 0 -10px;

@@ -192,7 +192,11 @@ export const BookingPage = ({
   const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
   // Which way the form moved: forward brings the next step in from the right, back («Изменить»)
   // from the left. Kept with the step it came from (React's «previous value in state» pattern).
-  const [stepTrail, setStepTrail] = useState({ step: activeStep, direction: 'forward' })
+  // No direction until the first move: the form replacing the sheet's placeholder is not a move,
+  // and playing the entrance again there read as the sheet opening twice.
+  const [stepTrail, setStepTrail] = useState<{ step: BookingStepId; direction?: string }>({
+    step: activeStep,
+  })
   if (stepTrail.step !== activeStep) {
     const isBack = STEP_ORDER.indexOf(activeStep) < STEP_ORDER.indexOf(stepTrail.step)
     setStepTrail({ step: activeStep, direction: isBack ? 'back' : 'forward' })

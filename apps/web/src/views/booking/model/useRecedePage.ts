@@ -1,6 +1,7 @@
 'use client'
 
 import { type RefObject, useEffect } from 'react'
+import { prefersLightMotion } from '@/shared/lib/lightMotion'
 
 const SETTLE_MS = 520
 
@@ -39,7 +40,8 @@ export const useRecedePage = (ref: RefObject<HTMLElement | null>) => {
     const root = sheet?.closest('.root')
     const isPhone = matchMedia('(max-width: 767px)').matches
     const isStill = matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!sheet || !root || !isPhone || isStill) return
+    // Android: scaling the whole page under the sheet dropped frames; the sheet simply slides up.
+    if (!sheet || !root || !isPhone || isStill || prefersLightMotion()) return
 
     const behind = [...root.children].filter(
       (element): element is HTMLElement =>
