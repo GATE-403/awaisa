@@ -1,5 +1,10 @@
 // Public API of the slice: other layers import only from here (Feature-Sliced Design).
 export * from './BookingPage'
+export { BookingLayer } from './ui/BookingLayer/BookingLayer'
 export { BookingModalGate } from './ui/BookingModalGate/BookingModalGate'
+export { BookingOriginTracker, BookingReturnOnReload } from './ui/BookingOrigin/BookingOrigin'
+export { BookingSheet } from './ui/BookingSheet/BookingSheet'
+export { BookingSheetPlaceholder } from './ui/BookingSheetPlaceholder/BookingSheetPlaceholder'
 export { BookingSkeleton } from './ui/BookingSkeleton/BookingSkeleton'
 export { BookingUnavailable } from './ui/BookingUnavailable/BookingUnavailable'
+export { PlaceUnderBooking } from './ui/PlaceUnderBooking/PlaceUnderBooking'
