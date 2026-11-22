@@ -145,6 +145,8 @@ const BOOKING: Record<string, Entry> = {
   День: ['Күн', 'Day'],
   '{day}, выходной': ['{day}, дем алыш', '{day}, closed'],
   Повторить: ['Кайталоо', 'Retry'],
+  'предоплата {amount}': ['алдын ала төлөм {amount}', 'deposit {amount}'],
+  'Шаги записи': ['Жазылуу кадамдары', 'Booking steps'],
   'На этот день всё занято': ['Бул күнү бош убакыт жок', 'This day is fully booked'],
   'Выберите другой день': ['Башка күндү тандаңыз', 'Choose another day'],
   'Выбрано {time}': ['Тандалды: {time}', 'Chosen {time}'],

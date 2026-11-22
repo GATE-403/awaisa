@@ -28,6 +28,7 @@ import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
+import { choiceLine } from '@/views/booking/lib/choiceLine'
 import { pickOfferedService } from '@/views/booking/lib/visitServices'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
@@ -203,7 +204,12 @@ export const BookingPage = ({
     return (
       <div
         className={styles.content}
-        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+        style={
+          {
+            '--place-tint': pickTint(business.name),
+            '--wash-tint': pickTint(form.createdBooking.specialistName || business.name),
+          } as CSSProperties
+        }
       >
         <div className={styles.wash} aria-hidden />
         <BookingTopBar business={business} isModal={isModal} />
@@ -293,10 +299,16 @@ export const BookingPage = ({
       tone: cardTone(1),
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
-        <img {...sizedImage(picture, 88)} alt='' className={styles.stackThumb} />
+        <img
+          {...sizedImage(picture, 88)}
+          alt=''
+          className={styles.stackThumb}
+          data-flight-target='service'
+        />
       ) : (
         <span
           className={styles.stackThumb}
+          data-flight-target='service'
           data-empty=''
           style={{ background: pickTint(business.name) }}
         />
@@ -324,9 +336,10 @@ export const BookingPage = ({
           src={chosenSpecialist.photoUrl ?? undefined}
           size='md'
           className={styles.stackFace}
+          data-flight-target='specialist'
         />
       ) : (
-        <span className={styles.stackFace} data-any=''>
+        <span className={styles.stackFace} data-any='' data-flight-target='specialist'>
           <UsersThree weight='fill' />
         </span>
       ),
@@ -454,7 +467,45 @@ export const BookingPage = ({
             total: payment.plan.price,
           }
         : null,
+    // «Любой мастер» says nothing by the time the visit is booked: the line keeps its room for
+    // the address.
+    masterShort:
+      form.specialistId && form.specialistId !== ANY_SPECIALIST_ID
+        ? (specialistLabel.split(' ')[0] ?? specialistLabel)
+        : null,
+    isAddressShown: form.branches.length > 1,
+    choice: choiceLine({
+      services: form.chosenServices.length
+        ? form.chosenServices.map((service) => service.name)
+        : form.service
+          ? [form.service.name]
+          : [],
+      master: form.specialistId
+        ? form.specialistId === ANY_SPECIALIST_ID
+          ? t('Любой мастер')
+          : (specialistLabel.split(' ')[0] ?? specialistLabel)
+        : null,
+      when: form.dayKey && form.time ? `${t.dayShort(form.dayKey)}, ${form.time}` : null,
+    }),
   }
+
+  // The light behind the sheet's top takes the chosen master's colour, slowly; the place's own
+  // until then (the stack cards keep the place's hue either way).
+  const chosenMaster = catalog.specialists.find((specialist) => specialist.id === form.specialistId)
+  const washTint = chosenMaster ? pickTint(chosenMaster.name) : pickTint(business.name)
+  // The four steps as thin segments under the top bar, like a story's progress.
+  const progress = (['service', 'specialist', 'datetime', 'contacts'] as const).map((step) => ({
+    id: step,
+    isDone:
+      step === 'service'
+        ? Boolean(form.serviceId)
+        : step === 'specialist'
+          ? Boolean(form.specialistId)
+          : step === 'datetime'
+            ? Boolean(form.time)
+            : form.firstIncompleteStep === null,
+    isCurrent: step === activeStep,
+  }))
 
   // A note, a code and the SMS options: under the contacts while they are typed, and on their
   // own under «Всё готово» once the contacts have folded into a card.
@@ -540,10 +591,10 @@ export const BookingPage = ({
   return (
     <div
       className={styles.content}
-      style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+      style={{ '--place-tint': pickTint(business.name), '--wash-tint': washTint } as CSSProperties}
     >
       <div className={styles.wash} aria-hidden />
-      <BookingTopBar business={business} isModal={isModal} />
+      <BookingTopBar business={business} isModal={isModal} progress={progress} />
       <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
         <div className={styles.steps}>
           {isQuickShown && quickService && (

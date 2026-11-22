@@ -8,6 +8,8 @@ import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import pageStyles from '../../BookingPage.module.css'
 import { clearSheetAlreadyUp, isSheetAlreadyUp } from '../../lib/sheetHandoff'
+import { useCardFlight } from '../../model/useCardFlight'
+import { useRecedePage } from '../../model/useRecedePage'
 import { BookingScrim } from '../BookingTopBar/BookingTopBar'
 
 interface BookingSheetProps {
@@ -39,6 +41,8 @@ const SheetFrame = ({ children, isModal = false, closeHref }: BookingSheetProps)
   const screenRef = useRef<HTMLElement>(null)
   useInertOutside(screenRef)
   useFocusedFieldInView(screenRef)
+  useCardFlight(screenRef)
+  useRecedePage(screenRef)
   const [isAlreadyUp] = useState(isSheetAlreadyUp)
   useEffect(clearSheetAlreadyUp, [])
 

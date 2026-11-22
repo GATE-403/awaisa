@@ -64,7 +64,10 @@
   width: 100%;
   margin-top: var(--space-5);
   border-radius: var(--radius-xl);
-  animation: print 700ms var(--ease-spring) both;
+  /* Printed like a receipt from a terminal once the check has popped: fed out from a slot at its
+     top edge, revealed downward with a little stutter of the paper feed. The clip reaches 40px
+     past the ticket so its shadow is never cut. */
+  animation: print 1100ms cubic-bezier(0.3, 0.7, 0.2, 1) 350ms both;
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
@@ -126,15 +129,29 @@
 
 @keyframes print {
   from {
-    opacity: 0;
-    translate: 0 -24px;
-    scale: 0.96;
+    clip-path: inset(-40px -40px 100% -40px);
+    translate: 0 -28px;
+  }
+
+  35% {
+    clip-path: inset(-40px -40px 62% -40px);
+    translate: 0 -16px;
+  }
+
+  45% {
+    clip-path: inset(-40px -40px 55% -40px);
+    translate: 0 -12px;
   }
 
   to {
-    opacity: 1;
+    clip-path: inset(-40px);
     translate: 0 0;
-    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket {
+    animation: none;
   }
 }
 
