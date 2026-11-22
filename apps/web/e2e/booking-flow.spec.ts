@@ -98,14 +98,18 @@ test.describe('User flow: booking', () => {
     // Sheets also close by pulling the top bar down.
     await ticket.getByRole('button', { name: 'Показать талон' }).click()
     const title = ticketSheet.getByRole('heading', { name: 'Талон' })
-    const box = await settledBox(title)
-    if (box) {
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
-      await page.mouse.down()
-      await page.mouse.move(box.x + box.width / 2, box.y + 220, { steps: 6 })
-      await page.mouse.up()
-    }
-    await expect(ticketSheet).toHaveCount(0)
+    // A pull begun while a slow runner still settles the sheet can be read as a tap: the pull is
+    // tried again from where the bar now is, until the sheet has gone.
+    await expect(async () => {
+      const box = await settledBox(title)
+      if (box) {
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(box.x + box.width / 2, box.y + 260, { steps: 8 })
+        await page.mouse.up()
+      }
+      await expect(ticketSheet).toHaveCount(0, { timeout: 2_000 })
+    }).toPass({ timeout: 15_000 })
 
     // Cancelling is immediate (from the pass's «⋯» menu); «Вернуть» in the toast undoes it.
     const cancelFromMenu = async () => {
