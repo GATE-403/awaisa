@@ -10,6 +10,7 @@ import {
   updateWorkPhoto,
 } from '@/shared/api/clientApi'
 import type { Catalog, WorkPhoto } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './PhotosSection.module.css'
 import { WorkPhotoSheet } from './WorkPhotoSheet'
@@ -46,6 +47,7 @@ export const PhotosSection = ({
   onPhotosChange,
   inputId,
 }: PhotosSectionProps) => {
+  const t = useT()
   const [isBusy, setIsBusy] = useState(false)
   const [photos, setPhotos] = useState<WorkPhoto[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
@@ -92,7 +94,9 @@ export const PhotosSection = ({
           setPhotos(next)
         }
       },
-      files.length > 1 ? `Добавлено фото: ${files.length}` : 'Фото добавлено',
+      files.length > 1
+        ? t('Добавлено фото: {count}', { count: files.length })
+        : t('Фото добавлено'),
     )
     setIsBusy(false)
     // Right away: what is on each, like tagging photos after taking them.
@@ -113,7 +117,7 @@ export const PhotosSection = ({
   }
 
   const saveOrder = (ids: string[]) =>
-    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), 'Порядок сохранён')
+    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), t('Порядок сохранён'))
 
   const handleDragOver = (event: DragEvent, overId: string) => {
     if (!draggedId || draggedId === overId) return
@@ -131,7 +135,7 @@ export const PhotosSection = ({
   }
 
   return (
-    <section className={styles.group} aria-label='Работы'>
+    <section className={styles.group} aria-label={t('Работы')}>
       <ul className={styles.strip} aria-busy={isBusy}>
         {shown.map((photo, index) => (
           <li
@@ -151,7 +155,13 @@ export const PhotosSection = ({
             <button
               type='button'
               className={styles.tileButton}
-              aria-label={`Фото ${index + 1}: ${photo.serviceName ?? 'услуга не указана'}${photo.isHidden ? ', скрыто' : ''}`}
+              aria-label={t(
+                photo.isHidden ? 'Фото {index}: {service}, скрыто' : 'Фото {index}: {service}',
+                {
+                  index: index + 1,
+                  service: photo.serviceName ?? t('услуга не указана'),
+                },
+              )}
               onClick={() => setOpenId(photo.id)}
             >
               {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
@@ -176,12 +186,12 @@ export const PhotosSection = ({
       {photos.length === 0 && (
         <EmptyState
           variant='inline'
-          title='Покажите свои работы'
-          text='Клиенты записываются с фото: добавьте до 30 штук, можно сразу несколько.'
+          title={t('Покажите свои работы')}
+          text={t('Клиенты записываются с фото: добавьте до 30 штук, можно сразу несколько.')}
         />
       )}
       {photos.length > 1 && (
-        <p className={styles.hint}>Первые пять фото видны на странице первыми.</p>
+        <p className={styles.hint}>{t('Первые пять фото видны на странице первыми.')}</p>
       )}
       <input
         id={inputId}
@@ -190,7 +200,7 @@ export const PhotosSection = ({
         multiple
         hidden
         onChange={handlePhotos}
-        aria-label='Файл фото'
+        aria-label={t('Файл фото')}
       />
       {open && (
         <WorkPhotoSheet
@@ -201,7 +211,7 @@ export const PhotosSection = ({
           step={queue.length > 1 ? { index: queueIndex + 1, total: queue.length } : undefined}
           onClose={closeSheet}
           onSave={(input) =>
-            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), 'Сохранено')
+            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), t('Сохранено'))
           }
           onMakeFirst={
             photos[0]?.id === open.id
@@ -216,7 +226,7 @@ export const PhotosSection = ({
                   )
           }
           onDelete={() =>
-            void run(async () => setPhotos(await removePhoto(slug, open.id)), 'Фото удалено')
+            void run(async () => setPhotos(await removePhoto(slug, open.id)), t('Фото удалено'))
           }
         />
       )}
