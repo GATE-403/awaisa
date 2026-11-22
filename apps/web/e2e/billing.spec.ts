@@ -105,7 +105,11 @@ test.describe('Business plans', () => {
     expect((await lifetime.json()).access).toMatchObject({ status: 'lifetime', endsAt: null })
   })
 
-  test('businesses from before plans keep everything for good', async ({ page }, testInfo) => {
+  test('businesses from before plans keep everything for good', async ({
+    page,
+    isMobile,
+  }, testInfo) => {
+    test.skip(isMobile, 'API only')
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const managed = await (await page.request.get('/api/manage/awaisa-studio')).json()
     expect(managed.access).toMatchObject({ status: 'lifetime', endsAt: null })

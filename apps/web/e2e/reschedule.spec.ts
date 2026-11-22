@@ -1,50 +1,15 @@
 import { expect, test } from '@playwright/test'
 import { randomClientPhone } from './account'
-import { API_URL } from './helpers'
-import { createPastVisit } from './visits'
+import { bookAhead, createPastVisit } from './visits'
 
-const SLUG = 'awaisa-studio'
-
-type Slot = { time: string; isAvailable: boolean }
+const _SLUG = 'awaisa-studio'
 
 // A real future booking for a guest, kept on the device like after booking on the site.
-const bookAhead = async () => {
-  const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
-  const specialist = business.catalog.specialists[1]
-  const serviceId = specialist.serviceIds[0]
-  for (let offset = 2; offset <= 14; offset += 1) {
-    const date = new Date(Date.now() + offset * 86_400_000 + 6 * 3_600_000)
-      .toISOString()
-      .slice(0, 10)
-    const { slots } = await (
-      await fetch(
-        `${API_URL}/availability?serviceId=${serviceId}&specialistId=${specialist.id}&date=${date}`,
-      )
-    ).json()
-    const free = (slots as Slot[]).filter((slot) => slot.isAvailable)
-    if (free.length < 2) continue
-    const response = await fetch(`${API_URL}/bookings`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        serviceId,
-        specialistId: specialist.id,
-        date,
-        time: free[0]?.time,
-        name: 'E2E Перенос',
-        phone: randomClientPhone(),
-        smsConfirmation: false,
-      }),
-    })
-    return response.json()
-  }
-  throw new Error('No free day to book')
-}
 
 test.describe('Client reschedules a visit', () => {
   test('from the ticket menu: another day and time with the same master', async ({ page }) => {
     test.setTimeout(60_000)
-    const booking = await bookAhead()
+    const booking = await bookAhead({ specialistIndex: 1, name: 'E2E Перенос', minFree: 2 })
     await page.addInitScript(
       (stored) => {
         window.localStorage.setItem('awaisa:bookings:v2', JSON.stringify([stored]))
@@ -69,8 +34,9 @@ test.describe('Client reschedules a visit', () => {
     await expect(ticket).toContainText(newTime)
   })
 
-  test('the API keeps strangers and past visits out', async ({ request }) => {
-    const booking = await bookAhead()
+  test('the API keeps strangers and past visits out', async ({ request, isMobile }) => {
+    test.skip(isMobile, 'API only')
+    const booking = await bookAhead({ specialistIndex: 1, name: 'E2E Перенос', minFree: 2 })
     const wrongToken = await request.patch(`/api/bookings/${booking.id}`, {
       headers: { 'x-booking-token': 'x'.repeat(32) },
       data: { date: booking.date, time: booking.time },

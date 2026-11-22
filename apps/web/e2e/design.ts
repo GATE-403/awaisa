@@ -23,6 +23,8 @@ type DesignRule =
   | 'single-item-menu'
   /** Two actions side by side under a centred head, of different widths: the gap leaves the axis. */
   | 'off-axis-pair'
+  /** Controls in one capsule or toolbar lying over each other (a segmented knob over a glyph). */
+  | 'overlap'
 
 const RULE_TITLES: Record<DesignRule, string> = {
   'sticks-out': 'вылезает за свой фон',
@@ -33,6 +35,7 @@ const RULE_TITLES: Record<DesignRule, string> = {
   'glyph-tile': 'иконка на цветной плитке',
   'single-item-menu': 'меню из одного пункта вместо действия',
   'off-axis-pair': 'пара кнопок не на общей оси',
+  overlap: 'элементы капсулы налезают друг на друга',
 }
 
 const findDesignDefects = (page: Page, scope?: string) =>
@@ -93,6 +96,8 @@ const findDesignDefects = (page: Page, scope?: string) =>
       if (!isPainted(style) || isScroller(style) || isClipping(style)) continue
       if (box === document.body || box === document.documentElement) continue
       const outer = box.getBoundingClientRect()
+      // A hairline (the timeline's red «now» line) is not a capsule: its time hangs across it.
+      if (outer.width <= 3 || outer.height <= 3) continue
       for (const child of box.querySelectorAll('*')) {
         if (!isShown(child) || isOutOfFlow(child)) continue
         if (!hasOwnText(child) && !isPainted(getComputedStyle(child))) continue
@@ -314,6 +319,99 @@ const findDesignDefects = (page: Page, scope?: string) =>
           target: name(row),
           detail: `ширины ${widths.map(Math.round).join(' и ')}px: просвет между ними уходит с оси на ${Math.round(spread / 2)}px`,
         })
+    }
+
+    // 9. Controls of one capsule or toolbar lie side by side, never over each other. A segmented
+    //    control's knob counts too: it sits exactly over its own segment and touches no other
+    //    control (it once spilled with its segment onto the schedule's «На всю ширину» glyph on a
+    //    375pt phone). Checked per holder, so a floating bar over the page or a calendar's
+    //    stacked visits are not compared with what lies under them.
+    const holders = [...root.querySelectorAll('*')].filter((holder) => {
+      if (!isShown(holder)) return false
+      if (holder.matches('fieldset, [role="group"], [role="toolbar"], [role="radiogroup"]'))
+        return true
+      const style = getComputedStyle(holder)
+      if (style.position === 'fixed' && holder.querySelector('button, a[href], label')) return true
+      const rect = holder.getBoundingClientRect()
+      return (
+        isPainted(style) &&
+        rect.height <= 64 &&
+        Number.parseFloat(style.borderTopLeftRadius) >= rect.height / 2 - 1 &&
+        holder.querySelectorAll('button, a[href], label').length > 1
+      )
+    })
+    // The knob: a painted, wordless, absolutely placed layer of a fieldset drawn under the segments.
+    const isKnob = (element: Element) =>
+      element.parentElement?.tagName === 'FIELDSET' &&
+      element.getAttribute('aria-hidden') === 'true' &&
+      getComputedStyle(element).position === 'absolute' &&
+      isPainted(getComputedStyle(element)) &&
+      !(element.textContent ?? '').trim()
+    // Parts placed on their own layer (a popover, a sticky row) belong to that layer, not here.
+    const layerOf = (element: Element, holder: Element) => {
+      for (let node = element.parentElement; node && node !== holder; node = node.parentElement) {
+        if (/^(absolute|fixed|sticky)$/.test(getComputedStyle(node).position)) return node
+      }
+      return holder
+    }
+    const overlapOf = (a: DOMRect, b: DOMRect) =>
+      Math.min(
+        Math.min(a.right, b.right) - Math.max(a.left, b.left),
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top),
+      )
+    const reported = new Set<Element>()
+    for (const holder of holders) {
+      if (out.filter((item) => item.rule === 'overlap').length >= 5) break
+      const controls = [...holder.querySelectorAll('button, a[href], label, *')].filter(
+        (element) =>
+          isShown(element) &&
+          (isKnob(element) ||
+            (element.matches('button, a[href], label') &&
+              !element.parentElement?.closest('button, a[href], label'))) &&
+          layerOf(element, holder) === holder,
+      )
+      for (const [index, first] of controls.entries()) {
+        const box = first.getBoundingClientRect()
+        for (const second of controls.slice(index + 1)) {
+          if (first.contains(second) || second.contains(first)) continue
+          if (reported.has(first) && reported.has(second)) continue
+          const other = second.getBoundingClientRect()
+          const depth = overlapOf(box, other)
+          if (depth <= 2) continue
+          const knob = isKnob(first) ? first : isKnob(second) ? second : null
+          const segment = knob === first ? second : first
+          if (knob && segment.parentElement === knob.parentElement) {
+            // Over its own segment: it must cover that one exactly, give or take a pixel.
+            const knobBox = knob.getBoundingClientRect()
+            const segmentBox = segment.getBoundingClientRect()
+            const isOwn = segment.matches(
+              ':has(:checked), [aria-pressed="true"], [aria-selected="true"], [aria-current]:not([aria-current="false"])',
+            )
+            const drift = Math.max(
+              Math.abs(knobBox.left - segmentBox.left),
+              Math.abs(knobBox.right - segmentBox.right),
+            )
+            if (isOwn && drift <= 1) continue
+            reported.add(knob)
+            out.push({
+              rule: 'overlap',
+              target: name(knob.parentElement ?? knob),
+              detail: isOwn
+                ? `бегунок не совпадает с выбранным сегментом на ${Math.round(drift)}px`
+                : `бегунок заходит на ${Math.round(depth)}px на сегмент ${name(segment)}`,
+            })
+            continue
+          }
+          reported.add(first)
+          reported.add(second)
+          out.push({
+            rule: 'overlap',
+            target: name(knob ? (knob.parentElement ?? knob) : first),
+            detail:
+              `${knob ? 'бегунок' : ''} налезает на ${Math.round(depth)}px на ${name(knob ? segment : second)} в ${name(holder)}`.trim(),
+          })
+        }
+      }
     }
 
     return out
