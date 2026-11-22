@@ -259,6 +259,7 @@ The web app is a booking platform: any business registers and gets its own page 
 - Pushes in the app (`apps/mobile/src/common/utils/pushNotifications.ts`, `expo-notifications` + `expo-device`): the Android channel `bookings`, the permission only on `pushEnable`, the Expo token with the EAS `projectId` (`extra.eas.projectId`, set by `eas init`; without it, or on a simulator, the answer is `unavailable` and the web hides the switch); banners show while the app is open; a tap (also one that launched the app, `useLastNotificationResponse`) opens `data.url` in the WebView (a path on the site only). Real pushes need a development build (not Expo Go), APNs and FCM credentials in EAS.
 - Web → native: `postToNative()` (`openExternal`, `haptic` → expo-haptics) from `apps/web/src/shared/lib/nativeBridge.ts`. Message types are mirrored in `apps/mobile/src/common/utils/nativeBridge.ts` — change both together.
 - Links to other origins open in the system browser; Android back navigates the web history first.
+- Keyboard on Android: the app draws edge to edge, so the window does not shrink for the keyboard; the WebView sits in a `KeyboardAvoidingView` (`behavior='padding'`, Android only) so the page is laid out above the keyboard. Without it the WebView panned the whole page up by the keyboard's height to reveal a field fixed at its foot (the cabinet's settings search). iOS: WKWebView handles the keyboard itself.
 - `allowedDevOrigins` in `apps/web/next.config.ts` lets the phone reach the Next dev server by LAN IP.
 
 ## Commands (run from repo root)
