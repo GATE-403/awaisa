@@ -29,6 +29,33 @@ jobs:
         env:
           API_URL: http://localhost:4000
 
+  # The SQL the cron jobs pick rows with, against a fresh migrated database (`pnpm --filter api test:db`).
+  db:
+    name: Cron queries on Postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: awaisa
+          POSTGRES_PASSWORD: awaisa
+          POSTGRES_DB: awaisa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U awaisa -d awaisa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env
+      - run: pnpm --filter api test:db
+
   # The suite is split into shards, each a job with its own Postgres and Redis (specs share one
   # database within a run, so they cannot run side by side in one job), started at once beside
   # `check` instead of after it. Desktop has the most specs, so it gets a shard more. Playwright
