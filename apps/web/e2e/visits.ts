@@ -102,6 +102,51 @@ const createPastVisit = async (
   throw new Error('No free slot to create a visit')
 }
 
+type Slot = { time: string; isAvailable: boolean }
+
+// A client's online booking of awaisa-studio two to fourteen days ahead, on the first day where
+// that master has `minFree` free times (a move needs a second one), with its device token.
+const bookAhead = async ({
+  specialistIndex,
+  name,
+  minFree = 1,
+}: {
+  specialistIndex: number
+  name: string
+  minFree?: number
+}) => {
+  const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
+  const specialist = business.catalog.specialists[specialistIndex]
+  const serviceId = specialist.serviceIds[0]
+  for (let offset = 2; offset <= 14; offset += 1) {
+    const date = new Date(Date.now() + offset * 86_400_000 + 6 * 3_600_000)
+      .toISOString()
+      .slice(0, 10)
+    const { slots } = await (
+      await fetch(
+        `${API_URL}/availability?serviceId=${serviceId}&specialistId=${specialist.id}&date=${date}`,
+      )
+    ).json()
+    const free = (slots as Slot[]).filter((slot) => slot.isAvailable)
+    if (free.length < minFree) continue
+    const response = await fetch(`${API_URL}/bookings`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        serviceId,
+        specialistId: specialist.id,
+        date,
+        time: free[0]?.time,
+        name,
+        phone: randomClientPhone(),
+        smsConfirmation: false,
+      }),
+    })
+    return response.json()
+  }
+  throw new Error('No free day to book')
+}
+
 // A real booking a few days ahead (for checks that the future cannot be marked).
 const createFutureVisit = async (name: string, phone: string) => {
   const visit = await createPastVisit(name, phone)
@@ -125,4 +170,4 @@ const createFutureVisit = async (name: string, phone: string) => {
   return visit
 }
 
-export { createFutureVisit, createPastVisit, withDb }
+export { bookAhead, createFutureVisit, createPastVisit, withDb }

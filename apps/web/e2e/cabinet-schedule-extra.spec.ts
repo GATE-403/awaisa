@@ -1,5 +1,6 @@
 import { type CDPSession, expect, type Page, test } from '@playwright/test'
-import { createOwnBusiness, createVisit, type OwnBusiness, type Visit } from './business'
+import { createOwnBusiness, type OwnBusiness, type Visit } from './business'
+import { board, book, visitCard } from './schedule'
 import { withDb } from './visits'
 
 type ScheduleBooking = {
@@ -17,14 +18,6 @@ const readBooking = async (page: Page, business: OwnBusiness, date: string, id: 
   return (schedule.bookings as ScheduleBooking[]).find((booking) => booking.id === id)
 }
 
-const book = (business: OwnBusiness, name: string) =>
-  createVisit({
-    slug: business.slug,
-    serviceId: business.service.id,
-    specialistId: business.master.id,
-    name,
-  })
-
 // A visit moved to another time of its day, keeping its length.
 const placeAt = async (visit: Visit, time: string) => {
   await withDb((client) =>
@@ -36,11 +29,6 @@ const placeAt = async (visit: Visit, time: string) => {
   )
   return { ...visit, time }
 }
-
-const board = (page: Page) => page.locator('[data-schedule-board]')
-
-const visitCard = (page: Page, name: string) =>
-  board(page).getByRole('button', { name: new RegExp(`, ${name}, `) })
 
 const showTimeline = async (page: Page) => {
   await page.getByRole('group', { name: 'Вид расписания' }).getByTitle('Лента').click()
