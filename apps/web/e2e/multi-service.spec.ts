@@ -72,6 +72,9 @@ test.describe('A visit of several services', () => {
 
       // The visit can grow in passing: one service is offered under its ticket, a tap adds it.
       await guest.getByRole('button', { name: /^\+ Педикюр/ }).click()
+      // Once per visit: nothing more is offered after it (Брови could still join, Айда aside).
+      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(guest.getByRole('button', { name: /^\+ / })).toHaveCount(0)
 
       // Only Айда does both, so the master is chosen; the card says the whole visit.
       await expect(steps.service).toContainText('Маникюр + Педикюр')

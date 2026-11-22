@@ -116,6 +116,12 @@ describe('the service offered for the visit', () => {
     )
   })
 
+  it('offers once per visit: none once one has been added', () => {
+    const menu = [manicure, pedicure, brows]
+    expect(pickOfferedService([pedicure, brows], [manicure], menu)).toBe(pedicure)
+    expect(pickOfferedService([brows], [manicure, pedicure], menu)).toBeUndefined()
+  })
+
   it('offers nothing when nothing can join', () => {
     expect(pickOfferedService([], [manicure], [manicure])).toBeUndefined()
   })

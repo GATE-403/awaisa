@@ -93,9 +93,11 @@ const wordRoots = (name: string) => {
  * The one service offered for the visit, like a side dish under the main one: an add-on, never an
  * alternative to what is chosen. Not the same kind (another category, when the menu has more than
  * one) and not the same thing under another name (a shared word); of the rest, what the place
- * sells most first, else the menu's own order. Nothing fits, nothing is offered.
+ * sells most first, else the menu's own order. Nothing fits, nothing is offered. Once per visit:
+ * a visit that already took one is not offered another (the line goes once it is accepted).
  */
 const pickOfferedService = (addable: Service[], chosen: Service[], menu: Service[]) => {
+  if (chosen.length !== 1) return undefined
   const hasCategories = new Set(menu.map((service) => service.categoryId)).size > 1
   const chosenCategories = new Set(chosen.map((service) => service.categoryId))
   const chosenRoots = new Set(chosen.flatMap((service) => wordRoots(service.name)))
