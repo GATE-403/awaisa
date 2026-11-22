@@ -149,11 +149,10 @@ describe('PushService in the app', () => {
         }),
       ),
     )
-    const { service, repository } = setup({ ...KEYS, EXPO_ACCESS_TOKEN: 'expo-secret' }, [
-      recipient('s1', 'member'),
-      appRecipient('a1', 'member'),
-      appRecipient('a2', 'master'),
-    ])
+    const { service, repository, dataSource } = setup(
+      { ...KEYS, EXPO_ACCESS_TOKEN: 'expo-secret' },
+      [recipient('s1', 'member'), appRecipient('a1', 'member'), appRecipient('a2', 'master')],
+    )
     sendNotification.mockResolvedValue({ statusCode: 201 })
 
     expect(service.config.isNativeAvailable).toBe(true)
@@ -173,6 +172,56 @@ describe('PushService in the app', () => {
     expect(messages[1].data.url).toBe('/master/old-school?date=2026-11-26')
     expect(messages[0].title).toBe('Новая запись')
     expect(repository.delete).toHaveBeenCalledWith(expect.objectContaining({ kind: 'expo' }))
+    const ticketInsert = dataSource.query.mock.calls.find(([sql]) =>
+      String(sql).includes('INSERT INTO "push_tickets"'),
+    )
+    expect(ticketInsert?.[1]).toEqual([['t1'], ['ExponentPushToken[a1]']])
+  })
+
+  it('forgets a token whose receipt says the device is gone and settles read tickets', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: {
+            t1: { status: 'ok' },
+            t2: { status: 'error', message: 'gone', details: { error: 'DeviceNotRegistered' } },
+          },
+        }),
+      ),
+    )
+    const { service, repository, dataSource } = setup({ EXPO_ACCESS_TOKEN: 'expo-secret' }, [])
+    dataSource.query.mockImplementation(async (sql: string) =>
+      sql.startsWith('SELECT')
+        ? [
+            { id: 't1', endpoint: 'ExponentPushToken[a1]' },
+            { id: 't2', endpoint: 'ExponentPushToken[a2]' },
+            { id: 't3', endpoint: 'ExponentPushToken[a3]' },
+          ]
+        : [],
+    )
+
+    await service.checkReceipts()
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('https://exp.host/--/api/v2/push/getReceipts')
+    expect(JSON.parse(init.body as string)).toEqual({ ids: ['t1', 't2', 't3'] })
+    expect(repository.delete).toHaveBeenCalledWith({
+      kind: 'expo',
+      endpoint: expect.objectContaining({ _value: ['ExponentPushToken[a2]'] }),
+    })
+    const settle = dataSource.query.mock.calls.find(([sql]) =>
+      String(sql).startsWith('DELETE FROM "push_tickets" WHERE "id"'),
+    )
+    expect(settle?.[1]).toEqual([['t1', 't2']])
+  })
+
+  it('asks for no receipts without an access token', async () => {
+    const { service, dataSource } = setup({}, [])
+
+    await service.checkReceipts()
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(dataSource.query).not.toHaveBeenCalled()
   })
 
   it('never throws when the Expo service is down', async () => {
