@@ -25,10 +25,14 @@ const BOOKING: Record<string, Entry> = {
   'Показать, что выбрано': ['Тандалганды көрсөтүү', 'Show what is chosen'],
   'Онлайн-запись': ['Онлайн жазылуу', 'Online booking'],
   'Что делаем?': ['Эмне кылабыз?', 'What are we doing?'],
-  'Что ещё сделать?': ['Дагы эмне кылабыз?', 'What else?'],
-  'Тот же мастер, сразу после': ['Ошол эле чебер, дароо кийин', 'Same master, right after'],
-  'Ещё услуга': ['Дагы кызмат', 'Add a service'],
-  'Услуги визита': ['Визиттин кызматтары', 'Services of the visit'],
+  '{master} не делает «{service}», выберите мастера': [
+    '{master} «{service}» кызматын жасабайт, чеберди тандаңыз',
+    '{master} does not do «{service}», choose a master',
+  ],
+  'В {time} визит теперь не помещается, выберите время': [
+    'Визит эми {time} убактысына батпайт, убакытты тандаңыз',
+    'The visit no longer fits at {time}, choose a time',
+  ],
   'К кому записаться?': ['Кимге жазыласыз?', 'Who would you like?'],
   'Когда удобно?': ['Качан ыңгайлуу?', 'When suits you?'],
   'Как вас записать?': ['Сизди кантип жазабыз?', 'Whose name is it?'],
