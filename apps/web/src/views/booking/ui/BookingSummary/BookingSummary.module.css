@@ -78,6 +78,15 @@
   -webkit-line-clamp: 2;
 }
 
+.barHintPart {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
 .barHint[data-error] {
   color: var(--color-danger-text);
   white-space: normal;

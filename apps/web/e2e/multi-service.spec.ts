@@ -1,7 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone } from './account'
 import { bishkekDay, createOwnBusiness, type OwnBusiness } from './business'
-import { API_URL, bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
+import { API_URL, bookingSteps, editStep, pickFirstFreeSlot, submitBooking } from './helpers'
 
 // One visit of several services by one master: manicure and pedicure in one booking.
 const setUpNails = async (page: Page) => {
@@ -73,11 +73,13 @@ test.describe('A visit of several services', () => {
       // The visit can grow in passing: one service is offered under its ticket, a tap adds it.
       await guest.getByRole('button', { name: /^\+ Педикюр/ }).click()
       // Once per visit: nothing more is offered after it (Брови could still join, Айда aside).
-      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      // The ticket keeps the first service's name and marks the added one under it.
+      await expect(steps.service).toContainText('+ Педикюр')
       await expect(guest.getByRole('button', { name: /^\+ / })).toHaveCount(0)
 
       // Only Айда does both, so the master is chosen; the card says the whole visit.
-      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(steps.service).toContainText('Маникюр')
+      await expect(steps.service).toContainText('+ Педикюр')
       await expect(steps.service).toContainText('2 ч 30 мин')
       await expect(steps.specialist).toContainText('Айда')
       const time = await pickFirstFreeSlot(guest)
@@ -135,9 +137,29 @@ test.describe('A visit of several services', () => {
         `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
       )
       await offer.click()
-      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(steps.service).toContainText('+ Педикюр')
       await expect(steps.datetime).toContainText('10:00–12:30')
       await expect(guest.getByText(/визит теперь не помещается/)).toHaveCount(0)
+
+      // «Изменить» on the service opens the visit's own list: several can be ticked, the added
+      // one is ticked too, and Брови can join (Айда does all three).
+      await editStep(guest, 'service')
+      const visit = steps.service.getByRole('group', { name: 'Услуги визита' })
+      await expect(visit.getByRole('checkbox', { name: /^Маникюр/ })).toBeChecked()
+      const pedicure = visit.getByRole('checkbox', { name: /^Педикюр/ })
+      await expect(pedicure).toBeChecked()
+      const brows = visit.getByRole('checkbox', { name: /^Брови/ })
+      await expect(brows).not.toBeChecked()
+      // A third one is ticked the same way, and the list stays open for more until «Готово».
+      await brows.click()
+      await expect(brows).toBeChecked()
+      await pedicure.click()
+      await expect(pedicure).not.toBeChecked()
+      await guest.getByRole('button', { name: 'Готово' }).filter({ visible: true }).click()
+      // Manicure and brows: 1 h 30 min from the same 10:00, which still fits.
+      await expect(steps.service).toContainText('+ Брови')
+      await expect(steps.service).not.toContainText('+ Педикюр')
+      await expect(steps.datetime).toContainText('10:00–11:30')
 
       // 19:00 is the last hour before closing at 20:00: the time goes, and the form says why.
       await guest.goto(

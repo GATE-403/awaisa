@@ -53,6 +53,24 @@ const scrollToStep = (_stepId: BookingStepId, _force = false) => {
   })
 }
 
+// The main action pressed while a step is still open: the sheet's top is that step already, so
+// scrolling there alone did nothing visible («ничего не происходит»). Its choices give a short
+// shake instead (`data-nudge` on the step, BookingStep.module.css), and the phone a tap of haptics.
+const nudgeStep = (stepId: BookingStepId) => {
+  requestAnimationFrame(() => {
+    const step = document.getElementById(`step-${stepId}`)
+    if (!step) return
+    step.removeAttribute('data-nudge')
+    // Read the layout once, so the same animation starts again on a second press.
+    void step.offsetWidth
+    step.setAttribute('data-nudge', '')
+    step.addEventListener('animationend', () => step.removeAttribute('data-nudge'), {
+      once: true,
+    })
+  })
+  haptic('warning')
+}
+
 // Once a time is picked, the cursor waits in «Имя»: a list-like row is not obviously a field to
 // someone new to forms. After the scroll settles; never steals focus from a field in use.
 const focusNameSoon = () => {
@@ -162,6 +180,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     masters: catalog.specialists,
     chosenIds: chosenServiceIds,
     specialistId: chosenSpecialistId,
+    branchId,
+  })
+  // What can join the visit in «Изменить» on the service ticket: any master who does it all
+  // counts, the chosen one gives way if needed (the form says so).
+  const combinableServices = getAddableServices({
+    services,
+    masters: catalog.specialists,
+    chosenIds: chosenServiceIds,
+    specialistId: null,
     branchId,
   })
   // One master for the service: nothing to choose, so the step is filled in.
@@ -407,7 +434,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   // The visit gains a service done right after the others; a master who does not do it lets go.
-  const addService = (id: string) => {
+  const addService = (id: string, { isStepKept = false } = {}) => {
     const nextIds = [...chosenServiceIds, id]
     // No master yet, «любой», or one who does the new service too: the master stays.
     const keepsSpecialist =
@@ -419,7 +446,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     const added = catalog.services.find((item) => item.id === id)
     setExtraServiceIds(nextIds.slice(1))
     setSubmitError(null)
-    setEditingStep(null)
+    // Ticked in the open picker, the picker stays: more can be ticked before «Готово».
+    if (!isStepKept) setEditingStep(null)
     if (keepsSpecialist) {
       // Same master: the time stays while the longer visit still fits it (checked below).
       setAddNotice(null)
@@ -434,7 +462,26 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     )
     setSpecialistId(null)
     setTime(null)
-    scrollToStep('specialist', true)
+    if (!isStepKept) scrollToStep('specialist', true)
+  }
+
+  // A card ticked or unticked in the picker opened from the service ticket: the visit gains or
+  // loses that service and the picker stays open. One service always stays: unticking the last
+  // one only closes the step. Taking one off makes the visit shorter, so the master and the time
+  // still fit and stay.
+  const toggleService = (id: string) => {
+    if (!chosenServiceIds.includes(id)) {
+      addService(id, { isStepKept: true })
+      return
+    }
+    if (chosenServiceIds.length === 1) {
+      finishEditing()
+      return
+    }
+    const rest = chosenServiceIds.filter((item) => item !== id)
+    setServiceId(rest[0] ?? null)
+    setExtraServiceIds(rest.slice(1))
+    setAddNotice(null)
   }
 
   const selectSpecialist = (id: string) => {
@@ -514,6 +561,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setHasTriedSubmit(true)
     if (firstIncompleteStep) {
       scrollToStep(firstIncompleteStep, true)
+      nudgeStep(firstIncompleteStep)
       return
     }
     if (!serviceId || !specialistId || !dayKey || !time || isSubmitting) return
@@ -599,6 +647,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     chosenServiceIds,
     addableServices,
     addService,
+    toggleService,
+    combinableServices,
     specialists,
     specialistId,
     days,

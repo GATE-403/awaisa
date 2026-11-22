@@ -27,7 +27,7 @@ const editStep = async (page: Page, step: keyof ReturnType<typeof bookingSteps>)
 const primaryAction = (page: Page) =>
   page
     .getByRole('button', {
-      name: /^(Выбрать услугу|Выбрать мастера|Выбрать время|Выбрать \d{2}:\d{2}|Ввести контакты|Записаться|Записываем…)$/,
+      name: /^(Выбрать услугу|Выбрать мастера|Любой мастер|Выбрать время|Выбрать \d{2}:\d{2}|Ввести контакты|Записаться|Записываем…)$/,
     })
     .filter({ visible: true })
 

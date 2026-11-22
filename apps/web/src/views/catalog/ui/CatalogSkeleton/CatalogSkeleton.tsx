@@ -19,6 +19,7 @@ export const CatalogSkeleton = () => (
   <div className={pageStyles.contained} data-page-skeleton='' aria-busy='true'>
     <FirstVisitNote />
     <ForYouShelfPlaceholder
+      variant='stories'
       headAction={
         <NextLink href='/top' className={pageStyles.topLink}>
           <T>Рейтинг ›</T>
@@ -55,5 +56,14 @@ export const CatalogSkeleton = () => (
         ))}
       </ul>
     </section>
+  </div>
+)
+
+// The skeleton on its own, outside the catalog's page (under a booking reloaded over the
+// catalog): the page's wrapper comes with it, or it stood 8px higher than the catalog from 768px.
+// A `div`, not the catalog's `main`: the route under the sheet has its own.
+export const CatalogPageSkeleton = () => (
+  <div className={pageStyles.page}>
+    <CatalogSkeleton />
   </div>
 )
