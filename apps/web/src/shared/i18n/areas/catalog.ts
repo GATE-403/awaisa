@@ -6,6 +6,7 @@ const CATALOG: Record<string, Entry> = {
   'Куда записаться': ['Кайда жазыласыз', 'Where to book'],
   Недавние: ['Акыркылар', 'Recent'],
   Очистить: ['Тазалоо', 'Clear'],
+  'Похожие услуги': ['Окшош кызматтар', 'Similar services'],
   Услуги: ['Кызматтар', 'Services'],
   Места: ['Жайлар', 'Places'],
   'Вы искали «{query}»': ['Сиз издегениңиз: «{query}»', 'You searched for «{query}»'],

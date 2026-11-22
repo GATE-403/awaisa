@@ -1,6 +1,7 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
+import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
 import {
   CalendarCheck,
@@ -9,6 +10,7 @@ import {
   CircleHalf,
   DownloadSimple,
   Flag,
+  Images,
   Phone,
   PlusCircle,
   SignOut,
@@ -20,8 +22,10 @@ import {
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { useFavorites } from '@/features/favorites'
+import { useFollows } from '@/features/followMaster'
 import { INTERESTS, PreferencesSheet, usePreferences } from '@/features/forYou'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { deleteMyAccount, exportMyData, getMasterPlaces } from '@/shared/api/clientApi'
@@ -61,6 +65,18 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
   const [isDeleting, setIsDeleting] = useState(false)
   const preferences = usePreferences()
   const favorites = useFavorites()
+  const follows = useFollows()
+
+  // One switch for every followed master: a list of switches read as settings per person.
+  const followWorks = async (isOn: boolean) => {
+    try {
+      for (const master of follows.items) {
+        if (master.notifyWorks !== isOn) await follows.follow(master.id, isOn)
+      }
+    } catch (error) {
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+    }
+  }
   const toast = useToast()
   const customer = session.customer
 
@@ -203,6 +219,54 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       <p className={styles.footnote}>
         {t('Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи.')}
       </p>
+
+      {follows.items.length > 0 && (
+        <>
+          <SectionCaption className={styles.caption}>{t('Мои мастера')}</SectionCaption>
+          <div className={styles.list}>
+            {follows.items.map((master) => (
+              <div key={master.id} className={styles.row}>
+                <NextLink
+                  href={`/${master.business.slug}/book?specialist=${master.id}`}
+                  className={styles.followLink}
+                >
+                  <PersonAvatar
+                    name={master.name}
+                    src={master.photoUrl ?? undefined}
+                    size='sm'
+                    className={styles.face}
+                  />
+                  <span className={styles.label}>{master.name.split(' ')[0]}</span>
+                  <span className={styles.value}>{master.business.name}</span>
+                </NextLink>
+                <button
+                  type='button'
+                  className={styles.unfollow}
+                  onClick={() => void follows.unfollow(master.id)}
+                >
+                  {t('Не следить')}
+                  <span className={styles.srOnly}>{` ${master.name}`}</span>
+                </button>
+              </div>
+            ))}
+            <label className={styles.row}>
+              <span className={styles.glyph} aria-hidden>
+                <Images />
+              </span>
+              <span className={styles.label}>{t('Новые работы')}</span>
+              <Switch
+                checked={follows.items.every((master) => master.notifyWorks)}
+                onCheckedChange={(checked) => void followWorks(checked)}
+              />
+            </label>
+          </div>
+          <p className={styles.footnote}>
+            {t(
+              'Напишем, когда у мастера освободится время или он сменит место. Не чаще раза в неделю.',
+            )}
+          </p>
+        </>
+      )}
 
       <SectionCaption className={styles.caption}>{t('Бизнес')}</SectionCaption>
       <div className={styles.list}>

@@ -7,6 +7,7 @@ import NextLink from 'next/link'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCalendarFile, formatPrice, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
+import { FollowButton } from '@/features/followMaster'
 import { ForYouShelf } from '@/features/forYou'
 import { TelegramReminderLink } from '@/features/telegramReminders'
 import { TicketViewer } from '@/features/ticketView'
@@ -157,6 +158,13 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
         <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
           {t('Мои записи')}
         </ButtonLink>
+      </div>
+      {/* Clients stay with their master: following brings word when the master has time again. */}
+      <div className={styles.follow}>
+        <FollowButton
+          specialistId={booking.specialistId}
+          name={booking.specialistName.split(' ')[0] ?? booking.specialistName}
+        />
       </div>
       {/* Guests keep bookings on this device only: say so at the moment it matters. */}
       {session.status === 'guest' && (

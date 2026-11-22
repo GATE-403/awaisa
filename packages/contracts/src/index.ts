@@ -676,7 +676,8 @@ type ClientListItem = {
   name: string
   visits: number
   noShows: number
-  spent: number
+  /** What they paid here; null for administrators, who do not see the money. */
+  spent: number | null
   lastVisit: string | null
   nextVisit: string | null
   hasNote: boolean
@@ -705,8 +706,9 @@ type ClientCard = {
     visits: number
     noShows: number
     cancellations: number
-    spent: number
-    averageCheck: number
+    /** Null for administrators, who do not see the money. */
+    spent: number | null
+    averageCheck: number | null
     firstVisit: string | null
     lastVisit: string | null
     nextVisit: string | null
@@ -817,6 +819,20 @@ type MasterDay = {
   hours: { opensMinutes: number; closesMinutes: number } | null
   leaveReason: string | null
   bookings: AdminBooking[]
+  /** How many clients follow the master; who they are stays private. */
+  followers: number
+}
+
+/** A master the signed-in client follows (`GET /me/follows`). */
+type FollowedMaster = {
+  id: string
+  name: string
+  role: string
+  photoUrl: string | null
+  /** False once the master left the place (a move elsewhere is followed automatically). */
+  isActive: boolean
+  business: { slug: string; name: string }
+  notifyWorks: boolean
 }
 
 type SlugCheck = { available: boolean; reason?: string }
@@ -1470,7 +1486,11 @@ type AccountExport = {
     issuedAt: string | null
   }[]
   waitlist: WaitlistEntry[]
-  favorites: { master: { id: string; name: string; business: string } | null }
+  favorites: {
+    master: { id: string; name: string; business: string } | null
+    /** Masters one follows (`/me/follows`). */
+    follows: { name: string; business: string; notifyWorks: boolean; since: string }[]
+  }
   notifications: {
     push: { kind: string; userAgent: string; createdAt: string; lastSuccessAt: string | null }[]
     telegram: { isLinked: boolean; linkedAt: string | null }
@@ -1890,6 +1910,7 @@ type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boole
 
 export type {
   MasterSuggestion,
+  FollowedMaster,
   CertificateOrderCreated,
   CertificateOrderInput,
   CertificateSale,
