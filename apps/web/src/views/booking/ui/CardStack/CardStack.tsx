@@ -30,6 +30,8 @@ interface CardStackProps {
   onEdit?: (id: string) => void
   /** «Начать заново», offered under the open stack (a half-made booking is let go of here). */
   onStartOver?: () => void
+  /** One more service for the visit, offered in passing at the end of the stack's foot line. */
+  offer?: { name: string; price: string; onAdd: () => void }
 }
 
 // How far a sideways pull goes before it shuffles the stack.
@@ -41,7 +43,7 @@ const PULL_DISTANCE = 140
 // stack above the open question, the newest in front. A sideways swipe shuffles the folded stack
 // (the front card goes to the back, the next one comes forward, like passes in Wallet); one tap
 // fans it out so each card can be changed; a single card is changed straight away.
-export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
+export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps) => {
   const t = useT()
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
@@ -250,9 +252,9 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
           <span className={styles.srOnly}>{t('Показать выбор')}</span>
         </button>
       )}
-      {isOpen && (onStartOver || (isFanned && count > 1)) && (
+      {(offer || (isOpen && (onStartOver || (isFanned && count > 1)))) && (
         <div className={styles.foot}>
-          {onStartOver && (
+          {isOpen && onStartOver && (
             <button
               type='button'
               className={styles.footAction}
@@ -265,7 +267,7 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
               {t('Начать заново')}
             </button>
           )}
-          {isFanned && count > 1 && (
+          {isFanned && count > 1 ? (
             <button
               type='button'
               className={styles.footAction}
@@ -277,6 +279,19 @@ export const CardStack = ({ cards, onEdit, onStartOver }: CardStackProps) => {
             >
               {t('Свернуть')}
             </button>
+          ) : (
+            offer && (
+              // Like a side dish offered under the main one: one line, no block of its own.
+              <button
+                type='button'
+                className={`${styles.footAction} ${styles.offer}`}
+                data-end=''
+                onClick={offer.onAdd}
+              >
+                <span className={styles.offerName}>{`+ ${offer.name}`}</span>
+                <span className={styles.offerPrice}>{offer.price}</span>
+              </button>
+            )
           )}
         </div>
       )}
