@@ -1,3 +1,4 @@
+import type { BookingChannel } from '@awaisa/contracts'
 import { z } from 'zod'
 import { MAX_EXTRA_SERVICES } from './booking-rules.js'
 
@@ -28,6 +29,16 @@ const availabilityQuerySchema = z.object({
     .pipe(z.array(ID_SCHEMA).max(MAX_EXTRA_SERVICES)),
 })
 
+const BOOKING_CHANNELS = [
+  'catalog',
+  'for_you',
+  'feed',
+  'search',
+  'map',
+  'salon_link',
+  'other',
+] as const satisfies readonly BookingChannel[]
+
 const createBookingSchema = z.object({
   serviceId: ID_SCHEMA,
   /** Services done after `serviceId` in the same visit, by the same master, in this order. */
@@ -56,6 +67,7 @@ const createBookingSchema = z.object({
   subscriptionId: z.uuid().optional(),
   /** «Купить абонемент и записаться»: an online plan bought with this booking. */
   subscriptionPlanId: z.uuid().optional(),
+  channel: z.enum(BOOKING_CHANNELS).optional(),
 })
 
 const nextFreeQuerySchema = z.object({

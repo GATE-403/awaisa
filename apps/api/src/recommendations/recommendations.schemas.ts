@@ -39,7 +39,7 @@ const recommendationEventsSchema = z.object({
         kind: z.enum(['impression', 'click', 'book']),
         serviceId: z.string().min(1).max(64),
         reason: z.string().max(80).default(''),
-        surface: z.enum(['catalog', 'profile', 'booking', 'success']),
+        surface: z.enum(['catalog', 'profile', 'booking', 'success', 'search', 'due']),
         position: z.number().int().min(0).max(100).optional(),
         /** The answer the card came from (`requestId` of GET /recommendations). */
         requestId: z.uuid().optional(),
@@ -57,6 +57,8 @@ const recommendationEventsSchema = z.object({
 
 const recommendationStatsSchema = z.object({
   days: z.coerce.number().int().min(1).max(90).default(14),
+  /** Rows per reason (default) or per shelf on the page (`surface`). */
+  by: z.enum(['reason', 'surface']).default('reason'),
 })
 
 type RecommendationsQuery = z.infer<typeof recommendationsQuerySchema>

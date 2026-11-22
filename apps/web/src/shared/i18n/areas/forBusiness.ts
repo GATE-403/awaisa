@@ -335,6 +335,31 @@ const FOR_BUSINESS: Record<string, Entry> = {
   Скрыто: ['Жашырылды', 'Hidden'],
   Удалено: ['Өчүрүлдү', 'Deleted'],
   'Автор заблокирован': ['Автор бөгөттөлдү', 'Author blocked'],
+  Стратегия: ['Стратегия', 'Strategy'],
+  'Ведут день в кабинете': ['Күнүн кабинетте жүргүзүшөт', 'Run their day in the cabinet'],
+  'По неделям: {counts}, с {date}': [
+    'Жумалар боюнча: {counts}, {date} баштап',
+    'By week: {counts}, since {date}',
+  ],
+  'Салоны, отметившие итог визита за неделю': [
+    'Жума ичинде визиттин жыйынтыгын белгилеген салондор',
+    'Places that marked a visit’s outcome this week',
+  ],
+  'Начаты в «Образах»': ['«Образдарда» башталган', 'Started in «Looks»'],
+  'Из {bookings} онлайн': ['Онлайн {bookings} ичинен', 'Of {bookings} online'],
+  'Онлайн-записей пока нет': ['Онлайн жазылуулар азырынча жок', 'No online bookings yet'],
+  'Записались снова': ['Кайра жазылышты', 'Booked again'],
+  '{returned} из {clients} новых клиентов, за 60 дней': [
+    '{clients} жаңы кардардан {returned}, 60 күндө',
+    '{returned} of {clients} new clients, within 60 days',
+  ],
+  'Новым клиентам ещё не прошло 60 дней': [
+    'Жаңы кардарларга 60 күн өтө элек',
+    '60 days have not passed for new clients yet',
+  ],
+  '«Для вас»': ['«Сиз үчүн»', '«For you»'],
+  '«Образы»': ['«Образдар»', '«Looks»'],
+  'Ссылка салона': ['Салондун шилтемеси', 'Salon’s link'],
 }
 
 const FOR_BUSINESS_COUNTED: Record<string, CountedEntry> = {

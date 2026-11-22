@@ -158,6 +158,7 @@ const PLACE: Record<string, Entry> = {
   'Работа: {name}': ['Иш: {name}', 'Work: {name}'],
   'Работа в {name}': ['{name}: иш', 'Work at {name}'],
   'Записаться к мастеру {name}': ['{name} устага жазылуу', 'Book with {name}'],
+  'Фото клиента': ['Кардардын сүрөтү', 'Client’s photo'],
   'Об этой услуге ещё не писали — станьте первым после визита.': [
     'Бул кызмат жөнүндө азырынча эч ким жаза элек: визиттен кийин биринчи болуп жазыңыз.',
     'No one has written about this service yet: be the first after your visit.',

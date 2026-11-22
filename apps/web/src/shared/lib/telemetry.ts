@@ -1,6 +1,7 @@
 'use client'
 
 import type { DeviceProfile, FunnelEventMeta, FunnelStep } from '@/shared/api/types'
+import { rememberChannel } from '@/shared/lib/bookingChannel'
 
 // Where people drop out of each scenario, on which devices, and what breaks for them — sent to
 // our own API (`/api/telemetry/*`, see apps/api/src/telemetry). No third-party tracker and no
@@ -101,6 +102,8 @@ const flush = () => {
  */
 const trackStep = (step: FunnelStep, slug?: string, meta?: FunnelEventMeta) => {
   if (typeof window === 'undefined') return
+  // A pick from search makes search where the next booking came from.
+  if (step === 'search_pick') rememberChannel('search')
   const key = `${step}|${slug ?? ''}|${meta ? JSON.stringify(meta) : ''}`
   if (sentSteps.has(key)) return
   sentSteps.add(key)

@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { getFunnelReport, getFunnelSegments, getFunnelSignals } from '@/shared/api/clientApi'
+import {
+  getFunnelReport,
+  getFunnelSegments,
+  getFunnelSignals,
+  getStrategyReport,
+} from '@/shared/api/clientApi'
 import type {
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
   FunnelSegmentsReport,
   FunnelSignalsReport,
+  StrategyReport,
 } from '@/shared/api/types'
 
 type InsightsDays = 7 | 30 | 90
@@ -30,6 +36,7 @@ const useInsights = (initial: InitialInsights) => {
   const [funnel, setFunnel] = useState(initial.funnel)
   const [signals, setSignals] = useState(initial.signals)
   const [segments, setSegments] = useState(initial.segments)
+  const [strategy, setStrategy] = useState<StrategyReport | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const segmentKey = JSON.stringify(segment)
@@ -74,6 +81,15 @@ const useInsights = (initial: InitialInsights) => {
     return () => controller.abort()
   }, [days, initial.signals, initial.segments])
 
+  // The strategy numbers follow the period only; read on the client, they are small.
+  useEffect(() => {
+    const controller = new AbortController()
+    getStrategyReport(days, controller.signal)
+      .then(setStrategy)
+      .catch(() => undefined)
+    return () => controller.abort()
+  }, [days])
+
   const setFilter = (key: keyof FunnelSegment, value: string | null) =>
     setSegment((current) => {
       const next = { ...current }
@@ -92,6 +108,7 @@ const useInsights = (initial: InitialInsights) => {
     funnel,
     signals,
     segments,
+    strategy,
     isLoading,
     error,
   }

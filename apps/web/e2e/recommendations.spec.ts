@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
-import { withDb } from './visits'
+import { adminPhone, randomClientPhone, signInViaApi } from './account'
+import { createPastVisit, withDb } from './visits'
 
 type Recommendation = { id: string; name: string; reason: string; slug: string }
 
@@ -117,5 +118,34 @@ test.describe('Recommendations', () => {
   test('unknown interests are refused', async ({ request, isMobile }) => {
     test.skip(isMobile, 'API only')
     expect((await request.get('/api/recommendations?interests=skydiving')).status()).toBe(400)
+  })
+})
+
+test.describe('Recommendations beyond «Для вас»', () => {
+  test('a search that finds little ends in «Похожие услуги»; the profile’s history shows what is due', async ({
+    page,
+    isMobile,
+  }, testInfo) => {
+    test.skip(isMobile, 'Runs once: it books')
+    test.setTimeout(90_000)
+    await page.goto('/?q=zzqqxx')
+    await expect(page.getByRole('region', { name: 'Похожие услуги' })).toBeVisible()
+
+    // A visit five weeks back: with the usual four-week gap it is due again.
+    const phone = randomClientPhone()
+    await signInViaApi(page, phone, 'E2E Пора Снова')
+    await createPastVisit('E2E Пора Снова', phone, 0, 35)
+    await page.goto('/bookings?tab=history')
+    const due = page.getByRole('region', { name: 'Пора снова' })
+    await expect(due).toBeVisible()
+    await expect(due.getByText(/^Пора снова/).first()).toBeVisible()
+
+    // What each shelf on the page brings is read per surface.
+    await page.context().clearCookies()
+    await signInViaApi(page, adminPhone(testInfo))
+    const rows = await (
+      await page.request.get('/api/recommendations/stats?days=1&by=surface')
+    ).json()
+    expect(rows.every((row: { surface?: string }) => typeof row.surface === 'string')).toBe(true)
   })
 })

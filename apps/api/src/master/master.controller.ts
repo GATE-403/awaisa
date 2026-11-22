@@ -29,6 +29,7 @@ import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Specialist } from '../catalog/specialist.entity.js'
 import { businessDateTimeToUtc } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { FollowsService } from '../follows/follows.service.js'
 import { PayrollService } from '../payroll/payroll.service.js'
 import { CurrentMaster, MasterGuard } from './master.guard.js'
 
@@ -41,6 +42,7 @@ export class MasterController {
     private readonly businesses: BusinessesService,
     private readonly masterSchedule: MasterScheduleService,
     private readonly payroll: PayrollService,
+    private readonly follows: FollowsService,
   ) {}
 
   /** Where the signed-in customer works as a master (for «Мой день» entry points). */
@@ -103,15 +105,16 @@ export class MasterController {
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
   ): Promise<MasterDay> {
     const window = await this.businesses.getOpeningWindow(business.id, query.date)
-    const [days, leaves, bookings, pay] = await Promise.all([
+    const dayStart = businessDateTimeToUtc(query.date, 0)
+    const dayEnd = businessDateTimeToUtc(query.date, 24 * 60)
+    const [days, leaves, bookings, pay, photos, followers] = await Promise.all([
       this.masterSchedule.daysFor([master.id], query.date, window),
       this.masterSchedule.leavesOn([master.id], query.date),
-      this.salonBookings.getAdminViews(business.id, {
-        dayStart: businessDateTimeToUtc(query.date, 0),
-        dayEnd: businessDateTimeToUtc(query.date, 24 * 60),
-      }),
+      this.salonBookings.getAdminViews(business.id, { dayStart, dayEnd }),
       // Only the master's own pay: never the others'.
       this.payroll.forMasterDay(business.id, master.id, query.date),
+      this.photoStats(business.id, master.id, dayStart, dayEnd),
+      this.follows.countFor(master.id),
     ])
 
     return {
@@ -122,6 +125,39 @@ export class MasterController {
       hours: window ? clampToWindow(days.get(master.id) ?? null, window) : null,
       leaveReason: leaves[0] ? leaves[0].reason || 'Отпуск' : null,
       bookings: bookings.filter((booking) => booking.specialistId === master.id),
+      photos,
+      followers,
+    }
+  }
+
+  /**
+   * How many of the master's visits of the last seven days got a work photo (any of theirs,
+   * the master's own, the cabinet's or the client's from a review), and which visits of the
+   * shown day already have one.
+   */
+  private async photoStats(businessId: string, masterId: string, dayStart: Date, dayEnd: Date) {
+    const [[week], day] = await Promise.all([
+      this.dataSource.query(
+        `SELECT COUNT(*)::int AS "visits",
+           COUNT(*) FILTER (WHERE EXISTS (
+             SELECT 1 FROM "work_photos" w WHERE w."booking_id" = b."id"))::int AS "withPhoto"
+         FROM "bookings" b
+         WHERE b."business_id" = $1 AND b."specialist_id" = $2 AND b."outcome" = 'arrived'
+           AND b."starts_at" >= now() - interval '7 days' AND b."starts_at" <= now()`,
+        [businessId, masterId],
+      ) as Promise<{ visits: number; withPhoto: number }[]>,
+      this.dataSource.query(
+        `SELECT DISTINCT w."booking_id" AS "id" FROM "work_photos" w
+         JOIN "bookings" b ON b."id" = w."booking_id"
+         WHERE b."business_id" = $1 AND b."specialist_id" = $2
+           AND b."starts_at" >= $3 AND b."starts_at" < $4`,
+        [businessId, masterId, dayStart, dayEnd],
+      ) as Promise<{ id: string }[]>,
+    ])
+    return {
+      weekVisits: Number(week?.visits ?? 0),
+      weekWithPhoto: Number(week?.withPhoto ?? 0),
+      bookingIds: day.map((row) => String(row.id)),
     }
   }
 

@@ -139,5 +139,9 @@ test.describe('Rating in one tap', () => {
       (item: { comment: string; photos: string[] }) => item.comment === comment,
     )
     expect(mine?.photos).toHaveLength(1)
+    // In «Образы» it is marked as the client's own.
+    const feed = await (await page.request.get(`/api/feed?business=${SLUG}`)).json()
+    const shared = feed.items.find((item: { url: string }) => item.url === mine.photos[0])
+    expect(shared?.isFromClient).toBe(true)
   })
 })

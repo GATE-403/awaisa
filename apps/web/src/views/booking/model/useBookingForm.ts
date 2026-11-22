@@ -19,6 +19,7 @@ import { readRef } from '@/features/invite'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
+import { readChannel } from '@/shared/lib/bookingChannel'
 import { distanceKm, knownPosition } from '@/shared/lib/geo'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -634,6 +635,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         reminderMinutes,
         promoCode: promoCode && !codeError && !isPaidBySubscription ? promoCode : undefined,
         ref: readRef(),
+        channel: readChannel(),
         // Paid by a subscription: one's own at this place, or one bought now with the visit.
         subscriptionId: isForOther ? undefined : subscriptionPayment.subscription?.id,
         subscriptionPlanId: isForOther ? undefined : subscriptionPayment.plan?.id,

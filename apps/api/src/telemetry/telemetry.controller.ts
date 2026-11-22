@@ -1,4 +1,9 @@
-import type { FunnelReport, FunnelSegmentsReport, FunnelSignalsReport } from '@awaisa/contracts'
+import type {
+  FunnelReport,
+  FunnelSegmentsReport,
+  FunnelSignalsReport,
+  StrategyReport,
+} from '@awaisa/contracts'
 import {
   Body,
   Controller,
@@ -14,6 +19,7 @@ import { ConfigService } from '@nestjs/config'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { StrategyService } from './strategy.service.js'
 import {
   type ClientErrorInput,
   clientErrorSchema,
@@ -29,6 +35,7 @@ import { TelemetryService } from './telemetry.service.js'
 export class TelemetryController {
   constructor(
     private readonly telemetry: TelemetryService,
+    private readonly strategy: StrategyService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
@@ -78,6 +85,16 @@ export class TelemetryController {
   ): Promise<FunnelSegmentsReport> {
     this.assertAdmin(customer)
     return this.telemetry.segments(query.days)
+  }
+
+  @Get('strategy')
+  @UseGuards(AuthGuard)
+  strategyReport(
+    @Query({ schema: telemetryReportSchema }) query: { days: number },
+    @CurrentCustomer() customer: Customer,
+  ): Promise<StrategyReport> {
+    this.assertAdmin(customer)
+    return this.strategy.report(query.days)
   }
 
   @Get('errors')

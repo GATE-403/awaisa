@@ -13,6 +13,8 @@ import {
 } from '@phosphor-icons/react/ssr'
 import { formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
+import { useVisitPhoto } from '@/features/visitPhoto'
+import { addBookingPhoto } from '@/shared/api/clientApi'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
@@ -60,6 +62,9 @@ export const BookingInspector = ({
   const total = booking.price - (booking.discount?.amount ?? 0)
   const day = capitalizeFirst(t.dayShort(booking.date))
   const master = booking.specialistName.split(' ')[0]
+  const visitPhoto = useVisitPhoto({
+    upload: (bookingId, file) => addBookingPhoto(slug, bookingId, file),
+  })
 
   const handleCancel = async () => {
     if (await onCancel(booking.id)) onClose()
@@ -175,6 +180,11 @@ export const BookingInspector = ({
             <MenuItem onClick={handleCopyPhone}>
               {t('Скопировать {phone}', { phone: formatPhone(booking.customerPhone) })}
             </MenuItem>
+            {booking.outcome === 'arrived' && (
+              <MenuItem onClick={() => visitPhoto.pick(booking.id)}>
+                {visitPhoto.uploadingId ? t('Загружаем фото…') : t('Фото работы')}
+              </MenuItem>
+            )}
             {!isCancelled && (
               <>
                 <MenuSeparator />
@@ -185,6 +195,7 @@ export const BookingInspector = ({
             )}
           </Menu>
         </GlyphGroup>
+        {visitPhoto.field}
       </div>
 
       {!isCancelled && onOutcome && (

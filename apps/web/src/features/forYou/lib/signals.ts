@@ -1,11 +1,12 @@
 'use client'
 
+import { rememberChannel } from '@/shared/lib/bookingChannel'
 import { deviceSession } from '@/shared/lib/telemetry'
 
 // What the shelves learn from: a random id per device, services looked at lately, and what was
 // shown, tapped and booked (sent in batches with sendBeacon, so leaving the page never loses them).
 
-type Surface = 'catalog' | 'profile' | 'booking' | 'success'
+type Surface = 'catalog' | 'profile' | 'booking' | 'success' | 'search' | 'due'
 type EventKind = 'impression' | 'click' | 'book'
 type PickEvent = {
   kind: EventKind
@@ -80,6 +81,7 @@ if (typeof window !== 'undefined') {
 /** A tap on a pick; kept for the session so a booking of it can be credited to the shelf. */
 const trackPickClick = (event: Omit<PickEvent, 'kind'>) => {
   track([{ ...event, kind: 'click' }])
+  rememberChannel('for_you')
   try {
     window.sessionStorage.setItem(CLICK_KEY, JSON.stringify(event))
   } catch {
