@@ -130,6 +130,35 @@
   margin-top: var(--space-8);
 }
 
+/* «Ещё запись …»: a link-coloured row as wide as the column, 44pt to tap, before the one primary
+   action; the gap to it is the tiles' own. */
+.another {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--control-height-md);
+  margin-top: var(--space-4);
+  padding: 0 var(--space-4);
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  text-align: center;
+  cursor: pointer;
+}
+
+.another + .primary {
+  margin-top: var(--space-4);
+}
+
+.another:focus-visible {
+  outline: none;
+  border-radius: var(--radius-full);
+  box-shadow: var(--focus-ring);
+}
+
 .keep {
   max-width: 34ch;
   margin-top: var(--space-4);

@@ -99,6 +99,14 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     presetDate && /^\d{2}:\d{2}$/.test(searchParams.get('time') ?? '')
       ? searchParams.get('time')
       : null
+  // «Ещё запись» after a booking: the same day, nothing before the first visit ends (`?after=`).
+  const presetAfter =
+    presetDate && /^\d{2}:\d{2}$/.test(searchParams.get('after') ?? '')
+      ? searchParams.get('after')
+      : null
+  const [notBefore, setNotBefore] = useState<{ date: string; time: string } | null>(
+    presetDate && presetAfter ? { date: presetDate, time: presetAfter } : null,
+  )
   const [serviceId, setServiceId] = useState(presetService?.id ?? null)
   // Services done after the first in the same visit, by the same master, in this order.
   const [extraServiceIds, setExtraServiceIds] = useState<string[]>([])
@@ -213,6 +221,17 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     branchId,
     chosenServiceIds.slice(1),
   )
+  // Times before the visit just booked ends are not offered for «Ещё запись»: shown as taken, so
+  // the ruler keeps its look.
+  const offeredAvailability =
+    notBefore && dayKey === notBefore.date
+      ? {
+          ...availability,
+          slots: availability.slots.map((slot) =>
+            slot.time < notBefore.time ? { ...slot, isAvailable: false } : slot,
+          ),
+        }
+      : availability
   const isAutoDayFull =
     selectedDayKey === null &&
     !availability.isLoading &&
@@ -396,6 +415,36 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
 
   // «Начать заново»: the choices go (service, master, time, comment, code) and so does the draft
   // and the link's preset; the name and phone stay — they are the same person.
+  // «Ещё запись в <place>» on the success screen: another visit at the same place, often to another
+  // master, without starting from the catalog. The name and number stay, the day is the visit's,
+  // and times before it ends are not offered. The address says so too, so a reload keeps it.
+  const bookAnother = () => {
+    if (!createdBooking) return
+    const [hours = 0, minutes = 0] = createdBooking.time.split(':').map(Number)
+    const end = hours * 60 + minutes + createdBooking.durationMinutes
+    const after = `${String(Math.floor(end / 60)).padStart(2, '0')}:${String(end % 60).padStart(2, '0')}`
+    setCreatedBooking(null)
+    setNotBefore({ date: createdBooking.date, time: after })
+    setSelectedDayKey(createdBooking.date)
+    setServiceId(null)
+    setExtraServiceIds([])
+    setSpecialistId(null)
+    setTime(null)
+    setComment('')
+    setPromoCode(null)
+    setSubmitError(null)
+    setHasTriedSubmit(false)
+    setAddNotice(null)
+    setFolded({})
+    setEditingStep(null)
+    const url = new URL(window.location.href)
+    for (const key of ['service', 'specialist', 'time']) url.searchParams.delete(key)
+    url.searchParams.set('date', createdBooking.date)
+    url.searchParams.set('after', after)
+    window.history.replaceState(window.history.state, '', url)
+    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const startOver = () => {
     setAddNotice(null)
     setServiceId(null)
@@ -653,7 +702,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     specialistId,
     days,
     dayKey,
-    availability,
+    availability: offeredAvailability,
     time,
     name,
     phone,
@@ -668,6 +717,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     firstIncompleteStep,
     completedSteps,
     createdBooking,
+    bookAnother,
     editingStep,
     isStepCollapsed,
     toggleStep,

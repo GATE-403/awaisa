@@ -22,9 +22,18 @@ const RIPPLE_MS = WAVE_MS + 1400
 
 interface BookingSuccessProps {
   booking: Booking
+  /** Another visit at the same place, the same day after this one (often to another master). */
+  onBookAnother?: () => void
 }
 
-export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
+// When the visit ends: «Ещё запись» offers the times after it.
+const endOf = (booking: Booking) => {
+  const [hours = 0, minutes = 0] = booking.time.split(':').map(Number)
+  const end = hours * 60 + minutes + booking.durationMinutes
+  return `${String(Math.floor(end / 60)).padStart(2, '0')}:${String(end % 60).padStart(2, '0')}`
+}
+
+export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) => {
   const toast = useToast()
   const t = useT()
   const session = useSession()
@@ -134,6 +143,16 @@ export const BookingSuccess = ({ booking }: BookingSuccessProps) => {
           {t('Талон')}
         </button>
       </div>
+      {/* A service another master does is a booking of its own: one quiet row starts it here, at
+          the same place and day after this visit, the name and number kept. */}
+      {onBookAnother && (
+        <button type='button' className={styles.another} onClick={onBookAnother}>
+          {t('Ещё запись в {place} · после {time} ›', {
+            place: booking.business.name,
+            time: endOf(booking),
+          })}
+        </button>
+      )}
       <div className={styles.primary}>
         <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
           {t('Мои записи')}

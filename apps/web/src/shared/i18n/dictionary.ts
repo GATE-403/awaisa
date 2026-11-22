@@ -29,6 +29,10 @@ const BOOKING: Record<string, Entry> = {
     '{master} «{service}» кызматын жасабайт, чеберди тандаңыз',
     '{master} does not do «{service}», choose a master',
   ],
+  'Ещё запись в {place} · после {time} ›': [
+    '{place} жайына дагы жазылуу · {time} кийин ›',
+    'Another booking at {place} · after {time} ›',
+  ],
   'Услуги визита': ['Визиттин кызматтары', 'Services of the visit'],
   'Можно несколько · один мастер подряд': [
     'Бир нечесин тандаса болот · бир уста катары менен',

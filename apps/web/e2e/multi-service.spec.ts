@@ -175,6 +175,46 @@ test.describe('A visit of several services', () => {
     }
   })
 
+  test('another master is another booking: «Ещё запись» opens the same place after the visit', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(90_000)
+    const { business, manicure, aida } = await setUpNails(page)
+    const date = bishkekDay(1)
+    const guestContext = await browser.newContext()
+    const guest = await guestContext.newPage()
+    try {
+      const steps = bookingSteps(guest)
+      await guest.goto(
+        `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
+      )
+      await steps.contacts.getByLabel('Имя').fill('E2E Ещё запись')
+      await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+      await submitBooking(guest)
+      await expect(guest.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+
+      // One quiet row: the same place, after the manicure ends at 11:00.
+      await guest.getByRole('button', { name: /^Ещё запись в .+ · после 11:00/ }).click()
+      await expect(guest).toHaveURL(new RegExp(`date=${date}.*after=11%3A00|after=11:00`))
+      await expect(steps.service.getByRole('radio', { name: /^Брови/ })).toBeVisible()
+      await steps.service.getByRole('radio', { name: /^Брови/ }).click()
+      await steps.specialist.getByRole('radio', { name: /Бермет/ }).click()
+      // The ruler offers nothing before the first visit ends; the action names the time it takes.
+      const action = guest
+        .getByRole('button', { name: /^Выбрать \d{2}:\d{2}$/ })
+        .filter({ visible: true })
+      await expect(action).toBeVisible()
+      const offered = ((await action.textContent()) ?? '').replace('Выбрать ', '')
+      expect(offered >= '11:00').toBe(true)
+      await action.click()
+      // The name and number are already known: the form is ready to book.
+      await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Ещё запись')
+    } finally {
+      await guestContext.close()
+    }
+  })
+
   test('the API keeps one master for every service and counts the whole visit', async ({
     page,
   }) => {
