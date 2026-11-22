@@ -66,6 +66,9 @@ const addMinutes = (time: string, minutes: number) => {
   return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
+// The steps in the order the form walks them, for which way a change of step goes.
+const STEP_ORDER: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
+
 export const BookingPage = ({
   business,
   catalog,
@@ -187,6 +190,13 @@ export const BookingPage = ({
   // One open step under a stack of done ones: the step being changed, else the first unfinished,
   // and contacts once everything is chosen.
   const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
+  // Which way the form moved: forward brings the next step in from the right, back («Изменить»)
+  // from the left. Kept with the step it came from (React's «previous value in state» pattern).
+  const [stepTrail, setStepTrail] = useState({ step: activeStep, direction: 'forward' })
+  if (stepTrail.step !== activeStep) {
+    const isBack = STEP_ORDER.indexOf(activeStep) < STEP_ORDER.indexOf(stepTrail.step)
+    setStepTrail({ step: activeStep, direction: isBack ? 'back' : 'forward' })
+  }
   const contactsReady = form.firstIncompleteStep === null
   const isContactsFolded = isContactsDone && activeStep === 'contacts' && contactsReady
   // Away from contacts (a taken time sends the client back to the times), they open again.
@@ -596,7 +606,7 @@ export const BookingPage = ({
       <div className={styles.wash} aria-hidden />
       <BookingTopBar business={business} isModal={isModal} progress={progress} />
       <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
-        <div className={styles.steps}>
+        <div className={styles.steps} data-step-direction={stepTrail.direction}>
           {isQuickShown && quickService && (
             <QuickSlots
               title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}

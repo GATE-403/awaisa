@@ -3,7 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
@@ -88,6 +88,28 @@ export const DateTimePicker = ({
     if (!isLoading && !error) setLastSlots(slots)
   }, [slots, isLoading, error])
   const rulerSlots = isLoading ? lastSlots : slots
+  // The day knob takes the pressed day's place and size: written as CSS variables, so the glide
+  // is a transition and no render per frame. The first placing does not glide in from nowhere.
+  const pickerRef = useRef<HTMLDivElement>(null)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-placed when the day or the list of days changes
+  useLayoutEffect(() => {
+    const row = pickerRef.current?.querySelector<HTMLElement>('[data-day-row]')
+    const knob = row?.querySelector<HTMLElement>('[data-day-knob]')
+    const pressed = row?.querySelector<HTMLElement>('[data-pressed]')
+    if (!row || !knob) return
+    if (!pressed) {
+      row.removeAttribute('data-knob')
+      return
+    }
+    const isFirst = !row.hasAttribute('data-knob')
+    if (isFirst) knob.style.transition = 'none'
+    knob.style.setProperty('--knob-x', `${pressed.offsetLeft}px`)
+    knob.style.setProperty('--knob-y', `${pressed.offsetTop}px`)
+    knob.style.setProperty('--knob-w', `${pressed.offsetWidth}px`)
+    knob.style.setProperty('--knob-h', `${pressed.offsetHeight}px`)
+    row.setAttribute('data-knob', '')
+    if (isFirst) window.setTimeout(() => knob.style.removeProperty('transition'), 0)
+  }, [dayKey, days])
   const isRulerShown =
     view === 'ruler' &&
     isSpecialistSelected &&
@@ -122,6 +144,9 @@ export const DateTimePicker = ({
       value={dayKey ? [dayKey] : []}
       onValueChange={(values) => toSingleValue(values, onDayChange)}
     >
+      {/* The chosen day's fill as one knob that glides to the day picked (measured below), like
+          the segmented controls' knob; the pressed day itself goes clear over it. */}
+      <span className={styles.dayKnob} data-day-knob='' aria-hidden='true' />
       {days.map((day) => (
         <Toggle
           key={day.key}
@@ -156,7 +181,7 @@ export const DateTimePicker = ({
   )
 
   return (
-    <div className={styles.picker} data-view={view}>
+    <div ref={pickerRef} className={styles.picker} data-view={view}>
       {/* The days lead the step in both views, right under its question: under the dial they
           ended below the booking bar on short screens («так и не смог исправить»), whatever the
           sheet's scroll. */}

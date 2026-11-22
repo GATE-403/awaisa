@@ -202,8 +202,17 @@ export const BookingSummary = ({
           </span>
           <span className={styles.srOnly}>{`, ${t('Показать, что выбрано')}`}</span>
         </button>
-        <Button size='lg' className={styles.barButton} onClick={onSubmit} disabled={isSubmitting}>
-          {buttonLabel}
+        {/* While it books the button folds into a round spinner; «Вы записаны» then opens with
+            its own check. The words stay for screen readers. */}
+        <Button
+          size='lg'
+          className={styles.barButton}
+          onClick={onSubmit}
+          disabled={isSubmitting}
+          data-busy={isSubmitting || undefined}
+          aria-busy={isSubmitting || undefined}
+        >
+          <span className={styles.barButtonLabel}>{buttonLabel}</span>
         </Button>
         {isDetailsOpen && (
           <Sheet

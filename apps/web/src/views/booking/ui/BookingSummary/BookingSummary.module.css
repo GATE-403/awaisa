@@ -363,7 +363,59 @@
 /* Room for the two lines beside the leaf on a 375pt phone: the button keeps its height, a little
    less padding. */
 .bar[data-ready] .barButton {
+  position: relative;
+  overflow: hidden;
+  max-width: 240px;
   padding-inline: var(--space-5);
+  transition:
+    max-width 380ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Booking: the capsule folds into a circle as tall as itself with a spinner in it, not a
+   greyed-out «Записываем…». */
+.bar[data-ready] .barButton[data-busy] {
+  max-width: var(--control-height-lg);
+  padding-inline: 0;
+  opacity: 1;
+}
+
+.barButtonLabel {
+  white-space: nowrap;
+  transition: opacity 160ms var(--ease-standard);
+}
+
+.barButton[data-busy] .barButtonLabel {
+  opacity: 0;
+}
+
+.barButton[data-busy]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 22px;
+  height: 22px;
+  margin: auto;
+  border: 2.5px solid currentcolor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: busy-spin 700ms linear infinite;
+}
+
+@keyframes busy-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar[data-ready] .barButton {
+    transition: none;
+  }
+
+  .barButton[data-busy]::after {
+    animation-duration: 1.6s;
+  }
 }
 
 .barLines {

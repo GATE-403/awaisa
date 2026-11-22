@@ -137,13 +137,15 @@ test.describe('Moving around the app', () => {
     const card = await bookingCardInMiddle(page)
     const before = await page.evaluate(() => window.scrollY)
     expect(before).toBeGreaterThan(300)
-    const headerHeight = await header.evaluate((node) => node.getBoundingClientRect().height)
+    // The layout height: on phones the page behind the sheet steps back (scaled), which a
+    // drawn box would count.
+    const headerHeight = await header.evaluate((node) => (node as HTMLElement).offsetHeight)
 
     await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
     // Next used to scroll the catalog to its top, and the header dropped its category row.
     expect(await page.evaluate(() => window.scrollY)).toBe(before)
-    expect(await header.evaluate((node) => node.getBoundingClientRect().height)).toBe(headerHeight)
+    expect(await header.evaluate((node) => (node as HTMLElement).offsetHeight)).toBe(headerHeight)
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
 
     const bookingUrl = page.url()
