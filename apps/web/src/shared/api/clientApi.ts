@@ -136,6 +136,7 @@ import type {
   StockItem,
   StockItemInput,
   StockReceiveInput,
+  StrategyReport,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
@@ -338,6 +339,9 @@ const getFunnelSignals = (days: number, signal?: AbortSignal) =>
 
 const getFunnelSegments = (days: number, signal?: AbortSignal) =>
   request<FunnelSegmentsReport>(`/telemetry/segments?days=${days}`, { signal })
+
+const getStrategyReport = (days: number, signal?: AbortSignal) =>
+  request<StrategyReport>(`/telemetry/strategy?days=${days}`, { signal })
 
 const getTelegramLoginConfig = (signal?: AbortSignal) =>
   request<TelegramLoginConfig>('/auth/telegram', { signal })
@@ -1031,6 +1035,7 @@ export {
   getBilling,
   getFunnelReport,
   getFunnelSegments,
+  getStrategyReport,
   getModerationLog,
   getModerationQueue,
   decideModeration,

@@ -1,4 +1,4 @@
-import type { FunnelFlow, FunnelSegment, FunnelStep } from '@/shared/api/types'
+import type { BookingChannel, FunnelFlow, FunnelSegment, FunnelStep } from '@/shared/api/types'
 
 // Words for the codes the funnel telemetry stores (apps/api/src/telemetry/telemetry.schemas.ts).
 
@@ -103,4 +103,14 @@ const SEGMENT_LABELS: Record<SegmentKey, { title: string; values: Record<string,
 const FILTER_KEYS: SegmentKey[] = ['type', 'textScale', 'net']
 
 export type { SegmentKey }
-export { FILTER_KEYS, FLOW_LABELS, SEGMENT_LABELS, STEP_LABELS, VALUE_LABELS }
+const CHANNEL_LABELS: Record<BookingChannel, string> = {
+  catalog: 'Каталог',
+  for_you: '«Для вас»',
+  feed: '«Образы»',
+  search: 'Поиск',
+  map: 'Карта',
+  salon_link: 'Ссылка салона',
+  other: 'Другое',
+}
+
+export { CHANNEL_LABELS, FILTER_KEYS, FLOW_LABELS, SEGMENT_LABELS, STEP_LABELS, VALUE_LABELS }

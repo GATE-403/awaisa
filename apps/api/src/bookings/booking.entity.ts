@@ -1,3 +1,4 @@
+import type { BookingChannel } from '@awaisa/contracts'
 import {
   Column,
   CreateDateColumn,
@@ -150,6 +151,10 @@ export class Booking {
   /** Where it was booked: `online` (the site), `staff` (the cabinet) or `import`. */
   @Column({ type: 'varchar', length: 8, default: 'online' })
   source: 'online' | 'staff' | 'import'
+
+  /** Where an online booking came from (`BookingChannel`); null for staff, imports and older ones. */
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  channel: BookingChannel | null
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
