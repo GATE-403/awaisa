@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
 import { MasterCard } from '@/entities/business'
+import { FollowButton } from '@/features/followMaster'
 import type { Business, Specialist } from '@/shared/api/types'
 import { T } from '@/shared/i18n'
 import styles from './Place.module.css'
@@ -30,11 +31,18 @@ export const MastersSection = ({ business, specialists }: MastersSectionProps) =
       </div>
       <ul className={styles.masters} data-edge-fade=''>
         {specialists.map((specialist) => (
-          <li key={specialist.id}>
+          <li key={specialist.id} className={styles.masterItem}>
             <MasterCard
               specialist={specialist}
               href={`/${business.slug}/book?specialist=${specialist.id}`}
             />
+            <span className={styles.masterFollow}>
+              <FollowButton
+                specialistId={specialist.id}
+                name={specialist.name.split(' ')[0] ?? specialist.name}
+                variant='glyph'
+              />
+            </span>
           </li>
         ))}
       </ul>
