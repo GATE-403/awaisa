@@ -358,6 +358,46 @@ test.describe('UX: layout and ergonomics', () => {
       .toBe(true)
   })
 
+  test('the page steps back under the sheet and a picked card flies into the stack', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'Phones only: from 768px the booking is a side panel')
+    await page.goto('/awaisa-studio/book')
+    const steps = bookingSteps(page)
+    await steps.service.getByRole('radio', { name: /Укладка/ }).waitFor()
+
+    // The page behind steps back toward the top edge: the pinned site header stays at the top
+    // (about the screen's middle it slid down and the cards above it showed through).
+    await expect.poll(() => page.locator('html').getAttribute('data-booking-sheet')).toBe('')
+    const behind = page.locator('[data-sheet-behind]')
+    expect(await behind.count()).toBeGreaterThan(0)
+    await expect
+      .poll(() => behind.first().evaluate((element) => getComputedStyle(element).scale))
+      .toBe('0.94')
+    const header = page.locator('header[class*="Header-module"]')
+    if (await header.count()) {
+      expect(Math.round((await header.boundingBox())?.y ?? -1)).toBe(0)
+    }
+
+    // The step segments say how far along, as a progress bar.
+    const progress = page.getByRole('progressbar', { name: 'Шаги записи' })
+    await expect(progress).toHaveAttribute('aria-valuenow', '0')
+
+    await steps.service.getByRole('radio', { name: /Укладка/ }).click()
+    // The copy flies and goes; the stack card's picture is shown once it has landed.
+    const target = page.locator('[data-flight-target="service"]')
+    await expect(target).toBeVisible()
+    await expect.poll(() => target.evaluate((element) => element.style.visibility)).toBe('')
+    await expect(page.locator('body > [aria-hidden="true"][style*="z-index: 61"]')).toHaveCount(0)
+    await expect(progress).toHaveAttribute('aria-valuenow', '1')
+
+    // The rolling total keeps its plain text (the digit strips are drawn by CSS).
+    await expect(page.locator('[data-booking-bar] [class*="barPrice"]')).toHaveText(
+      /^[\d\s]+\sсом$/,
+    )
+  })
+
   test('booking controls are at least 44×44 on phones', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Touch targets matter on touch screens')
     await page.goto('/awaisa-studio/book?service=styling')

@@ -1,11 +1,13 @@
 import { Avatar as BaseAvatar } from '@base-ui/react/avatar'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../../utils/className'
 import styles from './Avatar.module.css'
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl'
 
-interface AvatarProps {
+// Plain attributes (`data-*`, `aria-*`) reach the root, like any element's.
+interface AvatarProps
+  extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'className' | 'style'> {
   name: string
   src?: string
   size?: AvatarSize
@@ -24,8 +26,8 @@ const getInitials = (name: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join('')
 
-const Avatar = ({ name, src, size = 'md', className, style, fallback }: AvatarProps) => (
-  <BaseAvatar.Root data-size={size} className={cx(styles.root, className)} style={style}>
+const Avatar = ({ name, src, size = 'md', className, style, fallback, ...props }: AvatarProps) => (
+  <BaseAvatar.Root {...props} data-size={size} className={cx(styles.root, className)} style={style}>
     {src && <BaseAvatar.Image src={src} alt={name} className={styles.image} />}
     <BaseAvatar.Fallback className={styles.fallback}>
       {fallback ?? getInitials(name)}

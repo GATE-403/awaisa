@@ -180,9 +180,12 @@ test.describe('Moving around the app', () => {
     // Where the card is on screen: the first booking also drops the first-visit line from the top
     // of the catalog, and the browser keeps what is on screen in place by moving the scroll.
     const topOnScreen = async () => Math.round((await card.boundingBox())?.y ?? -1)
-    const before = await topOnScreen()
     await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
+    // Measured under the open sheet: on phones the page behind it steps back (scaled toward the
+    // top edge), which moves the card on screen without scrolling anything.
+    await page.waitForTimeout(700)
+    const before = await topOnScreen()
 
     // Through the main action, which does something real on each step: «Любой мастер» on the
     // masters (only when there are several to choose from), then the free time under the ruler.

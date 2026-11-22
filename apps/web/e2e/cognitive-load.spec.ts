@@ -179,28 +179,29 @@ test.describe('Cognitive load: booking', () => {
     }
   })
 
-  test('the action names the next step and the bar says how far along', async ({
+  test('the action names the next step and the bar says what is chosen', async ({
     page,
     isMobile,
   }) => {
-    test.skip(!isMobile, 'The step count lives in the phone action bar')
+    test.skip(!isMobile, 'The line lives in the phone action bar')
     await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     const action = primaryAction(page)
     const hint = page.locator('[aria-live="polite"]').filter({ visible: true }).last()
 
     await expect(action).toHaveText('Выбрать услугу')
-    await expect(hint).toHaveText('Шаг 1 из 4')
+    // Nothing chosen: the place. The step count lives over the question, not twice.
+    await expect(hint).not.toContainText('Шаг')
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
     // On the masters the action takes the usual choice and says so.
     await expect(action).toHaveText('Любой мастер')
-    await expect(hint).toHaveText('Шаг 2 из 4')
+    await expect(hint).toHaveText(/^Укладка/)
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
     // On the time step the action offers the time under the ruler's needle.
     await expect(action).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
     await pickFirstFreeSlot(page)
     await expect(action).toHaveText('Ввести контакты')
-    await expect(hint).toHaveText('Шаг 4 из 4')
+    await expect(hint).toHaveText(/^Укладка · Любой мастер · .+, \d{2}:\d{2}$/)
   })
 })
 

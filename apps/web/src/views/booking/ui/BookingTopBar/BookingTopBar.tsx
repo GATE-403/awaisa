@@ -14,6 +14,8 @@ interface BookingTopBarProps {
   business: Business
   /** Opened over another page (intercepted route): closing goes back to that page. */
   isModal?: boolean
+  /** The steps as thin segments under the bar, like a story's progress (done, the open one). */
+  progress?: { id: string; isDone: boolean; isCurrent: boolean }[]
 }
 
 // Over the page it was opened from, closing is «back» (that page, its scroll, its state); opened
@@ -29,7 +31,7 @@ const useClose = (isModal: boolean) => {
 
 // Booking opens like a page in Telegram's in-app browser: a sheet over the dimmed site, its own
 // bar with the place and a close button — all attention on the form.
-export const BookingTopBar = ({ business, isModal = false }: BookingTopBarProps) => {
+export const BookingTopBar = ({ business, isModal = false, progress }: BookingTopBarProps) => {
   const close = useClose(isModal)
   const router = useRouter()
   const t = useT()
@@ -60,6 +62,27 @@ export const BookingTopBar = ({ business, isModal = false }: BookingTopBarProps)
         </NextLink>
         <span className={styles.spacer} aria-hidden />
       </div>
+      {progress && (
+        // A picture of how far along, read out as a progress bar; the steps are changed from
+        // their cards (a 3pt segment is no tap target).
+        <div
+          className={styles.progress}
+          role='progressbar'
+          aria-label={t('Шаги записи')}
+          aria-valuemin={0}
+          aria-valuemax={progress.length}
+          aria-valuenow={progress.filter((step) => step.isDone).length}
+        >
+          {progress.map((step) => (
+            <span
+              key={step.id}
+              className={styles.segment}
+              data-done={step.isDone || undefined}
+              data-current={step.isCurrent || undefined}
+            />
+          ))}
+        </div>
+      )}
     </header>
   )
 }

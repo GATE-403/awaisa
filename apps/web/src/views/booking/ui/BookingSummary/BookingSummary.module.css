@@ -20,6 +20,8 @@
   box-shadow:
     inset 0 0 0 0.5px var(--color-material-border),
     var(--shadow-md);
+  /* From a capsule to the ready bar's rounded rect without a jump. */
+  transition: border-radius var(--duration-normal) var(--ease-standard);
 }
 
 @media (max-width: 399px) {
@@ -336,4 +338,89 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Ready to book: the same capsule as before, with a capsule button («как во втором варианте»: a
+   rounded rect bar and button read as square). The leaf sits in the capsule's own inset: rounder
+   than a square tile, short of a circle (a round leaf no longer read as a calendar), its corner
+   well inside the capsule's curve. */
+.bar[data-ready] {
+  --leaf-radius: 18px;
+  --ready-inset: 6px;
+
+  padding: var(--ready-inset);
+  border-radius: var(--radius-full);
+}
+
+.barInfo[data-ready] {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+/* Room for the two lines beside the leaf on a 375pt phone: the button keeps its height, a little
+   less padding. */
+.bar[data-ready] .barButton {
+  padding-inline: var(--space-5);
+}
+
+.barLines {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The calendar leaf of the stack's time card and the ticket, as tall as the button, square with
+   rounded corners like an app icon of its size (12 on 52; a round leaf no longer read as a
+   calendar). The bar's corner is the leaf's radius plus the inset around it. */
+.barLeaf {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  overflow: hidden;
+  width: var(--control-height-lg);
+  aspect-ratio: 1;
+  border-radius: var(--leaf-radius);
+  background: var(--color-elevated);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  color: var(--color-foreground);
+  text-align: center;
+}
+
+.barLeafMonth {
+  padding: 3px 0 2px;
+  background: var(--color-danger-strong);
+  color: var(--color-primary-foreground);
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.barLeafDay {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The time leads the second line in the label colour: the leaf says the day, this the hour. */
+.barTime {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.barChevron {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-left: var(--space-1);
+  color: var(--color-tertiary-foreground);
 }

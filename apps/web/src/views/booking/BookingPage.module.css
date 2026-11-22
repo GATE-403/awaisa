@@ -10,8 +10,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* Keyboard focus is scrolled clear of the sheet's top bar and its action bar (WCAG 2.4.11). */
-  scroll-padding-block: calc(60px + var(--space-3))
+  /* Keyboard focus is scrolled clear of the sheet's top bar (60pt and its 11pt of step segments)
+     and its action bar (WCAG 2.4.11). */
+  scroll-padding-block: calc(71px + var(--space-3))
     calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
   padding: 0 0 calc(var(--space-20) + var(--space-6) + env(safe-area-inset-bottom));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
@@ -428,6 +429,14 @@ label:has([data-checked]) .serviceNote {
   min-height: var(--control-height-md);
 }
 
+/* The wash's colour as a registered colour, so it can glide: the place's, then the chosen
+   master's (`--wash-tint` from the form), over a second and a half. */
+@property --wash-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+
 /* A soft wash of the place's colour behind the top of the sheet: the booking feels like this
    place's, not a form. It scrolls away with the content. */
 .wash {
@@ -435,14 +444,17 @@ label:has([data-checked]) .serviceNote {
   top: 0;
   right: 0;
   left: 0;
+  --wash-color: var(--wash-tint, var(--place-tint));
+
   height: 340px;
   overflow: hidden;
+  transition: --wash-color 1.5s var(--ease-standard);
   /* Strongest behind the top bar, nearly gone by the stack's foot line and «Шаг 2 из 4»: blue
      link text on a strong pink or orange wash fell below AA («читаемость синих кнопок упала»). */
   background: radial-gradient(
     120% 80% at 50% 0%,
-    color-mix(in srgb, var(--place-tint) 34%, transparent),
-    color-mix(in srgb, var(--place-tint) 8%, transparent) 50%,
+    color-mix(in srgb, var(--wash-color) 34%, transparent),
+    color-mix(in srgb, var(--wash-color) 8%, transparent) 50%,
     transparent 80%
   );
   /* The drifting light below fades out with the wash instead of ending on an edge. */
@@ -460,12 +472,12 @@ label:has([data-checked]) .serviceNote {
   background:
     radial-gradient(
       38% 40% at 26% 22%,
-      oklch(from var(--place-tint) l c calc(h + 48) / 0.18),
+      oklch(from var(--wash-color) l c calc(h + 48) / 0.18),
       transparent 70%
     ),
     radial-gradient(
       34% 36% at 76% 14%,
-      oklch(from var(--place-tint) l c calc(h - 42) / 0.16),
+      oklch(from var(--wash-color) l c calc(h - 42) / 0.16),
       transparent 70%
     );
   animation: wash-drift 26s ease-in-out infinite alternate;
