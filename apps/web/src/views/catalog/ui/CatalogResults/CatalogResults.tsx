@@ -4,6 +4,7 @@ import { Select } from '@awaisa/ui/Select'
 import NextLink from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
+import { ForYouShelf } from '@/features/forYou'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
@@ -19,6 +20,9 @@ type ResultsView = 'places' | 'services'
 /** Two rows on phones; CSS moves the shelf below two rows on wider grids too. */
 /** Places are drawn a screenful at a time as the list scrolls. */
 const PLACES_STEP = 24
+
+// Fewer services found than this adds «Похожие услуги» under them.
+const FEW_RESULTS = 4
 
 interface CatalogResultsProps {
   title: string
@@ -175,6 +179,17 @@ export const CatalogResults = ({
             onEndReached={feed.loadMore}
           />
         ))}
+      {/* A search that found little: services like the first found, or for everyone when
+          nothing was found, so the page does not end in an empty state. */}
+      {view === 'services' && query && !feed.hasMore && feed.offers.length < FEW_RESULTS && (
+        <ForYouShelf
+          title='Похожие услуги'
+          likeServiceId={feed.offers[0]?.id}
+          excludeServiceId={feed.offers.length === 1 ? feed.offers[0]?.id : undefined}
+          isForEveryone
+          surface='search'
+        />
+      )}
     </section>
   )
 }
