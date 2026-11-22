@@ -14,7 +14,23 @@ const markPage = (page: Page) =>
 const isSamePage = (page: Page) =>
   page.evaluate(() => (window as unknown as { pageMark?: number }).pageMark === 1)
 
-const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Запись', level: 1 })
+// The newest sheet: while a reload brings the booking back over the catalog, the old one may
+// still be on screen for a frame beside it.
+const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Запись', level: 1 }).last()
+
+// A service card a few rows down (the third row of four columns), scrolled to the middle of the
+// screen. Looking for «any card wholly on screen» after a fixed scroll found none on CI (other card
+// heights) and clicked nothing.
+const bookingCardInMiddle = async (page: Page) => {
+  const card = page
+    .getByRole('article', { name: /, / })
+    .filter({ has: page.locator('a[href*="/book?"]') })
+    .nth(10)
+  await card.evaluate((node) => node.scrollIntoView({ block: 'center', behavior: 'instant' }))
+  // Let the header settle (it tucks its chip row on scroll) before measuring.
+  await page.waitForTimeout(500)
+  return card
+}
 
 test.describe('Moving around the app', () => {
   test('the tab bar leads to every section and marks the one open', async ({ page, isMobile }) => {
@@ -119,24 +135,12 @@ test.describe('Moving around the app', () => {
     const header = page.locator('[data-site-header]')
     const chosenKind = header.getByRole('link', { name: 'Барбершопы' })
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
-    const cards = page.getByRole('article', { name: /, / })
-    await expect(cards.nth(11)).toBeAttached()
-    await page.evaluate(() => window.scrollTo({ top: 700, behavior: 'instant' }))
-    // Let the header settle (it tucks its chip row on scroll) before measuring.
-    await page.waitForTimeout(500)
+    const card = await bookingCardInMiddle(page)
     const before = await page.evaluate(() => window.scrollY)
     expect(before).toBeGreaterThan(300)
     const headerHeight = await header.evaluate((node) => node.getBoundingClientRect().height)
-    // A card wholly on screen below the header, wherever the grid has put the cards.
-    const inView = await cards.evaluateAll((nodes) =>
-      nodes.findIndex((node) => {
-        const box = node.getBoundingClientRect()
-        return box.top > 200 && box.bottom < window.innerHeight - 100
-      }),
-    )
-    expect(inView).toBeGreaterThan(-1)
 
-    await cards.nth(inView).getByRole('link').first().click()
+    await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
     // Next used to scroll the catalog to its top, and the header dropped its category row.
     expect(await page.evaluate(() => window.scrollY)).toBe(before)
@@ -160,17 +164,7 @@ test.describe('Moving around the app', () => {
     // The booking itself is answered by a stub: nothing lands in the shared data.
     await mockCreateBooking(page, succeed)
     await page.goto('/')
-    const cards = page.getByRole('article', { name: /, / })
-    await expect(cards.nth(11)).toBeAttached()
-    await page.evaluate(() => window.scrollTo({ top: 700, behavior: 'instant' }))
-    await page.waitForTimeout(500)
-    const inView = await cards.evaluateAll((nodes) =>
-      nodes.findIndex((node) => {
-        const box = node.getBoundingClientRect()
-        return box.top > 200 && box.bottom < window.innerHeight - 100
-      }),
-    )
-    const card = cards.nth(inView)
+    const card = await bookingCardInMiddle(page)
     // Where the card is on screen: the first booking also drops the first-visit line from the top
     // of the catalog, and the browser keeps what is on screen in place by moving the scroll.
     const topOnScreen = async () => Math.round((await card.boundingBox())?.y ?? -1)
