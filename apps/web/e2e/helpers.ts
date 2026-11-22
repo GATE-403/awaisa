@@ -44,6 +44,9 @@ const pickFirstFreeSlot = async (page: Page) => {
     return preset
 
   const days = page.getByRole('group', { name: 'День' }).getByRole('button')
+  // A link that already chose the master lands on the time step at once: wait for the days to be
+  // drawn before counting them, or a slow runner counts none.
+  await days.first().waitFor()
   const dayCount = await days.count()
 
   for (let index = 0; index < dayCount; index += 1) {
