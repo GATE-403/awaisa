@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { retryReceipt } from '@/shared/api/clientApi'
 import type { FiscalReceipt } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { ReceiptPaper } from '@/shared/ui/ReceiptPaper/ReceiptPaper'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -26,6 +27,7 @@ interface ReceiptSheetProps {
 // refused is sent again from here instead.
 export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: ReceiptSheetProps) => {
   const toast = useToast()
+  const t = useT()
   const [receipt, setReceipt] = useState(initial)
   const [isSending, setIsSending] = useState(false)
   const canShare = typeof navigator !== 'undefined' && 'share' in navigator
@@ -34,18 +36,18 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(link)
-      toast.show({ title: 'Ссылка на чек скопирована', type: 'success' })
+      toast.show({ title: t('Ссылка на чек скопирована'), type: 'success' })
     } catch {
-      toast.show({ title: 'Не получилось скопировать', type: 'error' })
+      toast.show({ title: t('Не получилось скопировать'), type: 'error' })
     }
   }
 
   const share = async () => {
     try {
-      await navigator.share({ title: `Чек ${receipt.businessName}`, url: link })
+      await navigator.share({ title: t('Чек {name}', { name: receipt.businessName }), url: link })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: 'Не получилось поделиться', type: 'error' })
+      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
     }
   }
 
@@ -56,11 +58,11 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
       setReceipt(next)
       onChange?.(next)
       toast.show({
-        title: next.status === 'issued' ? 'Чек выдан' : 'Чек снова в очереди',
+        title: t(next.status === 'issued' ? 'Чек выдан' : 'Чек снова в очереди'),
         type: next.status === 'issued' ? 'success' : 'info',
       })
     } catch (error) {
-      toast.show({ title: 'Не отправилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не отправилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSending(false)
     }
@@ -68,9 +70,9 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
 
   return (
     <Sheet
-      title={receipt.kind === 'refund' ? 'Чек возврата' : 'Чек'}
+      title={t(receipt.kind === 'refund' ? 'Чек возврата' : 'Чек')}
       onClose={onClose}
-      cancelLabel='Закрыть'
+      cancelLabel={t('Закрыть')}
     >
       <div className={sheet.form}>
         <ReceiptPaper receipt={receipt} surface='sheet' />
@@ -78,18 +80,18 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
           <div className={styles.actions}>
             <Button type='button' size='sm' className={styles.main} onClick={() => void copy()}>
               <Copy weight='bold' aria-hidden />
-              Скопировать ссылку
+              {t('Скопировать ссылку')}
             </Button>
-            <GlyphGroup label='Ещё'>
+            <GlyphGroup label={t('Ещё')}>
               <GlyphButton
                 icon={<ArrowSquareOut />}
-                label='Открыть чек'
+                label={t('Открыть чек')}
                 onClick={() => window.open(link, '_blank', 'noopener')}
               />
               {canShare && (
                 <GlyphButton
                   icon={<ShareNetwork />}
-                  label='Отправить'
+                  label={t('Отправить')}
                   onClick={() => void share()}
                 />
               )}
@@ -106,7 +108,7 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
               onClick={() => void retry()}
             >
               <ArrowClockwise weight='bold' aria-hidden />
-              Отправить снова
+              {t('Отправить снова')}
             </Button>
           </div>
         )}

@@ -1,5 +1,11 @@
 import type { FiscalSettings, TaxRegime } from '@/shared/api/types'
 
+type Tr = (text: string, vars?: Record<string, string | number>) => string
+
+// Russian as it is: callers without a translator (and the unit tests) read the keys filled in.
+const russian: Tr = (text, vars) =>
+  vars ? text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars[key] ?? match)) : text
+
 const TAX_REGIMES: { value: TaxRegime; label: string }[] = [
   { value: 'general', label: 'Общий' },
   { value: 'single', label: 'Единый налог' },
@@ -15,12 +21,17 @@ const isInnValid = (inn: string) => /^\d{14}$/.test(inn.trim())
 const formatRate = (value: number) => `${String(value).replace('.', ',')}%`
 
 /** «НсП: услуги 2% · товары 1%» in one value. */
-const describeTaxes = (settings: FiscalSettings) => ({
-  vat: settings.isVatPayer ? formatRate(settings.vatRate) : 'Не плательщик',
-  salesTax: `услуги ${formatRate(settings.salesTaxServices)} · товары ${formatRate(settings.salesTaxGoods)}`,
+const describeTaxes = (settings: FiscalSettings, t: Tr = russian) => ({
+  vat: settings.isVatPayer ? formatRate(settings.vatRate) : t('Не плательщик'),
+  salesTax: t('услуги {services} · товары {goods}', {
+    services: formatRate(settings.salesTaxServices),
+    goods: formatRate(settings.salesTaxGoods),
+  }),
 })
 
-const regimeLabel = (regime: TaxRegime) =>
-  TAX_REGIMES.find((item) => item.value === regime)?.label ?? regime
+const regimeLabel = (regime: TaxRegime, t: Tr = russian) => {
+  const label = TAX_REGIMES.find((item) => item.value === regime)?.label
+  return label ? t(label) : regime
+}
 
 export { defaultSalesTax, describeTaxes, isInnValid, regimeLabel, TAX_REGIMES }

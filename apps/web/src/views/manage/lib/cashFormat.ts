@@ -1,4 +1,12 @@
 import type { ExpenseCategory, FiscalReceipt, SalePaymentMethod } from '@/shared/api/types'
+import type { Translate } from '@/shared/i18n'
+
+type Vars = Record<string, string | number>
+type Tr = (text: string, vars?: Vars) => string
+
+// Russian as it is: callers without a translator (and the unit tests) read the keys filled in.
+const russian: Tr = (text, vars) =>
+  vars ? text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars[key] ?? match)) : text
 
 const SALE_METHODS: { value: SalePaymentMethod; label: string }[] = [
   { value: 'cash', label: 'Наличные' },
@@ -22,8 +30,16 @@ const EXPENSE_CATEGORIES: { value: string; label: string }[] = [
   { value: 'other', label: 'Прочее' },
 ]
 
-const expenseCategoryLabel = (category: ExpenseCategory) =>
-  EXPENSE_CATEGORIES.find((item) => item.value === category)?.label ?? category
+// «Карта» is the map elsewhere in the dictionary, so the card has its own key.
+const saleMethodLabel = (method: SalePaymentMethod, t: Translate) =>
+  method === 'card' && t.language !== 'ru'
+    ? t('Карта (оплата)')
+    : t(SALE_METHODS.find((item) => item.value === method)?.label ?? method)
+
+const expenseCategoryLabel = (category: ExpenseCategory, t: Tr = russian) => {
+  const preset = EXPENSE_CATEGORIES.find((item) => item.value === category)
+  return preset ? t(preset.label) : category
+}
 
 // Quantities may be fractional for some units; shown without trailing zeros.
 const formatCount = (value: number) =>
@@ -35,20 +51,19 @@ const formatCount = (value: number) =>
  * A receipt in a row's meta line: its number once issued, else what is happening to it. `isAlert`
  * paints it red: the provider refused it and somebody has to send it again.
  */
-const describeReceipt = (receipt: FiscalReceipt) => {
-  if (receipt.status === 'failed') return { text: 'чек не прошёл', isAlert: true }
-  if (receipt.status === 'cancelled') return { text: 'чек отменён', isAlert: false }
+const describeReceipt = (receipt: FiscalReceipt, t: Tr = russian) => {
+  if (receipt.status === 'failed') return { text: t('чек не прошёл'), isAlert: true }
+  if (receipt.status === 'cancelled') return { text: t('чек отменён'), isAlert: false }
   if (receipt.status !== 'issued') {
     return {
-      text: receipt.kind === 'refund' ? 'возврат чека отправляется' : 'чек отправляется',
+      text: t(receipt.kind === 'refund' ? 'возврат чека отправляется' : 'чек отправляется'),
       isAlert: false,
     }
   }
   return {
-    text:
-      receipt.kind === 'refund'
-        ? `возврат чека №${receipt.fiscalNumber}`
-        : `чек №${receipt.fiscalNumber}`,
+    text: t(receipt.kind === 'refund' ? 'возврат чека №{number}' : 'чек №{number}', {
+      number: receipt.fiscalNumber ?? '',
+    }),
     isAlert: false,
   }
 }
@@ -60,4 +75,5 @@ export {
   formatCount,
   METHOD_LABEL,
   SALE_METHODS,
+  saleMethodLabel,
 }
