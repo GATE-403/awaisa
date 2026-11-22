@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { getClientMessagingConfig } from '@/shared/api/clientApi'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import forms from '@/views/manage/ui/manageForms.module.css'
 
 // Where clients hear about their visits; nothing is drawn while WhatsApp is off (SMS as always).
 export const ClientChannelNote = () => {
+  const t = useT()
   const [isWhatsappOn, setIsWhatsappOn] = useState(false)
 
   useEffect(() => {
@@ -27,9 +29,9 @@ export const ClientChannelNote = () => {
 
   return (
     <div className={forms.group}>
-      <SectionCaption>Клиентам</SectionCaption>
+      <SectionCaption>{t('Клиентам')}</SectionCaption>
       <p className={forms.groupEmpty}>
-        Подтверждения и напоминания о визитах приходят в WhatsApp, а без него по SMS.
+        {t('Подтверждения и напоминания о визитах приходят в WhatsApp, а без него по SMS.')}
       </p>
     </div>
   )

@@ -1,9 +1,10 @@
 import { ArrowUpRight, CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { addDayKey, formatDayLong } from '@/entities/booking'
+import { addDayKey } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import type { BusinessLink } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import styles from './BusinessPickerCard.module.css'
 
@@ -19,15 +20,20 @@ const ROLE_LABELS: Record<BusinessLink['role'], string> = {
 
 // One row per business, like Settings: a glance at today on the right, one tap opens the cabinet.
 export const BusinessPickerCard = ({ business }: BusinessPickerCardProps) => {
+  const t = useT()
   const today = useToday()
   const next = business.next
   const nextLabel = !next
-    ? 'Записей впереди нет'
+    ? t('Записей впереди нет')
     : today && next.date === today.dayKey
-      ? `Дальше — сегодня в ${next.time}`
+      ? t('Дальше: сегодня в {time}', { time: next.time })
       : today && next.date === addDayKey(today.dayKey, 1)
-        ? `Дальше — завтра в ${next.time}`
-        : `Дальше — ${formatDayLong(next.date).toLowerCase()}, ${next.time}`
+        ? t('Дальше: завтра в {time}', { time: next.time })
+        : t('Дальше: {day}, {time}', {
+            // English keeps the weekday's capital letter.
+            day: t.language === 'en' ? t.dayLong(next.date) : t.dayLong(next.date).toLowerCase(),
+            time: next.time,
+          })
 
   return (
     <article className={styles.row} aria-label={business.name}>
@@ -45,26 +51,28 @@ export const BusinessPickerCard = ({ business }: BusinessPickerCardProps) => {
             <span className={styles.nameText}>{business.name}</span>
             <span className={styles.status} data-hidden={!business.isPublished || undefined}>
               <span className={styles.statusText}>
-                {business.isPublished ? 'Открыта' : 'Скрыта'}
+                {business.isPublished ? t('Открыта') : t('Скрыта')}
               </span>
             </span>
           </span>
           <span className={styles.meta}>
-            {[getKindLabel(business.kind), ROLE_LABELS[business.role]].filter(Boolean).join(' · ')}
+            {[t(getKindLabel(business.kind)), t(ROLE_LABELS[business.role])]
+              .filter(Boolean)
+              .join(' · ')}
           </span>
           <span className={styles.next}>{nextLabel}</span>
         </span>
         <span className={styles.today}>
           <span className={styles.todayCount}>{business.todayCount}</span>
-          <span className={styles.todayLabel}> сегодня</span>
+          <span className={styles.todayLabel}> {t('сегодня')}</span>
         </span>
         <CaretRight weight='bold' aria-hidden className={styles.chevron} />
       </NextLink>
       <NextLink
         href={`/${business.slug}`}
         className={styles.page}
-        aria-label={`Страница ${business.name}`}
-        title='Открыть страницу'
+        aria-label={t('Страница {name}', { name: business.name })}
+        title={t('Открыть страницу')}
       >
         <ArrowUpRight weight='bold' aria-hidden />
       </NextLink>

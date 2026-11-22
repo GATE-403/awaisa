@@ -2,6 +2,7 @@
 
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
+import { useT } from '@/shared/i18n'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -26,14 +27,15 @@ export const CalendarFeedGroup = ({
   canSetPhones,
   listClassName,
 }: CalendarFeedGroupProps) => {
+  const t = useT()
   const state = useCalendarFeed(scope)
   const [isOpen, setIsOpen] = useState(false)
 
   if (state.error) return null
 
   return (
-    <section className={sheet.group} aria-label='Календарь'>
-      <SectionCaption>Календарь</SectionCaption>
+    <section className={sheet.group} aria-label={t('Календарь')}>
+      <SectionCaption>{t('Календарь')}</SectionCaption>
       <div className={listClassName}>
         <button
           type='button'
@@ -41,14 +43,14 @@ export const CalendarFeedGroup = ({
           disabled={!state.feed}
           onClick={() => setIsOpen(true)}
         >
-          <span className={sheet.rowLabel}>Календарь на телефоне</span>
+          <span className={sheet.rowLabel}>{t('Календарь на телефоне')}</span>
           <span className={styles.value}>
-            {state.feed?.isActive && 'Подключён'}
+            {state.feed?.isActive && t('Подключён')}
             <CaretRight weight='bold' className={styles.chevron} aria-hidden />
           </span>
         </button>
       </div>
-      <RowNote>{ROW_NOTES[scope.kind]}</RowNote>
+      <RowNote>{t(ROW_NOTES[scope.kind])}</RowNote>
       {isOpen && (
         <CalendarFeedSheet
           scope={scope}

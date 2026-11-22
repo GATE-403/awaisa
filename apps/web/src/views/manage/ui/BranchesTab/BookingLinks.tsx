@@ -4,6 +4,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { Copy } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -18,6 +19,7 @@ interface BookingLinksProps {
 // their branch already chosen.
 export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   const toast = useToast()
+  const t = useT()
   // The page's own origin, read after hydration so server and client render the same.
   const [origin, setOrigin] = useState('')
 
@@ -26,8 +28,8 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   }, [])
   const items = [
     ...(branches.length > 1
-      ? [{ id: 'all', title: 'Все филиалы', path: `/${slug}/book` }]
-      : [{ id: 'one', title: branches[0]?.name ?? 'Запись', path: `/${slug}/book` }]),
+      ? [{ id: 'all', title: t('Все филиалы'), path: `/${slug}/book` }]
+      : [{ id: 'one', title: branches[0]?.name ?? t('Запись'), path: `/${slug}/book` }]),
     ...(branches.length > 1
       ? branches
           .filter((branch) => branch.isActive !== false)
@@ -42,15 +44,15 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   const handleCopy = async (url: string) => {
     try {
       await navigator.clipboard.writeText(url)
-      toast.show({ title: 'Ссылка скопирована', description: url, type: 'success' })
+      toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
     } catch {
-      toast.show({ title: 'Не удалось скопировать', description: url, type: 'error' })
+      toast.show({ title: t('Не удалось скопировать'), description: url, type: 'error' })
     }
   }
 
   return (
     <div className={styles.group}>
-      <SectionCaption>Ссылки для записи</SectionCaption>
+      <SectionCaption>{t('Ссылки для записи')}</SectionCaption>
       <ul className={styles.list}>
         {items.map((item) => {
           const url = `${origin}${item.path}`
@@ -64,18 +66,19 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
                 type='button'
                 className={links.copy}
                 onClick={() => handleCopy(url)}
-                aria-label={`Скопировать ссылку: ${item.title}`}
+                aria-label={t('Скопировать ссылку: {name}', { name: item.title })}
               >
                 <Copy aria-hidden />
-                Скопировать
+                {t('Скопировать')}
               </button>
             </li>
           )
         })}
       </ul>
       <RowNote>
-        Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа: клиент сразу
-        попадёт в запись в нужный филиал.
+        {t(
+          'Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа: клиент сразу попадёт в запись в нужный филиал.',
+        )}
       </RowNote>
     </div>
   )
