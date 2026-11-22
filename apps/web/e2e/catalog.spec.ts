@@ -17,7 +17,8 @@ test.describe('Catalog: endless scroll and similar places', () => {
     await expect.poll(() => cards.count()).toBeGreaterThan(first)
   })
 
-  test('pages continue one order without repeats', async ({ request }) => {
+  test('pages continue one order without repeats', async ({ request, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const page = (offset: number) =>
       request
         .get(`/api/businesses/offers?offset=${offset}&limit=10&sort=price`)

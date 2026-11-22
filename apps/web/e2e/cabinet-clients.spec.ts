@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { randomClientPhone } from './account'
-import { bishkekDay, createOwnBusiness, createVisit } from './business'
+import { bishkekDay, createOwnBusiness, createVisit, type OwnBusiness } from './business'
 
 // `YYYY-MM-DD` → the import's `dd.mm.yyyy`, born in 1992 (a leap year, so 29 February fits).
 const toImportBirthday = (day: string) => {
@@ -80,27 +80,29 @@ test.describe('Cabinet client base', () => {
     await tab('Все').click()
     await page.getByRole('combobox', { name: 'Сортировка' }).click()
     await page.getByRole('option', { name: 'По тратам' }).click()
+    // The other orders are pure rules: apps/api/src/clients/client-segments.spec.ts.
     await expect.poll(names).toEqual(['E2E Новый', 'E2E Постоянный', 'E2E Именинник', 'E2E Импорт'])
-    await page.getByRole('combobox', { name: 'Сортировка' }).click()
-    await page.getByRole('option', { name: 'По имени' }).click()
-    await expect.poll(names).toEqual(['E2E Именинник', 'E2E Импорт', 'E2E Новый', 'E2E Постоянный'])
   })
 
-  // Picks 15 March in the client's card (and `year` first, when given) and saves it.
-  const pickBirthday = async (page: Page, year: string | null) => {
-    const business = await createOwnBusiness(page)
+  // Picks 15 March in a client's card (and `year` first, when given), saves it and reads it back.
+  const pickBirthday = async (
+    page: Page,
+    business: OwnBusiness,
+    name: string,
+    year: string | null,
+  ) => {
     const phone = randomClientPhone()
     await createVisit({
       slug: business.slug,
       serviceId: business.service.id,
       specialistId: business.master.id,
-      name: 'E2E Без даты',
+      name,
       phone,
       daysBack: 1,
     })
 
     await page.goto(`/manage/${business.slug}?tab=clients`)
-    await page.getByRole('button', { name: /E2E Без даты/ }).click()
+    await page.getByRole('button', { name: new RegExp(name) }).click()
     const sheet = page.getByRole('dialog', { name: 'Клиент' })
     await sheet.getByRole('button', { name: 'Добавить', expanded: false }).click()
     if (year) {
@@ -123,13 +125,13 @@ test.describe('Cabinet client base', () => {
     return card.birthday
   }
 
-  test('a birthday with its year is picked in the card and saved', async ({ page }) => {
-    test.setTimeout(60_000)
-    expect(await pickBirthday(page, '1990')).toBe('1990-03-15')
-  })
-
-  test('a birthday without a year is kept as day and month', async ({ page }) => {
-    test.setTimeout(60_000)
-    expect(await pickBirthday(page, null)).toBe('1904-03-15')
+  test('a birthday is picked in the card and saved, with its year or as day and month', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000)
+    const business = await createOwnBusiness(page)
+    expect(await pickBirthday(page, business, 'E2E С годом', '1990')).toBe('1990-03-15')
+    // «Год не важен» keeps it on 1904, a leap year no client is born in.
+    expect(await pickBirthday(page, business, 'E2E Без года', null)).toBe('1904-03-15')
   })
 })
