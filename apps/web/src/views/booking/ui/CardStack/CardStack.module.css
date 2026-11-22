@@ -9,10 +9,14 @@
   --spread: calc(var(--peek) + var(--pull, 0) * (var(--card-height) + var(--gap) - var(--peek)));
 
   position: relative;
-  height: calc(var(--card-height) + (var(--count) - 1) * var(--spread));
+  /* Above what follows, so cards spread by a pull lie over the step below. */
+  z-index: 1;
+  /* The folded height, not the pulled one, and never animated: a height that changed under the
+     finger or glided after a new card laid the whole sheet out again every frame, and a Samsung
+     A55 showed picking a service at 24 fps (41 without it). The cards move by transform alone. */
+  height: calc(var(--card-height) + (var(--count) - 1) * var(--peek));
   /* Sideways moves are ours (they shuffle the stack); up and down still scroll the sheet. */
   touch-action: pan-y;
-  transition: height 460ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .stack[data-fanned] {
