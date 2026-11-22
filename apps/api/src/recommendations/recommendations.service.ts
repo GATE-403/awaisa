@@ -183,21 +183,23 @@ export class RecommendationsService implements OnApplicationBootstrap {
   }
 
   /** Per reason: how often shown, tapped and booked — what actually brings bookings. */
-  async stats(days: number) {
+  async stats(days: number, by: 'reason' | 'surface' = 'reason') {
+    // `by` is one of two column names checked by the schema, never free text.
+    const column = by === 'surface' ? '"surface"' : '"reason"'
     const rows = await this.query(
-      `SELECT "reason",
+      `SELECT ${column} AS "key",
          COUNT(*) FILTER (WHERE "kind" = 'impression')::int AS "impressions",
          COUNT(*) FILTER (WHERE "kind" = 'click')::int AS "clicks",
          COUNT(*) FILTER (WHERE "kind" = 'book')::int AS "bookings"
        FROM "recommendation_events"
        WHERE "created_at" > now() - make_interval(days => $1)
-       GROUP BY "reason" ORDER BY "impressions" DESC`,
+       GROUP BY 1 ORDER BY "impressions" DESC`,
       [days],
     )
     return rows.map((row) => {
       const impressions = Number(row.impressions)
       return {
-        reason: String(row.reason) || '—',
+        [by]: String(row.key) || '—',
         impressions,
         clicks: Number(row.clicks),
         bookings: Number(row.bookings),

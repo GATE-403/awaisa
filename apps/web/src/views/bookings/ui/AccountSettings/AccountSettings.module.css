@@ -156,3 +156,44 @@ div.row,
 .caption {
   margin-top: var(--space-3);
 }
+
+/* A followed master: the row books them; «Не следить» at its end lets go in one tap. */
+.followLink {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  min-height: 52px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* The face takes the glyphs' 24pt column, so names line up with the labels above. */
+.face {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.unfollow {
+  position: relative;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
