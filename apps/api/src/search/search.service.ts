@@ -1,3 +1,4 @@
+import type { MasterSuggestion } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
@@ -20,6 +21,9 @@ type Resolved = {
 // The vocabulary (words of service and place names) changes only when owners edit their menus.
 const VOCABULARY_TTL_MS = 10 * 60 * 1000
 
+// Masters in the search panel: a short group above the places.
+const MASTERS_LIMIT = 4
+
 @Injectable()
 export class SearchService {
   private vocabulary: { words: string[]; at: number } | null = null
@@ -31,6 +35,36 @@ export class SearchService {
    * their stems and everyday synonyms; when none of that matches anything, the closest words
    * of the site's own names stand in for the typos.
    */
+  /**
+   * Masters whose first or last name starts with what was typed (as typed, on the other
+   * layout or transliterated: «azamat», «фяфьфе» find «Азамат»), at published places, rated
+   * first. People search their own master by name, not by the place.
+   */
+  async masters(query: string, limit = MASTERS_LIMIT): Promise<MasterSuggestion[]> {
+    const patterns = readingsOf(query)
+      .filter((reading) => reading.length >= 2)
+      .flatMap((reading) => [`${reading}%`, `% ${reading}%`])
+    if (patterns.length === 0) return []
+    const rows = (await this.dataSource.query(
+      `SELECT sp."id", sp."name", sp."role", sp."photo_url" AS "photoUrl", sp."rating",
+         b."slug", b."name" AS "businessName"
+       FROM "specialists" sp
+       JOIN "businesses" b ON b."id" = sp."business_id" AND b."is_published"
+       WHERE sp."is_active" AND replace(lower(sp."name"), 'ё', 'е') LIKE ANY($1)
+       ORDER BY sp."rating" DESC NULLS LAST, sp."name"
+       LIMIT $2`,
+      [patterns, limit],
+    )) as Record<string, unknown>[]
+    return rows.map((row) => ({
+      id: String(row.id),
+      name: String(row.name),
+      role: String(row.role ?? ''),
+      photoUrl: (row.photoUrl as string | null) ?? null,
+      rating: row.rating === null ? null : Number(row.rating),
+      business: { slug: String(row.slug), name: String(row.businessName) },
+    }))
+  }
+
   async resolve(query: string): Promise<Resolved | null> {
     const base = normalize(query)
     if (!base) return null

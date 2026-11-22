@@ -1696,6 +1696,16 @@ type AvatarUpload = { avatarUrl: string }
 
 type UploadedPhoto = { url: string }
 
+/** A master found by name in the search panel (`GET /search/masters?q`). */
+type MasterSuggestion = {
+  id: string
+  name: string
+  role: string
+  photoUrl: string | null
+  rating: number | null
+  business: { slug: string; name: string }
+}
+
 type SearchCorrection = { query: string; corrected: string | null }
 
 /**
@@ -1879,6 +1889,7 @@ type BillingCheckoutInput =
 type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boolean }
 
 export type {
+  MasterSuggestion,
   CertificateOrderCreated,
   CertificateOrderInput,
   CertificateSale,
