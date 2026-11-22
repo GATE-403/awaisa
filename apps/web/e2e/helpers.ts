@@ -50,7 +50,10 @@ const pickFirstFreeSlot = async (page: Page) => {
   const dayCount = await days.count()
 
   for (let index = 0; index < dayCount; index += 1) {
-    await days.nth(index).click()
+    const day = days.nth(index)
+    // A closed day (the place's day off, e.g. today) is disabled: clicking it would wait forever.
+    if (await day.isDisabled()) continue
+    await day.click()
     const slots = page
       .getByRole('group', { name: 'Время' })
       .getByRole('button', { disabled: false })
