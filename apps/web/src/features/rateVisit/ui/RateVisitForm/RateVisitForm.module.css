@@ -12,6 +12,14 @@
   text-align: center;
 }
 
+.hint {
+  margin-top: calc(var(--space-2) * -1);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-align: center;
+}
+
 .label {
   margin-top: var(--space-3);
   font-size: var(--text-footnote);
@@ -57,6 +65,10 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+}
+
+.photos[data-first] {
+  justify-content: center;
 }
 
 .thumb {
