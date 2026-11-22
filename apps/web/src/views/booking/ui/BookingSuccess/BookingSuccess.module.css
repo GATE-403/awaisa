@@ -144,6 +144,17 @@
   white-space: nowrap;
 }
 
+/* A wave of light (`LightWave`) runs out from the check over the whole sheet as it shows, splitting
+   into colours. The pond covers the sheet (absolute in the sheet, not in this column); the wave's
+   origin is the check, measured from script. */
+.pond {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 /* The one line of actions: «Мои записи» takes the room, the glyph capsule beside it is as tall
    (44pt: the glyphs grow from the kit's 36 to 40). */
 .actions {
