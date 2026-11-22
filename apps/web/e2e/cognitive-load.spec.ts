@@ -232,9 +232,10 @@ test.describe("Tesler's law: the system takes the complexity it can", () => {
       await expect(bookingSteps(page).specialist, query).toContainText(firstName)
     }
 
-    // Several masters: now there is something to choose, and the step asks.
+    // Several masters: now there is something to choose, and the step asks; its action offers
+    // the usual choice, «Любой мастер».
     await page.goto(`/${SLUG}/book?service=${shared.id}`)
-    await expect(primaryAction(page)).toHaveText('Выбрать мастера')
+    await expect(primaryAction(page)).toHaveText('Любой мастер')
     expect(await bookingSteps(page).specialist.getByRole('radio').count()).toBeGreaterThan(1)
 
     // One branch: no «Куда приедете?» question at all.
