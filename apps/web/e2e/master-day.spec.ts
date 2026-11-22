@@ -189,31 +189,48 @@ test.describe('«Мой день»: the master’s share and photos of their wor
 
       // Only the arrived visit offers a photo.
       const arrived = master.getByRole('listitem').filter({ hasText: 'E2E Борода' })
-      await expect(
-        master.getByRole('listitem').filter({ hasText: 'E2E Стрижка' }).getByRole('button', {
-          name: 'Фото работы',
-        }),
-      ).toHaveCount(0)
-      await arrived.getByLabel(`Фото работы ${paid.id}`).setInputFiles({
-        name: 'work.png',
-        mimeType: 'image/png',
-        buffer: TINY_PNG,
-      })
+      const haircut = master.getByRole('listitem').filter({ hasText: 'E2E Стрижка' })
+      await expect(haircut.getByRole('button', { name: 'Фото работы' })).toHaveCount(0)
+      await expect(master.getByText(/Фото работ за неделю: 0 из 1 визита/)).toBeVisible()
+
+      // «Пришёл» offers the camera at once: two taps from the mark to the photo.
+      await haircut.getByText('Пришёл', { exact: true }).click()
+      const offered = master.waitForEvent('filechooser')
+      await master.getByRole('button', { name: 'Сфотографировать' }).click()
+      await (await offered).setFiles({ name: 'work.png', mimeType: 'image/png', buffer: TINY_PNG })
       await expect(master.getByText('Фото в «Образах»')).toBeVisible()
+      await expect(haircut.getByRole('button', { name: 'Ещё фото работы' })).toBeVisible()
+      await expect(master.getByText(/Фото работ за неделю: 1 из 2 визитов/)).toBeVisible()
+
+      const chooser = master.waitForEvent('filechooser')
+      await arrived.getByRole('button', { name: 'Фото работы' }).click()
+      await (await chooser).setFiles({ name: 'work.png', mimeType: 'image/png', buffer: TINY_PNG })
       await expect(arrived.getByRole('button', { name: 'Ещё фото работы' })).toBeVisible()
+      await expect(master.getByText(/Фото работ за неделю: 2 из 2 визитов/)).toBeVisible()
     } finally {
       await masterContext.close()
     }
 
+    // The cabinet snaps a visit too (administrators as well as the owner).
+    const fromCabinet = await page.request.post(
+      `/api/manage/${business.slug}/bookings/${paid.id}/photo`,
+      { multipart: { file: { name: 'work.png', mimeType: 'image/png', buffer: TINY_PNG } } },
+    )
+    expect(fromCabinet.ok()).toBe(true)
+
     const photos = await (await page.request.get(`/api/manage/${business.slug}/work-photos`)).json()
-    expect(photos).toEqual([
+    expect(photos).toHaveLength(3)
+    expect(photos).toContainEqual(
       expect.objectContaining({
         serviceId: beard.id,
         serviceName: 'Борода',
         specialistId: azamat.id,
         isHidden: false,
       }),
-    ])
+    )
+    expect(photos).toContainEqual(
+      expect.objectContaining({ serviceId: business.service.id, specialistId: azamat.id }),
+    )
   })
 
   test('without a percent the day shows all its money', async ({ page, browser }) => {

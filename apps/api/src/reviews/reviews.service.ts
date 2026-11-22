@@ -257,11 +257,19 @@ export class ReviewsService {
       'INSERT INTO "review_photos" ("review_id", "url") VALUES ($1, $2)',
       [review.id, url],
     )
-    if (await this.workPhotos.hasRoom(booking.businessId)) {
+    // The client's result joins «Образы» like a visit photo; a place full of the owner's own
+    // pictures keeps them, and the review still shows it.
+    const room = await this.workPhotos
+      .makeRoomForVisit(booking.businessId)
+      .then((freed) => ({ freed }))
+      .catch(() => null)
+    if (room) {
+      if (room.freed) await this.storage.remove(room.freed).catch(() => undefined)
       await this.workPhotos.add(booking.businessId, url, {
         serviceId: booking.serviceId,
         specialistId: booking.specialistId,
         bookingId,
+        isFromClient: true,
       })
     }
     const rows = (await this.dataSource.query(

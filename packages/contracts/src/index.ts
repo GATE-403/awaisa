@@ -821,6 +821,8 @@ type MasterDay = {
   bookings: AdminBooking[]
   /** How many clients follow the master; who they are stays private. */
   followers: number
+  /** Work photos of the master's visits: the last seven days' share, and the day's visits that have one. */
+  photos: { weekVisits: number; weekWithPhoto: number; bookingIds: string[] }
 }
 
 /** A master the signed-in client follows (`GET /me/follows`). */
@@ -1196,6 +1198,8 @@ type FeedItem = {
   /** Likes from devices («Нравится»); the feed is cached, so a fresh like adds on the client. */
   likes?: number
   /** Reviews of this service with this master (or the service at the place). */
+  /** A client's own photo from their review, not the salon's. */
+  isFromClient?: boolean
   reviewsCount?: number
 }
 

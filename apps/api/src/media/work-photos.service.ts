@@ -59,14 +59,43 @@ export class WorkPhotosService {
   async add(
     businessId: string,
     url: string,
-    tags: { serviceId?: string | null; specialistId?: string | null; bookingId?: string | null },
+    tags: {
+      serviceId?: string | null
+      specialistId?: string | null
+      bookingId?: string | null
+      isFromClient?: boolean
+    },
   ) {
     await this.assertTags(businessId, tags.serviceId ?? null, tags.specialistId ?? null)
     await this.query(
-      `INSERT INTO "work_photos" ("business_id", "url", "service_id", "specialist_id", "booking_id")
-       VALUES ($1, $2, $3, $4, $5)`,
-      [businessId, url, tags.serviceId ?? null, tags.specialistId ?? null, tags.bookingId ?? null],
+      `INSERT INTO "work_photos" ("business_id", "url", "service_id", "specialist_id", "booking_id", "is_from_client")
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        businessId,
+        url,
+        tags.serviceId ?? null,
+        tags.specialistId ?? null,
+        tags.bookingId ?? null,
+        tags.isFromClient ?? false,
+      ],
     )
+  }
+
+  /**
+   * Photos of visits come by themselves, one per visit, so a full place keeps the newest: the
+   * oldest visit photo the owner never put in order makes room. Returns its file when nothing
+   * else shows it, for the caller to delete; refuses as before when only the owner's own remain.
+   */
+  async makeRoomForVisit(businessId: string) {
+    if (await this.hasRoom(businessId)) return null
+    const [oldest] = await this.query(
+      `SELECT "id" FROM "work_photos"
+       WHERE "business_id" = $1 AND "booking_id" IS NOT NULL AND "position" IS NULL
+       ORDER BY "created_at" LIMIT 1`,
+      [businessId],
+    )
+    if (!oldest) await this.assertRoom(businessId)
+    return oldest ? this.remove(businessId, String(oldest.id)) : null
   }
 
   async update(businessId: string, id: string, input: UpdateWorkPhotoInput) {
@@ -184,7 +213,7 @@ export class WorkPhotosService {
          b."slug", b."name" AS "businessName", b."kind", b."address",
          s."id" AS "serviceId", s."name" AS "serviceName", s."price", s."duration_minutes" AS "duration",
          sp."id" AS "specialistId", sp."name" AS "specialistName", sp."photo_url" AS "specialistPhoto",
-         n."km", w."likes",
+         n."km", w."likes", w."is_from_client" AS "isFromClient",
          -- What people said about this very service with this master (or the service at the place).
          (SELECT COUNT(*)::int FROM "reviews" r
            WHERE r."business_id" = b."id" AND r."service_id" = w."service_id"
@@ -238,6 +267,7 @@ export class WorkPhotosService {
       distanceKm:
         row.km === null || row.km === undefined ? null : Math.round(Number(row.km) * 10) / 10,
       likes: Number(row.likes ?? 0),
+      isFromClient: Boolean(row.isFromClient),
       reviewsCount: row.serviceId ? Number(row.reviewsCount ?? 0) : 0,
     }))
     return {
