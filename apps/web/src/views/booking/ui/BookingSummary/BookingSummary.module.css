@@ -363,6 +363,9 @@
 
 .barInfo[data-ready] {
   flex-direction: row;
+  /* The leaf stays on the inset: centred in the room the button leaves, it drifted right on
+     phones wider than 375pt (a Samsung A55 at 412, «опять этот отступ»). */
+  justify-content: flex-start;
   align-items: center;
   gap: 10px;
   text-align: left;
