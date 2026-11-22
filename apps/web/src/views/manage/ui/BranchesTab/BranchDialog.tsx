@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import { type FormEvent, useRef, useState } from 'react'
 import { reverseAddress, searchAddress } from '@/shared/api/clientApi'
 import type { Branch, BranchInput, GeoPlace } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import type { Point } from '@/shared/ui/MapView/MapView'
@@ -38,6 +39,7 @@ export const BranchDialog = ({
   onSave,
   onDelete,
 }: BranchDialogProps) => {
+  const t = useT()
   const [name, setName] = useState(branch?.name ?? '')
   const [address, setAddress] = useState(branch?.address ?? '')
   const [phone, setPhone] = useState(branch?.phone ?? '')
@@ -145,18 +147,18 @@ export const BranchDialog = ({
 
   return (
     <Sheet
-      title={branch ? 'Филиал' : 'Новый филиал'}
+      title={branch ? t('Филиал') : t('Новый филиал')}
       onClose={onClose}
-      action={{ label: 'Сохранить', form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Название</span>
+            <span className={sheet.rowLabel}>{t('Название')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                placeholder='Центр, Джал, Асанбай'
+                placeholder={t('Центр, Джал, Асанбай')}
                 value={name}
                 onValueChange={setName}
                 maxLength={120}
@@ -165,11 +167,11 @@ export const BranchDialog = ({
             </span>
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Адрес</span>
+            <span className={sheet.rowLabel}>{t('Адрес')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                placeholder='ул. Токтогула, 125'
+                placeholder={t('ул. Токтогула, 125')}
                 value={address}
                 onValueChange={changeAddress}
                 maxLength={200}
@@ -178,13 +180,13 @@ export const BranchDialog = ({
             </span>
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Телефон</span>
+            <span className={sheet.rowLabel}>{t('Телефон')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
                 type='tel'
                 inputMode='tel'
-                placeholder='Как у бизнеса'
+                placeholder={t('Как у бизнеса')}
                 value={phone}
                 onValueChange={(value) => setPhone(maskPhoneInput(value))}
               />
@@ -193,7 +195,7 @@ export const BranchDialog = ({
         </div>
 
         {places.length > 0 && (
-          <section className={sheet.group} aria-label='Найденные адреса'>
+          <section className={sheet.group} aria-label={t('Найденные адреса')}>
             <ul className={sheet.list}>
               {places.map((place) => (
                 <li key={`${place.address}-${place.latitude}`}>
@@ -210,37 +212,43 @@ export const BranchDialog = ({
                 </li>
               ))}
             </ul>
-            <p className={sheet.groupFooter}>Выберите адрес, и метка встанет на карте сама.</p>
+            <p className={sheet.groupFooter}>
+              {t('Выберите адрес, и метка встанет на карте сама.')}
+            </p>
           </section>
         )}
 
-        <section className={sheet.group} aria-label='Метка на карте'>
-          <SectionCaption>Метка на карте</SectionCaption>
+        <section className={sheet.group} aria-label={t('Метка на карте')}>
+          <SectionCaption>{t('Метка на карте')}</SectionCaption>
           <LocationPicker value={point} onChange={changePoint} target={target} />
           {pinPlace ? (
             <p className={sheet.groupFooter}>
-              По метке: {pinPlace.address}.{' '}
+              {t('По метке: {address}.', { address: pinPlace.address })}{' '}
               <button type='button' className={styles.useAddress} onClick={applyPinAddress}>
-                Подставить адрес
+                {t('Подставить адрес')}
               </button>
             </p>
           ) : (
             <p className={sheet.groupFooter}>
               {point
-                ? 'Передвиньте карту, чтобы метка указала на вход: адрес подставится сам.'
-                : 'Начните вводить адрес или передвиньте карту: адрес и метка заполнят друг друга.'}
+                ? t('Передвиньте карту, чтобы метка указала на вход: адрес подставится сам.')
+                : t(
+                    'Начните вводить адрес или передвиньте карту: адрес и метка заполнят друг друга.',
+                  )}
             </p>
           )}
         </section>
 
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Принимает клиентов</span>
+            <span className={sheet.rowLabel}>{t('Принимает клиентов')}</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </label>
         </div>
 
-        {branch && canDelete && <HoldButton onConfirm={handleDelete}>Удалить филиал</HoldButton>}
+        {branch && canDelete && (
+          <HoldButton onConfirm={handleDelete}>{t('Удалить филиал')}</HoldButton>
+        )}
       </form>
     </Sheet>
   )

@@ -16,6 +16,7 @@ import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getMyBusinesses } from '@/shared/api/clientApi'
 import type { BusinessLink } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from './CabinetBar.module.css'
 
 interface BusinessSwitcherProps {
@@ -29,6 +30,7 @@ interface BusinessSwitcherProps {
 // in Instagram: one's other businesses, one's own day as a master, the funnels for platform
 // admins and a new page. Without it the only way across was out through the profile.
 export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: BusinessSwitcherProps) => {
+  const t = useT()
   const router = useRouter()
   const { customer } = useSession()
   const memberships = customer?.businesses ?? []
@@ -58,14 +60,14 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
     <Menu
       align='start'
       onOpenChange={load}
-      label={`${title ?? 'Бизнес'}: другие бизнесы и разделы`}
+      label={t('{name}: другие бизнесы и разделы', { name: title ?? t('Бизнес') })}
       className={styles.switcher}
       trigger={
         <>
           {title && <BusinessTile name={title} logoUrl={logoUrl} size='sm' />}
           <span className={styles.businessName}>
             {title}
-            {!isPublished && <span className={styles.hidden}> · скрыта</span>}
+            {!isPublished && <span className={styles.hidden}> · {t('скрыта')}</span>}
           </span>
           <CaretDown className={styles.switcherCaret} weight='bold' aria-hidden />
         </>
@@ -90,7 +92,7 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
       <MenuSeparator />
       {businesses.length > 1 && (
         <MenuItem icon={<SquaresFour aria-hidden />} onClick={() => router.push('/manage')}>
-          Все бизнесы
+          {t('Все бизнесы')}
         </MenuItem>
       )}
       <MenuSeparator />
@@ -101,21 +103,21 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
             router.push(masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master')
           }
         >
-          Мой день
+          {t('Мой день')}
         </MenuItem>
       )}
       {isAdmin && (
         <MenuItem icon={<Funnel aria-hidden />} onClick={() => router.push('/insights')}>
-          Воронки
+          {t('Воронки')}
         </MenuItem>
       )}
       {isAdmin && (
         <MenuItem icon={<Flag aria-hidden />} onClick={() => router.push('/moderation')}>
-          Модерация
+          {t('Модерация')}
         </MenuItem>
       )}
       <MenuItem icon={<Plus aria-hidden />} onClick={() => router.push('/business/new')}>
-        Новая страница
+        {t('Новая страница')}
       </MenuItem>
     </Menu>
   )

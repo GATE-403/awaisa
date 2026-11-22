@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
+import { useT } from '@/shared/i18n'
 import { getBackLabel, readCabinetFrom } from '@/shared/lib/cabinetFrom'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { useUpdatesSeen } from '@/shared/lib/hooks/useUpdatesSeen'
@@ -45,6 +46,7 @@ export const CabinetBar = ({
   logoUrl = null,
   back,
 }: CabinetBarProps) => {
+  const t = useT()
   const isScrolled = useIsScrolled()
   const router = useRouter()
   const { customer } = useSession()
@@ -77,7 +79,8 @@ export const CabinetBar = ({
   }, [])
 
   const backHref = back?.href ?? entry ?? '/bookings'
-  const backLabel = back?.label ?? getBackLabel(backHref)
+  // Labels are the Russian dictionary keys (`getBackLabel`, callers' `back.label`).
+  const backLabel = t(back?.label ?? getBackLabel(backHref))
 
   return (
     <div
@@ -90,7 +93,7 @@ export const CabinetBar = ({
         <NextLink
           href={backHref}
           className={styles.back}
-          aria-label={nav ? `Назад: ${backLabel}` : undefined}
+          aria-label={nav ? t('Назад: {label}', { label: backLabel }) : undefined}
         >
           <CaretLeft weight='bold' aria-hidden />
           {!nav && (back || entry !== undefined) && backLabel}
@@ -107,7 +110,7 @@ export const CabinetBar = ({
         ) : (
           <p className={styles.title} aria-hidden={!isScrolled}>
             {title}
-            {!isPublished && <span className={styles.hidden}> · скрыта</span>}
+            {!isPublished && <span className={styles.hidden}> · {t('скрыта')}</span>}
           </p>
         )}
         {nav && <div className={styles.nav}>{nav}</div>}
@@ -118,8 +121,8 @@ export const CabinetBar = ({
                 href={`/${slug}`}
                 target='_blank'
                 className={styles.icon}
-                aria-label='Открыть страницу бизнеса'
-                title='Открыть страницу бизнеса'
+                aria-label={t('Открыть страницу бизнеса')}
+                title={t('Открыть страницу бизнеса')}
               >
                 <ArrowSquareOut aria-hidden />
               </NextLink>
@@ -132,23 +135,27 @@ export const CabinetBar = ({
               }
               className={styles.icon}
               data-unread={hasUnread || undefined}
-              aria-label={hasUnread ? 'Что нового — есть обновления' : 'Что нового'}
-              title='Что нового'
+              aria-label={hasUnread ? t('Что нового: есть обновления') : t('Что нового')}
+              title={t('Что нового')}
             >
               <Megaphone aria-hidden />
             </NextLink>
             <ThemeToggle />
             {/* The way out to the client side: one's own profile and bookings, or the catalog. */}
             <Menu
-              label={customer ? `Профиль: ${customer.name || customer.phone}` : 'Профиль'}
+              label={
+                customer
+                  ? t('Профиль: {name}', { name: customer.name || customer.phone })
+                  : t('Профиль')
+              }
               className={styles.icon}
               trigger={<UserCircle weight='fill' aria-hidden />}
             >
               <MenuItem icon={<UserCircle aria-hidden />} onClick={() => router.push('/bookings')}>
-                Профиль и записи
+                {t('Профиль и записи')}
               </MenuItem>
               <MenuItem icon={<Compass aria-hidden />} onClick={() => router.push('/')}>
-                Каталог
+                {t('Каталог')}
               </MenuItem>
             </Menu>
           </span>
