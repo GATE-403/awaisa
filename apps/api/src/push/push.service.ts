@@ -1,6 +1,7 @@
 import type { PushConfig, PushMessage, PushSubscriptionInput } from '@awaisa/contracts'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, In, Repository } from 'typeorm'
 import webPush, { WebPushError } from 'web-push'
@@ -10,6 +11,9 @@ import {
   chunk,
   EXPO_BATCH_SIZE,
   EXPO_PUSH_URL,
+  EXPO_RECEIPT_BATCH_SIZE,
+  EXPO_RECEIPTS_URL,
+  parseExpoReceipts,
   parseExpoResponse,
   toExpoMessage,
 } from './expo-push.js'
@@ -30,6 +34,13 @@ const GONE_STATUSES = new Set([404, 410])
 
 // An answer from the Expo push service later than this is not waited for.
 const EXPO_TIMEOUT_MS = 10_000
+
+// Expo makes a receipt in about a quarter of an hour and keeps it a day: tickets are asked about
+// after that, and dropped once a day old with no receipt.
+const RECEIPT_DELAY_MINUTES = 15
+const TICKET_LIFETIME_HOURS = 24
+// Tickets read per check; more wait for the next one.
+const RECEIPTS_PER_CHECK = 5000
 
 type Recipient = {
   id: string
@@ -227,8 +238,71 @@ export class PushService {
           { lastSuccessAt: new Date() },
         )
       }
+      if (result.tickets.length > 0) {
+        await this.dataSource.query(
+          `INSERT INTO "push_tickets" ("id", "endpoint")
+           SELECT * FROM unnest($1::varchar[], $2::text[])
+           ON CONFLICT DO NOTHING`,
+          [result.tickets.map((ticket) => ticket.id), result.tickets.map((ticket) => ticket.token)],
+        )
+      }
     } catch (error) {
       this.logger.warn(`App push failed: ${String(error)}`)
+    }
+  }
+
+  /**
+   * A ticket only says Expo took the message; Apple or Google may still refuse the device, which
+   * the receipt tells a quarter of an hour later. Tokens whose receipt says `DeviceNotRegistered`
+   * are forgotten (their tickets go with them, `ON DELETE CASCADE`); a receipt of any kind settles
+   * its ticket; tickets a day old without one are dropped. A failed request settles nothing.
+   */
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async checkReceipts() {
+    if (!this.expoAccessToken) return
+    await this.dataSource.query(
+      `DELETE FROM "push_tickets" WHERE "created_at" < now() - make_interval(hours => $1)`,
+      [TICKET_LIFETIME_HOURS],
+    )
+    const rows = (await this.dataSource.query(
+      `SELECT "id", "endpoint" FROM "push_tickets"
+       WHERE "created_at" < now() - make_interval(mins => $1)
+       ORDER BY "created_at" LIMIT $2`,
+      [RECEIPT_DELAY_MINUTES, RECEIPTS_PER_CHECK],
+    )) as { id: string; endpoint: string }[]
+    for (const batch of chunk(rows, EXPO_RECEIPT_BATCH_SIZE)) {
+      await this.checkReceiptBatch(batch)
+    }
+  }
+
+  private async checkReceiptBatch(batch: { id: string; endpoint: string }[]) {
+    try {
+      const response = await fetch(EXPO_RECEIPTS_URL, {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'content-type': 'application/json',
+          authorization: `Bearer ${this.expoAccessToken}`,
+        },
+        body: JSON.stringify({ ids: batch.map((row) => row.id) }),
+        signal: AbortSignal.timeout(EXPO_TIMEOUT_MS),
+      })
+      const result = parseExpoReceipts(await response.json().catch(() => null))
+      for (const error of result.errors) this.logger.warn(error)
+      const gone = new Set(result.gone)
+      const endpoints = [
+        ...new Set(batch.filter((row) => gone.has(row.id)).map((row) => row.endpoint)),
+      ]
+      if (endpoints.length > 0) {
+        await this.subscriptions.delete({ kind: 'expo', endpoint: In(endpoints) })
+      }
+      if (result.settled.length > 0) {
+        await this.dataSource.query('DELETE FROM "push_tickets" WHERE "id" = ANY($1)', [
+          result.settled,
+        ])
+      }
+    } catch (error) {
+      this.logger.warn(`App push receipts failed: ${String(error)}`)
     }
   }
 }
