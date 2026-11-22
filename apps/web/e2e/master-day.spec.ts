@@ -41,7 +41,7 @@ test.describe('«Мой день» for a master', () => {
       name: 'E2E Довольный',
       daysBack: 5,
     })
-    await visit(bekzat.id, 'E2E Клиент Бекзата')
+    const colleague = await visit(bekzat.id, 'E2E Клиент Бекзата')
     const rated = await fetch(`${API_URL}/bookings/${reviewed.id}/review`, {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-booking-token': reviewed.token },
@@ -53,7 +53,13 @@ test.describe('«Мой день» for a master', () => {
     const master = await masterContext.newPage()
     try {
       await signInViaApi(master, masterPhone, 'E2E Мастер')
-      await master.goto(`/master/${business.slug}`)
+      const places = await (await master.request.get('/api/me/master')).json()
+      expect(places).toContainEqual(
+        expect.objectContaining({ slug: business.slug, specialistId: azamat.id }),
+      )
+      // One place: «/master» opens its day straight away.
+      await master.goto('/master')
+      await expect(master).toHaveURL(new RegExp(`/master/${business.slug}$`))
       await expect(master.getByRole('heading', { name: /Мой день/ })).toBeVisible()
       await expect(master.getByText(`Азамат · ${business.name}`)).toBeVisible()
 
@@ -82,6 +88,13 @@ test.describe('«Мой день» for a master', () => {
         })
         .toBe('arrived')
 
+      // A colleague's visit cannot be closed through the API either.
+      const foreign = await master.request.patch(
+        `/api/master/${business.slug}/bookings/${colleague.id}/outcome`,
+        { data: { outcome: 'no_show' } },
+      )
+      expect(foreign.status()).toBe(403)
+
       const reviews = master.getByRole('region', { name: 'Ваши отзывы' })
       await expect(reviews).toContainText('E2E Лучший барбер')
       await expect(reviews).toContainText('5,0 · 1 отзыв')
@@ -101,6 +114,9 @@ test.describe('«Мой день» for a master', () => {
       expect((await stranger.request.get(`/api/master/${business.slug}/reviews`)).status()).toBe(
         403,
       )
+      expect(
+        (await stranger.request.get(`/api/master/${business.slug}/day?date=2026-01-01`)).status(),
+      ).toBe(403)
     } finally {
       await strangerContext.close()
     }

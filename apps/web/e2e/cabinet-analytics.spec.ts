@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { expect, test } from '@playwright/test'
+import { randomClientPhone, signInViaApi } from './account'
 import { createOwnBusiness, createVisit } from './business'
 
 const money = (value: number) => `${new Intl.NumberFormat('ru-RU').format(value)} сом`
@@ -43,6 +44,8 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
     const row = masters.getByRole('button', { name: /Азамат/ })
     await expect(row).toContainText(`2 визита · ${money(2500)}`)
     await expect(row).toContainText(`к выплате ${money(1000)} · 40%`)
+    // Pay sits in the masters' list: «к выплате» on the row and the total under it.
+    await expect(page.getByText(/^Итого к выплате/)).toBeVisible()
     await row.click()
     const sheet = page.getByRole('dialog', { name: 'Азамат' })
     await expect(sheet).toContainText(`2 визита · ${money(2500)}`)
@@ -67,6 +70,30 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
     expect(csv).toContain('"Азамат";"2";"2500";"40";"1000";"0";"0";"";"1000";"0";"1000"')
     expect(csv).toContain('"Бекзат";"1";"1000";"";"";"";"";"";"";"";""')
     expect(csv).toContain(`"${paid.date}";"1500";"1"`)
+  })
+
+  test('the report follows the period; only the owner reads it, only offered periods', async ({
+    page,
+  }) => {
+    const business = await createOwnBusiness(page)
+    const manage = `/api/manage/${business.slug}`
+    const report = await (await page.request.get(`${manage}/analytics?days=7`)).json()
+    expect(report.daily).toHaveLength(7)
+    expect(report.previousDaily).toHaveLength(7)
+    expect((await page.request.get(`${manage}/analytics?days=12`)).status()).toBe(400)
+
+    await page.goto(`/manage/${business.slug}?tab=analytics`)
+    await expect(page.getByRole('link', { name: 'Аналитика' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
+    const period = page.getByRole('group', { name: 'Период' })
+    await period.getByText('Неделя').click()
+    await expect(period.getByRole('radio', { name: 'Неделя' })).toBeChecked()
+
+    await page.context().clearCookies()
+    await signInViaApi(page, randomClientPhone())
+    expect((await page.request.get(`${manage}/analytics`)).status()).toBe(403)
   })
 
   test('the month’s goal is set in its sheet, shows against the revenue and can be removed', async ({

@@ -158,10 +158,19 @@ test.describe('Cabinet schedule', () => {
     const second = await firstVisit(business, { name: 'E2E Второй' })
     expect(second.date).toBe(first.date)
     const date = await moveBack([first, second], 2)
+    const unclosedDays = async () =>
+      (
+        (await (
+          await page.request.get(`/api/manage/${business.slug}/bookings/unclosed`)
+        ).json()) as { days: { date: string }[] }
+      ).days.map((day) => day.date)
+    expect(await unclosedDays()).toContain(date)
 
     await page.goto(scheduleUrl(business, date))
     const bar = page.getByRole('region', { name: 'Неотмеченные визиты' })
     await expect(bar).toContainText('2 визита')
+    // Booking into a past day is not offered.
+    await expect(page.getByRole('button', { name: 'Новая запись', exact: true })).toHaveCount(0)
     await bar.getByRole('button', { name: 'Все пришли' }).click()
     await expect(page.getByText('Отмечено: 2 визита')).toBeVisible()
     await expect
@@ -170,6 +179,7 @@ test.describe('Cabinet schedule', () => {
       )
       .toEqual(['arrived', 'arrived'])
     await expect(bar).toHaveCount(0)
+    expect(await unclosedDays()).not.toContain(date)
 
     await page.getByRole('button', { name: 'Вернуть' }).click()
     await expect
