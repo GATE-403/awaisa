@@ -24,11 +24,11 @@ import type {
   MailingSegment,
   Specialist,
 } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useIsScrolledPast } from '@/shared/lib/hooks/useIsScrolledPast'
 import { useIsStuck } from '@/shared/lib/hooks/useIsStuck'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -37,6 +37,7 @@ import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { useHasFeature } from '@/views/manage/model/usePlanAccess'
+import { formatMomentDay } from '@/views/manage/ui/ClientSheet/BirthdayField'
 import { ClientSheet } from '@/views/manage/ui/ClientSheet/ClientSheet'
 import { ImportSheet } from '@/views/manage/ui/ImportSheet/ImportSheet'
 import { MailingSheet } from '@/views/manage/ui/MailingSheet/MailingSheet'
@@ -59,6 +60,8 @@ const BATCH = 200
 const CLIENT_WORDS: [string, string, string] = ['клиент', 'клиента', 'клиентов']
 // Whom «Позвать» calls: «1 клиента», «3 клиентов», «12 клиентов».
 const CALLED_WORDS: [string, string, string] = ['клиента', 'клиентов', 'клиентов']
+const VISIT_WORDS: [string, string, string] = ['визит', 'визита', 'визитов']
+const NO_SHOW_WORDS: [string, string, string] = ['неявка', 'неявки', 'неявок']
 
 const SEGMENTS: { value: ClientSegment; label: string }[] = [
   { value: 'all', label: 'Все' },
@@ -94,6 +97,9 @@ const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
 // it in one line («Позвать 12 клиентов ›» opens the mailing on that group). Rows lie on the page
 // with hairlines, each one tap target to the client's card; long groups come thirty at a time.
 export const ClientsTab = ({ slug, businessName, specialists, branches }: ClientsTabProps) => {
+  const t = useT()
+  const shortDate = (iso: string) =>
+    t.language === 'ru' ? dateFormatter.format(new Date(iso)) : formatMomentDay(iso, t)
   const canSeeMoney = useCanSeeMoney()
   const canImport = useHasFeature('import')
   const canMail = useHasFeature('mailings')
@@ -157,7 +163,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
 
   return (
     <section className={`${forms.section} ${styles.page}`}>
-      <h2 className={styles.title}>Клиенты</h2>
+      <h2 className={styles.title}>{t('Клиенты')}</h2>
 
       <div ref={searchRef} className={styles.searchPin} data-stuck={isStuck || undefined}>
         <FloatingToolbar className={styles.searchBar}>
@@ -167,14 +173,14 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
               setQuery(value)
               setShown(PAGE)
             }}
-            placeholder='Имя или номер'
-            label='Поиск клиента'
+            placeholder={t('Имя или номер')}
+            label={t('Поиск клиента')}
           />
           {
-            <GlyphGroup label='Клиентская база'>
+            <GlyphGroup label={t('Клиентская база')}>
               <GlyphButton
                 icon={<ArrowUp />}
-                label='Наверх'
+                label={t('Наверх')}
                 isHidden={!isFar}
                 className={styles.toTop}
                 onClick={scrollToTop}
@@ -182,21 +188,21 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
               {canSeeMoney && canImport && (
                 <GlyphButton
                   icon={<DownloadSimple />}
-                  label='Импорт'
+                  label={t('Импорт')}
                   onClick={() => setIsImporting(true)}
                 />
               )}
               {canSeeMoney && canMail && (
                 <GlyphButton
                   icon={<PaperPlaneTilt />}
-                  label='Рассылка'
+                  label={t('Рассылка')}
                   onClick={() => setMailing(mailingSegment ?? 'lapsed')}
                 />
               )}
               {canSell && (
                 <GlyphButton
                   icon={<ShoppingBag />}
-                  label='Продать товар'
+                  label={t('Продать товар')}
                   onClick={() => setIsSelling(true)}
                 />
               )}
@@ -206,9 +212,9 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
       </div>
       <div className={styles.controls}>
         <TextTabs
-          label='Группы клиентов'
+          label={t('Группы клиентов')}
           items={tabs.map((item) => ({
-            label: item.label,
+            label: t(item.label),
             count: counts?.[item.value],
             isActive: segment === item.value,
             onSelect: () => chooseSegment(item.value),
@@ -226,8 +232,8 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
           />
           <Select
             variant='plain'
-            aria-label='Сортировка'
-            items={SORTS}
+            aria-label={t('Сортировка')}
+            items={SORTS.map((item) => ({ ...item, label: t(item.label) }))}
             value={sort}
             onValueChange={(value) => value && setSort(value)}
             className={styles.sort}
@@ -240,14 +246,18 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
       {list && items.length === 0 && (
         <EmptyState
           title={
-            query ? 'Никого не нашли' : segment === 'all' ? 'Клиентов пока нет' : 'Здесь пусто'
+            query
+              ? t('Никого не нашли')
+              : segment === 'all'
+                ? t('Клиентов пока нет')
+                : t('Здесь пусто')
           }
           text={
             query
-              ? 'Проверьте имя или номер.'
+              ? t('Проверьте имя или номер.')
               : segment === 'all'
-                ? 'Они появятся с первой записью, или загрузите базу через «Импорт».'
-                : 'В этой группе пока никого.'
+                ? t('Они появятся с первой записью, или загрузите базу через «Импорт».')
+                : t('В этой группе пока никого.')
           }
         />
       )}
@@ -256,7 +266,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
           hiddenCount={hiddenCount}
           isOpen={false}
           onToggle={() => setShown((count) => count + PAGE)}
-          label={pluralWord(hiddenCount, CLIENT_WORDS)}
+          label={t.count(hiddenCount, CLIENT_WORDS).replace(/^\d+ /, '')}
         >
           <ul className={styles.rows}>
             {items.slice(0, shown).map((client) => (
@@ -273,22 +283,20 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
                         {client.name || formatPhone(client.phone)}
                       </span>
                       {client.hasNote && (
-                        <NotePencil aria-label='Есть заметка' className={styles.noteIcon} />
+                        <NotePencil aria-label={t('Есть заметка')} className={styles.noteIcon} />
                       )}
                       {client.noShows > 0 && (
                         <span className={styles.noShow}>
-                          {pluralize(client.noShows, ['неявка', 'неявки', 'неявок'])}
+                          {t.count(client.noShows, NO_SHOW_WORDS)}
                         </span>
                       )}
                     </span>
                     <span className={styles.meta}>
-                      {client.visits === 0
-                        ? 'ещё не был'
-                        : pluralize(client.visits, ['визит', 'визита', 'визитов'])}
+                      {client.visits === 0 ? t('ещё не был') : t.count(client.visits, VISIT_WORDS)}
                       {client.lastVisit &&
-                        ` · был ${dateFormatter.format(new Date(client.lastVisit))}`}
+                        ` · ${t('был {date}', { date: shortDate(client.lastVisit) })}`}
                       {client.nextVisit &&
-                        ` · придёт ${dateFormatter.format(new Date(client.nextVisit))}`}
+                        ` · ${t('придёт {date}', { date: shortDate(client.nextVisit) })}`}
                     </span>
                   </span>
                   <span className={styles.spent}>
@@ -347,15 +355,16 @@ interface SegmentNoteProps {
 
 // One line under the tabs: what the open group is and what to do with it.
 const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) => {
-  const clients = pluralize(count, CLIENT_WORDS)
+  const t = useT()
+  const clients = t.count(count, CLIENT_WORDS)
   if (onCall) {
     return (
       <p className={styles.note}>
         {segment === 'lapsed'
-          ? `Не были больше ${lapsedDays} дней. `
-          : 'День рождения в ближайшую неделю. '}
+          ? t('Не были больше {days} дней.', { days: lapsedDays })
+          : t('День рождения в ближайшую неделю.')}{' '}
         <button type='button' className={styles.noteAction} onClick={onCall}>
-          Позвать {pluralize(count, CALLED_WORDS)}
+          {t('Позвать {clients}', { clients: t.count(count, CALLED_WORDS) })}
           <CaretRight weight='bold' aria-hidden />
         </button>
       </p>
@@ -364,9 +373,9 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
   if (segment === 'noShows') {
     return (
       <p className={styles.note}>
-        Предоплата при записи онлайн защищает от неявок.{' '}
+        {t('Предоплата при записи онлайн защищает от неявок.')}{' '}
         <NextLink className={styles.noteAction} href='?tab=services'>
-          Включить в услугах
+          {t('Включить в услугах')}
           <CaretRight weight='bold' aria-hidden />
         </NextLink>
       </p>
@@ -374,9 +383,9 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
   }
   const notes: Partial<Record<ClientSegment, string>> = {
     all: clients,
-    upcoming: `${clients} с записью вперёд`,
-    new: `${clients} пришли один раз`,
-    regular: `${clients} с тремя визитами и больше`,
+    upcoming: t('{clients} с записью вперёд', { clients }),
+    new: t('{clients} пришли один раз', { clients }),
+    regular: t('{clients} с тремя визитами и больше', { clients }),
   }
 
   return <p className={styles.note}>{notes[segment] ?? clients}</p>

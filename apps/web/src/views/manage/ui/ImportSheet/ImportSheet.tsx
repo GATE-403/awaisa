@@ -9,7 +9,7 @@ import { type ChangeEvent, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { importBookings, importClients } from '@/shared/api/clientApi'
 import type { ImportReport } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -70,6 +70,7 @@ const NONE = '-1'
 // Moving from Altegio or YCLIENTS: the owner exports clients or upcoming bookings as CSV, we
 // guess the columns from the headers, the owner checks them and the rows go in at once.
 export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => {
+  const t = useT()
   const toast = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
   const [kind, setKind] = useState<Kind>('clients')
@@ -83,10 +84,10 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
   const fields = FIELDS[kind]
   const isMapped = fields.every((field) => !field.isRequired || (columns[field.key] ?? -1) >= 0)
   const options = [
-    { value: NONE, label: 'Нет' },
+    { value: NONE, label: t('Нет') },
     ...(headers ?? []).map((header, index) => ({
       value: String(index),
-      label: header || `Колонка ${index + 1}`,
+      label: header || t('Колонка {number}', { number: index + 1 }),
     })),
   ]
 
@@ -130,7 +131,7 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
       setResult(report)
       if (report.imported > 0) onImported()
     } catch (error) {
-      toast.show({ title: 'Не загрузилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не загрузилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsImporting(false)
     }
@@ -138,28 +139,33 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
 
   return (
     <Sheet
-      title='Импорт'
+      title={t('Импорт')}
       onClose={onClose}
       action={
         result
-          ? { label: 'Готово', onClick: onClose }
+          ? { label: t('Готово'), onClick: onClose }
           : {
-              label: 'Загрузить',
+              label: t('Загрузить'),
               onClick: () => void handleImport(),
               disabled: data.length === 0 || !isMapped || isImporting,
             }
       }
     >
       <div className={sheet.form}>
-        <SegmentedControl label='Что загрузить' value={kind} items={KINDS} onChange={changeKind} />
+        <SegmentedControl
+          label={t('Что загрузить')}
+          value={kind}
+          items={KINDS.map((item) => ({ ...item, label: t(item.label) }))}
+          onChange={changeKind}
+        />
 
-        <section className={sheet.group} aria-label='Файл'>
+        <section className={sheet.group} aria-label={t('Файл')}>
           <div className={sheet.list}>
             <button type='button' className={sheet.row} onClick={() => fileInput.current?.click()}>
               <span className={sheet.rowLabel}>
                 {fileName
-                  ? `${fileName} · ${pluralize(data.length, ['строка', 'строки', 'строк'])}`
-                  : 'Выбрать файл CSV'}
+                  ? `${fileName} · ${t.count(data.length, ['строка', 'строки', 'строк'])}`
+                  : t('Выбрать файл CSV')}
               </span>
               <FileArrowUp weight='bold' aria-hidden className={sheet.suffix} />
             </button>
@@ -168,28 +174,30 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
               type='file'
               accept='.csv,text/csv,text/plain'
               hidden
-              aria-label='Файл CSV'
+              aria-label={t('Файл CSV')}
               onChange={(event) => void handleFile(event)}
             />
           </div>
           <p className={sheet.groupFooter}>
             {kind === 'clients'
-              ? 'В Altegio или YCLIENTS: Клиенты → Экспорт. Сохраните таблицу как CSV.'
-              : 'Только будущие записи: выгрузите журнал записей с сегодняшнего дня и сохраните как CSV.'}
+              ? t('В Altegio или YCLIENTS: Клиенты → Экспорт. Сохраните таблицу как CSV.')
+              : t(
+                  'Только будущие записи: выгрузите журнал записей с сегодняшнего дня и сохраните как CSV.',
+                )}
           </p>
         </section>
 
         {headers && !result && (
-          <section className={sheet.group} aria-label='Колонки'>
-            <SectionCaption>Колонки</SectionCaption>
+          <section className={sheet.group} aria-label={t('Колонки')}>
+            <SectionCaption>{t('Колонки')}</SectionCaption>
             <div className={sheet.list}>
               {fields.map((field) => (
                 <div key={field.key} className={sheet.row}>
-                  <span className={sheet.rowLabel}>{field.label}</span>
+                  <span className={sheet.rowLabel}>{t(field.label)}</span>
                   <span className={sheet.rowControl}>
                     <Select
                       variant='plain'
-                      aria-label={`Колонка: ${field.label}`}
+                      aria-label={t('Колонка: {name}', { name: t(field.label) })}
                       items={options}
                       value={String(columns[field.key] ?? -1)}
                       onValueChange={(value) =>
@@ -202,42 +210,51 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
             </div>
             <p className={sheet.groupFooter}>
               {isMapped
-                ? `Первая строка: ${Object.values(toRecords()[0] ?? {})
-                    .filter(Boolean)
-                    .join(' · ')}`
-                : `Укажите колонки: ${fields
-                    .filter((field) => field.isRequired && (columns[field.key] ?? -1) < 0)
-                    .map((field) => field.label.toLowerCase())
-                    .join(', ')}.`}
+                ? t('Первая строка: {values}', {
+                    values: Object.values(toRecords()[0] ?? {})
+                      .filter(Boolean)
+                      .join(' · '),
+                  })
+                : t('Укажите колонки: {fields}.', {
+                    fields: fields
+                      .filter((field) => field.isRequired && (columns[field.key] ?? -1) < 0)
+                      .map((field) => t(field.label).toLowerCase())
+                      .join(', '),
+                  })}
             </p>
           </section>
         )}
 
         {kind === 'bookings' && headers && !result && (
-          <section className={sheet.group} aria-label='Напоминания'>
+          <section className={sheet.group} aria-label={t('Напоминания')}>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Напомнить клиентам по SMS</span>
+                <span className={sheet.rowLabel}>{t('Напомнить клиентам по SMS')}</span>
                 <Switch checked={remind} onCheckedChange={setRemind} />
               </label>
             </div>
             <p className={sheet.groupFooter}>
-              Подтверждения не отправим — клиенты уже записаны. Услуги и мастеров ищем по названию.
+              {t(
+                'Подтверждения не отправим: клиенты уже записаны. Услуги и мастеров ищем по названию.',
+              )}
             </p>
           </section>
         )}
 
         {result && (
-          <section className={sheet.group} aria-label='Итог импорта'>
+          <section className={sheet.group} aria-label={t('Итог импорта')}>
             <SectionCaption>
-              Загружено {result.imported}
-              {result.skippedCount > 0 && ` · пропущено ${result.skippedCount}`}
+              {t('Загружено {count}', { count: result.imported })}
+              {result.skippedCount > 0 &&
+                ` · ${t('пропущено {count}', { count: result.skippedCount })}`}
             </SectionCaption>
             {result.skipped.length > 0 && (
               <div className={sheet.list}>
                 {result.skipped.map((item) => (
                   <div key={item.row} className={sheet.row}>
-                    <span className={sheet.rowLabel}>Строка {item.row + 1}</span>
+                    <span className={sheet.rowLabel}>
+                      {t('Строка {number}', { number: item.row + 1 })}
+                    </span>
                     <span className={sheet.suffix}>{item.reason}</span>
                   </div>
                 ))}
@@ -245,12 +262,12 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
             )}
             {result.skippedCount > result.skipped.length && (
               <p className={sheet.groupFooter}>
-                И ещё {result.skippedCount - result.skipped.length}.
+                {t('И ещё {count}.', { count: result.skippedCount - result.skipped.length })}
               </p>
             )}
             {result.skippedCount > 0 && (
               <Button variant='secondary' onClick={() => setResult(null)}>
-                Исправить колонки
+                {t('Исправить колонки')}
               </Button>
             )}
           </section>

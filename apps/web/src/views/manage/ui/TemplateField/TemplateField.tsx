@@ -2,6 +2,7 @@
 
 import { Plus } from '@phosphor-icons/react/ssr'
 import { type ClipboardEvent, type KeyboardEvent, useEffect, useRef } from 'react'
+import { useT } from '@/shared/i18n'
 import styles from './TemplateField.module.css'
 
 type TemplateToken = { key: string; label: string }
@@ -58,16 +59,22 @@ export const TemplateField = ({
   placeholder,
   preview,
 }: TemplateFieldProps) => {
+  const t = useT()
   const fieldRef = useRef<HTMLDivElement>(null)
   // The last text this field reported, so a re-render from its own typing never resets the caret.
   const reported = useRef<string | null>(null)
+  // The language the pills were drawn in: another one redraws them with its labels.
+  const drawnIn = useRef<string | null>(null)
+  const labelled = tokens.map((token) => ({ ...token, label: t(token.label) }))
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `labelled` is new each render; the language decides it
   useEffect(() => {
     const field = fieldRef.current
-    if (!field || value === reported.current) return
-    field.innerHTML = toHtml(value, tokens)
+    if (!field || (value === reported.current && drawnIn.current === t.language)) return
+    field.innerHTML = toHtml(value, labelled)
     reported.current = value
-  }, [value, tokens])
+    drawnIn.current = t.language
+  }, [value, tokens, t])
 
   const report = () => {
     const field = fieldRef.current
@@ -138,7 +145,7 @@ export const TemplateField = ({
         onPaste={handlePaste}
       />
       <div className={styles.tokens}>
-        {tokens.map((token) => (
+        {labelled.map((token) => (
           <button
             key={token.key}
             type='button'
