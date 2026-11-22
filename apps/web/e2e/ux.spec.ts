@@ -30,17 +30,21 @@ test.describe('UX: guidance and feedback', () => {
     await expect(action).toHaveText('Выбрать услугу')
     // Already on that step, the press still answers: its choices shake (it looked like nothing
     // happened). The shake is short, so the moment it starts is caught, not looked for after.
+    // It lasts the whole shake: any other animation ending inside the step used to take the mark
+    // off at once, so nothing moved («кнопка активна, но ничего не делает»).
     await steps.service.evaluate((step) => {
-      const state = window as unknown as { stepNudged?: boolean }
+      const state = window as unknown as { nudgeMs?: number }
+      let start = 0
       new MutationObserver(() => {
-        if (step.hasAttribute('data-nudge')) state.stepNudged = true
+        if (step.hasAttribute('data-nudge')) start = performance.now()
+        else if (start) state.nudgeMs = performance.now() - start
       }).observe(step, { attributes: true, attributeFilter: ['data-nudge'] })
     })
     await action.click()
     await expect(steps.service).toBeInViewport()
     await expect
-      .poll(() => page.evaluate(() => (window as unknown as { stepNudged?: boolean }).stepNudged))
-      .toBe(true)
+      .poll(() => page.evaluate(() => (window as unknown as { nudgeMs?: number }).nudgeMs ?? 0))
+      .toBeGreaterThan(300)
 
     // On the masters the action does something real: it takes «Любой, кто свободен» and the
     // time comes next («Выбрать мастера» only pointed at the cards already on screen).
@@ -358,7 +362,7 @@ test.describe('UX: layout and ergonomics', () => {
       .toBe(true)
   })
 
-  test('the page steps back under the sheet and a picked card flies into the stack', async ({
+  test('the page steps back under the sheet (not on Android) and a picked card flies into the stack', async ({
     page,
     isMobile,
   }) => {
@@ -368,16 +372,27 @@ test.describe('UX: layout and ergonomics', () => {
     await steps.service.getByRole('radio', { name: /Укладка/ }).waitFor()
 
     // The page behind steps back toward the top edge: the pinned site header stays at the top
-    // (about the screen's middle it slid down and the cards above it showed through).
-    await expect.poll(() => page.locator('html').getAttribute('data-booking-sheet')).toBe('')
+    // (about the screen's middle it slid down and the cards above it showed through). Not on
+    // Android (the project's Pixel), where scaling the whole page stuttered: it stays put there.
+    const isAndroid = await page.evaluate(
+      () =>
+        matchMedia('(pointer: coarse)').matches && !CSS.supports('-webkit-touch-callout', 'none'),
+    )
     const behind = page.locator('[data-sheet-behind]')
-    expect(await behind.count()).toBeGreaterThan(0)
-    await expect
-      .poll(() => behind.first().evaluate((element) => getComputedStyle(element).scale))
-      .toBe('0.94')
-    const header = page.locator('header[class*="Header-module"]')
-    if (await header.count()) {
-      expect(Math.round((await header.boundingBox())?.y ?? -1)).toBe(0)
+    if (isAndroid) {
+      await page.waitForTimeout(300)
+      await expect(behind).toHaveCount(0)
+      expect(await page.locator('html').getAttribute('data-booking-sheet')).toBeNull()
+    } else {
+      await expect.poll(() => page.locator('html').getAttribute('data-booking-sheet')).toBe('')
+      expect(await behind.count()).toBeGreaterThan(0)
+      await expect
+        .poll(() => behind.first().evaluate((element) => getComputedStyle(element).scale))
+        .toBe('0.94')
+      const header = page.locator('header[class*="Header-module"]')
+      if (await header.count()) {
+        expect(Math.round((await header.boundingBox())?.y ?? -1)).toBe(0)
+      }
     }
 
     // The step segments say how far along, as a progress bar.

@@ -126,9 +126,14 @@ const nudgeStep = (stepId: BookingStepId) => {
     // Read the layout once, so the same animation starts again on a second press.
     void step.offsetWidth
     step.setAttribute('data-nudge', '')
-    step.addEventListener('animationend', () => step.removeAttribute('data-nudge'), {
-      once: true,
-    })
+    // Only the shake's own end: `animationend` bubbles, and any other animation ending inside
+    // the step (a picture, a chip) used to take the mark off before the shake was seen.
+    const handleEnd = (event: AnimationEvent) => {
+      if (!event.animationName.includes('nudge')) return
+      step.removeAttribute('data-nudge')
+      step.removeEventListener('animationend', handleEnd)
+    }
+    step.addEventListener('animationend', handleEnd)
   })
   haptic('warning')
 }

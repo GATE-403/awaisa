@@ -17,9 +17,10 @@
 
 /* The step's caption, its question and its choices arrive one after another, and the picture
    cards inside (services, masters) follow in a quick cascade: the form feels like it moves on,
-   not like a page that was swapped. Only `translate` and `opacity`. */
-.step > *,
-.body [data-card] {
+   not like a page that was swapped. Only `translate` and `opacity`, and only after the form has
+   moved once: the form taking the placeholder's place is not a move (it played twice). */
+:global([data-step-direction]) .step > *,
+:global([data-step-direction]) .body [data-card] {
   animation: enter 460ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
@@ -96,6 +97,15 @@
   animation: nudge 420ms var(--ease-standard);
 }
 
+/* After a move the choices carry the entrance too: it stays first in the list, so the shake
+   neither replaces it nor replays it when the mark comes off. */
+:global([data-step-direction]) .step[data-nudge] .body {
+  animation:
+    enter 460ms cubic-bezier(0.22, 1, 0.36, 1) backwards,
+    nudge 420ms var(--ease-standard);
+  animation-delay: 80ms, 0ms;
+}
+
 @keyframes nudge {
   20% {
     translate: -8px 0;
@@ -115,7 +125,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .step[data-nudge] .body {
+  .step[data-nudge] .body,
+  :global([data-step-direction]) .step[data-nudge] .body {
     animation: none;
   }
 

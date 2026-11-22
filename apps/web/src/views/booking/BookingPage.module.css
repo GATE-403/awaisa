@@ -510,6 +510,21 @@ label:has([data-checked]) .serviceNote {
   }
 }
 
+/* Android (touch, not iOS, as in `tokens.css`): the drifting light repainted a third of the
+   screen every frame and the grain is one more layer over it; mid-range phones (Samsung A55)
+   stuttered under them. The wash stays, still. */
+@supports not (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    .wash::before {
+      animation: none;
+    }
+
+    .wash::after {
+      display: none;
+    }
+  }
+}
+
 /* What sits on the stack cards — the service's picture, the master's face, the branch's pin,
    the day's leaf — all one shape: a 44pt rounded square, no rings. */
 .stackThumb,

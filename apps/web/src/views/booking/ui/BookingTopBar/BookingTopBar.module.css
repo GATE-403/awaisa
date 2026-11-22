@@ -38,6 +38,23 @@
   }
 }
 
+/* Android has no material blur (`tokens.css`); a `blur(0px)` at the top would still make the bar
+   a backdrop layer redrawn on every scrolled frame. Only the fill and the hairline come in. */
+@keyframes material-in-flat {
+  from {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+@supports not (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    .bar {
+      animation-name: material-in-flat;
+    }
+  }
+}
+
 .inner {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
