@@ -1,7 +1,7 @@
 import { clearLastNotificationResponseAsync, useLastNotificationResponse } from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Linking, StyleSheet } from 'react-native'
+import { KeyboardAvoidingView, Linking, Platform, StyleSheet } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview'
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
@@ -80,26 +80,37 @@ export const App = () => {
       <SafeAreaView style={[styles.container, backgroundStyle]} edges={['top']}>
         <StatusBar style='auto' />
         {error && <ErrorView message={error} onRetry={handleRetry} />}
-        <AppWebView
-          ref={webViewRef}
-          style={[styles.container, backgroundStyle, error && styles.hidden]}
-          source={{ uri: sourceUri }}
-          injectedJavaScriptBeforeContentLoaded={NATIVE_APP_SCRIPT}
-          onMessage={handleMessage}
-          onNavigationStateChange={handleNavigationStateChange}
-          onShouldStartLoadWithRequest={handleShouldStartLoad}
-          onLoadEnd={() => {
-            isLoadedRef.current = true
-          }}
-          onError={(event) => setError(event.nativeEvent.description)}
-          onHttpError={(event) => setError(`HTTP ${event.nativeEvent.statusCode}`)}
-          renderLoading={() => <LoadingView />}
-          startInLoadingState
-          allowsBackForwardNavigationGestures
-          pullToRefreshEnabled
-          sharedCookiesEnabled
-          setSupportMultipleWindows={false}
-        />
+        {/* Android draws edge to edge, so the window no longer shrinks for the keyboard: the page
+            stayed full height and panned up by the keyboard's height to reveal a field fixed at its
+            foot (the cabinet's settings search), taking the whole page with it. Shrinking the
+            WebView above the keyboard lets the page lay itself out like in a browser that resizes.
+            iOS: WKWebView handles the keyboard itself. */}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'android' ? 'padding' : undefined}
+          enabled={Platform.OS === 'android'}
+        >
+          <AppWebView
+            ref={webViewRef}
+            style={[styles.container, backgroundStyle, error && styles.hidden]}
+            source={{ uri: sourceUri }}
+            injectedJavaScriptBeforeContentLoaded={NATIVE_APP_SCRIPT}
+            onMessage={handleMessage}
+            onNavigationStateChange={handleNavigationStateChange}
+            onShouldStartLoadWithRequest={handleShouldStartLoad}
+            onLoadEnd={() => {
+              isLoadedRef.current = true
+            }}
+            onError={(event) => setError(event.nativeEvent.description)}
+            onHttpError={(event) => setError(`HTTP ${event.nativeEvent.statusCode}`)}
+            renderLoading={() => <LoadingView />}
+            startInLoadingState
+            allowsBackForwardNavigationGestures
+            pullToRefreshEnabled
+            sharedCookiesEnabled
+            setSupportMultipleWindows={false}
+          />
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
   )
