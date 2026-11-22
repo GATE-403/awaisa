@@ -122,6 +122,10 @@
   animation: dim var(--duration-normal) var(--ease-standard);
 }
 
+.scrim[data-already-up] {
+  animation: none;
+}
+
 @keyframes dim {
   from {
     opacity: 0;

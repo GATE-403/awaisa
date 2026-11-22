@@ -1,0 +1,10 @@
+/* Zero-sized and fixed: it takes no room and no taps; its children keep their own fixed boxes.
+   The z-index keeps the scrim (55) and the sheet (60) above the site, as they were before. */
+.layer {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  z-index: 60;
+  width: 0;
+  height: 0;
+}

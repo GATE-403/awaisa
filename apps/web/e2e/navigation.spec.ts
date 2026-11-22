@@ -110,6 +110,112 @@ test.describe('Moving around the app', () => {
     expect(await isSamePage(page)).toBe(true)
   })
 
+  test('opening booking far down the catalog keeps its place and kind; a reload keeps it under the sheet', async ({
+    page,
+  }) => {
+    await page.goto('/?kind=barber')
+    const header = page.locator('[data-site-header]')
+    const chosenKind = header.getByRole('link', { name: 'Барбершопы' })
+    await expect(chosenKind).toHaveAttribute('aria-current', 'page')
+    const cards = page.getByRole('article', { name: /, / })
+    await expect(cards.nth(11)).toBeAttached()
+    await page.evaluate(() => window.scrollTo({ top: 700, behavior: 'instant' }))
+    // Let the header settle (it tucks its chip row on scroll) before measuring.
+    await page.waitForTimeout(500)
+    const before = await page.evaluate(() => window.scrollY)
+    expect(before).toBeGreaterThan(300)
+    const headerHeight = await header.evaluate((node) => node.getBoundingClientRect().height)
+    // A card wholly on screen below the header, wherever the grid has put the cards.
+    const inView = await cards.evaluateAll((nodes) =>
+      nodes.findIndex((node) => {
+        const box = node.getBoundingClientRect()
+        return box.top > 200 && box.bottom < window.innerHeight - 100
+      }),
+    )
+    expect(inView).toBeGreaterThan(-1)
+
+    await cards.nth(inView).getByRole('link').first().click()
+    await expect(bookingSheet(page)).toBeVisible()
+    // Next used to scroll the catalog to its top, and the header dropped its category row.
+    expect(await page.evaluate(() => window.scrollY)).toBe(before)
+    expect(await header.evaluate((node) => node.getBoundingClientRect().height)).toBe(headerHeight)
+    await expect(chosenKind).toHaveAttribute('aria-current', 'page')
+
+    const bookingUrl = page.url()
+    await page.reload()
+    await expect(page).toHaveURL(bookingUrl)
+    await expect(bookingSheet(page)).toBeVisible()
+    // The catalog, not the place's page, is under the sheet again.
+    await expect(chosenKind).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeHidden()
+
+    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '?kind=barber')
+    await expect(bookingSheet(page)).toHaveCount(0)
+  })
+
+  test('the sheet rises once: one sheet from the tap to the form, filled in place', async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto('/')
+    const card = page.getByRole('article', { name: /, / }).first()
+    await expect(card).toBeVisible()
+    // A slow answer keeps the placeholder in the sheet mid-slide when the form arrives.
+    await page.route(/\/book\?.*_rsc=/, async (route) => {
+      if (route.request().headers()['next-router-prefetch']) return route.continue()
+      await new Promise((resolve) => setTimeout(resolve, 250))
+      await route.continue()
+    })
+    // Where the sheet is, frame by frame: across on a wide screen, up on a phone.
+    await page.evaluate((isPhone) => {
+      const track: number[] = []
+      const state = window as unknown as {
+        sheetTrack: number[]
+        sawPlaceholder: boolean
+        sheetCount: number
+      }
+      state.sheetTrack = track
+      state.sawPlaceholder = false
+      const sheets = new Set<Element>()
+      const step = () => {
+        const sheet = document.querySelector('[data-booking-screen]')
+        if (sheet) {
+          sheets.add(sheet)
+          state.sheetCount = sheets.size
+          if (sheet.querySelector('[aria-busy="true"]')) state.sawPlaceholder = true
+          const box = sheet.getBoundingClientRect()
+          track.push(isPhone ? box.top : box.left)
+        }
+        if (track.length < 90) requestAnimationFrame(step)
+      }
+      requestAnimationFrame(step)
+    }, isMobile)
+    await card.getByRole('link').first().click()
+    await expect(bookingSheet(page)).toBeVisible()
+    await page.waitForTimeout(800)
+    const { track, sawPlaceholder, sheetCount } = await page.evaluate(() => {
+      const state = window as unknown as {
+        sheetTrack: number[]
+        sawPlaceholder: boolean
+        sheetCount: number
+      }
+      return {
+        track: state.sheetTrack,
+        sawPlaceholder: state.sawPlaceholder,
+        sheetCount: state.sheetCount,
+      }
+    })
+    expect(sawPlaceholder).toBe(true)
+    // Two sheets (one in the fallback, one in the form) slid up one after the other.
+    expect(sheetCount).toBe(1)
+    expect(track.length).toBeGreaterThan(10)
+    // It only ever moves one way: dropping back by more than a pixel was the sheet starting over.
+    for (let index = 1; index < track.length; index += 1) {
+      expect(track[index]).toBeLessThanOrEqual((track[index - 1] ?? 0) + 1)
+    }
+  })
+
   test('a booking link opened directly shows the place under the sheet; ✕ lands on it', async ({
     page,
   }) => {

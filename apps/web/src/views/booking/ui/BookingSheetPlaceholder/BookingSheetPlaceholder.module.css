@@ -1,0 +1,129 @@
+/* No box of its own, like the form's content: the bar and the stack sit right in the sheet. */
+.placeholder {
+  display: contents;
+}
+
+/* The place's tile in the top bar, as large as `BusinessTile size='sm'`. */
+.tile {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+}
+
+/* The folded stack of done steps (`CardStack`): 72pt ticket cards lying 30pt apart, the older ones
+   a little smaller behind, each with the e-ticket's notches. */
+.stack {
+  position: relative;
+  height: calc(72px + (var(--count) - 1) * 30px);
+}
+
+.ticket {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: calc(1 + var(--i));
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 72px;
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border-radius: 18px;
+  /* A solid fill under the front card's own placeholders, so the cards behind do not show. */
+  background: var(--color-sheet-surface, var(--color-surface));
+  transform: translateY(calc(var(--i) * 30px)) scale(calc(1 - var(--depth) * 0.03));
+  transform-origin: top center;
+  mask:
+    radial-gradient(circle 7px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 7px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+.ticketMedia {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.ticketText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--text-body);
+}
+
+.ticketSecondary {
+  font-size: var(--text-footnote);
+}
+
+/* «Начать заново» under the stack: a footnote link at the height of the stack's own foot. */
+.startOver {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-2);
+  font-size: var(--text-footnote);
+}
+
+/* «+ Ещё услуга», the kit's secondary capsule. */
+.capsule {
+  width: 140px;
+  height: var(--control-height-md);
+  border-radius: var(--radius-full);
+}
+
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.chip {
+  flex: none;
+  width: 76px;
+  height: var(--control-height-sm);
+  border-radius: var(--radius-full);
+}
+
+.picture {
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+}
+
+/* The time step: the big time under the needle, the dial, the day cards. */
+.ruler {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rulerTime {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.1;
+}
+
+.rulerDial {
+  align-self: stretch;
+  height: 76px;
+  border-radius: var(--radius-lg);
+}
+
+.day {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+}
+
+/* The bar's action, a large capsule. */
+.action {
+  flex: none;
+  width: 132px;
+  height: var(--control-height-lg);
+  margin-left: auto;
+  border-radius: var(--radius-full);
+}

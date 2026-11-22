@@ -1,0 +1,4 @@
+/* The attribute lives only for the second it takes to go back (`stopReturning`). */
+:global(html[data-booking-returning]) .place {
+  visibility: hidden;
+}

@@ -1,7 +1,14 @@
 import { unstable_rethrow } from 'next/navigation'
 import { Suspense } from 'react'
 import { findBusiness, listServicePhotos } from '@/shared/api/serverApi'
-import { BookingModalGate, BookingPage, BookingUnavailable } from '@/views/booking'
+import {
+  BookingLayer,
+  BookingModalGate,
+  BookingPage,
+  BookingSheet,
+  BookingSheetPlaceholder,
+  BookingUnavailable,
+} from '@/views/booking'
 
 const BookingOverPage = async ({ slug }: { slug: string }) => {
   // Over a page, a failed read (the API down, a removed place) must not replace the whole screen
@@ -33,14 +40,24 @@ const BookingOverPage = async ({ slug }: { slug: string }) => {
 // («(.)(.)old-school»); the slug is what follows them.
 const toSlug = (param: string) => decodeURIComponent(param).replace(/^(\(\.{1,3}\))+/, '')
 
+// One sheet from the tap to the finished form: `BookingSheet` sits outside the Suspense that waits
+// for the place, and only what it holds changes (the placeholder, then the form). The outer
+// Suspense is for the server's HTML only (the sheet reads the address, which a prerender cannot):
+// a soft navigation draws the sheet at once.
 const BookModal = ({ params }: PageProps<'/[slug]/book'>) => (
-  <Suspense fallback={null}>
-    {params.then(({ slug }) => (
-      <BookingModalGate slug={toSlug(slug)}>
-        <BookingOverPage slug={toSlug(slug)} />
-      </BookingModalGate>
-    ))}
-  </Suspense>
+  <BookingLayer>
+    <Suspense fallback={null}>
+      <BookingSheet isModal>
+        <Suspense fallback={<BookingSheetPlaceholder />}>
+          {params.then(({ slug }) => (
+            <BookingModalGate slug={toSlug(slug)}>
+              <BookingOverPage slug={toSlug(slug)} />
+            </BookingModalGate>
+          ))}
+        </Suspense>
+      </BookingSheet>
+    </Suspense>
+  </BookingLayer>
 )
 
 export default BookModal
