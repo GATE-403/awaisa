@@ -4,6 +4,8 @@ import type { CountedEntry, Entry } from './types'
 const CATALOG: Record<string, Entry> = {
   // Catalog page
   'Куда записаться': ['Кайда жазыласыз', 'Where to book'],
+  Недавние: ['Акыркылар', 'Recent'],
+  Очистить: ['Тазалоо', 'Clear'],
   Услуги: ['Кызматтар', 'Services'],
   Места: ['Жайлар', 'Places'],
   'Вы искали «{query}»': ['Сиз издегениңиз: «{query}»', 'You searched for «{query}»'],
