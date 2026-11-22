@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react'
 import { parseClock } from '@/entities/business'
 import { INSTALL_HINT, usePushAlerts } from '@/features/pushAlerts'
 import type { AdminBooking } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { type Translate, useT } from '@/shared/i18n'
 import styles from './NowBar.module.css'
 
 interface NowBarProps {
@@ -22,14 +22,16 @@ const subscribeNoop = () => () => {}
 
 const getPermission = () => ('Notification' in window ? Notification.permission : 'denied')
 
-const formatWait = (minutes: number) => {
-  if (minutes < 60) return `через ${pluralize(minutes, ['минуту', 'минуты', 'минут'])}`
+const formatWait = (minutes: number, t: Translate) => {
+  if (minutes < 60) {
+    return t('через {time}', { time: t.count(minutes, ['минуту', 'минуты', 'минут']) })
+  }
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
 
-  return rest === 0
-    ? `через ${pluralize(hours, ['час', 'часа', 'часов'])}`
-    : `через ${hours} ч ${rest} мин`
+  return t('через {time}', {
+    time: rest === 0 ? t.count(hours, ['час', 'часа', 'часов']) : t.duration(minutes),
+  })
 }
 
 // Two glanceable tiles over today's calendar, like a widget: who is in the chair (with how much
@@ -37,6 +39,7 @@ const formatWait = (minutes: number) => {
 // its booking.
 export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   const toast = useToast()
+  const t = useT()
   const permission = useSyncExternalStore(subscribeNoop, getPermission, () => 'denied')
   const push = usePushAlerts()
   const live = bookings
@@ -62,7 +65,11 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
 
   const enableNotifications = async () => {
     if (push.state === 'install') {
-      toast.show({ title: 'Уведомления на iPhone', description: INSTALL_HINT, type: 'info' })
+      toast.show({
+        title: t('Уведомления на iPhone'),
+        description: t(INSTALL_HINT),
+        type: 'info',
+      })
       return
     }
     if (push.state !== 'off') {
@@ -71,16 +78,16 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
     }
     try {
       const isOn = await push.enable()
-      if (isOn) toast.show({ title: 'Уведомления включены', type: 'success' })
+      if (isOn) toast.show({ title: t('Уведомления включены'), type: 'success' })
     } catch {
-      toast.show({ title: 'Не получилось включить уведомления', type: 'error' })
+      toast.show({ title: t('Не получилось включить уведомления'), type: 'error' })
     }
   }
 
   return (
     // One slim row over the day: who is in the chair and who is next, as capsules that open their
     // visit — the day's own cards say the rest.
-    <section className={styles.bar} aria-label='Сейчас'>
+    <section className={styles.bar} aria-label={t('Сейчас')}>
       {current && (
         <button
           type='button'
@@ -89,9 +96,9 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           onClick={() => onOpen(current)}
         >
           <HourglassMedium weight='bold' className={styles.glyph} aria-hidden />
-          <span className={styles.srOnly}>Сейчас: </span>
+          <span className={styles.srOnly}>{t('Сейчас')}: </span>
           <span className={styles.who}>{current.customerName}</span>
-          <span className={styles.meta}>ещё {left} мин</span>
+          <span className={styles.meta}>{t('ещё {count} мин', { count: left })}</span>
         </button>
       )}
       {next && (
@@ -103,18 +110,18 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             onClick={() => onOpen(next)}
           >
             <Clock weight='bold' className={styles.glyph} aria-hidden />
-            <span className={styles.srOnly}>Далее: </span>
+            <span className={styles.srOnly}>{t('Далее')}: </span>
             <span className={styles.who}>
               {next.time} {next.customerName}
             </span>
-            <span className={styles.meta}>{formatWait(wait)}</span>
+            <span className={styles.meta}>{formatWait(wait, t)}</span>
           </button>
           {next.customerPhone && (
             <a
               href={`tel:${next.customerPhone}`}
               className={styles.call}
-              aria-label={`Позвонить: ${next.customerName}`}
-              title='Позвонить'
+              aria-label={t('Позвонить: {name}', { name: next.customerName })}
+              title={t('Позвонить')}
             >
               <Phone aria-hidden />
             </a>
@@ -126,10 +133,10 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           type='button'
           className={styles.notify}
           onClick={() => void enableNotifications()}
-          title='Уведомлять о новых записях'
+          title={t('Уведомлять о новых записях')}
         >
           <Bell aria-hidden />
-          <span className={styles.srOnly}>Уведомлять о записях</span>
+          <span className={styles.srOnly}>{t('Уведомлять о записях')}</span>
         </button>
       )}
     </section>

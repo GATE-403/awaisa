@@ -5,6 +5,7 @@ import { Camera, Check } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addVisitPhoto } from '@/shared/api/clientApi'
+import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from '../MasterDayPage.module.css'
 
@@ -17,6 +18,7 @@ interface VisitPhotoButtonProps {
 // so it books exactly that from the «Работы» feed.
 export const VisitPhotoButton = ({ slug, bookingId }: VisitPhotoButtonProps) => {
   const toast = useToast()
+  const t = useT()
   const input = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<'idle' | 'uploading' | 'done'>('idle')
 
@@ -29,10 +31,10 @@ export const VisitPhotoButton = ({ slug, bookingId }: VisitPhotoButtonProps) => 
       await addVisitPhoto(slug, bookingId, file)
       setState('done')
       haptic('success')
-      toast.show({ title: 'Фото в «Образах»', type: 'success' })
+      toast.show({ title: t('Фото в «Образах»'), type: 'success' })
     } catch (error) {
       setState('idle')
-      toast.show({ title: 'Не загрузилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не загрузилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -50,10 +52,10 @@ export const VisitPhotoButton = ({ slug, bookingId }: VisitPhotoButtonProps) => 
           <Camera weight='bold' aria-hidden />
         )}
         {state === 'uploading'
-          ? 'Загружаем…'
+          ? t('Загружаем…')
           : state === 'done'
-            ? 'Ещё фото работы'
-            : 'Фото работы'}
+            ? t('Ещё фото работы')
+            : t('Фото работы')}
       </button>
       <input
         ref={input}
@@ -61,7 +63,7 @@ export const VisitPhotoButton = ({ slug, bookingId }: VisitPhotoButtonProps) => 
         accept='image/*'
         capture='environment'
         hidden
-        aria-label={`Фото работы ${bookingId}`}
+        aria-label={`${t('Фото работы')} ${bookingId}`}
         onChange={(event) => void handleFile(event)}
       />
     </>

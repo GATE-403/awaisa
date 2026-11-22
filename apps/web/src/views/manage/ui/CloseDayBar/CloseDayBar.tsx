@@ -4,7 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { Menu } from '@awaisa/ui/Menu'
 import { CaretDown, Check, CircleDashed, X } from '@phosphor-icons/react/ssr'
 import type { AdminBooking } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import styles from './CloseDayBar.module.css'
 
@@ -22,8 +22,6 @@ interface CloseDayBarProps {
   onDismiss: () => void
 }
 
-const visits = (count: number) => pluralize(count, ['визит', 'визита', 'визитов'])
-
 // A task, not a setting: it floats over the schedule only while there is something to mark,
 // like the cabinet's save bar — the header keeps the day's numbers and its two actions.
 export const CloseDayBar = ({
@@ -35,13 +33,16 @@ export const CloseDayBar = ({
   onShowOther,
   onDismiss,
 }: CloseDayBarProps) => {
+  const t = useT()
   if (openHere === 0 && openElsewhere === 0) return null
   const isListed = openHere > 0 && visitsHere.length > 0 && Boolean(onOpen)
+  const visits = (count: number) => t.count(count, ['визит', 'визита', 'визитов'])
+  const passed = openHere === 1 ? t('прошёл без отметки') : t('прошли без отметки')
 
   return (
     <section
       className={styles.bar}
-      aria-label='Неотмеченные визиты'
+      aria-label={t('Неотмеченные визиты')}
       data-glyph-inside={isListed || undefined}
     >
       {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
@@ -53,17 +54,15 @@ export const CloseDayBar = ({
             // The count opens the list of who it is: time, client, service · master — a tap scrolls
             // the calendar to that visit's card (with «✓ Пришёл» on it).
             <Menu
-              label={`${visits(openHere)} ${openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'} — показать кто`}
+              label={t('{visits} {passed} — показать кто', { visits: visits(openHere), passed })}
               className={styles.who}
               trigger={
                 <>
                   <CircleDashed weight='bold' className={styles.dot} aria-hidden />
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
-                    <span className={styles.long}>
-                      {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
-                    </span>
-                    <span className={styles.short}>без отметки</span>
+                    <span className={styles.long}>{passed}</span>
+                    <span className={styles.short}>{t('без отметки')}</span>
                   </span>
                   <CaretDown weight='bold' aria-hidden className={styles.caret} />
                 </>
@@ -73,30 +72,27 @@ export const CloseDayBar = ({
             </Menu>
           ) : (
             <span className={styles.text}>
-              <strong>{visits(openHere)}</strong>{' '}
-              <span className={styles.long}>
-                {openHere === 1 ? 'прошёл без отметки' : 'прошли без отметки'}
-              </span>
-              <span className={styles.short}>без отметки</span>
+              <strong>{visits(openHere)}</strong> <span className={styles.long}>{passed}</span>
+              <span className={styles.short}>{t('без отметки')}</span>
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>
             <Check weight='bold' aria-hidden />
-            Все пришли
+            {t('Все пришли')}
           </Button>
         </>
       ) : (
         <>
           <span className={styles.text}>
-            <span className={styles.elsewhereLong}>Ещё </span>
-            <strong>{visits(openElsewhere)}</strong> в другие дни
+            <span className={styles.elsewhereLong}>{t('Ещё')} </span>
+            <strong>{visits(openElsewhere)}</strong> {t('в другие дни')}
           </span>
           <Button size='sm' variant='secondary' onClick={onShowOther}>
-            Показать
+            {t('Показать')}
           </Button>
         </>
       )}
-      <button type='button' className={styles.close} onClick={onDismiss} aria-label='Скрыть'>
+      <button type='button' className={styles.close} onClick={onDismiss} aria-label={t('Скрыть')}>
         <X weight='bold' aria-hidden />
       </button>
     </section>

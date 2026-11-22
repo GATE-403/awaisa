@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { getMasterReviews } from '@/shared/api/clientApi'
 import type { MasterReviews as MasterReviewsData } from '@/shared/api/types'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '../MasterDayPage.module.css'
@@ -22,6 +22,7 @@ const REVIEW_WORDS: [string, string, string] = ['отзыв', 'отзыва', '�
 // business page's thread, three and the rest behind «Ещё». Only their own reviews; nothing when
 // there are none yet.
 export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
+  const t = useT()
   const [data, setData] = useState<MasterReviewsData | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -40,13 +41,13 @@ export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
   const hiddenCount = isOpen ? data.items.length - SHOWN : data.items.length - shown.length
 
   return (
-    <section className={styles.reviews} aria-label='Ваши отзывы'>
+    <section className={styles.reviews} aria-label={t('Ваши отзывы')}>
       <SectionCaption isInset={false} className={styles.reviewsCaption}>
-        Ваши отзывы
+        {t('Ваши отзывы')}
         {data.average !== null && (
           <span className={styles.reviewsScore}>
             <Star weight='fill' aria-hidden />
-            {data.average.toFixed(1).replace('.', ',')} · {pluralize(data.count, REVIEW_WORDS)}
+            {data.average.toFixed(1).replace('.', ',')} · {t.count(data.count, REVIEW_WORDS)}
           </span>
         )}
       </SectionCaption>
@@ -54,7 +55,7 @@ export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
         hiddenCount={Math.max(0, hiddenCount)}
         isOpen={isOpen}
         onToggle={() => setIsOpen((current) => !current)}
-        label={pluralWord(Math.max(0, hiddenCount), REVIEW_WORDS)}
+        label={t.count(Math.max(0, hiddenCount), REVIEW_WORDS).replace(/^\d+\s/, '')}
       >
         <ul className={styles.reviewList}>
           {shown.map((review) => (

@@ -7,6 +7,7 @@ import { ArrowUpRight, Copy, TelegramLogo, WhatsappLogo } from '@phosphor-icons/
 import { useState } from 'react'
 import { formatClock } from '@/entities/business'
 import type { AdminSchedule, Catalog } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -48,6 +49,7 @@ export const ShareWindowsSheet = ({
   onClose,
 }: ShareWindowsSheetProps) => {
   const toast = useToast()
+  const t = useT()
   const [serviceId, setServiceId] = useState<string>(ANY_SERVICE)
   const services = catalog.services.filter((service) => service.isActive !== false)
   const service = services.find((item) => item.id === serviceId) ?? null
@@ -83,47 +85,50 @@ export const ShareWindowsSheet = ({
     .sort((first, second) => first.from - second.from || first.to - second.to)
     .map(({ from, to, names }) => `${formatClock(from)}–${formatClock(to)} — ${names.join(', ')}`)
 
-  const day = nowMinutes !== null ? `сегодня, ${dayLabel.split(', ').pop()}` : dayLabel
+  const day =
+    nowMinutes !== null
+      ? t('сегодня, {date}', { date: dayLabel.split(', ').pop() ?? '' })
+      : dayLabel
   const query = `${service ? `service=${service.id}&` : ''}date=${schedule.date}`
   const path = `/${slug}/book?${query}`
   const link = typeof window === 'undefined' ? path : `${window.location.origin}${path}`
   const heading = service
-    ? `Свободное время на «${service.name}» · ${day}`
-    : `Свободное время · ${day}`
+    ? t('Свободное время на «{service}» · {day}', { service: service.name, day })
+    : t('Свободное время · {day}', { day })
   const body = [heading, ...lines].join('\n')
   // Shown without the query: «awaisa.kg/kings-barbershop/book».
   const shortLink =
     typeof window === 'undefined' ? `${slug}/book` : `${window.location.host}/${slug}/book`
-  const text = `${body}\n\nЗапись онлайн: ${link}`
+  const text = `${body}\n\n${t('Запись онлайн: {link}', { link })}`
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.show({ title: 'Скопировано — вставьте в чат или сторис', type: 'success' })
+      toast.show({ title: t('Скопировано — вставьте в чат или сторис'), type: 'success' })
     } catch {
-      toast.show({ title: 'Не получилось скопировать', type: 'error' })
+      toast.show({ title: t('Не получилось скопировать'), type: 'error' })
     }
   }
 
   return (
     <Sheet
-      title='Свободные окна'
+      title={t('Свободные окна')}
       onClose={onClose}
       cancelLabel={null}
-      action={{ label: 'Готово', onClick: onClose }}
+      action={{ label: t('Готово'), onClick: onClose }}
     >
       {/* One group: the service, the message as the client will read it, the link — then one
           wide action (copy) with the messengers as thin glyphs beside it. */}
       <div className={sheet.group}>
-        <section className={sheet.list} aria-label='Сообщение для клиентов'>
+        <section className={sheet.list} aria-label={t('Сообщение для клиентов')}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>Услуга</span>
+            <span className={sheet.rowLabel}>{t('Услуга')}</span>
             <Select
-              aria-label='Услуга'
+              aria-label={t('Услуга')}
               variant='plain'
               value={serviceId}
               items={[
-                { value: ANY_SERVICE, label: 'Любая' },
+                { value: ANY_SERVICE, label: t('Любая') },
                 ...services.map((item) => ({ value: item.id, label: item.name })),
               ]}
               onValueChange={(value) => value && setServiceId(value)}
@@ -133,7 +138,7 @@ export const ShareWindowsSheet = ({
             <>
               <p className={styles.message}>{body}</p>
               <a className={sheet.row} href={link} target='_blank' rel='noreferrer'>
-                <span className={sheet.rowLabel}>Ссылка</span>
+                <span className={sheet.rowLabel}>{t('Ссылка')}</span>
                 <span className={styles.link}>
                   <span className={styles.linkText}>{shortLink}</span>
                   <ArrowUpRight aria-hidden />
@@ -147,12 +152,12 @@ export const ShareWindowsSheet = ({
             variant='inline'
             text={
               service
-                ? 'На этот день окна под эту услугу нет.'
-                : 'На этот день свободного времени нет.'
+                ? t('На этот день окна под эту услугу нет.')
+                : t('На этот день свободного времени нет.')
             }
           />
         ) : (
-          <p className={sheet.groupFooter}>Клиент увидит этот текст и ссылку на запись.</p>
+          <p className={sheet.groupFooter}>{t('Клиент увидит этот текст и ссылку на запись.')}</p>
         )}
       </div>
 
@@ -160,9 +165,9 @@ export const ShareWindowsSheet = ({
         <div className={styles.send}>
           <Button className={styles.copy} onClick={() => void handleCopy()}>
             <Copy aria-hidden />
-            Скопировать
+            {t('Скопировать')}
           </Button>
-          <GlyphGroup label='Отправить в мессенджер'>
+          <GlyphGroup label={t('Отправить в мессенджер')}>
             <a
               href={`https://wa.me/?text=${encodeURIComponent(text)}`}
               target='_blank'
