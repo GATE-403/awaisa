@@ -5,7 +5,7 @@ import { deviceSession } from '@/shared/lib/telemetry'
 // What the shelves learn from: a random id per device, services looked at lately, and what was
 // shown, tapped and booked (sent in batches with sendBeacon, so leaving the page never loses them).
 
-type Surface = 'catalog' | 'profile' | 'booking' | 'success'
+type Surface = 'catalog' | 'profile' | 'booking' | 'success' | 'search' | 'due'
 type EventKind = 'impression' | 'click' | 'book'
 type PickEvent = {
   kind: EventKind
