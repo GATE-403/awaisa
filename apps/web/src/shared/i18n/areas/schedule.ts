@@ -258,9 +258,17 @@ const SCHEDULE: Record<string, Entry> = {
   'Пришёл ли {name}?': ['{name} келдиби?', 'Did {name} come?'],
   пришёл: ['келди', 'arrived'],
   'не пришёл': ['келген жок', 'no-show'],
+  'Отмечено: пришёл': ['Белгиленди: келди', 'Marked: arrived'],
+  Сфотографировать: ['Сүрөткө тартуу', 'Take a photo'],
+  'Фото работ за неделю: {done} из {visits}': [
+    'Жумадагы иштердин сүрөттөрү: {visits} ичинен {done}',
+    'Work photos this week: {done} of {visits}',
+  ],
+  'Загружаем фото…': ['Сүрөт жүктөлүүдө…', 'Uploading the photo…'],
 }
 
 const SCHEDULE_COUNTED: Record<string, CountedEntry> = {
+  подписчиков: ['жазылуучу', 'follower', 'followers'],
   раз: ['жолу', 'time', 'times'],
   минут: ['мүнөт', 'minute', 'minutes'],
   часов: ['саат', 'hour', 'hours'],

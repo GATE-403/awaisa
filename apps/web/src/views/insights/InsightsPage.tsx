@@ -11,6 +11,7 @@ import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { CabinetBar } from '@/widgets/CabinetBar'
 import {
+  CHANNEL_LABELS,
   FILTER_KEYS,
   FLOW_LABELS,
   SEGMENT_LABELS,
@@ -35,6 +36,11 @@ const ANY = 'any'
 
 const DEVICES: [string, string, string] = ['устройство', 'устройства', 'устройств']
 
+const BOOKINGS: [string, string, string] = ['запись', 'записи', 'записей']
+
+const formatWeek = (week: string) =>
+  new Date(`${week}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+
 const formatShare = (value: number | null) =>
   value === null ? '—' : `${value.toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`
 
@@ -46,6 +52,14 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
   const steps = insights.funnel?.steps ?? []
   const started = steps[0]?.sessions ?? 0
   const devices = insights.segments?.sessions ?? 0
+  const strategy = insights.strategy
+  const online = strategy?.channels.reduce((sum, item) => sum + item.bookings, 0) ?? 0
+  const channels = strategy?.channels.filter((item) => item.bookings > 0) ?? []
+  const fromFeed = strategy?.channels.find((item) => item.channel === 'feed')?.bookings ?? 0
+  const weeks = strategy?.activeBusinesses ?? []
+  const thisWeek = weeks.at(-1)?.count ?? 0
+  const shareOf = (count: number) =>
+    online === 0 ? null : Math.round((count / online) * 1000) / 10
   const dimensions = (Object.keys(SEGMENT_LABELS) as SegmentKey[]).map((key) => ({
     key,
     items: insights.segments?.items.filter((item) => item.dimension === key) ?? [],
@@ -99,6 +113,88 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
               ))}
             </div>
           </div>
+
+          {strategy && (
+            <section aria-labelledby='insights-strategy'>
+              <SectionCaption as='h2' id='insights-strategy'>
+                {t('Стратегия')}
+              </SectionCaption>
+              <ul className={styles.list}>
+                <li className={styles.row}>
+                  <span className={styles.rowText}>
+                    <span className={styles.rowTitle}>{t('Ведут день в кабинете')}</span>
+                    <span className={styles.rowMeta}>
+                      {weeks.length > 1
+                        ? t('По неделям: {counts}, с {date}', {
+                            counts: weeks.map((week) => week.count).join(' · '),
+                            date: formatWeek(weeks[0].week),
+                          })
+                        : t('Салоны, отметившие итог визита за неделю')}
+                    </span>
+                  </span>
+                  <span className={styles.rowValue}>{thisWeek.toLocaleString('ru-RU')}</span>
+                </li>
+                <li className={styles.row}>
+                  <span className={styles.rowText}>
+                    <span className={styles.rowTitle}>{t('Начаты в «Образах»')}</span>
+                    <span className={styles.rowMeta}>
+                      {online
+                        ? t('Из {bookings} онлайн', { bookings: t.count(online, BOOKINGS) })
+                        : t('Онлайн-записей пока нет')}
+                    </span>
+                  </span>
+                  <span className={styles.rowValue}>
+                    {fromFeed.toLocaleString('ru-RU')}
+                    {fromFeed > 0 && (
+                      <span className={styles.rowShare}>{formatShare(shareOf(fromFeed))}</span>
+                    )}
+                  </span>
+                </li>
+                <li className={styles.row}>
+                  <span className={styles.rowText}>
+                    <span className={styles.rowTitle}>{t('Записались снова')}</span>
+                    <span className={styles.rowMeta}>
+                      {strategy.repeat.clients
+                        ? t('{returned} из {clients} новых клиентов, за 60 дней', {
+                            returned: strategy.repeat.returned,
+                            clients: strategy.repeat.clients,
+                          })
+                        : t('Новым клиентам ещё не прошло 60 дней')}
+                    </span>
+                  </span>
+                  <span className={styles.rowValue}>{formatShare(strategy.repeat.share)}</span>
+                </li>
+              </ul>
+            </section>
+          )}
+
+          {channels.length > 0 && (
+            <section aria-labelledby='insights-channels'>
+              <SectionCaption as='h2' id='insights-channels'>
+                {t('Откуда записи')}
+                <span className={styles.count}>{t.count(online, BOOKINGS)}</span>
+              </SectionCaption>
+              <ul className={styles.list}>
+                {channels.map((item) => {
+                  const share = shareOf(item.bookings)
+                  return (
+                    <li key={item.channel} className={styles.row}>
+                      <span className={styles.rowTitle}>{t(CHANNEL_LABELS[item.channel])}</span>
+                      <span className={styles.rowValue}>
+                        {item.bookings.toLocaleString('ru-RU')}
+                        <span className={styles.rowShare}>{formatShare(share)}</span>
+                      </span>
+                      <span
+                        className={styles.meter}
+                        style={{ '--share': `${share ?? 0}%` } as CSSProperties}
+                        aria-hidden
+                      />
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          )}
 
           <section aria-labelledby='insights-steps' aria-busy={insights.isLoading}>
             <SectionCaption as='h2' id='insights-steps'>

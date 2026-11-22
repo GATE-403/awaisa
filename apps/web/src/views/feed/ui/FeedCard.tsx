@@ -166,11 +166,22 @@ export const FeedCard = ({
           </span>
         </p>
         {service && <h2 className={styles.service}>{service.name}</h2>}
-        {service && (
+        {(service || item.isFromClient) && (
           <p className={styles.meta}>
-            <strong>{formatPrice(service.price)}</strong>
-            <span className={styles.metaDot}>·</span>
-            {t.duration(service.durationMinutes)}
+            {service && (
+              <>
+                <strong>{formatPrice(service.price)}</strong>
+                <span className={styles.metaDot}>·</span>
+                {t.duration(service.durationMinutes)}
+              </>
+            )}
+            {/* Shared from a client's review: their result, not the salon's showcase. */}
+            {item.isFromClient && (
+              <>
+                {service && <span className={styles.metaDot}>·</span>}
+                {t('Фото клиента')}
+              </>
+            )}
           </p>
         )}
       </div>

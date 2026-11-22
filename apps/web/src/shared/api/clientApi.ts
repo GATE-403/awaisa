@@ -62,6 +62,7 @@ import type {
   FiscalReceipt,
   FiscalSettings,
   FiscalSettingsInput,
+  FollowedMaster,
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
@@ -135,6 +136,7 @@ import type {
   StockItem,
   StockItemInput,
   StockReceiveInput,
+  StrategyReport,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
@@ -337,6 +339,9 @@ const getFunnelSignals = (days: number, signal?: AbortSignal) =>
 
 const getFunnelSegments = (days: number, signal?: AbortSignal) =>
   request<FunnelSegmentsReport>(`/telemetry/segments?days=${days}`, { signal })
+
+const getStrategyReport = (days: number, signal?: AbortSignal) =>
+  request<StrategyReport>(`/telemetry/strategy?days=${days}`, { signal })
 
 const getTelegramLoginConfig = (signal?: AbortSignal) =>
   request<TelegramLoginConfig>('/auth/telegram', { signal })
@@ -683,8 +688,19 @@ const getPageStats = (slug: string, signal?: AbortSignal) =>
 const removePhoto = (slug: string, id: string) =>
   send<WorkPhoto[]>('DELETE', `${manage(slug)}/work-photos/${id}`)
 
+const listFollows = (signal?: AbortSignal) => request<FollowedMaster[]>('/me/follows', { signal })
+
+const followMaster = (specialistId: string, notifyWorks?: boolean) =>
+  send<FollowedMaster[]>('PUT', `/me/follows/${encodeURIComponent(specialistId)}`, { notifyWorks })
+
+const unfollowMaster = (specialistId: string) =>
+  send<FollowedMaster[]>('DELETE', `/me/follows/${encodeURIComponent(specialistId)}`)
+
 const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
   upload<UploadedPhoto>(`/master/${slug}/photos`, file, { bookingId })
+
+const addBookingPhoto = (slug: string, bookingId: string, file: File) =>
+  upload<UploadedPhoto>(`/manage/${slug}/bookings/${bookingId}/photo`, file)
 
 const getFeed = (
   query: {
@@ -1022,6 +1038,7 @@ export {
   getBilling,
   getFunnelReport,
   getFunnelSegments,
+  getStrategyReport,
   getModerationLog,
   getModerationQueue,
   decideModeration,
@@ -1057,7 +1074,11 @@ export {
   searchAddress,
   reverseAddress,
   updateWorkPhoto,
+  addBookingPhoto,
   addVisitPhoto,
+  followMaster,
+  listFollows,
+  unfollowMaster,
   getFeed,
   reportContent,
   getRecommendations,

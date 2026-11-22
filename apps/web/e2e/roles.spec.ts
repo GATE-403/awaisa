@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
+import { createVisit } from './business'
 
 const SLUG = 'awaisa-studio'
 
@@ -38,6 +39,34 @@ test.describe('Staff roles', () => {
       expect((await staff.request.get(`/api/manage/${SLUG}/cash`)).status()).toBe(200)
       expect((await staff.request.get(`/api/manage/${SLUG}/expenses?days=30`)).status()).toBe(403)
       expect((await staff.request.get(`/api/manage/${SLUG}/money?days=30`)).status()).toBe(403)
+      // The studio has no seeded visits: one past visit gives the base a client who paid.
+      const business = await (await staff.request.get(`/api/businesses/${SLUG}`)).json()
+      const visit = await createVisit({
+        slug: SLUG,
+        serviceId: business.catalog.services[0].id,
+        specialistId: 'any',
+        daysBack: 2,
+      })
+      const clients = await (
+        await staff.request.get(
+          `/api/manage/${SLUG}/clients?sort=spent&q=${encodeURIComponent(visit.phone.slice(-6))}`,
+        )
+      ).json()
+      expect(clients.items.length).toBeGreaterThan(0)
+      expect(clients.items.every((client: { spent: unknown }) => client.spent === null)).toBe(true)
+      const card = await (
+        await staff.request.get(
+          `/api/manage/${SLUG}/clients/${encodeURIComponent(clients.items[0].phone)}`,
+        )
+      ).json()
+      expect(card.stats.spent).toBeNull()
+      expect(card.stats.averageCheck).toBeNull()
+      const ownerClients = await (
+        await page.request.get(
+          `/api/manage/${SLUG}/clients?q=${encodeURIComponent(visit.phone.slice(-6))}`,
+        )
+      ).json()
+      expect(ownerClients.items[0].spent).toBeGreaterThan(0)
 
       await staff.goto(`/manage/${SLUG}?tab=analytics`)
       const tabs = staff.getByRole('navigation', { name: 'Разделы кабинета' })

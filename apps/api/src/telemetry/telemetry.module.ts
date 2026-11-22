@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module.js'
 import { TelegramModule } from '../telegram/telegram.module.js'
 import { AlertsService } from './alerts.service.js'
 import { ServerErrorsFilter } from './server-errors.filter.js'
+import { StrategyService } from './strategy.service.js'
 import { TelemetryController } from './telemetry.controller.js'
 import { TelemetryService } from './telemetry.service.js'
 
@@ -12,6 +13,7 @@ import { TelemetryService } from './telemetry.service.js'
   controllers: [TelemetryController],
   providers: [
     TelemetryService,
+    StrategyService,
     AlertsService,
     { provide: APP_FILTER, useClass: ServerErrorsFilter },
   ],

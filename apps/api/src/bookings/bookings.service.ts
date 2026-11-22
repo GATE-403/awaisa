@@ -170,6 +170,7 @@ export class BookingsService {
             depositAmount: deposit ?? planPrice,
             subscriptionId: subscription?.id ?? null,
             source: staffBusinessId ? 'staff' : 'online',
+            channel: staffBusinessId ? null : (input.channel ?? null),
             promotionId: discount?.promotionId ?? null,
             discountAmount: discount?.amount ?? null,
             discountTitle: discount?.title ?? null,

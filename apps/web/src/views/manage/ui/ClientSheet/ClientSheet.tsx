@@ -17,7 +17,6 @@ import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
-import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { BirthdayField, formatMomentDay, formatMonthYear, getBishkekDate } from './BirthdayField'
 import { ClientLoyaltySection } from './ClientLoyaltySection'
@@ -79,7 +78,6 @@ const visitStatus = (item: ClientCard['history'][number], t: Translate) => {
 // private notes. Contacts are one tap away.
 export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientSheetProps) => {
   const t = useT()
-  const canSeeMoney = useCanSeeMoney()
   const hasLoyalty = useHasFeature('loyalty')
   const toast = useToast()
   const noteId = useId()
@@ -152,12 +150,12 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
               <p className={styles.facts}>
                 <strong>{stats.visits}</strong>{' '}
                 {t.count(stats.visits, VISIT_WORDS).replace(/^\d+ /, '')}
-                {canSeeMoney && stats.spent > 0 && (
+                {stats.spent ? (
                   <>
                     {' · '}
                     <strong>{formatPrice(stats.spent)}</strong>
                   </>
-                )}
+                ) : null}
                 {stats.firstVisit &&
                   ` · ${t('с {date}', { date: sinceLabel(stats.firstVisit, t) })}`}
               </p>
