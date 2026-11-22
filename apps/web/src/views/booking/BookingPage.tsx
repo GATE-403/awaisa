@@ -74,7 +74,8 @@ export const BookingPage = ({
   const form = useBookingForm(business, catalog)
   const offeredService = pickOfferedService(
     form.addableServices,
-    form.chosenServices[0]?.categoryId,
+    form.chosenServices,
+    catalog.services,
   )
   const serviceTimes = useServicesNextFree(business.slug, form.branchId ?? undefined)
   // «Сегодня с 15:30» on each service row: the choice shows when one could come, not only what.
