@@ -362,52 +362,38 @@ test.describe('UX: layout and ergonomics', () => {
       .toBe(true)
   })
 
-  test('the page steps back under the sheet (not on Android) and a picked card flies into the stack', async ({
-    page,
-    isMobile,
-  }) => {
+  test('picking in the booking sheet moves nothing decorative', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Phones only: from 768px the booking is a side panel')
     await page.goto('/awaisa-studio/book')
     const steps = bookingSteps(page)
     await steps.service.getByRole('radio', { name: /Укладка/ }).waitFor()
 
-    // The page behind steps back toward the top edge: the pinned site header stays at the top
-    // (about the screen's middle it slid down and the cards above it showed through). Not on
-    // Android (the project's Pixel), where scaling the whole page stuttered: it stays put there.
-    const isAndroid = await page.evaluate(
-      () =>
-        matchMedia('(pointer: coarse)').matches && !CSS.supports('-webkit-touch-callout', 'none'),
-    )
-    const behind = page.locator('[data-sheet-behind]')
-    if (isAndroid) {
-      await page.waitForTimeout(300)
-      await expect(behind).toHaveCount(0)
-      expect(await page.locator('html').getAttribute('data-booking-sheet')).toBeNull()
-    } else {
-      await expect.poll(() => page.locator('html').getAttribute('data-booking-sheet')).toBe('')
-      expect(await behind.count()).toBeGreaterThan(0)
-      await expect
-        .poll(() => behind.first().evaluate((element) => getComputedStyle(element).scale))
-        .toBe('0.94')
-      const header = page.locator('header[class*="Header-module"]')
-      if (await header.count()) {
-        expect(Math.round((await header.boundingBox())?.y ?? -1)).toBe(0)
-      }
-    }
+    // The page under the sheet stays as it is: it used to shrink back, a layer the size of the
+    // page that cost frames on phones («убери всю лишнюю анимацию»).
+    await page.waitForTimeout(600)
+    expect(await page.locator('html').getAttribute('data-booking-sheet')).toBeNull()
 
     // The step segments say how far along, as a progress bar.
     const progress = page.getByRole('progressbar', { name: 'Шаги записи' })
     await expect(progress).toHaveAttribute('aria-valuenow', '0')
 
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    // The copy flies and goes; the stack card's picture is shown once it has landed.
-    const target = page.locator('[data-flight-target="service"]')
-    await expect(target).toBeVisible()
-    await expect.poll(() => target.evaluate((element) => element.style.visibility)).toBe('')
-    await expect(page.locator('body > [aria-hidden="true"][style*="z-index: 61"]')).toHaveCount(0)
     await expect(progress).toHaveAttribute('aria-valuenow', '1')
-
-    // The rolling total keeps its plain text (the digit strips are drawn by CSS).
+    // No copy of the card flies, no step or stack card slides in, the total is plain text: the
+    // only motion left in the sheet answers a finger (a drag, the fan) or a wait (the spinner).
+    await expect(page.locator('body > [aria-hidden="true"][style*="z-index: 61"]')).toHaveCount(0)
+    const moving = await page.evaluate(() =>
+      document
+        .getAnimations()
+        .filter((animation) => {
+          const target = (animation.effect as KeyframeEffect | null)?.target
+          // Scroll-driven ones (the top bar's material) move with the finger, not by themselves.
+          const isTimed = animation.timeline instanceof DocumentTimeline
+          return isTimed && target instanceof Element && target.closest('[data-booking-screen]')
+        })
+        .map((animation) => (animation as CSSAnimation).animationName ?? 'transition'),
+    )
+    expect(moving.filter((name) => name !== 'transition')).toEqual([])
     await expect(page.locator('[data-booking-bar] [class*="barPrice"]')).toHaveText(
       /^[\d\s]+\sсом$/,
     )

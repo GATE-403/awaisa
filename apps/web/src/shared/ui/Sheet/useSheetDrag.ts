@@ -63,13 +63,6 @@ export const useSheetDrag = (onClose: () => void) => {
     current.lastTime = event.timeStamp
     const offset = raw >= 0 ? raw : -rubberBand(-raw, current.popup.offsetHeight)
     current.popup.style.translate = `0 ${offset}px`
-    // How far the sheet is pulled, for the page behind it to come forward (`useRecedePage`).
-    const root = document.documentElement
-    root.setAttribute('data-sheet-dragging', '')
-    root.style.setProperty(
-      '--sheet-pull',
-      `${Math.min(1, Math.max(0, offset / current.popup.offsetHeight))}`,
-    )
   }
 
   const end = (event: PointerEvent) => {
@@ -79,8 +72,6 @@ export const useSheetDrag = (onClose: () => void) => {
     const current = drag.current
     drag.current = null
     if (!current?.isDragging) return
-    const root = document.documentElement
-    root.removeAttribute('data-sheet-dragging')
     // A drag released off the link makes no click: the swallower must not eat the next real one.
     window.setTimeout(() => window.removeEventListener('click', swallowClick, { capture: true }), 0)
     const distance = Math.max(0, event.clientY - current.startY)
@@ -91,11 +82,9 @@ export const useSheetDrag = (onClose: () => void) => {
       const duration = Math.min(320, Math.max(160, (height - distance) / Math.max(velocity, 1.2)))
       popup.style.transition = `translate ${Math.round(duration)}ms cubic-bezier(0.25, 0.8, 0.5, 1)`
       popup.style.translate = '0 100%'
-      root.style.setProperty('--sheet-pull', '1')
       window.setTimeout(() => closeRef.current(), duration - 20)
       return
     }
-    root.style.removeProperty('--sheet-pull')
     popup.style.transition = SETTLE
     popup.style.translate = ''
     window.setTimeout(() => {
