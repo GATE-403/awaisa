@@ -345,6 +345,10 @@ const PROFILE: Record<string, Entry> = {
       'Орун визиттен кийинки баалардан көз каранды: пикирлер аз болгондо орточо баа 4,3кө тартылат; устага жок дегенде үч пикир, жайга беш пикир керек. Бир нече мүнөт сайын жаңыланат.',
       'The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes.',
     ],
+  'по абонементу: визит спишется, когда мастер отметит его': [
+    'абонемент менен: уста белгилегенде визит эсептен чыгат',
+    'with a pass: the visit is taken off when the specialist marks it',
+  ],
 }
 
 // Kyrgyz does not change the noun after a number; English has one/other.

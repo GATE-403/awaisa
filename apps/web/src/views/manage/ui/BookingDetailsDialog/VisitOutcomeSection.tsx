@@ -208,7 +208,9 @@ export const VisitOutcomeSection = ({
                 <button type='button' className={sheet.row} onClick={() => setIsReceiptOpen(true)}>
                   <span className={sheet.rowLabel}>{t('Чек')}</span>
                   <span
-                    className={describeReceipt(receipt, t).isAlert ? styles.rowAlert : styles.rowLink}
+                    className={
+                      describeReceipt(receipt, t).isAlert ? styles.rowAlert : styles.rowLink
+                    }
                   >
                     {receipt.status === 'issued'
                       ? receipt.kind === 'refund'
