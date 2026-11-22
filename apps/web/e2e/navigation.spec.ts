@@ -18,9 +18,8 @@ const isSamePage = (page: Page) =>
 // still be on screen for a frame beside it.
 const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Запись', level: 1 }).last()
 
-// A service card a few rows down (the third row of four columns), scrolled to the middle of the
-// screen. Looking for «any card wholly on screen» after a fixed scroll found none on CI (other card
-// heights) and clicked nothing.
+// A service card a few rows down (the third row of four columns), scrolled to the middle of the screen. Looking for «any card
+// wholly on screen» after a fixed scroll found none on CI (other card heights) and clicked nothing.
 const bookingCardInMiddle = async (page: Page) => {
   const card = page
     .getByRole('article', { name: /, / })

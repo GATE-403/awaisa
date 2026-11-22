@@ -125,19 +125,26 @@ export const BookingSummary = ({
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
   const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
-  const hint = firstIncompleteStep
-    ? t('Шаг {step} из {total}', {
-        step: STEPS.indexOf(firstIncompleteStep) + 1,
-        total: STEPS.length,
-      })
-    : deposit
-      ? t('{when} · предоплата {amount}', {
-          when: whenLabel ?? '',
-          amount: formatPrice(deposit),
-        })
-      : address
-        ? `${shortWhen} · ${address}`
-        : whenLabel
+  const hint = firstIncompleteStep ? (
+    t('Шаг {step} из {total}', {
+      step: STEPS.indexOf(firstIncompleteStep) + 1,
+      total: STEPS.length,
+    })
+  ) : deposit ? (
+    t('{when} · предоплата {amount}', {
+      when: whenLabel ?? '',
+      amount: formatPrice(deposit),
+    })
+  ) : address ? (
+    // Two unbreakable parts: the line breaks between the time and the address, never inside
+    // the address (a lone «7» of «мкр. Асанбай, 7» hung on the second line).
+    <>
+      <span className={styles.barHintPart}>{`${shortWhen} ·`}</span>{' '}
+      <span className={styles.barHintPart}>{address}</span>
+    </>
+  ) : (
+    whenLabel
+  )
 
   if (variant === 'bar') {
     return (
