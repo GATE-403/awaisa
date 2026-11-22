@@ -1,4 +1,4 @@
-import type { SearchCorrection } from '@awaisa/contracts'
+import type { MasterSuggestion, SearchCorrection } from '@awaisa/contracts'
 import { Controller, Get, Query } from '@nestjs/common'
 import { z } from 'zod'
 import { Cached } from '../cache/cached.decorator.js'
@@ -18,5 +18,14 @@ export class SearchController {
   ): Promise<SearchCorrection> {
     const resolved = await this.search.resolve(query.q)
     return { query: query.q, corrected: resolved?.corrected ?? null }
+  }
+
+  /** Masters by name for the header's search panel. */
+  @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
+  @Get('masters')
+  masters(
+    @Query({ schema: resolveQuerySchema }) query: z.infer<typeof resolveQuerySchema>,
+  ): Promise<MasterSuggestion[]> {
+    return this.search.masters(query.q)
   }
 }

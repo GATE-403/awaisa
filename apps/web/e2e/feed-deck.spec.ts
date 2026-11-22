@@ -118,9 +118,12 @@ test.describe('«Образы»: the deck', () => {
     const nextPage = page.waitForResponse(
       (response) => response.url().includes('/api/feed') && /[?&]offset=\d+/.test(response.url()),
     )
-    // A page holds 12 cards; the next one is asked for three before the end.
-    for (let turn = 0; turn < 10; turn += 1) await page.keyboard.press('ArrowRight')
-    await expectPosition(page, 11)
+    // A page holds 12 cards; the next one is asked for three before the end. Each turn waits for
+    // the card to settle: ten presses at once lost some mid-glide on a slow runner.
+    for (let position = 2; position <= 11; position += 1) {
+      await page.keyboard.press('ArrowRight')
+      await expectPosition(page, position)
+    }
     await nextPage
     // Past the first page's last card: the cards of the next page are in the deck.
     for (const position of [12, 13, 14]) {

@@ -1,18 +1,29 @@
 'use client'
 
-import { ArrowRight, MagnifyingGlass, NavigationArrow, X } from '@phosphor-icons/react/ssr'
+import {
+  ArrowRight,
+  ClockCounterClockwise,
+  MagnifyingGlass,
+  NavigationArrow,
+  X,
+} from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
-import { BusinessTile } from '@/entities/business'
+import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { PlacePickerSheet } from '@/features/myPlace'
 import { RecentVisits } from '@/features/rebook'
-import { listOffersPage, searchBusinesses } from '@/shared/api/clientApi'
-import type { BusinessCard, Offer } from '@/shared/api/types'
+import { listOffersPage, searchBusinesses, searchMasters } from '@/shared/api/clientApi'
+import type { BusinessCard, MasterSuggestion, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
 import { useT } from '@/shared/i18n'
 import { useMyPlace } from '@/shared/lib/myPlace'
+import {
+  readRecentSearches,
+  rememberSearch,
+  writeRecentSearches,
+} from '@/shared/lib/recentSearches'
 import { trackStep } from '@/shared/lib/telemetry'
 import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
 import styles from './HeaderSearch.module.css'
@@ -84,6 +95,8 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
   const [isOpen, setIsOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<BusinessCard[]>([])
   const [services, setServices] = useState<ServiceSuggestion[]>([])
+  const [masters, setMasters] = useState<MasterSuggestion[]>([])
+  const [recent, setRecent] = useState<string[]>([])
   const query = draft ?? urlQuery
   const trimmed = query.trim()
   const hasQuery = trimmed.length >= MIN_QUERY_LENGTH
@@ -108,6 +121,9 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
       listOffersPage({ q: trimmed, offset: 0, limit: 40, sort: 'popular' }, controller.signal)
         .then((offers) => setServices(groupServices(offers)))
         .catch(() => undefined)
+      searchMasters(trimmed, controller.signal)
+        .then(setMasters)
+        .catch(() => undefined)
     }, SUGGEST_DELAY_MS)
 
     return () => {
@@ -115,6 +131,11 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
       controller.abort()
     }
   }, [hasQuery, isOpen, trimmed])
+
+  // The device's own recent searches, read each time the panel opens.
+  useEffect(() => {
+    if (isOpen) setRecent(readRecentSearches())
+  }, [isOpen])
 
   const close = () => setIsOpen(false)
 
@@ -147,6 +168,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
   }, [isOpen])
 
   const search = (value: string) => {
+    rememberSearch(value)
     close()
     setDraft(null)
     router.push(`/?${new URLSearchParams({ q: value })}`)
@@ -272,6 +294,38 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                   </ul>
                 </>
               )}
+              {masters.length > 0 && (
+                <>
+                  <p className={styles.heading}>{t('Мастера')}</p>
+                  <ul className={styles.list}>
+                    {masters.map((master) => (
+                      <li key={master.id}>
+                        <NextLink
+                          href={`/${master.business.slug}/book?specialist=${master.id}`}
+                          className={styles.place}
+                          onClick={() => {
+                            trackStep('search_pick', master.business.slug, { kind: 'master' })
+                            rememberSearch(trimmed)
+                            close()
+                          }}
+                        >
+                          <PersonAvatar
+                            name={master.name}
+                            src={master.photoUrl ?? undefined}
+                            size='sm'
+                          />
+                          <span className={styles.placeText}>
+                            <span className={styles.placeName}>{master.name}</span>
+                            <span className={styles.placeMeta}>
+                              {[master.role, master.business.name].filter(Boolean).join(' · ')}
+                            </span>
+                          </span>
+                        </NextLink>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
               {(suggestions.length > 0 || services.length === 0) && (
                 <p className={styles.heading}>
                   {suggestions.length > 0
@@ -313,6 +367,33 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
           ) : (
             <>
               <RecentVisits onSelect={close} />
+              {recent.length > 0 && (
+                <section aria-label={t('Недавние')}>
+                  <p className={styles.heading}>
+                    {t('Недавние')}
+                    <button
+                      type='button'
+                      className={styles.clear}
+                      onClick={() => {
+                        writeRecentSearches([])
+                        setRecent([])
+                      }}
+                    >
+                      {t('Очистить')}
+                    </button>
+                  </p>
+                  <ul className={styles.list}>
+                    {recent.map((item) => (
+                      <li key={item}>
+                        <button type='button' className={styles.quick} onClick={() => search(item)}>
+                          <ClockCounterClockwise className={styles.quickIcon} aria-hidden />
+                          {item}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
               <section aria-label={t('Часто ищут')}>
                 <p className={styles.heading}>{t('Часто ищут')}</p>
                 <ul className={styles.list}>
