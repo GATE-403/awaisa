@@ -2,7 +2,7 @@
 
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import type { Business } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import styles from './PageTab.module.css'
 
 interface PageChecklistProps {
@@ -29,23 +29,30 @@ export const PageChecklist = ({
   onAddPhotos,
   onAddDescription,
 }: PageChecklistProps) => {
+  const t = useT()
   if (photoCount === null) return null
   const photosMissing = Math.max(0, PHOTOS_WANTED - photoCount)
   const missing = [
-    !business.coverUrl && { text: 'обложку', action: onAddCover, label: 'Добавить обложку' },
+    !business.coverUrl && {
+      text: t('обложку'),
+      action: onAddCover,
+      label: t('Добавить обложку'),
+    },
     photosMissing > 0 && {
       text:
         photoCount === 0
-          ? pluralize(photosMissing, ['фото работы', 'фото работ', 'фото работ'])
-          : `ещё ${pluralize(photosMissing, ['фото работы', 'фото работ', 'фото работ'])}`,
+          ? t.count(photosMissing, ['фото работы', 'фото работ', 'фото работ'])
+          : t('ещё {photos}', {
+              photos: t.count(photosMissing, ['фото работы', 'фото работ', 'фото работ']),
+            }),
       action: onAddPhotos,
-      label: 'Добавить фото',
+      label: t('Добавить фото'),
     },
-    !business.logoUrl && { text: 'логотип', action: onAddLogo, label: 'Добавить логотип' },
+    !business.logoUrl && { text: t('логотип'), action: onAddLogo, label: t('Добавить логотип') },
     !business.description && {
-      text: 'пару слов о себе',
+      text: t('пару слов о себе'),
       action: onAddDescription,
-      label: 'Написать',
+      label: t('Написать'),
     },
   ].filter((item) => item !== false)
   const [first] = missing
@@ -54,16 +61,20 @@ export const PageChecklist = ({
   const list =
     missing.length === 1
       ? first.text
-      : `${missing
-          .slice(0, -1)
-          .map((item) => item.text)
-          .join(', ')} и ${missing.at(-1)?.text}`
+      : t('{items} и {last}', {
+          items: missing
+            .slice(0, -1)
+            .map((item) => item.text)
+            .join(', '),
+          last: missing.at(-1)?.text ?? '',
+        })
 
   return (
     <p className={styles.checklist}>
       <span>
-        Добавьте {list}
-        {isAboutPhotos ? ': с фото записываются чаще.' : ', и страница будет готова.'}
+        {isAboutPhotos
+          ? t('Добавьте {list}: с фото записываются чаще.', { list })
+          : t('Добавьте {list}, и страница будет готова.', { list })}
       </span>{' '}
       <button type='button' className={styles.checklistAction} onClick={first.action}>
         {first.label}

@@ -3,6 +3,7 @@ import { CaretRight, MapPin } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { createBranch, deleteBranch, updateBranch } from '@/shared/api/clientApi'
 import type { Branch, BranchInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -17,6 +18,7 @@ interface BranchesTabProps {
 }
 
 export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
+  const t = useT()
   const [editing, setEditing] = useState<Branch | 'new' | null>(null)
 
   const handleSave = (input: BranchInput) =>
@@ -27,14 +29,14 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
   const handleDelete = (id: string) => run(() => deleteBranch(slug, id), 'Филиал удалён')
 
   return (
-    <section className={styles.section} aria-label='Филиалы'>
+    <section className={styles.section} aria-label={t('Филиалы')}>
       <SectionHeader
-        title='Филиалы'
-        description='Каждый адрес — своя метка на карте. Клиент выбирает ближайший при записи.'
+        title={t('Филиалы')}
+        description={t('Каждый адрес — своя метка на карте. Клиент выбирает ближайший при записи.')}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
-            Добавить филиал
+            {t('Добавить филиал')}
           </Button>
         }
       />
@@ -49,21 +51,28 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>
                   {branch.name}
-                  {branch.isActive === false && <span className={styles.badge}>Закрыт</span>}
+                  {branch.isActive === false && <span className={styles.badge}>{t('Закрыт')}</span>}
                 </span>
                 <span className={styles.rowMeta}>
-                  {[branch.address || 'Адрес не указан', branch.phone && formatPhone(branch.phone)]
+                  {[
+                    branch.address || t('Адрес не указан'),
+                    branch.phone && formatPhone(branch.phone),
+                  ]
                     .filter(Boolean)
                     .join(' · ')}
                 </span>
               </span>
-              {branch.latitude === null && <span className={styles.cellMuted}>Нет метки</span>}
+              {branch.latitude === null && (
+                <span className={styles.cellMuted}>{t('Нет метки')}</span>
+              )}
               <CaretRight className={styles.chevron} weight='bold' aria-hidden />
             </button>
           </li>
         ))}
       </ul>
-      <RowNote>Без метки филиал не виден на карте. Мастера без филиала принимают во всех.</RowNote>
+      <RowNote>
+        {t('Без метки филиал не виден на карте. Мастера без филиала принимают во всех.')}
+      </RowNote>
 
       <BookingLinks slug={slug} branches={branches} />
 

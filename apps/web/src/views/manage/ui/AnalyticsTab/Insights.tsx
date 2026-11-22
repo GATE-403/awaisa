@@ -11,18 +11,18 @@ import {
 import NextLink from 'next/link'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import type { AnalyticsReport } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
-import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import styles from './AnalyticsTab.module.css'
-import { formatDay, formatMoney } from './analyticsFormat'
+import { analyticsFormat } from './analyticsFormat'
+import { Filled } from './Filled'
 
-const visits = (count: number) => pluralize(count, ['визит', 'визита', 'визитов'])
-const hours = (minutes: number) => `${Math.round(minutes / 60)} ч`
+const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
 
 interface AttentionRowProps {
   icon: ReactNode
@@ -86,6 +86,8 @@ interface AttentionListProps {
 // they are on, clients who stopped coming to the mailing that calls them back, tomorrow's free time
 // to the day itself, stock running out to the stock. Nothing to do, nothing drawn.
 const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
+  const t = useT()
+  const { formatDay } = analyticsFormat(t)
   const { unmarked, lapsed, freeTomorrow, lowStock } = attention
   const isFreeTomorrow = freeTomorrow !== null && freeTomorrow.minutes >= 60
   if (unmarked.count === 0 && lapsed.count === 0 && !isFreeTomorrow && lowStock.count === 0) {
@@ -96,16 +98,18 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-attention'>
       <SectionCaption id='analytics-attention' isInset={false}>
-        Требует внимания
+        {t('Требует внимания')}
       </SectionCaption>
       <ul className={styles.rows}>
         {unmarked.count > 0 && (
           <AttentionRow
             icon={<CircleDashed weight='bold' />}
             tone='orange'
-            title={`${visits(unmarked.count)} без отметки`}
-            detail={unmarked.firstDate ? `с ${formatDay(unmarked.firstDate)}` : undefined}
-            actionLabel='Отметить'
+            title={t('{visits} без отметки', { visits: visits(t, unmarked.count) })}
+            detail={
+              unmarked.firstDate ? t('с {day}', { day: formatDay(unmarked.firstDate) }) : undefined
+            }
+            actionLabel={t('Отметить')}
             href={`?tab=schedule${unmarked.firstDate ? `&date=${unmarked.firstDate}` : ''}`}
           />
         )}
@@ -113,9 +117,11 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
           <AttentionRow
             icon={<UserMinus />}
             tone='red'
-            title={`${pluralize(lapsed.count, ['клиент', 'клиента', 'клиентов'])} давно не были`}
-            detail={`больше ${lapsed.days} дней`}
-            actionLabel='Позвать'
+            title={t('{clients} давно не были', {
+              clients: t.count(lapsed.count, ['клиент', 'клиента', 'клиентов']),
+            })}
+            detail={t('больше {days} дней', { days: lapsed.days })}
+            actionLabel={t('Позвать')}
             onClick={onCallBack}
           />
         )}
@@ -123,9 +129,11 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
           <AttentionRow
             icon={<CalendarBlank />}
             tone='blue'
-            title={`Завтра свободно ≈ ${hours(freeTomorrow.minutes)}`}
-            detail='поделитесь окнами'
-            actionLabel='Открыть день'
+            title={t('Завтра свободно ≈ {hours}', {
+              hours: t.duration(Math.round(freeTomorrow.minutes / 60) * 60),
+            })}
+            detail={t('поделитесь окнами')}
+            actionLabel={t('Открыть день')}
             href={`?tab=schedule&date=${freeTomorrow.date}`}
           />
         )}
@@ -133,8 +141,15 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
           <AttentionRow
             icon={<Package />}
             tone='gray'
-            title={`Заканчивается: ${lowStock.names.join(', ')}${restStock > 0 ? ` и ещё ${restStock}` : ''}`}
-            actionLabel='Склад'
+            title={
+              restStock > 0
+                ? t('Заканчивается: {names} и ещё {count}', {
+                    names: lowStock.names.join(', '),
+                    count: restStock,
+                  })
+                : t('Заканчивается: {names}', { names: lowStock.names.join(', ') })
+            }
+            actionLabel={t('Склад')}
             href='?tab=stock'
           />
         )}
@@ -153,11 +168,15 @@ const signed = (value: number) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${
 // Why the money moved, in one line under the change: visits and the average check (revenue is
 // their product), and the master whose money moved the most.
 const ChangeReasons = ({ totals, masters }: ChangeReasonsProps) => {
+  const t = useT()
   if (totals.revenueChange === null || totals.revenueChange === 0) return null
   const parts: string[] = []
-  if (totals.visitsChange !== null) parts.push(`визитов ${signed(totals.visitsChange)}`)
-  if (totals.averageCheckChange !== null)
-    parts.push(`средний чек ${signed(totals.averageCheckChange)}`)
+  if (totals.visitsChange !== null) {
+    parts.push(t('визитов {change}', { change: signed(totals.visitsChange) }))
+  }
+  if (totals.averageCheckChange !== null) {
+    parts.push(t('средний чек {change}', { change: signed(totals.averageCheckChange) }))
+  }
   const mover = masters
     .filter((master) => master.previousRevenue > 0)
     .map((master) => ({
@@ -168,7 +187,11 @@ const ChangeReasons = ({ totals, masters }: ChangeReasonsProps) => {
       ),
     }))
     .sort((left, right) => Math.abs(right.delta) - Math.abs(left.delta))[0]
-  if (mover && mover.change !== 0) parts.push(`сильнее всех ${mover.name} ${signed(mover.change)}`)
+  if (mover && mover.change !== 0) {
+    parts.push(
+      t('сильнее всех {name} {change}', { name: mover.name, change: signed(mover.change) }),
+    )
+  }
   if (parts.length === 0) return null
 
   return <p className={styles.reasons}>{parts.join(' · ')}</p>
@@ -182,10 +205,12 @@ interface GoalLineProps {
 // The month against the owner's goal: how far, and where this pace ends; one quiet line and a
 // thin bar, no widget. Without a goal, one link sets it.
 const GoalLine = ({ month, onEdit }: GoalLineProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   if (month.goal === null) {
     return (
       <button type='button' className={styles.goalSet} onClick={onEdit}>
-        Задать цель на {month.label}
+        {t('Задать цель на {month}', { month: month.label })}
         <CaretRight weight='bold' aria-hidden />
       </button>
     )
@@ -198,16 +223,28 @@ const GoalLine = ({ month, onEdit }: GoalLineProps) => {
     <div className={styles.goal}>
       <div className={styles.goalHead}>
         <p className={styles.goalText}>
-          Цель на {month.label}: <b>{share}%</b> · {formatMoney(month.revenue)} из{' '}
-          {formatMoney(month.goal)}
+          <Filled
+            text={t('Цель на {month}: {share} · {revenue} из {goal}', {
+              month: month.label,
+              revenue: formatMoney(month.revenue),
+              goal: formatMoney(month.goal),
+            })}
+            parts={{ share: <b>{share}%</b> }}
+          />
           <span className={styles.muted}>
+            {' · '}
             {isReached
-              ? ' · цель достигнута'
-              : ` · в этом темпе ${formatMoney(month.projected)}${isOnPace ? '' : `, не хватит ${formatMoney(month.goal - month.projected)}`}`}
+              ? t('цель достигнута')
+              : isOnPace
+                ? t('в этом темпе {amount}', { amount: formatMoney(month.projected) })
+                : t('в этом темпе {amount}, не хватит {missing}', {
+                    amount: formatMoney(month.projected),
+                    missing: formatMoney(month.goal - month.projected),
+                  })}
           </span>
         </p>
         <button type='button' className={styles.goalEdit} onClick={onEdit}>
-          Изменить
+          {t('Изменить')}
         </button>
       </div>
       <span className={styles.goalBar} data-on-pace={isOnPace || undefined} aria-hidden='true'>
@@ -228,6 +265,7 @@ const GOAL_FORM = 'analytics-goal'
 
 // The month's revenue goal: one amount, and «Убрать цель» when there is one.
 const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
+  const t = useT()
   const [value, setValue] = useState(goal ? maskAmountInput(String(goal)) : '')
   const [isSaving, setIsSaving] = useState(false)
   const amount = Number(value.replace(/\D/g, ''))
@@ -252,31 +290,33 @@ const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
 
   return (
     <Sheet
-      title='Цель на месяц'
+      title={t('Цель на месяц')}
       onClose={onClose}
-      action={{ label: 'Готово', form: GOAL_FORM, disabled: !canSave }}
+      action={{ label: t('Готово'), form: GOAL_FORM, disabled: !canSave }}
     >
       <form id={GOAL_FORM} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label='Цель'>
+        <section className={sheet.group} aria-label={t('Цель')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Выручка за {monthLabel}</span>
+              <span className={sheet.rowLabel}>
+                {t('Выручка за {month}', { month: monthLabel })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label='Цель по выручке, сом'
+                  aria-label={t('Цель по выручке, сом')}
                   inputMode='numeric'
                   placeholder='400 000'
                   value={value}
                   onValueChange={(next) => setValue(maskAmountInput(next.replace(/\D/g, '')))}
                   autoFocus
                 />
-                <span className={sheet.suffix}>сом</span>
+                <span className={sheet.suffix}>{t('сом')}</span>
               </span>
             </label>
           </div>
           <p className={sheet.groupFooter}>
-            Аналитика покажет, сколько уже есть и хватит ли текущего темпа до конца месяца.
+            {t('Аналитика покажет, сколько уже есть и хватит ли текущего темпа до конца месяца.')}
           </p>
         </section>
         {goal !== null && (
@@ -287,7 +327,7 @@ const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
               onClick={() => void save(null)}
               disabled={isSaving}
             >
-              Убрать цель
+              {t('Убрать цель')}
             </button>
           </div>
         )}
@@ -304,20 +344,22 @@ interface LossesGroupProps {
 // Money that did not come: no-shows and late cancellations in som, and who keeps not coming, each
 // opening their card; the footnote names what prevents it (a deposit on booking online).
 const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const total = losses.noShows.amount + losses.lateCancellations.amount
   if (total === 0 && losses.repeatNoShows.length === 0) return null
 
   return (
     <section className={styles.group} aria-labelledby='analytics-losses'>
       <SectionCaption id='analytics-losses' isInset={false}>
-        Потери <span className={forms.groupCount}>{formatMoney(total)}</span>
+        {t('Потери')} <span className={forms.groupCount}>{formatMoney(total)}</span>
       </SectionCaption>
       <ul className={styles.rows}>
         {losses.noShows.count > 0 && (
           <li className={styles.row}>
             <span className={styles.rowText}>
-              <span className={styles.rowTitle}>Неявки</span>
-              <span className={styles.rowMeta}>{visits(losses.noShows.count)}</span>
+              <span className={styles.rowTitle}>{t('Неявки')}</span>
+              <span className={styles.rowMeta}>{visits(t, losses.noShows.count)}</span>
             </span>
             <span className={styles.rowValue}>{formatMoney(losses.noShows.amount)}</span>
           </li>
@@ -325,9 +367,11 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
         {losses.lateCancellations.count > 0 && (
           <li className={styles.row}>
             <span className={styles.rowText}>
-              <span className={styles.rowTitle}>Поздние отмены</span>
+              <span className={styles.rowTitle}>{t('Поздние отмены')}</span>
               <span className={styles.rowMeta}>
-                {visits(losses.lateCancellations.count)} отменили меньше чем за сутки
+                {t('{visits} отменили меньше чем за сутки', {
+                  visits: visits(t, losses.lateCancellations.count),
+                })}
               </span>
             </span>
             <span className={styles.rowValue}>{formatMoney(losses.lateCancellations.amount)}</span>
@@ -343,8 +387,10 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
               <span className={styles.rowText}>
                 <span className={styles.rowTitle}>{client.name || formatPhone(client.phone)}</span>
                 <span className={styles.rowMeta}>
-                  не пришёл {pluralize(client.count, ['раз', 'раза', 'раз'])} за полгода ·{' '}
-                  {formatPhone(client.phone)}
+                  {t('не пришёл {times} за полгода', {
+                    times: t.count(client.count, ['раз', 'раза', 'раз']),
+                  })}{' '}
+                  · {formatPhone(client.phone)}
                 </span>
               </span>
               <CaretRight weight='bold' aria-hidden className={styles.rowChevron} />
@@ -353,11 +399,16 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
         ))}
       </ul>
       <p className={styles.footnote}>
-        Предоплата при записи онлайн защищает от неявок:{' '}
-        <NextLink className={styles.footnoteLink} href='?tab=services'>
-          включите её в услугах
-        </NextLink>
-        .
+        <Filled
+          text={t('Предоплата при записи онлайн защищает от неявок: {link}.')}
+          parts={{
+            link: (
+              <NextLink className={styles.footnoteLink} href='?tab=services'>
+                {t('включите её в услугах')}
+              </NextLink>
+            ),
+          }}
+        />
       </p>
     </section>
   )
@@ -376,6 +427,8 @@ const SOURCE_PARTS = [
 // Where the period's visits were booked: online by the clients themselves, by the staff, imported;
 // and per branch when there are several.
 const SourcesGroup = ({ sources }: SourcesGroupProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const parts = SOURCE_PARTS.map((part) => ({ ...part, value: sources[part.key] })).filter(
     (part) => part.value > 0,
   )
@@ -385,7 +438,7 @@ const SourcesGroup = ({ sources }: SourcesGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-sources'>
       <SectionCaption id='analytics-sources' isInset={false}>
-        Откуда записи
+        {t('Откуда записи')}
       </SectionCaption>
       <div className={styles.payments}>
         <span className={styles.paymentsBar} aria-hidden='true'>
@@ -397,8 +450,8 @@ const SourcesGroup = ({ sources }: SourcesGroupProps) => {
           {parts.map((part) => (
             <li key={part.key}>
               <i data-source={part.key} aria-hidden='true' />
-              {part.label} <b>{Math.round((part.value / total) * 100)}%</b>
-              <span className={styles.muted}>{visits(part.value)}</span>
+              {t(part.label)} <b>{Math.round((part.value / total) * 100)}%</b>
+              <span className={styles.muted}>{visits(t, part.value)}</span>
             </li>
           ))}
         </ul>
@@ -409,7 +462,7 @@ const SourcesGroup = ({ sources }: SourcesGroupProps) => {
             <li key={branch.id} className={styles.row}>
               <span className={styles.rowText}>
                 <span className={styles.rowTitle}>{branch.name}</span>
-                <span className={styles.rowMeta}>{visits(branch.visits)}</span>
+                <span className={styles.rowMeta}>{visits(t, branch.visits)}</span>
               </span>
               <span className={styles.rowValue}>{formatMoney(branch.revenue)}</span>
             </li>
@@ -428,19 +481,27 @@ interface PromotionsGroupProps {
 // What each promotion brought against what it gave away, and what loyalty paid for; nothing when
 // none of it was used in the period.
 const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const loyaltyParts = [
-    loyalty.bonusSpent > 0 && `бонусами оплачено ${formatMoney(loyalty.bonusSpent)}`,
-    loyalty.certificateSpent > 0 && `сертификатами ${formatMoney(loyalty.certificateSpent)}`,
-    loyalty.subscriptionVisits > 0 && `по абонементам ${visits(loyalty.subscriptionVisits)}`,
+    loyalty.bonusSpent > 0 &&
+      t('бонусами оплачено {amount}', { amount: formatMoney(loyalty.bonusSpent) }),
+    loyalty.certificateSpent > 0 &&
+      t('сертификатами {amount}', { amount: formatMoney(loyalty.certificateSpent) }),
+    loyalty.subscriptionVisits > 0 &&
+      t('по абонементам {visits}', { visits: visits(t, loyalty.subscriptionVisits) }),
     loyalty.subscriptionsSold > 0 &&
-      `продано абонементов: ${loyalty.subscriptionsSold} на ${formatMoney(loyalty.subscriptionsRevenue)}`,
+      t('продано абонементов: {count} на {amount}', {
+        count: loyalty.subscriptionsSold,
+        amount: formatMoney(loyalty.subscriptionsRevenue),
+      }),
   ].filter(Boolean)
   if (promotions.length === 0 && loyaltyParts.length === 0) return null
 
   return (
     <section className={styles.group} aria-labelledby='analytics-promotions'>
       <SectionCaption id='analytics-promotions' isInset={false}>
-        Акции и лояльность
+        {t('Акции и лояльность')}
       </SectionCaption>
       {promotions.length > 0 && (
         <ul className={styles.rows}>
@@ -449,7 +510,8 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
               <span className={styles.rowText}>
                 <span className={styles.rowTitle}>{promotion.title}</span>
                 <span className={styles.rowMeta}>
-                  {visits(promotion.visits)} · скидки {formatMoney(promotion.discount)}
+                  {visits(t, promotion.visits)} ·{' '}
+                  {t('скидки {amount}', { amount: formatMoney(promotion.discount) })}
                 </span>
               </span>
               <span className={styles.rowValue}>{formatMoney(promotion.revenue)}</span>
@@ -458,7 +520,9 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
         </ul>
       )}
       {loyaltyParts.length > 0 && (
-        <p className={styles.footnote}>Лояльность: {loyaltyParts.join(', ')}.</p>
+        <p className={styles.footnote}>
+          {t('Лояльность: {parts}.', { parts: loyaltyParts.join(', ') })}
+        </p>
       )}
     </section>
   )

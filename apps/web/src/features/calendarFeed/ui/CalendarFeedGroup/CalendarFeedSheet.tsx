@@ -7,6 +7,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { ArrowsClockwise, Copy, GoogleLogo } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
+import { useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -51,6 +52,7 @@ export const CalendarFeedSheet = ({
   onClose,
 }: CalendarFeedSheetProps) => {
   const toast = useToast()
+  const t = useT()
   const { feed, url, issue, setMaster, setPhones } = state
   const [isBusy, setIsBusy] = useState(false)
   const [specialistId, setSpecialistId] = useState<string | null>(feed?.specialistId ?? null)
@@ -61,7 +63,7 @@ export const CalendarFeedSheet = ({
     try {
       await action()
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsBusy(false)
     }
@@ -73,7 +75,7 @@ export const CalendarFeedSheet = ({
       await issue(specialistId)
       haptic('success')
       if (wasActive)
-        toast.show({ title: 'Ссылка сменилась, старая больше не работает', type: 'success' })
+        toast.show({ title: t('Ссылка сменилась, старая больше не работает'), type: 'success' })
     })
 
   const handleMaster = (next: string) => {
@@ -86,41 +88,46 @@ export const CalendarFeedSheet = ({
     if (!url) return
     try {
       await navigator.clipboard.writeText(url)
-      toast.show({ title: 'Ссылка скопирована', type: 'success' })
+      toast.show({ title: t('Ссылка скопирована'), type: 'success' })
     } catch {
-      toast.show({ title: 'Не получилось скопировать', type: 'error' })
+      toast.show({ title: t('Не удалось скопировать'), type: 'error' })
     }
   }
 
   const status = (() => {
     if (!feed?.isActive) return null
     if (feed.lastReadAt)
-      return `Календарь обновлялся ${readTime.format(new Date(feed.lastReadAt))}.`
-    if (!url) return 'Ссылка выдана на другом устройстве. Новая отключит прежнюю.'
+      return t('Календарь обновлялся {date}.', { date: readTime.format(new Date(feed.lastReadAt)) })
+    if (!url) return t('Ссылка выдана на другом устройстве. Новая отключит прежнюю.')
     return null
   })()
 
   return (
-    <Sheet title='Календарь на телефоне' onClose={onClose} cancelLabel='Закрыть'>
+    <Sheet title={t('Календарь на телефоне')} onClose={onClose} cancelLabel={t('Закрыть')}>
       <div className={sheet.form}>
         <p className={styles.intro}>
-          {isBusiness ? 'Записи' : 'Ваши записи'} за месяц назад и три вперёд появятся в Календаре
-          iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми.
+          {isBusiness
+            ? t(
+                'Записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми.',
+              )
+            : t(
+                'Ваши записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми.',
+              )}
         </p>
 
         {isBusiness && (
-          <section className={sheet.group} aria-label='Что показывать'>
-            <SectionCaption>Что показывать</SectionCaption>
+          <section className={sheet.group} aria-label={t('Что показывать')}>
+            <SectionCaption>{t('Что показывать')}</SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Мастер</span>
+                <span className={sheet.rowLabel}>{t('Мастер')}</span>
                 <Select
                   variant='plain'
-                  aria-label='Мастер'
+                  aria-label={t('Мастер')}
                   value={specialistId ?? ALL}
                   disabled={isBusy}
                   items={[
-                    { value: ALL, label: 'Все мастера' },
+                    { value: ALL, label: t('Все мастера') },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   onValueChange={(value) => handleMaster(String(value))}
@@ -128,7 +135,7 @@ export const CalendarFeedSheet = ({
               </div>
               {canSetPhones && (
                 <label className={sheet.row}>
-                  <span className={sheet.rowLabel}>Номера клиентов целиком</span>
+                  <span className={sheet.rowLabel}>{t('Номера клиентов целиком')}</span>
                   <Switch
                     checked={feed?.isPhoneShown ?? false}
                     disabled={isBusy || !feed}
@@ -138,7 +145,9 @@ export const CalendarFeedSheet = ({
               )}
             </div>
             {canSetPhones && (
-              <RowNote>{HIDDEN_PHONE_NOTE} Касается всех календарей бизнеса.</RowNote>
+              <RowNote>
+                {t(HIDDEN_PHONE_NOTE)} {t('Касается всех календарей бизнеса.')}
+              </RowNote>
             )}
           </section>
         )}
@@ -148,27 +157,27 @@ export const CalendarFeedSheet = ({
         <div className={styles.actions}>
           {url ? (
             <>
-              <GlyphGroup label='Ещё'>
+              <GlyphGroup label={t('Ещё')}>
                 <GlyphButton
                   icon={<GoogleLogo />}
-                  label='Добавить в Google Календарь'
+                  label={t('Добавить в Google Календарь')}
                   onClick={() => window.open(toGoogleCalendar(url), '_blank', 'noopener')}
                 />
                 <GlyphButton
                   icon={<Copy />}
-                  label='Скопировать ссылку'
+                  label={t('Скопировать ссылку')}
                   onClick={() => void handleCopy()}
                 />
                 <GlyphButton
                   icon={<ArrowsClockwise />}
-                  label='Сменить ссылку'
+                  label={t('Сменить ссылку')}
                   disabled={isBusy}
                   onClick={() => void handleIssue()}
                 />
               </GlyphGroup>
               {/* The sheet's main action comes last: nothing follows it. */}
               <ButtonLink href={toWebcal(url)} size='sm' className={styles.primary}>
-                Подписаться
+                {t('Подписаться')}
               </ButtonLink>
             </>
           ) : (
@@ -179,7 +188,7 @@ export const CalendarFeedSheet = ({
               disabled={isBusy || !feed}
               onClick={() => void handleIssue()}
             >
-              {feed?.isActive ? 'Получить новую ссылку' : 'Получить ссылку'}
+              {feed?.isActive ? t('Получить новую ссылку') : t('Получить ссылку')}
             </Button>
           )}
         </div>

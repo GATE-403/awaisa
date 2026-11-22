@@ -4,6 +4,7 @@ import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useState } from 'react'
 import type { Service, Specialist, WorkPhoto, WorkPhotoInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -35,6 +36,7 @@ export const WorkPhotoSheet = ({
   step,
   onMakeFirst,
 }: WorkPhotoSheetProps) => {
+  const t = useT()
   const isLastStep = !step || step.index >= step.total
   const [serviceId, setServiceId] = useState(photo.serviceId ?? NONE)
   const [specialistId, setSpecialistId] = useState(photo.specialistId ?? NONE)
@@ -57,27 +59,31 @@ export const WorkPhotoSheet = ({
 
   return (
     <Sheet
-      title={step ? `Фото ${step.index} из ${step.total}` : 'Фото работы'}
+      title={
+        step
+          ? t('Фото {index} из {total}', { index: step.index, total: step.total })
+          : t('Фото работы')
+      }
       onClose={onClose}
       action={{
-        label: isLastStep ? 'Готово' : 'Далее',
+        label: isLastStep ? t('Готово') : t('Далее'),
         onClick: () => void save(),
         disabled: isSaving,
       }}
     >
       <div className={sheet.form}>
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-        <img src={photo.url} alt='Фото работы' className={styles.preview} />
-        <section className={sheet.group} aria-label='Что на фото'>
+        <img src={photo.url} alt={t('Фото работы')} className={styles.preview} />
+        <section className={sheet.group} aria-label={t('Что на фото')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Услуга</span>
+              <span className={sheet.rowLabel}>{t('Услуга')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label='Услуга на фото'
+                  aria-label={t('Услуга на фото')}
                   items={[
-                    { value: NONE, label: 'Не указана' },
+                    { value: NONE, label: t('Не указана') },
                     ...services.map((service) => ({ value: service.id, label: service.name })),
                   ]}
                   value={serviceId}
@@ -93,13 +99,13 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Мастер</span>
+              <span className={sheet.rowLabel}>{t('Мастер')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label='Мастер на фото'
+                  aria-label={t('Мастер на фото')}
                   items={[
-                    { value: NONE, label: 'Любой' },
+                    { value: NONE, label: t('Любой') },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   value={specialistId}
@@ -108,7 +114,7 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Показывать клиентам</span>
+              <span className={sheet.rowLabel}>{t('Показывать клиентам')}</span>
               <Switch checked={isShown} onCheckedChange={setIsShown} />
             </label>
             {onMakeFirst && (
@@ -117,16 +123,18 @@ export const WorkPhotoSheet = ({
                 className={`${sheet.row} ${styles.rowAction}`}
                 onClick={onMakeFirst}
               >
-                Поставить первой
+                {t('Поставить первой')}
               </button>
             )}
           </div>
           <p className={sheet.groupFooter}>
             {photo.reports > 0 && photo.isHidden
-              ? `Скрыто после жалоб (${photo.reports}). Включите, если с фото всё в порядке.`
+              ? t('Скрыто после жалоб ({count}). Включите, если с фото всё в порядке.', {
+                  count: photo.reports,
+                })
               : serviceId === NONE
-                ? 'Укажите услугу — в ленте «Работы» под фото появится «Записаться» на неё.'
-                : 'В ленте «Работы» под фото будет цена, ближайшее время и «Записаться».'}
+                ? t('Укажите услугу — в ленте «Работы» под фото появится «Записаться» на неё.')
+                : t('В ленте «Работы» под фото будет цена, ближайшее время и «Записаться».')}
           </p>
         </section>
         <HoldButton
@@ -135,7 +143,7 @@ export const WorkPhotoSheet = ({
             onClose()
           }}
         >
-          Удалить фото
+          {t('Удалить фото')}
         </HoldButton>
       </div>
     </Sheet>

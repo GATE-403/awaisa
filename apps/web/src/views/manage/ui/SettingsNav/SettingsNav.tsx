@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react'
 import { formatWeekSchedule } from '@/entities/business'
 import { getSettingsSummary } from '@/shared/api/clientApi'
 import type { Business, Catalog, SettingsSummary } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
@@ -117,6 +117,7 @@ const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е')
 // on its right what is inside («2», «1 действует», «Бонусы 5%», «2 заканчиваются» in red), so the
 // state of the business reads without opening anything.
 export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavProps) => {
+  const t = useT()
   const [summary, setSummary] = useState<SettingsSummary | null>(null)
   const access = usePlanAccess()
   const [query, setQuery] = useState('')
@@ -144,52 +145,62 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
     branches: { text: String(branches) },
     services: { text: String(catalog.services.filter((item) => item.isActive !== false).length) },
     masters: { text: String(catalog.specialists.filter((item) => item.isActive !== false).length) },
-    hours: { text: formatWeekSchedule(business.hours) },
+    hours: { text: formatWeekSchedule(business.hours, t) },
     ...(access && {
       billing: {
-        text: access.status === 'trial' ? `${access.title} · пробный` : access.title,
+        text:
+          access.status === 'trial' ? t('{plan} · пробный', { plan: access.title }) : access.title,
         isAlert: access.status === 'expired',
       },
     }),
     ...(summary && {
-      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : 'Выкл.' },
+      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : t('Выкл.') },
       ...(summary.team > 0 && { team: { text: String(summary.team) } }),
       promotions: {
         text:
           summary.activePromotions > 0
-            ? `${summary.activePromotions} ${summary.activePromotions === 1 ? 'действует' : 'действуют'}`
-            : 'Нет',
+            ? t(summary.activePromotions === 1 ? '{count} действует' : '{count} действуют', {
+                count: summary.activePromotions,
+              })
+            : t('Нет'),
       },
       loyalty: {
         text:
           summary.bonusPercent !== null
-            ? `Бонусы ${summary.bonusPercent}%`
+            ? t('Бонусы {percent}%', { percent: summary.bonusPercent })
             : summary.plans > 0
-              ? pluralize(summary.plans, ['абонемент', 'абонемента', 'абонементов'])
-              : 'Выкл.',
+              ? t.count(summary.plans, ['абонемент', 'абонемента', 'абонементов'])
+              : t('Выкл.'),
       },
       stock:
         summary.lowStock > 0
           ? {
-              text: `${summary.lowStock} ${summary.lowStock === 1 ? 'заканчивается' : 'заканчиваются'}`,
+              text: t(summary.lowStock === 1 ? '{count} заканчивается' : '{count} заканчиваются', {
+                count: summary.lowStock,
+              }),
               isAlert: true,
             }
-          : { text: summary.stockItems > 0 ? String(summary.stockItems) : 'Пусто' },
+          : { text: summary.stockItems > 0 ? String(summary.stockItems) : t('Пусто') },
       fiscal:
         summary.failedReceipts > 0
           ? {
-              text: `${summary.failedReceipts} не ${summary.failedReceipts === 1 ? 'прошёл' : 'прошли'}`,
+              text: t(summary.failedReceipts === 1 ? '{count} не прошёл' : '{count} не прошли', {
+                count: summary.failedReceipts,
+              }),
               isAlert: true,
             }
-          : { text: summary.isFiscalOn ? 'Чеки' : 'Выкл.' },
+          : { text: summary.isFiscalOn ? t('Чеки') : t('Выкл.') },
     }),
   }
 
-  // By the start of words, each typed word somewhere («або» finds «абонемент», not «работы»).
+  // By the start of words, each typed word somewhere («або» finds «абонемент», not «работы»);
+  // the name is searched as shown too, so the search works in every language.
   const typed = needle.split(/\s+/).filter(Boolean)
   const results = needle
     ? [...SETTINGS_ENTRIES, ...PAGE_ENTRIES].filter((entry) => {
-        const words = normalize(`${entry.label} ${entry.words}`).split(/[\s«»().,-]+/)
+        const words = normalize(`${t(entry.label)} ${entry.label} ${entry.words}`).split(
+          /[\s«»().,-]+/,
+        )
         return typed.every((part) => words.some((word) => word.startsWith(part)))
       })
     : null
@@ -209,8 +220,8 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
             <Glyph />
           </span>
           <span className={styles.label}>
-            <span className={styles.labelText}>{entry.label}</span>
-            {entry.place && <span className={styles.place}>{entry.place}</span>}
+            <span className={styles.labelText}>{t(entry.label)}</span>
+            {entry.place && <span className={styles.place}>{t(entry.place)}</span>}
           </span>
           {value && (
             <span className={styles.value} data-alert={value.isAlert || undefined}>
@@ -224,29 +235,33 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
   }
 
   return (
-    <nav aria-label='Настройки' className={styles.nav}>
+    <nav aria-label={t('Настройки')} className={styles.nav}>
       {/* With a mouse over the list; on phones it floats at the window's foot, under the thumb. */}
       <FloatingToolbar className={styles.search}>
         <SearchField
           value={query}
           onChange={search}
-          placeholder='Поиск'
-          label='Поиск по настройкам'
+          placeholder={t('Поиск')}
+          label={t('Поиск по настройкам')}
         />
       </FloatingToolbar>
       {results ? (
         results.length > 0 ? (
-          <ul className={styles.list} aria-label='Найдено'>
+          <ul className={styles.list} aria-label={t('Найдено')}>
             {results.map(row)}
           </ul>
         ) : (
-          <EmptyState variant='inline' title='Ничего не нашли' text='Попробуйте другое слово.' />
+          <EmptyState
+            variant='inline'
+            title={t('Ничего не нашли')}
+            text={t('Попробуйте другое слово.')}
+          />
         )
       ) : (
         SETTINGS_GROUPS.map((group) => (
-          <section key={group.label} className={styles.group} aria-label={group.label}>
+          <section key={group.label} className={styles.group} aria-label={t(group.label)}>
             <SectionCaption as='h2' className={styles.caption}>
-              {group.label}
+              {t(group.label)}
             </SectionCaption>
             <ul className={styles.list}>
               {group.items.map((item) =>

@@ -55,6 +55,7 @@ import type {
   WorkPhoto,
 } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
@@ -105,6 +106,7 @@ const SECTIONS: { value: PageSection; label: string }[] = [
 // sheet, so the page stays what clients see), then tabs: the work as a grid, the masters, the
 // week's hours. The logo and the cover change from their own buttons.
 export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
+  const t = useT()
   const today = useToday()
   const hasPayroll = useHasFeature('payroll')
   const coverInput = useRef<HTMLInputElement>(null)
@@ -136,9 +138,10 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       items: catalog.services.filter((service) => service.categoryId === category.id),
     }))
     .filter((group) => group.items.length > 0)
-  const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes) : null
+  const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes, t) : null
   const todayWeekday = today ? weekdayOf(today.dayKey) : null
   const kindLabel = BUSINESS_KINDS.find((kind) => kind.value === business.kind)?.label
+  const kindText = kindLabel ? t(kindLabel) : undefined
   const settingsHref = (tab: string) => `/manage/${slug}?tab=${tab}`
   const handlePhotos = useCallback((next: WorkPhoto[]) => setPhotos(next), [])
   // Each service pictured as on the public page: its first visible tagged work, else the cover.
@@ -179,13 +182,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     setBusy(kind)
     await run(
       () => (kind === 'cover' ? uploadCover(slug, file) : uploadLogo(slug, file)),
-      kind === 'cover' ? 'Обложка обновлена' : 'Логотип обновлён',
+      kind === 'cover' ? t('Обложка обновлена') : t('Логотип обновлён'),
     )
     setBusy(null)
   }
 
   const save = (input: UpdateBusinessInput) =>
-    run(() => updateBusiness(slug, input), 'Страница сохранена')
+    run(() => updateBusiness(slug, input), t('Страница сохранена'))
 
   const share = () => setIsSharing(true)
 
@@ -193,23 +196,23 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const tabActions: Record<PageSection, TabAction | null> = {
     works:
       (photoCount ?? 0) < MAX_PHOTOS
-        ? { label: 'Добавить', ariaLabel: 'Добавить фото', icon: plus, onClick: addPhotos }
+        ? { label: t('Добавить'), ariaLabel: t('Добавить фото'), icon: plus, onClick: addPhotos }
         : null,
     services: {
-      label: 'Добавить',
-      ariaLabel: 'Добавить услугу',
+      label: t('Добавить'),
+      ariaLabel: t('Добавить услугу'),
       icon: plus,
       onClick: () => setEditingService('new'),
     },
     masters: {
-      label: 'Добавить',
-      ariaLabel: 'Добавить мастера',
+      label: t('Добавить'),
+      ariaLabel: t('Добавить мастера'),
       icon: plus,
       onClick: () => setEditingMaster('new'),
     },
     hours: {
-      label: 'Изменить',
-      ariaLabel: 'Изменить часы',
+      label: t('Изменить'),
+      ariaLabel: t('Изменить часы'),
       icon: <PencilSimple weight='bold' aria-hidden />,
       onClick: () => setIsEditingHours(true),
     },
@@ -218,13 +221,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
   const saveService = (input: ServiceInput) =>
     editingService && editingService !== 'new'
-      ? run(() => updateService(slug, editingService.id, input), 'Услуга сохранена')
-      : run(() => createService(slug, input), 'Услуга добавлена')
+      ? run(() => updateService(slug, editingService.id, input), t('Услуга сохранена'))
+      : run(() => createService(slug, input), t('Услуга добавлена'))
 
   const saveMaster = (input: SpecialistInput) =>
     editingMaster && editingMaster !== 'new'
-      ? run(() => updateSpecialist(slug, editingMaster.id, input), 'Мастер сохранён')
-      : run(() => createSpecialist(slug, input), 'Мастер добавлен')
+      ? run(() => updateSpecialist(slug, editingMaster.id, input), t('Мастер сохранён'))
+      : run(() => createSpecialist(slug, input), t('Мастер добавлен'))
 
   const tabCounts: Partial<Record<PageSection, () => number | undefined>> = {
     works: () => photoCount ?? undefined,
@@ -252,31 +255,31 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
             // biome-ignore lint/performance/noImgElement: already resized WebP from our API
             <img
               src={business.coverUrl}
-              alt='Обложка'
+              alt={t('Обложка')}
               className={styles.coverImage}
               fetchPriority='high'
             />
           )}
           {business.coverUrl ? (
             <Menu
-              label='Обложка'
+              label={t('Обложка')}
               className={styles.coverButton}
               trigger={
                 <>
                   <Camera weight='bold' aria-hidden />
-                  {busy === 'cover' ? 'Загружаем…' : 'Обложка'}
+                  {busy === 'cover' ? t('Загружаем…') : t('Обложка')}
                 </>
               }
             >
               <MenuItem icon={<Camera aria-hidden />} onClick={() => coverInput.current?.click()}>
-                Заменить обложку
+                {t('Заменить обложку')}
               </MenuItem>
               <MenuItem
                 variant='danger'
                 icon={<Trash aria-hidden />}
-                onClick={() => void run(() => removeCover(slug), 'Обложка удалена')}
+                onClick={() => void run(() => removeCover(slug), t('Обложка удалена'))}
               >
-                Удалить обложку
+                {t('Удалить обложку')}
               </MenuItem>
             </Menu>
           ) : (
@@ -287,23 +290,23 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
               disabled={busy !== null}
             >
               <Camera weight='bold' aria-hidden />
-              {busy === 'cover' ? 'Загружаем…' : 'Добавить обложку'}
+              {busy === 'cover' ? t('Загружаем…') : t('Добавить обложку')}
             </button>
           )}
         </div>
 
         <div className={styles.profileRow}>
           {business.logoUrl ? (
-            <Menu label='Логотип' className={styles.logoButton} trigger={logo}>
+            <Menu label={t('Логотип')} className={styles.logoButton} trigger={logo}>
               <MenuItem icon={<Camera aria-hidden />} onClick={() => logoInput.current?.click()}>
-                Заменить логотип
+                {t('Заменить логотип')}
               </MenuItem>
               <MenuItem
                 variant='danger'
                 icon={<Trash aria-hidden />}
-                onClick={() => void run(() => removeLogo(slug), 'Логотип удалён')}
+                onClick={() => void run(() => removeLogo(slug), t('Логотип удалён'))}
               >
-                Удалить логотип
+                {t('Удалить логотип')}
               </MenuItem>
             </Menu>
           ) : (
@@ -312,7 +315,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
               className={styles.logoButton}
               onClick={() => logoInput.current?.click()}
               disabled={busy !== null}
-              aria-label='Добавить логотип'
+              aria-label={t('Добавить логотип')}
             >
               {logo}
             </button>
@@ -326,16 +329,16 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
               className={styles.edit}
               onClick={() => setIsEditing(true)}
             >
-              Редактировать
+              {t('Редактировать')}
             </Button>
-            <GlyphGroup label='Страница'>
-              <GlyphButton icon={<ShareNetwork />} label='Поделиться' onClick={share} />
+            <GlyphGroup label={t('Страница')}>
+              <GlyphButton icon={<ShareNetwork />} label={t('Поделиться')} onClick={share} />
               <a
                 href={`/${slug}`}
                 target='_blank'
                 rel='noreferrer'
-                aria-label='Как видят клиенты'
-                title='Как видят клиенты'
+                aria-label={t('Как видят клиенты')}
+                title={t('Как видят клиенты')}
               >
                 <ArrowUpRight aria-hidden />
               </a>
@@ -345,18 +348,18 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
         <div className={styles.bio}>
           <h2 className={styles.name}>{business.name}</h2>
-          <p className={styles.line}>{[kindLabel, business.address].filter(Boolean).join(' · ')}</p>
+          <p className={styles.line}>{[kindText, business.address].filter(Boolean).join(' · ')}</p>
           {status && (
             <p className={styles.open} data-open={status.isOpen || undefined}>
               {status.label}
             </p>
           )}
-          {!business.isPublished && <p className={styles.unpublished}>Скрыта от клиентов</p>}
+          {!business.isPublished && <p className={styles.unpublished}>{t('Скрыта от клиентов')}</p>}
           {business.description ? (
             <p className={styles.description}>{business.description}</p>
           ) : (
             <button type='button' className={styles.addBio} onClick={() => setIsEditing(true)}>
-              Добавить пару слов о себе
+              {t('Добавить пару слов о себе')}
             </button>
           )}
         </div>
@@ -380,9 +383,9 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
       <div className={styles.sections}>
         <TextTabs
-          label='Разделы страницы'
+          label={t('Разделы страницы')}
           items={SECTIONS.map((item) => ({
-            label: item.label,
+            label: t(item.label),
             count: tabCounts[item.value]?.(),
             isActive: section === item.value,
             onSelect: () => setSection(item.value),
@@ -407,19 +410,19 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       {/* Phones: the page's tools float at the window's foot (the cabinet's rule for a section's
           tools): thin glyphs in one capsule and the open tab's action as a labelled accent button. */}
       <FloatingToolbar align='end' className={styles.phoneTools}>
-        <GlyphGroup label='Инструменты страницы'>
+        <GlyphGroup label={t('Инструменты страницы')}>
           <GlyphButton
             icon={<PencilSimple />}
-            label='Редактировать'
+            label={t('Редактировать')}
             onClick={() => setIsEditing(true)}
           />
-          <GlyphButton icon={<ShareNetwork />} label='Поделиться' onClick={share} />
+          <GlyphButton icon={<ShareNetwork />} label={t('Поделиться')} onClick={share} />
           <a
             href={`/${slug}`}
             target='_blank'
             rel='noreferrer'
-            aria-label='Как видят клиенты'
-            title='Как видят клиенты'
+            aria-label={t('Как видят клиенты')}
+            title={t('Как видят клиенты')}
           >
             <ArrowUpRight aria-hidden />
           </a>
@@ -463,8 +466,8 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         {serviceGroups.length === 0 ? (
           <EmptyState
             variant='inline'
-            title='Добавьте услуги'
-            text='С ценой и длительностью: по ним клиенты записываются.'
+            title={t('Добавьте услуги')}
+            text={t('С ценой и длительностью: по ним клиенты записываются.')}
           />
         ) : (
           <div className={styles.serviceGroups}>
@@ -484,12 +487,17 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                       <OfferCard
                         offer={toOffer(service)}
                         isHit={service.isPopular}
-                        linkLabel={`Изменить «${service.name}»${service.isActive === false ? ', скрыта' : ''}`}
-                        actionLabel='Изменить'
+                        linkLabel={t(
+                          service.isActive === false
+                            ? 'Изменить «{name}», скрыта'
+                            : 'Изменить «{name}»',
+                          { name: service.name },
+                        )}
+                        actionLabel={t('Изменить')}
                         onSelect={() => setEditingService(service)}
                         action={
                           service.isActive === false ? (
-                            <span className={styles.offMark}>Скрыта</span>
+                            <span className={styles.offMark}>{t('Скрыта')}</span>
                           ) : undefined
                         }
                         isPlaceHidden
@@ -507,7 +515,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           onClick={() => setIsAddingCategory(true)}
         >
           <Plus weight='bold' aria-hidden />
-          Категория
+          {t('Категория')}
         </button>
       </div>
 
@@ -520,8 +528,8 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         {catalog.specialists.length === 0 ? (
           <EmptyState
             variant='inline'
-            title='Добавьте мастеров'
-            text='Клиенты выбирают мастера по фото при записи.'
+            title={t('Добавьте мастеров')}
+            text={t('Клиенты выбирают мастера по фото при записи.')}
           />
         ) : (
           <ul className={styles.masters}>
@@ -531,7 +539,9 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 className={master.isActive === false ? styles.inactive : undefined}
               >
                 <MasterCard specialist={master} onSelect={() => setEditingMaster(master)}>
-                  {master.isActive === false && <span className={styles.offMark}>Не работает</span>}
+                  {master.isActive === false && (
+                    <span className={styles.offMark}>{t('Не работает')}</span>
+                  )}
                 </MasterCard>
               </li>
             ))}
@@ -555,7 +565,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         accept={ACCEPT}
         hidden
         onChange={upload('cover')}
-        aria-label='Файл обложки'
+        aria-label={t('Файл обложки')}
       />
       <input
         ref={logoInput}
@@ -563,7 +573,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         accept={ACCEPT}
         hidden
         onChange={upload('logo')}
-        aria-label='Файл логотипа'
+        aria-label={t('Файл логотипа')}
       />
 
       {editingService && (
@@ -592,7 +602,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                       file
                         ? uploadSpecialistPhoto(slug, editingMaster.id, file)
                         : removeSpecialistPhoto(slug, editingMaster.id),
-                    file ? 'Фото обновлено' : 'Фото удалено',
+                    file ? t('Фото обновлено') : t('Фото удалено'),
                   )
           }
           slug={slug}
@@ -617,7 +627,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       {isAddingCategory && (
         <CategoryDialog
           onClose={() => setIsAddingCategory(false)}
-          onSave={(name) => run(() => createCategory(slug, name), 'Категория добавлена')}
+          onSave={(name) => run(() => createCategory(slug, name), t('Категория добавлена'))}
         />
       )}
       {payingMaster && (
@@ -656,7 +666,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       {isEditing && (
         <EditPageSheet
           business={business}
-          hoursText={formatWeekSchedule(business.hours)}
+          hoursText={formatWeekSchedule(business.hours, t)}
           onEditHours={() => {
             setIsEditing(false)
             setIsEditingHours(true)

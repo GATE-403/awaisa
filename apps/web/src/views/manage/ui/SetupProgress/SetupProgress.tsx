@@ -5,6 +5,7 @@ import { Check } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
 
@@ -15,21 +16,22 @@ interface SetupProgressProps {
 
 export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   const toast = useToast()
+  const t = useT()
   const wasIncomplete = useRef(false)
   const steps: { label: string; tab: ManageTab; isDone: boolean }[] = [
     {
-      label: 'Добавьте услуги',
+      label: t('Добавьте услуги'),
       tab: 'services',
       isDone: catalog.services.some((service) => service.isActive !== false),
     },
     {
-      label: 'Добавьте мастеров',
+      label: t('Добавьте мастеров'),
       tab: 'masters',
       isDone: catalog.specialists.some(
         (master) => master.isActive !== false && master.serviceIds.length > 0,
       ),
     },
-    { label: 'Проверьте график', tab: 'hours', isDone: business.hours.length > 0 },
+    { label: t('Проверьте график'), tab: 'hours', isDone: business.hours.length > 0 },
   ]
   const doneCount = steps.filter((step) => step.isDone).length
   const next = steps.find((step) => !step.isDone)
@@ -46,16 +48,16 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
     wasIncomplete.current = false
     const url = `${window.location.origin}/${business.slug}`
     toast.show({
-      title: 'Запись открыта',
-      description: 'Отправьте клиентам ссылку на вашу страницу',
+      title: t('Запись открыта'),
+      description: t('Отправьте клиентам ссылку на вашу страницу'),
       type: 'success',
       timeout: 12_000,
       action: {
-        label: 'Копировать ссылку',
+        label: t('Скопировать ссылку'),
         onClick: () => void navigator.clipboard?.writeText(url).catch(() => undefined),
       },
     })
-  }, [isComplete, business.slug, toast])
+  }, [isComplete, business.slug, toast, t])
 
   if (!next) return null
 
@@ -65,16 +67,18 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
       <div className={styles.top}>
         <div>
           <h2 id='setup-title' className={styles.title}>
-            Запуск записи
+            {t('Запуск записи')}
           </h2>
           <p className={styles.subtitle}>
-            Ещё {steps.length - doneCount} — и клиенты смогут записываться
+            {t('Ещё {count}, и клиенты смогут записываться', {
+              count: steps.length - doneCount,
+            })}
           </p>
         </div>
         <span
           className={styles.count}
           role='img'
-          aria-label={`Готово ${doneCount} из ${steps.length}`}
+          aria-label={t('Готово {done} из {total}', { done: doneCount, total: steps.length })}
         >
           <svg viewBox='0 0 36 36' className={styles.ring} aria-hidden='true'>
             <circle cx='18' cy='18' r='15' className={styles.ringTrack} />
@@ -108,7 +112,7 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
                   {step.isDone ? <Check weight='bold' /> : index + 1}
                 </span>
                 <span className={styles.stepLabel}>{step.label}</span>
-                {state === 'next' && <span className={styles.go}>Начать ›</span>}
+                {state === 'next' && <span className={styles.go}>{t('Начать ›')}</span>}
               </NextLink>
             </li>
           )

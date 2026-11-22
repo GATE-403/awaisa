@@ -19,8 +19,8 @@ import type {
   CreateTimeOffInput,
   OutcomeInput,
 } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
-import { pluralize } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
 
 // Slightly shorter than the API's 15-second undo window.
@@ -28,6 +28,7 @@ const UNDO_TIMEOUT_MS = 12_000
 
 export const useAdminSchedule = (slug: string, date: string | null, refreshKey = 0) => {
   const toast = useToast()
+  const t = useT()
   const [schedule, setSchedule] = useState<AdminSchedule | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [version, setVersion] = useState(0)
@@ -57,7 +58,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return true
     } catch (actionError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(actionError),
         type: 'error',
       })
@@ -68,10 +69,10 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const restore = async (id: string) => {
     try {
       await restoreBookingAsSalon(slug, id)
-      toast.show({ title: 'Запись возвращена', type: 'success' })
+      toast.show({ title: t('Запись возвращена'), type: 'success' })
     } catch (restoreError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(restoreError),
         type: 'error',
       })
@@ -84,12 +85,12 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     try {
       await cancelBookingAsSalon(slug, id)
       toast.show({
-        title: 'Запись отменена',
-        description: 'Клиенту уйдёт SMS через 15 секунд',
+        title: t('Запись отменена'),
+        description: t('Клиенту уйдёт SMS через 15 секунд'),
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: 'Вернуть',
+          label: t('Вернуть'),
           onClick: () => {
             trackToastAction('staff_undo_cancel')
             void restore(id)
@@ -100,7 +101,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return true
     } catch (cancelError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(cancelError),
         type: 'error',
       })
@@ -112,7 +113,10 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     runAction(async () => {
       const booking = await createStaffBooking(slug, input)
       markOwnBooking(booking.id)
-      return `${booking.customerName} записан(а) на ${booking.time}, клиенту ушло SMS`
+      return t('{name} записан(а) на {time}, клиенту ушло SMS', {
+        name: booking.customerName,
+        time: booking.time,
+      })
     })
 
   const moveBooking = async (booking: AdminBooking, specialistId: string, time: string) => {
@@ -121,22 +125,29 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       const moved = await moveBookingAsSalon(slug, booking.id, { date, time, specialistId })
       haptic('success')
       toast.show({
-        title: `Перенесено на ${moved.time}`,
-        description: `${moved.customerName} · ${moved.specialistName}. Клиенту уйдёт SMS через 15 секунд`,
+        title: t('Перенесено на {time}', { time: moved.time }),
+        description: t('{name} · {master}. Клиенту уйдёт SMS через 15 секунд', {
+          name: moved.customerName,
+          master: moved.specialistName,
+        }),
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: 'Вернуть',
+          label: t('Вернуть'),
           onClick: () =>
             void runAction(async () => {
               trackToastAction('staff_undo_move')
               await moveBookingAsSalon(slug, booking.id, moved.previous)
-              return 'Запись на прежнем месте'
+              return t('Запись на прежнем месте')
             }),
         },
       })
     } catch (moveError) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(moveError), type: 'error' })
+      toast.show({
+        title: t('Не получилось'),
+        description: getErrorMessage(moveError),
+        type: 'error',
+      })
     }
     reload()
   }
@@ -144,9 +155,11 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const addTimeOff = (input: CreateTimeOffInput) =>
     runAction(async () => {
       const { conflictingBookingIds } = await createTimeOff(slug, input)
-      if (conflictingBookingIds.length === 0) return 'Время закрыто'
+      if (conflictingBookingIds.length === 0) return t('Время закрыто')
 
-      return `Время закрыто. В нём ${pluralize(conflictingBookingIds.length, ['запись', 'записи', 'записей'])} — отмените или перенесите`
+      return t('Время закрыто. В нём {count} — отмените или перенесите', {
+        count: t.count(conflictingBookingIds.length, ['запись', 'записи', 'записей']),
+      })
     })
 
   // Marking a visit is quiet (a tick, no toast): staff do it many times a day.
@@ -165,7 +178,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return updated
     } catch (outcomeError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(outcomeError),
         type: 'error',
       })
@@ -176,7 +189,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const removeTimeOff = (id: string) =>
     runAction(async () => {
       await deleteTimeOff(slug, id)
-      return 'Время снова открыто'
+      return t('Время снова открыто')
     })
 
   return {

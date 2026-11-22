@@ -41,6 +41,8 @@ test.describe('Insights', () => {
           dark: false,
         },
         events: [
+          // The booking funnel shows first: its first step must be there on a fresh database too.
+          { step: 'catalog' },
           { step: 'login_open' },
           { step: 'otp_sent', meta: { channel: 'sms' } },
           { step: 'form_error', meta: { field: 'phone' } },

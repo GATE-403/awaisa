@@ -7,6 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { useRequireSession } from '@/entities/session'
 import { useNewBookingAlerts } from '@/features/bookingAlerts'
 import type { BusinessPage } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -51,6 +52,7 @@ const FORBIDDEN = 403
 
 export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const session = useRequireSession()
+  const t = useT()
   const searchParams = useSearchParams()
   const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn', initialData)
   const role = data?.role ?? 'owner'
@@ -72,13 +74,15 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
         <Container size='sm' className={styles.error}>
           <PageTitle
             size='sm'
-            title={error.status === FORBIDDEN ? 'Нет доступа.' : 'Не получилось.'}
+            title={error.status === FORBIDDEN ? t('Нет доступа.') : t('Не получилось.')}
             subtitle={
-              error.status === FORBIDDEN ? 'Этим бизнесом управляет другой аккаунт.' : error.message
+              error.status === FORBIDDEN
+                ? t('Этим бизнесом управляет другой аккаунт.')
+                : error.message
             }
           />
           <NextLink href='/manage' className={styles.link}>
-            Мои бизнесы ›
+            {t('Мои бизнесы')} ›
           </NextLink>
         </Container>
       </main>
@@ -96,12 +100,12 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             isPublished={data?.business.isPublished ?? true}
             nav={
               <TextTabs
-                label='Разделы кабинета'
+                label={t('Разделы кабинета')}
                 items={[
                   ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
                     ({ value, label }) => ({
                       href: `/manage/${slug}?tab=${value}`,
-                      label,
+                      label: t(label),
                       isActive: tab === value,
                     }),
                   ),
@@ -109,7 +113,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                     ? [
                         {
                           href: `/manage/${slug}?tab=settings`,
-                          label: 'Настройки',
+                          label: t('Настройки'),
                           isActive: isSettings,
                         },
                       ]
@@ -150,13 +154,13 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                       href={`/manage/${slug}?tab=settings`}
                       scroll={false}
                       className={styles.backLink}
-                      aria-label='Назад к настройкам'
+                      aria-label={t('Назад к настройкам')}
                     >
                       <CaretLeft weight='bold' aria-hidden />
-                      Назад
+                      {t('Назад')}
                     </NextLink>
                     <h2 className={styles.backTitle}>
-                      {SETTINGS_TABS.find((item) => item.value === tab)?.label}
+                      {t(SETTINGS_TABS.find((item) => item.value === tab)?.label ?? '')}
                     </h2>
                   </div>
                 )}

@@ -6,6 +6,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'r
 import { PersonAvatar } from '@/entities/business'
 import { getMasterPay } from '@/shared/api/clientApi'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -41,6 +42,7 @@ export const MasterDialog = ({
   onOpenPay,
   slug,
 }: MasterDialogProps) => {
+  const t = useT()
   const [branchId, setBranchId] = useState<string | null>(master?.branchId ?? null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [photoUrl, setPhotoUrl] = useState(master?.photoUrl ?? null)
@@ -62,11 +64,11 @@ export const MasterDialog = ({
     if (!canOpenPay || !slug || !masterId) return
     const controller = new AbortController()
     getMasterPay(slug, masterId, controller.signal)
-      .then((scheme) => setPaySummary(describePayScheme(scheme)))
+      .then((scheme) => setPaySummary(describePayScheme(scheme, t)))
       // The row still opens the sheet, which says what went wrong.
       .catch(() => undefined)
     return () => controller.abort()
-  }, [canOpenPay, slug, masterId])
+  }, [canOpenPay, slug, masterId, t])
 
   const toggleService = (id: string, checked: boolean) =>
     setServiceIds((current) => (checked ? [...current, id] : current.filter((item) => item !== id)))
@@ -108,9 +110,9 @@ export const MasterDialog = ({
 
   return (
     <Sheet
-      title={master ? 'Мастер' : 'Новый мастер'}
+      title={master ? t('Мастер') : t('Новый мастер')}
       onClose={onClose}
-      action={{ label: 'Сохранить', form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.photoHeader}>
@@ -123,7 +125,7 @@ export const MasterDialog = ({
                 onClick={() => fileInput.current?.click()}
                 disabled={isUploading}
               >
-                {isUploading ? 'Загружаем…' : photoUrl ? 'Изменить фото' : 'Добавить фото'}
+                {isUploading ? t('Загружаем…') : photoUrl ? t('Изменить фото') : t('Добавить фото')}
               </button>
               {photoUrl && !isUploading && (
                 <button
@@ -131,7 +133,7 @@ export const MasterDialog = ({
                   className={sheet.photoButton}
                   onClick={() => void changePhoto(null)}
                 >
-                  Удалить
+                  {t('Удалить')}
                 </button>
               )}
               <input
@@ -140,19 +142,19 @@ export const MasterDialog = ({
                 accept='image/jpeg,image/png,image/webp,image/heic,image/heif'
                 hidden
                 onChange={handleFile}
-                aria-label='Фото мастера'
+                aria-label={t('Фото мастера')}
               />
             </span>
           ) : (
-            <span className={sheet.photoHint}>Фото добавите после сохранения</span>
+            <span className={sheet.photoHint}>{t('Фото добавите после сохранения')}</span>
           )}
         </div>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label='Имя'
-              placeholder='Имя и фамилия'
+              aria-label={t('Имя')}
+              placeholder={t('Имя и фамилия')}
               value={name}
               onValueChange={setName}
               autoFocus
@@ -161,19 +163,19 @@ export const MasterDialog = ({
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label='Должность'
-              placeholder='Должность, например «Стилист»'
+              aria-label={t('Должность')}
+              placeholder={t('Должность, например «Стилист»')}
               value={role}
               onValueChange={setRole}
             />
           </div>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Телефон для входа</span>
+            <span className={sheet.rowLabel}>{t('Телефон для входа')}</span>
             <Input
               variant='plain'
               type='tel'
               inputMode='tel'
-              aria-label='Телефон для входа'
+              aria-label={t('Телефон для входа')}
               placeholder='+996 …'
               value={phone}
               onValueChange={(value) => setPhone(maskPhoneInput(value))}
@@ -181,13 +183,13 @@ export const MasterDialog = ({
           </label>
           {branches.length > 1 && (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Филиал</span>
+              <span className={sheet.rowLabel}>{t('Филиал')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label='Филиал'
+                  aria-label={t('Филиал')}
                   items={[
-                    { value: 'all', label: 'Все филиалы' },
+                    { value: 'all', label: t('Все филиалы') },
                     ...branches.map(({ id, name: label }) => ({ value: id, label })),
                   ]}
                   value={branchId ?? 'all'}
@@ -199,11 +201,11 @@ export const MasterDialog = ({
         </div>
 
         {services.length > 0 && (
-          <section className={sheet.group} aria-label='Услуги мастера'>
+          <section className={sheet.group} aria-label={t('Услуги мастера')}>
             <div className={sheet.groupHeader}>
-              <SectionCaption isInset={false}>Выполняет услуги</SectionCaption>
+              <SectionCaption isInset={false}>{t('Выполняет услуги')}</SectionCaption>
               <button type='button' className={sheet.groupLink} onClick={toggleAll}>
-                {allSelected ? 'Снять все' : 'Выбрать все'}
+                {allSelected ? t('Снять все') : t('Выбрать все')}
               </button>
             </div>
             <div className={sheet.list}>
@@ -220,8 +222,13 @@ export const MasterDialog = ({
               ))}
             </div>
             <p className={sheet.groupFooter}>
-              Отмечено {serviceIds.length} из {services.length}. Клиент сможет выбрать мастера
-              только для этих услуг.
+              {t(
+                'Отмечено {count} из {total}. Клиент сможет выбрать мастера только для этих услуг.',
+                {
+                  count: serviceIds.length,
+                  total: services.length,
+                },
+              )}
             </p>
           </section>
         )}
@@ -229,7 +236,7 @@ export const MasterDialog = ({
         <div className={sheet.list}>
           {onOpenPay && (
             <button type='button' className={sheet.row} onClick={onOpenPay}>
-              <span className={sheet.rowLabel}>Зарплата</span>
+              <span className={sheet.rowLabel}>{t('Зарплата')}</span>
               <span className={sheet.rowControl}>
                 <span className={payStyles.summary}>{paySummary ?? ''}</span>
                 <span className={sheet.suffix}>›</span>
@@ -238,12 +245,12 @@ export const MasterDialog = ({
           )}
           {onOpenSchedule && (
             <button type='button' className={sheet.row} onClick={onOpenSchedule}>
-              <span className={sheet.rowLabel}>График и отпуск</span>
+              <span className={sheet.rowLabel}>{t('График и отпуск')}</span>
               <span className={sheet.suffix}>›</span>
             </button>
           )}
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Принимает записи</span>
+            <span className={sheet.rowLabel}>{t('Принимает записи')}</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </label>
         </div>

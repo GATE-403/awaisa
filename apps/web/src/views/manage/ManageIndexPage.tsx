@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { useRequireSession } from '@/entities/session'
 import { getMyBusinesses } from '@/shared/api/clientApi'
 import type { BusinessLink } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -23,6 +24,7 @@ interface ManageIndexPageProps {
 
 export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPageProps) => {
   const session = useRequireSession()
+  const t = useT()
   const router = useRouter()
   const [businesses, setBusinesses] = useState<BusinessLink[] | null>(initialBusinesses)
   const isSignedIn = session.status === 'signedIn'
@@ -48,18 +50,20 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
   return (
     <main className={styles.page}>
       {/* The owner's side looks like the cabinet: its own toolbar, not the client's header. */}
-      <CabinetBar title='Мои бизнесы' />
+      <CabinetBar title={t('Мои бизнесы')} />
       <Container size='md' className={styles.content}>
-        <PageTitle size='sm' title='Мои бизнесы.' subtitle='Выберите, чем управлять.' />
+        <PageTitle size='sm' title={t('Мои бизнесы.')} subtitle={t('Выберите, чем управлять.')} />
 
         {(!businesses || businesses.length === 1) && <Skeleton className={styles.skeleton} />}
 
         {businesses?.length === 0 && (
           <EmptyState
-            title='Создайте первую страницу'
-            text='Создайте страницу бизнеса — это пять минут, и клиенты смогут записываться.'
+            title={t('Создайте первую страницу')}
+            text={t('Создайте страницу бизнеса — это пять минут, и клиенты смогут записываться.')}
             action={
-              <ButtonLink render={<NextLink href='/business/new' />}>Создать страницу</ButtonLink>
+              <ButtonLink render={<NextLink href='/business/new' />}>
+                {t('Создать страницу')}
+              </ButtonLink>
             }
           />
         )}
@@ -76,7 +80,7 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
                 <span className={styles.addTile} aria-hidden='true'>
                   <Plus weight='bold' />
                 </span>
-                Новая страница
+                {t('Новая страница')}
               </NextLink>
             </li>
           </ul>

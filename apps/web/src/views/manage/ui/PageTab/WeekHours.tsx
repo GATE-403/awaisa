@@ -7,6 +7,7 @@ import {
   WEEKDAYS_SHORT,
 } from '@/entities/business'
 import type { WorkingDay } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from './PageTab.module.css'
 
 interface WeekHoursProps {
@@ -23,6 +24,7 @@ const HOUR = 60
 // chart, each day a track with its open hours filled on one shared scale (the earliest opening to
 // the latest closing of the week), so a short day or a day off shows without reading the numbers.
 export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
+  const t = useT()
   const start = Math.floor(Math.min(...hours.map((day) => day.opensMinutes)) / HOUR) * HOUR
   const end = Math.ceil(Math.max(...hours.map((day) => day.closesMinutes)) / HOUR) * HOUR
   const span = Math.max(end - start, HOUR)
@@ -35,15 +37,16 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
             {status.label}
           </p>
         )}
-        <p className={styles.weekSummary}>{formatWeekSchedule(hours)}</p>
+        <p className={styles.weekSummary}>{formatWeekSchedule(hours, t)}</p>
       </div>
       {hours.length > 0 && (
-        <ul className={styles.weekChart} aria-label='Часы по дням'>
-          {WEEKDAYS_FULL.map((dayName, weekday) => {
+        <ul className={styles.weekChart} aria-label={t('Часы по дням')}>
+          {WEEKDAYS_FULL.map((fullName, weekday) => {
+            const dayName = t(fullName)
             const day = findDay(hours, weekday)
             const range = day
               ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
-              : 'Выходной'
+              : t('Выходной')
             const bar = day
               ? ({
                   '--from': (day.opensMinutes - start) / span,
@@ -52,13 +55,13 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
               : undefined
             return (
               <li
-                key={dayName}
+                key={fullName}
                 className={styles.weekDay}
                 data-today={todayWeekday === weekday || undefined}
                 data-off={!day || undefined}
               >
                 <span className={styles.weekDayName} title={dayName}>
-                  {WEEKDAYS_SHORT[weekday]}
+                  {t(WEEKDAYS_SHORT[weekday] ?? '')}
                 </span>
                 <span className={styles.weekTrack} aria-hidden='true'>
                   {bar && <span className={styles.weekBar} style={bar} />}

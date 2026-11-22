@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { Ticket } from '@/entities/booking'
+import { T } from '@/shared/i18n'
 import styles from '@/views/forBusiness/ForBusinessPage.module.css'
 import { DEMO_BOOKING, DEMO_SCHEDULE } from '@/views/forBusiness/forBusinessContent'
 
@@ -14,7 +15,9 @@ export const ProductShowcase = () => (
           <span />
           <span />
         </span>
-        <span className={styles.windowTitle}>Barber Pro. Кабинет</span>
+        <span className={styles.windowTitle}>
+          <T>Barber Pro. Кабинет</T>
+        </span>
       </div>
       <div className={styles.schedule}>
         {DEMO_SCHEDULE.map((column) => (
@@ -32,7 +35,9 @@ export const ProductShowcase = () => (
                   style={{ top: block.top, height: block.height }}
                 >
                   <span className={styles.blockTime}>{block.time}</span>
-                  <span className={styles.blockTitle}>{block.title}</span>
+                  <span className={styles.blockTitle}>
+                    <T>{block.title}</T>
+                  </span>
                   <span className={styles.blockClient}>{block.client}</span>
                 </span>
               ))}
@@ -49,8 +54,12 @@ export const ProductShowcase = () => (
     <div className={styles.toast}>
       <span className={styles.toastIcon}>A</span>
       <span>
-        <strong>Новая запись</strong>
-        <span className={styles.toastText}>Данияр · 20 ноября, 14:30 · Стрижка</span>
+        <strong>
+          <T>Новая запись</T>
+        </strong>
+        <span className={styles.toastText}>
+          <T>Данияр · 20 ноября, 14:30 · Стрижка</T>
+        </span>
       </span>
     </div>
   </div>

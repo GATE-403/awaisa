@@ -1,6 +1,15 @@
+import { ANALYTICS, ANALYTICS_COUNTED } from './areas/analytics'
+import { AUTH } from './areas/auth'
+import { CABINET, CABINET_COUNTED } from './areas/cabinet'
+import { CABINET_PAGE, CABINET_PAGE_COUNTED } from './areas/cabinetPage'
 import { CATALOG, CATALOG_COUNTED } from './areas/catalog'
+import { CLIENTS, CLIENTS_COUNTED } from './areas/clients'
+import { FOR_BUSINESS, FOR_BUSINESS_COUNTED } from './areas/forBusiness'
+import { LOYALTY, LOYALTY_COUNTED } from './areas/loyalty'
+import { MONEY, MONEY_COUNTED } from './areas/money'
 import { PLACE, PLACE_COUNTED } from './areas/place'
 import { PROFILE, PROFILE_COUNTED } from './areas/profile'
+import { SCHEDULE, SCHEDULE_COUNTED } from './areas/schedule'
 import type { CountedEntry, Entry } from './areas/types'
 
 // The Russian text is the key: untranslated strings simply stay Russian. `{name}` is filled in.
@@ -234,15 +243,51 @@ const BOOKING_COUNTED: Record<string, CountedEntry> = {
   отзывов: ['пикир', 'review', 'reviews'],
 }
 
-const AREAS = { BOOKING, CATALOG, PLACE, PROFILE }
+const AREAS = {
+  ANALYTICS,
+  AUTH,
+  BOOKING,
+  CABINET,
+  CABINET_PAGE,
+  CATALOG,
+  CLIENTS,
+  FOR_BUSINESS,
+  LOYALTY,
+  MONEY,
+  PLACE,
+  PROFILE,
+  SCHEDULE,
+}
 
-const DICTIONARY: Record<string, Entry> = { ...CATALOG, ...PLACE, ...PROFILE, ...BOOKING }
+const DICTIONARY: Record<string, Entry> = {
+  ...CATALOG,
+  ...PLACE,
+  ...PROFILE,
+  ...BOOKING,
+  ...AUTH,
+  ...ANALYTICS,
+  ...CABINET,
+  ...CABINET_PAGE,
+  ...CLIENTS,
+  ...FOR_BUSINESS,
+  ...MONEY,
+  ...LOYALTY,
+  ...SCHEDULE,
+}
 
 const COUNTED: Record<string, CountedEntry> = {
   ...CATALOG_COUNTED,
   ...PLACE_COUNTED,
   ...PROFILE_COUNTED,
   ...BOOKING_COUNTED,
+  ...ANALYTICS_COUNTED,
+  ...CABINET_COUNTED,
+  ...CABINET_PAGE_COUNTED,
+  ...CLIENTS_COUNTED,
+  ...FOR_BUSINESS_COUNTED,
+  ...MONEY_COUNTED,
+  ...LOYALTY_COUNTED,
+  ...SCHEDULE_COUNTED,
 }
 
 export { AREAS, COUNTED, DICTIONARY }
