@@ -58,20 +58,18 @@
   font-size: var(--text-footnote);
 }
 
-/* «Начать заново» under the stack: a footnote link at the height of the stack's own foot. */
-.startOver {
+/* The stack's foot line, as tall as its links: «Начать заново» left, the offered service right. */
+.foot {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   min-height: var(--control-height-md);
   padding: 0 var(--space-2);
   font-size: var(--text-footnote);
 }
 
-/* «+ Ещё услуга», the kit's secondary capsule. */
-.capsule {
-  width: 140px;
-  height: var(--control-height-md);
-  border-radius: var(--radius-full);
+.footLine {
+  display: flex;
 }
 
 .chips {
