@@ -5,12 +5,21 @@ import { type RefObject, useEffect } from 'react'
 const TEXT_FIELDS =
   'input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), textarea'
 const KEYBOARD_MS = 900
+const SETTLE_MS = 150
+
+// The last keyboard seen, so the next field moves before the keyboard is up: its height in CSS
+// pixels and whether it shrank the window (Android, the app's WebView) or only the visual viewport
+// (iOS, where it covers the fixed bottom bar).
+const keyboard = {
+  height: 0,
+  resizesWindow: !/iP(hone|ad|od)/.test(globalThis.navigator?.userAgent ?? ''),
+}
 
 // A fixed layer that scrolls inside itself (the booking sheet): a phone's keyboard slides over it
 // without resizing the page, and a field focused by the form («Записываю другого человека», the
 // name after a time is picked) stayed under the keyboard. When a text field in the layer takes
-// focus, for as long as the keyboard is coming up (the visual viewport shrinks), the layer is
-// scrolled just enough to set the field above the keyboard and below the layer's top bar. Both
+// focus, once the keyboard is up (the visual viewport has settled), the layer is scrolled just
+// enough to set the field above the keyboard and below the layer's top bar. Both
 // edges come from the layer itself (its box and its `scroll-padding`), not from the window: the
 // sheet starts below the window's top, and on a Samsung, whose browser shrinks the page for the
 // keyboard, a field set 72px from the window's top went under the sheet's bar.
@@ -20,9 +29,23 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
     if (!layer) return
     let field: HTMLElement | null = null
     let timer = 0
+    let settle = 0
     const viewport = window.visualViewport
+    // A keyboard is up when it covers the page (the visual viewport is short) or shrank the window
+    // (Android, the app's WebView) below the tallest it has been.
+    let tallest = innerHeight
+    const isKeyboardUp = () =>
+      (viewport ? viewport.height < innerHeight - 120 : false) || innerHeight < tallest - 120
+    // While it is up the sheet keeps only its bottom bar's real height clear (`data-keyboard`,
+    // BookingPage.module.css), not the bar's tall fade: with the fade's 144px a field in plain
+    // view counted as hidden and the WebView jumped it to the middle (115px from «Имя» to
+    // «Телефон»).
+    const handleResize = () => {
+      tallest = Math.max(tallest, innerHeight)
+      layer.toggleAttribute('data-keyboard', isKeyboardUp())
+    }
 
-    const reveal = () => {
+    const reveal = (behavior: ScrollBehavior = 'instant') => {
       if (!field || document.activeElement !== field) return
       const box = field.getBoundingClientRect()
       const layerBox = layer.getBoundingClientRect()
@@ -31,21 +54,64 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       const visibleTop = Math.max(layerBox.top, viewport?.offsetTop ?? 0) + topRoom
       // With the keyboard up the layer's fixed bottom bar is behind it; without one (a hardware
       // keyboard) the bar covers the foot, which the layer's own scroll padding already measures.
-      const isKeyboardUp = viewport ? viewport.height < innerHeight - 120 : false
-      const footRoom = isKeyboardUp ? gap : Number.parseFloat(style.scrollPaddingBottom) || gap
+      const isCovered = viewport ? viewport.height < innerHeight - 120 : false
+      const footRoom = isCovered ? gap : Number.parseFloat(style.scrollPaddingBottom) || gap
       const visibleBottom =
         Math.min(layerBox.bottom, viewport ? viewport.offsetTop + viewport.height : innerHeight) -
         footRoom
       const below = box.bottom - visibleBottom
       const above = visibleTop - box.top
-      // Instant: it follows the keyboard as it slides in, and stacked smooth scrolls overshot.
-      if (below > 0) layer.scrollBy({ top: Math.min(below, -above) })
-      else if (above > 0) layer.scrollBy({ top: -above })
+      // Instant while the viewport moves (stacked smooth scrolls overshot); a glide when the
+      // keyboard is already up and only the field changed (a jump of 110px from «Имя» to «Телефон»).
+      if (below > 0) layer.scrollBy({ top: Math.min(below, -above), behavior })
+      else if (above > 0) layer.scrollBy({ top: -above, behavior })
+    }
+
+    // As the keyboard starts to slide in, the sheet glides so the field ends above where the
+    // keyboard (and, where the window shrinks, the bottom bar over it) will be: when the window is
+    // then resized, the field is already in view and the WebView does not jump it to the middle
+    // (163px at once on a Samsung A55, «при нажатии на инпуты происходит скролл»).
+    let startHeight = 0
+    const glideAhead = () => {
+      if (!field) return
+      if (isKeyboardUp() || !matchMedia('(pointer: coarse)').matches) return
+      const box = field.getBoundingClientRect()
+      const layerBox = layer.getBoundingClientRect()
+      const style = getComputedStyle(layer)
+      const height = keyboard.height || Math.round(innerHeight * 0.42)
+      const footRoom = keyboard.resizesWindow
+        ? Number.parseFloat(style.scrollPaddingBottom) || gap
+        : gap
+      const visibleTop = layerBox.top + (Number.parseFloat(style.scrollPaddingTop) || gap)
+      const visibleBottom = Math.min(layerBox.bottom, innerHeight - height) - footRoom
+      const below = box.bottom - visibleBottom
+      if (below <= 0) return
+      layer.scrollBy({ top: Math.min(below, box.top - visibleTop), behavior: 'smooth' })
+    }
+
+    // Remembers the keyboard once it is up, for the next field.
+    const learnKeyboard = () => {
+      const shrunk = startHeight - innerHeight
+      const covered = viewport ? innerHeight - viewport.height : 0
+      if (shrunk > 120) Object.assign(keyboard, { height: shrunk, resizesWindow: true })
+      else if (covered > 120) Object.assign(keyboard, { height: covered, resizesWindow: false })
+    }
+
+    // Once the viewport has stopped changing: while a WebView is resized for the keyboard (the
+    // Android app), the visual viewport passes through a false height (118px of 459) for a frame,
+    // and following it scrolled the sheet 231px in one jump.
+    const revealWhenSettled = () => {
+      window.clearTimeout(settle)
+      settle = window.setTimeout(() => {
+        learnKeyboard()
+        reveal()
+      }, SETTLE_MS)
     }
 
     const stop = () => {
       window.clearTimeout(timer)
-      viewport?.removeEventListener('resize', reveal)
+      window.clearTimeout(settle)
+      viewport?.removeEventListener('resize', revealWhenSettled)
     }
 
     const handleFocusIn = (event: FocusEvent) => {
@@ -53,18 +119,28 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       if (!(target instanceof HTMLElement) || !target.matches(TEXT_FIELDS)) return
       stop()
       field = target
-      // Now for a keyboard that is already up, then as it slides in.
-      window.setTimeout(reveal, 50)
-      viewport?.addEventListener('resize', reveal)
+      startHeight = innerHeight
+      glideAhead()
+      // Now for a keyboard that is already up, then once it is in.
+      window.setTimeout(() => {
+        if (isKeyboardUp()) reveal('smooth')
+      }, 50)
+      viewport?.addEventListener('resize', revealWhenSettled)
+      // The last look waits for the viewport to settle too, then the listening ends.
       timer = window.setTimeout(() => {
-        reveal()
-        stop()
+        viewport?.removeEventListener('resize', revealWhenSettled)
+        revealWhenSettled()
       }, KEYBOARD_MS)
     }
 
     layer.addEventListener('focusin', handleFocusIn)
+    window.addEventListener('resize', handleResize)
+    viewport?.addEventListener('resize', handleResize)
     return () => {
       layer.removeEventListener('focusin', handleFocusIn)
+      window.removeEventListener('resize', handleResize)
+      viewport?.removeEventListener('resize', handleResize)
+      layer.removeAttribute('data-keyboard')
       stop()
     }
   }, [ref, gap])

@@ -10,6 +10,9 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* The browser's own scroll to a tapped field glides too: it jumped 110px at once from «Имя» to
+     «Телефон» with the keyboard up. Scrolls the form makes itself say how they move. */
+  scroll-behavior: smooth;
   /* Keyboard focus is scrolled clear of the sheet's top bar (60pt and its 11pt of step segments)
      and its action bar (WCAG 2.4.11). */
   scroll-padding-block: calc(71px + var(--space-3))
@@ -20,6 +23,13 @@
   box-shadow: var(--shadow-lg);
   /* One plain slide, no overshoot: the bounce added frames to draw while the sheet filled. */
   animation: rise 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* With a phone's keyboard up only the bottom bar itself is kept clear (its 64pt, 8pt under it
+   and 16pt of air), not its tall fade: a field in plain view otherwise counted as hidden and the
+   WebView jumped it to the middle (`useFocusedFieldInView` sets the mark). */
+.page[data-keyboard] {
+  scroll-padding-bottom: calc(var(--space-20) + var(--space-2) + env(safe-area-inset-bottom));
 }
 
 /* Back after a reload, where it already was (lib/sheetHandoff). */
@@ -46,6 +56,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page {
+    scroll-behavior: auto;
+  }
+
   .page {
     animation: none;
   }
