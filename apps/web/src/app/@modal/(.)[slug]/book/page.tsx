@@ -1,7 +1,7 @@
 import { unstable_rethrow } from 'next/navigation'
 import { Suspense } from 'react'
 import { findBusiness, listServicePhotos } from '@/shared/api/serverApi'
-import { BookingPage, BookingUnavailable } from '@/views/booking'
+import { BookingModalGate, BookingPage, BookingUnavailable } from '@/views/booking'
 
 const BookingOverPage = async ({ slug }: { slug: string }) => {
   // Over a page, a failed read (the API down, a removed place) must not replace the whole screen
@@ -36,7 +36,9 @@ const toSlug = (param: string) => decodeURIComponent(param).replace(/^(\(\.{1,3}
 const BookModal = ({ params }: PageProps<'/[slug]/book'>) => (
   <Suspense fallback={null}>
     {params.then(({ slug }) => (
-      <BookingOverPage slug={toSlug(slug)} />
+      <BookingModalGate slug={toSlug(slug)}>
+        <BookingOverPage slug={toSlug(slug)} />
+      </BookingModalGate>
     ))}
   </Suspense>
 )
