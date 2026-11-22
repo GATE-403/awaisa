@@ -13,6 +13,7 @@ import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 import { THEME_BOOT_SCRIPT } from '@/shared/lib/theme'
 import { ErrorReporter } from '@/shared/ui/ErrorReporter/ErrorReporter'
 import { Splash } from '@/shared/ui/Splash/Splash'
+import { BookingOriginTracker } from '@/views/booking'
 import { Footer, FooterGate } from '@/widgets/Footer'
 import { Header, HeaderFallback } from '@/widgets/Header'
 import { TabBar } from '@/widgets/TabBar'
@@ -84,6 +85,7 @@ const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
             <ResumeBooking />
             <InviteRefCapture />
             <ErrorReporter />
+            <BookingOriginTracker />
           </Suspense>
         </div>
       </ToastProvider>
