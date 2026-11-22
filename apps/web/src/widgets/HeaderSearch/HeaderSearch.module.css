@@ -242,10 +242,31 @@
 }
 
 .heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-1) var(--space-2);
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
+}
+
+/* «Очистить» beside «Недавние»: link text, its 44pt reach drawn invisibly around it. */
+.clear {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+}
+
+.clear::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2));
 }
 
 .list {

@@ -90,6 +90,7 @@ import type {
   MasterPlace,
   MasterReviews,
   MasterSchedule,
+  MasterSuggestion,
   ModerationDecision,
   ModerationDecisionInput,
   ModerationLog,
@@ -571,6 +572,9 @@ const getAnalytics = (slug: string, days: AnalyticsDays, signal?: AbortSignal) =
 
 const setAnalyticsGoal = (slug: string, goal: number | null) =>
   send<AnalyticsGoal>('PUT', `${manage(slug)}/analytics/goal`, { goal })
+
+const searchMasters = (q: string, signal?: AbortSignal) =>
+  request<MasterSuggestion[]>(`/search/masters?${new URLSearchParams({ q })}`, { signal })
 
 const searchBusinesses = (query: string, signal?: AbortSignal) =>
   request<BusinessCard[]>(`/businesses?${new URLSearchParams({ q: query })}`, { signal })
@@ -1219,6 +1223,7 @@ export {
   restoreBookingAsSalon,
   restoreMyBooking,
   searchBusinesses,
+  searchMasters,
   setWorkingHours,
   updateBusiness,
   updateService,
