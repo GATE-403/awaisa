@@ -17,7 +17,7 @@ import {
   setMasterHours,
 } from '@/shared/api/clientApi'
 import type { MasterSchedule, Specialist, WorkingDay } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { DateField } from '@/shared/ui/DateField/DateField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -64,6 +64,7 @@ export const MasterScheduleSheet = ({
   onClose,
 }: MasterScheduleSheetProps) => {
   const toast = useToast()
+  const t = useT()
   const fromId = useId()
   const toId = useId()
   const [schedule, setSchedule] = useState<MasterSchedule | null>(null)
@@ -83,7 +84,11 @@ export const MasterScheduleSheet = ({
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
-          toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+          toast.show({
+            title: t('Не получилось'),
+            description: getErrorMessage(error),
+            type: 'error',
+          })
         }
       })
 
@@ -110,10 +115,10 @@ export const MasterScheduleSheet = ({
     setIsSaving(true)
     try {
       await setMasterHours(slug, master.id, { hasOwnHours, days: hasOwnHours ? toHours(days) : [] })
-      toast.show({ title: `График ${master.name} сохранён`, type: 'success' })
+      toast.show({ title: t('График {name} сохранён', { name: master.name }), type: 'success' })
       onClose()
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSaving(false)
     }
@@ -133,15 +138,17 @@ export const MasterScheduleSheet = ({
       })
       setLeave({ startsOn: '', endsOn: '', reason: '' })
       toast.show({
-        title: 'Отпуск добавлен',
+        title: t('Отпуск добавлен'),
         description:
           conflictingBookings > 0
-            ? `На эти дни уже ${pluralize(conflictingBookings, ['запись', 'записи', 'записей'])} — перенесите или отмените`
-            : 'Новые записи на эти дни не откроются',
+            ? t('На эти дни уже {bookings}: перенесите или отмените', {
+                bookings: t.count(conflictingBookings, ['запись', 'записи', 'записей']),
+              })
+            : t('Новые записи на эти дни не откроются'),
         type: conflictingBookings > 0 ? 'info' : 'success',
       })
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -151,7 +158,7 @@ export const MasterScheduleSheet = ({
       await removeMasterLeave(slug, master.id, id)
       setSchedule({ ...schedule, leaves: schedule.leaves.filter((item) => item.id !== id) })
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -159,63 +166,72 @@ export const MasterScheduleSheet = ({
     <Sheet
       title={master.name}
       onClose={onClose}
-      action={{ label: isDirty ? 'Сохранить' : 'Готово', onClick: handleDone, disabled: isSaving }}
+      action={{
+        label: isDirty ? t('Сохранить') : t('Готово'),
+        onClick: handleDone,
+        disabled: isSaving,
+      }}
     >
       {!schedule && <Skeleton className={styles.skeleton} />}
       {schedule && (
         <>
-          <section className={sheet.group} aria-label='Часы работы'>
-            <SectionCaption>Часы работы</SectionCaption>
+          <section className={sheet.group} aria-label={t('Часы работы')}>
+            <SectionCaption>{t('Часы работы')}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Как у салона</span>
+                <span className={sheet.rowLabel}>{t('Как у салона')}</span>
                 <Switch
                   checked={!hasOwnHours}
                   onCheckedChange={(followsBusiness) => setHasOwnHours(!followsBusiness)}
                 />
               </label>
               {hasOwnHours &&
-                days.map((day, weekday) => (
-                  <div key={WEEKDAYS_FULL[weekday]} className={styles.dayRow}>
-                    <Switch
-                      aria-label={`${WEEKDAYS_FULL[weekday]}: работает`}
-                      checked={day.isOn}
-                      onCheckedChange={(isOn) => updateDay(weekday, { isOn })}
-                    />
-                    <span className={styles.dayName}>{WEEKDAYS_FULL[weekday]}</span>
-                    {day.isOn ? (
-                      <span className={styles.range}>
-                        <Select
-                          aria-label={`${WEEKDAYS_FULL[weekday]}: с`}
-                          items={TIME_ITEMS}
-                          value={day.from}
-                          onValueChange={(value) => value && updateDay(weekday, { from: value })}
-                        />
-                        –
-                        <Select
-                          aria-label={`${WEEKDAYS_FULL[weekday]}: до`}
-                          items={TIME_ITEMS}
-                          value={day.to}
-                          onValueChange={(value) => value && updateDay(weekday, { to: value })}
-                        />
-                      </span>
-                    ) : (
-                      <span className={styles.off}>Выходной</span>
-                    )}
-                  </div>
-                ))}
+                days.map((day, weekday) => {
+                  const dayName = t(WEEKDAYS_FULL[weekday] ?? '')
+                  return (
+                    <div key={WEEKDAYS_FULL[weekday]} className={styles.dayRow}>
+                      <Switch
+                        aria-label={t('{day}: работает', { day: dayName })}
+                        checked={day.isOn}
+                        onCheckedChange={(isOn) => updateDay(weekday, { isOn })}
+                      />
+                      <span className={styles.dayName}>{dayName}</span>
+                      {day.isOn ? (
+                        <span className={styles.range}>
+                          <Select
+                            aria-label={t('{day}: с', { day: dayName })}
+                            items={TIME_ITEMS}
+                            value={day.from}
+                            onValueChange={(value) => value && updateDay(weekday, { from: value })}
+                          />
+                          –
+                          <Select
+                            aria-label={t('{day}: до', { day: dayName })}
+                            items={TIME_ITEMS}
+                            value={day.to}
+                            onValueChange={(value) => value && updateDay(weekday, { to: value })}
+                          />
+                        </span>
+                      ) : (
+                        <span className={styles.off}>{t('Выходной')}</span>
+                      )}
+                    </div>
+                  )
+                })}
             </div>
             <p className={sheet.groupFooter}>
               {invalidDay !== -1
-                ? `${WEEKDAYS_FULL[invalidDay]}: конец должен быть позже начала`
+                ? t('{day}: конец должен быть позже начала', {
+                    day: t(WEEKDAYS_FULL[invalidDay] ?? ''),
+                  })
                 : hasOwnHours
-                  ? 'Клиенты видят время мастера только в эти часы и только пока салон открыт.'
-                  : 'Мастер работает все часы салона.'}
+                  ? t('Клиенты видят время мастера только в эти часы и только пока салон открыт.')
+                  : t('Мастер работает все часы салона.')}
             </p>
           </section>
 
-          <section className={sheet.group} aria-label='Отпуск и выходные'>
-            <SectionCaption>Отпуск и выходные</SectionCaption>
+          <section className={sheet.group} aria-label={t('Отпуск и выходные')}>
+            <SectionCaption>{t('Отпуск и выходные')}</SectionCaption>
             <div className={sheet.list}>
               {schedule.leaves.map((item) => (
                 <div key={item.id} className={styles.leave}>
@@ -228,7 +244,9 @@ export const MasterScheduleSheet = ({
                   <button
                     type='button'
                     className={styles.remove}
-                    aria-label={`Убрать отпуск ${formatRange(item.startsOn, item.endsOn)}`}
+                    aria-label={t('Убрать отпуск {dates}', {
+                      dates: formatRange(item.startsOn, item.endsOn),
+                    })}
                     onClick={() => handleRemoveLeave(item.id)}
                   >
                     <X weight='bold' aria-hidden />
@@ -237,27 +255,27 @@ export const MasterScheduleSheet = ({
               ))}
               <div className={styles.leaveForm}>
                 <label htmlFor={fromId} className={styles.dateField}>
-                  <span>С</span>
+                  <span>{t('С')}</span>
                   <DateField
                     id={fromId}
-                    label='Отпуск с'
+                    label={t('Отпуск с')}
                     value={leave.startsOn}
                     onChange={(startsOn) => setLeave({ ...leave, startsOn })}
                   />
                 </label>
                 <label htmlFor={toId} className={styles.dateField}>
-                  <span>По</span>
+                  <span>{t('По')}</span>
                   <DateField
                     id={toId}
-                    label='Отпуск по'
+                    label={t('Отпуск по')}
                     value={leave.endsOn}
                     min={leave.startsOn || undefined}
                     onChange={(endsOn) => setLeave({ ...leave, endsOn })}
                   />
                 </label>
                 <Input
-                  aria-label='Причина'
-                  placeholder='Причина — по желанию'
+                  aria-label={t('Причина')}
+                  placeholder={t('Причина — по желанию')}
                   value={leave.reason}
                   onChange={(event) => setLeave({ ...leave, reason: event.target.value })}
                   className={styles.reason}
@@ -269,12 +287,12 @@ export const MasterScheduleSheet = ({
                   disabled={!leave.startsOn}
                   className={styles.addLeave}
                 >
-                  Добавить отпуск
+                  {t('Добавить отпуск')}
                 </Button>
               </div>
             </div>
             <p className={sheet.groupFooter}>
-              В эти дни мастер не появится в записи; уже сделанные записи останутся.
+              {t('В эти дни мастер не появится в записи; уже сделанные записи останутся.')}
             </p>
           </section>
         </>
