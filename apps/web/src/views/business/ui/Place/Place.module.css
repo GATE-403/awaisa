@@ -1211,6 +1211,17 @@ details[open] > .info .infoChevron {
   scroll-snap-align: start;
 }
 
+/* The bell sits over the card's corner, outside its link, like the heart on a service card. */
+.masterItem {
+  position: relative;
+}
+
+.masterFollow {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
 @media (min-width: 768px) {
   .masters {
     grid-auto-columns: 156px;
