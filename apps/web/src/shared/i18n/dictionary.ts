@@ -5,6 +5,7 @@ import { CABINET_PAGE, CABINET_PAGE_COUNTED } from './areas/cabinetPage'
 import { CATALOG, CATALOG_COUNTED } from './areas/catalog'
 import { CLIENTS, CLIENTS_COUNTED } from './areas/clients'
 import { FOR_BUSINESS, FOR_BUSINESS_COUNTED } from './areas/forBusiness'
+import { LOYALTY, LOYALTY_COUNTED } from './areas/loyalty'
 import { MONEY, MONEY_COUNTED } from './areas/money'
 import { PLACE, PLACE_COUNTED } from './areas/place'
 import { PROFILE, PROFILE_COUNTED } from './areas/profile'
@@ -251,6 +252,7 @@ const AREAS = {
   CATALOG,
   CLIENTS,
   FOR_BUSINESS,
+  LOYALTY,
   MONEY,
   PLACE,
   PROFILE,
@@ -269,6 +271,7 @@ const DICTIONARY: Record<string, Entry> = {
   ...CLIENTS,
   ...FOR_BUSINESS,
   ...MONEY,
+  ...LOYALTY,
   ...SCHEDULE,
 }
 
@@ -283,6 +286,7 @@ const COUNTED: Record<string, CountedEntry> = {
   ...CLIENTS_COUNTED,
   ...FOR_BUSINESS_COUNTED,
   ...MONEY_COUNTED,
+  ...LOYALTY_COUNTED,
   ...SCHEDULE_COUNTED,
 }
 
