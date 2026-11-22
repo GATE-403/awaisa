@@ -1,7 +1,12 @@
 import type { ClientCard, ClientList, ClientNote } from '@awaisa/contracts'
 import { Body, Controller, Get, Param, Put, Query, UseGuards } from '@nestjs/common'
 import type { Business } from '../businesses/business.entity.js'
-import { BusinessAccessGuard, CurrentBusiness } from '../businesses/business-access.guard.js'
+import {
+  BusinessAccessGuard,
+  CurrentBusiness,
+  CurrentRole,
+} from '../businesses/business-access.guard.js'
+import type { MemberRole } from '../businesses/business-member.entity.js'
 import {
   type ClientsQuery,
   clientsQuerySchema,
@@ -18,14 +23,19 @@ export class ClientsController {
   @Get()
   list(
     @CurrentBusiness() business: Business,
+    @CurrentRole() role: MemberRole,
     @Query({ schema: clientsQuerySchema }) query: ClientsQuery,
   ): Promise<ClientList> {
-    return this.clients.list(business, query)
+    return this.clients.list(business, query, role === 'owner')
   }
 
   @Get(':phone')
-  get(@CurrentBusiness() business: Business, @Param('phone') phone: string): Promise<ClientCard> {
-    return this.clients.get(business, phone)
+  get(
+    @CurrentBusiness() business: Business,
+    @CurrentRole() role: MemberRole,
+    @Param('phone') phone: string,
+  ): Promise<ClientCard> {
+    return this.clients.get(business, phone, role === 'owner')
   }
 
   @Put(':phone')

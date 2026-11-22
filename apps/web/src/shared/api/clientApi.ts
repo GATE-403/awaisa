@@ -62,6 +62,7 @@ import type {
   FiscalReceipt,
   FiscalSettings,
   FiscalSettingsInput,
+  FollowedMaster,
   FunnelFlow,
   FunnelReport,
   FunnelSegment,
@@ -687,6 +688,14 @@ const getPageStats = (slug: string, signal?: AbortSignal) =>
 const removePhoto = (slug: string, id: string) =>
   send<WorkPhoto[]>('DELETE', `${manage(slug)}/work-photos/${id}`)
 
+const listFollows = (signal?: AbortSignal) => request<FollowedMaster[]>('/me/follows', { signal })
+
+const followMaster = (specialistId: string, notifyWorks?: boolean) =>
+  send<FollowedMaster[]>('PUT', `/me/follows/${encodeURIComponent(specialistId)}`, { notifyWorks })
+
+const unfollowMaster = (specialistId: string) =>
+  send<FollowedMaster[]>('DELETE', `/me/follows/${encodeURIComponent(specialistId)}`)
+
 const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
   upload<UploadedPhoto>(`/master/${slug}/photos`, file, { bookingId })
 
@@ -1062,6 +1071,9 @@ export {
   reverseAddress,
   updateWorkPhoto,
   addVisitPhoto,
+  followMaster,
+  listFollows,
+  unfollowMaster,
   getFeed,
   reportContent,
   getRecommendations,

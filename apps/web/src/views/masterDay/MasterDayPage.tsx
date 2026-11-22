@@ -200,6 +200,13 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                   {hoursLine}
                 </>
               )}
+              {day.followers > 0 && (
+                <>
+                  {' · '}
+                  <b>{day.followers}</b>{' '}
+                  {pluralWord(day.followers, ['подписчик', 'подписчика', 'подписчиков'])}
+                </>
+              )}
             </p>
 
             {/* The month only when it says more than the day (on the month's first working day they match). */}
