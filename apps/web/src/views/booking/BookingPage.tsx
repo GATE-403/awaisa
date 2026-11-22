@@ -72,6 +72,14 @@ export const BookingPage = ({
 }: BookingPageProps) => {
   const t = useT()
   const form = useBookingForm(business, catalog)
+  // The service step opened from its ticket («Изменить») is the visit's own list: several services
+  // can be ticked, one master does them one after another. The first pick stays one tap.
+  const isEditingServices = form.editingStep === 'service' && form.chosenServices.length > 0
+  const visitServices = form.services.filter(
+    (item) =>
+      form.chosenServiceIds.includes(item.id) ||
+      form.combinableServices.some((combinable) => combinable.id === item.id),
+  )
   const offeredService = pickOfferedService(
     form.addableServices,
     form.chosenServices,
@@ -199,7 +207,7 @@ export const BookingPage = ({
         <div className={styles.wash} aria-hidden />
         <BookingTopBar business={business} isModal={isModal} />
         <Container size='md'>
-          <BookingSuccess booking={form.createdBooking} />
+          <BookingSuccess booking={form.createdBooking} onBookAnother={form.bookAnother} />
         </Container>
       </div>
     )
@@ -292,9 +300,15 @@ export const BookingPage = ({
           style={{ background: pickTint(business.name) }}
         />
       ),
-      primary: form.service.name,
+      // The visit's first service names the card; added ones are marked on the line under it
+      // («+ Укладка»): joined into one name, they ended in an ellipsis before «Изменить».
+      primary: form.chosenServices[0]?.name ?? form.service.name,
       // The price on the card itself, not only in the bar: it was missed down there.
-      secondary: `${t.duration(form.service.durationMinutes)} · ${formatPrice(form.quote?.total ?? form.service.price)}`,
+      secondary: [
+        ...form.chosenServices.slice(1).map((added) => `+ ${added.name}`),
+        t.duration(form.service.durationMinutes),
+        formatPrice(form.quote?.total ?? form.service.price),
+      ].join(' · '),
       trailing: formatPrice(form.quote?.total ?? form.service.price),
     })
   }
@@ -405,15 +419,25 @@ export const BookingPage = ({
     firstIncompleteStep: form.firstIncompleteStep,
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
+    // The action always does something real on the open step: it takes the free time under the
+    // ruler's needle, and on the masters it takes «Любой, кто свободен», the usual choice.
+    // «Выбрать мастера» there only pointed at the cards already on screen («это сильно путает»).
     ...(activeStep === 'datetime' && !isBranchOpen && rulerTime
       ? {
           onSubmit: () => form.selectTime(rulerTime),
           submitLabel: t('Выбрать {time}', { time: rulerTime }),
         }
-      : {
-          onSubmit: form.submit,
-          submitLabel: undefined,
-        }),
+      : isEditingServices && !isBranchOpen
+        ? { onSubmit: form.finishEditing, submitLabel: t('Готово') }
+        : activeStep === 'specialist' && !isBranchOpen && !form.specialistId
+          ? {
+              onSubmit: () => form.selectSpecialist(ANY_SPECIALIST_ID),
+              submitLabel: t('Любой мастер'),
+            }
+          : {
+              onSubmit: form.submit,
+              submitLabel: undefined,
+            }),
     quote: form.quote,
     place: { name: business.name, coverUrl: business.coverUrl },
     address:
@@ -652,12 +676,21 @@ export const BookingPage = ({
               )}
 
               {!isBranchOpen && activeStep === 'service' && (
-                <BookingStep id='service' eyebrow={stepEyebrow('service')} title={t('Что делаем?')}>
+                <BookingStep
+                  id='service'
+                  eyebrow={
+                    isEditingServices
+                      ? t('Можно несколько · один мастер подряд')
+                      : stepEyebrow('service')
+                  }
+                  title={t('Что делаем?')}
+                >
                   <ServicePicker
-                    services={form.services}
+                    services={isEditingServices ? visitServices : form.services}
                     categories={catalog.categories}
                     value={form.serviceId}
-                    onChange={form.selectService}
+                    chosenIds={isEditingServices ? form.chosenServiceIds : undefined}
+                    onChange={isEditingServices ? form.toggleService : form.selectService}
                     onReselect={form.finishEditing}
                     photos={servicePhotos}
                     coverUrl={business.coverUrl}

@@ -54,12 +54,13 @@ const shouldReturnToOrigin = (
 
 // Set on <html> while a reload goes back to the page under the booking: the place's page the full
 // route draws under the sheet stays hidden, so it does not flash before the catalog comes back.
+// Its value says where to: «catalog» (then the catalog's skeleton stands in for it) or «page».
 const RETURNING_ATTRIBUTE = 'data-booking-returning'
 
 // Runs while the browser parses the route's HTML, before the place's page streams in: scripts and
 // the effect that steps back come too late to keep it off the screen. The same test as
 // `shouldReturnToOrigin`, in plain JS.
-const RETURNING_BOOT_SCRIPT = `try{var o=JSON.parse(sessionStorage.getItem('${STORAGE_KEY}')||'null'),n=performance.getEntriesByType('navigation')[0],s=location.pathname.split('/')[1];if(o&&n&&n.type==='reload'&&o.slug===s&&o.from.charAt(0)==='/'&&o.from.split('?')[0]!=='/'+s&&history.length>1)document.documentElement.setAttribute('${RETURNING_ATTRIBUTE}','')}catch(e){}`
+const RETURNING_BOOT_SCRIPT = `try{var o=JSON.parse(sessionStorage.getItem('${STORAGE_KEY}')||'null'),n=performance.getEntriesByType('navigation')[0],s=location.pathname.split('/')[1];if(o&&n&&n.type==='reload'&&o.slug===s&&o.from.charAt(0)==='/'&&o.from.split('?')[0]!=='/'+s&&history.length>1)document.documentElement.setAttribute('${RETURNING_ATTRIBUTE}',o.from.split('?')[0]==='/'?'catalog':'page')}catch(e){}`
 
 const stopReturning = () => document.documentElement.removeAttribute(RETURNING_ATTRIBUTE)
 

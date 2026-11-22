@@ -10,6 +10,7 @@ import {
   PlaceUnderBooking,
 } from '@/views/booking'
 import { BusinessHomePage, PlaceSkeleton } from '@/views/business'
+import { CatalogPageSkeleton } from '@/views/catalog'
 
 export const generateMetadata = async ({
   params,
@@ -49,7 +50,7 @@ const BookRoute = ({ params }: PageProps<'/[slug]/book'>) => (
         <BookingWithBusiness slug={slug} />
       ))}
     </Suspense>
-    <PlaceUnderBooking>
+    <PlaceUnderBooking catalogSkeleton={<CatalogPageSkeleton />}>
       <Suspense fallback={<PlaceSkeleton />}>
         {params.then(({ slug }) => (
           <BusinessHomePage slug={slug} />

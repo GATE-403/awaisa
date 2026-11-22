@@ -14,6 +14,11 @@ interface ServicePickerProps {
   services: Service[]
   categories: Category[]
   value: string | null
+  /**
+   * The visit's services, when it is changed from its ticket: the cards are checkboxes, every
+   * service in the visit is ticked, and a tap ticks or unticks one (`onChange`).
+   */
+  chosenIds?: string[]
   onChange: (id: string) => void
   /** The chosen card tapped again: close the step without changing anything. */
   onReselect?: () => void
@@ -31,6 +36,7 @@ export const ServicePicker = ({
   services,
   categories,
   value,
+  chosenIds,
   onChange,
   photos,
   onReselect,
@@ -47,6 +53,7 @@ export const ServicePicker = ({
     ? services.filter((service) => service.categoryId === categoryId)
     : services
   const tint = { '--tint': pickTint(businessName) } as CSSProperties
+  const isMultiple = chosenIds !== undefined
 
   return (
     <div className={styles.picker}>
@@ -65,11 +72,18 @@ export const ServicePicker = ({
           ))}
         </div>
       )}
-      <div className={styles.grid} role='radiogroup' aria-label={t('Услуга')}>
+      <div
+        className={styles.grid}
+        // Checkboxes when the visit is changed from its ticket, radios when its first service is
+        // picked (one tap, and the form moves on).
+        {...(isMultiple
+          ? { role: 'group' as const, 'aria-label': t('Услуги визита') }
+          : { role: 'radiogroup' as const, 'aria-label': t('Услуга') })}
+      >
         {shown.map((service) => {
           const picture = photos?.[service.id] ?? coverUrl ?? null
           const soon = soonLabel(service.id)
-          const isChosen = value === service.id
+          const isChosen = isMultiple ? chosenIds.includes(service.id) : value === service.id
           return (
             <label
               key={service.id}
@@ -84,13 +98,13 @@ export const ServicePicker = ({
                 <img {...gridImage(picture)} alt='' className={styles.image} data-card-media='' />
               )}
               <input
-                type='radio'
+                type={isMultiple ? 'checkbox' : 'radio'}
                 name='service'
                 className={styles.input}
                 checked={isChosen}
                 onChange={() => onChange(service.id)}
                 onClick={() => {
-                  if (isChosen) onReselect?.()
+                  if (!isMultiple && isChosen) onReselect?.()
                 }}
                 aria-label={`${service.name}, ${formatPrice(service.price)}, ${t.duration(service.durationMinutes)}`}
               />
