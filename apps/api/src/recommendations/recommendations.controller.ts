@@ -58,7 +58,7 @@ export class RecommendationsController {
     @CurrentCustomer() customer: Customer,
   ) {
     this.assertAdmin(customer)
-    return this.recommendations.stats(query.days)
+    return this.recommendations.stats(query.days, query.by)
   }
 
   @Get('interleaving')

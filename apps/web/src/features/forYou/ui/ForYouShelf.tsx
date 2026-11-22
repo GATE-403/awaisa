@@ -72,6 +72,9 @@ const pickOf = (item: Recommendation) => ({
 
 // «Для вас»: services picked for this client — their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
+// The reason the score gives a service due again (`recommend-score.ts`).
+const DUE_REASON = 'Пора снова'
+
 interface ForYouShelfProps {
   /** The shelf's heading. */
   title?: string
@@ -93,6 +96,8 @@ interface ForYouShelfProps {
   headAction?: ReactNode
   /** `stories`: small square tiles like a stories row (the catalog's top); `cards` (default) the shelf. */
   variant?: 'cards' | 'stories'
+  /** Only services due again («Пора снова»); with none the shelf is not drawn. */
+  isOnlyDue?: boolean
 }
 
 export const ForYouShelf = ({
@@ -106,6 +111,7 @@ export const ForYouShelf = ({
   surface = 'catalog',
   headAction,
   variant = 'cards',
+  isOnlyDue = false,
 }: ForYouShelfProps = {}) => {
   const t = useT()
   const trackRef = useRef<HTMLUListElement>(null)
@@ -144,7 +150,9 @@ export const ForYouShelf = ({
         },
         controller.signal,
       )
-        .then(setItems)
+        .then((next) =>
+          setItems(isOnlyDue ? next.filter((item) => item.reason.startsWith(DUE_REASON)) : next),
+        )
         .catch(() => undefined),
     )
     return () => controller.abort()
@@ -192,6 +200,9 @@ export const ForYouShelf = ({
   const sheet = isAsking && (
     <PreferencesSheet initial={preferences} onClose={() => setIsAsking(false)} />
   )
+
+  // Nothing is due without visits: no questionnaire row in place of «Пора снова».
+  if (isOnlyDue && !hasSignals) return null
 
   // Nothing known yet: one quiet line instead of a shelf.
   if (!hasSignals) {
