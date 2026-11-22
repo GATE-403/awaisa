@@ -6,6 +6,7 @@ import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { getManagedPromotions } from '@/shared/api/clientApi'
 import type { ManagedReview, Promotion } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -24,6 +25,7 @@ interface ContactClientSheetProps {
 
 const NO_CODE = ''
 
+// The message goes to the client, so its default words stay Russian whatever the cabinet's language.
 const apologyText = (firstName: string, businessName: string) =>
   `${firstName}, здравствуйте! Это ${businessName}. Спасибо за честный отзыв, и простите, что визит вас огорчил. Расскажите, что пошло не так? Хотим исправить.`
 
@@ -37,6 +39,7 @@ export const ContactClientSheet = ({
   canOfferCode,
   onClose,
 }: ContactClientSheetProps) => {
+  const t = useT()
   const firstName = review.authorName.split(' ')[0] ?? review.authorName
   const [text, setText] = useState(() => apologyText(firstName, businessName))
   const [codes, setCodes] = useState<Promotion[]>([])
@@ -61,18 +64,18 @@ export const ContactClientSheet = ({
   }, [slug, canOfferCode])
 
   const codeItems = [
-    { value: NO_CODE, label: 'Без промокода' },
+    { value: NO_CODE, label: t('Без промокода') },
     ...codes.map((item) => ({ value: item.code ?? '', label: `${item.code} · −${item.percent}%` })),
   ]
 
   return (
-    <Sheet title='Написать клиенту' onClose={onClose} cancelLabel='Закрыть'>
+    <Sheet title={t('Написать клиенту')} onClose={onClose} cancelLabel={t('Закрыть')}>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label='Сообщение'>
+        <section className={sheet.group} aria-label={t('Сообщение')}>
           <SectionCaption>{`${review.authorName} · ${formatPhone(review.customerPhone)}`}</SectionCaption>
           <div className={sheet.list}>
             <textarea
-              aria-label='Текст сообщения'
+              aria-label={t('Текст сообщения')}
               className={styles.message}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -81,11 +84,11 @@ export const ContactClientSheet = ({
             />
             {codes.length > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Промокод</span>
+                <span className={sheet.rowLabel}>{t('Промокод')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label='Промокод в подарок'
+                    aria-label={t('Промокод в подарок')}
                     items={codeItems}
                     value={code}
                     onValueChange={(value) => setCode(value ?? NO_CODE)}
@@ -96,8 +99,10 @@ export const ContactClientSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {chosen
-              ? 'Промокод добавится в конце сообщения.'
-              : 'Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв «Решено».'}
+              ? t('Промокод добавится в конце сообщения.')
+              : t(
+                  'Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв «Решено».',
+                )}
           </p>
         </section>
 
@@ -109,16 +114,16 @@ export const ContactClientSheet = ({
             className={styles.contactPrimary}
           >
             <WhatsappLogo aria-hidden />
-            Написать в WhatsApp
+            {t('Написать в WhatsApp')}
           </ButtonLink>
-          <GlyphGroup label='Другие способы связи'>
+          <GlyphGroup label={t('Другие способы связи')}>
             <a href={`sms:${review.customerPhone}?&body=${body}`} title='SMS' aria-label='SMS'>
               <ChatCircle aria-hidden />
             </a>
             <a
               href={`tel:${review.customerPhone}`}
               title={formatPhone(review.customerPhone)}
-              aria-label='Позвонить'
+              aria-label={t('Позвонить')}
             >
               <Phone aria-hidden />
             </a>

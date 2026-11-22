@@ -2,6 +2,8 @@
 
 import { Select } from '@awaisa/ui/Select'
 import { useState } from 'react'
+import { type Translate, useT } from '@/shared/i18n'
+import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ClientSheet.module.css'
 
@@ -55,14 +57,48 @@ const parse = (value: string) => {
   return { year: year || NO_YEAR, month: Number(month) || null, day: Number(day) || null }
 }
 
-const describeBirthday = (value: string) => {
+/** «14 марта» · «14-март» · «14 March»: Russian takes the genitive, the others the name. */
+const formatDayMonth = (day: number, month: number, t: Translate) => {
+  if (t.language === 'ru') return `${day} ${MONTHS[month - 1]}`
+  const name = t(MONTH_NAMES[month - 1] ?? '')
+  return t.language === 'ky' ? `${day}-${name.toLowerCase()}` : `${day} ${name}`
+}
+
+/** «ноябрь 2026» in the client's language (Russian keeps its own words at the call). */
+const formatMonthYear = (month: number, year: number, t: Translate) => {
+  const name = t(MONTH_NAMES[month - 1] ?? '')
+  return `${t.language === 'ky' ? name.toLowerCase() : name} ${year}`
+}
+
+const bishkekParts = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'numeric',
+  year: 'numeric',
+  timeZone: BUSINESS_TIME_ZONE,
+})
+
+/** A moment's day, month and year on Bishkek's clock. */
+const getBishkekDate = (iso: string) => {
+  const parts = bishkekParts.formatToParts(new Date(iso))
+  const part = (type: string) => Number(parts.find((item) => item.type === type)?.value ?? 0)
+  return { day: part('day'), month: part('month'), year: part('year') }
+}
+
+/** «21 ноября» · «21-ноябрь» · «21 November» for a moment (an ISO timestamp). */
+const formatMomentDay = (iso: string, t: Translate) => {
+  const { day, month } = getBishkekDate(iso)
+  return formatDayMonth(day, month, t)
+}
+
+const describeBirthday = (value: string, t: Translate) => {
   const { year, month, day } = parse(value)
   if (!month || !day) return null
-  return `${day} ${MONTHS[month - 1]}${year === NO_YEAR ? '' : ` ${year}`}`
+  return `${formatDayMonth(day, month, t)}${year === NO_YEAR ? '' : ` ${year}`}`
 }
 
 // The row reads the birthday as words; a tap opens day · month · year (optional) pickers in place.
 const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
+  const t = useT()
   const [isEditing, setIsEditing] = useState(false)
   const parsed = parse(value)
   const thisYear = new Date().getFullYear()
@@ -70,9 +106,9 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
     value: index + 1,
     label: String(index + 1),
   }))
-  const monthItems = MONTH_NAMES.map((label, index) => ({ value: index + 1, label }))
+  const monthItems = MONTH_NAMES.map((label, index) => ({ value: index + 1, label: t(label) }))
   const yearItems = [
-    { value: NO_YEAR, label: 'Год не важен' },
+    { value: NO_YEAR, label: t('Год не важен') },
     ...Array.from({ length: 90 }, (_, index) => {
       const year = String(thisYear - 10 - index)
       return { value: year, label: year }
@@ -85,12 +121,12 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
     onChange(`${next.year}-${pad(next.month)}-${pad(day)}`)
   }
 
-  const label = describeBirthday(value)
+  const label = describeBirthday(value, t)
 
   return (
     <>
       <div className={sheet.row}>
-        <span className={sheet.rowLabel}>День рождения</span>
+        <span className={sheet.rowLabel}>{t('День рождения')}</span>
         <span className={styles.birthdayValue}>
           {label && !isEditing && <span>{label}</span>}
           <button
@@ -99,7 +135,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
             aria-expanded={isEditing}
             onClick={() => setIsEditing((current) => !current)}
           >
-            {isEditing ? 'Готово' : label ? 'Изменить' : 'Добавить'}
+            {isEditing ? t('Готово') : label ? t('Изменить') : t('Добавить')}
           </button>
         </span>
       </div>
@@ -107,31 +143,31 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
         <div className={styles.birthdayPickers}>
           <span>
             <Select
-              aria-label='День'
+              aria-label={t('День')}
               className={styles.picker}
               items={dayItems}
               value={parsed.day}
-              placeholder='День'
+              placeholder={t('День')}
               onValueChange={(day) => day && update({ day })}
             />
           </span>
           <span>
             <Select
-              aria-label='Месяц'
+              aria-label={t('Месяц')}
               className={styles.picker}
               items={monthItems}
               value={parsed.month}
-              placeholder='Месяц'
+              placeholder={t('Месяц')}
               onValueChange={(month) => month && update({ month })}
             />
           </span>
           <span>
             <Select
-              aria-label='Год'
+              aria-label={t('Год')}
               className={styles.picker}
               items={yearItems}
               value={value ? parsed.year : null}
-              placeholder='Год'
+              placeholder={t('Год')}
               onValueChange={(year) => year && update({ year })}
             />
           </span>
@@ -145,7 +181,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
                 setIsEditing(false)
               }}
             >
-              Убрать
+              {t('Убрать')}
             </button>
           )}
         </div>
@@ -154,4 +190,11 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
   )
 }
 
-export { BirthdayField, describeBirthday }
+export {
+  BirthdayField,
+  describeBirthday,
+  formatDayMonth,
+  formatMomentDay,
+  formatMonthYear,
+  getBishkekDate,
+}
