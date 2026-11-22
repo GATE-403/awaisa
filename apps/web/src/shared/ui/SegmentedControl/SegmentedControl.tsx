@@ -46,8 +46,11 @@ export const SegmentedControl = <Value extends string>({
       control.style.setProperty('--knob-w', `${segment.offsetWidth}px`)
     }
     place()
+    // The segments too: one can change width while the track keeps its own (web fonts arriving,
+    // a toolbar moving from the header to the window's foot).
     const observer = new ResizeObserver(place)
     observer.observe(control)
+    for (const segment of control.querySelectorAll(':scope > label')) observer.observe(segment)
     return () => observer.disconnect()
   }, [index])
 

@@ -31,7 +31,10 @@ const signInViaApi = async (page: Page, phone: string, name = 'E2E Тест') =>
   sessions.set(phone, await page.context().cookies())
 }
 
+// After a test signs the number out its cookie is dead: the next test signs in afresh.
+const forgetSession = (phone: string) => sessions.delete(phone)
+
 const formatPhone = (phone: string) =>
   phone.replace(/^\+996(\d{3})(\d{3})(\d{3})$/, '+996 $1 $2 $3')
 
-export { adminPhone, formatPhone, randomClientPhone, signInViaApi, TEST_CODE }
+export { adminPhone, forgetSession, formatPhone, randomClientPhone, signInViaApi, TEST_CODE }

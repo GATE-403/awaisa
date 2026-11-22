@@ -5,7 +5,10 @@
   display: inline-grid;
   grid-auto-columns: 1fr;
   grid-auto-flow: column;
-  min-width: 0;
+  /* Never narrower than its segments: squeezed by a full toolbar (the schedule's on a 375pt
+     phone) the track shrank under them and the segments and the knob spilled onto the glyph
+     beside it. A row short of room gives it from its other parts. */
+  min-width: min-content;
   max-width: 100%;
   margin: 0;
   padding: 2px;
