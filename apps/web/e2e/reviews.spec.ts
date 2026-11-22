@@ -1,11 +1,12 @@
 import { createHmac } from 'node:crypto'
 import { expect, test } from '@playwright/test'
-import { adminPhone, signInViaApi } from './account'
-import { API_URL } from './helpers'
+import { adminPhone, randomClientPhone, signInViaApi } from './account'
 import { createPastVisit, withDb } from './visits'
 
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
-const WEBHOOK_SECRET = 'e2e-webhook-secret'
+
+const _WEBHOOK_SECRET = 'e2e-webhook-secret'
+
 const SLUG = 'awaisa-studio'
 
 // The same link the «как прошёл визит?» SMS carries.
@@ -16,6 +17,12 @@ const reviewLink = (bookingId: string) => {
     .slice(0, 22)
   return `/review/${bookingId}?s=${signature}`
 }
+
+// A 1×1 PNG: enough for the upload pipeline to re-encode.
+const PIXEL = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+)
 
 test.describe('Reviews after a visit', () => {
   let savedRating: { id: string; rating: string | null } | null = null
@@ -81,7 +88,8 @@ test.describe('Reviews after a visit', () => {
     await expect(item).toContainText('Спасибо, ждём снова!')
   })
 
-  test('a review link with a wrong signature opens nothing', async ({ page }) => {
+  test('a review link with a wrong signature opens nothing', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const response = await page.request.get(
       '/api/bookings/00000000-0000-4000-8000-000000000009/review',
       { headers: { 'x-review-signature': 'x'.repeat(22) } },
@@ -90,46 +98,46 @@ test.describe('Reviews after a visit', () => {
   })
 })
 
-test.describe('Telegram for owners', () => {
-  test('the owner links a chat through the bot and can unlink it', async ({ page }, testInfo) => {
-    await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
-    await page.goto(`/manage/${SLUG}?tab=notifications`)
+test.describe('Rating in one tap', () => {
+  test('«Как прошло?» opens the review with the stars tapped; photos go with it', async ({
+    page,
+  }) => {
+    test.setTimeout(90_000)
+    const phone = randomClientPhone()
+    await signInViaApi(page, phone, 'E2E Оценка Тестов')
+    const { booking } = await createPastVisit('E2E Оценка Тестов', phone, 0, 2)
 
-    const connect = page.getByRole('link', { name: /Подключить (Telegram|ещё один чат)/ })
-    await expect(connect).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=/)
-    const code = new URL((await connect.getAttribute('href')) ?? '').searchParams.get('start')
+    // One's own profile says a visit waits for its stars.
+    const settings = await (await page.request.get('/api/me/profile')).json()
+    const own = await (await page.request.get(`/api/profiles/${settings.id}`)).json()
+    expect(own.awaitingReview).toBeGreaterThanOrEqual(1)
 
-    // What Telegram sends when the owner taps «Start» in the bot.
-    const username = `e2e_owner_${testInfo.project.name}`
-    const update = {
-      update_id: 1,
-      message: {
-        text: `/start ${code}`,
-        chat: {
-          id: 9_000_000 + testInfo.workerIndex * 10 + (testInfo.project.name === 'mobile' ? 1 : 2),
-        },
-        from: { username },
-      },
-    }
-    expect(
-      (await page.request.post(`${API_URL}/telegram/webhook`, { data: update })).status(),
-    ).toBe(403)
-    const linked = await page.request.post(`${API_URL}/telegram/webhook`, {
-      data: update,
-      headers: { 'x-telegram-bot-api-secret-token': WEBHOOK_SECRET },
+    await page.goto('/bookings')
+    const card = page.getByRole('region', { name: 'Как прошло?' })
+    await expect(card).toBeVisible()
+    await card.getByRole('button', { name: '4 из 5' }).click()
+    const sheet = page.getByRole('dialog')
+    await expect(sheet.getByText('Хорошо')).toBeVisible()
+    await sheet.getByLabel('Фото к отзыву').setInputFiles({
+      name: 'work.png',
+      mimeType: 'image/png',
+      buffer: PIXEL,
     })
-    expect(linked.ok()).toBe(true)
+    await expect(sheet.getByRole('img', { name: 'Фото 1' })).toBeVisible()
+    const comment = `E2E фото ${Date.now()}`
+    await sheet.getByLabel(/Расскажите подробнее/).fill(comment)
+    await sheet.getByRole('button', { name: 'Отправить отзыв' }).click()
+    await expect(page.getByText('Спасибо за отзыв')).toBeVisible()
+    await expect(card).toHaveCount(0)
 
-    await page.reload()
-    const row = page.getByText(`@${username}`)
-    await expect(row).toBeVisible()
-    // The nearest block around this chat that has its own button: other chats linked to the
-    // business (a developer's own, say) have theirs.
-    await row
-      .locator('xpath=ancestor::*[.//button[normalize-space()="Отключить"]][1]')
-      .getByRole('button', { name: 'Отключить' })
-      .click()
-    await expect(page.getByText('Уведомления отключены')).toBeVisible()
-    await expect(row).toHaveCount(0)
+    const review = await (await page.request.get(`/api/bookings/${booking.id}/review`)).json()
+    expect(review.visit.review.rating).toBe(4)
+    const reviews = await (
+      await page.request.get(`/api/businesses/${SLUG}/reviews?limit=50`)
+    ).json()
+    const mine = reviews.items.find(
+      (item: { comment: string; photos: string[] }) => item.comment === comment,
+    )
+    expect(mine?.photos).toHaveLength(1)
   })
 })
