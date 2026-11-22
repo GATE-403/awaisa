@@ -11,8 +11,9 @@ import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { CalendarFeedGroup } from '@/features/calendarFeed'
 import { PushAlertsGroup } from '@/features/pushAlerts'
+import { useVisitPhoto } from '@/features/visitPhoto'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { getMasterDay, setMasterOutcome } from '@/shared/api/clientApi'
+import { addVisitPhoto, getMasterDay, setMasterOutcome } from '@/shared/api/clientApi'
 import type { AdminBooking, MasterDay, VisitOutcome } from '@/shared/api/types'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
@@ -51,6 +52,8 @@ const MONTHS = [
 ]
 const PAST_DAYS = 7
 const FORBIDDEN = 403
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
 const OUTCOMES: { value: Choice; label: string }[] = [
   { value: 'pending', label: 'Ждём' },
   { value: 'arrived', label: 'Пришёл' },
@@ -75,6 +78,24 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
   const [selectedDay, setSelectedDay] = useState<string | null>(linkedDate)
   const [day, setDay] = useState<MasterDay | null>(null)
   const [error, setError] = useState<{ message: string; isForbidden: boolean } | null>(null)
+  const visitPhoto = useVisitPhoto({
+    upload: (bookingId, file) => addVisitPhoto(slug, bookingId, file),
+    onDone: (bookingId) =>
+      setDay((current) =>
+        current
+          ? {
+              ...current,
+              photos: {
+                ...current.photos,
+                weekWithPhoto: current.photos.bookingIds.includes(bookingId)
+                  ? current.photos.weekWithPhoto
+                  : current.photos.weekWithPhoto + 1,
+                bookingIds: [...new Set([...current.photos.bookingIds, bookingId])],
+              },
+            }
+          : current,
+      ),
+  })
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
   const isSignedIn = session.status === 'signedIn'
@@ -117,17 +138,36 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
         })
   const next = now === null ? null : live.find((booking) => parseClock(booking.time) > now)
 
+  const isThisWeek = (dayKey: string) => {
+    if (!today) return false
+    const age = Date.parse(today.dayKey) - Date.parse(dayKey)
+    return age >= 0 && age < WEEK_MS
+  }
+
   const handleOutcome = async (booking: AdminBooking, choice: Choice) => {
     try {
       const updated = await setMasterOutcome(slug, booking.id, {
         outcome: choice === 'pending' ? null : choice,
       })
       haptic('selection')
+      // The result is still in front of the master: the camera is one tap away.
+      if (choice === 'arrived' && !day?.photos.bookingIds.includes(booking.id)) {
+        toast.show({
+          title: 'Отмечено: пришёл',
+          type: 'success',
+          action: { label: 'Сфотографировать', onClick: () => visitPhoto.pick(booking.id) },
+        })
+      }
+      // The week's photo count follows the mark: an arrived visit of the last seven days counts.
+      const weekDelta = isThisWeek(booking.date)
+        ? Number(updated.outcome === 'arrived') - Number(booking.outcome === 'arrived')
+        : 0
       setDay((current) =>
         current
           ? {
               ...current,
               bookings: current.bookings.map((item) => (item.id === booking.id ? updated : item)),
+              photos: { ...current.photos, weekVisits: current.photos.weekVisits + weekDelta },
             }
           : current,
       )
@@ -217,6 +257,13 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               </RowNote>
             )}
 
+            {day.photos.weekVisits > 0 && (
+              <RowNote className={styles.monthPay}>
+                Фото работ за неделю: <b>{day.photos.weekWithPhoto}</b> из {day.photos.weekVisits}{' '}
+                {pluralWord(day.photos.weekVisits, ['визита', 'визитов', 'визитов'])}
+              </RowNote>
+            )}
+
             {isToday && (current || next) && (
               <div className={styles.now} aria-live='polite'>
                 {current && (
@@ -274,7 +321,11 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                           </span>
                         )}
                         {booking.outcome === 'arrived' && (
-                          <VisitPhotoButton slug={slug} bookingId={booking.id} />
+                          <VisitPhotoButton
+                            hasPhoto={day.photos.bookingIds.includes(booking.id)}
+                            isUploading={visitPhoto.uploadingId === booking.id}
+                            onPick={() => visitPhoto.pick(booking.id)}
+                          />
                         )}
                       </span>
                       {!isCancelled && (
@@ -301,6 +352,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 })}
               </ol>
             )}
+            {visitPhoto.field}
             <MasterReviews slug={slug} businessName={day.business.name} />
             <div className={styles.alerts}>
               <PushAlertsGroup audience='master' listClassName={styles.alertsList} />
