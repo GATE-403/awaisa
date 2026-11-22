@@ -14,8 +14,8 @@ import type {
   PaymentMethod,
   Sale,
 } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
-import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -68,6 +68,7 @@ export const VisitOutcomeSection = ({
   controlSize = isCompact ? 'sm' : 'md',
   onSellProducts,
 }: VisitOutcomeSectionProps) => {
+  const t = useT()
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [sales, setSales] = useState<Sale[]>([])
@@ -132,6 +133,13 @@ export const VisitOutcomeSection = ({
     return () => controller.abort()
   }, [isArrived, onSellProducts, slug, booking.id])
 
+  const outcomes = OUTCOMES.map((item) => ({ ...item, label: t(item.label) }))
+  // «Карта» is the map elsewhere in the app: the payment card has its own key.
+  const methods = METHODS.map((item) => ({
+    ...item,
+    label: item.value === 'card' && t.language !== 'ru' ? t('Карта (оплата)') : t(item.label),
+  }))
+
   const save = async (input: OutcomeInput) => {
     const updated = await onChange(input)
     if (!updated) return
@@ -146,15 +154,15 @@ export const VisitOutcomeSection = ({
   }
 
   return (
-    <section className={sheet.group} aria-label='Итог визита'>
-      {!isCompact && <SectionCaption>Итог визита</SectionCaption>}
+    <section className={sheet.group} aria-label={t('Итог визита')}>
+      {!isCompact && <SectionCaption>{t('Итог визита')}</SectionCaption>}
       {/* The control stands on its own, like a macOS segmented control in a form. */}
       <div className={styles.outcomeRow}>
         <SegmentedControl
-          label='Итог визита'
+          label={t('Итог визита')}
           size={controlSize}
           value={choice}
-          items={OUTCOMES}
+          items={outcomes}
           onChange={(value) => void save({ outcome: value === 'pending' ? null : value })}
         />
       </div>
@@ -162,27 +170,29 @@ export const VisitOutcomeSection = ({
         <div className={sheet.list}>
           {isPaidByLoyalty ? (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{PAID_BY[current.paymentMethod ?? 'cash']}</span>
+              <span className={sheet.rowLabel}>
+                {t(PAID_BY[current.paymentMethod ?? 'cash'] ?? '')}
+              </span>
             </div>
           ) : (
             <>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Оплачено, сом</span>
+                <span className={sheet.rowLabel}>{t('Оплачено, сом')}</span>
                 <Input
                   variant='plain'
                   inputMode='numeric'
-                  aria-label='Оплачено, сом'
+                  aria-label={t('Оплачено, сом')}
                   value={maskAmountInput(amount.replace(/\D/g, ''))}
                   onChange={(event) => setAmount(event.target.value)}
                   onBlur={handleAmountBlur}
                 />
               </label>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Способ</span>
+                <span className={sheet.rowLabel}>{t('Способ')}</span>
                 <Select
                   variant='plain'
-                  aria-label='Способ оплаты'
-                  items={METHODS}
+                  aria-label={t('Способ оплаты')}
+                  items={methods}
                   value={current.paymentMethod ?? 'cash'}
                   onValueChange={(method) =>
                     method &&
@@ -196,13 +206,15 @@ export const VisitOutcomeSection = ({
               </div>
               {receipt && (
                 <button type='button' className={sheet.row} onClick={() => setIsReceiptOpen(true)}>
-                  <span className={sheet.rowLabel}>Чек</span>
+                  <span className={sheet.rowLabel}>{t('Чек')}</span>
                   <span
-                    className={describeReceipt(receipt).isAlert ? styles.rowAlert : styles.rowLink}
+                    className={describeReceipt(receipt, t).isAlert ? styles.rowAlert : styles.rowLink}
                   >
                     {receipt.status === 'issued'
-                      ? `${receipt.kind === 'refund' ? 'Возврат ' : ''}№${receipt.fiscalNumber}`
-                      : describeReceipt(receipt).text}{' '}
+                      ? receipt.kind === 'refund'
+                        ? t('Возврат №{number}', { number: receipt.fiscalNumber ?? '' })
+                        : `№${receipt.fiscalNumber}`
+                      : describeReceipt(receipt, t).text}{' '}
                     ›
                   </span>
                 </button>
@@ -221,8 +233,8 @@ export const VisitOutcomeSection = ({
               )}
               {onSellProducts && (
                 <button type='button' className={sheet.row} onClick={onSellProducts}>
-                  <span className={sheet.rowLabel}>Товары</span>
-                  <span className={styles.rowLink}>Добавить ›</span>
+                  <span className={sheet.rowLabel}>{t('Товары')}</span>
+                  <span className={styles.rowLink}>{t('Добавить')} ›</span>
                 </button>
               )}
               {/* A certificate is rare: a row that opens its field only when asked. */}
@@ -231,8 +243,8 @@ export const VisitOutcomeSection = ({
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
-                      aria-label='Код сертификата'
-                      placeholder='Код сертификата'
+                      aria-label={t('Код сертификата')}
+                      placeholder={t('Код сертификата')}
                       autoFocus
                       value={certificateCode}
                       onValueChange={(value) =>
@@ -255,7 +267,7 @@ export const VisitOutcomeSection = ({
                       })
                     }
                   >
-                    Применить
+                    {t('Применить')}
                   </Button>
                 </div>
               ) : (
@@ -264,8 +276,8 @@ export const VisitOutcomeSection = ({
                   className={sheet.row}
                   onClick={() => setIsCertificateOpen(true)}
                 >
-                  <span className={sheet.rowLabel}>Сертификат</span>
-                  <span className={styles.rowLink}>Ввести код ›</span>
+                  <span className={sheet.rowLabel}>{t('Сертификат')}</span>
+                  <span className={styles.rowLink}>{t('Ввести код')} ›</span>
                 </button>
               )}
             </>
@@ -276,25 +288,29 @@ export const VisitOutcomeSection = ({
         loyalty &&
         !isPaidByLoyalty &&
         (subscriptions.length > 0 || loyalty.bonusBalance > 0) && (
-          <section className={sheet.list} aria-label='Лояльность клиента'>
+          <section className={sheet.list} aria-label={t('Лояльность клиента')}>
             {subscriptions.map((subscription) => (
               <div key={subscription.id} className={sheet.row}>
                 <span className={sheet.rowLabel}>
-                  {subscription.title} · осталось{' '}
-                  {pluralize(subscription.visitsLeft, ['визит', 'визита', 'визитов'])}
+                  {subscription.title} ·{' '}
+                  {t('осталось {count}', {
+                    count: t.count(subscription.visitsLeft, ['визит', 'визита', 'визитов']),
+                  })}
                 </span>
                 <Button
                   size='sm'
                   variant='outline'
                   onClick={() => void save({ outcome: 'arrived', subscriptionId: subscription.id })}
                 >
-                  Списать визит
+                  {t('Списать визит')}
                 </Button>
               </div>
             ))}
             {loyalty.bonusBalance > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Бонусы · {formatPrice(loyalty.bonusBalance)}</span>
+                <span className={sheet.rowLabel}>
+                  {t('Бонусы · {amount}', { amount: formatPrice(loyalty.bonusBalance) })}
+                </span>
                 <Button
                   size='sm'
                   variant='outline'
@@ -306,7 +322,7 @@ export const VisitOutcomeSection = ({
                     })
                   }
                 >
-                  Списать
+                  {t('Списать')}
                 </Button>
               </div>
             )}
@@ -314,7 +330,9 @@ export const VisitOutcomeSection = ({
         )}
       {current.outcome === 'arrived' && loyalty?.bonusPercent && !isPaidByLoyalty && (
         <p className={sheet.groupFooter}>
-          Клиенту начислится {loyalty.bonusPercent}% бонусами от оплаты деньгами.
+          {t('Клиенту начислится {percent}% бонусами от оплаты деньгами.', {
+            percent: loyalty.bonusPercent,
+          })}
         </p>
       )}
       {isReceiptOpen && receipt && (
@@ -326,7 +344,7 @@ export const VisitOutcomeSection = ({
         />
       )}
       {current.outcome === 'no_show' && (
-        <p className={sheet.groupFooter}>Неявка видна в карточке клиента и в аналитике.</p>
+        <p className={sheet.groupFooter}>{t('Неявка видна в карточке клиента и в аналитике.')}</p>
       )}
     </section>
   )

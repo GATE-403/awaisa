@@ -1,4 +1,5 @@
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 
@@ -27,22 +28,26 @@ export const BookingDetailsDialog = ({
   onOpenClient,
   onBookAgain,
   onSellProducts,
-}: BookingDetailsDialogProps) => (
-  <Sheet
-    title='Запись'
-    onClose={onClose}
-    cancelLabel={null}
-    action={{ label: 'Готово', onClick: onClose }}
-  >
-    <BookingInspector
-      slug={slug}
-      booking={booking}
-      onCancel={onCancel}
-      onOutcome={onOutcome}
-      onOpenClient={onOpenClient}
-      onBookAgain={onBookAgain}
-      onSellProducts={onSellProducts}
+}: BookingDetailsDialogProps) => {
+  const t = useT()
+
+  return (
+    <Sheet
+      title={t('Запись')}
       onClose={onClose}
-    />
-  </Sheet>
-)
+      cancelLabel={null}
+      action={{ label: t('Готово'), onClick: onClose }}
+    >
+      <BookingInspector
+        slug={slug}
+        booking={booking}
+        onCancel={onCancel}
+        onOutcome={onOutcome}
+        onOpenClient={onOpenClient}
+        onBookAgain={onBookAgain}
+        onSellProducts={onSellProducts}
+        onClose={onClose}
+      />
+    </Sheet>
+  )
+}

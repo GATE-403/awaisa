@@ -9,6 +9,7 @@ import { BusinessTile } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { getMasterPlaces } from '@/shared/api/clientApi'
 import type { MasterPlace } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -23,6 +24,7 @@ interface MasterPlacesPageProps {
 export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps) => {
   const session = useRequireSession()
   const router = useRouter()
+  const t = useT()
   const [places, setPlaces] = useState<MasterPlace[] | null>(initialPlaces)
   const isSignedIn = session.status === 'signedIn'
 
@@ -43,12 +45,12 @@ export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
-        <PageTitle size='sm' title='Мой день.' subtitle='Где вы работаете мастером.' />
+        <PageTitle size='sm' title={t('Мой день.')} subtitle={t('Где вы работаете мастером.')} />
         {!places && <Skeleton className={styles.skeleton} />}
         {places?.length === 0 && (
           <EmptyState
-            title='Этот номер не привязан к мастеру'
-            text='Попросите владельца указать его в карточке мастера: Кабинет → Мастера.'
+            title={t('Этот номер не привязан к мастеру')}
+            text={t('Попросите владельца указать его в карточке мастера: Кабинет → Мастера.')}
           />
         )}
         {places && places.length > 0 && (
