@@ -70,12 +70,11 @@ test.describe('A visit of several services', () => {
       const steps = bookingSteps(guest)
       await steps.service.getByRole('radio', { name: /^Маникюр/ }).click()
 
-      // The visit can grow: the service step opens again with the chosen one checked.
-      await guest.getByRole('button', { name: 'Ещё услуга' }).click()
-      const more = guest.locator('#step-service-more')
-      await expect(more.getByRole('heading', { name: 'Что ещё сделать?' })).toBeVisible()
-      await expect(more.getByRole('checkbox', { name: /^Маникюр/ })).toBeChecked()
-      await more.getByRole('checkbox', { name: /^Педикюр/ }).click()
+      // The visit can grow in passing: one service is offered under its ticket, a tap adds it.
+      await guest.getByRole('button', { name: /^\+ Педикюр/ }).click()
+      // Once per visit: nothing more is offered after it (Брови could still join, Айда aside).
+      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(guest.getByRole('button', { name: /^\+ / })).toHaveCount(0)
 
       // Only Айда does both, so the master is chosen; the card says the whole visit.
       await expect(steps.service).toContainText('Маникюр + Педикюр')
@@ -113,6 +112,42 @@ test.describe('A visit of several services', () => {
       await expect(
         page.locator('[data-schedule-board]').getByText('Маникюр + Педикюр'),
       ).toHaveCount(1)
+    } finally {
+      await guestContext.close()
+    }
+  })
+
+  test('adding a service keeps a time the longer visit still fits, and says so when it does not', async ({
+    page,
+    browser,
+  }) => {
+    test.setTimeout(90_000)
+    const { business, manicure, aida } = await setUpNails(page)
+    const date = bishkekDay(1)
+    const guestContext = await browser.newContext()
+    const guest = await guestContext.newPage()
+    try {
+      const steps = bookingSteps(guest)
+      const offer = guest.getByRole('button', { name: /^\+ Педикюр/ })
+
+      // 10:00 has the morning free after it: the visit grows to 2 h 30 min and keeps its time.
+      await guest.goto(
+        `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
+      )
+      await offer.click()
+      await expect(steps.service).toContainText('Маникюр + Педикюр')
+      await expect(steps.datetime).toContainText('10:00–12:30')
+      await expect(guest.getByText(/визит теперь не помещается/)).toHaveCount(0)
+
+      // 19:00 is the last hour before closing at 20:00: the time goes, and the form says why.
+      await guest.goto(
+        `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=19:00`,
+      )
+      await offer.click()
+      await expect(
+        guest.getByText('В 19:00 визит теперь не помещается, выберите время'),
+      ).toBeVisible()
+      await expect(guest.getByRole('heading', { name: 'Когда удобно?' })).toBeVisible()
     } finally {
       await guestContext.close()
     }
