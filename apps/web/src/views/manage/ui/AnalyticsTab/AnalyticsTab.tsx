@@ -16,8 +16,8 @@ import type {
   MoneyReport,
   PromotionInput,
 } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
-import { pluralize } from '@/shared/lib/plural'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -33,7 +33,8 @@ import forms from '@/views/manage/ui/manageForms.module.css'
 import { PromotionSheet } from '@/views/manage/ui/PromotionsTab/PromotionSheet'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import styles from './AnalyticsTab.module.css'
-import { formatDay, formatMoney, numberFormatter, toBuckets } from './analyticsFormat'
+import { analyticsFormat, numberFormatter } from './analyticsFormat'
+import { Filled } from './Filled'
 import {
   AttentionList,
   ChangeReasons,
@@ -84,18 +85,28 @@ const PERIODS: { value: `${AnalyticsDays}`; label: string }[] = [
   { value: '365', label: 'Год' },
 ]
 
-const PREVIOUS: Record<AnalyticsDays, string> = {
-  7: 'прошлой неделе',
-  30: 'прошлому месяцу',
-  90: 'прошлому кварталу',
-  365: 'прошлому году',
+const COMPARED: Record<AnalyticsDays, string> = {
+  7: 'к прошлой неделе',
+  30: 'к прошлому месяцу',
+  90: 'к прошлому кварталу',
+  365: 'к прошлому году',
 }
 
-const visits = (count: number) => pluralize(count, ['визит', 'визита', 'визитов'])
+const SAME: Record<AnalyticsDays, string> = {
+  7: 'Как на прошлой неделе',
+  30: 'Как в прошлом месяце',
+  90: 'Как в прошлом квартале',
+  365: 'Как в прошлом году',
+}
+
+const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
 
 // Direction is shown twice — arrow and sign — so it never relies on colour.
 const Delta = ({ value }: DeltaProps) => {
-  if (value === null) return <span className={styles.deltaNone}>нет данных для сравнения</span>
+  const t = useT()
+  if (value === null) {
+    return <span className={styles.deltaNone}>{t('нет данных для сравнения')}</span>
+  }
   const Icon = value >= 0 ? ArrowUpRight : ArrowDownRight
 
   return (
@@ -194,6 +205,8 @@ const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
 export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => {
   const router = useRouter()
   const toast = useToast()
+  const t = useT()
+  const { formatDay, formatMoney, toBuckets } = analyticsFormat(t)
   const [days, setDays] = useState<AnalyticsDays>(30)
   const [openPhone, setOpenPhone] = useState<string | null>(null)
   const [openMasterId, setOpenMasterId] = useState<string | null>(null)
@@ -221,7 +234,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
       await setAnalyticsGoal(slug, goal)
       setGoal(goal)
     } catch (goalError) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(goalError), type: 'error' })
+      toast.show({
+        title: t('Не получилось'),
+        description: getErrorMessage(goalError),
+        type: 'error',
+      })
       throw goalError
     }
   }
@@ -229,11 +246,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   const savePromotion = async (input: PromotionInput) => {
     try {
       await createPromotion(slug, input)
-      toast.show({ title: 'Акция создана', type: 'success' })
+      toast.show({ title: t('Акция создана'), type: 'success' })
       return true
     } catch (promotionError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(promotionError),
         type: 'error',
       })
@@ -271,25 +288,28 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   return (
     <section className={`${forms.section} ${styles.page}`}>
       <SectionHeader
-        title='Аналитика'
+        title={t('Аналитика')}
         description={
           report
-            ? `${formatDay(report.period.from)} – ${formatDay(report.period.to)} · по прошедшим визитам`
-            : 'Выручка, клиенты и загрузка'
+            ? t('{from} – {to} · по прошедшим визитам', {
+                from: formatDay(report.period.from),
+                to: formatDay(report.period.to),
+              })
+            : t('Выручка, клиенты и загрузка')
         }
         actions={
           <FloatingToolbar className={styles.tools}>
             <SegmentedControl
               size='sm'
-              label='Период'
+              label={t('Период')}
               value={String(days) as `${AnalyticsDays}`}
-              items={PERIODS}
+              items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
               onChange={(value) => setDays(Number(value) as AnalyticsDays)}
             />
-            <GlyphGroup label='Отчёт'>
+            <GlyphGroup label={t('Отчёт')}>
               <GlyphButton
                 icon={<DownloadSimple />}
-                label='Скачать CSV'
+                label={t('Скачать CSV')}
                 onClick={handleExport}
                 disabled={!report}
               />
@@ -303,8 +323,10 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
       {isEmpty && (
         <EmptyState
-          title='Визитов пока нет'
-          text='Поделитесь ссылкой на страницу, и здесь появятся выручка, клиенты и загрузка мастеров.'
+          title={t('Визитов пока нет')}
+          text={t(
+            'Поделитесь ссылкой на страницу, и здесь появятся выручка, клиенты и загрузка мастеров.',
+          )}
         />
       )}
 
@@ -316,15 +338,15 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
           {/* Money: the one number the tab leads with, what is booked ahead, its chart and how
               people paid. Right on the page, no card. */}
-          <section className={styles.revenue} aria-label='Выручка'>
+          <section className={styles.revenue} aria-label={t('Выручка')}>
             <div className={styles.revenueTop}>
               <div className={styles.revenueHead}>
-                <span className={styles.label}>Выручка</span>
+                <span className={styles.label}>{t('Выручка')}</span>
                 <span className={styles.revenueValue}>{formatMoney(totals.revenue)}</span>
                 <span className={styles.revenueMeta}>
                   <Delta value={totals.revenueChange} />
                   {totals.revenueChange !== null && (
-                    <span className={styles.muted}>к {PREVIOUS[report.period.days]}</span>
+                    <span className={styles.muted}>{t(COMPARED[report.period.days])}</span>
                   )}
                 </span>
                 <ChangeReasons totals={totals} masters={report.masters} />
@@ -332,16 +354,20 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
               <dl className={styles.facts}>
                 {totals.upcomingVisits > 0 && (
                   <div className={styles.fact}>
-                    <dt className={styles.label}>Впереди</dt>
+                    <dt className={styles.label}>{t('Впереди')}</dt>
                     <dd className={styles.factValue}>{formatMoney(totals.upcomingRevenue)}</dd>
-                    <dd className={styles.muted}>{visits(totals.upcomingVisits)} записано</dd>
+                    <dd className={styles.muted}>
+                      {t('{visits} записано', { visits: visits(t, totals.upcomingVisits) })}
+                    </dd>
                   </div>
                 )}
                 {totals.materialsCost > 0 && (
                   <div className={styles.fact}>
-                    <dt className={styles.label}>Без материалов</dt>
+                    <dt className={styles.label}>{t('Без материалов')}</dt>
                     <dd className={styles.factValue}>{formatMoney(totals.margin)}</dd>
-                    <dd className={styles.muted}>расходники {formatMoney(totals.materialsCost)}</dd>
+                    <dd className={styles.muted}>
+                      {t('расходники {amount}', { amount: formatMoney(totals.materialsCost) })}
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -359,11 +385,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
           <section className={styles.group} aria-labelledby='analytics-visits'>
             <SectionCaption id='analytics-visits' isInset={false}>
-              Визиты и клиенты
+              {t('Визиты и клиенты')}
             </SectionCaption>
             <div className={styles.stats}>
               <Stat
-                label='Визиты'
+                label={t('Визиты')}
                 value={numberFormatter.format(totals.visits)}
                 delta={totals.visitsChange}
                 trend={{
@@ -373,7 +399,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                 }}
               />
               <Stat
-                label='Средний чек'
+                label={t('Средний чек')}
                 value={formatMoney(totals.averageCheck)}
                 delta={totals.averageCheckChange}
                 trend={{
@@ -384,20 +410,27 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                   format: formatMoney,
                 }}
               />
-              <Stat label='Клиенты' value={numberFormatter.format(totals.clients)}>
+              <Stat label={t('Клиенты')} value={numberFormatter.format(totals.clients)}>
                 <ClientsSplit newClients={totals.newClients} returning={totals.returningClients} />
                 {report.retention.rate !== null && (
                   <span className={styles.deltaNone}>
-                    возвращаются <b className={styles.strong}>{report.retention.rate}%</b> за 6
-                    недель
+                    <Filled
+                      text={t('возвращаются {rate} за 6 недель')}
+                      parts={{
+                        rate: <b className={styles.strong}>{report.retention.rate}%</b>,
+                      }}
+                    />
                   </span>
                 )}
               </Stat>
-              <Stat label='Отмены' value={`${totals.cancellationRate}%`}>
+              <Stat label={t('Отмены')} value={`${totals.cancellationRate}%`}>
                 <span className={styles.deltaNone}>
                   {totals.noShows > 0
-                    ? `и неявки ${totals.noShowRate}% · ${totals.noShows}`
-                    : 'от всех записей'}
+                    ? t('и неявки {rate}% · {count}', {
+                        rate: totals.noShowRate,
+                        count: totals.noShows,
+                      })
+                    : t('от всех записей')}
                 </span>
               </Stat>
             </div>
@@ -410,17 +443,19 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
             <MastersGroup masters={report.masters} onOpen={setOpenMasterId} />
             <section className={styles.group} aria-labelledby='analytics-services'>
               <SectionCaption id='analytics-services' isInset={false}>
-                Услуги <span className={forms.groupCount}>{report.services.length}</span>
+                {t('Услуги')} <span className={forms.groupCount}>{report.services.length}</span>
               </SectionCaption>
               {report.services.length === 0 ? (
                 <EmptyState
                   variant='inline'
-                  text='Здесь появятся услуги, которые приносят больше всего.'
+                  text={t('Здесь появятся услуги, которые приносят больше всего.')}
                 />
               ) : (
                 <ScrollArea
-                  label='Услуги за период'
-                  moreLabel={(count) => `Ещё ${pluralize(count, ['услуга', 'услуги', 'услуг'])}`}
+                  label={t('Услуги за период')}
+                  moreLabel={(count) =>
+                    t('Ещё {count}', { count: t.count(count, ['услуга', 'услуги', 'услуг']) })
+                  }
                 >
                   <ol className={styles.rows}>
                     {report.services.map((service) => (
@@ -428,9 +463,9 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                         <span className={styles.rowText}>
                           <span className={styles.rowTitle}>{service.name}</span>
                           <span className={styles.rowMeta}>
-                            {visits(service.visits)}
+                            {visits(t, service.visits)}
                             {service.materialsCost > 0 &&
-                              ` · материалы ${formatMoney(service.materialsCost)}`}
+                              ` · ${t('материалы {amount}', { amount: formatMoney(service.materialsCost) })}`}
                           </span>
                         </span>
                         <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
@@ -455,18 +490,18 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
           >
             <section className={styles.group} aria-labelledby='analytics-clients'>
               <SectionCaption id='analytics-clients' isInset={false}>
-                Клиенты <span className={forms.groupCount}>{report.clients.length}</span>
+                {t('Клиенты')} <span className={forms.groupCount}>{report.clients.length}</span>
               </SectionCaption>
               {report.clients.length === 0 ? (
                 <EmptyState
                   variant='inline'
-                  text='Здесь появятся клиенты, которые пришли за период.'
+                  text={t('Здесь появятся клиенты, которые пришли за период.')}
                 />
               ) : (
                 <ScrollArea
-                  label='Клиенты за период'
+                  label={t('Клиенты за период')}
                   moreLabel={(count) =>
-                    `Ещё ${pluralize(count, ['клиент', 'клиента', 'клиентов'])}`
+                    t('Ещё {count}', { count: t.count(count, ['клиент', 'клиента', 'клиентов']) })
                   }
                 >
                   <ul className={styles.rows}>
@@ -480,11 +515,14 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                           <span className={styles.rowText}>
                             <span className={styles.rowTitle}>
                               {client.name || formatPhone(client.phone)}
-                              {client.isNew && <span className={styles.badge}>Новый</span>}
+                              {client.isNew && <span className={styles.badge}>{t('Новый')}</span>}
                             </span>
                             <span className={styles.rowMeta}>
-                              {visits(client.visits)} · был {formatDay(client.lastVisit)} ·{' '}
-                              {formatPhone(client.phone)}
+                              {t('{visits} · был {day}', {
+                                visits: visits(t, client.visits),
+                                day: formatDay(client.lastVisit),
+                              })}{' '}
+                              · {formatPhone(client.phone)}
                             </span>
                           </span>
                           <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
@@ -499,7 +537,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
             <section className={styles.group} aria-labelledby='analytics-heatmap'>
               <SectionCaption id='analytics-heatmap' isInset={false}>
-                Загрузка по часам
+                {t('Загрузка по часам')}
               </SectionCaption>
               <LoadHeatmap
                 cells={report.heatmap}
@@ -530,7 +568,8 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
       {openMaster && report && (
         <MasterStatsSheet
           master={openMaster}
-          periodLabel={PREVIOUS[report.period.days]}
+          comparedLabel={t(COMPARED[report.period.days])}
+          sameLabel={t(SAME[report.period.days])}
           slug={slug}
           period={report.period}
           onPayoutsChange={reload}
@@ -586,6 +625,8 @@ interface MastersGroupProps {
 // The team in one list: visits, money, rating, how full their hours were and what they are owed
 // by their pay scheme, less what was paid out. Pay used to be a second list of the same people.
 const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const paid = masters.filter((master) => master.pay !== null && master.pay.total > 0)
   const due = paid.reduce((sum, master) => sum + (master.pay?.due ?? 0), 0)
   const paidOut = paid.reduce((sum, master) => sum + (master.pay?.paid ?? 0), 0)
@@ -594,11 +635,13 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-masters'>
       <SectionCaption id='analytics-masters' isInset={false}>
-        Мастера <span className={forms.groupCount}>{masters.length}</span>
+        {t('Мастера')} <span className={forms.groupCount}>{masters.length}</span>
       </SectionCaption>
       <ScrollArea
-        label='Мастера за период'
-        moreLabel={(count) => `Ещё ${pluralize(count, ['мастер', 'мастера', 'мастеров'])}`}
+        label={t('Мастера за период')}
+        moreLabel={(count) =>
+          t('Ещё {count}', { count: t.count(count, ['мастер', 'мастера', 'мастеров']) })
+        }
       >
         <ul className={styles.rows}>
           {masters.map((master) => (
@@ -611,7 +654,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
                 <span className={styles.rowText}>
                   <span className={styles.rowTitle}>{master.name}</span>
                   <span className={styles.rowMeta}>
-                    {visits(master.visits)} · {formatMoney(master.revenue)}
+                    {visits(t, master.visits)} · {formatMoney(master.revenue)}
                     {master.rating !== null &&
                       ` · ★ ${master.rating.toFixed(1).replace('.', ',')} (${master.reviews})`}
                   </span>
@@ -620,7 +663,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
                   )}
                 </span>
                 <span className={styles.rowValue}>
-                  {master.load}%<span className={styles.srOnly}> загрузки</span>
+                  {master.load}%<span className={styles.srOnly}> {t('загрузки')}</span>
                 </span>
                 <CaretRight weight='bold' aria-hidden className={styles.rowChevron} />
                 {master.load > 0 && (
@@ -636,18 +679,20 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
       <p className={styles.footnote}>
         {paid.length > 0 ? (
           <>
-            Итого к выплате <b>{formatMoney(due)}</b>
-            {paidOut > 0 && (
-              <>
-                , выплачено <b>{formatMoney(paidOut)}</b>
-              </>
-            )}
-            {isPayMissing ? ', у части мастеров зарплата не задана. ' : '. '}
+            <Filled
+              text={
+                paidOut > 0
+                  ? t('Итого к выплате {due}, выплачено {paid}.')
+                  : t('Итого к выплате {due}.')
+              }
+              parts={{ due: <b>{formatMoney(due)}</b>, paid: <b>{formatMoney(paidOut)}</b> }}
+            />{' '}
+            {isPayMissing && `${t('У части мастеров зарплата не задана.')} `}
           </>
         ) : (
-          'Задайте зарплату в карточке мастера на «Странице», и здесь появится, сколько кому выплатить. '
+          `${t('Задайте зарплату в карточке мастера на «Странице», и здесь появится, сколько кому выплатить.')} `
         )}
-        Загрузка: доля рабочих часов, занятых визитами.
+        {t('Загрузка: доля рабочих часов, занятых визитами.')}
       </p>
     </section>
   )
@@ -660,18 +705,20 @@ interface PayLineProps {
 
 // «к выплате 1 000 сом · 40%» while one percent decides it, «выплачено» once it is settled.
 const PayLine = ({ pay, percent }: PayLineProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const plain = plainPercent(pay, percent)
   if (pay.due === 0) {
     return (
       <span className={styles.rowMeta}>
-        выплачено <b>{formatMoney(pay.paid)}</b>
+        <Filled text={t('выплачено {amount}')} parts={{ amount: <b>{formatMoney(pay.paid)}</b> }} />
       </span>
     )
   }
   return (
     <span className={styles.rowMeta}>
-      к выплате <b>{formatMoney(pay.due)}</b>
-      {pay.paid > 0 && ` · выплачено ${formatMoney(pay.paid)}`}
+      <Filled text={t('к выплате {amount}')} parts={{ amount: <b>{formatMoney(pay.due)}</b> }} />
+      {pay.paid > 0 && ` · ${t('выплачено {amount}', { amount: formatMoney(pay.paid) })}`}
       {plain !== null && pay.paid === 0 && ` · ${plain}%`}
     </span>
   )
@@ -682,15 +729,17 @@ interface PaymentsSplitProps {
 }
 
 const PAYMENT_PARTS = [
-  { key: 'cash', label: 'Наличные' },
-  { key: 'card', label: 'Карта' },
-  { key: 'transfer', label: 'Перевод' },
+  { key: 'cash', label: 'Наличными' },
+  { key: 'card', label: 'Картой' },
+  { key: 'transfer', label: 'Переводом' },
   { key: 'unmarked', label: 'Не отмечено' },
 ] as const
 
 // Where the money came in, as staff marked it: one thin bar of shares and a legend that names
 // each with its percent and sum (the rest is counted at the price list).
 const PaymentsSplit = ({ payments }: PaymentsSplitProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const parts = PAYMENT_PARTS.map((part) => ({ ...part, value: payments[part.key] })).filter(
     (part) => part.value > 0,
   )
@@ -699,7 +748,7 @@ const PaymentsSplit = ({ payments }: PaymentsSplitProps) => {
 
   return (
     <div className={styles.payments}>
-      <span className={styles.label}>Как платили</span>
+      <span className={styles.label}>{t('Как платили')}</span>
       <span className={styles.paymentsBar} aria-hidden='true'>
         {parts.map((part) => (
           <span key={part.key} data-part={part.key} style={{ flexGrow: part.value }} />
@@ -709,7 +758,7 @@ const PaymentsSplit = ({ payments }: PaymentsSplitProps) => {
         {parts.map((part) => (
           <li key={part.key}>
             <i data-part={part.key} aria-hidden='true' />
-            {part.label} <b>{Math.round((part.value / total) * 100)}%</b>
+            {t(part.label)} <b>{Math.round((part.value / total) * 100)}%</b>
             <span className={styles.muted}>{formatMoney(part.value)}</span>
           </li>
         ))}
@@ -725,6 +774,7 @@ interface ClientsSplitProps {
 
 // Two parts of one whole: a thin segmented bar plus a legend that names and counts both.
 const ClientsSplit = ({ newClients, returning }: ClientsSplitProps) => {
+  const t = useT()
   const total = newClients + returning
 
   return (
@@ -738,11 +788,11 @@ const ClientsSplit = ({ newClients, returning }: ClientsSplitProps) => {
       <span className={styles.splitLegend}>
         <span>
           <i data-part='new' aria-hidden='true' />
-          {pluralize(newClients, ['новый', 'новых', 'новых'])}
+          {t.count(newClients, ['новый', 'новых', 'новых'])}
         </span>
         <span>
           <i data-part='returning' aria-hidden='true' />
-          {pluralize(returning, ['вернулся', 'вернулись', 'вернулись'])}
+          {t.count(returning, ['вернулся', 'вернулись', 'вернулись'])}
         </span>
       </span>
     </span>

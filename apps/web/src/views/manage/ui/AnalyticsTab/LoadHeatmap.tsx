@@ -3,7 +3,7 @@
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import type { AnalyticsReport, WorkingDay } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import styles from './AnalyticsTab.module.css'
 
 interface LoadHeatmapProps {
@@ -18,7 +18,6 @@ type Cell = { weekday: number; hour: number }
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 const STEPS = 4
 
-const visitsLabel = (count: number) => pluralize(count, ['визит', 'визита', 'визитов'])
 const span = (hour: number) => `${hour}:00–${hour + 1}:00`
 
 const ARROWS: Record<string, [number, number]> = {
@@ -34,6 +33,7 @@ const ARROWS: Record<string, [number, number]> = {
 // rings the cell and lights its day and hour. With nothing picked the line names the peak, so the
 // headline never depends on reading a colour.
 export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps) => {
+  const t = useT()
   const [hovered, setHovered] = useState<Cell | null>(null)
   const [picked, setPicked] = useState<Cell | null>(null)
   const gridRef = useRef<HTMLTableElement>(null)
@@ -54,6 +54,8 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
       weekday: 0,
       hour: columns[0] ?? opens,
     }
+  const visitsLabel = (count: number) => t.count(count, ['визит', 'визита', 'визитов'])
+  const weekdayOf = (index: number) => t(WEEKDAYS[index] ?? '')
   const isPeak = (cell: Cell) => peak?.weekday === cell.weekday && peak.hour === cell.hour
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, cell: Cell) => {
@@ -70,7 +72,9 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
   }
 
   if (!peak) {
-    return <p className={styles.cardHint}>Визитов пока нет, карта заполнится по мере записей</p>
+    return (
+      <p className={styles.cardHint}>{t('Визитов пока нет, карта заполнится по мере записей')}</p>
+    )
   }
 
   return (
@@ -78,18 +82,26 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
       <p className={styles.cardHint} aria-live='polite'>
         {active ? (
           <>
-            {WEEKDAYS[active.weekday]}, {span(active.hour)} · {visitsLabel(visitsAt(active))}
+            {weekdayOf(active.weekday)}, {span(active.hour)} · {visitsLabel(visitsAt(active))}
             {!isPeak(active) && (
               <span className={styles.hintMuted}>
-                {' '}
-                · пик {WEEKDAYS[peak.weekday]} {peak.hour}:00, {visitsLabel(peak.visits)}
+                {' · '}
+                {t('пик {day} {hour}:00, {visits}', {
+                  day: weekdayOf(peak.weekday),
+                  hour: peak.hour,
+                  visits: visitsLabel(peak.visits),
+                })}
               </span>
             )}
           </>
         ) : (
           <>
-            Пик: {WEEKDAYS[peak.weekday]}, {span(peak.hour)} · {visitsLabel(peak.visits)}
-            <span className={styles.hintMuted}> · наведите на час</span>
+            {t('Пик: {day}, {hours} · {visits}', {
+              day: weekdayOf(peak.weekday),
+              hours: span(peak.hour),
+              visits: visitsLabel(peak.visits),
+            })}
+            <span className={styles.hintMuted}> · {t('наведите на час')}</span>
           </>
         )}
       </p>
@@ -100,7 +112,10 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           className={styles.heatmapAction}
           onClick={() => onMakePromotion(picked)}
         >
-          Скидка на {WEEKDAYS[picked.weekday]} {span(picked.hour)}, чтобы заполнить час
+          {t('Скидка на {day} {hours}, чтобы заполнить час', {
+            day: weekdayOf(picked.weekday),
+            hours: span(picked.hour),
+          })}
           <CaretRight weight='bold' aria-hidden />
         </button>
       )}
@@ -111,7 +126,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           style={{ '--heatmap-columns': columns.length } as React.CSSProperties}
           onMouseLeave={() => setHovered(null)}
         >
-          <caption className={styles.srOnly}>Визиты по дням недели и часам</caption>
+          <caption className={styles.srOnly}>{t('Визиты по дням недели и часам')}</caption>
           <thead>
             <tr>
               <td />
@@ -143,7 +158,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
                   className={styles.heatmapDay}
                   data-active={active?.weekday === weekdayIndex || undefined}
                 >
-                  {weekday}
+                  {weekdayOf(weekdayIndex)}
                 </th>
                 {columns.map((hour) => {
                   const cell = { weekday: weekdayIndex, hour }
@@ -158,7 +173,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
                         data-level={level}
                         data-cell={`${weekdayIndex}:${hour}`}
                         aria-pressed={picked?.weekday === weekdayIndex && picked.hour === hour}
-                        aria-label={`${weekday}, ${span(hour)}: ${visitsLabel(visits)}`}
+                        aria-label={`${weekdayOf(weekdayIndex)}, ${span(hour)}: ${visitsLabel(visits)}`}
                         tabIndex={isAnchor ? 0 : -1}
                         onMouseEnter={() => setHovered(cell)}
                         onFocus={() => setPicked(cell)}
@@ -174,11 +189,11 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
         </table>
       </div>
       <div className={styles.scale} aria-hidden='true'>
-        <span>Меньше</span>
+        <span>{t('Меньше')}</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <span key={level} className={styles.heatmapCell} data-level={level} />
         ))}
-        <span>Больше</span>
+        <span>{t('Больше')}</span>
       </div>
     </div>
   )

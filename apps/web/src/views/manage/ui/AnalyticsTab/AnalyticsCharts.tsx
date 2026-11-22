@@ -14,9 +14,9 @@ import {
   YAxis,
 } from 'recharts'
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
-import { pluralize } from '@/shared/lib/plural'
+import { type Translate, useT } from '@/shared/i18n'
 import styles from './AnalyticsCharts.module.css'
-import { type Bucket, formatMoney, formatTick } from './analyticsFormat'
+import { analyticsFormat, type Bucket, formatTick } from './analyticsFormat'
 
 // Recharts lives only here: the analytics tab loads this file on demand, so the rest of the
 // cabinet never ships it. Colours are our tokens, passed as CSS variables to the SVG.
@@ -36,23 +36,28 @@ const useAnimate = () =>
     () => false,
   )
 
-const visits = (count: number) => pluralize(count, ['визит', 'визита', 'визитов'])
-
 type RevenueRow = Bucket & { previous: number; previousTitle: string }
 
 const changeOf = (current: number, previous: number) =>
   previous === 0 ? null : Math.round(((current - previous) / previous) * 100)
 
-const RevenueTooltip = ({ active, payload }: TooltipContentProps<ValueType, NameType>) => {
+type RevenueTooltipProps = TooltipContentProps<ValueType, NameType> & { t: Translate }
+
+// Recharts calls `content` as a plain function, not a component, so `t` comes in from the chart.
+const RevenueTooltip = ({ active, payload, t }: RevenueTooltipProps) => {
+  // Recharts' payload is untyped: each item carries the row it was drawn from.
   const row = payload?.[0]?.payload as RevenueRow | undefined
   if (!active || !row) return null
+  const { formatMoney } = analyticsFormat(t)
   const change = changeOf(row.revenue, row.previous)
 
   return (
     <div className={styles.tooltip}>
       <span className={styles.tooltipTitle}>{row.title}</span>
       <span className={styles.tooltipValue}>{formatMoney(row.revenue)}</span>
-      <span className={styles.tooltipMeta}>{visits(row.visits)}</span>
+      <span className={styles.tooltipMeta}>
+        {t.count(row.visits, ['визит', 'визита', 'визитов'])}
+      </span>
       <span className={styles.tooltipCompare}>
         <i data-series='previous' aria-hidden='true' />
         {row.previousTitle}: {formatMoney(row.previous)}
@@ -78,6 +83,8 @@ interface RevenueChartProps {
 // the picture itself; the tooltip carries exact values, a hidden table carries all of them.
 const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) => {
   const animate = useAnimate()
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const rows: RevenueRow[] = buckets.map((bucket, index) => ({
     ...bucket,
     previous: previous[index]?.revenue ?? 0,
@@ -96,7 +103,7 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.chart}>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart
-            title='Выручка по периодам'
+            title={t('Выручка по периодам')}
             data={rows}
             barGap={2}
             barCategoryGap='18%'
@@ -142,7 +149,7 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }}
             />
             <Tooltip
-              content={RevenueTooltip}
+              content={(props) => <RevenueTooltip {...props} t={t} />}
               cursor={{ fill: 'var(--color-fill)', radius: 8 }}
               animationDuration={animate ? 160 : 0}
             />
@@ -171,24 +178,24 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.legend} aria-hidden='true'>
         <span>
           <i data-series='current' />
-          Этот период
+          {t('Этот период')}
         </span>
         <span>
           <i data-series='previous' />
-          Прошлый
+          {t('Прошлый')}
         </span>
       </div>
       {/* A table keeps its content's width whatever it is told, so a block hides it: the table
           itself stretched the page sideways on phones. */}
       <div className={styles.srOnly}>
         <table>
-          <caption>Выручка по периодам и тот же отрезок в прошлом периоде</caption>
+          <caption>{t('Выручка по периодам и тот же отрезок в прошлом периоде')}</caption>
           <thead>
             <tr>
-              <th scope='col'>Период</th>
-              <th scope='col'>Выручка</th>
-              <th scope='col'>Визиты</th>
-              <th scope='col'>Прошлый период</th>
+              <th scope='col'>{t('Период')}</th>
+              <th scope='col'>{t('Выручка')}</th>
+              <th scope='col'>{t('Визиты')}</th>
+              <th scope='col'>{t('Прошлый период')}</th>
             </tr>
           </thead>
           <tbody>
