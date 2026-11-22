@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { adminPhone, randomClientPhone, signInViaApi } from './account'
+import { adminPhone, forgetSession, randomClientPhone, signInViaApi } from './account'
 import { bishkekDay, createOwnBusiness, createVisit } from './business'
 import { expectGoodDesign } from './design'
 
@@ -108,6 +108,7 @@ test.describe('Design', () => {
     await expect(signOut).toBeVisible()
     await test.step('settings', () => expectGoodDesign(page, '[role="tabpanel"]'))
     await signOut.click()
+    forgetSession(adminPhone(testInfo))
     await test.step('sign out', () => expectGoodDesign(page))
   })
 
@@ -138,6 +139,28 @@ test.describe('Design', () => {
       await expect(page.locator('[data-page-skeleton]')).toHaveCount(0, { timeout: 15_000 })
       await page.waitForTimeout(500)
       await test.step(tab, () => expectGoodDesign(page, 'main'))
+    }
+  })
+
+  test('the schedule toolbar keeps its controls apart, also on a narrow phone', async ({
+    page,
+  }, testInfo) => {
+    await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
+    const isPhone = testInfo.project.name === 'mobile'
+    // Pixel 7 is 412pt wide, where the floating toolbar just fits; it overflowed on 390 and 375.
+    for (const width of isPhone ? [412, 375, 360] : [1440]) {
+      for (const scheme of ['light', 'dark'] as const) {
+        await page.setViewportSize({ width, height: isPhone ? 840 : 900 })
+        await page.emulateMedia({ colorScheme: scheme })
+        await page.goto(`/manage/${SLUG}?tab=schedule`)
+        const toolbar = page.getByRole('group', { name: 'Вид расписания' }).locator('..')
+        await expect(toolbar).toBeVisible({ timeout: 15_000 })
+        // Both views: the knob slides to the chosen segment and is judged once it has settled.
+        for (const view of ['Лента', 'Колонки']) {
+          await toolbar.getByTitle(view).click()
+          await test.step(`${width}pt ${scheme} ${view}`, () => expectGoodDesign(page, 'main'))
+        }
+      }
     }
   })
 })
