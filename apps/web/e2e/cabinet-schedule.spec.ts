@@ -6,6 +6,7 @@ import {
   type OwnBusiness,
   type Visit,
 } from './business'
+import { board, visitCard } from './schedule'
 import { withDb } from './visits'
 
 type ScheduleBooking = { id: string; outcome: string | null; customerName: string }
@@ -22,11 +23,7 @@ const outcomeOf = async (page: Page, business: OwnBusiness, date: string, id: st
   (await readSchedule(page, business, date)).bookings.find((booking) => booking.id === id)
     ?.outcome ?? null
 
-const board = (page: Page) => page.locator('[data-schedule-board]')
-
 // A visit's card on the board, found by the client's name in its accessible name.
-const visitCard = (page: Page, name: string) =>
-  board(page).getByRole('button', { name: new RegExp(`, ${name}, `) })
 
 const addMinutes = (time: string, minutes: number) => {
   const [hours = 0, mins = 0] = time.split(':').map(Number)

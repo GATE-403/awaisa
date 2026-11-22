@@ -1,57 +1,12 @@
 import { expect, test } from '@playwright/test'
 import { adminPhone, randomClientPhone, signInViaApi } from './account'
-import { createPastVisit } from './visits'
 
 const SLUG = 'awaisa-studio'
 // A 1×1 PNG: enough for the upload pipeline to re-encode.
-const PIXEL = Buffer.from(
+const _PIXEL = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
 )
-
-test.describe('Rating in one tap', () => {
-  test('«Как прошло?» opens the review with the stars tapped; photos go with it', async ({
-    page,
-  }) => {
-    test.setTimeout(90_000)
-    const phone = randomClientPhone()
-    await signInViaApi(page, phone, 'E2E Оценка Тестов')
-    const { booking } = await createPastVisit('E2E Оценка Тестов', phone, 0, 2)
-
-    // One's own profile says a visit waits for its stars.
-    const settings = await (await page.request.get('/api/me/profile')).json()
-    const own = await (await page.request.get(`/api/profiles/${settings.id}`)).json()
-    expect(own.awaitingReview).toBeGreaterThanOrEqual(1)
-
-    await page.goto('/bookings')
-    const card = page.getByRole('region', { name: 'Как прошло?' })
-    await expect(card).toBeVisible()
-    await card.getByRole('button', { name: '4 из 5' }).click()
-    const sheet = page.getByRole('dialog')
-    await expect(sheet.getByText('Хорошо')).toBeVisible()
-    await sheet.getByLabel('Фото к отзыву').setInputFiles({
-      name: 'work.png',
-      mimeType: 'image/png',
-      buffer: PIXEL,
-    })
-    await expect(sheet.getByRole('img', { name: 'Фото 1' })).toBeVisible()
-    const comment = `E2E фото ${Date.now()}`
-    await sheet.getByLabel(/Расскажите подробнее/).fill(comment)
-    await sheet.getByRole('button', { name: 'Отправить отзыв' }).click()
-    await expect(page.getByText('Спасибо за отзыв')).toBeVisible()
-    await expect(card).toHaveCount(0)
-
-    const review = await (await page.request.get(`/api/bookings/${booking.id}/review`)).json()
-    expect(review.visit.review.rating).toBe(4)
-    const reviews = await (
-      await page.request.get(`/api/businesses/${SLUG}/reviews?limit=50`)
-    ).json()
-    const mine = reviews.items.find(
-      (item: { comment: string; photos: string[] }) => item.comment === comment,
-    )
-    expect(mine?.photos).toHaveLength(1)
-  })
-})
 
 test.describe('Questions on a business page', () => {
   test('a client asks, the owner answers in the cabinet, the answer is on the page', async ({

@@ -12,7 +12,7 @@
 |---|---|---|
 | `/manage` без входа ведёт на `/login?next=/manage` | гость | `cabinet-home.spec.ts` › a guest is asked to sign in first |
 | Один бизнес: `/manage` сразу открывает кабинет; несколько: список строк (Открыта/Скрыта, роль, следующий визит, ↗ на страницу, «Новая страница») | В | `cabinet-home.spec.ts` › one business opens straight into its cabinet; two make a list of rows |
-| Таб «Кабинет», «‹» туда, откуда вошли, переключатель бизнеса, меню профиля | П | `cabinet-flow.spec.ts` |
+| Таб «Кабинет», «‹» туда, откуда вошли, переключатель бизнеса, меню профиля | П | `cabinet-home.spec.ts` |
 | «Что нового»: точка на мегафоне до прочтения | П | `updates.spec.ts` › the cabinet marks news until it is read |
 | Доступ: гость 401, чужой 403, staff 403 на `@OwnerOnly` (метод или весь контроллер), владелец и админ платформы проходят | все | unit `businesses/business-access.guard.spec.ts` |
 | Доступ мастера: только активный мастер этого бизнеса по своему номеру | М | unit `master/master.guard.spec.ts` |
@@ -20,7 +20,7 @@
 | Чужой аккаунт не открывает расписание | клиент | `account.spec.ts` › non-staff accounts cannot open the schedule |
 | Адрес бизнеса не может совпасть со своим разделом сайта (`RESERVED_SLUGS` ⊇ `APP_SEGMENTS` и папки `app/`) | | unit `businesses/business-rules.spec.ts` |
 | Доступность всех вкладок кабинета (axe, WCAG 2.1 AA) | В | `cabinet-a11y.spec.ts` |
-| Доступность открытых листов (новая запись, инспектор, клиент, рассылка, импорт, акция, «Редактировать», услуга, мастер, ответы на отзывы) и всех вкладок в тёмной теме | В | `cabinet-a11y-sheets.spec.ts` |
+| Доступность открытых листов (новая запись, инспектор, клиент, рассылка, импорт, акция, «Редактировать», услуга, мастер, ответы на отзывы) и всех вкладок в тёмной теме | В | `cabinet-a11y.spec.ts` |
 | Администратор не видит денег: выручка дня, траты клиента, «Рассылка», «Импорт», чек-лист запуска (владелец на тех же данных видит) | В, А | `cabinet-staff-money.spec.ts` |
 | Вкладки: старые ссылки ведут на «Страницу», администратору только Расписание · Клиенты · Отзывы | | unit web `views/manage/tests/manageTabs.test.ts` |
 | «‹» кабинета помнит, откуда вошли (без входа, новой страницы и «Что нового») | | unit web `shared/lib/tests/cabinetFrom.test.ts` |
@@ -94,7 +94,7 @@
 | Шаблоны ответов | unit `reviews/review-reply-text.spec.ts` |
 | Вопросы: ответ, правка, удаление | `questions.spec.ts` |
 | Telegram: подключить и отключить чат | `reviews.spec.ts` › Telegram for owners; unit `telegram/*.spec.ts` |
-| Кнопки отзыва в Telegram: быстрый ответ и «Свой ответ» публикуются один раз и только из чата этого бизнеса | `cabinet-telegram-reviews.spec.ts` |
+| Кнопки отзыва в Telegram: быстрый ответ и «Свой ответ» публикуются один раз и только из чата этого бизнеса | `cabinet-reviews.spec.ts` |
 | Быстрые ответы в поле дают те же слова, что автоответ на сервере | unit web `views/manage/tests/replyTemplate.test.ts` |
 
 ## Страница
@@ -109,14 +109,14 @@
 | «Поделиться»: QR, адрес, копирование ссылки | `cabinet-page.spec.ts` › «Поделиться» |
 | Порядок работ: «Поставить первой» | `cabinet-page.spec.ts` › «Поставить первой» |
 | Услуга, мастер, обложка | `platform.spec.ts` |
-| Фото работы с тегами | `feed.spec.ts` |
+| Фото работы с тегами | `feed-deck.spec.ts` |
 | «Пора прийти снова» у услуги | `return-visit.spec.ts` |
 | График и отпуск мастера | `master-schedule.spec.ts`; unit `catalog/master-hours.spec.ts` |
 | Предоплата у услуги | `prepayment.spec.ts` |
-| Обложка: добавить, заменить, удалить | `cabinet-page-ui.spec.ts` |
-| «Редактировать»: вид и контакты (телефон, WhatsApp) на публичной странице | `cabinet-page-ui.spec.ts` |
-| «+ Акция» и капсулы акций на «Странице» | `cabinet-page-ui.spec.ts` |
-| Фото мастера; выключенный мастер уходит со страницы и из записи; цена услуги с карточки | `cabinet-page-ui.spec.ts` |
+| Обложка: добавить, заменить, удалить | `cabinet-page.spec.ts` |
+| «Редактировать»: вид и контакты (телефон, WhatsApp) на публичной странице | `cabinet-page.spec.ts` |
+| «+ Акция» и капсулы акций на «Странице» | `cabinet-page.spec.ts` |
+| Фото мастера; выключенный мастер уходит со страницы и из записи; цена услуги с карточки | `cabinet-page.spec.ts` |
 | Описание акции одной строкой | unit web `shared/lib/tests/promotionText.test.ts` |
 
 ## Настройки
@@ -133,10 +133,10 @@
 | Лояльность | `loyalty.spec.ts` |
 | Склад | `inventory.spec.ts` |
 | Уведомления в Telegram | `reviews.spec.ts` |
-| Правка и удаление акции, плана абонемента, позиции склада (удержание кнопки) | `cabinet-settings-edit.spec.ts` |
-| История рассылок | `cabinet-settings-edit.spec.ts` |
-| Владелец не может закрыть доступ себе | `cabinet-settings-edit.spec.ts` |
-| Поиск сертификата по коду с остатком | `cabinet-settings-edit.spec.ts` |
+| Правка и удаление акции, плана абонемента, позиции склада (удержание кнопки) | `cabinet-settings.spec.ts` |
+| История рассылок | `cabinet-settings.spec.ts` |
+| Владелец не может закрыть доступ себе | `cabinet-settings.spec.ts` |
+| Поиск сертификата по коду с остатком | `cabinet-settings.spec.ts` |
 | Лояльность при откате: повторное сохранение ничего не списывает дважды, неявка и «Ждём» возвращают бонусы, сертификат, визит абонемента и материалы; «Все пришли» и «Вернуть» | `cabinet-loyalty-rollback.spec.ts` |
 | Текст предоплаты | unit web `entities/booking/tests/paymentText.test.ts` |
 
@@ -148,7 +148,7 @@
 | «Пришёл» в интерфейсе, «Ваши отзывы», чужой визит не виден | `master-day.spec.ts` › a master marks their own visit «Пришёл» |
 | Номер не мастера: «Нет доступа», 403 на отзывы | `master-day.spec.ts` › a number that is not a master here |
 | Воронки: срез по устройствам, остальным «не найдено» | `insights.spec.ts` |
-| «ваши N%» за день, без процента вся сумма; «Фото работы» с пришедшего визита с тегами | `master-day-extra.spec.ts` |
+| «ваши N%» за день, без процента вся сумма; «Фото работы» с пришедшего визита с тегами | `master-day.spec.ts` |
 
 ## Не покрыто и почему
 
