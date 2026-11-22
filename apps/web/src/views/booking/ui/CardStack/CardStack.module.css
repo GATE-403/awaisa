@@ -221,6 +221,13 @@
   display: none;
 }
 
+/* The button covers the card so all of it is a tap target, but its word sits at the end: the text
+   leaves it room and ends in an ellipsis before it (a long visit, «Классический массаж + Массаж
+   спины», ran under «Изменить»). In rem, so it grows with the word under large system text. */
+.stack[data-fanned] .content {
+  padding-right: 4.75rem;
+}
+
 .card:active:has(.edit) {
   scale: 0.98;
 }
@@ -267,6 +274,36 @@
 
 .footAction[data-end] {
   margin-left: auto;
+}
+
+/* The offered service: its name in the link colour, the price after it muted; cut short only
+   when «Начать заново» leaves it no room. */
+.offer {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.offerName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.offerPrice {
+  flex: none;
+  color: var(--color-muted-foreground);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Folded with the pager dots: the foot line sits under the dots, not against them. */
+.stack:has(.dots) .foot {
+  top: calc(100% + var(--space-4));
+}
+
+.stack:has(.dots):has(.foot) {
+  margin-bottom: calc(var(--control-height-md) + var(--space-4));
 }
 
 .srOnly {

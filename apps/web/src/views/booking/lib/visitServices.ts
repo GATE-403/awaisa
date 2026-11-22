@@ -69,4 +69,44 @@ const getAddableServices = <Master extends MasterLike>({
   )
 }
 
-export { combineServices, getAddableServices, getMastersForAll }
+// What a service is, by its head words, to tell the same thing under another name («Классический
+// массаж» and «Массаж спины», «Женская стрижка» and «Детская стрижка»). Words that only describe it
+// are left out: adjectives («классический», «мужская») and what follows «с», «без», «для», «на»
+// («с покрытием»), or «Маникюр с покрытием» and «Педикюр с покрытием» would read as one thing.
+// The roots: words of four letters and more, their first five letters, «ё» read as «е».
+const DESCRIBING_ENDING = /(ий|ый|ой|ая|яя|ое|ые)$/
+const PREPOSITIONS = new Set(['с', 'со', 'без', 'для', 'на'])
+
+const wordRoots = (name: string) => {
+  const words = name
+    .toLowerCase()
+    .replaceAll('ё', 'е')
+    .split(/[^a-zа-я]+/)
+    .filter(Boolean)
+  const tail = words.findIndex((word) => PREPOSITIONS.has(word))
+  return (tail === -1 ? words : words.slice(0, tail))
+    .filter((word) => word.length >= 4 && !DESCRIBING_ENDING.test(word))
+    .map((word) => word.slice(0, 5))
+}
+
+/**
+ * The one service offered for the visit, like a side dish under the main one: an add-on, never an
+ * alternative to what is chosen. Not the same kind (another category, when the menu has more than
+ * one) and not the same thing under another name (a shared word); of the rest, what the place
+ * sells most first, else the menu's own order. Nothing fits, nothing is offered. Once per visit:
+ * a visit that already took one is not offered another (the line goes once it is accepted).
+ */
+const pickOfferedService = (addable: Service[], chosen: Service[], menu: Service[]) => {
+  if (chosen.length !== 1) return undefined
+  const hasCategories = new Set(menu.map((service) => service.categoryId)).size > 1
+  const chosenCategories = new Set(chosen.map((service) => service.categoryId))
+  const chosenRoots = new Set(chosen.flatMap((service) => wordRoots(service.name)))
+  const addOns = addable.filter(
+    (service) =>
+      !(hasCategories && chosenCategories.has(service.categoryId)) &&
+      !wordRoots(service.name).some((root) => chosenRoots.has(root)),
+  )
+  return [...addOns].sort((left, right) => Number(right.isPopular) - Number(left.isPopular))[0]
+}
+
+export { combineServices, getAddableServices, getMastersForAll, pickOfferedService }
