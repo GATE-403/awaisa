@@ -124,6 +124,16 @@
   }
 }
 
+/* Android (touch, not iOS, as in `tokens.css`): the step comes in whole, without the cards'
+   cascade: a layer per card for the cascade cost a Samsung A55 frames on every step. */
+@supports not (-webkit-touch-callout: none) {
+  @media (pointer: coarse) {
+    :global([data-step-direction]) .body [data-card] {
+      animation: none;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .step[data-nudge] .body,
   :global([data-step-direction]) .step[data-nudge] .body {
