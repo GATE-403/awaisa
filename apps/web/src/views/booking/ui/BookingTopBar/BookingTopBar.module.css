@@ -7,11 +7,35 @@
   border-radius: inherit;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
-  background: var(--color-chrome);
+  /* The thin material, not the nearly solid chrome: what scrolls under the bar shows through,
+     blurred. */
+  background: var(--color-material);
   backdrop-filter: var(--blur-material);
   box-shadow:
     var(--shadow-material),
     0 0.5px 0 var(--color-border);
+}
+
+/* At the top the bar is clear, so the place's light runs up behind ✕ and the title; the material
+   and its hairline come in over the first 24px of scroll (the sheet's own scroll timeline, only
+   colour and shadow change). Without scroll timelines it stays material. */
+/* The backdrop filter goes too: even with a clear fill its saturate and blur tinted the light
+   under the bar and drew a line at its foot («линия сильно заметна»). Same functions as
+   `--blur-material`, so it interpolates. */
+@keyframes material-in {
+  from {
+    background-color: transparent;
+    box-shadow: none;
+    backdrop-filter: saturate(100%) blur(0px);
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .bar {
+    animation: material-in linear both;
+    animation-timeline: scroll(nearest block);
+    animation-range: 0 24px;
+  }
 }
 
 .inner {

@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { isBookingPath } from '@/shared/config/navigation'
+import { useFocusedFieldInView } from '@/shared/lib/hooks/useFocusedFieldInView'
 import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import pageStyles from '../../BookingPage.module.css'
@@ -37,6 +38,7 @@ const SheetFrame = ({ children, isModal = false, closeHref }: BookingSheetProps)
   usePageScrollLock()
   const screenRef = useRef<HTMLElement>(null)
   useInertOutside(screenRef)
+  useFocusedFieldInView(screenRef)
   const [isAlreadyUp] = useState(isSheetAlreadyUp)
   useEffect(clearSheetAlreadyUp, [])
 

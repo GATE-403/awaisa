@@ -125,7 +125,7 @@ test.describe('Cognitive load: booking', () => {
       .getByRole('group', { name: 'Время' })
       .getByRole('button', { disabled: false })
       .first()
-    await todaySlot.or(page.getByText('свободного времени нет')).waitFor()
+    await todaySlot.or(page.getByText('На этот день всё занято')).waitFor()
     if (await todaySlot.count()) await act(() => todaySlot.click())
     else {
       actions += 1

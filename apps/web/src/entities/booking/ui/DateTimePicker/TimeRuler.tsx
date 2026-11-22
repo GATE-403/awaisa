@@ -1,6 +1,6 @@
 'use client'
 
-import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -12,8 +12,6 @@ interface TimeRulerProps {
   /** The visit's length, for «до 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
-  /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
-  days?: ReactNode
   /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
   onCenter?: (time: string | null) => void
   /** Another day is loading: the dial stays, dimmed and still. */
@@ -40,7 +38,6 @@ export const TimeRuler = ({
   durationMinutes,
   onPick,
   isPending = false,
-  days,
   onCenter,
 }: TimeRulerProps) => {
   const t = useT()
@@ -201,23 +198,25 @@ export const TimeRuler = ({
         </span>
       </div>
 
-      {!hasMoved && <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>}
-
-      {/* The legend mirrors the ruler — a tall bar for free, a low one for taken — with counts. */}
-      <p className={styles.legend}>
-        <span className={styles.legendItem}>
-          <span className={styles.swatch} data-free='' aria-hidden />
-          {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
-        </span>
-        {takenCount > 0 && (
+      {/* One line under the dial: how it works until it is touched, then the legend — a tall bar
+          for free, a low one for taken — with counts. Two lines made the step taller than
+          short phones. */}
+      {!hasMoved ? (
+        <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>
+      ) : (
+        <p className={styles.legend}>
           <span className={styles.legendItem}>
-            <span className={styles.swatch} aria-hidden />
-            {t('{count} занято', { count: takenCount })}
+            <span className={styles.swatch} data-free='' aria-hidden />
+            {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
           </span>
-        )}
-      </p>
-
-      {days}
+          {takenCount > 0 && (
+            <span className={styles.legendItem}>
+              <span className={styles.swatch} aria-hidden />
+              {t('{count} занято', { count: takenCount })}
+            </span>
+          )}
+        </p>
+      )}
     </div>
   )
 }

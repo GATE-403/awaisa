@@ -39,7 +39,7 @@ export const BookingTopBar = ({ business, isModal = false }: BookingTopBarProps)
   )
 
   return (
-    <header className={styles.bar} {...drag}>
+    <header className={styles.bar} data-booking-top-bar='' {...drag}>
       <span className={styles.grabber} aria-hidden />
       <div className={styles.inner}>
         <NextLink

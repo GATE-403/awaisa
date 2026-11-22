@@ -1,11 +1,11 @@
 .placeholder {
-  height: 220px;
+  height: 92px;
   border-radius: var(--radius-xl);
   background: var(--color-fill);
 }
 
-/* Apple Account: the face in the middle, name and number under it, then an inset group. */
-.header {
+/* Guests: what the page is and the way in, centred. */
+.guest {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,7 +13,57 @@
   text-align: center;
 }
 
+.guestTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-title);
+}
+
+.guestText {
+  margin-bottom: var(--space-3);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-body);
+}
+
+/* Signed in: the Apple Account row, then the work rows, right on the page: no white cards
+(«убери фон»), a hairline across the column between them, rows starting on the column's edge. */
+.header {
+  display: flex;
+  flex-direction: column;
+}
+
+.plain.plain {
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.plain + .plain {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.plain.plain > * {
+  padding-inline: 0;
+}
+
+/* The hairlines between work rows run from the label, past the glyph, as in Settings. */
+.plain.plain > * + *::before {
+  left: calc(24px + var(--space-3));
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 92px;
+  padding: var(--space-3) 0;
+}
+
 .faceButton {
+  flex-shrink: 0;
   padding: 0;
   border: none;
   border-radius: var(--radius-full);
@@ -29,7 +79,6 @@
 .face {
   position: relative;
   display: inline-flex;
-  margin-bottom: var(--space-2);
   border-radius: var(--radius-full);
   transition: opacity var(--duration-fast) var(--ease-standard);
 }
@@ -38,47 +87,88 @@
   opacity: 0.5;
 }
 
+.avatar[data-size] {
+  width: 64px;
+  height: 64px;
+  font-size: 26px;
+}
+
 /* A small camera badge says the photo can be changed, like the edit badge on a contact. */
 .camera {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  right: -4px;
+  bottom: -4px;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: var(--radius-full);
-  background: var(--color-surface);
+  background: var(--color-elevated);
   box-shadow: var(--shadow-sm);
   color: var(--color-link);
 }
 
 .camera svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
+}
+
+/* The rest of the row opens the profile: name, number, facts and the chevron. */
+.accountLink {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  align-self: stretch;
+  color: var(--color-foreground);
+  text-decoration: none;
+}
+
+a.accountLink:focus-visible {
+  outline: none;
+  border-radius: var(--radius-lg);
+  box-shadow: inset var(--focus-ring);
+}
+
+.identity {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
 }
 
 .name {
-  max-width: 100%;
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: var(--text-title2);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-  letter-spacing: var(--tracking-title);
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--text-title3-line-height);
+  letter-spacing: var(--tracking-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.handle {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
+.status,
+.handle,
+.stats {
+  overflow: hidden;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+.status {
+  color: var(--color-foreground);
+}
+
+.handle,
 .stats {
-  margin-top: var(--space-1);
   color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
 }
 
 .stats strong {
@@ -91,135 +181,14 @@
   color: var(--color-tertiary-foreground);
 }
 
-.header > a {
-  margin-top: var(--space-3);
-}
-
-/* Settings-style inset group: glyph tile, label, value, chevron; hairlines past the glyph. */
-.list {
-  width: 100%;
-  margin-top: var(--space-5);
-  overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-}
-
-.list li + li .row::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: calc(var(--space-4) + 32px + var(--space-3));
-  height: 0.5px;
-  background: var(--color-border);
-}
-
-.row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  min-height: 52px;
-  padding: var(--space-2) var(--space-4);
-  border: none;
-  background: none;
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-body);
-  text-align: left;
-  cursor: pointer;
-}
-
-.row:hover {
-  background: var(--color-fill);
-}
-
-.row:focus-visible {
-  outline: none;
-  box-shadow: inset var(--focus-ring);
-}
-
-.glyph {
-  display: inline-grid;
-  flex-shrink: 0;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  color: var(--color-primary-foreground);
-}
-
-.glyph svg {
-  width: 18px;
-  height: 18px;
-}
-
-.glyph[data-tone="blue"] {
-  background: var(--color-primary);
-}
-
-.glyph[data-tone="green"] {
-  background: var(--color-success);
-}
-
-.glyph[data-tone="gray"] {
-  background: var(--color-muted-foreground);
-}
-
-.rowLabel {
-  flex-shrink: 0;
-}
-
-.rowValue {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  color: var(--color-muted-foreground);
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.chevron {
-  flex-shrink: 0;
-  width: 13px;
-  height: 13px;
-  color: var(--color-tertiary-foreground);
-}
-
-/* Work shortcuts under the name: one row of capsules of one width (the widest one's), so the
-   gaps between them sit on the face's axis («нет общего центра и пропорций»). */
-.shortcuts {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-flow: column;
-  gap: var(--space-2);
-  width: fit-content;
-  max-width: 100%;
-  margin: var(--space-2) auto 0;
-}
-
-/* The profile's level as a line in its colour, under the facts. */
+/* The profile's level in its colour, the last fact of the line. */
 .level {
   color: color-mix(in srgb, var(--accent, var(--color-primary)) 75%, var(--color-foreground));
-  font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
 }
 
-.status {
-  color: var(--color-foreground);
-  font-size: var(--text-footnote);
-}
-
-.wreath {
-  margin-bottom: var(--space-5);
-}
-
 .wreath .face {
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .srOnly {

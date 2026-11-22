@@ -126,8 +126,10 @@ export const WaitlistJoin = ({
 
   return (
     <>
-      <Button variant='outline' onClick={open} className={styles.button}>
-        <BellRinging weight='fill' aria-hidden />
+      {/* The empty day's next step: a quiet secondary capsule with a thin glyph, like «Следить
+          за мастером»; the sheet's one primary action stays the booking bar's. */}
+      <Button variant='secondary' size='sm' onClick={open} className={styles.button}>
+        <BellRinging aria-hidden />
         Сообщить, когда освободится
       </Button>
       {isOpen && (

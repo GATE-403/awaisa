@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
+import { Switch } from '@awaisa/ui/Switch'
 import { CaretRight, Check, MapPin, UsersThree } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import {
@@ -830,17 +831,16 @@ export const BookingPage = ({
                           />
                         </Field>
                       )}
+                      {/* Mum or a child: a Settings row with a switch in the same group (a lone
+                          link under it read as out of place); their name and number, the visit
+                          stays in this account. */}
+                      {form.canBookForOther && (
+                        <label className={styles.switchRow}>
+                          <span>{t('Записываю другого человека')}</span>
+                          <Switch checked={form.isForOther} onCheckedChange={form.setForOther} />
+                        </label>
+                      )}
                     </div>
-                    {/* Mum or a child: their name and number, the visit stays in this account. */}
-                    {form.canBookForOther && (
-                      <button
-                        type='button'
-                        className={styles.forOther}
-                        onClick={() => form.setForOther(!form.isForOther)}
-                      >
-                        {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
-                      </button>
-                    )}
                   </div>
                   {contactExtras}
                 </BookingStep>
@@ -878,7 +878,7 @@ export const BookingPage = ({
         )}
       </Container>
 
-      <div className={styles.bar}>
+      <div className={styles.bar} data-booking-bar=''>
         <BookingSummary
           variant='bar'
           {...summaryProps}

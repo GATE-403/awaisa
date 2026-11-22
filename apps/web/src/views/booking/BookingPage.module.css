@@ -270,6 +270,29 @@
   padding-bottom: var(--space-2);
 }
 
+/* «Записываю другого человека»: the group's last row, a label and the kit's switch. */
+.group .switchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.group > * + .switchRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
 /* The booking note: a label over a multi-line field (radius 12, like iOS text views). */
 .comment {
   display: flex;
@@ -321,19 +344,6 @@ button.fieldRow {
   width: 12px;
   height: 12px;
   color: var(--color-tertiary-foreground);
-}
-
-.forOther {
-  align-self: flex-start;
-  min-height: var(--control-height-md);
-  margin-top: calc(-1 * var(--space-2));
-  padding: 0 var(--space-4);
-  border: none;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  font-size: var(--text-footnote);
-  cursor: pointer;
 }
 
 .rowAction {
@@ -425,14 +435,67 @@ label:has([data-checked]) .serviceNote {
   top: 0;
   right: 0;
   left: 0;
-  height: 420px;
+  height: 340px;
+  overflow: hidden;
+  /* Strongest behind the top bar, nearly gone by the stack's foot line and «Шаг 2 из 4»: blue
+     link text on a strong pink or orange wash fell below AA («читаемость синих кнопок упала»). */
   background: radial-gradient(
-    120% 90% at 50% 0%,
-    color-mix(in srgb, var(--place-tint) 42%, transparent),
-    color-mix(in srgb, var(--place-tint) 12%, transparent) 55%,
-    transparent
+    120% 80% at 50% 0%,
+    color-mix(in srgb, var(--place-tint) 34%, transparent),
+    color-mix(in srgb, var(--place-tint) 8%, transparent) 50%,
+    transparent 80%
   );
+  /* The drifting light below fades out with the wash instead of ending on an edge. */
+  mask-image: linear-gradient(#000 30%, transparent 85%);
   pointer-events: none;
+}
+
+/* Light, not a flat gradient: two soft patches of the place's neighbouring hues (one warmer, one
+   cooler) drift very slowly, so the wash breathes like light through a window. Faint and only
+   `transform` moves (one compositor layer, nothing repainted); still under reduced motion. */
+.wash::before {
+  content: "";
+  position: absolute;
+  inset: -20% -30%;
+  background:
+    radial-gradient(
+      38% 40% at 26% 22%,
+      oklch(from var(--place-tint) l c calc(h + 48) / 0.18),
+      transparent 70%
+    ),
+    radial-gradient(
+      34% 36% at 76% 14%,
+      oklch(from var(--place-tint) l c calc(h - 42) / 0.16),
+      transparent 70%
+    );
+  animation: wash-drift 26s ease-in-out infinite alternate;
+}
+
+/* Film grain over the light: it breaks the gradient's banding and gives the wash a texture like
+   paper, too fine to read as a pattern. */
+.wash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px;
+  opacity: 0.07;
+}
+
+@keyframes wash-drift {
+  from {
+    transform: translate3d(-5%, -2%, 0) rotate(-6deg) scale(1);
+  }
+
+  to {
+    transform: translate3d(5%, 3%, 0) rotate(6deg) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wash::before {
+    animation: none;
+  }
 }
 
 /* What sits on the stack cards — the service's picture, the master's face, the branch's pin,
