@@ -70,7 +70,10 @@ export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursShee
                 <Select
                   variant='plain'
                   aria-label={t('Шаг записи')}
-                  items={STEPS.map((value) => ({ value, label: t.duration(value) }))}
+                  items={STEPS.map((value) => ({
+                    value,
+                    label: t('{minutes} мин', { minutes: value }),
+                  }))}
                   value={step}
                   onValueChange={(value) => value && setStep(value)}
                 />

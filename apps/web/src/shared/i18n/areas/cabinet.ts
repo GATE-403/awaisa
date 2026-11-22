@@ -89,6 +89,7 @@ const CABINET: Record<string, Entry> = {
   'Админ платформы': ['Платформанын админи', 'Platform admin'],
   Администратор: ['Администратор', 'Administrator'],
   'Записей впереди нет': ['Алдыда жазылуу жок', 'No bookings ahead'],
+  '{minutes} мин': ['{minutes} мүн', '{minutes} min'],
   'Дальше: сегодня в {time}': ['Кийинкиси: бүгүн саат {time}', 'Next: today at {time}'],
   'Дальше: завтра в {time}': ['Кийинкиси: эртең саат {time}', 'Next: tomorrow at {time}'],
   'Дальше: {day}, {time}': ['Кийинкиси: {day}, {time}', 'Next: {day}, {time}'],
