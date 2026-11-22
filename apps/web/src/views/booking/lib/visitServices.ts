@@ -69,4 +69,15 @@ const getAddableServices = <Master extends MasterLike>({
   )
 }
 
-export { combineServices, getAddableServices, getMastersForAll }
+/**
+ * The one service offered for the visit, like a side dish under the main one: what the place sells
+ * most first, then the same kind as the visit's first service, else the menu's own order.
+ */
+const pickOfferedService = (addable: Service[], firstCategoryId: string | undefined) =>
+  [...addable].sort(
+    (left, right) =>
+      Number(right.isPopular) - Number(left.isPopular) ||
+      Number(right.categoryId === firstCategoryId) - Number(left.categoryId === firstCategoryId),
+  )[0]
+
+export { combineServices, getAddableServices, getMastersForAll, pickOfferedService }

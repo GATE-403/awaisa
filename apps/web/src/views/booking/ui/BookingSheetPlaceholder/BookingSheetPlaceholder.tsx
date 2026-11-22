@@ -28,7 +28,7 @@ const STEP_INDEX: Record<OpenStep, number> = { service: 0, specialist: 1, dateti
 
 // What the sheet holds while the form is on its way (the slot's Suspense fallback, inside
 // `BookingSheet`, which stays): the form's own shapes from its own classes (the stack of done
-// steps as ticket cards, «+ Ещё услуга», the open step (the service pictures, the masters or the
+// steps as ticket cards, its foot line («Начать заново», the offered service), the open step (the service pictures, the masters or the
 // time) and the bar with the total and the action), so the form lands on what was already there.
 // The open step follows the link: the service pictures swapped for the masters read as a flicker.
 export const BookingSheetPlaceholder = () => {
@@ -85,13 +85,14 @@ export const BookingSheetPlaceholder = () => {
             </div>
           )}
           {doneCount > 0 && (
-            <span className={styles.startOver}>
-              <TextLine chars={14} />
-            </span>
-          )}
-          {doneCount > 0 && (
-            <div className={pageStyles.addService}>
-              <Block className={styles.capsule} />
+            // The stack's foot line: «Начать заново» on the left, the offered service on the right.
+            <div className={styles.foot}>
+              <span className={styles.footLine}>
+                <TextLine chars={14} />
+              </span>
+              <span className={styles.footLine}>
+                <TextLine chars={18} />
+              </span>
             </div>
           )}
 

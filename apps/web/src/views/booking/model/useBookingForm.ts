@@ -31,6 +31,11 @@ type ReminderChoice = 60 | 120 | 1440 | null
 
 type BookingStepId = 'service' | 'specialist' | 'datetime' | 'contacts'
 
+/** What adding a service undid: the master who does not do it, or the time the visit outgrew. */
+type AddNotice =
+  | { kind: 'master'; masterName: string; serviceName: string }
+  | { kind: 'time'; time: string; minutes: number }
+
 const STEP_ORDER: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
 
 const MIN_PHONE_DIGITS = 9
@@ -79,8 +84,6 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [serviceId, setServiceId] = useState(presetService?.id ?? null)
   // Services done after the first in the same visit, by the same master, in this order.
   const [extraServiceIds, setExtraServiceIds] = useState<string[]>([])
-  // «+ Ещё услуга»: the service step opens again to add one to the visit.
-  const [isAddingService, setIsAddingService] = useState(false)
   const [chosenSpecialistId, setSpecialistId] = useState(
     searchParams.get('specialist') === ANY_SPECIALIST_ID && presetService
       ? ANY_SPECIALIST_ID
@@ -101,6 +104,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const [selectedDayKey, setSelectedDayKey] = useState<string | null>(presetDate)
   const [autoDay, setAutoDay] = useState({ key: '', skips: 0 })
   const [time, setTime] = useState<string | null>(presetTime)
+  // What adding a service undid, said where the person has to choose again (no silent resets).
+  const [addNotice, setAddNotice] = useState<AddNotice | null>(null)
+  // A time kept through adding a service, until the free times for the longer visit say it fits.
+  const [addedTimeCheck, setAddedTimeCheck] = useState<{ time: string; minutes: number } | null>(
+    null,
+  )
   const [isPresetChecked, setIsPresetChecked] = useState(presetTime === null)
   // After moving to another branch the chosen time is kept, then checked once that branch's
   // free times arrive.
@@ -280,6 +289,20 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     }
   }, [isBranchTimeChecked, availability, time, toast])
 
+  // Adding a service kept the time: once the free times for the longer visit are in, keep it if
+  // it fits, else say why it went and open the time step.
+  useEffect(() => {
+    if (!addedTimeCheck || availability.isLoading) return
+    setAddedTimeCheck(null)
+    if (availability.error) return
+    const fits = availability.slots.some(
+      (slot) => slot.isAvailable && slot.time === addedTimeCheck.time,
+    )
+    if (fits) return
+    setTime(null)
+    setAddNotice({ kind: 'time', ...addedTimeCheck })
+  }, [addedTimeCheck, availability])
+
   // Keep the half-made booking on the device, so leaving the page never loses it.
   const hasContacts = Boolean(name.trim()) && isPhoneValid
   const stepsDone = [service, specialistId, time, hasContacts].filter(Boolean).length
@@ -347,9 +370,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // «Начать заново»: the choices go (service, master, time, comment, code) and so does the draft
   // and the link's preset; the name and phone stay — they are the same person.
   const startOver = () => {
+    setAddNotice(null)
     setServiceId(null)
     setExtraServiceIds([])
-    setIsAddingService(false)
     setSpecialistId(null)
     setSelectedDayKey(null)
     setTime(null)
@@ -370,7 +393,6 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setFolded((current) => ({ ...current, service: undefined }))
     // Another first service starts the visit over: the ones added to it went with the old one.
     setExtraServiceIds([])
-    setIsAddingService(false)
     const nextSpecialists = getMastersForAll(catalog.specialists, [id], branchId)
     const keepsSpecialist =
       chosenSpecialistId === ANY_SPECIALIST_ID ||
@@ -387,35 +409,36 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // The visit gains a service done right after the others; a master who does not do it lets go.
   const addService = (id: string) => {
     const nextIds = [...chosenServiceIds, id]
+    // No master yet, «любой», or one who does the new service too: the master stays.
     const keepsSpecialist =
+      !chosenSpecialistId ||
       chosenSpecialistId === ANY_SPECIALIST_ID ||
       getMastersForAll(catalog.specialists, nextIds, branchId).some(
         (item) => item.id === chosenSpecialistId,
       )
+    const added = catalog.services.find((item) => item.id === id)
     setExtraServiceIds(nextIds.slice(1))
-    setIsAddingService(false)
-    setTime(null)
     setSubmitError(null)
-    if (!keepsSpecialist) setSpecialistId(null)
     setEditingStep(null)
-    scrollToStep(keepsSpecialist && chosenSpecialistId ? 'datetime' : 'specialist', true)
-  }
-
-  const removeService = (id: string) => {
-    setExtraServiceIds((current) => current.filter((item) => item !== id))
-    setIsAddingService(false)
+    if (keepsSpecialist) {
+      // Same master: the time stays while the longer visit still fits it (checked below).
+      setAddNotice(null)
+      if (time && added) setAddedTimeCheck({ time, minutes: added.durationMinutes })
+      return
+    }
+    const droppedMaster = catalog.specialists.find((item) => item.id === chosenSpecialistId)
+    setAddNotice(
+      droppedMaster && added
+        ? { kind: 'master', masterName: droppedMaster.name, serviceName: added.name }
+        : null,
+    )
+    setSpecialistId(null)
     setTime(null)
-    setEditingStep(null)
-    scrollToStep('datetime', true)
-  }
-
-  const openAddService = () => {
-    setIsAddingService(true)
-    setEditingStep(null)
-    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollToStep('specialist', true)
   }
 
   const selectSpecialist = (id: string) => {
+    setAddNotice(null)
     setFolded((current) => ({ ...current, specialist: undefined }))
     setSpecialistId(id)
     setTime(null)
@@ -460,6 +483,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   const selectTime = (value: string) => {
+    setAddNotice(null)
     setFolded((current) => ({ ...current, datetime: undefined }))
     setTime(value)
     setSubmitError(null)
@@ -562,6 +586,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   return {
+    addNotice,
     branches,
     branchId,
     branchDistances,
@@ -572,11 +597,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     chosenServices,
     chosenServiceIds,
     addableServices,
-    isAddingService,
-    openAddService,
-    closeAddService: () => setIsAddingService(false),
     addService,
-    removeService,
     specialists,
     specialistId,
     days,
@@ -629,4 +650,4 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 }
 
-export type { BookingStepId, ReminderChoice }
+export type { AddNotice, BookingStepId, ReminderChoice }

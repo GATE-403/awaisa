@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Service } from '@/shared/api/types'
-import { combineServices, getAddableServices, getMastersForAll } from '../lib/visitServices'
+import {
+  combineServices,
+  getAddableServices,
+  getMastersForAll,
+  pickOfferedService,
+} from '../lib/visitServices'
 
 const service = (
   id: string,
@@ -69,5 +74,22 @@ describe('a visit of several services', () => {
         specialistId: null,
       }),
     ).toEqual([])
+  })
+})
+
+describe('the service offered for the visit', () => {
+  it('offers what the place sells most first', () => {
+    const popular = { ...brows, isPopular: true }
+    expect(pickOfferedService([pedicure, popular], 'nails')).toBe(popular)
+  })
+
+  it('then the same kind as the first service, then the menu order', () => {
+    const hair = { ...service('Стрижка', 900, 45), categoryId: 'hair' }
+    expect(pickOfferedService([hair, pedicure], 'nails')).toBe(pedicure)
+    expect(pickOfferedService([pedicure, brows], 'nails')).toBe(pedicure)
+  })
+
+  it('offers nothing when nothing can join', () => {
+    expect(pickOfferedService([], 'nails')).toBeUndefined()
   })
 })
