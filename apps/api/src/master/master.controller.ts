@@ -29,6 +29,7 @@ import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import type { Specialist } from '../catalog/specialist.entity.js'
 import { businessDateTimeToUtc } from '../common/business-time.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { FollowsService } from '../follows/follows.service.js'
 import { PayrollService } from '../payroll/payroll.service.js'
 import { CurrentMaster, MasterGuard } from './master.guard.js'
 
@@ -41,6 +42,7 @@ export class MasterController {
     private readonly businesses: BusinessesService,
     private readonly masterSchedule: MasterScheduleService,
     private readonly payroll: PayrollService,
+    private readonly follows: FollowsService,
   ) {}
 
   /** Where the signed-in customer works as a master (for «Мой день» entry points). */
@@ -103,7 +105,7 @@ export class MasterController {
     @Query({ schema: scheduleQuerySchema }) query: ScheduleQuery,
   ): Promise<MasterDay> {
     const window = await this.businesses.getOpeningWindow(business.id, query.date)
-    const [days, leaves, bookings, pay] = await Promise.all([
+    const [days, leaves, bookings, pay, followers] = await Promise.all([
       this.masterSchedule.daysFor([master.id], query.date, window),
       this.masterSchedule.leavesOn([master.id], query.date),
       this.salonBookings.getAdminViews(business.id, {
@@ -112,6 +114,7 @@ export class MasterController {
       }),
       // Only the master's own pay: never the others'.
       this.payroll.forMasterDay(business.id, master.id, query.date),
+      this.follows.countFor(master.id),
     ])
 
     return {
@@ -122,6 +125,7 @@ export class MasterController {
       hours: window ? clampToWindow(days.get(master.id) ?? null, window) : null,
       leaveReason: leaves[0] ? leaves[0].reason || 'Отпуск' : null,
       bookings: bookings.filter((booking) => booking.specialistId === master.id),
+      followers,
     }
   }
 
