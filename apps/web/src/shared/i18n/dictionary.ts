@@ -1,3 +1,4 @@
+import { AUTH } from './areas/auth'
 import { CATALOG, CATALOG_COUNTED } from './areas/catalog'
 import { PLACE, PLACE_COUNTED } from './areas/place'
 import { PROFILE, PROFILE_COUNTED } from './areas/profile'
@@ -234,9 +235,15 @@ const BOOKING_COUNTED: Record<string, CountedEntry> = {
   отзывов: ['пикир', 'review', 'reviews'],
 }
 
-const AREAS = { BOOKING, CATALOG, PLACE, PROFILE }
+const AREAS = { AUTH, BOOKING, CATALOG, PLACE, PROFILE }
 
-const DICTIONARY: Record<string, Entry> = { ...CATALOG, ...PLACE, ...PROFILE, ...BOOKING }
+const DICTIONARY: Record<string, Entry> = {
+  ...CATALOG,
+  ...PLACE,
+  ...PROFILE,
+  ...BOOKING,
+  ...AUTH,
+}
 
 const COUNTED: Record<string, CountedEntry> = {
   ...CATALOG_COUNTED,

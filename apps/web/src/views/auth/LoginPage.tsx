@@ -8,6 +8,7 @@ import { CaretLeft, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type FormEvent, useEffect, useRef } from 'react'
 import { PersonAvatar } from '@/entities/business'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskLocalPhoneInput } from '@/shared/lib/inputMasks'
 import { TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
@@ -28,6 +29,7 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
 // page colour, one question at a time (number → code → name), like the system's own sign-in.
 // It opens on slow living colour behind the mascot and ends with a wave of light.
 export const LoginPage = () => {
+  const t = useT()
   const form = useLoginForm()
   const phoneInputRef = useRef<HTMLInputElement>(null)
   const telegram = useTelegramLogin(form.finishSignIn)
@@ -50,12 +52,12 @@ export const LoginPage = () => {
             type='button'
             className={styles.corner}
             onClick={isWaitingForTelegram ? telegram.cancel : form.editPhone}
-            aria-label={isWaitingForTelegram ? 'Назад' : 'Изменить номер'}
+            aria-label={isWaitingForTelegram ? t('Назад') : t('Изменить номер')}
           >
             <CaretLeft weight='bold' aria-hidden />
           </button>
         ) : (
-          <NextLink href={form.redirectTo} className={styles.corner} aria-label='Закрыть'>
+          <NextLink href={form.redirectTo} className={styles.corner} aria-label={t('Закрыть')}>
             <X weight='bold' aria-hidden />
           </NextLink>
         )}
@@ -65,11 +67,11 @@ export const LoginPage = () => {
         {isWaitingForTelegram && (
           <div className={styles.form}>
             <TelegramMark className={styles.telegramMark} />
-            <h1 className={styles.title}>Подтвердите в Telegram</h1>
+            <h1 className={styles.title}>{t('Подтвердите в Telegram')}</h1>
             <p className={styles.lead}>
-              Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда
+              {t('Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда')}
             </p>
-            <p className={styles.note}>Ждём ваш номер…</p>
+            <p className={styles.note}>{t('Ждём ваш номер…')}</p>
             <div className={styles.links}>
               <ButtonLink
                 href={telegram.href}
@@ -78,10 +80,10 @@ export const LoginPage = () => {
                 variant='link'
                 size='sm'
               >
-                Открыть Telegram снова
+                {t('Открыть Telegram снова')}
               </ButtonLink>
               <Button variant='link' size='sm' onClick={telegram.cancel}>
-                Войти по SMS
+                {t('Войти по SMS')}
               </Button>
             </div>
           </div>
@@ -92,13 +94,13 @@ export const LoginPage = () => {
             <div className={styles.hero}>
               <Mascot className={styles.mark} />
               <h1 className={styles.headline}>
-                Запись к мастерам.
-                <span className={styles.headlineSecond}> Без звонков.</span>
+                {t('Запись к мастерам.')}
+                <span className={styles.headlineSecond}> {t('Без звонков.')}</span>
               </h1>
               {/* The number is typed right on the colour in big digits, no box around it. Still
                   a real tel input (keyboard, contact autofill, paste, the label); «+996» is
                   already there and the caret starts after it. */}
-              <Field label='Номер телефона' error={form.error} className={styles.number}>
+              <Field label={t('Номер телефона')} error={form.error} className={styles.number}>
                 <span className={styles.numberRow}>
                   <span
                     className={styles.numberPrefix}
@@ -126,9 +128,9 @@ export const LoginPage = () => {
             </div>
             <div className={styles.actions}>
               <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
-                {form.isSubmitting ? 'Отправляем…' : 'Получить код'}
+                {form.isSubmitting ? t('Отправляем…') : t('Получить код')}
               </Button>
-              {telegram.isAvailable && <span className={styles.or}>или</span>}
+              {telegram.isAvailable && <span className={styles.or}>{t('или')}</span>}
               {telegram.isAvailable && (
                 // Without typing the number: the bot asks for it with one button.
                 <ButtonLink
@@ -141,15 +143,15 @@ export const LoginPage = () => {
                   onClick={telegram.start}
                 >
                   <TelegramMark className={styles.brand} />
-                  Войти через Telegram
+                  {t('Войти через Telegram')}
                 </ButtonLink>
               )}
               {telegram.isExpired ? (
                 <p className={styles.error} role='alert'>
-                  Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз
+                  {t('Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз')}
                 </p>
               ) : (
-                <p className={styles.note}>Код придёт в Telegram или по SMS</p>
+                <p className={styles.note}>{t('Код придёт в Telegram или по SMS')}</p>
               )}
             </div>
           </form>
@@ -157,14 +159,18 @@ export const LoginPage = () => {
 
         {form.step === 'code' && (
           <form className={styles.form} onSubmit={handleSubmit(() => form.verify(form.code))}>
-            <h1 className={styles.title}>Введите код</h1>
+            <h1 className={styles.title}>{t('Введите код')}</h1>
             <p className={styles.lead}>
-              {form.channel === 'telegram' ? 'Код отправлен в Telegram' : 'Код отправлен по SMS'} на{' '}
-              <span className={styles.phone}>{formatPhone(form.normalizedPhone)}</span>
+              {t(
+                form.channel === 'telegram'
+                  ? 'Код отправлен в Telegram на {phone}'
+                  : 'Код отправлен по SMS на {phone}',
+                { phone: formatPhone(form.normalizedPhone) },
+              )}
             </p>
             <OtpField
               key={form.wrongAttempts}
-              aria-label='Код подтверждения'
+              aria-label={t('Код подтверждения')}
               length={CODE_LENGTH}
               value={form.code}
               onValueChange={form.changeCode}
@@ -180,10 +186,10 @@ export const LoginPage = () => {
             ) : (
               <p className={styles.note}>
                 {form.isSubmitting
-                  ? 'Проверяем…'
+                  ? t('Проверяем…')
                   : form.channel === 'telegram'
-                    ? 'Сообщение придёт от официального чата Telegram'
-                    : 'Войдём, как только наберёте все цифры'}
+                    ? t('Сообщение придёт от официального чата Telegram')
+                    : t('Войдём, как только наберёте все цифры')}
               </p>
             )}
             <div className={styles.links}>
@@ -194,7 +200,7 @@ export const LoginPage = () => {
                   onClick={form.sendBySms}
                   disabled={form.isSubmitting}
                 >
-                  Нет Telegram? Получить SMS
+                  {t('Нет Telegram? Получить SMS')}
                 </Button>
               ) : (
                 <Button
@@ -204,8 +210,8 @@ export const LoginPage = () => {
                   disabled={form.resendIn > 0 || form.isSubmitting}
                 >
                   {form.resendIn > 0
-                    ? `Отправить снова через ${form.resendIn} с`
-                    : 'Отправить снова'}
+                    ? t('Отправить снова через {seconds} с', { seconds: form.resendIn })
+                    : t('Отправить снова')}
                 </Button>
               )}
             </div>
@@ -215,12 +221,12 @@ export const LoginPage = () => {
         {form.step === 'name' && (
           <form className={styles.form} onSubmit={handleSubmit(form.saveName)}>
             <PersonAvatar name={form.name || form.normalizedPhone} size='lg' />
-            <h1 className={styles.title}>Вы вошли</h1>
-            <p className={styles.lead}>Как к вам обращаться?</p>
-            <Field label='Имя' error={form.error} className={styles.field}>
+            <h1 className={styles.title}>{t('Вы вошли')}</h1>
+            <p className={styles.lead}>{t('Как к вам обращаться?')}</p>
+            <Field label={t('Имя')} error={form.error} className={styles.field}>
               <Input
                 autoComplete='name'
-                placeholder='Имя'
+                placeholder={t('Имя')}
                 value={form.name}
                 onValueChange={form.setName}
                 autoFocus
@@ -232,7 +238,7 @@ export const LoginPage = () => {
               fullWidth
               disabled={form.isSubmitting || !form.name.trim()}
             >
-              Готово
+              {t('Готово')}
             </Button>
           </form>
         )}
