@@ -3,6 +3,7 @@
 import { Input } from '@awaisa/ui/Input'
 import { Plus, X } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
+import { useT } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -25,6 +26,7 @@ export const CertificateAmountsSheet = ({
   onClose,
   onSave,
 }: CertificateAmountsSheetProps) => {
+  const t = useT()
   const [drafts, setDrafts] = useState<Draft[]>(() =>
     (amounts.length > 0 ? amounts : DEFAULT_CERTIFICATE_AMOUNTS).map((amount, index) => ({
       key: index,
@@ -48,28 +50,28 @@ export const CertificateAmountsSheet = ({
 
   return (
     <Sheet
-      title='Суммы'
+      title={t('Суммы')}
       onClose={onClose}
-      action={{ label: 'Готово', form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Готово'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label='Суммы сертификатов'>
+        <section className={sheet.group} aria-label={t('Суммы сертификатов')}>
           <div className={sheet.groupHeader}>
             <span />
             {drafts.length < CERTIFICATE_AMOUNTS_MAX && (
               <button type='button' className={sheet.groupLink} onClick={handleAdd}>
-                <Plus weight='bold' aria-hidden /> Ещё сумма
+                <Plus weight='bold' aria-hidden /> {t('Ещё сумма')}
               </button>
             )}
           </div>
           <div className={sheet.list}>
             {drafts.map((draft, index) => (
               <div key={draft.key} className={sheet.row}>
-                <span className={sheet.rowLabel}>Сумма {index + 1}</span>
+                <span className={sheet.rowLabel}>{t('Сумма {number}', { number: index + 1 })}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={`Сумма ${index + 1}, сом`}
+                    aria-label={t('Сумма {number}, сом', { number: index + 1 })}
                     inputMode='numeric'
                     placeholder='3 000'
                     value={maskAmountInput(draft.value)}
@@ -83,12 +85,12 @@ export const CertificateAmountsSheet = ({
                       )
                     }
                   />
-                  <span className={sheet.suffix}>сом</span>
+                  <span className={sheet.suffix}>{t('сом')}</span>
                   {drafts.length > 1 && (
                     <button
                       type='button'
                       className={own.remove}
-                      aria-label={`Убрать сумму ${index + 1}`}
+                      aria-label={t('Убрать сумму {number}', { number: index + 1 })}
                       onClick={() =>
                         setDrafts((current) => current.filter((item) => item.key !== draft.key))
                       }
@@ -101,7 +103,7 @@ export const CertificateAmountsSheet = ({
             ))}
           </div>
           <p className={sheet.groupFooter}>
-            Клиент выбирает одну из сумм на странице места. От 100 сом, до шести сумм.
+            {t('Клиент выбирает одну из сумм на странице места. От 100 сом, до шести сумм.')}
           </p>
         </section>
       </form>

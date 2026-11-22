@@ -13,6 +13,7 @@ import {
 } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, Promotion, PromotionInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { describePromotion } from '@/shared/lib/promotionText'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -32,6 +33,7 @@ const KIND_LABEL: Record<Promotion['kind'], string> = {
 
 // «Акции»: discounts the business runs — by hours, for first visits, by promo code.
 export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
+  const t = useT()
   const toast = useToast()
   const [promotions, setPromotions] = useState<Promotion[] | null>(null)
   const [editing, setEditing] = useState<Promotion | 'new' | null>(null)
@@ -50,12 +52,12 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
     try {
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
-      toast.show({ title: 'Акция сохранена', type: 'success' })
+      toast.show({ title: t('Акция сохранена'), type: 'success' })
       await load()
       void refreshBusiness(slug)
       return true
     } catch (error) {
-      toast.show({ title: 'Не сохранилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -63,33 +65,33 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   const remove = async (promotion: Promotion) => {
     try {
       await deletePromotion(slug, promotion.id)
-      toast.show({ title: 'Акция удалена', type: 'success' })
+      toast.show({ title: t('Акция удалена'), type: 'success' })
       await load()
       void refreshBusiness(slug)
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
   return (
-    <section className={styles.section} aria-label='Акции'>
+    <section className={styles.section} aria-label={t('Акции')}>
       <SectionHeader
-        title='Акции'
-        description='Скидки не суммируются — клиент получает самую большую.'
+        title={t('Акции')}
+        description={t('Скидки не суммируются — клиент получает самую большую.')}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             <Plus weight='bold' aria-hidden />
-            Новая акция
+            {t('Новая акция')}
           </Button>
         }
       />
 
       {promotions?.length === 0 && (
         <EmptyState
-          title='Запустите первую акцию'
-          text='Заполните тихие часы скидкой, приведите новых клиентов или раздайте промокод.'
-          action={<Button onClick={() => setEditing('new')}>Новая акция</Button>}
+          title={t('Запустите первую акцию')}
+          text={t('Заполните тихие часы скидкой, приведите новых клиентов или раздайте промокод.')}
+          action={<Button onClick={() => setEditing('new')}>{t('Новая акция')}</Button>}
         />
       )}
 
@@ -110,12 +112,13 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
                   </span>
                   <span className={styles.rowMeta}>
                     {[
-                      !promotion.isActive && 'Выключена',
-                      KIND_LABEL[promotion.kind],
+                      !promotion.isActive && t('Выключена'),
+                      t(KIND_LABEL[promotion.kind]),
                       promotion.kind === 'promo_code'
                         ? promotion.code
                         : describePromotion(promotion),
-                      promotion.endsOn && `до ${promotion.endsOn.split('-').reverse().join('.')}`,
+                      promotion.endsOn &&
+                        t('до {date}', { date: promotion.endsOn.split('-').reverse().join('.') }),
                     ]
                       .filter(Boolean)
                       .join(' · ')}
