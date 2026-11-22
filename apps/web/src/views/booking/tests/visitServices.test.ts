@@ -78,18 +78,45 @@ describe('a visit of several services', () => {
 })
 
 describe('the service offered for the visit', () => {
-  it('offers what the place sells most first', () => {
-    const popular = { ...brows, isPopular: true }
-    expect(pickOfferedService([pedicure, popular], 'nails')).toBe(popular)
+  const hair = (name: string, categoryId = 'hair') => ({
+    ...service(name, 900, 45),
+    categoryId,
+  })
+  const haircut = hair('Женская стрижка')
+  const kidsCut = hair('Детская стрижка')
+  const toning = hair('Тонирование', 'colour')
+  const styling = hair('Укладка')
+
+  it('offers an add-on, not the same kind: another category when the menu has several', () => {
+    const menu = [haircut, kidsCut, styling, toning]
+    expect(pickOfferedService([kidsCut, styling, toning], [haircut], menu)).toBe(toning)
   })
 
-  it('then the same kind as the first service, then the menu order', () => {
-    const hair = { ...service('Стрижка', 900, 45), categoryId: 'hair' }
-    expect(pickOfferedService([hair, pedicure], 'nails')).toBe(pedicure)
-    expect(pickOfferedService([pedicure, brows], 'nails')).toBe(pedicure)
+  it('never offers the same thing under another name', () => {
+    const massage = { ...service('Классический массаж', 2500, 60), categoryId: 'all' }
+    const back = { ...service('Массаж спины', 1300, 30), categoryId: 'all' }
+    const stones = { ...service('Стоун-терапия', 3500, 90), categoryId: 'all' }
+    expect(pickOfferedService([back, stones], [massage], [massage, back, stones])).toBe(stones)
+    expect(pickOfferedService([back], [massage], [massage, back])).toBeUndefined()
+  })
+
+  it('reads only what a service is, not the words that describe it', () => {
+    const nails = { ...service('Маникюр с покрытием', 1200, 60), categoryId: 'all' }
+    const feet = { ...service('Педикюр с покрытием', 1500, 90), categoryId: 'all' }
+    const again = { ...service('Маникюр классический', 900, 45), categoryId: 'all' }
+    expect(pickOfferedService([again, feet], [nails], [nails, again, feet])).toBe(feet)
+  })
+
+  it('with one category reads names only, popular first, then the menu order', () => {
+    const popularBrows = { ...brows, isPopular: true }
+    const menu = [manicure, pedicure, popularBrows]
+    expect(pickOfferedService([pedicure, popularBrows], [manicure], menu)).toBe(popularBrows)
+    expect(pickOfferedService([pedicure, brows], [manicure], [manicure, pedicure, brows])).toBe(
+      pedicure,
+    )
   })
 
   it('offers nothing when nothing can join', () => {
-    expect(pickOfferedService([], 'nails')).toBeUndefined()
+    expect(pickOfferedService([], [manicure], [manicure])).toBeUndefined()
   })
 })
