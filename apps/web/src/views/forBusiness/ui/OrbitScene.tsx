@@ -1,6 +1,7 @@
 'use client'
 
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
+import { useT } from '@/shared/i18n'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import styles from './OrbitScene.module.css'
 
@@ -45,6 +46,7 @@ const rays = Array.from({ length: RAYS }, (_, index) => {
 // A small 3D scene with plain CSS transforms: the app icon as a thick glass tile, product chips
 // orbiting around it. The pointer tilts the scene, dragging spins the orbit, a tap sends a pulse.
 export const OrbitScene = () => {
+  const t = useT()
   const sceneRef = useRef<HTMLDivElement>(null)
   const state = useRef({
     tiltX: 0,
@@ -155,7 +157,7 @@ export const OrbitScene = () => {
                 } as CSSProperties
               }
             >
-              {chip.text}
+              {t(chip.text)}
             </span>
           ))}
         </div>

@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { PersonAvatar } from '@/entities/business'
 import { Stars } from '@/entities/review'
 import type { ModerationAction, ModerationItem } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { describeItem, describeReasons } from '../lib/describe'
 import styles from '../ModerationPage.module.css'
@@ -18,8 +19,9 @@ interface QueueItemProps {
 // One reported thing as it looks on the site (the photo, the review's stars and words, the
 // person's face and status), what was said about it, and the decisions as thin glyphs.
 export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
+  const t = useT()
   const { preview } = item
-  const title = preview?.title ?? 'Уже удалено'
+  const title = preview?.title ?? t('Уже удалено')
 
   return (
     <li className={styles.item} aria-busy={isPending}>
@@ -46,43 +48,43 @@ export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
             title
           )}
         </p>
-        <p className={styles.meta}>{describeItem(item)}</p>
+        <p className={styles.meta}>{describeItem(item, t)}</p>
         {preview?.rating ? <Stars rating={preview.rating} /> : null}
         {preview?.text && item.targetType !== 'photo' && (
           <p className={styles.quote}>{preview.text}</p>
         )}
-        <p className={styles.meta}>{describeReasons(item.reasons)}</p>
+        <p className={styles.meta}>{describeReasons(item.reasons, t)}</p>
         {(item.isHidden || item.isKept) && (
           <p className={styles.state} data-state={item.isHidden ? 'hidden' : 'kept'}>
-            {item.isHidden ? 'Скрыто, пока вы не решите' : 'Уже оставляли: само не скроется'}
+            {t(item.isHidden ? 'Скрыто, пока вы не решите' : 'Уже оставляли: само не скроется')}
           </p>
         )}
       </div>
-      <GlyphGroup label={`Решение: ${title}`}>
+      <GlyphGroup label={t('Решение: {title}', { title })}>
         <GlyphButton
           icon={<Check aria-hidden />}
-          label='Оставить'
+          label={t('Оставить')}
           disabled={isPending}
           onClick={() => onDecide('keep')}
         />
         {preview && (
           <GlyphButton
             icon={<EyeSlash aria-hidden />}
-            label='Скрыть'
+            label={t('Скрыть')}
             disabled={isPending || item.isHidden}
             onClick={() => onDecide('hide')}
           />
         )}
         <GlyphButton
           icon={<Trash aria-hidden />}
-          label='Удалить'
+          label={t('Удалить')}
           disabled={isPending}
           onClick={() => onDecide('delete')}
         />
         {item.targetType === 'profile' && preview && (
           <GlyphButton
             icon={<Prohibit aria-hidden />}
-            label='Заблокировать автора'
+            label={t('Заблокировать автора')}
             disabled={isPending}
             onClick={() => onDecide('block')}
           />

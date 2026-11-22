@@ -8,12 +8,12 @@ import { RadioGroup } from '@awaisa/ui/Radio'
 import { RadioCard } from '@awaisa/ui/RadioCard'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import type { CSSProperties, FormEvent } from 'react'
-import { formatDuration } from '@/entities/booking'
 import { useRequireSession } from '@/entities/session'
 import type { BusinessKind } from '@/shared/api/types'
 import { KIND_ICONS, KIND_TINTS } from '@/shared/config/kindStyles'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
+import { useT } from '@/shared/i18n'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -28,6 +28,7 @@ const STEP_TITLES = {
 }
 
 export const CreateBusinessPage = () => {
+  const t = useT()
   const session = useRequireSession()
   const form = useCreateBusinessForm()
   const heading = STEP_TITLES[form.step]
@@ -43,9 +44,9 @@ export const CreateBusinessPage = () => {
       <Container size='sm' className={styles.content}>
         <div className={styles.heading}>
           <p className={styles.eyebrow}>
-            Шаг {form.stepNumber} из {form.stepCount}
+            {t('Шаг {step} из {total}', { step: form.stepNumber, total: form.stepCount })}
           </p>
-          <PageTitle size='sm' title={heading.title} subtitle={heading.subtitle} />
+          <PageTitle size='sm' title={t(heading.title)} subtitle={t(heading.subtitle)} />
         </div>
 
         {!session.customer && <Skeleton className={styles.skeleton} />}
@@ -54,23 +55,23 @@ export const CreateBusinessPage = () => {
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
             {form.step === 'name' && (
               <div className={styles.card}>
-                <Field label='Название' error={form.errors.name}>
+                <Field label={t('Название')} error={form.errors.name}>
                   <Input
                     value={form.name}
                     onValueChange={form.setName}
-                    placeholder='Например, Barber Pro'
+                    placeholder={t('Например, Barber Pro')}
                     autoComplete='organization'
                     autoFocus
                   />
                 </Field>
                 <Field
-                  label='Ссылка на страницу'
+                  label={t('Ссылка на страницу')}
                   error={form.errors.slug}
                   // «Адрес» read as the street: the link is said to be what clients get.
                   description={
                     form.isSlugAvailable
-                      ? `Свободна: awaisa.kg/${form.slug} — её получат клиенты`
-                      : 'Латиница, цифры и дефис'
+                      ? t('Свободна: awaisa.kg/{slug} — её получат клиенты', { slug: form.slug })
+                      : t('Латиница, цифры и дефис')
                   }
                 >
                   <div className={styles.slug}>
@@ -93,7 +94,7 @@ export const CreateBusinessPage = () => {
             {form.step === 'kind' && (
               <>
                 <RadioGroup
-                  aria-label='Чем занимаетесь'
+                  aria-label={t('Чем занимаетесь')}
                   value={form.kind}
                   onValueChange={(value) => form.setKind(value as BusinessKind)}
                   className={styles.kinds}
@@ -107,9 +108,9 @@ export const CreateBusinessPage = () => {
                       <RadioCard
                         key={kind.value}
                         value={kind.value}
-                        title={kind.label}
+                        title={t(kind.label)}
                         description={
-                          examples.length > 0 ? `${examples.join(', ')}…` : 'Своё меню услуг'
+                          examples.length > 0 ? `${examples.join(', ')}…` : t('Своё меню услуг')
                         }
                         leading={
                           <span
@@ -126,8 +127,8 @@ export const CreateBusinessPage = () => {
                 </RadioGroup>
 
                 {form.templates.length > 0 ? (
-                  <section className={styles.group} aria-label='Услуги'>
-                    <SectionCaption as='h2'>Услуги</SectionCaption>
+                  <section className={styles.group} aria-label={t('Услуги')}>
+                    <SectionCaption as='h2'>{t('Услуги')}</SectionCaption>
                     <ul className={styles.list}>
                       {form.templates.map((template) => (
                         <li key={template.name} className={styles.serviceRow}>
@@ -144,14 +145,14 @@ export const CreateBusinessPage = () => {
                           >
                             <span className={styles.serviceName}>{template.name}</span>
                             <span className={styles.serviceMeta}>
-                              {formatDuration(template.durationMinutes)}
+                              {t.duration(template.durationMinutes)}
                             </span>
                           </span>
                           <span className={styles.price}>
                             <Input
                               variant='plain'
                               inputMode='numeric'
-                              aria-label={`Цена: ${template.name}, сом`}
+                              aria-label={t('Цена: {name}, сом', { name: template.name })}
                               value={maskAmountInput(template.price)}
                               onValueChange={(value) =>
                                 form.editTemplate(template.name, {
@@ -161,18 +162,18 @@ export const CreateBusinessPage = () => {
                               }
                               disabled={!template.isChecked}
                             />
-                            <span className={styles.suffix}>сом</span>
+                            <span className={styles.suffix}>{t('сом')}</span>
                           </span>
                         </li>
                       ))}
                     </ul>
                     <p className={styles.groupFooter}>
-                      Цены и длительность можно поменять в кабинете в любой момент.
+                      {t('Цены и длительность можно поменять в кабинете в любой момент.')}
                     </p>
                   </section>
                 ) : (
                   <p className={styles.groupFooter}>
-                    Услуги добавите в кабинете — название, длительность и цену.
+                    {t('Услуги добавите в кабинете — название, длительность и цену.')}
                   </p>
                 )}
               </>
@@ -181,7 +182,7 @@ export const CreateBusinessPage = () => {
             {form.step === 'contacts' && (
               <div className={styles.card}>
                 <div className={styles.row}>
-                  <Field label='Город'>
+                  <Field label={t('Город')}>
                     <Input
                       value={form.city}
                       onValueChange={form.setCity}
@@ -189,18 +190,18 @@ export const CreateBusinessPage = () => {
                       autoFocus
                     />
                   </Field>
-                  <Field label='Адрес'>
+                  <Field label={t('Адрес')}>
                     <Input
                       value={form.address}
                       onValueChange={form.setAddress}
-                      placeholder='Необязательно'
+                      placeholder={t('Необязательно')}
                       autoComplete='street-address'
                     />
                   </Field>
                 </div>
                 <Field
-                  label='Телефон для клиентов'
-                  description='Покажем на странице и в WhatsApp-кнопке'
+                  label={t('Телефон для клиентов')}
+                  description={t('Покажем на странице и в WhatsApp-кнопке')}
                 >
                   <Input
                     type='tel'
@@ -215,11 +216,11 @@ export const CreateBusinessPage = () => {
 
             <div className={styles.actions}>
               <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
-                {isLast ? (form.isSubmitting ? 'Создаём…' : 'Создать страницу') : 'Далее'}
+                {isLast ? t(form.isSubmitting ? 'Создаём…' : 'Создать страницу') : t('Далее')}
               </Button>
               {form.stepNumber > 1 && (
                 <Button type='button' variant='ghost' onClick={form.goBack}>
-                  Назад
+                  {t('Назад')}
                 </Button>
               )}
             </div>

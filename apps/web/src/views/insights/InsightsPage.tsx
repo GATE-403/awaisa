@@ -2,7 +2,7 @@
 
 import { Select } from '@awaisa/ui/Select'
 import type { CSSProperties } from 'react'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -33,7 +33,7 @@ const PERIODS: { value: `${InsightsDays}`; label: string }[] = [
 
 const ANY = 'any'
 
-const devicesText = (count: number) => pluralize(count, ['устройство', 'устройства', 'устройств'])
+const DEVICES: [string, string, string] = ['устройство', 'устройства', 'устройств']
 
 const formatShare = (value: number | null) =>
   value === null ? '—' : `${value.toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`
@@ -41,6 +41,7 @@ const formatShare = (value: number | null) =>
 // Platform admins read the funnels here: where people drop out of each scenario, on which
 // devices, and what trips them up — the same codes the telemetry stores, put into words.
 export const InsightsPage = ({ initial }: InsightsPageProps) => {
+  const t = useT()
   const insights = useInsights(initial)
   const steps = insights.funnel?.steps ?? []
   const started = steps[0]?.sessions ?? 0
@@ -52,39 +53,42 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
 
   return (
     <>
-      <CabinetBar title='Воронки' />
+      <CabinetBar title={t('Воронки')} />
       <main className={styles.page}>
         <Container size='md' className={styles.content}>
-          <PageTitle title='Воронки.' subtitle=' Где люди бросают и на каких устройствах.' />
+          <PageTitle
+            title={t('Воронки.')}
+            subtitle={t(' Где люди бросают и на каких устройствах.')}
+          />
 
           <div className={styles.controls}>
             <TextTabs
-              label='Сценарий'
+              label={t('Сценарий')}
               items={(Object.keys(FLOW_LABELS) as (keyof typeof FLOW_LABELS)[]).map((flow) => ({
-                label: FLOW_LABELS[flow],
+                label: t(FLOW_LABELS[flow]),
                 isActive: insights.flow === flow,
                 onSelect: () => insights.setFlow(flow),
               }))}
             />
             <SegmentedControl
-              label='Период'
+              label={t('Период')}
               value={`${insights.days}`}
-              items={PERIODS}
+              items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
               onChange={(value) => insights.setDays(Number(value) as InsightsDays)}
             />
             <div className={styles.group}>
               {FILTER_KEYS.map((key) => (
                 <div key={key} className={styles.filterRow}>
-                  <span className={styles.filterLabel}>{SEGMENT_LABELS[key].title}</span>
+                  <span className={styles.filterLabel}>{t(SEGMENT_LABELS[key].title)}</span>
                   <Select
                     variant='plain'
-                    aria-label={SEGMENT_LABELS[key].title}
+                    aria-label={t(SEGMENT_LABELS[key].title)}
                     value={insights.segment[key] ?? ANY}
                     items={[
-                      { value: ANY, label: 'Все' },
+                      { value: ANY, label: t('Все') },
                       ...Object.entries(SEGMENT_LABELS[key].values).map(([value, label]) => ({
                         value,
-                        label,
+                        label: t(label),
                       })),
                     ]}
                     onValueChange={(value) =>
@@ -98,28 +102,32 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
 
           <section aria-labelledby='insights-steps' aria-busy={insights.isLoading}>
             <SectionCaption as='h2' id='insights-steps'>
-              Шаги
-              <span className={styles.count}>{started ? devicesText(started) : null}</span>
+              {t('Шаги')}
+              <span className={styles.count}>{started ? t.count(started, DEVICES) : null}</span>
             </SectionCaption>
             {insights.error ? (
               <EmptyState variant='inline' text={insights.error} />
             ) : started === 0 ? (
               <EmptyState
                 variant='inline'
-                text='За этот период таких устройств здесь не было — выберите другой период или уберите отбор.'
+                text={t(
+                  'За этот период таких устройств здесь не было — выберите другой период или уберите отбор.',
+                )}
               />
             ) : (
               <ol className={styles.list} data-loading={insights.isLoading || undefined}>
                 {steps.map((row, index) => (
                   <li key={row.step} className={styles.row}>
                     <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>{STEP_LABELS[row.step]}</span>
+                      <span className={styles.rowTitle}>{t(STEP_LABELS[row.step])}</span>
                       <span className={styles.rowMeta}>
                         {index === 0
-                          ? 'Начало'
+                          ? t('Начало')
                           : row.fromPrevious === null
-                            ? 'До прошлого шага не дошли'
-                            : `${formatShare(row.fromPrevious)} от прошлого шага`}
+                            ? t('До прошлого шага не дошли')
+                            : t('{share} от прошлого шага', {
+                                share: formatShare(row.fromPrevious),
+                              })}
                       </span>
                     </span>
                     <span className={styles.rowValue}>
@@ -139,53 +147,53 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
 
           <section aria-labelledby='insights-signals'>
             <SectionCaption as='h2' id='insights-signals'>
-              Где спотыкаются
+              {t('Где спотыкаются')}
             </SectionCaption>
             {insights.signals?.items.length ? (
               <ul className={styles.list}>
                 {insights.signals.items.map((item) => (
                   <li key={`${item.step}-${item.value}`} className={styles.row}>
                     <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>{STEP_LABELS[item.step]}</span>
+                      <span className={styles.rowTitle}>{t(STEP_LABELS[item.step])}</span>
                       {item.value && (
                         <span className={styles.rowMeta}>
-                          {VALUE_LABELS[item.value] ?? item.value}
+                          {t(VALUE_LABELS[item.value] ?? item.value)}
                         </span>
                       )}
                     </span>
                     <span className={styles.rowValue}>
                       {item.sessions.toLocaleString('ru-RU')}
                       <span className={styles.rowShare}>
-                        {pluralize(item.count, ['раз', 'раза', 'раз'])}
+                        {t.count(item.count, ['раз', 'раза', 'раз'])}
                       </span>
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <EmptyState variant='inline' text='Ошибок в полях и сбоев за этот период нет.' />
+              <EmptyState variant='inline' text={t('Ошибок в полях и сбоев за этот период нет.')} />
             )}
           </section>
 
           <section aria-labelledby='insights-devices'>
             <SectionCaption as='h2' id='insights-devices'>
-              Кто приходит
-              <span className={styles.count}>{devices ? devicesText(devices) : null}</span>
+              {t('Кто приходит')}
+              <span className={styles.count}>{devices ? t.count(devices, DEVICES) : null}</span>
             </SectionCaption>
             {devices === 0 ? (
-              <EmptyState variant='inline' text='Пока нет данных об устройствах.' />
+              <EmptyState variant='inline' text={t('Пока нет данных об устройствах.')} />
             ) : (
               <div className={styles.dimensions}>
                 {dimensions.map(({ key, items }) => (
                   <div key={key} className={styles.dimension}>
-                    <h3 className={styles.dimensionTitle}>{SEGMENT_LABELS[key].title}</h3>
+                    <h3 className={styles.dimensionTitle}>{t(SEGMENT_LABELS[key].title)}</h3>
                     <ul className={styles.list}>
                       {items.map((item) => {
                         const share = Math.round((item.sessions / devices) * 1000) / 10
                         return (
                           <li key={item.value} className={styles.row}>
                             <span className={styles.rowTitle}>
-                              {SEGMENT_LABELS[key].values[item.value] ?? item.value}
+                              {t(SEGMENT_LABELS[key].values[item.value] ?? item.value)}
                             </span>
                             <span className={styles.rowValue}>
                               {item.sessions.toLocaleString('ru-RU')}
