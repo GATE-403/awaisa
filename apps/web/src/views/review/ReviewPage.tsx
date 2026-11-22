@@ -90,6 +90,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                 bookingId={bookingId}
                 access={{ signature }}
                 specialistName={visit.specialistName}
+                isPhotoFirst
                 onRated={(review) => setRated(review.rating)}
               />
             ) : (

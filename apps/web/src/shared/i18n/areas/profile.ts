@@ -187,6 +187,11 @@ const PROFILE: Record<string, Entry> = {
   'Фото {number}': ['Сүрөт {number}', 'Photo {number}'],
   'Убрать фото {number}': ['{number}-сүрөттү алып салуу', 'Remove photo {number}'],
   'Добавить фото': ['Сүрөт кошуу', 'Add photo'],
+  'Покажите результат': ['Жыйынтыкты көрсөтүңүз', 'Show the result'],
+  'Фото попадёт в «Образы» мастера с подписью «Фото клиента»': [
+    'Сүрөт устанын «Образдарына» «Кардардын сүрөтү» деген белги менен кошулат',
+    'The photo goes to the master’s «Looks» marked «Client’s photo»',
+  ],
   'Ещё фото': ['Дагы сүрөт', 'More photos'],
   'Фото к отзыву': ['Пикирге сүрөт', 'Review photo'],
   'Отправить отзыв': ['Пикир жөнөтүү', 'Send review'],

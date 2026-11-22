@@ -686,6 +686,9 @@ const removePhoto = (slug: string, id: string) =>
 const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
   upload<UploadedPhoto>(`/master/${slug}/photos`, file, { bookingId })
 
+const addBookingPhoto = (slug: string, bookingId: string, file: File) =>
+  upload<UploadedPhoto>(`/manage/${slug}/bookings/${bookingId}/photo`, file)
+
 const getFeed = (
   query: {
     kind?: string
@@ -1057,6 +1060,7 @@ export {
   searchAddress,
   reverseAddress,
   updateWorkPhoto,
+  addBookingPhoto,
   addVisitPhoto,
   getFeed,
   reportContent,

@@ -29,6 +29,8 @@ interface RateVisitFormProps {
   rebookHref?: string
   /** With a good rating the toast books the same master again. */
   specialistId?: string
+  /** The SMS review page asks for the result first: a photo says more than the words. */
+  isPhotoFirst?: boolean
   onRated: (review: Review) => void
 }
 
@@ -41,6 +43,7 @@ export const RateVisitForm = ({
   initialRating = 0,
   rebookHref,
   specialistId,
+  isPhotoFirst = false,
   onRated,
 }: RateVisitFormProps) => {
   const t = useT()
@@ -141,8 +144,57 @@ export const RateVisitForm = ({
     }
   }
 
+  const photoField = (
+    <div className={styles.photos} data-first={isPhotoFirst || undefined}>
+      {photos.map((photo, index) => (
+        <span key={photo.preview} className={styles.thumb}>
+          {/* biome-ignore lint/performance/noImgElement: a local preview (blob: URL) */}
+          <img src={photo.preview} alt={t('Фото {number}', { number: index + 1 })} />
+          <button
+            type='button'
+            className={styles.removePhoto}
+            aria-label={t('Убрать фото {number}', { number: index + 1 })}
+            onClick={() => handleRemovePhoto(photo.preview)}
+          >
+            <X weight='bold' aria-hidden />
+          </button>
+        </span>
+      ))}
+      {photos.length < MAX_PHOTOS && (
+        <Button
+          type='button'
+          variant='secondary'
+          size='sm'
+          className={styles.addPhoto}
+          onClick={() => fileInput.current?.click()}
+        >
+          <Camera aria-hidden />
+          {photos.length === 0 ? t('Добавить фото') : t('Ещё фото')}
+        </Button>
+      )}
+      <input
+        ref={fileInput}
+        type='file'
+        accept='image/*'
+        multiple
+        hidden
+        onChange={handlePick}
+        aria-label={t('Фото к отзыву')}
+      />
+    </div>
+  )
+
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      {isPhotoFirst && (
+        <>
+          <p className={styles.question}>{t('Покажите результат')}</p>
+          <p className={styles.hint}>
+            {t('Фото попадёт в «Образы» мастера с подписью «Фото клиента»')}
+          </p>
+          {photoField}
+        </>
+      )}
       <p className={styles.question}>{t('Как вам у мастера {name}?', { name: specialistName })}</p>
       <StarRating
         value={rating}
@@ -164,43 +216,7 @@ export const RateVisitForm = ({
         rows={4}
         placeholder={t('Что понравилось, что можно лучше')}
       />
-      <div className={styles.photos}>
-        {photos.map((photo, index) => (
-          <span key={photo.preview} className={styles.thumb}>
-            {/* biome-ignore lint/performance/noImgElement: a local preview (blob: URL) */}
-            <img src={photo.preview} alt={t('Фото {number}', { number: index + 1 })} />
-            <button
-              type='button'
-              className={styles.removePhoto}
-              aria-label={t('Убрать фото {number}', { number: index + 1 })}
-              onClick={() => handleRemovePhoto(photo.preview)}
-            >
-              <X weight='bold' aria-hidden />
-            </button>
-          </span>
-        ))}
-        {photos.length < MAX_PHOTOS && (
-          <Button
-            type='button'
-            variant='secondary'
-            size='sm'
-            className={styles.addPhoto}
-            onClick={() => fileInput.current?.click()}
-          >
-            <Camera aria-hidden />
-            {photos.length === 0 ? t('Добавить фото') : t('Ещё фото')}
-          </Button>
-        )}
-        <input
-          ref={fileInput}
-          type='file'
-          accept='image/*'
-          multiple
-          hidden
-          onChange={handlePick}
-          aria-label={t('Фото к отзыву')}
-        />
-      </div>
+      {!isPhotoFirst && photoField}
       {error && (
         <p className={styles.error} role='alert'>
           {error}
