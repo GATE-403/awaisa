@@ -676,7 +676,8 @@ type ClientListItem = {
   name: string
   visits: number
   noShows: number
-  spent: number
+  /** What they paid here; null for administrators, who do not see the money. */
+  spent: number | null
   lastVisit: string | null
   nextVisit: string | null
   hasNote: boolean
@@ -705,8 +706,9 @@ type ClientCard = {
     visits: number
     noShows: number
     cancellations: number
-    spent: number
-    averageCheck: number
+    /** Null for administrators, who do not see the money. */
+    spent: number | null
+    averageCheck: number | null
     firstVisit: string | null
     lastVisit: string | null
     nextVisit: string | null
