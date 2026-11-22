@@ -66,9 +66,6 @@ const addMinutes = (time: string, minutes: number) => {
   return `${String(Math.floor(total / 60) % 24).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
-// The steps in the order the form walks them, for which way a change of step goes.
-const STEP_ORDER: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
-
 export const BookingPage = ({
   business,
   catalog,
@@ -190,17 +187,6 @@ export const BookingPage = ({
   // One open step under a stack of done ones: the step being changed, else the first unfinished,
   // and contacts once everything is chosen.
   const activeStep: BookingStepId = form.editingStep ?? form.firstIncompleteStep ?? 'contacts'
-  // Which way the form moved: forward brings the next step in from the right, back («Изменить»)
-  // from the left. Kept with the step it came from (React's «previous value in state» pattern).
-  // No direction until the first move: the form replacing the sheet's placeholder is not a move,
-  // and playing the entrance again there read as the sheet opening twice.
-  const [stepTrail, setStepTrail] = useState<{ step: BookingStepId; direction?: string }>({
-    step: activeStep,
-  })
-  if (stepTrail.step !== activeStep) {
-    const isBack = STEP_ORDER.indexOf(activeStep) < STEP_ORDER.indexOf(stepTrail.step)
-    setStepTrail({ step: activeStep, direction: isBack ? 'back' : 'forward' })
-  }
   const contactsReady = form.firstIncompleteStep === null
   const isContactsFolded = isContactsDone && activeStep === 'contacts' && contactsReady
   // Away from contacts (a taken time sends the client back to the times), they open again.
@@ -221,7 +207,6 @@ export const BookingPage = ({
         style={
           {
             '--place-tint': pickTint(business.name),
-            '--wash-tint': pickTint(form.createdBooking.specialistName || business.name),
           } as CSSProperties
         }
       >
@@ -313,16 +298,10 @@ export const BookingPage = ({
       tone: cardTone(1),
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
-        <img
-          {...sizedImage(picture, 88)}
-          alt=''
-          className={styles.stackThumb}
-          data-flight-target='service'
-        />
+        <img {...sizedImage(picture, 88)} alt='' className={styles.stackThumb} />
       ) : (
         <span
           className={styles.stackThumb}
-          data-flight-target='service'
           data-empty=''
           style={{ background: pickTint(business.name) }}
         />
@@ -350,10 +329,9 @@ export const BookingPage = ({
           src={chosenSpecialist.photoUrl ?? undefined}
           size='md'
           className={styles.stackFace}
-          data-flight-target='specialist'
         />
       ) : (
-        <span className={styles.stackFace} data-any='' data-flight-target='specialist'>
+        <span className={styles.stackFace} data-any=''>
           <UsersThree weight='fill' />
         </span>
       ),
@@ -503,10 +481,6 @@ export const BookingPage = ({
     }),
   }
 
-  // The light behind the sheet's top takes the chosen master's colour, slowly; the place's own
-  // until then (the stack cards keep the place's hue either way).
-  const chosenMaster = catalog.specialists.find((specialist) => specialist.id === form.specialistId)
-  const washTint = chosenMaster ? pickTint(chosenMaster.name) : pickTint(business.name)
   // The four steps as thin segments under the top bar, like a story's progress.
   const progress = (['service', 'specialist', 'datetime', 'contacts'] as const).map((step) => ({
     id: step,
@@ -605,12 +579,12 @@ export const BookingPage = ({
   return (
     <div
       className={styles.content}
-      style={{ '--place-tint': pickTint(business.name), '--wash-tint': washTint } as CSSProperties}
+      style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
     >
       <div className={styles.wash} aria-hidden />
       <BookingTopBar business={business} isModal={isModal} progress={progress} />
       <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
-        <div className={styles.steps} data-step-direction={stepTrail.direction}>
+        <div className={styles.steps}>
           {isQuickShown && quickService && (
             <QuickSlots
               title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}

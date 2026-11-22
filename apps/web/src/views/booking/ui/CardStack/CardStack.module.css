@@ -51,8 +51,9 @@
   transform-origin: top center;
   /* A soft settle, no overshoot: a bouncing spring on big cards read as jerky. Only transforms
      move (no filters), so the phone's compositor carries it. */
+  /* Only the moves a finger or a tap asks for glide (a shuffle, the fan): a new card simply
+     appears, no landing or dealing («убери всю лишнюю анимацию»: the sheet dropped frames). */
   transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
-  animation: land 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   will-change: transform;
 }
 
@@ -124,32 +125,6 @@
   transform: translateY(calc(var(--i) * (var(--card-height) + var(--gap))));
 }
 
-/* Opened by hand, the cards are dealt out one after another from the top: each rises a little and
-   settles in its row (the top one too — it never moved before, so the fan looked half-done).
-   «land» stays first in the list so it is not replayed when the stack folds back. */
-.stack[data-dealt] .card {
-  transition-delay: calc(var(--i) * 40ms);
-  animation:
-    land 520ms cubic-bezier(0.22, 1, 0.36, 1) backwards,
-    deal 420ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 40ms) backwards;
-}
-
-/* Already there when the stack mounted: no landing (the placeholder showed them in place). */
-.card[data-mounted] {
-  animation: none;
-}
-
-.stack[data-dealt] .card[data-mounted] {
-  animation: deal 420ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i) * 40ms) backwards;
-}
-
-@keyframes deal {
-  from {
-    translate: 0 -10px;
-    scale: 0.96;
-  }
-}
-
 /* Ticket perforation: a notch cut into each side, like the tear line of the e-ticket. */
 .card::before {
   content: "";
@@ -162,15 +137,6 @@
   mask:
     radial-gradient(circle 7px at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
     radial-gradient(circle 7px at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
-}
-
-/* A new card arrives from the open card below and settles onto the stack. */
-@keyframes land {
-  from {
-    translate: 0 96px;
-    scale: 1.04;
-    opacity: 0;
-  }
 }
 
 .media {

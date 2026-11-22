@@ -7,7 +7,6 @@ import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { PriceQuote, Service } from '@/shared/api/types'
 import { type Translate, useT } from '@/shared/i18n'
-import { RollingText } from '@/shared/ui/RollingText/RollingText'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import type { BookingStepId } from '@/views/booking/model/useBookingForm'
@@ -182,7 +181,7 @@ export const BookingSummary = ({
             {/* The total stays the first line, where it was while steps remained: nothing jumps
                 and nothing runs under the button. */}
             <span className={styles.barPrice}>
-              {total !== null ? <RollingText text={formatPrice(total)} /> : (paidWith?.label ?? '')}
+              {total !== null ? formatPrice(total) : (paidWith?.label ?? '')}
               {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
               <CaretUp className={styles.barChevron} weight='bold' aria-hidden />
             </span>
@@ -247,12 +246,7 @@ export const BookingSummary = ({
             {discount && service && (
               <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
             )}
-            {/* The total rolls like an odometer when an add-on or a discount changes it. */}
-            {total !== null ? (
-              <RollingText text={formatPrice(total)} />
-            ) : (
-              (paidWith?.label ?? t('Онлайн-запись'))
-            )}
+            {total !== null ? formatPrice(total) : (paidWith?.label ?? t('Онлайн-запись'))}
             {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span

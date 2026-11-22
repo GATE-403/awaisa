@@ -1,9 +1,8 @@
 'use client'
 
-import { type CSSProperties, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { prefersLightMotion } from '@/shared/lib/lightMotion'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './TimeRuler.module.css'
 
@@ -96,9 +95,6 @@ export const TimeRuler = ({
   const handleScroll = () => {
     const track = trackRef.current
     if (!track) return
-    // Where the dial is between ticks, for the magnet (CSS only, no re-render per frame). Not on
-    // Android: the variable restyled every tick on every scrolled frame.
-    if (!prefersLightMotion()) track.style.setProperty('--pos', `${track.scrollLeft / TICK_WIDTH}`)
     const index = Math.min(slots.length - 1, Math.max(0, Math.round(track.scrollLeft / TICK_WIDTH)))
     // A detent on every free time the needle crosses, like the system's time wheel (in the app):
     // under the finger and on through the coast after it lets go, at most one per 40 ms.
@@ -205,7 +201,6 @@ export const TimeRuler = ({
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
               data-centered={index === centered || undefined}
-              style={{ '--idx': index } as CSSProperties}
               aria-pressed={slot.time === time}
               disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}

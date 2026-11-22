@@ -173,6 +173,9 @@ test.describe('Cognitive load: booking', () => {
       await page.goto(path)
       // Map tiles keep the network busy; a short wait is enough for the page itself.
       await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => undefined)
+      // The page under the booking sheet goes inert once the sheet has slid up, not before.
+      if (path.endsWith('/book'))
+        await page.locator('[inert]').first().waitFor({ state: 'attached' })
       expect(await countVisiblePrimaryButtons(page), path).toBeLessThanOrEqual(
         LIMITS.visiblePrimaryActions,
       )

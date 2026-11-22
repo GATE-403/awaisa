@@ -6,50 +6,10 @@
 }
 
 .days {
-  /* Holds the day knob, which scrolls with the days. */
-  position: relative;
   margin: 0 calc(-1 * var(--page-gutter));
   padding: 0 var(--page-gutter);
   scroll-padding-inline: var(--page-gutter);
   --edge-fade: 40px;
-}
-
-/* The chosen day's accent fill as one knob that glides (a spring) to the day picked, like the
-   segmented controls' knob; under the days, whose fills are see-through, so it shows on its way.
-   Until it is placed (before scripts) the pressed day keeps its own fill. */
-.dayKnob {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  width: var(--knob-w, 0);
-  height: var(--knob-h, 0);
-  border-radius: var(--radius-lg);
-  background: var(--color-primary);
-  opacity: 0;
-  pointer-events: none;
-  translate: var(--knob-x, 0) var(--knob-y, 0);
-  transition:
-    translate 420ms var(--ease-spring),
-    width 420ms var(--ease-spring);
-}
-
-.days[data-knob] .dayKnob {
-  opacity: 1;
-}
-
-.days > :not(.dayKnob) {
-  z-index: 1;
-}
-
-.days.days[data-knob] > [data-pressed] {
-  background: transparent;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dayKnob {
-    transition: none;
-  }
 }
 
 /* Times are one-line controls: capsules, like every other. */

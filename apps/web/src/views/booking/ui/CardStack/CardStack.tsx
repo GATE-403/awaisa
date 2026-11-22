@@ -48,12 +48,6 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
-  // Cards already there when the stack mounts (the form taking the placeholder's place, a reload)
-  // do not land again; one that leaves («Начать заново») lands when it comes back.
-  const cardIds = cards.map((card) => card.id)
-  const [mountedIds, setMountedIds] = useState(cardIds)
-  const keptIds = mountedIds.filter((id) => cardIds.includes(id))
-  if (keptIds.length !== mountedIds.length) setMountedIds(keptIds)
   // The finger's path lives outside React: written straight to CSS variables once a frame, so a
   // drag never re-renders the form (each re-render cost a dropped frame on phones).
   const gesture = useRef<{
@@ -173,7 +167,6 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
       ref={stackRef}
       className={styles.stack}
       data-fanned={isOpen || undefined}
-      data-dealt={(isFanned && count > 1) || undefined}
       data-movable={canMove || undefined}
       style={{ '--count': count } as CSSProperties}
       onPointerDown={handlePointerDown}
@@ -195,7 +188,6 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
             className={styles.card}
             data-back={!isOpen && !isFront ? '' : undefined}
             data-front={isFront || undefined}
-            data-mounted={mountedIds.includes(card.id) || undefined}
             style={
               {
                 '--i': place,
