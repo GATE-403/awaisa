@@ -81,7 +81,8 @@ test.describe('Reviews after a visit', () => {
     await expect(item).toContainText('Спасибо, ждём снова!')
   })
 
-  test('a review link with a wrong signature opens nothing', async ({ page }) => {
+  test('a review link with a wrong signature opens nothing', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const response = await page.request.get(
       '/api/bookings/00000000-0000-4000-8000-000000000009/review',
       { headers: { 'x-review-signature': 'x'.repeat(22) } },

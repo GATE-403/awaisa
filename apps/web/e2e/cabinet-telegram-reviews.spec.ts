@@ -71,7 +71,9 @@ test.describe('Answering reviews from the owners’ Telegram', () => {
   test('quick reply and «Свой ответ» publish once, from a chat of this business only', async ({
     page,
     browser,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     test.setTimeout(90_000)
     const business = await createOwnBusiness(page)
     await ratedVisit(business, 'E2E Тимур', 2, 5)

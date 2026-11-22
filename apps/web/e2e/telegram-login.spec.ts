@@ -9,7 +9,11 @@ const WEBHOOK_SECRET = 'e2e-webhook-secret'
 // «Войти через Telegram»: the page's token, the bot's /start, the person's own number shared
 // in the chat, then the page's check opens a session on that number.
 test.describe('Sign-in through the Telegram bot', () => {
-  test('a shared number signs the page in once; a forwarded one does not', async ({ page }) => {
+  test('a shared number signs the page in once; a forwarded one does not', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'API only')
     const config = await (await page.request.get('/api/auth/telegram')).json()
     expect(config).toEqual({ isAvailable: true, botUsername: 'awaisa_e2e_bot' })
 
@@ -107,7 +111,8 @@ test.describe('Sign-in through the Telegram bot', () => {
     )
   })
 
-  test('unknown and malformed tokens open nothing', async ({ page }) => {
+  test('unknown and malformed tokens open nothing', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const unknown = randomBytes(32).toString('base64url')
     expect(
       await (

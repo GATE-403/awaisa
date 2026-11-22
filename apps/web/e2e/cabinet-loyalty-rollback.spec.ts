@@ -77,7 +77,9 @@ const certificateBalance = async (page: Page, setup: Setup, code: string) =>
 test.describe('Loyalty and stock come back when a visit is undone', () => {
   test('bonuses, a certificate and money pay one visit; saving it again spends nothing twice; a no-show gives it all back', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     test.setTimeout(90_000)
     const setup = await setUp(page)
     const issued = await page.request.post(`${setup.manage}/loyalty/certificates`, {
@@ -128,7 +130,9 @@ test.describe('Loyalty and stock come back when a visit is undone', () => {
 
   test('a subscription pays a visit whole and earns nothing; back to «Ждём» gives the visit back', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     test.setTimeout(60_000)
     const setup = await setUp(page)
     const plans = await (
@@ -168,7 +172,9 @@ test.describe('Loyalty and stock come back when a visit is undone', () => {
 
   test('«Все пришли» earns bonuses and writes the product off once; «Вернуть» takes both back', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     test.setTimeout(60_000)
     const setup = await setUp(page)
     const first = await pastVisit(setup, 2)

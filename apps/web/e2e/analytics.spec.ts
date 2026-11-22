@@ -35,13 +35,15 @@ test.describe('Cabinet analytics', () => {
     await expect(report30.first()).toBeVisible()
   })
 
-  test('other accounts cannot read the numbers', async ({ page }) => {
+  test('other accounts cannot read the numbers', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     await signInViaApi(page, randomClientPhone())
     const response = await page.request.get('/api/manage/awaisa-studio/analytics')
     expect(response.status()).toBe(403)
   })
 
-  test('only the offered periods are accepted', async ({ page }, testInfo) => {
+  test('only the offered periods are accepted', async ({ page, isMobile }, testInfo) => {
+    test.skip(isMobile, 'API only')
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const response = await page.request.get('/api/manage/awaisa-studio/analytics?days=12')
     expect(response.status()).toBe(400)

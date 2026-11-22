@@ -120,7 +120,9 @@ test.describe('A visit of several services', () => {
 
   test('the API keeps one master for every service and counts the whole visit', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const { manicure, pedicure, aida, bermet } = await setUpNails(page)
     const visit = `serviceId=${manicure.id}&extraServiceIds=${pedicure.id}`
 

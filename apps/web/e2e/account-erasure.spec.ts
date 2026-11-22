@@ -79,7 +79,8 @@ test.describe('Account data: export and deletion', () => {
     expect(kept.rows[0]).toEqual({ customer_id: null })
   })
 
-  test('the only owner of a business cannot delete the account', async ({ page }) => {
+  test('the only owner of a business cannot delete the account', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page)
     const response = await page.request.delete('/api/me')
     expect(response.status()).toBe(409)
