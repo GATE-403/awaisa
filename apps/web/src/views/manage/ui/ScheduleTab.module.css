@@ -129,7 +129,24 @@
 
   .toolbar.toolbar > fieldset label[class][class] {
     height: 44px;
-    min-width: 48px;
+    min-width: 44px;
+  }
+
+  /* Narrow phones (375pt and less) have no room for every glyph at 44pt: the day's glyphs give
+     up to 8pt each (never under 36, their 44pt target kept by the hit area), the view switch and
+     «+» keep their size. */
+  .toolbar.toolbar > [role="group"] {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .toolbar.toolbar > [role="group"] button {
+    flex-shrink: 1;
+    min-width: 36px;
+  }
+
+  .toolbar.toolbar > [role="group"] button::before {
+    inset: -2px min(0px, calc((100% - 44px) / 2));
   }
 }
 
