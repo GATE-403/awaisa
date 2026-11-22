@@ -17,7 +17,7 @@ test.describe('User flow: booking', () => {
     await Promise.all(stored.map(cancelViaApi))
   })
 
-  test('catalog → business → next free slot → booking with the service preselected', async ({
+  test('catalog → business → next free slot → booking opens on that service and time', async ({
     page,
   }) => {
     await page.goto('/')
@@ -28,24 +28,9 @@ test.describe('User flow: booking', () => {
     await expect(page).toHaveURL(/\/awaisa-studio$/)
     await revealNextSlot(page)
     const nextSlot = page.getByRole('complementary', { name: 'Ближайшее окно' })
-
-    await expect(nextSlot.getByText(/^(Сегодня|Завтра), \d{2}:\d{2}$|появятся скоро/)).toBeVisible()
-    await nextSlot.getByRole('link', { name: /^Записаться/ }).click()
-
-    await expect(page).toHaveURL(/\/book\?service=/)
-    const steps = bookingSteps(page)
-    // The chosen service already lies in the stack of done cards.
-    await expect(steps.service).toBeVisible()
-    await expect(primaryAction(page)).toHaveText(/^(Выбрать (мастера|время)|Ввести контакты)$/)
-  })
-
-  test('a time shown on the business page is the time the booking opens with', async ({ page }) => {
-    await page.goto('/awaisa-studio')
-    await revealNextSlot(page)
-    const card = page
-      .getByRole('complementary', { name: 'Ближайшее окно' })
-      .getByRole('link', { name: /^Записаться на/ })
+    await expect(nextSlot.getByText(/^(Сегодня|Завтра), \d{2}:\d{2}$/)).toBeVisible()
     // The card links to its time once the first free slot is known.
+    const card = nextSlot.getByRole('link', { name: /^Записаться на/ })
     await expect(card).toHaveAttribute('href', /time=\d{2}:\d{2}/)
     const href = (await card.getAttribute('href')) ?? ''
     const time = new URL(href, 'http://local').searchParams.get('time') ?? ''
@@ -53,8 +38,11 @@ test.describe('User flow: booking', () => {
 
     await expect(page).toHaveURL(/\/book\?service=.*time=/)
     const steps = bookingSteps(page)
+    // Service and time already lie in the stack of done cards: only the contacts are asked.
+    await expect(steps.service).toBeVisible()
     await expect(steps.datetime).toContainText(time)
     await expect(steps.contacts.getByLabel('Имя')).toBeVisible()
+    await expect(primaryAction(page)).toHaveText(/^(Ввести контакты|Записаться)$/)
   })
 
   test('full booking: service → master → time → contacts → ticket → cancel', async ({ page }) => {

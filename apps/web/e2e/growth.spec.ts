@@ -53,7 +53,9 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
 
   test('funnel steps and errors are kept; only platform admins read them', async ({
     page,
+    isMobile,
   }, testInfo) => {
+    test.skip(isMobile, 'API only')
     const session = `e2e-${Math.random().toString(36).slice(2, 12)}`
     const events = await page.request.post('/api/telemetry/events', {
       data: {
@@ -90,7 +92,9 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
 
   test('each flow has its own funnel, read for one kind of device; signals keep codes only', async ({
     page,
+    isMobile,
   }, testInfo) => {
+    test.skip(isMobile, 'API only')
     const session = `e2e-${Math.random().toString(36).slice(2, 12)}`
     const device = {
       type: 'phone',

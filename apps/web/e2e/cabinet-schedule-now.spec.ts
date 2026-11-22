@@ -1,11 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
-import {
-  bishkekDay,
-  createOwnBusiness,
-  createVisit,
-  type OwnBusiness,
-  type Visit,
-} from './business'
+import { bishkekDay, createOwnBusiness, type Visit } from './business'
+import { board, book, visitCard } from './schedule'
 import { withDb } from './visits'
 
 // What the schedule shows about «now» is worked out in the browser (`useToday`): with the page's
@@ -28,19 +23,6 @@ const placeAt = async (visit: Visit, date: string, time: string) => {
   )
   return { ...visit, date, time }
 }
-
-const book = (business: OwnBusiness, name: string) =>
-  createVisit({
-    slug: business.slug,
-    serviceId: business.service.id,
-    specialistId: business.master.id,
-    name,
-  })
-
-const board = (page: Page) => page.locator('[data-schedule-board]')
-
-const visitCard = (page: Page, name: string) =>
-  board(page).getByRole('button', { name: new RegExp(`, ${name}, `) })
 
 test.describe('Schedule around «now»', () => {
   test('NowBar names who is in the chair and who is next; cards say «Сейчас» and «Не отмечен»', async ({

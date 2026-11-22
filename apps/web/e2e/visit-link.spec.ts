@@ -1,13 +1,11 @@
 import { createHmac } from 'node:crypto'
 import { expect, test } from '@playwright/test'
-import { adminPhone, randomClientPhone, signInViaApi } from './account'
-import { API_URL, bookingSteps, pickFirstFreeSlot } from './helpers'
-import './visits'
+import { adminPhone, signInViaApi } from './account'
+import { bookingSteps, pickFirstFreeSlot } from './helpers'
+import { bookAhead } from './visits'
 
 const SLUG = 'awaisa-studio'
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
-
-type Slot = { time: string; isAvailable: boolean }
 
 // The link the confirmation SMS carries.
 const visitPath = (id: string) =>
@@ -16,44 +14,11 @@ const visitPath = (id: string) =>
     .digest('base64url')
     .slice(0, 22)}`
 
-const bookAhead = async () => {
-  const business = await (await fetch(`${API_URL}/businesses/${SLUG}`)).json()
-  const specialist = business.catalog.specialists[2]
-  const serviceId = specialist.serviceIds[0]
-  for (let offset = 2; offset <= 14; offset += 1) {
-    const date = new Date(Date.now() + offset * 86_400_000 + 6 * 3_600_000)
-      .toISOString()
-      .slice(0, 10)
-    const { slots } = await (
-      await fetch(
-        `${API_URL}/availability?serviceId=${serviceId}&specialistId=${specialist.id}&date=${date}`,
-      )
-    ).json()
-    const free = (slots as Slot[]).find((slot) => slot.isAvailable)
-    if (!free) continue
-    const response = await fetch(`${API_URL}/bookings`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        serviceId,
-        specialistId: specialist.id,
-        date,
-        time: free.time,
-        name: 'E2E Ссылка',
-        phone: randomClientPhone(),
-        smsConfirmation: false,
-      }),
-    })
-    return response.json()
-  }
-  throw new Error('No free day to book')
-}
-
 test.describe('Client flow from outside the site', () => {
   test('the SMS link keeps the visit on the phone and lets the client cancel it', async ({
     page,
   }) => {
-    const booking = await bookAhead()
+    const booking = await bookAhead({ specialistIndex: 2, name: 'E2E Ссылка' })
     await page.goto(visitPath(booking.id))
     await expect(page).toHaveURL(/\/bookings$/)
     const ticket = page.getByRole('article', { name: /^Запись / }).first()
@@ -69,7 +34,7 @@ test.describe('Client flow from outside the site', () => {
   })
 
   test('a link with a wrong signature opens nothing', async ({ page }) => {
-    const booking = await bookAhead()
+    const booking = await bookAhead({ specialistIndex: 2, name: 'E2E Ссылка' })
     await page.goto(`/v/${booking.id}?s=${'x'.repeat(22)}`)
     await expect(page.getByRole('heading', { name: /Ссылка не открылась/ })).toBeVisible()
   })

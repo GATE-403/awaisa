@@ -203,7 +203,9 @@ test.describe('UX: guidance and feedback', () => {
     await expect(steps.specialist).toContainText('Айгерим Садыкова')
   })
 
-  test('success screen gives next steps: calendar, route, my bookings', async ({ page }) => {
+  test('success screen gives next steps: calendar, route, my bookings, more to look at', async ({
+    page,
+  }) => {
     await mockCreateBooking(page, succeed)
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
@@ -219,6 +221,21 @@ test.describe('UX: guidance and feedback', () => {
     const screen = page.locator('[data-booking-screen]')
     await expect(screen.getByRole('link', { name: 'Маршрут' })).toBeVisible()
     await expect(screen.getByRole('link', { name: 'Мои записи' })).toBeVisible()
+
+    // «Вам может понравиться» offers the next thing to look at, not the visit just booked.
+    const shelf = screen.getByRole('region', { name: 'Вам может понравиться' })
+    await shelf.scrollIntoViewIfNeeded()
+    const picks = shelf.getByRole('listitem').getByRole('link')
+    await expect(picks.first()).toHaveAttribute('href', /\/book\?service=/)
+    for (const href of await picks.evaluateAll((links) =>
+      links.map((link) => link.getAttribute('href') ?? ''),
+    )) {
+      expect(href).not.toMatch(/\/awaisa-studio\/book\?service=styling$/)
+    }
+    await expect(screen.getByRole('link', { name: 'Все места и услуги ›' })).toHaveAttribute(
+      'href',
+      '/',
+    )
   })
 })
 
