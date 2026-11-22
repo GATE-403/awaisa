@@ -202,6 +202,11 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 id='panel-history'
                 aria-labelledby='tab-history'
               >
+                {/* Like the «Пора снова» SMS: services whose usual gap has come, one tap from
+                    booking again. Nothing due, nothing drawn. */}
+                {history.length > 0 && (
+                  <ForYouShelf title={t('Пора снова')} surface='due' isOnlyDue />
+                )}
                 {history.length > 0 ? (
                   <BookingHistory
                     bookings={history}
