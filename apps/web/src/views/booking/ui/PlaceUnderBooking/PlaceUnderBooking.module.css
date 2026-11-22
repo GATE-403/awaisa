@@ -1,4 +1,12 @@
-/* The attribute lives only for the second it takes to go back (`stopReturning`). */
+/* The attribute lives only while a reload goes back (`stopReturning`). */
 :global(html[data-booking-returning]) .place {
-  visibility: hidden;
+  display: none;
+}
+
+.catalog {
+  display: none;
+}
+
+:global(html[data-booking-returning="catalog"]) .catalog {
+  display: block;
 }

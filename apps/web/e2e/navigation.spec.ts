@@ -148,7 +148,15 @@ test.describe('Moving around the app', () => {
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
 
     const bookingUrl = page.url()
+    // A slow catalog after the reload: while it comes back, its skeleton stands under the sheet
+    // (the place hidden and nothing in its place left an empty screen under the header).
+    await page.route(/\/\?kind=barber&_rsc=/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await route.continue()
+    })
     await page.reload()
+    await expect(page.locator('[data-page-skeleton]').first()).toBeVisible()
+    await page.unroute(/\/\?kind=barber&_rsc=/)
     await expect(page).toHaveURL(bookingUrl)
     await expect(bookingSheet(page)).toBeVisible()
     // The catalog, not the place's page, is under the sheet again.
