@@ -2,7 +2,7 @@
 
 import { ArrowRight, MagnifyingGlass, NavigationArrow, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
@@ -14,6 +14,7 @@ import { getKindLabel } from '@/shared/config/platform'
 import { useT } from '@/shared/i18n'
 import { useMyPlace } from '@/shared/lib/myPlace'
 import { trackStep } from '@/shared/lib/telemetry'
+import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
 import styles from './HeaderSearch.module.css'
 
 const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Окрашивание', 'Массаж', 'Брови']
@@ -63,18 +64,22 @@ const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
     .map(({ name, minPrice, places }) => ({ name, minPrice, places }))
 }
 
+interface HeaderSearchFieldProps {
+  /** What the catalog searched for (`?q=` on «/»), shown in the field. */
+  urlQuery: string
+}
+
 // The store's search field lives in the header, like on a marketplace: type, see places, press Enter.
-export const HeaderSearch = () => {
+const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) => {
   const t = useT()
   const myPlace = useMyPlace()
   const [isPicking, setIsPicking] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
   const router = useRouter()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const listId = useId()
   const rootRef = useRef<HTMLDivElement>(null)
-  const urlQuery = pathname === '/' ? (searchParams.get('q') ?? '') : ''
+  const urlQuery = pathname === '/' ? catalogQuery : ''
   const [draft, setDraft] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [suggestions, setSuggestions] = useState<BusinessCard[]>([])
@@ -329,3 +334,8 @@ export const HeaderSearch = () => {
     </div>
   )
 }
+
+// The query is read only on the catalog, so the field stays in the cached HTML of other pages.
+export const HeaderSearch = () => (
+  <CatalogQuery>{(query) => <HeaderSearchField urlQuery={query?.get('q') ?? ''} />}</CatalogQuery>
+)
