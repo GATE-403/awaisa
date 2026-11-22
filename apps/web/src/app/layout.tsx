@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import '@awaisa/tokens/tokens.css'
 import '@awaisa/ui/styles.css'
 import '@/shared/styles/shell.css'
+import { ChannelTracker } from '@/features/bookingChannel'
 import { ResumeBooking } from '@/features/bookingDraft'
 import { InviteRefCapture } from '@/features/invite'
 import { PLATFORM } from '@/shared/config/platform'
@@ -84,6 +85,7 @@ const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
             <TabBar />
             <ResumeBooking />
             <InviteRefCapture />
+            <ChannelTracker />
             <ErrorReporter />
             <BookingOriginTracker />
           </Suspense>

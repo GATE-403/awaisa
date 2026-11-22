@@ -821,6 +821,8 @@ type MasterDay = {
   bookings: AdminBooking[]
   /** How many clients follow the master; who they are stays private. */
   followers: number
+  /** Work photos of the master's visits: the last seven days' share, and the day's visits that have one. */
+  photos: { weekVisits: number; weekWithPhoto: number; bookingIds: string[] }
 }
 
 /** A master the signed-in client follows (`GET /me/follows`). */
@@ -836,6 +838,13 @@ type FollowedMaster = {
 }
 
 type SlugCheck = { available: boolean; reason?: string }
+
+/**
+ * Where an online booking came from: the discovery surface the client last used before booking
+ * in that browser session (the catalog, «Для вас», «Образы», search, the map), or the salon's
+ * own link when the session began on its page. `other`: none of these.
+ */
+type BookingChannel = 'catalog' | 'for_you' | 'feed' | 'search' | 'map' | 'salon_link' | 'other'
 
 type CreateBookingInput = {
   serviceId: string
@@ -859,6 +868,7 @@ type CreateBookingInput = {
   subscriptionId?: string
   /** Buy this online plan and book: the booking waits for the payment like a deposit. */
   subscriptionPlanId?: string
+  channel?: BookingChannel
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -1188,6 +1198,8 @@ type FeedItem = {
   /** Likes from devices («Нравится»); the feed is cached, so a fresh like adds on the client. */
   likes?: number
   /** Reviews of this service with this master (or the service at the place). */
+  /** A client's own photo from their review, not the salon's. */
+  isFromClient?: boolean
   reviewsCount?: number
 }
 
@@ -1656,6 +1668,23 @@ type FunnelSegmentsReport = {
   items: { dimension: keyof FunnelSegment; value: string; sessions: number }[]
 }
 
+/**
+ * `GET /telemetry/strategy?days`: whether the platform's strategy works. Businesses that run
+ * their day in the cabinet, where online bookings come from, and whether clients come back.
+ */
+type StrategyReport = {
+  days: number
+  /** Per week (Monday, Bishkek), businesses that marked at least one visit's outcome. */
+  activeBusinesses: { week: string; count: number }[]
+  /** Online bookings made in the period, by channel; bookings from before channels are `other`. */
+  channels: { channel: BookingChannel; bookings: number }[]
+  /**
+   * Clients whose first online booking fell in the period shifted back 60 days, and how many of
+   * them booked online again within 60 days of it. `share` is null without such clients.
+   */
+  repeat: { clients: number; returned: number; share: number | null }
+}
+
 // Small answers named once, so the API and the web read the same shape.
 type FeedLikes = { likes: number }
 
@@ -1910,6 +1939,8 @@ type BillingExtendInput = { planKey: string; months?: number; isLifetime?: boole
 
 export type {
   MasterSuggestion,
+  BookingChannel,
+  StrategyReport,
   FollowedMaster,
   CertificateOrderCreated,
   CertificateOrderInput,

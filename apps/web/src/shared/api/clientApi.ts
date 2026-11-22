@@ -137,6 +137,7 @@ import type {
   StockItem,
   StockItemInput,
   StockReceiveInput,
+  StrategyReport,
   SubscriptionPlan,
   SubscriptionPlanInput,
   TeamMember,
@@ -339,6 +340,9 @@ const getFunnelSignals = (days: number, signal?: AbortSignal) =>
 
 const getFunnelSegments = (days: number, signal?: AbortSignal) =>
   request<FunnelSegmentsReport>(`/telemetry/segments?days=${days}`, { signal })
+
+const getStrategyReport = (days: number, signal?: AbortSignal) =>
+  request<StrategyReport>(`/telemetry/strategy?days=${days}`, { signal })
 
 const getTelegramLoginConfig = (signal?: AbortSignal) =>
   request<TelegramLoginConfig>('/auth/telegram', { signal })
@@ -699,6 +703,9 @@ const unfollowMaster = (specialistId: string) =>
 const addVisitPhoto = (slug: string, bookingId: string, file: File) =>
   upload<UploadedPhoto>(`/master/${slug}/photos`, file, { bookingId })
 
+const addBookingPhoto = (slug: string, bookingId: string, file: File) =>
+  upload<UploadedPhoto>(`/manage/${slug}/bookings/${bookingId}/photo`, file)
+
 const getFeed = (
   query: {
     kind?: string
@@ -1035,6 +1042,7 @@ export {
   getBilling,
   getFunnelReport,
   getFunnelSegments,
+  getStrategyReport,
   getModerationLog,
   getModerationQueue,
   decideModeration,
@@ -1070,6 +1078,7 @@ export {
   searchAddress,
   reverseAddress,
   updateWorkPhoto,
+  addBookingPhoto,
   addVisitPhoto,
   followMaster,
   listFollows,
