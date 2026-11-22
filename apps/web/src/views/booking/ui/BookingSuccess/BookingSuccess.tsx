@@ -4,7 +4,7 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
 import { CalendarPlus, Check, MapPin } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCalendarFile, formatPrice, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { FollowButton } from '@/features/followMaster'
@@ -15,7 +15,12 @@ import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { LightWave, type Point } from '@/shared/ui/LightWave/LightWave'
 import styles from './BookingSuccess.module.css'
+
+// The wave and its fade; then the canvas leaves the page and gives its memory back.
+const WAVE_MS = 1500
+const RIPPLE_MS = WAVE_MS + 1400
 
 interface BookingSuccessProps {
   booking: Booking
@@ -35,18 +40,37 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
   const t = useT()
   const session = useSession()
   const [isTicketOpen, setIsTicketOpen] = useState(false)
+  const pondRef = useRef<HTMLDivElement>(null)
+  const checkRef = useRef<HTMLSpanElement>(null)
   const hasTapped = useRef(false)
+  const [isRippling, setIsRippling] = useState(true)
+  const [drop, setDrop] = useState<Point | null>(null)
+
+  // The light starts at the check and runs to the farthest corner of the sheet: the one effect
+  // kept on this screen (the owner's choice; the check, rings and rising lines stay still).
+  useLayoutEffect(() => {
+    const pond = pondRef.current
+    const check = checkRef.current
+    if (!pond || !check) return
+    const area = pond.getBoundingClientRect()
+    const mark = check.getBoundingClientRect()
+    setDrop({
+      x: (mark.left + mark.width / 2 - area.left) / area.width,
+      y: (mark.top + mark.height / 2 - area.top) / area.height,
+    })
+  }, [])
 
   // Booked is felt once: one firm tap (Taptic in the app, a short buzz in browsers that can
-  // vibrate). No light or motion on screen: they cost frames on phones. The ref keeps React's dev
-  // double-run from tapping twice.
+  // vibrate). The ref keeps React's dev double-run from tapping twice.
   useEffect(() => {
+    const timer = window.setTimeout(() => setIsRippling(false), RIPPLE_MS)
     const isCalm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (!hasTapped.current && !isCalm) {
       if (getNativeApp()) haptic('impact')
       else navigator.vibrate?.(30)
     }
     hasTapped.current = true
+    return () => window.clearTimeout(timer)
   }, [])
 
   const price = booking.price - (booking.discount?.amount ?? 0)
@@ -64,8 +88,13 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
   return (
     <div className={styles.success}>
       {/* A confirmation like Apple Pay's: a green check, the words, then the one fact that
-          matters — when. */}
-      <span className={styles.check} aria-hidden>
+          matters — when. A wave of light runs out from the check over the sheet. */}
+      {isRippling && (
+        <div ref={pondRef} className={styles.pond} aria-hidden>
+          {drop && <LightWave origin={drop} duration={WAVE_MS} />}
+        </div>
+      )}
+      <span ref={checkRef} className={styles.check} aria-hidden>
         <Check weight='bold' />
       </span>
       <h1 className={styles.title}>{t('Вы записаны')}</h1>
