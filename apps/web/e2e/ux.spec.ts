@@ -28,13 +28,27 @@ test.describe('UX: guidance and feedback', () => {
     await expect(action).toBeEnabled()
     // The action names the next thing to do instead of a bare «Далее».
     await expect(action).toHaveText('Выбрать услугу')
+    // Already on that step, the press still answers: its choices shake (it looked like nothing
+    // happened). The shake is short, so the moment it starts is caught, not looked for after.
+    await steps.service.evaluate((step) => {
+      const state = window as unknown as { stepNudged?: boolean }
+      new MutationObserver(() => {
+        if (step.hasAttribute('data-nudge')) state.stepNudged = true
+      }).observe(step, { attributes: true, attributeFilter: ['data-nudge'] })
+    })
     await action.click()
     await expect(steps.service).toBeInViewport()
+    await expect
+      .poll(() => page.evaluate(() => (window as unknown as { stepNudged?: boolean }).stepNudged))
+      .toBe(true)
 
+    // On the masters the action does something real: it takes «Любой, кто свободен» and the
+    // time comes next («Выбрать мастера» only pointed at the cards already on screen).
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    await expect(action).toHaveText('Выбрать мастера')
+    await expect(action).toHaveText('Любой мастер')
     await action.click()
-    await expect(steps.specialist).toBeInViewport()
+    await expect(steps.specialist).toContainText('Любой мастер')
+    await expect(action).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
   })
 
   test('the main action stays on screen at every step on phones', async ({ page, isMobile }) => {
@@ -162,27 +176,31 @@ test.describe('UX: guidance and feedback', () => {
 
     await expect(steps.service.getByRole('radio')).toHaveCount(0)
     await expect(steps.service).toContainText('Маникюр с покрытием')
+    // Reopened from its ticket it is the visit's own list: the service is ticked.
     await editStep(page, 'service')
-    await expect(steps.service.getByRole('radio', { name: /Маникюр/ })).toBeChecked()
-    // Tapping the chosen card again changes nothing and closes the step.
-    await steps.service.getByRole('radio', { name: /Маникюр/ }).click()
-    await expect(steps.service.getByRole('radio')).toHaveCount(0)
+    const chosen = steps.service.getByRole('checkbox', { name: /Маникюр с покрытием/ })
+    await expect(chosen).toBeChecked()
+    // Unticking the visit's only service changes nothing and closes the step.
+    await chosen.click()
+    await expect(steps.service.getByRole('checkbox')).toHaveCount(0)
     await expect(steps.service).toContainText('Маникюр с покрытием')
   })
 
-  test('changing the service keeps a compatible master but drops the chosen time', async ({
-    page,
-  }) => {
+  test('changing the services keeps a master who does them', async ({ page }) => {
     await page.goto('/awaisa-studio/book?service=haircut-women')
     const steps = bookingSteps(page)
     await steps.specialist.getByRole('radio', { name: /Айгерим/ }).click()
     await pickFirstFreeSlot(page)
 
+    // Another service instead: tick it, untick the first one, «Готово».
     await editStep(page, 'service')
-    await steps.service.getByRole('radio', { name: /Укладка/ }).click()
+    await steps.service.getByRole('checkbox', { name: /Укладка/ }).click()
+    await steps.service.getByRole('checkbox', { name: /Женская стрижка/ }).click()
+    await page.getByRole('button', { name: 'Готово' }).filter({ visible: true }).click()
 
+    await expect(steps.service).toContainText('Укладка')
+    await expect(steps.service).not.toContainText('Женская стрижка')
     await expect(steps.specialist).toContainText('Айгерим Садыкова')
-    await expect(steps.datetime.getByRole('button', { name: 'Изменить' })).toHaveCount(0)
   })
 
   test('success screen gives next steps: calendar, route, my bookings, more to look at', async ({

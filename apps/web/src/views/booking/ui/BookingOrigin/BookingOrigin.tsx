@@ -40,6 +40,8 @@ export const BookingOriginTracker = () => {
 // Once per page load: Strict Mode runs effects twice, and two steps back would leave the site.
 // Set when the step back is taken, not when it is planned: the first run's cleanup cancels it.
 let hasChecked = false
+// The step back has been taken and the place's page is hidden until the page under it is back.
+let isGoingBack = false
 
 // The full /<slug>/book route: a reload of a booking opened over the catalog used to land on the
 // place's page under the sheet. The page it was opened over is still the entry before this one,
@@ -68,8 +70,8 @@ export const BookingReturnOnReload = () => {
       // The sheet was on screen before the reload: it comes back in place, without rising again.
       noteSheetAlreadyUp()
       router.push(href, { scroll: false })
-      // By then Activity has hidden this route with the place's page, so the mark can go.
-      window.setTimeout(stopReturning, 1000)
+      // Should the page never come back (an error), the place shows again after a while.
+      window.setTimeout(stopReturning, 10_000)
     }
     // A task later on both ends: this effect runs before the app router's own (children first),
     // which is where Next starts listening for «back»; and once back, Next handles the step in its
@@ -77,11 +79,24 @@ export const BookingReturnOnReload = () => {
     // could slip past Next under load and the place's sheet stayed beside the new one.
     const goBack = window.setTimeout(() => {
       hasChecked = true
+      isGoingBack = true
       window.addEventListener('popstate', () => window.setTimeout(reopen, 0), { once: true })
       window.history.back()
     }, 0)
     return () => window.clearTimeout(goBack)
   }, [router])
+
+  // The mark (the place hidden, the catalog's skeleton shown) goes when the page under the sheet
+  // is really back: Activity hides this route then and runs this cleanup. On a timer it went
+  // before a slow catalog arrived, and the screen under the header was empty.
+  useEffect(
+    () => () => {
+      if (!isGoingBack) return
+      isGoingBack = false
+      stopReturning()
+    },
+    [],
+  )
 
   return (
     <div

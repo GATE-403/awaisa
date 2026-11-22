@@ -1,7 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { adminPhone, signInViaApi } from './account'
 import { mockCreateBooking, succeed } from './fixtures'
-import { bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
+import { bookingSteps, primaryAction, submitBooking } from './helpers'
 
 const SLUG = 'lumiere-salon'
 
@@ -18,9 +18,8 @@ const isSamePage = (page: Page) =>
 // still be on screen for a frame beside it.
 const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Запись', level: 1 }).last()
 
-// A service card a few rows down (the third row of four columns), scrolled to the middle of the
-// screen. Looking for «any card wholly on screen» after a fixed scroll found none on CI (other card
-// heights) and clicked nothing.
+// A service card a few rows down (the third row of four columns), scrolled to the middle of the screen. Looking for «any card
+// wholly on screen» after a fixed scroll found none on CI (other card heights) and clicked nothing.
 const bookingCardInMiddle = async (page: Page) => {
   const card = page
     .getByRole('article', { name: /, / })
@@ -148,7 +147,15 @@ test.describe('Moving around the app', () => {
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
 
     const bookingUrl = page.url()
+    // A slow catalog after the reload: while it comes back, its skeleton stands under the sheet
+    // (the place hidden and nothing in its place left an empty screen under the header).
+    await page.route(/\/\?kind=barber&_rsc=/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      await route.continue()
+    })
     await page.reload()
+    await expect(page.locator('[data-page-skeleton]').first()).toBeVisible()
+    await page.unroute(/\/\?kind=barber&_rsc=/)
     await expect(page).toHaveURL(bookingUrl)
     await expect(bookingSheet(page)).toBeVisible()
     // The catalog, not the place's page, is under the sheet again.
@@ -161,8 +168,13 @@ test.describe('Moving around the app', () => {
   })
 
   test('booking from far down the catalog leaves the catalog where it was', async ({ page }) => {
-    // The booking itself is answered by a stub: nothing lands in the shared data.
+    // The booking itself is answered by a stub: nothing lands in the shared data. So are the free
+    // times: one at 12:00 on whatever day is asked for.
     await mockCreateBooking(page, succeed)
+    await page.route('**/api/availability**', (route) => {
+      const date = new URL(route.request().url()).searchParams.get('date')
+      return route.fulfill({ json: { date, slots: [{ time: '12:00', isAvailable: true }] } })
+    })
     await page.goto('/')
     const card = await bookingCardInMiddle(page)
     // Where the card is on screen: the first booking also drops the first-visit line from the top
@@ -172,10 +184,15 @@ test.describe('Moving around the app', () => {
     await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
 
+    // Through the main action, which does something real on each step: «Любой мастер» on the
+    // masters (only when there are several to choose from), then the free time under the ruler.
+    // A free time is stubbed: walking the real days clicked day cards under the fixed bar on CI.
+    const action = primaryAction(page)
+    await expect(action).toHaveText(/^(Любой мастер|Выбрать \d{2}:\d{2}|Выбрать время)$/)
+    if ((await action.textContent()) === 'Любой мастер') await action.click()
+    await expect(action).toHaveText(/^Выбрать \d{2}:\d{2}$/)
+    await action.click()
     const steps = bookingSteps(page)
-    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
-    if (await anyMaster.isVisible()) await anyMaster.click()
-    await pickFirstFreeSlot(page)
     await steps.contacts.getByLabel('Имя').fill('E2E Тест')
     await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
     await submitBooking(page)

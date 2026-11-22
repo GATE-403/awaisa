@@ -40,7 +40,35 @@
   min-width: 0;
 }
 
+/* The main action pressed while this step is still open: its choices give a short shake, so the
+   press visibly answers «choose here» (the button itself is never disabled). Only `translate`. */
+.step[data-nudge] .body {
+  animation: nudge 420ms var(--ease-standard);
+}
+
+@keyframes nudge {
+  20% {
+    translate: -8px 0;
+  }
+
+  40% {
+    translate: 7px 0;
+  }
+
+  60% {
+    translate: -5px 0;
+  }
+
+  80% {
+    translate: 3px 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .step[data-nudge] .body {
+    animation: none;
+  }
+
   .step {
     animation: none;
   }

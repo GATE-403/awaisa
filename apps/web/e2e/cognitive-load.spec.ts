@@ -192,7 +192,8 @@ test.describe('Cognitive load: booking', () => {
     await expect(action).toHaveText('Выбрать услугу')
     await expect(hint).toHaveText('Шаг 1 из 4')
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    await expect(action).toHaveText('Выбрать мастера')
+    // On the masters the action takes the usual choice and says so.
+    await expect(action).toHaveText('Любой мастер')
     await expect(hint).toHaveText('Шаг 2 из 4')
     await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
     // On the time step the action offers the time under the ruler's needle.
@@ -231,9 +232,10 @@ test.describe("Tesler's law: the system takes the complexity it can", () => {
       await expect(bookingSteps(page).specialist, query).toContainText(firstName)
     }
 
-    // Several masters: now there is something to choose, and the step asks.
+    // Several masters: now there is something to choose, and the step asks; its action offers
+    // the usual choice, «Любой мастер».
     await page.goto(`/${SLUG}/book?service=${shared.id}`)
-    await expect(primaryAction(page)).toHaveText('Выбрать мастера')
+    await expect(primaryAction(page)).toHaveText('Любой мастер')
     expect(await bookingSteps(page).specialist.getByRole('radio').count()).toBeGreaterThan(1)
 
     // One branch: no «Куда приедете?» question at all.
