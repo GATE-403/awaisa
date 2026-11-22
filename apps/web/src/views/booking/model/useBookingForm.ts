@@ -554,8 +554,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       haptic('success')
       // No toast: the success screen is the confirmation, and a toast on top of it covered its
       // «Вы записаны» exactly when a first-time client looks for it.
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      // The booking sheet scrolls inside itself: bring its top («Вы записаны») into view too.
+      // The sheet scrolls inside itself: bring its top («Вы записаны») into view. Never the window:
+      // the sheet lies over the page it was opened from, and scrolling the window threw the
+      // catalog under it back to its top.
       requestAnimationFrame(() =>
         document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' }),
       )

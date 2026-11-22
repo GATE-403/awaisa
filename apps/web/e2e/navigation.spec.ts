@@ -1,5 +1,7 @@
 import { expect, type Page, test } from '@playwright/test'
 import { adminPhone, signInViaApi } from './account'
+import { mockCreateBooking, succeed } from './fixtures'
+import { bookingSteps, pickFirstFreeSlot, submitBooking } from './helpers'
 
 const SLUG = 'lumiere-salon'
 
@@ -152,6 +154,41 @@ test.describe('Moving around the app', () => {
     await page.getByRole('link', { name: 'Закрыть запись' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '?kind=barber')
     await expect(bookingSheet(page)).toHaveCount(0)
+  })
+
+  test('booking from far down the catalog leaves the catalog where it was', async ({ page }) => {
+    // The booking itself is answered by a stub: nothing lands in the shared data.
+    await mockCreateBooking(page, succeed)
+    await page.goto('/')
+    const cards = page.getByRole('article', { name: /, / })
+    await expect(cards.nth(11)).toBeAttached()
+    await page.evaluate(() => window.scrollTo({ top: 700, behavior: 'instant' }))
+    await page.waitForTimeout(500)
+    const inView = await cards.evaluateAll((nodes) =>
+      nodes.findIndex((node) => {
+        const box = node.getBoundingClientRect()
+        return box.top > 200 && box.bottom < window.innerHeight - 100
+      }),
+    )
+    const card = cards.nth(inView)
+    // Where the card is on screen: the first booking also drops the first-visit line from the top
+    // of the catalog, and the browser keeps what is on screen in place by moving the scroll.
+    const topOnScreen = async () => Math.round((await card.boundingBox())?.y ?? -1)
+    const before = await topOnScreen()
+    await card.getByRole('link').first().click()
+    await expect(bookingSheet(page)).toBeVisible()
+
+    const steps = bookingSteps(page)
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    if (await anyMaster.isVisible()) await anyMaster.click()
+    await pickFirstFreeSlot(page)
+    await steps.contacts.getByLabel('Имя').fill('E2E Тест')
+    await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
+    await submitBooking(page)
+    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    // The success screen used to scroll the window, and the catalog under the sheet jumped up.
+    await page.waitForTimeout(800)
+    expect(Math.abs((await topOnScreen()) - before)).toBeLessThanOrEqual(2)
   })
 
   test('the sheet rises once: one sheet from the tap to the form, filled in place', async ({
