@@ -35,7 +35,7 @@ export class ClientsService {
    * order (`client-segments.ts`), with every segment's size for the tabs. Grouped in SQL, cut in
    * code: a business's base is thousands of rows at most.
    */
-  async list(business: Business, { q, segment, sort, limit }: ClientsQuery) {
+  async list(business: Business, { q, segment, sort, limit }: ClientsQuery, canSeeMoney: boolean) {
     const search = `%${q.replace(/[%_]/g, '')}%`
     const rows = (await this.dataSource.query(
       `SELECT b."customer_phone" AS "phone",
@@ -78,18 +78,25 @@ export class ClientsService {
       birthday: (row.birthday as string | null) ?? null,
     }))
     const now = new Date()
+    // Ordering by spend would tell an administrator who pays most without the figures.
+    const order = !canSeeMoney && sort === 'spent' ? 'recent' : sort
     const { items, counts } = segmentClients(
       clients,
       segment,
-      sort,
+      order,
       now,
       toBusinessParts(now).dateKey,
     )
+    const shown = items.slice(0, limit)
 
-    return { items: items.slice(0, limit), counts, lapsedDays: LAPSED_DAYS }
+    return {
+      items: canSeeMoney ? shown : shown.map((client) => ({ ...client, spent: null })),
+      counts,
+      lapsedDays: LAPSED_DAYS,
+    }
   }
 
-  async get(business: Business, rawPhone: string) {
+  async get(business: Business, rawPhone: string, canSeeMoney: boolean) {
     const phone = this.toPhone(rawPhone)
     const history = (await this.dataSource.query(
       `SELECT b."id", b."starts_at" AS "startsAt", b."status", b."outcome", b."paid_amount" AS "paidAmount",
@@ -137,8 +144,12 @@ export class ClientsService {
         visits: visits.length,
         noShows: history.filter((row) => row.outcome === 'no_show').length,
         cancellations: history.filter((row) => row.status === 'cancelled').length,
-        spent,
-        averageCheck: visits.length === 0 ? 0 : Math.round(spent / visits.length),
+        spent: canSeeMoney ? spent : null,
+        averageCheck: canSeeMoney
+          ? visits.length === 0
+            ? 0
+            : Math.round(spent / visits.length)
+          : null,
         firstVisit: toDate(visits.at(-1)?.startsAt),
         lastVisit: toDate(visits[0]?.startsAt),
         nextVisit: toDate(upcoming?.startsAt),

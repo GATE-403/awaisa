@@ -227,7 +227,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
           <Select
             variant='plain'
             aria-label='Сортировка'
-            items={SORTS}
+            items={canSeeMoney ? SORTS : SORTS.filter((item) => item.value !== 'spent')}
             value={sort}
             onValueChange={(value) => value && setSort(value)}
             className={styles.sort}
@@ -292,7 +292,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
                     </span>
                   </span>
                   <span className={styles.spent}>
-                    {canSeeMoney && client.spent > 0 ? formatPrice(client.spent) : ''}
+                    {client.spent ? formatPrice(client.spent) : ''}
                   </span>
                   <CaretRight weight='bold' aria-hidden className={styles.chevron} />
                 </button>
