@@ -37,7 +37,7 @@ test.describe('«Мои бизнесы» (/manage)', () => {
     await expect(firstRow).toContainText('Открыта')
     await expect(firstRow).toContainText('Владелец')
     // The next visit, whichever day it falls on, with its time.
-    await expect(firstRow).toContainText(new RegExp(`Дальше — .*${visit.time}`))
+    await expect(firstRow).toContainText(new RegExp(`Дальше: .*${visit.time}`))
     await expect(secondRow).toContainText('Скрыта')
     await expect(secondRow).toContainText('Записей впереди нет')
 
