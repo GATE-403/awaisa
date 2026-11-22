@@ -69,7 +69,8 @@ test.describe('Client reschedules a visit', () => {
     await expect(ticket).toContainText(newTime)
   })
 
-  test('the API keeps strangers and past visits out', async ({ request }) => {
+  test('the API keeps strangers and past visits out', async ({ request, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const booking = await bookAhead()
     const wrongToken = await request.patch(`/api/bookings/${booking.id}`, {
       headers: { 'x-booking-token': 'x'.repeat(32) },

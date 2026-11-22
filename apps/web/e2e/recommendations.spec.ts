@@ -74,7 +74,9 @@ test.describe('Recommendations', () => {
 
   test('the service being chosen leads the picks; refusing bad event batches', async ({
     request,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const nails = await (await request.get('/api/businesses/pink-nails')).json()
     const manicure = nails.catalog?.services.find((service: { name: string }) =>
       /маникюр/i.test(service.name),
@@ -95,7 +97,9 @@ test.describe('Recommendations', () => {
 
   test('a visit as long ago as people come back puts that service first: «Пора снова»', async ({
     request,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const business = await (await request.get('/api/businesses/awaisa-studio')).json()
     const service = business.catalog.services[0]
     const fiveWeeksAgo = new Date(Date.now() - 35 * 86_400_000).toISOString().slice(0, 10)
@@ -110,7 +114,8 @@ test.describe('Recommendations', () => {
     expect(Math.max(...perPlace.values())).toBeLessThanOrEqual(2)
   })
 
-  test('unknown interests are refused', async ({ request }) => {
+  test('unknown interests are refused', async ({ request, isMobile }) => {
+    test.skip(isMobile, 'API only')
     expect((await request.get('/api/recommendations?interests=skydiving')).status()).toBe(400)
   })
 })

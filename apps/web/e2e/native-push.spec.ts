@@ -60,7 +60,8 @@ const offerNativePush = (page: Page) =>
   )
 
 test.describe('App pushes through the native bridge', () => {
-  test('the API keeps an app token for the signed-in person', async ({ page }) => {
+  test('the API keeps an app token for the signed-in person', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'API only')
     const token = tokenFor('api')
     const guest = await page.request.post('/api/me/push-tokens', { data: { token } })
     expect(guest.status()).toBe(401)

@@ -170,7 +170,9 @@ test.describe('Settings: change and remove what was made', () => {
   test('a certificate is looked up by its code with what is left on it, staff too', async ({
     page,
     browser,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page)
     const issued = await (
       await page.request.post(`/api/manage/${business.slug}/loyalty/certificates`, {

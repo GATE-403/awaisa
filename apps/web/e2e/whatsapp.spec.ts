@@ -36,7 +36,9 @@ test.describe('WhatsApp for client messages', () => {
 
   test('a booking with its confirmation, then a move, go through with the WhatsApp channel on', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page)
     const visit = await createVisit({
       slug: business.slug,

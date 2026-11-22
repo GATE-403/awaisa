@@ -153,7 +153,9 @@ test.describe('Calendar subscription', () => {
 
   test('the owner subscribes to one master and decides on whole numbers', async ({
     page,
+    isMobile,
   }, testInfo) => {
+    test.skip(isMobile, 'API only')
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     const managed = await (await page.request.get(`/api/manage/${SLUG}`)).json()
     const [first, second]: ManagedSpecialist[] = managed.catalog.specialists

@@ -57,7 +57,11 @@ test.describe('Web Push for the business side', () => {
     test.skip(!config.isAvailable, 'The API under test runs without VAPID keys')
   })
 
-  test('a signed-in person saves and removes a browser subscription', async ({ page }) => {
+  test('a signed-in person saves and removes a browser subscription', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, 'API only')
     const endpoint = endpointFor('api')
     const guest = await page.request.post('/api/me/push-subscriptions', {
       data: { endpoint, keys: KEYS },

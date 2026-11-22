@@ -109,7 +109,9 @@ test.describe('Cabinet schedule', () => {
 
   test('the strip’s load: booked minutes over the day’s capacity, at most 42 days', async ({
     page,
+    isMobile,
   }) => {
+    test.skip(isMobile, 'API only')
     const business = await createOwnBusiness(page)
     const visit = await firstVisit(business, { fromDay: 2 })
     const response = await page.request.get(
