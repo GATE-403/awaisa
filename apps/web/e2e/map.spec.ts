@@ -68,24 +68,6 @@ test.describe('Map: places nearby', () => {
     await expect(page.getByRole('listitem').filter({ hasText: 'Awaisa Studio' })).toHaveCount(0)
   })
 
-  test('on phones the full-screen list has a «Карта» button back to the map', async ({
-    page,
-    isMobile,
-  }) => {
-    test.skip(!isMobile, 'The sheet is a phone layout')
-    await openMap(page)
-    await expect(page.getByRole('button', { name: 'Карта', exact: true })).toHaveCount(0)
-    // The grabber steps from half to the whole screen…
-    await page.getByRole('button', { name: /Список наполовину/ }).click()
-    await expect(page.getByRole('button', { name: /Список на весь экран/ })).toBeVisible()
-    const back = page.getByRole('button', { name: 'Карта', exact: true })
-    await expect(back).toBeVisible()
-    // …and one tap brings the map back.
-    await back.click()
-    await expect(page.getByRole('button', { name: /Список наполовину/ })).toBeVisible()
-    await expect(back).toHaveCount(0)
-  })
-
   test('on phones pulling the list down from its top collapses the sheet', async ({
     page,
     isMobile,
@@ -110,16 +92,26 @@ test.describe('Map: places nearby', () => {
     await expect(page.getByRole('button', { name: /Список свёрнут/ })).toBeVisible()
   })
 
-  test('on phones the list sheet changes height by its grabber', async ({ page, isMobile }) => {
+  test('on phones the list sheet changes height by its grabber; «Карта» brings the map back', async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(!isMobile, 'Desktop has a floating sidebar instead')
     await openMap(page)
     const map = page.getByRole('region', { name: 'Карта салонов и мастеров' })
     await expect(map).toBeVisible()
     const half = (await map.boundingBox())?.height ?? 0
+    const back = page.getByRole('button', { name: 'Карта', exact: true })
+    await expect(back).toHaveCount(0)
     // A tap steps through the heights: half → full screen → compact.
     await page.getByRole('button', { name: /Список наполовину/ }).click()
     await expect(page.getByRole('button', { name: /Список на весь экран/ })).toBeVisible()
     await expect.poll(async () => (await map.boundingBox())?.height ?? 0).toBeLessThan(10)
+    // The full-screen list has a «Карта» button: one tap brings the map back.
+    await back.click()
+    await expect(page.getByRole('button', { name: /Список наполовину/ })).toBeVisible()
+    await expect(back).toHaveCount(0)
+    await page.getByRole('button', { name: /Список наполовину/ }).click()
     // Dragging down settles on the nearest height: the list folds and the map grows.
     const grabber = page.getByRole('button', { name: /Список на весь экран/ })
     const box = await settledBox(grabber)

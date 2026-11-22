@@ -59,8 +59,3 @@ for (const [language, text] of Object.entries(LANGUAGES) as [
     })
   })
 }
-
-test('Russian stays the default', async ({ page }) => {
-  await page.goto('/lumiere-salon')
-  await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible()
-})

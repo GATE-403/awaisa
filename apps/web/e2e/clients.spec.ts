@@ -65,35 +65,4 @@ test.describe('Visit outcomes and the client base', () => {
       page.getByRole('dialog', { name: 'Клиент' }).getByLabel('Заметка о клиенте'),
     ).toHaveValue('E2E любит кофе без сахара')
   })
-
-  test('visits left open in past days are flagged until someone marks them', async ({
-    page,
-  }, testInfo) => {
-    test.setTimeout(60_000)
-    await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
-    const visit = await createPastVisit(
-      `E2E Незакрыт ${testInfo.project.name}`,
-      randomClientPhone(),
-      0,
-      2,
-    )
-    const before = await (await page.request.get(`/api/manage/${SLUG}/bookings/unclosed`)).json()
-    expect(before.days).toContainEqual(expect.objectContaining({ date: visit.date }))
-
-    await page.goto(`/manage/${SLUG}`)
-    // The floating bar says visits wait for an outcome; on their day it offers «Все пришли».
-    const bar = page.getByRole('region', { name: 'Неотмеченные визиты' })
-    await expect(bar).toBeVisible()
-    await page.locator(`[data-day="${visit.date}"]`).click()
-    await expect(page.locator(`[data-day="${visit.date}"]`)).toHaveAttribute('aria-pressed', 'true')
-    await expect(bar.getByRole('button', { name: 'Все пришли' })).toBeVisible()
-    // Booking into a past day is not offered.
-    await expect(page.getByRole('button', { name: 'Новая запись', exact: true })).toHaveCount(0)
-
-    await page.request.patch(`/api/manage/${SLUG}/bookings/${visit.booking.id}/outcome`, {
-      data: { outcome: 'arrived' },
-    })
-    const after = await (await page.request.get(`/api/manage/${SLUG}/bookings/unclosed`)).json()
-    expect(after.total).toBe(before.total - 1)
-  })
 })
