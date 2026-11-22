@@ -207,7 +207,7 @@ export const BookingPage = ({
         <div className={styles.wash} aria-hidden />
         <BookingTopBar business={business} isModal={isModal} />
         <Container size='md'>
-          <BookingSuccess booking={form.createdBooking} />
+          <BookingSuccess booking={form.createdBooking} onBookAnother={form.bookAnother} />
         </Container>
       </div>
     )
