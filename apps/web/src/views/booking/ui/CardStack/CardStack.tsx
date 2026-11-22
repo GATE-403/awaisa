@@ -254,10 +254,25 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
       )}
       {(offer || (isOpen && (onStartOver || (isFanned && count > 1)))) && (
         <div className={styles.foot}>
+          {/* The offered service leads the line from the page's left edge, the same edge as the
+              step's heading below: alone on the right it hung off the edge («обрыв»). The
+              stack's own controls sit on the right. */}
+          {offer && !(isFanned && count > 1) && (
+            // Like a side dish offered under the main one: one line, no block of its own.
+            <button
+              type='button'
+              className={`${styles.footAction} ${styles.offer}`}
+              onClick={offer.onAdd}
+            >
+              <span className={styles.offerName}>{`+ ${offer.name}`}</span>
+              <span className={styles.offerPrice}>{offer.price}</span>
+            </button>
+          )}
           {isOpen && onStartOver && (
             <button
               type='button'
-              className={styles.footAction}
+              className={`${styles.footAction} ${styles.footControl}`}
+              data-end={offer && !(isFanned && count > 1) ? '' : undefined}
               onClick={() => {
                 setIsFanned(false)
                 setShift(0)
@@ -267,10 +282,10 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
               {t('Начать заново')}
             </button>
           )}
-          {isFanned && count > 1 ? (
+          {isFanned && count > 1 && (
             <button
               type='button'
-              className={styles.footAction}
+              className={`${styles.footAction} ${styles.footControl}`}
               data-end=''
               onClick={() => {
                 setIsFanned(false)
@@ -279,19 +294,6 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
             >
               {t('Свернуть')}
             </button>
-          ) : (
-            offer && (
-              // Like a side dish offered under the main one: one line, no block of its own.
-              <button
-                type='button'
-                className={`${styles.footAction} ${styles.offer}`}
-                data-end=''
-                onClick={offer.onAdd}
-              >
-                <span className={styles.offerName}>{`+ ${offer.name}`}</span>
-                <span className={styles.offerPrice}>{offer.price}</span>
-              </button>
-            )
           )}
         </div>
       )}

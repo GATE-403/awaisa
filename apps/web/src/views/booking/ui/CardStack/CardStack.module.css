@@ -8,8 +8,15 @@
   /* A pull down spreads the folded cards toward their fanned rows under the finger. */
   --spread: calc(var(--peek) + var(--pull, 0) * (var(--card-height) + var(--gap) - var(--peek)));
 
+  /* Depth, like cards lying on a table: the stack is seen in perspective from just below its
+     foot, so each card further back leans away (its top edge recedes) and sinks deeper. */
+  --lean: 14deg;
+  --sink: 30px;
+
   position: relative;
   height: calc(var(--card-height) + (var(--count) - 1) * var(--spread));
+  perspective: 700px;
+  perspective-origin: 50% 160%;
   /* Sideways moves are ours (they shuffle the stack); up and down still scroll the sheet. */
   touch-action: pan-y;
   transition: height 460ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -40,9 +47,15 @@
 
   isolation: isolate;
   color: #fff;
-  transform: translate(var(--drag), calc(var(--i) * var(--spread))) rotate(var(--tilt))
-    scale(calc(1 - var(--depth) * 0.03 * (1 - var(--pull, 0))));
-  transform-origin: top center;
+  /* Folded, a card further back leans away and sinks (`--depth`); a pull down stands them up
+     as they spread. The same list of functions in every state (folded, fanned, under the finger),
+     so they always interpolate. */
+  --fold: calc(var(--depth) * (1 - var(--pull, 0)));
+
+  transform: translate(var(--drag), calc(var(--i) * var(--spread)))
+    translateZ(calc(var(--fold) * var(--sink) * -1)) rotateX(calc(var(--fold) * var(--lean)))
+    rotate(var(--tilt)) scale(calc(1 - var(--fold) * 0.02));
+  transform-origin: 50% 0%;
   /* A soft settle, no overshoot: a bouncing spring on big cards read as jerky. Only transforms
      move (no filters), so the phone's compositor carries it. */
   transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -69,7 +82,23 @@
   inset: 4px 10px 0;
   z-index: -2;
   border-radius: inherit;
+  /* Deeper cards cast a softer, wider shadow, as if further from the light. Static per card:
+     nothing to repaint while the stack moves. */
+  box-shadow: 0 calc(8px + var(--depth) * 3px) calc(18px + var(--depth) * 6px)
+    rgb(0 0 0 / max(0.08, 0.22 - var(--depth) * 0.04));
+}
+
+/* Fanned, every card lies in one plane again: one shadow for all. */
+.stack[data-fanned] .card::after {
   box-shadow: 0 8px 18px rgb(0 0 0 / 0.22);
+}
+
+/* Flat under reduced motion: no lean or sink. */
+@media (prefers-reduced-motion: reduce) {
+  .stack {
+    --lean: 0deg;
+    --sink: 0px;
+  }
 }
 
 /* Folded and movable, the stack takes the finger in every direction (swipe aside, pull down);
@@ -107,7 +136,8 @@
 }
 
 .stack[data-fanned] .card {
-  transform: translateY(calc(var(--i) * (var(--card-height) + var(--gap))));
+  transform: translate(0, calc(var(--i) * (var(--card-height) + var(--gap)))) translateZ(0)
+    rotateX(0deg) rotate(0deg) scale(1);
 }
 
 /* Opened by hand, the cards are dealt out one after another from the top: each rises a little and
@@ -269,19 +299,32 @@
   font: inherit;
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
   cursor: pointer;
+}
+
+/* «Начать заново» and «Свернуть» keep their one line; the offer's name gives way instead. */
+.footControl {
+  flex: none;
+}
+
+/* The line's first action starts on the page's left edge (its text, not its 8pt padding), in line
+   with «Шаг 2 из 4» and the heading under it. */
+.foot > :first-child {
+  margin-left: calc(-1 * var(--space-2));
 }
 
 .footAction[data-end] {
   margin-left: auto;
 }
 
-/* The offered service: its name in the link colour, the price after it muted; cut short only
-   when «Начать заново» leaves it no room. */
+/* The offered service: its name in the link colour, the price after it as a small price tag
+   (accent at 12%, like the kit's outline button) so it reads as what it costs; first on the line,
+   from the left edge; the name is cut short only when «Начать заново» leaves it no room. */
 .offer {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 6px;
   min-width: 0;
 }
 
@@ -293,8 +336,15 @@
 
 .offerPrice {
   flex: none;
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-link);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* Folded with the pager dots: the foot line sits under the dots, not against them. */

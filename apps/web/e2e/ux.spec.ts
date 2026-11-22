@@ -165,7 +165,7 @@ test.describe('UX: guidance and feedback', () => {
     await expect(page.getByText('Сервис временно недоступен')).toBeVisible()
     await page.getByRole('button', { name: 'Повторить' }).click()
     await expect(
-      page.getByRole('group', { name: 'Время' }).or(page.getByText('свободного времени нет')),
+      page.getByRole('group', { name: 'Время' }).or(page.getByText('На этот день всё занято')),
     ).toBeVisible()
   })
 
@@ -269,6 +269,95 @@ test.describe('UX: layout and ergonomics', () => {
     })
   }
 
+  test('a field the form focuses is set above the phone keyboard', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'The on-screen keyboard is a phone matter')
+    // A saved contact offers «Записываю другого человека», which moves the caret to «Имя».
+    await page.addInitScript(() =>
+      localStorage.setItem(
+        'awaisa:contact:v1',
+        JSON.stringify({ name: 'E2E Тест', phone: '+996 555 000 111' }),
+      ),
+    )
+    await page.goto('/awaisa-studio/book?service=styling')
+    await bookingSteps(page)
+      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .click()
+    await pickFirstFreeSlot(page)
+    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    await toggle.waitFor()
+
+    // The keyboard slides over the fixed sheet and only shrinks the visual viewport: play that
+    // with the switch low on the screen, where «Имя» above it ends up under the keyboard.
+    const result = await toggle.evaluate(async (switchElement) => {
+      const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+      const sheet = document.querySelector<HTMLElement>('[data-booking-screen]')
+      const viewport = window.visualViewport
+      if (!sheet || !viewport) return null
+      switchElement.scrollIntoView({ block: 'end' })
+      sheet.scrollBy({ top: -90 })
+      await wait(300)
+      const keyboardTop = window.innerHeight - 300
+      Object.defineProperty(viewport, 'height', { configurable: true, get: () => keyboardTop })
+      if (switchElement instanceof HTMLElement) switchElement.click()
+      await wait(600)
+      viewport.dispatchEvent(new Event('resize'))
+      await wait(500)
+      const input = document.querySelector<HTMLInputElement>(
+        '#step-contacts input[autocomplete="name"]',
+      )
+      const box = input?.getBoundingClientRect()
+      return {
+        isFocused: document.activeElement === input,
+        bottom: box?.bottom ?? Number.POSITIVE_INFINITY,
+        keyboardTop,
+      }
+    })
+
+    expect(result?.isFocused).toBe(true)
+    expect(result?.bottom).toBeLessThanOrEqual(result?.keyboardTop ?? 0)
+  })
+
+  test('a field the form focuses stays clear of the sheet bars when the keyboard shrinks the page', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The on-screen keyboard is a phone matter')
+    // Samsung Internet and others shrink the page itself for the keyboard: the field once went
+    // under the sheet's top bar, measured from the window's top instead of the sheet's.
+    await page.addInitScript(() =>
+      localStorage.setItem(
+        'awaisa:contact:v1',
+        JSON.stringify({ name: 'E2E Тест', phone: '+996 555 000 111' }),
+      ),
+    )
+    await page.goto('/awaisa-studio/book?service=styling')
+    await bookingSteps(page)
+      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .click()
+    await pickFirstFreeSlot(page)
+    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    await toggle.waitFor()
+    await toggle.evaluate((switchElement) => {
+      switchElement.scrollIntoView({ block: 'end' })
+      document.querySelector('[data-booking-screen]')?.scrollBy({ top: -90 })
+    })
+    await toggle.click()
+    const size = page.viewportSize()
+    await page.setViewportSize({ width: size?.width ?? 412, height: (size?.height ?? 839) - 300 })
+
+    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Имя' })
+    await expect(name).toBeFocused()
+    await expect
+      .poll(async () => {
+        const box = await name.boundingBox()
+        const topBar = await page.locator('[data-booking-top-bar]').boundingBox()
+        const bar = await page.locator('[data-booking-bar] > *').first().boundingBox()
+        if (!box || !topBar || !bar) return false
+        return box.y >= topBar.y + topBar.height && box.y + box.height <= bar.y
+      })
+      .toBe(true)
+  })
+
   test('booking controls are at least 44×44 on phones', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Touch targets matter on touch screens')
     await page.goto('/awaisa-studio/book?service=styling')
@@ -277,7 +366,7 @@ test.describe('UX: layout and ergonomics', () => {
       .click()
     await page
       .getByRole('group', { name: 'Время' })
-      .or(page.getByText('свободного времени нет'))
+      .or(page.getByText('На этот день всё занято'))
       .waitFor()
 
     expect(await findSmallTapTargets(page)).toEqual([])
@@ -298,7 +387,7 @@ test.describe('UX: layout and ergonomics', () => {
       .getByRole('group', { name: 'Время' })
       .getByRole('button', { disabled: false })
       .first()
-    await freeSlot.or(page.getByText('свободного времени нет')).waitFor()
+    await freeSlot.or(page.getByText('На этот день всё занято')).waitFor()
     test.skip((await freeSlot.count()) === 0, 'No free slots today')
     await freeSlot.focus()
     await page.keyboard.press('Enter')

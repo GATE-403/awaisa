@@ -2,7 +2,7 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { CalendarPlus, Check, MapPin, Ticket as TicketIcon } from '@phosphor-icons/react/ssr'
+import { CalendarPlus, Check, MapPin } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { downloadCalendarFile, formatPrice, Ticket } from '@/entities/booking'
@@ -14,6 +14,7 @@ import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { LightWave, type Point } from '@/shared/ui/LightWave/LightWave'
 import styles from './BookingSuccess.module.css'
 
@@ -122,28 +123,6 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <div className={styles.ticket}>
         <Ticket booking={booking} onOpen={() => setIsTicketOpen(true)} />
       </div>
-      {/* Next steps as three equal tiles, icon over word, like a share sheet's row. */}
-      <div className={styles.tiles}>
-        <button type='button' className={styles.tile} onClick={handleAddToCalendar}>
-          <CalendarPlus weight='bold' aria-hidden />
-          {t('В календарь')}
-        </button>
-        {booking.business.mapUrl ? (
-          <a
-            href={booking.business.mapUrl}
-            target='_blank'
-            rel='noreferrer'
-            className={styles.tile}
-          >
-            <MapPin weight='bold' aria-hidden />
-            {t('Маршрут')}
-          </a>
-        ) : null}
-        <button type='button' className={styles.tile} onClick={() => setIsTicketOpen(true)}>
-          <TicketIcon weight='bold' aria-hidden />
-          {t('Талон')}
-        </button>
-      </div>
       {/* A service another master does is a booking of its own: one quiet row starts it here, at
           the same place and day after this visit, the name and number kept. */}
       {onBookAnother && (
@@ -154,17 +133,41 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           })}
         </button>
       )}
-      <div className={styles.primary}>
-        <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
+      {/* One line of actions: the one primary «Мои записи» and the rest as thin glyphs in one
+          capsule of the same height (calendar, route, following the master). Tiles, a link, a big
+          button and a small capsule of four sizes read as clutter. The ticket opens itself. */}
+      <div className={styles.actions}>
+        <ButtonLink
+          render={<NextLink href='/bookings' />}
+          size='md'
+          className={styles.primaryAction}
+        >
           {t('Мои записи')}
         </ButtonLink>
-      </div>
-      {/* Clients stay with their master: following brings word when the master has time again. */}
-      <div className={styles.follow}>
-        <FollowButton
-          specialistId={booking.specialistId}
-          name={booking.specialistName.split(' ')[0] ?? booking.specialistName}
-        />
+        <GlyphGroup label={t('Ещё')}>
+          <GlyphButton
+            icon={<CalendarPlus />}
+            label={t('В календарь')}
+            onClick={handleAddToCalendar}
+          />
+          {booking.business.mapUrl && (
+            <a
+              href={booking.business.mapUrl}
+              target='_blank'
+              rel='noreferrer'
+              aria-label={t('Маршрут')}
+              title={t('Маршрут')}
+            >
+              <MapPin aria-hidden />
+            </a>
+          )}
+          {/* Clients stay with their master: following brings word when the master has time. */}
+          <FollowButton
+            variant='groupItem'
+            specialistId={booking.specialistId}
+            name={booking.specialistName.split(' ')[0] ?? booking.specialistName}
+          />
+        </GlyphGroup>
       </div>
       {/* Guests keep bookings on this device only: say so at the moment it matters. */}
       {session.status === 'guest' && (

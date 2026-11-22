@@ -47,11 +47,72 @@ const CONFLICT_STATUS = 409
 const MAX_AUTO_DAY_SKIPS = 6
 
 // The sheet is a stack of done cards over one open card: after each choice it goes back to its
-// top, where the new card has just landed and the next question waits right under it.
-const scrollToStep = (_stepId: BookingStepId, _force = false) => {
+// top, where the new card has just landed and the next question waits right under it. The time
+// step is the tallest: on a short phone its days ended under the booking bar («приходится чуть
+// скролить»), so the sheet stops just low enough to show them, never past the step's own caption.
+const scrollToStep = (stepId: BookingStepId, _force = false) => {
   requestAnimationFrame(() => {
-    document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
+    const screen = document.querySelector<HTMLElement>('[data-booking-screen]')
+    if (!screen) return
+    screen.scrollTo({ top: getStepScrollTop(screen, stepId), behavior: 'smooth' })
+    if (stepId === 'datetime') keepDaysInView(screen)
   })
+}
+
+// The time step may not be drawn yet on the next frame (a slower phone), and its free times
+// arrive later still: the dial that replaces the loading shapes is taller and pushed the days back
+// under the bar on an iPhone SE. So for a while, until the person touches the sheet, the sheet is
+// lowered (never raised) whenever the step appears or changes height.
+const keepDaysInView = (screen: HTMLElement) => {
+  let resizeObserver: ResizeObserver | null = null
+  const lower = () => {
+    const top = getStepScrollTop(screen, 'datetime')
+    if (top > screen.scrollTop + 2) screen.scrollTo({ top, behavior: 'smooth' })
+  }
+  const attach = () => {
+    const step = document.getElementById('step-datetime')
+    if (resizeObserver || !step?.querySelector('[data-day-row]')) return
+    lower()
+    if (typeof ResizeObserver === 'undefined') return
+    resizeObserver = new ResizeObserver(lower)
+    resizeObserver.observe(step)
+  }
+  const mutationObserver = new MutationObserver(attach)
+  const stop = () => {
+    mutationObserver.disconnect()
+    resizeObserver?.disconnect()
+    window.clearTimeout(timer)
+    screen.removeEventListener('pointerdown', stop)
+    screen.removeEventListener('wheel', stop)
+    screen.removeEventListener('touchstart', stop)
+  }
+  const timer = window.setTimeout(stop, 2500)
+  mutationObserver.observe(screen, { childList: true, subtree: true })
+  screen.addEventListener('pointerdown', stop, { once: true })
+  screen.addEventListener('touchstart', stop, { once: true, passive: true })
+  screen.addEventListener('wheel', stop, { once: true, passive: true })
+  attach()
+}
+
+const getStepScrollTop = (screen: HTMLElement, stepId: BookingStepId) => {
+  if (stepId !== 'datetime') return 0
+  const step = document.getElementById('step-datetime')
+  const days = step?.querySelector('[data-day-row]')
+  if (!step || !days) return 0
+  const screenBox = screen.getBoundingClientRect()
+  // The bar's wrapper keeps no height; the fixed panel inside it is what covers the sheet.
+  const barEl = document.querySelector('[data-booking-bar]')
+  const barTop = [barEl, ...(barEl?.children ?? [])]
+    .map((element) => element?.getBoundingClientRect())
+    .find((box) => box && box.height > 0)?.top
+  const visibleBottom = Math.min(screenBox.bottom, barTop ?? screenBox.bottom) - 12
+  // Positions as if the sheet were at its top.
+  const offset = screen.scrollTop - screenBox.top
+  const daysBottom = days.getBoundingClientRect().bottom + offset
+  const topBar = screen.querySelector('[data-booking-top-bar]')?.getBoundingClientRect().height ?? 0
+  const stepTop = step.getBoundingClientRect().top + offset - topBar - 8
+  const needed = daysBottom - (visibleBottom - screenBox.top)
+  return Math.max(0, Math.min(needed, stepTop))
 }
 
 // The main action pressed while a step is still open: the sheet's top is that step already, so
