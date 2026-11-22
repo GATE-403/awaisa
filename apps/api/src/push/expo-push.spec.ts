@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { chunk, isExpoPushToken, parseExpoResponse, toExpoMessage } from './expo-push.js'
+import {
+  chunk,
+  isExpoPushToken,
+  parseExpoReceipts,
+  parseExpoResponse,
+  toExpoMessage,
+} from './expo-push.js'
 
 const message = {
   title: 'Новая запись',
@@ -52,6 +58,7 @@ describe('parseExpoResponse', () => {
     })
 
     expect(result.sent).toEqual(['ExponentPushToken[a1]'])
+    expect(result.tickets).toEqual([{ token: 'ExponentPushToken[a1]', id: 't1' }])
     expect(result.gone).toEqual(['ExponentPushToken[b2]'])
     expect(result.errors).toEqual(['Expo push to ExponentPushToken[c3]: Too big'])
   })
@@ -71,6 +78,37 @@ describe('parseExpoResponse', () => {
       'Expo push to ExponentPushToken[a1]: no ticket',
     ])
     expect(parseExpoResponse(tokens, null).errors).toEqual(['Expo push: unreadable answer'])
+  })
+})
+
+describe('parseExpoReceipts', () => {
+  it('names gone devices and settles every ticket that has a receipt', () => {
+    const result = parseExpoReceipts({
+      data: {
+        t1: { status: 'ok' },
+        t2: { status: 'error', message: 'gone', details: { error: 'DeviceNotRegistered' } },
+        t3: {
+          status: 'error',
+          message: 'Rate exceeded',
+          details: { error: 'MessageRateExceeded' },
+        },
+      },
+    })
+
+    expect(result.gone).toEqual(['t2'])
+    expect(result.settled).toEqual(['t1', 't2', 't3'])
+    expect(result.errors).toEqual(['Expo receipt t3: Rate exceeded'])
+  })
+
+  it('settles nothing when the request failed or the answer is unreadable', () => {
+    expect(
+      parseExpoReceipts({ errors: [{ code: 'UNAUTHORIZED', message: 'Bad access token' }] }),
+    ).toEqual({ gone: [], settled: [], errors: ['Expo receipts: UNAUTHORIZED Bad access token'] })
+    expect(parseExpoReceipts('nope').settled).toEqual([])
+  })
+
+  it('leaves tickets without a receipt yet for later', () => {
+    expect(parseExpoReceipts({ data: {} })).toEqual({ gone: [], settled: [], errors: [] })
   })
 })
 

@@ -159,6 +159,12 @@
   box-shadow: var(--focus-ring);
 }
 
+.follow {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
 .keep {
   max-width: 34ch;
   margin-top: var(--space-4);

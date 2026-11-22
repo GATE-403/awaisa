@@ -130,6 +130,15 @@ export class AccountService {
       ])
     const [favoriteMaster] = master
     const [telegramLink] = telegram
+    const follows = await this.query(
+      `SELECT sp."name", bz."name" AS "business", f."notify_works" AS "notifyWorks",
+         f."created_at" AS "since"
+       FROM "master_follows" f
+       JOIN "specialists" sp ON sp."id" = f."specialist_id"
+       JOIN "businesses" bz ON bz."id" = sp."business_id"
+       WHERE f."customer_id" = $1 ORDER BY f."created_at"`,
+      [customer.id],
+    )
     const [referrals] = refs
 
     return {
@@ -214,6 +223,12 @@ export class AccountService {
               business: String(favoriteMaster.business),
             }
           : null,
+        follows: follows.map((row) => ({
+          name: String(row.name),
+          business: String(row.business),
+          notifyWorks: Boolean(row.notifyWorks),
+          since: iso(row.since) ?? '',
+        })),
       },
       notifications: {
         push: push.map((row) => ({

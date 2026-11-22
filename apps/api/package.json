@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
+    "test:db": "vitest run --config vitest.db.config.ts",
     "typeorm": "typeorm -d dist/database/data-source.js",
     "migration:generate": "pnpm build && typeorm -d dist/database/data-source.js migration:generate src/database/migrations/Migration",
     "migration:run": "typeorm -d dist/database/data-source.js migration:run",
