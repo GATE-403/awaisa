@@ -4,6 +4,7 @@ import { Input } from '@awaisa/ui/Input'
 import { type FormEvent, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import type { CashShift } from '@/shared/api/types'
+import { type Translate, useT } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -44,12 +45,12 @@ const ACTIONS: Record<ShiftSheetMode, string> = {
 const toAmount = (value: string) => Number(value.replace(/\D/g, '') || 0)
 
 // What the difference at closing means, in words: a shortage, a surplus or a match.
-const describeDifference = (difference: number) => {
-  if (difference === 0) return { text: 'Сходится с ожидаемым.', tone: undefined }
+const describeDifference = (difference: number, t: Translate) => {
+  if (difference === 0) return { text: t('Сходится с ожидаемым.'), tone: undefined }
   const amount = formatPrice(Math.abs(difference))
   return difference < 0
-    ? { text: `Недостача ${amount}.`, tone: 'danger' as const }
-    : { text: `Излишек ${amount}.`, tone: 'success' as const }
+    ? { text: t('Недостача {amount}.', { amount }), tone: 'danger' as const }
+    : { text: t('Излишек {amount}.', { amount }), tone: 'success' as const }
 }
 
 // One sheet for the till: open a shift with the counted cash, put cash in or take it out with
@@ -63,6 +64,7 @@ export const ShiftSheet = ({
   onMove,
   onCloseShift,
 }: ShiftSheetProps) => {
+  const t = useT()
   const [amount, setAmount] = useState('')
   const [kind, setKind] = useState<'in' | 'out'>('out')
   const [reason, setReason] = useState('')
@@ -99,23 +101,28 @@ export const ShiftSheet = ({
 
   return (
     <Sheet
-      title={TITLES[mode]}
+      title={t(TITLES[mode])}
       onClose={onClose}
-      action={{ label: ACTIONS[mode], form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t(ACTIONS[mode]), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         {mode === 'move' && (
           <div className={styles.segment}>
-            <SegmentedControl label='Что сделать' value={kind} items={MOVES} onChange={setKind} />
+            <SegmentedControl
+              label={t('Что сделать')}
+              value={kind}
+              items={MOVES.map((move) => ({ ...move, label: t(move.label) }))}
+              onChange={setKind}
+            />
           </div>
         )}
 
         {mode === 'close' && shift && (
-          <section className={sheet.group} aria-label='Ожидается'>
+          <section className={sheet.group} aria-label={t('Ожидается')}>
             <div className={sheet.list}>
               {summary.map((line) => (
                 <div key={line.label} className={sheet.row}>
-                  <span className={sheet.rowLabel}>{line.label}</span>
+                  <span className={sheet.rowLabel}>{t(line.label)}</span>
                   <span className={styles.value}>
                     {line.amount < 0 ? '−' : ''}
                     {formatPrice(Math.abs(line.amount))}
@@ -123,7 +130,7 @@ export const ShiftSheet = ({
                 </div>
               ))}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Должно быть в кассе</span>
+                <span className={sheet.rowLabel}>{t('Должно быть в кассе')}</span>
                 <span className={styles.value} data-strong>
                   {formatPrice(shift.expectedCash)}
                 </span>
@@ -132,31 +139,31 @@ export const ShiftSheet = ({
           </section>
         )}
 
-        <section className={sheet.group} aria-label='Сумма'>
+        <section className={sheet.group} aria-label={t('Сумма')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
-                {mode === 'move' ? 'Сумма' : mode === 'open' ? 'В кассе сейчас' : 'Пересчитано'}
+                {t(mode === 'move' ? 'Сумма' : mode === 'open' ? 'В кассе сейчас' : 'Пересчитано')}
               </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={mode === 'close' ? 'Пересчитано наличных, сом' : 'Сумма, сом'}
+                  aria-label={t(mode === 'close' ? 'Пересчитано наличных, сом' : 'Сумма, сом')}
                   inputMode='numeric'
                   placeholder='0'
                   autoFocus
                   value={maskAmountInput(amount.replace(/\D/g, ''))}
                   onValueChange={setAmount}
                 />
-                <span className={sheet.suffix}>сом</span>
+                <span className={sheet.suffix}>{t('сом')}</span>
               </span>
             </label>
             {mode === 'move' && (
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label='Причина'
-                  placeholder={kind === 'out' ? 'Например, «Вода и кофе»' : 'Например, «Размен»'}
+                  aria-label={t('Причина')}
+                  placeholder={t(kind === 'out' ? 'Например, «Вода и кофе»' : 'Например, «Размен»')}
                   value={reason}
                   onValueChange={setReason}
                   maxLength={160}
@@ -167,8 +174,8 @@ export const ShiftSheet = ({
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label='Комментарий'
-                  placeholder='Комментарий, если нужно'
+                  aria-label={t('Комментарий')}
+                  placeholder={t('Комментарий, если нужно')}
                   value={note}
                   onValueChange={setNote}
                   maxLength={240}
@@ -178,18 +185,22 @@ export const ShiftSheet = ({
           </div>
           <p
             className={`${sheet.groupFooter} ${styles.footer}`}
-            data-tone={difference === null ? undefined : describeDifference(difference).tone}
+            data-tone={difference === null ? undefined : describeDifference(difference, t).tone}
           >
             {mode === 'open' &&
-              `Пересчитайте наличные${branchName ? ` в кассе «${branchName}»` : ''}: от этой суммы считается остаток.`}
+              (branchName
+                ? t('Пересчитайте наличные в кассе «{branch}»: от этой суммы считается остаток.', {
+                    branch: branchName,
+                  })
+                : t('Пересчитайте наличные: от этой суммы считается остаток.'))}
             {mode === 'move' &&
               (kind === 'out'
-                ? 'Изъятие уменьшает ожидаемый остаток. Расходы бизнеса записывайте в «Расходы».'
-                : 'Например, размен в начале дня.')}
+                ? t('Изъятие уменьшает ожидаемый остаток. Расходы бизнеса записывайте в «Расходы».')
+                : t('Например, размен в начале дня.'))}
             {mode === 'close' &&
               (difference === null
-                ? 'Пересчитайте наличные: покажем расхождение.'
-                : describeDifference(difference).text)}
+                ? t('Пересчитайте наличные: покажем расхождение.')
+                : describeDifference(difference, t).text)}
           </p>
         </section>
       </form>

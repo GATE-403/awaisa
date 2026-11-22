@@ -3,6 +3,7 @@
 import { CircleDashed } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef } from 'react'
 import type { BookingDay } from '@/entities/booking'
+import { useT } from '@/shared/i18n'
 import styles from './DayStrip.module.css'
 
 interface DayStripProps {
@@ -25,6 +26,7 @@ export const DayStrip = ({
   loads,
   variant = 'default',
 }: DayStripProps) => {
+  const t = useT()
   const daysRef = useRef<HTMLFieldSetElement>(null)
   const knobRef = useRef<HTMLSpanElement>(null)
   const today = days.find((day) => day.isToday)
@@ -60,7 +62,7 @@ export const DayStrip = ({
   return (
     <div className={styles.strip} data-variant={variant}>
       <fieldset
-        aria-label='День'
+        aria-label={t('День')}
         className={styles.days}
         ref={daysRef}
         data-edge-fade={variant === 'compact' || undefined}
@@ -77,7 +79,7 @@ export const DayStrip = ({
             data-marked={marks?.has(day.key) || undefined}
             onClick={() => onChange(day.key)}
           >
-            <span className={styles.weekday}>{day.weekday}</span>
+            <span className={styles.weekday}>{t.weekdayShort(day.key)}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
             {marks?.has(day.key) && (
               <CircleDashed weight='bold' className={styles.markGlyph} aria-hidden />
@@ -91,9 +93,13 @@ export const DayStrip = ({
             )}
             {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
-              {`, ${day.label}${marks?.has(day.key) ? ', есть незакрытые визиты' : ''}${
+              {`, ${t.language === 'ru' ? day.label : t.dayLong(day.key)}${
+                marks?.has(day.key) ? `, ${t('есть незакрытые визиты')}` : ''
+              }${
                 loads?.has(day.key)
-                  ? `, занято на ${Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100)}%`
+                  ? `, ${t('занято на {percent}%', {
+                      percent: Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100),
+                    })}`
                   : ''
               }`}
             </span>
@@ -114,7 +120,7 @@ export const DayStrip = ({
           }}
           disabled={variant === 'default' && value === today.key}
         >
-          Сегодня
+          {t('Сегодня')}
         </button>
       )}
     </div>

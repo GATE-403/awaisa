@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { createOwnBusiness } from './business'
 
 // The server renders Russian; the language saved in `awaisa:lang:v1` takes over after hydration.
 const LANGUAGES = {
@@ -11,6 +12,10 @@ const LANGUAGES = {
     yourBookings: 'Сиздин жазылууларыңыз',
     upcoming: 'Алдыдагылар',
     history: 'Тарых',
+    getCode: 'Код алуу',
+    phoneNumber: 'Телефон номери',
+    schedule: 'Жадыбал',
+    branches: 'Филиалдар',
   },
   en: {
     catalogTab: 'Services',
@@ -21,6 +26,10 @@ const LANGUAGES = {
     yourBookings: 'Your bookings',
     upcoming: 'Upcoming',
     history: 'History',
+    getCode: 'Get a code',
+    phoneNumber: 'Phone number',
+    schedule: 'Schedule',
+    branches: 'Branches',
   },
 } as const
 
@@ -56,6 +65,26 @@ for (const [language, text] of Object.entries(LANGUAGES) as [
       await expect(page.getByRole('heading', { name: text.yourBookings })).toBeVisible()
       await expect(page.getByText(text.upcoming, { exact: false }).first()).toBeVisible()
       await expect(page.getByText(text.history, { exact: false }).first()).toBeVisible()
+    })
+
+    test('sign-in', async ({ page }) => {
+      await page.goto('/login')
+      await expect(page.getByLabel(text.phoneNumber)).toBeVisible()
+      await expect(page.getByRole('button', { name: text.getCode })).toBeVisible()
+    })
+  })
+
+  test.describe(`The cabinet in ${language}`, () => {
+    test('«Настройки»', async ({ page }) => {
+      const business = await createOwnBusiness(page)
+      await speak(page, language)
+      await page.goto(`/manage/${business.slug}?tab=settings`)
+      await expect(
+        page.getByRole('link', { name: new RegExp(`^${text.schedule}`) }).first(),
+      ).toBeVisible()
+      await expect(
+        page.getByRole('link', { name: new RegExp(`^${text.branches}`) }).first(),
+      ).toBeVisible()
     })
   })
 }

@@ -3,6 +3,7 @@
 import { useToast } from '@awaisa/ui/Toast'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
+import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 
 interface UseVisitPhotoOptions {
@@ -17,6 +18,7 @@ interface UseVisitPhotoOptions {
  */
 const useVisitPhoto = ({ upload, onDone }: UseVisitPhotoOptions) => {
   const toast = useToast()
+  const t = useT()
   const input = useRef<HTMLInputElement>(null)
   const target = useRef<string | null>(null)
   const [uploadingId, setUploadingId] = useState<string | null>(null)
@@ -35,10 +37,10 @@ const useVisitPhoto = ({ upload, onDone }: UseVisitPhotoOptions) => {
     try {
       await upload(bookingId, file)
       haptic('success')
-      toast.show({ title: 'Фото в «Образах»', type: 'success' })
+      toast.show({ title: t('Фото в «Образах»'), type: 'success' })
       onDone?.(bookingId)
     } catch (error) {
-      toast.show({ title: 'Не загрузилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не загрузилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setUploadingId(null)
     }

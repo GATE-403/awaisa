@@ -11,6 +11,7 @@ import type {
   ModerationLog,
   ModerationQueue,
 } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { ACTION_LABELS } from '../config/labels'
 
 type InitialModeration = { queue: ModerationQueue | null; log: ModerationLog | null }
@@ -21,6 +22,7 @@ const keyOf = (item: Pick<ModerationItem, 'targetType' | 'targetId'>) =>
 // The queue and the journal, both from the server; a decision takes the thing off the queue and
 // puts the decision on top of the journal, and the public page it lived on is read afresh.
 const useModeration = (initial: InitialModeration) => {
+  const t = useT()
   const toast = useToast()
   const [items, setItems] = useState(initial.queue?.items ?? [])
   const [log, setLog] = useState(initial.log?.items ?? [])
@@ -38,7 +40,7 @@ const useModeration = (initial: InitialModeration) => {
       setItems((current) => current.filter((entry) => keyOf(entry) !== key))
       setLog((current) => [decision, ...current])
       if (item.preview?.business) void refreshBusiness(item.preview.business.slug)
-      toast.show({ title: ACTION_LABELS[action], type: 'success' })
+      toast.show({ title: t(ACTION_LABELS[action]), type: 'success' })
     } catch (error) {
       toast.show({ title: getErrorMessage(error), type: 'error' })
     } finally {

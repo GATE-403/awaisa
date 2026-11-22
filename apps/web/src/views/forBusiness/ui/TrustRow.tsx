@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { CLIENT_API_PREFIX } from '@/shared/config/api'
+import { useT } from '@/shared/i18n'
 import styles from '../ForBusinessPage.module.css'
 
 type Place = { slug: string; name: string }
@@ -11,6 +12,7 @@ const MIN_MARQUEE = 6
 
 // Fetched in the browser: the page itself stays fully static (SSG) and never waits for the API.
 export const TrustRow = () => {
+  const t = useT()
   const [places, setPlaces] = useState<Place[]>([])
 
   useEffect(() => {
@@ -28,9 +30,13 @@ export const TrustRow = () => {
   const items = isMarquee ? [...places, ...places, ...places] : places
 
   return (
-    <section className={styles.trust} aria-label='Уже на Awaisa'>
+    <section className={styles.trust} aria-label={t('Уже на Awaisa')}>
       <p className={styles.trustCaption}>
-        Салоны, барбершопы и студии Бишкека. Уже на Awaisa{places.length > 0 ? ':' : '.'}
+        {t(
+          places.length > 0
+            ? 'Салоны, барбершопы и студии Бишкека. Уже на Awaisa:'
+            : 'Салоны, барбершопы и студии Бишкека. Уже на Awaisa.',
+        )}
       </p>
       {items.length > 0 && (
         <div className={styles.marquee} data-static={!isMarquee || undefined}>

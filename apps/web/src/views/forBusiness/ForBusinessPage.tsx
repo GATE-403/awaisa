@@ -2,10 +2,12 @@ import { ButtonLink } from '@awaisa/ui/Button'
 import { ArrowRight, Bell, CalendarCheck, CaretDown, Columns } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import type { CSSProperties } from 'react'
+import { T } from '@/shared/i18n'
 import { TrackStep } from '@/shared/ui/TrackStep/TrackStep'
 import styles from './ForBusinessPage.module.css'
 import { FAQ, STATS, STEPS } from './forBusinessContent'
 import { DragVisual, ReminderVisual, SlotsVisual } from './ui/FeatureVisuals'
+import { LabelledSection } from './ui/LabelledSection'
 import { OrbitScene } from './ui/OrbitScene'
 import { ProductShowcase } from './ui/ProductShowcase'
 import { TiltCard } from './ui/TiltCard'
@@ -44,10 +46,12 @@ export const ForBusinessPage = () => (
     <TrackStep step='business_landing' />
     <header className={styles.hero}>
       <div className={styles.heroCopy}>
-        <h1 className={styles.title}>Онлайн-запись, которая работает сама</h1>
+        <h1 className={styles.title}>
+          <T>Онлайн-запись, которая работает сама</T>
+        </h1>
         <div className={styles.actions}>
           <ButtonLink size='lg' className={styles.pill} render={<NextLink href='/business/new' />}>
-            Создать страницу
+            <T>Создать страницу</T>
             <ArrowRight weight='bold' aria-hidden />
           </ButtonLink>
           <ButtonLink
@@ -56,7 +60,7 @@ export const ForBusinessPage = () => (
             className={styles.pill}
             render={<NextLink href='/manage' />}
           >
-            Войти в кабинет
+            <T>Войти в кабинет</T>
           </ButtonLink>
         </div>
       </div>
@@ -65,13 +69,18 @@ export const ForBusinessPage = () => (
 
       <div className={styles.heroAside}>
         <NextLink href='/map' className={styles.news}>
-          <span className={styles.newsBadge}>Новое</span>
-          Филиалы и карта
+          <span className={styles.newsBadge}>
+            <T>Новое</T>
+          </span>
+          <T>Филиалы и карта</T>
           <ArrowRight weight='bold' aria-hidden />
         </NextLink>
         <p className={styles.lead}>
-          Страница с услугами и ценами, расписание мастеров, напоминания клиентам и талоны в Wallet.
-          Бесплатно, без абонплаты и комиссии.
+          <T>
+            {
+              'Страница с услугами и ценами, расписание мастеров, напоминания клиентам и талоны в Wallet. Бесплатно, без абонплаты и комиссии.'
+            }
+          </T>
         </p>
       </div>
     </header>
@@ -80,7 +89,10 @@ export const ForBusinessPage = () => (
 
     <section className={styles.panel} aria-labelledby='blocks-title'>
       <h2 id='blocks-title' className={styles.panelTitle}>
-        Всё для записи<span className={styles.titleMuted}> — из коробки</span>
+        <T>Всё для записи</T>
+        <span className={styles.titleMuted}>
+          <T>{' — из коробки'}</T>
+        </span>
       </h2>
       <ProductShowcase />
       <div className={styles.bento}>
@@ -90,8 +102,12 @@ export const ForBusinessPage = () => (
               <span className={styles.bentoIcon} aria-hidden='true'>
                 <Icon weight='fill' />
               </span>
-              <h3 className={styles.bentoTitle}>{title}</h3>
-              <p className={styles.bentoText}>{text}</p>
+              <h3 className={styles.bentoTitle}>
+                <T>{title}</T>
+              </h3>
+              <p className={styles.bentoText}>
+                <T>{text}</T>
+              </p>
             </div>
             {visual}
           </TiltCard>
@@ -99,18 +115,25 @@ export const ForBusinessPage = () => (
       </div>
     </section>
 
-    <section className={styles.stats} aria-label='В цифрах'>
+    <LabelledSection className={styles.stats} label='В цифрах'>
       {STATS.map((stat) => (
         <div key={stat.value} className={styles.stat}>
-          <p className={styles.statValue}>{stat.value}</p>
-          <p className={styles.statLabel}>{stat.label}</p>
+          <p className={styles.statValue}>
+            <T>{stat.value}</T>
+          </p>
+          <p className={styles.statLabel}>
+            <T>{stat.label}</T>
+          </p>
         </div>
       ))}
-    </section>
+    </LabelledSection>
 
     <section className={styles.steps} aria-labelledby='steps-title'>
       <h2 id='steps-title' className={styles.sectionTitle}>
-        Три шага<span className={styles.titleMuted}> до первой записи</span>
+        <T>Три шага</T>
+        <span className={styles.titleMuted}>
+          <T>{' до первой записи'}</T>
+        </span>
       </h2>
       <ol className={styles.stepList}>
         {STEPS.map((step, index) => (
@@ -118,8 +141,12 @@ export const ForBusinessPage = () => (
             <span className={styles.stepNumber} aria-hidden='true'>
               0{index + 1}
             </span>
-            <span className={styles.stepTitle}>{step.title}</span>
-            <span className={styles.stepText}>{step.text}</span>
+            <span className={styles.stepTitle}>
+              <T>{step.title}</T>
+            </span>
+            <span className={styles.stepText}>
+              <T>{step.text}</T>
+            </span>
           </li>
         ))}
       </ol>
@@ -127,31 +154,38 @@ export const ForBusinessPage = () => (
 
     <section className={styles.faq} aria-labelledby='faq-title'>
       <h2 id='faq-title' className={styles.sectionTitle}>
-        Вопросы<span className={styles.titleMuted}> и ответы</span>
+        <T>Вопросы</T>
+        <span className={styles.titleMuted}>
+          <T>{' и ответы'}</T>
+        </span>
       </h2>
       <div className={styles.faqList}>
         {FAQ.map((item) => (
           <details key={item.question} className={styles.faqItem}>
             <summary className={styles.faqQuestion}>
-              {item.question}
+              <T>{item.question}</T>
               <CaretDown className={styles.faqCaret} weight='bold' aria-hidden />
             </summary>
-            <p className={styles.faqAnswer}>{item.answer}</p>
+            <p className={styles.faqAnswer}>
+              <T>{item.answer}</T>
+            </p>
           </details>
         ))}
       </div>
     </section>
 
-    <section className={styles.closing} aria-label='Начать'>
-      <h2 className={styles.closingTitle}>Первая запись — уже сегодня.</h2>
+    <LabelledSection className={styles.closing} label='Начать'>
+      <h2 className={styles.closingTitle}>
+        <T>Первая запись — уже сегодня.</T>
+      </h2>
       <ButtonLink
         variant='contrast'
         size='lg'
         className={styles.pill}
         render={<NextLink href='/business/new' />}
       >
-        Начать бесплатно
+        <T>Начать бесплатно</T>
       </ButtonLink>
-    </section>
+    </LabelledSection>
   </main>
 )

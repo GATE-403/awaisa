@@ -7,7 +7,7 @@ import { formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClientLoyalty, getLoyalty, sellSubscription } from '@/shared/api/clientApi'
 import type { ClientLoyalty, SubscriptionPlan } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -20,6 +20,7 @@ const formatDate = (date: string) => date.split('-').reverse().join('.')
 
 // The client's bonuses, subscriptions and certificates; a subscription is sold right here.
 export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps) => {
+  const t = useT()
   const toast = useToast()
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [plans, setPlans] = useState<SubscriptionPlan[]>([])
@@ -38,9 +39,9 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
   const sell = async (planId: string) => {
     try {
       setLoyalty(await sellSubscription(slug, phone, planId))
-      toast.show({ title: 'Абонемент оформлен', type: 'success' })
+      toast.show({ title: t('Абонемент оформлен'), type: 'success' })
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -54,12 +55,12 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
   if (!hasAnything) return null
 
   return (
-    <section className={sheet.group} aria-label='Лояльность'>
-      <SectionCaption>Лояльность</SectionCaption>
+    <section className={sheet.group} aria-label={t('Лояльность')}>
+      <SectionCaption>{t('Лояльность')}</SectionCaption>
       <div className={sheet.list}>
         {(loyalty.bonusPercent !== null || loyalty.bonusBalance > 0) && (
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>Бонусы</span>
+            <span className={sheet.rowLabel}>{t('Бонусы')}</span>
             <span>{formatPrice(loyalty.bonusBalance)}</span>
           </div>
         )}
@@ -67,25 +68,29 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
           <div key={subscription.id} className={sheet.row}>
             <span className={sheet.rowLabel}>{subscription.title}</span>
             <span>
-              {pluralize(subscription.visitsLeft, ['визит', 'визита', 'визитов'])} · до{' '}
-              {formatDate(subscription.expiresOn)}
+              {t('{visits} · до {date}', {
+                visits: t.count(subscription.visitsLeft, ['визит', 'визита', 'визитов']),
+                date: formatDate(subscription.expiresOn),
+              })}
             </span>
           </div>
         ))}
         {loyalty.certificates.map((certificate) => (
           <div key={certificate.id} className={sheet.row}>
-            <span className={sheet.rowLabel}>Сертификат {certificate.code}</span>
+            <span className={sheet.rowLabel}>
+              {t('Сертификат {code}', { code: certificate.code })}
+            </span>
             <span>{formatPrice(certificate.balance)}</span>
           </div>
         ))}
         {plans.length > 0 && (
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>Продать абонемент</span>
+            <span className={sheet.rowLabel}>{t('Продать абонемент')}</span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'
-                aria-label='Продать абонемент'
-                placeholder='Выбрать'
+                aria-label={t('Продать абонемент')}
+                placeholder={t('Выбрать')}
                 items={plans.map((plan) => ({
                   value: plan.id,
                   label: `${plan.title} · ${formatPrice(plan.price)}`,

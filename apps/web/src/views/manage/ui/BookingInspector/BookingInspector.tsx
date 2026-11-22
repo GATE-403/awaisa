@@ -11,11 +11,12 @@ import {
   Prohibit,
   WhatsappLogo,
 } from '@phosphor-icons/react/ssr'
-import { formatDuration, formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
+import { formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import { useVisitPhoto } from '@/features/visitPhoto'
 import { addBookingPhoto } from '@/shared/api/clientApi'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -37,12 +38,6 @@ interface BookingInspectorProps {
   onClose: () => void
 }
 
-const dayFormatter = new Intl.DateTimeFormat('ru-RU', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-})
-
 const capitalizeFirst = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 // A visit as staff need it, like an event inspector in Calendar: who first (face, name, number,
@@ -60,11 +55,12 @@ export const BookingInspector = ({
   onClose,
 }: BookingInspectorProps) => {
   const isTouch = useMediaQuery('(pointer: coarse)')
+  const t = useT()
   const isCancelled = booking.status === 'cancelled'
   const canBookAgain = isCancelled && onBookAgain !== undefined
   const digits = booking.customerPhone.replace(/\D/g, '')
   const total = booking.price - (booking.discount?.amount ?? 0)
-  const day = capitalizeFirst(dayFormatter.format(new Date(`${booking.date}T12:00:00`)))
+  const day = capitalizeFirst(t.dayShort(booking.date))
   const master = booking.specialistName.split(' ')[0]
   const visitPhoto = useVisitPhoto({
     upload: (bookingId, file) => addBookingPhoto(slug, bookingId, file),
@@ -86,7 +82,7 @@ export const BookingInspector = ({
       {isCancelled && (
         <p className={styles.status}>
           <Prohibit weight='bold' aria-hidden />
-          Запись отменена
+          {t('Запись отменена')}
         </p>
       )}
       {/* Who and what in two lines beside the face; the price on the right. */}
@@ -100,7 +96,7 @@ export const BookingInspector = ({
           >
             {booking.customerName}
             <CaretRight weight='bold' aria-hidden />
-            <span className={styles.srOnly}>: карточка клиента</span>
+            <span className={styles.srOnly}>: {t('карточка клиента')}</span>
           </button>
           <span className={styles.what}>
             {booking.serviceName} · {master}
@@ -120,11 +116,14 @@ export const BookingInspector = ({
 
       <p className={styles.when}>
         {day}, {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
-        {formatDuration(booking.durationMinutes)}
+        {t.duration(booking.durationMinutes)}
         {booking.discount && ` · ${booking.discount.title}`}
-        {booking.isBySubscription && ' · по абонементу'}
+        {booking.isBySubscription && ` · ${t('по абонементу')}`}
         {booking.payment &&
-          ` · предоплата ${formatPrice(booking.payment.amount)}, ${PAYMENT_STATUS_TEXT[booking.payment.status].toLowerCase()}`}
+          ` · ${t('предоплата {amount}, {status}', {
+            amount: formatPrice(booking.payment.amount),
+            status: t(PAYMENT_STATUS_TEXT[booking.payment.status]).toLowerCase(),
+          })}`}
       </p>
       {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
 
@@ -141,22 +140,22 @@ export const BookingInspector = ({
             onClick={() => onBookAgain(booking)}
           >
             <ArrowCounterClockwise aria-hidden />
-            Записать снова
+            {t('Записать снова')}
           </Button>
         ) : (
           <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
             <Phone weight='bold' aria-hidden />
-            Позвонить
+            {t('Позвонить')}
           </a>
         )}
-        <GlyphGroup label='Связаться с клиентом'>
+        <GlyphGroup label={t('Связаться с клиентом')}>
           <a
             className={styles.callGlyph}
             href={`tel:${booking.customerPhone}`}
             title={formatPhone(booking.customerPhone)}
           >
             <Phone aria-hidden />
-            <span className={styles.actionLabel}>Позвонить</span>
+            <span className={styles.actionLabel}>{t('Позвонить')}</span>
           </a>
           <a href={`https://wa.me/${digits}`} target='_blank' rel='noreferrer' title='WhatsApp'>
             <WhatsappLogo aria-hidden />
@@ -167,30 +166,30 @@ export const BookingInspector = ({
             <span className={styles.actionLabel}>SMS</span>
           </a>
           <Menu
-            label='Ещё действия'
+            label={t('Ещё действия')}
             trigger={
               <>
                 <DotsThree weight='bold' aria-hidden />
-                <span className={styles.actionLabel}>Ещё</span>
+                <span className={styles.actionLabel}>{t('Ещё')}</span>
               </>
             }
           >
             <MenuItem onClick={() => onOpenClient(booking.customerPhone)}>
-              Карточка клиента
+              {t('Карточка клиента')}
             </MenuItem>
             <MenuItem onClick={handleCopyPhone}>
-              Скопировать {formatPhone(booking.customerPhone)}
+              {t('Скопировать {phone}', { phone: formatPhone(booking.customerPhone) })}
             </MenuItem>
             {booking.outcome === 'arrived' && (
               <MenuItem onClick={() => visitPhoto.pick(booking.id)}>
-                {visitPhoto.uploadingId ? 'Загружаем фото…' : 'Фото работы'}
+                {visitPhoto.uploadingId ? t('Загружаем фото…') : t('Фото работы')}
               </MenuItem>
             )}
             {!isCancelled && (
               <>
                 <MenuSeparator />
                 <MenuItem variant='danger' onClick={() => void handleCancel()}>
-                  Отменить запись
+                  {t('Отменить запись')}
                 </MenuItem>
               </>
             )}

@@ -6,6 +6,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { checkSlug, createBusiness } from '@/shared/api/clientApi'
 import type { BusinessKind, SlugCheck } from '@/shared/api/types'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
+import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { slugify } from '@/shared/lib/slugify'
 import { trackFormError, trackStep } from '@/shared/lib/telemetry'
@@ -20,6 +21,7 @@ type CreateStep = (typeof STEPS)[number]
 type TemplateEdit = { isChecked: boolean; price: string }
 
 export const useCreateBusinessForm = () => {
+  const t = useT()
   const router = useRouter()
   const toast = useToast()
   const { customer } = useSession()
@@ -48,7 +50,7 @@ export const useCreateBusinessForm = () => {
   })
   const isNameValid = name.trim().length >= 2 && !(currentCheck && !currentCheck.available)
   const errors = {
-    name: hasTriedSubmit && name.trim().length < 2 ? 'Укажите название' : undefined,
+    name: hasTriedSubmit && name.trim().length < 2 ? t('Укажите название') : undefined,
     slug: currentCheck && !currentCheck.available ? currentCheck.reason : undefined,
   }
 
@@ -137,17 +139,18 @@ export const useCreateBusinessForm = () => {
         services,
       })
       toast.show({
-        title: 'Страница создана',
-        description:
+        title: t('Страница создана'),
+        description: t(
           services.length > 0
             ? 'Осталось добавить мастеров — и можно принимать записи'
             : 'Добавьте услуги и мастеров — и можно принимать записи',
+        ),
         type: 'success',
       })
       trackStep('register_done', business.slug)
       router.replace(`/manage/${business.slug}?tab=${services.length > 0 ? 'masters' : 'services'}`)
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
       setIsSubmitting(false)
     }
   }

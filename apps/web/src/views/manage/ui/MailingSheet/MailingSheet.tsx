@@ -12,12 +12,13 @@ import {
   setBirthdayGreeting,
 } from '@/shared/api/clientApi'
 import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
-import { pluralize } from '@/shared/lib/plural'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
+import { formatMomentDay } from '@/views/manage/ui/ClientSheet/BirthdayField'
 import { TemplateField } from '@/views/manage/ui/TemplateField/TemplateField'
 import styles from './MailingSheet.module.css'
 
@@ -37,7 +38,7 @@ const SEGMENTS: { value: MailingSegment; label: string }[] = [
   { value: 'all', label: 'Все' },
 ]
 
-const LAPSED_DAYS = [30, 60, 90, 180].map((days) => ({ value: days, label: `${days} дней` }))
+const LAPSED_DAYS = [30, 60, 90, 180]
 
 const templates = (name: string): Record<MailingSegment, string> => ({
   lapsed: `{имя}, давно вас не видели в ${name}! Запишитесь, когда удобно: {ссылка}`,
@@ -45,6 +46,7 @@ const templates = (name: string): Record<MailingSegment, string> => ({
   all: `{имя}, новости ${name}: {ссылка}`,
 })
 
+// Default words sent to clients: they stay Russian whatever the cabinet's language.
 // The placeholders a mailing takes, as pills in the shared template editor (the same as replies).
 const MAILING_TOKENS = [
   { key: 'имя', label: 'Имя клиента' },
@@ -61,6 +63,7 @@ export const MailingSheet = ({
   initialSegment = 'lapsed',
   onClose,
 }: MailingSheetProps) => {
+  const t = useT()
   const toast = useToast()
   const [segment, setSegment] = useState<MailingSegment>(initialSegment)
   const [days, setDays] = useState(60)
@@ -106,12 +109,14 @@ export const MailingSheet = ({
     try {
       const result = await sendMailing(slug, { segment, days, text })
       toast.show({
-        title: `Отправлено: ${pluralize(result.recipients, ['клиенту', 'клиентам', 'клиентам'])}`,
+        title: t('Отправлено: {clients}', {
+          clients: t.count(result.recipients, ['клиенту', 'клиентам', 'клиентам']),
+        }),
         type: 'success',
       })
       onClose()
     } catch (error) {
-      toast.show({ title: 'Не отправилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не отправилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSending(false)
     }
@@ -122,35 +127,46 @@ export const MailingSheet = ({
       const greeting = isOn ? `{имя}, с днём рождения! ${businessName} ждёт вас: {ссылка}` : null
       await setBirthdayGreeting(slug, greeting)
       setOverview((current) => (current ? { ...current, birthdayGreeting: greeting } : current))
-      toast.show({ title: isOn ? 'Будем поздравлять' : 'Поздравления выключены', type: 'success' })
+      toast.show({
+        title: isOn ? t('Будем поздравлять') : t('Поздравления выключены'),
+        type: 'success',
+      })
     } catch (error) {
-      toast.show({ title: 'Не сохранилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
   return (
     <Sheet
-      title='Рассылка'
+      title={t('Рассылка')}
       onClose={onClose}
       action={{
-        label: isSending ? 'Отправляем…' : 'Отправить',
+        label: isSending ? t('Отправляем…') : t('Отправить'),
         form: FORM_ID,
         disabled: !preview?.count || isSending || text.trim().length < 10,
       }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <SegmentedControl label='Кому' value={segment} items={SEGMENTS} onChange={changeSegment} />
+        <SegmentedControl
+          label={t('Кому')}
+          value={segment}
+          items={SEGMENTS.map((item) => ({ ...item, label: t(item.label) }))}
+          onChange={changeSegment}
+        />
 
-        <section className={sheet.group} aria-label='Кому'>
+        <section className={sheet.group} aria-label={t('Кому')}>
           <div className={sheet.list}>
             {segment === 'lapsed' && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Не были</span>
+                <span className={sheet.rowLabel}>{t('Не были')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label='Не были дольше'
-                    items={LAPSED_DAYS}
+                    aria-label={t('Не были дольше')}
+                    items={LAPSED_DAYS.map((value) => ({
+                      value,
+                      label: t.count(value, ['день', 'дня', 'дней']),
+                    }))}
                     value={days}
                     onValueChange={(value) => value && setDays(value)}
                   />
@@ -158,45 +174,51 @@ export const MailingSheet = ({
               </div>
             )}
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Получат</span>
+              <span className={sheet.rowLabel}>{t('Получат')}</span>
               <span className={styles.count} aria-live='polite'>
-                {preview === null
-                  ? '…'
-                  : pluralize(preview.count, ['клиент', 'клиента', 'клиентов'])}
+                {preview === null ? '…' : t.count(preview.count, ['клиент', 'клиента', 'клиентов'])}
               </span>
             </div>
           </div>
           <p className={sheet.groupFooter}>
             {preview && preview.names.length > 0
-              ? `${preview.names.join(', ')}${preview.count > preview.names.length ? ' и другие' : ''}. Только те, кто не отключал SMS.`
+              ? t('{names}. Только те, кто не отключал SMS.', {
+                  names:
+                    preview.count > preview.names.length
+                      ? t('{names} и другие', { names: preview.names.join(', ') })
+                      : preview.names.join(', '),
+                })
               : segment === 'birthday'
-                ? 'Дни рождения в ближайшую неделю — из карточек клиентов.'
-                : 'Только клиенты, которые не отключали SMS.'}
+                ? t('Дни рождения в ближайшую неделю: из карточек клиентов.')
+                : t('Только клиенты, которые не отключали SMS.')}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label='Текст'>
-          <SectionCaption>Текст</SectionCaption>
+        <section className={sheet.group} aria-label={t('Текст')}>
+          <SectionCaption>{t('Текст')}</SectionCaption>
           <div className={sheet.list}>
             <TemplateField
-              label='Текст рассылки'
+              label={t('Текст рассылки')}
               value={text}
               onChange={setText}
               tokens={MAILING_TOKENS}
-              placeholder='Напишите текст рассылки'
+              placeholder={t('Напишите текст рассылки')}
               preview={sample}
             />
           </div>
           <p className={sheet.groupFooter}>
-            ≈ {sent.length} символов, {pluralize(smsParts(sent), ['SMS', 'SMS', 'SMS'])} на клиента.
-            Имя и ссылка на запись подставятся каждому.
+            {t('≈ {chars}, {parts} на клиента.', {
+              chars: t.count(sent.length, ['символ', 'символа', 'символов']),
+              parts: t.count(smsParts(sent), ['SMS', 'SMS', 'SMS']),
+            })}{' '}
+            {t('Имя и ссылка на запись подставятся каждому.')}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label='Поздравления'>
+        <section className={sheet.group} aria-label={t('Поздравления')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Поздравлять с днём рождения</span>
+              <span className={sheet.rowLabel}>{t('Поздравлять с днём рождения')}</span>
               <Switch
                 checked={Boolean(overview?.birthdayGreeting)}
                 onCheckedChange={(checked) => void toggleBirthday(checked)}
@@ -204,25 +226,29 @@ export const MailingSheet = ({
             </label>
           </div>
           <p className={sheet.groupFooter}>
-            Каждый год в 11:00 в день рождения — одно SMS клиенту, у которого он указан в карточке.
+            {t(
+              'Каждый год в 11:00 в день рождения: одно SMS клиенту, у которого он указан в карточке.',
+            )}
           </p>
         </section>
 
         {overview && overview.history.length > 0 && (
-          <section className={sheet.group} aria-label='Отправленные'>
-            <SectionCaption>Отправленные</SectionCaption>
+          <section className={sheet.group} aria-label={t('Отправленные')}>
+            <SectionCaption>{t('Отправленные')}</SectionCaption>
             <div className={sheet.list}>
               {overview.history.slice(0, 5).map((item) => (
                 <div key={item.id} className={sheet.row}>
                   <span className={sheet.rowLabel}>
-                    {SEGMENTS.find((option) => option.value === item.segment)?.label} ·{' '}
-                    {new Date(item.createdAt).toLocaleDateString('ru-RU', {
-                      day: 'numeric',
-                      month: 'short',
-                      timeZone: BUSINESS_TIME_ZONE,
-                    })}
+                    {t(SEGMENTS.find((option) => option.value === item.segment)?.label ?? '')} ·{' '}
+                    {t.language === 'ru'
+                      ? new Date(item.createdAt).toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'short',
+                          timeZone: BUSINESS_TIME_ZONE,
+                        })
+                      : formatMomentDay(item.createdAt, t)}
                   </span>
-                  <span>{pluralize(item.recipients, ['клиент', 'клиента', 'клиентов'])}</span>
+                  <span>{t.count(item.recipients, ['клиент', 'клиента', 'клиентов'])}</span>
                 </div>
               ))}
             </div>

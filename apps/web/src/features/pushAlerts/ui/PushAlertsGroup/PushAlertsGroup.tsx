@@ -4,6 +4,7 @@ import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
+import { useT } from '@/shared/i18n'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -22,6 +23,7 @@ interface PushAlertsGroupProps {
 // comes only from this switch, never on load.
 export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProps) => {
   const toast = useToast()
+  const t = useT()
   const { state, enable, disable } = usePushAlerts()
   const [isBusy, setIsBusy] = useState(false)
 
@@ -37,27 +39,27 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
       if (isDone) {
         haptic('success')
         toast.show({
-          title: isOn ? 'Уведомления включены' : 'Уведомления выключены',
+          title: isOn ? t('Уведомления включены') : t('Уведомления выключены'),
           type: 'success',
         })
       }
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsBusy(false)
     }
   }
 
   return (
-    <section className={sheet.group} aria-label='Уведомления на этом устройстве'>
-      <SectionCaption>На этом устройстве</SectionCaption>
+    <section className={sheet.group} aria-label={t('Уведомления на этом устройстве')}>
+      <SectionCaption>{t('На этом устройстве')}</SectionCaption>
       {state === 'install' ? (
-        <RowNote>{INSTALL_HINT}</RowNote>
+        <RowNote>{t(INSTALL_HINT)}</RowNote>
       ) : (
         <>
           <div className={listClassName}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Уведомлять о записях</span>
+              <span className={sheet.rowLabel}>{t('Уведомлять о записях')}</span>
               <Switch
                 checked={state === 'on'}
                 disabled={isBusy || state === 'denied'}
@@ -65,7 +67,7 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
               />
             </label>
           </div>
-          <RowNote>{state === 'denied' ? deniedHint : AUDIENCE_NOTES[audience]}</RowNote>
+          <RowNote>{t(state === 'denied' ? deniedHint : AUDIENCE_NOTES[audience])}</RowNote>
         </>
       )}
     </section>

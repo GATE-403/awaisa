@@ -1,11 +1,13 @@
+'use client'
+
 import type { ReactNode } from 'react'
 import type { MoneyReport } from '@/shared/api/types'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { ScrollArea } from '@/shared/ui/ScrollArea/ScrollArea'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { expenseCategoryLabel, formatCount } from '@/views/manage/lib/cashFormat'
 import styles from './AnalyticsTab.module.css'
-import { formatMoney } from './analyticsFormat'
+import { analyticsFormat } from './analyticsFormat'
 
 interface ProfitSectionProps {
   money: MoneyReport
@@ -18,29 +20,33 @@ type Line = { key: string; title: string; meta?: string; amount: number }
 // «Прибыль»: what came in (services, products, subscriptions sold) and what went out (materials, products' cost,
 // expenses by category), the profit at the top. Right on the page, rows with hairlines.
 const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
+  const t = useT()
+  const { formatMoney } = analyticsFormat(t)
   const sold = money.products.reduce((sum, product) => sum + product.quantity, 0)
   const lines: Line[] = [
-    { key: 'services', title: 'Услуги', amount: money.servicesRevenue },
+    { key: 'services', title: t('Услуги'), amount: money.servicesRevenue },
     {
       key: 'products',
-      title: 'Товары',
-      meta: sold > 0 ? `продано ${formatCount(sold)} шт.` : undefined,
+      title: t('Товары'),
+      meta: sold > 0 ? t('продано {count} шт.', { count: formatCount(sold) }) : undefined,
       amount: money.productsRevenue,
     },
     {
       key: 'subscriptions',
-      title: 'Абонементы',
+      title: t('Абонементы'),
       meta:
-        money.subscriptionsSold > 0 ? `продано ${formatCount(money.subscriptionsSold)}` : undefined,
+        money.subscriptionsSold > 0
+          ? t('продано {count}', { count: formatCount(money.subscriptionsSold) })
+          : undefined,
       amount: money.subscriptionsRevenue,
     },
     // Paid online on that day; spending them on visits later is not counted again.
-    { key: 'certificates', title: 'Сертификаты', amount: money.certificatesRevenue },
-    { key: 'materials', title: 'Материалы на визиты', amount: -money.materialsCost },
-    { key: 'productsCost', title: 'Себестоимость товаров', amount: -money.productsCost },
+    { key: 'certificates', title: t('Сертификаты'), amount: money.certificatesRevenue },
+    { key: 'materials', title: t('Материалы на визиты'), amount: -money.materialsCost },
+    { key: 'productsCost', title: t('Себестоимость товаров'), amount: -money.productsCost },
     ...money.expensesByCategory.map((item) => ({
       key: `expense-${item.category}`,
-      title: expenseCategoryLabel(item.category),
+      title: t(expenseCategoryLabel(item.category)),
       amount: -item.amount,
     })),
   ].filter((line) => line.amount !== 0)
@@ -48,7 +54,7 @@ const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-profit'>
       <SectionCaption id='analytics-profit' isInset={false}>
-        Прибыль
+        {t('Прибыль')}
       </SectionCaption>
       <div className={styles.revenueHead}>
         <span className={styles.factValue} data-negative={money.profit < 0 || undefined}>
@@ -58,13 +64,17 @@ const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
         <span className={styles.revenueMeta}>
           {delta}
           {money.expenses > 0 && (
-            <span className={styles.muted}>расходы {formatMoney(Math.round(money.expenses))}</span>
+            <span className={styles.muted}>
+              {t('расходы {amount}', { amount: formatMoney(Math.round(money.expenses)) })}
+            </span>
           )}
         </span>
       </div>
       <ScrollArea
-        label='Из чего прибыль'
-        moreLabel={(count) => `Ещё ${pluralize(count, ['строка', 'строки', 'строк'])}`}
+        label={t('Из чего прибыль')}
+        moreLabel={(count) =>
+          t('Ещё {count}', { count: t.count(count, ['строка', 'строки', 'строк']) })
+        }
       >
         <ol className={styles.rows}>
           {lines.map((line) => (

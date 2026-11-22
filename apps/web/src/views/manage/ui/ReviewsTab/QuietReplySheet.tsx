@@ -2,7 +2,7 @@
 
 import { Select } from '@awaisa/ui/Select'
 import { type FormEvent, useState } from 'react'
-import { pluralize } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -25,14 +25,15 @@ const FORM_ID = 'quiet-reply'
 // «Ответить всем»: the backlog of good ratings left without a word gets one thank-you, filled per
 // client. Only reviews without text: whoever wrote something gets a reply of the owner's own.
 export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietReplySheetProps) => {
+  const t = useT()
   const [minRating, setMinRating] = useState<4 | 5>(counts.fiveStars > 0 ? 5 : 4)
   const [text, setText] = useState(template)
   const [isSending, setIsSending] = useState(false)
   const count = minRating === 5 ? counts.fiveStars : counts.fourAndUp
   const canSend = count > 0 && text.trim().length > 0 && !isSending
   const ratings = [
-    { value: 5 as const, label: `Только 5 ★ · ${counts.fiveStars}` },
-    { value: 4 as const, label: `4 и 5 ★ · ${counts.fourAndUp}` },
+    { value: 5 as const, label: `${t('Только 5 ★')} · ${counts.fiveStars}` },
+    { value: 4 as const, label: `${t('4 и 5 ★')} · ${counts.fourAndUp}` },
   ]
 
   const handleSubmit = async (event: FormEvent) => {
@@ -51,19 +52,19 @@ export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietRepl
 
   return (
     <Sheet
-      title='Ответить всем'
+      title={t('Ответить всем')}
       onClose={onClose}
-      action={{ label: 'Отправить', form: FORM_ID, disabled: !canSend }}
+      action={{ label: t('Отправить'), form: FORM_ID, disabled: !canSend }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label='Кому'>
+        <section className={sheet.group} aria-label={t('Кому')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Оценки</span>
+              <span className={sheet.rowLabel}>{t('Оценки')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label='На какие оценки ответить'
+                  aria-label={t('На какие оценки ответить')}
                   items={ratings}
                   value={minRating}
                   onValueChange={(value) => value && setMinRating(value)}
@@ -72,24 +73,26 @@ export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietRepl
             </div>
           </div>
           <p className={sheet.groupFooter}>
-            {`Ответ получат ${pluralize(count, [...REVIEW_WORDS])} без текста. На отзывы с текстом ответьте сами.`}
+            {t('Ответ получат {reviews} без текста. На отзывы с текстом ответьте сами.', {
+              reviews: t.count(count, [...REVIEW_WORDS]),
+            })}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label='Текст ответа'>
-          <SectionCaption>Ответ</SectionCaption>
+        <section className={sheet.group} aria-label={t('Текст ответа')}>
+          <SectionCaption>{t('Ответ')}</SectionCaption>
           <div className={sheet.list}>
             <TemplateField
-              label='Текст ответа'
+              label={t('Текст ответа')}
               value={text}
               onChange={setText}
-              placeholder='Напишите текст ответа'
+              placeholder={t('Напишите текст ответа')}
               tokens={TEMPLATE_TOKENS}
-              preview={fillReplyTemplate(text, SAMPLE_REVIEW) || 'Напишите текст ответа'}
+              preview={fillReplyTemplate(text, SAMPLE_REVIEW) || t('Напишите текст ответа')}
             />
           </div>
           <p className={sheet.groupFooter}>
-            Имя клиента, мастер и услуга подставятся в каждый ответ.
+            {t('Имя клиента, мастер и услуга подставятся в каждый ответ.')}
           </p>
         </section>
       </form>

@@ -20,7 +20,7 @@ import {
 } from '@phosphor-icons/react/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { type ReactNode, useEffect, useState } from 'react'
-import { formatDuration, formatPrice, getDaysAround } from '@/entities/booking'
+import { formatPrice, getDaysAround } from '@/entities/booking'
 import { findDay, parseClock, weekdayOf } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
@@ -32,10 +32,10 @@ import {
   reopenVisits,
 } from '@/shared/api/clientApi'
 import type { AdminBooking, Business, Catalog, ManagedWaitlistEntry } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { useToday } from '@/shared/lib/hooks/useToday'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { trackToastAction } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -103,6 +103,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const canSeeMoney = useCanSeeMoney()
   const canSell = useHasFeature('cashdesk')
   const toast = useToast()
+  const t = useT()
   const [unclosed, setUnclosed] = useState<{
     total: number
     days: { date: string; count: number }[]
@@ -145,10 +146,15 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     addTimeOff,
     removeTimeOff,
   } = useAdminSchedule(slug, date, refreshKey)
-  const dayLabel = days.find((day) => day.key === date)?.label ?? ''
-  const dayTitle = date
-    ? capitalizeFirst(dayTitleFormatter.format(new Date(`${date}T12:00:00`)))
-    : ''
+  const dayLabel =
+    t.language === 'ru' || !date
+      ? (days.find((day) => day.key === date)?.label ?? '')
+      : t.dayLong(date)
+  const dayTitle = !date
+    ? ''
+    : t.language === 'ru'
+      ? capitalizeFirst(dayTitleFormatter.format(new Date(`${date}T12:00:00`)))
+      : t.dayLong(date)
   const confirmed = schedule?.bookings.filter((booking) => booking.status === 'confirmed') ?? []
   // What the day brings: paid amounts once marked, prices otherwise; no-shows bring nothing.
   const revenue = confirmed.reduce(
@@ -185,13 +191,14 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       <span className={styles.dayTitle}>{dayTitle}</span>
       <span className={styles.dayStats}>
         {!dayHours ? (
-          'Выходной'
+          t('Выходной')
         ) : confirmed.length === 0 ? (
-          'Записей нет'
+          t('Записей нет')
         ) : (
           <>
             <strong>{confirmed.length}</strong>{' '}
-            {pluralWord(confirmed.length, ['запись', 'записи', 'записей'])}
+            {/* The figure is bold on its own: only the counted word follows it. */}
+            {t.count(confirmed.length, ['запись', 'записи', 'записей']).replace(/^\d+\s/, '')}
           </>
         )}
         {canSeeMoney && revenue > 0 && (
@@ -348,10 +355,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     try {
       await removeManagedWaitlist(slug, entry.id)
       setWaitlist((current) => current.filter((item) => item.id !== entry.id))
-      toast.show({ title: `${entry.customerName} больше не ждёт`, type: 'success' })
+      toast.show({
+        title: t('{name} больше не ждёт', { name: entry.customerName }),
+        type: 'success',
+      })
     } catch (removeError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(removeError),
         type: 'error',
       })
@@ -365,11 +375,13 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       const { ids } = await closeDay(slug, date)
       reload()
       toast.show({
-        title: `Отмечено: ${pluralize(ids.length, ['визит', 'визита', 'визитов'])}`,
-        description: 'Все пришли, оплата по прайсу наличными — поправьте, где было иначе',
+        title: t('Отмечено: {count}', {
+          count: t.count(ids.length, ['визит', 'визита', 'визитов']),
+        }),
+        description: t('Все пришли, оплата по прайсу наличными — поправьте, где было иначе'),
         type: 'success',
         action: {
-          label: 'Вернуть',
+          label: t('Вернуть'),
           onClick: () => {
             trackToastAction('staff_undo_close_day')
             void reopenVisits(slug, ids).then(reload)
@@ -378,7 +390,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
       })
     } catch (closeError) {
       toast.show({
-        title: 'Не получилось',
+        title: t('Не получилось'),
         description: getErrorMessage(closeError),
         type: 'error',
       })
@@ -387,16 +399,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
   const handleCreate = (specialistId: string, time: string | null) => {
     if (isPast) {
-      toast.show({ title: 'Записать в прошедший день нельзя', type: 'info' })
+      toast.show({ title: t('Записать в прошедший день нельзя'), type: 'info' })
       return
     }
     setDraft({ specialistId, time })
   }
 
   return (
-    <section className={styles.content} aria-label='Расписание'>
+    <section className={styles.content} aria-label={t('Расписание')}>
       <SectionHeader
-        title='Расписание'
+        title={t('Расписание')}
         description={
           <>
             {schedule ? summary : <span className={styles.dayTitle}>{dayTitle}</span>}
@@ -408,7 +420,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 onClick={() => setIsWaitlistOpen(true)}
               >
                 <BellRinging weight='fill' aria-hidden />
-                Ждут окна: {dayWaitlist.length} ›
+                {t('Ждут окна: {count}', { count: dayWaitlist.length })} ›
               </button>
             )}
           </>
@@ -417,16 +429,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           hasMasters && (
             <div className={styles.toolbar} data-wide ref={setToolbar}>
               <SegmentedControl
-                label='Вид расписания'
+                label={t('Вид расписания')}
                 size='sm'
                 value={layout}
-                items={LAYOUTS}
+                items={LAYOUTS.map((item) => ({ ...item, label: t(item.label) }))}
                 onChange={setLayout}
               />
               {!isPast && (
                 <>
                   {/* Secondary tools as one capsule of thin glyphs (named in tooltips). */}
-                  <GlyphGroup label='Инструменты дня'>
+                  <GlyphGroup label={t('Инструменты дня')}>
                     <span className={styles.wideToggle}>
                       <GlyphButton
                         icon={
@@ -436,30 +448,33 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                             <ArrowsOutLineHorizontal aria-hidden />
                           )
                         }
-                        label={isWide ? 'Обычный вид' : 'На всю ширину'}
+                        label={isWide ? t('Обычный вид') : t('На всю ширину')}
                         aria-pressed={isWide}
                         onClick={() => setWide(!isWide)}
                       />
                     </span>
                     <GlyphButton
                       icon={<Coffee aria-hidden />}
-                      label='Перерыв'
+                      label={t('Перерыв')}
                       onClick={() => setIsClosingTime(true)}
                     />
                     <GlyphButton
                       icon={<ShareNetwork aria-hidden />}
-                      label='Поделиться свободными окнами'
+                      label={t('Поделиться свободными окнами')}
                       onClick={() => setIsSharing(true)}
                       disabled={!schedule}
                     />
                     {canSell && (
                       <GlyphButton
                         icon={<ShoppingBag aria-hidden />}
-                        label='Продать товар'
+                        label={t('Продать товар')}
                         onClick={() => setSale({ booking: null })}
                       />
                     )}
-                    <Menu label='Найти место под услугу' trigger={<MagnifyingGlass aria-hidden />}>
+                    <Menu
+                      label={t('Найти место под услугу')}
+                      trigger={<MagnifyingGlass aria-hidden />}
+                    >
                       {catalog.services
                         .filter((service) => service.isActive !== false)
                         .map((service) => (
@@ -468,7 +483,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                             onClick={() => setFitServiceId(service.id)}
                             icon={
                               <span className={styles.menuMeta}>
-                                {formatDuration(service.durationMinutes)}
+                                {t.duration(service.durationMinutes)}
                               </span>
                             }
                           >
@@ -485,7 +500,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                     }
                   >
                     <Plus weight='bold' aria-hidden />
-                    <span className={styles.buttonLabel}>Новая запись</span>
+                    <span className={styles.buttonLabel}>{t('Новая запись')}</span>
                   </Button>
                 </>
               )}
@@ -498,7 +513,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         <div className={styles.error} role='alert'>
           <p>{error}</p>
           <Button variant='link' size='sm' onClick={reload}>
-            Повторить
+            {t('Повторить')}
           </Button>
         </div>
       )}
@@ -507,11 +522,12 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         // While the gaps for a service are lit, one capsule names it and turns the search off.
         <div className={styles.fitBar}>
           <span className={styles.fitText}>
-            Места для «{fitService.name}» · {formatDuration(fitService.durationMinutes)}
+            {t('Места для «{service}»', { service: fitService.name })} ·{' '}
+            {t.duration(fitService.durationMinutes)}
           </span>
           <Button variant='outline' size='sm' onClick={() => setFitServiceId(null)}>
             <X weight='bold' aria-hidden />
-            Готово
+            {t('Готово')}
           </Button>
         </div>
       )}
@@ -550,8 +566,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
 
         {schedule && !hasMasters && (
           <EmptyState
-            title='Добавьте мастеров'
-            text='Откройте раздел «Мастера» и добавьте хотя бы себя — здесь появится расписание.'
+            title={t('Добавьте мастеров')}
+            text={t(
+              'Откройте раздел «Мастера» и добавьте хотя бы себя — здесь появится расписание.',
+            )}
           />
         )}
 
@@ -605,7 +623,10 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
               if (!open) setSelected(null)
             }}
             anchor={selectedCard}
-            label={`Запись: ${selected.customerName}, ${selected.time}`}
+            label={t('Запись: {name}, {time}', {
+              name: selected.customerName,
+              time: selected.time,
+            })}
           >
             <BookingInspector
               key={selected.id}
@@ -708,7 +729,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
           schedule={schedule}
           catalog={catalog}
           dayHours={dayHours}
-          dayLabel={dayTitle.toLowerCase()}
+          dayLabel={t.language === 'ru' ? dayTitle.toLowerCase() : dayTitle}
           nowMinutes={today && date === today.dayKey ? today.minutes : null}
           slotMinutes={business.slotMinutes}
           onClose={() => setIsSharing(false)}

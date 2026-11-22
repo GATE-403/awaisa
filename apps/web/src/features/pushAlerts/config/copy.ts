@@ -1,3 +1,5 @@
+// Russian texts are the dictionary keys (`areas/cabinet.ts`): render them through `t()`.
+
 // iPhone Safari cannot take pushes: the site has to be on the home screen first (iOS 16.4+).
 const INSTALL_HINT =
   'На iPhone уведомления приходят только из приложения: «Поделиться» → «На экран Домой», затем включите их там.'

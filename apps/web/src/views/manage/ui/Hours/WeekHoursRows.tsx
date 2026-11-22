@@ -4,6 +4,7 @@ import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { findDay, formatClock, parseClock, TIME_OPTIONS, WEEKDAYS_FULL } from '@/entities/business'
 import type { WorkingDay } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import styles from '@/views/manage/ui/manageForms.module.css'
 
 type DayDraft = { isOpen: boolean; from: string; to: string }
@@ -38,6 +39,7 @@ const findInvalidDay = (days: DayDraft[]) =>
 // The week as Settings rows: the day on the left, its hours as plain pop-up values and the switch
 // on the right, like iOS. One editor for «График» in the settings and the page's «Время» sheet.
 export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
+  const t = useT()
   const invalidDay = findInvalidDay(days)
 
   return (
@@ -46,16 +48,16 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
         {days.map((day, weekday) => (
           <li key={WEEKDAYS_FULL[weekday]} className={styles.hoursRow}>
             <span className={styles.dayName}>
-              <span className={styles.dayFull}>{WEEKDAYS_FULL[weekday]}</span>
+              <span className={styles.dayFull}>{t(WEEKDAYS_FULL[weekday] ?? '')}</span>
               <span className={styles.dayShort} aria-hidden='true'>
-                {WEEKDAYS_SHORT[weekday]}
+                {t(WEEKDAYS_SHORT[weekday] ?? '')}
               </span>
             </span>
             {day.isOpen ? (
               <span className={styles.timeRange}>
                 <Select
                   variant='plain'
-                  aria-label={`${WEEKDAYS_FULL[weekday]}: открытие`}
+                  aria-label={t('{day}: открытие', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
                   items={TIME_ITEMS}
                   value={day.from}
                   onValueChange={(value) => value && onChange(weekday, { from: value })}
@@ -65,17 +67,17 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
                 </span>
                 <Select
                   variant='plain'
-                  aria-label={`${WEEKDAYS_FULL[weekday]}: закрытие`}
+                  aria-label={t('{day}: закрытие', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
                   items={TIME_ITEMS}
                   value={day.to}
                   onValueChange={(value) => value && onChange(weekday, { to: value })}
                 />
               </span>
             ) : (
-              <span className={styles.cellMuted}>Выходной</span>
+              <span className={styles.cellMuted}>{t('Выходной')}</span>
             )}
             <Switch
-              aria-label={`${WEEKDAYS_FULL[weekday]}: рабочий день`}
+              aria-label={t('{day}: рабочий день', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
               checked={day.isOpen}
               onCheckedChange={(isOpen) => onChange(weekday, { isOpen })}
             />
@@ -84,7 +86,9 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
       </ul>
       {invalidDay !== -1 && (
         <p className={styles.fieldError} role='alert'>
-          {WEEKDAYS_FULL[invalidDay]}: закрытие должно быть позже открытия
+          {t('{day}: закрытие должно быть позже открытия', {
+            day: t(WEEKDAYS_FULL[invalidDay] ?? ''),
+          })}
         </p>
       )}
     </>

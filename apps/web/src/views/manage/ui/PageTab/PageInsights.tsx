@@ -11,7 +11,7 @@ import {
   updatePromotion,
 } from '@/shared/api/clientApi'
 import type { PageStats, Promotion, PromotionInput, Service } from '@/shared/api/types'
-import { pluralWord } from '@/shared/lib/plural'
+import { useT } from '@/shared/i18n'
 import { describePromotion } from '@/shared/lib/promotionText'
 import { PromotionSheet } from '@/views/manage/ui/PromotionsTab/PromotionSheet'
 import styles from './PageTab.module.css'
@@ -35,6 +35,9 @@ const promotionText = (promotion: Promotion) =>
     ? `${describePromotion(promotion)} · ${promotion.code}`
     : describePromotion(promotion)
 
+// The count is drawn bold on its own, so only the words after it are kept.
+const wordsOf = (counted: string) => counted.replace(/^\S+\s/, '')
+
 // Under the bio, like a professional account's insights and its highlights: one footnote line
 // «За 7 дней: 18 записей · 120 просмотров ›» (to «Аналитика»), then the running promotions as the
 // clients see them as capsules and «+ Акция»; each opens the promotion's sheet right here.
@@ -45,6 +48,7 @@ export const PageInsights = ({
   run,
   todayKey,
 }: PageInsightsProps) => {
+  const t = useT()
   const [stats, setStats] = useState<PageStats | null>(null)
   const [promotions, setPromotions] = useState<Promotion[]>([])
   // Promotions are changed in their sheet right here, never in another tab.
@@ -71,25 +75,25 @@ export const PageInsights = ({
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
       setPromotions(await getManagedPromotions(slug))
-    }, 'Акция сохранена')
+    }, t('Акция сохранена'))
 
   const remove = (promotion: Promotion) =>
     void run(async () => {
       await deletePromotion(slug, promotion.id)
       setPromotions(await getManagedPromotions(slug))
-    }, 'Акция удалена')
+    }, t('Акция удалена'))
 
   const facts = stats
     ? [
         stats.bookings > 0 && {
           key: 'bookings',
           count: stats.bookings,
-          words: pluralWord(stats.bookings, ['запись', 'записи', 'записей']),
+          words: wordsOf(t.count(stats.bookings, ['запись', 'записи', 'записей'])),
         },
         stats.views > 0 && {
           key: 'views',
           count: stats.views,
-          words: pluralWord(stats.views, ['просмотр', 'просмотра', 'просмотров']),
+          words: wordsOf(t.count(stats.views, ['просмотр', 'просмотра', 'просмотров'])),
         },
       ].filter((fact) => fact !== false)
     : []
@@ -98,7 +102,9 @@ export const PageInsights = ({
     <>
       {facts.length > 0 && (
         <NextLink href={analyticsHref} scroll={false} className={styles.insights}>
-          <span>За {stats?.days} дней:</span>
+          <span>
+            {t('За {period}:', { period: t.count(stats?.days ?? 0, ['день', 'дня', 'дней']) })}
+          </span>
           {facts.map((fact, index) => (
             <span key={fact.key}>
               {index > 0 && ' · '}
@@ -108,7 +114,7 @@ export const PageInsights = ({
           <CaretRight weight='bold' aria-hidden />
         </NextLink>
       )}
-      <ul className={styles.promotions} aria-label='Акции'>
+      <ul className={styles.promotions} aria-label={t('Акции')}>
         {running.map((promotion) => (
           <li key={promotion.id}>
             <button
@@ -126,10 +132,10 @@ export const PageInsights = ({
             className={styles.promotion}
             data-add
             onClick={() => setEditing('new')}
-            aria-label='Новая акция'
+            aria-label={t('Новая акция')}
           >
             <Plus weight='bold' aria-hidden />
-            Акция
+            {t('Акция')}
           </button>
         </li>
       </ul>

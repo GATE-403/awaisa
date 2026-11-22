@@ -1,3 +1,4 @@
+// Russian texts are the dictionary keys (`areas/cabinet.ts`): render them through `t()`.
 const ROW_NOTES = {
   business: 'Записи в Календаре iPhone или Google: обновляются сами, кабинет открывать не нужно.',
   master:

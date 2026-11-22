@@ -40,9 +40,9 @@ import {
 import { formatPrice } from '@/entities/booking'
 import { addMinutes, formatClock, PersonAvatar, parseClock } from '@/entities/business'
 import type { AdminBooking, Specialist, TimeOff, WorkingDay } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
-import { pluralWord } from '@/shared/lib/plural'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import { blockState } from './blockState'
 import {
@@ -282,6 +282,7 @@ export const DayCalendar = ({
   onMoveBooking,
 }: DayCalendarProps) => {
   const [hoverStore] = useState(createHoverStore)
+  const t = useT()
   // A right click opens the visit's menu with a mouse; on touch screens a long press drags.
   const isFinePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
   // What the right click landed on: a visit, or a free spot in a master's lane.
@@ -380,9 +381,9 @@ export const DayCalendar = ({
   const dayOf = (specialist: DayCalendarProps['specialists'][number]) =>
     specialist.hours === undefined ? hours : specialist.hours
   const headNote = (specialist: DayCalendarProps['specialists'][number]) => {
-    if (specialist.isOnLeave) return specialist.leaveReason || 'Отпуск'
+    if (specialist.isOnLeave) return specialist.leaveReason || t('Отпуск')
     const day = dayOf(specialist)
-    if (!day) return 'Выходной'
+    if (!day) return t('Выходной')
     if (
       hours &&
       day.opensMinutes === hours.opensMinutes &&
@@ -774,20 +775,22 @@ export const DayCalendar = ({
       const hasStarted = isPast || (nowMinutes !== null && parseClock(booking.time) <= nowMinutes)
       return (
         <>
-          <MenuItem onClick={() => onSelectBooking(booking)}>Открыть запись</MenuItem>
+          <MenuItem onClick={() => onSelectBooking(booking)}>{t('Открыть запись')}</MenuItem>
           <MenuSeparator />
-          <MenuItem onClick={() => window.open(`tel:+${digits}`, '_self')}>Позвонить</MenuItem>
+          <MenuItem onClick={() => window.open(`tel:+${digits}`, '_self')}>
+            {t('Позвонить')}
+          </MenuItem>
           <MenuItem onClick={() => window.open(`https://wa.me/${digits}`, '_blank', 'noopener')}>
-            Написать в WhatsApp
+            {t('Написать в WhatsApp')}
           </MenuItem>
           {isLive && hasStarted && (onMarkArrived || onMarkNoShow) && (
             <>
               <MenuSeparator />
               {onMarkArrived && booking.outcome !== 'arrived' && (
-                <MenuItem onClick={() => onMarkArrived(booking)}>Пришёл</MenuItem>
+                <MenuItem onClick={() => onMarkArrived(booking)}>{t('Пришёл')}</MenuItem>
               )}
               {onMarkNoShow && booking.outcome !== 'no_show' && (
-                <MenuItem onClick={() => onMarkNoShow(booking)}>Не пришёл</MenuItem>
+                <MenuItem onClick={() => onMarkNoShow(booking)}>{t('Не пришёл')}</MenuItem>
               )}
             </>
           )}
@@ -795,7 +798,7 @@ export const DayCalendar = ({
             <>
               <MenuSeparator />
               <MenuItem variant='danger' onClick={() => onCancelBooking(booking)}>
-                Отменить запись
+                {t('Отменить запись')}
               </MenuItem>
             </>
           )}
@@ -811,8 +814,8 @@ export const DayCalendar = ({
           onCreateBooking(specialist.id, minutes === null ? null : formatClock(minutes))
         }
       >
-        Новая запись{minutes === null ? '' : ` · ${formatClock(minutes)}`} ·{' '}
-        {specialist.name.split(' ')[0]}
+        {t('Новая запись')}
+        {minutes === null ? '' : ` · ${formatClock(minutes)}`} · {specialist.name.split(' ')[0]}
       </MenuItem>
     )
   })()
@@ -886,13 +889,15 @@ export const DayCalendar = ({
         )
       })
       if (current) {
-        return `с клиентом до ${formatClock(parseClock(current.time) + current.durationMinutes)}`
+        return t('с клиентом до {time}', {
+          time: formatClock(parseClock(current.time) + current.durationMinutes),
+        })
       }
     }
     const { freeFrom } = loadOf(specialist)
-    if (freeFrom === null) return 'занят до конца дня'
-    if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return 'свободен сейчас'
-    return `свободен с ${formatClock(freeFrom)}`
+    if (freeFrom === null) return t('занят до конца дня')
+    if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return t('свободен сейчас')
+    return t('свободен с {time}', { time: formatClock(freeFrom) })
   }
   const ringStyle = (specialist: DayCalendarProps['specialists'][number]) =>
     ({ '--load': `${Math.round(loadOf(specialist).share * 360)}deg` }) as CSSProperties
@@ -919,12 +924,12 @@ export const DayCalendar = ({
     const Trail = isTimeline ? CaretRight : CaretDown
     const where = isTimeline
       ? side === 'before'
-        ? 'раньше'
-        : 'позже'
+        ? '{count} раньше'
+        : '{count} позже'
       : side === 'before'
-        ? 'выше'
-        : 'ниже'
-    const count = `${visits.length} ${pluralWord(visits.length, ['запись', 'записи', 'записей'])} ${where}`
+        ? '{count} выше'
+        : '{count} ниже'
+    const count = t(where, { count: t.count(visits.length, ['запись', 'записи', 'записей']) })
     const content = (
       <>
         {side === 'before' && <Lead weight='bold' aria-hidden />}
@@ -1010,14 +1015,14 @@ export const DayCalendar = ({
         // and when they are free next — where a new client fits.
         <div className={styles.viewBar}>
           <fieldset className={styles.track}>
-            <legend className={styles.trackLegend}>Мастера</legend>
+            <legend className={styles.trackLegend}>{t('Мастера')}</legend>
             <button
               type='button'
               className={styles.trackAll}
               aria-pressed={focusId === null}
               onClick={() => setFocusId(null)}
             >
-              Все
+              {t('Все')}
             </button>
             {specialists.map((specialist) => {
               const isChosen = focusId === specialist.id
@@ -1030,15 +1035,15 @@ export const DayCalendar = ({
               )
               const note =
                 day === null || specialist.isOnLeave
-                  ? (headNote(specialist) ?? 'Выходной')
+                  ? (headNote(specialist) ?? t('Выходной'))
                   : load.share === 0 && !isPast
-                    ? 'свободен весь день'
-                    : `занят на ${Math.round(load.share * 100)}%${
+                    ? t('свободен весь день')
+                    : `${t('занят на {percent}%', { percent: Math.round(load.share * 100) })}${
                         isPast
                           ? ''
                           : load.freeFrom === null
-                            ? ' · до конца дня'
-                            : ` · свободен с ${formatClock(load.freeFrom)}`
+                            ? ` · ${t('до конца дня')}`
+                            : ` · ${t('свободен с {time}', { time: formatClock(load.freeFrom) })}`
                       }`
               return (
                 <button
@@ -1081,7 +1086,7 @@ export const DayCalendar = ({
         <div className={styles.zoomPill}>
           <button
             type='button'
-            aria-label='Уменьшить масштаб'
+            aria-label={t('Уменьшить масштаб')}
             disabled={zoom <= MIN_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom / 1.5))}
           >
@@ -1090,7 +1095,7 @@ export const DayCalendar = ({
           <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
           <button
             type='button'
-            aria-label='Увеличить масштаб'
+            aria-label={t('Увеличить масштаб')}
             disabled={zoom >= MAX_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom * 1.5))}
           >
@@ -1108,7 +1113,7 @@ export const DayCalendar = ({
         >
           {isTimeline && nowSide === 'before' && <ArrowLeft weight='bold' aria-hidden />}
           {!isTimeline && nowSide === 'before' && <ArrowUp weight='bold' aria-hidden />}
-          Сейчас {formatClock(nowMinutes)}
+          {t('Сейчас')} {formatClock(nowMinutes)}
           {isTimeline && nowSide === 'after' && <ArrowRight weight='bold' aria-hidden />}
           {!isTimeline && nowSide === 'after' && <ArrowDown weight='bold' aria-hidden />}
         </button>
@@ -1204,7 +1209,7 @@ export const DayCalendar = ({
                 <button
                   type='button'
                   className={styles.slotTarget}
-                  aria-label={`Новая запись к мастеру ${specialist.name}`}
+                  aria-label={t('Новая запись к мастеру {name}', { name: specialist.name })}
                   // A mouse press must not focus the lane: the new-booking sheet gives focus back on
                   // close, and the whole lane then wore a focus ring.
                   onMouseDown={(event) => event.preventDefault()}
@@ -1241,7 +1246,7 @@ export const DayCalendar = ({
                       <Plus weight='bold' aria-hidden />
                       {formatClock(gap.from)}–{formatClock(gap.to)}
                       <span className={styles.srOnlyText}>
-                        : записать к мастеру {specialist.name}
+                        : {t('записать к мастеру {name}', { name: specialist.name })}
                       </span>
                     </button>
                   ))}
@@ -1326,8 +1331,8 @@ export const DayCalendar = ({
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       {dayOf(specialist) === null || specialist.isOnLeave
-                        ? (headNote(specialist) ?? 'Выходной')
-                        : 'без записей'}
+                        ? (headNote(specialist) ?? t('Выходной'))
+                        : t('без записей')}
                     </span>
                   ) : (
                     <button
@@ -1340,11 +1345,13 @@ export const DayCalendar = ({
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       <span>
-                        свободен<span className={styles.laneNoteLong}> весь день</span>
+                        {t('свободен')}
+                        <span className={styles.laneNoteLong}> {t('весь день')}</span>
                       </span>
                       <span className={styles.laneBook}>
                         <Plus weight='bold' aria-hidden />
-                        Записать
+                        {/* «Записать» is «record» elsewhere in the cabinet: booking has its own key. */}
+                        {t.language === 'ru' ? 'Записать' : t('Записать (клиента)')}
                       </span>
                     </button>
                   ))}
@@ -1378,11 +1385,14 @@ export const DayCalendar = ({
                       <span className={styles.blockTime}>
                         {item.from}–{item.to}
                       </span>
-                      <span className={styles.blockTitle}>{item.reason || 'Время закрыто'}</span>
+                      <span className={styles.blockTitle}>{item.reason || t('Время закрыто')}</span>
                       <button
                         type='button'
                         className={styles.remove}
-                        aria-label={`Открыть время ${item.from}–${item.to}`}
+                        aria-label={t('Открыть время {from}–{to}', {
+                          from: item.from,
+                          to: item.to,
+                        })}
                         onClick={() => onRemoveTimeOff(item.id)}
                       >
                         <X weight='bold' aria-hidden />
@@ -1449,27 +1459,27 @@ export const DayCalendar = ({
                         }
                       >
                         <legend className={styles.srOnlyText}>
-                          Пришёл ли {booking.customerName}?
+                          {t('Пришёл ли {name}?', { name: booking.customerName })}
                         </legend>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='arrived'
-                          title='Пришёл'
+                          title={t('Пришёл')}
                           onClick={() => onMarkArrived(booking)}
                         >
                           <Check weight='bold' aria-hidden />
-                          <span className={styles.markLabel}>Пришёл</span>
+                          <span className={styles.markLabel}>{t('Пришёл')}</span>
                         </button>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='no-show'
-                          title='Не пришёл'
+                          title={t('Не пришёл')}
                           onClick={() => onMarkNoShow(booking)}
                         >
                           <X weight='bold' aria-hidden />
-                          <span className={styles.markLabel}>Не пришёл</span>
+                          <span className={styles.markLabel}>{t('Не пришёл')}</span>
                         </button>
                       </fieldset>
                     )
@@ -1504,7 +1514,7 @@ export const DayCalendar = ({
                           onClick={() => {
                             if (!drag.consumeClick()) onSelectBooking(booking)
                           }}
-                          aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? ', отменена' : ''}${booking.outcome === 'arrived' ? ', пришёл' : booking.outcome === 'no_show' ? ', не пришёл' : ''}`}
+                          aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? `, ${t('отменена')}` : ''}${booking.outcome === 'arrived' ? `, ${t('пришёл')}` : booking.outcome === 'no_show' ? `, ${t('не пришёл')}` : ''}`}
                         >
                           {size === 'compact' ? (
                             <span className={styles.blockLine}>
@@ -1527,7 +1537,7 @@ export const DayCalendar = ({
                               </span>
                               <span className={styles.blockState} data-tone={state.tone}>
                                 <StateGlyph label={state.label} />
-                                <span className={styles.stateWord}>{state.label}</span>
+                                <span className={styles.stateWord}>{t(state.label)}</span>
                               </span>
                             </span>
                           )}
@@ -1538,7 +1548,7 @@ export const DayCalendar = ({
                             {booking.serviceName}
                             {size !== 'compact' &&
                               (progress !== null && nowMinutes !== null
-                                ? ` · ещё ${to - nowMinutes} мин`
+                                ? ` · ${t('ещё {count} мин', { count: to - nowMinutes })}`
                                 : ` · ${formatPrice(paid)}`)}
                           </span>
                           {/* The visit under way: how much of it has passed, as a thin bar. */}

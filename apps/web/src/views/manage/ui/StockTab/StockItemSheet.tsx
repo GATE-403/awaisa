@@ -6,6 +6,7 @@ import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { type FormEvent, useState } from 'react'
 import type { Service, StockItem, StockItemInput } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -26,7 +27,8 @@ interface StockItemSheetProps {
 
 const FORM_ID = 'stock-item-form'
 
-const UNITS = ['шт', 'мл', 'г', 'пара', 'уп'].map((unit) => ({ value: unit, label: unit }))
+// Stored as these words; translated only where shown.
+const UNITS = ['шт', 'мл', 'г', 'пара', 'уп']
 
 // Quantities may be fractional (12,5 мл): keep digits and one decimal separator.
 const maskDecimal = (value: string) => {
@@ -48,6 +50,7 @@ export const StockItemSheet = ({
   onAdjust,
   onDelete,
 }: StockItemSheetProps) => {
+  const t = useT()
   const [name, setName] = useState(item?.name ?? '')
   const [unit, setUnit] = useState(item?.unit ?? 'мл')
   const [unitCost, setUnitCost] = useState(item ? String(item.unitCost) : '')
@@ -106,107 +109,110 @@ export const StockItemSheet = ({
 
   return (
     <Sheet
-      title={item ? (item.isForSale ? 'Товар' : 'Расходник') : 'Новый расходник'}
+      title={t(item ? (item.isForSale ? 'Товар' : 'Расходник') : 'Новый расходник')}
       onClose={onClose}
-      action={{ label: 'Сохранить', form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label='Название'
-              placeholder='Например, «Краска для волос»'
+              aria-label={t('Название')}
+              placeholder={t('Например, «Краска для волос»')}
               value={name}
               onValueChange={setName}
               autoFocus={!item}
             />
           </div>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>Единица</span>
+            <span className={sheet.rowLabel}>{t('Единица')}</span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'
-                aria-label='Единица'
-                items={UNITS}
+                aria-label={t('Единица')}
+                items={UNITS.map((value) => ({ value, label: t(value) }))}
                 value={unit}
                 onValueChange={(value) => value && setUnit(value)}
               />
             </span>
           </div>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Цена за {unit}</span>
+            <span className={sheet.rowLabel}>{t('Цена за {unit}', { unit: t(unit) })}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label='Цена за единицу, сом'
+                aria-label={t('Цена за единицу, сом')}
                 inputMode='decimal'
                 placeholder='0'
                 value={unitCost}
                 onValueChange={(value) => setUnitCost(maskDecimal(value))}
               />
-              <span className={sheet.suffix}>сом</span>
+              <span className={sheet.suffix}>{t('сом')}</span>
             </span>
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>Предупредить, когда</span>
+            <span className={sheet.rowLabel}>{t('Предупредить, когда')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label='Минимальный остаток'
+                aria-label={t('Минимальный остаток')}
                 inputMode='decimal'
-                placeholder='Не нужно'
+                placeholder={t('Не нужно')}
                 value={minQuantity}
                 onValueChange={(value) => setMinQuantity(maskDecimal(value))}
               />
-              {minQuantity !== '' && <span className={sheet.suffix}>{unit}</span>}
+              {minQuantity !== '' && <span className={sheet.suffix}>{t(unit)}</span>}
             </span>
           </label>
         </div>
 
-        <section className={sheet.group} aria-label='Продажа'>
+        <section className={sheet.group} aria-label={t('Продажа')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Продаётся клиентам</span>
+              <span className={sheet.rowLabel}>{t('Продаётся клиентам')}</span>
               <Switch checked={isForSale} onCheckedChange={setIsForSale} />
             </label>
             {isForSale && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Цена продажи</span>
+                <span className={sheet.rowLabel}>{t('Цена продажи')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label='Цена продажи, сом'
+                    aria-label={t('Цена продажи, сом')}
                     inputMode='decimal'
                     placeholder='0'
                     value={salePrice}
                     onValueChange={(value) => setSalePrice(maskDecimal(value))}
                   />
-                  <span className={sheet.suffix}>сом</span>
+                  <span className={sheet.suffix}>{t('сом')}</span>
                 </span>
               </label>
             )}
           </div>
           <p className={sheet.groupFooter}>
             {isForSale
-              ? 'Продаётся в «Кассе» и в итоге визита, остаток уменьшается сам.'
-              : 'Шампунь, воск, масло: продавайте с визитом или отдельно.'}
+              ? t('Продаётся в «Кассе» и в итоге визита, остаток уменьшается сам.')
+              : t('Шампунь, воск, масло: продавайте с визитом или отдельно.')}
           </p>
         </section>
 
         {item && (
-          <section className={sheet.group} aria-label='Остаток'>
+          <section className={sheet.group} aria-label={t('Остаток')}>
             <SectionCaption>
-              Остаток · {formatQuantity(item.quantity)} {item.unit}
+              {t('Остаток · {count} {unit}', {
+                count: formatQuantity(item.quantity),
+                unit: t(item.unit),
+              })}
             </SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label='Приход'
+                    aria-label={t('Приход')}
                     inputMode='decimal'
-                    placeholder={`Приход, ${unit}`}
+                    placeholder={t('Приход, {unit}', { unit: t(unit) })}
                     value={received}
                     onValueChange={(value) => setReceived(maskDecimal(value))}
                   />
@@ -217,15 +223,17 @@ export const StockItemSheet = ({
                   disabled={parseDecimal(received) <= 0}
                   onClick={() => void receive()}
                 >
-                  Принять
+                  {t('Принять')}
                 </Button>
               </div>
               {parseDecimal(received) > 0 && (
                 <label className={sheet.row}>
                   <span className={sheet.rowLabel}>
-                    Записать в расходы ·{' '}
-                    {maskAmountInput(String(Math.round(parseDecimal(received) * item.unitCost)))}{' '}
-                    сом
+                    {t('Записать в расходы · {amount} сом', {
+                      amount: maskAmountInput(
+                        String(Math.round(parseDecimal(received) * item.unitCost)),
+                      ),
+                    })}
                   </span>
                   <Switch checked={isReceivedExpense} onCheckedChange={setIsReceivedExpense} />
                 </label>
@@ -234,9 +242,9 @@ export const StockItemSheet = ({
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label='Остаток по факту'
+                    aria-label={t('Остаток по факту')}
                     inputMode='decimal'
-                    placeholder='Остаток по факту'
+                    placeholder={t('Остаток по факту')}
                     value={counted}
                     onValueChange={(value) => setCounted(maskDecimal(value))}
                   />
@@ -247,7 +255,7 @@ export const StockItemSheet = ({
                   disabled={counted === ''}
                   onClick={() => void adjust()}
                 >
-                  Исправить
+                  {t('Исправить')}
                 </Button>
               </div>
             </div>
@@ -255,8 +263,8 @@ export const StockItemSheet = ({
         )}
 
         {services.length > 0 && (
-          <section className={sheet.group} aria-label='Расход на услугу'>
-            <SectionCaption>Расход на одну услугу</SectionCaption>
+          <section className={sheet.group} aria-label={t('Расход на услугу')}>
+            <SectionCaption>{t('Расход на одну услугу')}</SectionCaption>
             <div className={sheet.list}>
               {services.map((service) => (
                 <label key={service.id} className={sheet.row}>
@@ -264,7 +272,7 @@ export const StockItemSheet = ({
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
-                      aria-label={`Расход: ${service.name}`}
+                      aria-label={t('Расход: {name}', { name: service.name })}
                       inputMode='decimal'
                       placeholder='—'
                       value={amounts[service.id] ?? ''}
@@ -272,15 +280,18 @@ export const StockItemSheet = ({
                         setAmounts((current) => ({ ...current, [service.id]: maskDecimal(value) }))
                       }
                     />
-                    {amounts[service.id] && <span className={sheet.suffix}>{unit}</span>}
+                    {amounts[service.id] && <span className={sheet.suffix}>{t(unit)}</span>}
                   </span>
                 </label>
               ))}
             </div>
             <p className={sheet.groupFooter}>
               {example && exampleCost > 0
-                ? `«${example.name}» — ${maskAmountInput(String(exampleCost))} сом материалов за визит.`
-                : 'Сколько уходит на один визит — спишется, когда визит отмечен «Пришёл».'}
+                ? t('«{name}» — {amount} сом материалов за визит.', {
+                    name: example.name,
+                    amount: maskAmountInput(String(exampleCost)),
+                  })
+                : t('Сколько уходит на один визит — спишется, когда визит отмечен «Пришёл».')}
             </p>
           </section>
         )}
@@ -292,7 +303,7 @@ export const StockItemSheet = ({
               onClose()
             }}
           >
-            Удалить позицию
+            {t('Удалить позицию')}
           </HoldButton>
         )}
       </form>
