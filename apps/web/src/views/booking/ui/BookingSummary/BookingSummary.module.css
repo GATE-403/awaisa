@@ -348,7 +348,8 @@
   --leaf-radius: 18px;
   --ready-inset: 6px;
 
-  padding: var(--ready-inset);
+  /* A little more on the left: at the bare inset the leaf sat against the capsule's curve. */
+  padding: var(--ready-inset) var(--ready-inset) var(--ready-inset) 10px;
   border-radius: var(--radius-full);
 }
 
