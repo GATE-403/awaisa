@@ -349,11 +349,11 @@
 }
 
 /* Ready to book: the same capsule as before, with a capsule button («как во втором варианте»: a
-   rounded rect bar and button read as square). The leaf sits in the capsule's own inset: rounder
-   than a square tile, short of a circle (a round leaf no longer read as a calendar), its corner
-   well inside the capsule's curve. */
+   rounded rect bar and button read as square). The leaf is concentric with the capsule like the
+   button, half its height on the same 6 inset: the owner chose that over a rounded square
+   («сделать концентричным»), the red month band keeps it a calendar. */
 .bar[data-ready] {
-  --leaf-radius: 18px;
+  --leaf-radius: calc(var(--control-height-lg) / 2);
 
   /* The leaf on the same 6 inset as the button: at 10 the gap on the left read as too wide
      («слишком большой отступ»). */
@@ -449,7 +449,8 @@
 }
 
 .barLeafMonth {
-  padding: 3px 0 2px;
+  /* Lower in the band: in the round leaf a month at its very top was cut by the curve. */
+  padding: 7px 0 2px;
   background: var(--color-danger-strong);
   color: var(--color-primary-foreground);
   font-size: 9px;
