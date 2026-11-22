@@ -22,8 +22,6 @@ import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
-import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
-import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
@@ -35,7 +33,7 @@ import { BookingReview } from '@/views/booking/ui/BookingReview/BookingReview'
 import { BookingStep } from '@/views/booking/ui/BookingStep/BookingStep'
 import { BookingSuccess } from '@/views/booking/ui/BookingSuccess/BookingSuccess'
 import { BookingSummary } from '@/views/booking/ui/BookingSummary/BookingSummary'
-import { BookingScrim, BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
+import { BookingTopBar } from '@/views/booking/ui/BookingTopBar/BookingTopBar'
 import { CardStack, type StackCardProps } from '@/views/booking/ui/CardStack/CardStack'
 import { MasterPicker } from '@/views/booking/ui/MasterPicker/MasterPicker'
 import { NotifyOptions } from '@/views/booking/ui/NotifyOptions/NotifyOptions'
@@ -82,13 +80,10 @@ export const BookingPage = ({
     if (next.date === addDayKey(todayKey, 1)) return t('Завтра с {time}', { time: next.time })
     return null
   }
-  usePageScrollLock()
-  const screenRef = useRef<HTMLElement>(null)
   // The deposit's terms reached the screen before the name and number were asked for.
   const trackDepositShown = (node: HTMLElement | null) => {
     if (node) trackStep('deposit_shown', business.slug)
   }
-  useInertOutside(screenRef, Boolean(form.createdBooking))
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
   // The contacts fold into a card too, once the number is whole (or «Готово» is pressed), so the
@@ -190,22 +185,16 @@ export const BookingPage = ({
 
   if (form.createdBooking) {
     return (
-      <>
-        <BookingScrim slug={business.slug} isModal={isModal} />
-        <main
-          ref={screenRef}
-          className={styles.page}
-          data-booking-screen=''
-          data-sheet-drag=''
-          style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
-        >
-          <div className={styles.wash} aria-hidden />
-          <BookingTopBar business={business} isModal={isModal} />
-          <Container size='md'>
-            <BookingSuccess booking={form.createdBooking} />
-          </Container>
-        </main>
-      </>
+      <div
+        className={styles.content}
+        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+      >
+        <div className={styles.wash} aria-hidden />
+        <BookingTopBar business={business} isModal={isModal} />
+        <Container size='md'>
+          <BookingSuccess booking={form.createdBooking} />
+        </Container>
+      </div>
     )
   }
 
@@ -521,376 +510,366 @@ export const BookingPage = ({
   )
 
   return (
-    <>
-      <BookingScrim slug={business.slug} isModal={isModal} />
-      <main
-        ref={screenRef}
-        className={styles.page}
-        data-booking-screen=''
-        data-sheet-drag=''
-        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
-      >
-        <div className={styles.wash} aria-hidden />
-        <BookingTopBar business={business} isModal={isModal} />
-        <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
-          <div className={styles.steps}>
-            {isQuickShown && quickService && (
-              <QuickSlots
-                title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}
-                subtitle={`${quickService.name}, ${quickMaster}`}
-                slots={quick.slots}
-                isLoading={quick.isLoading}
-                todayKey={form.today?.dayKey ?? null}
-                onPick={pickQuickSlot}
-              />
-            )}
+    <div
+      className={styles.content}
+      style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+    >
+      <div className={styles.wash} aria-hidden />
+      <BookingTopBar business={business} isModal={isModal} />
+      <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
+        <div className={styles.steps}>
+          {isQuickShown && quickService && (
+            <QuickSlots
+              title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}
+              subtitle={`${quickService.name}, ${quickMaster}`}
+              slots={quick.slots}
+              isLoading={quick.isLoading}
+              todayKey={form.today?.dayKey ?? null}
+              onPick={pickQuickSlot}
+            />
+          )}
 
-            {isReviewing && form.service && form.dayKey && form.time ? (
-              <BookingReview
-                business={business}
-                branchAddress={
-                  form.branches.find((branch) => branch.id === form.branchId)?.address ??
-                  business.address ??
-                  null
-                }
-                service={form.service ?? null}
-                specialist={
-                  catalog.specialists.find((specialist) => specialist.id === form.specialistId) ??
-                  null
-                }
-                dayKey={form.dayKey}
-                time={form.time}
-                name={form.name}
-                phone={form.accountPhone ?? form.phone}
-                comment={form.comment}
-                quote={form.quote}
-                onEdit={summaryProps.onStepOpen}
-                action={
-                  <>
-                    <Button size='lg' fullWidth onClick={form.submit} disabled={form.isSubmitting}>
-                      {form.isSubmitting ? t('Записываем…') : t('Записаться')}
-                    </Button>
-                    {form.submitError && (
-                      <p className={styles.submitError} role='alert'>
-                        {form.submitError}
-                      </p>
-                    )}
-                  </>
-                }
-              />
-            ) : (
-              <>
-                <CardStack
-                  cards={stackCards}
-                  onEdit={(step) => openStep(step as BookingStepId | 'branch')}
-                  onStartOver={form.isStarted ? form.startOver : undefined}
-                />
-
-                {isBranchOpen && (
-                  <BookingStep id='branch' title={t('Куда приедете?')}>
-                    {/* Each branch a row with its full address and how far it is, the chosen
-                        one checked; picking one folds it back into its card. */}
-                    <fieldset className={`${styles.group} ${styles.branchList}`}>
-                      <legend className={styles.srOnly}>{t('Филиал')}</legend>
-                      {form.branches.map((branch) => {
-                        const distance = form.branchDistances?.[branch.id]
-                        const isChosen = form.branchId === branch.id
-                        return (
-                          <label key={branch.id} className={styles.branchRow}>
-                            <input
-                              type='radio'
-                              name='booking-branch'
-                              className={styles.branchRadio}
-                              checked={isChosen}
-                              onChange={() => form.selectBranch(branch.id)}
-                              // Also a tap on the branch already chosen: it folds back into its card.
-                              onClick={() => setIsBranchOpen(false)}
-                            />
-                            <span className={styles.branchText}>
-                              <span className={styles.branchName}>{branch.name}</span>
-                              <span className={styles.branchAddress}>
-                                {branch.address}
-                                {distance !== undefined && ` · ${formatDistance(distance)}`}
-                              </span>
-                            </span>
-                            {isChosen && (
-                              <Check weight='bold' className={styles.branchCheck} aria-hidden />
-                            )}
-                          </label>
-                        )
-                      })}
-                    </fieldset>
-                    {(() => {
-                      const chosen = form.branches.find((branch) => branch.id === form.branchId)
-                      if (!chosen || chosen.latitude === null || chosen.longitude === null)
-                        return null
-                      return (
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${chosen.latitude},${chosen.longitude}`}
-                          target='_blank'
-                          rel='noreferrer'
-                          className={styles.branchRoute}
-                        >
-                          {t('Маршрут до «{name}» ›', { name: chosen.name })}
-                        </a>
-                      )
-                    })()}
-                  </BookingStep>
-                )}
-
-                {/* One more service in the same visit, by the same master right after: a quiet
-                    capsule under the stack, never in the way of the one-tap first choice. */}
-                {!isBranchOpen &&
-                  !form.isAddingService &&
-                  activeStep !== 'service' &&
-                  form.addableServices.length > 0 && (
-                    <div className={styles.addService}>
-                      <Button
-                        variant='secondary'
-                        size='md'
-                        onClick={() => {
-                          setIsReviewRequested(false)
-                          setIsContactsDone(false)
-                          form.openAddService()
-                        }}
-                      >
-                        <Plus aria-hidden />
-                        {t('Ещё услуга')}
-                      </Button>
-                    </div>
+          {isReviewing && form.service && form.dayKey && form.time ? (
+            <BookingReview
+              business={business}
+              branchAddress={
+                form.branches.find((branch) => branch.id === form.branchId)?.address ??
+                business.address ??
+                null
+              }
+              service={form.service ?? null}
+              specialist={
+                catalog.specialists.find((specialist) => specialist.id === form.specialistId) ??
+                null
+              }
+              dayKey={form.dayKey}
+              time={form.time}
+              name={form.name}
+              phone={form.accountPhone ?? form.phone}
+              comment={form.comment}
+              quote={form.quote}
+              onEdit={summaryProps.onStepOpen}
+              action={
+                <>
+                  <Button size='lg' fullWidth onClick={form.submit} disabled={form.isSubmitting}>
+                    {form.isSubmitting ? t('Записываем…') : t('Записаться')}
+                  </Button>
+                  {form.submitError && (
+                    <p className={styles.submitError} role='alert'>
+                      {form.submitError}
+                    </p>
                   )}
+                </>
+              }
+            />
+          ) : (
+            <>
+              <CardStack
+                cards={stackCards}
+                onEdit={(step) => openStep(step as BookingStepId | 'branch')}
+                onStartOver={form.isStarted ? form.startOver : undefined}
+              />
 
-                {!isBranchOpen && form.isAddingService && form.service && (
-                  <BookingStep
-                    id='service-more'
-                    eyebrow={t('Тот же мастер, сразу после')}
-                    title={t('Что ещё сделать?')}
-                  >
-                    <ServicePicker
-                      services={[...form.chosenServices, ...form.addableServices]}
-                      categories={catalog.categories}
-                      value={form.serviceId}
-                      chosenIds={form.chosenServiceIds}
-                      onChange={form.addService}
-                      onRemove={form.removeService}
-                      onReselect={form.closeAddService}
-                      photos={servicePhotos}
-                      coverUrl={business.coverUrl}
-                      businessName={business.name}
-                      soonLabel={() => null}
-                    />
-                  </BookingStep>
-                )}
-
-                {!isBranchOpen && !form.isAddingService && activeStep === 'service' && (
-                  <BookingStep
-                    id='service'
-                    eyebrow={stepEyebrow('service')}
-                    title={t('Что делаем?')}
-                  >
-                    <ServicePicker
-                      services={form.services}
-                      categories={catalog.categories}
-                      value={form.serviceId}
-                      onChange={form.selectService}
-                      onReselect={form.finishEditing}
-                      photos={servicePhotos}
-                      coverUrl={business.coverUrl}
-                      businessName={business.name}
-                      soonLabel={soonLabel}
-                    />
-                  </BookingStep>
-                )}
-
-                {!isBranchOpen && !form.isAddingService && activeStep === 'specialist' && (
-                  <BookingStep
-                    id='specialist'
-                    eyebrow={stepEyebrow('specialist')}
-                    title={t('К кому записаться?')}
-                  >
-                    <MasterPicker
-                      specialists={form.specialists}
-                      value={form.specialistId}
-                      onChange={form.selectSpecialist}
-                      onReselect={form.finishEditing}
-                    />
-                  </BookingStep>
-                )}
-
-                {!isBranchOpen && !form.isAddingService && activeStep === 'datetime' && (
-                  <BookingStep
-                    id='datetime'
-                    eyebrow={stepEyebrow('datetime')}
-                    title={t('Когда удобно?')}
-                  >
-                    <DateTimePicker
-                      view='ruler'
-                      onCenteredTimeChange={setRulerTime}
-                      durationMinutes={form.service?.durationMinutes}
-                      days={form.days}
-                      dayKey={form.dayKey}
-                      slots={form.availability.slots}
-                      isLoading={form.availability.isLoading}
-                      error={form.availability.error}
-                      onRetry={form.availability.reload}
-                      time={form.time}
-                      isSpecialistSelected={Boolean(form.specialistId)}
-                      onDayChange={form.selectDay}
-                      onTimeChange={form.selectTime}
-                      fullDayAction={
-                        form.serviceId && form.specialistId && form.dayKey ? (
-                          <WaitlistJoin
-                            serviceId={form.serviceId}
-                            specialistId={form.specialistId}
-                            branchId={form.branchId ?? undefined}
-                            date={form.dayKey}
-                            dayLabel={t.dayLong(form.dayKey)}
+              {isBranchOpen && (
+                <BookingStep id='branch' title={t('Куда приедете?')}>
+                  {/* Each branch a row with its full address and how far it is, the chosen
+                        one checked; picking one folds it back into its card. */}
+                  <fieldset className={`${styles.group} ${styles.branchList}`}>
+                    <legend className={styles.srOnly}>{t('Филиал')}</legend>
+                    {form.branches.map((branch) => {
+                      const distance = form.branchDistances?.[branch.id]
+                      const isChosen = form.branchId === branch.id
+                      return (
+                        <label key={branch.id} className={styles.branchRow}>
+                          <input
+                            type='radio'
+                            name='booking-branch'
+                            className={styles.branchRadio}
+                            checked={isChosen}
+                            onChange={() => form.selectBranch(branch.id)}
+                            // Also a tap on the branch already chosen: it folds back into its card.
+                            onClick={() => setIsBranchOpen(false)}
                           />
-                        ) : null
-                      }
-                    />
-                  </BookingStep>
+                          <span className={styles.branchText}>
+                            <span className={styles.branchName}>{branch.name}</span>
+                            <span className={styles.branchAddress}>
+                              {branch.address}
+                              {distance !== undefined && ` · ${formatDistance(distance)}`}
+                            </span>
+                          </span>
+                          {isChosen && (
+                            <Check weight='bold' className={styles.branchCheck} aria-hidden />
+                          )}
+                        </label>
+                      )
+                    })}
+                  </fieldset>
+                  {(() => {
+                    const chosen = form.branches.find((branch) => branch.id === form.branchId)
+                    if (!chosen || chosen.latitude === null || chosen.longitude === null)
+                      return null
+                    return (
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${chosen.latitude},${chosen.longitude}`}
+                        target='_blank'
+                        rel='noreferrer'
+                        className={styles.branchRoute}
+                      >
+                        {t('Маршрут до «{name}» ›', { name: chosen.name })}
+                      </a>
+                    )
+                  })()}
+                </BookingStep>
+              )}
+
+              {/* One more service in the same visit, by the same master right after: a quiet
+                    capsule under the stack, never in the way of the one-tap first choice. */}
+              {!isBranchOpen &&
+                !form.isAddingService &&
+                activeStep !== 'service' &&
+                form.addableServices.length > 0 && (
+                  <div className={styles.addService}>
+                    <Button
+                      variant='secondary'
+                      size='md'
+                      onClick={() => {
+                        setIsReviewRequested(false)
+                        setIsContactsDone(false)
+                        form.openAddService()
+                      }}
+                    >
+                      <Plus aria-hidden />
+                      {t('Ещё услуга')}
+                    </Button>
+                  </div>
                 )}
 
-                {!isBranchOpen &&
-                  !form.isAddingService &&
-                  activeStep === 'contacts' &&
-                  !isContactsFolded && (
-                    <BookingStep
-                      id='contacts'
-                      eyebrow={stepEyebrow('contacts')}
-                      title={t('Как вас записать?')}
-                    >
-                      <div className={styles.fields}>
-                        {/* Said before the name and number are asked for: what is paid now, when it
+              {!isBranchOpen && form.isAddingService && form.service && (
+                <BookingStep
+                  id='service-more'
+                  eyebrow={t('Тот же мастер, сразу после')}
+                  title={t('Что ещё сделать?')}
+                >
+                  <ServicePicker
+                    services={[...form.chosenServices, ...form.addableServices]}
+                    categories={catalog.categories}
+                    value={form.serviceId}
+                    chosenIds={form.chosenServiceIds}
+                    onChange={form.addService}
+                    onRemove={form.removeService}
+                    onReselect={form.closeAddService}
+                    photos={servicePhotos}
+                    coverUrl={business.coverUrl}
+                    businessName={business.name}
+                    soonLabel={() => null}
+                  />
+                </BookingStep>
+              )}
+
+              {!isBranchOpen && !form.isAddingService && activeStep === 'service' && (
+                <BookingStep id='service' eyebrow={stepEyebrow('service')} title={t('Что делаем?')}>
+                  <ServicePicker
+                    services={form.services}
+                    categories={catalog.categories}
+                    value={form.serviceId}
+                    onChange={form.selectService}
+                    onReselect={form.finishEditing}
+                    photos={servicePhotos}
+                    coverUrl={business.coverUrl}
+                    businessName={business.name}
+                    soonLabel={soonLabel}
+                  />
+                </BookingStep>
+              )}
+
+              {!isBranchOpen && !form.isAddingService && activeStep === 'specialist' && (
+                <BookingStep
+                  id='specialist'
+                  eyebrow={stepEyebrow('specialist')}
+                  title={t('К кому записаться?')}
+                >
+                  <MasterPicker
+                    specialists={form.specialists}
+                    value={form.specialistId}
+                    onChange={form.selectSpecialist}
+                    onReselect={form.finishEditing}
+                  />
+                </BookingStep>
+              )}
+
+              {!isBranchOpen && !form.isAddingService && activeStep === 'datetime' && (
+                <BookingStep
+                  id='datetime'
+                  eyebrow={stepEyebrow('datetime')}
+                  title={t('Когда удобно?')}
+                >
+                  <DateTimePicker
+                    view='ruler'
+                    onCenteredTimeChange={setRulerTime}
+                    durationMinutes={form.service?.durationMinutes}
+                    days={form.days}
+                    dayKey={form.dayKey}
+                    slots={form.availability.slots}
+                    isLoading={form.availability.isLoading}
+                    error={form.availability.error}
+                    onRetry={form.availability.reload}
+                    time={form.time}
+                    isSpecialistSelected={Boolean(form.specialistId)}
+                    onDayChange={form.selectDay}
+                    onTimeChange={form.selectTime}
+                    fullDayAction={
+                      form.serviceId && form.specialistId && form.dayKey ? (
+                        <WaitlistJoin
+                          serviceId={form.serviceId}
+                          specialistId={form.specialistId}
+                          branchId={form.branchId ?? undefined}
+                          date={form.dayKey}
+                          dayLabel={t.dayLong(form.dayKey)}
+                        />
+                      ) : null
+                    }
+                  />
+                </BookingStep>
+              )}
+
+              {!isBranchOpen &&
+                !form.isAddingService &&
+                activeStep === 'contacts' &&
+                !isContactsFolded && (
+                  <BookingStep
+                    id='contacts'
+                    eyebrow={stepEyebrow('contacts')}
+                    title={t('Как вас записать?')}
+                  >
+                    <div className={styles.fields}>
+                      {/* Said before the name and number are asked for: what is paid now, when it
                           comes back and where to go. The side panel has no summary card for it. */}
-                        {form.service?.deposit ? (
-                          <p className={styles.terms} ref={trackDepositShown}>
-                            {t('Предоплата {amount} — вернём, если отмените за сутки', {
-                              amount: formatPrice(form.service.deposit),
-                            })}
-                            {summaryProps.address ? ` · ${summaryProps.address}` : ''}
-                          </p>
-                        ) : null}
-                        {/* Settings-style rows: the label on the left, the value typed on the right. */}
-                        <div className={styles.group}>
+                      {form.service?.deposit ? (
+                        <p className={styles.terms} ref={trackDepositShown}>
+                          {t('Предоплата {amount} — вернём, если отмените за сутки', {
+                            amount: formatPrice(form.service.deposit),
+                          })}
+                          {summaryProps.address ? ` · ${summaryProps.address}` : ''}
+                        </p>
+                      ) : null}
+                      {/* Settings-style rows: the label on the left, the value typed on the right. */}
+                      <div className={styles.group}>
+                        <Field
+                          label={t('Имя')}
+                          error={form.errors.name && t(form.errors.name)}
+                          className={styles.fieldRow}
+                        >
+                          <Input
+                            variant='plain'
+                            value={form.name}
+                            onValueChange={form.setName}
+                            autoComplete='name'
+                            enterKeyHint={form.accountPhone ? 'done' : 'next'}
+                            // Enter moves on to the number: one keyboard, no hunting for the field.
+                            onKeyDown={(event) => {
+                              if (event.key !== 'Enter') return
+                              event.preventDefault()
+                              const phoneInput = document.querySelector<HTMLInputElement>(
+                                '#step-contacts input[type="tel"]',
+                              )
+                              if (phoneInput) phoneInput.focus()
+                              else foldContacts()
+                            }}
+                            placeholder={t(
+                              form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
+                            )}
+                          />
+                        </Field>
+                        {form.accountPhone ? null : (
                           <Field
-                            label={t('Имя')}
-                            error={form.errors.name && t(form.errors.name)}
+                            label={t('Телефон')}
+                            error={form.errors.phone && t(form.errors.phone)}
                             className={styles.fieldRow}
                           >
                             <Input
                               variant='plain'
-                              value={form.name}
-                              onValueChange={form.setName}
-                              autoComplete='name'
-                              enterKeyHint={form.accountPhone ? 'done' : 'next'}
-                              // Enter moves on to the number: one keyboard, no hunting for the field.
+                              type='tel'
+                              inputMode='tel'
+                              autoComplete='tel'
+                              enterKeyHint='done'
                               onKeyDown={(event) => {
                                 if (event.key !== 'Enter') return
                                 event.preventDefault()
-                                const phoneInput = document.querySelector<HTMLInputElement>(
-                                  '#step-contacts input[type="tel"]',
-                                )
-                                if (phoneInput) phoneInput.focus()
-                                else foldContacts()
+                                foldContacts()
                               }}
-                              placeholder={t(
-                                form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
-                              )}
+                              value={form.phone}
+                              onValueChange={(value) => {
+                                const masked = maskPhoneInput(value)
+                                form.setPhone(masked)
+                                // A whole number (+996 and nine digits) with a name: the card folds,
+                                // like a code field moving on once full.
+                                if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
+                                  window.clearTimeout(foldTimer.current)
+                                  foldTimer.current = window.setTimeout(
+                                    () => setIsContactsDone(true),
+                                    450,
+                                  )
+                                }
+                              }}
+                              placeholder='+996 555 123 456'
                             />
                           </Field>
-                          {form.accountPhone ? null : (
-                            <Field
-                              label={t('Телефон')}
-                              error={form.errors.phone && t(form.errors.phone)}
-                              className={styles.fieldRow}
-                            >
-                              <Input
-                                variant='plain'
-                                type='tel'
-                                inputMode='tel'
-                                autoComplete='tel'
-                                enterKeyHint='done'
-                                onKeyDown={(event) => {
-                                  if (event.key !== 'Enter') return
-                                  event.preventDefault()
-                                  foldContacts()
-                                }}
-                                value={form.phone}
-                                onValueChange={(value) => {
-                                  const masked = maskPhoneInput(value)
-                                  form.setPhone(masked)
-                                  // A whole number (+996 and nine digits) with a name: the card folds,
-                                  // like a code field moving on once full.
-                                  if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
-                                    window.clearTimeout(foldTimer.current)
-                                    foldTimer.current = window.setTimeout(
-                                      () => setIsContactsDone(true),
-                                      450,
-                                    )
-                                  }
-                                }}
-                                placeholder='+996 555 123 456'
-                              />
-                            </Field>
-                          )}
-                        </div>
-                        {/* Mum or a child: their name and number, the visit stays in this account. */}
-                        {form.canBookForOther && (
-                          <button
-                            type='button'
-                            className={styles.forOther}
-                            onClick={() => form.setForOther(!form.isForOther)}
-                          >
-                            {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
-                          </button>
                         )}
                       </div>
-                      {contactExtras}
-                    </BookingStep>
-                  )}
-
-                {!isBranchOpen && isContactsFolded && (
-                  <BookingStep id='ready' title={t('Всё готово')}>
-                    <p className={styles.readyNote}>
-                      {t(
-                        'Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы изменить.',
+                      {/* Mum or a child: their name and number, the visit stays in this account. */}
+                      {form.canBookForOther && (
+                        <button
+                          type='button'
+                          className={styles.forOther}
+                          onClick={() => form.setForOther(!form.isForOther)}
+                        >
+                          {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
+                        </button>
                       )}
-                    </p>
+                    </div>
                     {contactExtras}
                   </BookingStep>
                 )}
-              </>
-            )}
 
-            {/* Under the form and set well apart from it (a wide gap), so it reads as something to
+              {!isBranchOpen && isContactsFolded && (
+                <BookingStep id='ready' title={t('Всё готово')}>
+                  <p className={styles.readyNote}>
+                    {t(
+                      'Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы изменить.',
+                    )}
+                  </p>
+                  {contactExtras}
+                </BookingStep>
+              )}
+            </>
+          )}
+
+          {/* Under the form and set well apart from it (a wide gap), so it reads as something to
                 look at, not another step. Nothing here leads away: picks of other places live on
                 the success screen, not in the middle of a booking. */}
-            <aside className={styles.after} aria-label={t('Дополнительно')}>
-              <PlaceReviews
-                slug={business.slug}
-                businessName={business.name}
-                service={form.service ?? null}
-              />
-            </aside>
-          </div>
-
-          {!isReviewing && (
-            <aside className={styles.aside}>
-              <BookingSummary variant='card' {...summaryProps} />
-            </aside>
-          )}
-        </Container>
-
-        <div className={styles.bar}>
-          <BookingSummary
-            variant='bar'
-            {...summaryProps}
-            ticket={<Ticket booking={draftTicket} isDraft />}
-          />
+          <aside className={styles.after} aria-label={t('Дополнительно')}>
+            <PlaceReviews
+              slug={business.slug}
+              businessName={business.name}
+              service={form.service ?? null}
+            />
+          </aside>
         </div>
-      </main>
-    </>
+
+        {!isReviewing && (
+          <aside className={styles.aside}>
+            <BookingSummary variant='card' {...summaryProps} />
+          </aside>
+        )}
+      </Container>
+
+      <div className={styles.bar}>
+        <BookingSummary
+          variant='bar'
+          {...summaryProps}
+          ticket={<Ticket booking={draftTicket} isDraft />}
+        />
+      </div>
+    </div>
   )
 }

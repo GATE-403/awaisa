@@ -65,17 +65,38 @@ export const BookingTopBar = ({ business, isModal = false }: BookingTopBarProps)
 }
 
 // The site stays visible beside the sheet, dimmed; tapping it closes the booking.
-export const BookingScrim = ({ slug, isModal = false }: { slug: string; isModal?: boolean }) => {
-  const close = useClose(isModal)
+interface BookingScrimProps {
+  /** Opened as a page of its own: the place it leads to. */
+  href?: string
+  isModal?: boolean
+  /** Back after a reload: the page is already dimmed, no second fade. */
+  isAlreadyUp?: boolean
+}
+
+export const BookingScrim = ({ href, isModal = false, isAlreadyUp = false }: BookingScrimProps) => {
+  const router = useRouter()
+
+  // Over a page it closes back to it; the address under the sheet is not known here.
+  if (isModal || !href) {
+    return (
+      <div
+        className={styles.scrim}
+        aria-hidden='true'
+        data-keep-interactive=''
+        data-already-up={isAlreadyUp || undefined}
+        onClick={() => router.back()}
+      />
+    )
+  }
 
   return (
     <NextLink
-      href={`/${slug}`}
+      href={href}
       className={styles.scrim}
       aria-hidden='true'
       tabIndex={-1}
       data-keep-interactive=''
-      onClick={close}
+      data-already-up={isAlreadyUp || undefined}
     />
   )
 }
