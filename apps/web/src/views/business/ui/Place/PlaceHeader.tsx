@@ -1,7 +1,14 @@
 import { Star } from '@phosphor-icons/react/ssr'
-import { type CSSProperties, ViewTransition } from 'react'
-import { BusinessTile, pickTint } from '@/entities/business'
-import type { Business, Catalog, ReviewSummary } from '@/shared/api/types'
+import { ViewTransition } from 'react'
+import {
+  PlaceCoverImage,
+  PlaceDescription,
+  PlaceLine,
+  PlaceLogo,
+  PlaceName,
+  PlaceProfile,
+} from '@/entities/business'
+import type { Business, Catalog, PublicPromotion, ReviewSummary } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
 import { T } from '@/shared/i18n'
 import { fluidImage } from '@/shared/lib/imageSizes'
@@ -10,17 +17,19 @@ import { Counted } from './Counted'
 import { OpenStatus } from './OpenStatus'
 import styles from './Place.module.css'
 import { PlaceActions } from './PlaceActions'
+import { PromotionsStrip } from './PromotionsStrip'
 
 interface PlaceHeaderProps {
   business: Business
   catalog: Catalog
   reviews: ReviewSummary
+  promotions: PublicPromotion[]
 }
 
-// A profile head like a social app's: the cover, the tile resting on its edge with the actions
-// across from it, then the name, a quiet handle line (kind · street), the counts that decide a
-// visit with bold numbers, whether it is open, and the description.
-export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) => {
+// The owner's «Страница» as clients see it, laid out like a profile in Instagram: the cover, the
+// logo on its edge with «Записаться» and the thin glyphs across from it, then a bio set close
+// (name, kind · street, the rating, whether it is open, the description) and open promotions.
+export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHeaderProps) => {
   const rated = catalog.specialists.filter((specialist) => specialist.rating !== null)
   // Real reviews once there are any; until then the masters' ratings.
   const rating =
@@ -31,86 +40,55 @@ export const PlaceHeader = ({ business, catalog, reviews }: PlaceHeaderProps) =>
         : null
   // The city is the same for everyone in the catalog; the street is what helps.
   const address = business.address || business.city
-  const services = catalog.services.length
-  const masters = catalog.specialists.length
 
   return (
-    <header
-      className={styles.header}
-      style={{ '--tint': pickTint(business.name) } as CSSProperties}
+    <PlaceProfile
+      name={business.name}
+      hasCover={Boolean(business.coverUrl)}
+      // Only the catalog card → cover morph animates; while the page stays (the booking sheet
+      // slides over it) the cover must not join the transition layer, which paints above it.
+      coverFrame={(frame) => (
+        <ViewTransition name={`business-${business.slug}`} update='none'>
+          {frame}
+        </ViewTransition>
+      )}
+      cover={
+        business.coverUrl && (
+          <PlaceCoverImage {...fluidImage(business.coverUrl)} fetchPriority='high' />
+        )
+      }
+      logo={<PlaceLogo name={business.name} logoUrl={business.logoUrl} />}
+      actions={<PlaceActions business={business} />}
+      footer={<PromotionsStrip promotions={promotions} />}
     >
-      {/* Only the catalog card → cover morph animates; while the page stays (the booking sheet
-          slides over it) the cover must not join the transition layer, which paints above it. */}
-      <ViewTransition name={`business-${business.slug}`} update='none'>
-        <figure
-          className={styles.cover}
-          data-empty={!business.coverUrl || undefined}
-          data-picture-frame={business.coverUrl ? '' : undefined}
-        >
-          {business.coverUrl && (
-            // biome-ignore lint/performance/noImgElement: already resized WebP from our API
-            <img
-              {...fluidImage(business.coverUrl)}
-              alt=''
-              className={styles.coverImage}
-              fetchPriority='high'
-            />
-          )}
-        </figure>
-      </ViewTransition>
-
-      <div className={styles.headerBody}>
-        <div className={styles.topRow}>
-          <BusinessTile
-            name={business.name}
-            logoUrl={business.logoUrl}
-            size='lg'
-            className={styles.tile}
-          />
-          <PlaceActions business={business} />
-        </div>
-
-        <div className={styles.identityText}>
-          <h1 className={styles.name}>{business.name}</h1>
-          <p className={styles.handle}>
-            <span>
-              <T>{getKindLabel(business.kind)}</T>
+      <PlaceName as='h1'>{business.name}</PlaceName>
+      <p className={styles.handle}>
+        <span>
+          <T>{getKindLabel(business.kind)}</T>
+        </span>
+        {address && <AddressLine address={address} />}
+      </p>
+      {rating !== null && (
+        <PlaceLine>
+          {reviews.count > 0 ? (
+            <a href='#reviews' className={styles.stat}>
+              <Star weight='fill' aria-hidden className={styles.factStar} />
+              <strong>{rating.toFixed(1)}</strong>
+              {' · '}
+              <Counted count={reviews.count} forms={['отзыв', 'отзыва', 'отзывов']} />
+            </a>
+          ) : (
+            <span className={styles.stat}>
+              <Star weight='fill' aria-hidden className={styles.factStar} />
+              <strong>{rating.toFixed(1)}</strong>
             </span>
-            {address && <AddressLine address={address} />}
-          </p>
-          <p className={styles.stats}>
-            {rating !== null && (
-              <span className={styles.statRating}>
-                <Star weight='fill' aria-hidden className={styles.factStar} />
-                <strong>{rating.toFixed(1)}</strong>
-                {reviews.count > 0 && (
-                  <>
-                    {' · '}
-                    <Counted count={reviews.count} forms={['отзыв', 'отзыва', 'отзывов']} />
-                  </>
-                )}
-              </span>
-            )}
-            {services > 0 && (
-              <a href='#services' className={styles.stat}>
-                <strong>{services}</strong>{' '}
-                <Counted count={services} forms={['услуга', 'услуги', 'услуг']} isWordOnly />
-              </a>
-            )}
-            {masters > 0 && (
-              <a href='#masters' className={styles.stat}>
-                <strong>{masters}</strong>{' '}
-                <Counted count={masters} forms={['мастер', 'мастера', 'мастеров']} isWordOnly />
-              </a>
-            )}
-          </p>
-          <p className={styles.where}>
-            <OpenStatus hours={business.hours} />
-          </p>
-        </div>
-
-        {business.description && <p className={styles.description}>{business.description}</p>}
-      </div>
-    </header>
+          )}
+        </PlaceLine>
+      )}
+      <PlaceLine>
+        <OpenStatus hours={business.hours} />
+      </PlaceLine>
+      {business.description && <PlaceDescription>{business.description}</PlaceDescription>}
+    </PlaceProfile>
   )
 }

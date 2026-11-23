@@ -5,202 +5,47 @@
 
 .shell {
   width: 100%;
+  /* The cover's 100vw counts a classic scrollbar: the sliver is clipped, never scrolled to. */
+  overflow-x: clip;
 }
 
 .page {
+  /* The owner's «Страница» as clients see it: one 640px column, on phones the page's gutter. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
   width: 100%;
-  max-width: var(--layout-container-width);
+  max-width: calc(640px + 2 * var(--page-gutter));
   margin: 0 auto;
   padding: 0 var(--page-gutter) var(--section-gap);
 }
 
-.body {
-  display: grid;
-  gap: var(--space-8);
-  margin-top: var(--space-8);
-}
-
+/* Under the tabs: everything else about the place, one section after another. */
 .main {
   display: flex;
   flex-direction: column;
-  gap: var(--space-12);
+  gap: var(--space-6);
   min-width: 0;
+  /* The page's own gap (20) already parts it from the tabs' panel. */
+  margin-top: var(--space-2);
 }
 
-.aside {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-@media (min-width: 1024px) {
-  .body {
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: var(--space-10);
-    align-items: start;
-  }
-
-  .aside {
-    position: sticky;
-    top: calc(var(--header-height) + var(--business-bar-height, 0px) + var(--space-6));
+@media (min-width: 640px) {
+  .main {
+    gap: var(--space-8);
   }
 }
 
-/* ---------- Place card ---------- */
+/* ---------- Head ---------- */
 
-/* A profile head like a social app's, in our materials: a full-width cover with square edges,
-   the round logo on its edge with the actions across from it, then name, handle, counts. */
-.header {
-  display: flex;
-  flex-direction: column;
-}
-
-.headerBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  width: 100%;
-  max-width: var(--layout-container-width);
-  margin: 0 auto;
-  padding: var(--space-4) var(--page-gutter) 0;
-}
-
-.cover {
-  position: relative;
-  aspect-ratio: 3 / 1.2;
-  max-height: 340px;
-  width: 100%;
-  margin: 0;
-  overflow: hidden;
-  background: var(--color-fill);
-}
-
-@media (min-width: 768px) {
-  .cover {
-    aspect-ratio: 4 / 1;
-  }
-}
-
-/* No photo: no banner at all — the logo and the name lead. */
-.cover[data-empty] {
-  display: none;
-}
-
-.coverImage {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.topRow {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-
-.tile {
-  position: relative;
-  z-index: 1;
-  flex-shrink: 0;
-}
-
-/* The place's mark as an app icon: a full gradient of its colour with the white mascot —
-   confident on the cover's edge, not a pale wash. */
-.topRow .tile[data-size] {
-  width: 80px;
-  height: 80px;
-  background:
-    radial-gradient(120% 90% at 30% 15%, rgb(255 255 255 / 0.28), transparent 55%),
-    linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--tint) 92%, white),
-      color-mix(in srgb, var(--tint) 70%, black)
-    );
-  box-shadow:
-    inset 0 0 0 0.5px rgb(255 255 255 / 0.25),
-    var(--shadow-sm);
-  color: #fff;
-}
-
-/* With a cover the logo rests half over its edge, ringed in the page colour; the actions sit on
-   the same line, so there is no empty row under the photo. */
-.cover:not([data-empty]) + .headerBody {
-  padding-top: 0;
-}
-
-.cover:not([data-empty]) + .headerBody .topRow {
-  align-items: flex-start;
-  margin-top: -40px;
-}
-
-/* The buttons sit below the photo's edge, never on it. */
-.cover:not([data-empty]) + .headerBody .actions {
-  margin-top: calc(40px + var(--space-3));
-  padding-bottom: 0;
-}
-
-.cover:not([data-empty]) + .headerBody .tile {
-  box-shadow:
-    0 0 0 4px var(--color-background),
-    var(--shadow-md);
-}
-
-@media (min-width: 768px) {
-  .topRow .tile[data-size] {
-    width: 120px;
-    height: 120px;
-  }
-
-  .cover:not([data-empty]) + .headerBody .topRow {
-    margin-top: -60px;
-  }
-
-  .cover:not([data-empty]) + .headerBody .actions {
-    margin-top: calc(60px + var(--space-4));
-  }
-
-  .headerBody {
-    padding-top: var(--space-6);
-  }
-}
-
-.identityText {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-
-.name {
-  overflow: hidden;
-  font-family: var(--font-display);
-  font-size: var(--text-title1);
-  line-height: 1.15;
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-tight);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-@media (min-width: 768px) {
-  .name {
-    font-size: var(--text-3xl);
-    line-height: var(--text-3xl-line-height);
-  }
-}
-
-/* «SPA и массаж · ул. Ахунбаева, 98» — the quiet line under the name, like a handle. */
+/* «SPA и массаж · ул. Ахунбаева, 98»: the quiet line under the name, like a handle. */
 .handle {
   display: flex;
   gap: var(--space-2);
   min-width: 0;
   color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
   white-space: nowrap;
 }
 
@@ -219,79 +64,29 @@
   white-space: normal;
 }
 
-/* «★ 4.5 · 189 отзывов   40 услуг   4 мастера»: bold numbers, muted words. */
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-4);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-}
-
-.stats strong {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-}
-
 .stat {
-  color: inherit;
-}
-
-.statRating {
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  color: inherit;
   white-space: pre;
 }
 
 @media (hover: hover) {
-  .stat:hover {
-    text-decoration: underline;
+  a.stat:hover {
+    color: var(--color-link);
   }
 }
 
 .factStar {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   color: var(--color-rating);
 }
 
-.muted {
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
-}
-
-.where {
-  display: flex;
-  gap: var(--space-2);
-  min-width: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
-  white-space: nowrap;
-}
-
-.status {
-  flex-shrink: 0;
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-}
-
-.status::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 6px;
-  border-radius: var(--radius-full);
-  background: var(--color-highlight);
-  vertical-align: 1px;
-}
-
-.status[data-open]::before {
-  background: var(--color-success);
+/* «Открыто до 21:00»: green while open, like the owner's «Страница». */
+.status[data-open] {
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
 
 .address {
@@ -314,36 +109,6 @@
   display: none;
 }
 
-.description {
-  display: -webkit-box;
-  max-width: 64ch;
-  overflow: hidden;
-  color: var(--color-foreground);
-  font-size: var(--text-body);
-  line-height: 1.45;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-}
-
-/* Across from the tile: round glyph buttons, then the one primary capsule. */
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  padding-bottom: var(--space-1);
-}
-
-.bookButton {
-  flex-shrink: 0;
-  min-height: var(--control-height-md);
-  padding-inline: var(--space-5);
-}
-
-/* Phones: slimmer round buttons; when four and the capsule would crowd the tile, the last ones
-   (share, then directions) give way — the place's card below still has the address and phone. */
 /* ---------- Sections ---------- */
 
 .section {
@@ -397,6 +162,12 @@
 
 /* ---------- Menu ---------- */
 
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 /* Search and categories stay pinned under the business bar while the menu scrolls, on the
    page colour with a soft edge under them. */
 .menuHead {
@@ -408,41 +179,33 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin: 0 calc(var(--page-gutter) * -1);
-  padding: 0 var(--page-gutter);
+  /* The window's whole width, the chips kept on the column: pinned, it is one surface, the same
+     blurred material edge to edge (a spread shadow beside it had no blur, another shade). */
+  margin: 0 calc(50% - 50vw);
+  padding: 0 calc(50vw - 50%);
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-/* Pinned: one surface with the business bar — the same material out to the window's edges (a
-   spread shadow clipped to the bar's height, so nothing overflows sideways), one hairline under
-   both. */
 .menuHead[data-stuck] {
   background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
-  box-shadow:
-    0 0 0 100vmax var(--color-chrome),
-    0 0.5px 0 100vmax var(--color-border);
-  clip-path: inset(0 -100vmax -1px);
+  box-shadow: 0 0.5px 0 var(--color-border);
 }
 
-/* Beside the sticky aside the bar stops at the menu's column: it never covers the map card. */
-@media (min-width: 1024px) {
-  .menuHead[data-stuck] {
-    clip-path: inset(0 0 -1px -100vmax);
-  }
+/* The chips sit in the pinned bar: the bar keeps the gutter, the chips' row scrolls inside it
+   (room for their 44pt hit areas, taken back by the margin). */
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-2) var(--space-4);
+  overflow-x: auto;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
 }
 
-/* The tabs sit flush in the pinned bar: the bar keeps the gutter and the one hairline. */
-.menuHead > div {
-  margin-inline: 0;
-  padding-inline: 0;
-}
-
-@media (min-width: 768px) {
-  .menuHead {
-    margin: 0 calc(var(--space-4) * -1);
-    padding-inline: var(--space-4);
-  }
+.chips::-webkit-scrollbar {
+  display: none;
 }
 
 .filters {
@@ -569,20 +332,15 @@
   }
 }
 
-/* ---------- Masters: a row of faces, like favourites in Contacts ---------- */
-
 /* ---------- Reviews: a thread, like comments in a social app ---------- */
 
-/* The score card: the average at display size with stars and the count, bars by stars. */
+/* The score right on the page, no card: the average at display size with stars and the count,
+   bars by stars. */
 .reviewSummary {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-6);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .reviewScore {
@@ -655,82 +413,6 @@
 .reviewStars svg {
   width: 12px;
   height: 12px;
-}
-
-/* ---------- Work photos ---------- */
-
-.photos {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 320px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 140px;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 768px) {
-  .photos {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: 160px;
-  }
-}
-
-.photo {
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: var(--color-fill);
-}
-
-.photos:not([data-count="1"]) .photo:first-child,
-.photos[data-count="1"] .photo {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.photoButton {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: zoom-in;
-}
-
-.photoButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
-}
-
-/* The last tile says how many more wait in the viewer. */
-.photoMore {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(0 0 0 / 45%);
-  color: #fff;
-  font-size: var(--text-title2);
-  font-weight: var(--font-weight-semibold);
-}
-
-.photoImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: scale var(--duration-normal) var(--ease-standard);
-}
-
-@media (hover: hover) {
-  .photo:hover .photoImage {
-    scale: 1.03;
-  }
 }
 
 /* ---------- Aside ---------- */
@@ -1085,8 +767,6 @@ details[open] > .info .infoChevron {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quickAction,
-  .photoImage,
   .serviceRow {
     transition: none;
   }
@@ -1094,37 +774,27 @@ details[open] > .info .infoChevron {
 
 /* ---------- Promotions under the place card ---------- */
 
+/* Open promotions: a row of small red capsules under the bio, like the owner's «Страница». */
 .promotions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  margin-top: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .promotion {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  min-height: var(--control-height-sm);
-  padding: 0 var(--space-4);
+  min-height: 32px;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-full);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  font-size: var(--text-body);
-}
-
-.promotion svg {
-  width: 16px;
-  height: 16px;
-  color: var(--color-danger);
-}
-
-.promotionTitle {
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger-text);
+  font-size: var(--text-footnote);
   font-weight: var(--font-weight-semibold);
-}
-
-.promotionText {
-  color: var(--color-muted-foreground);
+  white-space: nowrap;
 }
 
 /* «Похожие места»: a band of its own under the place — a lighter layer edge to edge with a
@@ -1140,7 +810,7 @@ details[open] > .info .infoChevron {
   flex-direction: column;
   gap: var(--space-3);
   width: 100%;
-  max-width: var(--layout-container-width);
+  max-width: calc(640px + 2 * var(--page-gutter));
   margin: 0 auto;
   padding: 0 var(--page-gutter);
 }
@@ -1190,140 +860,27 @@ details[open] > .info .infoChevron {
 
 @media (min-width: 768px) {
   .similarTrack {
-    grid-auto-columns: minmax(200px, 23%);
+    grid-auto-columns: minmax(180px, 31%);
   }
 }
 
-/* ---------- Masters: picture cards like the catalog's ---------- */
-
-.masters {
-  display: grid;
-  grid-auto-columns: 132px;
-  grid-auto-flow: column;
-  gap: 8px;
-  margin: 0 calc(var(--page-gutter) * -1);
-  padding: 2px var(--page-gutter) var(--space-1);
-  overflow-x: auto;
-  scroll-padding-inline: var(--page-gutter);
-  scroll-snap-type: x proximity;
-  overscroll-behavior-x: contain;
-  --edge-fade: 48px;
-  scrollbar-width: none;
-  list-style: none;
-}
-
-.masters::-webkit-scrollbar {
-  display: none;
-}
-
-.masters > li {
-  scroll-snap-align: start;
-}
-
-/* The bell sits over the card's corner, outside its link, like the heart on a service card. */
-.masterItem {
-  position: relative;
-}
-
+/* The bell over a master card's corner, outside its link, like the heart on a service card. */
 .masterFollow {
   position: absolute;
   top: 0;
   right: 0;
 }
 
-@media (min-width: 768px) {
-  .masters {
-    grid-auto-columns: 156px;
-    margin: 0;
-    padding-inline: 0;
-  }
-}
-
-/* ---------- The head ends here: a hairline parts it from the menu ---------- */
-
-/* The quick actions as one button group, like a macOS toolbar group: a single surface capsule
-   holding the glyphs with hairlines between them — one object beside «Записаться», not a row of
-   loose circles. */
-.quickActions {
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
-  padding: 2px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  list-style: none;
-}
-
-.quickActions > li {
-  position: relative;
-  display: flex;
-}
-
-.quickActions > li + li::before {
-  content: "";
-  position: absolute;
-  top: 25%;
-  bottom: 25%;
-  left: 0;
-  width: 0.5px;
-  background: var(--color-border);
-}
-
-.quickAction {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--color-link);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-standard),
-    scale var(--duration-fast) var(--ease-standard);
-}
-
-.quickAction svg {
-  width: 19px;
-  height: 19px;
-}
-
-.quickAction:active {
-  scale: 0.92;
-  background: var(--color-fill);
-}
-
-.quickAction:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-@media (hover: hover) {
-  .quickAction:hover {
-    background: var(--color-fill);
-  }
-}
-
-/* Phones keep three glyphs in the group, narrow ones two (share and directions go last), so the
-   logo, the group and «Записаться» fit one line. */
+/* Phones keep three glyphs beside «Записаться» (share goes), narrower ones two (directions too),
+   so the logo, «Записаться» and the glyphs fit one line; the contacts below keep them all. */
 @media (max-width: 429px) {
-  .quickActions > li:nth-child(n + 4) {
+  .contactGlyph:nth-child(n + 4) {
     display: none;
   }
 }
 
-@media (max-width: 767px) {
-  .quickAction {
-    width: 38px;
-  }
-}
-
-@media (max-width: 359px) {
-  .quickActions > li:nth-child(n + 3) {
+@media (max-width: 389px) {
+  .contactGlyph:nth-child(n + 3) {
     display: none;
   }
 }
@@ -1332,11 +889,6 @@ details[open] > .info .infoChevron {
    short swipe feel stuck on phones. */
 @media (hover: none) {
   .similarTrack {
-    scroll-snap-type: none;
-    touch-action: pan-x pan-y;
-  }
-
-  .masters {
     scroll-snap-type: none;
     touch-action: pan-x pan-y;
   }
@@ -1351,32 +903,9 @@ details[open] > .info .infoChevron {
   margin-block: -12px;
 }
 
-/* The counts in the stats line get less: at 200% zoom the line wraps and 44pt areas ran into
-   the open status under them. 28pt still clears WCAG's 24, and wrapped rows keep apart. */
+/* The rating line gets less: at 200% zoom 44pt areas ran into the open status under it. 28pt
+   still clears WCAG's 24. */
 .stat {
   padding-block: var(--space-1);
   margin-block: calc(-1 * var(--space-1));
-}
-
-.stats {
-  row-gap: var(--space-2);
-}
-
-/* A 44pt tap target around the smaller control, invisible — it looks the same (WCAG 2.5.8 and
-   our 44pt rule). `:where` keeps the control's own position if it has one. */
-:where(.quickAction) {
-  position: relative;
-}
-
-.quickAction::before {
-  content: "";
-  position: absolute;
-  inset-block: min(0px, calc((100% - 44px) / 2));
-  inset-inline: min(0px, calc((100% - 44px) / 2));
-}
-
-/* The quick actions sit side by side in one capsule: their hit area grows up and down only,
-   or each ran into its neighbour when the buttons narrow (200% zoom). */
-.quickAction::before {
-  inset-inline: 0;
 }

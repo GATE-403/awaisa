@@ -6,6 +6,15 @@ const SLUG = 'lumiere-salon'
 
 const services = (page: Page) => page.locator('#services')
 
+// The place's sections are tabs like a profile's: «Работы · Услуги · Мастера · Время».
+const openTab = async (page: Page, name: string) => {
+  const tab = page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', {
+    name: new RegExp(`^${name}`),
+  })
+  await tab.click()
+  await expect(tab).toHaveAttribute('aria-selected', 'true')
+}
+
 // Each review of the thread is an `li` styled `review` (bars and photos are lists too).
 const countReviews = (page: Page) =>
   page.evaluate(
@@ -19,21 +28,24 @@ test.describe('Business page', () => {
   test('the menu is searched and cut by section', async ({ page }) => {
     await page.goto(`/${SLUG}`)
     const menu = services(page)
-    await expect(menu.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible()
+    // The page opens on «Услуги»: people come to book a service.
+    await expect(
+      page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', { name: /^Услуги/ }),
+    ).toHaveAttribute('aria-selected', 'true')
     await expect(menu.getByText('Часто выбирают')).toBeVisible()
 
-    // A section tab keeps its own services only, and «Часто выбирают» steps aside.
-    const sections = menu.getByRole('tablist', { name: 'Разделы услуг' })
-    await sections.getByRole('tab', { name: /^Уход/ }).click()
-    await expect(sections.getByRole('tab', { name: /^Уход/ })).toHaveAttribute(
-      'aria-selected',
+    // A section chip keeps its own services only, and «Часто выбирают» steps aside.
+    const sections = menu.getByRole('group', { name: 'Разделы услуг' })
+    await sections.getByRole('button', { name: /^Уход/ }).click()
+    await expect(sections.getByRole('button', { name: /^Уход/ })).toHaveAttribute(
+      'aria-pressed',
       'true',
     )
     await expect(menu.getByText('Часто выбирают')).toHaveCount(0)
     await expect(menu.getByRole('article')).toHaveCount(1)
     await expect(menu.getByRole('article', { name: /^Кератиновое восстановление/ })).toBeVisible()
 
-    await sections.getByRole('tab', { name: /^Все/ }).click()
+    await sections.getByRole('button', { name: /^Все/ }).click()
     const search = menu.getByRole('searchbox', { name: 'Найти услугу' })
     await search.fill('тонир')
     await expect(menu.getByText('Нашли 1 услугу')).toBeVisible()
@@ -54,12 +66,12 @@ test.describe('Business page', () => {
 
   test('work photos open full screen and turn', async ({ page, isMobile }) => {
     await page.goto(`/${SLUG}`)
+    await openTab(page, 'Работы')
     const work = page.locator('#work')
-    await work.scrollIntoViewIfNeeded()
-    await expect(work.getByRole('link', { name: 'Смотреть с ценами ›' })).toHaveAttribute(
-      'href',
-      `/feed?business=${SLUG}`,
-    )
+    // The tab's one action at the tabs' row end; phones keep the row for the tabs.
+    const prices = page.locator(`a[href="/feed?business=${SLUG}"]`)
+    if (isMobile) await expect(prices).toBeHidden()
+    else await expect(prices).toHaveText('Смотреть с ценами')
     await work.getByRole('button', { name: 'Открыть фото 2 из 6' }).click()
     const viewer = page.getByRole('dialog', { name: /: фото 2 из 6$/ })
     await expect(viewer).toBeVisible()
@@ -109,9 +121,13 @@ test.describe('Business page', () => {
       .poll(() => page.evaluate(() => (window as unknown as { shared?: ShareData }).shared?.url))
       .toMatch(new RegExp(`/${SLUG}$`))
 
-    // The counts in the head lead to their sections.
-    await expect(page.locator('a[href="#services"]').first()).toBeVisible()
-    await expect(page.locator('a[href="#masters"]').first()).toBeVisible()
+    // The rating leads to the reviews; an anchor opens its tab.
+    await expect(page.locator('a[href="#reviews"]').first()).toBeVisible()
+    await page.goto(`/${SLUG}#masters`)
+    await expect(
+      page.getByRole('tablist', { name: 'Разделы места' }).getByRole('tab', { name: /^Мастера/ }),
+    ).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('#masters')).toBeVisible()
   })
 
   test('reviews: three to read, the rest a tap away; masters book themselves', async ({ page }) => {
@@ -130,8 +146,9 @@ test.describe('Business page', () => {
 
     const { catalog } = await (await page.request.get(`/api/businesses/${SLUG}`)).json()
     const master = catalog.specialists[0]
+    await openTab(page, 'Мастера')
     await expect(
       page.locator('#masters').locator(`a[href="/${SLUG}/book?specialist=${master.id}"]`),
-    ).toHaveCount(1)
+    ).toBeVisible()
   })
 })

@@ -1,0 +1,63 @@
+/* The tabs, and the open tab's one action at the row's end. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  /* Opened by an anchor: the row lands under the page's sticky bars. */
+  scroll-margin-top: calc(
+    var(--header-height, 0px) +
+    var(--business-bar-height, 0px) +
+    var(--space-4)
+  );
+}
+
+/* The tabs take what is left and scroll sideways rather than push the action out. */
+.row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.action {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action::before {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -8px;
+}
+
+.action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action:focus-visible {
+  outline: none;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--focus-ring);
+}
+
+@media (max-width: 639px) {
+  .action[data-phone-hidden] {
+    display: none;
+  }
+}
