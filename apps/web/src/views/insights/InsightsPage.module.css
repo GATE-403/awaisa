@@ -1,3 +1,5 @@
+/* Laid out like the cabinet's «Аналитика» («как в табе аналитике в бизнесе»): the report lies
+   right on the page, no cards or fills; groups are told apart by captions and air. */
 .page {
   padding: 0 0 var(--section-gap);
 }
@@ -5,47 +7,63 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
-  padding-top: var(--space-6);
+  gap: var(--space-6);
+  margin-top: var(--space-5);
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-/* Settings-style rows: the cut on the left, the chosen value on the right. */
-.group,
-.list {
-  margin: 0;
-  padding: 0;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  list-style: none;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.filterRow {
+/* The hint and the period on one line, like a section's toolbar in the cabinet. */
+.head {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-3) var(--space-4);
   min-height: var(--control-height-md);
-  padding: 0 var(--space-4);
 }
 
-.filterRow + .filterRow,
-.row + .row {
-  box-shadow:
-    inset 16px 0.5px 0 var(--color-surface),
-    inset 0 0.5px 0 var(--color-border);
+.hint {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
-.filterLabel {
-  font-size: var(--text-body);
-  line-height: var(--text-body-line-height);
+.report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.report[data-loading] {
+  opacity: 0.55;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
 }
 
 .count {
@@ -54,19 +72,165 @@
   text-transform: none;
 }
 
-.list[data-loading] {
-  opacity: 0.55;
-  transition: opacity var(--duration-fast) var(--ease-standard);
+/* ——— Стратегия: three figures in a row, like «Визиты и клиенты» ——— */
+
+.stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6) var(--space-5);
+  margin: 0;
 }
 
-/* A step or a value: words on the left, the count and its share on the right, a meter under. */
+@media (min-width: 640px) {
+  .stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.stat dd {
+  margin: 0;
+}
+
+.statLabel {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-caption);
+}
+
+.statValue {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.statMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* ——— The funnel: its tabs, the one big share, the cuts, the steps ——— */
+
+.funnel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.hero {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    align-items: end;
+  }
+}
+
+.heroHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.heroValue {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .heroValue {
+    font-size: var(--text-display);
+    line-height: var(--text-display-line-height);
+  }
+}
+
+.heroMeta {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* The device cuts as plain Select rows with hairlines, no card. */
+.filters {
+  margin: 0;
+}
+
+.filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--row-height);
+}
+
+.filter + .filter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.filterLabel {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.filterValue {
+  margin: 0;
+}
+
+/* ——— Rows: words left, the figure right, the share as a meter on the row's hairline ——— */
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li {
+  position: relative;
+}
+
+.rows > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
 .row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-1) var(--space-3);
   min-height: 56px;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) 0;
 }
 
 .rowText {
@@ -76,24 +240,29 @@
 }
 
 .rowTitle {
+  overflow: hidden;
   font-size: var(--text-body);
   line-height: var(--text-body-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rowMeta {
+  overflow: hidden;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
   letter-spacing: var(--tracking-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rowValue {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: var(--text-md);
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--text-body);
   font-weight: var(--font-weight-semibold);
-  line-height: var(--text-md-line-height);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -102,44 +271,56 @@
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   font-weight: var(--font-weight-regular);
-  line-height: var(--text-footnote-line-height);
 }
 
 .meter {
-  grid-column: 1 / -1;
-  height: 4px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--color-primary-subtle);
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: 1;
+  height: 2px;
+  pointer-events: none;
 }
 
-.meter::before {
-  content: "";
+.meter span {
   display: block;
-  width: var(--share, 0%);
   height: 100%;
-  border-radius: inherit;
+  border-radius: var(--radius-full);
   background: var(--color-primary);
+}
+
+/* Two groups side by side from 1024px, as in «Аналитика». */
+.pairs {
+  display: grid;
+  gap: var(--space-10);
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .pairs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .dimensions {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6) var(--space-10);
 }
 
 .dimension {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .dimensionTitle {
   margin: 0;
-  padding: 0 var(--space-4);
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
   line-height: var(--text-footnote-line-height);
+  font-weight: var(--font-weight-medium);
 }
 
 @media (min-width: 768px) {
@@ -148,8 +329,39 @@
   }
 }
 
+@media (min-width: 1280px) {
+  .dimensions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Phones: the period floats at the foot, so the page keeps room for it; groups sit closer. */
+@media (max-width: 639px) {
+  .page {
+    padding-bottom: var(--floating-toolbar-space);
+  }
+
+  .report {
+    gap: var(--space-6);
+  }
+
+  .head {
+    min-height: 0;
+  }
+
+  .pairs {
+    gap: var(--space-6);
+  }
+}
+
+@media (forced-colors: active) {
+  .meter span {
+    background: CanvasText;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .list[data-loading] {
+  .report {
     transition: none;
   }
 }

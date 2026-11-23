@@ -209,11 +209,6 @@ const FOR_BUSINESS: Record<string, Entry> = {
   ],
 
   // Insights
-  'Воронки.': ['Воронкалар.', 'Funnels.'],
-  ' Где люди бросают и на каких устройствах.': [
-    ' Адамдар кайсы жерде жана кайсы түзмөктөрдө таштап кетишет.',
-    ' Where people drop out, and on which devices.',
-  ],
   Сценарий: ['Сценарий', 'Scenario'],
   '3 месяца': ['3 ай', '3 months'],
   Шаги: ['Кадамдар', 'Steps'],
@@ -225,6 +220,15 @@ const FOR_BUSINESS: Record<string, Entry> = {
   'До прошлого шага не дошли': ['Мурунку кадамга жетишкен жок', 'Didn’t reach the previous step'],
   '{share} от прошлого шага': ['мурунку кадамдан {share}', '{share} of the previous step'],
   'Где спотыкаются': ['Кайда мүдүрүлүшөт', 'Where people stumble'],
+  'Где люди бросают и на каких устройствах': [
+    'Адамдар кайда таштап кетишет жана кайсы түзмөктөрдө',
+    'Where people drop out and on which devices',
+  ],
+  'Дошли до конца': ['Аягына чейин жетишти', 'Reached the end'],
+  '{finished} из {started} · {flow}': [
+    '{started} ичинен {finished} · {flow}',
+    '{finished} of {started} · {flow}',
+  ],
   'Ошибок в полях и сбоев за этот период нет.': [
     'Бул мезгилде талаалардагы каталар жана мүчүлүштүктөр жок.',
     'No field errors or failures in this period.',
