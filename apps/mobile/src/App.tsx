@@ -108,9 +108,10 @@ export const App = () => {
   }
 
   return (
-    // Expo draws edge to edge: both system bars are translucent, so the keyboard's height is the
-    // whole part of the screen it covers, the same box the WebView fills.
-    <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
+    // Expo draws edge to edge (react-native-edge-to-edge), which keyboard-controller follows by
+    // itself: the keyboard's height is the whole part of the screen it covers, the box the WebView
+    // fills. Its own translucency props are ignored there.
+    <KeyboardProvider>
       <SafeAreaProvider>
         <SafeAreaView style={[styles.container, backgroundStyle]} edges={['top']}>
           <StatusBar style='auto' />

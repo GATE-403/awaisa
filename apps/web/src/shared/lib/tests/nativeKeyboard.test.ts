@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { holdKeyboardOverlay } from '../nativeKeyboard'
+import {
+  holdKeyboardOverlay,
+  rememberedKeyboardHeight,
+  rememberKeyboardHeight,
+} from '../nativeKeyboard'
 
 const posted: string[] = []
 
@@ -39,5 +43,15 @@ describe('holdKeyboardOverlay', () => {
     })
     holdKeyboardOverlay()()
     expect(posted).toEqual([])
+  })
+})
+
+describe('rememberedKeyboardHeight', () => {
+  it('guesses a share of the window until a keyboard is seen, then keeps the last one', () => {
+    vi.stubGlobal('window', { innerHeight: 800 })
+    expect(rememberedKeyboardHeight()).toBe(336)
+    rememberKeyboardHeight(341)
+    rememberKeyboardHeight(0)
+    expect(rememberedKeyboardHeight()).toBe(341)
   })
 })

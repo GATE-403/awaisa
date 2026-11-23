@@ -167,6 +167,10 @@ test.describe('Cabinet «Настройки»', () => {
 
     await search.focus()
     await expect.poll(posted).toContain('"mode":"overlay"')
+    // It rises at the focus, before the keyboard is reported: a field still under the keyboard
+    // when the WebView shrinks its visual viewport makes it pan the whole page.
+    const bar = page.locator('[data-align]:has([aria-label="Поиск по настройкам"])')
+    await expect(bar).toHaveAttribute('data-keyboard', '')
     await keyboard(300)
     const keyboardTop = await page.evaluate(() => window.innerHeight - 300)
     await expect
