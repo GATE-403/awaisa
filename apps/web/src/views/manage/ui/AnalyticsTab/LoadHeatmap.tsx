@@ -116,7 +116,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
             day: weekdayOf(picked.weekday),
             hours: span(picked.hour),
           })}
-          <CaretRight weight='bold' aria-hidden />
+          <CaretRight aria-hidden />
         </button>
       )}
       <div className={styles.heatmapScroll}>

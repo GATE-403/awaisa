@@ -44,7 +44,7 @@ export const Footer = () => (
           <FooterColumn key={column.title} className={styles.column}>
             <summary className={styles.columnTitle}>
               <T>{column.title}</T>
-              <CaretDown className={styles.caret} weight='bold' aria-hidden />
+              <CaretDown className={styles.caret} aria-hidden />
             </summary>
             <ul className={styles.links}>
               {column.links.map((link) => (

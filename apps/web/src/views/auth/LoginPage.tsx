@@ -54,11 +54,11 @@ export const LoginPage = () => {
             onClick={isWaitingForTelegram ? telegram.cancel : form.editPhone}
             aria-label={isWaitingForTelegram ? t('Назад') : t('Изменить номер')}
           >
-            <CaretLeft weight='bold' aria-hidden />
+            <CaretLeft aria-hidden />
           </button>
         ) : (
           <NextLink href={form.closeTo} className={styles.corner} aria-label={t('Закрыть')}>
-            <X weight='bold' aria-hidden />
+            <X aria-hidden />
           </NextLink>
         )}
       </div>

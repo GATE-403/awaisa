@@ -46,7 +46,7 @@ export const CalendarFeedGroup = ({
           <span className={sheet.rowLabel}>{t('Календарь на телефоне')}</span>
           <span className={styles.value}>
             {state.feed?.isActive && t('Подключён')}
-            <CaretRight weight='bold' className={styles.chevron} aria-hidden />
+            <CaretRight className={styles.chevron} aria-hidden />
           </span>
         </button>
       </div>

@@ -60,7 +60,7 @@ export const CertificateAmountsSheet = ({
             <span />
             {drafts.length < CERTIFICATE_AMOUNTS_MAX && (
               <button type='button' className={sheet.groupLink} onClick={handleAdd}>
-                <Plus weight='bold' aria-hidden /> {t('Ещё сумма')}
+                <Plus aria-hidden /> {t('Ещё сумма')}
               </button>
             )}
           </div>

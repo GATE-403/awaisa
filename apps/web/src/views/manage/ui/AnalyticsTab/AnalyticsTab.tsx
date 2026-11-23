@@ -111,7 +111,7 @@ const Delta = ({ value }: DeltaProps) => {
 
   return (
     <span className={styles.delta} data-direction={value > 0 ? 'up' : value < 0 ? 'down' : 'flat'}>
-      <Icon weight='bold' aria-hidden='true' className={styles.deltaIcon} />
+      <Icon aria-hidden='true' className={styles.deltaIcon} />
       {value > 0 ? '+' : value < 0 ? '−' : ''}
       {Math.abs(value)}%
     </span>
@@ -526,7 +526,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                             </span>
                           </span>
                           <span className={styles.rowValue}>{formatMoney(client.revenue)}</span>
-                          <CaretRight weight='bold' aria-hidden className={styles.rowChevron} />
+                          <CaretRight aria-hidden className={styles.rowChevron} />
                         </button>
                       </li>
                     ))}
@@ -665,7 +665,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
                 <span className={styles.rowValue}>
                   {master.load}%<span className={styles.srOnly}> {t('загрузки')}</span>
                 </span>
-                <CaretRight weight='bold' aria-hidden className={styles.rowChevron} />
+                <CaretRight aria-hidden className={styles.rowChevron} />
                 {master.load > 0 && (
                   <span className={styles.meter} data-tone='load' aria-hidden='true'>
                     <span style={{ width: `${master.load}%` }} />

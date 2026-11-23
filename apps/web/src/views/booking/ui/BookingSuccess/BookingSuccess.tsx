@@ -95,7 +95,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
         </div>
       )}
       <span ref={checkRef} className={styles.check} aria-hidden>
-        <Check weight='bold' />
+        <Check />
       </span>
       <h1 className={styles.title}>{t('Вы записаны')}</h1>
       <p className={styles.lead}>

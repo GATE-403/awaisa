@@ -19,7 +19,7 @@ export const SearchField = ({ value, onChange, placeholder, label }: SearchField
   const t = useT()
   return (
     <label className={styles.search}>
-      <MagnifyingGlass weight='bold' aria-hidden className={styles.icon} />
+      <MagnifyingGlass aria-hidden className={styles.icon} />
       <Input
         type='search'
         aria-label={label ?? placeholder}
@@ -35,7 +35,7 @@ export const SearchField = ({ value, onChange, placeholder, label }: SearchField
           onClick={() => onChange('')}
           aria-label={t('Очистить поиск')}
         >
-          <X weight='bold' aria-hidden />
+          <X aria-hidden />
         </button>
       )}
     </label>

@@ -86,7 +86,7 @@ export const CreateBusinessPage = () => {
             along (done steps lit, the open one filling up as its fields are filled in). */}
         <div className={styles.topBar}>
           <NextLink href='/business' className={styles.close} aria-label={t('Закрыть')}>
-            <X weight='bold' aria-hidden />
+            <X aria-hidden />
           </NextLink>
           <div
             className={styles.progress}
@@ -211,9 +211,9 @@ export const CreateBusinessPage = () => {
                             </span>
                           </span>
                           {isChosen ? (
-                            <Check weight='bold' className={styles.kindCheck} aria-hidden />
+                            <Check className={styles.kindCheck} aria-hidden />
                           ) : (
-                            <CaretRight weight='bold' className={styles.kindChevron} aria-hidden />
+                            <CaretRight className={styles.kindChevron} aria-hidden />
                           )}
                         </button>
                       </li>

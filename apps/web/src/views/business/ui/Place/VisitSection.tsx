@@ -115,7 +115,7 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
                   })}
             </span>
           </span>
-          <CaretRight weight='bold' className={styles.infoChevron} aria-hidden />
+          <CaretRight className={styles.infoChevron} aria-hidden />
         </summary>
         <ul className={styles.hours}>
           {WEEKDAYS_FULL.map((dayName, weekday) => (

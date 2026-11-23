@@ -217,7 +217,7 @@ export const MasterDialog = ({
                     checked={serviceIds.includes(service.id)}
                     onChange={(event) => toggleService(service.id, event.target.checked)}
                   />
-                  <Check className={sheet.check} weight='bold' aria-hidden />
+                  <Check className={sheet.check} aria-hidden />
                 </label>
               ))}
             </div>

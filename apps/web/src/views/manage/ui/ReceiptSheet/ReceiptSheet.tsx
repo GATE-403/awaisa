@@ -79,7 +79,7 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
         {receipt.status === 'issued' && (
           <div className={styles.actions}>
             <Button type='button' size='sm' className={styles.main} onClick={() => void copy()}>
-              <Copy weight='bold' aria-hidden />
+              <Copy aria-hidden />
               {t('Скопировать ссылку')}
             </Button>
             <GlyphGroup label={t('Ещё')}>
@@ -107,7 +107,7 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
               disabled={isSending}
               onClick={() => void retry()}
             >
-              <ArrowClockwise weight='bold' aria-hidden />
+              <ArrowClockwise aria-hidden />
               {t('Отправить снова')}
             </Button>
           </div>

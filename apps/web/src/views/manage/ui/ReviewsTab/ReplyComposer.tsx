@@ -165,7 +165,7 @@ export const ReplyComposer = ({
             aria-label={isEditing && !text.trim() ? t('Удалить ответ') : t('Отправить ответ')}
             title={t('Отправить (⌘ Enter)')}
           >
-            <ArrowUp weight='bold' aria-hidden />
+            <ArrowUp aria-hidden />
           </button>
         )}
       </div>

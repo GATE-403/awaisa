@@ -113,7 +113,7 @@ export const ServicePicker = ({
                   <Fire weight='fill' />
                 </span>
               )}
-              <Check className={styles.check} weight='bold' aria-hidden />
+              <Check className={styles.check} aria-hidden />
               <span className={styles.caption}>
                 <span className={styles.name}>{service.name}</span>
                 <span className={styles.meta}>

@@ -249,7 +249,7 @@ export const MasterScheduleSheet = ({
                     })}
                     onClick={() => handleRemoveLeave(item.id)}
                   >
-                    <X weight='bold' aria-hidden />
+                    <X aria-hidden />
                   </button>
                 </div>
               ))}

@@ -62,7 +62,7 @@ export const ResumeBooking = () => {
               strokeDashoffset={circumference * (1 - stepsDone / DRAFT_STEPS)}
             />
           </svg>
-          <CalendarBlank weight='fill' className={styles.glyph} />
+          <CalendarBlank className={styles.glyph} />
         </span>
         <span className={styles.text}>
           <span className={styles.title}>{draft.serviceName}</span>
@@ -72,7 +72,7 @@ export const ResumeBooking = () => {
         </span>
         <span className={styles.go} aria-hidden>
           <span className={styles.goLabel}>Продолжить</span>
-          <ArrowRight weight='bold' />
+          <ArrowRight />
         </span>
       </NextLink>
       <button
@@ -81,7 +81,7 @@ export const ResumeBooking = () => {
         onClick={clearDraft}
         aria-label='Не продолжать'
       >
-        <X weight='bold' aria-hidden />
+        <X aria-hidden />
       </button>
     </aside>
   )

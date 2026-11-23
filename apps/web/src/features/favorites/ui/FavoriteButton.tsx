@@ -32,7 +32,7 @@ export const FavoriteButton = ({ id, label }: FavoriteButtonProps) => {
         haptic('selection')
       }}
     >
-      <Heart weight={isOn ? 'fill' : 'bold'} aria-hidden />
+      <Heart weight={isOn ? 'fill' : 'regular'} aria-hidden />
     </button>
   )
 }

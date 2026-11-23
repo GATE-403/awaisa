@@ -84,7 +84,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
         disabled={isBusy}
         onClick={(event) => void handleClick(event)}
       >
-        {isOn ? <BellRinging weight='fill' aria-hidden /> : <Bell weight='bold' aria-hidden />}
+        {isOn ? <BellRinging weight='fill' aria-hidden /> : <Bell aria-hidden />}
       </button>
     )
   }
