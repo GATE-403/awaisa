@@ -465,7 +465,9 @@ export const BookingPage = ({
       form.specialistId && form.specialistId !== ANY_SPECIALIST_ID
         ? (specialistLabel.split(' ')[0] ?? specialistLabel)
         : null,
-    isAddressShown: form.branches.length > 1,
+    // With several branches the ready bar names the branch: a whole address ended in «мкр. Аса…»
+    // on a 375pt phone. The address stays on the branch card and in «Ваша запись».
+    branchName: form.branches.length > 1 ? (chosenBranch?.name ?? null) : null,
     choice: choiceLine({
       services: form.chosenServices.length
         ? form.chosenServices.map((service) => service.name)
