@@ -256,6 +256,9 @@
 
 .time {
   position: relative;
+  /* Above the name's stretched link (z 1) on cards without pictures: under it «10:00» opened
+     the place instead of booking that time. */
+  z-index: 2;
   color: #fff;
   font-size: var(--text-xs);
   font-weight: var(--font-weight-semibold);
