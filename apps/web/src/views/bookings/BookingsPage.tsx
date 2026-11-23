@@ -3,12 +3,14 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import { CaretLeft } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { FavoritesShelf, useFavorites } from '@/features/favorites'
 import { ForYouShelf } from '@/features/forYou'
+import { RateRecent } from '@/features/rateVisit'
 import { WaitlistList } from '@/features/waitlist'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
@@ -16,6 +18,7 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { useMyBookings } from '@/views/bookings/model/useMyBookings'
 import { BookingHistory } from '@/views/bookings/ui/BookingHistory/BookingHistory'
@@ -25,18 +28,20 @@ import { getCountdown, isUpcoming } from './bookingsUtils'
 import { AccountCard } from './ui/AccountCard/AccountCard'
 import { AccountSettings } from './ui/AccountSettings/AccountSettings'
 import { LoyaltyCard } from './ui/LoyaltyCard/LoyaltyCard'
-import { RateRecent } from './ui/RateRecent/RateRecent'
 
-// The nearest visits first; the rest behind «Ещё N записей», so the page does not run long.
-const UPCOMING_FIRST = 3
+// After the nearest visit, the next few as rows; the rest behind «Ещё N записей».
+const LATER_FIRST = 3
 
 interface BookingsPageProps {
   /** The signed-in account's bookings, read on the server for this request. */
   initialAccountBookings?: Booking[] | null
 }
 
-const PROFILE_TABS = ['upcoming', 'history', 'favorites', 'settings'] as const
+const PROFILE_TABS = ['bookings', 'favorites', 'settings'] as const
 type ProfileTab = (typeof PROFILE_TABS)[number]
+
+/** Old links to the two tabs the records were split into land on the one «Записи». */
+const OLD_TABS: Record<string, ProfileTab> = { upcoming: 'bookings', history: 'bookings' }
 
 export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
   const t = useT()
@@ -55,7 +60,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
     window.history.replaceState(window.history.state, '', url)
   }
   const { ids: favoriteIds } = useFavorites()
-  const isSignedIn = useSession().status === 'signedIn'
+  const sessionStatus = useSession().status
+  const isSignedIn = sessionStatus === 'signedIn'
   const [isAllUpcoming, setIsAllUpcoming] = useState(false)
   const toast = useToast()
   const upcoming = bookings
@@ -64,8 +70,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   const history = bookings.filter((booking) => !isUpcoming(booking, today))
 
   useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get('tab')
-    const known = PROFILE_TABS.find((item) => item === fromUrl)
+    const fromUrl = new URLSearchParams(window.location.search).get('tab') ?? ''
+    const known = PROFILE_TABS.find((item) => item === fromUrl) ?? OLD_TABS[fromUrl]
     if (known) setTabState(known)
   }, [])
 
@@ -83,68 +89,59 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   }, [])
 
   const visits = history.filter((booking) => booking.status === 'confirmed').length
-  const view = tab ?? (upcoming.length === 0 && history.length > 0 ? 'history' : 'upcoming')
+  // A guest has no settings: a «?tab=settings» link shows their records instead of an empty
+  // screen under a «‹ Записи · Настройки» bar.
+  const isGuest = sessionStatus === 'guest'
+  const view = tab === 'settings' && isGuest ? 'bookings' : (tab ?? 'bookings')
+  const [next, ...later] = upcoming
 
   return (
     <main className={styles.page}>
       <Container size='md' className={styles.content}>
-        <AccountCard bookings={bookings} visits={visits} />
+        <AccountCard
+          bookings={bookings}
+          visits={visits}
+          onOpenSettings={isSignedIn && view !== 'settings' ? () => setTab('settings') : undefined}
+        />
 
         {!isReady && <Skeleton className={styles.skeleton} />}
 
         {isReady && (
           <div className={styles.feed}>
-            <RateRecent history={history} today={today} onRated={replace} />
-            {/* The whole profile in four tabs: what is ahead, what has been, what was saved, and
-                the account's settings — one place to look, no long page to scroll. */}
-            <TextTabs
-              label={t('Профиль')}
-              items={[
-                {
-                  label: t('Предстоящие'),
-                  count: upcoming.length,
-                  isActive: view === 'upcoming',
-                  onSelect: () => setTab('upcoming'),
-                  id: 'tab-upcoming',
-                  controls: 'panel-upcoming',
-                },
-                {
-                  label: t('История'),
-                  count: history.length,
-                  isActive: view === 'history',
-                  onSelect: () => setTab('history'),
-                  id: 'tab-history',
-                  controls: 'panel-history',
-                },
-                {
-                  label: t('Избранное'),
-                  count: favoriteIds.length || undefined,
-                  isActive: view === 'favorites',
-                  onSelect: () => setTab('favorites'),
-                  id: 'tab-favorites',
-                  controls: 'panel-favorites',
-                },
-                ...(isSignedIn
-                  ? [
-                      {
-                        label: t('Настройки'),
-                        isActive: view === 'settings',
-                        onSelect: () => setTab('settings'),
-                        id: 'tab-settings',
-                        controls: 'panel-settings',
-                      },
-                    ]
-                  : []),
-              ]}
-            />
+            {/* Two tabs: the records (what is ahead, then what has been) and what was saved; the
+                settings open from the account's gear as a screen of their own. */}
+            {view !== 'settings' && (
+              <TextTabs
+                label={t('Профиль')}
+                items={[
+                  {
+                    label: t('Записи'),
+                    count: upcoming.length || undefined,
+                    isActive: view === 'bookings',
+                    onSelect: () => setTab('bookings'),
+                    id: 'tab-bookings',
+                    controls: 'panel-bookings',
+                  },
+                  {
+                    label: t('Избранное'),
+                    count: favoriteIds.length || undefined,
+                    isActive: view === 'favorites',
+                    onSelect: () => setTab('favorites'),
+                    id: 'tab-favorites',
+                    controls: 'panel-favorites',
+                  },
+                ]}
+              />
+            )}
 
-            {view === 'upcoming' && (
+            {view === 'bookings' && (
               <div
                 className={styles.panel}
                 role='tabpanel'
-                id='panel-upcoming'
-                aria-labelledby='tab-upcoming'
+                id='panel-bookings'
+                aria-labelledby='tab-bookings'
               >
+                {/* The page answers «when and where do I go» first: the nearest visit, large. */}
                 {bookings.length === 0 ? (
                   <EmptyState
                     title={t('Запишитесь к мастеру')}
@@ -155,67 +152,79 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                       </ButtonLink>
                     }
                   />
-                ) : upcoming.length > 0 ? (
-                  <MoreFade
-                    hiddenCount={Math.max(0, upcoming.length - UPCOMING_FIRST)}
-                    isOpen={isAllUpcoming}
-                    onToggle={() => setIsAllUpcoming((value) => !value)}
-                    label={t
-                      .count(upcoming.length - UPCOMING_FIRST, ['запись', 'записи', 'записей'])
-                      .replace(/^\d+ /, '')}
-                    surface='card'
-                  >
-                    <div className={styles.upcoming}>
-                      {(isAllUpcoming ? upcoming : upcoming.slice(0, UPCOMING_FIRST)).map(
-                        (booking) => (
-                          <UpcomingBooking
-                            key={booking.id}
-                            booking={booking}
-                            countdown={getCountdown(booking, today, t)}
-                            isCancelling={cancellingId === booking.id}
-                            onCancel={() => cancel(booking.id)}
-                            onMoved={replace}
-                          />
-                        ),
-                      )}
-                    </div>
-                  </MoreFade>
+                ) : next ? (
+                  <section className={styles.next} aria-label={t('Ближайший визит')}>
+                    <UpcomingBooking
+                      booking={next}
+                      countdown={getCountdown(next, today, t)}
+                      isCancelling={cancellingId === next.id}
+                      onCancel={() => cancel(next.id)}
+                      onMoved={replace}
+                    />
+                  </section>
                 ) : (
                   <p className={styles.panelEmpty}>
                     {t('Впереди ничего нет.')}{' '}
                     <NextLink href='/'>{t('Найти, куда записаться ›')}</NextLink>
                   </p>
                 )}
-                {/* Nothing ahead: what to book next, picked for this person — here it is useful,
-                    not at the foot of the profile. */}
-                {upcoming.length === 0 && (
+
+                {/* The later visits: one quiet row each, every action behind «⋯». */}
+                {later.length > 0 && (
+                  <section className={styles.section} aria-labelledby='later-title'>
+                    <SectionCaption as='h2' id='later-title' isInset={false}>
+                      {t('Дальше')}
+                    </SectionCaption>
+                    <MoreFade
+                      hiddenCount={Math.max(0, later.length - LATER_FIRST)}
+                      isOpen={isAllUpcoming}
+                      onToggle={() => setIsAllUpcoming((value) => !value)}
+                      label={t
+                        .count(later.length - LATER_FIRST, ['запись', 'записи', 'записей'])
+                        .replace(/^\d+ /, '')}
+                      surface='card'
+                    >
+                      <div className={styles.upcoming}>
+                        {(isAllUpcoming ? later : later.slice(0, LATER_FIRST)).map((booking) => (
+                          <UpcomingBooking
+                            key={booking.id}
+                            booking={booking}
+                            variant='row'
+                            countdown={getCountdown(booking, today, t)}
+                            isCancelling={cancellingId === booking.id}
+                            onCancel={() => cancel(booking.id)}
+                            onMoved={replace}
+                          />
+                        ))}
+                      </div>
+                    </MoreFade>
+                  </section>
+                )}
+
+                {/* Nothing ahead: what to book next, picked for this person. */}
+                {bookings.length > 0 && !next && (
                   <ForYouShelf title={t('Куда записаться')} surface='profile' />
                 )}
                 <WaitlistList />
                 <LoyaltyCard />
-              </div>
-            )}
-            {view === 'history' && (
-              <div
-                className={styles.panel}
-                role='tabpanel'
-                id='panel-history'
-                aria-labelledby='tab-history'
-              >
-                {/* Like the «Пора снова» SMS: services whose usual gap has come, one tap from
-                    booking again. Nothing due, nothing drawn. */}
+
+                {/* What has been, under what is ahead: the last visit asks how it went, the
+                    services due again come one tap from booking, then the visits themselves. */}
                 {history.length > 0 && (
-                  <ForYouShelf title={t('Пора снова')} surface='due' isOnlyDue />
-                )}
-                {history.length > 0 ? (
-                  <BookingHistory
-                    bookings={history}
-                    canForget={canForget}
-                    onForget={forget}
-                    onRated={replace}
-                  />
-                ) : (
-                  <p className={styles.panelEmpty}>{t('Здесь появятся прошедшие визиты.')}</p>
+                  <section className={styles.section} aria-labelledby='past-title'>
+                    <SectionCaption as='h2' id='past-title' isInset={false}>
+                      {t('Прошлые')}
+                      <span className={styles.captionCount}>{history.length}</span>
+                    </SectionCaption>
+                    <RateRecent history={history} today={today} onRated={replace} />
+                    <ForYouShelf title={t('Пора снова')} surface='due' isOnlyDue />
+                    <BookingHistory
+                      bookings={history}
+                      canForget={canForget}
+                      onForget={forget}
+                      onRated={replace}
+                    />
+                  </section>
                 )}
               </div>
             )}
@@ -230,14 +239,27 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
               </div>
             )}
             {view === 'settings' && (
-              <div
+              <section
                 className={styles.panel}
-                role='tabpanel'
                 id='panel-settings'
-                aria-labelledby='tab-settings'
+                aria-labelledby='settings-title'
               >
+                {/* Back to the records, the way an iOS settings screen leads back. */}
+                <div className={styles.settingsBar}>
+                  <button
+                    type='button'
+                    className={styles.backLink}
+                    onClick={() => setTab('bookings')}
+                  >
+                    <CaretLeft weight='bold' aria-hidden />
+                    {t('Записи')}
+                  </button>
+                  <h2 id='settings-title' className={styles.settingsTitle}>
+                    {t('Настройки')}
+                  </h2>
+                </div>
                 <AccountSettings isTitleHidden />
-              </div>
+              </section>
             )}
           </div>
         )}

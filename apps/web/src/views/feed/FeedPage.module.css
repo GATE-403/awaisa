@@ -114,7 +114,7 @@
 .placeholder {
   height: 100%;
   margin: 0 var(--page-gutter);
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   background: var(--color-fill);
 }
 
@@ -190,7 +190,7 @@
   width: var(--width);
   height: min(100cqh, var(--width) / 0.6);
   margin: 0;
-  border-radius: 28px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   isolation: isolate;
   background: #1c1c1e;

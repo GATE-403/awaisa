@@ -2,7 +2,7 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import { MapTrifold, NavigationArrow } from '@phosphor-icons/react/ssr'
+import { MapPin, NavigationArrow } from '@phosphor-icons/react/ssr'
 import dynamic from 'next/dynamic'
 import NextLink from 'next/link'
 import {
@@ -310,7 +310,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
                 size='sm'
                 onClick={() => setIsPicking(true)}
               >
-                <NavigationArrow weight='fill' aria-hidden />
+                <NavigationArrow aria-hidden />
                 {myPlace ? t(myPlace.label) : t('Где вы?')}
               </Button>
             </div>
@@ -366,7 +366,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
               settle('half')
             }}
           >
-            <MapTrifold weight='fill' aria-hidden />
+            <MapPin aria-hidden />
             {t('Карта')}
           </button>
         )}

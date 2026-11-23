@@ -49,7 +49,7 @@ test.describe('Moving around the app', () => {
       ['Образы', '/feed'],
       ['Карта', '/map'],
       ['Бизнес', '/business'],
-      ['Профиль', '/bookings'],
+      ['Записи', '/bookings'],
       ['Каталог', '/'],
     ] as const) {
       await tabs.getByRole('link', { name: label }).click()
@@ -76,7 +76,7 @@ test.describe('Moving around the app', () => {
       ['Образы', '/feed'],
       ['Карта', '/map'],
       ['Рейтинг', '/top'],
-      ['Для бизнеса', '/business'],
+      ['Бизнес', '/business'],
     ] as const) {
       await header.getByRole('link', { name: label }).click()
       await expect(page).toHaveURL((url) => url.pathname === path)

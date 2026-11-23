@@ -36,7 +36,8 @@ test.describe('Account: sign in by SMS', () => {
     await expect(greeting).toContainText('Привет, E2E')
     await expect(greeting).toContainText('Вы вошли')
     await expect(page).toHaveURL(/\/bookings$/)
-    await expect(page.getByRole('region', { name: 'Профиль' })).toContainText(formatPhone(phone))
+    // The account is one row over the records: the name (the number lives in «Настройки»).
+    await expect(page.getByRole('region', { name: 'Профиль' })).toContainText('E2E Тест')
   })
 
   test('the name is changed in a sheet from «Настройки»', async ({ page }) => {
@@ -65,10 +66,11 @@ test.describe('Account: sign in by SMS', () => {
       'true',
     )
 
-    await tabs.getByRole('tab', { name: /^История/ }).click()
-    await expect(page).toHaveURL(/[?&]tab=history/)
-    await page.reload()
-    await expect(tabs.getByRole('tab', { name: /^История/ })).toHaveAttribute(
+    // Ahead and past are one «Записи» tab now; an old «?tab=history» link lands on it too.
+    await tabs.getByRole('tab', { name: /^Записи/ }).click()
+    await expect(page).toHaveURL(/[?&]tab=bookings/)
+    await page.goto('/bookings?tab=history')
+    await expect(tabs.getByRole('tab', { name: /^Записи/ })).toHaveAttribute(
       'aria-selected',
       'true',
     )

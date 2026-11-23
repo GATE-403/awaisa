@@ -1,15 +1,6 @@
 'use client'
 
-import {
-  Compass,
-  MapPin,
-  MapTrifold,
-  Sparkle,
-  SquaresFour,
-  Storefront,
-  Trophy,
-  UserCircle,
-} from '@phosphor-icons/react/ssr'
+import { Compass, MapPin, SquaresFour, Storefront, Ticket, Trophy } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
@@ -26,15 +17,16 @@ import { useT } from '@/shared/i18n'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
+import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 import { Logo } from '@/shared/ui/Logo/Logo'
 import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
 
 const ACTIONS = [
-  { href: '/feed', label: 'Образы', icon: Sparkle },
-  { href: '/map', label: 'Карта', icon: MapTrifold },
+  { href: '/feed', label: 'Образы', icon: FanCardsIcon },
+  { href: '/map', label: 'Карта', icon: MapPin },
   { href: '/top', label: 'Рейтинг', icon: Trophy },
-  { href: '/business', label: 'Для бизнеса', icon: Storefront },
+  { href: '/business', label: 'Бизнес', icon: Storefront },
 ]
 
 interface HeaderContentProps {
@@ -136,7 +128,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
           className={styles.catalog}
           aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
         >
-          <Compass weight='fill' aria-hidden />
+          <Compass aria-hidden />
           {t('Каталог')}
         </NextLink>
         {!isSlim && (
@@ -154,7 +146,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
               aria-label={t(label)}
               aria-current={isActivePath(pathname, href) ? 'page' : undefined}
             >
-              <Icon weight={isActivePath(pathname, href) ? 'fill' : 'regular'} aria-hidden />
+              <Icon weight={isActivePath(pathname, href) ? 'fill' : 'light'} aria-hidden />
               <span>{t(label)}</span>
             </NextLink>
           ))}
@@ -175,11 +167,11 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
                 style={monogramTint(customer.name || customer.phone)}
               />
             ) : (
-              <UserCircle weight='regular' aria-hidden />
+              <Ticket weight='light' aria-hidden />
             )}
-            {/* «Профиль» like the other actions' one-word labels: a person's name cut to
-                «Локальны…» stood out among them. The face already says whose it is. */}
-            <span>{t('Профиль')}</span>
+            {/* «Записи» like the other actions' one-word labels (the page leads with the
+                visits; «Мой профиль» is the public one). The face already says whose it is. */}
+            <span>{t('Записи')}</span>
           </NextLink>
         </nav>
       </div>
@@ -217,7 +209,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             {/* On tablets only «Бишкек» shows, so the last categories are not hidden under it;
                 the name stays whole and still holds the visible word (WCAG 2.5.3). */}
             <NextLink href='/map' className={styles.city} aria-label={t('Бишкек · рядом на карте')}>
-              <MapPin weight='fill' aria-hidden />
+              <MapPin aria-hidden />
               {t('Бишкек')}
               <span className={styles.cityMore}>
                 {' · '}

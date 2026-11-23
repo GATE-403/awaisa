@@ -73,7 +73,7 @@ export const TabBar = () => {
                 style={monogramTint(customer.name || customer.phone)}
               />
             ) : (
-              <Icon className={styles.icon} weight={isActive ? 'fill' : 'regular'} aria-hidden />
+              <Icon className={styles.icon} weight={isActive ? 'fill' : 'light'} aria-hidden />
             )}
             <span className={styles.label}>{t(label)}</span>
           </NextLink>

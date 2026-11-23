@@ -3,16 +3,15 @@
 import { Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
-import { RateVisitSheet } from '@/features/rateVisit'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import type { Today } from '@/views/bookings/bookingsUtils'
+import { RateVisitSheet } from '../RateVisitSheet/RateVisitSheet'
 import styles from './RateRecent.module.css'
 
 interface RateRecentProps {
   /** Past visits, newest first or not — the latest unrated one is picked. */
   history: Booking[]
-  today: Today | null
+  today: { dayKey: string } | null
   onRated: (booking: Booking) => void
 }
 
@@ -30,7 +29,7 @@ const readDismissed = (): string[] => {
   }
 }
 
-const whenLabel = (date: string, today: Today) => {
+const whenLabel = (date: string, today: { dayKey: string }) => {
   const days = Math.round(
     (Date.parse(`${today.dayKey}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / DAY_MS,
   )
