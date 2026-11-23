@@ -9,7 +9,7 @@
   text-align: center;
 }
 
-/* A green check in a circle, popping in once. */
+/* A green check in a circle. */
 .check {
   display: inline-flex;
   align-items: center;
@@ -20,20 +20,11 @@
   border-radius: var(--radius-full);
   background: var(--color-success);
   color: #fff;
-  position: relative;
-  animation: pop 420ms var(--ease-spring) both;
 }
 
 .check svg {
   width: 28px;
   height: 28px;
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    scale: 0.6;
-  }
 }
 
 .title {
@@ -52,59 +43,14 @@
   text-transform: uppercase;
 }
 
-/* Three equal tiles under the ticket: icon over the word. */
-.tiles {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  gap: var(--space-2);
-  width: 100%;
-  margin-top: var(--space-4);
-}
-
-.tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 64px;
-  padding: var(--space-2);
-  border: none;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: scale var(--duration-fast) var(--ease-standard);
-}
-
-.tile svg {
-  width: 22px;
-  height: 22px;
-  color: var(--color-link);
-}
-
-.tile:active {
-  scale: 0.96;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .check {
-    animation: none;
-  }
-}
-
 .ticket {
   display: flex;
   justify-content: center;
   width: 100%;
   margin-top: var(--space-5);
   border-radius: var(--radius-xl);
-  animation: print 700ms var(--ease-spring) both;
+  /* No entrance of its own: printed from a slot, it read as a picture still loading («как будто
+     подгружается как изображение»). It is simply there under «Вы записаны». */
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
@@ -125,13 +71,8 @@
   height: 17px;
 }
 
-.primary {
-  width: 100%;
-  margin-top: var(--space-8);
-}
-
-/* «Ещё запись …»: a link-coloured row as wide as the column, 44pt to tap, before the one primary
-   action; the gap to it is the tiles' own. */
+/* «Ещё запись …»: a link-coloured row as wide as the column, 44pt to tap, right before the
+   line of actions. */
 .another {
   display: flex;
   align-items: center;
@@ -149,20 +90,10 @@
   cursor: pointer;
 }
 
-.another + .primary {
-  margin-top: var(--space-4);
-}
-
 .another:focus-visible {
   outline: none;
   border-radius: var(--radius-full);
   box-shadow: var(--focus-ring);
-}
-
-.follow {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-4);
 }
 
 .keep {
@@ -177,20 +108,6 @@
 .keepLink {
   color: var(--color-link);
   font-weight: var(--font-weight-semibold);
-}
-
-@keyframes print {
-  from {
-    opacity: 0;
-    translate: 0 -24px;
-    scale: 0.96;
-  }
-
-  to {
-    opacity: 1;
-    translate: 0 0;
-    scale: 1;
-  }
 }
 
 /* After the ticket: picks for this client, then a quiet way into the catalog. */
@@ -227,10 +144,9 @@
   white-space: nowrap;
 }
 
-/* Arrival: the check lands and a wave of light (`LightWave`) runs out from it over the whole
-   sheet, splitting into colours; a sheen runs across «Вы записаны» as it passes, and the lines
-   rise one after another. The pond covers the sheet (absolute in the sheet, not in this column);
-   the wave's origin is the check, measured from script. */
+/* A wave of light (`LightWave`) runs out from the check over the whole sheet as it shows, splitting
+   into colours. The pond covers the sheet (absolute in the sheet, not in this column); the wave's
+   origin is the check, measured from script. */
 .pond {
   position: absolute;
   inset: 0;
@@ -239,80 +155,27 @@
   pointer-events: none;
 }
 
-.check::before,
-.check::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2px solid var(--color-success);
-  border-radius: inherit;
-  opacity: 0;
-  pointer-events: none;
+/* The one line of actions: «Мои записи» takes the room, the glyph capsule beside it is as tall
+   (44pt: the glyphs grow from the kit's 36 to 40). */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-6);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .check::before {
-    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
-  }
-
-  .check::after {
-    animation: ring 900ms cubic-bezier(0.22, 1, 0.36, 1) 360ms;
-  }
-
-  .title {
-    background:
-      linear-gradient(
-        100deg,
-        currentColor 40%,
-        color-mix(in srgb, var(--color-success) 55%, #fff) 50%,
-        currentColor 60%
-      )
-      100% 0 / 300% 100%;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation:
-      rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 160ms backwards,
-      sheen 1100ms var(--ease-standard) 380ms backwards;
-  }
-
-  .lead {
-    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 240ms backwards;
-  }
-
-  .nextStep {
-    animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) 320ms backwards;
-  }
-
-  .ticket {
-    animation-delay: 380ms;
-  }
+.another + .actions {
+  margin-top: var(--space-2);
 }
 
-@keyframes ring {
-  from {
-    opacity: 0.7;
-    scale: 1;
-  }
-
-  to {
-    opacity: 0;
-    scale: 2.4;
-  }
+.actions .primaryAction {
+  flex: 1;
+  height: var(--control-height-md);
+  min-height: var(--control-height-md);
 }
 
-@keyframes sheen {
-  from {
-    background-position: 100% 0;
-  }
-
-  to {
-    background-position: 0 0;
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    translate: 0 10px;
-  }
+.actions [role="group"] :is(button, a) {
+  width: 40px;
+  height: 40px;
 }

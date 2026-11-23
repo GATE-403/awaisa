@@ -28,12 +28,14 @@
   padding: var(--space-3) var(--space-4);
 }
 
+/* Always square, like a calendar icon: the day centred under the month band. */
 .leaf {
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
   width: 44px;
+  aspect-ratio: 1;
   border-radius: var(--radius-sm);
   background: var(--color-subtle);
   font-variant-numeric: tabular-nums;
@@ -53,8 +55,12 @@
 }
 
 .leafDay {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
   font-size: var(--text-body);
-  line-height: 26px;
+  line-height: 1;
   font-weight: var(--font-weight-semibold);
 }
 

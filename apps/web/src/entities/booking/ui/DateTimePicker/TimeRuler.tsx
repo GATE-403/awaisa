@@ -1,6 +1,6 @@
 'use client'
 
-import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -12,8 +12,6 @@ interface TimeRulerProps {
   /** The visit's length, for «до 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
-  /** The day row, set under the dial (the time is what is asked for; the day tunes it). */
-  days?: ReactNode
   /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
   onCenter?: (time: string | null) => void
   /** Another day is loading: the dial stays, dimmed and still. */
@@ -40,7 +38,6 @@ export const TimeRuler = ({
   durationMinutes,
   onPick,
   isPending = false,
-  days,
   onCenter,
 }: TimeRulerProps) => {
   const t = useT()
@@ -59,6 +56,11 @@ export const TimeRuler = ({
   const [centered, setCentered] = useState(chosenIndex >= 0 ? chosenIndex : firstFree)
   // The tick under the needle as the scroll last saw it, for one detent per tick crossed.
   const centeredRef = useRef(centered)
+  const lastDetent = useRef(0)
+  // When the finger let go: its coast still ticks, the dial's own glides never do.
+  const releasedAt = useRef(0)
+  // A touch pan cancels the pointer at once, so the finger is followed by its touch events.
+  const isTouching = useRef(false)
   const startIndex = chosenIndex >= 0 ? chosenIndex : firstFree
   const slotsKey = slots.map((slot) => slot.time).join()
 
@@ -93,12 +95,17 @@ export const TimeRuler = ({
   const handleScroll = () => {
     const track = trackRef.current
     if (!track) return
-    // Where the dial is between ticks, for the magnet (CSS only, no re-render per frame).
-    track.style.setProperty('--pos', `${track.scrollLeft / TICK_WIDTH}`)
     const index = Math.min(slots.length - 1, Math.max(0, Math.round(track.scrollLeft / TICK_WIDTH)))
-    // A detent under the finger on every free time, like the system's time wheel (in the app).
-    if (index !== centeredRef.current && isHolding.current && slots[index]?.isAvailable) {
-      haptic('selection')
+    // A detent on every free time the needle crosses, like the system's time wheel (in the app):
+    // under the finger and on through the coast after it lets go, at most one per 40 ms.
+    const isByHand =
+      isHolding.current || isTouching.current || performance.now() - releasedAt.current < 1200
+    if (index !== centeredRef.current && isByHand && slots[index]?.isAvailable) {
+      const now = performance.now()
+      if (now - lastDetent.current > 40) {
+        lastDetent.current = now
+        haptic('selection')
+      }
     }
     centeredRef.current = index
     setCentered(index)
@@ -164,11 +171,24 @@ export const TimeRuler = ({
           }}
           onPointerUp={() => {
             isHolding.current = false
+            releasedAt.current = performance.now()
             window.clearTimeout(settleTimer.current)
             settleTimer.current = window.setTimeout(settle, 140)
           }}
           onPointerCancel={() => {
             isHolding.current = false
+            releasedAt.current = performance.now()
+          }}
+          onTouchStart={() => {
+            isTouching.current = true
+          }}
+          onTouchEnd={() => {
+            isTouching.current = false
+            releasedAt.current = performance.now()
+          }}
+          onTouchCancel={() => {
+            isTouching.current = false
+            releasedAt.current = performance.now()
           }}
           onWheel={() => setHasMoved(true)}
           onScroll={handleScroll}
@@ -181,7 +201,6 @@ export const TimeRuler = ({
               data-free={slot.isAvailable || undefined}
               data-hour={slot.time.endsWith(':00') || undefined}
               data-centered={index === centered || undefined}
-              style={{ '--idx': index } as CSSProperties}
               aria-pressed={slot.time === time}
               disabled={!slot.isAvailable || isPending}
               onClick={() => pick(index)}
@@ -201,23 +220,25 @@ export const TimeRuler = ({
         </span>
       </div>
 
-      {!hasMoved && <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>}
-
-      {/* The legend mirrors the ruler — a tall bar for free, a low one for taken — with counts. */}
-      <p className={styles.legend}>
-        <span className={styles.legendItem}>
-          <span className={styles.swatch} data-free='' aria-hidden />
-          {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
-        </span>
-        {takenCount > 0 && (
+      {/* One line under the dial: how it works until it is touched, then the legend — a tall bar
+          for free, a low one for taken — with counts. Two lines made the step taller than
+          short phones. */}
+      {!hasMoved ? (
+        <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>
+      ) : (
+        <p className={styles.legend}>
           <span className={styles.legendItem}>
-            <span className={styles.swatch} aria-hidden />
-            {t('{count} занято', { count: takenCount })}
+            <span className={styles.swatch} data-free='' aria-hidden />
+            {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
           </span>
-        )}
-      </p>
-
-      {days}
+          {takenCount > 0 && (
+            <span className={styles.legendItem}>
+              <span className={styles.swatch} aria-hidden />
+              {t('{count} занято', { count: takenCount })}
+            </span>
+          )}
+        </p>
+      )}
     </div>
   )
 }

@@ -141,7 +141,7 @@ test.describe('User flow: booking', () => {
     await expect(
       steps.datetime
         .getByRole('group', { name: 'Время' })
-        .or(steps.datetime.getByText('свободного времени нет')),
+        .or(steps.datetime.getByText('На этот день всё занято')),
     ).toBeVisible()
   })
 

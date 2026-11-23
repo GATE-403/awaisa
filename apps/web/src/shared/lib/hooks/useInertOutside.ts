@@ -7,27 +7,34 @@ import { type RefObject, useEffect } from 'react'
 // walk into the dimmed header behind the scrim. Live regions (toasts) and elements marked
 // `data-keep-interactive` (the scrim that closes the layer) stay usable. An effect, like
 // `usePageScrollLock`: React Activity runs the cleanup when it hides the route.
-export const useInertOutside = (ref: RefObject<HTMLElement | null>, key?: unknown) => {
+// `delayMs` waits for a layer that slides in: making the page inert restyles all of it, which on a
+// phone cost frames of the slide.
+export const useInertOutside = (ref: RefObject<HTMLElement | null>, key?: unknown, delayMs = 0) => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` re-runs it when the layer's element is replaced
   useEffect(() => {
     const layer = ref.current
     if (!layer) return
     const made: HTMLElement[] = []
-    for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
-      const parent: HTMLElement | null = node.parentElement
-      if (!parent) break
-      for (const sibling of parent.children) {
-        if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue
-        if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
-        if (sibling.querySelector('[aria-live]')) continue
-        sibling.inert = true
-        made.push(sibling)
+    const makeInert = () => {
+      for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
+        const parent: HTMLElement | null = node.parentElement
+        if (!parent) break
+        for (const sibling of parent.children) {
+          if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue
+          if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
+          if (sibling.querySelector('[aria-live]')) continue
+          sibling.inert = true
+          made.push(sibling)
+        }
+        node = parent
       }
-      node = parent
     }
+    const timer = delayMs ? window.setTimeout(makeInert, delayMs) : 0
+    if (!delayMs) makeInert()
 
     return () => {
+      window.clearTimeout(timer)
       for (const element of made) element.inert = false
     }
-  }, [ref, key])
+  }, [ref, key, delayMs])
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { CaretRight, CaretUp } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type ReactNode, useState } from 'react'
 import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
@@ -39,6 +39,12 @@ interface BookingSummaryProps {
    * or one bought with the visit (`total` is its price, paid now). No discount or deposit then.
    */
   paidWith?: { label: string; total: number | null } | null
+  /** What is chosen so far («Укладка · Мээрим»), said in the bar while steps remain. */
+  choice?: string
+  /** The master as the ready bar names them: a first name or «Любой мастер». */
+  masterShort?: string | null
+  /** Several branches: the ready bar says which address (with one, it is in the SMS). */
+  isAddressShown?: boolean
 }
 
 // The button names the next thing to do (a bare «Далее» left people unsure that a time was still
@@ -56,8 +62,6 @@ const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
   datetime: 'Выберите время',
   contacts: 'Оставьте контакты',
 }
-
-const STEPS: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
 
 const getButtonLabel = (
   firstIncompleteStep: BookingStepId | null,
@@ -87,6 +91,9 @@ export const BookingSummary = ({
   address = null,
   ticket,
   paidWith = null,
+  choice = '',
+  masterShort = null,
+  isAddressShown = false,
 }: BookingSummaryProps) => {
   const t = useT()
   const total = paidWith ? paidWith.total : (quote?.total ?? service?.price ?? null)
@@ -125,11 +132,10 @@ export const BookingSummary = ({
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line — a place with two addresses must not be a surprise.
   const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
+  // While steps remain the line says what is chosen so far, not «Шаг 2 из 4»: the step's own
+  // caption above its question already counts, and two counters read as clutter.
   const hint = firstIncompleteStep ? (
-    t('Шаг {step} из {total}', {
-      step: STEPS.indexOf(firstIncompleteStep) + 1,
-      total: STEPS.length,
-    })
+    choice || place?.name || t('Онлайн-запись')
   ) : deposit ? (
     t('{when} · предоплата {amount}', {
       when: whenLabel ?? '',
@@ -145,6 +151,90 @@ export const BookingSummary = ({
   ) : (
     whenLabel
   )
+
+  // Ready to book: the day as a calendar leaf (the one on the stack's time card and the ticket),
+  // then the time and the total over one quiet line, the master and where or how long.
+  const isReady = !firstIncompleteStep && Boolean(dayKey && time)
+  const readyLine = deposit
+    ? [masterShort, t('предоплата {amount}', { amount: formatPrice(deposit) })]
+        .filter(Boolean)
+        .join(' · ')
+    : [masterShort, isAddressShown ? address : service ? t.duration(service.durationMinutes) : null]
+        .filter(Boolean)
+        .join(' · ')
+
+  if (variant === 'bar' && isReady && dayKey && time) {
+    return (
+      <div className={styles.bar} data-ready=''>
+        {/* The leaf, the time and the total open everything chosen («Ваша запись»): ⌃ says so. */}
+        <button
+          type='button'
+          className={styles.barInfo}
+          data-ready=''
+          onClick={() => setIsDetailsOpen(true)}
+        >
+          <span className={styles.barLeaf} aria-hidden='true'>
+            <span className={styles.barLeafMonth}>{t.monthShort(dayKey)}</span>
+            <span className={styles.barLeafDay}>{Number(dayKey.slice(8))}</span>
+          </span>
+          <span className={styles.barLines}>
+            {/* The total stays the first line, where it was while steps remained: nothing jumps
+                and nothing runs under the button. */}
+            <span className={styles.barPrice}>
+              {total !== null ? formatPrice(total) : (paidWith?.label ?? '')}
+              {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
+              <CaretUp className={styles.barChevron} weight='bold' aria-hidden />
+            </span>
+            <span
+              className={styles.barHint}
+              data-error={errorMessage ? true : undefined}
+              aria-live='polite'
+            >
+              {errorMessage ?? (
+                <>
+                  <span className={styles.srOnly}>{`${t.dayLong(dayKey)}, `}</span>
+                  <span className={styles.barTime}>{time}</span>
+                  {readyLine ? ` · ${readyLine}` : ''}
+                </>
+              )}
+            </span>
+          </span>
+          <span className={styles.srOnly}>{`, ${t('Показать, что выбрано')}`}</span>
+        </button>
+        {/* While it books the button folds into a round spinner; «Вы записаны» then opens with
+            its own check. The words stay for screen readers. */}
+        <Button
+          size='lg'
+          className={styles.barButton}
+          onClick={onSubmit}
+          disabled={isSubmitting}
+          data-busy={isSubmitting || undefined}
+          aria-busy={isSubmitting || undefined}
+        >
+          <span className={styles.barButtonLabel}>{buttonLabel}</span>
+        </Button>
+        {isDetailsOpen && (
+          <Sheet
+            title={t('Ваша запись')}
+            cancelLabel={t('Готово')}
+            onClose={() => setIsDetailsOpen(false)}
+          >
+            {ticket && <div className={styles.ticket}>{ticket}</div>}
+            {sheetRows.length > 0 && (
+              <dl className={sheet.list}>
+                {sheetRows.map((item) => (
+                  <div key={item.label} className={sheet.row}>
+                    <dt className={sheet.rowLabel}>{item.label}</dt>
+                    <dd className={styles.detailValue}>{item.value || '—'}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </Sheet>
+        )}
+      </div>
+    )
+  }
 
   if (variant === 'bar') {
     return (

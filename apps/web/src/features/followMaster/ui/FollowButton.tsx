@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { useFollows } from '../model/useFollows'
 import styles from './FollowButton.module.css'
 
@@ -15,8 +16,9 @@ interface FollowButtonProps {
   specialistId: string
   /** The master's first name, for the label and the toast. */
   name: string
-  /** `glyph`: a round bell in a picture card's corner; `capsule`: a secondary capsule. */
-  variant?: 'glyph' | 'capsule'
+  /** `glyph`: a round bell in a picture card's corner; `capsule`: a secondary capsule;
+      `groupItem`: a thin bell inside a `GlyphGroup` (its label in the tooltip). */
+  variant?: 'glyph' | 'capsule' | 'groupItem'
 }
 
 // «Следить»: freed time with the master, a move to another place. Guests sign in first and
@@ -59,6 +61,18 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
   const label = isOn
     ? t('Не следить за мастером {name}', { name })
     : t('Следить за мастером {name}', { name })
+
+  if (variant === 'groupItem') {
+    return (
+      <GlyphButton
+        icon={isOn ? <BellRinging weight='fill' /> : <Bell />}
+        label={label}
+        aria-pressed={isOn}
+        disabled={isBusy}
+        onClick={(event) => void handleClick(event)}
+      />
+    )
+  }
 
   if (variant === 'glyph') {
     return (

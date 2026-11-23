@@ -4,8 +4,10 @@
   grid-auto-columns: 112px;
   grid-auto-flow: column;
   gap: 8px;
-  margin: 0 calc(var(--page-gutter) * -1);
-  padding: 4px var(--page-gutter);
+  /* Room under the cards for their shadow (a sideways scroll box clips what pokes out of it),
+     taken back by the margin so nothing around moves. */
+  margin: -12px calc(var(--page-gutter) * -1) -16px;
+  padding: 16px var(--page-gutter) 20px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-padding-inline: var(--page-gutter);

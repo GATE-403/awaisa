@@ -4,8 +4,8 @@
   gap: var(--space-2);
   /* Room for the chips' invisible 44pt hit areas inside the row, taken back by the margin:
      poking out, they made the sideways row scroll up and down a few pixels. */
-  margin: calc(-1 * var(--space-2)) calc(-1 * var(--page-gutter));
-  padding: var(--space-2) var(--page-gutter);
+  margin: calc(-1 * var(--space-2)) calc(-1 * var(--shelf-bleed, var(--page-gutter)));
+  padding: var(--space-2) var(--shelf-bleed, var(--page-gutter));
   overflow-x: auto;
   scrollbar-width: none;
 }

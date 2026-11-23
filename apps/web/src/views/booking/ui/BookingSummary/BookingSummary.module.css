@@ -11,10 +11,17 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  /* The same inset around the button before and after everything is chosen: at 8 here and 6 on
+     the ready bar the button jumped in size between the two («почему размеры разные»). */
+  --bar-inset: 6px;
+
+  padding: var(--bar-inset) var(--bar-inset) var(--bar-inset) var(--space-5);
   /* A capsule on one line; with large system text the button drops under the total and the bar
      becomes a rounded rect instead of a stretched pill. */
-  border-radius: calc(var(--control-height-md) / 2 + var(--space-2));
+  /* Concentric with the 52pt capsule button (half its height plus the inset), as on the ready
+     bar: at the md height's 22 + 6 the bar's corner was tighter than the button's
+     («радиусы не сочетаются»). */
+  border-radius: calc(var(--control-height-lg) / 2 + var(--bar-inset));
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
   box-shadow:
@@ -32,6 +39,7 @@
 /* Concentric with the capsule bar: the button is a capsule too, as in Liquid Glass toolbars. */
 .bar .barButton {
   margin-left: auto;
+  padding-inline: var(--space-5);
   border-radius: var(--radius-full);
 }
 
@@ -336,4 +344,142 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Ready to book: the same capsule as before, with a capsule button («как во втором варианте»: a
+   rounded rect bar and button read as square). The leaf is concentric with the capsule like the
+   button, half its height on the same 6 inset: the owner chose that over a rounded square
+   («сделать концентричным»), the red month band keeps it a calendar. */
+.bar[data-ready] {
+  --leaf-radius: calc(var(--control-height-lg) / 2);
+
+  /* The leaf on the same 6 inset as the button: at 10 the gap on the left read as too wide
+     («слишком большой отступ»). */
+  padding: var(--bar-inset);
+  border-radius: var(--radius-full);
+}
+
+.barInfo[data-ready] {
+  flex-direction: row;
+  /* The leaf stays on the inset: centred in the room the button leaves, it drifted right on
+     phones wider than 375pt (a Samsung A55 at 412, «опять этот отступ»). */
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+/* Room for the two lines beside the leaf on a 375pt phone: the button keeps its height, a little
+   less padding. */
+.bar[data-ready] .barButton {
+  position: relative;
+  overflow: hidden;
+  max-width: 240px;
+}
+
+/* Booking: the capsule folds into a circle as tall as itself with a spinner in it, not a
+   greyed-out «Записываем…». */
+.bar[data-ready] .barButton[data-busy] {
+  max-width: var(--control-height-lg);
+  padding-inline: 0;
+  opacity: 1;
+}
+
+.barButtonLabel {
+  white-space: nowrap;
+  transition: opacity 160ms var(--ease-standard);
+}
+
+.barButton[data-busy] .barButtonLabel {
+  opacity: 0;
+}
+
+.barButton[data-busy]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 22px;
+  height: 22px;
+  margin: auto;
+  border: 2.5px solid currentcolor;
+  border-right-color: transparent;
+  border-radius: var(--radius-full);
+  animation: busy-spin 700ms linear infinite;
+}
+
+@keyframes busy-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar[data-ready] .barButton {
+    transition: none;
+  }
+
+  .barButton[data-busy]::after {
+    animation-duration: 1.6s;
+  }
+}
+
+.barLines {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The calendar leaf of the stack's time card and the ticket, as tall as the button, square with
+   rounded corners like an app icon of its size (12 on 52; a round leaf no longer read as a
+   calendar). The bar's corner is the leaf's radius plus the inset around it. */
+.barLeaf {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  overflow: hidden;
+  width: var(--control-height-lg);
+  aspect-ratio: 1;
+  border-radius: var(--leaf-radius);
+  background: var(--color-elevated);
+  box-shadow: inset 0 0 0 0.5px var(--color-border);
+  color: var(--color-foreground);
+  text-align: center;
+}
+
+.barLeafMonth {
+  /* Lower in the band: in the round leaf a month at its very top was cut by the curve. */
+  padding: 7px 0 2px;
+  background: var(--color-danger-strong);
+  color: var(--color-primary-foreground);
+  font-size: 9px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.barLeafDay {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-title3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The time leads the second line in the label colour: the leaf says the day, this the hour. */
+.barTime {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.barChevron {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  margin-left: var(--space-1);
+  color: var(--color-tertiary-foreground);
 }
