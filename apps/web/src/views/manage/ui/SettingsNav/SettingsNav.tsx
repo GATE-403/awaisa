@@ -28,6 +28,7 @@ import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { type ManageTab, SETTINGS_GROUPS, type SettingsTone } from '@/views/manage/manageTabs'
 import { usePlanAccess } from '@/views/manage/model/usePlanAccess'
+import { BusinessSheet } from '@/views/manage/ui/BusinessSheet/BusinessSheet'
 import styles from './SettingsNav.module.css'
 
 interface SettingsNavProps {
@@ -36,6 +37,8 @@ interface SettingsNavProps {
   current: ManageTab
   business: Business
   catalog: Catalog
+  /** The cabinet's runner (save, toast, reload), for the page switch at the list's foot. */
+  run?: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
 }
 
 type Value = { text: string; isAlert?: boolean }
@@ -116,11 +119,16 @@ const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е')
 // each row leads with a thin glyph in its colour, no tile. Each row says
 // on its right what is inside («2», «1 действует», «Бонусы 5%», «2 заканчиваются» in red), so the
 // state of the business reads without opening anything.
-export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavProps) => {
+export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsNavProps) => {
   const t = useT()
   const [summary, setSummary] = useState<SettingsSummary | null>(null)
   const access = usePlanAccess()
   const [query, setQuery] = useState('')
+  const [isBusinessSheetOpen, setIsBusinessSheetOpen] = useState(false)
+  // The switch's saved value until the cabinet's own data reads it back.
+  const [published, setPublished] = useState<{ from: boolean; to: boolean } | null>(null)
+  const isPublished =
+    published && published.from === business.isPublished ? published.to : business.isPublished
   const needle = normalize(query.trim())
 
   useEffect(() => {
@@ -267,9 +275,38 @@ export const SettingsNav = ({ slug, current, business, catalog }: SettingsNavPro
               {group.items.map((item) =>
                 row({ tab: item.value, label: item.label, tone: item.tone }),
               )}
+              {/* Hiding and deleting the business: a row of its own that opens its sheet, so the
+                  red action is never in plain view. */}
+              {group.label === 'Бизнес' && (
+                <li>
+                  <button
+                    type='button'
+                    className={`${styles.row} ${styles.rowButton}`}
+                    onClick={() => setIsBusinessSheetOpen(true)}
+                  >
+                    <span className={styles.glyph} aria-hidden>
+                      <Storefront />
+                    </span>
+                    <span className={styles.label}>
+                      <span className={styles.labelText}>{t('Скрыть или удалить')}</span>
+                    </span>
+                    <span className={styles.value}>{t(isPublished ? 'Открыта' : 'Скрыта')}</span>
+                    <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                  </button>
+                </li>
+              )}
             </ul>
           </section>
         ))
+      )}
+      {isBusinessSheetOpen && (
+        <BusinessSheet
+          slug={slug}
+          isPublished={isPublished}
+          onPublishedChange={(value) => setPublished({ from: business.isPublished, to: value })}
+          run={run}
+          onClose={() => setIsBusinessSheetOpen(false)}
+        />
       )}
     </nav>
   )

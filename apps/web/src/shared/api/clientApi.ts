@@ -20,6 +20,7 @@ import type {
   BulkReplyResult,
   BusinessBilling,
   BusinessCard,
+  BusinessDeleted,
   BusinessLink,
   BusinessPage,
   BusinessProfile,
@@ -593,6 +594,8 @@ const getManagedBusiness = (slug: string, signal?: AbortSignal) =>
 const updateBusiness = (slug: string, input: UpdateBusinessInput) =>
   send<BusinessProfile>('PATCH', manage(slug), input)
 
+const deleteBusiness = (slug: string) => send<BusinessDeleted>('DELETE', manage(slug))
+
 const setWorkingHours = (slug: string, days: WorkingDay[]) =>
   send<BusinessProfile>('PUT', `${manage(slug)}/hours`, days)
 
@@ -1155,6 +1158,7 @@ export {
   getUnclosedVisits,
   getMasterPlaces,
   exportMyData,
+  deleteBusiness,
   deleteMyAccount,
   getMasterDay,
   getCalendarFeed,
