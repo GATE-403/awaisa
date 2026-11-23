@@ -31,7 +31,12 @@ test.describe('Catalog cards', () => {
   }) => {
     test.skip(isMobile, 'one booking is enough; the card itself is checked on phones below')
     await page.goto('/')
-    const want = page.getByRole('link', { name: 'Хочу так' }).first()
+    // A work of a seeded place: other specs add works to their own «E2E …» places, which come first
+    // in the catalog and may lack a tagged service or master.
+    const want = page
+      .getByRole('link', { name: 'Хочу так' })
+      .and(page.locator(':not([href^="/e2e-"])'))
+      .first()
     await want.scrollIntoViewIfNeeded()
     const href = new URL((await want.getAttribute('href')) ?? '', 'http://x')
     const lookId = href.searchParams.get('look')
