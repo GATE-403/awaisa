@@ -137,7 +137,7 @@ export const EditPageSheet = ({
               <span className={sheet.rowLabel}>{t('Часы')}</span>
               <span className={styles.sheetValue}>
                 {hoursText}
-                <CaretRight weight='bold' aria-hidden />
+                <CaretRight aria-hidden />
               </span>
             </button>
           </div>

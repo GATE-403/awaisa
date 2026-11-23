@@ -1,4 +1,5 @@
 import type { CSSProperties, ImgHTMLAttributes, ReactElement, ReactNode } from 'react'
+import { MASCOT_TILE } from '@/shared/ui/Mascot/mascotTile'
 import { BusinessTile, pickTint } from '../BusinessTile/BusinessTile'
 import styles from './PlaceProfile.module.css'
 
@@ -54,7 +55,10 @@ export const PlaceProfile = ({
   children,
   footer,
 }: PlaceProfileProps) => (
-  <header className={styles.head} style={{ '--place-tint': pickTint(name) } as CSSProperties}>
+  <header
+    className={styles.head}
+    style={{ '--place-tint': pickTint(name), '--mascot-tile': MASCOT_TILE } as CSSProperties}
+  >
     {coverFrame(
       <figure
         className={styles.cover}

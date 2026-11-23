@@ -1,112 +1,76 @@
-/* «Время»: today's status large, the week in a line, then the week as a chart on the page. */
+/* «Время»: today's status, then the week as Settings rows right on the page, hairlines between
+   them, the days on the left and the hours on the right. */
 .weekHours {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-}
-
-.weekHead {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.weekHead p {
-  margin: 0;
+  gap: var(--space-2);
 }
 
 .weekStatus {
+  margin: 0;
   color: var(--color-foreground);
-  font-family: var(--font-display);
-  font-size: var(--text-title2);
-  line-height: var(--text-title2-line-height);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: var(--tracking-title);
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
 }
 
 .weekStatus[data-open] {
   color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
 
-.weekSummary {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-}
-
-.weekChart {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.weekRows {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.weekDay {
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 96px;
+.weekRow {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-3);
-  min-height: 28px;
-  color: var(--color-muted-foreground);
+  min-height: var(--row-height);
+  padding-block: var(--space-2);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.weekRow + .weekRow {
+  border-top: 0.5px solid var(--color-border);
+}
+
+.weekDays {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* «Сегодня» after today's days, a quiet footnote in the link colour. */
+.today {
+  color: var(--color-link);
   font-size: var(--text-footnote);
 }
 
-.weekDayName {
+.weekRow[data-today] .weekDays > :first-child {
   font-weight: var(--font-weight-semibold);
 }
 
-/* One shared scale for the week: the day's open hours filled on a quiet track. */
-.weekTrack {
-  position: relative;
-  height: 8px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-}
-
-.weekBar {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(var(--from) * 100%);
-  width: calc((var(--to) - var(--from)) * 100%);
-  border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--color-primary) 45%, transparent);
-}
-
 .weekRange {
-  position: relative;
-  text-align: right;
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
   font-variant-numeric: tabular-nums;
 }
 
-.weekDay[data-off] .weekRange {
-  color: var(--color-muted-foreground);
-}
-
-/* Today: its name, hours and bar in full. */
-.weekDay[data-today] {
+.weekRow[data-today] .weekRange {
   color: var(--color-foreground);
 }
 
-.weekDay[data-today] .weekDayName {
-  color: var(--color-link);
-}
-
-.weekDay[data-today] .weekBar {
-  background: var(--color-primary);
-}
-
-.weekScale {
-  display: flex;
-  justify-content: space-between;
-  margin: calc(-1 * var(--space-2)) 0 0;
-  padding: 0 calc(96px + var(--space-3)) 0 calc(28px + var(--space-3));
+.weekRow[data-off] .weekRange {
   color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  font-variant-numeric: tabular-nums;
 }
 
 .srOnly {

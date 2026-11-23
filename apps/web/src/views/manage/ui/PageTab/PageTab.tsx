@@ -182,7 +182,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
   const share = () => setIsSharing(true)
 
-  const plus = <Plus weight='bold' aria-hidden />
+  const plus = <Plus aria-hidden />
   const tabActions: Record<PageSection, TabAction | null> = {
     works:
       (photoCount ?? 0) < MAX_PHOTOS
@@ -203,7 +203,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     hours: {
       label: t('Изменить'),
       ariaLabel: t('Изменить часы'),
-      icon: <PencilSimple weight='bold' aria-hidden />,
+      icon: <PencilSimple aria-hidden />,
       onClick: () => setIsEditingHours(true),
     },
   }
@@ -243,7 +243,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 className={styles.coverButton}
                 trigger={
                   <>
-                    <Camera weight='bold' aria-hidden />
+                    <Camera aria-hidden />
                     {busy === 'cover' ? t('Загружаем…') : t('Обложка')}
                   </>
                 }
@@ -266,7 +266,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 onClick={() => coverInput.current?.click()}
                 disabled={busy !== null}
               >
-                <Camera weight='bold' aria-hidden />
+                <Camera aria-hidden />
                 {busy === 'cover' ? t('Загружаем…') : t('Добавить обложку')}
               </button>
             )}
@@ -321,7 +321,9 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         }
         isActionsHiddenOnPhone
         footer={
-          <>
+          // The week's facts on a line of their own, then one row of capsules: what the page
+          // still lacks and the promotions («поработать над лаконичностью и иерархией»).
+          <div className={styles.pageFooter}>
             <PageInsights
               slug={slug}
               analyticsHref={settingsHref('analytics')}
@@ -332,24 +334,20 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
             <PageChecklist
               business={business}
               photoCount={photoCount}
-              onAddCover={() => coverInput.current?.click()}
               onAddLogo={() => logoInput.current?.click()}
               onAddPhotos={addPhotos}
+              onAddBio={() => setIsEditing(true)}
             />
-          </>
+          </div>
         }
       >
         <PlaceName>{business.name}</PlaceName>
-        <PlaceLine>{[kindText, business.address].filter(Boolean).join(' · ')}</PlaceLine>
-        {status && <PlaceLine tone={status.isOpen ? 'open' : undefined}>{status.label}</PlaceLine>}
+        {/* One quiet line of facts; only «Скрыта» stands out, in red. */}
+        <PlaceLine>
+          {[kindText, business.address, status?.label].filter(Boolean).join(' · ')}
+        </PlaceLine>
         {!business.isPublished && <PlaceLine tone='danger'>{t('Скрыта от клиентов')}</PlaceLine>}
-        {business.description ? (
-          <PlaceDescription>{business.description}</PlaceDescription>
-        ) : (
-          <button type='button' className={styles.addBio} onClick={() => setIsEditing(true)}>
-            {t('Добавить пару слов о себе')}
-          </button>
-        )}
+        {business.description && <PlaceDescription>{business.description}</PlaceDescription>}
       </PlaceProfile>
 
       <ProfileTabs
@@ -435,7 +433,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                   className={styles.addCategory}
                   onClick={() => setIsAddingCategory(true)}
                 >
-                  <Plus weight='bold' aria-hidden />
+                  <Plus aria-hidden />
                   {t('Категория')}
                 </button>
               </>

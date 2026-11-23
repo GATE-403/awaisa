@@ -43,12 +43,14 @@ test.describe('Cabinet «Страница»', () => {
     const business = await createOwnBusiness(page)
     await openPage(page, business)
 
-    // A bare page names what it lacks as capsules; the words have their own link in the bio.
+    // A bare page names what it lacks as capsules in one row, the words about it too.
     const checklist = page.getByRole('list', { name: 'Добавьте на страницу' })
-    await expect(checklist.getByRole('button', { name: 'Обложка' })).toBeVisible()
+    await expect(checklist.getByRole('button', { name: 'Логотип' })).toBeVisible()
+    // The cover is offered on the cover itself, not twice.
+    await expect(checklist.getByRole('button', { name: 'Обложка' })).toHaveCount(0)
     await expect(checklist.getByRole('button', { name: '3 фото работ' })).toBeVisible()
 
-    await page.getByRole('button', { name: 'Добавить пару слов о себе' }).click()
+    await checklist.getByRole('button', { name: 'О себе' }).click()
     const sheet = page.getByRole('dialog', { name: 'Редактировать' })
     const newName = `${business.name} Плюс`
     await sheet.getByLabel('Название').fill(newName)
@@ -60,7 +62,7 @@ test.describe('Cabinet «Страница»', () => {
     await expect(page.locator('[data-page-tab]')).toContainText(
       'E2E Стрижём аккуратно и без очереди',
     )
-    await expect(page.getByRole('button', { name: 'Добавить пару слов о себе' })).toHaveCount(0)
+    await expect(checklist.getByRole('button', { name: 'О себе' })).toHaveCount(0)
     await expect
       .poll(async () => (await (await readPublic(page, business.slug)).json()).business)
       .toMatchObject({ name: newName, description: 'E2E Стрижём аккуратно и без очереди' })
@@ -97,10 +99,11 @@ test.describe('Cabinet «Страница»', () => {
     await openPage(page, business)
 
     await page.getByRole('tab', { name: 'Время' }).click()
+    // The week as rows: one «Ежедневно 10:00–20:00» while every day has the same hours.
     const chart = page.getByRole('list', { name: 'Часы по дням' })
-    await expect(chart.getByRole('listitem').filter({ hasText: 'Воскресенье:' })).toContainText(
-      '10:00–20:00',
-    )
+    await expect(chart.getByRole('listitem')).toHaveCount(1)
+    await expect(chart.getByRole('listitem')).toContainText('Ежедневно')
+    await expect(chart.getByRole('listitem')).toContainText('10:00–20:00')
 
     await visibleButton(page, 'Изменить часы').click()
     const sheet = page.getByRole('dialog', { name: 'Часы работы' })
@@ -110,7 +113,9 @@ test.describe('Cabinet «Страница»', () => {
     await sheet.getByRole('button', { name: 'Готово' }).click()
     await expect(sheet).toHaveCount(0)
 
-    await expect(chart.getByRole('listitem').filter({ hasText: 'Воскресенье:' })).toContainText(
+    // Sunday off: «Пн–Сб» and «Вс Выходной» as rows of their own.
+    await expect(chart.getByRole('listitem')).toHaveCount(2)
+    await expect(chart.getByRole('listitem').filter({ hasText: 'Воскресенье' })).toContainText(
       'Выходной',
     )
     const managed = await (await page.request.get(`/api/manage/${business.slug}`)).json()
