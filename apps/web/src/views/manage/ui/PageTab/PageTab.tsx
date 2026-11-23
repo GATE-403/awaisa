@@ -377,7 +377,6 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           onAddCover={() => coverInput.current?.click()}
           onAddLogo={() => logoInput.current?.click()}
           onAddPhotos={addPhotos}
-          onAddDescription={() => setIsEditing(true)}
         />
       </header>
 

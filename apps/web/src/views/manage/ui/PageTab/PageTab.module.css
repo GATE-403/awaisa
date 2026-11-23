@@ -598,39 +598,6 @@
   box-shadow: var(--focus-ring);
 }
 
-/* What the page still lacks: one quiet line and the action on the first thing missing. */
-.checklist {
-  margin: 0;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-}
-
-.checklistAction {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.checklistAction::before {
-  content: "";
-  position: absolute;
-  inset: min(0px, calc((100% - 44px) / 2)) -6px;
-}
-
-.checklistAction svg {
-  width: 10px;
-  height: 10px;
-}
-
 /* «Услуги» by category: a caption over each group's cards, «+ Категория» under them. */
 .serviceGroups {
   display: flex;

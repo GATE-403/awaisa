@@ -4,6 +4,7 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
 import type { Customer, OtpChannel } from '@/shared/api/types'
+import { isSignInOnlyPath } from '@/shared/config/navigation'
 import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 import { trackFormError, trackStep } from '@/shared/lib/telemetry'
@@ -11,6 +12,12 @@ import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 type LoginStep = 'phone' | 'code' | 'name'
 
 const CODE_LENGTH = 6
+
+const getCloseTarget = (redirectTo: string) => {
+  const path = redirectTo.split(/[?#]/)[0] ?? '/'
+  if (!isSignInOnlyPath(path)) return redirectTo
+  return path === '/business/new' ? '/business' : '/'
+}
 
 export const useLoginForm = () => {
   const router = useRouter()
@@ -33,6 +40,9 @@ export const useLoginForm = () => {
   // Whom the transition greets: the account's name, or the one just typed.
   const [signedInName, setSignedInName] = useState('')
   const redirectTo = getSafeRedirect(searchParams.get('next'))
+  // ✕ goes where the person was going, unless that page itself asks to sign in: then to the
+  // business landing for the setup, else to the catalog.
+  const closeTo = getCloseTarget(redirectTo)
 
   useEffect(() => {
     trackStep('login_open')
@@ -162,6 +172,7 @@ export const useLoginForm = () => {
     wrongAttempts,
     isCodeInvalid,
     redirectTo,
+    closeTo,
     setPhone,
     setName,
     changeCode,

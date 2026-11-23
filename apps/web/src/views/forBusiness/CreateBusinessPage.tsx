@@ -4,12 +4,12 @@ import { Button } from '@awaisa/ui/Button'
 import { Checkbox } from '@awaisa/ui/Checkbox'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
-import { RadioGroup } from '@awaisa/ui/Radio'
-import { RadioCard } from '@awaisa/ui/RadioCard'
 import { Skeleton } from '@awaisa/ui/Skeleton'
-import type { CSSProperties, FormEvent } from 'react'
+import { CaretRight, Check, X } from '@phosphor-icons/react/ssr'
+import NextLink from 'next/link'
+import { type CSSProperties, type FormEvent, useEffect, useState } from 'react'
+import { BusinessTile, pickTint } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
-import type { BusinessKind } from '@/shared/api/types'
 import { KIND_ICONS, KIND_TINTS } from '@/shared/config/kindStyles'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
@@ -17,13 +17,18 @@ import { useT } from '@/shared/i18n'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
-import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { useCreateBusinessForm } from '@/views/forBusiness/model/useCreateBusinessForm'
+import { PageLaunch } from '@/views/forBusiness/ui/PageLaunch/PageLaunch'
 import styles from './CreateBusinessPage.module.css'
+
+/** The tile's colour follows the name once typing pauses: a colour per keystroke flickered. */
+const TINT_DELAY_MS = 400
+const PHONE_DIGITS = 12
 
 const STEP_TITLES = {
   name: { title: 'Как называется?', subtitle: ' Так вас найдут в каталоге.' },
-  kind: { title: 'Чем занимаетесь?', subtitle: ' Подставим услуги — уберите лишнее.' },
+  kind: { title: 'Чем занимаетесь?', subtitle: ' Подставим услуги для вашего меню.' },
+  services: { title: 'Что в меню?', subtitle: ' Уберите лишнее и поправьте цены.' },
   contacts: { title: 'Где вас найти?', subtitle: ' Остальное настроите в кабинете.' },
 }
 
@@ -33,6 +38,38 @@ export const CreateBusinessPage = () => {
   const form = useCreateBusinessForm()
   const heading = STEP_TITLES[form.step]
   const isLast = form.stepNumber === form.stepCount
+  const [tintName, setTintName] = useState(form.name)
+  const kindLabel = BUSINESS_KINDS.find((kind) => kind.value === form.kind)?.label ?? ''
+  const where = [form.city.trim(), form.address.trim()].filter(Boolean).join(', ')
+  const previewFacts =
+    form.step === 'name' || form.step === 'kind'
+      ? [`awaisa.kg/${form.slug || 'barber-pro'}`]
+      : [t(kindLabel), form.step === 'contacts' && where ? where : `awaisa.kg/${form.slug}`]
+  // How much of each step is filled: the open step's segment grows as its fields are filled in.
+  const stepFill = {
+    name: (form.name.trim().length >= 2 ? 0.5 : 0) + (form.isSlugAvailable ? 0.5 : 0),
+    kind: 0.5,
+    services: 1,
+    contacts:
+      ((form.city.trim() ? 1 : 0) +
+        (form.address.trim() ? 1 : 0) +
+        (form.phone.replace(/\D/g, '').length >= PHONE_DIGITS ? 1 : 0)) /
+      3,
+  }
+  const fills = (['name', 'kind', 'services', 'contacts'] as const).map((step, index) => {
+    if (index + 1 < form.stepNumber) return 1
+    if (index + 1 > form.stepNumber) return 0
+    return Math.max(0.08, stepFill[step])
+  })
+
+  const { reset } = form
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only when the page is hidden or left
+  useEffect(() => () => reset(), [])
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setTintName(form.name.trim()), TINT_DELAY_MS)
+    return () => window.clearTimeout(timeout)
+  }, [form.name])
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
@@ -40,12 +77,58 @@ export const CreateBusinessPage = () => {
   }
 
   return (
-    <main className={styles.page}>
+    <main
+      className={styles.page}
+      style={{ '--place-tint': pickTint(tintName || 'awaisa') } as CSSProperties}
+    >
       <Container size='sm' className={styles.content}>
+        {/* A screen of its own, like sign-in: ✕ back to the business landing, beside it how far
+            along (done steps lit, the open one filling up as its fields are filled in). */}
+        <div className={styles.topBar}>
+          <NextLink href='/business' className={styles.close} aria-label={t('Закрыть')}>
+            <X weight='bold' aria-hidden />
+          </NextLink>
+          <div
+            className={styles.progress}
+            role='progressbar'
+            aria-label={t('Готово {done} из {total}', {
+              done: form.stepNumber - 1,
+              total: form.stepCount,
+            })}
+            aria-valuemin={0}
+            aria-valuemax={form.stepCount}
+            aria-valuenow={form.stepNumber - 1}
+          >
+            {fills.map((fill, index) => (
+              <span
+                // biome-ignore lint/suspicious/noArrayIndexKey: three fixed segments
+                key={index}
+                className={styles.segment}
+                style={{ '--fill': fill } as CSSProperties}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* The page as clients will see it, filled in live: the tile in the place's colour, the
+            name, then the link, the kind and the address as they are given. */}
+        <div className={styles.preview} aria-hidden='true'>
+          <BusinessTile name={tintName || 'awaisa'} size='md' />
+          <span className={styles.previewText}>
+            <span className={styles.previewName} data-empty={!form.name.trim() || undefined}>
+              {form.name.trim() || t('Ваша страница')}
+            </span>
+            <span className={styles.previewFacts}>
+              {previewFacts.map((fact) => (
+                <span key={fact} className={styles.previewFact}>
+                  {fact}
+                </span>
+              ))}
+            </span>
+          </span>
+        </div>
+
         <div className={styles.heading}>
-          <p className={styles.eyebrow}>
-            {t('Шаг {step} из {total}', { step: form.stepNumber, total: form.stepCount })}
-          </p>
           <PageTitle size='sm' title={t(heading.title)} subtitle={t(heading.subtitle)} />
         </div>
 
@@ -53,82 +136,95 @@ export const CreateBusinessPage = () => {
 
         {session.customer && (
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            {form.step === 'name' && (
-              <div className={styles.card}>
-                <Field label={t('Название')} error={form.errors.name}>
-                  <Input
-                    value={form.name}
-                    onValueChange={form.setName}
-                    placeholder={t('Например, Barber Pro')}
-                    autoComplete='organization'
-                    autoFocus
-                  />
-                </Field>
-                <Field
-                  label={t('Ссылка на страницу')}
-                  error={form.errors.slug}
-                  // «Адрес» read as the street: the link is said to be what clients get.
-                  description={
-                    form.isSlugAvailable
-                      ? t('Свободна: awaisa.kg/{slug} — её получат клиенты', { slug: form.slug })
-                      : t('Латиница, цифры и дефис')
-                  }
-                >
-                  <div className={styles.slug}>
-                    <span className={styles.slugPrefix} aria-hidden='true'>
-                      awaisa.kg/
-                    </span>
+            <div key={form.step} className={styles.stepBody}>
+              {form.step === 'name' && (
+                // Settings rows right on the page: the label on the left, the value typed on the right.
+                <div className={styles.rows}>
+                  <Field label={t('Название')} error={form.errors.name} className={styles.fieldRow}>
                     <Input
-                      value={form.slug}
-                      onValueChange={form.changeSlug}
-                      placeholder='barber-pro'
-                      autoCapitalize='none'
-                      spellCheck={false}
-                      className={styles.slugInput}
+                      variant='plain'
+                      value={form.name}
+                      onValueChange={form.setName}
+                      placeholder={t('Например, Barber Pro')}
+                      autoComplete='organization'
+                      enterKeyHint='next'
+                      autoFocus
                     />
-                  </div>
-                </Field>
-              </div>
-            )}
+                  </Field>
+                  <Field
+                    label={t('Ссылка')}
+                    error={form.errors.slug}
+                    // «Адрес» read as the street: the link is said to be what clients get.
+                    description={
+                      form.isSlugAvailable
+                        ? t('Свободна: awaisa.kg/{slug} — её получат клиенты', { slug: form.slug })
+                        : t('Латиница, цифры и дефис')
+                    }
+                    className={styles.fieldRow}
+                  >
+                    <span className={styles.slug}>
+                      <span className={styles.slugPrefix} aria-hidden='true'>
+                        awaisa.kg/
+                      </span>
+                      <Input
+                        variant='plain'
+                        value={form.slug}
+                        onValueChange={form.changeSlug}
+                        placeholder='barber-pro'
+                        autoCapitalize='none'
+                        spellCheck={false}
+                        enterKeyHint='go'
+                        className={styles.slugInput}
+                      />
+                    </span>
+                  </Field>
+                </div>
+              )}
 
-            {form.step === 'kind' && (
-              <>
-                <RadioGroup
-                  aria-label={t('Чем занимаетесь')}
-                  value={form.kind}
-                  onValueChange={(value) => form.setKind(value as BusinessKind)}
-                  className={styles.kinds}
-                >
+              {form.step === 'kind' && (
+                // One tap picks the kind and moves on, like the first pick in booking: rows on
+                // the page, the glyph bare in its colour, a check on the one chosen before.
+                <ul className={styles.kinds} aria-label={t('Чем занимаетесь')}>
                   {BUSINESS_KINDS.map((kind) => {
                     const Glyph = KIND_ICONS[kind.value]
                     const examples = SERVICE_TEMPLATES[kind.value]
                       .slice(0, 2)
                       .map((item) => item.name.toLowerCase())
+                    const isChosen = form.hasPickedKind && kind.value === form.kind
                     return (
-                      <RadioCard
-                        key={kind.value}
-                        value={kind.value}
-                        title={t(kind.label)}
-                        description={
-                          examples.length > 0 ? `${examples.join(', ')}…` : t('Своё меню услуг')
-                        }
-                        leading={
-                          <span
-                            className={styles.kindTile}
+                      <li key={kind.value}>
+                        <button
+                          type='button'
+                          className={styles.kind}
+                          onClick={() => form.pickKind(kind.value)}
+                          aria-current={isChosen || undefined}
+                        >
+                          <Glyph
+                            className={styles.kindGlyph}
                             style={{ '--tint': KIND_TINTS[kind.value] } as CSSProperties}
                             aria-hidden
-                          >
-                            <Glyph weight='fill' />
+                          />
+                          <span className={styles.kindBody}>
+                            <span className={styles.kindTitle}>{t(kind.label)}</span>
+                            <span className={styles.kindNote}>
+                              {examples.length > 0 ? examples.join(', ') : t('Своё меню услуг')}
+                            </span>
                           </span>
-                        }
-                      />
+                          {isChosen ? (
+                            <Check weight='bold' className={styles.kindCheck} aria-hidden />
+                          ) : (
+                            <CaretRight weight='bold' className={styles.kindChevron} aria-hidden />
+                          )}
+                        </button>
+                      </li>
                     )
                   })}
-                </RadioGroup>
+                </ul>
+              )}
 
-                {form.templates.length > 0 ? (
+              {form.step === 'services' &&
+                (form.templates.length > 0 ? (
                   <section className={styles.group} aria-label={t('Услуги')}>
-                    <SectionCaption as='h2'>{t('Услуги')}</SectionCaption>
                     <ul className={styles.list}>
                       {form.templates.map((template) => (
                         <li key={template.name} className={styles.serviceRow}>
@@ -175,58 +271,69 @@ export const CreateBusinessPage = () => {
                   <p className={styles.groupFooter}>
                     {t('Услуги добавите в кабинете — название, длительность и цену.')}
                   </p>
-                )}
-              </>
-            )}
+                ))}
 
-            {form.step === 'contacts' && (
-              <div className={styles.card}>
-                <div className={styles.row}>
-                  <Field label={t('Город')}>
+              {form.step === 'contacts' && (
+                <div className={styles.rows}>
+                  <Field label={t('Город')} className={styles.fieldRow}>
                     <Input
+                      variant='plain'
                       value={form.city}
                       onValueChange={form.setCity}
                       autoComplete='address-level2'
+                      enterKeyHint='next'
                       autoFocus
                     />
                   </Field>
-                  <Field label={t('Адрес')}>
+                  <Field label={t('Адрес')} className={styles.fieldRow}>
                     <Input
+                      variant='plain'
                       value={form.address}
                       onValueChange={form.setAddress}
                       placeholder={t('Необязательно')}
                       autoComplete='street-address'
+                      enterKeyHint='next'
+                    />
+                  </Field>
+                  <Field
+                    label={t('Телефон')}
+                    description={t('Покажем на странице и в WhatsApp-кнопке')}
+                    className={styles.fieldRow}
+                  >
+                    <Input
+                      variant='plain'
+                      type='tel'
+                      inputMode='tel'
+                      value={form.phone}
+                      onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
+                      autoComplete='tel'
+                      enterKeyHint='done'
                     />
                   </Field>
                 </div>
-                <Field
-                  label={t('Телефон для клиентов')}
-                  description={t('Покажем на странице и в WhatsApp-кнопке')}
-                >
-                  <Input
-                    type='tel'
-                    inputMode='tel'
-                    value={form.phone}
-                    onValueChange={(value) => form.setPhone(maskPhoneInput(value))}
-                    autoComplete='tel'
-                  />
-                </Field>
-              </div>
-            )}
+              )}
+            </div>
 
+            {/* A content-width capsule at the column's end with «Назад» before it: a full-width
+                bar took all the attention from the form («кнопка забирает всё внимание»). */}
             <div className={styles.actions}>
-              <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
-                {isLast ? t(form.isSubmitting ? 'Создаём…' : 'Создать страницу') : t('Далее')}
-              </Button>
               {form.stepNumber > 1 && (
-                <Button type='button' variant='ghost' onClick={form.goBack}>
+                <Button type='button' variant='ghost' onClick={form.goBack} className={styles.back}>
                   {t('Назад')}
+                </Button>
+              )}
+              {form.step !== 'kind' && (
+                <Button type='submit' disabled={form.isSubmitting} className={styles.next}>
+                  {isLast ? t(form.isSubmitting ? 'Создаём…' : 'Создать страницу') : t('Далее')}
                 </Button>
               )}
             </div>
           </form>
         )}
       </Container>
+      {form.launched && (
+        <PageLaunch name={form.name.trim()} slug={form.launched.slug} onDone={form.openCabinet} />
+      )}
     </main>
   )
 }

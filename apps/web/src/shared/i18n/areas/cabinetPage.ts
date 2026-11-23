@@ -4,6 +4,7 @@ import type { CountedEntry, Entry } from './types'
 const CABINET_PAGE: Record<string, Entry> = {
   // Page head: cover, logo, bio
   Обложка: ['Мукаба', 'Cover'],
+  'Добавьте на страницу': ['Баракчага кошуңуз', 'Add to your page'],
   'Обложка обновлена': ['Мукаба жаңыланды', 'Cover updated'],
   'Обложка удалена': ['Мукаба өчүрүлдү', 'Cover deleted'],
   'Заменить обложку': ['Мукабаны алмаштыруу', 'Replace cover'],

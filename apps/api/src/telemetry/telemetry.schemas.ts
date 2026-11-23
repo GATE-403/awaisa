@@ -29,6 +29,7 @@ const FUNNELS = {
     'business_landing',
     'register_name',
     'register_kind',
+    'register_services',
     'register_contacts',
     'register_done',
   ],
