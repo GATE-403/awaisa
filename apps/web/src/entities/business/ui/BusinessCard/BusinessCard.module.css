@@ -34,7 +34,8 @@
   scale: 0.98;
 }
 
-.card:has(.open:focus-visible) {
+.card:has(.open:focus-visible),
+.card:has(.slide:focus-visible) {
   outline: 2px solid var(--color-ring);
   outline-offset: 3px;
 }
@@ -109,6 +110,7 @@
 
 .slide {
   position: relative;
+  outline: none;
   flex: 0 0 100%;
   overflow: hidden;
   scroll-snap-align: start;
@@ -246,7 +248,11 @@
 }
 
 .time {
-  position: relative;
+  /* A 44pt target from padding, not a positioned ::after: a positioned link over the photo made
+     axe read the card's own light fill as its background (2.4:1), the photo unseen. */
+  display: inline-block;
+  margin-block: -16px;
+  padding-block: 16px;
   color: #fff;
   font-size: var(--text-xs);
   font-weight: var(--font-weight-semibold);
@@ -259,13 +265,6 @@
   margin-right: var(--space-1);
   color: rgb(255 255 255 / 0.6);
   font-weight: var(--font-weight-regular);
-}
-
-/* A 44pt target around the short word. */
-.time::after {
-  content: "";
-  position: absolute;
-  inset: min(0px, calc((100% - 44px) / 2)) -6px;
 }
 
 .time:focus-visible {
