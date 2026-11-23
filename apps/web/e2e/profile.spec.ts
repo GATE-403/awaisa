@@ -58,11 +58,12 @@ test.describe('Own profile', () => {
     await expect(page.getByText('💅').first()).toBeVisible()
     await expect(page.getByText('E2E о себе')).toBeVisible()
     await expect(page.getByText(/Уровень 1/).first()).toBeVisible()
-    // Achievements: every goal is listed, the ones not reached with progress.
-    await expect(page.getByText('Достижения')).toBeVisible()
-    await expect(page.getByText('0 из 10').first()).toBeVisible()
+    // Laid out like Telegram: the tiles, then the sections as tabs, medals first; with nothing
+    // earned yet the goals are shown open with their progress.
     await expect(page.getByRole('button', { name: 'Пригласить' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Оформление' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Изменить' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: /Медали/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('list', { name: 'Цели' })).toBeVisible()
 
     // Bad presets and a status «emoji» that is not one are refused.
     expect(
@@ -91,11 +92,12 @@ test.describe('Own profile', () => {
     await page.reload()
     await expect(page.getByText('Профиль скрыт — его видите только вы')).toBeVisible()
 
-    // «Оформление» on one's own page opens the editor with the live preview.
-    await page.getByRole('button', { name: 'Оформление' }).click()
+    // «Изменить» on one's own page opens the editor with the live preview.
+    await page.getByRole('button', { name: 'Изменить' }).click()
     const sheet = page.getByRole('dialog', { name: 'Профиль' })
-    await expect(sheet.getByRole('radio', { name: 'Розовый' })).toBeChecked()
-    await expect(sheet.getByRole('radio', { name: 'Эмодзи 💅' })).toBeChecked()
+    await expect(sheet.getByRole('combobox', { name: 'Цвет профиля' })).toContainText('Розовый')
+    // The status emoji is a plain Select row now; it shows the saved one.
+    await expect(sheet.getByRole('combobox', { name: 'Эмодзи статуса' })).toContainText('💅')
     await sheet.getByText('Открытый профиль', { exact: true }).click()
     await sheet.getByRole('button', { name: 'Готово' }).click()
     await expect(page.getByText('Профиль обновлён')).toBeVisible()
@@ -124,10 +126,8 @@ test.describe('Own profile', () => {
     await page.getByRole('button', { name: 'В сторис' }).click()
     const storySheet = page.getByRole('dialog', { name: 'Для сторис' })
     await expect(storySheet.getByRole('img', { name: 'Картинка профиля для сторис' })).toBeVisible()
-    await expect(storySheet.getByRole('link', { name: 'Скачать картинку' })).toHaveAttribute(
-      'download',
-      /\.png$/,
-    )
+    // Saving it is one glyph in the sheet's bar (a download with a mouse).
+    await expect(storySheet.getByRole('button', { name: 'Скачать картинку' })).toBeVisible()
     await storySheet.getByRole('button', { name: 'Закрыть' }).click()
 
     // A friend books by the link: once they have come, they count — points and «Привёл друга».
@@ -151,6 +151,38 @@ test.describe('Own profile', () => {
     await withDb((client) =>
       client.query('DELETE FROM "referrals" WHERE "friend_phone" = $1', [friendPhone]),
     )
+  })
+})
+
+test.describe('Profile story', () => {
+  test('medals carry when they came, the year counts visits, masters and places their history', async ({
+    page,
+    request,
+  }) => {
+    const phone = randomClientPhone()
+    await signInViaApi(page, phone)
+    // Two past visits: a medal earned, a month lit, a master and a place with their last visit.
+    await createPastVisit('E2E Профиль', phone, 0, 5)
+    await createPastVisit('E2E Профиль', phone, 1, 40)
+    const settings = await (await page.request.get('/api/me/profile')).json()
+    const profile = await (await request.get(`${API_URL}/profiles/${settings.id}`)).json()
+
+    expect(profile.activity).toHaveLength(12)
+    expect(
+      profile.activity.reduce((sum: number, month: { visits: number }) => sum + month.visits, 0),
+    ).toBe(2)
+    const first = profile.achievements.find((item: { id: string }) => item.id === 'first-visit')
+    expect(first.earnedAt).toEqual(expect.any(String))
+    expect(profile.masters[0]?.lastVisitAt ?? profile.places[0]?.lastVisitAt).toEqual(
+      expect.any(String),
+    )
+
+    // On the page: the earned medal on the shelf, the goals folded into one line that opens.
+    await page.goto(`/u/${settings.id}`)
+    await expect(page.getByRole('list', { name: 'Получено' })).toContainText('Первый визит')
+    const goals = page.getByRole('button', { name: /целей.*ближе всего/ })
+    await goals.click()
+    await expect(page.getByRole('list', { name: 'Цели' })).toBeVisible()
   })
 })
 
@@ -192,14 +224,24 @@ test.describe('Client profiles', () => {
       expect([null, 1, 2, 3]).toContain(master.rank ?? null)
     }
 
-    // The author's name on the business page leads to that profile.
+    // The author's name on the business page opens that profile as a sheet over the page, like a
+    // booking; «Закрыть» goes back to the place.
     await page.goto(`/${found.slug}`)
     await page
       .getByRole('link', { name: `${found.review.authorName}: профиль` })
       .first()
       .click()
     await page.waitForURL(new RegExp(`/u/${found.review.authorId}$`))
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByText(/Уровень \d+/).first()).toBeVisible()
+    const sheet = page.getByRole('dialog', { name: 'Профиль' })
+    await expect(sheet.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(sheet.getByText(/Уровень \d+/).first()).toBeVisible()
+    await sheet.getByRole('button', { name: 'Закрыть' }).click()
+    await page.waitForURL(new RegExp(`/${found.slug}$`))
+    await expect(page.getByRole('dialog', { name: 'Профиль' })).toHaveCount(0)
+
+    // The address itself (a shared link, a reload) is the full page, no sheet.
+    await page.goto(`/u/${found.review.authorId}`)
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Профиль' })).toHaveCount(0)
   })
 })

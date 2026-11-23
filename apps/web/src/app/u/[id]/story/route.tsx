@@ -1,9 +1,13 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { pluralize } from '@/shared/lib/plural'
 import { OgMascot } from '@/shared/lib/seo/OgMascot'
+import { loadProfilePhoto } from '@/shared/lib/seo/profilePhoto'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
+import { MASCOT_PATH } from '@/shared/ui/Mascot/Mascot'
 
 // Images cannot read CSS variables: the profile colours as plain values (`entities/profile`).
 const ACCENT_HEX: Record<string, string> = {
@@ -47,6 +51,31 @@ type StoryProfile = {
   stats: { visits: number; places: number; reviews: number }
 }
 
+// Inter from disk (traced into the build by `outputFileTracingIncludes`): the image renderer's own
+// font has one weight, so the bold words read as regular ones.
+const loadFonts = async () => {
+  const dir = join(process.cwd(), 'assets/fonts')
+  const [regular, semibold] = await Promise.all([
+    readFile(join(dir, 'Inter-Regular.otf')),
+    readFile(join(dir, 'Inter-SemiBold.otf')),
+  ])
+  return [
+    { name: 'Inter', data: regular, weight: 400 as const, style: 'normal' as const },
+    { name: 'Inter', data: semibold, weight: 600 as const, style: 'normal' as const },
+  ]
+}
+
+// The light frame's pattern: mascots barely there, two per tile, the second turned and set half
+// a tile over (`shared/ui/Mascot/mascotTile.ts`), in the label colour at 3%.
+const patternTile = () =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 96 96'>` +
+      `<g fill='#1d1d1f' fill-opacity='0.028'>` +
+      `<path transform='translate(12 10) scale(0.8)' fill-rule='evenodd' d='${MASCOT_PATH}'/>` +
+      `<path transform='translate(60 58) rotate(-14 12 13) scale(0.8)' fill-rule='evenodd' d='${MASCOT_PATH}'/>` +
+      '</g></svg>',
+  )}")`
+
 const formatSince = (iso: string | null) => {
   if (!iso) return null
   const date = new Date(iso)
@@ -75,18 +104,37 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
   const address = `${host}/u/${profile.handle ?? profile.id}`
   const handle = profile.handle ? `@${profile.handle}` : profile.name
   const since = formatSince(profile.since)
-  const status = `${profile.statusEmoji} ${profile.status}`.trim()
+  // A lone emoji under the name read as noise: the status shows only with its words.
+  const status = profile.status.trim() ? `${profile.statusEmoji} ${profile.status}`.trim() : ''
   const chip = {
     display: 'flex',
     alignItems: 'center',
     gap: 14,
     padding: '18px 34px',
     borderRadius: 60,
-    border: '2px solid #c7c7cc',
+    border: '2px solid #d1d1d6',
+    background: 'rgba(255,255,255,0.7)',
     fontSize: 34,
     fontWeight: 600,
     color: '#1d1d1f',
   } as const
+  // The card's numbers, big and bold over a quiet word, like a stat on a medal.
+  const facts = [
+    {
+      value: profile.stats.visits,
+      label: pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']).replace(/^\d+ /, ''),
+    },
+    {
+      value: profile.stats.places,
+      label: pluralize(profile.stats.places, ['место', 'места', 'мест']).replace(/^\d+ /, ''),
+    },
+    {
+      value: earned.length,
+      label: pluralize(earned.length, ['медаль', 'медали', 'медалей']).replace(/^\d+ /, ''),
+    },
+  ]
+  const fonts = await loadFonts()
+  const photo = await loadProfilePhoto(profile, 820)
 
   return new ImageResponse(
     <div
@@ -97,9 +145,12 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
         width: '100%',
         height: '100%',
         padding: '150px 90px 120px',
-        background: '#f7f7f8',
+        backgroundColor: '#f7f7f8',
+        backgroundImage: patternTile(),
+        backgroundRepeat: 'repeat',
+        backgroundSize: '180px 180px',
         color: '#1d1d1f',
-        fontFamily: 'sans-serif',
+        fontFamily: 'Inter',
       }}
     >
       <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
@@ -120,15 +171,15 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
           borderRadius: 96,
           overflow: 'hidden',
           background: `linear-gradient(160deg, ${accent}cc, ${accent})`,
-          // The glow under the card, in the profile's colour.
-          boxShadow: `0 70px 180px ${accent}77`,
+          // A plain soft shadow: a glow in the profile's colour read as out of place.
+          boxShadow: '0 40px 90px rgba(0,0,0,0.18)',
           color: '#fff',
         }}
       >
-        {profile.avatarUrl ? (
+        {photo ? (
           // biome-ignore lint/performance/noImgElement: OG images render plain img
           <img
-            src={profile.avatarUrl}
+            src={photo}
             alt=''
             width={820}
             height={1150}
@@ -142,15 +193,15 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
               top: 0,
               left: 0,
               width: 820,
-              height: 860,
+              height: 820,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <OgMascot size={300} color='rgba(255,255,255,0.92)' />
+            <OgMascot size={260} color='rgba(255,255,255,0.92)' />
           </div>
         )}
-        {/* Soft at the top for the name, a warm veil of the colour at the foot for the row. */}
+        {/* Dark at the top for the name, a deep veil at the foot for the numbers and the row. */}
         <div
           style={{
             display: 'flex',
@@ -159,7 +210,7 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
             left: 0,
             width: 820,
             height: 1150,
-            background: `linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 58%, ${accent}aa 86%, ${accent}ee 100%)`,
+            background: `linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 46%, rgba(0,0,0,0.62) 82%, rgba(0,0,0,0.72) 100%)`,
           }}
         />
         <div
@@ -168,12 +219,30 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
             flexDirection: 'column',
             alignItems: 'center',
             position: 'relative',
-            paddingTop: 72,
+            padding: '72px 56px 0',
           }}
         >
-          <div style={{ display: 'flex', fontSize: 84, fontWeight: 700 }}>{profile.name}</div>
+          <div
+            style={{
+              display: 'flex',
+              fontSize: 92,
+              fontWeight: 600,
+              letterSpacing: -3,
+              lineHeight: 1.05,
+              textAlign: 'center',
+            }}
+          >
+            {profile.name}
+          </div>
           {status && (
-            <div style={{ display: 'flex', marginTop: 10, fontSize: 38, opacity: 0.92 }}>
+            <div
+              style={{
+                display: 'flex',
+                marginTop: 14,
+                fontSize: 38,
+                color: 'rgba(255,255,255,0.82)',
+              }}
+            >
               {status}
             </div>
           )}
@@ -182,76 +251,114 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
         <div
           style={{
             display: 'flex',
+            position: 'relative',
+            justifyContent: 'space-between',
+            padding: '0 64px 44px',
+          }}
+        >
+          {facts.map((fact, index) => (
+            <div
+              key={fact.label}
+              // The three numbers sit on the card's left edge, centre and right edge.
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: ['flex-start', 'center', 'flex-end'][index] ?? 'center',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  fontSize: 104,
+                  fontWeight: 600,
+                  letterSpacing: -4,
+                  lineHeight: 1,
+                }}
+              >
+                {String(fact.value)}
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  marginTop: 8,
+                  fontSize: 32,
+                  color: 'rgba(255,255,255,0.8)',
+                }}
+              >
+                {fact.label}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            display: 'flex',
             alignItems: 'center',
             position: 'relative',
-            gap: 26,
-            padding: '0 56px 56px',
+            gap: 24,
+            margin: '0 32px 32px',
+            padding: '20px 20px 20px 24px',
+            borderRadius: 64,
+            background: 'rgba(255,255,255,0.16)',
           }}
         >
           <div
             style={{
               display: 'flex',
+              flexShrink: 0,
               alignItems: 'center',
               justifyContent: 'center',
-              width: 96,
-              height: 96,
-              borderRadius: 48,
+              width: 84,
+              height: 84,
+              borderRadius: 42,
               overflow: 'hidden',
               border: '3px solid rgba(255,255,255,0.85)',
               background: accent,
-              fontSize: 38,
-              fontWeight: 700,
             }}
           >
-            {profile.avatarUrl ? (
+            {photo ? (
               // biome-ignore lint/performance/noImgElement: OG images render plain img
-              <img
-                src={profile.avatarUrl}
-                alt=''
-                width={96}
-                height={96}
-                style={{ objectFit: 'cover' }}
-              />
+              <img src={photo} alt='' width={84} height={84} style={{ objectFit: 'cover' }} />
             ) : (
-              <OgMascot size={46} />
+              <OgMascot size={40} />
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', width: 340 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
             <div
               style={{
                 display: 'block',
-                width: 340,
                 overflow: 'hidden',
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',
-                fontSize: 38,
-                fontWeight: 700,
+                fontSize: 36,
+                fontWeight: 600,
               }}
             >
               {handle}
             </div>
-            <div style={{ display: 'flex', fontSize: 30, opacity: 0.85 }}>
-              {[
-                pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']),
-                pluralize(profile.stats.places, ['место', 'места', 'мест']),
-              ].join(' · ')}
+            <div style={{ display: 'flex', fontSize: 28, color: 'rgba(255,255,255,0.8)' }}>
+              {`Уровень ${profile.level.level} в Awaisa`}
             </div>
           </div>
+          {/* A link sticker's look: a white capsule, the glyph and the word in one line. */}
           <div
             style={{
               display: 'flex',
+              flexShrink: 0,
               alignItems: 'center',
-              gap: 12,
-              padding: '26px 40px',
-              borderRadius: 36,
+              gap: 10,
+              height: 84,
+              padding: '0 36px',
+              borderRadius: 42,
               background: '#fff',
-              color: '#1d1d1f',
-              fontSize: 36,
+              color: accent,
+              fontSize: 34,
               fontWeight: 600,
               whiteSpace: 'nowrap',
             }}
           >
-            + Профиль
+            <div style={{ display: 'flex', fontSize: 40, lineHeight: 1 }}>+</div>
+            <div style={{ display: 'flex', color: '#1d1d1f' }}>Профиль</div>
           </div>
         </div>
       </div>
@@ -267,13 +374,13 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
           display: 'flex',
           marginTop: 10,
           fontSize: profile.handle ? 48 : 36,
-          fontWeight: 700,
+          fontWeight: 600,
           whiteSpace: 'nowrap',
         }}
       >
         {address}
       </div>
     </div>,
-    { width: 1080, height: 1920, emoji: 'twemoji' },
+    { width: 1080, height: 1920, emoji: 'twemoji', fonts },
   )
 }

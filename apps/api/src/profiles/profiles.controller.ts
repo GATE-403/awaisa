@@ -1,5 +1,16 @@
 import type { ProfileSettings, PublicProfile } from '@awaisa/contracts'
-import { Body, Controller, Get, NotFoundException, Param, Patch, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  NotFoundException,
+  Param,
+  Patch,
+  Query,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common'
 import { AuthGuard, CurrentCustomer, OptionalAuthGuard } from '../auth/auth.guard.js'
 import { PUBLIC_ID_PATTERN } from '../common/public-id.js'
 import type { Customer } from '../customers/customer.entity.js'
@@ -22,6 +33,18 @@ export class ProfilesController {
       throw new NotFoundException('Профиль не найден')
     }
     return this.profiles.profile(id, customer)
+  }
+
+  // The face as a PNG for the story card and the share image (they cannot read WebP).
+  @Get('profiles/:id/avatar.png')
+  @Header('Content-Type', 'image/png')
+  @Header('Cache-Control', 'public, max-age=300')
+  async avatar(@Param('id') id: string, @Query('w') width?: string) {
+    if (!PUBLIC_ID_PATTERN.test(id) && !/^[a-z0-9][a-z0-9_.]{2,19}$/i.test(id)) {
+      throw new NotFoundException('Профиль не найден')
+    }
+    const size = Math.min(1080, Math.max(64, Number(width) || 820))
+    return new StreamableFile(await this.profiles.avatarPng(id, size))
   }
 
   @Get('me/profile')

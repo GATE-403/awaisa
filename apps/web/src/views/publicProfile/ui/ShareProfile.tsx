@@ -1,10 +1,10 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { ShareNetwork, UserPlus } from '@phosphor-icons/react/ssr'
+import { LinkSimple } from '@phosphor-icons/react/ssr'
 import { inviteUrl } from '@/features/invite'
 import { useT } from '@/shared/i18n'
+import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
 
 interface ShareProfileProps {
   name: string
@@ -42,9 +42,11 @@ export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
   }
 
   return (
-    <Button variant='secondary' size='sm' onClick={share}>
-      {isOwn ? <UserPlus weight='bold' aria-hidden /> : <ShareNetwork weight='bold' aria-hidden />}
-      {isOwn ? t('Пригласить') : t('Поделиться')}
-    </Button>
+    <GlyphButton
+      // What it gives is a link (an invitation on one's own profile).
+      icon={<LinkSimple aria-hidden />}
+      label={isOwn ? t('Пригласить') : t('Поделиться')}
+      onClick={share}
+    />
   )
 }

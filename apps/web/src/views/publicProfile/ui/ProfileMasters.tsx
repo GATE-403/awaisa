@@ -1,0 +1,45 @@
+'use client'
+
+import { MasterCard, MasterGrid } from '@/entities/business'
+import type { PublicProfile } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
+import { toBusinessDayKey } from '@/shared/lib/businessTime'
+import { useToday } from '@/shared/lib/hooks/useToday'
+import { agoLabel } from '../lib/since'
+
+type Master = PublicProfile['masters'][number]
+
+interface ProfileMastersProps {
+  masters: Master[]
+}
+
+// The masters as the place page shows them, 3:4 picture cards three a row (`MasterCard`), the
+// one visited most first; each says how often and how long ago («4 визита · 3 нед. назад») and
+// books that master. A big lead row with faces under it was «плохой выбор и нет удобства».
+export const ProfileMasters = ({ masters }: ProfileMastersProps) => {
+  const t = useT()
+  const today = useToday()
+
+  return (
+    <MasterGrid>
+      {masters.map((master) => {
+        // When is read on the client only: the server does not know today.
+        const ago =
+          today && master.lastVisitAt
+            ? agoLabel(toBusinessDayKey(master.lastVisitAt), today.dayKey, t)
+            : null
+        return (
+          <li key={master.id}>
+            <MasterCard
+              specialist={{ ...master, rating: null }}
+              href={`/${master.slug}/book?specialist=${master.id}`}
+              meta={[t.count(master.visits, ['визит', 'визита', 'визитов']), ago]
+                .filter(Boolean)
+                .join(' · ')}
+            />
+          </li>
+        )
+      })}
+    </MasterGrid>
+  )
+}
