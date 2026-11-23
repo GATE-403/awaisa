@@ -68,7 +68,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* No width of its own (`width: 0`) and the column's whole width at least: WebKit sizes a button's
+   flex column by its text, so in the iOS app the line «Мужская стрижка · Любой мастер» ran on
+   under «Выбрать 13:00» instead of ending in its ellipsis. */
 .barHint {
+  width: 0;
+  min-width: 100%;
   overflow: hidden;
   color: var(--color-muted-foreground);
   font-weight: var(--font-weight-medium);
