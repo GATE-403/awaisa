@@ -6,7 +6,6 @@ import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
 
@@ -62,31 +61,49 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
 
   if (!next) return null
 
-  // Like a Settings group on the page: an uppercase caption with «2 из 3» on its right, then one
-  // row that is the next step itself, whole a link ending in ›. A title3 heading with a sentence
-  // and a link wrapping under it fought the day's own title on phones («очень плохо»).
+  // A card on a soft wash of the accent, the one place the cabinet lifts something off the page
+  // («добавь фон градиент но чтобы сочетался, а то совсем незаметный»): the caption with
+  // «2 из 3», a bar of three steps, then the next step and a small «Начать ›». The whole card is
+  // one link to that step.
   return (
     <section className={styles.setup} aria-labelledby='setup-title'>
-      <SectionCaption as='h2' id='setup-title' isInset={false} className={styles.caption}>
-        {t('Запуск записи')}
-        <span className={styles.count}>
-          {t('{done} из {total}', { done: doneCount, total: steps.length })}
-        </span>
-      </SectionCaption>
       <NextLink
         href={`/manage/${business.slug}?tab=${next.tab}`}
         scroll={false}
-        className={styles.row}
+        className={styles.card}
       >
+        <div className={styles.head}>
+          <h2 id='setup-title' className={styles.caption}>
+            {t('Запуск записи')}
+          </h2>
+          <span className={styles.count}>
+            {t('{done} из {total}', { done: doneCount, total: steps.length })}
+          </span>
+        </div>
+        <span className={styles.steps} aria-hidden='true'>
+          {/* A progress bar fills from the left, whichever steps are done. */}
+          {steps.map((step, index) => (
+            <span
+              key={step.tab}
+              className={styles.step}
+              data-done={index < doneCount || undefined}
+            />
+          ))}
+        </span>
         <span className={styles.body}>
-          <span className={styles.title}>{next.label}</span>
-          <span className={styles.note}>
-            {t('Ещё {count}, и клиенты смогут записываться', {
-              count: steps.length - doneCount,
-            })}
+          <span className={styles.text}>
+            <span className={styles.title}>{next.label}</span>
+            <span className={styles.note}>
+              {t('Ещё {count}, и клиенты смогут записываться', {
+                count: steps.length - doneCount,
+              })}
+            </span>
+          </span>
+          <span className={styles.start}>
+            {t('Начать')}
+            <CaretRight aria-hidden />
           </span>
         </span>
-        <CaretRight weight='bold' className={styles.chevron} aria-hidden />
       </NextLink>
     </section>
   )

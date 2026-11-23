@@ -13,6 +13,8 @@ import { PayrollModule } from '../payroll/payroll.module.js'
 import { AdminController } from './admin.controller.js'
 import { AdminService } from './admin.service.js'
 import { AnalyticsService } from './analytics.service.js'
+import { BusinessAttentionController } from './business-attention.controller.js'
+import { BusinessAttentionService } from './business-attention.service.js'
 import { BusinessErasureController } from './business-erasure.controller.js'
 import { BusinessErasureService } from './business-erasure.service.js'
 import { SettingsSummaryService } from './settings-summary.service.js'
@@ -32,7 +34,13 @@ import { TimeOff } from './time-off.entity.js'
     PayrollModule,
     FiscalModule,
   ],
-  controllers: [AdminController, BusinessErasureController],
-  providers: [AdminService, AnalyticsService, SettingsSummaryService, BusinessErasureService],
+  controllers: [AdminController, BusinessErasureController, BusinessAttentionController],
+  providers: [
+    AdminService,
+    AnalyticsService,
+    SettingsSummaryService,
+    BusinessErasureService,
+    BusinessAttentionService,
+  ],
 })
 export class AdminModule {}

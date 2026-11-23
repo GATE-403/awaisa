@@ -50,7 +50,9 @@ test.describe('Platform: a new business goes live', () => {
     await page.getByRole('button', { name: 'Создать страницу' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/manage/${slug}\\?tab=services`))
-    await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
+    // «Страница» (where services now live) names what it lacks itself: no banner over its cover.
+    await expect(page.getByRole('list', { name: 'Добавьте на страницу' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeHidden()
 
     // Back to «Создать страницу»: the kept-alive form starts over instead of replaying the launch.
     await page.goBack()
@@ -58,8 +60,10 @@ test.describe('Platform: a new business goes live', () => {
     await expect(page.getByLabel('Название')).toHaveValue('')
     await page.waitForTimeout(3000)
     await expect(page).toHaveURL(/\/business\/new$/)
-    await page.goto(`/manage/${slug}?tab=services`)
+    // Every other tab carries «Запуск записи» as a banner under the cabinet bar.
+    await page.goto(`/manage/${slug}?tab=schedule`)
     await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
+    await page.goto(`/manage/${slug}?tab=services`)
 
     await page.getByRole('button', { name: 'Добавить услугу' }).first().click()
     const serviceDialog = page.getByRole('dialog')
