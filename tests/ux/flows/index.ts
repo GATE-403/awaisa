@@ -116,7 +116,8 @@ const flows: Flow[] = [
       await page.locator('[data-place-book]').first().waitFor()
       await ux.step('Шапка места', FILES.place)
 
-      const services = page.getByRole('heading', { name: /Услуги и цены/ }).first()
+      // The place's tabs open on «Услуги»: the menu is the panel under them.
+      const services = page.locator('#services')
       await services.scrollIntoViewIfNeeded()
       await ux.step('Услуги и цены', FILES.place)
 
