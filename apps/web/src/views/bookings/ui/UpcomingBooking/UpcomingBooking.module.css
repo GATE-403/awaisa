@@ -144,7 +144,14 @@
 
 .leafMonth {
   width: 100%;
-  padding: 1px 0;
+  flex: none;
+  /* The band is a third of the leaf at every size, the day fills the rest («что с иконкой
+     календаря»: a 9pt band on a 40pt leaf took half of it). */
+  height: 30%;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  padding: 0;
   background: var(--color-danger-strong);
   color: var(--color-primary-foreground);
   font-size: 10px;
@@ -232,6 +239,7 @@
 
 .link {
   white-space: nowrap;
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -269,4 +277,62 @@
   position: absolute;
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: min(0px, calc((100% - 44px) / 2));
+}
+
+/* The nearest visit: the page's lead, a little larger than the rows under it — the time in
+   title2, the service at body size in semibold, the actions as footnote links («слишком
+   огромный» with title1 and a 64pt leaf). */
+.card[data-variant="next"] {
+  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
+}
+
+.card[data-variant="next"] .leaf {
+  align-self: start;
+  width: 52px;
+}
+
+.card[data-variant="next"] .when {
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+}
+
+.card[data-variant="next"] .service {
+  font-size: var(--text-body);
+}
+
+/* A later visit: one quiet row — a small leaf, the time with its day, the service over master ·
+   place; no buttons, the ticket opens on tap and the actions wait in «⋯». */
+.card[data-variant="row"] {
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+}
+
+.card[data-variant="row"] .leaf {
+  width: 40px;
+}
+
+.card[data-variant="row"] .leafMonth {
+  font-size: 9px;
+}
+
+.card[data-variant="row"] .leafDay {
+  font-size: var(--text-body);
+}
+
+.card[data-variant="row"] .when {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: normal;
+}
+
+.card[data-variant="row"] .service {
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+.card[data-variant="row"] .more {
+  align-self: center;
+  background: transparent;
+  color: var(--color-muted-foreground);
 }

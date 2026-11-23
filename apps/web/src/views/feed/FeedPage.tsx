@@ -342,7 +342,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             disabled={active === 0}
             onClick={() => turn(-1)}
           >
-            <CaretLeft weight='bold' aria-hidden />
+            <CaretLeft aria-hidden />
           </button>
           <button
             type='button'
@@ -352,7 +352,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             disabled={active >= shown.length - 1}
             onClick={() => turn(1)}
           >
-            <CaretRight weight='bold' aria-hidden />
+            <CaretRight aria-hidden />
           </button>
         </div>
       )}

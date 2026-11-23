@@ -156,7 +156,7 @@ export const RateVisitForm = ({
             aria-label={t('Убрать фото {number}', { number: index + 1 })}
             onClick={() => handleRemovePhoto(photo.preview)}
           >
-            <X weight='bold' aria-hidden />
+            <X aria-hidden />
           </button>
         </span>
       ))}

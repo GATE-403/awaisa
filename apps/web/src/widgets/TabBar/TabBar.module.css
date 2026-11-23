@@ -52,7 +52,8 @@
   color: var(--color-foreground);
   font-size: 10px;
   line-height: 12px;
-  font-weight: var(--font-weight-medium);
+  /* Regular words under light glyphs, like the header's («слишком жирные»). */
+  font-weight: var(--font-weight-regular);
   transition:
     color var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard);
@@ -73,7 +74,7 @@
 
 .tab[aria-current="page"] {
   color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
 }
 
 /* The chosen tab's glyph pops a little as the highlight arrives under it. */

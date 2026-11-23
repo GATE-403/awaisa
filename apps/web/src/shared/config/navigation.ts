@@ -1,5 +1,6 @@
 import type { Icon } from '@phosphor-icons/react'
-import { Compass, MapTrifold, Sparkle, Storefront, UserCircle } from '@phosphor-icons/react/ssr'
+import { Compass, MapPin, Storefront, Ticket } from '@phosphor-icons/react/ssr'
+import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 
 type NavItem = {
   href: string
@@ -10,11 +11,11 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Каталог', icon: Compass },
   // Finished work as a vertical feed, each photo one tap from booking it.
-  { href: '/feed', label: 'Образы', icon: Sparkle },
-  { href: '/map', label: 'Карта', icon: MapTrifold },
+  { href: '/feed', label: 'Образы', icon: FanCardsIcon },
+  { href: '/map', label: 'Карта', icon: MapPin },
   { href: '/business', label: 'Бизнес', icon: Storefront },
-  // Profile and bookings are one page.
-  { href: '/bookings', label: 'Профиль', icon: UserCircle },
+  // The records lead that page («Записи»): «Мой профиль» is the public profile, one of each.
+  { href: '/bookings', label: 'Записи', icon: Ticket },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.
