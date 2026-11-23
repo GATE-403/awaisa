@@ -4,7 +4,7 @@ import { Button } from '@awaisa/ui/Button'
 import { useEffect } from 'react'
 import { reportError } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
-import { Mascot } from '@/shared/ui/Mascot/Mascot'
+import { LiveMascot } from '@/shared/ui/Mascot/LiveMascot'
 import styles from './error.module.css'
 
 interface ErrorPageProps {
@@ -20,7 +20,7 @@ const ErrorPage = ({ error, retry }: ErrorPageProps) => {
   return (
     <main className={styles.page}>
       <Container size='md' className={styles.content}>
-        <Mascot className={styles.mascot} />
+        <LiveMascot className={styles.mascot} />
         <h1 className={styles.title}>Что-то пошло не так</h1>
         <p className={styles.text}>
           Не получилось загрузить страницу. Попробуйте ещё раз через минуту — ваши записи никуда не

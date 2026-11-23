@@ -43,9 +43,10 @@ test.describe('Cabinet «Страница»', () => {
     const business = await createOwnBusiness(page)
     await openPage(page, business)
 
-    // A bare page names what it lacks; the words are one of them.
-    const checklist = page.getByText(/^Добавьте обложку/)
-    await expect(checklist).toContainText('пару слов о себе')
+    // A bare page names what it lacks as capsules; the words have their own link in the bio.
+    const checklist = page.getByRole('list', { name: 'Добавьте на страницу' })
+    await expect(checklist.getByRole('button', { name: 'Обложка' })).toBeVisible()
+    await expect(checklist.getByRole('button', { name: '3 фото работ' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Добавить пару слов о себе' }).click()
     const sheet = page.getByRole('dialog', { name: 'Редактировать' })
@@ -59,7 +60,7 @@ test.describe('Cabinet «Страница»', () => {
     await expect(page.locator('[data-page-tab]')).toContainText(
       'E2E Стрижём аккуратно и без очереди',
     )
-    await expect(checklist).not.toContainText('пару слов о себе')
+    await expect(page.getByRole('button', { name: 'Добавить пару слов о себе' })).toHaveCount(0)
     await expect
       .poll(async () => (await (await readPublic(page, business.slug)).json()).business)
       .toMatchObject({ name: newName, description: 'E2E Стрижём аккуратно и без очереди' })

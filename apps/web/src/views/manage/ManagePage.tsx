@@ -123,10 +123,6 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             }
           />
           <Container className={styles.content}>
-            {data && role === 'owner' && (
-              <SetupProgress business={data.business} catalog={data.catalog} />
-            )}
-
             <div
               className={styles.layout}
               data-settings={isSettings || undefined}
@@ -162,6 +158,12 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                     <h2 className={styles.backTitle}>
                       {t(SETTINGS_TABS.find((item) => item.value === tab)?.label ?? '')}
                     </h2>
+                  </div>
+                )}
+                {/* In the section's own column, so it lines up with what is under it. */}
+                {data && role === 'owner' && (
+                  <div className={styles.setup}>
+                    <SetupProgress business={data.business} catalog={data.catalog} />
                   </div>
                 )}
                 {!data && <Skeleton className={styles.skeleton} />}

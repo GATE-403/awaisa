@@ -1,6 +1,6 @@
 'use client'
 
-import { CaretRight } from '@phosphor-icons/react/ssr'
+import { Plus } from '@phosphor-icons/react/ssr'
 import type { Business } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import styles from './PageTab.module.css'
@@ -12,74 +12,46 @@ interface PageChecklistProps {
   onAddCover: () => void
   onAddLogo: () => void
   onAddPhotos: () => void
-  onAddDescription: () => void
 }
 
 /** Places with this many photos of work show a full first row on the page. */
 const PHOTOS_WANTED = 3
 
-// What the page still lacks, in one line, while it lacks anything: «Добавьте обложку и ещё 2 фото
-// работ: с фото записываются чаще» (or «…, и страница будет готова» for the rest), the action
-// taking the first thing missing. Gone once complete.
+// What the page still lacks, while it lacks anything: «+ Обложка · + 3 фото работ · + Логотип»; «Добавить пару слов о себе» already sits in the bio right above, each capsule doing its own. Gone once complete.
 export const PageChecklist = ({
   business,
   photoCount,
   onAddCover,
   onAddLogo,
   onAddPhotos,
-  onAddDescription,
 }: PageChecklistProps) => {
   const t = useT()
   if (photoCount === null) return null
   const photosMissing = Math.max(0, PHOTOS_WANTED - photoCount)
   const missing = [
     !business.coverUrl && {
-      text: t('обложку'),
+      chip: t('Обложка'),
       action: onAddCover,
-      label: t('Добавить обложку'),
     },
     photosMissing > 0 && {
-      text:
-        photoCount === 0
-          ? t.count(photosMissing, ['фото работы', 'фото работ', 'фото работ'])
-          : t('ещё {photos}', {
-              photos: t.count(photosMissing, ['фото работы', 'фото работ', 'фото работ']),
-            }),
+      chip: t.count(photosMissing, ['фото работы', 'фото работ', 'фото работ']),
       action: onAddPhotos,
-      label: t('Добавить фото'),
     },
-    !business.logoUrl && { text: t('логотип'), action: onAddLogo, label: t('Добавить логотип') },
-    !business.description && {
-      text: t('пару слов о себе'),
-      action: onAddDescription,
-      label: t('Написать'),
-    },
+    !business.logoUrl && { chip: t('Логотип'), action: onAddLogo },
   ].filter((item) => item !== false)
-  const [first] = missing
-  if (!first) return null
-  const isAboutPhotos = !business.coverUrl || photosMissing > 0
-  const list =
-    missing.length === 1
-      ? first.text
-      : t('{items} и {last}', {
-          items: missing
-            .slice(0, -1)
-            .map((item) => item.text)
-            .join(', '),
-          last: missing.at(-1)?.text ?? '',
-        })
-
+  if (missing.length === 0) return null
+  // One row of small capsules, one per thing missing, like «+ Акция» beside it: a sentence with
+  // its action wrapped onto a second line read as a wall of grey («как сделать дизайн лучше»).
   return (
-    <p className={styles.checklist}>
-      <span>
-        {isAboutPhotos
-          ? t('Добавьте {list}: с фото записываются чаще.', { list })
-          : t('Добавьте {list}, и страница будет готова.', { list })}
-      </span>{' '}
-      <button type='button' className={styles.checklistAction} onClick={first.action}>
-        {first.label}
-        <CaretRight weight='bold' aria-hidden />
-      </button>
-    </p>
+    <ul className={styles.promotions} aria-label={t('Добавьте на страницу')}>
+      {missing.map((item) => (
+        <li key={item.chip}>
+          <button type='button' className={styles.promotion} data-add onClick={item.action}>
+            <Plus weight='bold' aria-hidden />
+            {item.chip}
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }

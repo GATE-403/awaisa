@@ -1,11 +1,12 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
-import { Check } from '@phosphor-icons/react/ssr'
+import { CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
 
@@ -61,63 +62,32 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
 
   if (!next) return null
 
+  // Like a Settings group on the page: an uppercase caption with «2 из 3» on its right, then one
+  // row that is the next step itself, whole a link ending in ›. A title3 heading with a sentence
+  // and a link wrapping under it fought the day's own title on phones («очень плохо»).
   return (
-    // A checklist, not just a bar: what is done, and the one step to do now.
-    <section className={styles.card} aria-labelledby='setup-title'>
-      <div className={styles.top}>
-        <div>
-          <h2 id='setup-title' className={styles.title}>
-            {t('Запуск записи')}
-          </h2>
-          <p className={styles.subtitle}>
+    <section className={styles.setup} aria-labelledby='setup-title'>
+      <SectionCaption as='h2' id='setup-title' isInset={false} className={styles.caption}>
+        {t('Запуск записи')}
+        <span className={styles.count}>
+          {t('{done} из {total}', { done: doneCount, total: steps.length })}
+        </span>
+      </SectionCaption>
+      <NextLink
+        href={`/manage/${business.slug}?tab=${next.tab}`}
+        scroll={false}
+        className={styles.row}
+      >
+        <span className={styles.body}>
+          <span className={styles.title}>{next.label}</span>
+          <span className={styles.note}>
             {t('Ещё {count}, и клиенты смогут записываться', {
               count: steps.length - doneCount,
             })}
-          </p>
-        </div>
-        <span
-          className={styles.count}
-          role='img'
-          aria-label={t('Готово {done} из {total}', { done: doneCount, total: steps.length })}
-        >
-          <svg viewBox='0 0 36 36' className={styles.ring} aria-hidden='true'>
-            <circle cx='18' cy='18' r='15' className={styles.ringTrack} />
-            <circle
-              cx='18'
-              cy='18'
-              r='15'
-              className={styles.ringValue}
-              pathLength={steps.length}
-              strokeDasharray={`${doneCount} ${steps.length}`}
-            />
-          </svg>
-          <span className={styles.countText}>
-            {doneCount}/{steps.length}
           </span>
         </span>
-      </div>
-      <ol className={styles.steps}>
-        {steps.map((step, index) => {
-          const state = step.isDone ? 'done' : step === next ? 'next' : 'todo'
-          return (
-            <li key={step.tab}>
-              <NextLink
-                href={`/manage/${business.slug}?tab=${step.tab}`}
-                scroll={false}
-                className={styles.step}
-                data-state={state}
-                aria-current={state === 'next' ? 'step' : undefined}
-              >
-                <span className={styles.mark} aria-hidden>
-                  {step.isDone ? <Check weight='bold' /> : index + 1}
-                </span>
-                <span className={styles.stepLabel}>{step.label}</span>
-                {state === 'next' && <span className={styles.go}>{t('Начать ›')}</span>}
-              </NextLink>
-            </li>
-          )
-        })}
-      </ol>
+        <CaretRight weight='bold' className={styles.chevron} aria-hidden />
+      </NextLink>
     </section>
   )
 }

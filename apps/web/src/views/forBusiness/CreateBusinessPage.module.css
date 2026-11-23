@@ -1,5 +1,169 @@
 .page {
-  padding: var(--space-6) 0 var(--section-gap);
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  padding: env(safe-area-inset-top) 0 calc(var(--space-16) + env(safe-area-inset-bottom));
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: 60px;
+}
+
+/* ✕ back to the business landing, the same round fill as sign-in's. */
+.close {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.close svg {
+  width: 17px;
+  height: 17px;
+}
+
+.close:active {
+  scale: 0.92;
+}
+
+.close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* A soft wash of the place's colour behind the head, like the quiet profile style. */
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 360px;
+  background: radial-gradient(
+    ellipse 70% 100% at 50% 0%,
+    color-mix(in srgb, var(--place-tint) 22%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.progress {
+  display: grid;
+  flex: 1;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  gap: var(--space-1);
+}
+
+.segment {
+  position: relative;
+  overflow: hidden;
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+}
+
+.segment::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-foreground);
+  transform: scaleX(var(--fill));
+  transform-origin: left center;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.previewText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.previewName {
+  overflow: hidden;
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewName[data-empty] {
+  color: var(--color-muted-foreground);
+}
+
+.previewFacts {
+  display: flex;
+  min-width: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  white-space: nowrap;
+}
+
+.previewFact {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: fact-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.previewFact + .previewFact {
+  flex-shrink: 1;
+}
+
+.previewFact + .previewFact::before {
+  content: " · ";
+  white-space: pre;
+}
+
+/* Each step comes in with a short rise; the form's own height is never animated. */
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  animation: step-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes fact-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segment::after {
+    transition: none;
+  }
+
+  .stepBody,
+  .previewFact {
+    animation: none;
+  }
 }
 
 .content {
@@ -19,14 +183,6 @@
   gap: var(--space-2);
 }
 
-.eyebrow {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
 .form {
   display: flex;
   flex-direction: column;
@@ -35,38 +191,116 @@
 
 .actions {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--space-2);
 }
 
+.next {
+  min-width: 120px;
+}
+
+/* Kinds lie on the page like the cabinet's settings: rows with hairlines across the column, the
+   category's glyph bare in its colour, a chevron (a check on the one chosen before). */
 .kinds {
-  display: grid;
-  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* App-icon tile per kind: the colour and glyph the catalog uses for that category. */
-.kindTile {
+.kinds > li {
+  position: relative;
+}
+
+.kinds > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.kind {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--tint);
-  box-shadow: inset 0 0.5px 0 var(--color-material-highlight);
-  color: var(--color-primary-foreground);
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--space-2) 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
-.kindTile svg {
-  width: 22px;
-  height: 22px;
+.kind:active {
+  opacity: 0.6;
 }
 
-@media (min-width: 640px) {
-  .kinds {
-    grid-template-columns: 1fr 1fr;
+.kind:focus-visible {
+  border-radius: var(--radius-md);
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.kindGlyph {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  color: var(--tint);
+}
+
+.kindBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kindTitle {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+}
+
+.kind[aria-current] .kindTitle {
+  font-weight: var(--font-weight-semibold);
+}
+
+.kindCheck {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+}
+
+.kindChevron {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--color-tertiary-foreground);
+}
+
+@media (hover: hover) {
+  .kind:hover .kindTitle {
+    color: var(--color-link);
   }
+}
+
+.kindNote {
+  display: block;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-sm);
+  line-height: var(--text-sm-line-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .group {
@@ -76,19 +310,15 @@
 }
 
 .groupFooter {
-  padding: 0 var(--space-4);
+  padding: 0;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
   line-height: var(--text-footnote-line-height);
 }
 
 .list {
-  overflow: hidden;
   margin: 0;
   padding: 0;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
   list-style: none;
 }
 
@@ -98,7 +328,7 @@
   align-items: center;
   gap: var(--space-3);
   min-height: 56px;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) 0;
 }
 
 .serviceRow + .serviceRow::before {
@@ -106,7 +336,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(var(--space-4) * 2 + 20px);
+  left: 0;
   height: 0.5px;
   background: var(--color-border);
 }
@@ -145,39 +375,122 @@
   color: var(--color-muted-foreground);
 }
 
-.card {
+/* Fields as Settings rows right on the page (like the booking form's contacts and the cabinet's
+   sections): label left, the value right, hairlines across the column, no card or boxed inputs.
+   Doubled classes: over the kit's Field root, whichever stylesheet loads last. */
+.rows {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-6);
-  border-radius: var(--radius-2xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+}
+
+.rows .fieldRow.fieldRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--space-4);
+  min-height: 52px;
+  padding-block: var(--space-1);
+}
+
+.rows .fieldRow + .fieldRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0.5px;
+  background: var(--color-border);
+}
+
+.rows .fieldRow.fieldRow > label {
+  padding-left: 0;
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-regular);
+}
+
+.rows .fieldRow.fieldRow > :is(p, [class*="description"], [class*="error"]) {
+  grid-column: 1 / -1;
+  padding: 0 0 var(--space-2);
+}
+
+/* The typed value right on the row, the field taking the row's height as its tap area. */
+.rows .fieldRow input {
+  min-height: 44px;
+  font-size: var(--text-input);
+}
+
+.rows .fieldRow:focus-within > label {
+  color: var(--color-link);
 }
 
 .slug {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
 }
 
 .slugPrefix {
   flex-shrink: 0;
-  padding-right: var(--space-1);
   color: var(--color-muted-foreground);
+  font-size: var(--text-input);
 }
 
-.slugInput {
-  flex: 1;
-  min-width: 0;
+.slugInput.slugInput {
+  flex: 0 1 auto;
+  width: auto;
+  min-width: 1ch;
+  max-width: 100%;
+  text-align: left;
+  field-sizing: content;
 }
 
-.row {
-  display: grid;
-  gap: var(--space-5);
-}
-
-@media (min-width: 640px) {
-  .row {
-    grid-template-columns: 1fr 2fr;
+/* Phones: the head is one compact block («занимает большую часть пространства, кнопок не
+   видно»): the step count lives in the segments, the title a size down, a smaller tile, tighter
+   gaps, and the actions stuck to the window's foot over a fade of the page colour. */
+@media (max-width: 639px) {
+  .page {
+    padding-bottom: 0;
   }
+
+  .content {
+    gap: var(--space-5);
+  }
+
+  .heading h1 {
+    font-size: var(--text-title2);
+  }
+
+  .preview > :first-child {
+    width: 36px;
+    height: 36px;
+  }
+
+  .previewName {
+    font-size: var(--text-body);
+  }
+
+  .stepBody {
+    gap: var(--space-4);
+  }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-inline: calc(var(--page-gutter) * -1);
+    padding: var(--space-6) var(--page-gutter) calc(var(--space-3) + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--color-background) var(--space-6));
+  }
+
+  .actions:not(:has(.next)) {
+    justify-content: flex-start;
+  }
+}
+
+/* «Назад» is a borderless button: its word sits on the column's edge, its padding hangs outside. */
+.back {
+  margin-inline-start: calc(var(--space-4) * -1);
 }
