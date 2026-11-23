@@ -1,7 +1,7 @@
 import { clearLastNotificationResponseAsync, useLastNotificationResponse } from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { KeyboardAvoidingView, Linking, Platform, StyleSheet } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Linking, Platform, StyleSheet } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview'
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
@@ -10,7 +10,7 @@ import { LoadingView } from './common/components/LoadingView/LoadingView'
 import { useAndroidBackHandler } from './common/hooks/useAndroidBackHandler'
 import { useThemeColors } from './common/hooks/useThemeColors'
 import { playHaptic } from './common/utils/haptics'
-import { parseNativeMessage, toWebScript } from './common/utils/nativeBridge'
+import { type KeyboardMode, parseNativeMessage, toWebScript } from './common/utils/nativeBridge'
 import { getNotificationPath, getPushState } from './common/utils/pushNotifications'
 import { NATIVE_APP_SCRIPT, WEB_ORIGIN, WEB_URL } from './constants/webApp'
 
@@ -25,6 +25,8 @@ export const App = () => {
   // Where the WebView starts: the site, or the screen a tapped push opened the app with.
   const [sourceUri, setSourceUri] = useState(WEB_URL)
   const isLoadedRef = useRef(false)
+  // The page asks for `overlay` while the booking sheet is open (see `KeyboardMode`).
+  const [keyboardMode, setKeyboardMode] = useState<KeyboardMode>('resize')
   const notificationResponse = useLastNotificationResponse()
   const themeColors = useThemeColors()
   const goBack = useCallback(() => webViewRef.current?.goBack(), [])
@@ -46,6 +48,24 @@ export const App = () => {
     void clearLastNotificationResponseAsync()
   }, [notificationResponse])
 
+  // Android: the keyboard's height goes to the page as it shows and hides, so a page in `overlay`
+  // mode can make room for it itself. iOS: WKWebView handles the keyboard, the page reads its
+  // visual viewport.
+  useEffect(() => {
+    if (Platform.OS !== 'android') return
+    const send = (height: number) =>
+      webViewRef.current?.injectJavaScript(toWebScript({ type: 'keyboard', height }))
+    const shown = Keyboard.addListener('keyboardDidShow', (event) =>
+      send(Math.round(event.endCoordinates.height)),
+    )
+    const hidden = Keyboard.addListener('keyboardDidHide', () => send(0))
+
+    return () => {
+      shown.remove()
+      hidden.remove()
+    }
+  }, [])
+
   const answerPush = async (shouldAsk: boolean) => {
     const state = await getPushState(shouldAsk)
     webViewRef.current?.injectJavaScript(toWebScript(state))
@@ -57,6 +77,7 @@ export const App = () => {
     if (message?.type === 'haptic') void playHaptic(message.style)
     if (message?.type === 'pushStatus') void answerPush(false)
     if (message?.type === 'pushEnable') void answerPush(true)
+    if (message?.type === 'keyboardMode') setKeyboardMode(message.mode)
   }
 
   const handleNavigationStateChange = (navigation: WebViewNavigation) => {
@@ -84,11 +105,13 @@ export const App = () => {
             stayed full height and panned up by the keyboard's height to reveal a field fixed at its
             foot (the cabinet's settings search), taking the whole page with it. Shrinking the
             WebView above the keyboard lets the page lay itself out like in a browser that resizes.
-            iOS: WKWebView handles the keyboard itself. */}
+            iOS: WKWebView handles the keyboard itself. A page that moves itself for the keyboard
+            (the booking sheet) asks for `overlay`: the WebView keeps its size, so the long page
+            under the sheet is not laid out again while the keyboard slides in. */}
         <KeyboardAvoidingView
           style={styles.container}
           behavior={Platform.OS === 'android' ? 'padding' : undefined}
-          enabled={Platform.OS === 'android'}
+          enabled={Platform.OS === 'android' && keyboardMode === 'resize'}
         >
           <AppWebView
             ref={webViewRef}
@@ -98,6 +121,9 @@ export const App = () => {
             onMessage={handleMessage}
             onNavigationStateChange={handleNavigationStateChange}
             onShouldStartLoadWithRequest={handleShouldStartLoad}
+            // A new page starts in `resize`: one that left without saying so (a reload, a full
+            // navigation) must not leave the next page's fields under the keyboard.
+            onLoadStart={() => setKeyboardMode('resize')}
             onLoadEnd={() => {
               isLoadedRef.current = true
             }}
