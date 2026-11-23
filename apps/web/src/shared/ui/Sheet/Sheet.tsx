@@ -1,8 +1,9 @@
 'use client'
 
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@awaisa/ui/Dialog'
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { useT } from '@/shared/i18n'
+import { useFocusedFieldInView } from '@/shared/lib/hooks/useFocusedFieldInView'
 import styles from './Sheet.module.css'
 import { useSheetDrag } from './useSheetDrag'
 
@@ -22,11 +23,17 @@ interface SheetProps {
 }
 
 // iOS form sheet: «Отмена» on the left, the title in the middle, the confirming action on the right.
-// Pull the top bar down to dismiss it, like an iOS sheet.
+// Pull the top bar down to dismiss it, like an iOS sheet. A field that takes the caret is set above
+// the phone's keyboard; in the Android app the sheet takes the keyboard itself (`overlay`), so the
+// page under it is not laid out again while the keyboard slides in.
 export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', children }: SheetProps) => {
   const t = useT()
   const dragHandlers = useSheetDrag(onClose)
   const [isOpen, setIsOpen] = useState(false)
+  // The body is portalled in only once the dialog opens, so the hook follows the element itself.
+  const [body, setBody] = useState<HTMLDivElement | null>(null)
+  const bodyRef = useMemo(() => ({ current: body }), [body])
+  useFocusedFieldInView(bodyRef)
 
   // Callers mount the sheet already «open»; opening it a frame later lets it slide up, and
   // closing waits for the slide down before the caller unmounts it.
@@ -63,7 +70,9 @@ export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', ch
             <span />
           )}
         </header>
-        <div className={styles.body}>{children}</div>
+        <div ref={setBody} className={styles.body}>
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   )

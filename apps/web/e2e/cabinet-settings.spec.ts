@@ -167,6 +167,10 @@ test.describe('Cabinet «Настройки»', () => {
 
     await search.focus()
     await expect.poll(posted).toContain('"mode":"overlay"')
+    // It rises at the focus, before the keyboard is reported: a field still under the keyboard
+    // when the WebView shrinks its visual viewport makes it pan the whole page.
+    const bar = page.locator('[data-align]:has([aria-label="Поиск по настройкам"])')
+    await expect(bar).toHaveAttribute('data-keyboard', '')
     await keyboard(300)
     const keyboardTop = await page.evaluate(() => window.innerHeight - 300)
     await expect
@@ -186,6 +190,55 @@ test.describe('Cabinet «Настройки»', () => {
         return box ? box.y > keyboardTop : false
       })
       .toBe(true)
+  })
+
+  test('in the Android app a sheet takes the keyboard itself and lifts its field above it', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'Sheets slide up from the foot on phones')
+    await page.addInitScript(() => {
+      const state = window as unknown as { __posted: string[] }
+      state.__posted = []
+      Object.assign(window, {
+        __NATIVE_APP__: { platform: 'android', version: '1.0.0' },
+        ReactNativeWebView: { postMessage: (message: string) => state.__posted.push(message) },
+      })
+    })
+    const posted = () =>
+      page.evaluate(() => (window as unknown as { __posted: string[] }).__posted.join('\n'))
+    const business = await createOwnBusiness(page)
+    const created = await page.request.post(`/api/manage/${business.slug}/promotions`, {
+      data: { title: 'E2E Клавиатура', kind: 'first_visit', percent: 10 },
+    })
+    expect(created.ok()).toBe(true)
+
+    await page.goto(`/manage/${business.slug}?tab=promotions`)
+    await settingsRow(page, /E2E Клавиатура/).click()
+    const sheet = page.getByRole('dialog', { name: 'Акция', exact: true })
+    // Open, the sheet leaves the WebView whole.
+    await expect.poll(posted).toContain('"mode":"overlay"')
+
+    const field = sheet.getByLabel('Скидка, %')
+    await field.focus()
+    const keyboardTop = await page.evaluate(() => {
+      const height = 360
+      window.dispatchEvent(
+        new CustomEvent('awaisa:native', { detail: { type: 'keyboard', height, duration: 0 } }),
+      )
+      return window.innerHeight - height
+    })
+    await expect
+      .poll(async () => {
+        const box = await field.boundingBox()
+        return box ? box.y + box.height <= keyboardTop : false
+      })
+      .toBe(true)
+
+    // Closed, the app resizes the WebView again.
+    await sheet.getByRole('button', { name: 'Отмена' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect.poll(posted).toContain('"mode":"resize"')
   })
 
   test('the only branch can be neither deleted nor closed; a second one is deleted', async ({

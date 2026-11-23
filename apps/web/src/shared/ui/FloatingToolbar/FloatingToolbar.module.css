@@ -22,15 +22,16 @@
       var(--shadow-lg);
   }
 
-  /* The Android app's keyboard (`useKeyboardLift`): the bar rides up with it by transform alone,
-     over the same time and curve as the keyboard; the safe area it stood above is under the
-     keyboard now. */
+  /* The Android app's keyboard (`useKeyboardLift`): the bar rides up by transform alone, by the
+     keyboard's whole height, so it keeps over the keyboard the gap it had over the safe area. That
+     gap is also the margin for the first keyboard, whose height is guessed: a field even a pixel
+     under the keyboard made the WebView pan the whole page up. */
   .toolbar {
     transition: translate var(--keyboard-duration, 250ms) cubic-bezier(0.2, 0, 0, 1);
   }
 
   .toolbar[data-keyboard] {
-    translate: 0 calc(env(safe-area-inset-bottom) - var(--keyboard-inset, 0px));
+    translate: 0 calc(-1 * var(--keyboard-inset, 0px));
   }
 
   /* Nothing to press (a staff member without the owner's tools): nothing floats. */
