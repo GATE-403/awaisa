@@ -58,13 +58,13 @@ const main = () => {
   const date = toDayKey(process.env.MERGED_AT ?? new Date().toISOString())
   const added = parseSection(process.env.PR_BODY ?? '', { number, date })
   if (added.length === 0) {
-    process.stdout.write(`#${number}: no «Что нового» entries` + '\n')
+    process.stdout.write(`#${number}: no «Что нового» entries\n`)
     return
   }
   const current = JSON.parse(readFileSync(FILE, 'utf8'))
   const kept = current.filter((entry) => !entry.id.startsWith(`pr${number}-`))
   writeFileSync(FILE, `${JSON.stringify([...added, ...kept], null, 2)}\n`)
-  process.stdout.write(`#${number}: ${added.length} «Что нового» entries` + '\n')
+  process.stdout.write(`#${number}: ${added.length} «Что нового» entries\n`)
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main()
