@@ -182,6 +182,7 @@
 }
 
 /* The visit's day as a small tear-off leaf, as in the profile's history. */
+/* Always square, like a calendar icon: the day centred under the month band. */
 .leaf {
   display: flex;
   flex-direction: column;
@@ -189,6 +190,7 @@
   flex-shrink: 0;
   overflow: hidden;
   width: 40px;
+  aspect-ratio: 1;
   border-radius: var(--radius-sm);
   background: var(--color-subtle);
   font-variant-numeric: tabular-nums;
@@ -207,8 +209,12 @@
 }
 
 .leafDay {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
   font-size: var(--text-body);
-  line-height: 24px;
+  line-height: 1;
   font-weight: var(--font-weight-semibold);
 }
 

@@ -57,7 +57,7 @@ const pickFirstFreeSlot = async (page: Page) => {
     const slots = page
       .getByRole('group', { name: 'Время' })
       .getByRole('button', { disabled: false })
-    const emptyHint = page.getByText('свободного времени нет')
+    const emptyHint = page.getByText('На этот день всё занято')
     await slots.first().or(emptyHint).waitFor()
     if (await slots.count()) {
       const slot = slots.first()

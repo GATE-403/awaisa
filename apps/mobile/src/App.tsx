@@ -109,6 +109,9 @@ export const App = () => {
             pullToRefreshEnabled
             sharedCookiesEnabled
             setSupportMultipleWindows={false}
+            // Development builds only: Chrome's remote DevTools can then profile the page on the
+            // phone (chrome://inspect).
+            webviewDebuggingEnabled={__DEV__}
           />
         </KeyboardAvoidingView>
       </SafeAreaView>
