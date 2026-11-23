@@ -52,7 +52,7 @@ export const ForBusinessPage = () => (
         <div className={styles.actions}>
           <ButtonLink size='lg' className={styles.pill} render={<NextLink href='/business/new' />}>
             <T>Создать страницу</T>
-            <ArrowRight weight='bold' aria-hidden />
+            <ArrowRight aria-hidden />
           </ButtonLink>
           <ButtonLink
             size='lg'
@@ -73,7 +73,7 @@ export const ForBusinessPage = () => (
             <T>Новое</T>
           </span>
           <T>Филиалы и карта</T>
-          <ArrowRight weight='bold' aria-hidden />
+          <ArrowRight aria-hidden />
         </NextLink>
         <p className={styles.lead}>
           <T>
@@ -100,7 +100,7 @@ export const ForBusinessPage = () => (
           <TiltCard key={id} className={styles.bentoItem}>
             <div className={styles.bentoCopy} style={{ '--tint': tint } as CSSProperties}>
               <span className={styles.bentoIcon} aria-hidden='true'>
-                <Icon weight='fill' />
+                <Icon />
               </span>
               <h3 className={styles.bentoTitle}>
                 <T>{title}</T>
@@ -164,7 +164,7 @@ export const ForBusinessPage = () => (
           <details key={item.question} className={styles.faqItem}>
             <summary className={styles.faqQuestion}>
               <T>{item.question}</T>
-              <CaretDown className={styles.faqCaret} weight='bold' aria-hidden />
+              <CaretDown className={styles.faqCaret} aria-hidden />
             </summary>
             <p className={styles.faqAnswer}>
               <T>{item.answer}</T>

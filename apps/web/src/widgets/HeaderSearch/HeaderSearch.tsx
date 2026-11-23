@@ -193,7 +193,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
     >
       <search className={styles.search} data-open={isOpen || undefined}>
         <form className={styles.form} onSubmit={handleSubmit} data-open={isOpen || undefined}>
-          <MagnifyingGlass className={styles.icon} weight='bold' aria-hidden />
+          <MagnifyingGlass className={styles.icon} aria-hidden />
           <span className={styles.field}>
             {!query && (
               <span className={styles.hint} aria-hidden>
@@ -232,7 +232,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 setSuggestions([])
               }}
             >
-              <X weight='bold' aria-hidden />
+              <X aria-hidden />
             </button>
           )}
           {!isOpen && pathname !== '/map' && (
@@ -248,12 +248,12 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                   : t('Указать, где вы')
               }
             >
-              <NavigationArrow weight='fill' aria-hidden />
+              <NavigationArrow aria-hidden />
               <span className={styles.whereLabel}>{myPlace ? t(myPlace.label) : t('Где вы?')}</span>
             </button>
           )}
           <button type='submit' className={styles.submit} aria-label={t('Найти')}>
-            <MagnifyingGlass weight='bold' aria-hidden />
+            <MagnifyingGlass aria-hidden />
           </button>
         </form>
         {/* Phones, like iOS search: «Отмена» beside the field while the suggestions are open. */}
@@ -358,7 +358,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 ))}
                 <li>
                   <button type='button' className={styles.all} onClick={() => search(trimmed)}>
-                    <ArrowRight weight='bold' aria-hidden />
+                    <ArrowRight aria-hidden />
                     {t('Все услуги и места по «{query}»', { query: trimmed })}
                   </button>
                 </li>

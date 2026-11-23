@@ -104,7 +104,7 @@ export const CabinetBar = ({
           className={styles.back}
           aria-label={nav ? t('Назад: {label}', { label: backLabel }) : undefined}
         >
-          <CaretLeft weight='bold' aria-hidden />
+          <CaretLeft aria-hidden />
           {!nav && (back || entry !== undefined) && backLabel}
         </NextLink>
         {nav && slug ? (
@@ -162,7 +162,7 @@ export const CabinetBar = ({
                   : t('Профиль')
               }
               className={styles.icon}
-              trigger={<UserCircle weight='fill' aria-hidden />}
+              trigger={<UserCircle aria-hidden />}
             >
               <MenuItem icon={<UserCircle aria-hidden />} onClick={() => router.push('/bookings')}>
                 {t('Профиль и записи')}

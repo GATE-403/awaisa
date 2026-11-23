@@ -69,7 +69,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
           onClick={onClose}
           aria-label={t('Закрыть')}
         >
-          <X weight='bold' aria-hidden />
+          <X aria-hidden />
         </button>
       </div>
       <div ref={trackRef} className={styles.track} onScroll={syncIndex}>
@@ -94,7 +94,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
           onClick={() => go(index - 1)}
           aria-label={t('Предыдущее фото')}
         >
-          <CaretLeft weight='bold' aria-hidden />
+          <CaretLeft aria-hidden />
         </button>
       )}
       {index < photos.length - 1 && (
@@ -105,7 +105,7 @@ export const PhotoViewer = ({ photos, startIndex, label, onClose }: PhotoViewerP
           onClick={() => go(index + 1)}
           aria-label={t('Следующее фото')}
         >
-          <CaretRight weight='bold' aria-hidden />
+          <CaretRight aria-hidden />
         </button>
       )}
     </div>,

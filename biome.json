@@ -18,7 +18,8 @@
       "!**/dist",
       "!**/dist-e2e",
       "!**/build",
-      "!**/coverage"
+      "!**/coverage",
+      "!!**/.claude"
     ]
   },
   "formatter": {

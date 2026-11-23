@@ -52,7 +52,7 @@ export const LoyaltyCard = () => {
               </span>
               {place.bonusBalance > 0 && (
                 <span className={styles.balance}>
-                  <Gift weight='fill' aria-hidden />
+                  <Gift aria-hidden />
                   {formatPrice(place.bonusBalance)}
                 </span>
               )}

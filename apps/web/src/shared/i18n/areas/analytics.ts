@@ -283,6 +283,13 @@ const ANALYTICS: Record<string, Entry> = {
     '{price} a month for {masters}, {extra} for each one more.',
   ],
   'Год по цене десяти месяцев.': ['Жыл он айдын баасында.', 'A year for the price of ten months.'],
+  '{masters} включено, ещё {extra} за каждого': [
+    '{masters} кирет, ар бири үчүн дагы {extra}',
+    '{masters} included, {extra} for each more',
+  ],
+  'в месяц': ['айына', 'a month'],
+  'в год': ['жылына', 'a year'],
+  '2 месяца в подарок': ['2 ай белек', '2 months free'],
   'Продлится после {day}.': ['{day} кийин узартылат.', 'It extends after {day}.'],
   'Онлайн-оплата пока недоступна: напишите нам, продлим вручную.': [
     'Онлайн төлөм азырынча жеткиликсиз: бизге жазыңыз, кол менен узартабыз.',

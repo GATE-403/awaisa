@@ -28,7 +28,9 @@ test.describe('Deleting a business', () => {
     const staff = await staffContext.newPage()
     try {
       await signInViaApi(staff, staffPhone, 'E2E Админ Удаляемого Места')
-      expect((await staff.request.delete(manage)).status()).toBe(403)
+      expect(
+        (await staff.request.delete(manage, { data: { confirmSlug: business.slug } })).status(),
+      ).toBe(403)
     } finally {
       await staffContext.close()
     }
@@ -37,7 +39,7 @@ test.describe('Deleting a business', () => {
     await page.goto(`/manage/${business.slug}?tab=settings`)
     await expect(page.getByRole('button', { name: /Удалить бизнес/ })).toHaveCount(0)
     const businessRow = page.getByRole('button', { name: /Скрыть или удалить/ })
-    await expect(businessRow).toContainText('Открыта')
+    await expect(businessRow).not.toContainText('Скрыта')
     await businessRow.click()
     const sheet = page.getByRole('dialog', { name: 'Скрыть или удалить' })
     const pageSwitch = sheet.getByRole('switch', { name: 'Страница открыта' })
@@ -51,8 +53,21 @@ test.describe('Deleting a business', () => {
     await pageSwitch.click()
     await expect(pageSwitch).toBeChecked()
 
+    // The page's address typed by hand unlocks the button, like deleting a repository on GitHub;
+    // the API refuses without it too.
+    const deleteButton = sheet.getByRole('button', { name: /Удалить бизнес/ })
+    await expect(deleteButton).toBeDisabled()
+    const confirmField = sheet.getByLabel(/Чтобы удалить, введите адрес страницы/)
+    await confirmField.fill(business.name)
+    await expect(deleteButton).toBeDisabled()
+    expect(
+      (await page.request.delete(manage, { data: { confirmSlug: business.name } })).status(),
+    ).toBe(400)
+    expect((await page.request.delete(manage, { data: {} })).status()).toBe(400)
+    await confirmField.fill(business.slug)
+    await expect(deleteButton).toBeEnabled()
     // Held, not confirmed in a dialog.
-    await sheet.getByRole('button', { name: /Удалить бизнес/ }).click({ delay: 1300 })
+    await deleteButton.click({ delay: 1300 })
     await expect(page.getByText('Бизнес удалён')).toBeVisible()
     // The owner had no other business: the profile.
     await expect(page).toHaveURL(/\/bookings/)

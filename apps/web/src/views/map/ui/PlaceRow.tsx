@@ -76,7 +76,7 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
         {place.distanceKm !== null && (
           <span className={styles.distance}>{formatDistance(place.distanceKm)}</span>
         )}
-        <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+        <CaretRight aria-hidden className={styles.chevron} />
       </NextLink>
     </li>
   )

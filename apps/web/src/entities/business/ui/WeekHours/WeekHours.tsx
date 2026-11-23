@@ -1,15 +1,8 @@
 'use client'
 
-import type { CSSProperties } from 'react'
 import type { WorkingDay } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import {
-  findDay,
-  formatClock,
-  formatWeekSchedule,
-  WEEKDAYS_FULL,
-  WEEKDAYS_SHORT,
-} from '../../lib/workingHours'
+import { groupWeek, WEEKDAYS_FULL, WEEKDAYS_SHORT } from '../../lib/workingHours'
 import styles from './WeekHours.module.css'
 
 interface WeekHoursProps {
@@ -20,69 +13,62 @@ interface WeekHoursProps {
   status: { isOpen: boolean; label: string } | null
 }
 
-const HOUR = 60
+const DAYS_IN_WEEK = 7
 
-// «Время» at a glance: today's status large, the week in one line under it, then the week as a
-// chart, each day a track with its open hours filled on one shared scale (the earliest opening to
-// the latest closing of the week), so a short day or a day off shows without reading the numbers.
+// «Время» as a table people read, like hours on a map card: today's status, then the week as rows
+// of neighbouring days with the same hours («Пн–Пт 10:00–20:00», «Вс Выходной»), today's row
+// marked. Seven identical bars on a shared scale said nothing a row could not («нужно переделать
+// этот компонент»).
 export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
   const t = useT()
-  const start = Math.floor(Math.min(...hours.map((day) => day.opensMinutes)) / HOUR) * HOUR
-  const end = Math.ceil(Math.max(...hours.map((day) => day.closesMinutes)) / HOUR) * HOUR
-  const span = Math.max(end - start, HOUR)
+  const groups = groupWeek(hours)
+  const isEveryDay = groups.length === 1
+
+  const daysLabel = (from: number, to: number) => {
+    if (isEveryDay) return t('Ежедневно')
+    const first = t(WEEKDAYS_SHORT[from] ?? '')
+    return from === to ? first : `${first}–${t(WEEKDAYS_SHORT[to] ?? '')}`
+  }
+
+  // Screen readers hear the days in full: «Понедельник – Пятница».
+  const daysFull = (from: number, to: number) =>
+    from === to
+      ? t(WEEKDAYS_FULL[from] ?? '')
+      : `${t(WEEKDAYS_FULL[from] ?? '')} – ${t(WEEKDAYS_FULL[to] ?? '')}`
 
   return (
     <div className={styles.weekHours}>
-      <div className={styles.weekHead}>
-        {status && (
-          <p className={styles.weekStatus} data-open={status.isOpen || undefined}>
-            {status.label}
-          </p>
-        )}
-        <p className={styles.weekSummary}>{formatWeekSchedule(hours, t)}</p>
-      </div>
-      {hours.length > 0 && (
-        <ul className={styles.weekChart} aria-label={t('Часы по дням')}>
-          {WEEKDAYS_FULL.map((fullName, weekday) => {
-            const dayName = t(fullName)
-            const day = findDay(hours, weekday)
-            const range = day
-              ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}`
-              : t('Выходной')
-            const bar = day
-              ? ({
-                  '--from': (day.opensMinutes - start) / span,
-                  '--to': (day.closesMinutes - start) / span,
-                } as CSSProperties)
-              : undefined
-            return (
-              <li
-                key={fullName}
-                className={styles.weekDay}
-                data-today={todayWeekday === weekday || undefined}
-                data-off={!day || undefined}
-              >
-                <span className={styles.weekDayName} title={dayName}>
-                  {t(WEEKDAYS_SHORT[weekday] ?? '')}
-                </span>
-                <span className={styles.weekTrack} aria-hidden='true'>
-                  {bar && <span className={styles.weekBar} style={bar} />}
-                </span>
-                <span className={styles.weekRange}>
-                  <span className={styles.srOnly}>{dayName}: </span>
-                  {range}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-      {hours.length > 0 && (
-        <p className={styles.weekScale} aria-hidden='true'>
-          <span>{formatClock(start)}</span>
-          <span>{formatClock(end)}</span>
+      {status && (
+        <p className={styles.weekStatus} data-open={status.isOpen || undefined}>
+          {status.label}
         </p>
       )}
+      <ul className={styles.weekRows} aria-label={t('Часы по дням')}>
+        {groups.map(({ from, to, range }) => {
+          // Every day the same: «Сегодня» would add nothing to «Ежедневно».
+          const isToday =
+            !isEveryDay && todayWeekday !== null && todayWeekday >= from && todayWeekday <= to
+          return (
+            <li
+              key={from}
+              className={styles.weekRow}
+              data-today={isToday || undefined}
+              data-off={!range || undefined}
+            >
+              <span className={styles.weekDays}>
+                <span aria-hidden='true'>{daysLabel(from, to)}</span>
+                <span className={styles.srOnly}>
+                  {isEveryDay && to - from === DAYS_IN_WEEK - 1
+                    ? t('Ежедневно')
+                    : daysFull(from, to)}
+                </span>
+                {isToday && <span className={styles.today}>{t('Сегодня')}</span>}
+              </span>
+              <span className={styles.weekRange}>{range ?? t('Выходной')}</span>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }

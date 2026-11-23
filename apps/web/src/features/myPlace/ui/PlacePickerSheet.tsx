@@ -52,7 +52,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
             onClick={locate}
             disabled={state === 'locating'}
           >
-            <NavigationArrow weight='fill' aria-hidden className={styles.locateIcon} />
+            <NavigationArrow aria-hidden className={styles.locateIcon} />
             <span>{state === 'locating' ? t('Определяем…') : t('Определить автоматически')}</span>
           </button>
         </div>
@@ -77,7 +77,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
                 onClick={() => pick({ ...area, source: 'area' })}
               >
                 <span>{area.label}</span>
-                {isChosen && <Check weight='bold' aria-hidden className={styles.check} />}
+                {isChosen && <Check aria-hidden className={styles.check} />}
               </button>
             )
           })}

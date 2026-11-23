@@ -195,15 +195,20 @@
   margin-top: 0;
 }
 
-/* «Запуск записи» over that cover keeps the air the other tabs have under the bar. */
-.content:has([data-page-tab]) .setup:has(*) {
-  padding-top: var(--space-5);
+/* «Запуск записи» is a banner right under the cabinet bar, no air above it («убери эти лишние
+   отступы»): it takes back the page's top margin. */
+.content .setup:has(*) {
+  margin-top: calc(-1 * var(--space-5));
 }
 
-@media (min-width: 768px) {
-  .content:has([data-page-tab]) .setup:has(*) {
-    padding-top: var(--space-10);
-  }
+.content:has([data-schedule-board]) .setup:has(*) {
+  margin-top: calc(-1 * var(--space-3));
+}
+
+/* On «Страница» the banner would sit on the place's coloured cover, two bands clashing; that
+   page names what it lacks itself («+ О себе · + 3 фото работ»), and its tabs are the steps. */
+.content:has([data-page-tab]) .setup {
+  display: none;
 }
 
 /* Nothing left to set up: no empty block taking a gap. */

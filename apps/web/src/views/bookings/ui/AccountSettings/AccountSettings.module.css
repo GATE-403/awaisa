@@ -43,7 +43,7 @@
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  min-height: 52px;
+  min-height: var(--row-height);
   padding: 0 var(--space-4);
   border: none;
   background: transparent;
@@ -54,25 +54,20 @@
   cursor: pointer;
 }
 
-/* Centred in a box as wide as the rows' glyphs, so the glyph and the word sit in the same
-   columns as the glyphs and labels above. */
-.danger svg {
-  box-sizing: content-box;
-  width: 20px;
-  height: 20px;
-  padding-inline: calc((24px - 20px) / 2);
-}
-
 div.row,
 .row:disabled {
   cursor: default;
 }
 
 .label {
-  flex: 1;
+  flex: 1 0 auto;
+  white-space: nowrap;
 }
 
+/* A long value ends in an ellipsis; the label keeps its one line («Для» over «вас» read broken). */
 .value {
+  flex: 0 1 auto;
+  min-width: 0;
   overflow: hidden;
   color: var(--color-muted-foreground);
   text-overflow: ellipsis;
@@ -87,36 +82,14 @@ div.row,
 }
 
 /* «Выйти» on the page itself: the glyph lines up with the rows' glyphs above (16pt in). */
-.signOut {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: var(--space-4);
-}
-
 .deleteAccount {
-  margin-top: var(--space-6);
+  margin-top: var(--space-8);
 }
 
-.signOut .footnote {
-  padding-top: 0;
-}
-
-.danger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: var(--control-height-md);
-  padding: 0 var(--space-4);
-  border: none;
-  border-radius: var(--radius-full);
-  background: transparent;
+/* «Выйти» is a row of the group like the others, only red: the glyph and the word. */
+.signOutRow .glyph,
+.signOutRow .label {
   color: var(--color-danger-text);
-  font: inherit;
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-medium);
-  text-align: left;
-  cursor: pointer;
 }
 
 /* A thin glyph per row, all in one quiet colour, no tile («не даём фон иконкам, не добавляем
@@ -138,18 +111,9 @@ div.row,
 }
 
 @media (hover: hover) {
-  .row:is(button, a):hover,
-  .danger:hover {
+  .row:is(button, a):hover {
     background: var(--color-fill);
   }
-}
-
-.title[data-hidden] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
 }
 
 /* Group captions sit a little apart from the group above. */
@@ -164,7 +128,7 @@ div.row,
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--row-height);
   color: inherit;
   text-decoration: none;
 }
@@ -196,4 +160,49 @@ div.row,
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* Like the cabinet's «Настройки» («нужно настройки сделать как в админке»): the groups lie right
+   on the page — no card, no fill — hairlines between rows from the label on, one left edge for
+   captions, rows and footnotes; a row under the mouse takes the link colour, no hover fill. */
+.list.list {
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.list > * + *::before {
+  left: calc(24px + var(--space-3));
+}
+
+.row {
+  min-height: var(--row-height);
+  padding-inline: 0;
+}
+
+.caption.caption {
+  padding-inline: 0;
+}
+
+.footnote {
+  padding-inline: 0;
+}
+
+@media (hover: hover) {
+  .row:is(button, a):hover {
+    background: none;
+  }
+
+  .row:is(button, a):hover .label {
+    color: var(--color-link);
+  }
+
+  .signOutRow.signOutRow:hover .label {
+    color: var(--color-danger);
+  }
+}
+
+.row:is(button, a):active {
+  opacity: 0.6;
 }

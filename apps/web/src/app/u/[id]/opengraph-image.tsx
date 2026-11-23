@@ -1,6 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
 import { OG_IMAGE_SIZE } from '@/shared/lib/seo/businessMetadata'
+import { loadProfilePhoto } from '@/shared/lib/seo/profilePhoto'
 
 export const alt = 'Профиль в Awaisa'
 export const size = OG_IMAGE_SIZE
@@ -37,6 +38,7 @@ const ProfileOgImage = async ({ params }: { params: Promise<{ id: string }> }) =
   const profile = response.ok ? ((await response.json()) as OgProfile) : null
   const accent = ACCENT_HEX[profile?.accent ?? ''] ?? '#0a84ff'
   const earned = profile?.achievements.filter((item) => item.earned) ?? []
+  const photo = profile ? await loadProfilePhoto({ id, avatarUrl: profile.avatarUrl }, 336) : null
 
   return new ImageResponse(
     <div
@@ -66,15 +68,9 @@ const ProfileOgImage = async ({ params }: { params: Promise<{ id: string }> }) =
           fontWeight: 700,
         }}
       >
-        {profile?.avatarUrl ? (
+        {photo ? (
           // biome-ignore lint/performance/noImgElement: OG images render plain img
-          <img
-            src={profile.avatarUrl}
-            alt=''
-            width={168}
-            height={168}
-            style={{ objectFit: 'cover' }}
-          />
+          <img src={photo} alt='' width={168} height={168} style={{ objectFit: 'cover' }} />
         ) : (
           (profile?.name ?? 'A').charAt(0)
         )}

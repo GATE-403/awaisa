@@ -76,7 +76,7 @@ export const DateField = ({
           aria-label={`${label}: убрать дату`}
           onClick={() => onChange('')}
         >
-          <X weight='bold' aria-hidden />
+          <X aria-hidden />
         </button>
       )}
     </span>

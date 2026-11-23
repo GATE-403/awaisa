@@ -22,4 +22,9 @@ const bookingsToCancel = (bookings: UpcomingBooking[], now: Date) =>
     .filter((booking) => booking.status === 'confirmed' && booking.startsAt > now)
     .map((booking) => booking.id)
 
-export { ARCHIVED_SLUG_PREFIX, archivedSlug, bookingsToCancel }
+/** The owner typed the page's address (case and spaces forgiven, nothing else). */
+const confirmsDeletion = (typed: string, slug: string) => typed.trim().toLowerCase() === slug
+
+const CONFIRM_MESSAGE = 'Введите адрес страницы, чтобы удалить бизнес'
+
+export { ARCHIVED_SLUG_PREFIX, archivedSlug, bookingsToCancel, CONFIRM_MESSAGE, confirmsDeletion }

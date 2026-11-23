@@ -6,15 +6,18 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
+import sharp from 'sharp'
 import { DataSource } from 'typeorm'
 import { toBusinessParts } from '../common/business-time.js'
 import { PUBLIC_ID_PATTERN, publicIdOf, publicIdSql, saltOf } from '../common/public-id.js'
 import type { Env } from '../config/env.js'
 import type { Customer } from '../customers/customer.entity.js'
+import { StorageService } from '../media/storage.service.js'
 import { RankingsService } from '../rankings/rankings.service.js'
 import { interestsOf } from '../recommendations/recommend-score.js'
 import { ReferralsService } from '../referrals/referrals.service.js'
 import { achievementsOf, badgesOf, levelOf } from './profile-badges.js'
+import { activityOf, earnedDatesOf, type HistoryVisit } from './profile-history.js'
 import { LINK_LABELS, linksView, normalizeLinks, type ProfileLinks } from './profile-links.js'
 import { defaultStyle } from './profile-style.js'
 import type { UpdateProfileStyleInput } from './profiles.schemas.js'
@@ -24,6 +27,8 @@ type Row = Record<string, unknown>
 const DAY_MS = 86_400_000
 const EARLY_MINUTES = 10 * 60
 const TOP_ITEMS = 6
+/** Places drawn on the profile's map. */
+const MAP_PLACES = 30
 
 // Words that read as the service itself, not a person.
 const RESERVED_HANDLES = new Set([
@@ -54,6 +59,7 @@ export class ProfilesService {
     private readonly config: ConfigService<Env, true>,
     private readonly rankings: RankingsService,
     private readonly referrals: ReferralsService,
+    private readonly storage: StorageService,
   ) {}
 
   idOf(phone: string) {
@@ -168,11 +174,13 @@ export class ProfilesService {
       this.query(
         `SELECT b."starts_at" AS "startsAt", s."name" AS "serviceName",
            bz."slug", bz."name" AS "businessName", bz."logo_url" AS "logoUrl", bz."cover_url" AS "coverUrl",
-           sp."id" AS "masterId", sp."name" AS "masterName", sp."photo_url" AS "masterPhoto", sp."role" AS "masterRole"
+           sp."id" AS "masterId", sp."name" AS "masterName", sp."photo_url" AS "masterPhoto", sp."role" AS "masterRole",
+           br."latitude", br."longitude"
          FROM "bookings" b
          JOIN "services" s ON s."id" = b."service_id"
          JOIN "businesses" bz ON bz."id" = b."business_id" AND bz."is_published"
          LEFT JOIN "specialists" sp ON sp."id" = b."specialist_id" AND sp."is_active"
+         LEFT JOIN "branches" br ON br."id" = b."branch_id"
          WHERE b."customer_phone" = $1 AND b."status" = 'confirmed' AND b."starts_at" < now()
            AND b."outcome" IS DISTINCT FROM 'no_show'
          ORDER BY b."starts_at" DESC`,
@@ -206,6 +214,9 @@ export class ProfilesService {
         logoUrl: string | null
         coverUrl: string | null
         visits: number
+        lastVisitAt: string
+        latitude: number | null
+        longitude: number | null
       }
     >()
     const masters = new Map<
@@ -218,18 +229,32 @@ export class ProfilesService {
         slug: string
         businessName: string
         visits: number
+        lastVisitAt: string
+        serviceName: string
       }
     >()
     const kinds = new Set<string>()
+    const history: HistoryVisit[] = []
     let early = 0
+    // Newest first: the first row of a place or a master is the last visit there.
     for (const visit of visits) {
       const slug = String(visit.slug)
+      const at = new Date(visit.startsAt as string)
+      const latitude = visit.latitude === null ? null : Number(visit.latitude)
+      const longitude = visit.longitude === null ? null : Number(visit.longitude)
       const place = places.get(slug) ?? {
         slug,
         name: String(visit.businessName),
         logoUrl: (visit.logoUrl as string | null) ?? null,
         coverUrl: (visit.coverUrl as string | null) ?? null,
         visits: 0,
+        lastVisitAt: at.toISOString(),
+        latitude,
+        longitude,
+      }
+      if (place.latitude === null && latitude !== null) {
+        place.latitude = latitude
+        place.longitude = longitude
       }
       place.visits += 1
       places.set(slug, place)
@@ -243,12 +268,25 @@ export class ProfilesService {
           slug,
           businessName: String(visit.businessName),
           visits: 0,
+          lastVisitAt: at.toISOString(),
+          serviceName: String(visit.serviceName),
         }
         master.visits += 1
         masters.set(key, master)
       }
-      for (const kind of interestsOf(String(visit.serviceName))) kinds.add(kind)
-      if (toBusinessParts(new Date(visit.startsAt as string)).minutes < EARLY_MINUTES) early += 1
+      const visitKinds = interestsOf(String(visit.serviceName))
+      for (const kind of visitKinds) kinds.add(kind)
+      const isEarly = toBusinessParts(at).minutes < EARLY_MINUTES
+      if (isEarly) early += 1
+      history.push({
+        at,
+        slug,
+        businessName: String(visit.businessName),
+        serviceName: String(visit.serviceName),
+        masterName: visit.masterName ? String(visit.masterName) : null,
+        kinds: [...visitKinds],
+        isEarly,
+      })
     }
     const byVisits = <T extends { visits: number }>(items: Iterable<T>) =>
       [...items].sort((first, second) => second.visits - first.visits)
@@ -273,6 +311,12 @@ export class ProfilesService {
         ) / 10
       : null
     const showsPlaces = person.showPlaces || isOwn
+    const achievements = achievementsOf(stats)
+    const earnedAt = earnedDatesOf(
+      history,
+      reviews.map((row) => new Date(row.createdAt as string)),
+      achievements,
+    )
 
     return {
       id,
@@ -305,7 +349,9 @@ export class ProfilesService {
       level: levelOf(stats),
       rank: clientRanks.get(person.phone) ?? null,
       badges: badgesOf(stats),
-      achievements: achievementsOf(stats),
+      achievements: achievements.map((item) => ({ ...item, earnedAt: earnedAt[item.id] ?? null })),
+      // The last twelve months of visits; where and with whom only when places are shown.
+      activity: activityOf(history, new Date(), showsPlaces),
       stats: {
         visits: stats.visits,
         places: stats.places,
@@ -313,7 +359,7 @@ export class ProfilesService {
         average,
         friends,
       },
-      places: showsPlaces ? topPlaces.slice(0, TOP_ITEMS) : [],
+      places: showsPlaces ? topPlaces.slice(0, MAP_PLACES) : [],
       masters: showsPlaces
         ? byVisits(masters.values())
             .slice(0, TOP_ITEMS)
@@ -336,6 +382,17 @@ export class ProfilesService {
         },
       })),
     }
+  }
+
+  /**
+   * The face as a PNG for generated pictures (the story card, the share image): photos are kept
+   * as WebP, which the image renderer cannot read. Only for profiles anyone may open.
+   */
+  async avatarPng(idOrHandle: string, width: number) {
+    const profile = await this.profile(idOrHandle, null)
+    if (!profile.avatarUrl) throw new NotFoundException('Нет фото')
+    const source = await this.storage.read(profile.avatarUrl)
+    return sharp(source).resize({ width, withoutEnlargement: true }).png().toBuffer()
   }
 
   /** Ended visits of the last two weeks without a review — the «Как прошло?» card asks the same. */

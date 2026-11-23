@@ -163,7 +163,7 @@ export const PhotosSection = ({
           >
             {photo.isHidden ? (
               <span className={styles.badge}>
-                <EyeSlash weight='bold' aria-hidden />
+                <EyeSlash aria-hidden />
               </span>
             ) : (
               !photo.serviceId && <span className={styles.badge}>?</span>

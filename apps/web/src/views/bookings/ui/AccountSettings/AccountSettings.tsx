@@ -26,7 +26,7 @@ import { PersonAvatar } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { useFavorites } from '@/features/favorites'
 import { useFollows } from '@/features/followMaster'
-import { INTERESTS, PreferencesSheet, usePreferences } from '@/features/forYou'
+import { INTERESTS, type Preferences, PreferencesSheet, usePreferences } from '@/features/forYou'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { deleteMyAccount, exportMyData, getMasterPlaces } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
@@ -48,6 +48,14 @@ const THEMES: { value: Theme; label: string }[] = [
 
 // The account's settings right on the profile, at its foot like iOS Settings — no sheet to open:
 // name and number, the theme, the business side, one's data, signing out and deleting the account.
+// What «что важнее» reads as in the settings' summary line.
+const PRIORITY_WORDS: Record<NonNullable<Preferences['priorities']>[number], string> = {
+  near: 'Рядом',
+  soon: 'Свободно сегодня',
+  rating: 'Высокий рейтинг',
+  price: 'Подешевле',
+}
+
 interface AccountSettingsProps {
   /** Inside the «Настройки» tab the tab names it. */
   isTitleHidden?: boolean
@@ -110,6 +118,9 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         preferences.budget
           ? t('до {amount}', { amount: preferences.budget.toLocaleString('ru-RU') })
           : null,
+        (preferences.priorities ?? [])
+          .map((value) => t(PRIORITY_WORDS[value]).toLowerCase())
+          .join(', ') || null,
       ]
         .filter(Boolean)
         .join(' · ') || t('Без предпочтений')
@@ -169,10 +180,16 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
   }
 
   return (
-    <section className={styles.settings} aria-labelledby='settings-title'>
-      <h2 id='settings-title' className={styles.title} data-hidden={isTitleHidden || undefined}>
-        {t('Настройки')}
-      </h2>
+    // With the title hidden the screen around it names the section (one `settings-title` id).
+    <section
+      className={styles.settings}
+      aria-labelledby={isTitleHidden ? undefined : 'settings-title'}
+    >
+      {!isTitleHidden && (
+        <h2 id='settings-title' className={styles.title}>
+          {t('Настройки')}
+        </h2>
+      )}
 
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsNaming(true)}>
@@ -181,7 +198,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           </span>
           <span className={styles.label}>{t('Имя')}</span>
           <span className={styles.value}>{customer.name || t('Указать')}</span>
-          <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </button>
         <div className={styles.row}>
           <span className={styles.glyph} aria-hidden>
@@ -213,7 +230,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           </span>
           <span className={styles.label}>{t('Для вас')}</span>
           <span className={styles.value}>{tasteSummary}</span>
-          <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </button>
       </div>
       <p className={styles.footnote}>
@@ -281,7 +298,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
                 ? places[0]?.businessName
                 : t('{count} места', { count: places.length })}
             </span>
-            <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+            <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
         <NextLink href='/manage' className={styles.row}>
@@ -289,14 +306,14 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <Storefront />
           </span>
           <span className={styles.label}>{t('Мои бизнесы')}</span>
-          <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </NextLink>
         <NextLink href='/business/new' className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <PlusCircle />
           </span>
           <span className={styles.label}>{t('Подключить бизнес')}</span>
-          <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </NextLink>
         {/* Platform admins: where people drop out of each scenario, on which devices. */}
         {customer.isAdmin && (
@@ -305,7 +322,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
               <ChartBar />
             </span>
             <span className={styles.label}>{t('Воронки')}</span>
-            <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+            <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
         {/* Platform admins: what viewers reported and what was decided about it. */}
@@ -315,7 +332,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
               <Flag />
             </span>
             <span className={styles.label}>Модерация</span>
-            <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+            <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
       </div>
@@ -334,28 +351,29 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.label}>Скачать мои данные</span>
           <span className={styles.value}>{isExporting ? 'Готовим…' : 'JSON'}</span>
         </button>
+        {/* Signing out is a row of this group in red, not a lone word under it («выйти стоит в
+            углу как не свой»). It signs out at once: a menu of one «Выйти из аккаунта» was a
+            second tap asking the same thing («доп подтверждение сделано плохо»). */}
+        <button
+          type='button'
+          className={`${styles.row} ${styles.signOutRow}`}
+          onClick={() => void handleSignOut()}
+        >
+          <span className={styles.glyph} aria-hidden>
+            <SignOut />
+          </span>
+          <span className={styles.label}>{t('Выйти')}</span>
+        </button>
       </div>
       <p className={styles.footnote}>
-        Профиль, записи, отзывы, бонусы, уведомления и избранное одним файлом.
+        Профиль, записи, отзывы, бонусы, уведомления и избранное одним файлом.{' '}
+        {t('Записи, сделанные на этом телефоне, останутся на нём и после выхода.')}
       </p>
-
-      {/* Destructive and quiet: a red glyph and the word right on the page, no group, no tile.
-          It signs out at once: a menu of one «Выйти из аккаунта» under «Выйти» was a second tap
-          asking the same thing («доп подтверждение сделано плохо»), and signing in again is easy. */}
-      <div className={styles.signOut}>
-        <button type='button' className={styles.danger} onClick={() => void handleSignOut()}>
-          <SignOut aria-hidden />
-          {t('Выйти')}
-        </button>
-        <p className={styles.footnote}>
-          {t('Записи, сделанные на этом телефоне, останутся на нём и после выхода.')}
-        </p>
-      </div>
 
       {/* Deleting is held, not confirmed in a dialog (HoldButton), and says what happens. */}
       <div className={styles.deleteAccount}>
         <HoldButton
-          icon={<UserMinus weight='bold' aria-hidden />}
+          icon={<UserMinus aria-hidden />}
           disabled={isDeleting}
           onConfirm={() => void handleDelete()}
         >

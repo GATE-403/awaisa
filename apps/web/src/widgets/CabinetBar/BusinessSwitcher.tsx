@@ -69,7 +69,7 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
             {title}
             {!isPublished && <span className={styles.hidden}> · {t('скрыта')}</span>}
           </span>
-          <CaretDown className={styles.switcherCaret} weight='bold' aria-hidden />
+          <CaretDown className={styles.switcherCaret} aria-hidden />
         </>
       }
     >
@@ -79,7 +79,7 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
           <MenuItem
             key={business.slug}
             className={styles.switcherItem}
-            icon={business.slug === slug ? <Check weight='bold' aria-hidden /> : undefined}
+            icon={business.slug === slug ? <Check aria-hidden /> : undefined}
             onClick={() => {
               if (business.slug !== slug) router.push(`/manage/${business.slug}`)
             }}

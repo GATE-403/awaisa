@@ -18,6 +18,7 @@ import type {
   Branch,
   BranchInput,
   BulkReplyResult,
+  BusinessAttention,
   BusinessBilling,
   BusinessCard,
   BusinessDeleted,
@@ -583,6 +584,9 @@ const searchBusinesses = (query: string, signal?: AbortSignal) =>
 const getMyBusinesses = (signal?: AbortSignal) =>
   request<BusinessLink[]>('/me/businesses', { signal })
 
+const getBusinessesAttention = (signal?: AbortSignal) =>
+  request<BusinessAttention[]>('/me/businesses/attention', { signal })
+
 const checkSlug = (slug: string, signal?: AbortSignal) =>
   request<SlugCheck>(`/businesses/slug-available?${new URLSearchParams({ slug })}`, { signal })
 
@@ -594,7 +598,8 @@ const getManagedBusiness = (slug: string, signal?: AbortSignal) =>
 const updateBusiness = (slug: string, input: UpdateBusinessInput) =>
   send<BusinessProfile>('PATCH', manage(slug), input)
 
-const deleteBusiness = (slug: string) => send<BusinessDeleted>('DELETE', manage(slug))
+const deleteBusiness = (slug: string, confirmSlug: string) =>
+  send<BusinessDeleted>('DELETE', manage(slug), { confirmSlug })
 
 const setWorkingHours = (slug: string, days: WorkingDay[]) =>
   send<BusinessProfile>('PUT', `${manage(slug)}/hours`, days)
@@ -732,6 +737,8 @@ const getRecommendations = (
     interests?: string
     gender?: string
     budget?: number
+    /** What matters most: near, soon, rating or price. */
+    priority?: string
     visits?: string
     lat?: number
     lng?: number
@@ -1210,6 +1217,7 @@ export {
   getManagedBusiness,
   getSession,
   getMyBookings,
+  getBusinessesAttention,
   getMyBusinesses,
   getNextFree,
   likeFeedItem,

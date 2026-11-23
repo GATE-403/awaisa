@@ -34,6 +34,8 @@ const nextConfig: NextConfig = {
   ],
   output: 'standalone',
   outputFileTracingRoot: path.join(import.meta.dirname, '../../'),
+  // The story picture reads Inter from disk (images get no web fonts): ship it with the route.
+  outputFileTracingIncludes: { '/u/[id]/story': ['./assets/fonts/**'] },
   poweredByHeader: false,
   transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts'],
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],

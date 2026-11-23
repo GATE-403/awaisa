@@ -63,7 +63,7 @@ export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps
                     <span className={styles.service}>{place.businessName}</span>
                     <span className={styles.client}>{place.role || place.name}</span>
                   </span>
-                  <CaretRight weight='bold' aria-hidden />
+                  <CaretRight aria-hidden />
                 </NextLink>
               </li>
             ))}

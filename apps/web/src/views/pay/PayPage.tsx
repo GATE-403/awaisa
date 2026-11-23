@@ -263,12 +263,12 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                     />
                   }
                 >
-                  <LockSimple weight='fill' aria-hidden />
+                  <LockSimple aria-hidden />
                   {isChecking ? 'Проверяем оплату…' : `Оплатить ${formatPrice(payment.amount)}`}
                 </ButtonLink>
               ) : (
                 <Button size='lg' fullWidth onClick={handlePay} disabled={isPaying}>
-                  <LockSimple weight='fill' aria-hidden />
+                  <LockSimple aria-hidden />
                   {isPaying ? 'Оплачиваем…' : `Оплатить ${formatPrice(payment.amount)}`}
                 </Button>
               )}

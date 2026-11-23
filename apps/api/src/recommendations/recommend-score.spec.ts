@@ -3,6 +3,7 @@ import {
   type Candidate,
   computeAffinities,
   interestsOf,
+  type Priority,
   type Profile,
   rankCandidates,
   scoreCandidate,
@@ -74,9 +75,45 @@ describe('scoreCandidate', () => {
     const dear = scoreCandidate(candidate({ price: 3000 }), profile({ budget: 1000 }))
     expect(cheap?.score ?? 0).toBeGreaterThan(dear?.score ?? 0)
   })
+
+  it('«что важнее» decides between a near place and a better-rated one far away', () => {
+    const near = candidate({ serviceId: 'near', distanceKm: 0.5, rating: 4.3 })
+    const famous = candidate({ serviceId: 'famous', distanceKm: 9, rating: 4.9, reviews: 200 })
+    const score = (item: Candidate, priority: Priority | null) =>
+      scoreCandidate(item, profile({ priorities: priority ? [priority] : [] }))?.score ?? 0
+    expect(score(near, 'near')).toBeGreaterThan(score(famous, 'near'))
+    expect(score(famous, 'rating')).toBeGreaterThan(score(near, 'rating'))
+  })
+
+  it('several «что важнее» count together', () => {
+    const near = candidate({ serviceId: 'near', distanceKm: 0.5, freeInDays: 0 })
+    const both = scoreCandidate(near, profile({ priorities: ['near', 'soon'] }))?.score ?? 0
+    const one = scoreCandidate(near, profile({ priorities: ['near'] }))?.score ?? 0
+    expect(both).toBeGreaterThan(one)
+  })
+
+  it('«свободно сегодня» and «подешевле» weigh the free time and the price', () => {
+    const today = candidate({ serviceId: 'today', freeInDays: 0, price: 2000 })
+    const later = candidate({ serviceId: 'later', freeInDays: null, price: 800 })
+    const score = (item: Candidate, priority: Priority | null) =>
+      scoreCandidate(item, profile({ priorities: priority ? [priority] : [] }))?.score ?? 0
+    expect(score(today, 'soon') - score(later, 'soon')).toBeGreaterThan(
+      score(today, null) - score(later, null),
+    )
+    const cheap = candidate({ serviceId: 'cheap', price: 600 })
+    const dear = candidate({ serviceId: 'dear', price: 3500 })
+    expect(score(cheap, 'price') - score(dear, 'price')).toBeGreaterThan(
+      score(cheap, null) - score(dear, null) + 1,
+    )
+  })
 })
 
 describe('interestsOf', () => {
+  it('reads sugaring and waxing as hair removal', () => {
+    expect(interestsOf('Шугаринг ног')).toContain('waxing')
+    expect(interestsOf('Восковая депиляция')).toContain('waxing')
+  })
+
   it('reads brow colouring as brows, not hair colour', () => {
     expect(interestsOf('Окрашивание бровей')).toEqual(['brows'])
     expect(interestsOf('Окрашивание корней')).toEqual(['coloring'])

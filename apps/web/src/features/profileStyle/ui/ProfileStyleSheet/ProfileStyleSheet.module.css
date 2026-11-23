@@ -1,163 +1,141 @@
-/* A live preview of the profile head: the face on a soft wash of the chosen colour. */
-.preview {
+/* The form fills the sheet's body as its own column, with the body's spacing. */
+.form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: var(--space-5) var(--space-4) var(--space-4);
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(
-      90% 100% at 50% 0%,
-      color-mix(in srgb, var(--accent) 18%, transparent),
-      transparent 75%
-    ),
-    var(--color-sheet-surface);
-  text-align: center;
+  gap: var(--space-6);
 }
 
-.face[data-size] {
-  width: 72px;
-  height: 72px;
-  margin-bottom: var(--space-2);
-}
-
-.previewName {
-  font-size: var(--text-title3);
-  font-weight: var(--font-weight-semibold);
-}
-
-.previewStatus {
+.previewStatus,
+.previewAbout {
+  overflow-wrap: anywhere;
   font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
-.previewLevel {
-  color: color-mix(in srgb, var(--accent) 75%, var(--color-foreground));
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-}
-
-.accents {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  padding-inline: var(--space-1);
-}
-
-.accentOption {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  background: var(--accent);
-  cursor: pointer;
-}
-
-.accentOption:has(.input:checked) {
-  box-shadow:
-    0 0 0 2px var(--color-sheet),
-    0 0 0 4px var(--color-foreground);
-}
-
-.accentOption:has(.input:focus-visible) {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 4px;
-}
-
-.input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.check {
-  width: 18px;
-  height: 18px;
-  color: #fff;
-  opacity: 0;
-}
-
-.input:checked + .check {
-  opacity: 1;
-}
-
-/* Status emoji: a scrolling row of round keys, the chosen one on a ring. */
-.emojis {
-  display: flex;
-  gap: var(--space-1);
-  margin: 0 calc(-1 * var(--space-4));
-  padding: var(--space-1) var(--space-4);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.emojis::-webkit-scrollbar {
-  display: none;
-}
-
-.emojiOption {
-  position: relative;
-  display: grid;
-  flex-shrink: 0;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  background: var(--color-sheet-surface);
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.emojiOption[data-none] {
+/* A long «о себе» shows two lines here; the field below holds the whole of it. */
+.previewAbout {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: var(--space-1);
   color: var(--color-muted-foreground);
-  font-size: var(--text-body);
-}
-
-.emojiOption:has(.input:checked) {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
-}
-
-.emojiOption:has(.input:focus-visible) {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .previewLevel {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  color: color-mix(in srgb, var(--accent) 75%, var(--color-foreground));
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
 }
 
 .previewBadge {
   font-size: 15px;
 }
 
-.previewAbout {
-  max-width: 300px;
-  margin-top: var(--space-1);
-  font-size: var(--text-footnote);
-  line-height: 1.35;
+/* The cabinet's sheet look («нужен дизайн из админки»): rows right on the sheet, a thin glyph
+   before each label, the control on the right, hairlines between the rows of a group. */
+.group {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
-/* «О себе»: a borderless note inside the group, like the booking comment. */
+.row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--row-height);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+}
+
+.row + .row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(24px + var(--space-3));
+  border-top: 0.5px solid var(--color-border);
+}
+
+.rowTop {
+  align-items: flex-start;
+  padding-top: var(--space-3);
+}
+
+.glyph {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 24px;
+  height: 22px;
+  color: var(--color-muted-foreground);
+  font-size: 18px;
+}
+
+.glyph svg {
+  width: 22px;
+  height: 22px;
+}
+
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* A field without a label takes the row; one beside a label keeps to the right. */
+.field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.field :global(input[data-variant="plain"]) {
+  text-align: left;
+}
+
+.value {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
 .about {
   display: block;
-  width: 100%;
-  min-height: 84px;
-  padding: var(--space-3) var(--space-4);
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 60px;
+  padding: 0 0 var(--space-3);
   border: none;
   background: transparent;
   color: var(--color-foreground);
   font: inherit;
   font-size: var(--text-input);
   line-height: 1.4;
+  overflow-wrap: anywhere;
   resize: none;
+  /* Grows with what is written instead of scrolling inside two lines. */
+  field-sizing: content;
 }
 
 .about::placeholder {
@@ -169,91 +147,68 @@
   box-shadow: none;
 }
 
-/* The showcase: earned achievements as capsules; the chosen ones lit in the profile's colour. */
-.showcase {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.showcaseChip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: 36px;
-  padding: 0 var(--space-3);
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-sheet-surface);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  cursor: pointer;
-}
-
-.showcaseChip[aria-pressed="true"] {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.showcaseChip:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
-/* «Мой мастер»: faces in a row, the chosen one on a ring. */
-.masters {
-  display: flex;
-  gap: var(--space-3);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.masters::-webkit-scrollbar {
-  display: none;
-}
-
-.masterOption {
-  position: relative;
-  display: flex;
+/* What is left of a field's length, in the corner of its row once it gets close. */
+.counter {
   flex-shrink: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  width: 60px;
-  padding-top: 3px;
-  cursor: pointer;
-}
-
-.masterOption > :nth-child(2) {
-  border-radius: var(--radius-full);
-}
-
-.masterOption:has(.input:checked) > :nth-child(2) {
-  box-shadow:
-    0 0 0 2px var(--color-sheet),
-    0 0 0 4px var(--color-primary);
-}
-
-.masterNone {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  background: var(--color-sheet-surface);
   color: var(--color-muted-foreground);
-}
-
-.masterName {
-  overflow: hidden;
-  max-width: 100%;
-  font-size: var(--text-xs);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: var(--text-footnote);
+  font-variant-numeric: tabular-nums;
 }
 
 .addressPrefix {
   flex-shrink: 0;
   color: var(--color-muted-foreground);
+  font-size: var(--text-input);
+}
+
+/* «Витрина»'s menu button reads like a plain Select: the value and the up-down caret. */
+.menuTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-muted-foreground);
+  font: inherit;
   font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.menuTrigger svg {
+  width: 14px;
+  height: 14px;
+}
+
+.menuTrigger:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+.menuValue {
+  white-space: nowrap;
+}
+
+/* A row with a plain Select or the showcase menu opens from anywhere on it, like Settings («поля
+   полностью должны быть кликабельны»): the trigger's ::before stretches over the row. */
+.row:has(button[data-variant="plain"], .menuTrigger) {
+  cursor: pointer;
+}
+
+.row button[data-variant="plain"]::before,
+.row .menuTrigger::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* A field row puts the caret in its field from anywhere on it: the row is its label. */
+label.row {
+  cursor: text;
+}
+
+label.row:has(button[role="switch"]) {
+  cursor: pointer;
 }

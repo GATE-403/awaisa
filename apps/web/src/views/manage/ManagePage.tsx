@@ -152,7 +152,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                       className={styles.backLink}
                       aria-label={t('Назад к настройкам')}
                     >
-                      <CaretLeft weight='bold' aria-hidden />
+                      <CaretLeft aria-hidden />
                       {t('Назад')}
                     </NextLink>
                     <h2 className={styles.backTitle}>

@@ -23,14 +23,21 @@ type Interest =
   | 'face'
   | 'tattoo'
   | 'health'
+  | 'waxing'
 
 type Gender = 'male' | 'female'
+
+/** What matters most when choosing («Что важнее при выборе», one or several): each counts twice. */
+const PRIORITIES = ['near', 'soon', 'rating', 'price'] as const
+type Priority = (typeof PRIORITIES)[number]
 
 type Profile = {
   interests: Interest[]
   gender: Gender | null
   /** The most a visit should cost, сом; null = any. */
   budget: number | null
+  /** What matters most when choosing (one or several); empty = nothing in particular. */
+  priorities?: Priority[]
   /** Past visits: service, place, when (from the device and the account). */
   visits: { serviceId: string; slug: string; serviceName: string; daysAgo: number }[]
   /** The service being chosen right now (the booking form): picks follow it before anything. */
@@ -78,6 +85,7 @@ const INTEREST_WORDS: Record<Interest, string[]> = {
   face: ['лиц', 'чистк', 'пилинг', 'косметолог', 'макияж', 'уход'],
   tattoo: ['тату', 'пирсинг', 'эскиз'],
   health: ['консульт', 'кинезио', 'физио', 'мануал', 'реабил', 'осмотр'],
+  waxing: ['шугар', 'депиляц', 'эпиляц', 'воск'],
 }
 
 /** The reason on a card for a stated interest: short enough for the card's capsule. */
@@ -91,6 +99,7 @@ const INTEREST_LABEL: Record<Interest, string> = {
   face: 'Ваш выбор · лицо',
   tattoo: 'Ваш выбор · тату',
   health: 'Ваш выбор · здоровье',
+  waxing: 'Ваш выбор · депиляция',
 }
 
 const normalize = (value: string) => value.toLowerCase().replace(/ё/g, 'е')
@@ -123,6 +132,7 @@ const INTEREST_WITH: Record<Interest, string> = {
   face: 'с уходом за лицом',
   tattoo: 'с тату',
   health: 'с консультацией',
+  waxing: 'с депиляцией',
 }
 
 /** Who a service is for, when its name says so: «Маникюр» leans female, «Борода» male. */
@@ -279,27 +289,36 @@ const scoreCandidate = (
     else if (candidate.price > profile.budget * 1.3) parts.push({ value: -2.5, reason: '' })
   }
 
+  // Each of the client's «что важнее» counts its part twice; the others stay as they are.
+  const priorities = profile.priorities ?? []
+  const weight = (key: Priority) => (priorities.includes(key) ? 2 : 1)
+
   if (candidate.distanceKm !== null) {
     const near = 1 - Math.min(candidate.distanceKm, 10) / 10
     parts.push({
-      value: near * 2.5,
+      value: near * 2.5 * weight('near'),
       reason: near > 0.6 ? `Рядом · ${formatKm(candidate.distanceKm)}` : '',
     })
   }
 
   if (candidate.freeInDays === 0) {
-    parts.push({ value: 1.5, reason: `Сегодня с ${candidate.freeTime}` })
+    parts.push({ value: 1.5 * weight('soon'), reason: `Сегодня с ${candidate.freeTime}` })
   } else if (candidate.freeInDays === 1) {
-    parts.push({ value: 0.8, reason: `Завтра с ${candidate.freeTime}` })
+    parts.push({ value: 0.8 * weight('soon'), reason: `Завтра с ${candidate.freeTime}` })
   } else {
-    parts.push({ value: -1, reason: '' })
+    parts.push({ value: -1 * weight('soon'), reason: '' })
   }
 
   const rating = trustedRating(candidate.rating, candidate.reviews)
   parts.push({
-    value: (rating - 4) * 2,
+    value: (rating - 4) * 2 * weight('rating'),
     reason: rating >= 4.6 ? `Рейтинг ${rating.toFixed(1).replace('.', ',')}` : '',
   })
+
+  // «Подешевле»: the cheaper, the more it adds (nothing from 5 000 сом up).
+  if (priorities.includes('price')) {
+    parts.push({ value: 2 * (1 - Math.min(candidate.price, 5000) / 5000), reason: '' })
+  }
   parts.push({
     value: Math.log1p(candidate.bookings30d) * 0.4,
     reason: candidate.bookings30d >= 20 ? 'Часто выбирают' : '',
@@ -445,13 +464,14 @@ const computeAffinities = (
     .filter((pair) => pair.support >= MIN_SUPPORT)
 }
 
-export type { Affinities, Algorithm, Candidate, Gender, Interest, Profile }
+export type { Affinities, Algorithm, Candidate, Gender, Interest, Priority, Profile }
 export {
   ALGORITHM,
   ALGORITHMS,
   computeAffinities,
   INTERESTS,
   interestsOf,
+  PRIORITIES,
   rankCandidates,
   scoreCandidate,
   trustedRating,

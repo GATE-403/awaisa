@@ -260,6 +260,7 @@ export class RecommendationsService implements OnApplicationBootstrap {
       interests: query.interests as Interest[],
       gender: query.gender ?? null,
       budget: query.budget ?? null,
+      priorities: query.priority,
       visits,
       focus: focus ? toRef(focus) : null,
       recent,

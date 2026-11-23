@@ -181,7 +181,7 @@ const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
 
 const StateGlyph = ({ label }: { label: string }) => {
   const Glyph = STATE_GLYPHS[label]
-  return Glyph ? <Glyph weight='bold' aria-hidden /> : null
+  return Glyph ? <Glyph aria-hidden /> : null
 }
 
 // Room left under the day before the window's foot.
@@ -932,10 +932,10 @@ export const DayCalendar = ({
     const count = t(where, { count: t.count(visits.length, ['запись', 'записи', 'записей']) })
     const content = (
       <>
-        {side === 'before' && <Lead weight='bold' aria-hidden />}
+        {side === 'before' && <Lead aria-hidden />}
         <span className={styles.edgeTime}>{nearest.booking.time}</span>
         {more > 0 && <span className={styles.edgeMore}>+{more}</span>}
-        {side === 'after' && <Trail weight='bold' aria-hidden />}
+        {side === 'after' && <Trail aria-hidden />}
       </>
     )
     return (
@@ -1090,7 +1090,7 @@ export const DayCalendar = ({
             disabled={zoom <= MIN_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom / 1.5))}
           >
-            <Minus weight='bold' aria-hidden />
+            <Minus aria-hidden />
           </button>
           <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
           <button
@@ -1099,7 +1099,7 @@ export const DayCalendar = ({
             disabled={zoom >= MAX_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom * 1.5))}
           >
-            <Plus weight='bold' aria-hidden />
+            <Plus aria-hidden />
           </button>
         </div>
       )}
@@ -1111,11 +1111,11 @@ export const DayCalendar = ({
           data-layout={layout}
           onClick={scrollToNow}
         >
-          {isTimeline && nowSide === 'before' && <ArrowLeft weight='bold' aria-hidden />}
-          {!isTimeline && nowSide === 'before' && <ArrowUp weight='bold' aria-hidden />}
+          {isTimeline && nowSide === 'before' && <ArrowLeft aria-hidden />}
+          {!isTimeline && nowSide === 'before' && <ArrowUp aria-hidden />}
           {t('Сейчас')} {formatClock(nowMinutes)}
-          {isTimeline && nowSide === 'after' && <ArrowRight weight='bold' aria-hidden />}
-          {!isTimeline && nowSide === 'after' && <ArrowDown weight='bold' aria-hidden />}
+          {isTimeline && nowSide === 'after' && <ArrowRight aria-hidden />}
+          {!isTimeline && nowSide === 'after' && <ArrowDown aria-hidden />}
         </button>
       )}
       <div
@@ -1243,7 +1243,7 @@ export const DayCalendar = ({
                       style={place(gap.from, gap.to)}
                       onClick={() => onCreateBooking(specialist.id, formatClock(gap.from))}
                     >
-                      <Plus weight='bold' aria-hidden />
+                      <Plus aria-hidden />
                       {formatClock(gap.from)}–{formatClock(gap.to)}
                       <span className={styles.srOnlyText}>
                         : {t('записать к мастеру {name}', { name: specialist.name })}
@@ -1274,7 +1274,7 @@ export const DayCalendar = ({
                         {/* A time cursor, not a card: a thin line in the master's colour where the
                         visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
                         <span className={styles.ghostChip}>
-                          <Plus weight='bold' aria-hidden />
+                          <Plus aria-hidden />
                           {formatClock(hovered)}
                           {isTimeline && (
                             <span className={styles.ghostChipWho}>
@@ -1349,7 +1349,7 @@ export const DayCalendar = ({
                         <span className={styles.laneNoteLong}> {t('весь день')}</span>
                       </span>
                       <span className={styles.laneBook}>
-                        <Plus weight='bold' aria-hidden />
+                        <Plus aria-hidden />
                         {/* «Записать» is «record» elsewhere in the cabinet: booking has its own key. */}
                         {t.language === 'ru' ? 'Записать' : t('Записать (клиента)')}
                       </span>
@@ -1395,7 +1395,7 @@ export const DayCalendar = ({
                         })}
                         onClick={() => onRemoveTimeOff(item.id)}
                       >
-                        <X weight='bold' aria-hidden />
+                        <X aria-hidden />
                       </button>
                     </div>
                   ))}
@@ -1468,7 +1468,7 @@ export const DayCalendar = ({
                           title={t('Пришёл')}
                           onClick={() => onMarkArrived(booking)}
                         >
-                          <Check weight='bold' aria-hidden />
+                          <Check aria-hidden />
                           <span className={styles.markLabel}>{t('Пришёл')}</span>
                         </button>
                         <button
@@ -1478,7 +1478,7 @@ export const DayCalendar = ({
                           title={t('Не пришёл')}
                           onClick={() => onMarkNoShow(booking)}
                         >
-                          <X weight='bold' aria-hidden />
+                          <X aria-hidden />
                           <span className={styles.markLabel}>{t('Не пришёл')}</span>
                         </button>
                       </fieldset>

@@ -112,7 +112,7 @@
 .placeholder {
   aspect-ratio: 3 / 4;
   height: auto;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
 }
 
 .loadingNote {

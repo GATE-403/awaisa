@@ -85,7 +85,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
             <span className={styles.wasTime}>{booking.time}</span>
             <span className={styles.date}>{t.dayShort(booking.date)}</span>
           </span>
-          <ArrowRight weight='bold' aria-hidden className={styles.arrow} />
+          <ArrowRight aria-hidden className={styles.arrow} />
           <span className={styles.will} data-empty={!time || undefined}>
             <span className={styles.caption}>{t('Станет')}</span>
             <span className={styles.willTime}>{time ?? '—:—'}</span>

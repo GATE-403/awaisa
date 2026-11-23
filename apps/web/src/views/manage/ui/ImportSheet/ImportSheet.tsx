@@ -167,7 +167,7 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
                   ? `${fileName} · ${t.count(data.length, ['строка', 'строки', 'строк'])}`
                   : t('Выбрать файл CSV')}
               </span>
-              <FileArrowUp weight='bold' aria-hidden className={sheet.suffix} />
+              <FileArrowUp aria-hidden className={sheet.suffix} />
             </button>
             <input
               ref={fileInput}

@@ -8,6 +8,7 @@ import {
   CreditCard,
   DotsThree,
   MapPin,
+  Phone,
   XCircle,
 } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
@@ -34,16 +35,23 @@ interface UpcomingBookingProps {
   isCancelling: boolean
   onCancel: () => void
   onMoved: (booking: Booking) => void
+  /**
+   * `next` — the nearest visit, large, its everyday actions in plain sight (route, call, move);
+   * `row` — a later visit, one quiet line, every action behind «⋯».
+   */
+  variant?: 'next' | 'row'
 }
 
-// Upcoming visits as compact passes, not full tickets: the list stays short; the ticket with
-// every detail opens on tap, rarer actions wait in the «⋯» pull-down menu.
+// Upcoming visits as passes, not full tickets: the ticket with every detail opens on tap. The
+// nearest visit is large with its everyday actions in plain sight (route, call, move); later ones
+// are one quiet row each, their actions in «⋯» («профиль должен быть самой удобной частью»).
 export const UpcomingBooking = ({
   booking,
   countdown,
   isCancelling,
   onCancel,
   onMoved,
+  variant = 'next',
 }: UpcomingBookingProps) => {
   const t = useT()
   const [isMoving, setIsMoving] = useState(false)
@@ -53,6 +61,14 @@ export const UpcomingBooking = ({
   const code = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase()
   const isAwaitingPayment = booking.status === 'confirmed' && booking.payment?.status === 'pending'
   const toast = useToast()
+  const isRow = variant === 'row'
+  const isConfirmed = booking.status === 'confirmed'
+  const phone = booking.business.phone
+  const openMap = () => window.open(booking.business.mapUrl ?? '', '_blank', 'noreferrer')
+  const startMoving = () => {
+    setIsMoving(true)
+    trackStep('reschedule_open', booking.business.slug)
+  }
 
   // The slot is held until the deposit is paid: back to the same checkout.
   const handlePay = async () => {
@@ -75,6 +91,7 @@ export const UpcomingBooking = ({
       <article
         className={styles.card}
         data-status={booking.status}
+        data-variant={variant}
         aria-label={t('Запись {code}', { code })}
       >
         <button
@@ -106,20 +123,27 @@ export const UpcomingBooking = ({
             {booking.specialistName} · {booking.business.name}
           </span>
         </span>
-        <Menu
-          label={t('Ещё')}
-          className={styles.more}
-          trigger={<DotsThree weight='bold' aria-hidden />}
-        >
-          {booking.business.mapUrl && (
-            <MenuItem
-              icon={<MapPin aria-hidden />}
-              onClick={() => window.open(booking.business.mapUrl ?? '', '_blank', 'noreferrer')}
-            >
+        <Menu label={t('Ещё')} className={styles.more} trigger={<DotsThree aria-hidden />}>
+          {/* A later visit keeps all its actions here; the nearest one shows the everyday ones. */}
+          {isRow && isConfirmed && !isAwaitingPayment && (
+            <MenuItem icon={<ArrowsClockwise aria-hidden />} onClick={startMoving}>
+              {t('Перенести')}
+            </MenuItem>
+          )}
+          {isRow && booking.business.mapUrl && (
+            <MenuItem icon={<MapPin aria-hidden />} onClick={openMap}>
               {t('Маршрут')}
             </MenuItem>
           )}
-          {booking.status === 'confirmed' && (
+          {isConfirmed && !isAwaitingPayment && (
+            <MenuItem
+              icon={<CalendarPlus aria-hidden />}
+              onClick={() => downloadCalendarFile(booking, booking.business)}
+            >
+              {t('В календарь')}
+            </MenuItem>
+          )}
+          {isConfirmed && (
             <MenuItem
               variant='danger'
               icon={<XCircle aria-hidden />}
@@ -130,34 +154,31 @@ export const UpcomingBooking = ({
             </MenuItem>
           )}
         </Menu>
-        {booking.status === 'confirmed' && (
+        {isConfirmed && (isAwaitingPayment || !isRow) && (
           <span className={styles.links}>
             {/* Unpaid: the one thing to do is pay; moving and the calendar wait for it. */}
             {isAwaitingPayment ? (
               <button type='button' className={styles.link} onClick={() => void handlePay()}>
-                <CreditCard weight='bold' aria-hidden />
+                <CreditCard aria-hidden />
                 {t('Оплатить {amount}', { amount: formatPrice(booking.payment?.amount ?? 0) })}
               </button>
             ) : (
               <>
-                <button
-                  type='button'
-                  className={styles.link}
-                  onClick={() => {
-                    setIsMoving(true)
-                    trackStep('reschedule_open', booking.business.slug)
-                  }}
-                >
-                  <ArrowsClockwise weight='bold' aria-hidden />
+                {booking.business.mapUrl && (
+                  <button type='button' className={styles.link} onClick={openMap}>
+                    <MapPin aria-hidden />
+                    {t('Маршрут')}
+                  </button>
+                )}
+                {phone && (
+                  <a className={styles.link} href={`tel:${phone}`}>
+                    <Phone aria-hidden />
+                    {t('Позвонить')}
+                  </a>
+                )}
+                <button type='button' className={styles.link} onClick={startMoving}>
+                  <ArrowsClockwise aria-hidden />
                   {t('Перенести')}
-                </button>
-                <button
-                  type='button'
-                  className={styles.link}
-                  onClick={() => downloadCalendarFile(booking, booking.business)}
-                >
-                  <CalendarPlus weight='bold' aria-hidden />
-                  {t('В календарь')}
                 </button>
               </>
             )}

@@ -3,7 +3,44 @@
 }
 
 .page > .content {
-  padding-top: var(--space-4);
+  padding-top: 0;
+}
+
+/* The head: the title and today's line on the left, the search on the same line on the right
+   («можно в одну линию»). */
+.head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  /* Right on the page, no colour behind it: a glow, a pattern of mascots and a live mascot were
+     all rejected here («убери цвета», «убери маскота»). */
+  padding-top: var(--space-8);
+}
+
+.headText {
+  position: relative;
+}
+
+/* The page title's own air above it is the band's padding here, so it sits level with the search. */
+.headText > :first-child {
+  padding-top: 0;
+}
+
+/* With a mouse the search sits in the head (on phones it floats instead). */
+@media (min-width: 640px) {
+  .head > .search {
+    position: relative;
+    flex-shrink: 0;
+  }
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
 .content {
@@ -17,13 +54,10 @@
   border-radius: var(--radius-2xl);
 }
 
+/* Rows right on the page with hairlines, like the cabinet's sections («убери лишние обёртки»). */
 .list {
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
   list-style: none;
 }
 
@@ -36,7 +70,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: calc(44px + var(--space-4) + var(--space-3));
+  left: calc(44px + var(--space-3));
   height: 0.5px;
   background: var(--color-border);
 }
@@ -46,7 +80,7 @@
   align-items: center;
   gap: var(--space-3);
   min-height: 52px;
-  padding: var(--space-1) var(--space-4);
+  padding: var(--space-1) 0;
   color: var(--color-link);
   font-size: var(--text-body);
   font-weight: var(--font-weight-medium);
@@ -66,8 +100,61 @@
   height: 20px;
 }
 
-@media (hover: hover) {
-  .addRow:hover {
-    background: var(--color-fill);
+/* The tabs (a platform admin's «Мои · Все») and the search on one line with a mouse. */
+.search {
+  width: min(100%, 280px);
+  margin-left: auto;
+}
+
+/* Phones: the search floats across the window's foot (16pt in), as in «Настройки». */
+@media (max-width: 639px) {
+  .search.search {
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+    max-width: none;
+  }
+
+  .search > * {
+    flex: 1;
+  }
+
+  /* Room for the floating search at the foot. */
+  .page {
+    padding-bottom: var(--floating-toolbar-space, var(--section-gap));
+  }
+}
+
+/* «Сегодня 23 визита · 31 200 сом · ближайший в 14:30, Борода»: one footnote line under the title,
+   the figures bold in the label colour. */
+.summary {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.summary strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Motion («до сих пор не хватает динамики»): the rows rise in one after another on the page's
+   first draw, 40ms apart; transform and opacity only, nothing under reduced motion. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.item {
+  animation: rise-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    animation: none;
   }
 }

@@ -37,7 +37,7 @@
   aspect-ratio: 3 / 4;
   overflow: clip;
   isolation: isolate;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
   background: var(--tint);
   box-shadow: var(--shadow-sm);
   color: #fff;

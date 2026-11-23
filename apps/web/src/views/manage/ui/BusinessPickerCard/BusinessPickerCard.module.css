@@ -1,40 +1,16 @@
+/* A Settings row right on the page (no card): the picture, two lines, today and a chevron. */
 .row {
   position: relative;
   display: flex;
-  align-items: stretch;
-}
-
-.main {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto 12px;
-  flex: 1;
   align-items: center;
   gap: var(--space-3);
-  min-width: 0;
   min-height: 64px;
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
-  color: inherit;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-}
-
-.main:active {
-  background: var(--color-fill);
-}
-
-@media (hover: hover) {
-  .main:hover {
-    background: var(--color-fill);
-  }
-}
-
-.main:focus-visible,
-.page:focus-visible {
-  outline: none;
-  box-shadow: inset var(--focus-ring);
+  padding: var(--space-3) 0;
 }
 
 .thumb {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -51,14 +27,14 @@
 
 .text {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 0;
   min-width: 0;
 }
 
 .name {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-2);
   min-width: 0;
   font-size: var(--text-body);
@@ -66,36 +42,48 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* One line: a long name ends in an ellipsis before the status rather than wrapping the row. */
-.nameText {
+/* The cabinet link, stretched over the row; a long name ends in an ellipsis. */
+.main {
   overflow: hidden;
+  color: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.status {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.status::before {
+.main::after {
   content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--color-success);
+  position: absolute;
+  inset: 0;
 }
 
-.status[data-hidden]::before {
-  background: var(--color-tertiary-foreground);
+.main:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
-.meta,
+.main:focus-visible::after {
+  border-radius: var(--radius-md);
+  box-shadow: var(--focus-ring);
+}
+
+/* Pressed, or the name in the link colour under a mouse: no fill that crosses the hairlines. */
+.row:has(.main:active) {
+  opacity: 0.6;
+}
+
+@media (hover: hover) {
+  .row:has(.main:hover) .main {
+    color: var(--color-link);
+  }
+}
+
+.hidden {
+  flex-shrink: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
 .next {
   overflow: hidden;
   color: var(--color-muted-foreground);
@@ -105,21 +93,154 @@
   white-space: nowrap;
 }
 
-.next {
+/* What waits: a quiet footnote like the next visit, only the glyph in orange («жёлтый жирный
+   цвет забирает много внимания»). Each item is a link over the row's own. */
+.attention {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-3);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.attentionGlyph {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+}
+
+/* «▰▰▱ Запуск 2 из 3 · Добавьте мастеров»: a link over the row's own. Every link in the row reads
+   the same: the quiet footnote colour with a thin underline («иконки и текст одним цветом, если
+   кликабельны — добавь линии»); the link colour under a mouse. */
+.statusLink,
+.attentionLink {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-muted-foreground);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-decoration-thickness: 0.5px;
+  text-underline-offset: 3px;
+}
+
+.statusLink {
+  align-self: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+@media (hover: hover) {
+  .statusLink:hover,
+  .attentionLink:hover {
+    color: var(--color-link);
+  }
+}
+
+/* Three thin segments, the done ones filling in from the left as the row appears. */
+.steps {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
+.stepSegment {
+  position: relative;
+  width: 10px;
+  height: 2px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, currentColor 30%, transparent);
+}
+
+.stepSegment[data-done]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  transform-origin: left;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @starting-style {
+    transform: scaleX(0);
+  }
+}
+
+.next strong {
   color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* The week's direction: a small arrow in green or red after the figures. */
+.trendUp,
+.trendDown {
+  width: 13px;
+  height: 13px;
+  margin-left: var(--space-1);
+  vertical-align: -2px;
+}
+
+.trendUp {
+  color: var(--color-success);
+}
+
+.trendDown {
+  color: var(--color-danger);
+}
+
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* A thin copy glyph over the row's link, with an invisible 44pt target. */
+.copy {
+  position: relative;
+  z-index: 1;
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-link);
+  cursor: pointer;
+}
+
+.copy::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+.copy svg {
+  width: 15px;
+  height: 15px;
 }
 
 .today {
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
   align-items: flex-end;
   min-width: 40px;
 }
 
 .todayCount {
-  font-size: var(--text-xl);
+  font-size: var(--text-title3);
   line-height: 1.1;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-semibold);
   letter-spacing: var(--tracking-tight);
   font-variant-numeric: tabular-nums;
 }
@@ -130,31 +251,52 @@
   letter-spacing: var(--tracking-caption);
 }
 
+/* A thin track under «сегодня», filled to the day's load; full reads as the accent. */
+.load {
+  position: relative;
+  width: 40px;
+  height: 2px;
+  margin-top: var(--space-1);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+.load::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transform: scaleX(var(--load));
+  transform-origin: left;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Grows from empty as the row appears, and glides when the minute's refresh moves it. */
+  @starting-style {
+    transform: scaleX(0);
+  }
+}
+
 .chevron {
+  flex-shrink: 0;
   width: 12px;
   height: 12px;
   color: var(--color-tertiary-foreground);
 }
 
-/* «Страница ↗» as a trailing accessory with its own hairline, like a detail button. */
+/* «↗» to the public page: with a mouse only, shown on the row under the pointer. */
 .page {
   position: relative;
-  display: flex;
+  z-index: 1;
+  display: none;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
   color: var(--color-link);
-}
-
-.page::before {
-  content: "";
-  position: absolute;
-  top: var(--space-3);
-  bottom: var(--space-3);
-  left: 0;
-  width: 0.5px;
-  background: var(--color-border);
 }
 
 .page svg {
@@ -162,24 +304,26 @@
   height: 18px;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
+  .page {
+    display: flex;
+    opacity: 0;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+  }
+
+  .row:hover .page,
+  .page:focus-visible {
+    opacity: 1;
+  }
+
   .page:hover {
     background: var(--color-fill);
   }
 }
 
-/* Phones: the dot alone says it (the word stays for screen readers), so the name has room. */
-@media (max-width: 639px) {
-  .status {
-    position: relative;
-  }
-
-  .statusText {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+@media (prefers-reduced-motion: reduce) {
+  .load::before,
+  .stepSegment[data-done]::before {
+    transition: none;
   }
 }

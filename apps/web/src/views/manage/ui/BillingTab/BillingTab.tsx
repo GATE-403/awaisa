@@ -193,29 +193,36 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
       </section>
 
       {isPayable && paidPlan && price && (
-        <section className={sheet.group} aria-label={t('Оплатить')}>
-          <SectionCaption>{t('Оплатить «{plan}»', { plan: paidPlan.title })}</SectionCaption>
-          <SegmentedControl<Period>
-            label={t('Срок')}
-            size='sm'
-            value={period}
-            onChange={setPeriod}
-            items={[
-              { value: '1', label: t('Месяц') },
-              { value: '12', label: t('Год') },
-            ]}
-          />
-          <RowNote>
-            {t('{price} в месяц за {masters}, ещё {extra} за каждого следующего.', {
-              price: formatPrice(t, paidPlan.monthlyPrice),
-              masters: t.count(paidPlan.includedMasters, ['мастера', 'мастеров', 'мастеров']),
-              extra: formatPrice(t, paidPlan.extraMasterPrice),
-            })}
-            {period === '12' && ` ${t('Год по цене десяти месяцев.')}`}
-            {access.endsAt &&
-              access.status !== 'expired' &&
-              ` ${t('Продлится после {day}.', { day: formatDay(t, access.endsAt) })}`}
-          </RowNote>
+        // An offer, not a form: the plan and its price large on a soft wash of the accent, the
+        // period beside it, one button («совсем плохой дизайн надо переделать»: a full-width
+        // switch over a sentence and a full-width button read as a wall).
+        <section className={own.offer} aria-label={t('Оплатить')}>
+          <div className={own.offerHead}>
+            <div className={own.offerTitle}>
+              <h3 className={own.planName}>{paidPlan.title}</h3>
+              <p className={own.offerMeta}>
+                {t('{masters} включено, ещё {extra} за каждого', {
+                  masters: t.count(paidPlan.includedMasters, ['мастер', 'мастера', 'мастеров']),
+                  extra: formatPrice(t, paidPlan.extraMasterPrice),
+                })}
+              </p>
+            </div>
+            <SegmentedControl<Period>
+              label={t('Срок')}
+              size='sm'
+              value={period}
+              onChange={setPeriod}
+              items={[
+                { value: '1', label: t('Месяц') },
+                { value: '12', label: t('Год') },
+              ]}
+            />
+          </div>
+          <p className={own.price}>
+            <span className={own.amount}>{formatPrice(t, price.amount)}</span>
+            <span className={own.per}>{period === '12' ? t('в год') : t('в месяц')}</span>
+            {period === '12' && <span className={own.gift}>{t('2 месяца в подарок')}</span>}
+          </p>
           {billing.isPaymentAvailable ? (
             <Button
               className={own.pay}
@@ -228,7 +235,14 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               {t('Оплатить {amount}', { amount: formatPrice(t, price.amount) })}
             </Button>
           ) : (
-            <RowNote>{t('Онлайн-оплата пока недоступна: напишите нам, продлим вручную.')}</RowNote>
+            <p className={own.offerMeta}>
+              {t('Онлайн-оплата пока недоступна: напишите нам, продлим вручную.')}
+            </p>
+          )}
+          {access.endsAt && access.status !== 'expired' && (
+            <p className={own.offerMeta}>
+              {t('Продлится после {day}.', { day: formatDay(t, access.endsAt) })}
+            </p>
           )}
         </section>
       )}
@@ -252,7 +266,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               </span>
               <span className={styles.cellValue}>{planPrice(t, plan)}</span>
               {plan.key === access.planKey ? (
-                <Check className={own.check} weight='bold' aria-label={t('Ваш тариф')} />
+                <Check className={own.check} aria-label={t('Ваш тариф')} />
               ) : (
                 <span className={own.check} />
               )}
@@ -276,7 +290,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
                   <span className={own.packTitle}>{pack.size} SMS</span>
                   <span className={sheet.rowControl}>
                     <span className={styles.cellValue}>{formatPrice(t, pack.price)}</span>
-                    <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                    <CaretRight className={styles.chevron} aria-hidden />
                   </span>
                 </button>
               </li>
@@ -314,7 +328,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               trigger={
                 <>
                   <span>{t('Продлить вручную')}</span>
-                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                  <CaretRight className={styles.chevron} aria-hidden />
                 </>
               }
             >

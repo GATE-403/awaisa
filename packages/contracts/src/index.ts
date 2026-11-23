@@ -174,6 +174,26 @@ type BusinessLink = Pick<
   next: { date: string; time: string } | null
 }
 
+// `GET /me/businesses/attention`: what waits in each business for «Мои бизнесы» (zero: nothing)
+// and how today goes there.
+type BusinessAttention = {
+  slug: string
+  /** Ended visits of the last 30 days nobody marked «Пришёл» or «Не пришёл». */
+  unmarkedVisits: number
+  /** Reviews of the last 30 days without a reply and not marked «Решено». */
+  unansweredReviews: number
+  /** Fiscal receipts the provider refused (always 0 for administrators). */
+  failedReceipts: number
+  /** What today's visits bring, in som (no-shows left out); null for administrators. */
+  todayRevenue: number | null
+  /** Booked minutes over open minutes × active masters today, 0–1; null on a day off. */
+  todayLoad: number | null
+  /** «Запуск записи»: steps done of the three and the first one left (null: bookable). */
+  setup: { done: number; total: number; next: 'services' | 'masters' | 'hours' | null }
+  /** The last seven days and the seven before: devices that opened the page, online bookings. */
+  week: { views: number; previousViews: number; bookings: number; previousBookings: number }
+}
+
 type BookingBusiness = Pick<Business, 'slug' | 'name' | 'address' | 'phone' | 'mapUrl'>
 
 type Catalog = {
@@ -351,7 +371,21 @@ type PublicProfile = {
   achievements: (ProfileBadge & {
     earned: boolean
     progress: { current: number; target: number }
+    /** When it was reached; null when not yet, or unknown (friends). */
+    earnedAt?: string | null
   })[]
+  /** The last twelve months of visits, oldest first («2026-11»); `items` empty when places are private. */
+  activity?: {
+    month: string
+    visits: number
+    items: {
+      date: string
+      slug: string
+      businessName: string
+      serviceName: string
+      masterName: string | null
+    }[]
+  }[]
   stats: {
     visits: number
     places: number
@@ -365,6 +399,10 @@ type PublicProfile = {
     logoUrl: string | null
     coverUrl: string | null
     visits: number
+    lastVisitAt?: string
+    /** Where the latest visit's branch is pinned. */
+    latitude?: number | null
+    longitude?: number | null
   }[]
   masters: {
     id: string
@@ -375,6 +413,9 @@ type PublicProfile = {
     businessName: string
     visits: number
     rank: Rank | null
+    lastVisitAt?: string
+    /** The service of the latest visit with them. */
+    serviceName?: string
   }[]
   reviews: {
     id: string
@@ -1548,6 +1589,8 @@ type ManagedWaitlistEntry = WaitlistEntry & {
 
 type JoinWaitlistInput = {
   serviceId: string
+  /** The visit's other services after the first; the day is full for the whole visit. */
+  extraServiceIds?: string[]
   specialistId: string
   branchId?: string
   date: string
@@ -2171,5 +2214,6 @@ export type {
   WaitlistEntry,
   AccountExport,
   AccountDeleted,
+  BusinessAttention,
   BusinessDeleted,
 }

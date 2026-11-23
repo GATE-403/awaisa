@@ -164,7 +164,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
                   <span className={styles.rowTitle}>{row.label}</span>
                 </span>
                 <span className={styles.cellValue}>{row.value}</span>
-                <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                <CaretRight className={styles.chevron} aria-hidden />
               </button>
             </li>
           ))}
@@ -199,7 +199,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
                     <span className={styles.rowMeta}>{receipt.error}</span>
                   </span>
                   <span className={styles.cellValue}>{formatPrice(receipt.total)}</span>
-                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                  <CaretRight className={styles.chevron} aria-hidden />
                 </button>
               </li>
             ))}

@@ -69,27 +69,16 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
 
   return (
     <div className={styles.actions}>
-      <Menu
-        label={t('Ещё')}
-        className={styles.roundButton}
-        trigger={<DotsThree weight='bold' aria-hidden />}
-      >
+      <Menu label={t('Ещё')} className={styles.roundButton} trigger={<DotsThree aria-hidden />}>
         {service && (
-          <MenuItem
-            icon={<ChatCircle weight='bold' aria-hidden />}
-            onClick={() => setIsReviewsOpen(true)}
-          >
+          <MenuItem icon={<ChatCircle aria-hidden />} onClick={() => setIsReviewsOpen(true)}>
             {`${t('Отзывы')}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
           </MenuItem>
         )}
-        <MenuItem icon={<ShareFat weight='bold' aria-hidden />} onClick={() => void share()}>
+        <MenuItem icon={<ShareFat aria-hidden />} onClick={() => void share()}>
           {t('Поделиться')}
         </MenuItem>
-        <MenuSubmenu
-          label={t('Пожаловаться')}
-          variant='danger'
-          icon={<Flag weight='bold' aria-hidden />}
-        >
+        <MenuSubmenu label={t('Пожаловаться')} variant='danger' icon={<Flag aria-hidden />}>
           <ReportReasons onPick={(reason) => void report(reason)} />
         </MenuSubmenu>
       </Menu>

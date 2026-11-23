@@ -54,6 +54,40 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.barEnd {
+  display: flex;
+  justify-self: end;
+  align-items: center;
+}
+
+/* A glyph capsule in the bar is the bar's size, not a toolbar's: at 44pt it crowded the title
+   («кнопки будто слишком большие что упираются под текст»). An invisible 44pt target stays. */
+.barEnd.barEnd :is(button, a) {
+  width: 34px;
+  height: 30px;
+}
+
+.barEnd.barEnd :is(button, a) svg {
+  width: 18px;
+  height: 18px;
+}
+
+.barEnd.barEnd :is(button, a)::before {
+  inset: -7px -5px;
+}
+
+.barAction[data-icon] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-height-md);
+}
+
+.barAction[data-icon] svg {
+  width: 24px;
+  height: 24px;
+}
+
 .barAction:disabled {
   color: var(--color-tertiary-foreground);
   cursor: default;
@@ -164,7 +198,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  min-height: 48px;
+  min-height: var(--row-height);
   padding: 0 var(--space-4);
 }
 
@@ -218,7 +252,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 48px;
+  min-height: var(--row-height);
   padding: 0 var(--space-4);
   cursor: pointer;
 }
@@ -250,7 +284,7 @@
 
 .danger {
   width: 100%;
-  min-height: 48px;
+  min-height: var(--row-height);
   border: none;
   background: transparent;
   color: var(--color-danger-text);

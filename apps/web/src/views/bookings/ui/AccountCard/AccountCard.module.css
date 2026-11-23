@@ -7,24 +7,48 @@
 /* Guests: what the page is and the way in, centred. */
 .guest {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  text-align: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-2) 0;
 }
 
-.guestTitle {
-  font-family: var(--font-display);
-  font-size: var(--text-title2);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.2;
-  letter-spacing: var(--tracking-title);
+/* The mascot in a quiet circle where a signed-in person's face would be. */
+.guestFace {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-muted-foreground);
+}
+
+.guestFace svg {
+  width: 24px;
+  height: auto;
 }
 
 .guestText {
-  margin-bottom: var(--space-3);
-  color: var(--color-muted-foreground);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.guestTitle {
+  margin: 0;
   font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.guestNote {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
 }
 
 /* Signed in: the Apple Account row, then the work rows, right on the page: no white cards
@@ -87,12 +111,6 @@
   opacity: 0.5;
 }
 
-.avatar[data-size] {
-  width: 64px;
-  height: 64px;
-  font-size: 26px;
-}
-
 /* A small camera badge says the photo can be changed, like the edit badge on a contact. */
 .camera {
   position: absolute;
@@ -141,52 +159,6 @@ a.accountLink:focus-visible {
   min-width: 0;
 }
 
-.name {
-  overflow: hidden;
-  font-family: var(--font-display);
-  font-size: var(--text-title3);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--text-title3-line-height);
-  letter-spacing: var(--tracking-tight);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status,
-.handle,
-.stats {
-  overflow: hidden;
-  font-size: var(--text-footnote);
-  line-height: var(--text-footnote-line-height);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.status {
-  color: var(--color-foreground);
-}
-
-.handle,
-.stats {
-  color: var(--color-muted-foreground);
-}
-
-.stats strong {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
-}
-
-.dot {
-  color: var(--color-tertiary-foreground);
-}
-
-/* The profile's level in its colour, the last fact of the line. */
-.level {
-  color: color-mix(in srgb, var(--accent, var(--color-primary)) 75%, var(--color-foreground));
-  font-weight: var(--font-weight-semibold);
-}
-
 .wreath .face {
   margin: 0;
 }
@@ -198,4 +170,57 @@ a.accountLink:focus-visible {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* One row above the records («профиль должен быть самой удобной частью»): a smaller face, the
+   name and its facts, and the gear for the settings at its end. */
+.account {
+  min-height: 64px;
+  padding: var(--space-2) 0;
+}
+
+.camera {
+  width: 20px;
+  height: 20px;
+}
+
+.camera svg {
+  width: 11px;
+  height: 11px;
+}
+
+/* The settings: a thin gear in a quiet round button, a 44pt target. */
+.gear {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  cursor: pointer;
+}
+
+.gear svg {
+  width: 22px;
+  height: 22px;
+}
+
+.gear:active {
+  scale: 0.94;
+}
+
+.gear:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* On phones the gear ends the row; the chevron beside it only took the name's room. */
+@media (max-width: 639px) {
+  .accountChevron {
+    display: none;
+  }
 }

@@ -81,9 +81,7 @@ export const DayStrip = ({
           >
             <span className={styles.weekday}>{t.weekdayShort(day.key)}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
-            {marks?.has(day.key) && (
-              <CircleDashed weight='bold' className={styles.markGlyph} aria-hidden />
-            )}
+            {marks?.has(day.key) && <CircleDashed className={styles.markGlyph} aria-hidden />}
             {variant === 'compact' && loads?.has(day.key) && (
               <span
                 className={styles.load}
