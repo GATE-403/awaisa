@@ -151,10 +151,10 @@ export const App = () => {
               pullToRefreshEnabled
               sharedCookiesEnabled
               setSupportMultipleWindows={false}
-            // iOS: no «˄ ˅ Готово» bar over the keyboard, like a native app. WKWebView in the app
-            // left it out when it lifted a field over the keyboard, so the cabinet's search at the
-            // window's foot stayed half under it. A tap outside the field closes the keyboard.
-            hideKeyboardAccessoryView
+              // iOS: no «˄ ˅ Готово» bar over the keyboard, like a native app. WKWebView in the app
+              // left it out when it lifted a field over the keyboard, so the cabinet's search at the
+              // window's foot stayed half under it. A tap outside the field closes the keyboard.
+              hideKeyboardAccessoryView
               // Development builds only: Chrome's remote DevTools can then profile the page on the
               // phone (chrome://inspect).
               webviewDebuggingEnabled={__DEV__}
