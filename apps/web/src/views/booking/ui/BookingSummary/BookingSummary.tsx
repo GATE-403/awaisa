@@ -43,8 +43,8 @@ interface BookingSummaryProps {
   choice?: string
   /** The master as the ready bar names them: a first name or «Любой мастер». */
   masterShort?: string | null
-  /** Several branches: the ready bar says which address (with one, it is in the SMS). */
-  isAddressShown?: boolean
+  /** Several branches: the ready bar names the chosen one (with one, nothing to tell apart). */
+  branchName?: string | null
 }
 
 // The button names the next thing to do (a bare «Далее» left people unsure that a time was still
@@ -93,7 +93,7 @@ export const BookingSummary = ({
   paidWith = null,
   choice = '',
   masterShort = null,
-  isAddressShown = false,
+  branchName = null,
 }: BookingSummaryProps) => {
   const t = useT()
   const total = paidWith ? paidWith.total : (quote?.total ?? service?.price ?? null)
@@ -159,7 +159,7 @@ export const BookingSummary = ({
     ? [masterShort, t('предоплата {amount}', { amount: formatPrice(deposit) })]
         .filter(Boolean)
         .join(' · ')
-    : [masterShort, isAddressShown ? address : service ? t.duration(service.durationMinutes) : null]
+    : [masterShort, branchName ?? (service ? t.duration(service.durationMinutes) : null)]
         .filter(Boolean)
         .join(' · ')
 
