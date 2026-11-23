@@ -1,5 +1,9 @@
 type HapticStyle = 'success' | 'warning' | 'error' | 'selection' | 'impact'
 
+// How the app meets the keyboard: `resize` shrinks the WebView above it (the default), `overlay`
+// leaves it whole and sends the keyboard's height (the booking sheet makes room itself).
+type KeyboardMode = 'resize' | 'overlay'
+
 // Web → native; mirrored in apps/mobile `src/common/utils/nativeBridge.ts`, change both together.
 // `pushStatus` asks without a prompt, `pushEnable` may show the system's prompt.
 type NativeMessage =
@@ -7,11 +11,15 @@ type NativeMessage =
   | { type: 'haptic'; style: HapticStyle }
   | { type: 'pushStatus' }
   | { type: 'pushEnable' }
+  | { type: 'keyboardMode'; mode: KeyboardMode }
 
 type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable'
 
-// Native → web, as an `awaisa:native` window event: the answer to both push messages.
-type WebMessage = { type: 'pushState'; permission: PushPermission; token: string | null }
+// Native → web, as an `awaisa:native` window event: the answer to both push messages, and on
+// Android the keyboard's height in CSS pixels as it shows (0 when it hides).
+type PushStateMessage = { type: 'pushState'; permission: PushPermission; token: string | null }
+type KeyboardMessage = { type: 'keyboard'; height: number }
+type WebMessage = PushStateMessage | KeyboardMessage
 
 const WEB_EVENT = 'awaisa:native'
 
@@ -45,8 +53,13 @@ const haptic = (style: HapticStyle) => {
   postToNative({ type: 'haptic', style })
 }
 
-const isWebMessage = (value: unknown): value is WebMessage =>
-  typeof value === 'object' && value !== null && (value as { type?: unknown }).type === 'pushState'
+const isWebMessage = (value: unknown): value is WebMessage => {
+  if (typeof value !== 'object' || value === null) return false
+  const message = value as { type?: unknown; height?: unknown }
+  if (message.type === 'keyboard') return typeof message.height === 'number'
+
+  return message.type === 'pushState'
+}
 
 /** Listens to what the app sends the page; returns the unsubscribe. */
 const onNativeMessage = (listener: (message: WebMessage) => void) => {
@@ -63,10 +76,12 @@ const onNativeMessage = (listener: (message: WebMessage) => void) => {
 const NATIVE_ANSWER_MS = 30_000
 
 const askNativePush = (type: 'pushStatus' | 'pushEnable') =>
-  new Promise<WebMessage | null>((resolve) => {
+  new Promise<PushStateMessage | null>((resolve) => {
     const timer = window.setTimeout(() => finish(null), NATIVE_ANSWER_MS)
-    const stop = onNativeMessage((message) => finish(message))
-    const finish = (message: WebMessage | null) => {
+    const stop = onNativeMessage((message) => {
+      if (message.type === 'pushState') finish(message)
+    })
+    const finish = (message: PushStateMessage | null) => {
       window.clearTimeout(timer)
       stop()
       resolve(message)
@@ -74,5 +89,14 @@ const askNativePush = (type: 'pushStatus' | 'pushEnable') =>
     if (!postToNative({ type })) finish(null)
   })
 
-export type { HapticStyle, NativeApp, NativeMessage, PushPermission, WebMessage }
+export type {
+  HapticStyle,
+  KeyboardMessage,
+  KeyboardMode,
+  NativeApp,
+  NativeMessage,
+  PushPermission,
+  PushStateMessage,
+  WebMessage,
+}
 export { askNativePush, getNativeApp, haptic, onNativeMessage, postToNative }

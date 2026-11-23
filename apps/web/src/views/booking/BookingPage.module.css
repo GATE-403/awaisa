@@ -32,6 +32,18 @@
   scroll-padding-bottom: calc(var(--space-20) + var(--space-2) + env(safe-area-inset-bottom));
 }
 
+/* In the Android app the keyboard covers the sheet without resizing the WebView (`overlay`, sent
+   by the app with its height as `--keyboard-inset`): room under the content to scroll the last
+   field above it. Set once as the keyboard shows; only the sheet is laid out again. */
+.page[data-keyboard][style*="--keyboard-inset"] {
+  padding-bottom: calc(
+    var(--space-20) +
+    var(--space-6) +
+    env(safe-area-inset-bottom) +
+    var(--keyboard-inset)
+  );
+}
+
 /* Back after a reload, where it already was (lib/sheetHandoff). */
 .page[data-already-up] {
   animation: none;
