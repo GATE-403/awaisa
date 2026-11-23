@@ -304,7 +304,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
                   <span className={styles.spent}>
                     {client.spent ? formatPrice(client.spent) : ''}
                   </span>
-                  <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+                  <CaretRight aria-hidden className={styles.chevron} />
                 </button>
               </li>
             ))}
@@ -367,7 +367,7 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
           : t('День рождения в ближайшую неделю.')}{' '}
         <button type='button' className={styles.noteAction} onClick={onCall}>
           {t('Позвать {clients}', { clients: t.count(count, CALLED_WORDS) })}
-          <CaretRight weight='bold' aria-hidden />
+          <CaretRight aria-hidden />
         </button>
       </p>
     )
@@ -378,7 +378,7 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
         {t('Предоплата при записи онлайн защищает от неявок.')}{' '}
         <NextLink className={styles.noteAction} href='?tab=services'>
           {t('Включить в услугах')}
-          <CaretRight weight='bold' aria-hidden />
+          <CaretRight aria-hidden />
         </NextLink>
       </p>
     )

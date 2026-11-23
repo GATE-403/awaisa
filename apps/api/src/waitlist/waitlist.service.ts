@@ -25,6 +25,7 @@ import { waitlistFreedMessage } from '../notifications/messages.js'
 import { whatsappWaitlistFreed } from '../notifications/whatsapp-messages.js'
 import type { JoinWaitlistInput } from './waitlist.schemas.js'
 import { WaitlistEntry } from './waitlist-entry.entity.js'
+import { waitlistGroupKey } from './waitlist-visit.js'
 
 const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
@@ -62,8 +63,10 @@ export class WaitlistService {
 
     // Same rules as booking (date range, published page, the master does the service); a day with
     // free time does not need a waitlist — the client books it instead.
+    // The whole visit, as the form showed it: one service of two may still fit that day.
     const { slots } = await this.availability.getAvailability({
       serviceId: input.serviceId,
+      extraServiceIds: input.extraServiceIds,
       specialistId: input.specialistId,
       date: input.date,
       branchId: input.branchId,
@@ -85,10 +88,15 @@ export class WaitlistService {
     // Joining twice keeps one entry; the new device gets a fresh token for it.
     const entry = await this.entries.save(
       existing
-        ? Object.assign(existing, { tokenHash: hashToken(token), customerName: input.name })
+        ? Object.assign(existing, {
+            tokenHash: hashToken(token),
+            customerName: input.name,
+            extraServiceIds: input.extraServiceIds,
+          })
         : this.entries.create({
             businessId: service.businessId,
             serviceId: service.id,
+            extraServiceIds: input.extraServiceIds,
             specialistId,
             branchId: input.branchId ?? null,
             date: input.date,
@@ -203,7 +211,7 @@ export class WaitlistService {
     const waiting = await this.entries.find({ where: { status: 'waiting' } })
     const groups = new Map<string, WaitlistEntry[]>()
     for (const entry of waiting) {
-      const key = `${entry.serviceId}|${entry.specialistId ?? ''}|${entry.branchId ?? ''}|${entry.date}`
+      const key = waitlistGroupKey(entry)
       groups.set(key, [...(groups.get(key) ?? []), entry])
     }
 
@@ -214,6 +222,7 @@ export class WaitlistService {
         if (await this.hasFreshCancellation(first.businessId)) continue
         const { slots } = await this.availability.getAvailability({
           serviceId: first.serviceId,
+          extraServiceIds: first.extraServiceIds,
           specialistId: first.specialistId ?? ANY_SPECIALIST_ID,
           date: first.date,
           branchId: first.branchId ?? undefined,

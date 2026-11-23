@@ -111,7 +111,7 @@ export const PageInsights = ({
               <strong>{fact.count}</strong> {fact.words}
             </span>
           ))}
-          <CaretRight weight='bold' aria-hidden />
+          <CaretRight aria-hidden />
         </NextLink>
       )}
       <ul className={styles.promotions} aria-label={t('Акции')}>
@@ -134,7 +134,7 @@ export const PageInsights = ({
             onClick={() => setEditing('new')}
             aria-label={t('Новая акция')}
           >
-            <Plus weight='bold' aria-hidden />
+            <Plus aria-hidden />
             {t('Акция')}
           </button>
         </li>

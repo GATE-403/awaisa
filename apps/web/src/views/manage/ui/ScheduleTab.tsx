@@ -419,7 +419,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                 className={styles.statusLink}
                 onClick={() => setIsWaitlistOpen(true)}
               >
-                <BellRinging weight='fill' aria-hidden />
+                <BellRinging aria-hidden />
                 {t('Ждут окна: {count}', { count: dayWaitlist.length })} ›
               </button>
             )}
@@ -499,7 +499,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
                       setDraft({ specialistId: schedule?.specialists[0]?.id ?? '', time: null })
                     }
                   >
-                    <Plus weight='bold' aria-hidden />
+                    <Plus aria-hidden />
                     <span className={styles.buttonLabel}>{t('Новая запись')}</span>
                   </Button>
                 </>
@@ -526,7 +526,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
             {t.duration(fitService.durationMinutes)}
           </span>
           <Button variant='outline' size='sm' onClick={() => setFitServiceId(null)}>
-            <X weight='bold' aria-hidden />
+            <X aria-hidden />
             {t('Готово')}
           </Button>
         </div>

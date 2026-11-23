@@ -9,6 +9,8 @@ import { useSheetDrag } from './useSheetDrag'
 
 interface SheetAction {
   label: string
+  /** A glyph in place of the word (the label stays its accessible name and tooltip). */
+  icon?: ReactNode
   form?: string
   disabled?: boolean
   onClick?: () => void
@@ -19,6 +21,10 @@ interface SheetProps {
   onClose: () => void
   action?: SheetAction
   cancelLabel?: string | null
+  /** The left button does this instead of closing the sheet (back from a step inside it). */
+  onCancel?: () => void
+  /** The bar's right corner when there is no action: a capsule of glyphs (a profile's actions). */
+  barEnd?: ReactNode
   children: ReactNode
 }
 
@@ -26,7 +32,15 @@ interface SheetProps {
 // Pull the top bar down to dismiss it, like an iOS sheet. A field that takes the caret is set above
 // the phone's keyboard; in the Android app the sheet takes the keyboard itself (`overlay`), so the
 // page under it is not laid out again while the keyboard slides in.
-export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', children }: SheetProps) => {
+export const Sheet = ({
+  title,
+  onClose,
+  action,
+  cancelLabel = 'Отмена',
+  onCancel,
+  barEnd,
+  children,
+}: SheetProps) => {
   const t = useT()
   const dragHandlers = useSheetDrag(onClose)
   const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +64,11 @@ export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', ch
       <DialogContent variant='sheet'>
         <header className={styles.bar} {...dragHandlers}>
           <span className={styles.grabber} aria-hidden='true' />
-          {cancelLabel ? (
+          {cancelLabel && onCancel ? (
+            <button type='button' className={styles.barButton} onClick={onCancel}>
+              {t(cancelLabel)}
+            </button>
+          ) : cancelLabel ? (
             <DialogClose className={styles.barButton}>{t(cancelLabel)}</DialogClose>
           ) : (
             <span />
@@ -61,11 +79,16 @@ export const Sheet = ({ title, onClose, action, cancelLabel = 'Отмена', ch
               type={action.form ? 'submit' : 'button'}
               form={action.form}
               className={styles.barAction}
+              data-icon={action.icon ? '' : undefined}
+              aria-label={action.icon ? action.label : undefined}
+              title={action.icon ? action.label : undefined}
               disabled={action.disabled}
               onClick={action.onClick}
             >
-              {action.label}
+              {action.icon ?? action.label}
             </button>
+          ) : barEnd ? (
+            <span className={styles.barEnd}>{barEnd}</span>
           ) : (
             <span />
           )}

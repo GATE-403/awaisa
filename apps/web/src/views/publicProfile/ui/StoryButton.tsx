@@ -1,10 +1,10 @@
 'use client'
 
-import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import { InstagramLogo } from '@phosphor-icons/react/ssr'
+import { DownloadSimple, Export, IdentificationBadge } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { useT } from '@/shared/i18n'
+import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './StoryButton.module.css'
 
@@ -50,6 +50,14 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
     }
   }
 
+  const download = () => {
+    if (!story) return
+    const link = document.createElement('a')
+    link.href = story.url
+    link.download = story.file.name
+    link.click()
+  }
+
   const share = async () => {
     if (!story) return
     try {
@@ -62,31 +70,38 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
 
   return (
     <>
-      <Button variant='secondary' size='sm' onClick={open} disabled={isBusy}>
-        <InstagramLogo weight='bold' aria-hidden />
-        {isBusy ? t('Готовим…') : t('В сторис')}
-      </Button>
+      <GlyphButton
+        // The picture it makes is the profile as a card.
+        icon={<IdentificationBadge aria-hidden />}
+        label={isBusy ? t('Готовим…') : t('В сторис')}
+        onClick={open}
+        disabled={isBusy}
+      />
       {story && (
-        <Sheet title={t('Для сторис')} cancelLabel={t('Закрыть')} onClose={() => setStory(null)}>
+        // The picture alone; saving it is one glyph in the sheet's bar («кнопку скачать можно
+        // было бы сделать иконкой справа сверху»): the share sheet on a phone, a download with
+        // a mouse.
+        <Sheet
+          title={t('Для сторис')}
+          cancelLabel={t('Закрыть')}
+          onClose={() => setStory(null)}
+          action={
+            canShare
+              ? {
+                  label: t('Поделиться'),
+                  icon: <Export aria-hidden />,
+                  onClick: () => void share(),
+                }
+              : {
+                  label: t('Скачать картинку'),
+                  icon: <DownloadSimple aria-hidden />,
+                  onClick: download,
+                }
+          }
+        >
           <div className={styles.preview}>
             {/* biome-ignore lint/performance/noImgElement: a generated picture (blob: URL) */}
             <img src={story.url} alt={t('Картинка профиля для сторис')} className={styles.image} />
-            <div className={styles.actions}>
-              {canShare && (
-                <Button size='lg' fullWidth onClick={share}>
-                  {t('Поделиться')}
-                </Button>
-              )}
-              <ButtonLink
-                href={story.url}
-                download={story.file.name}
-                variant={canShare ? 'secondary' : 'primary'}
-                size='lg'
-                fullWidth
-              >
-                {t('Скачать картинку')}
-              </ButtonLink>
-            </div>
           </div>
         </Sheet>
       )}

@@ -154,7 +154,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         <div className={sheet.groupHeader}>
           <SectionCaption isInset={false}>{t('Абонементы')}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setEditingPlan('new')}>
-            <Plus weight='bold' aria-hidden /> {t('Новый')}
+            <Plus aria-hidden /> {t('Новый')}
           </button>
         </div>
         {data.plans.length === 0 ? (
@@ -188,7 +188,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                     </span>
                   </span>
                   <span className={styles.cellValue}>{formatPrice(plan.price)}</span>
-                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                  <CaretRight className={styles.chevron} aria-hidden />
                 </button>
               </li>
             ))}
@@ -214,7 +214,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                 <span className={own.amounts}>
                   {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} {t('сом')}
                 </span>
-                <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                <CaretRight className={styles.chevron} aria-hidden />
               </button>
             )}
           </div>
@@ -232,7 +232,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         <div className={sheet.groupHeader}>
           <SectionCaption isInset={false}>{t('Сертификаты')}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setIsIssuing(true)}>
-            <Plus weight='bold' aria-hidden /> {t('Выпустить')}
+            <Plus aria-hidden /> {t('Выпустить')}
           </button>
         </div>
         {data.certificates.length === 0 ? (

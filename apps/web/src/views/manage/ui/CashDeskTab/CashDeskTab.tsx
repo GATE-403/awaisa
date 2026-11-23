@@ -225,12 +225,12 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
   const primary =
     view === 'expenses' ? (
       <Button size='sm' onClick={() => setEditingExpense('new')}>
-        <Plus weight='bold' aria-hidden />
+        <Plus aria-hidden />
         {t('Расход')}
       </Button>
     ) : (
       <Button size='sm' onClick={() => setIsSelling(true)}>
-        <Plus weight='bold' aria-hidden />
+        <Plus aria-hidden />
         {t('Продажа')}
       </Button>
     )
@@ -413,7 +413,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                     <Menu
                       label={t('Действия с продажей')}
                       className={styles.more}
-                      trigger={<DotsThree weight='bold' aria-hidden />}
+                      trigger={<DotsThree aria-hidden />}
                     >
                       {sale.receipt && (
                         <MenuItem onClick={() => setOpenReceipt(sale.receipt)}>
@@ -471,7 +471,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                       </span>
                     </span>
                     <span className={forms.cellValue}>{formatPrice(expense.amount)}</span>
-                    <CaretRight className={forms.chevron} weight='bold' aria-hidden />
+                    <CaretRight className={forms.chevron} aria-hidden />
                   </button>
                 </li>
               ))}

@@ -70,7 +70,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
-            <Plus weight='bold' aria-hidden />
+            <Plus aria-hidden />
             {t('Позиция')}
           </Button>
         }
@@ -113,7 +113,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
                   <span className={styles.cellValue} data-tone={item.isLow ? 'danger' : undefined}>
                     {formatQuantity(item.quantity)} {t(item.unit)}
                   </span>
-                  <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                  <CaretRight className={styles.chevron} aria-hidden />
                 </button>
               </li>
             ))}

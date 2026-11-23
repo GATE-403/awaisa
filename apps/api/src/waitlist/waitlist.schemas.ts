@@ -4,6 +4,8 @@ const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должн
 
 const joinWaitlistSchema = z.object({
   serviceId: z.string().trim().min(1).max(64),
+  /** The visit's other services, after the first (manicure and pedicure). */
+  extraServiceIds: z.array(z.string().trim().min(1).max(64)).max(3).default([]),
   /** A master's id or `any`. */
   specialistId: z.string().trim().min(1).max(64),
   branchId: z.uuid().optional(),

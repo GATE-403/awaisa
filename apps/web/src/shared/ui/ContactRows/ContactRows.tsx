@@ -35,7 +35,7 @@ export const ContactRows = ({ phone, surface = 'sheet' }: ContactRowsProps) => {
             <WhatsappMark />
           </span>
           <span className={styles.label}>WhatsApp</span>
-          <CaretRight weight='bold' className={styles.chevron} aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </a>
       </li>
       <li>
@@ -44,7 +44,7 @@ export const ContactRows = ({ phone, surface = 'sheet' }: ContactRowsProps) => {
             <ChatCircle />
           </span>
           <span className={styles.label}>SMS</span>
-          <CaretRight weight='bold' className={styles.chevron} aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </a>
       </li>
     </ul>

@@ -95,7 +95,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           data-kind='now'
           onClick={() => onOpen(current)}
         >
-          <HourglassMedium weight='bold' className={styles.glyph} aria-hidden />
+          <HourglassMedium className={styles.glyph} aria-hidden />
           <span className={styles.srOnly}>{t('Сейчас')}: </span>
           <span className={styles.who}>{current.customerName}</span>
           <span className={styles.meta}>{t('ещё {count} мин', { count: left })}</span>
@@ -109,7 +109,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             data-soon={wait <= SOON_MINUTES || undefined}
             onClick={() => onOpen(next)}
           >
-            <Clock weight='bold' className={styles.glyph} aria-hidden />
+            <Clock className={styles.glyph} aria-hidden />
             <span className={styles.srOnly}>{t('Далее')}: </span>
             <span className={styles.who}>
               {next.time} {next.customerName}

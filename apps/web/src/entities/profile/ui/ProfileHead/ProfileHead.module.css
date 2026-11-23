@@ -1,0 +1,61 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  text-align: start;
+}
+
+.face {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+/* One face size wherever the head is drawn (doubled class: over the kit's own size rule). */
+.face.face [data-size] {
+  width: 80px;
+  height: 80px;
+  font-size: 30px;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--text-title2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+
+.emoji {
+  font-size: 0.9em;
+}
+
+.meta {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* Phones: a smaller face and gap, so the name keeps the room («в мобилке съедает свободное место»). */
+@media (max-width: 639px) {
+  .head {
+    gap: var(--space-3);
+  }
+
+  .face.face [data-size] {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+}

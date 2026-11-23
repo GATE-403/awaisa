@@ -113,3 +113,53 @@
 /* More visits wait: the last shown fades into the page and the button floats on the fade,
    the same as the reviews on a business page. */
 /* The floating button's shadow reaches past the card; the hairline between items skips it. */
+
+/* The nearest visit: a card of its own, larger than the rows under it. */
+.next {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.captionCount {
+  margin-left: var(--space-1);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The settings screen's bar: «‹ Записи» back on the left, the title in the middle. */
+.settingsBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height-md);
+}
+
+.backLink {
+  position: absolute;
+  left: calc(-1 * var(--space-1));
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--control-height-md);
+  padding: 0 var(--space-1);
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.backLink svg {
+  width: 18px;
+  height: 18px;
+}
+
+.settingsTitle {
+  margin: 0;
+  font-size: var(--text-title3);
+  line-height: var(--text-title3-line-height);
+  font-weight: var(--font-weight-semibold);
+}

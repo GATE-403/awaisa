@@ -13,6 +13,16 @@ export class WaitlistEntry {
   @Column({ name: 'service_id', type: 'varchar', length: 64 })
   serviceId: string
 
+  /** The services after the first in the same visit, in order (empty for one service). */
+  @Column({
+    name: 'extra_service_ids',
+    type: 'varchar',
+    length: 64,
+    array: true,
+    default: () => "'{}'",
+  })
+  extraServiceIds: string[]
+
   /** null = any master. */
   @Column({ name: 'specialist_id', type: 'varchar', length: 64, nullable: true })
   specialistId: string | null

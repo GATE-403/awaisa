@@ -107,7 +107,8 @@
   /* The kit's caption size: 11px under the glyphs read as fine print beside «Каталог». */
   font-size: var(--text-xs);
   line-height: 14px;
-  font-weight: var(--font-weight-medium);
+  /* Regular words under light glyphs («текст и иконки слишком жирные»). */
+  font-weight: var(--font-weight-regular);
   white-space: nowrap;
   transition: color var(--duration-fast) var(--ease-standard);
 }
@@ -198,9 +199,11 @@
   color: inherit;
 }
 
+/* The chosen category in the accent, its words and glyph alike («выдели лучше синим»); on phones
+   on a faint wash of the accent. */
 .category[aria-current="page"] {
-  background: var(--color-fill);
-  color: var(--color-foreground);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-link);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -336,7 +339,7 @@
 
   .category[aria-current="page"] {
     background: transparent;
-    color: var(--color-foreground);
+    color: var(--color-link);
     font-weight: var(--font-weight-semibold);
   }
 

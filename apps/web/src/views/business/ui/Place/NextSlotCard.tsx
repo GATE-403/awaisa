@@ -93,7 +93,7 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
           </span>
         </span>
         <span className={styles.slotArrow} aria-hidden>
-          <ArrowRight weight='bold' />
+          <ArrowRight />
         </span>
       </NextLink>
     </aside>,

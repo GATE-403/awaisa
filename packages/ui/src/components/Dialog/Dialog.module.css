@@ -143,3 +143,18 @@
     position: absolute;
   }
 }
+
+/* A sheet opened from a sheet (the story picture from a profile): the one under it steps back
+   like an iOS card stack, a little smaller and under the new one's dim. Both used to sit at the
+   same height, so the new sheet's backdrop (80) lay under the old one (81) and the two read as
+   one sheet («модалка в модалке не видно»). */
+.popup[data-nested-dialog-open] {
+  z-index: 80;
+  scale: 0.94;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popup[data-nested-dialog-open] {
+    scale: 1;
+  }
+}

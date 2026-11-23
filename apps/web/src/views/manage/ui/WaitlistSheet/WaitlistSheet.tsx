@@ -67,7 +67,7 @@ export const WaitlistSheet = ({
                   {t.language === 'ru' ? 'Записать' : t('Записать (клиента)')}
                 </Button>
                 <a href={`tel:${entry.customerPhone}`} className={styles.call}>
-                  <Phone weight='fill' aria-hidden />
+                  <Phone aria-hidden />
                   {formatPhone(entry.customerPhone)}
                 </a>
               </div>
@@ -78,7 +78,7 @@ export const WaitlistSheet = ({
               aria-label={t('Убрать {name} из листа ожидания', { name: entry.customerName })}
               onClick={() => onRemove(entry)}
             >
-              <X weight='bold' aria-hidden />
+              <X aria-hidden />
             </button>
           </li>
         ))}

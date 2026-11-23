@@ -354,7 +354,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                           className={styles.call}
                           aria-label={t('Позвонить: {name}', { name: booking.customerName })}
                         >
-                          <Phone weight='fill' aria-hidden />
+                          <Phone aria-hidden />
                         </a>
                       )}
                       {canMark && !isCancelled && (

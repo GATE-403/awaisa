@@ -90,25 +90,6 @@
   box-shadow: var(--focus-ring);
 }
 
-.addBio {
-  position: relative;
-  align-self: flex-start;
-  margin-top: var(--space-1);
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  font-size: var(--text-body);
-  cursor: pointer;
-}
-
-.addBio::before {
-  content: "";
-  position: absolute;
-  inset: min(0px, calc((100% - 44px) / 2)) 0;
-}
-
 /* Phones: «Редактировать», the glyphs beside it and the tab's action float in one capsule at the
    window's foot; a mouse never sees it. */
 @media (min-width: 640px) {
@@ -233,6 +214,28 @@
   box-shadow: var(--focus-ring);
 }
 
+/* Under the bio: the week's facts on their own line, then one row of small capsules: what the
+   page lacks first, then the running promotions and «+ Акция». */
+.pageFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.pageFooter > .insights {
+  flex-basis: 100%;
+  order: -2;
+}
+
+.pageFooter > .promotions {
+  display: contents;
+}
+
+.pageFooter > .promotions[data-checklist] > li {
+  order: -1;
+}
+
 /* Running promotions as the clients see them, a row of small capsules, «+ Акция» last. */
 .promotions {
   display: flex;
@@ -263,6 +266,12 @@
 
 .promotion[data-add] {
   background: var(--color-fill);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Only the «+» carries the accent: a row of bold blue words read loud («не сочетаемо»). */
+.promotion[data-add] svg {
   color: var(--color-link);
 }
 

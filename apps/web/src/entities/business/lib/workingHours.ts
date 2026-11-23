@@ -105,8 +105,31 @@ const formatWeekSchedule = (hours: WorkingDay[], t: Say = russian) => {
     .join(', ')
 }
 
+type WeekGroup = {
+  /** 0 = Monday. */
+  from: number
+  to: number
+  /** «10:00–20:00», or null for days off. */
+  range: string | null
+}
+
+/** The week as runs of neighbouring days with the same hours, days off included: Пн–Пт, Сб, Вс. */
+const groupWeek = (hours: WorkingDay[]): WeekGroup[] => {
+  const groups: WeekGroup[] = []
+  for (let weekday = 0; weekday < DAYS_IN_WEEK; weekday += 1) {
+    const day = findDay(hours, weekday)
+    const range = day ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}` : null
+    const last = groups.at(-1)
+    if (last && last.range === range) last.to = weekday
+    else groups.push({ from: weekday, to: weekday, range })
+  }
+  return groups
+}
+
+export type { WeekGroup }
 export {
   findDay,
+  groupWeek,
   formatClock,
   formatWeekSchedule,
   getOpeningStatus,

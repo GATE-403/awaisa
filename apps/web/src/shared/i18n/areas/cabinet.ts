@@ -397,7 +397,33 @@ const CABINET: Record<string, Entry> = {
       'Алдыдагы жазылууларды жокко чыгарып, кардарларга жазабыз, алдын ала төлөмдү кайтарабыз. Барак жоголот, дарек бошойт, команда кирүү укугун жоготот. Өткөн визиттер жана чектер эсепте калат.',
       'We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books.',
     ],
+  'Чтобы удалить, введите адрес страницы:': [
+    'Өчүрүү үчүн барактын дарегин жазыңыз:',
+    'To delete, type the page address:',
+  ],
   'Бизнес удалён': ['Бизнес өчүрүлдү', 'Business deleted'],
+  // «Мои бизнесы»: what waits in each business, a platform admin's own and all of them
+  'без ответа': ['жоопсуз', 'unanswered'],
+  'не прошёл': ['өткөн жок', 'failed'],
+  'не прошли': ['өткөн жок', 'failed'],
+  'Какие бизнесы': ['Кайсы бизнестер', 'Which businesses'],
+  Мои: ['Меники', 'Mine'],
+  'Поиск по бизнесам': ['Бизнестерден издөө', 'Search businesses'],
+  'Запуск {done} из {total} · {step}': [
+    'Ишке киргизүү: {total} ичинен {done} · {step}',
+    'Setup {done} of {total} · {step}',
+  ],
+  'За неделю:': ['Аптада:', 'This week:'],
+  'За неделю': ['Аптада', 'This week'],
+  'больше, чем неделей раньше': ['мурунку аптадан көп', 'more than the week before'],
+  'меньше, чем неделей раньше': ['мурунку аптадан аз', 'fewer than the week before'],
+  'Поделитесь ссылкой, и придут первые клиенты': [
+    'Шилтемени бөлүшүңүз, биринчи кардарлар келет',
+    'Share the link and the first clients will come',
+  ],
+  'Скопировать ссылку на {name}': ['{name} шилтемесин көчүрүү', 'Copy the link to {name}'],
+  'ближайший в {time}, {name}': ['жакынкысы {time}, {name}', 'next at {time}, {name}'],
+  'День занят на {percent}%': ['Күн {percent}% бош эмес', 'The day is {percent}% booked'],
   'Не удалили': ['Өчүрүлгөн жок', 'Not deleted'],
   'Не сохранили': ['Сакталган жок', 'Not saved'],
 }
@@ -405,6 +431,7 @@ const CABINET: Record<string, Entry> = {
 const CABINET_COUNTED: Record<string, CountedEntry> = {
   клиентов: ['кардар', 'client', 'clients'],
   абонементов: ['абонемент', 'pass', 'passes'],
+  чеков: ['чек', 'receipt', 'receipts'],
 }
 
 export { CABINET, CABINET_COUNTED }

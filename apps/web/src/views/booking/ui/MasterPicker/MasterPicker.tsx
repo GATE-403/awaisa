@@ -24,7 +24,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
       <MasterCard
         specialist={null}
         className={styles.card}
-        icon={<UsersThree weight='fill' />}
+        icon={<UsersThree />}
         title={t('Любой')}
         meta={t('кто свободен')}
       >
@@ -39,7 +39,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
           }}
           aria-label={t('Любой мастер — подберём свободного на выбранное время')}
         />
-        <Check className={styles.check} weight='bold' aria-hidden />
+        <Check className={styles.check} aria-hidden />
       </MasterCard>
       {specialists.map((specialist) => (
         <MasterCard
@@ -59,7 +59,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
             }}
             aria-label={[specialist.name, specialist.role].filter(Boolean).join(', ')}
           />
-          <Check className={styles.check} weight='bold' aria-hidden />
+          <Check className={styles.check} aria-hidden />
         </MasterCard>
       ))}
     </div>

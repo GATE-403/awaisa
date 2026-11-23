@@ -1,6 +1,6 @@
 'use client'
 
-import { Heart, Sparkle } from '@phosphor-icons/react/ssr'
+import { Heart } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
@@ -11,6 +11,7 @@ import type { BusinessKind, FeedItem } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { gridImage } from '@/shared/lib/imageSizes'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 import { BIG_TILE_IMAGE, DOUBLE_TAP_MS } from '../../config/workTile'
 import { workFeedHref, workLookHref } from '../../lib/workLinks'
 import styles from './WorkTile.module.css'
@@ -103,7 +104,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
       />
       <span className={styles.marks}>
         <span className={styles.kind}>
-          <Sparkle weight='fill' aria-hidden />
+          <FanCardsIcon aria-hidden />
           {t('Образ')}
         </span>
         {/* A client's own photo from their review: trusted more than the salon's own shots. */}
@@ -118,7 +119,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
         onClick={() => setLiked(!isLiked)}
       >
         <span className={styles.likeBody}>
-          <Heart weight={isLiked ? 'fill' : 'bold'} aria-hidden />
+          <Heart weight={isLiked ? 'fill' : 'regular'} aria-hidden />
           {likesCount > 0 && <span className={styles.likeCount}>{likesCount}</span>}
         </span>
       </button>

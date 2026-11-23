@@ -90,7 +90,7 @@ export const BookingReview = ({
               <span className={styles.placeName}>{business.name}</span>
               {branchAddress && (
                 <span className={styles.placeAddress}>
-                  <MapPin weight='fill' aria-hidden />
+                  <MapPin aria-hidden />
                   {branchAddress}
                 </span>
               )}
@@ -125,7 +125,7 @@ export const BookingReview = ({
                 <span className={styles.rowName}>{service.name}</span>
                 <span className={styles.rowMeta}>{t.duration(service.durationMinutes)}</span>
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+              <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
           <li>
@@ -157,7 +157,7 @@ export const BookingReview = ({
                   </span>
                 )}
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+              <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
           <li>
@@ -167,7 +167,7 @@ export const BookingReview = ({
                 <span className={styles.rowName}>{name}</span>
                 <span className={styles.rowMeta}>{formatPhone(phone)}</span>
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+              <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
           {/* The extras read as rows of the same ticket, each opening the contacts step. */}
@@ -179,7 +179,7 @@ export const BookingReview = ({
                   {comment || t('Добавить')}
                 </span>
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+              <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
           <li>
@@ -190,7 +190,7 @@ export const BookingReview = ({
                   {discount ? `${discount.title} · −${discount.percent}%` : t('Ввести')}
                 </span>
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.chevron} />
+              <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
         </ul>

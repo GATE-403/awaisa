@@ -1,4 +1,7 @@
 :root {
+  /* One height for every Settings-style row (account settings, the cabinet, sheets): 44pt read
+     cramped («44px мало как минимум должно быть 48 или 50»). */
+  --row-height: 52px;
   /* Text over pictures (offer, place, master, «Для вас», work and service cards): one scrim,
      clear over the top third and nearly black at the foot, eased so it never shows a band, and
      a soft shadow under the letters — light photos used to swallow white text. */
@@ -10,6 +13,9 @@
     rgb(0 0 0 / 0.84) 80%,
     rgb(0 0 0 / 0.92)
   );
+  /* Picture cards (services, places, masters, «Образы» and its deck): one radius, strict but
+     not square («что если углы карточек сделать без скругления?» → 4–6). */
+  --radius-card: 12px;
   --card-text-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 0 14px rgb(0 0 0 / 0.3);
 
   /* Phones: the mascot with the search field, then category chips. */

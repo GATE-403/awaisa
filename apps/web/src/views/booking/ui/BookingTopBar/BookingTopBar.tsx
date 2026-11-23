@@ -50,7 +50,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
           aria-label={t('Закрыть запись')}
           onClick={close}
         >
-          <X weight='bold' aria-hidden />
+          <X aria-hidden />
         </NextLink>
         {/* The place is a big tap target back to its page, like a chat header in Telegram. */}
         <NextLink href={`/${business.slug}`} className={styles.title}>

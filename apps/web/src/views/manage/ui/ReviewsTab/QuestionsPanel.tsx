@@ -112,7 +112,7 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
             >
               {question.answer ? (
                 <>
-                  <PencilSimple weight='bold' aria-hidden />
+                  <PencilSimple aria-hidden />
                   {t('Изменить')}
                 </>
               ) : (

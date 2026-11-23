@@ -87,7 +87,7 @@
 
 .picture {
   aspect-ratio: 3 / 4;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
 }
 
 /* The time step: the big time under the needle, the dial, the day cards. */

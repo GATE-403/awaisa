@@ -2,17 +2,23 @@
 
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import { CheckCircle, Eye, EyeSlash, Link } from '@phosphor-icons/react/ssr'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { deleteBusiness, getMyBusinesses, updateBusiness } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import { useT } from '@/shared/i18n'
+import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './BusinessSheet.module.css'
+
+/** «awaisa.kg»: the page's address reads as it does in a link. */
+const SITE_HOST = new URL(SITE_URL).host
 
 interface BusinessSheetProps {
   slug: string
@@ -40,6 +46,11 @@ export const BusinessSheet = ({
   const router = useRouter()
   const session = useSession()
   const [isDeleting, setIsDeleting] = useState(false)
+  const confirmId = useId()
+  // Like deleting a repository on GitHub: the page's address typed by hand unlocks the button,
+  // so a child with the phone or a stray tap cannot delete the business (the API checks it too).
+  const [typed, setTyped] = useState('')
+  const isConfirmed = typed.trim().toLowerCase() === slug
 
   const savePublished = async (isOpen: boolean) => {
     const title = isOpen ? 'Страница открыта' : 'Страница скрыта'
@@ -61,7 +72,7 @@ export const BusinessSheet = ({
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
-      await deleteBusiness(slug)
+      await deleteBusiness(slug, typed)
       await refreshBusiness(slug).catch(() => undefined)
       const [others] = await Promise.all([
         getMyBusinesses().catch(() => []),
@@ -75,34 +86,57 @@ export const BusinessSheet = ({
     }
   }
 
+  const Glyph = isPublished ? Eye : EyeSlash
+
   return (
     <Sheet title={t('Скрыть или удалить')} onClose={onClose} cancelLabel='Готово'>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Публикация')}>
-          <div className={sheet.list}>
-            <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Страница открыта')}</span>
-              <Switch
-                checked={isPublished}
-                onCheckedChange={(value) => void savePublished(value)}
-              />
-            </label>
-          </div>
-          <p className={sheet.groupFooter}>
+        {/* Right on the sheet, no inset fill: the glyph, the switch and a ↳ note under it. */}
+        <section className={styles.group} aria-label={t('Публикация')}>
+          <label className={styles.row}>
+            <Glyph className={styles.glyph} aria-hidden />
+            <span className={styles.label}>{t('Страница открыта')}</span>
+            <Switch checked={isPublished} onCheckedChange={(value) => void savePublished(value)} />
+          </label>
+          <RowNote>
             {t('Скрытую страницу не найдут в каталоге. Записи и кабинет остаются.')}
-          </p>
+          </RowNote>
         </section>
 
-        <div className={styles.delete}>
-          <HoldButton disabled={isDeleting} onConfirm={() => void handleDelete()}>
-            {t('Удалить бизнес')}
-          </HoldButton>
-          <p className={sheet.groupFooter}>
+        {/* What happens is read before the button, not after it. */}
+        <section className={styles.group} aria-label={t('Удалить бизнес')}>
+          <p className={styles.note}>
             {t(
               'Будущие записи отменим и напишем клиентам, предоплату вернём. Страница пропадёт, адрес освободится, команда потеряет доступ. Прошлые визиты и чеки останутся в учёте.',
             )}
           </p>
-        </div>
+          <label className={styles.note} htmlFor={confirmId}>
+            {t('Чтобы удалить, введите адрес страницы:')}{' '}
+            <strong className={styles.slug}>{slug}</strong>
+          </label>
+          {/* The address as it reads in a link, typed in place: no box, a hairline under it. */}
+          <div className={styles.address} data-confirmed={isConfirmed || undefined}>
+            <Link className={styles.glyph} aria-hidden />
+            <span className={styles.host} aria-hidden>
+              {SITE_HOST}/
+            </span>
+            <input
+              id={confirmId}
+              className={styles.addressInput}
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              autoComplete='off'
+              autoCapitalize='none'
+              autoCorrect='off'
+              spellCheck={false}
+              enterKeyHint='done'
+            />
+            {isConfirmed && <CheckCircle className={styles.check} weight='fill' aria-hidden />}
+          </div>
+          <HoldButton disabled={!isConfirmed || isDeleting} onConfirm={() => void handleDelete()}>
+            {t('Удалить бизнес')}
+          </HoldButton>
+        </section>
       </div>
     </Sheet>
   )

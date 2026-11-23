@@ -4,4 +4,14 @@
 // page fails to hydrate.
 const BUSINESS_TIME_ZONE = 'Asia/Bishkek'
 
-export { BUSINESS_TIME_ZONE }
+const dayKeyFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: BUSINESS_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
+/** A moment's day on Bishkek's clock, «2026-11-23», for the day helpers (`t.monthShort`…). */
+const toBusinessDayKey = (iso: string) => dayKeyFormat.format(new Date(iso))
+
+export { BUSINESS_TIME_ZONE, toBusinessDayKey }

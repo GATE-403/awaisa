@@ -131,13 +131,13 @@ export const ScrollArea = ({
           aria-expanded={isTouch ? false : undefined}
         >
           {moreLabel(below)}
-          <CaretDown weight='bold' aria-hidden />
+          <CaretDown aria-hidden />
         </button>
       )}
       {isTouch && isOpen && isLong && (
         <button type='button' className={styles.less} onClick={fold} aria-expanded>
           {t('Свернуть')}
-          <CaretUp weight='bold' aria-hidden />
+          <CaretUp aria-hidden />
         </button>
       )}
     </div>

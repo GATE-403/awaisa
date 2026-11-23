@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { INTERESTS } from './recommend-score.js'
+import { INTERESTS, PRIORITIES } from './recommend-score.js'
 
 const list = (value: unknown) =>
   typeof value === 'string'
@@ -11,10 +11,12 @@ const list = (value: unknown) =>
 
 const recommendationsQuerySchema = z.object({
   interests: z
-    .preprocess(list, z.array(z.enum(INTERESTS as [string, ...string[]])).max(9))
+    .preprocess(list, z.array(z.enum(INTERESTS as [string, ...string[]])).max(INTERESTS.length))
     .default([]),
   gender: z.enum(['male', 'female']).optional(),
   budget: z.coerce.number().int().min(100).max(1_000_000).optional(),
+  /** What matters most when choosing, comma-separated: each part counts twice. */
+  priority: z.preprocess(list, z.array(z.enum(PRIORITIES)).max(PRIORITIES.length)).default([]),
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
   /** Device visits as `serviceId~YYYY-MM-DD`, newest first. */

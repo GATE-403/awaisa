@@ -3,18 +3,18 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
-import { CalendarCheck, Camera, CaretRight, Storefront, Trash } from '@phosphor-icons/react/ssr'
+import { CalendarCheck, Camera, CaretRight, GearSix, Trash } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
-import { profileStyle } from '@/entities/profile'
-import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
+import { ProfileHead, ProfileHeadText, profileStyle } from '@/entities/profile'
+import { useSession } from '@/entities/session'
 import { useMyProfile } from '@/features/profileStyle'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { removeAvatar, uploadAvatar } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { formatPhone } from '@/shared/lib/formatPhone'
+import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import settings from '../AccountSettings/AccountSettings.module.css'
 import styles from './AccountCard.module.css'
@@ -23,14 +23,17 @@ interface AccountCardProps {
   /** Past and upcoming visits, for the one-line stats under the name. */
   bookings: Booking[]
   visits: number
+  /** The gear at the row's end: the account's settings, a screen of their own. */
+  onOpenSettings?: () => void
 }
 
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
-// The account like the Apple Account row at the top of iOS Settings: one inset row with the face,
-// the name, number and facts (it opens «Мой профиль»), then Settings rows for the cabinet and
-// «Мой день». The centred face with two capsules under it asked for a redesign.
-export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
+// The account as one row above the records: the face (a tap changes the photo), the name and one
+// line of facts — the rest of the row opens «Мой профиль» — and a gear for the settings at its
+// end. The records lead the page; the account no longer pushes them down («профиль должен быть
+// самой удобной частью»). The cabinet lives in the tab bar; masters keep «Мой день» here.
+export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardProps) => {
   const session = useSession()
   const t = useT()
   const toast = useToast()
@@ -52,9 +55,18 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
 
   if (!customer) {
     return (
+      // A guest's row like the signed-in account's: the mascot where the face would be, what
+      // these records are and «Войти» at the row's end — not a centred title over the records.
       <section className={styles.guest} aria-label={t('Профиль')} style={look}>
-        <h1 className={styles.guestTitle}>{t('Ваши записи')}</h1>
-        <p className={styles.guestText}>{t('Только на этом телефоне — войдите, будут везде')}</p>
+        <span className={styles.guestFace} aria-hidden>
+          <Mascot />
+        </span>
+        <span className={styles.guestText}>
+          <h1 className={styles.guestTitle}>{t('Ваши записи')}</h1>
+          <span className={styles.guestNote}>
+            {t('Только на этом телефоне — войдите, будут везде')}
+          </span>
+        </span>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
           {t('Войти')}
         </ButtonLink>
@@ -63,16 +75,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
   }
 
   const displayName = customer.name || t('Без имени')
-  const businesses = customer.businesses ?? []
   const masterOf = customer.masterOf ?? []
-  const isCabinetShown = hasCabinet(customer)
-  const cabinetHref = getCabinetHref(customer)
-  const cabinetName =
-    businesses.length === 1
-      ? businesses[0]?.name
-      : businesses.length
-        ? t('{count} бизнесы', { count: businesses.length })
-        : t('Все бизнесы')
 
   const setAvatar = async (file: File | null) => {
     setIsUploading(true)
@@ -133,34 +136,26 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
     : null
   const level = myProfile.profile?.level.level
   const masterHref = masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master'
+  // The same head as the profile itself (`ProfileHead`): the name with the status emoji over
+  // one quiet line «Уровень 4 · 20 визитов · 13 мест» («оставь один дизайн»).
+  const meta = [
+    ...(level ? [t('Уровень {level}', { level })] : []),
+    ...stats.map((stat) => `${stat.value} ${stat.label}`),
+  ].join(' · ')
   const identity = (
     <>
-      <div className={styles.identity}>
-        <h1 className={styles.name}>{displayName}</h1>
-        {(myProfile.settings?.status || myProfile.settings?.statusEmoji) && (
-          <span className={styles.status}>
-            {myProfile.settings.statusEmoji} {myProfile.settings.status}
-          </span>
-        )}
-        <span className={styles.handle}>{formatPhone(customer.phone)}</span>
-        {(stats.length > 0 || level) && (
-          <span className={styles.stats}>
-            {stats.map((stat, index) => (
-              <span key={stat.label}>
-                {index > 0 && <span className={styles.dot}> · </span>}
-                <strong>{stat.value}</strong> {stat.label}
-              </span>
-            ))}
-            {level && (
-              <>
-                {stats.length > 0 && <span className={styles.dot}> · </span>}
-                <span className={styles.level}>{t('Уровень {level}', { level })}</span>
-              </>
-            )}
-          </span>
-        )}
-      </div>
-      {profileHref && <CaretRight className={settings.chevron} weight='bold' aria-hidden />}
+      <span className={styles.identity}>
+        {/* The name heads the page, like the Apple Account row heads Settings. */}
+        <ProfileHeadText
+          isHeading
+          name={displayName}
+          emoji={myProfile.settings?.statusEmoji}
+          meta={meta || undefined}
+        />
+      </span>
+      {profileHref && (
+        <CaretRight className={`${settings.chevron} ${styles.accountChevron}`} aria-hidden />
+      )}
     </>
   )
 
@@ -169,30 +164,47 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
       {/* Like the Apple Account row at the top of Settings: the face (a tap changes the photo),
           then the name, number and one line of facts; the rest of the row opens the profile. */}
       <div className={`${settings.list} ${styles.plain}`}>
-        <div className={styles.account}>
-          {customer.avatarUrl ? (
-            <Menu label={t('Фото профиля')} className={styles.faceButton} trigger={face}>
-              <MenuItem icon={<Camera aria-hidden />} onClick={() => fileInput.current?.click()}>
-                {t('Выбрать фото')}
-              </MenuItem>
-              <MenuItem
-                variant='danger'
-                icon={<Trash aria-hidden />}
-                onClick={() => void setAvatar(null)}
+        <ProfileHead
+          className={styles.account}
+          face={
+            customer.avatarUrl ? (
+              <Menu label={t('Фото профиля')} className={styles.faceButton} trigger={face}>
+                <MenuItem icon={<Camera aria-hidden />} onClick={() => fileInput.current?.click()}>
+                  {t('Выбрать фото')}
+                </MenuItem>
+                <MenuItem
+                  variant='danger'
+                  icon={<Trash aria-hidden />}
+                  onClick={() => void setAvatar(null)}
+                >
+                  {t('Удалить фото')}
+                </MenuItem>
+              </Menu>
+            ) : (
+              <button
+                type='button'
+                className={styles.faceButton}
+                onClick={() => fileInput.current?.click()}
+                aria-label={t('Добавить фото профиля')}
               >
-                {t('Удалить фото')}
-              </MenuItem>
-            </Menu>
-          ) : (
-            <button
-              type='button'
-              className={styles.faceButton}
-              onClick={() => fileInput.current?.click()}
-              aria-label={t('Добавить фото профиля')}
-            >
-              {face}
-            </button>
-          )}
+                {face}
+              </button>
+            )
+          }
+          end={
+            onOpenSettings && (
+              <button
+                type='button'
+                className={styles.gear}
+                onClick={onOpenSettings}
+                aria-label={t('Настройки')}
+                title={t('Настройки')}
+              >
+                <GearSix aria-hidden />
+              </button>
+            )
+          }
+        >
           {profileHref ? (
             <NextLink href={profileHref} className={styles.accountLink}>
               {identity}
@@ -201,7 +213,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
           ) : (
             <div className={styles.accountLink}>{identity}</div>
           )}
-        </div>
+        </ProfileHead>
       </div>
       <input
         ref={fileInput}
@@ -212,20 +224,9 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
         onChange={handleFile}
       />
 
-      {/* Work places as Settings rows, the same as the settings under them: a thin glyph, the
-          label, what it opens on the right, a chevron. */}
-      {(isCabinetShown || masterOf.length > 0) && (
+      {/* A master's day as a Settings row (owners reach the cabinet from the tab bar). */}
+      {masterOf.length > 0 && (
         <div className={`${settings.list} ${styles.plain}`}>
-          {isCabinetShown && (
-            <NextLink href={cabinetHref} className={settings.row}>
-              <span className={settings.glyph} aria-hidden>
-                <Storefront />
-              </span>
-              <span className={settings.label}>{t('Кабинет')}</span>
-              <span className={settings.value}>{cabinetName}</span>
-              <CaretRight className={settings.chevron} weight='bold' aria-hidden />
-            </NextLink>
-          )}
           {masterOf.length > 0 && (
             <NextLink href={masterHref} className={settings.row}>
               <span className={settings.glyph} aria-hidden>
@@ -233,7 +234,7 @@ export const AccountCard = ({ bookings, visits }: AccountCardProps) => {
               </span>
               <span className={settings.label}>{t('Мой день')}</span>
               {masterOf.length === 1 && <span className={settings.value}>{masterOf[0]?.name}</span>}
-              <CaretRight className={settings.chevron} weight='bold' aria-hidden />
+              <CaretRight className={settings.chevron} aria-hidden />
             </NextLink>
           )}
         </div>

@@ -183,7 +183,7 @@ export const BookingSummary = ({
             <span className={styles.barPrice}>
               {total !== null ? formatPrice(total) : (paidWith?.label ?? '')}
               {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
-              <CaretUp className={styles.barChevron} weight='bold' aria-hidden />
+              <CaretUp className={styles.barChevron} aria-hidden />
             </span>
             <span
               className={styles.barHint}
@@ -341,7 +341,7 @@ export const BookingSummary = ({
                     <span className={styles.rowEmpty}>—</span>
                   )}
                 </span>
-                <CaretRight weight='bold' className={styles.rowChevron} aria-hidden />
+                <CaretRight className={styles.rowChevron} aria-hidden />
               </button>
             </li>
           )

@@ -6,12 +6,11 @@ const LANGUAGES = {
   ky: {
     catalogTab: 'Кызматтар',
     placesTab: 'Жайлар',
-    forBusiness: 'Бизнес үчүн',
     placeTabs: 'Жайдын бөлүмдөрү',
     similarHeading: 'Окшош жайлар',
     yourBookings: 'Сиздин жазылууларыңыз',
-    upcoming: 'Алдыдагылар',
-    history: 'Тарых',
+    bookingsTab: 'Жазылуулар',
+    favoritesTab: 'Тандалгандар',
     getCode: 'Код алуу',
     phoneNumber: 'Телефон номери',
     schedule: 'Жадыбал',
@@ -20,12 +19,11 @@ const LANGUAGES = {
   en: {
     catalogTab: 'Services',
     placesTab: 'Places',
-    forBusiness: 'For business',
     placeTabs: 'Place sections',
     similarHeading: 'Similar places',
     yourBookings: 'Your bookings',
-    upcoming: 'Upcoming',
-    history: 'History',
+    bookingsTab: 'Bookings',
+    favoritesTab: 'Favourites',
     getCode: 'Get a code',
     phoneNumber: 'Phone number',
     schedule: 'Schedule',
@@ -50,7 +48,8 @@ for (const [language, text] of Object.entries(LANGUAGES) as [
       await expect(page.getByRole('tab', { name: text.catalogTab }).first()).toBeVisible()
       await expect(page.getByRole('tab', { name: text.placesTab }).first()).toBeVisible()
       if (testInfo.project.name === 'desktop') {
-        await expect(page.getByRole('link', { name: text.forBusiness }).first()).toBeVisible()
+        // The header's «Записи»: «Бизнес» reads the same in Kyrgyz, so it proves nothing.
+        await expect(page.getByRole('link', { name: text.bookingsTab }).first()).toBeVisible()
       }
     })
 
@@ -63,8 +62,8 @@ for (const [language, text] of Object.entries(LANGUAGES) as [
     test('the profile', async ({ page }) => {
       await page.goto('/bookings')
       await expect(page.getByRole('heading', { name: text.yourBookings })).toBeVisible()
-      await expect(page.getByText(text.upcoming, { exact: false }).first()).toBeVisible()
-      await expect(page.getByText(text.history, { exact: false }).first()).toBeVisible()
+      await expect(page.getByRole('tab', { name: text.bookingsTab })).toBeVisible()
+      await expect(page.getByRole('tab', { name: text.favoritesTab })).toBeVisible()
     })
 
     test('sign-in', async ({ page }) => {

@@ -34,7 +34,7 @@ export const WaitlistList = () => {
               aria-label={t('Жду окна: {service}', { service: entry.service.name })}
             >
               <span className={styles.glyph} data-free={isFree || undefined} aria-hidden>
-                <BellRinging weight='fill' />
+                <BellRinging />
               </span>
               <span className={styles.text}>
                 <span className={styles.name}>{entry.service.name}</span>
@@ -56,7 +56,7 @@ export const WaitlistList = () => {
                 aria-label={t('Больше не ждать')}
                 onClick={() => void leave(entry.id)}
               >
-                <X weight='bold' aria-hidden />
+                <X aria-hidden />
               </button>
             </li>
           )

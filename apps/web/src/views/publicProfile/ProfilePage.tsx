@@ -16,7 +16,6 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => (
   <main className={styles.page} style={profileStyle(profile.accent)}>
     <div className={styles.column}>
       <Breadcrumbs
-        align='center'
         className={styles.crumbs}
         items={[
           { label: 'Каталог', href: '/' },
