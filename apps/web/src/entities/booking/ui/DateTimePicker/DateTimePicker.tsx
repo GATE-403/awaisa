@@ -94,6 +94,13 @@ export const DateTimePicker = ({
     !error &&
     rulerSlots.some((slot) => slot.isAvailable)
   const availableCount = slots.filter((slot) => slot.isAvailable).length
+  // Without a dial (a full day, an error, no master yet) there is no time under a needle: the
+  // ruler only tells the form while it is on screen, so the bar kept «Выбрать 18:30» from the day
+  // before on a day with nothing free.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only when the dial comes or goes
+  useEffect(() => {
+    if (!isRulerShown) onCenteredTimeChange?.(null)
+  }, [isRulerShown])
   // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null

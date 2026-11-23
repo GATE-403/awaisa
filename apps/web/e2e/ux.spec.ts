@@ -150,6 +150,29 @@ test.describe('UX: guidance and feedback', () => {
     expect(failures).toBe(0)
   })
 
+  test('a full day offers no time left over from the day before', async ({ page }) => {
+    // The first day asked for has one free time; every other day is full.
+    let firstDate: string | null = null
+    await page.route('**/api/availability**', (route) => {
+      const date = new URL(route.request().url()).searchParams.get('date')
+      firstDate ??= date
+      const isFree = date === firstDate
+      return route.fulfill({ json: { date, slots: [{ time: '12:00', isAvailable: isFree }] } })
+    })
+    await page.goto('/awaisa-studio/book?service=styling')
+    await bookingSteps(page)
+      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .click()
+    const action = primaryAction(page)
+    await expect(action).toHaveText('Выбрать 12:00')
+
+    // Another day, full: the bar no longer offers the first day's 12:00.
+    const days = page.getByRole('group', { name: 'День' }).getByRole('button', { disabled: false })
+    await days.nth(1).click()
+    await expect(page.getByText('На этот день всё занято')).toBeVisible()
+    await expect(action).toHaveText('Выбрать время')
+  })
+
   test('slot loading failure offers a retry instead of a dead end', async ({ page }) => {
     let failures = 1
     await page.goto('/awaisa-studio/book?service=styling')
