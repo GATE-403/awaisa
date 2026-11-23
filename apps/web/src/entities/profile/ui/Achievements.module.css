@@ -1,4 +1,113 @@
-/* Medals on the page itself, no card: three a row on phones, five from 768px. */
+.collection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The medals earned: one row of bigger coins like trophies on a shelf, sideways when they do not
+   fit (momentum on touch, edge fades with a mouse: `data-edge-fade`). */
+.shelf {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  padding: var(--space-1) var(--space-2) var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.shelf::-webkit-scrollbar {
+  display: none;
+}
+
+.shelf .item {
+  flex: 0 0 92px;
+}
+
+/* The whole name on a trophy, in two lines at most («Первый ви…» read as broken). */
+.shelf .title {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  hyphens: auto;
+}
+
+.shelf .medal {
+  width: 64px;
+  height: 64px;
+}
+
+.shelf .emoji {
+  font-size: 30px;
+}
+
+/* Phones: smaller coins with more air between them, so the shelf breathes («свободного
+   пространства нет и все что можно запихано»). */
+@media (max-width: 639px) {
+  .shelf {
+    gap: var(--space-3);
+  }
+
+  .shelf .item {
+    flex-basis: 80px;
+  }
+
+  .shelf .medal {
+    width: 56px;
+    height: 56px;
+  }
+
+  .shelf .emoji {
+    font-size: 26px;
+  }
+}
+
+/* The goals folded into one line, the two closest named; a tap opens them in place. */
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-muted-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  text-align: start;
+  cursor: pointer;
+}
+
+.more strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (hover: hover) {
+  .more:hover {
+    color: var(--color-link);
+  }
+}
+
+.more:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+.moreCaret {
+  flex: none;
+  transition: rotate var(--duration-fast) var(--ease-standard);
+}
+
+.moreCaret[data-open] {
+  rotate: 180deg;
+}
+
+/* The goals: three a row on phones, five from 768px. */
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -80,16 +189,23 @@
 }
 
 .track {
+  position: relative;
+  overflow: hidden;
   width: 48px;
   height: 3px;
   margin-top: 2px;
   border-radius: var(--radius-full);
-  /* The progress already made, in the medal's own colour, on a visible track. */
-  background: linear-gradient(
-    to right,
-    var(--medal, var(--color-primary)) var(--done),
-    color-mix(in srgb, var(--color-foreground) 14%, transparent) 0
-  );
+  background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
+}
+
+/* The progress already made, in the medal's own colour. */
+.track::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--done);
+  border-radius: inherit;
+  background: var(--medal, var(--color-primary));
 }
 
 .srOnly {
@@ -99,4 +215,104 @@
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* The medal is a button when its card can open: the whole item, no chrome of its own. */
+.press {
+  display: contents;
+}
+
+button.press {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+button.press:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+button.press:active .medal {
+  scale: 0.92;
+}
+
+/* Motion («сделать живее»): the medals come in one after another, an earned one catches the
+   light like a coin under the mouse; nothing moves under reduced motion. */
+@keyframes medal-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+  }
+}
+
+.item {
+  animation: medal-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 35ms);
+}
+
+.medal {
+  position: relative;
+  overflow: hidden;
+  transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+.item[data-earned] .medal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .item[data-earned]:hover .medal::after {
+    transform: translateX(120%);
+    transition: transform 700ms var(--ease-standard);
+  }
+}
+
+/* The goal's progress line fills from empty as it appears. */
+.track::before {
+  transform-origin: left;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @starting-style {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    animation: none;
+  }
+
+  .item[data-earned] .medal::after {
+    display: none;
+  }
+
+  .track::before {
+    transition: none;
+  }
+
+  .moreCaret {
+    transition: none;
+  }
 }

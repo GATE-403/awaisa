@@ -1,6 +1,11 @@
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3'
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import type { Env } from '../config/env.js'
@@ -71,6 +76,22 @@ export class StorageService {
       }
     } catch (error) {
       this.logger.warn(`Could not delete ${key}: ${String(error)}`)
+    }
+  }
+
+  /** The bytes of one of our own pictures by its public URL (local or the bucket); 404 otherwise. */
+  async read(url: string) {
+    const key = this.keyFromUrl(url)
+    if (!key) throw new NotFoundException()
+    if (!this.s3) return this.readLocal(key)
+    try {
+      const object = await this.s3.send(
+        new GetObjectCommand({ Bucket: this.config.get('S3_BUCKET', { infer: true }), Key: key }),
+      )
+      if (!object.Body) throw new NotFoundException()
+      return Buffer.from(await object.Body.transformToByteArray())
+    } catch {
+      throw new NotFoundException()
     }
   }
 

@@ -1,10 +1,12 @@
 'use client'
 
-import { Button } from '@awaisa/ui/Button'
+import { PencilSimple } from '@phosphor-icons/react/ssr'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useSession } from '@/entities/session'
 import { useT } from '@/shared/i18n'
+import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { useProfileEditorHost } from '../model/profileEditorHost'
 import { useMyProfile } from '../model/useMyProfile'
 import { ProfileStyleSheet } from './ProfileStyleSheet/ProfileStyleSheet'
 
@@ -15,18 +17,17 @@ export const EditProfileButton = () => {
   const session = useSession()
   const myProfile = useMyProfile(session.status === 'signedIn')
   const [isOpen, setIsOpen] = useState(false)
+  const host = useProfileEditorHost()
   const customer = session.customer
 
   return (
     <>
-      <Button
-        variant='secondary'
-        size='sm'
-        onClick={() => setIsOpen(true)}
+      <GlyphButton
+        icon={<PencilSimple aria-hidden />}
+        label={t('Изменить')}
+        onClick={() => (host ? host.open() : setIsOpen(true))}
         disabled={!myProfile.settings}
-      >
-        {t('Оформление')}
-      </Button>
+      />
       {isOpen && myProfile.settings && customer && (
         <ProfileStyleSheet
           settings={myProfile.settings}

@@ -1,4 +1,6 @@
 .page {
+  /* The map's full-bleed width must not scroll the page sideways. */
+  overflow-x: clip;
   /* As tall as the skeleton before it (a screen), so a short profile does not pull the footer
      up into view when it streams in (Lighthouse layout shift 0.22 on phones). */
   min-height: 100svh;
@@ -21,34 +23,18 @@
   padding: var(--space-6) var(--page-gutter) 0;
 }
 
+/* The head as in Telegram: the face, the name and one quiet line, tight (12, 4); the tiles and
+   the data group follow 16 apart («отступы … не соблюдают иерархию»). */
 .head {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-
-.face[data-size] {
-  width: 96px;
-  height: 96px;
-  margin-bottom: var(--space-3);
-  box-shadow:
-    0 0 0 0.5px var(--color-border),
-    var(--shadow-md);
-  font-size: 34px;
-}
-
-.wreath {
-  margin-bottom: var(--space-6);
-}
-
-.wreath .face[data-size] {
-  margin-bottom: 0;
+  gap: var(--space-4);
+  text-align: start;
 }
 
 .name {
-  font-size: var(--text-title1);
+  margin: 0;
+  font-size: var(--text-title2);
   line-height: 1.15;
   font-weight: var(--font-weight-bold);
   letter-spacing: var(--tracking-title);
@@ -58,16 +44,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  margin: var(--space-1) 0 0;
   font-size: var(--text-body);
 }
 
-.statusEmoji {
-  font-size: 1.15em;
-  line-height: 1;
-}
-
 .facts {
-  margin-top: var(--space-1);
+  margin: var(--space-1) 0 0;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
 }
@@ -83,62 +65,16 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.levelMuted {
-  color: var(--color-muted-foreground);
-  font-weight: var(--font-weight-regular);
-}
-
 .hidden {
+  margin: var(--space-2) 0 0;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
 }
 
 .actions {
   display: flex;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
-}
-
-/* The report flag: a round secondary capsule as tall as «Поделиться» beside it. */
-:where(.report) {
-  position: relative;
-}
-
-.report {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
   justify-content: center;
-  width: var(--control-height-sm);
-  height: var(--control-height-sm);
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-muted-foreground);
-  cursor: pointer;
-}
-
-.report::before {
-  position: absolute;
-  inset: min(0px, calc((100% - 44px) / 2));
-  content: "";
-}
-
-.report svg {
-  width: 16px;
-  height: 16px;
-}
-
-.report:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-@media (hover: hover) {
-  .report:hover {
-    background: var(--color-fill-hover);
-  }
+  margin-top: var(--space-4);
 }
 
 .section {
@@ -147,73 +83,10 @@
   gap: var(--space-3);
 }
 
-.captionCount {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  margin-left: auto;
-  text-transform: none;
-}
-
 .star {
   width: 12px;
   height: 12px;
   color: var(--color-rating);
-}
-
-/* Masters: small faces with first names, like favourites in Contacts. */
-.faces {
-  display: flex;
-  gap: var(--space-4);
-  margin: 0;
-  padding: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  list-style: none;
-}
-
-.faces::-webkit-scrollbar {
-  display: none;
-}
-
-.faceLink {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  width: 60px;
-  color: var(--color-foreground);
-}
-
-.faceName {
-  overflow: hidden;
-  max-width: 100%;
-  font-size: var(--text-xs);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Places: quiet capsules with the logo and how many visits. */
-.places {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.place {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 36px;
-  padding: 0 var(--space-3) 0 var(--space-2);
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
 }
 
 .placeCount {
@@ -280,35 +153,9 @@
   line-height: 1.4;
 }
 
-.about {
-  max-width: 420px;
-  margin-top: var(--space-1);
-  font-size: var(--text-footnote);
-  line-height: 1.4;
-}
-
 .featured {
   margin-left: 3px;
   font-size: 14px;
-}
-
-/* «Мой мастер»: a quiet capsule with the face, booking that master. */
-.myMaster {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 36px;
-  margin-top: var(--space-2);
-  padding: 0 var(--space-3) 0 4px;
-  border-radius: var(--radius-full);
-  background: var(--color-fill);
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
-}
-
-.myMaster strong {
-  color: var(--color-foreground);
-  font-weight: var(--font-weight-semibold);
 }
 
 .awaiting {
@@ -321,48 +168,547 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* A bio's links: glyph and handle in the link colour, wrapping as one centred line. */
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0 var(--space-4);
-  margin: var(--space-1) 0 0;
-  padding: 0;
-  list-style: none;
+/* The trail sits close above the head: the column's gap is for sections, not for it. */
+.crumbs {
+  margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
 }
 
-.link {
-  display: inline-flex;
+/* «Следующая цель»: one row over the medals — the closest medal in a ring that fills to its
+   progress, what is left, and the one tap that brings it nearer. No card: it lies on the page. */
+.goal {
+  display: flex;
   align-items: center;
-  gap: var(--space-1);
-  min-height: 44px;
-  color: var(--color-link);
+  gap: var(--space-3);
+  min-height: 64px;
+  margin-bottom: var(--space-6);
+}
+
+.goalRing {
+  position: relative;
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+}
+
+.goalRing svg {
+  position: absolute;
+  inset: 0;
+  rotate: -90deg;
+}
+
+.goalTrack,
+.goalFill {
+  fill: none;
+  stroke-width: 4;
+}
+
+.goalTrack {
+  stroke: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+}
+
+.goalFill {
+  stroke: var(--medal);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 900ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @starting-style {
+    stroke-dashoffset: 138.23;
+  }
+}
+
+.goalEmoji {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.goalText {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.goalCaption {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+}
+
+.goalTitle {
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.goalHint {
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+/* The progress the ring already shows, said for screen readers. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A medal's card in the popover: the coin large, the whole name, what it is for, the progress
+   in the medal's colour and, on one's own profile, where to go next. */
+.medalCard {
+  /* A compact row like a notification: the coin on the left, what it is and the progress on the
+     right; the tall centred card took half a phone («в мобилке слишком большие»). */
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: start;
+}
+
+.medalCardBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.medalCardCoin {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill);
+  font-size: 22px;
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+.medalCard[data-earned] .medalCardCoin {
+  background:
+    radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--medal) 55%, white), transparent 62%),
+    var(--medal);
+  filter: none;
+  opacity: 1;
+}
+
+.medalCardTitle {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  font-weight: var(--font-weight-semibold);
+}
+
+.medalCardText,
+.medalCardDone {
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.medalCardDone {
+  color: color-mix(in srgb, var(--color-success) 60%, var(--color-foreground));
   font-weight: var(--font-weight-medium);
 }
 
-.link svg {
-  flex-shrink: 0;
-  width: 15px;
-  height: 15px;
+.medalCardTrack {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  height: 4px;
+  margin: var(--space-1) 0 2px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
 }
 
-.linkText {
-  max-width: 180px;
+.medalCardTrack::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--medal);
+  transform: scaleX(var(--share));
+  transform-origin: left;
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @starting-style {
+    transform: scaleX(0);
+  }
+}
+
+.medalCardBody > a {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goalFill,
+  .medalCardTrack::before {
+    transition: none;
+  }
+}
+
+/* The year in visits: twelve months as columns of dots in the profile's colour, the month read
+   in the line above. */
+.year {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.yearLine {
+  min-height: calc(var(--text-footnote-line-height) * 2);
+  /* The month's line may run long: two lines, the rest is in the place pages. */
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin: 0;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.yearLine strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.yearMonth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: 44px;
+  padding: var(--space-1) 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-muted-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.yearMonth[data-picked] {
+  background: var(--color-fill);
+  color: var(--color-foreground);
+}
+
+.yearMonth:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Dots stacked from the foot, one a visit (six at most); an empty month keeps a faint dot. */
+.yearBar {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  /* As tall as the busiest month needs (six dots at most). */
+  height: calc(var(--rows, 6) * 11px - 3px);
+}
+
+.yearBar:empty::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+}
+
+.yearDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent, var(--color-primary));
+  animation: year-dot 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 30ms);
+}
+
+@keyframes year-dot {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+}
+
+.yearLabel {
+  font-size: var(--text-xs);
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+/* The places on the city: a static map picture, a pin opens the place. */
+.mapWrap {
+  position: relative;
+  height: 220px;
+  /* The window's whole width on the page, square edges («на всю ширину и убери закругления»). */
+  margin-inline: calc(50% - 50vw);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* In the sheet: from one edge of the sheet to the other. */
+.sheetBody .mapWrap {
+  margin-inline: calc(-1 * var(--space-4));
+}
+
+/* The places as one line of plain items, sideways when they do not fit: the tile, the name,
+   the visits; no fill behind them. */
+.placesLine {
+  display: flex;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.placesLine::-webkit-scrollbar {
+  display: none;
+}
+
+.placesLine > li {
+  flex-shrink: 0;
+}
+
+/* A compact line («сделай компактнее»): 32pt rows with an invisible 44pt target. */
+.placeItem::before {
+  content: "";
+  position: absolute;
+  inset-block: -6px;
+  inset-inline: 0;
+}
+
+/* The places tab is tight: the line close to the tabs and to the map under it. */
+.placesPanel {
+  gap: var(--space-2);
+}
+
+.tabs [role="tabpanel"]:has(.placesPanel) {
+  padding-top: var(--space-2);
+}
+
+/* In the sheet the map runs to the sheet's foot, with no strip of the layer under it. */
+.sheetBody .placesPanel > .mapWrap:last-child {
+  margin-bottom: calc(-1 * var(--space-6));
+}
+
+.placeItem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  color: var(--color-foreground);
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
 @media (hover: hover) {
-  .link:hover .linkText {
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .placeItem:hover {
+    color: var(--color-link);
   }
 }
 
-/* The trail sits close above the head: the column's gap is for sections, not for it. */
-.crumbs {
-  margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
+.map,
+.mapPlaceholder {
+  height: 100%;
+  min-height: 0;
+}
+
+.mapPlaceholder {
+  background: var(--color-fill);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yearDot {
+    animation: none;
+  }
+}
+
+/* Telegram's profile: the head, the tiles and the data group 16 apart, as one block. */
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The data as plain rows right on the page, the value over a small caption: no fill and no
+   lines around or between them («убери все оберточные фоны», «эти линии не подходят»). */
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.infoRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "value mark"
+    "caption mark";
+  align-items: center;
+  column-gap: var(--space-3);
+  min-height: var(--row-height);
+  padding: var(--space-1) 0;
+  color: var(--color-foreground);
+  text-align: start;
+}
+
+.infoRow[data-with-face] {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "face value mark"
+    "face caption mark";
+}
+
+.infoValue {
+  grid-area: value;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  text-overflow: ellipsis;
+}
+
+.infoValue[data-link] {
+  color: var(--color-link);
+}
+
+.infoCaption {
+  grid-area: caption;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.infoFace {
+  grid-area: face;
+}
+
+.infoMark,
+.infoChevron {
+  grid-area: mark;
+  display: flex;
+  color: var(--color-tertiary-foreground);
+}
+
+.infoMark svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: hover) {
+  a.infoRow:hover .infoValue {
+    color: var(--color-link);
+  }
+}
+
+a.infoRow:focus-visible {
+  outline: none;
+  border-radius: var(--radius-md);
+  box-shadow: inset var(--focus-ring);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Every panel starts the same distance under the tabs. */
+.tabs [role="tabpanel"] {
+  padding-top: var(--space-4);
+}
+
+.average {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* The profile in a sheet over a page: the same column right on the sheet, no wash or card
+   behind it («убери все оберточные фоны»). */
+.sheetBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* In the sheet the tabs' content lies on a darker layer down to the sheet's foot, edge to edge
+   («сделай секцию под табом темного цвета»): the head and the tabs on the sheet, the content a
+   step below, like a grouped list under its header. */
+.sheetBody .tabs {
+  flex: 1;
+}
+
+.sheetBody .tabs [role="tabpanel"]:not([hidden]) {
+  flex: 1;
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-6));
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  /* A step below the sheet, not the page's black («не настолько темным»). */
+  background: color-mix(in srgb, var(--color-sheet) 55%, var(--color-background));
+}
+
+/* The profile's glyph capsule at the head row's end on the full page (in a sheet it sits in
+   the bar instead). */
+.corner {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Phones: the capsule rides a row of its own over the face, at the right like a bar's buttons;
+   beside the face it squeezed the name into «Локаль-ный А.». */
+@media (max-width: 639px) {
+  .pageHead {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  .pageHead > .corner {
+    display: flex;
+    flex-basis: 100%;
+    justify-content: flex-end;
+    order: -1;
+  }
 }

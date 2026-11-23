@@ -1,24 +1,43 @@
 'use client'
 
 import { Input } from '@awaisa/ui/Input'
+import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
-import { Check } from '@phosphor-icons/react/ssr'
-import { useState } from 'react'
+import {
+  CaretUpDown,
+  ChatCircleText,
+  Check,
+  Eye,
+  EyeSlash,
+  Globe,
+  LinkSimple,
+  MapPin,
+  Medal,
+  Palette,
+  Smiley,
+  TextAlignLeft,
+  TiktokLogo,
+  User,
+} from '@phosphor-icons/react/ssr'
+import { type ComponentType, type FormEvent, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import {
   ACCENTS,
   achievementLook,
   achievementTitle,
+  ProfileHead,
+  ProfileHeadText,
   profileStyle,
   STATUS_EMOJI,
 } from '@/entities/profile'
 import { getErrorMessage } from '@/shared/api/apiError'
 import type { ProfileLinkKind, ProfileSettings, PublicProfile } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
+import { InstagramMark, TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
+import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
-import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ProfileStyleSheet.module.css'
 
 const LINK_FIELDS: { kind: ProfileLinkKind; label: string; placeholder: string }[] = [
@@ -29,25 +48,81 @@ const LINK_FIELDS: { kind: ProfileLinkKind; label: string; placeholder: string }
 ]
 
 const MAX_FEATURED = 3
+const STATUS_MAX = 80
+const ABOUT_MAX = 160
 
-interface ProfileStyleSheetProps {
+const LINK_GLYPHS: Record<ProfileLinkKind, ComponentType> = {
+  instagram: InstagramMark,
+  telegram: TelegramMark,
+  tiktok: TiktokLogo,
+  website: Globe,
+}
+
+// What is left of a field's length, shown only near its end («ставь ограничение»).
+const Counter = ({ value, max }: { value: string; max: number }) =>
+  value.length >= max * 0.7 ? (
+    <span className={styles.counter} aria-live='polite'>
+      {max - value.length}
+    </span>
+  ) : null
+
+interface ProfileStyleFormProps {
+  /** The form's id: the sheet's «Готово» submits it from the bar. */
+  formId: string
   settings: ProfileSettings
   profile: PublicProfile | null
   name: string
   avatarUrl: string | null
   onSave: (input: Partial<Omit<ProfileSettings, 'id'>>) => Promise<void>
+  /** Saved: the caller closes the sheet or goes back to the profile. */
+  onDone: () => void
+  onSavingChange?: (isSaving: boolean) => void
+}
+
+interface ProfileStyleSheetProps
+  extends Omit<ProfileStyleFormProps, 'formId' | 'onDone' | 'onSavingChange'> {
   onClose: () => void
 }
 
+const SHEET_FORM_ID = 'profile-style-form'
+
 // How the profile looks to others: a live preview, the colour, a short status and who sees it.
-export const ProfileStyleSheet = ({
+// A sheet of its own on the profile page; inside the profile's own sheet the same form takes its
+// place («оформление … могла там же внутри поменяться»), so there is no sheet over a sheet.
+export const ProfileStyleSheet = ({ onClose, ...props }: ProfileStyleSheetProps) => {
+  const t = useT()
+  const [isSaving, setIsSaving] = useState(false)
+
+  return (
+    <Sheet
+      title={t('Профиль')}
+      onClose={onClose}
+      action={{
+        label: isSaving ? t('Сохраняем…') : t('Готово'),
+        form: SHEET_FORM_ID,
+        disabled: isSaving,
+      }}
+    >
+      <ProfileStyleForm
+        {...props}
+        formId={SHEET_FORM_ID}
+        onDone={onClose}
+        onSavingChange={setIsSaving}
+      />
+    </Sheet>
+  )
+}
+
+export const ProfileStyleForm = ({
+  formId,
   settings,
   profile,
   name,
   avatarUrl,
   onSave,
-  onClose,
-}: ProfileStyleSheetProps) => {
+  onDone,
+  onSavingChange,
+}: ProfileStyleFormProps) => {
   const t = useT()
   const toast = useToast()
   const [accent, setAccent] = useState(settings.accent)
@@ -74,10 +149,9 @@ export const ProfileStyleSheet = ({
     )
   const [isPublic, setIsPublic] = useState(settings.isPublic)
   const [showPlaces, setShowPlaces] = useState(settings.showPlaces)
-  const [isSaving, setIsSaving] = useState(false)
-
-  const save = async () => {
-    setIsSaving(true)
+  const save = async (event: FormEvent) => {
+    event.preventDefault()
+    onSavingChange?.(true)
     try {
       await onSave({
         accent,
@@ -94,112 +168,113 @@ export const ProfileStyleSheet = ({
         showPlaces,
       })
       toast.show({ title: t('Профиль обновлён'), type: 'success' })
-      onClose()
+      onSavingChange?.(false)
+      onDone()
     } catch (error) {
       toast.show({
         title: t('Не получилось сохранить'),
         description: getErrorMessage(error),
         type: 'error',
       })
-      setIsSaving(false)
+      onSavingChange?.(false)
     }
   }
 
   return (
-    <Sheet
-      title={t('Профиль')}
-      onClose={onClose}
-      action={{
-        label: isSaving ? t('Сохраняем…') : t('Готово'),
-        onClick: save,
-        disabled: isSaving,
-      }}
-    >
-      <div className={styles.preview} style={profileStyle(accent)} aria-hidden>
-        <PersonAvatar name={name} src={avatarUrl ?? undefined} size='xl' className={styles.face} />
-        <p className={styles.previewName}>{name}</p>
-        {(status.trim() || statusEmoji) && (
-          <p className={styles.previewStatus}>
-            {statusEmoji} {status.trim()}
-          </p>
-        )}
-        <p className={styles.previewLevel}>
-          {t('Уровень {level}', { level: profile?.level.level ?? 1 })}
-          {featured.map((id) => (
-            <span key={id} className={styles.previewBadge}>
-              {achievementLook(id).emoji}
-            </span>
-          ))}
-        </p>
-        {about.trim() && <p className={styles.previewAbout}>{about.trim()}</p>}
+    <form id={formId} className={styles.form} onSubmit={(event) => void save(event)}>
+      {/* The preview is the profile's own head (`ProfileHead`), in the chosen colour. */}
+      <div style={profileStyle(accent)} aria-hidden>
+        <ProfileHead face={<PersonAvatar name={name} src={avatarUrl ?? undefined} size='xl' />}>
+          <ProfileHeadText
+            name={name}
+            emoji={statusEmoji}
+            meta={
+              <span className={styles.previewLevel}>
+                {t('Уровень {level}', { level: profile?.level.level ?? 1 })}
+                {featured.map((id) => (
+                  <span key={id} className={styles.previewBadge}>
+                    {achievementLook(id).emoji}
+                  </span>
+                ))}
+              </span>
+            }
+          >
+            {status.trim() && <p className={styles.previewStatus}>{status.trim()}</p>}
+            {about.trim() && <p className={styles.previewAbout}>{about.trim()}</p>}
+          </ProfileHeadText>
+        </ProfileHead>
       </div>
 
-      <div className={sheet.group}>
-        <SectionCaption>{t('Цвет')}</SectionCaption>
-        <div className={styles.accents} role='radiogroup' aria-label={t('Цвет профиля')}>
-          {Object.entries(ACCENTS).map(([key, item]) => (
-            <label key={key} className={styles.accentOption} style={profileStyle(key)}>
-              <input
-                type='radio'
-                name='accent'
-                className={styles.input}
-                checked={accent === key}
-                onChange={() => setAccent(key)}
-                aria-label={t(item.label)}
-              />
-              <Check className={styles.check} weight='bold' aria-hidden />
-            </label>
-          ))}
+      {/* Laid out like the cabinet's sheets («нужен дизайн из админки»): rows right on the
+          sheet, a thin glyph before each label, the control on the right, a ↳ note under a group. */}
+      <div className={styles.group}>
+        <div className={styles.row}>
+          <Palette className={styles.glyph} aria-hidden />
+          <span className={styles.label}>{t('Цвет')}</span>
+          <Select
+            variant='plain'
+            aria-label={t('Цвет профиля')}
+            items={Object.entries(ACCENTS).map(([key, item]) => ({
+              value: key,
+              label: (
+                <span className={styles.option}>
+                  <span className={styles.swatch} style={profileStyle(key)} aria-hidden />
+                  {t(item.label)}
+                </span>
+              ),
+            }))}
+            value={accent}
+            onValueChange={(value) => value && setAccent(value)}
+          />
         </div>
-      </div>
-
-      <div className={sheet.group}>
-        <SectionCaption>{t('Статус')}</SectionCaption>
-        <div className={styles.emojis} role='radiogroup' aria-label={t('Эмодзи статуса')}>
-          <label className={styles.emojiOption} data-none=''>
-            <input
-              type='radio'
-              name='status-emoji'
-              className={styles.input}
-              checked={statusEmoji === ''}
-              onChange={() => setStatusEmoji('')}
-              aria-label={t('Без эмодзи')}
-            />
-            <span aria-hidden>—</span>
-          </label>
-          {STATUS_EMOJI.map((emoji) => (
-            <label key={emoji} className={styles.emojiOption}>
-              <input
-                type='radio'
-                name='status-emoji'
-                className={styles.input}
-                checked={statusEmoji === emoji}
-                onChange={() => setStatusEmoji(emoji)}
-                aria-label={t('Эмодзи {emoji}', { emoji })}
-              />
-              <span aria-hidden>{emoji}</span>
-            </label>
-          ))}
+        <div className={styles.row}>
+          <Smiley className={styles.glyph} aria-hidden />
+          <span className={styles.label}>{t('Эмодзи')}</span>
+          <Select
+            variant='plain'
+            aria-label={t('Эмодзи статуса')}
+            items={[
+              { value: '', label: t('Без эмодзи') },
+              ...STATUS_EMOJI.map((emoji) => ({ value: emoji, label: emoji })),
+            ]}
+            value={statusEmoji}
+            onValueChange={(value) => setStatusEmoji(value ?? '')}
+          />
         </div>
-        <div className={sheet.list}>
-          <label className={`${sheet.row} ${sheet.textRow}`}>
+        <label className={styles.row}>
+          <ChatCircleText className={styles.glyph} aria-hidden />
+          <span className={styles.field}>
             <Input
               variant='plain'
               aria-label={t('Статус')}
               placeholder={t('Статус, например «Хожу к Азамату с 2024»')}
               value={status}
-              maxLength={80}
+              maxLength={STATUS_MAX}
               onValueChange={setStatus}
             />
-          </label>
-        </div>
+          </span>
+          <Counter value={status} max={STATUS_MAX} />
+        </label>
+        <label className={`${styles.row} ${styles.rowTop}`}>
+          <TextAlignLeft className={styles.glyph} aria-hidden />
+          <textarea
+            className={styles.about}
+            aria-label={t('О себе')}
+            placeholder={t('О себе: что любите, к кому ходите')}
+            value={about}
+            maxLength={ABOUT_MAX}
+            rows={2}
+            onChange={(event) => setAbout(event.target.value)}
+          />
+          <Counter value={about} max={ABOUT_MAX} />
+        </label>
       </div>
 
-      <div className={sheet.group}>
-        <SectionCaption>{t('Адрес профиля')}</SectionCaption>
-        <div className={sheet.list}>
-          <label className={sheet.row}>
-            <span className={styles.addressPrefix}>awaisa.kg/u/</span>
+      <div className={styles.group}>
+        <label className={styles.row}>
+          <LinkSimple className={styles.glyph} aria-hidden />
+          <span className={styles.addressPrefix}>awaisa.kg/u/</span>
+          <span className={styles.field}>
             <Input
               variant='plain'
               aria-label={t('Адрес профиля')}
@@ -211,35 +286,23 @@ export const ProfileStyleSheet = ({
               spellCheck={false}
               onValueChange={(value) => setHandle(value.replace(/[^a-zA-Z0-9_.]/g, ''))}
             />
-          </label>
-        </div>
-        <p className={sheet.groupFooter}>
+          </span>
+        </label>
+        <RowNote>
           {t('Латиница, цифры, «_» и «.», от 3 символов — короткая ссылка для био и сторис.')}
-        </p>
+        </RowNote>
       </div>
 
-      <div className={sheet.group}>
-        <SectionCaption>{t('О себе')}</SectionCaption>
-        <div className={sheet.list}>
-          <textarea
-            className={styles.about}
-            aria-label={t('О себе')}
-            placeholder={t('Пара строк: что любите, к кому ходите')}
-            value={about}
-            maxLength={160}
-            rows={3}
-            onChange={(event) => setAbout(event.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className={sheet.group}>
-        <SectionCaption>{t('Ссылки')}</SectionCaption>
-        <div className={sheet.list}>
-          {LINK_FIELDS.map(({ kind, label, placeholder }) => (
-            <label key={kind} className={sheet.row}>
-              <span className={sheet.rowLabel}>{t(label)}</span>
-              <span className={sheet.rowControl}>
+      <div className={styles.group}>
+        {LINK_FIELDS.map(({ kind, label, placeholder }) => {
+          const Glyph = LINK_GLYPHS[kind]
+          return (
+            <label key={kind} className={styles.row}>
+              <span className={styles.glyph} aria-hidden>
+                <Glyph />
+              </span>
+              <span className={styles.label}>{t(label)}</span>
+              <span className={styles.value}>
                 <Input
                   variant='plain'
                   aria-label={t(label)}
@@ -254,91 +317,92 @@ export const ProfileStyleSheet = ({
                 />
               </span>
             </label>
-          ))}
-        </div>
-        <p className={sheet.groupFooter}>
-          {t('Ник или ссылка — покажем значками на вашей странице.')}
-        </p>
+          )
+        })}
+        <RowNote>{t('Ник или ссылка — покажем значками на вашей странице.')}</RowNote>
       </div>
 
       {earned.length > 0 && (
-        <div className={sheet.group}>
-          <SectionCaption>{t('Витрина')}</SectionCaption>
-          <div className={styles.showcase}>
-            {earned.map((item) => {
-              const isOn = featured.includes(item.id)
-              return (
-                <button
-                  key={item.id}
-                  type='button'
-                  className={styles.showcaseChip}
-                  aria-pressed={isOn}
-                  disabled={!isOn && featured.length >= MAX_FEATURED}
-                  onClick={() => toggleFeatured(item.id)}
-                >
-                  <span aria-hidden>{achievementLook(item.id).emoji}</span>
-                  {achievementTitle(item.title, t)}
-                </button>
-              )
-            })}
+        // The showcase as options too («тоже можно опциями сделать»): one row, the chosen medals
+        // as emoji on its right, a menu that ticks up to three and stays open while you pick.
+        <div className={styles.group}>
+          <div className={styles.row}>
+            <Medal className={styles.glyph} aria-hidden />
+            <span className={styles.label}>{t('Витрина')}</span>
+            <Menu
+              label={t('Витрина: достижения рядом с уровнем')}
+              className={styles.menuTrigger}
+              trigger={
+                <>
+                  <span className={styles.menuValue}>
+                    {featured.length > 0
+                      ? featured.map((id) => achievementLook(id).emoji).join(' ')
+                      : t('Не выбрано')}
+                  </span>
+                  <CaretUpDown aria-hidden />
+                </>
+              }
+            >
+              {earned.map((item) => {
+                const isOn = featured.includes(item.id)
+                return (
+                  <MenuItem
+                    key={item.id}
+                    closeOnClick={false}
+                    disabled={!isOn && featured.length >= MAX_FEATURED}
+                    icon={isOn ? <Check /> : undefined}
+                    onClick={() => toggleFeatured(item.id)}
+                  >
+                    {achievementLook(item.id).emoji} {achievementTitle(item.title, t)}
+                  </MenuItem>
+                )
+              })}
+            </Menu>
           </div>
-          <p className={sheet.groupFooter}>{t('До трёх достижений — рядом с вашим уровнем.')}</p>
+          <RowNote>{t('До трёх достижений — рядом с вашим уровнем.')}</RowNote>
         </div>
       )}
 
-      {masters.length > 0 && (
-        <div className={sheet.group}>
-          <SectionCaption>{t('Мой мастер')}</SectionCaption>
-          <div className={styles.masters} role='radiogroup' aria-label={t('Мой мастер')}>
-            <label className={styles.masterOption}>
-              <input
-                type='radio'
-                name='favorite-master'
-                className={styles.input}
-                checked={favoriteMasterId === null}
-                onChange={() => setFavoriteMasterId(null)}
-                aria-label={t('Не показывать')}
-              />
-              <span className={styles.masterNone} aria-hidden>
-                —
-              </span>
-              <span className={styles.masterName}>{t('Никто')}</span>
-            </label>
-            {masters.map((master) => (
-              <label key={master.id} className={styles.masterOption}>
-                <input
-                  type='radio'
-                  name='favorite-master'
-                  className={styles.input}
-                  checked={favoriteMasterId === master.id}
-                  onChange={() => setFavoriteMasterId(master.id)}
-                  aria-label={`${master.name}, ${master.businessName}`}
-                />
-                <PersonAvatar name={master.name} src={master.photoUrl ?? undefined} size='lg' />
-                <span className={styles.masterName}>{master.name.split(' ')[0]}</span>
-              </label>
-            ))}
+      <div className={styles.group}>
+        {masters.length > 0 && (
+          <div className={styles.row}>
+            <User className={styles.glyph} aria-hidden />
+            <span className={styles.label}>{t('Мой мастер')}</span>
+            <Select
+              variant='plain'
+              aria-label={t('Мой мастер')}
+              items={[
+                { value: '', label: t('Не показывать') },
+                ...masters.map((master) => ({
+                  value: master.id,
+                  label: `${master.name.split(' ')[0]} · ${master.businessName}`,
+                })),
+              ]}
+              value={favoriteMasterId ?? ''}
+              onValueChange={(value) => setFavoriteMasterId(value || null)}
+            />
           </div>
-        </div>
-      )}
-
-      <div className={sheet.group}>
-        <div className={sheet.list}>
-          <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Открытый профиль')}</span>
-            <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-          </label>
-          <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Мастера и места')}</span>
-            <Switch checked={showPlaces} onCheckedChange={setShowPlaces} />
-          </label>
-        </div>
-        <p className={sheet.groupFooter}>
+        )}
+        <label className={styles.row}>
+          {isPublic ? (
+            <Eye className={styles.glyph} aria-hidden />
+          ) : (
+            <EyeSlash className={styles.glyph} aria-hidden />
+          )}
+          <span className={styles.label}>{t('Открытый профиль')}</span>
+          <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+        </label>
+        <label className={styles.row}>
+          <MapPin className={styles.glyph} aria-hidden />
+          <span className={styles.label}>{t('Мастера и места')}</span>
+          <Switch checked={showPlaces} onCheckedChange={setShowPlaces} />
+        </label>
+        <RowNote>
           {t(
             'Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения — за визиты и отзывы.',
           )}
-        </p>
+        </RowNote>
       </div>
-    </Sheet>
+    </form>
   )
 }
