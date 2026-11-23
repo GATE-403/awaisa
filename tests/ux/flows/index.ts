@@ -449,18 +449,20 @@ const flows: Flow[] = [
       await ux.uncounted(() => ux.fill(title, 'Login'))
       // The address is checked against the server after a pause: wait for the answer.
       await expect(page.getByText('Этот адрес занят')).toBeVisible()
-      await ux.expectFieldError(page.getByLabel('Ссылка на страницу'), /занят/)
+      await ux.expectFieldError(page.getByLabel('Ссылка'), /занят/)
       await ux.step('Ошибка: адрес занят', FILES.register)
 
       await ux.fill(title, `E2E UX Барбер ${suffix}`)
       await expect(page.getByText(/Свободна:/)).toBeVisible()
       await ux.tap(page.getByRole('button', { name: 'Далее' }))
-      await page.getByRole('radio', { name: 'Барбершопы' }).waitFor()
-      await ux.step('Шаг 2: вид бизнеса и услуги', FILES.register)
+      await page.getByRole('button', { name: /^Барбершопы/ }).waitFor()
+      await ux.step('Шаг 2: вид бизнеса', FILES.register)
 
-      await ux.tap(page.getByRole('radio', { name: 'Барбершопы' }))
+      await ux.tap(page.getByRole('button', { name: /^Барбершопы/ }))
+      await page.getByRole('checkbox', { name: 'Мужская стрижка' }).waitFor()
+      await ux.step('Шаг 3: услуги', FILES.register)
       await ux.tap(page.getByRole('button', { name: 'Далее' }))
-      await ux.step('Шаг 3: контакты', FILES.register)
+      await ux.step('Шаг 4: контакты', FILES.register)
       await ux.tap(page.getByRole('button', { name: 'Создать страницу' }))
 
       await expect(page).toHaveURL(/\/manage\/e2e-ux-barber/)

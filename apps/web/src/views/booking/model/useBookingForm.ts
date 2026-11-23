@@ -25,6 +25,7 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackFormError } from '@/shared/lib/telemetry'
 import { combineServices, getAddableServices, getMastersForAll } from '../lib/visitServices'
+import { useLookPhoto } from './useLookPhoto'
 import { usePriceQuote } from './usePriceQuote'
 import { useSubscriptionPayment } from './useSubscriptionPayment'
 
@@ -158,6 +159,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const session = useSession()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
   const presetService = findService(catalog, searchParams.get('service'))
+  // «Хочу так» on a work: the photo goes with the booking as the look the client wants.
+  const look = useLookPhoto(business.slug, searchParams.get('look'))
   // A time shown on a card («Сегодня, 14:30») opens the form on that time, not on a blank day.
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') ?? '')
     ? searchParams.get('date')
@@ -383,14 +386,32 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
 
   // The shown time may be gone by now: say so and let the client pick another one.
   useEffect(() => {
-    if (isPresetChecked || availability.isLoading || dayKey !== presetDate) return
+    // A place card's time comes without a service: it is checked once a service and a master
+    // are chosen, and the time waits on its card until then.
+    if (isPresetChecked || !serviceId || !specialistId) return
+    if (availability.isLoading || dayKey !== presetDate) return
     setIsPresetChecked(true)
     if (availability.error) return
     if (!availability.slots.some((slot) => slot.isAvailable && slot.time === presetTime)) {
       setTime(null)
-      toast.show({ title: `${presetTime} уже заняли — выберите другое время`, type: 'info' })
+      toast.show({
+        title: presetService
+          ? `${presetTime} уже заняли — выберите другое время`
+          : `В ${presetTime} эта услуга не помещается. Выберите другое время`,
+        type: 'info',
+      })
     }
-  }, [isPresetChecked, availability, dayKey, presetDate, presetTime, toast])
+  }, [
+    isPresetChecked,
+    serviceId,
+    specialistId,
+    availability,
+    dayKey,
+    presetDate,
+    presetTime,
+    presetService,
+    toast,
+  ])
 
   useEffect(() => {
     if (isBranchTimeChecked || availability.isLoading) return
@@ -521,13 +542,15 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setTime(null)
     setComment('')
     setPromoCode(null)
+    look.remove()
     setSubmitError(null)
     setHasTriedSubmit(false)
     setFolded({})
     setEditingStep(null)
     clearDraft()
     const url = new URL(window.location.href)
-    for (const key of ['service', 'specialist', 'date', 'time']) url.searchParams.delete(key)
+    for (const key of ['service', 'specialist', 'date', 'time', 'look'])
+      url.searchParams.delete(key)
     window.history.replaceState(window.history.state, '', url)
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -542,7 +565,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       nextSpecialists.some((item) => item.id === chosenSpecialistId)
     const hasSpecialist = (keepsSpecialist && chosenSpecialistId) || nextSpecialists.length === 1
     setServiceId(id)
-    setTime(null)
+    // A time from a link stays until it is checked against this service's free times.
+    if (isPresetChecked) setTime(null)
     setSubmitError(null)
     if (!keepsSpecialist) setSpecialistId(null)
     setEditingStep(null)
@@ -604,7 +628,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setAddNotice(null)
     setFolded((current) => ({ ...current, specialist: undefined }))
     setSpecialistId(id)
-    setTime(null)
+    if (isPresetChecked) setTime(null)
     setSubmitError(null)
     setEditingStep(null)
     scrollToStep('datetime', true)
@@ -702,6 +726,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
         promoCode: promoCode && !codeError && !isPaidBySubscription ? promoCode : undefined,
         ref: readRef(),
         channel: readChannel(),
+        lookPhotoId: look.photo?.id,
         // Paid by a subscription: one's own at this place, or one bought now with the visit.
         subscriptionId: isForOther ? undefined : subscriptionPayment.subscription?.id,
         subscriptionPlanId: isForOther ? undefined : subscriptionPayment.plan?.id,
@@ -805,6 +830,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     promoCodeError: codeError,
     applyPromoCode: (code: string) => setPromoCode(code.trim().toUpperCase() || null),
     clearPromoCode: () => setPromoCode(null),
+    lookPhoto: look.photo,
+    removeLookPhoto: look.remove,
     selectService,
     selectSpecialist,
     isStarted: Boolean(service || chosenSpecialistId || time),

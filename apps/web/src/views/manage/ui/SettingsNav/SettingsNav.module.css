@@ -199,3 +199,13 @@
   inset-block: min(0px, calc((100% - 44px) / 2));
   inset-inline: 0;
 }
+
+/* «Скрыть или удалить» opens a sheet: a button dressed as the link rows above. */
+.rowButton {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}

@@ -31,19 +31,34 @@ test.describe('Platform: a new business goes live', () => {
     await page.goto('/business')
     await page.getByRole('link', { name: 'Создать страницу' }).click()
     await page.getByLabel('Название').fill(name)
-    await expect(page.getByLabel('Ссылка на страницу')).toHaveValue(slug)
+    await expect(page.getByLabel('Ссылка')).toHaveValue(slug)
     await expect(page.getByText(`Свободна: awaisa.kg/${slug}`)).toBeVisible()
+    // The progress bar and the live preview of the page follow what is typed.
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0')
+    await expect(page.getByText(name, { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Далее' }).click()
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
 
     // Kind: a barbershop gets a starter menu; this test builds its own, so it picks «Другое».
-    await page.getByRole('radio', { name: 'Барбершопы' }).click()
+    // One tap picks the kind and moves on; «Другое» has no starter menu and skips that step.
+    await page.getByRole('button', { name: /^Барбершопы/ }).click()
+    await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2')
     await expect(page.getByRole('checkbox', { name: 'Мужская стрижка' })).toBeChecked()
-    await page.getByRole('radio', { name: 'Другое' }).click()
+    await page.getByRole('button', { name: 'Назад' }).click()
+    await page.getByRole('button', { name: /^Другое/ }).click()
     await expect(page.getByRole('checkbox')).toHaveCount(0)
-    await page.getByRole('button', { name: 'Далее' }).click()
     await page.getByRole('button', { name: 'Создать страницу' }).click()
 
     await expect(page).toHaveURL(new RegExp(`/manage/${slug}\\?tab=services`))
+    await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
+
+    // Back to «Создать страницу»: the kept-alive form starts over instead of replaying the launch.
+    await page.goBack()
+    await page.getByRole('link', { name: 'Создать страницу' }).click()
+    await expect(page.getByLabel('Название')).toHaveValue('')
+    await page.waitForTimeout(3000)
+    await expect(page).toHaveURL(/\/business\/new$/)
+    await page.goto(`/manage/${slug}?tab=services`)
     await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Добавить услугу' }).first().click()
@@ -201,8 +216,14 @@ test.describe('Platform: a new business goes live', () => {
 
     await page.getByLabel('Название').fill('Login')
     await expect(page.getByText('Этот адрес занят')).toBeVisible()
-    await page.getByLabel('Ссылка на страницу').fill('awaisa-studio')
+    await page.getByLabel('Ссылка').fill('awaisa-studio')
     await expect(page.getByText('Этот адрес занят')).toBeVisible()
+
+    // Too short: «Далее» stays on the name and says why, instead of failing at «Создать страницу».
+    await page.getByLabel('Ссылка').fill('ab')
+    await page.getByRole('button', { name: 'Далее' }).click()
+    await expect(page.getByText('Ссылка: от 3 символов')).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Барбершопы/ })).toHaveCount(0)
   })
 
   test('closed days cannot be picked for booking', async ({ page }) => {

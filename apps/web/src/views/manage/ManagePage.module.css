@@ -195,6 +195,22 @@
   margin-top: 0;
 }
 
+/* «Запуск записи» over that cover keeps the air the other tabs have under the bar. */
+.content:has([data-page-tab]) .setup:has(*) {
+  padding-top: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .content:has([data-page-tab]) .setup:has(*) {
+    padding-top: var(--space-10);
+  }
+}
+
+/* Nothing left to set up: no empty block taking a gap. */
+.setup:not(:has(*)) {
+  display: none;
+}
+
 /* Phones: a settings section's actions float at the foot (`SectionHeader isFloatingOnPhone`);
    the section pads its end so its last row scrolls out from under them. */
 @media (max-width: 639px) {

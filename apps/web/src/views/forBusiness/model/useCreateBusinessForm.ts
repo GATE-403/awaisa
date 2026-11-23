@@ -14,7 +14,19 @@ import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 const SLUG_CHECK_DELAY_MS = 350
 const MIN_SLUG_LENGTH = 3
 
-const STEPS = ['name', 'kind', 'contacts'] as const
+// The API's own rule (`business-rules.ts` `getSlugProblem`): checked here before «Далее», so a
+// two-letter or malformed link never reaches the last step and fails there.
+const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,46}[a-z0-9])$/
+
+const getSlugFormatProblem = (slug: string) => {
+  if (slug.length < MIN_SLUG_LENGTH) return 'Ссылка: от 3 символов'
+  if (!SLUG_PATTERN.test(slug) || slug.includes('--')) {
+    return 'Ссылка: латиница, цифры и дефис, без дефиса в начале и в конце'
+  }
+  return null
+}
+
+const STEPS = ['name', 'kind', 'services', 'contacts'] as const
 
 type CreateStep = (typeof STEPS)[number]
 
@@ -29,6 +41,7 @@ export const useCreateBusinessForm = () => {
   const [slugInput, setSlug] = useState<string | null>(null)
   const [step, setStep] = useState<CreateStep>('name')
   const [kind, setKind] = useState<BusinessKind>('beauty')
+  const [hasPickedKind, setHasPickedKind] = useState(false)
   const [edits, setEdits] = useState<Record<string, TemplateEdit>>({})
   const [city, setCity] = useState('Бишкек')
   const [address, setAddress] = useState('')
@@ -36,6 +49,7 @@ export const useCreateBusinessForm = () => {
   const [slugCheck, setSlugCheck] = useState<(SlugCheck & { slug: string }) | null>(null)
   const [hasTriedSubmit, setHasTriedSubmit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [launched, setLaunched] = useState<{ slug: string; hasServices: boolean } | null>(null)
   const slug = slugInput ?? slugify(name)
   const phone = phoneInput ?? maskPhoneInput(customer?.phone ?? '')
   const currentCheck = slugCheck?.slug === slug ? slugCheck : null
@@ -48,10 +62,18 @@ export const useCreateBusinessForm = () => {
       price: edit?.price ?? String(template.price),
     }
   })
-  const isNameValid = name.trim().length >= 2 && !(currentCheck && !currentCheck.available)
+  const slugFormatProblem = getSlugFormatProblem(slug)
+  // A taken link says so at once; a short or malformed one only after «Далее» (not while typing).
+  const getSlugError = () => {
+    if (currentCheck && !currentCheck.available) return currentCheck.reason
+    if (hasTriedSubmit && slugFormatProblem) return t(slugFormatProblem)
+    return undefined
+  }
+  const isSlugTaken = currentCheck !== null && !currentCheck.available
+  const isNameValid = name.trim().length >= 2 && slugFormatProblem === null && !isSlugTaken
   const errors = {
     name: hasTriedSubmit && name.trim().length < 2 ? t('Укажите название') : undefined,
-    slug: currentCheck && !currentCheck.available ? currentCheck.reason : undefined,
+    slug: getSlugError(),
   }
 
   // Which step of the setup people reach, and what the name step refuses (codes only).
@@ -94,22 +116,82 @@ export const useCreateBusinessForm = () => {
   }
 
   const goBack = () => {
+    // A kind with no starter menu skipped «Что в меню?» on the way forward, so back skips it too.
+    if (step === 'contacts' && templates.length === 0) {
+      setStep('kind')
+      return
+    }
     const index = STEPS.indexOf(step)
     setStep(STEPS[Math.max(0, index - 1)] ?? 'name')
+  }
+
+  // The kind is one tap, like the first pick in booking: it moves on at once — to the starter
+  // menu, or straight to contacts when the kind has none («Другое»).
+  const pickKind = (value: BusinessKind) => {
+    setKind(value)
+    setHasPickedKind(true)
+    setStep(SERVICE_TEMPLATES[value].length > 0 ? 'services' : 'contacts')
   }
 
   // One question per screen, like Setup Assistant: «Далее» validates only the current step.
   const next = () => {
     if (step === 'name') {
       setHasTriedSubmit(true)
-      if (isNameValid) setStep('kind')
+      if (!isNameValid) return
+      if (currentCheck) {
+        setStep('kind')
+        return
+      }
+      // Not checked yet (typed fast, «Далее» at once): ask now, move on only when it is free.
+      void checkSlug(slug)
+        .then((result) => {
+          setSlugCheck({ ...result, slug })
+          if (result.available) setStep('kind')
+        })
+        .catch(() => setStep('kind'))
       return
     }
     if (step === 'kind') {
+      pickKind(kind)
+      return
+    }
+    if (step === 'services') {
       setStep('contacts')
       return
     }
     void submit()
+  }
+
+  const openCabinet = () => {
+    if (!launched) return
+    toast.show({
+      title: t('Страница создана'),
+      description: t(
+        launched.hasServices
+          ? 'Осталось добавить мастеров — и можно принимать записи'
+          : 'Добавьте услуги и мастеров — и можно принимать записи',
+      ),
+      type: 'success',
+    })
+    router.replace(`/manage/${launched.slug}?tab=${launched.hasServices ? 'masters' : 'services'}`)
+  }
+
+  // Visited routes stay mounted (hidden): once the page is left, it starts over, or coming back to
+  // «Создать страницу» replayed the launch of the page just made and sent the owner to it again.
+  const reset = () => {
+    setName('')
+    setSlug(null)
+    setStep('name')
+    setKind('beauty')
+    setHasPickedKind(false)
+    setEdits({})
+    setCity('Бишкек')
+    setAddress('')
+    setPhone(null)
+    setSlugCheck(null)
+    setHasTriedSubmit(false)
+    setIsSubmitting(false)
+    setLaunched(null)
   }
 
   const submit = async () => {
@@ -138,17 +220,12 @@ export const useCreateBusinessForm = () => {
         phone,
         services,
       })
-      toast.show({
-        title: t('Страница создана'),
-        description: t(
-          services.length > 0
-            ? 'Осталось добавить мастеров — и можно принимать записи'
-            : 'Добавьте услуги и мастеров — и можно принимать записи',
-        ),
-        type: 'success',
-      })
       trackStep('register_done', business.slug)
-      router.replace(`/manage/${business.slug}?tab=${services.length > 0 ? 'masters' : 'services'}`)
+      // The cabinet opens after the launch moment (`PageLaunch`), then says what is next.
+      setLaunched({
+        slug: business.slug,
+        hasServices: services.length > 0,
+      })
     } catch (error) {
       toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
       setIsSubmitting(false)
@@ -163,15 +240,19 @@ export const useCreateBusinessForm = () => {
     name,
     slug,
     kind,
+    hasPickedKind,
     city,
     address,
     phone,
     errors,
     isSlugAvailable: currentCheck?.available === true,
     isSubmitting,
+    launched,
+    openCabinet,
+    reset,
     setName,
     changeSlug,
-    setKind,
+    pickKind,
     setCity,
     setAddress,
     setPhone,

@@ -4,8 +4,11 @@ import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import {
   ArrowSquareOut,
   CaretLeft,
+  CircleHalf,
   Compass,
   Megaphone,
+  Moon,
+  Sun,
   UserCircle,
 } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
@@ -16,11 +19,15 @@ import { ThemeToggle } from '@/features/theme'
 import { useT } from '@/shared/i18n'
 import { getBackLabel, readCabinetFrom } from '@/shared/lib/cabinetFrom'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
+import { useTheme } from '@/shared/lib/hooks/useTheme'
 import { useUpdatesSeen } from '@/shared/lib/hooks/useUpdatesSeen'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 import { rememberUpdatesFrom } from '@/shared/lib/updatesFrom'
 import { BusinessSwitcher } from './BusinessSwitcher'
 import styles from './CabinetBar.module.css'
+
+const THEME_LABELS = { system: 'как в системе', light: 'светлая', dark: 'тёмная' } as const
+const THEME_ICONS = { system: CircleHalf, light: Sun, dark: Moon }
 
 interface CabinetBarProps {
   /** Inside a cabinet; without it the bar is the list's (no page link, no switcher). */
@@ -47,6 +54,8 @@ export const CabinetBar = ({
   back,
 }: CabinetBarProps) => {
   const t = useT()
+  const { theme, cycleTheme } = useTheme()
+  const ThemeIcon = THEME_ICONS[theme]
   const isScrolled = useIsScrolled()
   const router = useRouter()
   const { customer } = useSession()
@@ -120,7 +129,7 @@ export const CabinetBar = ({
               <NextLink
                 href={`/${slug}`}
                 target='_blank'
-                className={styles.icon}
+                className={`${styles.icon} ${styles.wideOnly}`}
                 aria-label={t('Открыть страницу бизнеса')}
                 title={t('Открыть страницу бизнеса')}
               >
@@ -140,7 +149,11 @@ export const CabinetBar = ({
             >
               <Megaphone aria-hidden />
             </NextLink>
-            <ThemeToggle />
+            {/* On phones the page link and the theme move into the profile menu: four glyphs left
+                the business's name a few letters («даже часть названия не видно»). */}
+            <span className={styles.wideOnly}>
+              <ThemeToggle />
+            </span>
             {/* The way out to the client side: one's own profile and bookings, or the catalog. */}
             <Menu
               label={
@@ -156,6 +169,23 @@ export const CabinetBar = ({
               </MenuItem>
               <MenuItem icon={<Compass aria-hidden />} onClick={() => router.push('/')}>
                 {t('Каталог')}
+              </MenuItem>
+              {slug && (
+                <MenuItem
+                  icon={<ArrowSquareOut aria-hidden />}
+                  className={styles.phoneOnly}
+                  onClick={() => window.open(`/${slug}`, '_blank')}
+                >
+                  {t('Открыть страницу бизнеса')}
+                </MenuItem>
+              )}
+              <MenuItem
+                icon={<ThemeIcon aria-hidden />}
+                className={styles.phoneOnly}
+                closeOnClick={false}
+                onClick={cycleTheme}
+              >
+                {t('Тема: {theme}', { theme: t(THEME_LABELS[theme]) })}
               </MenuItem>
             </Menu>
           </span>

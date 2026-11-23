@@ -83,7 +83,8 @@ test.describe('Business page', () => {
     await page.keyboard.press('ArrowLeft')
     await expect(page.getByRole('dialog', { name: /: фото 1 из 6$/ })).toBeVisible()
     if (!isMobile) {
-      await page.getByRole('button', { name: 'Следующее фото' }).click()
+      // The viewer's own arrow: the cards of «Похожие места» leaf their pictures too.
+      await page.getByRole('dialog').getByRole('button', { name: 'Следующее фото' }).click()
       await expect(page.getByRole('dialog', { name: /: фото 2 из 6$/ })).toBeVisible()
     }
 

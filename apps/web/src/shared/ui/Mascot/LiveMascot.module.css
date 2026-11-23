@@ -1,0 +1,97 @@
+/* Hop in: a rise with a small squash as it lands, like the splash's hop. */
+.mascot {
+  overflow: visible;
+  animation: mascot-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes mascot-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.85);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.02, 0.98);
+  }
+
+  80% {
+    transform: translateY(0) scale(1.04, 0.95);
+  }
+}
+
+.body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* Pointed at or tapped: one little jump. */
+@media (hover: hover) {
+  .mascot:hover .body {
+    animation: mascot-jump 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.mascot:active .body {
+  animation: mascot-jump 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mascot-jump {
+  30% {
+    transform: translateY(-14%) scale(0.96, 1.04);
+  }
+
+  60% {
+    transform: translateY(0) scale(1.05, 0.94);
+  }
+}
+
+/* A glance aside and back, twice; the eyes blink three times, a few seconds apart. */
+.eyes {
+  animation: mascot-glance 5s ease-in-out 1.6s 2;
+}
+
+@keyframes mascot-glance {
+  0%,
+  40%,
+  100% {
+    transform: translateX(0);
+  }
+
+  48%,
+  62% {
+    transform: translateX(-1.4px);
+  }
+
+  70%,
+  84% {
+    transform: translateX(1.2px);
+  }
+}
+
+.eye {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: mascot-blink 3.6s ease-in-out 1s 3;
+}
+
+@keyframes mascot-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot,
+  .mascot .body,
+  .eyes,
+  .eye {
+    animation: none;
+  }
+}

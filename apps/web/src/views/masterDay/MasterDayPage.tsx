@@ -6,7 +6,7 @@ import { ChatText, Phone } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { formatPrice, getDaysAround } from '@/entities/booking'
+import { formatPrice, getDaysAround, LookPhoto } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { CalendarFeedGroup } from '@/features/calendarFeed'
@@ -336,6 +336,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                           <span className={styles.comment}>
                             <ChatText aria-hidden />«{booking.comment}»
                           </span>
+                        )}
+                        {booking.lookPhotoUrl && (
+                          <LookPhoto url={booking.lookPhotoUrl} clientName={booking.customerName} />
                         )}
                         {booking.outcome === 'arrived' && (
                           <VisitPhotoButton

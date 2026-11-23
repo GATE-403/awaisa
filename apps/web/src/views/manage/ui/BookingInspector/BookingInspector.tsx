@@ -11,7 +11,7 @@ import {
   Prohibit,
   WhatsappLogo,
 } from '@phosphor-icons/react/ssr'
-import { formatPrice, PAYMENT_STATUS_TEXT } from '@/entities/booking'
+import { formatPrice, LookPhoto, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import { useVisitPhoto } from '@/features/visitPhoto'
 import { addBookingPhoto } from '@/shared/api/clientApi'
@@ -126,6 +126,11 @@ export const BookingInspector = ({
           })}`}
       </p>
       {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
+      {booking.lookPhotoUrl && (
+        <span className={styles.look}>
+          <LookPhoto url={booking.lookPhotoUrl} clientName={booking.customerName} />
+        </span>
+      )}
 
       <div className={styles.actions} data-book-again={canBookAgain || undefined}>
         {/* A capsule of thin glyphs with a mouse; on phones four labelled tiles, like the
