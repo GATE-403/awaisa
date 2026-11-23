@@ -4,12 +4,12 @@
   "main": "index.ts",
   "dependencies": {
     "@awaisa/tokens": "workspace:*",
-    "expo": "~58.0.23",
-    "expo-constants": "~58.0.15",
+    "expo": "~58.0.26",
+    "expo-constants": "~58.0.16",
     "expo-device": "~58.0.5",
-    "expo-haptics": "~58.0.7",
+    "expo-haptics": "~58.0.8",
     "expo-notifications": "~58.1.9",
-    "expo-status-bar": "~58.0.4",
+    "expo-status-bar": "~58.0.5",
     "react": "19.3.0",
     "react-native": "0.88.1",
     "react-native-keyboard-controller": "1.22.7",
@@ -30,7 +30,8 @@
     "ios": "expo start --ios",
     "lint": "biome check .",
     "typecheck": "tsc --noEmit",
-    "doctor": "expo-doctor"
+    "doctor": "expo-doctor",
+    "measure:keyboard": "node scripts/measure-keyboard.mjs"
   },
   "private": true
 }
