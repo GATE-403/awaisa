@@ -140,13 +140,15 @@ test.describe('Moving around the app', () => {
     const card = await bookingCardInMiddle(page)
     const before = await page.evaluate(() => window.scrollY)
     expect(before).toBeGreaterThan(300)
-    const headerHeight = await header.evaluate((node) => node.getBoundingClientRect().height)
+    // The layout height: on phones the page behind the sheet steps back (scaled), which a
+    // drawn box would count.
+    const headerHeight = await header.evaluate((node) => (node as HTMLElement).offsetHeight)
 
     await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
     // Next used to scroll the catalog to its top, and the header dropped its category row.
     expect(await page.evaluate(() => window.scrollY)).toBe(before)
-    expect(await header.evaluate((node) => node.getBoundingClientRect().height)).toBe(headerHeight)
+    expect(await header.evaluate((node) => (node as HTMLElement).offsetHeight)).toBe(headerHeight)
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
 
     const bookingUrl = page.url()
@@ -183,9 +185,12 @@ test.describe('Moving around the app', () => {
     // Where the card is on screen: the first booking also drops the first-visit line from the top
     // of the catalog, and the browser keeps what is on screen in place by moving the scroll.
     const topOnScreen = async () => Math.round((await card.boundingBox())?.y ?? -1)
-    const before = await topOnScreen()
     await card.getByRole('link').first().click()
     await expect(bookingSheet(page)).toBeVisible()
+    // Measured under the open sheet: on phones the page behind it steps back (scaled toward the
+    // top edge), which moves the card on screen without scrolling anything.
+    await page.waitForTimeout(700)
+    const before = await topOnScreen()
 
     // Through the main action, which does something real on each step: «Любой мастер» on the
     // masters (only when there are several to choose from), then the free time under the ruler.

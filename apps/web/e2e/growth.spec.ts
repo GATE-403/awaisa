@@ -22,9 +22,9 @@ test.describe('Booking for someone else, Kyrgyz, Telegram and telemetry', () => 
     await steps.service.getByRole('radio', { name: /Мужская стрижка/ }).click()
     await pickFirstFreeSlot(page)
 
-    // Signed in: no phone field until «Записать другого человека».
+    // Signed in: no phone field until «Записываю другого человека» is switched on.
     await expect(steps.contacts.getByLabel('Телефон')).toHaveCount(0)
-    await steps.contacts.getByRole('button', { name: 'Записать другого человека' }).click()
+    await steps.contacts.getByRole('switch', { name: 'Записываю другого человека' }).click()
     await steps.contacts.getByLabel('Имя').fill('E2E Мама')
     await steps.contacts.getByLabel('Телефон').fill(mumPhone)
     await submitBooking(page)

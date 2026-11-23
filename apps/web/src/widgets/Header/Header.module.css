@@ -276,15 +276,6 @@
     display: inline;
   }
 
-  /* The name only: a bare `span` here also hit the face's own spans, which lost their centring
-     and pushed the mascot into the circle's top-left corner. */
-  .action[data-account] .accountName {
-    display: inline;
-    max-width: 72px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   .cta {
     height: 36px;
     padding: 0 var(--space-4);
@@ -354,8 +345,10 @@
   }
 }
 
+/* `> span:last-child`: the label only, never the face's own spans (they lost their centring and
+   pushed the mascot into the circle's corner). */
 @media (max-width: 1023px) {
-  .action:not([data-account]) > span {
+  .action > span:last-child {
     display: none;
   }
 }

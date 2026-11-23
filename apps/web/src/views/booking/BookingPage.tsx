@@ -3,6 +3,7 @@
 import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
+import { Switch } from '@awaisa/ui/Switch'
 import { CaretRight, Check, MapPin, UsersThree } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import {
@@ -27,6 +28,7 @@ import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
+import { choiceLine } from '@/views/booking/lib/choiceLine'
 import { pickOfferedService } from '@/views/booking/lib/visitServices'
 import { type BookingStepId, useBookingForm } from '@/views/booking/model/useBookingForm'
 import { type QuickSlot, useQuickSlots } from '@/views/booking/model/useQuickSlots'
@@ -202,7 +204,11 @@ export const BookingPage = ({
     return (
       <div
         className={styles.content}
-        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
+        style={
+          {
+            '--place-tint': pickTint(business.name),
+          } as CSSProperties
+        }
       >
         <div className={styles.wash} aria-hidden />
         <BookingTopBar business={business} isModal={isModal} />
@@ -453,7 +459,43 @@ export const BookingPage = ({
             total: payment.plan.price,
           }
         : null,
+    // «Любой мастер» says nothing by the time the visit is booked: the line keeps its room for
+    // the address.
+    masterShort:
+      form.specialistId && form.specialistId !== ANY_SPECIALIST_ID
+        ? (specialistLabel.split(' ')[0] ?? specialistLabel)
+        : null,
+    // With several branches the ready bar names the branch: a whole address ended in «мкр. Аса…»
+    // on a 375pt phone. The address stays on the branch card and in «Ваша запись».
+    branchName: form.branches.length > 1 ? (chosenBranch?.name ?? null) : null,
+    choice: choiceLine({
+      services: form.chosenServices.length
+        ? form.chosenServices.map((service) => service.name)
+        : form.service
+          ? [form.service.name]
+          : [],
+      master: form.specialistId
+        ? form.specialistId === ANY_SPECIALIST_ID
+          ? t('Любой мастер')
+          : (specialistLabel.split(' ')[0] ?? specialistLabel)
+        : null,
+      when: form.dayKey && form.time ? `${t.dayShort(form.dayKey)}, ${form.time}` : null,
+    }),
   }
+
+  // The four steps as thin segments under the top bar, like a story's progress.
+  const progress = (['service', 'specialist', 'datetime', 'contacts'] as const).map((step) => ({
+    id: step,
+    isDone:
+      step === 'service'
+        ? Boolean(form.serviceId)
+        : step === 'specialist'
+          ? Boolean(form.specialistId)
+          : step === 'datetime'
+            ? Boolean(form.time)
+            : form.firstIncompleteStep === null,
+    isCurrent: step === activeStep,
+  }))
 
   // A note, a code and the SMS options: under the contacts while they are typed, and on their
   // own under «Всё готово» once the contacts have folded into a card.
@@ -542,7 +584,7 @@ export const BookingPage = ({
       style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
     >
       <div className={styles.wash} aria-hidden />
-      <BookingTopBar business={business} isModal={isModal} />
+      <BookingTopBar business={business} isModal={isModal} progress={progress} />
       <Container className={styles.layout} data-reviewing={isReviewing || undefined}>
         <div className={styles.steps}>
           {isQuickShown && quickService && (
@@ -830,17 +872,16 @@ export const BookingPage = ({
                           />
                         </Field>
                       )}
+                      {/* Mum or a child: a Settings row with a switch in the same group (a lone
+                          link under it read as out of place); their name and number, the visit
+                          stays in this account. */}
+                      {form.canBookForOther && (
+                        <label className={styles.switchRow}>
+                          <span>{t('Записываю другого человека')}</span>
+                          <Switch checked={form.isForOther} onCheckedChange={form.setForOther} />
+                        </label>
+                      )}
                     </div>
-                    {/* Mum or a child: their name and number, the visit stays in this account. */}
-                    {form.canBookForOther && (
-                      <button
-                        type='button'
-                        className={styles.forOther}
-                        onClick={() => form.setForOther(!form.isForOther)}
-                      >
-                        {t(form.isForOther ? 'Записать себя' : 'Записать другого человека')}
-                      </button>
-                    )}
                   </div>
                   {contactExtras}
                 </BookingStep>
@@ -878,7 +919,7 @@ export const BookingPage = ({
         )}
       </Container>
 
-      <div className={styles.bar}>
+      <div className={styles.bar} data-booking-bar=''>
         <BookingSummary
           variant='bar'
           {...summaryProps}

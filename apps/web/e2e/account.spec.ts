@@ -39,6 +39,21 @@ test.describe('Account: sign in by SMS', () => {
     await expect(page.getByRole('region', { name: 'Профиль' })).toContainText(formatPhone(phone))
   })
 
+  test('the name is changed in a sheet from «Настройки»', async ({ page }) => {
+    await signInViaApi(page, randomClientPhone(), 'E2E Тест')
+    await page.goto('/bookings?tab=settings')
+    await page.getByRole('button', { name: /^Имя/ }).click()
+    const sheet = page.getByRole('dialog', { name: 'Ваше имя' })
+    const field = sheet.getByLabel('Имя')
+    await expect(field).toBeFocused()
+    await field.fill('E2E Новое имя')
+    await sheet.getByRole('button', { name: 'Сохранить' }).click()
+    await expect(sheet).toHaveCount(0)
+    await expect
+      .poll(async () => (await (await page.request.get('/api/me')).json()).name)
+      .toBe('E2E Новое имя')
+  })
+
   test('the open tab lives in the address; «Выйти» signs out at once and leads to the catalog', async ({
     page,
   }) => {

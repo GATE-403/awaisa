@@ -70,6 +70,13 @@
   padding: var(--space-5) var(--space-4) var(--space-6);
 }
 
+/* The Android app's keyboard over the sheet (`useFocusedFieldInView`, `overlay`): room at the
+   foot of the scroll so the last field can rise above it. The sheet itself keeps its size: resizing
+   it laid its rows out again while the keyboard slid in. */
+.body[data-keyboard] {
+  padding-bottom: calc(var(--space-6) + var(--keyboard-inset, 0px));
+}
+
 /* Groups keep their height and the body scrolls; otherwise clipped lists squeeze their rows. */
 .body > * {
   flex-shrink: 0;

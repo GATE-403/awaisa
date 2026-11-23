@@ -232,11 +232,12 @@ html {
   }
 }
 
-/* Wide desktops: the page column grows so a 1440px+ window does not frame the catalog with empty
-   bands; the catalog grids take a fifth column at the same width. */
+/* Wide desktops: the page column grows with the window (80px of air on each side) from 1280 to
+   1440px, so a 1600px window does not frame the catalog with empty bands; the catalog grids take
+   a fifth column from 1400px. */
 @media (min-width: 1400px) {
   :root {
-    --layout-container-width: 1280px;
+    --layout-container-width: clamp(1280px, 100vw - 160px, 1440px);
   }
 }
 
