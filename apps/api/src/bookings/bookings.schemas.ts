@@ -68,6 +68,7 @@ const createBookingSchema = z.object({
   /** «Купить абонемент и записаться»: an online plan bought with this booking. */
   subscriptionPlanId: z.uuid().optional(),
   channel: z.enum(BOOKING_CHANNELS).optional(),
+  lookPhotoId: z.uuid().optional(),
 })
 
 const nextFreeQuerySchema = z.object({

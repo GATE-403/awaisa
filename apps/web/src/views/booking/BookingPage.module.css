@@ -368,6 +368,15 @@ button.fieldRow {
   font-size: var(--text-body);
 }
 
+/* «Хочу так»: the look as a small square on the row's right, before «Убрать». */
+.lookThumb {
+  justify-self: end;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
 .extraChevron {
   width: 12px;
   height: 12px;

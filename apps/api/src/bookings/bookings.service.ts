@@ -141,6 +141,11 @@ export class BookingsService {
     const deposit = isDepositOn
       ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
       : null
+    // «Хочу так»: a visible photo of this place only; anything else is dropped, never refused.
+    const look =
+      input.lookPhotoId && !staffBusinessId
+        ? await this.findLookPhoto(service.businessId, input.lookPhotoId)
+        : null
     const candidates = slot.specialistId
       ? [slot.specialistId, ...specialistIds.filter((id) => id !== slot.specialistId)]
       : specialistIds
@@ -171,6 +176,8 @@ export class BookingsService {
             subscriptionId: subscription?.id ?? null,
             source: staffBusinessId ? 'staff' : 'online',
             channel: staffBusinessId ? null : (input.channel ?? null),
+            lookPhotoId: look?.id ?? null,
+            lookPhotoUrl: look?.url ?? null,
             promotionId: discount?.promotionId ?? null,
             discountAmount: discount?.amount ?? null,
             discountTitle: discount?.title ?? null,
@@ -508,6 +515,15 @@ export class BookingsService {
   }
 
   /** The booking and the services done after its first one, in one transaction. */
+  private async findLookPhoto(businessId: string, photoId: string) {
+    const rows: { id: string; url: string }[] = await this.bookings.query(
+      `SELECT "id", "url" FROM "work_photos"
+        WHERE "id" = $1 AND "business_id" = $2 AND NOT "is_hidden"`,
+      [photoId, businessId],
+    )
+    return rows[0] ?? null
+  }
+
   private saveVisit(fields: Partial<Booking>, extraServiceIds: string[]) {
     return this.bookings.manager.transaction(async (manager) => {
       const saved = await manager.save(Booking, manager.create(Booking, fields))

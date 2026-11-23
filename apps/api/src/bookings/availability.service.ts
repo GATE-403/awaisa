@@ -254,8 +254,11 @@ export class AvailabilityService {
               interval.startsAt < dayEnd &&
               interval.endsAt > dayStart,
           ),
-        }).find((slot) => slot.isAvailable)
-        if (free) return { date, time: free.time }
+        }).filter((slot) => slot.isAvailable)
+        // The first two: a place card offers them as capsules that open the form on that time.
+        const first = free[0]
+        if (first)
+          return { date, time: first.time, times: free.slice(0, 2).map((slot) => slot.time) }
       }
 
       return null

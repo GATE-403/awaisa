@@ -4,13 +4,13 @@ import { CaretLeft, CaretRight } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
 import { useFavorites } from '@/features/favorites'
+import { useWorkLikes } from '@/features/workLikes'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { knownPosition } from '@/shared/lib/geo'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
-import { useFeedLikes } from './model/useFeedLikes'
 import { FeedActions } from './ui/FeedActions'
 import { FeedCard } from './ui/FeedCard'
 
@@ -59,7 +59,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
     dy: number
     samples: { t: number; x: number; y: number }[]
   } | null>(null)
-  const likes = useFeedLikes()
+  const likes = useWorkLikes()
   const favorites = useFavorites()
   // `start` keeps the tapped photo first, so later pages follow the same order.
   const query = { kind, business, start, ...(point ?? {}) }
