@@ -112,6 +112,7 @@ const CABINET: Record<string, Entry> = {
     'Дагы {count}, жана кардарлар жазыла алышат',
     '{count} more, and clients can book',
   ],
+  '{done} из {total}': ['{total} ичинен {done}', '{done} of {total}'],
   'Готово {done} из {total}': ['{total} ичинен {done} даяр', '{done} of {total} done'],
   'Начать ›': ['Баштоо ›', 'Start ›'],
 
@@ -383,6 +384,22 @@ const CABINET: Record<string, Entry> = {
     '{day}: жабылуу убактысы ачылуудан кеч болушу керек',
     '{day}: closing must be after opening',
   ],
+  // The foot of «Настройки»: hiding the page and deleting the business
+  'Скрыть или удалить': ['Жашыруу же өчүрүү', 'Hide or delete'],
+  'Страница скрыта': ['Барак жашырылды', 'Page hidden'],
+  'Скрытую страницу не найдут в каталоге. Записи и кабинет остаются.': [
+    'Жашырылган баракты каталогдон табышпайт. Жазылуулар жана кабинет калат.',
+    'A hidden page is not found in the catalog. Bookings and the cabinet stay.',
+  ],
+  'Удалить бизнес': ['Бизнести өчүрүү', 'Delete business'],
+  'Будущие записи отменим и напишем клиентам, предоплату вернём. Страница пропадёт, адрес освободится, команда потеряет доступ. Прошлые визиты и чеки останутся в учёте.':
+    [
+      'Алдыдагы жазылууларды жокко чыгарып, кардарларга жазабыз, алдын ала төлөмдү кайтарабыз. Барак жоголот, дарек бошойт, команда кирүү укугун жоготот. Өткөн визиттер жана чектер эсепте калат.',
+      'We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books.',
+    ],
+  'Бизнес удалён': ['Бизнес өчүрүлдү', 'Business deleted'],
+  'Не удалили': ['Өчүрүлгөн жок', 'Not deleted'],
+  'Не сохранили': ['Сакталган жок', 'Not saved'],
 }
 
 const CABINET_COUNTED: Record<string, CountedEntry> = {

@@ -46,7 +46,8 @@ const getSlugProblem = (slug: string) => {
   if (!SLUG_PATTERN.test(slug) || slug.includes('--')) {
     return 'Адрес: латинские буквы, цифры и дефис, от 3 до 48 символов'
   }
-  if (RESERVED_SLUGS.has(slug)) return 'Этот адрес занят'
+  // Deleted businesses move to `deleted-…` (admin/business-erasure.ts): nobody registers one.
+  if (RESERVED_SLUGS.has(slug) || slug.startsWith('deleted-')) return 'Этот адрес занят'
 
   return null
 }
