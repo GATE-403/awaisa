@@ -59,6 +59,13 @@
   pointer-events: none;
 }
 
+/* Under the photos the card is dark, as the photos' foot is under the scrim: never seen (the
+   frame's own fill shows while a photo loads), but contrast checkers that cannot see the photo
+   read the white words against it, not against the light fill (2.4:1). */
+.card[data-gallery] {
+  background-color: rgb(0 0 0);
+}
+
 .card[data-gallery] .body :is(a, button) {
   pointer-events: auto;
 }
@@ -248,11 +255,7 @@
 }
 
 .time {
-  /* A 44pt target from padding, not a positioned ::after: a positioned link over the photo made
-     axe read the card's own light fill as its background (2.4:1), the photo unseen. */
-  display: inline-block;
-  margin-block: -16px;
-  padding-block: 16px;
+  position: relative;
   color: #fff;
   font-size: var(--text-xs);
   font-weight: var(--font-weight-semibold);
@@ -265,6 +268,13 @@
   margin-right: var(--space-1);
   color: rgb(255 255 255 / 0.6);
   font-weight: var(--font-weight-regular);
+}
+
+/* A 44pt target around the short word. */
+.time::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
 }
 
 .time:focus-visible {
