@@ -108,9 +108,10 @@ export const App = () => {
   }
 
   return (
-    // Expo draws edge to edge: both system bars are translucent, so the keyboard's height is the
-    // whole part of the screen it covers, the same box the WebView fills.
-    <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
+    // Expo draws edge to edge (react-native-edge-to-edge), which keyboard-controller follows by
+    // itself: the keyboard's height is the whole part of the screen it covers, the box the WebView
+    // fills. Its own translucency props are ignored there.
+    <KeyboardProvider>
       <SafeAreaProvider>
         <SafeAreaView style={[styles.container, backgroundStyle]} edges={['top']}>
           <StatusBar style='auto' />
@@ -150,6 +151,10 @@ export const App = () => {
               pullToRefreshEnabled
               sharedCookiesEnabled
               setSupportMultipleWindows={false}
+              // iOS: no «˄ ˅ Готово» bar over the keyboard, like a native app. WKWebView in the app
+              // left it out when it lifted a field over the keyboard, so the cabinet's search at the
+              // window's foot stayed half under it. A tap outside the field closes the keyboard.
+              hideKeyboardAccessoryView
               // Development builds only: Chrome's remote DevTools can then profile the page on the
               // phone (chrome://inspect).
               webviewDebuggingEnabled={__DEV__}
