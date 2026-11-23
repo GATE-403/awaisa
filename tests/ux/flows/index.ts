@@ -465,11 +465,19 @@ const flows: Flow[] = [
       await ux.step('Шаг 4: контакты', FILES.register)
       await ux.tap(page.getByRole('button', { name: 'Создать страницу' }))
 
+      // A new business opens on «Страница», which names what it lacks itself (no banner there).
       await expect(page).toHaveURL(/\/manage\/e2e-ux-barber/)
-      await expect(page.getByRole('heading', { name: 'Запуск записи' })).toBeVisible()
-      await ux.step('Кабинет: запуск записи', FILES.cabinet)
+      await expect(page.getByRole('list', { name: 'Добавьте на страницу' })).toBeVisible()
+      await ux.step('Кабинет: страница бизнеса', [...FILES.cabinet, `${WEB}/views/manage/ui/PageTab`])
 
-      await ux.tap(page.getByRole('button', { name: 'Добавить мастера' }).first())
+      // Masters live in the page's «Мастера» tab; on phones its action floats at the foot.
+      await ux.tap(page.getByRole('tab', { name: /Мастера/ }))
+      await ux.tap(
+        page
+          .getByRole('button', { name: 'Добавить мастера', exact: true })
+          .filter({ visible: true })
+          .first(),
+      )
       // Toasts are dialogs too (Base UI): the sheet is the one with the form.
       const dialog = page.getByRole('dialog').filter({ has: page.getByLabel('Имя') })
       await dialog.getByLabel('Имя').waitFor()
