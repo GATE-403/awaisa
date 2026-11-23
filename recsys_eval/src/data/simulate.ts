@@ -29,6 +29,8 @@ const CYCLE: Record<Interest, number> = {
   brows: 35,
   massage: 40,
   face: 45,
+  // Sugaring grows back in three to five weeks.
+  waxing: 30,
   tattoo: 150,
   health: 90,
 }
