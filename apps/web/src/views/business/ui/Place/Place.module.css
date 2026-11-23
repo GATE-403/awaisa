@@ -179,21 +179,17 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin: 0 calc(var(--page-gutter) * -1);
-  padding: 0 var(--page-gutter);
+  /* The window's whole width, the chips kept on the column: pinned, it is one surface, the same
+     blurred material edge to edge (a spread shadow beside it had no blur, another shade). */
+  margin: 0 calc(50% - 50vw);
+  padding: 0 calc(50vw - 50%);
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
-/* Pinned: one surface with the business bar — the same material out to the window's edges (a
-   spread shadow clipped to the bar's height, so nothing overflows sideways), one hairline under
-   both. */
 .menuHead[data-stuck] {
   background: var(--color-chrome);
   backdrop-filter: var(--blur-material);
-  box-shadow:
-    0 0 0 100vmax var(--color-chrome),
-    0 0.5px 0 100vmax var(--color-border);
-  clip-path: inset(0 -100vmax -1px);
+  box-shadow: 0 0.5px 0 var(--color-border);
 }
 
 /* The chips sit in the pinned bar: the bar keeps the gutter, the chips' row scrolls inside it
@@ -210,13 +206,6 @@
 
 .chips::-webkit-scrollbar {
   display: none;
-}
-
-@media (min-width: 768px) {
-  .menuHead {
-    margin: 0 calc(var(--space-4) * -1);
-    padding-inline: var(--space-4);
-  }
 }
 
 .filters {
