@@ -5,21 +5,56 @@ import { createPastVisit, withDb } from './visits'
 type Recommendation = { id: string; name: string; reason: string; slug: string }
 
 test.describe('Recommendations', () => {
-  test('a guest answers three questions and gets «Для вас» with reasons', async ({ page }) => {
+  test('a guest answers the questions step by step and gets «Для вас» with reasons', async ({
+    page,
+  }) => {
     // Picks live in the profile, not in the catalog.
     await page.goto('/bookings')
     await page.getByRole('button', { name: /Подберём для вас/ }).click()
     const sheet = page.getByRole('dialog', { name: 'Подберём для вас' })
+    // One question a step, like the business setup; a one-answer step moves on by itself.
     // The sheet slides up on phones: tap the rows once it has settled.
-    await expect(sheet.getByRole('heading', { name: 'Для кого' })).toBeInViewport()
-    await sheet.getByText('Женщине', { exact: true }).click()
-    await expect(sheet.getByRole('radio', { name: 'Женщине' })).toBeChecked()
+    await expect(sheet.getByRole('heading', { name: 'Для кого подбираем?' })).toBeInViewport()
+    await expect(sheet.getByRole('progressbar')).toHaveAccessibleName('Вопрос 1 из 5')
+    await sheet.getByRole('button', { name: 'Женщине' }).click()
+    await expect(sheet.getByRole('heading', { name: 'Что вам интересно?' })).toBeVisible()
+    // Women are not offered «Борода».
+    await expect(sheet.getByRole('checkbox', { name: 'Борода' })).toHaveCount(0)
     await sheet.getByText('Маникюр', { exact: true }).click()
     await expect(sheet.getByRole('checkbox', { name: 'Маникюр' })).toBeChecked()
-    await sheet.getByRole('button', { name: 'Готово' }).click()
+    await sheet.getByRole('button', { name: 'Далее' }).click()
+    await sheet.getByRole('button', { name: 'До 2 500 сом' }).click()
+    await expect(sheet.getByRole('heading', { name: 'Что важнее при выборе?' })).toBeVisible()
+    // «Назад» returns to the step before with its answer kept.
+    await sheet.getByRole('button', { name: 'Назад' }).click()
+    await expect(sheet.getByRole('heading', { name: 'Сколько на визит?' })).toBeVisible()
+    await sheet.getByRole('button', { name: 'До 2 500 сом' }).click()
+    // The answers so far ride above the question; one leads back to its step.
+    const answers = sheet.getByRole('list', { name: 'Ваши ответы' })
+    await expect(answers.getByRole('button')).toHaveText(['Женщине', 'Маникюр', 'До 2 500 сом'])
+    // Several things may matter at once: they tick, «Далее» moves on.
+    const asked = page.waitForRequest((request) =>
+      decodeURIComponent(request.url()).includes('priority=soon,rating'),
+    )
+    await sheet.getByRole('button', { name: /Свободно сегодня/ }).click()
+    await sheet.getByRole('button', { name: /Высокий рейтинг/ }).click()
+    await expect(sheet.getByRole('button', { name: /Высокий рейтинг/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await sheet.getByRole('button', { name: 'Далее' }).click()
+    await sheet.getByRole('button', { name: 'Не учитывать место' }).click()
     await expect(page.getByText('Подборка обновлена')).toBeVisible()
+    const saved = await page.evaluate(() => localStorage.getItem('awaisa:preferences:v1'))
+    expect(JSON.parse(saved ?? '{}')).toMatchObject({
+      gender: 'female',
+      interests: ['nails'],
+      budget: 2500,
+      priorities: ['soon', 'rating'],
+    })
+    await asked
 
-    // In the profile the picks sit in the empty «Предстоящие» tab as «Куда записаться».
+    // In the profile the picks sit in «Записи» as «Куда записаться» while nothing is ahead.
     const shelf = page.getByRole('region', { name: 'Куда записаться' })
     await expect(shelf).toBeVisible()
     const cards = shelf.getByRole('link')
@@ -118,6 +153,10 @@ test.describe('Recommendations', () => {
   test('unknown interests are refused', async ({ request, isMobile }) => {
     test.skip(isMobile, 'API only')
     expect((await request.get('/api/recommendations?interests=skydiving')).status()).toBe(400)
+    expect((await request.get('/api/recommendations?priority=luck')).status()).toBe(400)
+    expect(
+      (await request.get('/api/recommendations?priority=near&interests=waxing')).status(),
+    ).toBe(200)
   })
 })
 

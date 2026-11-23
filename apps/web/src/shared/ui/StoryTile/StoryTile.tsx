@@ -1,5 +1,5 @@
 import NextLink from 'next/link'
-import type { ReactNode, Ref } from 'react'
+import type { CSSProperties, ReactNode, Ref } from 'react'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from './StoryTile.module.css'
 
@@ -13,6 +13,10 @@ interface StoryTileProps {
    */
   details?: string
   imageUrl?: string | null
+  /** Drawn in the frame when there is no picture: the place's own tile, on `tint`. */
+  fallback?: ReactNode
+  /** A CSS colour washing the frame behind `fallback` (the place's colour). */
+  tint?: string
   /** A small square in the corner: the master's face or the place's tile. */
   badge?: ReactNode
   /** A short capsule over the picture. */
@@ -32,6 +36,8 @@ export const StoryTile = ({
   label,
   details,
   imageUrl,
+  fallback,
+  tint,
   badge,
   chip,
   note,
@@ -41,7 +47,13 @@ export const StoryTile = ({
 }: StoryTileProps) => (
   <li className={styles.item}>
     <NextLink href={href} className={styles.tile} data-ring={ring} onClick={onOpen}>
-      <span className={styles.frame} data-picture-frame=''>
+      <span
+        className={styles.frame}
+        data-picture-frame=''
+        data-fallback={!imageUrl && fallback ? '' : undefined}
+        style={tint ? ({ '--story-tint': tint } as CSSProperties) : undefined}
+      >
+        {!imageUrl && fallback}
         {imageUrl && (
           // biome-ignore lint/performance/noImgElement: sized CDN/WebP pictures
           <img

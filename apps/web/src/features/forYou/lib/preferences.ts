@@ -12,12 +12,18 @@ type Interest =
   | 'face'
   | 'tattoo'
   | 'health'
+  | 'waxing'
+
+/** What matters most when choosing: that part of the picks counts twice. */
+type Priority = 'near' | 'soon' | 'rating' | 'price'
 
 type Preferences = {
   gender: 'male' | 'female' | null
   interests: Interest[]
   /** The most a visit should cost, сом; null = any. */
   budget: number | null
+  /** What matters most, one or several; older answers have none. */
+  priorities?: Priority[]
 }
 
 const STORAGE_KEY = 'awaisa:preferences:v1'
@@ -31,6 +37,7 @@ const INTERESTS: { value: Interest; label: string; for?: 'male' | 'female' }[] =
   { value: 'brows', label: 'Брови и ресницы' },
   { value: 'face', label: 'Уход за лицом' },
   { value: 'massage', label: 'Массаж и SPA' },
+  { value: 'waxing', label: 'Депиляция' },
   { value: 'tattoo', label: 'Тату' },
   { value: 'health', label: 'Здоровье' },
 ]
@@ -72,5 +79,5 @@ const subscribe = (onChange: () => void) => {
 /** The client's answers to «Подберём для вас», kept on the device; null until answered. */
 const usePreferences = () => useSyncExternalStore(subscribe, read, () => null)
 
-export type { Interest, Preferences }
+export type { Interest, Preferences, Priority }
 export { INTERESTS, savePreferences, usePreferences }

@@ -4,6 +4,7 @@ import { Sliders, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { formatPrice, useStoredBookings } from '@/entities/booking'
+import { BusinessTile, pickTint } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
@@ -38,6 +39,10 @@ const storyNote = (reason: string) => {
   const lead = reason.split(' · ')[0] ?? reason
   if (lead.startsWith('Часто выбирают')) return 'Популярное'
   if (lead.startsWith('Часто берут')) return 'Берут вместе'
+  // Reasons that ran past a story's width, said in a word or two («Похоже на прос…»).
+  if (lead === 'Похоже на просмотренное') return 'Похожее'
+  if (lead === 'Как в ваших визитах') return 'Как обычно'
+  if (lead === 'Вы были здесь') return 'Были здесь'
   return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
 }
 
@@ -141,6 +146,7 @@ export const ForYouShelf = ({
           interests: preferences?.interests.join(',') || undefined,
           gender: preferences?.gender ?? undefined,
           budget: preferences?.budget ?? undefined,
+          priority: preferences?.priorities?.join(',') || undefined,
           visits: visits || undefined,
           lat: point?.lat,
           lng: point?.lng,
@@ -209,7 +215,7 @@ export const ForYouShelf = ({
     return (
       <>
         <button type='button' className={styles.prompt} onClick={() => setIsAsking(true)}>
-          <Sparkle weight='fill' aria-hidden className={styles.promptIcon} />
+          <Sparkle aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
             <span className={styles.promptTitle}>{t('Подберём для вас')}</span>
             <span className={styles.promptMeta}>{t('3 вопроса — и подборка услуг рядом')}</span>
@@ -231,7 +237,7 @@ export const ForYouShelf = ({
         </h2>
         {isTunable && (
           <button type='button' className={styles.tune} onClick={() => setIsAsking(true)}>
-            <Sliders weight='bold' aria-hidden />
+            <Sliders aria-hidden />
             {t('Настроить')}
           </button>
         )}
@@ -246,6 +252,8 @@ export const ForYouShelf = ({
               label={item.name}
               details={`${item.businessName}, ${formatPrice(item.price)}`}
               imageUrl={item.coverUrl}
+              fallback={<BusinessTile name={item.businessName} logoUrl={item.logoUrl} size='lg' />}
+              tint={pickTint(item.businessName)}
               note={translateReason(t, storyNote(item.reason))}
               isEager={position < 5}
               onOpen={() => trackPickClick({ ...pickOf(item), surface, position })}

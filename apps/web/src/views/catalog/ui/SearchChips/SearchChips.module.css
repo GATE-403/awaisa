@@ -5,6 +5,8 @@
   /* Room for the chips' invisible 44pt hit areas inside the row, taken back by the margin:
      poking out, they made the sideways row scroll up and down a few pixels. */
   margin: calc(-1 * var(--space-2)) calc(-1 * var(--shelf-bleed, var(--page-gutter)));
+  /* One step of 20 above and below the chips: the tabs under them used to sit 32 away. */
+  margin-bottom: -20px;
   padding: var(--space-2) var(--shelf-bleed, var(--page-gutter));
   overflow-x: auto;
   scrollbar-width: none;
@@ -18,7 +20,6 @@
   flex-shrink: 0;
   color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
 }
 
 .count {
@@ -34,9 +35,25 @@
   }
 }
 
-/* Wide screens only (a mouse): lighter than the header's categories, not taller than them. */
+/* Wide screens only (a mouse): quieter than the stories above and the header's categories — the
+   heaviest thing on the screen was this row («сделать более гармоничным»): regular words of the
+   stories' size on a lighter fill, the count faint. */
 .row .chip {
-  height: 32px;
+  height: 28px;
   padding: 0 var(--space-3);
+  background: color-mix(in srgb, var(--color-fill) 60%, transparent);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   font-size: var(--text-footnote);
+  font-weight: var(--font-weight-regular);
+}
+
+@media (hover: hover) {
+  .row .chip:hover {
+    background: var(--color-fill);
+    color: var(--color-foreground);
+  }
+}
+
+.row .count {
+  color: var(--color-muted-foreground);
 }
