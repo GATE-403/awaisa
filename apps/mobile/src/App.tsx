@@ -1,7 +1,12 @@
 import { clearLastNotificationResponseAsync, useLastNotificationResponse } from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Linking, Platform, StyleSheet } from 'react-native'
+import { Linking, Platform, StyleSheet } from 'react-native'
+import {
+  KeyboardAvoidingView,
+  KeyboardEvents,
+  KeyboardProvider,
+} from 'react-native-keyboard-controller'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { WebView, type WebViewMessageEvent, type WebViewNavigation } from 'react-native-webview'
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
@@ -48,17 +53,23 @@ export const App = () => {
     void clearLastNotificationResponseAsync()
   }, [notificationResponse])
 
-  // Android: the keyboard's height goes to the page as it shows and hides, so a page in `overlay`
-  // mode can make room for it itself. iOS: WKWebView handles the keyboard, the page reads its
-  // visual viewport.
+  // Android: the keyboard's height goes to the page as it starts to show or hide, with how long it
+  // takes, so a page in `overlay` mode moves with it (its `keyboardDidShow` came only once the
+  // keyboard was up, so the page caught up afterwards). The height is the keyboard's final one,
+  // read from the window insets when its animation starts. iOS: WKWebView handles the keyboard,
+  // the page reads its visual viewport.
   useEffect(() => {
     if (Platform.OS !== 'android') return
-    const send = (height: number) =>
-      webViewRef.current?.injectJavaScript(toWebScript({ type: 'keyboard', height }))
-    const shown = Keyboard.addListener('keyboardDidShow', (event) =>
-      send(Math.round(event.endCoordinates.height)),
+    const send = (height: number, duration: number) =>
+      webViewRef.current?.injectJavaScript(
+        toWebScript({ type: 'keyboard', height: Math.round(height), duration }),
+      )
+    const shown = KeyboardEvents.addListener('keyboardWillShow', (event) =>
+      send(event.height, event.duration),
     )
-    const hidden = Keyboard.addListener('keyboardDidHide', () => send(0))
+    const hidden = KeyboardEvents.addListener('keyboardWillHide', (event) =>
+      send(0, event.duration),
+    )
 
     return () => {
       shown.remove()
@@ -97,51 +108,56 @@ export const App = () => {
   }
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={[styles.container, backgroundStyle]} edges={['top']}>
-        <StatusBar style='auto' />
-        {error && <ErrorView message={error} onRetry={handleRetry} />}
-        {/* Android draws edge to edge, so the window no longer shrinks for the keyboard: the page
+    // Expo draws edge to edge: both system bars are translucent, so the keyboard's height is the
+    // whole part of the screen it covers, the same box the WebView fills.
+    <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
+      <SafeAreaProvider>
+        <SafeAreaView style={[styles.container, backgroundStyle]} edges={['top']}>
+          <StatusBar style='auto' />
+          {error && <ErrorView message={error} onRetry={handleRetry} />}
+          {/* Android draws edge to edge, so the window no longer shrinks for the keyboard: the page
             stayed full height and panned up by the keyboard's height to reveal a field fixed at its
             foot (the cabinet's settings search), taking the whole page with it. Shrinking the
             WebView above the keyboard lets the page lay itself out like in a browser that resizes.
-            iOS: WKWebView handles the keyboard itself. A page that moves itself for the keyboard
+            keyboard-controller's view follows the keyboard frame by frame. iOS: WKWebView handles
+            the keyboard itself. A page that moves itself for the keyboard
             (the booking sheet) asks for `overlay`: the WebView keeps its size, so the long page
             under the sheet is not laid out again while the keyboard slides in. */}
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === 'android' ? 'padding' : undefined}
-          enabled={Platform.OS === 'android' && keyboardMode === 'resize'}
-        >
-          <AppWebView
-            ref={webViewRef}
-            style={[styles.container, backgroundStyle, error && styles.hidden]}
-            source={{ uri: sourceUri }}
-            injectedJavaScriptBeforeContentLoaded={NATIVE_APP_SCRIPT}
-            onMessage={handleMessage}
-            onNavigationStateChange={handleNavigationStateChange}
-            onShouldStartLoadWithRequest={handleShouldStartLoad}
-            // A new page starts in `resize`: one that left without saying so (a reload, a full
-            // navigation) must not leave the next page's fields under the keyboard.
-            onLoadStart={() => setKeyboardMode('resize')}
-            onLoadEnd={() => {
-              isLoadedRef.current = true
-            }}
-            onError={(event) => setError(event.nativeEvent.description)}
-            onHttpError={(event) => setError(`HTTP ${event.nativeEvent.statusCode}`)}
-            renderLoading={() => <LoadingView />}
-            startInLoadingState
-            allowsBackForwardNavigationGestures
-            pullToRefreshEnabled
-            sharedCookiesEnabled
-            setSupportMultipleWindows={false}
-            // Development builds only: Chrome's remote DevTools can then profile the page on the
-            // phone (chrome://inspect).
-            webviewDebuggingEnabled={__DEV__}
-          />
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+          <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === 'android' ? 'padding' : undefined}
+            enabled={Platform.OS === 'android' && keyboardMode === 'resize'}
+          >
+            <AppWebView
+              ref={webViewRef}
+              style={[styles.container, backgroundStyle, error && styles.hidden]}
+              source={{ uri: sourceUri }}
+              injectedJavaScriptBeforeContentLoaded={NATIVE_APP_SCRIPT}
+              onMessage={handleMessage}
+              onNavigationStateChange={handleNavigationStateChange}
+              onShouldStartLoadWithRequest={handleShouldStartLoad}
+              // A new page starts in `resize`: one that left without saying so (a reload, a full
+              // navigation) must not leave the next page's fields under the keyboard.
+              onLoadStart={() => setKeyboardMode('resize')}
+              onLoadEnd={() => {
+                isLoadedRef.current = true
+              }}
+              onError={(event) => setError(event.nativeEvent.description)}
+              onHttpError={(event) => setError(`HTTP ${event.nativeEvent.statusCode}`)}
+              renderLoading={() => <LoadingView />}
+              startInLoadingState
+              allowsBackForwardNavigationGestures
+              pullToRefreshEnabled
+              sharedCookiesEnabled
+              setSupportMultipleWindows={false}
+              // Development builds only: Chrome's remote DevTools can then profile the page on the
+              // phone (chrome://inspect).
+              webviewDebuggingEnabled={__DEV__}
+            />
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </KeyboardProvider>
   )
 }
 

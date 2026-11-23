@@ -18,10 +18,11 @@ type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable'
 
 // Native → web, delivered as a `awaisa:native` window event: the answer to both push messages
 // (`token` is the Expo push token once the permission is granted, else null), and on Android the
-// keyboard's height in CSS pixels as it shows (0 when it hides).
+// keyboard's final height in CSS pixels as it starts to show (0 as it starts to hide) and how long
+// its animation takes in ms.
 type WebMessage =
   | { type: 'pushState'; permission: PushPermission; token: string | null }
-  | { type: 'keyboard'; height: number }
+  | { type: 'keyboard'; height: number; duration?: number }
 
 // The window event the page listens to (`apps/web/src/shared/lib/nativeBridge.ts`).
 const WEB_EVENT = 'awaisa:native'
