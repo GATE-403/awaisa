@@ -12,7 +12,7 @@ test.describe('Following a master', () => {
   }) => {
     test.skip(isMobile, 'Runs once: it changes the account')
     await signInViaApi(page, randomClientPhone(), 'E2E Подписчик')
-    await page.goto('/lumiere-salon')
+    await page.goto('/lumiere-salon#masters')
     const masters = page.locator('#masters')
     const bell = masters.getByRole('button', { name: /^Следить за мастером/ }).first()
     const label = (await bell.getAttribute('aria-label')) ?? ''

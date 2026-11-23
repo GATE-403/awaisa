@@ -17,7 +17,7 @@ import { NextSlotCard } from '@/views/business/ui/Place/NextSlotCard'
 import { PhotosSection } from '@/views/business/ui/Place/PhotosSection'
 import styles from '@/views/business/ui/Place/Place.module.css'
 import { PlaceHeader } from '@/views/business/ui/Place/PlaceHeader'
-import { PromotionsStrip } from '@/views/business/ui/Place/PromotionsStrip'
+import { PlaceTabs } from '@/views/business/ui/Place/PlaceTabs'
 import { QuestionsSection } from '@/views/business/ui/Place/QuestionsSection'
 import { ReviewsSection } from '@/views/business/ui/Place/ReviewsSection'
 import { ServicesBrowser } from '@/views/business/ui/Place/ServicesBrowser'
@@ -55,28 +55,36 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
           { label: business.name, href: `/${business.slug}` },
         ])}
       />
-      <PlaceHeader business={business} catalog={catalog} reviews={reviews} />
       <div className={styles.page}>
-        <PromotionsStrip promotions={promotions} />
-        <div className={styles.body}>
-          <div className={styles.main}>
+        <PlaceHeader
+          business={business}
+          catalog={catalog}
+          reviews={reviews}
+          promotions={promotions}
+        />
+        <PlaceTabs
+          business={business}
+          catalog={catalog}
+          works={<PhotosSection business={business} />}
+          services={
             <ServicesBrowser business={business} catalog={catalog} servicePhotos={servicePhotos} />
-            <SubscriptionsSection business={business} plans={subscriptionPlans} />
-            <MastersSection business={business} specialists={catalog.specialists} />
-            <ReviewsSection business={business} reviews={reviews} />
-            <PhotosSection business={business} />
-            {certificateSale.amounts.length > 0 && (
-              <GiftCertificateSection business={business} amounts={certificateSale.amounts} />
-            )}
-            <QuestionsSection business={business} questions={questions} />
-          </div>
-          <div className={styles.aside}>
-            {quickest && <NextSlotCard business={business} service={quickest} />}
-            <VisitSection business={business} />
-          </div>
+          }
+          masters={<MastersSection business={business} specialists={catalog.specialists} />}
+        />
+        {/* Under the tabs, everything else about the place, as before: what to buy, what people
+            say, what to ask, how to get there. */}
+        <div className={styles.main}>
+          <SubscriptionsSection business={business} plans={subscriptionPlans} />
+          <ReviewsSection business={business} reviews={reviews} />
+          {certificateSale.amounts.length > 0 && (
+            <GiftCertificateSection business={business} amounts={certificateSale.amounts} />
+          )}
+          <QuestionsSection business={business} questions={questions} />
+          <VisitSection business={business} />
         </div>
+        {quickest && <NextSlotCard business={business} service={quickest} />}
       </div>
-      {/* Set apart from the place itself: a band of its own, after everything about this place. */}
+      {/* Set apart from the place itself, after everything about this place. */}
       <SimilarPlaces business={business} places={similar} />
     </main>
   )

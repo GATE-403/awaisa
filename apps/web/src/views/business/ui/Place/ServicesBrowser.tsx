@@ -6,10 +6,10 @@ import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
+import chipStyles from '@/shared/ui/Chip/Chip.module.css'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { SearchField } from '@/shared/ui/SearchField/SearchField'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
-import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import styles from './Place.module.css'
 
 interface ServicesBrowserProps {
@@ -46,8 +46,8 @@ const PopularCard = ({ offer, isHit }: ServiceCardProps) => {
   )
 }
 
-// The heart of the page: the menu. Popular first, then every service by category, with a filter
-// and a search for long menus; every row books that service.
+// The «Услуги» tab, the heart of the page: popular first, then every service by category, with
+// chips and a search for long menus; every card books that service.
 export const ServicesBrowser = ({
   business,
   catalog,
@@ -56,12 +56,12 @@ export const ServicesBrowser = ({
   const t = useT()
   const [category, setCategory] = useState(ALL)
   const [query, setQuery] = useState('')
-  // The tabs row continues the business bar: the bar drops its hairline (one line under both).
+  // The chips row continues the business bar: the bar drops its hairline (one line under both).
   const menuHeadRef = useRef<HTMLDivElement>(null)
   const [isStuck, setIsStuck] = useState(false)
   useRootFlag(catalog.categories.length > 1 && isStuck ? 'category-nav' : null)
 
-  // The tabs lie on the page; only once pinned under the business bar do they take its material,
+  // The chips lie on the page; only once pinned under the business bar do they take its material,
   // so the menu scrolling under them stays readable.
   useEffect(() => {
     const head = menuHeadRef.current
@@ -118,35 +118,34 @@ export const ServicesBrowser = ({
 
   return (
     <NextFreeProvider slugs={[business.slug]}>
-      <section id='services' className={styles.section} aria-labelledby='place-services'>
-        <div className={styles.sectionHead}>
-          <h2 id='place-services' className={styles.sectionTitle}>
-            {t('Услуги и цены')}
-          </h2>
-          <span className={styles.sectionCount}>
-            {t.count(catalog.services.length, ['услуга', 'услуги', 'услуг'])}
-          </span>
-        </div>
-
+      <div className={styles.menu}>
         {catalog.services.length >= SEARCH_FROM && (
           <SearchField value={query} onChange={setQuery} placeholder={t('Найти услугу')} />
         )}
-        {/* Only the category tabs stay pinned under the business bar; the search scrolls away. */}
+        {/* Only the category chips stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (
           <div ref={menuHeadRef} className={styles.menuHead} data-stuck={isStuck || undefined}>
-            {/* The app's one tab style; each tab says how many services it holds. */}
-            <TextTabs
-              label={t('Разделы услуг')}
-              items={[{ id: ALL, name: t('Все') }, ...catalog.categories].map((item) => ({
-                label: item.name,
-                isActive: category === item.id,
-                onSelect: () => setCategory(item.id),
-                count:
-                  item.id === ALL
-                    ? catalog.services.length
-                    : catalog.services.filter((service) => service.categoryId === item.id).length,
-              }))}
-            />
+            {/* The app's filter chips (the booking form's too), each with how many it holds:
+                a second row of tabs under the page's own read as one more level of pages. */}
+            {/* biome-ignore lint/a11y/useSemanticElements: a fieldset would add a legend over the row. */}
+            <div className={styles.chips} role='group' aria-label={t('Разделы услуг')}>
+              {[{ id: ALL, name: t('Все') }, ...catalog.categories].map((item) => (
+                <button
+                  key={item.id}
+                  type='button'
+                  className={chipStyles.chip}
+                  aria-pressed={category === item.id}
+                  onClick={() => setCategory(item.id)}
+                >
+                  {item.name}
+                  <span className={chipStyles.count}>
+                    {item.id === ALL
+                      ? catalog.services.length
+                      : catalog.services.filter((service) => service.categoryId === item.id).length}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -193,7 +192,7 @@ export const ServicesBrowser = ({
             </ul>
           </div>
         ))}
-      </section>
+      </div>
     </NextFreeProvider>
   )
 }
