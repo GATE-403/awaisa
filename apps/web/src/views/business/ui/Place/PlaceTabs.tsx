@@ -1,11 +1,12 @@
 'use client'
 
-import { ListBullets, Sparkle, Trophy } from '@phosphor-icons/react/ssr'
+import { ListBullets, Trophy } from '@phosphor-icons/react/ssr'
 import { type ReactNode, useEffect, useState } from 'react'
 import { getOpeningStatus, WeekHours, weekdayOf } from '@/entities/business'
 import type { Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
+import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 import { ProfileTabAction, ProfileTabs } from '@/shared/ui/ProfileTabs/ProfileTabs'
 
 interface PlaceTabsProps {
@@ -100,7 +101,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
       <ProfileTabAction
         href={`/feed?business=${business.slug}`}
         label={t('Смотреть с ценами')}
-        icon={<Sparkle aria-hidden />}
+        icon={<FanCardsIcon aria-hidden />}
         isHiddenOnPhone
       />
     ),

@@ -120,7 +120,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
             className={styles.shareCopy}
             onClick={() => void copy(pageUrl, t('Ссылка на страницу скопирована'))}
           >
-            <Copy weight='bold' aria-hidden />
+            <Copy aria-hidden />
             {t('Скопировать ссылку')}
           </Button>
           <GlyphGroup label={t('Ещё')}>

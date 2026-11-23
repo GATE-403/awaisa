@@ -90,6 +90,7 @@ const PLACE: Record<string, Entry> = {
   Адрес: ['Дарек', 'Address'],
   Часы: ['Иш убактысы', 'Hours'],
   Выходной: ['Дем алыш', 'Closed'],
+  Ежедневно: ['Күн сайын', 'Daily'],
   'Сегодня {hours}': ['Бүгүн {hours}', 'Today {hours}'],
   '{name} на карте': ['{name} картада', '{name} on the map'],
   'Открыть на карте': ['Картадан ачуу', 'Open on the map'],

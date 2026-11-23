@@ -20,6 +20,8 @@ interface MasterCardProps {
   children?: ReactNode
   icon?: ReactNode
   title?: string
+  /** The line under the name; a master's own card says ★ rating · role unless this is given
+   * (a profile's masters say «4 визита · 3 нед. назад»). */
   meta?: ReactNode
   /** The picture's width in CSS px, for the sized `srcSet`. */
   imageWidth?: number
@@ -63,7 +65,7 @@ export const MasterCard = ({
       <span className={styles.caption}>
         <span className={styles.name}>{specialist ? specialist.name.split(' ')[0] : title}</span>
         <span className={styles.meta}>
-          {specialist ? (
+          {specialist && !meta ? (
             <>
               {specialist.rating !== null && (
                 <span className={styles.rating}>

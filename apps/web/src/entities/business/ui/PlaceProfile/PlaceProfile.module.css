@@ -23,15 +23,36 @@
   }
 }
 
-/* No cover: a band in the place's colour. */
+/* No cover: a band in the place's colour, a quiet pattern of mascots on it instead of an empty
+   wash («вместо пустого фона можно сделать узор из маскотов»). */
 .cover[data-empty] {
   display: grid;
   place-items: center;
+  overflow: hidden;
   background-image: radial-gradient(
     70% 90% at 50% 0%,
     color-mix(in srgb, var(--place-tint) 22%, transparent),
     transparent
   );
+}
+
+.cover[data-empty]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--place-tint) 16%, transparent);
+  mask-image: var(--mascot-tile), linear-gradient(to bottom, #000 30%, transparent);
+  mask-composite: intersect;
+  mask-repeat: repeat, no-repeat;
+  mask-size:
+    96px 96px,
+    100% 100%;
+  pointer-events: none;
+}
+
+/* Whatever lies on the empty cover (the cabinet's «Добавить обложку») stays over the pattern. */
+.cover[data-empty] > * {
+  position: relative;
 }
 
 .coverImage {
