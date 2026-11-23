@@ -97,5 +97,5 @@
 /* A service card still on its way (the loading skeleton). */
 .placeholderCard {
   aspect-ratio: 3 / 4;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
 }

@@ -99,7 +99,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
                   })}
                   onClick={() => void remove(member)}
                 >
-                  <X weight='bold' aria-hidden />
+                  <X aria-hidden />
                 </button>
               )}
             </li>

@@ -95,7 +95,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             hidden={index === 0}
             onClick={() => turn(-1)}
           >
-            <CaretLeft weight='bold' aria-hidden />
+            <CaretLeft aria-hidden />
           </button>
           <button
             type='button'
@@ -105,7 +105,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             hidden={index === pictures.length - 1}
             onClick={() => turn(1)}
           >
-            <CaretRight weight='bold' aria-hidden />
+            <CaretRight aria-hidden />
           </button>
         </>
       )}

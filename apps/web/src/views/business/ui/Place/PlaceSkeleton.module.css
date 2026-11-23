@@ -55,5 +55,5 @@
 
 .card {
   aspect-ratio: 3 / 4;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
 }

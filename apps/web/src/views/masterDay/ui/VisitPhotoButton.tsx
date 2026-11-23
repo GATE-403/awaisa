@@ -16,7 +16,7 @@ export const VisitPhotoButton = ({ hasPhoto, isUploading, onPick }: VisitPhotoBu
 
   return (
     <button type='button' className={styles.photoButton} onClick={onPick} disabled={isUploading}>
-      {hasPhoto ? <Check weight='bold' aria-hidden /> : <Camera weight='bold' aria-hidden />}
+      {hasPhoto ? <Check aria-hidden /> : <Camera aria-hidden />}
       {isUploading ? t('Загружаем…') : hasPhoto ? t('Ещё фото работы') : t('Фото работы')}
     </button>
   )

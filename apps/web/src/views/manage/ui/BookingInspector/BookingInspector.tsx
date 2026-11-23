@@ -81,7 +81,7 @@ export const BookingInspector = ({
           price is struck, the one thing that will not come. */}
       {isCancelled && (
         <p className={styles.status}>
-          <Prohibit weight='bold' aria-hidden />
+          <Prohibit aria-hidden />
           {t('Запись отменена')}
         </p>
       )}
@@ -95,7 +95,7 @@ export const BookingInspector = ({
             onClick={() => onOpenClient(booking.customerPhone)}
           >
             {booking.customerName}
-            <CaretRight weight='bold' aria-hidden />
+            <CaretRight aria-hidden />
             <span className={styles.srOnly}>: {t('карточка клиента')}</span>
           </button>
           <span className={styles.what}>
@@ -149,7 +149,7 @@ export const BookingInspector = ({
           </Button>
         ) : (
           <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
-            <Phone weight='bold' aria-hidden />
+            <Phone aria-hidden />
             {t('Позвонить')}
           </a>
         )}
@@ -174,7 +174,7 @@ export const BookingInspector = ({
             label={t('Ещё действия')}
             trigger={
               <>
-                <DotsThree weight='bold' aria-hidden />
+                <DotsThree aria-hidden />
                 <span className={styles.actionLabel}>{t('Ещё')}</span>
               </>
             }

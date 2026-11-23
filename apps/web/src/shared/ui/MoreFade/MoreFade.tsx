@@ -46,12 +46,12 @@ export const MoreFade = ({
           aria-expanded
         >
           {t('Скрыть')}
-          <CaretUp weight='bold' aria-hidden />
+          <CaretUp aria-hidden />
         </button>
       ) : (
         <button type='button' className={styles.more} onClick={onToggle} aria-expanded={false}>
           {t('Ещё {count} {label}', { count: hiddenCount, label })}
-          <CaretDown weight='bold' aria-hidden />
+          <CaretDown aria-hidden />
         </button>
       )}
     </div>

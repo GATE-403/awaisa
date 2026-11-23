@@ -49,7 +49,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
           <NextLink href='/' className={styles.crumb}>
             {t('Каталог')}
           </NextLink>
-          <CaretRight className={styles.separator} weight='bold' aria-hidden />
+          <CaretRight className={styles.separator} aria-hidden />
           <NextLink
             href={base}
             className={styles.business}

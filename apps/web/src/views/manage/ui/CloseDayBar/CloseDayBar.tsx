@@ -47,7 +47,7 @@ export const CloseDayBar = ({
     >
       {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
           the capsule's own rounded start. */}
-      {!isListed && <CircleDashed weight='bold' className={styles.dot} aria-hidden />}
+      {!isListed && <CircleDashed className={styles.dot} aria-hidden />}
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
@@ -58,13 +58,13 @@ export const CloseDayBar = ({
               className={styles.who}
               trigger={
                 <>
-                  <CircleDashed weight='bold' className={styles.dot} aria-hidden />
+                  <CircleDashed className={styles.dot} aria-hidden />
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
                     <span className={styles.long}>{passed}</span>
                     <span className={styles.short}>{t('без отметки')}</span>
                   </span>
-                  <CaretDown weight='bold' aria-hidden className={styles.caret} />
+                  <CaretDown aria-hidden className={styles.caret} />
                 </>
               }
             >
@@ -77,7 +77,7 @@ export const CloseDayBar = ({
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>
-            <Check weight='bold' aria-hidden />
+            <Check aria-hidden />
             {t('Все пришли')}
           </Button>
         </>
@@ -93,7 +93,7 @@ export const CloseDayBar = ({
         </>
       )}
       <button type='button' className={styles.close} onClick={onDismiss} aria-label={t('Скрыть')}>
-        <X weight='bold' aria-hidden />
+        <X aria-hidden />
       </button>
     </section>
   )

@@ -69,7 +69,7 @@ export const WalletButton = ({ bookingId }: WalletButtonProps) => {
 
   return (
     <button type='button' className={styles.button} onClick={open} disabled={isOpening}>
-      <Wallet weight='fill' aria-hidden />
+      <Wallet aria-hidden />
       {t(LABELS[kind])}
     </button>
   )

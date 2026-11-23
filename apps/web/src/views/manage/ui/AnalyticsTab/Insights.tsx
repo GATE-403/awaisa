@@ -57,7 +57,7 @@ const AttentionRow = ({
       </span>
       <span className={styles.attentionAction}>
         {actionLabel}
-        <CaretRight weight='bold' aria-hidden />
+        <CaretRight aria-hidden />
       </span>
     </>
   )
@@ -103,7 +103,7 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
       <ul className={styles.rows}>
         {unmarked.count > 0 && (
           <AttentionRow
-            icon={<CircleDashed weight='bold' />}
+            icon={<CircleDashed />}
             tone='orange'
             title={t('{visits} без отметки', { visits: visits(t, unmarked.count) })}
             detail={
@@ -211,7 +211,7 @@ const GoalLine = ({ month, onEdit }: GoalLineProps) => {
     return (
       <button type='button' className={styles.goalSet} onClick={onEdit}>
         {t('Задать цель на {month}', { month: month.label })}
-        <CaretRight weight='bold' aria-hidden />
+        <CaretRight aria-hidden />
       </button>
     )
   }
@@ -393,7 +393,7 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
                   · {formatPhone(client.phone)}
                 </span>
               </span>
-              <CaretRight weight='bold' aria-hidden className={styles.rowChevron} />
+              <CaretRight aria-hidden className={styles.rowChevron} />
             </button>
           </li>
         ))}

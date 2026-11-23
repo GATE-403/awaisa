@@ -65,7 +65,7 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
               {branch.latitude === null && (
                 <span className={styles.cellMuted}>{t('Нет метки')}</span>
               )}
-              <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+              <CaretRight className={styles.chevron} aria-hidden />
             </button>
           </li>
         ))}

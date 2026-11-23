@@ -7,7 +7,7 @@
   aspect-ratio: 3 / 4;
   overflow: hidden;
   isolation: isolate;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
   background: linear-gradient(
     160deg,
     color-mix(in srgb, var(--tint) 62%, white),

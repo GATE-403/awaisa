@@ -81,7 +81,7 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
-            <Plus weight='bold' aria-hidden />
+            <Plus aria-hidden />
             {t('Новая акция')}
           </Button>
         }
@@ -107,7 +107,7 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
               >
                 <span className={styles.rowBody}>
                   <span className={styles.rowTitle}>
-                    <Tag weight='fill' aria-hidden className={styles.star} />
+                    <Tag aria-hidden className={styles.star} />
                     {promotion.title}
                   </span>
                   <span className={styles.rowMeta}>
@@ -125,7 +125,7 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
                   </span>
                 </span>
                 <span className={styles.cellValue}>−{promotion.percent}%</span>
-                <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                <CaretRight className={styles.chevron} aria-hidden />
               </button>
             </li>
           ))}

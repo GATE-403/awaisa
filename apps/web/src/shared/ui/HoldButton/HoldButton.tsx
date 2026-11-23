@@ -33,7 +33,7 @@ const KEYS = new Set(['Enter', ' '])
 export const HoldButton = ({
   children,
   onConfirm,
-  icon = <Trash weight='bold' aria-hidden />,
+  icon = <Trash aria-hidden />,
   holdMs = 1000,
   disabled = false,
 }: HoldButtonProps) => {
