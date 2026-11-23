@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { getSlugProblem } from '../businesses/business-rules.js'
-import { ARCHIVED_SLUG_PREFIX, archivedSlug, bookingsToCancel } from './business-erasure.js'
+import {
+  ARCHIVED_SLUG_PREFIX,
+  archivedSlug,
+  bookingsToCancel,
+  confirmsDeletion,
+} from './business-erasure.js'
 
 const now = new Date('2026-11-23T10:00:00Z')
 const id = '3f2b8c1e-7a4d-4e0b-9c55-0123456789ab'
@@ -41,5 +46,19 @@ describe('bookingsToCancel', () => {
 
   it('has nothing to cancel without visits', () => {
     expect(bookingsToCancel([], now)).toEqual([])
+  })
+})
+
+describe('confirmsDeletion', () => {
+  it('takes the address typed exactly, forgiving case and spaces', () => {
+    expect(confirmsDeletion('old-school', 'old-school')).toBe(true)
+    expect(confirmsDeletion('  Old-School ', 'old-school')).toBe(true)
+  })
+
+  it('refuses anything else: empty, a part, the name or a typo', () => {
+    expect(confirmsDeletion('', 'old-school')).toBe(false)
+    expect(confirmsDeletion('old', 'old-school')).toBe(false)
+    expect(confirmsDeletion('Old School', 'old-school')).toBe(false)
+    expect(confirmsDeletion('old-schol', 'old-school')).toBe(false)
   })
 })

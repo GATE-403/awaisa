@@ -236,7 +236,7 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
               {value.text}
             </span>
           )}
-          <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+          <CaretRight className={styles.chevron} aria-hidden />
         </NextLink>
       </li>
     )
@@ -281,7 +281,7 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
                 <li>
                   <button
                     type='button'
-                    className={`${styles.row} ${styles.rowButton}`}
+                    className={`${styles.row} ${styles.rowButton} ${styles.danger}`}
                     onClick={() => setIsBusinessSheetOpen(true)}
                   >
                     <span className={styles.glyph} aria-hidden>
@@ -290,8 +290,9 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
                     <span className={styles.label}>
                       <span className={styles.labelText}>{t('Скрыть или удалить')}</span>
                     </span>
-                    <span className={styles.value}>{t(isPublished ? 'Открыта' : 'Скрыта')}</span>
-                    <CaretRight className={styles.chevron} weight='bold' aria-hidden />
+                    {/* Only the state that asks for attention: an open page says nothing. */}
+                    {!isPublished && <span className={styles.value}>{t('Скрыта')}</span>}
+                    <CaretRight className={styles.chevron} aria-hidden />
                   </button>
                 </li>
               )}
