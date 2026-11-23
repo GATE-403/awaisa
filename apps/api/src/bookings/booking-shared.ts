@@ -37,6 +37,8 @@ type BookingView = {
   isNoShow: boolean
   /** Paid by the client's subscription, drawn when the salon marks «Пришёл». */
   isBySubscription: boolean
+  /** «Хочу так»: the work photo the client wants to look like. */
+  lookPhotoUrl: string | null
   business: {
     slug: string
     name: string
@@ -127,6 +129,7 @@ const toView = (booking: Booking): BookingView => {
         : null,
     isNoShow: booking.outcome === 'no_show',
     isBySubscription: Boolean(booking.subscriptionId),
+    lookPhotoUrl: booking.lookPhotoId ? booking.lookPhotoUrl : null,
     review: booking.review
       ? {
           rating: booking.review.rating,

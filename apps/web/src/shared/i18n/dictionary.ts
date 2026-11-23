@@ -166,6 +166,11 @@ const BOOKING: Record<string, Entry> = {
   'Напомнить о визите': ['Визит жөнүндө эскертүү', 'Remind me'],
   'Когда напомнить': ['Качан эскертүү', 'When to remind'],
 
+  // «Хочу так»: the look the client booked from
+  Образец: ['Үлгү', 'Reference'],
+  'Фото, как хочется': ['Каалаган көрүнүштүн сүрөтү', 'Photo of the look you want'],
+  'Хочет так': ['Ушундай каалайт', 'Wants this look'],
+  'Образец от клиента: {name}': ['Кардардын үлгүсү: {name}', 'Reference from the client: {name}'],
   // Promo code
   Промокод: ['Промокод', 'Promo code'],
   Ввести: ['Киргизүү', 'Enter'],

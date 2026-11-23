@@ -9,6 +9,7 @@ import type { Offer } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { gridImage } from '@/shared/lib/imageSizes'
+import { cheaperThan } from '../../lib/cheaperThan'
 import styles from './OfferCard.module.css'
 
 interface OfferCardProps {
@@ -57,6 +58,7 @@ export const OfferCard = ({
           ? 'Завтра'
           : null
       : null
+  const cheaperShare = cheaperThan(offer.cheaperThanPercent)
   // The place's first free time (any service): open that day, the client picks the time.
   const href =
     hrefOverride ??
@@ -141,8 +143,15 @@ export const OfferCard = ({
               {slotText ?? t('Сегодня с {time}', { time: slot?.time ?? '' })}
             </span>
           )}
+          {cheaperShare !== null && (
+            <span className={styles.cheaper}>
+              {t('Дешевле {percent}% мест', { percent: cheaperShare })}
+            </span>
+          )}
         </div>
-        {/* What a tap does, said on the card: a service books, a place card opens the place. */}
+        {/* What a tap does, said on the card: a service books, a place card opens the place.
+            One capsule of one look on every card: a time on it broke the row («кнопки не
+            вписываются в дизайн»), so the time keeps its own line above. */}
         <span className={styles.book} aria-hidden>
           {t(actionLabel)}
         </span>

@@ -111,6 +111,8 @@ type BusinessCard = Pick<
   rating?: number | null
   reviewsCount?: number
   hours: WorkingDay[]
+  /** Up to three visible work photos after the cover, for leafing through on the card. */
+  photos?: string[]
 }
 
 type Offer = {
@@ -129,6 +131,8 @@ type Offer = {
   address: string | null
   /** The biggest open promotion on this service, percent; null = none. */
   discountPercent?: number | null
+  /** Share of other places with this service that ask more, percent; null = too few to compare. */
+  cheaperThanPercent?: number | null
 }
 
 /** A service picked for this client, with why («Пора снова», «Вы любите маникюр»). */
@@ -147,7 +151,8 @@ type PopularService = {
   durationMinutes: number
 }
 
-type NextFree = Record<string, { date: string; time: string } | null>
+/** The first free time today or tomorrow; `times` is the first two of that day. */
+type NextFree = Record<string, { date: string; time: string; times?: string[] } | null>
 
 type BusinessPage = {
   business: Business
@@ -226,6 +231,8 @@ type Booking = {
   isNoShow?: boolean
   /** Paid by the client's subscription: the visit is drawn from it when the salon marks «Пришёл». */
   isBySubscription?: boolean
+  /** «Хочу так»: the work photo the client picked as the look they want. */
+  lookPhotoUrl?: string | null
   business: BookingBusiness
 }
 
@@ -869,6 +876,8 @@ type CreateBookingInput = {
   /** Buy this online plan and book: the booking waits for the payment like a deposit. */
   subscriptionPlanId?: string
   channel?: BookingChannel
+  /** «Хочу так»: a work photo of this place the client wants to look like. */
+  lookPhotoId?: string
 }
 
 type PromotionKind = 'happy_hours' | 'first_visit' | 'promo_code'
@@ -1515,6 +1524,9 @@ type AccountExport = {
 // so the web refreshes them at once.
 type AccountDeleted = { slugs: string[]; cancelledBookings: number }
 
+// `DELETE /manage/:slug`: the address the business had (now free) and the visits cancelled with it.
+type BusinessDeleted = { slug: string; cancelledBookings: number }
+
 // «Сообщить, когда освободится»: a client waits for a full day (see apps/api/src/waitlist).
 type WaitlistEntry = {
   id: string
@@ -1613,6 +1625,7 @@ type FunnelStep =
   | 'business_landing'
   | 'register_name'
   | 'register_kind'
+  | 'register_services'
   | 'register_contacts'
   | 'register_done'
   // signals: trouble, not progress
@@ -2158,4 +2171,5 @@ export type {
   WaitlistEntry,
   AccountExport,
   AccountDeleted,
+  BusinessDeleted,
 }

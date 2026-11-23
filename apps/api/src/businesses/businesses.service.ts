@@ -66,6 +66,8 @@ type BusinessCard = Pick<
   rating: number | null
   reviewsCount: number
   hours: { weekday: number; opensMinutes: number; closesMinutes: number }[]
+  /** Up to three visible work photos after the cover: the place card leafs through them. */
+  photos: string[]
 }
 
 const MAX_CATALOG_ITEMS = 60
@@ -76,6 +78,8 @@ const MAX_MAP_ITEMS = 200
 const MAX_POPULAR_SERVICES = 12
 
 const MAX_OFFERS = 60
+// A price is compared only with at least this many other places offering the same service.
+const MIN_PRICE_PEERS = 4
 
 const toBusinessView = (business: Business): BusinessView => ({
   id: business.id,
@@ -136,7 +140,13 @@ export class BusinessesService {
             'weekday', h."weekday", 'opensMinutes', h."opens_minutes", 'closesMinutes', h."closes_minutes"
           ) ORDER BY h."weekday"), '[]')
           FROM "working_hours" h WHERE h."business_id" = b."id"
-        ) AS "hours"
+        ) AS "hours",
+        -- The same order as the place's own «Работы»: the owner's first, then the newest.
+        ARRAY(
+          SELECT w."url" FROM "work_photos" w
+          WHERE w."business_id" = b."id" AND NOT w."is_hidden"
+          ORDER BY w."position" ASC NULLS FIRST, w."created_at" DESC LIMIT 3
+        ) AS "photos"
       FROM "businesses" b
       JOIN "services" s ON s."business_id" = b."id" AND s."is_active"
       WHERE b."is_published"
@@ -186,7 +196,16 @@ export class BusinessesService {
             AND (p."service_ids" IS NULL OR s."id" = ANY(p."service_ids"))
             AND (p."ends_on" IS NULL OR p."ends_on" >= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
             AND (p."starts_on" IS NULL OR p."starts_on" <= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
-        ) AS "discountPercent"
+        ) AS "discountPercent",
+        -- The share of other places with this service (same kind, same name) that ask more:
+        -- «Дешевле 70% мест» under the price. Null with fewer than four to compare with.
+        (SELECT CASE WHEN COUNT(*) >= ${MIN_PRICE_PEERS}
+            THEN (100 * COUNT(*) FILTER (WHERE o."price" > s."price") / COUNT(*))::int END
+          FROM "services" o
+          JOIN "businesses" ob ON ob."id" = o."business_id" AND ob."is_published"
+          WHERE o."is_active" AND lower(o."name") = lower(s."name")
+            AND ob."kind" = b."kind" AND o."business_id" <> s."business_id"
+        ) AS "cheaperThanPercent"
       FROM "services" s
       JOIN "businesses" b ON b."id" = s."business_id" AND b."is_published"
       WHERE s."is_active"

@@ -504,6 +504,22 @@ export const BookingPage = ({
       {/* Optional extras as a second group of the same Settings rows: a note and a
                         code read like the name and number above, not like loose buttons. */}
       <div className={styles.group}>
+        {/* «Хочу так» from a work: the look goes to the master with the booking. */}
+        {form.lookPhoto && (
+          <div className={styles.fieldRow} data-action=''>
+            <span className={styles.extraLabel}>{t('Образец')}</span>
+            {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
+            <img
+              src={form.lookPhoto.url}
+              alt={t('Фото, как хочется')}
+              className={styles.lookThumb}
+              decoding='async'
+            />
+            <button type='button' className={styles.rowAction} onClick={form.removeLookPhoto}>
+              {t('Убрать')}
+            </button>
+          </div>
+        )}
         {isCommentOpen || form.comment ? (
           <>
             <div className={styles.fieldRow} data-action=''>

@@ -34,9 +34,32 @@
   scale: 0.98;
 }
 
-.card:focus-visible {
+.card:has(.open:focus-visible) {
   outline: 2px solid var(--color-ring);
   outline-offset: 3px;
+}
+
+/* Without pictures the name's link covers the whole card; with them every picture is a link of
+   its own, and the words over them let the finger through to the pictures (a swipe leafs them,
+   a tap opens the place), keeping only their links and capsules. */
+.open {
+  color: inherit;
+  outline: none;
+}
+
+.card:not([data-gallery]) .open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.card[data-gallery] .body {
+  pointer-events: none;
+}
+
+.card[data-gallery] .body :is(a, button) {
+  pointer-events: auto;
 }
 
 .media {
@@ -61,6 +84,110 @@
   position: absolute;
   inset: 0;
   background: var(--card-scrim);
+  pointer-events: none;
+}
+
+/* The pictures side by side, one in view: leafed by a swipe with its own momentum, no bar. */
+.gallery {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.gallery[data-scrolls] {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+}
+
+.gallery::-webkit-scrollbar {
+  display: none;
+}
+
+.slide {
+  position: relative;
+  flex: 0 0 100%;
+  overflow: hidden;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* Which picture is in view, like stories: thin bars across the top, the current one lit. */
+.dots {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-3);
+  left: var(--space-3);
+  z-index: 1;
+  display: flex;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.dot {
+  flex: 1;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.45);
+  transition: background-color var(--duration-normal) var(--ease-standard);
+}
+
+.dot[data-current] {
+  background: #fff;
+}
+
+/* ‹ › with a mouse only, shown while the card is pointed at (fingers swipe). */
+.turn {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .turn {
+    position: absolute;
+    top: 38%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: rgb(255 255 255 / 0.9);
+    box-shadow: var(--shadow-xs);
+    color: #1d1d1f;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-standard);
+  }
+
+  .turn[hidden] {
+    display: none;
+  }
+
+  .turn[data-side="start"] {
+    left: var(--space-2);
+  }
+
+  .turn[data-side="end"] {
+    right: var(--space-2);
+  }
+
+  .turn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .card:hover .turn,
+  .turn:focus-visible {
+    opacity: 1;
+  }
 }
 
 .cover {
@@ -95,6 +222,7 @@
 }
 
 .title {
+  min-width: 0;
   overflow: hidden;
   font-size: var(--text-body);
   line-height: var(--text-sm-line-height);
@@ -103,16 +231,74 @@
   white-space: nowrap;
 }
 
+/* «● Сегодня 14:30 · 15:00»: one quiet line like the approved «Сегодня с 18:30», each time a
+   link that books it. No capsules: white ones over the picture outweighed the place and wrapped
+   on phones («выглядит мягко говоря плохо»). */
 .live {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow: hidden;
   font-size: var(--text-xs);
   line-height: var(--text-xs-line-height);
+  white-space: nowrap;
+}
+
+.time {
+  position: relative;
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.time + .time::before {
+  content: "·";
+  margin-right: var(--space-1);
+  color: rgb(255 255 255 / 0.6);
+  font-weight: var(--font-weight-regular);
+}
+
+/* A 44pt target around the short word. */
+.time::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2)) -6px;
+}
+
+.time:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .time:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+/* Phones: the first time only, so the line never wraps. */
+@media (max-width: 639px) {
+  .time + .time {
+    display: none;
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .free {
-  color: #fff;
-  font-weight: var(--font-weight-semibold);
+  color: rgb(255 255 255 / 0.85);
 }
 
 .free[data-today]::before {
