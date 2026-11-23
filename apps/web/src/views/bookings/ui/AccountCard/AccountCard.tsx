@@ -145,7 +145,9 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   const identity = (
     <>
       <span className={styles.identity}>
+        {/* The name heads the page, like the Apple Account row heads Settings. */}
         <ProfileHeadText
+          isHeading
           name={displayName}
           emoji={myProfile.settings?.statusEmoji}
           meta={meta || undefined}

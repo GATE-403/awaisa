@@ -5,12 +5,13 @@ import { createPastVisit, withDb } from './visits'
 type Recommendation = { id: string; name: string; reason: string; slug: string }
 
 test.describe('Recommendations', () => {
-  test('a guest answers the questions step by step and gets «Для вас» with reasons', async ({
+  test('a client answers the questions step by step and gets «Для вас» with reasons', async ({
     page,
   }) => {
-    // Picks live in the profile, not in the catalog.
-    await page.goto('/bookings')
-    await page.getByRole('button', { name: /Подберём для вас/ }).click()
+    // The questions live in the account's «Настройки → Подборка».
+    await signInViaApi(page, randomClientPhone(), 'E2E Подборка')
+    await page.goto('/bookings?tab=settings')
+    await page.getByRole('button', { name: /^Для вас/ }).click()
     const sheet = page.getByRole('dialog', { name: 'Подберём для вас' })
     // One question a step, like the business setup; a one-answer step moves on by itself.
     // The sheet slides up on phones: tap the rows once it has settled.
@@ -33,9 +34,6 @@ test.describe('Recommendations', () => {
     const answers = sheet.getByRole('list', { name: 'Ваши ответы' })
     await expect(answers.getByRole('button')).toHaveText(['Женщине', 'Маникюр', 'До 2 500 сом'])
     // Several things may matter at once: they tick, «Далее» moves on.
-    const asked = page.waitForRequest((request) =>
-      decodeURIComponent(request.url()).includes('priority=soon,rating'),
-    )
     await sheet.getByRole('button', { name: /Свободно сегодня/ }).click()
     await sheet.getByRole('button', { name: /Высокий рейтинг/ }).click()
     await expect(sheet.getByRole('button', { name: /Высокий рейтинг/ })).toHaveAttribute(
@@ -52,16 +50,15 @@ test.describe('Recommendations', () => {
       budget: 2500,
       priorities: ['soon', 'rating'],
     })
-    await asked
 
-    // In the profile the picks sit in «Записи» as «Куда записаться» while nothing is ahead.
-    const shelf = page.getByRole('region', { name: 'Куда записаться' })
-    await expect(shelf).toBeVisible()
-    const cards = shelf.getByRole('link')
-    await expect(cards.first()).toHaveAccessibleName(/Ваш выбор · ногти/)
-    // Services for the other gender are left out.
-    await expect(shelf.getByRole('link', { name: /Мужская/ })).toHaveCount(0)
-    await expect(cards.first()).toHaveAttribute('href', /\/book\?service=/)
+    // The catalog's «Для вас» asks with the answers: nails first, nothing for men.
+    const answered = page.waitForResponse((response) =>
+      decodeURIComponent(response.url()).includes('priority=soon,rating'),
+    )
+    await page.goto('/')
+    const picks: Recommendation[] = await (await answered).json()
+    expect(picks[0]?.reason).toMatch(/Ваш выбор · ногти/)
+    expect(picks.filter((pick) => /Мужская/.test(pick.name))).toEqual([])
   })
 
   test('the catalog opens with picks, even for a new guest, and learns what was shown and tapped', async ({

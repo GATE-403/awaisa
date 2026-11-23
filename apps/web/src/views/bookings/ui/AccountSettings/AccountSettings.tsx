@@ -180,10 +180,16 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
   }
 
   return (
-    <section className={styles.settings} aria-labelledby='settings-title'>
-      <h2 id='settings-title' className={styles.title} data-hidden={isTitleHidden || undefined}>
-        {t('Настройки')}
-      </h2>
+    // With the title hidden the screen around it names the section (one `settings-title` id).
+    <section
+      className={styles.settings}
+      aria-labelledby={isTitleHidden ? undefined : 'settings-title'}
+    >
+      {!isTitleHidden && (
+        <h2 id='settings-title' className={styles.title}>
+          {t('Настройки')}
+        </h2>
+      )}
 
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsNaming(true)}>

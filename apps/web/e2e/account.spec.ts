@@ -42,33 +42,19 @@ test.describe('Account: sign in by SMS', () => {
 
   test('the name is changed in a sheet from «Настройки»', async ({ page }) => {
     await signInViaApi(page, randomClientPhone(), 'E2E Тест')
+    // Settings are a screen of their own behind the account row's gear, kept in `?tab=settings`.
     await page.goto('/bookings?tab=settings')
-    await page.getByRole('button', { name: /^Имя/ }).click()
-    const sheet = page.getByRole('dialog', { name: 'Ваше имя' })
-    const field = sheet.getByLabel('Имя')
-    await expect(field).toBeFocused()
-    await field.fill('E2E Новое имя')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(sheet).toHaveCount(0)
-    await expect
-      .poll(async () => (await (await page.request.get('/api/me')).json()).name)
-      .toBe('E2E Новое имя')
-  })
-
-  test('the open tab lives in the address; «Выйти» signs out at once and leads to the catalog', async ({
-    page,
-  }) => {
-    await signInViaApi(page, randomClientPhone(), 'E2E Тест')
-    await page.goto('/bookings?tab=settings')
+    await expect(page.getByRole('heading', { name: 'Настройки' })).toBeVisible()
     const tabs = page.getByRole('tablist', { name: 'Профиль' })
-    await expect(tabs.getByRole('tab', { name: /^Настройки/ })).toHaveAttribute(
+    await expect(tabs).toHaveCount(0)
+    await page.getByRole('button', { name: 'Записи' }).click()
+    await expect(page).toHaveURL(/[?&]tab=bookings/)
+    await expect(tabs.getByRole('tab', { name: /^Записи/ })).toHaveAttribute(
       'aria-selected',
       'true',
     )
 
     // Ahead and past are one «Записи» tab now; an old «?tab=history» link lands on it too.
-    await tabs.getByRole('tab', { name: /^Записи/ }).click()
-    await expect(page).toHaveURL(/[?&]tab=bookings/)
     await page.goto('/bookings?tab=history')
     await expect(tabs.getByRole('tab', { name: /^Записи/ })).toHaveAttribute(
       'aria-selected',
@@ -82,17 +68,17 @@ test.describe('Account: sign in by SMS', () => {
       'true',
     )
 
-    await tabs.getByRole('tab', { name: /^Настройки/ }).click()
+    const profile = page.getByRole('region', { name: 'Профиль' })
+    await profile.getByRole('button', { name: 'Настройки' }).click()
+    await expect(page).toHaveURL(/[?&]tab=settings/)
     await page.getByRole('button', { name: 'Выйти' }).click()
     // Signed out at once, on the catalog; the session is gone on the server too.
     await expect(page).toHaveURL((url) => url.pathname === '/')
     expect((await page.request.get('/api/me')).status()).toBe(401)
-    // The profile is a guest's again: a sign-in card, no settings.
+    // The page is a guest's again: a sign-in row and no gear to the settings.
     await page.goto('/bookings')
-    await expect(
-      page.getByRole('region', { name: 'Профиль' }).getByRole('link', { name: 'Войти' }),
-    ).toBeVisible()
-    await expect(tabs.getByRole('tab', { name: /^Настройки/ })).toHaveCount(0)
+    await expect(profile.getByRole('link', { name: 'Войти' })).toBeVisible()
+    await expect(profile.getByRole('button', { name: 'Настройки' })).toHaveCount(0)
   })
 
   test('a sign-in link cannot send the client to another site afterwards', async ({ page }) => {
