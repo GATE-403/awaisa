@@ -296,6 +296,66 @@ test.describe('UX: layout and ergonomics', () => {
     })
   }
 
+  test('in the Android app the sheet takes the keyboard itself, without a resized WebView', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The on-screen keyboard is a phone matter')
+    // The page as the Android app shows it: the app's flag and its message port, kept to read.
+    await page.addInitScript(() => {
+      const state = window as unknown as { __posted: string[] }
+      state.__posted = []
+      Object.assign(window, {
+        __NATIVE_APP__: { platform: 'android', version: '1.0.0' },
+        ReactNativeWebView: { postMessage: (message: string) => state.__posted.push(message) },
+      })
+      localStorage.setItem(
+        'awaisa:contact:v1',
+        JSON.stringify({ name: 'E2E Тест', phone: '+996 555 000 111' }),
+      )
+    })
+    const posted = () =>
+      page.evaluate(() => (window as unknown as { __posted: string[] }).__posted.join('\n'))
+    await page.goto('/awaisa-studio/book?service=styling')
+    await bookingSteps(page)
+      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .click()
+    await pickFirstFreeSlot(page)
+    // The sheet asks the app to leave the WebView whole.
+    await expect.poll(posted).toContain('"mode":"overlay"')
+
+    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    await toggle.waitFor()
+    await toggle.evaluate((element) => {
+      element.scrollIntoView({ block: 'end' })
+      document.querySelector('[data-booking-screen]')?.scrollBy({ top: -90 })
+    })
+    await toggle.click()
+    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Имя' })
+    await expect(name).toBeFocused()
+
+    // The app reports its keyboard: the sheet makes room and sets the field above it.
+    const keyboardTop = await page.evaluate(() => {
+      const height = 300
+      window.dispatchEvent(
+        new CustomEvent('awaisa:native', { detail: { type: 'keyboard', height } }),
+      )
+      return window.innerHeight - height
+    })
+    const sheet = page.locator('[data-booking-screen]')
+    await expect(sheet).toHaveAttribute('data-keyboard', '')
+    await expect
+      .poll(async () => {
+        const box = await name.boundingBox()
+        return box ? box.y + box.height <= keyboardTop : false
+      })
+      .toBe(true)
+
+    // Closed, the sheet gives the app its usual resizing back.
+    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await expect.poll(posted).toContain('"mode":"resize"')
+  })
+
   test('a field the form focuses is set above the phone keyboard', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'The on-screen keyboard is a phone matter')
     // A saved contact offers «Записываю другого человека», which moves the caret to «Имя».
