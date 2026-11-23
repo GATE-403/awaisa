@@ -57,7 +57,7 @@ export const LoginPage = () => {
             <CaretLeft weight='bold' aria-hidden />
           </button>
         ) : (
-          <NextLink href={form.redirectTo} className={styles.corner} aria-label={t('Закрыть')}>
+          <NextLink href={form.closeTo} className={styles.corner} aria-label={t('Закрыть')}>
             <X weight='bold' aria-hidden />
           </NextLink>
         )}

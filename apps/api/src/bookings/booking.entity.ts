@@ -156,6 +156,14 @@ export class Booking {
   @Column({ type: 'varchar', length: 16, nullable: true })
   channel: BookingChannel | null
 
+  /** «Хочу так»: the work photo the client picked as the look they want; null once it is deleted. */
+  @Column({ name: 'look_photo_id', type: 'uuid', nullable: true })
+  lookPhotoId: string | null
+
+  /** The photo's address when booked, shown only while `lookPhotoId` still points at it. */
+  @Column({ name: 'look_photo_url', type: 'varchar', length: 500, nullable: true })
+  lookPhotoUrl: string | null
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
 }

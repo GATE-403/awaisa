@@ -313,8 +313,18 @@
     height: 52px;
   }
 
+  /* The name keeps its room beside the sections: the tabs scroll sideways, the name only ends in
+     an ellipsis past 13rem («даже часть названия не видно»: it shrank to one letter). */
   .business {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
+  }
+
+  .businessName {
+    max-width: 13rem;
+  }
+
+  .business .switcher {
+    max-width: none;
   }
 
   .nav {
@@ -324,8 +334,9 @@
     margin-left: var(--space-4);
   }
 
-  /* The tabs' own bleed is for the page edge; in the bar they sit in the row. */
-  .nav > * {
+  /* The tabs' own bleed is for the page edge; in the bar they sit in the row (doubled: over the
+     tabs' own rule, whichever stylesheet loads last — the bleed ran the tabs under the tools). */
+  .nav.nav > * {
     margin: 0;
     padding: 0;
   }
@@ -335,4 +346,30 @@
 .group :is(button, a)[data-popup-open] {
   background: var(--color-fill-hover);
   color: var(--color-foreground);
+}
+
+/* Phones keep two glyphs in the bar (news, profile); the page link and the theme live in the
+   profile menu there, so the business's name has room. */
+.phoneOnly.phoneOnly {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .wideOnly {
+    display: none;
+  }
+
+  .phoneOnly.phoneOnly {
+    display: flex;
+  }
+}
+
+.wideOnly:not(a) {
+  display: contents;
+}
+
+@media (max-width: 639px) {
+  .wideOnly:not(a) {
+    display: none;
+  }
 }

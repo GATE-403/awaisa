@@ -1,9 +1,18 @@
-import { CaretRight, Sparkle } from '@phosphor-icons/react/ssr'
+'use client'
+
+import { Heart, Sparkle } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
+import { useRouter } from 'next/navigation'
+import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
+import { useFavorites } from '@/features/favorites'
+import { useWorkLikes } from '@/features/workLikes'
 import type { BusinessKind, FeedItem } from '@/shared/api/types'
-import { T } from '@/shared/i18n'
+import { useT } from '@/shared/i18n'
 import { gridImage } from '@/shared/lib/imageSizes'
+import { haptic } from '@/shared/lib/nativeBridge'
+import { BIG_TILE_IMAGE, DOUBLE_TAP_MS } from '../../config/workTile'
+import { workFeedHref, workLookHref } from '../../lib/workLinks'
 import styles from './WorkTile.module.css'
 
 interface WorkTileProps {
@@ -15,27 +24,72 @@ interface WorkTileProps {
   isPriority?: boolean
 }
 
-// A feature spans two columns: the whole width on phones, two of three or four further up.
-const BIG_TILE_IMAGE = {
-  sizes: '(max-width: 767px) 100vw, (max-width: 1099px) 66vw, 600px',
-  widths: [360, 480, 640, 840, 1280],
-}
+type Burst = { id: number; x: number; y: number }
 
-// A master's work set into the services grid as one of its cells — the same shape, radius and
-// scrim as the service cards, told apart by the play mark and the master's face: it opens
-// «Работы» on this photo, where it books that service with that master.
+// A master's work set into the services grid as one of its cells: the same shape, radius and
+// scrim as the service cards, told apart by «✦ Образ», the master's face, the likes and «Хочу
+// так», which books that service with that master and hands the photo over as the look wanted.
+// A tap opens «Образы» on this photo; on a touch screen a double tap likes it, as in the deck.
 export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: WorkTileProps) => {
-  const params = new URLSearchParams({ start: item.id })
-  if (kind) params.set('kind', kind)
+  const t = useT()
+  const router = useRouter()
+  const likes = useWorkLikes()
+  const favorites = useFavorites()
+  const isLiked = likes.isLiked(item.id)
+  // The feed answer is cached: the count adds this device's own like on top of it.
+  const [wasLiked] = useState(isLiked)
+  const [bursts, setBursts] = useState<Burst[]>([])
+  const pointerType = useRef('mouse')
+  const lastTap = useRef(0)
+  const openTimer = useRef<number | undefined>(undefined)
+  const likesCount = (item.likes ?? 0) + (isLiked === wasLiked ? 0 : isLiked ? 1 : -1)
   const author = item.specialist?.name.split(' ')[0]
 
+  const feedHref = workFeedHref(item, kind)
+  const lookHref = workLookHref(item)
+
+  useEffect(() => () => window.clearTimeout(openTimer.current), [])
+
+  const setLiked = (next: boolean) => {
+    likes.setLiked(item.id, next)
+    haptic('selection')
+    if (!next) return
+    // A liked work keeps its service in «Избранное», like saving a post (the same as the deck).
+    if (item.service && !favorites.isFavorite(item.service.id)) favorites.toggle(item.service.id)
+  }
+
+  // With a mouse a click opens at once; a finger waits a moment for a second tap, which likes.
+  const handleOpen = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (pointerType.current !== 'touch') return
+    event.preventDefault()
+    const now = performance.now()
+    if (now - lastTap.current < DOUBLE_TAP_MS) {
+      window.clearTimeout(openTimer.current)
+      lastTap.current = 0
+      const card = event.currentTarget.closest('[data-card]')?.getBoundingClientRect()
+      if (card) {
+        setBursts((current) => [
+          ...current,
+          { id: now, x: event.clientX - card.left, y: event.clientY - card.top },
+        ])
+      }
+      if (!isLiked) setLiked(true)
+      return
+    }
+    lastTap.current = now
+    openTimer.current = window.setTimeout(() => router.push(feedHref), DOUBLE_TAP_MS)
+  }
+
   return (
-    <NextLink
-      href={`/feed?${params}`}
+    // Not an article: the catalog's grid counts its service cards as articles.
+    <div
       className={styles.tile}
       data-big={isBig || undefined}
       data-card=''
       data-picture-frame=''
+      onPointerDown={(event) => {
+        pointerType.current = event.pointerType
+      }}
     >
       {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
       <img
@@ -47,13 +101,39 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
         fetchPriority={isPriority ? 'high' : undefined}
         decoding='async'
       />
-      {/* Told apart from a service card at a glance: an «Образ» label instead of the heart, and
-          «Смотреть» instead of a price and «Записаться» — it opens «Образы», it does not book. */}
-      {/* The visible words name the link (WCAG 2.5.3): «Образ … Смотреть». */}
-      <span className={styles.kind}>
-        <Sparkle weight='fill' aria-hidden />
-        <T>Образ</T>
+      <span className={styles.marks}>
+        <span className={styles.kind}>
+          <Sparkle weight='fill' aria-hidden />
+          {t('Образ')}
+        </span>
+        {/* A client's own photo from their review: trusted more than the salon's own shots. */}
+        {item.isFromClient && <span className={styles.client}>{t('Фото клиента')}</span>}
       </span>
+      <button
+        type='button'
+        className={styles.like}
+        aria-pressed={isLiked}
+        aria-label={t('Нравится: {count}', { count: likesCount })}
+        data-liked={isLiked || undefined}
+        onClick={() => setLiked(!isLiked)}
+      >
+        <span className={styles.likeBody}>
+          <Heart weight={isLiked ? 'fill' : 'bold'} aria-hidden />
+          {likesCount > 0 && <span className={styles.likeCount}>{likesCount}</span>}
+        </span>
+      </button>
+      {bursts.map((burst) => (
+        <Heart
+          key={burst.id}
+          weight='fill'
+          aria-hidden
+          className={styles.burst}
+          style={{ left: burst.x, top: burst.y } as CSSProperties}
+          onAnimationEnd={() =>
+            setBursts((current) => current.filter((other) => other.id !== burst.id))
+          }
+        />
+      ))}
       <span className={styles.caption}>
         <span className={styles.author}>
           {item.specialist ? (
@@ -68,12 +148,16 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
             {author ? `${author} · ${item.business.name}` : item.business.name}
           </span>
         </span>
-        {item.service && <span className={styles.name}>{item.service.name}</span>}
-        <span className={styles.watch}>
-          <T>Смотреть</T>
-          <CaretRight weight='bold' aria-hidden />
-        </span>
+        {/* The whole card opens «Образы» through this link (stretched over the card). */}
+        <h3 className={styles.name}>
+          <NextLink href={feedHref} className={styles.open} onClick={handleOpen}>
+            {item.service?.name ?? item.business.name}
+          </NextLink>
+        </h3>
+        <NextLink href={lookHref} className={styles.want}>
+          {t('Хочу так')}
+        </NextLink>
       </span>
-    </NextLink>
+    </div>
   )
 }

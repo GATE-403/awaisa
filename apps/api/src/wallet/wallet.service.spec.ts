@@ -33,6 +33,7 @@ const booking: BookingView = {
   review: null,
   isNoShow: false,
   isBySubscription: false,
+  lookPhotoUrl: null,
   payment: null,
   discount: null,
   customerName: 'Данияр',

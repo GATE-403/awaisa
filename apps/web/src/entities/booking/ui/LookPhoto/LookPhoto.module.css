@@ -1,0 +1,29 @@
+/* A small square and one footnote, like a photo attached to a message. */
+.look {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-link);
+  font: inherit;
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+  cursor: pointer;
+}
+
+.picture {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.look:active .picture {
+  scale: 0.97;
+}

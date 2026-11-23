@@ -3,6 +3,11 @@ import type { CountedEntry, Entry } from './types'
 // The catalog `/`, the header and its search, the tab bar, the footer and the shared bits they use.
 const CATALOG: Record<string, Entry> = {
   // Catalog page
+  'Предыдущее фото: {name}': ['Мурунку сүрөт: {name}', 'Previous photo: {name}'],
+  'Следующее фото: {name}': ['Кийинки сүрөт: {name}', 'Next photo: {name}'],
+  'Хочу так': ['Мага да ушундай', 'I want this look'],
+  'Дешевле {percent}% мест': ['{percent}% жайдан арзан', 'Cheaper than {percent}% of places'],
+  'записаться на {day}': ['{day} жазылуу', 'book for {day}'],
   'Куда записаться': ['Кайда жазыласыз', 'Where to book'],
   Недавние: ['Акыркылар', 'Recent'],
   Очистить: ['Тазалоо', 'Clear'],

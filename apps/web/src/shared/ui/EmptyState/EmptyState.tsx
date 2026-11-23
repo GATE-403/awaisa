@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Mascot } from '../Mascot/Mascot'
+import { LiveMascot } from '../Mascot/LiveMascot'
 import styles from './EmptyState.module.css'
 
 interface EmptyStateProps {
@@ -33,7 +33,7 @@ export const EmptyState = ({
   className,
 }: EmptyStateProps) => {
   const rootClass = className ? `${styles.root} ${className}` : styles.root
-  const mark = icon ?? (title ? <Mascot /> : null)
+  const mark = icon ?? (title ? <LiveMascot /> : null)
 
   return (
     <div className={rootClass} data-size={variant} data-on-dark={isOnDark || undefined}>

@@ -211,6 +211,16 @@
   vertical-align: 1px;
 }
 
+/* «Дешевле 70% мест»: why the price is worth it, quiet under the price. */
+.cheaper {
+  overflow: hidden;
+  color: rgb(255 255 255 / 0.8);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs-line-height);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 639px) {
   .body {
     padding: var(--space-3);

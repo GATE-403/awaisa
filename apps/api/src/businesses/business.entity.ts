@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -61,6 +62,11 @@ export class Business {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date
+
+  /** Set when the owner deleted the business: the row stays as an archive of its books
+   * (`admin/business-erasure.ts`), and TypeORM's finds leave it out. */
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamptz', nullable: true })
+  deletedAt: Date | null
 
   @OneToMany(
     () => WorkingHours,

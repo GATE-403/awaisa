@@ -304,3 +304,26 @@ test.describe('Moving around the app', () => {
     await expect(page).toHaveURL((url) => url.pathname === '/map')
   })
 })
+
+test.describe('Leaving sign-in', () => {
+  // ✕ used to lead to `next`, and a page that asks to sign in sent the guest straight back.
+  test('✕ on sign-in for the cabinet leads to the catalog, not back to sign-in', async ({
+    page,
+  }) => {
+    await page.goto('/login?next=%2Fmanage')
+    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await expect(page).toHaveURL((url) => url.pathname === '/')
+  })
+
+  test('✕ on sign-in for the setup leads to the business landing', async ({ page }) => {
+    await page.goto('/login?next=%2Fbusiness%2Fnew')
+    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await expect(page).toHaveURL((url) => url.pathname === '/business')
+  })
+
+  test('✕ on sign-in for a page guests can open goes back to it', async ({ page }) => {
+    await page.goto('/login?next=%2Fbookings')
+    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await expect(page).toHaveURL((url) => url.pathname === '/bookings')
+  })
+})

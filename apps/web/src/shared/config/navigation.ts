@@ -61,8 +61,16 @@ const isCabinetPath = (pathname: string) =>
   pathname === '/insights' ||
   pathname === '/moderation'
 
-// Screens of their own, without the site's header, tab bar and footer (sign-in).
-const isStandalonePath = (pathname: string) => pathname === '/login'
+// Screens of their own, without the site's header, tab bar and footer: sign-in and the new
+// business's setup (the site's navigation pulled the eye from the questions).
+const isStandalonePath = (pathname: string) => pathname === '/login' || pathname === '/business/new'
+
+// Pages that send a guest to sign in first: closing sign-in must not lead back to them, or ✕ on
+// `/login?next=/manage` bounced straight back to `/login`.
+const SIGN_IN_ONLY = ['/manage', '/master', '/business/new', '/insights', '/moderation']
+
+const isSignInOnlyPath = (pathname: string) =>
+  SIGN_IN_ONLY.some((path) => pathname === path || pathname.startsWith(`${path}/`))
 
 const isBookingPath = (pathname: string) => /^\/[^/]+\/book$/.test(pathname)
 
@@ -72,4 +80,12 @@ const isActivePath = (pathname: string, href: string) => {
 }
 
 export type { NavItem }
-export { getBusinessSlug, isActivePath, isBookingPath, isCabinetPath, isStandalonePath, NAV_ITEMS }
+export {
+  getBusinessSlug,
+  isActivePath,
+  isBookingPath,
+  isCabinetPath,
+  isSignInOnlyPath,
+  isStandalonePath,
+  NAV_ITEMS,
+}

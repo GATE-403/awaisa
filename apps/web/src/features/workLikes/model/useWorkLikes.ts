@@ -1,8 +1,8 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
-import { deviceSession } from '@/features/forYou'
 import { likeFeedItem } from '@/shared/api/clientApi'
+import { deviceSession } from '@/shared/lib/telemetry'
 
 const KEY = 'awaisa:liked-works:v1'
 const EMPTY: string[] = []
@@ -40,7 +40,7 @@ const subscribe = (listener: () => void) => {
  * tells the server. The feed answer is cached for a minute, so the shown count adds this
  * device's own like on top of what the server last said.
  */
-export const useFeedLikes = () => {
+export const useWorkLikes = () => {
   const liked = useSyncExternalStore(subscribe, read, () => EMPTY)
 
   const setLiked = (id: string, isLiked: boolean) => {

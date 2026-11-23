@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { bishkekDay } from './business'
 import { bookingSteps, primaryAction } from './helpers'
 
 // Two branches: with a service and a master in the link the stack holds three cards
@@ -10,14 +11,15 @@ type Catalog = {
   specialists: { id: string; name: string; serviceIds: string[] }[]
 }
 
-const openWithServiceAndMaster = async (page: Page) => {
+const openWithServiceAndMaster = async (page: Page, date?: string) => {
   const { catalog } = (await (await page.request.get(`/api/businesses/${SLUG}`)).json()) as {
     catalog: Catalog
   }
   const master = catalog.specialists[0]
   if (!master) throw new Error('No masters in the seed')
   const serviceId = master.serviceIds[0]
-  await page.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}`)
+  const day = date ? `&date=${date}` : ''
+  await page.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}${day}`)
   await expect(bookingSteps(page).specialist).toBeVisible()
 }
 
@@ -108,7 +110,9 @@ test.describe('Booking: the time ruler', () => {
   test('a wheel turns the dial to a tick, the action offers that time, a tap takes one', async ({
     page,
   }) => {
-    await openWithServiceAndMaster(page)
+    // Tomorrow, not today: late in the day today keeps one free time and the dial has nowhere to
+    // turn (CI ran into «Выбрать 20:00» before and after the wheel).
+    await openWithServiceAndMaster(page, bishkekDay(1))
     const ruler = page.getByRole('group', { name: 'Время' })
     await expect(ruler.locator('button[data-free]').first()).toBeVisible()
     await expect(page.getByText('Листайте шкалу или нажмите на время')).toBeVisible()
