@@ -145,22 +145,42 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
     // It hears of the keyboard as it starts to slide in, with its final height, so the sheet glides
     // along with it.
     const release = holdKeyboardOverlay()
+    const applyInset = (height: number) => {
+      nativeInset = height
+      layer.style.setProperty('--keyboard-inset', `${height}px`)
+      layer.toggleAttribute('data-keyboard', height > 0)
+    }
     const stopNative = isAndroidApp()
       ? onNativeKeyboard(({ height }) => {
-          nativeInset = height
-          layer.style.setProperty('--keyboard-inset', `${height}px`)
-          layer.toggleAttribute('data-keyboard', height > 0)
+          applyInset(height)
           if (height <= 0) return
           Object.assign(keyboard, { height, resizesWindow: false })
           reveal('smooth')
         })
       : null
+    // The app may never say the keyboard went (it went with the app to the background, measured on
+    // a Samsung A55): the sheet kept 341px of room under it. With no text field in focus a moment
+    // after the caret left, or on coming back, there is no keyboard.
+    let staleTimer = 0
+    const dropStaleInset = () => {
+      window.clearTimeout(staleTimer)
+      staleTimer = window.setTimeout(() => {
+        if (nativeInset > 0 && !document.activeElement?.matches(TEXT_FIELDS)) applyInset(0)
+      }, KEYBOARD_MS)
+    }
+    if (stopNative) {
+      layer.addEventListener('focusout', dropStaleInset)
+      document.addEventListener('visibilitychange', dropStaleInset)
+    }
 
     layer.addEventListener('focusin', handleFocusIn)
     window.addEventListener('resize', handleResize)
     viewport?.addEventListener('resize', handleResize)
     return () => {
       stopNative?.()
+      window.clearTimeout(staleTimer)
+      layer.removeEventListener('focusout', dropStaleInset)
+      document.removeEventListener('visibilitychange', dropStaleInset)
       release()
       layer.style.removeProperty('--keyboard-inset')
       layer.removeEventListener('focusin', handleFocusIn)
