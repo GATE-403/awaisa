@@ -251,7 +251,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                     className={styles.backLink}
                     onClick={() => setTab('bookings')}
                   >
-                    <CaretLeft weight='bold' aria-hidden />
+                    <CaretLeft aria-hidden />
                     {t('Записи')}
                   </button>
                   <h2 id='settings-title' className={styles.settingsTitle}>
