@@ -28,6 +28,16 @@ const holdKeyboardOverlay = () => {
   }
 }
 
+// The last keyboard's height, for a bar that rises before the next keyboard is reported; before
+// any, a phone keyboard's usual share of the window (341 of 800 on a Samsung A55).
+let lastHeight = 0
+
+const rememberKeyboardHeight = (height: number) => {
+  if (height > 0) lastHeight = height
+}
+
+const rememberedKeyboardHeight = () => lastHeight || Math.round(window.innerHeight * 0.42)
+
 /** The keyboard as the Android app reports it; returns the unsubscribe. */
 const onNativeKeyboard = (listener: (keyboard: NativeKeyboard) => void) =>
   onNativeMessage((message) => {
@@ -36,4 +46,10 @@ const onNativeKeyboard = (listener: (keyboard: NativeKeyboard) => void) =>
   })
 
 export type { NativeKeyboard }
-export { holdKeyboardOverlay, isAndroidApp, onNativeKeyboard }
+export {
+  holdKeyboardOverlay,
+  isAndroidApp,
+  onNativeKeyboard,
+  rememberedKeyboardHeight,
+  rememberKeyboardHeight,
+}
