@@ -468,7 +468,10 @@ const flows: Flow[] = [
       // A new business opens on «Страница», which names what it lacks itself (no banner there).
       await expect(page).toHaveURL(/\/manage\/e2e-ux-barber/)
       await expect(page.getByRole('list', { name: 'Добавьте на страницу' })).toBeVisible()
-      await ux.step('Кабинет: страница бизнеса', [...FILES.cabinet, `${WEB}/views/manage/ui/PageTab`])
+      await ux.step('Кабинет: страница бизнеса', [
+        ...FILES.cabinet,
+        `${WEB}/views/manage/ui/PageTab`,
+      ])
 
       // Masters live in the page's «Мастера» tab; on phones its action floats at the foot.
       await ux.tap(page.getByRole('tab', { name: /Мастера/ }))
