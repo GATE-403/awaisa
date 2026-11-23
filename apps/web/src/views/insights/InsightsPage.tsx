@@ -1,11 +1,11 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
-import type { CSSProperties } from 'react'
 import { useT } from '@/shared/i18n'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
-import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
+import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
+import { ScrollArea } from '@/shared/ui/ScrollArea/ScrollArea'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -42,7 +42,15 @@ const formatWeek = (week: string) =>
   new Date(`${week}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 
 const formatShare = (value: number | null) =>
-  value === null ? '—' : `${value.toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`
+  `${(value ?? 0).toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`
+
+// A share as a meter on the row's own hairline, as in the cabinet's «Аналитика».
+const Meter = ({ share }: { share: number | null }) =>
+  share ? (
+    <span className={styles.meter} aria-hidden>
+      <span style={{ width: `${Math.min(share, 100)}%` }} />
+    </span>
+  ) : null
 
 // Platform admins read the funnels here: where people drop out of each scenario, on which
 // devices, and what trips them up — the same codes the telemetry stores, put into words.
@@ -65,250 +73,273 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
     items: insights.segments?.items.filter((item) => item.dimension === key) ?? [],
   }))
 
+  const finished = steps.at(-1)
+  const finishedShare = finished?.fromStart ?? null
+  const flowLabel = t(FLOW_LABELS[insights.flow])
+
   return (
     <>
       <CabinetBar title={t('Воронки')} />
       <main className={styles.page}>
-        <Container size='md' className={styles.content}>
-          <PageTitle
-            title={t('Воронки.')}
-            subtitle={t(' Где люди бросают и на каких устройствах.')}
-          />
+        <Container className={styles.content}>
+          {/* Laid out like the cabinet's «Аналитика»: the hint and the period on one line (the
+              period floats at the foot on phones), then everything right on the page, no cards
+              («как в табе аналитике в бизнесе»). */}
+          <header className={styles.head}>
+            <h1 className={styles.srOnly}>{t('Воронки')}</h1>
+            <p className={styles.hint}>{t('Где люди бросают и на каких устройствах')}</p>
+            <FloatingToolbar className={styles.tools}>
+              <SegmentedControl
+                size='sm'
+                label={t('Период')}
+                value={`${insights.days}`}
+                items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
+                onChange={(value) => insights.setDays(Number(value) as InsightsDays)}
+              />
+            </FloatingToolbar>
+          </header>
 
-          <div className={styles.controls}>
-            <TextTabs
-              label={t('Сценарий')}
-              items={(Object.keys(FLOW_LABELS) as (keyof typeof FLOW_LABELS)[]).map((flow) => ({
-                label: t(FLOW_LABELS[flow]),
-                isActive: insights.flow === flow,
-                onSelect: () => insights.setFlow(flow),
-              }))}
-            />
-            <SegmentedControl
-              label={t('Период')}
-              value={`${insights.days}`}
-              items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
-              onChange={(value) => insights.setDays(Number(value) as InsightsDays)}
-            />
-            <div className={styles.group}>
-              {FILTER_KEYS.map((key) => (
-                <div key={key} className={styles.filterRow}>
-                  <span className={styles.filterLabel}>{t(SEGMENT_LABELS[key].title)}</span>
-                  <Select
-                    variant='plain'
-                    aria-label={t(SEGMENT_LABELS[key].title)}
-                    value={insights.segment[key] ?? ANY}
-                    items={[
-                      { value: ANY, label: t('Все') },
-                      ...Object.entries(SEGMENT_LABELS[key].values).map(([value, label]) => ({
-                        value,
-                        label: t(label),
-                      })),
-                    ]}
-                    onValueChange={(value) =>
-                      insights.setFilter(key, value && value !== ANY ? String(value) : null)
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {strategy && (
-            <section aria-labelledby='insights-strategy'>
-              <SectionCaption as='h2' id='insights-strategy'>
-                {t('Стратегия')}
-              </SectionCaption>
-              <ul className={styles.list}>
-                <li className={styles.row}>
-                  <span className={styles.rowText}>
-                    <span className={styles.rowTitle}>{t('Ведут день в кабинете')}</span>
-                    <span className={styles.rowMeta}>
+          <div
+            className={styles.report}
+            data-loading={insights.isLoading || undefined}
+            aria-busy={insights.isLoading}
+          >
+            {strategy && (
+              <section className={styles.group} aria-labelledby='insights-strategy'>
+                <SectionCaption as='h2' id='insights-strategy' isInset={false}>
+                  {t('Стратегия')}
+                </SectionCaption>
+                <dl className={styles.stats}>
+                  <div className={styles.stat}>
+                    <dt className={styles.statLabel}>{t('Ведут день в кабинете')}</dt>
+                    <dd className={styles.statValue}>{thisWeek.toLocaleString('ru-RU')}</dd>
+                    <dd className={styles.statMeta}>
                       {weeks.length > 1
                         ? t('По неделям: {counts}, с {date}', {
                             counts: weeks.map((week) => week.count).join(' · '),
                             date: formatWeek(weeks[0].week),
                           })
                         : t('Салоны, отметившие итог визита за неделю')}
-                    </span>
-                  </span>
-                  <span className={styles.rowValue}>{thisWeek.toLocaleString('ru-RU')}</span>
-                </li>
-                <li className={styles.row}>
-                  <span className={styles.rowText}>
-                    <span className={styles.rowTitle}>{t('Начаты в «Образах»')}</span>
-                    <span className={styles.rowMeta}>
+                    </dd>
+                  </div>
+                  <div className={styles.stat}>
+                    <dt className={styles.statLabel}>{t('Начаты в «Образах»')}</dt>
+                    <dd className={styles.statValue}>{fromFeed.toLocaleString('ru-RU')}</dd>
+                    <dd className={styles.statMeta}>
                       {online
-                        ? t('Из {bookings} онлайн', { bookings: t.count(online, BOOKINGS) })
+                        ? `${formatShare(shareOf(fromFeed))} · ${t('Из {bookings} онлайн', {
+                            bookings: t.count(online, BOOKINGS),
+                          })}`
                         : t('Онлайн-записей пока нет')}
-                    </span>
-                  </span>
-                  <span className={styles.rowValue}>
-                    {fromFeed.toLocaleString('ru-RU')}
-                    {fromFeed > 0 && (
-                      <span className={styles.rowShare}>{formatShare(shareOf(fromFeed))}</span>
-                    )}
-                  </span>
-                </li>
-                <li className={styles.row}>
-                  <span className={styles.rowText}>
-                    <span className={styles.rowTitle}>{t('Записались снова')}</span>
-                    <span className={styles.rowMeta}>
+                    </dd>
+                  </div>
+                  <div className={styles.stat}>
+                    <dt className={styles.statLabel}>{t('Записались снова')}</dt>
+                    <dd className={styles.statValue}>{formatShare(strategy.repeat.share)}</dd>
+                    <dd className={styles.statMeta}>
                       {strategy.repeat.clients
                         ? t('{returned} из {clients} новых клиентов, за 60 дней', {
                             returned: strategy.repeat.returned,
                             clients: strategy.repeat.clients,
                           })
                         : t('Новым клиентам ещё не прошло 60 дней')}
-                    </span>
-                  </span>
-                  <span className={styles.rowValue}>{formatShare(strategy.repeat.share)}</span>
-                </li>
-              </ul>
-            </section>
-          )}
-
-          {channels.length > 0 && (
-            <section aria-labelledby='insights-channels'>
-              <SectionCaption as='h2' id='insights-channels'>
-                {t('Откуда записи')}
-                <span className={styles.count}>{t.count(online, BOOKINGS)}</span>
-              </SectionCaption>
-              <ul className={styles.list}>
-                {channels.map((item) => {
-                  const share = shareOf(item.bookings)
-                  return (
-                    <li key={item.channel} className={styles.row}>
-                      <span className={styles.rowTitle}>{t(CHANNEL_LABELS[item.channel])}</span>
-                      <span className={styles.rowValue}>
-                        {item.bookings.toLocaleString('ru-RU')}
-                        <span className={styles.rowShare}>{formatShare(share)}</span>
-                      </span>
-                      <span
-                        className={styles.meter}
-                        style={{ '--share': `${share ?? 0}%` } as CSSProperties}
-                        aria-hidden
-                      />
-                    </li>
-                  )
-                })}
-              </ul>
-            </section>
-          )}
-
-          <section aria-labelledby='insights-steps' aria-busy={insights.isLoading}>
-            <SectionCaption as='h2' id='insights-steps'>
-              {t('Шаги')}
-              <span className={styles.count}>{started ? t.count(started, DEVICES) : null}</span>
-            </SectionCaption>
-            {insights.error ? (
-              <EmptyState variant='inline' text={insights.error} />
-            ) : started === 0 ? (
-              <EmptyState
-                variant='inline'
-                text={t(
-                  'За этот период таких устройств здесь не было — выберите другой период или уберите отбор.',
-                )}
-              />
-            ) : (
-              <ol className={styles.list} data-loading={insights.isLoading || undefined}>
-                {steps.map((row, index) => (
-                  <li key={row.step} className={styles.row}>
-                    <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>{t(STEP_LABELS[row.step])}</span>
-                      <span className={styles.rowMeta}>
-                        {index === 0
-                          ? t('Начало')
-                          : row.fromPrevious === null
-                            ? t('До прошлого шага не дошли')
-                            : t('{share} от прошлого шага', {
-                                share: formatShare(row.fromPrevious),
-                              })}
-                      </span>
-                    </span>
-                    <span className={styles.rowValue}>
-                      {row.sessions.toLocaleString('ru-RU')}
-                      <span className={styles.rowShare}>{formatShare(row.fromStart)}</span>
-                    </span>
-                    <span
-                      className={styles.meter}
-                      style={{ '--share': `${row.fromStart ?? 0}%` } as CSSProperties}
-                      aria-hidden
-                    />
-                  </li>
-                ))}
-              </ol>
-            )}
-          </section>
-
-          <section aria-labelledby='insights-signals'>
-            <SectionCaption as='h2' id='insights-signals'>
-              {t('Где спотыкаются')}
-            </SectionCaption>
-            {insights.signals?.items.length ? (
-              <ul className={styles.list}>
-                {insights.signals.items.map((item) => (
-                  <li key={`${item.step}-${item.value}`} className={styles.row}>
-                    <span className={styles.rowText}>
-                      <span className={styles.rowTitle}>{t(STEP_LABELS[item.step])}</span>
-                      {item.value && (
-                        <span className={styles.rowMeta}>
-                          {t(VALUE_LABELS[item.value] ?? item.value)}
-                        </span>
-                      )}
-                    </span>
-                    <span className={styles.rowValue}>
-                      {item.sessions.toLocaleString('ru-RU')}
-                      <span className={styles.rowShare}>
-                        {t.count(item.count, ['раз', 'раза', 'раз'])}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <EmptyState variant='inline' text={t('Ошибок в полях и сбоев за этот период нет.')} />
-            )}
-          </section>
-
-          <section aria-labelledby='insights-devices'>
-            <SectionCaption as='h2' id='insights-devices'>
-              {t('Кто приходит')}
-              <span className={styles.count}>{devices ? t.count(devices, DEVICES) : null}</span>
-            </SectionCaption>
-            {devices === 0 ? (
-              <EmptyState variant='inline' text={t('Пока нет данных об устройствах.')} />
-            ) : (
-              <div className={styles.dimensions}>
-                {dimensions.map(({ key, items }) => (
-                  <div key={key} className={styles.dimension}>
-                    <h3 className={styles.dimensionTitle}>{t(SEGMENT_LABELS[key].title)}</h3>
-                    <ul className={styles.list}>
-                      {items.map((item) => {
-                        const share = Math.round((item.sessions / devices) * 1000) / 10
-                        return (
-                          <li key={item.value} className={styles.row}>
-                            <span className={styles.rowTitle}>
-                              {t(SEGMENT_LABELS[key].values[item.value] ?? item.value)}
-                            </span>
-                            <span className={styles.rowValue}>
-                              {item.sessions.toLocaleString('ru-RU')}
-                              <span className={styles.rowShare}>{formatShare(share)}</span>
-                            </span>
-                            <span
-                              className={styles.meter}
-                              style={{ '--share': `${share}%` } as CSSProperties}
-                              aria-hidden
-                            />
-                          </li>
-                        )
-                      })}
-                    </ul>
+                    </dd>
                   </div>
-                ))}
-              </div>
+                </dl>
+              </section>
             )}
-          </section>
+
+            {/* The funnel: which scenario, the one number it leads with (how many got to the
+                end), the device cuts, then its steps with their share on the row's hairline. */}
+            <section className={styles.funnel} aria-labelledby='insights-steps'>
+              <TextTabs
+                label={t('Сценарий')}
+                items={(Object.keys(FLOW_LABELS) as (keyof typeof FLOW_LABELS)[]).map((flow) => ({
+                  label: t(FLOW_LABELS[flow]),
+                  isActive: insights.flow === flow,
+                  onSelect: () => insights.setFlow(flow),
+                }))}
+              />
+
+              <div className={styles.hero}>
+                <div className={styles.heroHead}>
+                  <span className={styles.label} id='insights-steps'>
+                    {t('Дошли до конца')}
+                  </span>
+                  <span className={styles.heroValue}>
+                    {formatShare(started ? finishedShare : 0)}
+                  </span>
+                  <span className={styles.heroMeta}>
+                    {started
+                      ? t('{finished} из {started} · {flow}', {
+                          finished: (finished?.sessions ?? 0).toLocaleString('ru-RU'),
+                          started: t.count(started, DEVICES),
+                          flow: flowLabel.toLowerCase(),
+                        })
+                      : flowLabel}
+                  </span>
+                </div>
+                <dl className={styles.filters}>
+                  {FILTER_KEYS.map((key) => (
+                    <div key={key} className={styles.filter}>
+                      <dt className={styles.filterLabel}>{t(SEGMENT_LABELS[key].title)}</dt>
+                      <dd className={styles.filterValue}>
+                        <Select
+                          variant='plain'
+                          aria-label={t(SEGMENT_LABELS[key].title)}
+                          value={insights.segment[key] ?? ANY}
+                          items={[
+                            { value: ANY, label: t('Все') },
+                            ...Object.entries(SEGMENT_LABELS[key].values).map(([value, label]) => ({
+                              value,
+                              label: t(label),
+                            })),
+                          ]}
+                          onValueChange={(value) =>
+                            insights.setFilter(key, value && value !== ANY ? String(value) : null)
+                          }
+                        />
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              {insights.error ? (
+                <EmptyState variant='inline' text={insights.error} />
+              ) : started === 0 ? (
+                <EmptyState
+                  variant='inline'
+                  text={t(
+                    'За этот период таких устройств здесь не было — выберите другой период или уберите отбор.',
+                  )}
+                />
+              ) : (
+                <ol className={styles.rows}>
+                  {steps.map((row, index) => (
+                    <li key={row.step} className={styles.row}>
+                      <span className={styles.rowText}>
+                        <span className={styles.rowTitle}>{t(STEP_LABELS[row.step])}</span>
+                        <span className={styles.rowMeta}>
+                          {index === 0
+                            ? t('Начало')
+                            : row.fromPrevious === null
+                              ? t('До прошлого шага не дошли')
+                              : t('{share} от прошлого шага', {
+                                  share: formatShare(row.fromPrevious),
+                                })}
+                        </span>
+                      </span>
+                      <span className={styles.rowValue}>
+                        {row.sessions.toLocaleString('ru-RU')}
+                        <span className={styles.rowShare}>{formatShare(row.fromStart)}</span>
+                      </span>
+                      <Meter share={row.fromStart} />
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+
+            <div className={styles.pairs}>
+              <section className={styles.group} aria-labelledby='insights-signals'>
+                <SectionCaption as='h2' id='insights-signals' isInset={false}>
+                  {t('Где спотыкаются')}
+                </SectionCaption>
+                {insights.signals?.items.length ? (
+                  <ScrollArea
+                    label={t('Где спотыкаются')}
+                    moreLabel={(count) => t('Ещё {count}', { count })}
+                  >
+                    <ul className={styles.rows}>
+                      {insights.signals.items.map((item) => (
+                        <li key={`${item.step}-${item.value}`} className={styles.row}>
+                          <span className={styles.rowText}>
+                            <span className={styles.rowTitle}>{t(STEP_LABELS[item.step])}</span>
+                            {item.value && (
+                              <span className={styles.rowMeta}>
+                                {t(VALUE_LABELS[item.value] ?? item.value)}
+                              </span>
+                            )}
+                          </span>
+                          <span className={styles.rowValue}>
+                            {item.sessions.toLocaleString('ru-RU')}
+                            <span className={styles.rowShare}>
+                              {t.count(item.count, ['раз', 'раза', 'раз'])}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </ScrollArea>
+                ) : (
+                  <EmptyState
+                    variant='inline'
+                    text={t('Ошибок в полях и сбоев за этот период нет.')}
+                  />
+                )}
+              </section>
+
+              {channels.length > 0 && (
+                <section className={styles.group} aria-labelledby='insights-channels'>
+                  <SectionCaption as='h2' id='insights-channels' isInset={false}>
+                    {t('Откуда записи')}
+                    <span className={styles.count}>{t.count(online, BOOKINGS)}</span>
+                  </SectionCaption>
+                  <ul className={styles.rows}>
+                    {channels.map((item) => {
+                      const share = shareOf(item.bookings)
+                      return (
+                        <li key={item.channel} className={styles.row}>
+                          <span className={styles.rowTitle}>{t(CHANNEL_LABELS[item.channel])}</span>
+                          <span className={styles.rowValue}>
+                            {item.bookings.toLocaleString('ru-RU')}
+                            <span className={styles.rowShare}>{formatShare(share)}</span>
+                          </span>
+                          <Meter share={share} />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              )}
+            </div>
+
+            <section className={styles.group} aria-labelledby='insights-devices'>
+              <SectionCaption as='h2' id='insights-devices' isInset={false}>
+                {t('Кто приходит')}
+                <span className={styles.count}>{devices ? t.count(devices, DEVICES) : null}</span>
+              </SectionCaption>
+              {devices === 0 ? (
+                <EmptyState variant='inline' text={t('Пока нет данных об устройствах.')} />
+              ) : (
+                <div className={styles.dimensions}>
+                  {dimensions.map(({ key, items }) => (
+                    <div key={key} className={styles.dimension}>
+                      <h3 className={styles.dimensionTitle}>{t(SEGMENT_LABELS[key].title)}</h3>
+                      <ul className={styles.rows}>
+                        {items.map((item) => {
+                          const share = Math.round((item.sessions / devices) * 1000) / 10
+                          return (
+                            <li key={item.value} className={styles.row}>
+                              <span className={styles.rowTitle}>
+                                {t(SEGMENT_LABELS[key].values[item.value] ?? item.value)}
+                              </span>
+                              <span className={styles.rowValue}>
+                                {item.sessions.toLocaleString('ru-RU')}
+                                <span className={styles.rowShare}>{formatShare(share)}</span>
+                              </span>
+                              <Meter share={share} />
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         </Container>
       </main>
     </>

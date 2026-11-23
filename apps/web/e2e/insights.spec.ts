@@ -66,7 +66,7 @@ test.describe('Insights', () => {
     await page.getByRole('tablist', { name: 'Сценарий' }).getByRole('tab', { name: 'Вход' }).click()
     await page.getByRole('combobox', { name: 'Шрифт в браузере' }).click()
     await page.getByRole('option', { name: 'Очень крупный' }).click()
-    const steps = page.getByRole('region', { name: /Шаги/ })
+    const steps = page.getByRole('region', { name: /Дошли до конца/ })
     await expect(steps.getByText('Открыли вход')).toBeVisible()
     await expect(steps.getByText('Получили код')).toBeVisible()
     await expect(page.getByText('Телефон', { exact: true }).first()).toBeVisible()
