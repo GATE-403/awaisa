@@ -54,7 +54,7 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
       </div>
       {offers !== null && shown.length === 0 ? (
         <EmptyState
-          icon={<Heart weight='fill' className={styles.heart} />}
+          icon={<Heart className={styles.heart} />}
           title={t('Сохраняйте услуги')}
           text={
             <>

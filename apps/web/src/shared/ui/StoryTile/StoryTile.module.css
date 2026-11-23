@@ -49,11 +49,19 @@
   width: 92px;
   height: 92px;
   overflow: hidden;
+  /* Stories stay soft rounded squares, apart from the strict picture cards («их лучше закруглить»). */
   border-radius: 20px;
   background: var(--color-fill);
   outline: 2.5px solid transparent;
   outline-offset: 2px;
   transition: scale var(--duration-fast) var(--ease-standard);
+}
+
+/* No picture: the place's own tile in the middle of a soft wash of its colour, not a grey hole. */
+.frame[data-fallback] {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--story-tint, var(--color-primary)) 18%, var(--color-surface));
 }
 
 .tile[data-ring="new"] .frame {
@@ -112,20 +120,26 @@
   border-radius: inherit;
 }
 
+/* The service's name in up to two lines, never cut after a word or two («Стрижка маш…»); every
+   label keeps two lines' height, so the notes under them stay on one line across the row. */
 .label {
+  display: -webkit-box;
   overflow: hidden;
   width: 100%;
+  min-height: calc(2 * 1.25em);
   font-size: var(--text-xs);
   line-height: 1.25;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  hyphens: auto;
 }
 
 .note {
   overflow: hidden;
   width: 100%;
-  margin-top: -4px;
+  margin-top: -2px;
   color: var(--color-muted-foreground);
   font-size: 11px;
   line-height: 1.25;
