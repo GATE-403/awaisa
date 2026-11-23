@@ -351,6 +351,11 @@ test.describe('UX: layout and ergonomics', () => {
       })
       .toBe(true)
 
+    // A keyboard that went with the app to the background says nothing: once no field has the
+    // caret, the sheet gives its room back.
+    await name.blur()
+    await expect(sheet).not.toHaveAttribute('data-keyboard')
+
     // Closed, the sheet gives the app its usual resizing back.
     await page.getByRole('link', { name: 'Закрыть запись' }).click()
     await expect.poll(posted).toContain('"mode":"resize"')
