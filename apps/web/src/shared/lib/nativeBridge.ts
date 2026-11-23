@@ -16,9 +16,11 @@ type NativeMessage =
 type PushPermission = 'granted' | 'denied' | 'undetermined' | 'unavailable'
 
 // Native → web, as an `awaisa:native` window event: the answer to both push messages, and on
-// Android the keyboard's height in CSS pixels as it shows (0 when it hides).
+// Android the keyboard's final height in CSS pixels as it starts to show (0 as it starts to hide)
+// and how long its animation takes in ms (an app before keyboard-controller sends no duration, and
+// only once the keyboard is up).
 type PushStateMessage = { type: 'pushState'; permission: PushPermission; token: string | null }
-type KeyboardMessage = { type: 'keyboard'; height: number }
+type KeyboardMessage = { type: 'keyboard'; height: number; duration?: number }
 type WebMessage = PushStateMessage | KeyboardMessage
 
 const WEB_EVENT = 'awaisa:native'
