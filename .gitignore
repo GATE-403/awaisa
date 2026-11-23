@@ -47,3 +47,4 @@ reports/ux/*
 !reports/ux/README.md
 .next-lh/
 .next-3001/
+.next-prod/
