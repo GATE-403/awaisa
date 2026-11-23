@@ -11,21 +11,19 @@ import {
   Trash,
 } from '@phosphor-icons/react/ssr'
 import { useSearchParams } from 'next/navigation'
+import { type ChangeEvent, type ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import {
-  type ChangeEvent,
-  type CSSProperties,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import {
-  BusinessTile,
   formatWeekSchedule,
   getOpeningStatus,
   MasterCard,
-  pickTint,
+  MasterGrid,
+  PlaceCoverImage,
+  PlaceDescription,
+  PlaceLine,
+  PlaceLogo,
+  PlaceName,
+  PlaceProfile,
+  WeekHours,
   weekdayOf,
 } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
@@ -60,8 +58,8 @@ import { useToday } from '@/shared/lib/hooks/useToday'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
+import { ProfileTabAction, ProfileTabs } from '@/shared/ui/ProfileTabs/ProfileTabs'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
-import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { PAGE_SECTIONS } from '@/views/manage/manageTabs'
 import { useHasFeature } from '@/views/manage/model/usePlanAccess'
 import { HoursSheet } from '@/views/manage/ui/Hours/HoursSheet'
@@ -76,7 +74,6 @@ import { PageChecklist } from './PageChecklist'
 import { PageInsights } from './PageInsights'
 import styles from './PageTab.module.css'
 import { ShareSheet } from './ShareSheet'
-import { WeekHours } from './WeekHours'
 
 interface PageTabProps {
   slug: string
@@ -93,13 +90,6 @@ type TabAction = { label: string; ariaLabel: string; icon: ReactNode; onClick: (
 
 const MAX_PHOTOS = 30
 const PHOTO_INPUT_ID = 'page-work-photo'
-
-const SECTIONS: { value: PageSection; label: string }[] = [
-  { value: 'works', label: 'Работы' },
-  { value: 'services', label: 'Услуги' },
-  { value: 'masters', label: 'Мастера' },
-  { value: 'hours', label: 'Время' },
-]
 
 // The business page laid out like a profile in Instagram: the cover with the logo over its edge, a
 // short bio, «Редактировать · Поделиться» (everything written about the place is edited in one
@@ -229,74 +219,61 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       ? run(() => updateSpecialist(slug, editingMaster.id, input), t('Мастер сохранён'))
       : run(() => createSpecialist(slug, input), t('Мастер добавлен'))
 
-  const tabCounts: Partial<Record<PageSection, () => number | undefined>> = {
-    works: () => photoCount ?? undefined,
-    services: () => services.length,
-    masters: () => masters.length,
-  }
-
   const logo = (
-    <span className={styles.logo} data-busy={busy === 'logo' || undefined}>
-      <BusinessTile name={business.name} logoUrl={business.logoUrl} size='lg' />
+    <PlaceLogo name={business.name} logoUrl={business.logoUrl} isBusy={busy === 'logo'}>
       <span className={styles.logoBadge} aria-hidden='true'>
         <Camera weight='fill' />
       </span>
-    </span>
+    </PlaceLogo>
   )
 
   return (
     <div className={styles.page} data-page-tab>
-      <header
-        className={styles.head}
-        style={{ '--place-tint': pickTint(business.name) } as CSSProperties}
-      >
-        <div className={styles.cover} data-empty={!business.coverUrl || undefined}>
-          {business.coverUrl && (
-            // biome-ignore lint/performance/noImgElement: already resized WebP from our API
-            <img
-              src={business.coverUrl}
-              alt={t('Обложка')}
-              className={styles.coverImage}
-              fetchPriority='high'
-            />
-          )}
-          {business.coverUrl ? (
-            <Menu
-              label={t('Обложка')}
-              className={styles.coverButton}
-              trigger={
-                <>
-                  <Camera weight='bold' aria-hidden />
-                  {busy === 'cover' ? t('Загружаем…') : t('Обложка')}
-                </>
-              }
-            >
-              <MenuItem icon={<Camera aria-hidden />} onClick={() => coverInput.current?.click()}>
-                {t('Заменить обложку')}
-              </MenuItem>
-              <MenuItem
-                variant='danger'
-                icon={<Trash aria-hidden />}
-                onClick={() => void run(() => removeCover(slug), t('Обложка удалена'))}
+      <PlaceProfile
+        name={business.name}
+        hasCover={Boolean(business.coverUrl)}
+        cover={
+          <>
+            {business.coverUrl && (
+              <PlaceCoverImage src={business.coverUrl} alt={t('Обложка')} fetchPriority='high' />
+            )}
+            {business.coverUrl ? (
+              <Menu
+                label={t('Обложка')}
+                className={styles.coverButton}
+                trigger={
+                  <>
+                    <Camera weight='bold' aria-hidden />
+                    {busy === 'cover' ? t('Загружаем…') : t('Обложка')}
+                  </>
+                }
               >
-                {t('Удалить обложку')}
-              </MenuItem>
-            </Menu>
-          ) : (
-            <button
-              type='button'
-              className={styles.coverAdd}
-              onClick={() => coverInput.current?.click()}
-              disabled={busy !== null}
-            >
-              <Camera weight='bold' aria-hidden />
-              {busy === 'cover' ? t('Загружаем…') : t('Добавить обложку')}
-            </button>
-          )}
-        </div>
-
-        <div className={styles.profileRow}>
-          {business.logoUrl ? (
+                <MenuItem icon={<Camera aria-hidden />} onClick={() => coverInput.current?.click()}>
+                  {t('Заменить обложку')}
+                </MenuItem>
+                <MenuItem
+                  variant='danger'
+                  icon={<Trash aria-hidden />}
+                  onClick={() => void run(() => removeCover(slug), t('Обложка удалена'))}
+                >
+                  {t('Удалить обложку')}
+                </MenuItem>
+              </Menu>
+            ) : (
+              <button
+                type='button'
+                className={styles.coverAdd}
+                onClick={() => coverInput.current?.click()}
+                disabled={busy !== null}
+              >
+                <Camera weight='bold' aria-hidden />
+                {busy === 'cover' ? t('Загружаем…') : t('Добавить обложку')}
+              </button>
+            )}
+          </>
+        }
+        logo={
+          business.logoUrl ? (
             <Menu label={t('Логотип')} className={styles.logoButton} trigger={logo}>
               <MenuItem icon={<Camera aria-hidden />} onClick={() => logoInput.current?.click()}>
                 {t('Заменить логотип')}
@@ -319,16 +296,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
             >
               {logo}
             </button>
-          )}
-          {/* Where the public page keeps its quick actions: one primary «Редактировать» and the
-              secondary ones as thin glyphs in one capsule. */}
-          <div className={styles.actions}>
-            <Button
-              type='button'
-              size='sm'
-              className={styles.edit}
-              onClick={() => setIsEditing(true)}
-            >
+          )
+        }
+        // Where the public page keeps «Записаться» and its glyphs: one primary «Редактировать»
+        // and the secondary actions as thin glyphs in one capsule.
+        actions={
+          <>
+            <Button type='button' size='sm' onClick={() => setIsEditing(true)}>
               {t('Редактировать')}
             </Button>
             <GlyphGroup label={t('Страница')}>
@@ -343,69 +317,179 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 <ArrowUpRight aria-hidden />
               </a>
             </GlyphGroup>
-          </div>
-        </div>
-
-        <div className={styles.bio}>
-          <h2 className={styles.name}>{business.name}</h2>
-          <p className={styles.line}>{[kindText, business.address].filter(Boolean).join(' · ')}</p>
-          {status && (
-            <p className={styles.open} data-open={status.isOpen || undefined}>
-              {status.label}
-            </p>
-          )}
-          {!business.isPublished && <p className={styles.unpublished}>{t('Скрыта от клиентов')}</p>}
-          {business.description ? (
-            <p className={styles.description}>{business.description}</p>
-          ) : (
-            <button type='button' className={styles.addBio} onClick={() => setIsEditing(true)}>
-              {t('Добавить пару слов о себе')}
-            </button>
-          )}
-        </div>
-
-        <PageInsights
-          slug={slug}
-          analyticsHref={settingsHref('analytics')}
-          services={catalog.services}
-          run={run}
-          todayKey={today?.dayKey ?? null}
-        />
-        <PageChecklist
-          business={business}
-          photoCount={photoCount}
-          onAddCover={() => coverInput.current?.click()}
-          onAddLogo={() => logoInput.current?.click()}
-          onAddPhotos={addPhotos}
-        />
-      </header>
-
-      <div className={styles.sections}>
-        <TextTabs
-          label={t('Разделы страницы')}
-          items={SECTIONS.map((item) => ({
-            label: t(item.label),
-            count: tabCounts[item.value]?.(),
-            isActive: section === item.value,
-            onSelect: () => setSection(item.value),
-            id: `page-tab-${item.value}`,
-            controls: `page-panel-${item.value}`,
-          }))}
-        />
-        {/* One action per tab, always in the same place: the end of the tabs' row. */}
-        {tabAction && (
-          <button
-            type='button'
-            className={styles.sectionAction}
-            onClick={tabAction.onClick}
-            aria-label={tabAction.ariaLabel}
-          >
-            {tabAction.icon}
-            {tabAction.label}
+          </>
+        }
+        isActionsHiddenOnPhone
+        footer={
+          <>
+            <PageInsights
+              slug={slug}
+              analyticsHref={settingsHref('analytics')}
+              services={catalog.services}
+              run={run}
+              todayKey={today?.dayKey ?? null}
+            />
+            <PageChecklist
+              business={business}
+              photoCount={photoCount}
+              onAddCover={() => coverInput.current?.click()}
+              onAddLogo={() => logoInput.current?.click()}
+              onAddPhotos={addPhotos}
+            />
+          </>
+        }
+      >
+        <PlaceName>{business.name}</PlaceName>
+        <PlaceLine>{[kindText, business.address].filter(Boolean).join(' · ')}</PlaceLine>
+        {status && <PlaceLine tone={status.isOpen ? 'open' : undefined}>{status.label}</PlaceLine>}
+        {!business.isPublished && <PlaceLine tone='danger'>{t('Скрыта от клиентов')}</PlaceLine>}
+        {business.description ? (
+          <PlaceDescription>{business.description}</PlaceDescription>
+        ) : (
+          <button type='button' className={styles.addBio} onClick={() => setIsEditing(true)}>
+            {t('Добавить пару слов о себе')}
           </button>
         )}
-      </div>
+      </PlaceProfile>
 
+      <ProfileTabs
+        label={t('Разделы страницы')}
+        value={section}
+        onChange={setSection}
+        items={[
+          {
+            value: 'works',
+            label: t('Работы'),
+            count: photoCount ?? undefined,
+            panelId: 'page-panel-works',
+            panel: (
+              <PhotosSection
+                slug={slug}
+                catalog={catalog}
+                run={run}
+                onPhotosChange={handlePhotos}
+                inputId={PHOTO_INPUT_ID}
+              />
+            ),
+          },
+          {
+            value: 'services',
+            label: t('Услуги'),
+            count: services.length,
+            panelId: 'page-panel-services',
+            panel: (
+              <>
+                {serviceGroups.length === 0 ? (
+                  <EmptyState
+                    variant='inline'
+                    title={t('Добавьте услуги')}
+                    text={t('С ценой и длительностью: по ним клиенты записываются.')}
+                  />
+                ) : (
+                  <div className={styles.serviceGroups}>
+                    {serviceGroups.map(({ category, items }) => (
+                      <section
+                        key={category.id}
+                        className={styles.serviceGroup}
+                        aria-label={category.name}
+                      >
+                        {serviceGroups.length > 1 && (
+                          <SectionCaption as='h3' isInset={false}>
+                            {category.name}{' '}
+                            <span className={styles.captionCount}>{items.length}</span>
+                          </SectionCaption>
+                        )}
+                        <ul className={styles.services}>
+                          {items.map((service) => (
+                            <li
+                              key={service.id}
+                              className={service.isActive === false ? styles.inactive : undefined}
+                            >
+                              <OfferCard
+                                offer={toOffer(service)}
+                                isHit={service.isPopular}
+                                linkLabel={t(
+                                  service.isActive === false
+                                    ? 'Изменить «{name}», скрыта'
+                                    : 'Изменить «{name}»',
+                                  { name: service.name },
+                                )}
+                                actionLabel={t('Изменить')}
+                                onSelect={() => setEditingService(service)}
+                                action={
+                                  service.isActive === false ? (
+                                    <span className={styles.offMark}>{t('Скрыта')}</span>
+                                  ) : undefined
+                                }
+                                isPlaceHidden
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    ))}
+                  </div>
+                )}
+                <button
+                  type='button'
+                  className={styles.addCategory}
+                  onClick={() => setIsAddingCategory(true)}
+                >
+                  <Plus weight='bold' aria-hidden />
+                  {t('Категория')}
+                </button>
+              </>
+            ),
+          },
+          {
+            value: 'masters',
+            label: t('Мастера'),
+            count: masters.length,
+            panelId: 'page-panel-masters',
+            panel:
+              catalog.specialists.length === 0 ? (
+                <EmptyState
+                  variant='inline'
+                  title={t('Добавьте мастеров')}
+                  text={t('Клиенты выбирают мастера по фото при записи.')}
+                />
+              ) : (
+                <MasterGrid>
+                  {catalog.specialists.map((master) => (
+                    <li
+                      key={master.id}
+                      className={master.isActive === false ? styles.inactive : undefined}
+                    >
+                      <MasterCard specialist={master} onSelect={() => setEditingMaster(master)}>
+                        {master.isActive === false && (
+                          <span className={styles.offMark}>{t('Не работает')}</span>
+                        )}
+                      </MasterCard>
+                    </li>
+                  ))}
+                </MasterGrid>
+              ),
+          },
+          {
+            value: 'hours',
+            label: t('Время'),
+            panelId: 'page-panel-hours',
+            panel: <WeekHours hours={business.hours} todayWeekday={todayWeekday} status={status} />,
+          },
+        ]}
+        // One action per tab, always in the same place: the end of the tabs' row.
+        action={
+          tabAction && (
+            <ProfileTabAction
+              label={tabAction.label}
+              ariaLabel={tabAction.ariaLabel}
+              icon={tabAction.icon}
+              onClick={tabAction.onClick}
+              isHiddenOnPhone
+            />
+          )
+        }
+      />
       {/* Phones: the page's tools float at the window's foot (the cabinet's rule for a section's
           tools): thin glyphs in one capsule and the open tab's action as a labelled accent button. */}
       <FloatingToolbar align='end' className={styles.phoneTools}>
@@ -439,124 +523,6 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           </Button>
         )}
       </FloatingToolbar>
-
-      {/* Every panel stays mounted (the work grid keeps its photos); only the chosen one shows. */}
-      <div
-        id='page-panel-works'
-        role='tabpanel'
-        aria-labelledby='page-tab-works'
-        hidden={section !== 'works'}
-      >
-        <PhotosSection
-          slug={slug}
-          catalog={catalog}
-          run={run}
-          onPhotosChange={handlePhotos}
-          inputId={PHOTO_INPUT_ID}
-        />
-      </div>
-
-      <div
-        id='page-panel-services'
-        role='tabpanel'
-        aria-labelledby='page-tab-services'
-        hidden={section !== 'services'}
-      >
-        {serviceGroups.length === 0 ? (
-          <EmptyState
-            variant='inline'
-            title={t('Добавьте услуги')}
-            text={t('С ценой и длительностью: по ним клиенты записываются.')}
-          />
-        ) : (
-          <div className={styles.serviceGroups}>
-            {serviceGroups.map(({ category, items }) => (
-              <section key={category.id} className={styles.serviceGroup} aria-label={category.name}>
-                {serviceGroups.length > 1 && (
-                  <SectionCaption as='h3' isInset={false}>
-                    {category.name} <span className={styles.captionCount}>{items.length}</span>
-                  </SectionCaption>
-                )}
-                <ul className={styles.services}>
-                  {items.map((service) => (
-                    <li
-                      key={service.id}
-                      className={service.isActive === false ? styles.inactive : undefined}
-                    >
-                      <OfferCard
-                        offer={toOffer(service)}
-                        isHit={service.isPopular}
-                        linkLabel={t(
-                          service.isActive === false
-                            ? 'Изменить «{name}», скрыта'
-                            : 'Изменить «{name}»',
-                          { name: service.name },
-                        )}
-                        actionLabel={t('Изменить')}
-                        onSelect={() => setEditingService(service)}
-                        action={
-                          service.isActive === false ? (
-                            <span className={styles.offMark}>{t('Скрыта')}</span>
-                          ) : undefined
-                        }
-                        isPlaceHidden
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )}
-        <button
-          type='button'
-          className={styles.addCategory}
-          onClick={() => setIsAddingCategory(true)}
-        >
-          <Plus weight='bold' aria-hidden />
-          {t('Категория')}
-        </button>
-      </div>
-
-      <div
-        id='page-panel-masters'
-        role='tabpanel'
-        aria-labelledby='page-tab-masters'
-        hidden={section !== 'masters'}
-      >
-        {catalog.specialists.length === 0 ? (
-          <EmptyState
-            variant='inline'
-            title={t('Добавьте мастеров')}
-            text={t('Клиенты выбирают мастера по фото при записи.')}
-          />
-        ) : (
-          <ul className={styles.masters}>
-            {catalog.specialists.map((master) => (
-              <li
-                key={master.id}
-                className={master.isActive === false ? styles.inactive : undefined}
-              >
-                <MasterCard specialist={master} onSelect={() => setEditingMaster(master)}>
-                  {master.isActive === false && (
-                    <span className={styles.offMark}>{t('Не работает')}</span>
-                  )}
-                </MasterCard>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div
-        id='page-panel-hours'
-        role='tabpanel'
-        aria-labelledby='page-tab-hours'
-        hidden={section !== 'hours'}
-        className={styles.hours}
-      >
-        <WeekHours hours={business.hours} todayWeekday={todayWeekday} status={status} />
-      </div>
 
       <input
         ref={coverInput}

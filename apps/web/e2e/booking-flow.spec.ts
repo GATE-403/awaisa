@@ -130,8 +130,12 @@ test.describe('User flow: booking', () => {
   })
 
   test('master page link preselects the master and narrows services', async ({ page }) => {
-    await page.goto('/awaisa-studio')
-    await page.getByRole('link', { name: /Тимур Абдыкадыров/ }).click()
+    // The masters live in their own tab of the place; the anchor opens it.
+    await page.goto('/awaisa-studio#masters')
+    await page
+      .locator('#masters')
+      .getByRole('link', { name: /Тимур Абдыкадыров/ })
+      .click()
 
     await expect(page).toHaveURL(/specialist=timur/)
     const steps = bookingSteps(page)
