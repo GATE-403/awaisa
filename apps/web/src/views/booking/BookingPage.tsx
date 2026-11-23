@@ -281,7 +281,7 @@ export const BookingPage = ({
       tone: cardTone(0),
       media: (
         <span className={styles.stackPin}>
-          <MapPin weight='fill' />
+          <MapPin />
         </span>
       ),
       primary: chosenBranch.name,
@@ -332,7 +332,7 @@ export const BookingPage = ({
         />
       ) : (
         <span className={styles.stackFace} data-any=''>
-          <UsersThree weight='fill' />
+          <UsersThree />
         </span>
       ),
       primary: chosenSpecialist ? chosenSpecialist.name : t('Любой мастер'),
@@ -556,7 +556,7 @@ export const BookingPage = ({
           >
             <span className={styles.extraLabel}>{t('Комментарий')}</span>
             <span className={styles.extraValue}>{t('Добавить')}</span>
-            <CaretRight weight='bold' aria-hidden className={styles.extraChevron} />
+            <CaretRight aria-hidden className={styles.extraChevron} />
           </button>
         )}
         {isPaymentShown && (
@@ -695,9 +695,7 @@ export const BookingPage = ({
                               {distance !== undefined && ` · ${formatDistance(distance)}`}
                             </span>
                           </span>
-                          {isChosen && (
-                            <Check weight='bold' className={styles.branchCheck} aria-hidden />
-                          )}
+                          {isChosen && <Check className={styles.branchCheck} aria-hidden />}
                         </label>
                       )
                     })}
@@ -797,6 +795,7 @@ export const BookingPage = ({
                       form.serviceId && form.specialistId && form.dayKey ? (
                         <WaitlistJoin
                           serviceId={form.serviceId}
+                          extraServiceIds={form.chosenServiceIds.slice(1)}
                           specialistId={form.specialistId}
                           branchId={form.branchId ?? undefined}
                           date={form.dayKey}

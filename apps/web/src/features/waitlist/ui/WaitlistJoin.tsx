@@ -20,6 +20,8 @@ import styles from './WaitlistJoin.module.css'
 
 interface WaitlistJoinProps {
   serviceId: string
+  /** The visit's other services: the day was checked for the whole visit, so is the waitlist. */
+  extraServiceIds?: string[]
   /** A master's id or `any`. */
   specialistId: string
   branchId?: string
@@ -33,6 +35,7 @@ const FORM_ID = 'waitlist-form'
 // A full day is not a dead end: leave a number and get one SMS when a time opens up.
 export const WaitlistJoin = ({
   serviceId,
+  extraServiceIds = [],
   specialistId,
   branchId,
   date,
@@ -92,6 +95,7 @@ export const WaitlistJoin = ({
     try {
       const { token, ...entry } = await joinWaitlist({
         serviceId,
+        extraServiceIds,
         specialistId,
         branchId,
         date,
