@@ -132,6 +132,62 @@ test.describe('Cabinet «Настройки»', () => {
     await expect(page.getByRole('tab', { name: /Услуги/ })).toHaveAttribute('aria-selected', 'true')
   })
 
+  test('in the Android app the search at the foot rides up on the keyboard itself', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'The search floats at the foot on phones')
+    // The page as the Android app shows it: the app's flag and its message port, kept to read.
+    await page.addInitScript(() => {
+      const state = window as unknown as { __posted: string[] }
+      state.__posted = []
+      Object.assign(window, {
+        __NATIVE_APP__: { platform: 'android', version: '1.0.0' },
+        ReactNativeWebView: { postMessage: (message: string) => state.__posted.push(message) },
+      })
+    })
+    const posted = () =>
+      page.evaluate(() => (window as unknown as { __posted: string[] }).__posted.join('\n'))
+    const keyboard = (height: number) =>
+      page.evaluate((value) => {
+        window.dispatchEvent(
+          new CustomEvent('awaisa:native', {
+            detail: { type: 'keyboard', height: value, duration: 0 },
+          }),
+        )
+      }, height)
+    const business = await createOwnBusiness(page)
+    await page.goto(`/manage/${business.slug}?tab=settings`)
+    const search = page
+      .getByRole('navigation', { name: 'Настройки' })
+      .getByLabel('Поиск по настройкам')
+    // Nothing is asked of the app until the field takes focus.
+    await expect(search).toBeVisible()
+    expect(await posted()).not.toContain('keyboardMode')
+
+    await search.focus()
+    await expect.poll(posted).toContain('"mode":"overlay"')
+    await keyboard(300)
+    const keyboardTop = await page.evaluate(() => window.innerHeight - 300)
+    await expect
+      .poll(async () => {
+        const box = await search.boundingBox()
+        return box ? box.y + box.height <= keyboardTop : false
+      })
+      .toBe(true)
+
+    // Off the field and the keyboard gone, the app resizes the WebView again.
+    await search.blur()
+    await keyboard(0)
+    await expect.poll(posted).toContain('"mode":"resize"')
+    await expect
+      .poll(async () => {
+        const box = await search.boundingBox()
+        return box ? box.y > keyboardTop : false
+      })
+      .toBe(true)
+  })
+
   test('the only branch can be neither deleted nor closed; a second one is deleted', async ({
     page,
   }) => {

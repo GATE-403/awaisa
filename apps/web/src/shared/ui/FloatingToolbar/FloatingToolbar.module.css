@@ -22,6 +22,17 @@
       var(--shadow-lg);
   }
 
+  /* The Android app's keyboard (`useKeyboardLift`): the bar rides up with it by transform alone,
+     over the same time and curve as the keyboard; the safe area it stood above is under the
+     keyboard now. */
+  .toolbar {
+    transition: translate var(--keyboard-duration, 250ms) cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .toolbar[data-keyboard] {
+    translate: 0 calc(env(safe-area-inset-bottom) - var(--keyboard-inset, 0px));
+  }
+
   /* Nothing to press (a staff member without the owner's tools): nothing floats. */
   .toolbar:not(:has(button, a, input)) {
     display: none;
