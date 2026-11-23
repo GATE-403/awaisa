@@ -8,6 +8,7 @@ import { type ComponentType, useEffect } from 'react'
 import type { Business } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { trackStep } from '@/shared/lib/telemetry'
+import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import styles from './Place.module.css'
 
 interface PlaceActionsProps {
@@ -16,7 +17,7 @@ interface PlaceActionsProps {
 
 type Action = {
   label: string
-  icon: ComponentType<{ weight?: 'fill'; 'aria-hidden'?: boolean }>
+  icon: ComponentType<{ 'aria-hidden'?: boolean }>
   href?: string
   onClick?: () => void
   isExternal?: boolean
@@ -34,7 +35,7 @@ const directionsOf = (business: Business) => {
   return business.mapUrl || null
 }
 
-// One primary action (book) and quiet secondary ones beside it.
+// One primary action (book) and the quiet ones beside it: call, write, route, share.
 export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const toast = useToast()
   const t = useT()
@@ -71,38 +72,11 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   ].filter((action) => action !== null)
 
   return (
-    // Across from the tile, like a profile's buttons: round glyph buttons, then one primary capsule.
-    <div className={styles.actions}>
-      <ul className={styles.quickActions}>
-        {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) => (
-          <li key={label}>
-            {href ? (
-              <a
-                href={href}
-                className={styles.quickAction}
-                aria-label={label}
-                title={label}
-                {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
-              >
-                <ActionIcon weight='fill' aria-hidden />
-              </a>
-            ) : (
-              <button
-                type='button'
-                className={styles.quickAction}
-                aria-label={label}
-                title={label}
-                onClick={onClick}
-              >
-                <ActionIcon weight='fill' aria-hidden />
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
+    // Across from the logo, like the owner's «Редактировать»: one primary capsule and the quiet
+    // actions as thin glyphs in one capsule of the same height.
+    <>
       <ButtonLink
-        size='md'
-        className={styles.bookButton}
+        size='sm'
         data-place-book
         // Opens the booking form itself (the side sheet over this page); scrolling to the menu
         // just below looked like the button did nothing.
@@ -110,6 +84,30 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
       >
         {t('Записаться')}
       </ButtonLink>
-    </div>
+      <GlyphGroup label={t('Связаться')}>
+        {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) =>
+          href ? (
+            <a
+              key={label}
+              href={href}
+              className={styles.contactGlyph}
+              aria-label={label}
+              title={label}
+              {...(isExternal ? { target: '_blank', rel: 'noreferrer' } : {})}
+            >
+              <ActionIcon aria-hidden />
+            </a>
+          ) : (
+            <GlyphButton
+              key={label}
+              className={styles.contactGlyph}
+              icon={<ActionIcon aria-hidden />}
+              label={label}
+              onClick={onClick}
+            />
+          ),
+        )}
+      </GlyphGroup>
+    </>
   )
 }

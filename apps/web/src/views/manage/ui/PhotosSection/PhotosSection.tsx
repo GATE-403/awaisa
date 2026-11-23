@@ -12,6 +12,7 @@ import {
 import type { Catalog, WorkPhoto } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
+import { PhotoGrid, PhotoGridTile } from '@/shared/ui/PhotoGrid/PhotoGrid'
 import styles from './PhotosSection.module.css'
 import { WorkPhotoSheet } from './WorkPhotoSheet'
 
@@ -136,12 +137,20 @@ export const PhotosSection = ({
 
   return (
     <section className={styles.group} aria-label={t('Работы')}>
-      <ul className={styles.strip} aria-busy={isBusy}>
+      <PhotoGrid isBusy={isBusy}>
         {shown.map((photo, index) => (
-          <li
+          <PhotoGridTile
             key={photo.id}
-            className={styles.tile}
-            data-hidden={photo.isHidden || undefined}
+            src={photo.url}
+            label={t(
+              photo.isHidden ? 'Фото {index}: {service}, скрыто' : 'Фото {index}: {service}',
+              {
+                index: index + 1,
+                service: photo.serviceName ?? t('услуга не указана'),
+              },
+            )}
+            onOpen={() => setOpenId(photo.id)}
+            isDimmed={photo.isHidden}
             data-dragged={draggedId === photo.id || undefined}
             draggable
             onDragStart={(event) => {
@@ -152,37 +161,16 @@ export const PhotosSection = ({
             onDrop={(event) => event.preventDefault()}
             onDragEnd={() => void handleDragEnd()}
           >
-            <button
-              type='button'
-              className={styles.tileButton}
-              aria-label={t(
-                photo.isHidden ? 'Фото {index}: {service}, скрыто' : 'Фото {index}: {service}',
-                {
-                  index: index + 1,
-                  service: photo.serviceName ?? t('услуга не указана'),
-                },
-              )}
-              onClick={() => setOpenId(photo.id)}
-            >
-              {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-              <img
-                src={photo.url}
-                alt=''
-                className={styles.image}
-                loading='lazy'
-                draggable={false}
-              />
-              {photo.isHidden ? (
-                <span className={styles.badge}>
-                  <EyeSlash weight='bold' aria-hidden />
-                </span>
-              ) : (
-                !photo.serviceId && <span className={styles.badge}>?</span>
-              )}
-            </button>
-          </li>
+            {photo.isHidden ? (
+              <span className={styles.badge}>
+                <EyeSlash weight='bold' aria-hidden />
+              </span>
+            ) : (
+              !photo.serviceId && <span className={styles.badge}>?</span>
+            )}
+          </PhotoGridTile>
         ))}
-      </ul>
+      </PhotoGrid>
       {photos.length === 0 && (
         <EmptyState
           variant='inline'

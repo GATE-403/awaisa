@@ -5,6 +5,9 @@ import { bookingSteps, primaryAction, submitBooking } from './helpers'
 
 const SLUG = 'lumiere-salon'
 
+// The place's own page: its tabs «Работы · Услуги · Мастера · Время».
+const placeTabs = (page: Page) => page.getByRole('tablist', { name: 'Разделы места' })
+
 // A soft navigation keeps the page's JavaScript; a reload would lose this mark.
 const markPage = (page: Page) =>
   page.evaluate(() => {
@@ -87,14 +90,14 @@ test.describe('Moving around the app', () => {
     page,
   }) => {
     await page.goto(`/${SLUG}`)
-    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible()
+    await expect(placeTabs(page)).toBeVisible()
     await markPage(page)
 
     await page.locator('[data-place-book]').first().click()
     await expect(page).toHaveURL(new RegExp(`/${SLUG}/book$`))
     await expect(bookingSheet(page)).toBeVisible()
     // The place stays under the sheet: the same page, not a new one.
-    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeAttached()
+    await expect(placeTabs(page)).toBeAttached()
     expect(await isSamePage(page)).toBe(true)
 
     await page.getByRole('link', { name: 'Закрыть запись' }).click()
@@ -160,7 +163,7 @@ test.describe('Moving around the app', () => {
     await expect(bookingSheet(page)).toBeVisible()
     // The catalog, not the place's page, is under the sheet again.
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
-    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeHidden()
+    await expect(placeTabs(page)).toBeHidden()
 
     await page.getByRole('link', { name: 'Закрыть запись' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '?kind=barber')
@@ -269,10 +272,10 @@ test.describe('Moving around the app', () => {
   }) => {
     await page.goto(`/${SLUG}/book`)
     await expect(bookingSheet(page)).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeAttached()
+    await expect(placeTabs(page)).toBeAttached()
     await page.getByRole('link', { name: 'Закрыть запись' }).click()
     await expect(page).toHaveURL(new RegExp(`/${SLUG}$`))
-    await expect(page.getByRole('heading', { name: 'Услуги и цены' })).toBeVisible()
+    await expect(placeTabs(page)).toBeVisible()
     await expect(bookingSheet(page)).toHaveCount(0)
   })
 
