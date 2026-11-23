@@ -1,0 +1,145 @@
+/* A place's head like a profile in Instagram: the public page and the owner's «Страница». */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.cover {
+  position: relative;
+  /* The window's whole width with square edges, no shadow. 100vw also counts a classic
+     scrollbar; the page around clips the sliver (`overflow-x: clip`). */
+  width: 100vw;
+  margin: 0 calc(50% - 50vw);
+  aspect-ratio: 3 / 1.2;
+  max-height: 340px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--place-tint) 14%, var(--color-surface));
+}
+
+@media (min-width: 768px) {
+  .cover {
+    aspect-ratio: 4 / 1;
+  }
+}
+
+/* No cover: a band in the place's colour. */
+.cover[data-empty] {
+  display: grid;
+  place-items: center;
+  background-image: radial-gradient(
+    70% 90% at 50% 0%,
+    color-mix(in srgb, var(--place-tint) 22%, transparent),
+    transparent
+  );
+}
+
+.coverImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The logo over the cover's edge, the actions at the line's end under the cover. */
+.profileRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: -44px;
+  padding-left: var(--space-1);
+}
+
+.logo {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  box-shadow:
+    0 0 0 4px var(--color-background),
+    var(--shadow-md);
+}
+
+.logo > :first-child {
+  width: 88px;
+  height: 88px;
+}
+
+.logo[data-busy] {
+  opacity: 0.6;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The primary capsule as tall as the glyph capsule beside it: 40, 44 on phones. */
+.actions > :not([role="group"]) {
+  min-height: 40px;
+}
+
+@media (max-width: 639px) {
+  .actions > :not([role="group"]) {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 639px) {
+  .actions[data-phone-hidden] {
+    display: none;
+  }
+}
+
+/* The bio: lines set close, like a profile's. */
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bio p {
+  margin: 0;
+}
+
+.name {
+  margin: 0 0 2px;
+  font-family: var(--font-display);
+  font-size: var(--text-title2);
+  line-height: var(--text-title2-line-height);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+
+.line {
+  color: var(--color-muted-foreground);
+  font-size: var(--text-footnote);
+  line-height: var(--text-footnote-line-height);
+}
+
+.line strong {
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+}
+
+.line[data-tone="open"] {
+  color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
+}
+
+.line[data-tone="danger"] {
+  color: var(--color-danger-text);
+}
+
+.bio .description {
+  margin-top: var(--space-1);
+  color: var(--color-foreground);
+  font-size: var(--text-body);
+  line-height: var(--text-body-line-height);
+  white-space: pre-line;
+}

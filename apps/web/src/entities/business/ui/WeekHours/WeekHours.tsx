@@ -1,14 +1,16 @@
+'use client'
+
 import type { CSSProperties } from 'react'
+import type { WorkingDay } from '@/shared/api/types'
+import { useT } from '@/shared/i18n'
 import {
   findDay,
   formatClock,
   formatWeekSchedule,
   WEEKDAYS_FULL,
   WEEKDAYS_SHORT,
-} from '@/entities/business'
-import type { WorkingDay } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import styles from './PageTab.module.css'
+} from '../../lib/workingHours'
+import styles from './WeekHours.module.css'
 
 interface WeekHoursProps {
   hours: WorkingDay[]
