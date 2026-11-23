@@ -113,16 +113,8 @@
 }
 
 .bar {
-  /* The magnet: ticks within a step and a half of the pointer lean toward it and grow a little as
-     the dial moves (--pos is the dial's place in ticks, written on scroll). */
-  --d: calc(var(--pos, 0) - var(--idx, 0));
-  --near: max(0, 1.5 - max(var(--d), -1 * var(--d)));
-
   width: 12px;
   height: 18px;
-  translate: calc(clamp(-1, var(--d), 1) * var(--near) * 4px) 0;
-  scale: 1 calc(1 + var(--near) * 0.06);
-  transform-origin: bottom center;
   border-radius: var(--radius-full);
   background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
   transition:
@@ -238,4 +230,24 @@
 .ruler[data-pending] .track,
 .ruler[data-pending] .pick {
   pointer-events: none;
+}
+
+/* Short phones (iPhone SE, 667pt): a smaller time and a lower dial, so the days under it stay
+   above the booking bar without scrolling. */
+@media (max-height: 700px) {
+  .ruler {
+    gap: var(--space-2);
+  }
+
+  .time {
+    font-size: 40px;
+  }
+
+  .track {
+    height: 104px;
+  }
+
+  .tick[data-free] .bar {
+    height: 48px;
+  }
 }

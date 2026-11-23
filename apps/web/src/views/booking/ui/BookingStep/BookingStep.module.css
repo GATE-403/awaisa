@@ -5,23 +5,19 @@
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-3) 0 var(--space-6);
-  /* Its content changes with the step: a soft rise, not a jump. */
-  animation: open 420ms var(--ease-spring) backwards;
   scroll-margin-top: var(--space-4);
 }
 
-@keyframes open {
-  from {
-    translate: 0 24px;
-    opacity: 0;
-  }
-}
-
+/* «Шаг 2 из 4» as the app's quiet uppercase caption (like «Часто выбирают»), not in the link
+   colour: blue, it read as a button («выглядит как кнопка»). */
 .eyebrow {
   margin: 0 0 calc(-1 * var(--space-3));
-  color: var(--color-link);
+  color: var(--color-muted-foreground);
   font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-caption);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
 .title {
@@ -66,10 +62,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .step[data-nudge] .body {
-    animation: none;
-  }
-
-  .step {
     animation: none;
   }
 }

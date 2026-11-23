@@ -10,14 +10,38 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* Keyboard focus is scrolled clear of the sheet's top bar and its action bar (WCAG 2.4.11). */
-  scroll-padding-block: calc(60px + var(--space-3))
+  /* The browser's own scroll to a tapped field glides too: it jumped 110px at once from «Имя» to
+     «Телефон» with the keyboard up. Scrolls the form makes itself say how they move. */
+  scroll-behavior: smooth;
+  /* Keyboard focus is scrolled clear of the sheet's top bar (60pt and its 11pt of step segments)
+     and its action bar (WCAG 2.4.11). */
+  scroll-padding-block: calc(71px + var(--space-3))
     calc(var(--space-20) + var(--space-16) + env(safe-area-inset-bottom));
   padding: 0 0 calc(var(--space-20) + var(--space-6) + env(safe-area-inset-bottom));
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   background: var(--color-background);
   box-shadow: var(--shadow-lg);
-  animation: rise 520ms cubic-bezier(0.32, 1.12, 0.5, 1);
+  /* One plain slide, no overshoot: the bounce added frames to draw while the sheet filled. */
+  animation: rise 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* With a phone's keyboard up only the bottom bar itself is kept clear (its 64pt, 8pt under it
+   and 16pt of air), not its tall fade: a field in plain view otherwise counted as hidden and the
+   WebView jumped it to the middle (`useFocusedFieldInView` sets the mark). */
+.page[data-keyboard] {
+  scroll-padding-bottom: calc(var(--space-20) + var(--space-2) + env(safe-area-inset-bottom));
+}
+
+/* In the Android app the keyboard covers the sheet without resizing the WebView (`overlay`, sent
+   by the app with its height as `--keyboard-inset`): room under the content to scroll the last
+   field above it. Set once as the keyboard shows; only the sheet is laid out again. */
+.page[data-keyboard][style*="--keyboard-inset"] {
+  padding-bottom: calc(
+    var(--space-20) +
+    var(--space-6) +
+    env(safe-area-inset-bottom) +
+    var(--keyboard-inset)
+  );
 }
 
 /* Back after a reload, where it already was (lib/sheetHandoff). */
@@ -44,6 +68,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .page {
+    scroll-behavior: auto;
+  }
+
   .page {
     animation: none;
   }
@@ -270,6 +298,29 @@
   padding-bottom: var(--space-2);
 }
 
+/* «Записываю другого человека»: the group's last row, a label and the kit's switch. */
+.group .switchRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding: var(--space-1) var(--space-4);
+  font-size: var(--text-body);
+  cursor: pointer;
+}
+
+.group > * + .switchRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: var(--space-4);
+  height: 0.5px;
+  background: var(--color-border);
+}
+
 /* The booking note: a label over a multi-line field (radius 12, like iOS text views). */
 .comment {
   display: flex;
@@ -321,19 +372,6 @@ button.fieldRow {
   width: 12px;
   height: 12px;
   color: var(--color-tertiary-foreground);
-}
-
-.forOther {
-  align-self: flex-start;
-  min-height: var(--control-height-md);
-  margin-top: calc(-1 * var(--space-2));
-  padding: 0 var(--space-4);
-  border: none;
-  background: none;
-  color: var(--color-link);
-  font: inherit;
-  font-size: var(--text-footnote);
-  cursor: pointer;
 }
 
 .rowAction {
@@ -418,19 +456,22 @@ label:has([data-checked]) .serviceNote {
   min-height: var(--control-height-md);
 }
 
-/* A soft wash of the place's colour behind the top of the sheet: the booking feels like this
-   place's, not a form. It scrolls away with the content. */
 .wash {
+  /* A soft wash of the place's colour behind the top of the sheet: the booking feels like this
+     place's, not a form. It scrolls away with the content. Still: no drift, grain or glide to
+     the master's colour (they cost frames on phones, «убери всю лишнюю анимацию»). */
   position: absolute;
   top: 0;
   right: 0;
   left: 0;
-  height: 420px;
+  height: 340px;
+  /* Strongest behind the top bar, nearly gone by the stack's foot line and «Шаг 2 из 4»: blue
+     link text on a strong pink or orange wash fell below AA («читаемость синих кнопок упала»). */
   background: radial-gradient(
-    120% 90% at 50% 0%,
-    color-mix(in srgb, var(--place-tint) 42%, transparent),
-    color-mix(in srgb, var(--place-tint) 12%, transparent) 55%,
-    transparent
+    120% 80% at 50% 0%,
+    color-mix(in srgb, var(--place-tint) 34%, transparent),
+    color-mix(in srgb, var(--place-tint) 8%, transparent) 50%,
+    transparent 80%
   );
   pointer-events: none;
 }

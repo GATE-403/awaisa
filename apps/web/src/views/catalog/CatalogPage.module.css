@@ -24,6 +24,15 @@
   padding: 0 var(--page-gutter);
 }
 
+/* Once the column stops filling the window (1120px), a shelf running into the gutter ended in
+   mid-air, 32px past every other edge: shelves keep to the content edge, with room only for the
+   story rings and the chips' hit areas. */
+@media (min-width: 1120px) {
+  .contained {
+    --shelf-bleed: var(--space-2);
+  }
+}
+
 .title {
   max-width: 16ch;
   font-family: var(--font-display);

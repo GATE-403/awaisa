@@ -177,9 +177,9 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             ) : (
               <UserCircle weight='regular' aria-hidden />
             )}
-            <span className={styles.accountName} aria-hidden='true'>
-              {customer?.name || t('Профиль')}
-            </span>
+            {/* «Профиль» like the other actions' one-word labels: a person's name cut to
+                «Локальны…» stood out among them. The face already says whose it is. */}
+            <span>{t('Профиль')}</span>
           </NextLink>
         </nav>
       </div>

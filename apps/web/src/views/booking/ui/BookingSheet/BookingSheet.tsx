@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { isBookingPath } from '@/shared/config/navigation'
+import { useFocusedFieldInView } from '@/shared/lib/hooks/useFocusedFieldInView'
 import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'
 import pageStyles from '../../BookingPage.module.css'
@@ -33,11 +34,18 @@ export const BookingSheet = ({ children, isModal = false, closeHref }: BookingSh
   )
 }
 
+// The sheet's slide up (`rise` in BookingPage.module.css) and a little more.
+const SHEET_SETTLE_MS = 460
+
 const SheetFrame = ({ children, isModal = false, closeHref }: BookingSheetProps) => {
-  usePageScrollLock()
-  const screenRef = useRef<HTMLElement>(null)
-  useInertOutside(screenRef)
   const [isAlreadyUp] = useState(isSheetAlreadyUp)
+  // Locking the page and making it inert restyle and lay out all of it: done once the sheet has
+  // slid up, not during the slide (it dropped to 43 fps on a Samsung A55 on a long place page).
+  const settleMs = isAlreadyUp ? 0 : SHEET_SETTLE_MS
+  usePageScrollLock(settleMs)
+  const screenRef = useRef<HTMLElement>(null)
+  useInertOutside(screenRef, undefined, settleMs)
+  useFocusedFieldInView(screenRef)
   useEffect(clearSheetAlreadyUp, [])
 
   return (

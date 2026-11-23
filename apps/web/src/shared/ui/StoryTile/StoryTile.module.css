@@ -1,12 +1,13 @@
-/* A row of stories: sideways, with momentum on touch, the page gutter kept at both ends. */
+/* A row of stories: sideways, with momentum on touch, the page gutter kept at both ends. It runs
+   into the gutter (`--shelf-bleed`, the gutter unless the page column sets less). */
 .row {
   display: flex;
   gap: var(--space-3);
-  margin: 0 calc(var(--page-gutter) * -1);
-  padding: var(--space-1) var(--page-gutter);
+  margin: 0 calc(var(--shelf-bleed, var(--page-gutter)) * -1);
+  padding: var(--space-1) var(--shelf-bleed, var(--page-gutter));
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-padding-inline: var(--page-gutter);
+  scroll-padding-inline: var(--shelf-bleed, var(--page-gutter));
   scrollbar-width: none;
   touch-action: pan-x pan-y;
   list-style: none;

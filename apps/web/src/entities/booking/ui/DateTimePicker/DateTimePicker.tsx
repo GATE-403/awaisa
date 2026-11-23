@@ -6,6 +6,7 @@ import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
 import { type ReactNode, useEffect, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
 import styles from './DateTimePicker.module.css'
 import { TimeRuler } from './TimeRuler'
@@ -93,6 +94,13 @@ export const DateTimePicker = ({
     !error &&
     rulerSlots.some((slot) => slot.isAvailable)
   const availableCount = slots.filter((slot) => slot.isAvailable).length
+  // Without a dial (a full day, an error, no master yet) there is no time under a needle: the
+  // ruler only tells the form while it is on screen, so the bar kept «Выбрать 18:30» from the day
+  // before on a day with nothing free.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only when the dial comes or goes
+  useEffect(() => {
+    if (!isRulerShown) onCenteredTimeChange?.(null)
+  }, [isRulerShown])
   // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
@@ -113,6 +121,7 @@ export const DateTimePicker = ({
 
   const dayRow = (
     <ToggleGroup
+      data-day-row=''
       aria-label={t('День')}
       layout='scroll'
       className={styles.days}
@@ -155,7 +164,10 @@ export const DateTimePicker = ({
 
   return (
     <div className={styles.picker} data-view={view}>
-      {view === 'grid' && dayRow}
+      {/* The days lead the step in both views, right under its question: under the dial they
+          ended below the booking bar on short screens («так и не смог исправить»), whatever the
+          sheet's scroll. */}
+      {dayRow}
 
       {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
       {isSpecialistSelected &&
@@ -171,12 +183,13 @@ export const DateTimePicker = ({
         </div>
       )}
       {isSpecialistSelected && !isLoading && !error && availableCount === 0 && (
-        <div className={styles.full}>
-          <p className={styles.hint}>
-            {t('На этот день свободного времени нет — выберите другой')}
-          </p>
-          {fullDayAction}
-        </div>
+        // The app's one empty place, not a white card with an apology in it.
+        <EmptyState
+          variant='inline'
+          title={t('На этот день всё занято')}
+          text={t('Выберите другой день')}
+          action={fullDayAction}
+        />
       )}
       {isRulerShown && (
         <TimeRuler
@@ -186,11 +199,8 @@ export const DateTimePicker = ({
           durationMinutes={durationMinutes}
           onPick={onTimeChange}
           onCenter={onCenteredTimeChange}
-          days={dayRow}
         />
       )}
-      {/* Without a dial (loading, a full day, an error) the days still sit under it. */}
-      {view === 'ruler' && !isRulerShown && dayRow}
       {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
