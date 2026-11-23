@@ -51,14 +51,15 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
         onScroll={hasMore ? handleScroll : undefined}
       >
         {pictures.map((url, pictureIndex) => (
-          // The name link carries the card for keyboards and screen readers; these are for
-          // pointers only.
+          // The first picture is the card's link for keyboards and screen readers, named after the
+          // place; the others are for pointers only.
           <NextLink
             key={url}
             href={href}
             className={styles.slide}
-            tabIndex={-1}
-            aria-hidden
+            tabIndex={pictureIndex === 0 ? undefined : -1}
+            aria-hidden={pictureIndex === 0 ? undefined : true}
+            aria-label={pictureIndex === 0 ? name : undefined}
             draggable={false}
           >
             {/* biome-ignore lint/performance/noImgElement: covers are already resized WebP from our API */}

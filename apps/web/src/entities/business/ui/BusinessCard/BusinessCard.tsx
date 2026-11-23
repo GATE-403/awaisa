@@ -80,10 +80,16 @@ export const BusinessCard = ({ business }: BusinessCardProps) => {
               className={styles.logo}
             />
           )}
+          {/* With a gallery the first picture is the card's link (named after the place), so the
+              name is plain text; without one the name stretches over the card. */}
           <h3 className={styles.title}>
-            <NextLink href={href} className={styles.open}>
-              {business.name}
-            </NextLink>
+            {pictures.length > 0 ? (
+              business.name
+            ) : (
+              <NextLink href={href} className={styles.open}>
+                {business.name}
+              </NextLink>
+            )}
           </h3>
         </span>
         <span className={styles.footer}>
