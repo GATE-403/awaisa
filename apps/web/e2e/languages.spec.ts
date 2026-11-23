@@ -7,7 +7,7 @@ const LANGUAGES = {
     catalogTab: 'Кызматтар',
     placesTab: 'Жайлар',
     forBusiness: 'Бизнес үчүн',
-    servicesHeading: 'Кызматтар жана баалар',
+    placeTabs: 'Жайдын бөлүмдөрү',
     similarHeading: 'Окшош жайлар',
     yourBookings: 'Сиздин жазылууларыңыз',
     upcoming: 'Алдыдагылар',
@@ -21,7 +21,7 @@ const LANGUAGES = {
     catalogTab: 'Services',
     placesTab: 'Places',
     forBusiness: 'For business',
-    servicesHeading: 'Services and prices',
+    placeTabs: 'Place sections',
     similarHeading: 'Similar places',
     yourBookings: 'Your bookings',
     upcoming: 'Upcoming',
@@ -56,7 +56,7 @@ for (const [language, text] of Object.entries(LANGUAGES) as [
 
     test('a place', async ({ page }) => {
       await page.goto('/lumiere-salon')
-      await expect(page.getByRole('heading', { name: text.servicesHeading })).toBeVisible()
+      await expect(page.getByRole('tablist', { name: text.placeTabs })).toBeVisible()
       await expect(page.getByRole('heading', { name: text.similarHeading })).toBeAttached()
     })
 
