@@ -338,16 +338,13 @@
 
 /* ---------- Reviews: a thread, like comments in a social app ---------- */
 
-/* The score card: the average at display size with stars and the count, bars by stars. */
+/* The score right on the page, no card: the average at display size with stars and the count,
+   bars by stars. */
 .reviewSummary {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-6);
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
 }
 
 .reviewScore {
