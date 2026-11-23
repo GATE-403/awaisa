@@ -1,6 +1,7 @@
 'use client'
 
 import { type RefObject, useEffect } from 'react'
+import { getNativeApp, onNativeMessage, postToNative } from '../nativeBridge'
 
 const TEXT_FIELDS =
   'input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), textarea'
@@ -34,8 +35,13 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
     // A keyboard is up when it covers the page (the visual viewport is short) or shrank the window
     // (Android, the app's WebView) below the tallest it has been.
     let tallest = innerHeight
+    // The Android app's keyboard as the app reports it (`overlay`): the WebView keeps its size, so
+    // neither the window nor the visual viewport says the keyboard is there.
+    let nativeInset = 0
     const isKeyboardUp = () =>
-      (viewport ? viewport.height < innerHeight - 120 : false) || innerHeight < tallest - 120
+      nativeInset > 0 ||
+      (viewport ? viewport.height < innerHeight - 120 : false) ||
+      innerHeight < tallest - 120
     // While it is up the sheet keeps only its bottom bar's real height clear (`data-keyboard`,
     // BookingPage.module.css), not the bar's tall fade: with the fade's 144px a field in plain
     // view counted as hidden and the WebView jumped it to the middle (115px from «Имя» to
@@ -54,11 +60,10 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       const visibleTop = Math.max(layerBox.top, viewport?.offsetTop ?? 0) + topRoom
       // With the keyboard up the layer's fixed bottom bar is behind it; without one (a hardware
       // keyboard) the bar covers the foot, which the layer's own scroll padding already measures.
-      const isCovered = viewport ? viewport.height < innerHeight - 120 : false
+      const isCovered = nativeInset > 0 || (viewport ? viewport.height < innerHeight - 120 : false)
       const footRoom = isCovered ? gap : Number.parseFloat(style.scrollPaddingBottom) || gap
-      const visibleBottom =
-        Math.min(layerBox.bottom, viewport ? viewport.offsetTop + viewport.height : innerHeight) -
-        footRoom
+      const viewBottom = viewport ? viewport.offsetTop + viewport.height : innerHeight
+      const visibleBottom = Math.min(layerBox.bottom, viewBottom - nativeInset) - footRoom
       const below = box.bottom - visibleBottom
       const above = visibleTop - box.top
       // Instant while the viewport moves (stacked smooth scrolls overshot); a glide when the
@@ -133,10 +138,31 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       }, KEYBOARD_MS)
     }
 
+    // In the Android app the sheet takes the keyboard itself: the app leaves the WebView whole
+    // (resizing it laid the long page under the sheet out again while the keyboard slid in, and
+    // the frame rate dropped) and sends the keyboard's height as it shows and hides. An app too
+    // old to know `overlay` keeps resizing and sends nothing: everything above still works.
+    const isAndroidApp = getNativeApp()?.platform === 'android'
+    const stopNative = isAndroidApp
+      ? onNativeMessage((message) => {
+          if (message.type !== 'keyboard') return
+          nativeInset = message.height
+          layer.style.setProperty('--keyboard-inset', `${message.height}px`)
+          layer.toggleAttribute('data-keyboard', message.height > 0)
+          if (message.height <= 0) return
+          Object.assign(keyboard, { height: message.height, resizesWindow: false })
+          reveal('smooth')
+        })
+      : null
+    if (isAndroidApp) postToNative({ type: 'keyboardMode', mode: 'overlay' })
+
     layer.addEventListener('focusin', handleFocusIn)
     window.addEventListener('resize', handleResize)
     viewport?.addEventListener('resize', handleResize)
     return () => {
+      stopNative?.()
+      if (isAndroidApp) postToNative({ type: 'keyboardMode', mode: 'resize' })
+      layer.style.removeProperty('--keyboard-inset')
       layer.removeEventListener('focusin', handleFocusIn)
       window.removeEventListener('resize', handleResize)
       viewport?.removeEventListener('resize', handleResize)
