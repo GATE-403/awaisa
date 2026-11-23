@@ -106,7 +106,7 @@
 
 .hoursRow {
   grid-template-columns: minmax(0, 1fr) auto auto;
-  min-height: 48px;
+  min-height: var(--row-height);
   padding-block: 0;
 }
 
@@ -117,7 +117,7 @@
 .fieldRow {
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
-  min-height: 48px;
+  min-height: var(--row-height);
   padding-block: 0;
   cursor: text;
 }
@@ -288,7 +288,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: var(--control-height-md);
+  min-height: var(--row-height);
 }
 
 .checks {
