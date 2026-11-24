@@ -4,67 +4,32 @@
 
 <h1 align="center">Awaisa</h1>
 
-<p align="center">Book beauty and wellness masters in Bishkek. No phone calls.</p>
+<p align="center">Book your master in Bishkek. No phone calls.</p>
 
-Awaisa is an online booking platform. Any business (a barbershop, a hair or nail salon, a spa, a dental clinic) signs up and gets its own page at `/<slug>`. Clients find places and services in the catalog, pick a master and a time and book themselves; the confirmation and reminders come by SMS, WhatsApp or Telegram. Owners get a cabinet: the day's schedule, clients, analytics, the cash desk, promotions and loyalty, and the public page edited in place. Masters get «Мой день», their own day on the phone.
+## What it is
 
-The interface is in Russian, with Kyrgyz and English translations.
+Awaisa is where people in Bishkek find a barber, a nail artist, a brow master, a massage therapist or a dentist, see their work and their free time, and book in a few taps. Any business, from a one-chair barbershop to a salon with several branches, gets its own page and a calm place to run its day: the schedule, clients, reviews, money.
 
-## Stack
+## Why we started
 
-- **Monorepo:** Turborepo and pnpm workspaces, Biome for lint and format.
-- **Web:** Next.js 16 (App Router, Cache Components, Partial Prerendering, React Compiler), CSS Modules on design tokens, an in-house UI kit on Base UI.
-- **API:** NestJS (ESM), TypeORM, PostgreSQL, Redis for the cache and rate limits.
-- **Mobile:** Expo shell that renders the web app in a WebView, with native pushes, haptics and keyboard handling.
-- **Tests:** Vitest unit tests, Playwright e2e with axe, k6 load tests.
+Booking a haircut here still means calling, writing to an Instagram account and waiting for a reply, or sending voice messages back and forth in WhatsApp. The salon keeps the day in a notebook or in someone's head, and the client never knows whether 18:00 is free until somebody answers.
 
-## Monorepo
+We wanted the opposite: you open the app, see real photos of real work, see «Сегодня с 15:30», tap, and you are booked. The master knows at once, the reminder comes by itself, and moving the visit is one more tap, not another call.
 
-| Package | What is inside |
-| --- | --- |
-| `apps/web` | Next.js app: catalog, business pages, booking, client profile, owner cabinet |
-| `apps/api` | NestJS + TypeORM + PostgreSQL API, Redis cache, cron jobs |
-| `apps/mobile` | Expo shell that shows `apps/web` in a WebView |
-| `packages/tokens` | design tokens (colors, spacing, typography) as TS and CSS variables |
-| `packages/ui` | UI kit on Base UI and CSS Modules |
-| `packages/contracts` | API request and response types shared by web and api |
-| `recsys_eval` | offline evaluation of the «Для вас» recommendations (never part of the app) |
-| `tests/ux` | UX and accessibility kit |
+## What inspires us
 
-## Quick start
+- **Pictures first.** People choose a master by their work, so the work leads: photos of haircuts, nails and brows, not lists and forms.
+- **Apple's restraint.** Quiet interfaces where content speaks and every screen has one clear next step. Facts instead of sentences, nothing that only decorates.
+- **Respect for the people who do the work.** A master's craft, their regulars and their reputation belong to them. Awaisa should help them grow, not stand between them and their clients.
+- **Made for here.** Phones first, slow networks and weak devices in mind, Russian and Kyrgyz, local payment and messaging habits.
 
-Requirements: Node.js, pnpm and Docker.
+## Where we are going
 
-```bash
-cp .env.example .env
-pnpm install
-pnpm db:up      # PostgreSQL and Redis in Docker
-pnpm db:seed    # demo data, development only
-pnpm dev        # web :3000, api :4000 (/health), Expo
-```
+- **From booking to discovery.** «Образы», a feed of finished work, and «Для вас», picks that learn what each person likes, so people find new masters, not only rebook old ones.
+- **Masters as people.** Follow a master, hear when their time frees up, follow them when they move to another place.
+- **The whole day of a business in one place.** Schedule, cash desk and receipts, stock, loyalty and analytics that answer «what should I do today?», so a small salon runs as smoothly as a big one.
+- **A habit, not a tool.** Booking a master should feel as ordinary as ordering a taxi, for every neighbourhood of Bishkek and, later, other cities of Kyrgyzstan.
 
-`pnpm dev` also starts Expo (`apps/mobile`): press `i` / `a` in its panel or scan the QR code in Expo Go. Sign-in codes are printed to the API log in development. The UI kit demo is at http://localhost:3000/ui.
+## For developers
 
-The whole stack in Docker: `docker compose --profile app up --build`.
-
-## Tests and checks
-
-```bash
-pnpm lint         # Biome
-pnpm typecheck
-pnpm test         # unit tests
-pnpm test:e2e     # Playwright, needs pnpm db:up
-pnpm test:a11y    # accessibility checks
-pnpm test:ux      # the whole UX kit
-pnpm --filter api test:db   # cron SQL on a real Postgres
-```
-
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests and the build on every pull request, and the e2e suite in five shards.
-
-## Documentation
-
-- [AGENTS.md](AGENTS.md): architecture, design system, API, conventions and tests (start here).
-- [docs/launch.md](docs/launch.md): the launch checklist.
-- [docs/architecture-review.md](docs/architecture-review.md): architecture audit and follow-ups.
-- [docs/design](docs/design): design principles and approved patterns.
-- `apps/web/AGENTS.md`, `apps/api/AGENTS.md`, `apps/mobile/AGENTS.md`: notes per app.
+Architecture, design rules, commands and tests are in [AGENTS.md](AGENTS.md).
