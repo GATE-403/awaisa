@@ -16,7 +16,7 @@ import {
   Users,
 } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type ReactNode, useState } from 'react'
-import { BISHKEK_AREAS } from '@/shared/config/areas'
+import { CITY_AREAS } from '@/shared/config/areas'
 import { useT } from '@/shared/i18n'
 import { type MyPlace, saveMyPlace, useMyPlace } from '@/shared/lib/myPlace'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -343,7 +343,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
               </ul>
               <SectionCaption isInset={false}>{t('Или выберите район')}</SectionCaption>
               <ul className={styles.choices} aria-label={t('Район Бишкека')}>
-                {BISHKEK_AREAS.map((area) => (
+                {CITY_AREAS.map((area) => (
                   <Choice
                     key={area.label}
                     label={area.label}

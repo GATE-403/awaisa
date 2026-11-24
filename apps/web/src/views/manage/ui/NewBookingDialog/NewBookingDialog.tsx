@@ -4,6 +4,7 @@ import { type FormEvent, useState } from 'react'
 import { formatPrice, useAvailability } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
 import type { Catalog, ClientListItem, CreateBookingInput, Specialist } from '@/shared/api/types'
+import { NATIONAL_PHONE_DIGITS, PHONE_PLACEHOLDER, REGION } from '@/shared/config/region'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
@@ -29,7 +30,6 @@ interface NewBookingDialogProps {
 
 const FORM_ID = 'new-booking-form'
 
-const MIN_PHONE_DIGITS = 9
 const MIN_NAME_QUERY = 2
 const MIN_PHONE_QUERY = 3
 
@@ -56,7 +56,10 @@ export const NewBookingDialog = ({
   const [comment, setComment] = useState('')
   // The field being typed in: clients who were here before are offered right under it.
   const [typing, setTyping] = useState<ClientField | null>(null)
-  const localDigits = phone.replace(/\D/g, '').replace(/^996/, '')
+  const digits = phone.replace(/\D/g, '')
+  const localDigits = digits.startsWith(REGION.phone.callingCode)
+    ? digits.slice(REGION.phone.callingCode.length)
+    : digits
   const query =
     typing === 'name' && name.trim().length >= MIN_NAME_QUERY
       ? name.trim()
@@ -86,7 +89,7 @@ export const NewBookingDialog = ({
     freeTimes.find((item) => time === null || item >= time) ??
     freeTimes[0] ??
     null
-  const isPhoneValid = phone.replace(/\D/g, '').length >= MIN_PHONE_DIGITS
+  const isPhoneValid = phone.replace(/\D/g, '').length >= NATIONAL_PHONE_DIGITS
   const canSubmit = Boolean(service && selectedTime && name.trim() && isPhoneValid)
   const timeHint = availability.isLoading
     ? t('Ищем свободное время…')
@@ -257,7 +260,7 @@ export const NewBookingDialog = ({
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  placeholder='+996 555 123 456'
+                  placeholder={PHONE_PLACEHOLDER}
                   value={phone}
                   onValueChange={typePhone}
                   maxLength={32}

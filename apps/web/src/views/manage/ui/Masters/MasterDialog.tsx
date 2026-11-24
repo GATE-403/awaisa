@@ -6,6 +6,7 @@ import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'r
 import { PersonAvatar } from '@/entities/business'
 import { getMasterPay } from '@/shared/api/clientApi'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
+import { PHONE_PREFIX } from '@/shared/config/region'
 import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -176,7 +177,7 @@ export const MasterDialog = ({
               type='tel'
               inputMode='tel'
               aria-label={t('Телефон для входа')}
-              placeholder='+996 …'
+              placeholder={`${PHONE_PREFIX} …`}
               value={phone}
               onValueChange={(value) => setPhone(maskPhoneInput(value))}
             />
