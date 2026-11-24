@@ -234,7 +234,9 @@ export const MasterDialog = ({
         <div className={sheet.list}>
           {onOpenPay && (
             <button type='button' className={sheet.row} onClick={onOpenPay}>
-              <span className={sheet.rowLabel}>{t`Pay`}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Pay', context: 'specialist pay, noun' })}
+              </span>
               <span className={sheet.rowControl}>
                 <span className={payStyles.summary}>{paySummary ?? ''}</span>
                 <span className={sheet.suffix}>›</span>

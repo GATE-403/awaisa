@@ -145,7 +145,9 @@ export const PromotionSheet = ({
         <section className={sheet.group} aria-label={t`Discount`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t`Name`}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Name', context: 'name of a thing, not a person' })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'

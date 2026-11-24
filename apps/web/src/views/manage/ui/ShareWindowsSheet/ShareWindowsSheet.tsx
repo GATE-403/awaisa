@@ -125,7 +125,10 @@ export const ShareWindowsSheet = ({
               variant='plain'
               value={serviceId}
               items={[
-                { value: ANY_SERVICE, label: t`Any` },
+                {
+                  value: ANY_SERVICE,
+                  label: t({ message: 'Any', context: 'any service, feminine' }),
+                },
                 ...services.map((item) => ({ value: item.id, label: item.name })),
               ]}
               onValueChange={(value) => value && setServiceId(value)}

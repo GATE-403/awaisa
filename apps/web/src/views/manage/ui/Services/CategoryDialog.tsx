@@ -38,7 +38,7 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
             <div className={`${sheet.row} ${sheet.textRow}`}>
               <Input
                 variant='plain'
-                aria-label={t`Name`}
+                aria-label={t({ message: 'Name', context: 'name of a thing, not a person' })}
                 placeholder={t`For example, “Nails”`}
                 value={name}
                 onValueChange={setName}

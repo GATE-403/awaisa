@@ -913,7 +913,10 @@ export const BookingPage = ({
           {/* Under the form and set well apart from it (a wide gap), so it reads as something to
                 look at, not another step. Nothing here leads away: picks of other places live on
                 the success screen, not in the middle of a booking. */}
-          <aside className={styles.after} aria-label={t`More`}>
+          <aside
+            className={styles.after}
+            aria-label={t({ message: 'More', context: 'extra sections under the form' })}
+          >
             <PlaceReviews
               slug={business.slug}
               businessName={business.name}

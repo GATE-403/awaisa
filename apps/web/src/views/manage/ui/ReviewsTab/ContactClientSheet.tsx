@@ -71,7 +71,10 @@ export const ContactClientSheet = ({
   return (
     <Sheet title={t`Message the client`} onClose={onClose} cancelLabel={t`Close`}>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label={t`Message`}>
+        <section
+          className={sheet.group}
+          aria-label={t({ message: 'Message', context: 'noun: text of a message' })}
+        >
           <SectionCaption>{`${review.authorName} · ${formatPhone(review.customerPhone)}`}</SectionCaption>
           <div className={sheet.list}>
             <textarea

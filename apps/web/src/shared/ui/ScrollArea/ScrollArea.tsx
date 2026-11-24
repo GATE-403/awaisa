@@ -136,7 +136,7 @@ export const ScrollArea = ({
       )}
       {isTouch && isOpen && isLong && (
         <button type='button' className={styles.less} onClick={fold} aria-expanded>
-          {t`Hide`}
+          {t({ message: 'Hide', context: 'fold a list' })}
           <CaretUp aria-hidden />
         </button>
       )}

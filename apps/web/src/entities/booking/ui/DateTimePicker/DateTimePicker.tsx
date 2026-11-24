@@ -205,7 +205,9 @@ export const DateTimePicker = ({
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
         <p className={styles.caption} aria-hidden>
-          {time ? t`Chosen ${time}` : t`Choose a time`}
+          {time
+            ? t`Chosen ${time}`
+            : t({ message: 'Choose a time', context: 'instruction to the client' })}
           <span
             className={styles.captionCount}
           >{t`${plural(availableCount, { one: '# free', other: '# free' })}`}</span>

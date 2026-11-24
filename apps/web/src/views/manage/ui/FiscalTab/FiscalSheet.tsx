@@ -194,7 +194,11 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
                     type='password'
                     aria-label={t`eKassa password`}
                     autoComplete='new-password'
-                    placeholder={settings.hasPassword ? t`Saved` : t`Password`}
+                    placeholder={
+                      settings.hasPassword
+                        ? t({ message: 'Saved', context: 'password is saved, masculine' })
+                        : t`Password`
+                    }
                     value={password}
                     onValueChange={setPassword}
                   />

@@ -70,11 +70,11 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t`To`}</span>
+              <span className={sheet.rowLabel}>{t({ message: 'To', context: 'recipient' })}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t`To`}
+                  aria-label={t({ message: 'To', context: 'recipient' })}
                   placeholder={t`Name`}
                   value={recipient}
                   onValueChange={setRecipient}

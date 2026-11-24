@@ -152,7 +152,11 @@ export const CreateBusinessPage = () => {
               {form.step === 'name' && (
                 // Settings rows right on the page: the label on the left, the value typed on the right.
                 <div className={styles.rows}>
-                  <Field label={t`Name`} error={form.errors.name} className={styles.fieldRow}>
+                  <Field
+                    label={t({ message: 'Name', context: 'name of a thing, not a person' })}
+                    error={form.errors.name}
+                    className={styles.fieldRow}
+                  >
                     <Input
                       variant='plain'
                       value={form.name}

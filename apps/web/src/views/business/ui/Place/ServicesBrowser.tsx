@@ -153,7 +153,9 @@ export const ServicesBrowser = ({
 
         {hasPopular && (
           <div className={styles.group}>
-            <SectionCaption>{t`Popular`}</SectionCaption>
+            <SectionCaption>
+              {t({ message: 'Popular', context: 'caption: services people often pick' })}
+            </SectionCaption>
             <ul className={styles.serviceGrid}>
               {popular.map((service, index) => (
                 <PopularCard key={service.id} offer={toOffer(service)} isHit={index === 0} />

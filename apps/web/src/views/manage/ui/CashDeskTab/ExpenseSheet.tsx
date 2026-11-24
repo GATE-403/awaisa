@@ -80,7 +80,9 @@ export const ExpenseSheet = ({
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t`Category`}</span>
+            <span className={sheet.rowLabel}>
+              {t({ message: 'Category', context: 'expense category' })}
+            </span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'

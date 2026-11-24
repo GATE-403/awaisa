@@ -28,7 +28,7 @@ interface ShiftSheetProps {
 const FORM_ID = 'shift-form'
 
 const MOVES: { value: 'in' | 'out'; label: MessageDescriptor }[] = [
-  { value: 'in', label: msg`Put in` },
+  { value: 'in', label: msg({ message: 'Put in', context: 'action: put cash into the drawer' }) },
   { value: 'out', label: msg`Take out` },
 ]
 
@@ -39,7 +39,7 @@ const TITLES: Record<ShiftSheetMode, MessageDescriptor> = {
 }
 
 const ACTIONS: Record<ShiftSheetMode, MessageDescriptor> = {
-  open: msg`Open`,
+  open: msg({ message: 'Open', context: 'shift status, feminine' }),
   move: msg`Record`,
   close: msg`Close`,
 }
@@ -131,7 +131,10 @@ export const ShiftSheet = ({
         )}
 
         {mode === 'close' && shift && (
-          <section className={sheet.group} aria-label={t`Expected`}>
+          <section
+            className={sheet.group}
+            aria-label={t({ message: 'Expected', context: 'cash expected in the drawer' })}
+          >
             <div className={sheet.list}>
               {summary.map((line) => (
                 <div key={line.key} className={sheet.row}>

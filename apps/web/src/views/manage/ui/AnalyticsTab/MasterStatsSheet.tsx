@@ -235,7 +235,9 @@ export const MasterStatsSheet = ({
                 </div>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t`Earned`}</span>
+                <span className={sheet.rowLabel}>
+                  {t({ message: 'Earned', context: 'pay accrued to a specialist' })}
+                </span>
                 <span className={styles.payTotal}>{formatMoney(pay.total)}</span>
               </div>
               {pay.paid > 0 && (
@@ -276,7 +278,7 @@ export const MasterStatsSheet = ({
                     onClick={() => void undo(item)}
                     aria-label={t`Cancel payout of ${ph({ amount: formatMoney(item.amount) })}`}
                   >
-                    {t`Cancel`}
+                    {t({ message: 'Cancel', context: 'verb: undo a payout' })}
                   </button>
                 </div>
               ))}
@@ -350,7 +352,10 @@ export const MasterStatsSheet = ({
           // The sheet's one main action, last and as wide as the groups above it.
           <Button fullWidth onClick={() => void markPaid()} disabled={isSaving}>
             {payout
-              ? t`Pay ${ph({ amount: format.price(Number(digits(payout.amount)) || 0) })}`
+              ? t({
+                  message: `Pay ${ph({ amount: format.price(Number(digits(payout.amount)) || 0) })}`,
+                  context: 'pay out to a specialist',
+                })
               : t`Mark payout of ${ph({ amount: formatMoney(pay.due) })}`}
           </Button>
         )}

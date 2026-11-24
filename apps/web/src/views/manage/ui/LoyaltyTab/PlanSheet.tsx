@@ -83,7 +83,9 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
         <section className={sheet.group} aria-label={t`Pass`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t`Name`}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Name', context: 'name of a thing, not a person' })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
@@ -101,7 +103,10 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
                   variant='plain'
                   aria-label={t`Pass service`}
                   items={[
-                    { value: 'any', label: t`Any` },
+                    {
+                      value: 'any',
+                      label: t({ message: 'Any', context: 'any service, feminine' }),
+                    },
                     ...services.map((item) => ({ value: item.id, label: item.name })),
                   ]}
                   value={serviceId}
@@ -110,11 +115,13 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t`Visits`}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Visits', context: 'number of visits in a pass' })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t`Visits`}
+                  aria-label={t({ message: 'Visits', context: 'number of visits in a pass' })}
                   inputMode='numeric'
                   value={visits}
                   onValueChange={(value) => setVisits(value.replace(/\D/g, '').slice(0, 3))}

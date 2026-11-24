@@ -82,7 +82,10 @@ export const WorkPhotoSheet = ({
                   variant='plain'
                   aria-label={t`Service in the photo`}
                   items={[
-                    { value: NONE, label: t`Not set` },
+                    {
+                      value: NONE,
+                      label: t({ message: 'Not set', context: 'no service chosen, feminine' }),
+                    },
                     ...services.map((service) => ({ value: service.id, label: service.name })),
                   ]}
                   value={serviceId}
@@ -104,7 +107,10 @@ export const WorkPhotoSheet = ({
                   variant='plain'
                   aria-label={t`Specialist in the photo`}
                   items={[
-                    { value: NONE, label: t`Any` },
+                    {
+                      value: NONE,
+                      label: t({ message: 'Any', context: 'any specialist, masculine' }),
+                    },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   value={specialistId}

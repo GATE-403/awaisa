@@ -112,7 +112,9 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             onClick={() => onOpen(next)}
           >
             <Clock className={styles.glyph} aria-hidden />
-            <span className={styles.srOnly}>{t`Next`}: </span>
+            <span className={styles.srOnly}>
+              {t({ message: 'Next', context: 'next client in line' })}:{' '}
+            </span>
             <span className={styles.who}>
               {next.time} {next.customerName}
             </span>

@@ -51,7 +51,11 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>
                   {branch.name}
-                  {branch.isActive === false && <span className={styles.badge}>{t`Closed`}</span>}
+                  {branch.isActive === false && (
+                    <span className={styles.badge}>
+                      {t({ message: 'Closed', context: 'branch is closed, masculine' })}
+                    </span>
+                  )}
                 </span>
                 <span className={styles.rowMeta}>
                   {[branch.address || t`No address`, branch.phone && formatPhone(branch.phone)]

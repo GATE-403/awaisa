@@ -54,8 +54,10 @@ export const RecentVisits = ({ onSelect }: RecentVisitsProps) => {
   if (visits.length === 0) return null
 
   return (
-    <section aria-label={t`Book again`}>
-      <p className={styles.heading}>{t`Book again`}</p>
+    <section aria-label={t({ message: 'Book again', context: 'heading: rebook a past visit' })}>
+      <p className={styles.heading}>
+        {t({ message: 'Book again', context: 'heading: rebook a past visit' })}
+      </p>
       <ul className={styles.list}>
         {visits.map((booking) => (
           <VisitRow key={booking.id} booking={booking} onSelect={onSelect} />

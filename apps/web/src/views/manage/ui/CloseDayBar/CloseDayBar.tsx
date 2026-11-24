@@ -38,7 +38,10 @@ export const CloseDayBar = ({
   if (openHere === 0 && openElsewhere === 0) return null
   const isListed = openHere > 0 && visitsHere.length > 0 && Boolean(onOpen)
   const visits = (count: number) => t`${plural(count, { one: '# visit', other: '# visits' })}`
-  const passed = openHere === 1 ? t`passed unmarked` : t`passed unmarked`
+  const passed =
+    openHere === 1
+      ? t({ message: 'passed unmarked', context: 'one visit, singular' })
+      : t({ message: 'passed unmarked', context: 'several visits, plural' })
 
   return (
     <section

@@ -72,7 +72,7 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>
-                <Trans>Name</Trans>
+                <Trans context='name of a thing, not a person'>Name</Trans>
               </span>
               <span className={sheet.rowControl}>{plan.title}</span>
             </div>
@@ -80,11 +80,13 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
               <span className={sheet.rowLabel}>
                 <Trans>Service</Trans>
               </span>
-              <span className={sheet.rowControl}>{plan.serviceName ?? 'Any'}</span>
+              <span className={sheet.rowControl}>
+                {plan.serviceName ?? t({ message: 'Any', context: 'any service, feminine' })}
+              </span>
             </div>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>
-                <Trans>Visits</Trans>
+                <Trans context='number of visits in a pass'>Visits</Trans>
               </span>
               <span className={sheet.rowControl}>{plan.visits}</span>
             </div>

@@ -291,7 +291,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 setShift(0)
               }}
             >
-              {t`Hide`}
+              {t({ message: 'Hide', context: 'fold a list' })}
             </button>
           )}
         </div>

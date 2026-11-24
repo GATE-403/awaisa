@@ -55,9 +55,9 @@ const RECEIPT_RECHECK_MS = 2000
 const RECEIPT_RECHECKS = 3
 
 const METHODS: { value: PaymentMethod; label: MessageDescriptor }[] = [
-  { value: 'cash', label: msg`Cash` },
-  { value: 'card', label: msg`Card` },
-  { value: 'transfer', label: msg`Transfer` },
+  { value: 'cash', label: msg({ message: 'Cash', context: 'payment method' }) },
+  { value: 'card', label: msg({ message: 'Card', context: 'payment method' }) },
+  { value: 'transfer', label: msg({ message: 'Transfer', context: 'payment method' }) },
 ]
 
 // Staff close the visit in two taps: "Arrived" fills the price and cash; the amount and the way

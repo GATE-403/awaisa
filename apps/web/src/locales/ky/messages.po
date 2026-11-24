@@ -794,8 +794,12 @@ msgstr "{online, plural, other {# жазылуу}}"
 msgid "{online, plural, one {Of # booking online} other {Of # bookings online}}"
 msgstr "{online, plural, one {# онлайн жазылуудан} other {# онлайн жазылуудан}}"
 
-#: src/widgets/DayCalendar/DayCalendar.tsx
 #: src/widgets/DayStrip/DayStrip.tsx
+msgid "{percent}% booked"
+msgstr "{percent}% бош эмес"
+
+#: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "specialist is booked, masculine"
 msgid "{percent}% booked"
 msgstr "{percent}% бош эмес"
 
@@ -1204,16 +1208,20 @@ msgstr "Иш жүзүндөгү калдык"
 
 #: src/views/booking/BookingPage.tsx
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
-#: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
 #: src/views/manage/ui/ClientSheet/BirthdayField.tsx
-#: src/views/manage/ui/FiscalTab/FiscalTab.tsx
 #: src/views/manage/ui/NewBookingDialog/NewBookingDialog.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/TeamTab/TeamTab.tsx
 msgid "Add"
 msgstr "Кошуу"
+
+#: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+#: src/views/manage/ui/FiscalTab/FiscalTab.tsx
+msgctxt "empty value, prompt to fill in"
+msgid "Add"
+msgstr "Көрсөтүү"
 
 #: src/views/manage/ui/BranchesTab/BranchesTab.tsx
 msgid "Add a branch"
@@ -1539,12 +1547,21 @@ msgid "Answer to the question"
 msgstr "Суроого жооп"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
-#: src/views/booking/ui/MasterPicker/MasterPicker.tsx
-#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
-#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
-#: src/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet.tsx
 msgid "Any"
 msgstr "Баары бир"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
+#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
+#: src/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet.tsx
+msgctxt "any service, feminine"
+msgid "Any"
+msgstr "Каалаган"
+
+#: src/views/booking/ui/MasterPicker/MasterPicker.tsx
+#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
+msgctxt "any specialist, masculine"
+msgid "Any"
+msgstr "Каалаган"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 msgid "Any budget"
@@ -1889,13 +1906,17 @@ msgstr "Бонустар, абонементтер жана сертификат
 #: src/views/business/ui/Place/VisitSection.tsx
 #: src/views/feed/ui/FeedActions.tsx
 #: src/views/leaderboard/ui/LeaderboardBoard.tsx
-#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
 #: src/views/publicProfile/lib/goals.ts
 #: src/widgets/BusinessBar/BusinessBar.tsx
-#: src/widgets/DayCalendar/DayCalendar.tsx
 #: src/widgets/Footer/Footer.tsx
 msgid "Book"
 msgstr "Жазылуу"
+
+#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
+#: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "staff books a client"
+msgid "Book"
+msgstr "Жазуу"
 
 #: src/views/review/ReviewPage.tsx
 msgid "Book {firstName} again"
@@ -1905,12 +1926,21 @@ msgstr "{firstName} устага кайра жазылуу"
 msgid "Book a specialist"
 msgstr "Устага жазылыңыз"
 
-#: src/features/rebook/ui/RecentVisits.tsx
-#: src/views/manage/ui/BookingInspector/BookingInspector.tsx
-#: src/views/manage/ui/ClientSheet/ClientSheet.tsx
 #: src/views/pay/PayPage.tsx
+msgctxt "client books again"
+msgid "Book again"
+msgstr "Кайра жазылуу"
+
+#: src/features/rebook/ui/RecentVisits.tsx
+msgctxt "heading: rebook a past visit"
 msgid "Book again"
 msgstr "Кайра устага"
+
+#: src/views/manage/ui/BookingInspector/BookingInspector.tsx
+#: src/views/manage/ui/ClientSheet/ClientSheet.tsx
+msgctxt "staff books the client again"
+msgid "Book again"
+msgstr "Кайра жазуу"
 
 #: src/features/rebook/ui/RecentVisits.tsx
 msgid "Book again: {service}, {name}"
@@ -2249,9 +2279,13 @@ msgstr "Администратор менен чогуу иштесе болоб
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 #: src/shared/ui/Sheet/Sheet.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/publicProfile/ui/ProfileSheet.tsx
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
+msgid "Cancel"
+msgstr "Жокко чыгаруу"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "verb: undo a payout"
 msgid "Cancel"
 msgstr "Жокко чыгаруу"
 
@@ -2282,12 +2316,16 @@ msgstr "жокко чыгарылды"
 #: src/features/ticketView/ui/TicketViewer.tsx
 #: src/views/bookings/ui/BookingHistory/BookingHistory.tsx
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
-#: src/views/insights/config/labels.ts
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
 #: src/views/masterDay/MasterDayPage.tsx
 #: src/widgets/DayCalendar/blockState.ts
 msgid "Cancelled"
 msgstr "Жокко чыгарылды"
+
+#: src/views/insights/config/labels.ts
+msgctxt "funnel step: people who cancelled"
+msgid "Cancelled"
+msgstr "Жокко чыгарышты"
 
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
 msgid "Cancelling…"
@@ -2301,8 +2339,9 @@ msgstr "карта"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Card"
-msgstr "Карта менен"
+msgstr "Карта"
 
 #: src/views/pay/PayPage.tsx
 msgid "Card payment through Freedom Pay."
@@ -2320,6 +2359,7 @@ msgstr "накталай"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Cash"
 msgstr "Накталай"
 
@@ -2362,9 +2402,14 @@ msgid "Cash movements"
 msgstr "Накталай кыймылы"
 
 #: src/features/favorites/ui/FavoritesShelf.tsx
-#: src/views/map/MapPage.tsx
+msgctxt "in the catalogue, prepositional"
 msgid "catalogue"
 msgstr "каталогдон"
+
+#: src/views/map/MapPage.tsx
+msgctxt "or the catalogue, accusative"
+msgid "catalogue"
+msgstr "каталогду"
 
 #: src/shared/config/navigation.ts
 #: src/shared/lib/cabinetFrom.ts
@@ -2389,12 +2434,16 @@ msgstr "Категориялар"
 msgid "Categories group services on the business page."
 msgstr "Категориялар бизнес барагында кызматтарды топтойт."
 
-#: src/views/manage/ui/CashDeskTab/ExpenseSheet.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/Services/ServiceDialog.tsx
 msgid "Category"
 msgstr "Категория"
+
+#: src/views/manage/ui/CashDeskTab/ExpenseSheet.tsx
+msgctxt "expense category"
+msgid "Category"
+msgstr "Берене"
 
 #: src/views/manage/ui/PageTab/PageTab.tsx
 msgid "Category added"
@@ -2568,18 +2617,33 @@ msgid "Choose a service"
 msgstr "Кызматты тандоо"
 
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
+msgid "Choose a service"
+msgstr "Кызматты тандаңыз"
+
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
 msgid "Choose a specialist"
 msgstr "Устаны тандоо"
+
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
+msgid "Choose a specialist"
+msgstr "Устаны тандаңыз"
 
 #: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
 msgid "Choose a specialist first"
 msgstr "Адегенде устаны тандаңыз"
 
-#: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
 #: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
 msgid "Choose a time"
 msgstr "Убакытты тандоо"
+
+#: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
+msgid "Choose a time"
+msgstr "Убакытты тандаңыз"
 
 #: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
 msgid "Choose another day"
@@ -2737,7 +2801,6 @@ msgstr "Сменаны жабуу"
 
 #: src/entities/business/ui/WeekHours/WeekHours.tsx
 #: src/views/business/ui/Place/VisitSection.tsx
-#: src/views/manage/ui/BranchesTab/BranchesTab.tsx
 #: src/views/manage/ui/Hours/WeekHoursRows.tsx
 #: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
 #: src/views/manage/ui/ScheduleTab.tsx
@@ -2745,6 +2808,11 @@ msgstr "Сменаны жабуу"
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "Closed"
 msgstr "Дем алыш"
+
+#: src/views/manage/ui/BranchesTab/BranchesTab.tsx
+msgctxt "branch is closed, masculine"
+msgid "Closed"
+msgstr "Жабык"
 
 #: src/entities/profile/ui/Achievements.tsx
 msgid "closest: {names}"
@@ -3068,8 +3136,13 @@ msgstr "Данияр · 20-ноябрь, 14:30 · Чач кырктыруу"
 msgid "dark"
 msgstr "караңгы"
 
-#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+msgctxt "appearance setting, neuter"
+msgid "Dark"
+msgstr "Караңгы"
+
+#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
+msgctxt "theme, feminine"
 msgid "Dark"
 msgstr "Караңгы"
 
@@ -3459,10 +3532,14 @@ msgid "earned"
 msgstr "таптыңыз"
 
 #: src/entities/profile/ui/Achievements.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/publicProfile/ui/AchievementCard.tsx
 msgid "Earned"
 msgstr "Алынды"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "pay accrued to a specialist"
+msgid "Earned"
+msgstr "Эсептелди"
 
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 msgid "Earned {amount}, under the minimum: the minimum is paid."
@@ -3514,9 +3591,13 @@ msgstr "Киргизүү"
 
 #: src/features/waitlist/ui/WaitlistJoin.tsx
 #: src/views/booking/model/useBookingForm.ts
-#: src/views/forBusiness/model/useCreateBusinessForm.ts
 msgid "Enter a name"
 msgstr "Атыңызды жазыңыз"
+
+#: src/views/forBusiness/model/useCreateBusinessForm.ts
+msgctxt "business name"
+msgid "Enter a name"
+msgstr "Аталышын жазыңыз"
 
 #: src/views/booking/model/useBookingForm.ts
 msgid "Enter a number so we can confirm the booking"
@@ -3591,8 +3672,9 @@ msgid "Excellent"
 msgstr "Эң сонун"
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "cash expected in the drawer"
 msgid "Expected"
-msgstr "Күтөбүз"
+msgstr "Күтүлүүдө"
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 #: src/views/manage/ui/CashDeskTab/ExpenseSheet.tsx
@@ -3865,9 +3947,13 @@ msgid "Found"
 msgstr "Табылды"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
-#: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "free"
 msgstr "акысыз"
+
+#: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "specialist is free, masculine"
+msgid "free"
+msgstr "бош"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 msgid "Free"
@@ -4153,10 +4239,15 @@ msgstr "Салам, {name}"
 msgid "hidden"
 msgstr "жашырылган"
 
+#: src/views/moderation/config/labels.ts
+msgctxt "moderation decision, neuter"
+msgid "Hidden"
+msgstr "Жашырылды"
+
 #: src/views/manage/ui/BusinessPickerCard/BusinessPickerCard.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
-#: src/views/moderation/config/labels.ts
+msgctxt "status, feminine"
 msgid "Hidden"
 msgstr "Жашырылган"
 
@@ -4173,12 +4264,16 @@ msgid "Hidden until you decide"
 msgstr "Сиз чечмейинче жашырылган"
 
 #: src/shared/ui/MoreFade/MoreFade.tsx
-#: src/shared/ui/ScrollArea/ScrollArea.tsx
-#: src/views/booking/ui/CardStack/CardStack.tsx
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
 #: src/views/moderation/ui/QueueItem.tsx
 msgid "Hide"
 msgstr "Жашыруу"
+
+#: src/shared/ui/ScrollArea/ScrollArea.tsx
+#: src/views/booking/ui/CardStack/CardStack.tsx
+msgctxt "fold a list"
+msgid "Hide"
+msgstr "Жыйноо"
 
 #: src/entities/profile/ui/Achievements.tsx
 msgid "Hide goals"
@@ -4567,8 +4662,13 @@ msgstr "Awaisa’да {level}-деңгээл"
 msgid "light"
 msgstr "жарык"
 
-#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+msgctxt "appearance setting, neuter"
+msgid "Light"
+msgstr "Жарык"
+
+#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
+msgctxt "theme, feminine"
 msgid "Light"
 msgstr "Жарык"
 
@@ -4894,8 +4994,13 @@ msgid "Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, 
 msgstr "Бишкектин барбершопторунда эркектердин чач кырктыруусу, сакал оңдоо жана кырынуу: баалар, пикирлүү барберлер жана бош убакыт. Онлайн жазылыңыз, чалуусуз."
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
-#: src/views/business/ui/Place/PlaceActions.tsx
 #: src/views/manage/ui/ReviewsTab/ContactClientSheet.tsx
+msgctxt "noun: text of a message"
+msgid "Message"
+msgstr "Билдирүү"
+
+#: src/views/business/ui/Place/PlaceActions.tsx
+msgctxt "verb: write to someone"
 msgid "Message"
 msgstr "Жазуу"
 
@@ -4982,17 +5087,25 @@ msgid "Monthly goal"
 msgstr "Айлык максат"
 
 #: src/features/calendarFeed/ui/CalendarFeedGroup/CalendarFeedSheet.tsx
-#: src/views/booking/BookingPage.tsx
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
 #: src/views/feed/ui/FeedActions.tsx
-#: src/views/manage/ui/AnalyticsTab/LoadHeatmap.tsx
 #: src/views/manage/ui/BookingInspector/BookingInspector.tsx
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
 #: src/views/manage/ui/PageTab/ShareSheet.tsx
 #: src/views/manage/ui/ReceiptSheet/ReceiptSheet.tsx
 msgid "More"
 msgstr "Дагы"
+
+#: src/views/booking/BookingPage.tsx
+msgctxt "extra sections under the form"
+msgid "More"
+msgstr "Кошумча"
+
+#: src/views/manage/ui/AnalyticsTab/LoadHeatmap.tsx
+msgctxt "heatmap legend: more bookings"
+msgid "More"
+msgstr "Көбүрөөк"
 
 #: src/views/business/ui/Place/SimilarPlaces.tsx
 msgid "More {kind} nearby."
@@ -5131,23 +5244,27 @@ msgstr "Тырмактар"
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 #: src/views/bookings/ui/NameDialog.tsx
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
-#: src/views/business/ui/Place/SubscriptionSheet.tsx
-#: src/views/forBusiness/CreateBusinessPage.tsx
 #: src/views/insights/config/labels.ts
-#: src/views/manage/ui/BranchesTab/BranchDialog.tsx
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/CertificateSheet.tsx
-#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
 #: src/views/manage/ui/Masters/MasterDialog.tsx
 #: src/views/manage/ui/NewBookingDialog/NewBookingDialog.tsx
+#: src/views/manage/ui/SaleSheet/SaleSheet.tsx
+msgid "Name"
+msgstr "Аты"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
+#: src/views/forBusiness/CreateBusinessPage.tsx
+#: src/views/manage/ui/BranchesTab/BranchDialog.tsx
+#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
 #: src/views/manage/ui/PageTab/EditPageSheet.tsx
 #: src/views/manage/ui/PromotionsTab/PromotionSheet.tsx
-#: src/views/manage/ui/SaleSheet/SaleSheet.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/Services/ServiceDialog.tsx
 #: src/views/manage/ui/StockTab/StockItemSheet.tsx
+msgctxt "name of a thing, not a person"
 msgid "Name"
-msgstr "Аты"
+msgstr "Аталышы"
 
 #: src/views/insights/config/labels.ts
 msgid "Name in the waitlist"
@@ -5194,11 +5311,28 @@ msgstr "Көңүл буруу керек"
 msgid "Network"
 msgstr "Тармак"
 
-#: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
-#: src/views/forBusiness/ForBusinessPage.tsx
-#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
-#: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
+msgctxt "add a new pass, masculine"
+msgid "New"
+msgstr "Жаңы"
+
+#: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
+msgctxt "after the change"
+msgid "New"
+msgstr "Жаңы"
+
+#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgctxt "client is new, masculine"
+msgid "New"
+msgstr "Жаңы"
+
+#: src/views/manage/ui/ClientsTab/ClientsTab.tsx
+msgctxt "client segment, plural"
+msgid "New"
+msgstr "Жаңылар"
+
+#: src/views/forBusiness/ForBusinessPage.tsx
+msgctxt "news badge, neuter"
 msgid "New"
 msgstr "Жаңы"
 
@@ -5295,11 +5429,15 @@ msgstr "Жаңы иштер"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 #: src/views/forBusiness/CreateBusinessPage.tsx
-#: src/views/manage/ui/NowBar/NowBar.tsx
 #: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
-#: src/views/masterDay/MasterDayPage.tsx
 msgid "Next"
 msgstr "Андан ары"
+
+#: src/views/manage/ui/NowBar/NowBar.tsx
+#: src/views/masterDay/MasterDayPage.tsx
+msgctxt "next client in line"
+msgid "Next"
+msgstr "Кийинки"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "next {date}"
@@ -5707,12 +5845,28 @@ msgid "Not sent"
 msgstr "Жөнөтүлгөн жок"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-#: src/views/manage/lib/payText.ts
-#: src/views/manage/ui/Masters/MasterPaySheet.tsx
-#: src/views/manage/ui/PageTab/EditPageSheet.tsx
-#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
 msgid "Not set"
 msgstr "Жөндөлгөн эмес"
+
+#: src/views/manage/ui/PageTab/EditPageSheet.tsx
+msgctxt "empty contact field"
+msgid "Not set"
+msgstr "Көрсөтүлгөн эмес"
+
+#: src/views/manage/ui/Masters/MasterPaySheet.tsx
+msgctxt "empty percent, masculine"
+msgid "Not set"
+msgstr "Белгиленген эмес"
+
+#: src/views/manage/lib/payText.ts
+msgctxt "no pay scheme, feminine"
+msgid "Not set"
+msgstr "Белгиленген эмес"
+
+#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
+msgctxt "no service chosen, feminine"
+msgid "Not set"
+msgstr "Көрсөтүлгөн эмес"
 
 #: src/views/manage/ui/SaleSheet/SaleSheet.tsx
 msgid "Not specified"
@@ -5864,8 +6018,12 @@ msgstr "бардык жазылуулардан"
 msgid "Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count."
 msgstr "Уста «Кассада» саткан товарлардын суммасынан («Саткан» талаасы). Жокко чыгарылган сатуулар эсептелбейт."
 
-#: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
+msgid "Off"
+msgstr "Өчүк"
+
+#: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
+msgctxt "promotion is off, feminine"
 msgid "Off"
 msgstr "Өчүк"
 
@@ -5980,6 +6138,7 @@ msgid "Only free slots that respect schedules and durations. Double bookings can
 msgstr "Графикти жана узактыкты эске алган бош убакыттар гана. Эки жолу жазылуу мүмкүн эмес."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "shift status, feminine"
 msgid "Open"
 msgstr "Ачык"
 
@@ -6157,7 +6316,16 @@ msgstr "Тартип сакталды"
 #: src/features/report/config/reasons.ts
 #: src/shared/config/platform.ts
 #: src/views/insights/config/labels.ts
+msgid "Other"
+msgstr "Башка"
+
 #: src/views/manage/lib/cashFormat.ts
+msgctxt "expense category"
+msgid "Other"
+msgstr "Башка"
+
+#: src/views/insights/config/labels.ts
+msgctxt "operating system, feminine"
 msgid "Other"
 msgstr "Башка"
 
@@ -6232,10 +6400,14 @@ msgstr "Барактын куралдары"
 msgid "paid"
 msgstr "төлөндү"
 
-#: src/views/insights/config/labels.ts
 #: src/views/pay/PayPage.tsx
 msgid "Paid"
 msgstr "Төлөндү"
+
+#: src/views/insights/config/labels.ts
+msgctxt "funnel step: people who paid"
+msgid "Paid"
+msgstr "Төлөштү"
 
 #: src/views/pay/PayPage.tsx
 msgid "Paid - you're booked"
@@ -6319,6 +6491,12 @@ msgid "Pass service"
 msgstr "Абонементтин кызматы"
 
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
+msgctxt "one visit, singular"
+msgid "passed unmarked"
+msgstr "белгисиз өттү"
+
+#: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
+msgctxt "several visits, plural"
 msgid "passed unmarked"
 msgstr "белгисиз өттү"
 
@@ -6349,17 +6527,25 @@ msgstr "Патент"
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
-#: src/views/manage/ui/Masters/MasterDialog.tsx
-#: src/views/manage/ui/Masters/MasterPaySheet.tsx
 msgid "Pay"
 msgstr "Төлөө"
 
+#: src/views/manage/ui/Masters/MasterDialog.tsx
+#: src/views/manage/ui/Masters/MasterPaySheet.tsx
+msgctxt "specialist pay, noun"
+msgid "Pay"
+msgstr "Айлык"
+
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 #: src/views/pay/PayPage.tsx
 msgid "Pay {amount}"
 msgstr "{amount} төлөө"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "pay out to a specialist"
+msgid "Pay {amount}"
+msgstr "{amount} төлөп берүү"
 
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
 msgid "Pay at the salon - cash or card. Move or cancel by the link in the SMS."
@@ -6654,11 +6840,19 @@ msgstr "саатка багыттаңыз"
 msgid "Point the camera to open the page. Print it for the counter or the window."
 msgstr "Баракты ачуу үчүн камераны багыттаңыз. Кассага же витринага басып чыгарыңыз."
 
-#: src/views/business/ui/Place/ServicesBrowser.tsx
 #: src/views/catalog/ui/OffersFeed/OffersFeed.tsx
-#: src/views/manage/ui/Services/ServiceDialog.tsx
 msgid "Popular"
 msgstr "Популярдуулар"
+
+#: src/views/business/ui/Place/ServicesBrowser.tsx
+msgctxt "caption: services people often pick"
+msgid "Popular"
+msgstr "Көп тандашат"
+
+#: src/views/manage/ui/Services/ServiceDialog.tsx
+msgctxt "service flag, feminine"
+msgid "Popular"
+msgstr "Популярдуу"
 
 #: src/views/catalog/ui/CatalogSkeleton/CatalogSkeleton.tsx
 #: src/views/catalog/ui/SearchChips/SearchChips.tsx
@@ -6898,6 +7092,11 @@ msgstr "Биринчи коюу"
 msgid "Put in"
 msgstr "Салынды"
 
+#: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "action: put cash into the drawer"
+msgid "Put in"
+msgstr "Салуу"
+
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 msgid "Put in or take out"
 msgstr "Салуу же алуу"
@@ -6962,7 +7161,6 @@ msgstr "Визитке баа"
 msgid "Rate your visit"
 msgstr "Визитке баа бериңиз"
 
-#: src/features/rateVisit/ui/StarRating/StarRating.tsx
 #: src/shared/lib/cabinetFrom.ts
 #: src/views/business/ui/Place/PlaceTabs.tsx
 #: src/views/leaderboard/LeaderboardPage.tsx
@@ -6970,6 +7168,11 @@ msgstr "Визитке баа бериңиз"
 #: src/widgets/Header/Header.tsx
 msgid "Rating"
 msgstr "Рейтинг"
+
+#: src/features/rateVisit/ui/StarRating/StarRating.tsx
+msgctxt "score given in a review"
+msgid "Rating"
+msgstr "Баа"
 
 #: src/views/catalog/CatalogPage.tsx
 #: src/views/catalog/ui/CatalogSkeleton/CatalogSkeleton.tsx
@@ -7290,9 +7493,13 @@ msgstr "Пикирге жооп"
 
 #: src/features/report/ui/ReportMenu.tsx
 #: src/views/feed/ui/FeedActions.tsx
-#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "Report"
 msgstr "Арыздануу"
+
+#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgctxt "analytics report, noun"
+msgid "Report"
+msgstr "Отчет"
 
 #: src/views/publicProfile/ui/ProfileContent.tsx
 msgid "Report profile: {name}"
@@ -7609,7 +7816,6 @@ msgstr "Кызматтарды сактаңыз"
 msgid "Save to Google Wallet"
 msgstr "Google Wallet’ке сактоо"
 
-#: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
 #: src/views/manage/ui/PhotosSection/PhotosSection.tsx
@@ -7617,6 +7823,11 @@ msgstr "Google Wallet’ке сактоо"
 #: src/views/manage/ui/StockTab/StockTab.tsx
 msgid "Saved"
 msgstr "Сакталды"
+
+#: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
+msgctxt "password is saved, masculine"
+msgid "Saved"
+msgstr "Сакталган"
 
 #: src/features/profileStyle/ui/ProfileStyleSheet/ProfileStyleSheet.tsx
 #: src/features/ticketView/ui/TicketViewer.tsx
@@ -8066,10 +8277,14 @@ msgid "Sign in with Telegram"
 msgstr "Telegram аркылуу кирүү"
 
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
-#: src/views/forBusiness/forBusinessContent.ts
 #: src/widgets/Footer/Footer.tsx
 msgid "Sign in with your number"
 msgstr "Номер менен кирүү"
+
+#: src/views/forBusiness/forBusinessContent.ts
+msgctxt "step instruction"
+msgid "Sign in with your number"
+msgstr "Номер менен кириңиз"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 msgid "Sign out"
@@ -8395,10 +8610,14 @@ msgstr "4-кадам: байланыштар"
 
 #: src/views/manage/manageTabs.ts
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-#: src/views/manage/ui/StockTab/StockItemSheet.tsx
 #: src/views/manage/ui/StockTab/StockTab.tsx
 msgid "Stock"
 msgstr "Кампа"
+
+#: src/views/manage/ui/StockTab/StockItemSheet.tsx
+msgctxt "quantity left"
+msgid "Stock"
+msgstr "Калдык"
 
 #: src/views/manage/ui/StockTab/StockItemSheet.tsx
 msgid "Stock · {count} {unit}"
@@ -8462,9 +8681,14 @@ msgid "Sunday"
 msgstr "Жекшемби"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-#: src/views/insights/config/labels.ts
+msgctxt "appearance setting, neuter"
 msgid "System"
 msgstr "Системадагыдай"
+
+#: src/views/insights/config/labels.ts
+msgctxt "operating system"
+msgid "System"
+msgstr "Система"
 
 #: src/views/insights/config/labels.ts
 msgid "Tablet"
@@ -9029,13 +9253,17 @@ msgstr "ИНН: 14 сан."
 msgid "Tmrw"
 msgstr "Эрт."
 
+#: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
+msgid "To"
+msgstr "Аягы"
+
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/CertificateSheet.tsx
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
-#: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
 #: src/views/manage/ui/ReviewsTab/QuietReplySheet.tsx
+msgctxt "recipient"
 msgid "To"
-msgstr "Аягы"
+msgstr "Кимге"
 
 #: src/views/booking/ui/NotifyOptions/NotifyOptions.tsx
 msgid "to {phone}"
@@ -9207,7 +9435,11 @@ msgid "Top SPAs"
 msgstr "Мыкты SPA"
 
 #: src/views/leaderboard/config/boards.ts
+msgid "Top specialists"
+msgstr "Мыкты адистер"
+
 #: src/widgets/Footer/Footer.tsx
+msgctxt "footer link to the leaderboard"
 msgid "Top specialists"
 msgstr "Усталардын рейтинги"
 
@@ -9254,8 +9486,9 @@ msgstr "которуу"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Transfer"
-msgstr "Которуу менен"
+msgstr "Которуу"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 msgid "trial until {day}"
@@ -9473,10 +9706,14 @@ msgstr "Визиттин жыйынтыгы"
 msgid "Visit outcome {time}"
 msgstr "Визиттин жыйынтыгы {time}"
 
-#: src/views/business/ui/Place/SubscriptionSheet.tsx
 #: src/views/manage/ui/AnalyticsTab/AnalyticsCharts.tsx
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgid "Visits"
+msgstr "Визиттер"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
+msgctxt "number of visits in a pass"
 msgid "Visits"
 msgstr "Визиттер"
 
@@ -9519,9 +9756,13 @@ msgid "Waiting"
 msgstr "Күтөбүз"
 
 #: src/features/waitlist/ui/WaitlistList.tsx
-#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
 msgid "Waiting for a slot"
 msgstr "Бош убакыт күтөм"
+
+#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
+msgctxt "clients waiting, plural"
+msgid "Waiting for a slot"
+msgstr "Бош убакыт күтүшөт"
 
 #: src/features/waitlist/ui/WaitlistJoin.tsx
 msgid "Waiting for a slot on this day: we will send an SMS"

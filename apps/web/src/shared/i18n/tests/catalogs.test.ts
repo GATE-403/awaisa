@@ -7,8 +7,14 @@ import { LOCALES } from '../locales'
 // pofile-ts comes with @lingui/format-po (what `lingui extract` writes the catalogs with).
 const require = createRequire(import.meta.resolve('@lingui/format-po'))
 const { parsePo } = require('pofile-ts') as {
-  parsePo: (text: string) => { items: { msgid: string; msgstr: string[]; obsolete: boolean }[] }
+  parsePo: (text: string) => {
+    items: { msgid: string; msgctxt?: string; msgstr: string[]; obsolete: boolean }[]
+  }
 }
+
+// A message is its text and its context: «Book» for the client and «Book» for the staff are two.
+const keyOf = (item: { msgid: string; msgctxt?: string }) =>
+  item.msgctxt ? `${item.msgid} [${item.msgctxt}]` : item.msgid
 
 const CATALOGS = join(import.meta.dirname, '../../../locales')
 
@@ -38,7 +44,7 @@ describe('translation catalogs', () => {
   it.each(LOCALES.filter((locale) => locale !== 'en'))('%s translates every message', (locale) => {
     const untranslated = readCatalog(locale)
       .filter((item) => !item.msgstr.some((text) => text.trim()))
-      .map((item) => item.msgid)
+      .map(keyOf)
     expect(untranslated).toEqual([])
   })
 
@@ -53,13 +59,9 @@ describe('translation catalogs', () => {
   })
 
   it('has the same messages in every language', () => {
-    const ids = source.map((item) => item.msgid).sort()
+    const ids = source.map(keyOf).sort()
     for (const locale of LOCALES) {
-      expect(
-        readCatalog(locale)
-          .map((item) => item.msgid)
-          .sort(),
-      ).toEqual(ids)
+      expect(readCatalog(locale).map(keyOf).sort()).toEqual(ids)
     }
   })
 })

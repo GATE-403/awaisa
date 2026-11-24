@@ -184,7 +184,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
 
   return (
     <Sheet
-      title={t`Pay`}
+      title={t({ message: 'Pay', context: 'specialist pay, noun' })}
       onClose={onClose}
       action={{
         label: isDirty ? t`Save` : t`Done`,
@@ -205,7 +205,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                     variant='plain'
                     inputMode='numeric'
                     aria-label={t`Specialist’s percent`}
-                    placeholder={t`Not set`}
+                    placeholder={t({ message: 'Not set', context: 'empty percent, masculine' })}
                     value={draft.percent}
                     onValueChange={(value) => update({ percent: digits(value).slice(0, 3) })}
                   />

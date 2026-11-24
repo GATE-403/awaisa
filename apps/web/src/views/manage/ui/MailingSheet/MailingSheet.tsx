@@ -153,13 +153,13 @@ export const MailingSheet = ({
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <SegmentedControl
-          label={t`To`}
+          label={t({ message: 'To', context: 'recipient' })}
           value={segment}
           items={SEGMENTS.map((item) => ({ ...item, label: t(item.label) }))}
           onChange={changeSegment}
         />
 
-        <section className={sheet.group} aria-label={t`To`}>
+        <section className={sheet.group} aria-label={t({ message: 'To', context: 'recipient' })}>
           <div className={sheet.list}>
             {segment === 'lapsed' && (
               <div className={sheet.row}>

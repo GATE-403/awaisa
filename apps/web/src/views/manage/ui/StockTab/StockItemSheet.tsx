@@ -118,7 +118,7 @@ export const StockItemSheet = ({
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t`Name`}
+              aria-label={t({ message: 'Name', context: 'name of a thing, not a person' })}
               placeholder={t`For example, “Hair dye”`}
               value={name}
               onValueChange={setName}
@@ -200,7 +200,10 @@ export const StockItemSheet = ({
         </section>
 
         {item && (
-          <section className={sheet.group} aria-label={t`Stock`}>
+          <section
+            className={sheet.group}
+            aria-label={t({ message: 'Stock', context: 'quantity left' })}
+          >
             <SectionCaption>
               {t`Stock · ${ph({ count: formatQuantity(format, item.quantity) })} ${ph({ unit: unitLabel(item.unit, t) })}`}
             </SectionCaption>

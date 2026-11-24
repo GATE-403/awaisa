@@ -4,9 +4,9 @@ import type { ExpenseCategory, FiscalReceipt, SalePaymentMethod } from '@/shared
 import type { Format, Translate } from '@/shared/i18n'
 
 const SALE_METHODS: { value: SalePaymentMethod; label: MessageDescriptor }[] = [
-  { value: 'cash', label: msg`Cash` },
-  { value: 'card', label: msg`Card` },
-  { value: 'transfer', label: msg`Transfer` },
+  { value: 'cash', label: msg({ message: 'Cash', context: 'payment method' }) },
+  { value: 'card', label: msg({ message: 'Card', context: 'payment method' }) },
+  { value: 'transfer', label: msg({ message: 'Transfer', context: 'payment method' }) },
 ]
 
 const METHOD_LABEL: Record<SalePaymentMethod, MessageDescriptor> = {
@@ -22,7 +22,7 @@ const EXPENSE_CATEGORIES: { value: string; label: MessageDescriptor }[] = [
   { value: 'salaries', label: msg`Salaries` },
   { value: 'utilities', label: msg`Utilities` },
   { value: 'marketing', label: msg`Marketing` },
-  { value: 'other', label: msg`Other` },
+  { value: 'other', label: msg({ message: 'Other', context: 'expense category' }) },
 ]
 
 const saleMethodLabel = (method: SalePaymentMethod, t: Translate) => {

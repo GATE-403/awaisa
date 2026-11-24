@@ -33,7 +33,7 @@ export const WaitlistSheet = ({
 
   return (
     <Sheet
-      title={t`Waiting for a slot`}
+      title={t({ message: 'Waiting for a slot', context: 'clients waiting, plural' })}
       cancelLabel={null}
       action={{ label: t`Done`, onClick: onClose }}
       onClose={onClose}
@@ -59,7 +59,7 @@ export const WaitlistSheet = ({
               </p>
               <div className={styles.actions}>
                 <Button size='sm' onClick={() => onBook(entry)}>
-                  {t`Book`}
+                  {t({ message: 'Book', context: 'staff books a client' })}
                 </Button>
                 <a href={`tel:${entry.customerPhone}`} className={styles.call}>
                   <Phone aria-hidden />

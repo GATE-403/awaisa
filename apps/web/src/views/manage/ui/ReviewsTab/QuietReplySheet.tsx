@@ -58,7 +58,7 @@ export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietRepl
       action={{ label: t`Send`, form: FORM_ID, disabled: !canSend }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t`To`}>
+        <section className={sheet.group} aria-label={t({ message: 'To', context: 'recipient' })}>
           <div className={sheet.list}>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>{t`Ratings`}</span>

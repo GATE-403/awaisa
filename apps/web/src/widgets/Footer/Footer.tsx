@@ -16,7 +16,10 @@ const COLUMNS = [
     links: [
       { href: '/', label: msg`Catalogue` },
       { href: '/map', label: msg`Nearby on the map` },
-      { href: '/top', label: msg`Top specialists` },
+      {
+        href: '/top',
+        label: msg({ message: 'Top specialists', context: 'footer link to the leaderboard' }),
+      },
     ],
   },
   {

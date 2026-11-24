@@ -182,7 +182,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
                     })
                   }
                 >
-                  {t`Book again`}
+                  {t({ message: 'Book again', context: 'staff books the client again' })}
                 </Button>
               </div>
             )}

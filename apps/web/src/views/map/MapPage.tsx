@@ -337,7 +337,10 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
               text={
                 <>
                   {t`No places on the map here yet. Try another type or the`}{' '}
-                  <NextLink href='/'>{t`catalogue`}</NextLink>.
+                  <NextLink href='/'>
+                    {t({ message: 'catalogue', context: 'or the catalogue, accusative' })}
+                  </NextLink>
+                  .
                 </>
               }
             />

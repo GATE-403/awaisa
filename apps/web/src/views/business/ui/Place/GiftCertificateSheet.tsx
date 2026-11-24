@@ -126,8 +126,8 @@ export const GiftCertificateSheet = ({
           )}
         </section>
 
-        <section className={sheet.group} aria-label={t`To`}>
-          <SectionCaption>{t`To`}</SectionCaption>
+        <section className={sheet.group} aria-label={t({ message: 'To', context: 'recipient' })}>
+          <SectionCaption>{t({ message: 'To', context: 'recipient' })}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
@@ -163,7 +163,7 @@ export const GiftCertificateSheet = ({
             </label>
             <label className={styles.messageRow}>
               <textarea
-                aria-label={t`Message`}
+                aria-label={t({ message: 'Message', context: 'noun: text of a message' })}
                 className={styles.message}
                 placeholder={t`A few words`}
                 maxLength={300}

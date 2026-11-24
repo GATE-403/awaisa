@@ -62,7 +62,7 @@ const BATCH = 200
 const SEGMENTS: { value: ClientSegment; label: MessageDescriptor }[] = [
   { value: 'all', label: msg`All` },
   { value: 'upcoming', label: msg`Coming soon` },
-  { value: 'new', label: msg`New` },
+  { value: 'new', label: msg({ message: 'New', context: 'client segment, plural' }) },
   { value: 'regular', label: msg`Regulars` },
   { value: 'lapsed', label: msg`Lapsed` },
   { value: 'noShows', label: msg`With no-shows` },

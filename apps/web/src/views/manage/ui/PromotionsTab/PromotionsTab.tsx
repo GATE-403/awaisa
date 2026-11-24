@@ -118,7 +118,8 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
                   </span>
                   <span className={styles.rowMeta}>
                     {[
-                      !promotion.isActive && t`Off`,
+                      !promotion.isActive &&
+                        t({ message: 'Off', context: 'promotion is off, feminine' }),
                       t(KIND_LABEL[promotion.kind]),
                       promotion.kind === 'promo_code'
                         ? promotion.code

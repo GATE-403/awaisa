@@ -192,7 +192,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
         {[0, 1, 2, 3, 4].map((level) => (
           <span key={level} className={styles.heatmapCell} data-level={level} />
         ))}
-        <span>{t`More`}</span>
+        <span>{t({ message: 'More', context: 'heatmap legend: more bookings' })}</span>
       </div>
     </div>
   )

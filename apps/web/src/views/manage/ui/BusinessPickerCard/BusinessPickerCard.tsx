@@ -91,7 +91,11 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
           >
             {business.name}
           </NextLink>
-          {!business.isPublished && <span className={styles.hidden}>{t`Hidden`}</span>}
+          {!business.isPublished && (
+            <span className={styles.hidden}>
+              {t({ message: 'Hidden', context: 'status, feminine' })}
+            </span>
+          )}
         </span>
         {status?.kind === 'setup' && (
           // How far from taking bookings: three small segments and the step left, a link to it.

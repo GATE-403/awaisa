@@ -269,7 +269,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 <Trans>The booking was released and the time is free again. Choose it again.</Trans>
               </p>
               <ButtonLink render={<NextLink href={`/${business.slug}/book`} />} size='lg' fullWidth>
-                <Trans>Book again</Trans>
+                <Trans context='client books again'>Book again</Trans>
               </ButtonLink>
             </div>
           ) : (

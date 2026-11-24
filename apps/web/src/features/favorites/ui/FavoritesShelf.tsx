@@ -58,7 +58,10 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
           title={t`Save services`}
           text={
             <>
-              {t`Tap ♡ on a service in the`} <NextLink href='/'>{t`catalogue`}</NextLink>
+              {t`Tap ♡ on a service in the`}{' '}
+              <NextLink href='/'>
+                {t({ message: 'catalogue', context: 'in the catalogue, prepositional' })}
+              </NextLink>
               {t` and it will appear here.`}
             </>
           }

@@ -78,7 +78,7 @@ export const ForBusinessPage = () => {
         <div className={styles.heroAside}>
           <NextLink href='/map' className={styles.news}>
             <span className={styles.newsBadge}>
-              <Trans>New</Trans>
+              <Trans context='news badge, neuter'>New</Trans>
             </span>
             <Trans>Branches and map</Trans>
             <ArrowRight aria-hidden />

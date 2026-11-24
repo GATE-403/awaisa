@@ -80,11 +80,13 @@ export const EditPageSheet = ({
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t`Name`}</span>
+            <span className={sheet.rowLabel}>
+              {t({ message: 'Name', context: 'name of a thing, not a person' })}
+            </span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label={t`Name`}
+                aria-label={t({ message: 'Name', context: 'name of a thing, not a person' })}
                 value={values.name}
                 maxLength={80}
                 onValueChange={(name) => change({ name })}
@@ -128,7 +130,9 @@ export const EditPageSheet = ({
                     type={type}
                     inputMode={type === 'tel' ? 'tel' : undefined}
                     value={type === 'tel' ? maskPhoneInput(values[key]) : values[key]}
-                    placeholder={t(placeholder ?? msg`Not set`)}
+                    placeholder={t(
+                      placeholder ?? msg({ message: 'Not set', context: 'empty contact field' }),
+                    )}
                     onValueChange={(value) =>
                       change({ [key]: type === 'tel' ? maskPhoneInput(value) : value })
                     }

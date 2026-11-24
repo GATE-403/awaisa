@@ -150,7 +150,7 @@ export const BookingInspector = ({
             onClick={() => onBookAgain(booking)}
           >
             <ArrowCounterClockwise aria-hidden />
-            {t`Book again`}
+            {t({ message: 'Book again', context: 'staff books the client again' })}
           </Button>
         ) : (
           <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>

@@ -56,7 +56,7 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
     business.phone ? { label: t`Call`, icon: Phone, href: `tel:${business.phone}` } : null,
     business.whatsapp
       ? {
-          label: t`Message`,
+          label: t({ message: 'Message', context: 'verb: write to someone' }),
           icon: ChatCircleText,
           href: toWhatsappHref(business.whatsapp),
           isExternal: true,

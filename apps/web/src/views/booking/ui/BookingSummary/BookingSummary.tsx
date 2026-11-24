@@ -60,9 +60,9 @@ const NEXT_STEP_ACTIONS: Record<BookingStepId, MessageDescriptor> = {
 }
 
 const NEXT_STEP_HINTS: Record<BookingStepId, MessageDescriptor> = {
-  service: msg`Choose a service`,
-  specialist: msg`Choose a specialist`,
-  datetime: msg`Choose a time`,
+  service: msg({ message: 'Choose a service', context: 'instruction to the client' }),
+  specialist: msg({ message: 'Choose a specialist', context: 'instruction to the client' }),
+  datetime: msg({ message: 'Choose a time', context: 'instruction to the client' }),
   contacts: msg`Leave your contacts`,
 }
 

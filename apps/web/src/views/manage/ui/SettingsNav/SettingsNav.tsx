@@ -284,7 +284,11 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
                       <span className={styles.labelText}>{t`Hide or delete`}</span>
                     </span>
                     {/* Only the state that asks for attention: an open page says nothing. */}
-                    {!isPublished && <span className={styles.value}>{t`Hidden`}</span>}
+                    {!isPublished && (
+                      <span className={styles.value}>
+                        {t({ message: 'Hidden', context: 'status, feminine' })}
+                      </span>
+                    )}
                     <CaretRight className={styles.chevron} aria-hidden />
                   </button>
                 </li>

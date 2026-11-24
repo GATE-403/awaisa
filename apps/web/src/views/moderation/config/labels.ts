@@ -11,7 +11,7 @@ const TARGET_LABELS: Record<ReportTargetType, MessageDescriptor> = {
 // What the journal says was done (and the toast after a decision).
 const ACTION_LABELS: Record<ModerationAction, MessageDescriptor> = {
   keep: msg`Kept`,
-  hide: msg`Hidden`,
+  hide: msg({ message: 'Hidden', context: 'moderation decision, neuter' }),
   delete: msg`Deleted`,
   block: msg`Author blocked`,
 }

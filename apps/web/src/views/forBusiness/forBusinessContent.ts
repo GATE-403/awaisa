@@ -59,7 +59,7 @@ const DEMO_SLOTS = ['10:00', '10:30', '11:00', '11:30', '12:00', '13:30', '14:00
 
 const STEPS = [
   {
-    title: msg`Sign in with your number`,
+    title: msg({ message: 'Sign in with your number', context: 'step instruction' }),
     text: msg`The code comes by Telegram or SMS. No passwords.`,
   },
   {

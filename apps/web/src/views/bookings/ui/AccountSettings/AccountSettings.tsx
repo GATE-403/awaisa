@@ -46,9 +46,9 @@ import { NameDialog } from '../NameDialog'
 import styles from './AccountSettings.module.css'
 
 const THEMES: { value: Theme; label: MessageDescriptor }[] = [
-  { value: 'system', label: msg`System` },
-  { value: 'light', label: msg`Light` },
-  { value: 'dark', label: msg`Dark` },
+  { value: 'system', label: msg({ message: 'System', context: 'appearance setting, neuter' }) },
+  { value: 'light', label: msg({ message: 'Light', context: 'appearance setting, neuter' }) },
+  { value: 'dark', label: msg({ message: 'Dark', context: 'appearance setting, neuter' }) },
 ]
 
 // The account's settings right on the profile, at its foot like iOS Settings - no sheet to open:
@@ -187,7 +187,9 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <User />
           </span>
           <span className={styles.label}>{t`Name`}</span>
-          <span className={styles.value}>{customer.name || t`Add`}</span>
+          <span className={styles.value}>
+            {customer.name || t({ message: 'Add', context: 'empty value, prompt to fill in' })}
+          </span>
           <CaretRight className={styles.chevron} aria-hidden />
         </button>
         <div className={styles.row}>

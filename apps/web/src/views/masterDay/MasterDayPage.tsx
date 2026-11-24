@@ -286,7 +286,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 )}
                 {next && now !== null && (
                   <p>
-                    <strong>{t`Next`}:</strong>{' '}
+                    <strong>{t({ message: 'Next', context: 'next client in line' })}:</strong>{' '}
                     {t`${ph({ name: next.customerName })} at ${ph({ time: next.time })}, ${ph({ wait: minutesUntil(now, parseClock(next.time), t, format) })}`}
                   </p>
                 )}

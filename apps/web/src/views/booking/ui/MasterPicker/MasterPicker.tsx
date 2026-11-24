@@ -25,7 +25,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
         specialist={null}
         className={styles.card}
         icon={<UsersThree />}
-        title={t`Any`}
+        title={t({ message: 'Any', context: 'any specialist, masculine' })}
         meta={t`whoever is free`}
       >
         <input

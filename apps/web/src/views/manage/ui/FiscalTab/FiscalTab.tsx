@@ -107,7 +107,10 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
   }
 
   const rows = [
-    { label: t`TIN`, value: settings.inn ?? t`Add` },
+    {
+      label: t`TIN`,
+      value: settings.inn ?? t({ message: 'Add', context: 'empty value, prompt to fill in' }),
+    },
     { label: t`Regime`, value: regimeLabel(settings.taxRegime, t) },
     { label: t`VAT`, value: taxes.vat },
     { label: t`Sales tax`, value: taxes.salesTax },

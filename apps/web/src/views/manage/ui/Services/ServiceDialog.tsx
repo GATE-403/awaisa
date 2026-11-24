@@ -95,7 +95,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t`Name`}
+              aria-label={t({ message: 'Name', context: 'name of a thing, not a person' })}
               placeholder={t`Name, for example “Men’s haircut”`}
               value={name}
               onValueChange={setName}
@@ -221,7 +221,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
-                {t`Popular`}
+                {t({ message: 'Popular', context: 'service flag, feminine' })}
                 <span className={sheet.rowHint}>{t`Shown first on the page`}</span>
               </span>
               <Switch checked={isPopular} onCheckedChange={setIsPopular} />

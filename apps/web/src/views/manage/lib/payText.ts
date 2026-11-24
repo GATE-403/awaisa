@@ -19,7 +19,9 @@ const describePayScheme = (scheme: MasterPayScheme, t: Translate, format: Format
       ? null
       : t(msg`minimum ${ph({ amount: format.amount(scheme.minimum) })}`),
   ].filter(Boolean)
-  return parts.length === 0 ? t(msg`Not set`) : parts.join(' · ')
+  return parts.length === 0
+    ? t(msg({ message: 'Not set', context: 'no pay scheme, feminine' }))
+    : parts.join(' · ')
 }
 
 /** The master's percent when it alone decided the pay ("1,000 som due · 40%"). */

@@ -21,7 +21,9 @@ export const StarRating = ({ value, onChange }: StarRatingProps) => {
 
   return (
     <fieldset className={styles.rating}>
-      <legend className={styles.legend}>{t`Rating`}</legend>
+      <legend className={styles.legend}>
+        {t({ message: 'Rating', context: 'score given in a review' })}
+      </legend>
       <span className={styles.stars}>
         {LABELS.map((label, index) => {
           const stars = index + 1

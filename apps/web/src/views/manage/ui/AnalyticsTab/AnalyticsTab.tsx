@@ -299,7 +299,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
               items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
               onChange={(value) => setDays(Number(value) as AnalyticsDays)}
             />
-            <GlyphGroup label={t`Report`}>
+            <GlyphGroup label={t({ message: 'Report', context: 'analytics report, noun' })}>
               <GlyphButton
                 icon={<DownloadSimple />}
                 label={t`Download CSV`}
@@ -501,7 +501,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                           <span className={styles.rowText}>
                             <span className={styles.rowTitle}>
                               {client.name || formatPhone(client.phone)}
-                              {client.isNew && <span className={styles.badge}>{t`New`}</span>}
+                              {client.isNew && (
+                                <span className={styles.badge}>
+                                  {t({ message: 'New', context: 'client is new, masculine' })}
+                                </span>
+                              )}
                             </span>
                             <span className={styles.rowMeta}>
                               {t`${ph({ visits: visits(t, client.visits) })} · last ${ph({ day: formatDay(client.lastVisit) })}`}{' '}
@@ -719,9 +723,9 @@ interface PaymentsSplitProps {
 }
 
 const PAYMENT_PARTS = [
-  { key: 'cash', label: msg`Cash` },
-  { key: 'card', label: msg`Card` },
-  { key: 'transfer', label: msg`Transfer` },
+  { key: 'cash', label: msg({ message: 'Cash', context: 'payment method' }) },
+  { key: 'card', label: msg({ message: 'Card', context: 'payment method' }) },
+  { key: 'transfer', label: msg({ message: 'Transfer', context: 'payment method' }) },
   { key: 'unmarked', label: msg`Not marked` },
 ] as const
 

@@ -73,7 +73,10 @@ export const useCreateBusinessForm = () => {
   const isSlugTaken = currentCheck !== null && !currentCheck.available
   const isNameValid = name.trim().length >= 2 && slugFormatProblem === null && !isSlugTaken
   const errors = {
-    name: hasTriedSubmit && name.trim().length < 2 ? t`Enter a name` : undefined,
+    name:
+      hasTriedSubmit && name.trim().length < 2
+        ? t({ message: 'Enter a name', context: 'business name' })
+        : undefined,
     slug: getSlugError(),
   }
 

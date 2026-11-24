@@ -1036,7 +1036,7 @@ export const DayCalendar = ({
                   ? (headNote(specialist) ?? t`Closed`)
                   : load.share === 0 && !isPast
                     ? t`free all day`
-                    : `${t`${ph({ percent: Math.round(load.share * 100) })}% booked`}${
+                    : `${t({ message: `${ph({ percent: Math.round(load.share * 100) })}% booked`, context: 'specialist is booked, masculine' })}${
                         isPast
                           ? ''
                           : load.freeFrom === null
@@ -1343,12 +1343,12 @@ export const DayCalendar = ({
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       <span>
-                        {t`free`}
+                        {t({ message: 'free', context: 'specialist is free, masculine' })}
                         <span className={styles.laneNoteLong}> {t`all day`}</span>
                       </span>
                       <span className={styles.laneBook}>
                         <Plus aria-hidden />
-                        {t`Book`}
+                        {t({ message: 'Book', context: 'staff books a client' })}
                       </span>
                     </button>
                   ))}

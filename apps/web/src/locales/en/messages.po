@@ -788,8 +788,12 @@ msgstr "{online, plural, one {# booking} other {# bookings}}"
 msgid "{online, plural, one {Of # booking online} other {Of # bookings online}}"
 msgstr "{online, plural, one {Of # booking online} other {Of # bookings online}}"
 
-#: src/widgets/DayCalendar/DayCalendar.tsx
 #: src/widgets/DayStrip/DayStrip.tsx
+msgid "{percent}% booked"
+msgstr "{percent}% booked"
+
+#: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "specialist is booked, masculine"
 msgid "{percent}% booked"
 msgstr "{percent}% booked"
 
@@ -1198,14 +1202,18 @@ msgstr "Actual stock"
 
 #: src/views/booking/BookingPage.tsx
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
-#: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
 #: src/views/manage/ui/ClientSheet/BirthdayField.tsx
-#: src/views/manage/ui/FiscalTab/FiscalTab.tsx
 #: src/views/manage/ui/NewBookingDialog/NewBookingDialog.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/TeamTab/TeamTab.tsx
+msgid "Add"
+msgstr "Add"
+
+#: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+#: src/views/manage/ui/FiscalTab/FiscalTab.tsx
+msgctxt "empty value, prompt to fill in"
 msgid "Add"
 msgstr "Add"
 
@@ -1533,10 +1541,19 @@ msgid "Answer to the question"
 msgstr "Answer to the question"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
-#: src/views/booking/ui/MasterPicker/MasterPicker.tsx
+msgid "Any"
+msgstr "Any"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
-#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
 #: src/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet.tsx
+msgctxt "any service, feminine"
+msgid "Any"
+msgstr "Any"
+
+#: src/views/booking/ui/MasterPicker/MasterPicker.tsx
+#: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
+msgctxt "any specialist, masculine"
 msgid "Any"
 msgstr "Any"
 
@@ -1883,11 +1900,15 @@ msgstr "Bonuses, passes and certificates bring clients back."
 #: src/views/business/ui/Place/VisitSection.tsx
 #: src/views/feed/ui/FeedActions.tsx
 #: src/views/leaderboard/ui/LeaderboardBoard.tsx
-#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
 #: src/views/publicProfile/lib/goals.ts
 #: src/widgets/BusinessBar/BusinessBar.tsx
-#: src/widgets/DayCalendar/DayCalendar.tsx
 #: src/widgets/Footer/Footer.tsx
+msgid "Book"
+msgstr "Book"
+
+#: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
+#: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "staff books a client"
 msgid "Book"
 msgstr "Book"
 
@@ -1899,10 +1920,19 @@ msgstr "Book {firstName} again"
 msgid "Book a specialist"
 msgstr "Book a specialist"
 
+#: src/views/pay/PayPage.tsx
+msgctxt "client books again"
+msgid "Book again"
+msgstr "Book again"
+
 #: src/features/rebook/ui/RecentVisits.tsx
+msgctxt "heading: rebook a past visit"
+msgid "Book again"
+msgstr "Book again"
+
 #: src/views/manage/ui/BookingInspector/BookingInspector.tsx
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
-#: src/views/pay/PayPage.tsx
+msgctxt "staff books the client again"
 msgid "Book again"
 msgstr "Book again"
 
@@ -2243,9 +2273,13 @@ msgstr "Can I work together with an administrator?"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 #: src/shared/ui/Sheet/Sheet.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/publicProfile/ui/ProfileSheet.tsx
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "verb: undo a payout"
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -2276,10 +2310,14 @@ msgstr "cancelled"
 #: src/features/ticketView/ui/TicketViewer.tsx
 #: src/views/bookings/ui/BookingHistory/BookingHistory.tsx
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
-#: src/views/insights/config/labels.ts
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
 #: src/views/masterDay/MasterDayPage.tsx
 #: src/widgets/DayCalendar/blockState.ts
+msgid "Cancelled"
+msgstr "Cancelled"
+
+#: src/views/insights/config/labels.ts
+msgctxt "funnel step: people who cancelled"
 msgid "Cancelled"
 msgstr "Cancelled"
 
@@ -2295,6 +2333,7 @@ msgstr "card"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Card"
 msgstr "Card"
 
@@ -2314,6 +2353,7 @@ msgstr "cash"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Cash"
 msgstr "Cash"
 
@@ -2356,7 +2396,12 @@ msgid "Cash movements"
 msgstr "Cash movements"
 
 #: src/features/favorites/ui/FavoritesShelf.tsx
+msgctxt "in the catalogue, prepositional"
+msgid "catalogue"
+msgstr "catalogue"
+
 #: src/views/map/MapPage.tsx
+msgctxt "or the catalogue, accusative"
 msgid "catalogue"
 msgstr "catalogue"
 
@@ -2383,10 +2428,14 @@ msgstr "Categories"
 msgid "Categories group services on the business page."
 msgstr "Categories group services on the business page."
 
-#: src/views/manage/ui/CashDeskTab/ExpenseSheet.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/Services/ServiceDialog.tsx
+msgid "Category"
+msgstr "Category"
+
+#: src/views/manage/ui/CashDeskTab/ExpenseSheet.tsx
+msgctxt "expense category"
 msgid "Category"
 msgstr "Category"
 
@@ -2562,6 +2611,16 @@ msgid "Choose a service"
 msgstr "Choose a service"
 
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
+msgid "Choose a service"
+msgstr "Choose a service"
+
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgid "Choose a specialist"
+msgstr "Choose a specialist"
+
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
 msgid "Choose a specialist"
 msgstr "Choose a specialist"
 
@@ -2569,9 +2628,14 @@ msgstr "Choose a specialist"
 msgid "Choose a specialist first"
 msgstr "Choose a specialist first"
 
-#: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
 #: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgid "Choose a time"
+msgstr "Choose a time"
+
+#: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
+#: src/views/booking/ui/BookingSummary/BookingSummary.tsx
+msgctxt "instruction to the client"
 msgid "Choose a time"
 msgstr "Choose a time"
 
@@ -2731,12 +2795,16 @@ msgstr "Close shift"
 
 #: src/entities/business/ui/WeekHours/WeekHours.tsx
 #: src/views/business/ui/Place/VisitSection.tsx
-#: src/views/manage/ui/BranchesTab/BranchesTab.tsx
 #: src/views/manage/ui/Hours/WeekHoursRows.tsx
 #: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
 #: src/views/manage/ui/ScheduleTab.tsx
 #: src/views/masterDay/MasterDayPage.tsx
 #: src/widgets/DayCalendar/DayCalendar.tsx
+msgid "Closed"
+msgstr "Closed"
+
+#: src/views/manage/ui/BranchesTab/BranchesTab.tsx
+msgctxt "branch is closed, masculine"
 msgid "Closed"
 msgstr "Closed"
 
@@ -3062,8 +3130,13 @@ msgstr "Daniyar · 20 November, 14:30 · Haircut"
 msgid "dark"
 msgstr "dark"
 
-#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+msgctxt "appearance setting, neuter"
+msgid "Dark"
+msgstr "Dark"
+
+#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
+msgctxt "theme, feminine"
 msgid "Dark"
 msgstr "Dark"
 
@@ -3453,8 +3526,12 @@ msgid "earned"
 msgstr "earned"
 
 #: src/entities/profile/ui/Achievements.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/publicProfile/ui/AchievementCard.tsx
+msgid "Earned"
+msgstr "Earned"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "pay accrued to a specialist"
 msgid "Earned"
 msgstr "Earned"
 
@@ -3508,7 +3585,11 @@ msgstr "Enter"
 
 #: src/features/waitlist/ui/WaitlistJoin.tsx
 #: src/views/booking/model/useBookingForm.ts
+msgid "Enter a name"
+msgstr "Enter a name"
+
 #: src/views/forBusiness/model/useCreateBusinessForm.ts
+msgctxt "business name"
 msgid "Enter a name"
 msgstr "Enter a name"
 
@@ -3585,6 +3666,7 @@ msgid "Excellent"
 msgstr "Excellent"
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "cash expected in the drawer"
 msgid "Expected"
 msgstr "Expected"
 
@@ -3859,7 +3941,11 @@ msgid "Found"
 msgstr "Found"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
+msgid "free"
+msgstr "free"
+
 #: src/widgets/DayCalendar/DayCalendar.tsx
+msgctxt "specialist is free, masculine"
 msgid "free"
 msgstr "free"
 
@@ -4147,10 +4233,15 @@ msgstr "Hi, {name}"
 msgid "hidden"
 msgstr "hidden"
 
+#: src/views/moderation/config/labels.ts
+msgctxt "moderation decision, neuter"
+msgid "Hidden"
+msgstr "Hidden"
+
 #: src/views/manage/ui/BusinessPickerCard/BusinessPickerCard.tsx
 #: src/views/manage/ui/PageTab/PageTab.tsx
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
-#: src/views/moderation/config/labels.ts
+msgctxt "status, feminine"
 msgid "Hidden"
 msgstr "Hidden"
 
@@ -4167,10 +4258,14 @@ msgid "Hidden until you decide"
 msgstr "Hidden until you decide"
 
 #: src/shared/ui/MoreFade/MoreFade.tsx
-#: src/shared/ui/ScrollArea/ScrollArea.tsx
-#: src/views/booking/ui/CardStack/CardStack.tsx
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
 #: src/views/moderation/ui/QueueItem.tsx
+msgid "Hide"
+msgstr "Hide"
+
+#: src/shared/ui/ScrollArea/ScrollArea.tsx
+#: src/views/booking/ui/CardStack/CardStack.tsx
+msgctxt "fold a list"
 msgid "Hide"
 msgstr "Hide"
 
@@ -4561,8 +4656,13 @@ msgstr "Level {level} on Awaisa"
 msgid "light"
 msgstr "light"
 
-#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+msgctxt "appearance setting, neuter"
+msgid "Light"
+msgstr "Light"
+
+#: src/features/theme/ui/ThemeSwitcher/ThemeSwitcher.tsx
+msgctxt "theme, feminine"
 msgid "Light"
 msgstr "Light"
 
@@ -4888,8 +4988,13 @@ msgid "Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, 
 msgstr "Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, reviewed barbers and free times. Book online, no calls."
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
-#: src/views/business/ui/Place/PlaceActions.tsx
 #: src/views/manage/ui/ReviewsTab/ContactClientSheet.tsx
+msgctxt "noun: text of a message"
+msgid "Message"
+msgstr "Message"
+
+#: src/views/business/ui/Place/PlaceActions.tsx
+msgctxt "verb: write to someone"
 msgid "Message"
 msgstr "Message"
 
@@ -4976,15 +5081,23 @@ msgid "Monthly goal"
 msgstr "Monthly goal"
 
 #: src/features/calendarFeed/ui/CalendarFeedGroup/CalendarFeedSheet.tsx
-#: src/views/booking/BookingPage.tsx
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
 #: src/views/feed/ui/FeedActions.tsx
-#: src/views/manage/ui/AnalyticsTab/LoadHeatmap.tsx
 #: src/views/manage/ui/BookingInspector/BookingInspector.tsx
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
 #: src/views/manage/ui/PageTab/ShareSheet.tsx
 #: src/views/manage/ui/ReceiptSheet/ReceiptSheet.tsx
+msgid "More"
+msgstr "More"
+
+#: src/views/booking/BookingPage.tsx
+msgctxt "extra sections under the form"
+msgid "More"
+msgstr "More"
+
+#: src/views/manage/ui/AnalyticsTab/LoadHeatmap.tsx
+msgctxt "heatmap legend: more bookings"
 msgid "More"
 msgstr "More"
 
@@ -5125,21 +5238,25 @@ msgstr "Nails"
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 #: src/views/bookings/ui/NameDialog.tsx
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
-#: src/views/business/ui/Place/SubscriptionSheet.tsx
-#: src/views/forBusiness/CreateBusinessPage.tsx
 #: src/views/insights/config/labels.ts
-#: src/views/manage/ui/BranchesTab/BranchDialog.tsx
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/CertificateSheet.tsx
-#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
 #: src/views/manage/ui/Masters/MasterDialog.tsx
 #: src/views/manage/ui/NewBookingDialog/NewBookingDialog.tsx
+#: src/views/manage/ui/SaleSheet/SaleSheet.tsx
+msgid "Name"
+msgstr "Name"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
+#: src/views/forBusiness/CreateBusinessPage.tsx
+#: src/views/manage/ui/BranchesTab/BranchDialog.tsx
+#: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
 #: src/views/manage/ui/PageTab/EditPageSheet.tsx
 #: src/views/manage/ui/PromotionsTab/PromotionSheet.tsx
-#: src/views/manage/ui/SaleSheet/SaleSheet.tsx
 #: src/views/manage/ui/Services/CategoryDialog.tsx
 #: src/views/manage/ui/Services/ServiceDialog.tsx
 #: src/views/manage/ui/StockTab/StockItemSheet.tsx
+msgctxt "name of a thing, not a person"
 msgid "Name"
 msgstr "Name"
 
@@ -5188,11 +5305,28 @@ msgstr "Needs attention"
 msgid "Network"
 msgstr "Network"
 
-#: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
-#: src/views/forBusiness/ForBusinessPage.tsx
-#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
-#: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
+msgctxt "add a new pass, masculine"
+msgid "New"
+msgstr "New"
+
+#: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
+msgctxt "after the change"
+msgid "New"
+msgstr "New"
+
+#: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgctxt "client is new, masculine"
+msgid "New"
+msgstr "New"
+
+#: src/views/manage/ui/ClientsTab/ClientsTab.tsx
+msgctxt "client segment, plural"
+msgid "New"
+msgstr "New"
+
+#: src/views/forBusiness/ForBusinessPage.tsx
+msgctxt "news badge, neuter"
 msgid "New"
 msgstr "New"
 
@@ -5289,9 +5423,13 @@ msgstr "New works"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 #: src/views/forBusiness/CreateBusinessPage.tsx
-#: src/views/manage/ui/NowBar/NowBar.tsx
 #: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
+msgid "Next"
+msgstr "Next"
+
+#: src/views/manage/ui/NowBar/NowBar.tsx
 #: src/views/masterDay/MasterDayPage.tsx
+msgctxt "next client in line"
 msgid "Next"
 msgstr "Next"
 
@@ -5701,10 +5839,26 @@ msgid "Not sent"
 msgstr "Not sent"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-#: src/views/manage/lib/payText.ts
-#: src/views/manage/ui/Masters/MasterPaySheet.tsx
+msgid "Not set"
+msgstr "Not set"
+
 #: src/views/manage/ui/PageTab/EditPageSheet.tsx
+msgctxt "empty contact field"
+msgid "Not set"
+msgstr "Not set"
+
+#: src/views/manage/ui/Masters/MasterPaySheet.tsx
+msgctxt "empty percent, masculine"
+msgid "Not set"
+msgstr "Not set"
+
+#: src/views/manage/lib/payText.ts
+msgctxt "no pay scheme, feminine"
+msgid "Not set"
+msgstr "Not set"
+
 #: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
+msgctxt "no service chosen, feminine"
 msgid "Not set"
 msgstr "Not set"
 
@@ -5858,8 +6012,12 @@ msgstr "of all bookings"
 msgid "Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count."
 msgstr "Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count."
 
-#: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
+msgid "Off"
+msgstr "Off"
+
+#: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
+msgctxt "promotion is off, feminine"
 msgid "Off"
 msgstr "Off"
 
@@ -5974,6 +6132,7 @@ msgid "Only free slots that respect schedules and durations. Double bookings can
 msgstr "Only free slots that respect schedules and durations. Double bookings can’t happen."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "shift status, feminine"
 msgid "Open"
 msgstr "Open"
 
@@ -6151,7 +6310,16 @@ msgstr "Order saved"
 #: src/features/report/config/reasons.ts
 #: src/shared/config/platform.ts
 #: src/views/insights/config/labels.ts
+msgid "Other"
+msgstr "Other"
+
 #: src/views/manage/lib/cashFormat.ts
+msgctxt "expense category"
+msgid "Other"
+msgstr "Other"
+
+#: src/views/insights/config/labels.ts
+msgctxt "operating system, feminine"
 msgid "Other"
 msgstr "Other"
 
@@ -6226,8 +6394,12 @@ msgstr "Page tools"
 msgid "paid"
 msgstr "paid"
 
-#: src/views/insights/config/labels.ts
 #: src/views/pay/PayPage.tsx
+msgid "Paid"
+msgstr "Paid"
+
+#: src/views/insights/config/labels.ts
+msgctxt "funnel step: people who paid"
 msgid "Paid"
 msgstr "Paid"
 
@@ -6313,6 +6485,12 @@ msgid "Pass service"
 msgstr "Pass service"
 
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
+msgctxt "one visit, singular"
+msgid "passed unmarked"
+msgstr "passed unmarked"
+
+#: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
+msgctxt "several visits, plural"
 msgid "passed unmarked"
 msgstr "passed unmarked"
 
@@ -6343,15 +6521,23 @@ msgstr "Patent"
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
+msgid "Pay"
+msgstr "Pay"
+
 #: src/views/manage/ui/Masters/MasterDialog.tsx
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
+msgctxt "specialist pay, noun"
 msgid "Pay"
 msgstr "Pay"
 
 #: src/views/bookings/ui/UpcomingBooking/UpcomingBooking.tsx
-#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 #: src/views/pay/PayPage.tsx
+msgid "Pay {amount}"
+msgstr "Pay {amount}"
+
+#: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
+msgctxt "pay out to a specialist"
 msgid "Pay {amount}"
 msgstr "Pay {amount}"
 
@@ -6648,9 +6834,17 @@ msgstr "point at an hour"
 msgid "Point the camera to open the page. Print it for the counter or the window."
 msgstr "Point the camera to open the page. Print it for the counter or the window."
 
-#: src/views/business/ui/Place/ServicesBrowser.tsx
 #: src/views/catalog/ui/OffersFeed/OffersFeed.tsx
+msgid "Popular"
+msgstr "Popular"
+
+#: src/views/business/ui/Place/ServicesBrowser.tsx
+msgctxt "caption: services people often pick"
+msgid "Popular"
+msgstr "Popular"
+
 #: src/views/manage/ui/Services/ServiceDialog.tsx
+msgctxt "service flag, feminine"
 msgid "Popular"
 msgstr "Popular"
 
@@ -6892,6 +7086,11 @@ msgstr "Put first"
 msgid "Put in"
 msgstr "Put in"
 
+#: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
+msgctxt "action: put cash into the drawer"
+msgid "Put in"
+msgstr "Put in"
+
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 msgid "Put in or take out"
 msgstr "Put in or take out"
@@ -6956,12 +7155,16 @@ msgstr "Rate the visit"
 msgid "Rate your visit"
 msgstr "Rate your visit"
 
-#: src/features/rateVisit/ui/StarRating/StarRating.tsx
 #: src/shared/lib/cabinetFrom.ts
 #: src/views/business/ui/Place/PlaceTabs.tsx
 #: src/views/leaderboard/LeaderboardPage.tsx
 #: src/views/leaderboard/ui/BoardViewSwitch.tsx
 #: src/widgets/Header/Header.tsx
+msgid "Rating"
+msgstr "Rating"
+
+#: src/features/rateVisit/ui/StarRating/StarRating.tsx
+msgctxt "score given in a review"
 msgid "Rating"
 msgstr "Rating"
 
@@ -7284,7 +7487,11 @@ msgstr "Reply to the review"
 
 #: src/features/report/ui/ReportMenu.tsx
 #: src/views/feed/ui/FeedActions.tsx
+msgid "Report"
+msgstr "Report"
+
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgctxt "analytics report, noun"
 msgid "Report"
 msgstr "Report"
 
@@ -7603,12 +7810,16 @@ msgstr "Save services"
 msgid "Save to Google Wallet"
 msgstr "Save to Google Wallet"
 
-#: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
 #: src/views/manage/ui/PhotosSection/PhotosSection.tsx
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
 #: src/views/manage/ui/StockTab/StockTab.tsx
+msgid "Saved"
+msgstr "Saved"
+
+#: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
+msgctxt "password is saved, masculine"
 msgid "Saved"
 msgstr "Saved"
 
@@ -8060,8 +8271,12 @@ msgid "Sign in with Telegram"
 msgstr "Sign in with Telegram"
 
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
-#: src/views/forBusiness/forBusinessContent.ts
 #: src/widgets/Footer/Footer.tsx
+msgid "Sign in with your number"
+msgstr "Sign in with your number"
+
+#: src/views/forBusiness/forBusinessContent.ts
+msgctxt "step instruction"
 msgid "Sign in with your number"
 msgstr "Sign in with your number"
 
@@ -8389,8 +8604,12 @@ msgstr "Step 4: contacts"
 
 #: src/views/manage/manageTabs.ts
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-#: src/views/manage/ui/StockTab/StockItemSheet.tsx
 #: src/views/manage/ui/StockTab/StockTab.tsx
+msgid "Stock"
+msgstr "Stock"
+
+#: src/views/manage/ui/StockTab/StockItemSheet.tsx
+msgctxt "quantity left"
 msgid "Stock"
 msgstr "Stock"
 
@@ -8456,7 +8675,12 @@ msgid "Sunday"
 msgstr "Sunday"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
+msgctxt "appearance setting, neuter"
+msgid "System"
+msgstr "System"
+
 #: src/views/insights/config/labels.ts
+msgctxt "operating system"
 msgid "System"
 msgstr "System"
 
@@ -9023,11 +9247,15 @@ msgstr "TIN: 14 digits."
 msgid "Tmrw"
 msgstr "Tmrw"
 
+#: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
+msgid "To"
+msgstr "To"
+
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/CertificateSheet.tsx
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
-#: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
 #: src/views/manage/ui/ReviewsTab/QuietReplySheet.tsx
+msgctxt "recipient"
 msgid "To"
 msgstr "To"
 
@@ -9201,7 +9429,11 @@ msgid "Top SPAs"
 msgstr "Top SPAs"
 
 #: src/views/leaderboard/config/boards.ts
+msgid "Top specialists"
+msgstr "Top specialists"
+
 #: src/widgets/Footer/Footer.tsx
+msgctxt "footer link to the leaderboard"
 msgid "Top specialists"
 msgstr "Top specialists"
 
@@ -9248,6 +9480,7 @@ msgstr "transfer"
 #: src/views/manage/lib/cashFormat.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
+msgctxt "payment method"
 msgid "Transfer"
 msgstr "Transfer"
 
@@ -9467,10 +9700,14 @@ msgstr "Visit outcome"
 msgid "Visit outcome {time}"
 msgstr "Visit outcome {time}"
 
-#: src/views/business/ui/Place/SubscriptionSheet.tsx
 #: src/views/manage/ui/AnalyticsTab/AnalyticsCharts.tsx
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
+msgid "Visits"
+msgstr "Visits"
+
+#: src/views/business/ui/Place/SubscriptionSheet.tsx
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
+msgctxt "number of visits in a pass"
 msgid "Visits"
 msgstr "Visits"
 
@@ -9513,7 +9750,11 @@ msgid "Waiting"
 msgstr "Waiting"
 
 #: src/features/waitlist/ui/WaitlistList.tsx
+msgid "Waiting for a slot"
+msgstr "Waiting for a slot"
+
 #: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
+msgctxt "clients waiting, plural"
 msgid "Waiting for a slot"
 msgstr "Waiting for a slot"
 

@@ -418,7 +418,9 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                                 onSelect={() => setEditingService(service)}
                                 action={
                                   service.isActive === false ? (
-                                    <span className={styles.offMark}>{t`Hidden`}</span>
+                                    <span className={styles.offMark}>
+                                      {t({ message: 'Hidden', context: 'status, feminine' })}
+                                    </span>
                                   ) : undefined
                                 }
                                 isPlaceHidden

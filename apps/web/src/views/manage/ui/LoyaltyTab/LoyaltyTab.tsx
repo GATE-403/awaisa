@@ -153,7 +153,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         <div className={sheet.groupHeader}>
           <SectionCaption isInset={false}>{t`Passes`}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setEditingPlan('new')}>
-            <Plus aria-hidden /> {t`New`}
+            <Plus aria-hidden /> {t({ message: 'New', context: 'add a new pass, masculine' })}
           </button>
         </div>
         {data.plans.length === 0 ? (

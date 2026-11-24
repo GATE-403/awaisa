@@ -9,8 +9,8 @@ import styles from './ThemeSwitcher.module.css'
 
 const OPTIONS: { value: Theme; label: MessageDescriptor }[] = [
   { value: 'system', label: msg`Auto` },
-  { value: 'light', label: msg`Light` },
-  { value: 'dark', label: msg`Dark` },
+  { value: 'light', label: msg({ message: 'Light', context: 'theme, feminine' }) },
+  { value: 'dark', label: msg({ message: 'Dark', context: 'theme, feminine' }) },
 ]
 
 export const ThemeSwitcher = () => {
