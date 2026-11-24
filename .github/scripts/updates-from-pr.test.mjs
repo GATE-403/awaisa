@@ -42,6 +42,26 @@ test('nothing for «нет», no section or links off the site', () => {
   assert.equal(entry.text, 'б [x](https://evil.example)')
 })
 
+test('reads the English description, keeping the entry as written', () => {
+  const body = `## Changes
+- stuff
+
+## What's new
+- For everyone: Вход через Telegram - Код приходит в Telegram. [Войти](/login)
+- none`
+  assert.deepEqual(parseSection(body, meta), [
+    {
+      id: 'pr80-1',
+      date: '2026-11-20',
+      audience: 'everyone',
+      title: 'Вход через Telegram',
+      text: 'Код приходит в Telegram.',
+      link: { href: '/login', label: 'Войти' },
+    },
+  ])
+  assert.deepEqual(parseSection("## What's new\n- none", meta), [])
+})
+
 test('dates follow Bishkek', () => {
   assert.equal(toDayKey('2026-11-19T20:30:00Z'), '2026-11-20')
   assert.equal(toDayKey('2026-11-19T10:00:00Z'), '2026-11-19')
