@@ -2,6 +2,7 @@ import type { BusinessKind } from '@awaisa/contracts'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
+import { returnedRows } from '../common/sql.js'
 import type { FeedQuery, UpdateWorkPhotoInput } from './work-photos.schemas.js'
 
 type Row = Record<string, unknown>
@@ -114,7 +115,7 @@ export class WorkPhotosService {
        WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
       [id, businessId, input.serviceId, input.specialistId, input.isHidden],
     )
-    if (this.rows(rows).length === 0) throw new NotFoundException('Фото не найдено')
+    if (returnedRows(rows).length === 0) throw new NotFoundException('Фото не найдено')
     if (!input.isHidden) {
       // Shown again by the owner: the reports so far are settled for the moderators too.
       await this.query(
@@ -144,7 +145,7 @@ export class WorkPhotosService {
       `DELETE FROM "work_photos" WHERE "id" = $1 AND "business_id" = $2 RETURNING "url"`,
       [id, businessId],
     )
-    const [row] = this.rows(rows)
+    const [row] = returnedRows(rows)
     if (!row) throw new NotFoundException('Фото не найдено')
     // Nothing left to moderate: its reports leave the queue.
     await this.query(
@@ -186,7 +187,7 @@ export class WorkPhotosService {
            WHERE "id" = $1 RETURNING "likes"`,
           [id, session],
         )
-    const [row] = this.rows(rows)
+    const [row] = returnedRows(rows)
     if (!row) throw new NotFoundException('Фото не найдено')
     return { likes: Number(row.likes) }
   }
@@ -295,11 +296,6 @@ export class WorkPhotosService {
       )
       if (!master) throw new BadRequestException('Мастер не найден')
     }
-  }
-
-  // UPDATE/DELETE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {

@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CacheService } from '../cache/cache.service.js'
+import { returnedRows } from '../common/sql.js'
 import { Customer } from '../customers/customer.entity.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { confirmationMessage } from '../notifications/messages.js'
@@ -137,10 +138,6 @@ export class BookingPaymentsService {
 
   private async claim(sql: string) {
     const result: unknown = await this.bookings.manager.query(sql)
-    // TypeORM returns [rows, affected] for UPDATE … RETURNING on Postgres.
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
-      id: string
-      payment_status?: string
-    }[]
+    return returnedRows<{ id: string; payment_status?: string }>(result)
   }
 }

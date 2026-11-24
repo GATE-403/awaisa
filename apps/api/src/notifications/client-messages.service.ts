@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { BillingService } from '../billing/billing.service.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { clientStartParam, readClientStartParam } from './client-telegram.js'
 import { SmsService } from './sms.service.js'
@@ -92,8 +93,7 @@ export class ClientMessagesService {
       'DELETE FROM "client_telegram_chats" WHERE "chat_id" = $1 RETURNING "phone"',
       [chatId],
     )) as unknown
-    const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
-    return Array.isArray(rows) && rows.length > 0
+    return returnedRows(result).length > 0
   }
 
   async isLinked(phone: string) {

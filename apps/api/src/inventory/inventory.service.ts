@@ -2,11 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { visitLines } from '../bookings/visit-sql.js'
+import { returnedRows, toNumber } from '../common/sql.js'
 import type { StockItemInput } from './inventory.schemas.js'
 
 type Row = Record<string, unknown>
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 /**
  * The shelf: items with a quantity and a unit cost. Services name what one visit uses; an
@@ -85,7 +84,7 @@ export class InventoryService {
         input.isForSale ? input.salePrice : null,
       ],
     )
-    if (this.rows(rows).length === 0) throw new NotFoundException('Позиция не найдена')
+    if (returnedRows(rows).length === 0) throw new NotFoundException('Позиция не найдена')
     await this.setMaterials(businessId, id, input.materials)
     return this.list(businessId)
   }
@@ -114,7 +113,7 @@ export class InventoryService {
        WHERE "id" = $1 AND "business_id" = $2 RETURNING "unit_cost", "name"`,
       [id, businessId, quantity, unitCost ?? null],
     )
-    const [item] = this.rows(rows)
+    const [item] = returnedRows(rows)
     if (!item) throw new NotFoundException('Позиция не найдена')
     const cost = quantity * toNumber(item.unit_cost)
     const [movement] = await this.query(
@@ -142,7 +141,7 @@ export class InventoryService {
        RETURNING $3 - (SELECT "quantity" FROM old) AS "delta"`,
       [id, businessId, quantity],
     )
-    const [moved] = this.rows(rows)
+    const [moved] = returnedRows(rows)
     if (!moved) throw new NotFoundException('Позиция не найдена')
     if (toNumber(moved.delta) !== 0) {
       await this.query(
@@ -188,7 +187,7 @@ export class InventoryService {
        RETURNING "item_id", "delta"`,
       [bookingIds],
     )
-    for (const row of this.rows(used)) {
+    for (const row of returnedRows(used)) {
       await this.query('UPDATE "stock_items" SET "quantity" = "quantity" + $2 WHERE "id" = $1', [
         row.item_id,
         row.delta,
@@ -204,17 +203,12 @@ export class InventoryService {
        RETURNING "item_id", "delta"`,
       [bookingIds],
     )
-    for (const row of this.rows(removed)) {
+    for (const row of returnedRows(removed)) {
       await this.query('UPDATE "stock_items" SET "quantity" = "quantity" - $2 WHERE "id" = $1', [
         row.item_id,
         row.delta,
       ])
     }
-  }
-
-  // DELETE/UPDATE … RETURNING come back as [rows, affected] from TypeORM on Postgres.
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {

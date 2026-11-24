@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import type { Business } from '../businesses/business.entity.js'
 import { CacheService } from '../cache/cache.service.js'
+import { returnedRows } from '../common/sql.js'
 import {
   DEFAULT_AUTO_TEMPLATE,
   DEFAULT_QUICK_REPLIES,
@@ -130,8 +131,7 @@ export class ReviewRepliesService {
          WHERE "id" = $2 AND "reply" IS NULL RETURNING "id"`,
         [text, row.id],
       )
-      const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
-      if (Array.isArray(rows) && rows.length > 0) sent += 1
+      if (returnedRows(result).length > 0) sent += 1
     }
 
     return sent

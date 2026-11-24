@@ -15,6 +15,7 @@ import { visitNames, visitPrice } from '../bookings/visit-sql.js'
 import { CacheService } from '../cache/cache.service.js'
 import { businessDateTimeToUtc, formatMinutes, toBusinessParts } from '../common/business-time.js'
 import { normalizePhone } from '../common/phone.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { DEFAULT_QUICK_REPLIES, fillReplyTemplate } from '../reviews/review-reply-text.js'
@@ -498,8 +499,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
        WHERE "id" = $2 AND "reply" IS NULL RETURNING "id"`,
       [text, reviewId],
     )
-    const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
-    const isSaved = Array.isArray(rows) && rows.length > 0
+    const isSaved = returnedRows(result).length > 0
     // The public page shows replies; the bot's writes do not pass the cache interceptor.
     if (isSaved) await this.cache.bump(['catalog'])
 

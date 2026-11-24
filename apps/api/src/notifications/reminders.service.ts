@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { visitNames } from '../bookings/visit-sql.js'
 import { formatMinutes, toBusinessParts } from '../common/business-time.js'
+import { returnedRows } from '../common/sql.js'
 import { visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from './client-messages.service.js'
@@ -48,10 +49,7 @@ export class RemindersService {
         bz."name" AS business_name, bz."slug" AS business_slug, b."business_id"
       `,
     )
-    // TypeORM returns [rows, affected] for UPDATE … RETURNING on Postgres.
-    const due = (
-      Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
-    ) as DueReminder[]
+    const due = returnedRows<DueReminder>(result)
     if (due.length === 0) return
 
     this.logger.log(`Sending ${due.length} reminder(s)`)
