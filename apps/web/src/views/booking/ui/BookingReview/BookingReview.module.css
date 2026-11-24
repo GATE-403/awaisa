@@ -312,40 +312,6 @@
   color: var(--color-tertiary-foreground);
 }
 
-.extras {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: 0 var(--space-4) var(--space-3);
-}
-
-.extra {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 100%;
-  min-height: var(--control-height-md);
-  padding: 0 var(--space-3);
-  overflow: hidden;
-  border: none;
-  border-radius: var(--radius-control);
-  background: var(--color-fill);
-  color: var(--color-foreground);
-  font: inherit;
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-medium);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.extra svg {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  color: var(--color-link);
-}
-
 /* The stub under the second tear line: what it costs, how it is paid, and the button. */
 .total {
   display: flex;
