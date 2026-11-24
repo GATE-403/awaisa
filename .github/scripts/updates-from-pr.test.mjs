@@ -10,11 +10,11 @@ test('reads entries with audience, title, text and an optional link', () => {
 
 ## Что нового
 <!-- comment -->
-- Для бизнеса: Склад считает расход — Материалы списываются, когда визит отмечен. [Открыть склад](/manage)
+- Для бизнеса: Склад считает расход - Материалы списываются, когда визит отмечен. [Открыть склад](/manage)
 - Для клиентов: Отзывы с фото – До трёх фото к отзыву.
 
 ## Проверка
-- Для всех: Не отсюда — это другой раздел.`
+- Для всех: Не отсюда - это другой раздел.`
   assert.deepEqual(parseSection(body, meta), [
     {
       id: 'pr80-1',
@@ -36,8 +36,8 @@ test('reads entries with audience, title, text and an optional link', () => {
 
 test('nothing for «нет», no section or links off the site', () => {
   assert.deepEqual(parseSection('## Что нового\n- нет', meta), [])
-  assert.deepEqual(parseSection('## Что изменилось\n- Для всех: А — б', meta), [])
-  const [entry] = parseSection('## Что нового\n- Для всех: А — б [x](https://evil.example)', meta)
+  assert.deepEqual(parseSection('## Что изменилось\n- Для всех: А - б', meta), [])
+  const [entry] = parseSection('## Что нового\n- Для всех: А - б [x](https://evil.example)', meta)
   assert.equal(entry.link, undefined)
   assert.equal(entry.text, 'б [x](https://evil.example)')
 })

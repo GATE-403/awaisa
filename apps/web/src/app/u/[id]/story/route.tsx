@@ -91,8 +91,8 @@ const formatSince = (iso: string | null) => {
 }
 
 // A 9:16 story card (1080 × 1920) in a quiet, light frame: chips with the level and the date on
-// top, one rounded photo card glowing in the profile's colour — the name over the photo, the
-// face, handle and facts with a white capsule at its foot — and the address to type under it.
+// top, one rounded photo card glowing in the profile's colour - the name over the photo, the
+// face, handle and facts with a white capsule at its foot - and the address to type under it.
 export const GET = async (_request: Request, { params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params
   const response = await fetch(`${API_URL}/profiles/${encodeURIComponent(id)}`)
@@ -366,7 +366,7 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
       <div style={{ display: 'flex', flex: 1 }} />
       <div style={{ display: 'flex', fontSize: 34, color: '#6e6e73' }}>
         {profile.favoriteMaster
-          ? `Мой мастер — ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`
+          ? `Мой мастер - ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`
           : 'Записывайся к мастерам через Awaisa'}
       </div>
       <div

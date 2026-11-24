@@ -275,7 +275,7 @@ export const MasterScheduleSheet = ({
                 </label>
                 <Input
                   aria-label={t('Причина')}
-                  placeholder={t('Причина — по желанию')}
+                  placeholder={t('Причина - по желанию')}
                   value={leave.reason}
                   onChange={(event) => setLeave({ ...leave, reason: event.target.value })}
                   className={styles.reason}

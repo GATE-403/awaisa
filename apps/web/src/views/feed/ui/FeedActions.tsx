@@ -53,7 +53,7 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
 
   const share = async () => {
     const url = `${window.location.origin}/feed?start=${item.id}`
-    const title = service ? `${service.name} — ${business.name}` : business.name
+    const title = service ? `${service.name} - ${business.name}` : business.name
     // The share sheet was closed: nothing to do.
     const result = await shareLink({ title, url })
     if (result === 'copied') toast.show({ title: t('Ссылка скопирована'), type: 'success' })

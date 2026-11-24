@@ -17,7 +17,7 @@ export const generateMetadata = async ({
 }: PageProps<'/[slug]/book'>): Promise<Metadata> => {
   const { business } = await getBusiness((await params).slug)
 
-  return { title: `Онлайн-запись — ${business.name}` }
+  return { title: `Онлайн-запись - ${business.name}` }
 }
 
 const BookingWithBusiness = async ({ slug }: { slug: string }) => {
@@ -37,7 +37,7 @@ const BookingWithBusiness = async ({ slug }: { slug: string }) => {
 }
 
 // A link from outside (an SMS, 2GIS, a QR code) or a reload opens the booking as a full route.
-// The place's own page sits under the sheet, dimmed, as when «Записаться» is tapped on it — on
+// The place's own page sits under the sheet, dimmed, as when «Записаться» is tapped on it - on
 // wide screens the sheet is a side panel, and an empty page beside it read as a broken site.
 // Its own Suspense, after the booking: the sheet streams first and never waits for the page.
 // `BookingReturnOnReload` sits in the static shell, so it runs before the form and the place

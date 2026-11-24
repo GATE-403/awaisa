@@ -54,7 +54,7 @@ export class Businesses1794500000000 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO "businesses" ("id", "slug", "name", "kind", "description", "address", "phone", "whatsapp", "map_url")
        VALUES ($1, 'awaisa-studio', 'Awaisa Studio', 'beauty',
-         'Стрижки, окрашивание и уход. Запись онлайн за минуту — без звонков.',
+         'Стрижки, окрашивание и уход. Запись онлайн за минуту - без звонков.',
          'ул. Токтогула, 125', '+996555123456', '+996555123456',
          'https://2gis.kg/bishkek/search/Токтогула%20125')`,
       [AWAISA_ID],

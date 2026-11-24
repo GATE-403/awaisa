@@ -61,7 +61,7 @@ export class WaitlistService {
     if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
 
     // Same rules as booking (date range, published page, the master does the service); a day with
-    // free time does not need a waitlist — the client books it instead.
+    // free time does not need a waitlist - the client books it instead.
     // The whole visit, as the form showed it: one service of two may still fit that day.
     const { slots } = await this.availability.getAvailability({
       serviceId: input.serviceId,
@@ -71,7 +71,7 @@ export class WaitlistService {
       branchId: input.branchId,
     })
     if (slots.some((slot) => slot.isAvailable)) {
-      throw new ConflictException('В этот день есть свободное время — выберите его')
+      throw new ConflictException('В этот день есть свободное время - выберите его')
     }
 
     const service = await this.catalog.getActiveService(input.serviceId)
@@ -159,7 +159,7 @@ export class WaitlistService {
 
   /**
    * The owner's view: who waits for which day, still waiting or texted. Anyone who has since
-   * booked that day at this business drops off — they are no longer waiting.
+   * booked that day at this business drops off - they are no longer waiting.
    */
   async listForBusiness(businessId: string) {
     const today = toBusinessParts(new Date()).dateKey
@@ -200,7 +200,7 @@ export class WaitlistService {
   /**
    * Every minute: entries for past days expire; for each waiting group (service, master, day) the
    * availability is checked and, when a time is free, everyone in the group gets one SMS.
-   * A cancellation still inside its undo window is not counted yet — it may come back.
+   * A cancellation still inside its undo window is not counted yet - it may come back.
    */
   @Cron(CronExpression.EVERY_MINUTE)
   async notifyFreed() {

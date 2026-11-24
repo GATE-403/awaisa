@@ -1,6 +1,6 @@
 ---
 name: design-check
-description: Use before building or changing any UI in apps/web or packages/ui (a new screen, block, sheet, list, button row, card) and again before showing the result to the owner — checks the design against the owner's approved and rejected patterns in docs/design/patterns.md. Also use when the owner rejects or praises a design, to record it.
+description: Use before building or changing any UI in apps/web or packages/ui (a new screen, block, sheet, list, button row, card) and again before showing the result to the owner - checks the design against the owner's approved and rejected patterns in docs/design/patterns.md. Also use when the owner rejects or praises a design, to record it.
 ---
 
 # Design check

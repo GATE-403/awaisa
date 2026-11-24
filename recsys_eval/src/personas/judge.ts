@@ -11,7 +11,7 @@ import { previous, production } from '../recommenders/production.ts'
 import type { Context, Recommender, User } from '../types.ts'
 import { PERSONAS, type Persona, toUser } from './personas.ts'
 
-// `pnpm rec:judge` — Claude rates each persona's shelf, card by card, 1–5 with a reason, without
+// `pnpm rec:judge` - Claude rates each persona's shelf, card by card, 1–5 with a reason, without
 // knowing which model made it. Only invented material goes out: the persona's portrait and
 // history from personas.ts and the demo catalog's service names, places and prices. No client
 // of the database is ever sent. The key comes from ANTHROPIC_API_KEY (environment or the root
@@ -44,8 +44,8 @@ type Verdict = z.infer<typeof Verdict>
 const SYSTEM = `Ты оцениваешь рекомендации сервиса записи к мастерам красоты и здоровья в Бишкеке.
 Тебе дают портрет клиента, его прошлые визиты и ленту «Для вас» из нескольких услуг.
 Оцени каждую карточку от 1 до 5: насколько вероятно, что этот человек захочет записаться на неё
-в ближайшие две недели (5 — точно запишется, 3 — может заинтересовать, 1 — не подходит совсем).
-Учитывай пол, возраст, бюджет, ритм визитов, привычные места. Причина — одно короткое предложение
+в ближайшие две недели (5 - точно запишется, 3 - может заинтересовать, 1 - не подходит совсем).
+Учитывай пол, возраст, бюджет, ритм визитов, привычные места. Причина - одно короткое предложение
 по-русски. Затем общая оценка ленты 1–5 и одна фраза: чего в ней не хватает или что лишнее.`
 
 const describeUser = (persona: Persona, user: User, context: Context) => {
@@ -67,7 +67,7 @@ const describeList = (ids: string[], context: Context) =>
   ids
     .map((id, index) => {
       const item = context.byId.get(id)
-      return `${index + 1}. ${item?.name} — «${item?.businessName}» (${item?.kind}), ${item?.price} сом`
+      return `${index + 1}. ${item?.name} - «${item?.businessName}» (${item?.kind}), ${item?.price} сом`
     })
     .join('\n')
 
@@ -197,12 +197,12 @@ const lines = [
     ...('refused' in verdict
       ? [`Нет оценки: ${verdict.refused}`]
       : [
-          `Лента: **${verdict.overall}/5** — ${verdict.comment}`,
+          `Лента: **${verdict.overall}/5** - ${verdict.comment}`,
           '',
           ...task.ids.map((id, index) => {
             const item = context.byId.get(id)
             const card = verdict.cards.find((entry) => entry.number === index + 1)
-            return `${index + 1}. ${item?.name} («${item?.businessName}», ${item?.price} сом) — **${card?.score ?? '—'}** · ${card?.reason ?? ''}`
+            return `${index + 1}. ${item?.name} («${item?.businessName}», ${item?.price} сом) - **${card?.score ?? '-'}** · ${card?.reason ?? ''}`
           }),
         ]),
     '',

@@ -127,7 +127,7 @@ const usualBoost = (user: User, context: Context, serviceId: string) => {
 type Delta = (user: User, context: Context, serviceId: string, serviceName: string) => number
 
 // Scores are changed before the shelf rules (two per place, one per name, the new-place spot),
-// which stay exactly as in production — see shelf.ts.
+// which stay exactly as in production - see shelf.ts.
 const adjusted = (
   name: string,
   description: string,
@@ -166,7 +166,7 @@ const makePrototypes = () => {
     ),
     adjusted(
       'proto-usual',
-      'score-v1, но свои прошлые услуги — привычка: «пора» с запасом в неделю, +1 за каждый повтор (до +3).',
+      'score-v1, но свои прошлые услуги - привычка: «пора» с запасом в неделю, +1 за каждый повтор (до +3).',
       (user, context, id) => usualBoost(user, context, id),
     ),
     adjusted(

@@ -43,7 +43,7 @@ const capitalizeFirst = (text: string) => text.charAt(0).toUpperCase() + text.sl
 
 // A visit as staff need it, like an event inspector in Calendar: who first (face, name, number,
 // what they pay), then what and when in two quiet lines, the ways to reach them as one capsule of
-// glyphs, and the visit's outcome. Cancelling sits in «⋯» — it happens at once and the toast
+// glyphs, and the visit's outcome. Cancelling sits in «⋯» - it happens at once and the toast
 // brings it back.
 export const BookingInspector = ({
   slug,
@@ -77,7 +77,7 @@ export const BookingInspector = ({
 
   return (
     <div className={styles.inspector} data-cancelled={isCancelled || undefined}>
-      {/* Cancelled: said once, at the top, like a cancelled event in Calendar — the glyph of its
+      {/* Cancelled: said once, at the top, like a cancelled event in Calendar - the glyph of its
           card in red, the words quiet; the rest stays readable (no strike-through), only the
           price is struck, the one thing that will not come. */}
       {isCancelled && (

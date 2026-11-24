@@ -30,7 +30,7 @@ interface AccountCardProps {
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
 // The account as one row above the records: the face (a tap changes the photo), the name and one
-// line of facts — the rest of the row opens «Мой профиль» — and a gear for the settings at its
+// line of facts - the rest of the row opens «Мой профиль» - and a gear for the settings at its
 // end. The records lead the page; the account no longer pushes them down («профиль должен быть
 // самой удобной частью»). The cabinet lives in the tab bar; masters keep «Мой день» here.
 export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardProps) => {
@@ -56,7 +56,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   if (!customer) {
     return (
       // A guest's row like the signed-in account's: the mascot where the face would be, what
-      // these records are and «Войти» at the row's end — not a centred title over the records.
+      // these records are and «Войти» at the row's end - not a centred title over the records.
       <section className={styles.guest} aria-label={t('Профиль')} style={look}>
         <span className={styles.guestFace} aria-hidden>
           <Mascot />
@@ -64,7 +64,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
         <span className={styles.guestText}>
           <h1 className={styles.guestTitle}>{t('Ваши записи')}</h1>
           <span className={styles.guestNote}>
-            {t('Только на этом телефоне — войдите, будут везде')}
+            {t('Только на этом телефоне - войдите, будут везде')}
           </span>
         </span>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>

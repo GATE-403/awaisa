@@ -14,7 +14,7 @@ interface WorkReviewsSheetProps {
   onClose: () => void
 }
 
-// What people said about this very service with this master — read over the feed, like the
+// What people said about this very service with this master - read over the feed, like the
 // comments under a reel, without leaving it.
 export const WorkReviewsSheet = ({ item, onClose }: WorkReviewsSheetProps) => {
   const t = useT()
@@ -43,7 +43,7 @@ export const WorkReviewsSheet = ({ item, onClose }: WorkReviewsSheetProps) => {
       {!summary && <Skeleton className={styles.reviewsSkeleton} />}
       {summary && summary.count === 0 && (
         <p className={styles.reviewsEmpty}>
-          {t('Об этой услуге ещё не писали — станьте первым после визита.')}
+          {t('Об этой услуге ещё не писали - станьте первым после визита.')}
         </p>
       )}
       {summary && summary.count > 0 && (

@@ -4,7 +4,7 @@ export class Inventory1796100000000 implements MigrationInterface {
   name = 'Inventory1796100000000'
 
   async up(queryRunner: QueryRunner): Promise<void> {
-    // Consumables on the shelf: paint, shampoo, gloves — in their own units, with a unit cost.
+    // Consumables on the shelf: paint, shampoo, gloves - in their own units, with a unit cost.
     await queryRunner.query(`
       CREATE TABLE "stock_items" (
         "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),

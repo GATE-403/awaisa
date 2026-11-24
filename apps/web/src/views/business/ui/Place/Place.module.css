@@ -1,4 +1,4 @@
-/* Business page — one system: title1 name, title2 sections, uppercase captions, body rows.
+/* Business page - one system: title1 name, title2 sections, uppercase captions, body rows.
    Cards are white surfaces on the grey page; every one-line control is a capsule. */
 
 /* ---------- Layout ---------- */
@@ -692,8 +692,8 @@ details[open] > .info .infoChevron {
   white-space: nowrap;
 }
 
-/* «Похожие места»: a band of its own under the place — a lighter layer edge to edge with a
-   hairline on top — holding the catalog's place cards in one row that scrolls sideways. */
+/* «Похожие места»: a band of its own under the place - a lighter layer edge to edge with a
+   hairline on top - holding the catalog's place cards in one row that scrolls sideways. */
 .similar {
   padding: var(--space-8) 0 var(--space-10);
   content-visibility: auto;
@@ -780,7 +780,7 @@ details[open] > .info .infoChevron {
   }
 }
 
-/* Touch screens: the row glides with the finger and its momentum — snapping to a card made a
+/* Touch screens: the row glides with the finger and its momentum - snapping to a card made a
    short swipe feel stuck on phones. */
 @media (hover: none) {
   .similarTrack {

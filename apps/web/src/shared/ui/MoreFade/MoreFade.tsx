@@ -16,7 +16,7 @@ interface MoreFadeProps {
   /** What the fade melts into: the page, the card the list sits on, or a sheet's inset group. */
   surface?: 'page' | 'card' | 'sheet'
   /** «Скрыть» floats at the bottom of the screen while the open list is in view (default);
-      false keeps it under the list — for short lists in a sheet with its own bottom bar. */
+      false keeps it under the list - for short lists in a sheet with its own bottom bar. */
   isLessFloating?: boolean
 }
 

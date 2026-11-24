@@ -55,7 +55,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
     ? Math.max(0, parseClock(current.time) + current.durationMinutes - nowMinutes)
     : 0
 
-  // Nothing in the chair and nothing ahead: no row at all — the calendar under it says enough.
+  // Nothing in the chair and nothing ahead: no row at all - the calendar under it says enough.
   if (!current && !next) return null
 
   // With Web Push on the server the bell subscribes this device (pushes with the cabinet closed);
@@ -86,7 +86,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
 
   return (
     // One slim row over the day: who is in the chair and who is next, as capsules that open their
-    // visit — the day's own cards say the rest.
+    // visit - the day's own cards say the rest.
     <section className={styles.bar} aria-label={t('Сейчас')}>
       {current && (
         <button

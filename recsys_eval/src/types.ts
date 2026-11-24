@@ -49,7 +49,7 @@ type User = {
   stated: StatedPreferences | null
 }
 
-/** What the world looked like at the cutoff (popularity, ratings, affinities — all before it). */
+/** What the world looked like at the cutoff (popularity, ratings, affinities - all before it). */
 type Context = {
   now: number
   items: Item[]

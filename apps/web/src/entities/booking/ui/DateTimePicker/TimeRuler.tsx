@@ -30,7 +30,7 @@ const toTime = (minutes: number) =>
   `${String(Math.floor(minutes / 60) % 24).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
 
 // The day as a ruler, like a dial: free times stand tall, taken ones lie low, so the shape of the
-// day — a busy morning, a free evening — reads before any number. Scrolling moves the day under
+// day - a busy morning, a free evening - reads before any number. Scrolling moves the day under
 // the needle and the big time follows it; a tap on a free tick (or «Выбрать») takes that time.
 export const TimeRuler = ({
   slots,
@@ -147,7 +147,7 @@ export const TimeRuler = ({
     <div className={styles.ruler} data-pending={isPending || undefined} aria-busy={isPending}>
       <div className={styles.readout} aria-hidden>
         <span className={styles.time} data-taken={isFree ? undefined : ''}>
-          {current?.time ?? '—'}
+          {current?.time ?? '-'}
         </span>
         <span className={styles.status}>
           {!current
@@ -156,7 +156,7 @@ export const TimeRuler = ({
               ? t('до {time} · свободно', {
                   time: toTime(toMinutes(current.time) + durationMinutes),
                 })
-              : t('Занято — прокрутите дальше')}
+              : t('Занято - прокрутите дальше')}
         </span>
       </div>
 
@@ -220,8 +220,8 @@ export const TimeRuler = ({
         </span>
       </div>
 
-      {/* One line under the dial: how it works until it is touched, then the legend — a tall bar
-          for free, a low one for taken — with counts. Two lines made the step taller than
+      {/* One line under the dial: how it works until it is touched, then the legend - a tall bar
+          for free, a low one for taken - with counts. Two lines made the step taller than
           short phones. */}
       {!hasMoved ? (
         <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>

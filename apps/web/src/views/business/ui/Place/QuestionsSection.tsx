@@ -89,7 +89,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
       {questions.items.length === 0 ? (
         <EmptyState
           variant='inline'
-          text={t('Спросите о парковке, оплате или детях — место ответит здесь.')}
+          text={t('Спросите о парковке, оплате или детях - место ответит здесь.')}
         />
       ) : (
         <MoreFade
@@ -146,7 +146,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
               </p>
             )}
             <p className={styles.hint}>
-              {t('Вопрос увидят после ответа места — с вашим именем, без номера.')}
+              {t('Вопрос увидят после ответа места - с вашим именем, без номера.')}
             </p>
           </form>
         </Sheet>

@@ -133,7 +133,7 @@ export class CertificateSalesService implements OnModuleInit {
       status,
       doneText: row.recipient_phone
         ? 'Код сертификата отправили вам и получателю.'
-        : 'Код сертификата отправили вам — передайте его получателю.',
+        : 'Код сертификата отправили вам - передайте его получателю.',
     }
   }
 

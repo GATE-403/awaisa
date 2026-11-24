@@ -39,7 +39,7 @@ interface BlockProps {
   style?: CSSProperties
 }
 
-// Any other shape — a capsule, a circle, a card — sized by the class given.
+// Any other shape - a capsule, a circle, a card - sized by the class given.
 const Block = ({ className, style }: BlockProps) => (
   <span
     aria-hidden='true'

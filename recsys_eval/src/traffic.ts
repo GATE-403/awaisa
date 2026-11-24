@@ -3,7 +3,7 @@ import { dirname, join, resolve } from 'node:path'
 import { parseArgs } from 'node:util'
 import pg from 'pg'
 
-// `pnpm rec:traffic` — the shelves' real traffic from `recommendation_events` (read-only: device
+// `pnpm rec:traffic` - the shelves' real traffic from `recommendation_events` (read-only: device
 // sessions are counted, never read out) and, from it, how long the tests in
 // docs/recsys/experiments.md would take. Point DATABASE_URL at a read replica or an export to
 // read production; locally it counts whatever e2e runs and your own clicks left.
@@ -40,7 +40,7 @@ await client.connect()
 await client.query('BEGIN READ ONLY')
 const { rows } = await client.query(
   `SELECT ("created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date::text AS "day",
-     COALESCE("algorithm", '—') AS "algorithm",
+     COALESCE("algorithm", '-') AS "algorithm",
      COUNT(DISTINCT "session") FILTER (WHERE "kind" = 'impression')::int AS "shown",
      COUNT(DISTINCT "session") FILTER (WHERE "kind" = 'click')::int AS "tapped",
      COUNT(DISTINCT "session") FILTER (WHERE "kind" = 'book')::int AS "booked"
@@ -89,7 +89,7 @@ const tests = [
 const lines = [
   `# Трафик полок «Для вас» за ${days} дн.`,
   '',
-  `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · база: ${new URL(process.env.DATABASE_URL).hostname}. Локальная база — это прогоны e2e и ваши клики, не клиенты.`,
+  `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · база: ${new URL(process.env.DATABASE_URL).hostname}. Локальная база - это прогоны e2e и ваши клики, не клиенты.`,
   '',
   `Сессий с показом: **${total.shown}** за ${total.activeDays} активных дн. (≈ ${Math.round(perDay)} в день) · с нажатием: ${total.tapped} (${percent(ctr)}) · с записью: ${total.booked} (${percent(bookRate)}).`,
   '',
@@ -97,11 +97,11 @@ const lines = [
   '|---|---|---|',
   ...tests.map((test) =>
     Number.isNaN(test.sessions)
-      ? `| ${test.name} | нет данных (0 событий) | — |`
+      ? `| ${test.name} | нет данных (0 событий) | - |`
       : `| ${test.name} | ${test.sessions.toLocaleString('ru-RU')} | ${duration(test.sessions)} |`,
   ),
   '',
-  'Расчёт: две доли, α = 0.05, мощность 80%, два варианта поровну; interleaving — знаковый тест. Не меньше двух полных недель в любом случае (docs/recsys/experiments.md).',
+  'Расчёт: две доли, α = 0.05, мощность 80%, два варианта поровну; interleaving - знаковый тест. Не меньше двух полных недель в любом случае (docs/recsys/experiments.md).',
   '',
   '## По дням и версиям',
   '',

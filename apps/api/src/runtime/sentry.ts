@@ -15,7 +15,7 @@ type ErrorSource = 'web' | 'api'
 type ErrorEvent = { source: ErrorSource; message: string; stack?: string; url?: string }
 
 /**
- * Error reports to Sentry (or GlitchTip — the same SDK) when SENTRY_DSN is set; nothing at all
+ * Error reports to Sentry (or GlitchTip - the same SDK) when SENTRY_DSN is set; nothing at all
  * otherwise. Only what the API already records in app_errors is sent, scrubbed: the browser gets
  * no SDK (its errors come through /telemetry/errors), and nothing traces requests or users.
  */
@@ -27,7 +27,7 @@ const initSentry = (role: string) => {
     environment: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV || 'development',
     release: process.env.SENTRY_RELEASE || undefined,
     // Nothing about people or requests: no user, cookies, headers, bodies, query strings,
-    // query data or local variables — only the scrubbed message and stack below.
+    // query data or local variables - only the scrubbed message and stack below.
     dataCollection: {
       userInfo: false,
       cookies: false,

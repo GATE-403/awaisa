@@ -13,7 +13,7 @@
   height: 100%;
 }
 
-/* Without WebGL: one soft ring of the same colours swells from the origin and fades — a single
+/* Without WebGL: one soft ring of the same colours swells from the origin and fades - a single
    layer drawn small and scaled up, transform and opacity only. */
 .flash {
   position: absolute;

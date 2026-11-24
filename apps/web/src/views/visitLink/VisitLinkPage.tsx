@@ -16,7 +16,7 @@ interface VisitLinkPageProps {
 }
 
 // Opened from the confirmation or reminder SMS: the signed link becomes this booking's token on
-// the phone, so «Записи» show it with «Перенести» and «Отменить» — no sign-in, no other device.
+// the phone, so «Записи» show it with «Перенести» and «Отменить» - no sign-in, no other device.
 export const VisitLinkPage = ({ bookingId }: VisitLinkPageProps) => {
   const router = useRouter()
   const signature = useSearchParams().get('s')

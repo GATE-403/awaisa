@@ -6,7 +6,7 @@ import styles from './BookingSkeleton.module.css'
 
 // While a direct /book link loads: the open card with its question and the service pictures, built
 // from the step's and the picker's own classes, so the real form lands on the same shapes. Not a
-// sheet of its own — the form slides up once, when it arrives.
+// sheet of its own - the form slides up once, when it arrives.
 export const BookingSkeleton = () => (
   <Container size='md' className={styles.page} data-page-skeleton='' aria-busy='true'>
     <div className={stepStyles.step}>

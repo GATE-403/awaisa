@@ -143,7 +143,7 @@ test.describe('Schedule: more on a visit and the day', () => {
     await expect(visitCard(page, last.name)).not.toBeInViewport()
 
     // Two visits beyond the right edge: the nearest one's time and «+1».
-    const tab = board(page).getByRole('button', { name: `${late.time} +1 — 2 записи позже` })
+    const tab = board(page).getByRole('button', { name: `${late.time} +1 - 2 записи позже` })
     // The tab sits flush with the view's right edge, so a pixel of it may lie past the edge (CI's
     // Linux scrollbars): a plain click would scroll the day to show it whole, and the visits it
     // points to would come into view and take it away. A person presses what they see: the

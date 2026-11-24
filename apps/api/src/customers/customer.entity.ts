@@ -37,7 +37,7 @@ export class Customer {
   @Column({ type: 'varchar', length: 160, default: '' })
   about: string
 
-  /** Handles (Instagram, Telegram, TikTok) and a website — `profiles/profile-links.ts`. */
+  /** Handles (Instagram, Telegram, TikTok) and a website - `profiles/profile-links.ts`. */
   @Column({ name: 'social_links', type: 'jsonb', default: {} })
   socialLinks: Partial<Record<'instagram' | 'telegram' | 'tiktok' | 'website', string>>
 

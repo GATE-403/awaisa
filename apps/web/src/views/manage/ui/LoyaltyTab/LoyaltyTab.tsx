@@ -36,7 +36,7 @@ interface LoyaltyTabProps {
 
 const PERCENTS = [3, 5, 7, 10, 15].map((value) => ({ value, label: `${value}%` }))
 
-// «Лояльность»: what keeps clients coming back — bonuses, subscriptions, gift certificates.
+// «Лояльность»: what keeps clients coming back - bonuses, subscriptions, gift certificates.
 // Everything is spent at the desk through the visit's outcome («Итог визита»).
 export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
   const t = useT()

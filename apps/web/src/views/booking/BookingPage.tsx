@@ -219,7 +219,7 @@ export const BookingPage = ({
     )
   }
 
-  // Everything filled: the action books at once — a separate «check» press made people think
+  // Everything filled: the action books at once - a separate «check» press made people think
   // they were done and leave without booking. The check card shows only after a quick time was
   // picked with one tap, so that tap never books by itself.
   const isReviewing = form.firstIncompleteStep === null && isReviewRequested
@@ -818,7 +818,7 @@ export const BookingPage = ({
                           comes back and where to go. The side panel has no summary card for it. */}
                     {form.service?.deposit ? (
                       <p className={styles.terms} ref={trackDepositShown}>
-                        {t('Предоплата {amount} — вернём, если отмените за сутки', {
+                        {t('Предоплата {amount} - вернём, если отмените за сутки', {
                           amount: formatPrice(form.service.deposit),
                         })}
                         {summaryProps.address ? ` · ${summaryProps.address}` : ''}

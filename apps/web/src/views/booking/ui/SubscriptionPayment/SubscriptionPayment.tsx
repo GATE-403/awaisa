@@ -23,7 +23,7 @@ interface SubscriptionPaymentNoteProps {
 }
 
 // «Оплата» as a Settings row with a plain Select: at the salon, by one's own subscription here,
-// or buying one with this visit — offered only when one of the last two exists.
+// or buying one with this visit - offered only when one of the last two exists.
 export const SubscriptionPaymentRow = ({
   className,
   labelClassName,

@@ -13,8 +13,8 @@ import { DAY_MS } from '../data/split.ts'
 import type { Context, Recommender, User } from '../types.ts'
 
 // The production scorer itself, imported from the API (not a copy): the same `rankCandidates`
-// GET /recommendations runs, fed with what was known at the cutoff. What the past cannot tell —
-// where the client stood, who was free that day, promotions running then — is left empty for
+// GET /recommendations runs, fed with what was known at the cutoff. What the past cannot tell -
+// where the client stood, who was free that day, promotions running then - is left empty for
 // every candidate alike, so those parts do not move the order here (see the report's caveats).
 
 const NEW_PLACE_REVIEWS = 5
@@ -111,15 +111,15 @@ const scorer = (version: Algorithm, description: string): Recommender => ({
 
 const production = scorer(
   ALGORITHM,
-  'Текущая формула «Для вас» (rankCandidates из API) — production.',
+  'Текущая формула «Для вас» (rankCandidates из API) - production.',
 )
 const previous = scorer(
   'score-v1',
   'Прошлая версия формулы (до 2026-11-18): для сравнения и interleaving.',
 )
 
-// A diagnostic, not a candidate: what the exploration spot costs in today's accuracy (its gain —
-// new places getting seen at all — only shows online).
+// A diagnostic, not a candidate: what the exploration spot costs in today's accuracy (its gain -
+// new places getting seen at all - only shows online).
 const productionNoExplore: Recommender = {
   name: `${ALGORITHM}-no-explore`,
   description: `Диагностика: ${ALGORITHM} без слота «Новое место».`,

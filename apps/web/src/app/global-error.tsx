@@ -23,13 +23,13 @@ const GlobalError = ({ error, retry }: GlobalErrorProps) => {
   return (
     <html lang='ru'>
       <body className={styles.globalBody}>
-        <title>Awaisa — не получилось загрузить</title>
+        <title>Awaisa - не получилось загрузить</title>
         <main className={styles.page}>
           <div className={styles.content}>
             <Mascot className={styles.mascot} />
             <h1 className={styles.title}>Что-то пошло не так</h1>
             <p className={styles.text}>
-              Не получилось загрузить страницу. Попробуйте ещё раз через минуту — ваши записи никуда
+              Не получилось загрузить страницу. Попробуйте ещё раз через минуту - ваши записи никуда
               не делись.
             </p>
             <Button size='lg' onClick={retry}>

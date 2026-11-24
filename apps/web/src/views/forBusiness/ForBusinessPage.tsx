@@ -27,7 +27,7 @@ const BLOCKS = [
     icon: Bell,
     tint: 'var(--system-orange)',
     title: 'Напоминания',
-    text: 'Подтверждение сразу и напоминание за два часа — меньше пустых кресел.',
+    text: 'Подтверждение сразу и напоминание за два часа - меньше пустых кресел.',
     visual: <ReminderVisual />,
   },
   {
@@ -35,7 +35,7 @@ const BLOCKS = [
     icon: Columns,
     tint: 'var(--system-green)',
     title: 'Расписание',
-    text: 'Колонка на мастера. Перенос перетаскиванием, запись с улицы — нажатием на время.',
+    text: 'Колонка на мастера. Перенос перетаскиванием, запись с улицы - нажатием на время.',
     visual: <DragVisual />,
   },
 ]
@@ -91,7 +91,7 @@ export const ForBusinessPage = () => (
       <h2 id='blocks-title' className={styles.panelTitle}>
         <T>Всё для записи</T>
         <span className={styles.titleMuted}>
-          <T>{' — из коробки'}</T>
+          <T>{' - из коробки'}</T>
         </span>
       </h2>
       <ProductShowcase />
@@ -176,7 +176,7 @@ export const ForBusinessPage = () => (
 
     <LabelledSection className={styles.closing} label='Начать'>
       <h2 className={styles.closingTitle}>
-        <T>Первая запись — уже сегодня.</T>
+        <T>Первая запись - уже сегодня.</T>
       </h2>
       <ButtonLink
         variant='contrast'

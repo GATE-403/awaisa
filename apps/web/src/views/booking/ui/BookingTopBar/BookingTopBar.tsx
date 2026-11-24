@@ -30,7 +30,7 @@ const useClose = (isModal: boolean) => {
 }
 
 // Booking opens like a page in Telegram's in-app browser: a sheet over the dimmed site, its own
-// bar with the place and a close button — all attention on the form.
+// bar with the place and a close button - all attention on the form.
 export const BookingTopBar = ({ business, isModal = false, progress }: BookingTopBarProps) => {
   const close = useClose(isModal)
   const router = useRouter()

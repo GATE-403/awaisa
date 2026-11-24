@@ -20,7 +20,7 @@ type CheckResult =
 /**
  * «Войти через Telegram» through the owners' bot: the page registers its token, the bot's
  * `/start login_<token>` ties a chat to it, the person shares their own number there, and the
- * page trades the token for a session — the same account as signing in by SMS on that number.
+ * page trades the token for a session - the same account as signing in by SMS on that number.
  */
 @Injectable()
 export class TelegramLoginService {

@@ -353,7 +353,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
 
   // A returning guest: their name and number from last time, editable as usual.
   // With several branches and a location already allowed (no prompt), the nearest one is chosen
-  // — unless a link named a branch or the client picked one meanwhile.
+  // - unless a link named a branch or the client picked one meanwhile.
   // biome-ignore lint/correctness/useExhaustiveDependencies: once per place
   useEffect(() => {
     // A link to a master who works in one branch already decided it.
@@ -396,7 +396,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setTime(null)
       toast.show({
         title: presetService
-          ? `${presetTime} уже заняли — выберите другое время`
+          ? `${presetTime} уже заняли - выберите другое время`
           : `В ${presetTime} эта услуга не помещается. Выберите другое время`,
         type: 'info',
       })
@@ -418,7 +418,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setIsBranchTimeChecked(true)
     if (!time || availability.error) return
     if (!availability.slots.some((slot) => slot.isAvailable && slot.time === time)) {
-      toast.show({ title: `В этом филиале ${time} занято — выберите другое время`, type: 'info' })
+      toast.show({ title: `В этом филиале ${time} занято - выберите другое время`, type: 'info' })
       setTime(null)
     }
   }, [isBranchTimeChecked, availability, time, toast])
@@ -502,7 +502,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   }
 
   // «Начать заново»: the choices go (service, master, time, comment, code) and so does the draft
-  // and the link's preset; the name and phone stay — they are the same person.
+  // and the link's preset; the name and phone stay - they are the same person.
   // «Ещё запись в <place>» on the success screen: another visit at the same place, often to another
   // master, without starting from the catalog. The name and number stay, the day is the visit's,
   // and times before it ends are not offered. The address says so too, so a reload keeps it.

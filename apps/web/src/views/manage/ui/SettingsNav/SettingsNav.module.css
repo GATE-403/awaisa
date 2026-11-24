@@ -127,7 +127,7 @@
   }
 }
 
-/* Wide screens: macOS System Settings sidebar — small rows, the open one on a fill. */
+/* Wide screens: macOS System Settings sidebar - small rows, the open one on a fill. */
 @media (min-width: 1024px) {
   .nav {
     gap: var(--space-5);

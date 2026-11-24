@@ -23,7 +23,7 @@ interface ProfileHeadTextProps {
   children?: ReactNode
 }
 
-// A person's head in one look everywhere — the profile, its preview in «Оформление» and the
+// A person's head in one look everywhere - the profile, its preview in «Оформление» and the
 // account row on «Записи» («оставь один дизайн и вынеси в компоненты»): the face on the left, the
 // name with the status emoji and one quiet line of facts to its right, like a contact row.
 export const ProfileHead = ({ face, children, end, className }: ProfileHeadProps) => (

@@ -13,7 +13,7 @@ import styles from './CatalogSkeleton.module.css'
 const CARDS = 8
 
 // The catalog while it streams in, built from the page's own classes: «Для вас» with its frames,
-// the results' tabs and sorting, then the grid of 3:4 service cards — the same sizes, so the
+// the results' tabs and sorting, then the grid of 3:4 service cards - the same sizes, so the
 // page fills in place instead of jumping.
 export const CatalogSkeleton = () => (
   <div className={pageStyles.contained} data-page-skeleton='' aria-busy='true'>
@@ -26,7 +26,7 @@ export const CatalogSkeleton = () => (
         </NextLink>
       }
     />
-    {/* «Часто ищут» — wide screens only, like the real row. */}
+    {/* «Часто ищут» - wide screens only, like the real row. */}
     <div className={chipStyles.row} aria-hidden='true'>
       <span className={chipStyles.label}>
         <T>Часто ищут</T>

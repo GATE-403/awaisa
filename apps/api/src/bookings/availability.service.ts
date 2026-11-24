@@ -48,7 +48,7 @@ export class AvailabilityService {
 
   /**
    * The first free time today or tomorrow for each business, for live catalog cards.
-   * Uses the business's quickest service with any master — the earliest anyone could come in.
+   * Uses the business's quickest service with any master - the earliest anyone could come in.
    */
   async findNextFree(slugs: string[]) {
     const rows = (await this.bookings.manager.query(
@@ -162,7 +162,7 @@ export class AvailabilityService {
   }
 
   /**
-   * The first free time today or tomorrow, with any master, for each request — the same answer
+   * The first free time today or tomorrow, with any master, for each request - the same answer
    * as `getAvailability` day by day, but with a fixed number of queries however many requests
    * there are (it used to be about eight per place per day: catalog cards and «Для вас» ask for
    * dozens of places at once). A service without masters, or of an unpublished place, gets null.

@@ -16,7 +16,7 @@ type PlaceSignals = {
 // in one district rarely crosses the city for the same haircut.
 const NEAR_WEIGHT = 3
 const NEAR_LIMIT_KM = 10
-// The same services (by name) — a nail bar is like another nail bar, not a full salon.
+// The same services (by name) - a nail bar is like another nail bar, not a full salon.
 const MENU_WEIGHT = 3
 // A similar price level: no gap, full weight; a place three times dearer or cheaper, none.
 const PRICE_WEIGHT = 1.5

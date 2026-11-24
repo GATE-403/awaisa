@@ -58,7 +58,7 @@ const BOOKING: Record<string, Entry> = {
   '{count} занято': ['{count} бош эмес', '{count} taken'],
   'Ближайшее свободное: {time}': ['Эң жакын бош убакыт: {time}', 'Nearest free: {time}'],
   'до {time} · свободно': ['{time} чейин · бош', 'until {time} · free'],
-  'Занято — прокрутите дальше': ['Бош эмес — андан ары жылдырыңыз', 'Taken — scroll on'],
+  'Занято - прокрутите дальше': ['Бош эмес - андан ары жылдырыңыз', 'Taken - scroll on'],
   'Выбрать {time}': ['{time} тандоо', 'Choose {time}'],
   Все: ['Баары', 'All'],
   'Куда приедете?': ['Кайсы филиалга келесиз?', 'Which branch?'],
@@ -82,15 +82,15 @@ const BOOKING: Record<string, Entry> = {
   'Скидка «{title}»': ['«{title}» арзандатуусу', 'Discount «{title}»'],
   Итого: ['Жалпы', 'Total'],
   Предоплата: ['Алдын ала төлөм', 'Deposit'],
-  'Предоплата {amount} — вернём, если отмените за сутки': [
-    'Алдын ала төлөм {amount} — бир сутка мурда жокко чыгарсаңыз, кайтарабыз',
+  'Предоплата {amount} - вернём, если отмените за сутки': [
+    'Алдын ала төлөм {amount} - бир сутка мурда жокко чыгарсаңыз, кайтарабыз',
     'Deposit {amount}, refunded if you cancel a day ahead',
   ],
   '{amount} картой при записи': ['{amount} жазылууда карта менен', '{amount} by card when booking'],
-  'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.':
+  'Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.':
     [
-      'Алдын ала төлөм {amount} — жазылгандан кийин дароо карта менен, калганы салондо. Бир сутка мурун жокко чыгарсаңыз, кайтарабыз.',
-      'Deposit {amount} — by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
+      'Алдын ала төлөм {amount} - жазылгандан кийин дароо карта менен, калганы салондо. Бир сутка мурун жокко чыгарсаңыз, кайтарабыз.',
+      'Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
     ],
 
   // Steps
@@ -132,9 +132,9 @@ const BOOKING: Record<string, Entry> = {
   // Masters
   Любой: ['Каалаган', 'Any'],
   'кто свободен': ['ким бош болсо', 'whoever is free'],
-  'Любой мастер — подберём свободного на выбранное время': [
-    'Каалаган уста — тандалган убакытка бош устаны табабыз',
-    'Any specialist — we pick whoever is free at that time',
+  'Любой мастер - подберём свободного на выбранное время': [
+    'Каалаган уста - тандалган убакытка бош устаны табабыз',
+    'Any specialist - we pick whoever is free at that time',
   ],
 
   // Date and time
@@ -188,9 +188,9 @@ const BOOKING: Record<string, Entry> = {
   завтра: ['эртең', 'tomorrow'],
   послезавтра: ['бүрсүгүнү', 'the day after tomorrow'],
   'через {days} дней': ['{days} күндөн кийин', 'in {days} days'],
-  'Оплата в салоне — наличными или картой. Перенести или отменить можно по ссылке из SMS.': [
-    'Төлөм салондо — накталай же карта менен. SMSтеги шилтеме аркылуу которуп же жокко чыгарсаңыз болот.',
-    'Pay at the salon — cash or card. Move or cancel by the link in the SMS.',
+  'Оплата в салоне - наличными или картой. Перенести или отменить можно по ссылке из SMS.': [
+    'Төлөм салондо - накталай же карта менен. SMSтеги шилтеме аркылуу которуп же жокко чыгарсаңыз болот.',
+    'Pay at the salon - cash or card. Move or cancel by the link in the SMS.',
   ],
 
   // Done
@@ -200,8 +200,8 @@ const BOOKING: Record<string, Entry> = {
   '{day} в {time} · {place}': ['{day}, {time} · {place}', '{day} at {time} · {place}'],
   'Приходите к {time}': ['{time} келиңиз', 'Come at {time}'],
   ' по адресу {address}': [', дареги: {address}', ' to {address}'],
-  'Остаток в салоне —': ['Калганы салондо —', 'The rest at the salon:'],
-  'Оплата в салоне —': ['Салондо төлөйсүз —', 'Pay at the salon:'],
+  'Остаток в салоне -': ['Калганы салондо -', 'The rest at the salon:'],
+  'Оплата в салоне -': ['Салондо төлөйсүз -', 'Pay at the salon:'],
   'Перенести или отменить можно по ссылке из SMS.': [
     'SMSтеги шилтеме аркылуу которуп же жокко чыгарсаңыз болот.',
     'Move or cancel by the link in the SMS.',

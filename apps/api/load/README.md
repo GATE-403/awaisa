@@ -1,6 +1,6 @@
 # Load tests
 
-k6 scenarios against a production build, on a stand of its own (database `awaisa_load` with fresh demo data, Redis db 6, ports 4400 / 3400), so the dev servers and their data are untouched. k6 runs from the official Docker image — nothing to install.
+k6 scenarios against a production build, on a stand of its own (database `awaisa_load` with fresh demo data, Redis db 6, ports 4400 / 3400), so the dev servers and their data are untouched. k6 runs from the official Docker image - nothing to install.
 
 ```bash
 pnpm db:up                              # Postgres and Redis
@@ -13,7 +13,7 @@ pnpm --filter api load:browse           # or load:capacity, load:rush, load:page
 
 | Scenario | What it does |
 | --- | --- |
-| `browse.js` | A visitor's path — catalog, offers, free times, «Для вас», a place, its reviews, its services' free times, tomorrow's slots — with 1–2 s between steps, ramping to `PEAK` (300) people. |
+| `browse.js` | A visitor's path - catalog, offers, free times, «Для вас», a place, its reviews, its services' free times, tomorrow's slots - with 1–2 s between steps, ramping to `PEAK` (300) people. |
 | `capacity.js` | The same mix at a rising arrival rate up to `MAX_RATE` req/s (open model): where one API process bends. |
 | `booking-rush.js` | `PEOPLE` (200) book the same free time at once, one master (`MODE=one`) or any master (`MODE=any`): exactly one gets it per master, everyone else a clean 409. |
 | `pages.js` | The site's server-rendered pages (catalog, a place, its menu, map, «Образы», leaderboard) at a rising rate up to `MAX_RATE` pages/s; with `-e VUS=16` a closed loop of that many pages in flight for `DURATION` (20s), the most one Next process serves; `-e ONLY=place` (or `catalog`, `services`, `map`, `feed`, `top`, `search`) keeps to one page. |
@@ -57,4 +57,4 @@ A visitor makes ~2 requests a second while browsing, so one process serves rough
 
 **Pages (`pages.js`).** One `next start` process holds ~100 pages/s at 10 ms and ~150 at 100 ms; beyond that it is CPU-bound (~130% of a core) and the Mac's accept queue (`kern.ipc.somaxconn` 128) refuses connections. **The site's server rendering, not the API, is the first ceiling.** (22 November, above: a place's pages are now served whole from the cache.)
 
-**Where the database time goes.** 55% of all database time in the runs was the «Для вас» candidate query (`RecommendationsService`, ~160 rows per call, 4.6 ms) and most of the rest its free-time lookups — `/recommendations` is the one public endpoint with no cache, and the heaviest. The candidate set does not depend on the person, so it can be cached for a minute and scored per request.
+**Where the database time goes.** 55% of all database time in the runs was the «Для вас» candidate query (`RecommendationsService`, ~160 rows per call, 4.6 ms) and most of the rest its free-time lookups - `/recommendations` is the one public endpoint with no cache, and the heaviest. The candidate set does not depend on the person, so it can be cached for a minute and scored per request.

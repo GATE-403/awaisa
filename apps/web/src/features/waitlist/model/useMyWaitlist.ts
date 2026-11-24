@@ -21,7 +21,7 @@ import {
 
 const NOT_FOUND = 404
 
-// Entries from this device and, when signed in, the account — still waiting or just notified.
+// Entries from this device and, when signed in, the account - still waiting or just notified.
 export const useMyWaitlist = () => {
   const stored = useStoredWaitlist()
   const session = useSession()

@@ -96,7 +96,7 @@ export const RateVisitForm = ({
     event.preventDefault()
     // The button stays active: a tap without stars explains what is missing instead.
     if (rating === 0) {
-      setError(t('Поставьте оценку — от одной до пяти звёзд'))
+      setError(t('Поставьте оценку - от одной до пяти звёзд'))
       trackFormError('rating')
       return
     }
@@ -205,7 +205,7 @@ export const RateVisitForm = ({
         }}
       />
       <label htmlFor={commentId} className={styles.label}>
-        {t('Расскажите подробнее')} <span className={styles.optional}>{t('— по желанию')}</span>
+        {t('Расскажите подробнее')} <span className={styles.optional}>{t('- по желанию')}</span>
       </label>
       <textarea
         id={commentId}

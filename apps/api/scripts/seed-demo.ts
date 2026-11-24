@@ -434,7 +434,7 @@ const BUSINESSES: BusinessSeed[] = [
     slug: 'fade-house',
     name: 'Fade House',
     kind: 'barber',
-    description: 'Фейды, кроп и текстура — молодые барберы у Филармонии.',
+    description: 'Фейды, кроп и текстура - молодые барберы у Филармонии.',
     branches: [
       { name: 'Филармония', address: 'ул. Абдрахманова, 170', lat: 42.8782, lng: 74.5951 },
     ],
@@ -549,7 +549,7 @@ const BUSINESSES: BusinessSeed[] = [
     slug: 'nails-coffee',
     name: 'Nails & Coffee',
     kind: 'nails',
-    description: 'Маникюр и кофе в одном месте — в ТЦ Вефа.',
+    description: 'Маникюр и кофе в одном месте - в ТЦ Вефа.',
     branches: [{ name: 'Вефа', address: 'ТЦ Вефа, 3 этаж', lat: 42.8572, lng: 74.6093 }],
     masters: [
       ['Кристина Пак', 'Нейл-мастер'],
@@ -621,7 +621,7 @@ const BUSINESSES: BusinessSeed[] = [
     slug: 'lash-me',
     name: 'Lash Me',
     kind: 'beauty',
-    description: 'Наращивание ресниц и брови — Восток-5.',
+    description: 'Наращивание ресниц и брови - Восток-5.',
     branches: [{ name: 'Восток-5', address: 'мкр. Восток-5, 2/1', lat: 42.8601, lng: 74.6611 }],
     masters: [
       ['Айсулуу Темирова', 'Лэшмейкер'],
@@ -723,7 +723,7 @@ const weekdayOf = (key: string) => (new Date(`${key}T00:00:00Z`).getUTCDay() + 6
 const tokenHash = () => createHash('sha256').update(randomUUID()).digest('hex')
 
 // Demo pictures (scripts/demo-pictures.ts): a cover and up to eight photos of finished work per
-// place, each place its own slice of its set — no photo shows up at two places.
+// place, each place its own slice of its set - no photo shows up at two places.
 const UNSPLASH = (id: string, size: 'cover' | 'work' | 'portrait') =>
   `https://images.unsplash.com/photo-${id}?${
     size === 'cover'
@@ -1251,7 +1251,7 @@ const writeClientFaces = async (client: pg.Client) => {
   return faces
 }
 
-// `--pictures`: only pictures — covers, work photos, masters' portraits and clients' faces — for
+// `--pictures`: only pictures - covers, work photos, masters' portraits and clients' faces - for
 // the demo places already in the database; the rest (and bookings made by hand) stays as it is.
 const addPictures = async () => {
   const client = new pg.Client({ connectionString: process.env.DATABASE_URL })

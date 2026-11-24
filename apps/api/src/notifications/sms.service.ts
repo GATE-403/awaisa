@@ -15,8 +15,8 @@ export class SmsService implements OnModuleInit {
     const driver = this.config.get('SMS_DRIVER', { infer: true })
     this.logger.log(
       driver === 'twilio'
-        ? 'SMS driver: twilio — messages are sent'
-        : 'SMS driver: console — messages are only logged, nothing is sent',
+        ? 'SMS driver: twilio - messages are sent'
+        : 'SMS driver: console - messages are only logged, nothing is sent',
     )
   }
 

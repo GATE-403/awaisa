@@ -3,7 +3,7 @@ import styles from './BusinessBar.module.css'
 import skeleton from './BusinessBarSkeleton.module.css'
 
 // The bar's row while the business loads: the same height and material, the tile and name and
-// the section tabs as bars — so the page under it starts where it will stay.
+// the section tabs as bars - so the page under it starts where it will stay.
 export const BusinessBarSkeleton = () => (
   <div className={styles.bar} aria-hidden='true'>
     <div className={styles.inner}>

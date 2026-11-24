@@ -23,7 +23,7 @@ interface CloseDayBarProps {
 }
 
 // A task, not a setting: it floats over the schedule only while there is something to mark,
-// like the cabinet's save bar — the header keeps the day's numbers and its two actions.
+// like the cabinet's save bar - the header keeps the day's numbers and its two actions.
 export const CloseDayBar = ({
   openHere,
   openElsewhere,
@@ -51,10 +51,10 @@ export const CloseDayBar = ({
       {openHere > 0 ? (
         <>
           {visitsHere.length > 0 && onOpen ? (
-            // The count opens the list of who it is: time, client, service · master — a tap scrolls
+            // The count opens the list of who it is: time, client, service · master - a tap scrolls
             // the calendar to that visit's card (with «✓ Пришёл» on it).
             <Menu
-              label={t('{visits} {passed} — показать кто', { visits: visits(openHere), passed })}
+              label={t('{visits} {passed} - показать кто', { visits: visits(openHere), passed })}
               className={styles.who}
               trigger={
                 <>

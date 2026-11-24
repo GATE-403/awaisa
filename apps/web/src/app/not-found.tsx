@@ -7,7 +7,7 @@ import styles from './error.module.css'
 const NotFound = () => (
   <main>
     <Container size='md' className={styles.page}>
-      <PageTitle title='Не нашли.' subtitle='Такой страницы нет — возможно, ссылка устарела.' />
+      <PageTitle title='Не нашли.' subtitle='Такой страницы нет - возможно, ссылка устарела.' />
       <ButtonLink render={<NextLink href='/' />} size='lg'>
         В каталог
       </ButtonLink>

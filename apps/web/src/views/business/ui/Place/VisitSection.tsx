@@ -29,7 +29,7 @@ const routeOf = (business: Business, latitude: number | null, longitude: number 
     ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
     : business.mapUrl || null
 
-// Settings-style facts: a quiet glyph, a small label, the value — hours, address, phone.
+// Settings-style facts: a quiet glyph, a small label, the value - hours, address, phone.
 export const VisitSection = ({ business }: VisitSectionProps) => {
   const t = useT()
   const today = useToday()

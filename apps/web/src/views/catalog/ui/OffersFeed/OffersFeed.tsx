@@ -36,7 +36,7 @@ const NO_SLOT = '9999-12-31 99:99'
 const WORK_FIRST = 3
 const WORK_EVERY = 5
 
-// Which work goes before this card: the first after three cards, then one every five more —
+// Which work goes before this card: the first after three cards, then one every five more -
 // the grid keeps its rhythm and the work reads as part of it, not as a section.
 const workAt = (index: number) =>
   index >= WORK_FIRST && (index - WORK_FIRST) % WORK_EVERY === 0

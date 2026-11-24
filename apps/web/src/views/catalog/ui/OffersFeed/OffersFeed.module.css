@@ -51,7 +51,7 @@
   }
 }
 
-/* A master's work is one more cell; a feature spans two — on phones the width of the grid at about
+/* A master's work is one more cell; a feature spans two - on phones the width of the grid at about
    one card's height, from 768px two cards by two. Dense flow fills any hole it leaves. */
 .work {
   min-width: 0;

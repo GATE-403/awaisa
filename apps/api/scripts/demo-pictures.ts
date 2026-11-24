@@ -1,6 +1,6 @@
 // Demo pictures from Unsplash (free under the Unsplash License, hotlinked as its guidelines ask),
 // gathered from Unsplash searches per kind and checked to load. Each place takes its own slice
-// of its set, so no two places share a photo. Generated list — edit by hand only to add ids.
+// of its set, so no two places share a photo. Generated list - edit by hand only to add ids.
 
 type PictureSet = { covers: string[]; works: string[] }
 

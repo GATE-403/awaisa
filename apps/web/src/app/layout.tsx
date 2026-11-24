@@ -26,12 +26,12 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: { default: `${PLATFORM.name} — онлайн-запись`, template: `%s · ${PLATFORM.name}` },
+  title: { default: `${PLATFORM.name} - онлайн-запись`, template: `%s · ${PLATFORM.name}` },
   description: PLATFORM.tagline,
   metadataBase: new URL(SITE_URL),
   openGraph: {
     ...BASE_OPEN_GRAPH,
-    title: `${PLATFORM.name} — онлайн-запись`,
+    title: `${PLATFORM.name} - онлайн-запись`,
     description: PLATFORM.tagline,
   },
   twitter: { card: 'summary_large_image' },
@@ -59,7 +59,7 @@ const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
     <head />
     <body>
       {/* The theme before the first paint, as raw HTML in a hidden wrapper: the browser runs it
-          while parsing the server's HTML, and React never sees a <script> element — so a client
+          while parsing the server's HTML, and React never sees a <script> element - so a client
           re-render of the root (an extension's mismatch, a slot change) does not warn about one,
           and nothing in <head> gets matched against scripts extensions inject there. */}
       <div

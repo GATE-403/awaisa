@@ -36,7 +36,7 @@ const toPx = (minutes: number) => minutes * PX_PER_MINUTE
 type DayWindow = { opensMinutes: number; closesMinutes: number }
 
 // How full a master's day is (booked minutes inside their hours) and the first slot left from
-// now (or from opening on another day) — what the timeline's masters filter shows on each face.
+// now (or from opening on another day) - what the timeline's masters filter shows on each face.
 const masterDayLoad = (
   day: DayWindow | null,
   bookings: AdminBooking[],

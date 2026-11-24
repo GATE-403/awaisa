@@ -14,7 +14,7 @@ interface SearchFieldProps {
 }
 
 // The app's one search field (like Settings' search): a fill capsule at the control height with
-// the glass and a clear button — no border, so it sits on a page or a sheet beside other capsules.
+// the glass and a clear button - no border, so it sits on a page or a sheet beside other capsules.
 export const SearchField = ({ value, onChange, placeholder, label }: SearchFieldProps) => {
   const t = useT()
   return (

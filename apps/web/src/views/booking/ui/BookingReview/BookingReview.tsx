@@ -41,8 +41,8 @@ const relativeDay = (dayKey: string, todayKey: string | null, t: Translate) => {
 }
 
 // The last step before «Записаться», shaped like the ticket it becomes: the place on its cover,
-// the day as a calendar leaf beside the time span, then who, what and for whom — each a tap
-// away from being changed — and what it costs and how it is paid. Nothing to fill in, only to
+// the day as a calendar leaf beside the time span, then who, what and for whom - each a tap
+// away from being changed - and what it costs and how it is paid. Nothing to fill in, only to
 // check.
 export const BookingReview = ({
   business,
@@ -213,11 +213,11 @@ export const BookingReview = ({
           <p className={styles.terms}>
             {service.deposit
               ? t(
-                  'Предоплата {amount} — картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+                  'Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
                   { amount: formatPrice(service.deposit) },
                 )
               : t(
-                  'Оплата в салоне — наличными или картой. Перенести или отменить можно по ссылке из SMS.',
+                  'Оплата в салоне - наличными или картой. Перенести или отменить можно по ссылке из SMS.',
                 )}
           </p>
         </div>

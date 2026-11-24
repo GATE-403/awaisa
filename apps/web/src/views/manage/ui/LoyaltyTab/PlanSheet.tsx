@@ -158,7 +158,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
           {fullPrice !== null && price !== '' && Number(price) < fullPrice && (
             <p className={sheet.groupFooter}>
               {t(
-                'По отдельности {visits} визитов стоят {full} сом — клиент экономит {saving} сом.',
+                'По отдельности {visits} визитов стоят {full} сом - клиент экономит {saving} сом.',
                 {
                   visits: Number(visits),
                   full: fullPrice.toLocaleString('ru-RU'),

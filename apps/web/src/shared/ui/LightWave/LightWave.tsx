@@ -38,7 +38,7 @@ const SPECTRUM = [
 const QUICK_DONE_MS = 300
 
 // A wave of light filling its box (absolute, inset 0, behind or over the content as the caller
-// places it): it plays once when mounted — remount with a new `key` to play again. Without WebGL a
+// places it): it plays once when mounted - remount with a new `key` to play again. Without WebGL a
 // plain CSS flash of the same colours stands in; under reduced motion nothing moves.
 export const LightWave = ({
   origin = TOP,

@@ -34,7 +34,7 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
             <T vars={{ name: business.name }}>{' в {name}'}</T>
           </span>
         </h1>
-        {/* The facts that decide, bold numbers in one quiet line — like the place's head. */}
+        {/* The facts that decide, bold numbers in one quiet line - like the place's head. */}
         <ServicesFacts
           servicesCount={catalog.services.length}
           mastersCount={catalog.specialists.length}

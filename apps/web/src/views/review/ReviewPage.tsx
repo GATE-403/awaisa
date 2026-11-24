@@ -19,7 +19,7 @@ interface ReviewPageProps {
   error: string | null
 }
 
-// Opened from the «как прошёл визит?» SMS: the visit, five stars, a comment — nothing else.
+// Opened from the «как прошёл визит?» SMS: the visit, five stars, a comment - nothing else.
 // The visit arrives rendered from the server; only the rating form is interactive.
 export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProps) => {
   const [rated, setRated] = useState<number | null>(null)
@@ -96,7 +96,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
             ) : (
               <p className={styles.text}>
                 {visit.status === 'cancelled'
-                  ? 'Эта запись отменена — оценивать нечего.'
+                  ? 'Эта запись отменена - оценивать нечего.'
                   : 'Оценить можно после визита.'}
               </p>
             )}

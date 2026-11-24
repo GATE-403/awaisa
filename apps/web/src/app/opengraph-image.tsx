@@ -3,7 +3,7 @@ import { BUSINESS_KINDS, PLATFORM } from '@/shared/config/platform'
 import { OG_IMAGE_SIZE } from '@/shared/lib/seo/businessMetadata'
 import { PlatformOgCard } from '@/shared/lib/seo/OgCard'
 
-export const alt = `${PLATFORM.name} — онлайн-запись в салоны Бишкека`
+export const alt = `${PLATFORM.name} - онлайн-запись в салоны Бишкека`
 export const size = OG_IMAGE_SIZE
 export const contentType = 'image/png'
 

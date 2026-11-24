@@ -19,7 +19,7 @@ interface PlaceReviewsProps {
 type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 
 // While choosing, what people said decides it: reviews of this very service under the form as a
-// thread — three, the last fading with «Ещё N отзывов» on it, which opens a few more right here
+// thread - three, the last fading with «Ещё N отзывов» on it, which opens a few more right here
 // (never a sheet over the booking, never a list that runs on and on).
 const SHOWN = 3
 const OPENED = 8

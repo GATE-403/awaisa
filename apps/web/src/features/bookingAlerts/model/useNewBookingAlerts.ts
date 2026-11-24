@@ -19,8 +19,8 @@ const markOwnBooking = (id: string) => ownBookingIds.add(id)
 const describe = (booking: AdminBooking) =>
   `${booking.customerName} · ${formatDayLong(booking.date)}, ${booking.time} · ${booking.serviceName}`
 
-// While the cabinet is open, new client bookings arrive as a toast, a chime and — when the tab is
-// in the background and the owner allowed it — a system notification.
+// While the cabinet is open, new client bookings arrive as a toast, a chime and - when the tab is
+// in the background and the owner allowed it - a system notification.
 export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
   const toast = useToast()
   const router = useRouter()

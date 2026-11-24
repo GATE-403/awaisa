@@ -37,7 +37,7 @@ test.describe('Inventory', () => {
       await sheet.getByLabel('Минимальный остаток').fill('60')
       await sheet.getByLabel(`Расход: ${service.name}`).fill('50')
       await expect(
-        sheet.getByText(`«${service.name}» — 200 сом материалов за визит.`),
+        sheet.getByText(`«${service.name}» - 200 сом материалов за визит.`),
       ).toBeVisible()
       await sheet.getByRole('button', { name: 'Сохранить' }).click()
       await expect(page.getByRole('button', { name: /E2E Краска/ })).toBeVisible()

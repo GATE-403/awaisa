@@ -223,7 +223,7 @@ export const NewBookingDialog = ({
                     onValueChange={(value) => value && setTime(value)}
                   />
                 ) : (
-                  <span className={sheet.rowHint}>—</span>
+                  <span className={sheet.rowHint}>-</span>
                 )}
               </span>
             </div>

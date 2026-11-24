@@ -3,7 +3,7 @@
 import type { DeviceProfile, FunnelEventMeta, FunnelStep } from '@/shared/api/types'
 import { rememberChannel } from '@/shared/lib/bookingChannel'
 
-// Where people drop out of each scenario, on which devices, and what breaks for them — sent to
+// Where people drop out of each scenario, on which devices, and what breaks for them - sent to
 // our own API (`/api/telemetry/*`, see apps/api/src/telemetry). No third-party tracker and no
 // personal data: a random device id, the step, the place's slug, short codes (`meta`: which
 // field was wrong, which channel) and a coarse profile of the device and its settings.
@@ -97,7 +97,7 @@ const flush = () => {
 
 /**
  * A step reached in a scenario (its flow is worked out by the API). Each step, place and meta
- * counts once per page load. `meta` holds short codes only — `{ field: 'phone' }` — never what
+ * counts once per page load. `meta` holds short codes only - `{ field: 'phone' }` - never what
  * a person typed.
  */
 const trackStep = (step: FunnelStep, slug?: string, meta?: FunnelEventMeta) => {

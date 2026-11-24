@@ -1,5 +1,5 @@
 /**
- * Bishkek's districts and landmarks people name when asked «где вы?» — a point inside each,
+ * Bishkek's districts and landmarks people name when asked «где вы?» - a point inside each,
  * close enough to sort places by distance when the browser's location is not shared.
  */
 const BISHKEK_AREAS = [

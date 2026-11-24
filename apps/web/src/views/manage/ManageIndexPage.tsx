@@ -169,7 +169,7 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
         {businesses?.length === 0 && (
           <EmptyState
             title={t('Создайте первую страницу')}
-            text={t('Создайте страницу бизнеса — это пять минут, и клиенты смогут записываться.')}
+            text={t('Создайте страницу бизнеса - это пять минут, и клиенты смогут записываться.')}
             action={
               <ButtonLink render={<NextLink href='/business/new' />}>
                 {t('Создать страницу')}

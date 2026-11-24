@@ -32,7 +32,7 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
     <section className={styles.section} aria-label={t('Филиалы')}>
       <SectionHeader
         title={t('Филиалы')}
-        description={t('Каждый адрес — своя метка на карте. Клиент выбирает ближайший при записи.')}
+        description={t('Каждый адрес - своя метка на карте. Клиент выбирает ближайший при записи.')}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>

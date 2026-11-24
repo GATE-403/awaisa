@@ -48,7 +48,7 @@ export class BookingPaymentsService {
   }
 
   /**
-   * The deposit went through: the booking is final — confirmation SMS and the owner's message
+   * The deposit went through: the booking is final - confirmation SMS and the owner's message
    * now. Paid after the hold ran out (the slot was released): the money goes straight back.
    */
   async onPaid(bookingId: string) {
@@ -108,7 +108,7 @@ export class BookingPaymentsService {
 
   /**
    * Every minute: unpaid holds past their time are released; deposits of cancelled visits are
-   * settled once the undo window has passed — returned when the salon cancelled or the client
+   * settled once the undo window has passed - returned when the salon cancelled or the client
    * did it early enough, kept otherwise. Claimed with UPDATE … RETURNING, safe on several instances.
    */
   @Cron(CronExpression.EVERY_MINUTE)

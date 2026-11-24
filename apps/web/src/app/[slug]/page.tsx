@@ -10,7 +10,7 @@ export const generateMetadata = async ({ params }: PageProps<'/[slug]'>): Promis
   return buildBusinessMetadata({
     business,
     path: `/${business.slug}`,
-    title: `${business.name} — онлайн-запись`,
+    title: `${business.name} - онлайн-запись`,
   })
 }
 

@@ -57,7 +57,7 @@ export class MailingsService {
          AND "created_at" > now() - interval '20 hours' LIMIT 1`,
       [business.id, segment],
     )
-    if (recent) throw new ConflictException('Эта рассылка уже уходила сегодня — повторите завтра')
+    if (recent) throw new ConflictException('Эта рассылка уже уходила сегодня - повторите завтра')
     const recipients = (await this.recipients(business.id, segment, days)).slice(0, MAX_RECIPIENTS)
     // A mailing goes whole or not at all: past the month's SMS and packs it is refused.
     const left = await this.billing.smsLeft(business.id)

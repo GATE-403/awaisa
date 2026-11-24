@@ -60,7 +60,7 @@ test.describe('«Образы»: the deck', () => {
     // The photo tells cards apart: one place may have several works in a row.
     const photoOf = () => activeCard(page).locator('img').first().getAttribute('src')
     const first = await photoOf()
-    await expect(page.getByText('Потяните вверх — вернуть прошлую')).toHaveCount(0)
+    await expect(page.getByText('Потяните вверх - вернуть прошлую')).toHaveCount(0)
 
     // A short, slow move is not a swipe: the card settles back.
     await drag(page, -12, 0, 12)
@@ -70,7 +70,7 @@ test.describe('«Образы»: the deck', () => {
     await expectPosition(page, 2)
     expect(await photoOf()).not.toBe(first)
     // Once a card has gone the hint says how to get it back.
-    await expect(page.getByText('Потяните вверх — вернуть прошлую')).toBeVisible()
+    await expect(page.getByText('Потяните вверх - вернуть прошлую')).toBeVisible()
 
     await drag(page, 140, 0)
     await expectPosition(page, 3)

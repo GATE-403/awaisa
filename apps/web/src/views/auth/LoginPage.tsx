@@ -25,7 +25,7 @@ const handleSubmit = (action: () => void) => (event: FormEvent) => {
   action()
 }
 
-// Sign-in as a screen of its own — no site header, tab bar or footer: one quiet column on the
+// Sign-in as a screen of its own - no site header, tab bar or footer: one quiet column on the
 // page colour, one question at a time (number → code → name), like the system's own sign-in.
 // It opens on slow living colour behind the mascot and ends with a wave of light.
 export const LoginPage = () => {
@@ -69,7 +69,7 @@ export const LoginPage = () => {
             <TelegramMark className={styles.telegramMark} />
             <h1 className={styles.title}>{t('Подтвердите в Telegram')}</h1>
             <p className={styles.lead}>
-              {t('Нажмите «Поделиться номером» в чате с ботом — и вернитесь сюда')}
+              {t('Нажмите «Поделиться номером» в чате с ботом - и вернитесь сюда')}
             </p>
             <p className={styles.note}>{t('Ждём ваш номер…')}</p>
             <div className={styles.links}>
@@ -148,7 +148,7 @@ export const LoginPage = () => {
               )}
               {telegram.isExpired ? (
                 <p className={styles.error} role='alert'>
-                  {t('Ссылка для входа устарела — нажмите «Войти через Telegram» ещё раз')}
+                  {t('Ссылка для входа устарела - нажмите «Войти через Telegram» ещё раз')}
                 </p>
               ) : (
                 <p className={styles.note}>{t('Код придёт в Telegram или по SMS')}</p>

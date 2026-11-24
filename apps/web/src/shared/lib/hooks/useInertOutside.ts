@@ -3,7 +3,7 @@
 import { type RefObject, useEffect } from 'react'
 
 // A full-screen layer over the site (the booking sheet) keeps the keyboard and screen readers
-// inside it: everything around it, up to <body>, is inert while it is on screen — Tab used to
+// inside it: everything around it, up to <body>, is inert while it is on screen - Tab used to
 // walk into the dimmed header behind the scrim. Live regions (toasts) and elements marked
 // `data-keep-interactive` (the scrim that closes the layer) stay usable. An effect, like
 // `usePageScrollLock`: React Activity runs the cleanup when it hides the route.

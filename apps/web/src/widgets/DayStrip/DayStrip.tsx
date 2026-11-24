@@ -38,7 +38,7 @@ export const DayStrip = ({
   }, [value])
 
   // The compact row's chosen fill is one knob that glides to the picked day (a spring), like the
-  // segmented control's — measured and written to CSS variables, no re-render.
+  // segmented control's - measured and written to CSS variables, no re-render.
   useLayoutEffect(() => {
     const knob = knobRef.current
     const selected = daysRef.current?.querySelector<HTMLElement>(`[data-day="${value}"]`)

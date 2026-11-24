@@ -31,7 +31,7 @@ const DUE_WINDOW_DAYS = 7
 
 /**
  * «Пора прийти снова»: a service may set `rebook_days`; that many days after a visit (that was
- * not a no-show) the client gets one SMS with a link to the same master — unless they already
+ * not a no-show) the client gets one SMS with a link to the same master - unless they already
  * booked that service again, or turned SMS off when booking.
  */
 @Injectable()

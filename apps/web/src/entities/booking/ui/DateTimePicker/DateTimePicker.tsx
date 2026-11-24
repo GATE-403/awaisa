@@ -46,7 +46,7 @@ const SlotsSkeleton = () => (
   </div>
 )
 
-// The ruler while the day loads: the big time, the dial's ticks and the button, in place —
+// The ruler while the day loads: the big time, the dial's ticks and the button, in place -
 // so the step keeps its shape instead of showing a grid of capsules that is not coming.
 const RULER_TICKS = [18, 60, 60, 18, 60, 60, 60, 18, 60, 60, 18, 18, 60]
 

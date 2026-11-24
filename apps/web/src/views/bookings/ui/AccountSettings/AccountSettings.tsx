@@ -47,7 +47,7 @@ const THEMES: { value: Theme; label: string }[] = [
   { value: 'dark', label: 'Тёмное' },
 ]
 
-// The account's settings right on the profile, at its foot like iOS Settings — no sheet to open:
+// The account's settings right on the profile, at its foot like iOS Settings - no sheet to open:
 // name and number, the theme, the business side, one's data, signing out and deleting the account.
 // What «что важнее» reads as in the settings' summary line.
 const PRIORITY_WORDS: Record<NonNullable<Preferences['priorities']>[number], string> = {

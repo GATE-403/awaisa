@@ -94,7 +94,7 @@ export const TimeOffDialog = ({
           </div>
           <p className={sheet.groupFooter}>
             {isRangeValid
-              ? t('Перерыв, обучение или выходной — клиенты не смогут записаться на это время.')
+              ? t('Перерыв, обучение или выходной - клиенты не смогут записаться на это время.')
               : t('Конец должен быть позже начала.')}
           </p>
         </section>
@@ -103,7 +103,7 @@ export const TimeOffDialog = ({
             <Input
               variant='plain'
               aria-label={t('Причина')}
-              placeholder={t('Причина — необязательно')}
+              placeholder={t('Причина - необязательно')}
               value={reason}
               onValueChange={setReason}
               maxLength={160}

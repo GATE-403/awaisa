@@ -61,7 +61,7 @@ export class WalletService {
       expected.length === given.length &&
       timingSafeEqual(expected, given) &&
       Number(expires) > Date.now()
-    if (!isValid) throw new NotFoundException('Ссылка устарела — откройте запись ещё раз')
+    if (!isValid) throw new NotFoundException('Ссылка устарела - откройте запись ещё раз')
   }
 
   async createApplePass(booking: BookingView) {
@@ -77,7 +77,7 @@ export class WalletService {
             teamIdentifier: this.get('WALLET_TEAM_ID'),
             serialNumber: booking.id,
             organizationName: booking.business.name,
-            description: `${booking.serviceName} — ${booking.business.name}`,
+            description: `${booking.serviceName} - ${booking.business.name}`,
             logoText: booking.business.name,
             foregroundColor: 'rgb(255, 255, 255)',
             labelColor: 'rgb(214, 230, 255)',
@@ -105,8 +105,8 @@ export class WalletService {
                 { key: 'code', label: 'НОМЕР', value: booking.id.slice(0, 8).toUpperCase() },
               ],
               backFields: [
-                { key: 'address', label: 'Адрес', value: booking.business.address || '—' },
-                { key: 'phone', label: 'Телефон', value: booking.business.phone || '—' },
+                { key: 'address', label: 'Адрес', value: booking.business.address || '-' },
+                { key: 'phone', label: 'Телефон', value: booking.business.phone || '-' },
               ],
             },
             barcodes: [
@@ -156,7 +156,7 @@ export class WalletService {
             subheader: { defaultValue: { language: 'ru', value: booking.specialistName } },
             textModulesData: [
               { id: 'when', header: 'Когда', body: `${booking.date} ${booking.time}` },
-              { id: 'address', header: 'Адрес', body: booking.business.address || '—' },
+              { id: 'address', header: 'Адрес', body: booking.business.address || '-' },
             ],
             barcode: {
               type: 'QR_CODE',

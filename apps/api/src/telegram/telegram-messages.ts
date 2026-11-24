@@ -35,7 +35,7 @@ const stars = (rating: number) => '★'.repeat(rating) + '☆'.repeat(5 - rating
 const newBookingText = (business: string, date: string, booking: BookingLine) =>
   [
     `🗓 <b>Новая запись</b> · ${escapeHtml(business)}`,
-    `${formatDate(date)}, <b>${booking.time}</b> — ${escapeHtml(booking.serviceName)}`,
+    `${formatDate(date)}, <b>${booking.time}</b> - ${escapeHtml(booking.serviceName)}`,
     `Мастер: ${escapeHtml(booking.specialistName)}`,
     `Клиент: ${escapeHtml(booking.customerName)}${booking.customerPhone ? `, ${booking.customerPhone}` : ''}`,
   ].join('\n')
@@ -43,7 +43,7 @@ const newBookingText = (business: string, date: string, booking: BookingLine) =>
 const cancelledText = (business: string, date: string, booking: BookingLine) =>
   [
     `✖️ <b>Клиент отменил запись</b> · ${escapeHtml(business)}`,
-    `${formatDate(date)}, ${booking.time} — ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
+    `${formatDate(date)}, ${booking.time} - ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
     `Клиент: ${escapeHtml(booking.customerName)}`,
     'Время снова свободно для записи.',
   ].join('\n')
@@ -57,7 +57,7 @@ const movedByClientText = (
   return [
     `🔁 <b>Клиент перенёс запись</b> · ${escapeHtml(business)}`,
     `Было: ${formatDate(previousDate)}, ${previousTime}`,
-    `Стало: ${formatDate(date)}, <b>${booking.time}</b> — ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
+    `Стало: ${formatDate(date)}, <b>${booking.time}</b> - ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
     `Клиент: ${escapeHtml(booking.customerName)}`,
   ].join('\n')
 }
@@ -113,7 +113,7 @@ const dayText = (business: string, date: string, bookings: BookingLine[], title 
   }
 
   return [
-    `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)} — ${bookings.length} ${
+    `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)} - ${bookings.length} ${
       bookings.length % 10 === 1 && bookings.length % 100 !== 11
         ? 'запись'
         : [2, 3, 4].includes(bookings.length % 10) && ![12, 13, 14].includes(bookings.length % 100)
@@ -122,26 +122,26 @@ const dayText = (business: string, date: string, bookings: BookingLine[], title 
     }`,
     ...bookings.map(
       (booking) =>
-        `<b>${booking.time}</b> ${escapeHtml(booking.serviceName)} — ${escapeHtml(booking.customerName)} · ${escapeHtml(booking.specialistName)}`,
+        `<b>${booking.time}</b> ${escapeHtml(booking.serviceName)} - ${escapeHtml(booking.customerName)} · ${escapeHtml(booking.specialistName)}`,
     ),
   ].join('\n')
 }
 
 const linkedText = (business: string) =>
-  `✅ Готово! Сюда будут приходить новые записи, отмены и отзывы «${escapeHtml(business)}», а каждое утро — расписание на день.\n\n/today — записи на сегодня\n/stop — отключить уведомления`
+  `✅ Готово! Сюда будут приходить новые записи, отмены и отзывы «${escapeHtml(business)}», а каждое утро - расписание на день.\n\n/today - записи на сегодня\n/stop - отключить уведомления`
 
 const unclosedText = (count: number) =>
-  `📋 Сегодня не отмечено визитов: <b>${count}</b>. Откройте расписание и отметьте, кто пришёл — так выручка будет точной.`
+  `📋 Сегодня не отмечено визитов: <b>${count}</b>. Откройте расписание и отметьте, кто пришёл - так выручка будет точной.`
 
 const HELP_TEXT =
-  'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today — записи на сегодня\n/stop — отключить уведомления'
+  'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today - записи на сегодня\n/stop - отключить уведомления'
 
 // «Войти через Telegram»: the bot asks for the person's own number with one button.
 const LOGIN_ASK_CONTACT =
-  'Вход в <b>Awaisa</b>. Нажмите «Поделиться номером» внизу — так мы узнаем ваш номер и войдём в ваш профиль с записями.'
+  'Вход в <b>Awaisa</b>. Нажмите «Поделиться номером» внизу - так мы узнаем ваш номер и войдём в ваш профиль с записями.'
 const LOGIN_SHARE_BUTTON = '📱 Поделиться номером'
 const LOGIN_DONE =
-  'Готово — вы вошли. Вернитесь на сайт или в приложение. Напоминания о визитах теперь будут приходить сюда.'
+  'Готово - вы вошли. Вернитесь на сайт или в приложение. Напоминания о визитах теперь будут приходить сюда.'
 const LOGIN_EXPIRED = 'Ссылка для входа устарела. Нажмите «Войти через Telegram» на сайте ещё раз.'
 // A chat that already shared its number signs in at once, with a way to use another one.
 const loginKnownText = (phone: string) => {
@@ -149,9 +149,9 @@ const loginKnownText = (phone: string) => {
   const shown = digits.startsWith('996')
     ? `+996 ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9)}`
     : phone
-  return `Готово — вы вошли с номером <b>${escapeHtml(shown)}</b>. Вернитесь на сайт или в приложение.\n\nДругой номер? Отправьте /stop и войдите ещё раз.`
+  return `Готово - вы вошли с номером <b>${escapeHtml(shown)}</b>. Вернитесь на сайт или в приложение.\n\nДругой номер? Отправьте /stop и войдите ещё раз.`
 }
-const LOGIN_NOT_OWN = 'Нужен ваш собственный номер — нажмите кнопку «Поделиться номером» внизу.'
+const LOGIN_NOT_OWN = 'Нужен ваш собственный номер - нажмите кнопку «Поделиться номером» внизу.'
 const LOGIN_REFUSED = 'Пока принимаем только номера Кыргызстана (+996).'
 
 export type { BookingLine }

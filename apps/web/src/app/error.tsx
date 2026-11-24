@@ -23,7 +23,7 @@ const ErrorPage = ({ error, retry }: ErrorPageProps) => {
         <LiveMascot className={styles.mascot} />
         <h1 className={styles.title}>Что-то пошло не так</h1>
         <p className={styles.text}>
-          Не получилось загрузить страницу. Попробуйте ещё раз через минуту — ваши записи никуда не
+          Не получилось загрузить страницу. Попробуйте ещё раз через минуту - ваши записи никуда не
           делись.
         </p>
         <Button size='lg' onClick={retry}>

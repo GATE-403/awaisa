@@ -104,7 +104,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
             <Input
               variant='plain'
               aria-label={t('Описание')}
-              placeholder={t('Что входит — необязательно')}
+              placeholder={t('Что входит - необязательно')}
               value={description}
               onValueChange={setDescription}
             />
@@ -182,7 +182,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
               ? t(
                   'Клиенту придёт одно SMS со ссылкой к тому же мастеру, если он ещё не записался сам.',
                 )
-              : t('Напомним клиенту записаться снова — к тому же мастеру.')}
+              : t('Напомним клиенту записаться снова - к тому же мастеру.')}
           </p>
         </section>
 

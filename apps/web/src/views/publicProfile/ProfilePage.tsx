@@ -10,7 +10,7 @@ interface ProfilePageProps {
 
 // A client's page in the app's own voice, like a contact card in iOS: the face centred on a soft
 // wash of their colour, name and status, one line of facts, the level as a line of text; then
-// achievements as medals and short rows of masters, places and reviews — on the page, no cards.
+// achievements as medals and short rows of masters, places and reviews - on the page, no cards.
 // The trail stays on the server (its schema.org markup is Russian); the rest is translated.
 export const ProfilePage = ({ profile }: ProfilePageProps) => (
   <main className={styles.page} style={profileStyle(profile.accent)}>

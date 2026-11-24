@@ -103,7 +103,7 @@
   -webkit-line-clamp: 2;
 }
 
-/* ★ rating and role: the role moves under the rating when the line is short — it used to be
+/* ★ rating and role: the role moves under the rating when the line is short - it used to be
    cut off mid-word (a flex row ignores text-overflow), even on desktop. */
 .meta {
   display: flex;

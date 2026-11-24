@@ -16,7 +16,7 @@ const TILE_ATTRIBUTION =
 
 // Real dark tiles only from a keyed provider (CARTO and MapTiler both want a key now): set
 // NEXT_PUBLIC_MAP_TILES_URL_DARK, e.g. MapTiler's
-// https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=… — without it the dark theme
+// https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=… - without it the dark theme
 // dims the light tiles with a CSS filter (MapView.module.css), slower to pan but keyless.
 const DARK_TILE_URL = process.env.NEXT_PUBLIC_MAP_TILES_URL_DARK || null
 
