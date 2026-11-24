@@ -50,6 +50,7 @@ export const PhotosSection = ({
   inputId,
 }: PhotosSectionProps) => {
   const { t } = useLingui()
+  const noService = t`no service set`
   const [isBusy, setIsBusy] = useState(false)
   const [photos, setPhotos] = useState<WorkPhoto[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
@@ -143,8 +144,8 @@ export const PhotosSection = ({
             src={photo.url}
             label={
               photo.isHidden
-                ? t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? t`no service set` })}, hidden`
-                : t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? t`no service set` })}`
+                ? t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? noService })}, hidden`
+                : t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? noService })}`
             }
             onOpen={() => setOpenId(photo.id)}
             isDimmed={photo.isHidden}

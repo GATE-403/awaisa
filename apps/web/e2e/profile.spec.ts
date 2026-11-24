@@ -125,7 +125,9 @@ test.describe('Own profile', () => {
     // “To stories” shows the picture first, with a download for a mouse.
     await page.getByRole('button', { name: 'To stories' }).click()
     const storySheet = page.getByRole('dialog', { name: 'For stories' })
-    await expect(storySheet.getByRole('img', { name: 'Profile picture for stories' })).toBeVisible()
+    await expect(
+      storySheet.getByRole('img', { name: 'Your profile card for stories' }),
+    ).toBeVisible()
     // Saving it is one glyph in the sheet's bar (a download with a mouse).
     await expect(storySheet.getByRole('button', { name: 'Download picture' })).toBeVisible()
     await storySheet.getByRole('button', { name: 'Close', exact: true }).click()

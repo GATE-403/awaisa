@@ -77,7 +77,7 @@ export const DateField = ({
         <button
           type='button'
           className={styles.clear}
-          aria-label={t`${ph({ label })}: remove the date`}
+          aria-label={t`${label}: remove the date`}
           onClick={() => onChange('')}
         >
           <X aria-hidden />

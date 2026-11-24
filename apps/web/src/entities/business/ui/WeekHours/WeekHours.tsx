@@ -35,7 +35,7 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
   const daysFull = (from: number, to: number) => {
     const first = weekdayName(t, from)
     if (from === to) return first
-    return t`${ph({ first })} to ${ph({ last: weekdayName(t, to) })}`
+    return t`${first} to ${ph({ last: weekdayName(t, to) })}`
   }
 
   return (

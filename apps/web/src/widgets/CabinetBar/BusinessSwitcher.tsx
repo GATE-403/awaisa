@@ -56,12 +56,13 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
   }
   const masterOf = customer?.masterOf ?? []
   const isAdmin = Boolean(customer?.isAdmin)
+  const businessWord = t`Business`
 
   return (
     <Menu
       align='start'
       onOpenChange={load}
-      label={t`${ph({ name: title ?? t`Business` })}: other businesses and sections`}
+      label={t`${ph({ name: title ?? businessWord })}: other businesses and sections`}
       className={styles.switcher}
       trigger={
         <>

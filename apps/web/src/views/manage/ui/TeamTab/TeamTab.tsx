@@ -32,6 +32,7 @@ interface TeamTabProps {
 export const TeamTab = ({ slug }: TeamTabProps) => {
   const toast = useToast()
   const { t } = useLingui()
+  const businessPlan = t`Business`
   const [team, setTeam] = useState<TeamMember[] | null>(null)
   const [phone, setPhone] = useState('')
   const [isAdding, setIsAdding] = useState(false)
@@ -116,7 +117,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       )}
       {!canAdd && (
         <RowNote>
-          {t`Administrators are available on the “${ph({ plan: access?.upgradeTitle ?? t`Business` })}” plan.`}{' '}
+          {t`Administrators are available on the “${ph({ plan: access?.upgradeTitle ?? businessPlan })}” plan.`}{' '}
           <NextLink href={`/manage/${slug}?tab=billing`} className={own.planLink}>
             {t`Open the plan`} ›
           </NextLink>

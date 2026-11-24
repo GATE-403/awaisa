@@ -5,7 +5,7 @@ import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
 import type { MessageDescriptor } from '@lingui/core'
 import { msg, ph, plural } from '@lingui/core/macro'
-import { Trans, useLingui } from '@lingui/react/macro'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useId, useState } from 'react'
 import { getDateParts } from '@/entities/booking'
@@ -142,7 +142,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
               <p className={styles.facts}>
                 <Trans>
                   <strong>{stats.visits}</strong>{' '}
-                  {plural(stats.visits, { one: 'visit', other: 'visits' })}
+                  <Plural value={stats.visits} one='visit' other='visits' />
                 </Trans>
                 {stats.spent ? (
                   <>

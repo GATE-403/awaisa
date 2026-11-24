@@ -425,7 +425,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     if (!time || availability.error) return
     if (!availability.slots.some((slot) => slot.isAvailable && slot.time === time)) {
       toast.show({
-        title: t`${ph({ time })} is taken at this branch, choose another time`,
+        title: t`${time} is taken at this branch, choose another time`,
         type: 'info',
       })
       setTime(null)

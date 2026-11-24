@@ -169,7 +169,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                   </span>
                   <span className={styles.heroMeta}>
                     {started
-                      ? t`${ph({ finished: format.number(finished?.sessions ?? 0) })} of ${ph({ started: t`${plural(started, { one: '# device', other: '# devices' })}` })} · ${ph({ flow: flowLabel.toLowerCase() })}`
+                      ? t`${ph({ finished: format.number(finished?.sessions ?? 0) })} of ${plural(started, { one: '# device', other: '# devices' })} · ${ph({ flow: flowLabel.toLowerCase() })}`
                       : flowLabel}
                   </span>
                 </div>

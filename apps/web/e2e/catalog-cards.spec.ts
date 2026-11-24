@@ -51,7 +51,7 @@ test.describe('Catalog cards', () => {
     await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await steps.contacts.getByLabel('Phone').fill(randomClientPhone())
     // The look waits beside the note, with a way to drop it.
-    const look = page.getByRole('img', { name: 'Photo of the look you want' })
+    const look = page.getByRole('img', { name: 'The look you want' })
     await expect(look).toBeVisible()
 
     const booked = page.waitForResponse(

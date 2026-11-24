@@ -103,7 +103,7 @@ test.describe('“My day” for a master', () => {
 
       const reviews = master.getByRole('region', { name: 'Your reviews' })
       await expect(reviews).toContainText('E2E Лучший барбер')
-      await expect(reviews).toContainText('5,0 · 1 review')
+      await expect(reviews).toContainText('5.0 · 1 review')
     } finally {
       await masterContext.close()
     }

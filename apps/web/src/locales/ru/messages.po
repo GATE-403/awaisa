@@ -108,23 +108,28 @@ msgstr "- по желанию"
 #: src/views/manage/ui/ScheduleTab.tsx
 #: src/views/masterDay/MasterDayPage.tsx
 msgid "{0, plural, one {# booking} other {# bookings}}"
-msgstr "{0, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
+msgstr "{0, plural, one {# запись} few {# записи} many {# записей} other {# "
+"записи}}"
 
 #. placeholder {0}: plan.maxBranches
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 msgid "{0, plural, one {# branch} other {# branches}}"
-msgstr "{0, plural, one {# филиал} few {# филиала} many {# филиалов} other {# филиала}}"
+msgstr "{0, plural, one {# филиал} few {# филиала} many {# филиалов} other {# "
+"филиала}}"
 
 #. placeholder {0}: lapsed.count
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-msgid "{0, plural, one {# client not seen for a while} other {# clients not seen for a while}}"
-msgstr "{0, plural, one {# клиент давно не был} few {# клиента давно не были} many {# клиентов давно не были} other {# клиента давно не были}}"
+msgid "{0, plural, one {# client not seen for a while} other {# clients not "
+"seen for a while}}"
+msgstr "{0, plural, one {# клиент давно не был} few {# клиента давно не были} "
+"many {# клиентов давно не были} other {# клиента давно не были}}"
 
 #. placeholder {0}: item.recipients
 #. placeholder {0}: preview.count
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
 msgid "{0, plural, one {# client} other {# clients}}"
-msgstr "{0, plural, one {# клиенту} few {# клиентам} many {# клиентам} other {# клиентам}}"
+msgstr "{0, plural, one {# клиенту} few {# клиентам} many {# клиентам} other {# "
+"клиентам}}"
 
 #. placeholder {0}: plan.validDays
 #: src/views/booking/ui/SubscriptionPayment/SubscriptionPayment.tsx
@@ -134,12 +139,14 @@ msgstr "{0, plural, one {# день} few {# дня} many {# дней} other {# �
 #. placeholder {0}: summary.failedReceipts
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
 msgid "{0, plural, one {# failed} other {# failed}}"
-msgstr "{0, plural, one {# не прошёл} few {# не прошли} many {# не прошли} other {# не прошли}}"
+msgstr "{0, plural, one {# не прошёл} few {# не прошли} many {# не прошли} "
+"other {# не прошли}}"
 
 #. placeholder {0}: day.followers
 #: src/views/masterDay/MasterDayPage.tsx
 msgid "{0, plural, one {# follower} other {# followers}}"
-msgstr "{0, plural, one {# подписчик} few {# подписчика} many {# подписчиков} other {# подписчика}}"
+msgstr "{0, plural, one {# подписчик} few {# подписчика} many {# подписчиков} "
+"other {# подписчика}}"
 
 #. placeholder {0}: goals.length
 #: src/entities/profile/ui/Achievements.tsx
@@ -149,17 +156,22 @@ msgstr "{0, plural, one {# цель} few {# цели} many {# целей} other 
 #. placeholder {0}: client.noShows
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "{0, plural, one {# no-show} other {# no-shows}}"
-msgstr "{0, plural, one {# неявка} few {# неявки} many {# неявок} other {# неявки}}"
+msgstr "{0, plural, one {# неявка} few {# неявки} many {# неявок} other {# "
+"неявки}}"
 
 #. placeholder {0}: summary.plans
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
 msgid "{0, plural, one {# pass} other {# passes}}"
-msgstr "{0, plural, one {# абонемент} few {# абонемента} many {# абонементов} other {# абонемента}}"
+msgstr "{0, plural, one {# абонемент} few {# абонемента} many {# абонементов} "
+"other {# абонемента}}"
 
 #. placeholder {0}: places.length
 #: src/views/map/MapPage.tsx
-msgid "{0, plural, one {# place, nearest first} other {# places, nearest first}}"
-msgstr "{0, plural, one {# место, ближайшие первыми} few {# места, ближайшие первыми} many {# мест, ближайшие первыми} other {# места, ближайшие первыми}}"
+msgid "{0, plural, one {# place, nearest first} other {# places, nearest "
+"first}}"
+msgstr "{0, plural, one {# место, ближайшие первыми} few {# места, ближайшие "
+"первыми} many {# мест, ближайшие первыми} other {# места, ближайшие "
+"первыми}}"
 
 #. placeholder {0}: businesses.length
 #. placeholder {0}: places.length
@@ -174,7 +186,8 @@ msgstr "{0, plural, one {# место} few {# места} many {# мест} othe
 #. placeholder {0}: reviews.count
 #: src/views/business/ui/Place/ReviewsSection.tsx
 msgid "{0, plural, one {# rating} other {# ratings}}"
-msgstr "{0, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценки}}"
+msgstr "{0, plural, one {# оценка} few {# оценки} many {# оценок} other {# "
+"оценки}}"
 
 #. placeholder {0}: Math.min(summary.items.length, OPENED) - SHOWN
 #. placeholder {0}: data.count
@@ -185,17 +198,20 @@ msgstr "{0, plural, one {# оценка} few {# оценки} many {# оцено
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
 #: src/views/masterDay/ui/MasterReviews.tsx
 msgid "{0, plural, one {# review} other {# reviews}}"
-msgstr "{0, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}"
+msgstr "{0, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# "
+"отзыва}}"
 
 #. placeholder {0}: data.length
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
 msgid "{0, plural, one {# row} other {# rows}}"
-msgstr "{0, plural, one {# строка} few {# строки} many {# строк} other {# строки}}"
+msgstr "{0, plural, one {# строка} few {# строки} many {# строк} other {# "
+"строки}}"
 
 #. placeholder {0}: summary.lowStock
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
 msgid "{0, plural, one {# running low} other {# running low}}"
-msgstr "{0, plural, one {# заканчивается} few {# заканчиваются} many {# заканчиваются} other {# заканчиваются}}"
+msgstr "{0, plural, one {# заканчивается} few {# заканчиваются} many {# "
+"заканчиваются} other {# заканчиваются}}"
 
 #. placeholder {0}: summary.activePromotions
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
@@ -204,13 +220,17 @@ msgstr "{0, plural, one {# идёт} few {# идут} many {# идут} other {#
 
 #. placeholder {0}: liveSales.length
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
-msgid "{0, plural, one {# sale} other {# sales}} for {amount}. Cancelling puts the products back in stock."
-msgstr "{0, plural, one {# продажа} few {# продажи} many {# продаж} other {# продажи}} на {amount}. Отмена возвращает товары на склад."
+msgid "{0, plural, one {# sale} other {# sales}} for {amount}. Cancelling puts "
+"the products back in stock."
+msgstr "{0, plural, one {# продажа} few {# продажи} many {# продаж} other {# "
+"продажи}} на {amount}. Отмена возвращает товары на склад."
 
 #. placeholder {0}: paidPlan.includedMasters
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
-msgid "{0, plural, one {# specialist included} other {# specialists included}}, {extra} for each more"
-msgstr "{0, plural, one {# мастер включён} few {# мастера включено} many {# мастеров включено} other {# мастера включено}}, ещё {extra} за каждого"
+msgid "{0, plural, one {# specialist included} other {# specialists included}}, "
+"{extra} for each more"
+msgstr "{0, plural, one {# мастер включён} few {# мастера включено} many {# "
+"мастеров включено} other {# мастера включено}}, ещё {extra} за каждого"
 
 #. placeholder {0}: item.count
 #: src/views/insights/InsightsPage.tsx
@@ -224,27 +244,34 @@ msgstr "{0, plural, one {# раз} few {# раза} many {# раз} other {# р�
 #: src/views/manage/ui/BusinessPickerCard/BusinessPickerCard.tsx
 #: src/views/manage/ui/PageTab/PageInsights.tsx
 msgid "{0, plural, one {# view} other {# views}}"
-msgstr "{0, plural, one {# просмотр} few {# просмотра} many {# просмотров} other {# просмотра}}"
+msgstr "{0, plural, one {# просмотр} few {# просмотра} many {# просмотров} "
+"other {# просмотра}}"
 
 #. placeholder {0}: totals.upcomingVisits
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{0, plural, one {# visit booked} other {# visits booked}}"
-msgstr "{0, plural, one {# визит записан} few {# визита записано} many {# визитов записано} other {# визита записано}}"
+msgstr "{0, plural, one {# визит записан} few {# визита записано} many {# "
+"визитов записано} other {# визита записано}}"
 
 #. placeholder {0}: losses.lateCancellations.count
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-msgid "{0, plural, one {# visit cancelled less than a day ahead} other {# visits cancelled less than a day ahead}}"
-msgstr "{0, plural, one {# визит отменён меньше чем за сутки} few {# визита отменены меньше чем за сутки} many {# визитов отменены меньше чем за сутки} other {# визита отменены меньше чем за сутки}}"
+msgid "{0, plural, one {# visit cancelled less than a day ahead} other {# "
+"visits cancelled less than a day ahead}}"
+msgstr "{0, plural, one {# визит отменён меньше чем за сутки} few {# визита "
+"отменены меньше чем за сутки} many {# визитов отменены меньше чем за "
+"сутки} other {# визита отменены меньше чем за сутки}}"
 
 #. placeholder {0}: subscription.visitsLeft
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
 msgid "{0, plural, one {# visit left} other {# visits left}}"
-msgstr "{0, plural, one {остался # визит} few {осталось # визита} many {осталось # визитов} other {осталось # визита}}"
+msgstr "{0, plural, one {остался # визит} few {осталось # визита} many "
+"{осталось # визитов} other {осталось # визита}}"
 
 #. placeholder {0}: unmarked.count
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
 msgid "{0, plural, one {# visit unmarked} other {# visits unmarked}}"
-msgstr "{0, plural, one {# визит без отметки} few {# визита без отметки} many {# визитов без отметки} other {# визита без отметки}}"
+msgstr "{0, plural, one {# визит без отметки} few {# визита без отметки} many "
+"{# визитов без отметки} other {# визита без отметки}}"
 
 #. placeholder {0}: client.visits
 #. placeholder {0}: item.visitsLeft
@@ -261,27 +288,34 @@ msgstr "{0, plural, one {# визит без отметки} few {# визита
 #: src/views/publicProfile/ui/ProfileMasters.tsx
 #: src/views/publicProfile/ui/VisitYear.tsx
 msgid "{0, plural, one {# visit} other {# visits}}"
-msgstr "{0, plural, one {# визит} few {# визита} many {# визитов} other {# визита}}"
+msgstr "{0, plural, one {# визит} few {# визита} many {# визитов} other {# "
+"визита}}"
 
 #. placeholder {0}: subscription.visitsLeft
 #: src/views/manage/ui/ClientSheet/ClientLoyaltySection.tsx
 msgid "{0, plural, one {# visit} other {# visits}} · until {date}"
-msgstr "{0, plural, one {# визит} few {# визита} many {# визитов} other {# визита}} · до {date}"
+msgstr "{0, plural, one {# визит} few {# визита} many {# визитов} other {# "
+"визита}} · до {date}"
 
 #. placeholder {0}: client.count
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-msgid "{0, plural, one {no-show # time in six months} other {no-show # times in six months}}"
-msgstr "{0, plural, one {не пришёл # раз за полгода} few {не пришёл # раза за полгода} many {не пришёл # раз за полгода} other {не пришёл # раза за полгода}}"
+msgid "{0, plural, one {no-show # time in six months} other {no-show # times in "
+"six months}}"
+msgstr "{0, plural, one {не пришёл # раз за полгода} few {не пришёл # раза за "
+"полгода} many {не пришёл # раз за полгода} other {не пришёл # раза за "
+"полгода}}"
 
 #. placeholder {0}: stats.noShows
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
 msgid "{0, plural, one {No-show # time} other {No-show # times}}"
-msgstr "{0, plural, one {Не пришёл # раз} few {Не пришёл # раза} many {Не пришёл # раз} other {Не пришёл # раза}}"
+msgstr "{0, plural, one {Не пришёл # раз} few {Не пришёл # раза} many {Не "
+"пришёл # раз} other {Не пришёл # раза}}"
 
 #. placeholder {0}: loyalty.subscriptionVisits
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
 msgid "{0, plural, one {on passes # visit} other {on passes # visits}}"
-msgstr "{0, plural, one {по абонементам # визит} few {по абонементам # визита} many {по абонементам # визитов} other {по абонементам # визита}}"
+msgstr "{0, plural, one {по абонементам # визит} few {по абонементам # визита} "
+"many {по абонементам # визитов} other {по абонементам # визита}}"
 
 #. placeholder {0}: Math.max(0, hiddenCount)
 #: src/views/masterDay/ui/MasterReviews.tsx
@@ -291,10 +325,10 @@ msgstr "{0, plural, one {отзыв} few {отзыва} many {отзывов} ot
 #. placeholder {0}: plan.maxMasters
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 msgid "{0, plural, one {up to # specialist} other {up to # specialists}}"
-msgstr "{0, plural, one {до # мастера} few {до # мастеров} many {до # мастеров} other {до # мастеров}}"
+msgstr "{0, plural, one {до # мастера} few {до # мастеров} many {до # мастеров} "
+"other {до # мастеров}}"
 
 #. placeholder {0}: history.length - FIRST_VISITS
-#. placeholder {0}: stats.visits
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
 msgid "{0, plural, one {visit} other {visits}}"
 msgstr "{0, plural, one {визит} few {визита} many {визитов} other {визита}}"
@@ -318,47 +352,63 @@ msgstr "{amount}: назовите код клиенту"
 
 #: src/entities/booking/ui/DateTimePicker/DateTimePicker.tsx
 msgid "{availableCount, plural, one {# free} other {# free}}"
-msgstr "{availableCount, plural, one {# свободное} few {# свободных} many {# свободных} other {# свободных}}"
+msgstr "{availableCount, plural, one {# свободное} few {# свободных} many {# "
+"свободных} other {# свободных}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "{count, plural, one {# client came once} other {# clients came once}}"
-msgstr "{count, plural, one {# клиент пришёл один раз} few {# клиента пришли один раз} many {# клиентов пришли один раз} other {# клиента пришли один раз}}"
+msgstr "{count, plural, one {# клиент пришёл один раз} few {# клиента пришли "
+"один раз} many {# клиентов пришли один раз} other {# клиента пришли "
+"один раз}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
-msgid "{count, plural, one {# client with a booking ahead} other {# clients with a booking ahead}}"
-msgstr "{count, plural, one {# клиент с записью впереди} few {# клиента с записью впереди} many {# клиентов с записью впереди} other {# клиента с записью впереди}}"
+msgid "{count, plural, one {# client with a booking ahead} other {# clients "
+"with a booking ahead}}"
+msgstr "{count, plural, one {# клиент с записью впереди} few {# клиента с "
+"записью впереди} many {# клиентов с записью впереди} other {# клиента с "
+"записью впереди}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
-msgid "{count, plural, one {# client with three visits or more} other {# clients with three visits or more}}"
-msgstr "{count, plural, one {# клиент с тремя визитами и больше} few {# клиента с тремя визитами и больше} many {# клиентов с тремя визитами и больше} other {# клиента с тремя визитами и больше}}"
+msgid "{count, plural, one {# client with three visits or more} other {# "
+"clients with three visits or more}}"
+msgstr "{count, plural, one {# клиент с тремя визитами и больше} few {# клиента "
+"с тремя визитами и больше} many {# клиентов с тремя визитами и больше} "
+"other {# клиента с тремя визитами и больше}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "{count, plural, one {# client} other {# clients}}"
-msgstr "{count, plural, one {# клиенту} few {# клиентам} many {# клиентам} other {# клиентам}}"
+msgstr "{count, plural, one {# клиенту} few {# клиентам} many {# клиентам} "
+"other {# клиентам}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{count, plural, one {# more client} other {# more clients}}"
-msgstr "{count, plural, one {Ещё # клиент} few {Ещё # клиента} many {Ещё # клиентов} other {Ещё # клиента}}"
+msgstr "{count, plural, one {Ещё # клиент} few {Ещё # клиента} many {Ещё # "
+"клиентов} other {Ещё # клиента}}"
 
 #: src/views/manage/ui/AnalyticsTab/ProfitSection.tsx
 msgid "{count, plural, one {# more row} other {# more rows}}"
-msgstr "{count, plural, one {Ещё # строка} few {Ещё # строки} many {Ещё # строк} other {Ещё # строки}}"
+msgstr "{count, plural, one {Ещё # строка} few {Ещё # строки} many {Ещё # "
+"строк} other {Ещё # строки}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{count, plural, one {# more service} other {# more services}}"
-msgstr "{count, plural, one {Ещё # услуга} few {Ещё # услуги} many {Ещё # услуг} other {Ещё # услуги}}"
+msgstr "{count, plural, one {Ещё # услуга} few {Ещё # услуги} many {Ещё # "
+"услуг} other {Ещё # услуги}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{count, plural, one {# more specialist} other {# more specialists}}"
-msgstr "{count, plural, one {Ещё # мастер} few {Ещё # мастера} many {Ещё # мастеров} other {Ещё # мастера}}"
+msgstr "{count, plural, one {Ещё # мастер} few {Ещё # мастера} many {Ещё # "
+"мастеров} other {Ещё # мастера}}"
 
 #: src/views/moderation/lib/describe.ts
 msgid "{count, plural, one {# report} other {# reports}}"
-msgstr "{count, plural, one {# жалоба} few {# жалобы} many {# жалоб} other {# жалобы}}"
+msgstr "{count, plural, one {# жалоба} few {# жалобы} many {# жалоб} other {# "
+"жалобы}}"
 
 #: src/entities/business/ui/BusinessCard/ServicesCount.tsx
 msgid "{count, plural, one {# service} other {# services}}"
-msgstr "{count, plural, one {# услуга} few {# услуги} many {# услуг} other {# услуги}}"
+msgstr "{count, plural, one {# услуга} few {# услуги} many {# услуг} other {# "
+"услуги}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
@@ -366,15 +416,18 @@ msgstr "{count, plural, one {# услуга} few {# услуги} many {# усл
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 #: src/views/manage/ui/CloseDayBar/CloseDayBar.tsx
 msgid "{count, plural, one {# visit} other {# visits}}"
-msgstr "{count, plural, one {# визит} few {# визита} many {# визитов} other {# визита}}"
+msgstr "{count, plural, one {# визит} few {# визита} many {# визитов} other {# "
+"визита}}"
 
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 msgid "{count, plural, one {# working day} other {# working days}}"
-msgstr "{count, plural, one {# рабочий день} few {# рабочих дня} many {# рабочих дней} other {# рабочих дня}}"
+msgstr "{count, plural, one {# рабочий день} few {# рабочих дня} many {# "
+"рабочих дней} other {# рабочих дня}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "{count, plural, one {Invite # client} other {Invite # clients}}"
-msgstr "{count, plural, one {Позвать # клиента} few {Позвать # клиентов} many {Позвать # клиентов} other {Позвать # клиента}}"
+msgstr "{count, plural, one {Позвать # клиента} few {Позвать # клиентов} many "
+"{Позвать # клиентов} other {Позвать # клиента}}"
 
 #: src/views/publicProfile/lib/since.ts
 msgid "{count} d ago"
@@ -418,8 +471,10 @@ msgid "{count} more, and clients can book"
 msgstr "Ещё {count}, и клиенты смогут записываться"
 
 #: src/views/manage/ui/Masters/MasterDialog.tsx
-msgid "{count} of {total} ticked. Clients can choose this specialist only for these services."
-msgstr "Отмечено {count} из {total}. Клиент сможет выбрать мастера только для этих услуг."
+msgid "{count} of {total} ticked. Clients can choose this specialist only for "
+"these services."
+msgstr "Отмечено {count} из {total}. Клиент сможет выбрать мастера только для "
+"этих услуг."
 
 #: src/views/manage/ui/AnalyticsTab/ProfitSection.tsx
 msgid "{count} pcs sold"
@@ -542,7 +597,8 @@ msgid "{day}: from"
 msgstr "{day}: с"
 
 #: src/features/waitlist/ui/WaitlistJoin.tsx
-msgid "{day}: if someone cancels, we will send one SMS with a link to that time."
+msgid "{day}: if someone cancels, we will send one SMS with a link to that "
+"time."
 msgstr "{day}: если кто-то отменит, пришлём одно SMS со ссылкой на это время."
 
 #: src/views/manage/ui/Hours/WeekHoursRows.tsx
@@ -566,12 +622,15 @@ msgid "{day}: working day"
 msgstr "{day}: рабочий день"
 
 #: src/views/manage/ui/WaitlistSheet/WaitlistSheet.tsx
-msgid "{day}. When time frees up, clients get an SMS on their own; you can also book them now."
-msgstr "{day}. Освободится время - клиенты получат SMS сами; можно и записать их сразу."
+msgid "{day}. When time frees up, clients get an SMS on their own; you can also "
+"book them now."
+msgstr "{day}. Освободится время - клиенты получат SMS сами; можно и записать "
+"их сразу."
 
 #: src/views/bookings/bookingsUtils.ts
 msgid "{days, plural, one {In # day} other {In # days}}"
-msgstr "{days, plural, one {Через # день} few {Через # дня} many {Через # дней} other {Через # дня}}"
+msgstr "{days, plural, one {Через # день} few {Через # дня} many {Через # дней} "
+"other {Через # дня}}"
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
@@ -580,7 +639,8 @@ msgstr "{days} дн."
 
 #: src/views/insights/InsightsPage.tsx
 msgid "{devices, plural, one {# device} other {# devices}}"
-msgstr "{devices, plural, one {# устройство} few {# устройства} many {# устройств} other {# устройства}}"
+msgstr "{devices, plural, one {# устройство} few {# устройства} many {# "
+"устройств} other {# устройства}}"
 
 #: src/views/manage/ui/SetupProgress/SetupProgress.tsx
 msgid "{done} of {total}"
@@ -592,12 +652,16 @@ msgid "{done} of {total} done"
 msgstr "Готово {done} из {total}"
 
 #: src/views/manage/lib/businessList.ts
-msgid "{failedReceipts, plural, one {# receipt failed} other {# receipts failed}}"
-msgstr "{failedReceipts, plural, one {# чек не прошёл} few {# чека не прошли} many {# чеков не прошли} other {# чека не прошли}}"
+msgid "{failedReceipts, plural, one {# receipt failed} other {# receipts "
+"failed}}"
+msgstr "{failedReceipts, plural, one {# чек не прошёл} few {# чека не прошли} "
+"many {# чеков не прошли} other {# чека не прошли}}"
 
 #: src/views/insights/InsightsPage.tsx
-msgid "{finished} of {started} · {flow}"
-msgstr "{finished} из {started} · {flow}"
+msgid "{finished} of {started, plural, one {# device} other {# devices}} · "
+"{flow}"
+msgstr "{finished} из {started, plural, one {# устройства} few {# устройств} "
+"many {# устройств} other {# устройства}} · {flow}"
 
 #: src/entities/business/ui/WeekHours/WeekHours.tsx
 msgid "{first} to {last}"
@@ -605,19 +669,23 @@ msgstr "{first} - {last}"
 
 #: src/views/business/ui/Place/ServicesBrowser.tsx
 msgid "{foundCount, plural, one {Found # service} other {Found # services}}"
-msgstr "{foundCount, plural, one {Нашли # услугу} few {Нашли # услуги} many {Нашли # услуг} other {Нашли # услуги}}"
+msgstr "{foundCount, plural, one {Нашли # услугу} few {Нашли # услуги} many "
+"{Нашли # услуг} other {Нашли # услуги}}"
 
 #: src/entities/booking/ui/DateTimePicker/TimeRuler.tsx
 msgid "{freeCount, plural, one {# free slot} other {# free slots}}"
-msgstr "{freeCount, plural, one {# свободное окно} few {# свободных окна} many {# свободных окон} other {# свободного окна}}"
+msgstr "{freeCount, plural, one {# свободное окно} few {# свободных окна} many "
+"{# свободных окон} other {# свободного окна}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{from} to {to} · past visits"
 msgstr "{from} – {to} · по прошедшим визитам"
 
 #: src/views/leaderboard/lib/boardMetadata.ts
-msgid "{heading} in Bishkek by client reviews: ratings, review counts and online booking with no calls."
-msgstr "{heading} в Бишкеке по отзывам клиентов: рейтинг, число отзывов и онлайн-запись без звонков."
+msgid "{heading} in Bishkek by client reviews: ratings, review counts and "
+"online booking with no calls."
+msgstr "{heading} в Бишкеке по отзывам клиентов: рейтинг, число отзывов и "
+"онлайн-запись без звонков."
 
 #: src/views/leaderboard/lib/boardMetadata.ts
 msgid "{heading} in Bishkek: ranked by reviews"
@@ -625,20 +693,24 @@ msgstr "{heading} в Бишкеке: рейтинг по отзывам"
 
 #: src/views/business/ui/Place/QuestionsSection.tsx
 msgid "{hidden, plural, one {# question} other {# questions}}"
-msgstr "{hidden, plural, one {# вопрос} few {# вопроса} many {# вопросов} other {# вопроса}}"
+msgstr "{hidden, plural, one {# вопрос} few {# вопроса} many {# вопросов} other "
+"{# вопроса}}"
 
 #: src/views/business/ui/Place/ReviewThread.tsx
 #: src/views/publicProfile/ui/ProfileReviews.tsx
 msgid "{hidden, plural, one {# review} other {# reviews}}"
-msgstr "{hidden, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}"
+msgstr "{hidden, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# "
+"отзыва}}"
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "{hiddenCount, plural, one {client} other {clients}}"
-msgstr "{hiddenCount, plural, one {клиент} few {клиента} many {клиентов} other {клиента}}"
+msgstr "{hiddenCount, plural, one {клиент} few {клиента} many {клиентов} other "
+"{клиента}}"
 
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
 msgid "{hiddenCount, plural, one {review} other {reviews}}"
-msgstr "{hiddenCount, plural, one {отзыв} few {отзыва} many {отзывов} other {отзыва}}"
+msgstr "{hiddenCount, plural, one {отзыв} few {отзыва} many {отзывов} other "
+"{отзыва}}"
 
 #: src/shared/i18n/format.ts
 msgid "{hours} h"
@@ -661,36 +733,52 @@ msgid "{label}: remove the date"
 msgstr "{label}: убрать дату"
 
 #: src/views/publicProfile/lib/goals.ts
-msgid "{left, plural, one {# friend more by your link} other {# friends more by your link}}"
-msgstr "{left, plural, one {Ещё # друг по вашей ссылке} few {Ещё # друга по вашей ссылке} many {Ещё # друзей по вашей ссылке} other {Ещё # друга по вашей ссылке}}"
+msgid "{left, plural, one {# friend more by your link} other {# friends more by "
+"your link}}"
+msgstr "{left, plural, one {Ещё # друг по вашей ссылке} few {Ещё # друга по "
+"вашей ссылке} many {Ещё # друзей по вашей ссылке} other {Ещё # друга по "
+"вашей ссылке}}"
 
 #: src/views/publicProfile/lib/goals.ts
 msgid "{left, plural, one {# new place more} other {# new places more}}"
-msgstr "{left, plural, one {Ещё # новое место} few {Ещё # новых места} many {Ещё # новых мест} other {Ещё # нового места}}"
+msgstr "{left, plural, one {Ещё # новое место} few {Ещё # новых места} many "
+"{Ещё # новых мест} other {Ещё # нового места}}"
 
 #: src/views/publicProfile/lib/goals.ts
 msgid "{left, plural, one {# review more} other {# reviews more}}"
-msgstr "{left, plural, one {Ещё # отзыв} few {Ещё # отзыва} many {Ещё # отзывов} other {Ещё # отзыва}}"
+msgstr "{left, plural, one {Ещё # отзыв} few {Ещё # отзыва} many {Ещё # "
+"отзывов} other {Ещё # отзыва}}"
 
 #: src/views/publicProfile/lib/goals.ts
-msgid "{left, plural, one {# visit more at {place}} other {# visits more at {place}}}"
-msgstr "{left, plural, one {Ещё # визит в {place}} few {Ещё # визита в {place}} many {Ещё # визитов в {place}} other {Ещё # визита в {place}}}"
+msgid "{left, plural, one {# visit more at {place}} other {# visits more at "
+"{place}}}"
+msgstr "{left, plural, one {Ещё # визит в {place}} few {Ещё # визита в {place}} "
+"many {Ещё # визитов в {place}} other {Ещё # визита в {place}}}"
 
 #: src/views/publicProfile/lib/goals.ts
-msgid "{left, plural, one {# visit more before 10:00} other {# visits more before 10:00}}"
-msgstr "{left, plural, one {Ещё # визит до 10:00} few {Ещё # визита до 10:00} many {Ещё # визитов до 10:00} other {Ещё # визита до 10:00}}"
+msgid "{left, plural, one {# visit more before 10:00} other {# visits more "
+"before 10:00}}"
+msgstr "{left, plural, one {Ещё # визит до 10:00} few {Ещё # визита до 10:00} "
+"many {Ещё # визитов до 10:00} other {Ещё # визита до 10:00}}"
 
 #: src/views/publicProfile/lib/goals.ts
-msgid "{left, plural, one {# visit more to one place} other {# visits more to one place}}"
-msgstr "{left, plural, one {Ещё # визит в одно место} few {Ещё # визита в одно место} many {Ещё # визитов в одно место} other {Ещё # визита в одно место}}"
+msgid "{left, plural, one {# visit more to one place} other {# visits more to "
+"one place}}"
+msgstr "{left, plural, one {Ещё # визит в одно место} few {Ещё # визита в одно "
+"место} many {Ещё # визитов в одно место} other {Ещё # визита в одно "
+"место}}"
 
 #: src/views/publicProfile/lib/goals.ts
 msgid "{left, plural, one {# visit more} other {# visits more}}"
-msgstr "{left, plural, one {Ещё # визит} few {Ещё # визита} many {Ещё # визитов} other {Ещё # визита}}"
+msgstr "{left, plural, one {Ещё # визит} few {Ещё # визита} many {Ещё # "
+"визитов} other {Ещё # визита}}"
 
 #: src/views/publicProfile/lib/goals.ts
-msgid "{left, plural, one {Try # kind of service more} other {Try # kinds of service more}}"
-msgstr "{left, plural, one {Попробуйте ещё # вид услуг} few {Попробуйте ещё # вида услуг} many {Попробуйте ещё # видов услуг} other {Попробуйте ещё # вида услуг}}"
+msgid "{left, plural, one {Try # kind of service more} other {Try # kinds of "
+"service more}}"
+msgstr "{left, plural, one {Попробуйте ещё # вид услуг} few {Попробуйте ещё # "
+"вида услуг} many {Попробуйте ещё # видов услуг} other {Попробуйте ещё # "
+"вида услуг}}"
 
 #: src/views/booking/BookingPage.tsx
 msgid "{master} does not do “{service}”, choose a master"
@@ -698,11 +786,13 @@ msgstr "{master} не делает «{service}», выберите мастер�
 
 #: src/views/services/ui/ServicesFacts.tsx
 msgid "{mastersCount, plural, one {specialist} other {specialists}}"
-msgstr "{mastersCount, plural, one {мастер} few {мастера} many {мастеров} other {мастера}}"
+msgstr "{mastersCount, plural, one {мастер} few {мастера} many {мастеров} other "
+"{мастера}}"
 
 #: src/app/[lang]/u/[id]/story/route.tsx
 msgid "{medals, plural, one {medal} other {medals}}"
-msgstr "{medals, plural, one {медаль} few {медали} many {медалей} other {медали}}"
+msgstr "{medals, plural, one {медаль} few {медали} many {медалей} other "
+"{медали}}"
 
 #: src/views/manage/ui/Hours/HoursSheet.tsx
 msgid "{minutes} min"
@@ -741,8 +831,10 @@ msgid "{name} on Awaisa"
 msgstr "{name} в Awaisa"
 
 #: src/app/[lang]/u/[id]/page.tsx
-msgid "{name} on Awaisa: level {level}, {badges, plural, one {# badge} other {# badges}}"
-msgstr "{name} в Awaisa: уровень {level}, {badges, plural, one {# достижение} few {# достижения} many {# достижений} other {# достижения}}"
+msgid "{name} on Awaisa: level {level}, {badges, plural, one {# badge} other {# "
+"badges}}"
+msgstr "{name} в Awaisa: уровень {level}, {badges, plural, one {# достижение} "
+"few {# достижения} many {# достижений} other {# достижения}}"
 
 #: src/views/business/ui/Place/BranchesMap.tsx
 msgid "{name} on the map"
@@ -778,15 +870,18 @@ msgstr "{names}. Только те, кто не отключал SMS."
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{newClients, plural, one {# new} other {# new}}"
-msgstr "{newClients, plural, one {# новый} few {# новых} many {# новых} other {# новых}}"
+msgstr "{newClients, plural, one {# новый} few {# новых} many {# новых} other "
+"{# новых}}"
 
 #: src/views/insights/InsightsPage.tsx
 msgid "{online, plural, one {# booking} other {# bookings}}"
-msgstr "{online, plural, one {# запись} few {# записи} many {# записей} other {# записи}}"
+msgstr "{online, plural, one {# запись} few {# записи} many {# записей} other "
+"{# записи}}"
 
 #: src/views/insights/InsightsPage.tsx
 msgid "{online, plural, one {Of # booking online} other {Of # bookings online}}"
-msgstr "{online, plural, one {Из # онлайн-записи} few {Из # онлайн-записей} many {Из # онлайн-записей} other {Из # онлайн-записи}}"
+msgstr "{online, plural, one {Из # онлайн-записи} few {Из # онлайн-записей} "
+"many {Из # онлайн-записей} other {Из # онлайн-записи}}"
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 #: src/widgets/DayStrip/DayStrip.tsx
@@ -799,7 +894,8 @@ msgstr "{percent}% от {base}"
 
 #: src/views/manage/ui/PageTab/PageChecklist.tsx
 msgid "{photosMissing, plural, one {# work photo} other {# work photos}}"
-msgstr "{photosMissing, plural, one {# фото работы} few {# фото работ} many {# фото работ} other {# фото работ}}"
+msgstr "{photosMissing, plural, one {# фото работы} few {# фото работ} many {# "
+"фото работ} other {# фото работ}}"
 
 #: src/shared/ui/Wreath/Wreath.tsx
 msgid "{place} on Awaisa"
@@ -840,7 +936,8 @@ msgstr "{productsPercent}% с товаров"
 
 #: src/views/manage/lib/payText.ts
 msgid "{rates, plural, one {# rate} other {# rates}}"
-msgstr "{rates, plural, one {# ставка} few {# ставки} many {# ставок} other {# ставки}}"
+msgstr "{rates, plural, one {# ставка} few {# ставки} many {# ставок} other {# "
+"ставки}}"
 
 #: src/entities/review/ui/Stars.tsx
 msgid "{rating} of 5"
@@ -856,7 +953,8 @@ msgstr "{returned} из {clients} новых клиентов, за 60 дней"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{returning, plural, one {# returning} other {# returning}}"
-msgstr "{returning, plural, one {# вернулся} few {# вернулись} many {# вернулись} other {# вернулись}}"
+msgstr "{returning, plural, one {# вернулся} few {# вернулись} many {# "
+"вернулись} other {# вернулись}}"
 
 #: src/views/publicProfile/ui/VisitYear.tsx
 msgid "{service} · {master}, {place}"
@@ -868,7 +966,8 @@ msgstr "{service}: {duration}, {price}. Клиенту придёт SMS с по�
 
 #: src/views/services/ui/ServicesFacts.tsx
 msgid "{servicesCount, plural, one {service} other {services}}"
-msgstr "{servicesCount, plural, one {услуга} few {услуги} many {услуг} other {услуги}}"
+msgstr "{servicesCount, plural, one {услуга} few {услуги} many {услуг} other "
+"{услуги}}"
 
 #: src/views/insights/InsightsPage.tsx
 msgid "{share} of the previous step"
@@ -877,10 +976,6 @@ msgstr "{share} от прошлого шага"
 #: src/features/rateVisit/ui/StarRating/StarRating.tsx
 msgid "{stars} of 5: {label}"
 msgstr "{stars} из 5 - {label}"
-
-#: src/views/insights/InsightsPage.tsx
-msgid "{started, plural, one {# device} other {# devices}}"
-msgstr "{started, plural, one {# устройство} few {# устройства} many {# устройств} other {# устройства}}"
 
 #: src/views/map/MapPage.tsx
 msgid "{state}. Change the list height"
@@ -900,35 +995,44 @@ msgstr "В этом филиале {time} занято, выберите дру�
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "{total, plural, one {# booking above} other {# bookings above}}"
-msgstr "{total, plural, one {# запись выше} few {# записи выше} many {# записей выше} other {# записи выше}}"
+msgstr "{total, plural, one {# запись выше} few {# записи выше} many {# записей "
+"выше} other {# записи выше}}"
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "{total, plural, one {# booking below} other {# bookings below}}"
-msgstr "{total, plural, one {# запись ниже} few {# записи ниже} many {# записей ниже} other {# записи ниже}}"
+msgstr "{total, plural, one {# запись ниже} few {# записи ниже} many {# записей "
+"ниже} other {# записи ниже}}"
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "{total, plural, one {# booking earlier} other {# bookings earlier}}"
-msgstr "{total, plural, one {# запись раньше} few {# записи раньше} many {# записей раньше} other {# записи раньше}}"
+msgstr "{total, plural, one {# запись раньше} few {# записи раньше} many {# "
+"записей раньше} other {# записи раньше}}"
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "{total, plural, one {# booking later} other {# bookings later}}"
-msgstr "{total, plural, one {# запись позже} few {# записи позже} many {# записей позже} other {# записи позже}}"
+msgstr "{total, plural, one {# запись позже} few {# записи позже} many {# "
+"записей позже} other {# записи позже}}"
 
 #: src/views/publicProfile/ui/VisitYear.tsx
 msgid "{total, plural, one {# visit} other {# visits}}"
-msgstr "{total, plural, one {# визит} few {# визита} many {# визитов} other {# визита}}"
+msgstr "{total, plural, one {# визит} few {# визита} many {# визитов} other {# "
+"визита}}"
 
 #: src/views/manage/lib/businessList.ts
-msgid "{unansweredReviews, plural, one {# review unanswered} other {# reviews unanswered}}"
-msgstr "{unansweredReviews, plural, one {# отзыв без ответа} few {# отзыва без ответа} many {# отзывов без ответа} other {# отзыва без ответа}}"
+msgid "{unansweredReviews, plural, one {# review unanswered} other {# reviews "
+"unanswered}}"
+msgstr "{unansweredReviews, plural, one {# отзыв без ответа} few {# отзыва без "
+"ответа} many {# отзывов без ответа} other {# отзыва без ответа}}"
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
 msgid "{unit}, {name}: percent or amount per visit"
 msgstr "{unit}, {name}: процент или сумма за визит"
 
 #: src/views/manage/lib/businessList.ts
-msgid "{unmarkedVisits, plural, one {# visit unmarked} other {# visits unmarked}}"
-msgstr "{unmarkedVisits, plural, one {# визит без отметки} few {# визита без отметки} many {# визитов без отметки} other {# визита без отметки}}"
+msgid "{unmarkedVisits, plural, one {# visit unmarked} other {# visits "
+"unmarked}}"
+msgstr "{unmarkedVisits, plural, one {# визит без отметки} few {# визита без "
+"отметки} many {# визитов без отметки} other {# визита без отметки}}"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
 msgid "{used} of {limit}"
@@ -943,13 +1047,19 @@ msgid "{value} of 5"
 msgstr "{value} из 5"
 
 #: src/app/[lang]/u/[id]/opengraph-image.tsx
-msgid "{visits, plural, one {# visit} other {# visits}} · {places, plural, one {# place} other {# places}} · {reviews, plural, one {# review} other {# reviews}}"
-msgstr "{visits, plural, one {# визит} few {# визита} many {# визитов} other {# визита}} · {places, plural, one {# место} few {# места} many {# мест} other {# места}} · {reviews, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}"
+msgid "{visits, plural, one {# visit} other {# visits}} · {places, plural, one "
+"{# place} other {# places}} · {reviews, plural, one {# review} other {# "
+"reviews}}"
+msgstr "{visits, plural, one {# визит} few {# визита} many {# визитов} other {# "
+"визита}} · {places, plural, one {# место} few {# места} many {# мест} "
+"other {# места}} · {reviews, plural, one {# отзыв} few {# отзыва} many "
+"{# отзывов} other {# отзыва}}"
 
 #: src/app/[lang]/u/[id]/story/route.tsx
 #: src/views/bookings/ui/AccountCard/AccountCard.tsx
 msgid "{visits, plural, one {visit} other {visits}}"
-msgstr "{visits, plural, one {визит} few {визита} many {визитов} other {визита}}"
+msgstr "{visits, plural, one {визит} few {визита} many {визитов} other "
+"{визита}}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "{visits} · last {day}"
@@ -973,16 +1083,20 @@ msgid "<0>{0}%</0> return within 6 weeks"
 msgstr "возвращаются <0>{0}%</0> за 6 недель"
 
 #. placeholder {0}: stats.visits
-#. placeholder {1}: 'use client' import { Button } from '@awaisa/ui/Button' import { Skeleton } from '@awaisa/ui/Skeleton' import { useToast } from '@awaisa/ui/Toast' import type { MessageDescriptor } from '@lingui/core' import { msg, ph, plural } from '@lingui/core/macro' import { Trans, useLingui } from '@lingui/react/macro' import { Star } from '@phosphor-icons/react/ssr' import { type CSSProperties, useEffect, useId, useState } from 'react' import { getDateParts } from '@/entities/booking' import { PersonAvatar, pickTint } from '@/entities/business' import { getErrorMessage } from '@/shared/api/apiError' import { getClient, updateClient } from '@/shared/api/clientApi' import type { ClientCard } from '@/shared/api/types' import { type Format, type Translate, useFormat } from '@/shared/i18n' import { ContactRows } from '@/shared/ui/ContactRows/ContactRows' import { MoreFade } from '@/shared/ui/MoreFade/MoreFade' import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption' import { Sheet } from '@/shared/ui/Sheet/Sheet' import sheet from '@/shared/ui/Sheet/Sheet.module.css' import { useHasFeature } from '@/views/manage/model/usePlanAccess' import { BirthdayField, formatMomentDay, formatMonthYear, getBishkekDate } from './BirthdayField' import { ClientLoyaltySection } from './ClientLoyaltySection' import styles from './ClientSheet.module.css' interface ClientSheetProps { slug: string phone: string onClose: () => void onSaved?: () => void /** Book this client again (the schedule passes it): their usual service, name and number. */ onBook?: (client: { name: string; phone: string; serviceName: string | null }) => void } const METHOD_LABELS: Record<string, MessageDescriptor> = { cash: msg`cash`, card: msg`card`, transfer: msg`transfer`, } const methodLabel = (method: string, t: Translate) => { const label = METHOD_LABELS[method] return label ? t(label) : method } const sinceLabel = (iso: string, t: Translate) => { const { month, year } = getBishkekDate(iso) return formatMonthYear(month, year, t) } const FIRST_VISITS = 4 const visitStatus = (item: ClientCard['history'][number], t: Translate, format: Format) => { if (item.status === 'cancelled') return { label: t(msg`Cancelled`), tone: 'muted' } if (item.outcome === 'no_show') return { label: t(msg`No-show`), tone: 'danger' } if (item.outcome === 'arrived') { const paid = item.paidAmount ?? item.price return { label: `${format.price(paid)}${item.paymentMethod ? `, ${methodLabel(item.paymentMethod, t)}` : ''}`, tone: 'ok', } } return { label: format.price(item.price), tone: 'plain' } } // Everything the business knows about one client: what they come for, how reliable they are, // private notes. Contacts are one tap away. export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientSheetProps) => { const format = useFormat() const { t } = useLingui() const hasLoyalty = useHasFeature('loyalty') const toast = useToast() const noteId = useId() const [card, setCard] = useState<ClientCard | null>(null) const [error, setError] = useState<string | null>(null) const [note, setNote] = useState('') const [birthday, setBirthday] = useState('') const [isAllHistory, setIsAllHistory] = useState(false) useEffect(() => { const controller = new AbortController() getClient(slug, phone, controller.signal) .then((loaded) => { setCard(loaded) setNote(loaded.note) setBirthday(loaded.birthday ?? '') }) .catch((loadError: unknown) => { if (!controller.signal.aborted) setError(getErrorMessage(loadError)) }) return () => controller.abort() }, [slug, phone]) const isDirty = card !== null && (note !== card.note || birthday !== (card.birthday ?? '')) const handleDone = async () => { if (!card || !isDirty) { onClose() return } try { await updateClient(slug, card.phone, { note, birthday: birthday || null }) toast.show({ title: t`Card saved`, type: 'success' }) onSaved?.() onClose() } catch (saveError) { toast.show({ title: t`Something went wrong`, description: getErrorMessage(saveError), type: 'error', }) } } const name = card?.name || t`No name` const stats = card?.stats const history = card?.history ?? [] const shownHistory = isAllHistory ? history : history.slice(0, FIRST_VISITS) return ( <Sheet title={t`Client`} onClose={onClose} cancelLabel={null} action={{ label: isDirty ? t`Save` : t`Done`, onClick: handleDone }} > {error && <p className={styles.error}>{error}</p>} {!card && !error && <Skeleton className={styles.skeleton} />} {card && stats && ( <> {/* The quiet profile head: a wash of the person's colour, the face, one line of facts. */} <header className={styles.head} style={{ '--client-tint': pickTint(card.name || card.phone) } as CSSProperties} > <PersonAvatar name={card.name || card.phone.slice(-2)} size='lg' /> <h3 className={styles.name}>{name}</h3> {stats.visits > 0 && ( <p className={styles.facts}> <Trans> <strong>{stats.visits}</strong>{' '} {plural(stats.visits, { one: 'visit', other: 'visits' })} </Trans> {stats.spent ? ( <> {' · '} <strong>{format.price(stats.spent)}</strong> </> ) : null} {stats.firstVisit && ` · ${t`since ${ph({ date: sinceLabel(stats.firstVisit, t) })}`}`} </p> )} {stats.favoriteService && ( <p className={styles.usual}> {t`Usually: ${ph({ service: stats.favoriteService })}`} {stats.favoriteMaster && ` · ${stats.favoriteMaster}`} </p> )} {stats.nextVisit && ( <p className={styles.next}> {t`Next visit ${ph({ date: formatMomentDay(stats.nextVisit, t) })}`} </p> )} {stats.noShows > 0 && ( <p className={styles.warning}> {t`${plural(stats.noShows, { one: 'No-show # time', other: 'No-show # times' })}`} </p> )} {onBook && ( <div className={styles.actions}> <Button size='sm' onClick={() => onBook({ name: card.name, phone: card.phone, serviceName: stats.favoriteService, }) } > {t`Book again`} </Button> </div> )} </header> <ContactRows phone={card.phone} /> <section className={sheet.group} aria-label={t`Only for you`}> <SectionCaption>{t`Only for you`}</SectionCaption> <div className={sheet.list}> <BirthdayField value={birthday} onChange={setBirthday} /> <textarea id={noteId} aria-label={t`Note about the client`} className={styles.note} value={note} onChange={(event) => setNote(event.target.value)} maxLength={2000} rows={2} placeholder={t`Note: allergies, favourite specialist, how to address them`} /> </div> </section> {hasLoyalty && <ClientLoyaltySection slug={slug} phone={card.phone} />} {history.length > 0 && ( <section className={sheet.group} aria-label={t`History`}> <SectionCaption> {t`History`} <span className={styles.count}>{history.length}</span> </SectionCaption> <MoreFade hiddenCount={Math.max(0, history.length - FIRST_VISITS)} isOpen={isAllHistory} onToggle={() => setIsAllHistory((value) => !value)} label={t`${plural(history.length - FIRST_VISITS, { one: 'visit', other: 'visits' })}`} surface='sheet' isLessFloating={false} > <ul className={`${sheet.list} ${styles.history}`}> {shownHistory.map((item) => { const status = visitStatus(item, t, format) const { day } = getDateParts(item.date) const month = format.monthShort(item.date) return ( <li key={item.id} className={styles.visit}> <span className={styles.leaf} aria-hidden='true'> <span className={styles.leafMonth}>{month}</span> <span className={styles.leafDay}>{day}</span> </span> <span className={styles.visitText}> <span className={styles.visitTitle}>{item.serviceName}</span> <span className={styles.visitMeta}> <span className={styles.srOnly}> {day} {month},{' '} </span> {item.time} · {item.specialistName} </span> {item.rating !== null && ( <span className={styles.visitRating}> <Star weight='fill' aria-hidden /> {item.rating} {item.reviewComment && ` · "${item.reviewComment}"`} </span> )} </span> <span className={styles.visitStatus} data-tone={status.tone}> {status.label} </span> </li> ) })} </ul> </MoreFade> </section> )} </> )} </Sheet> ) } 
+#. placeholder {1}: stats.visits
 #: src/views/manage/ui/ClientSheet/ClientSheet.tsx
-msgid "<0>{0}</0> {1}"
-msgstr "<0>{0}</0> {1}"
+msgid "<0>{0}</0> {1, plural, one {visit} other {visits}}"
+msgstr "<0>{0}</0> {1, plural, one {визит} few {визита} many {визитов} other "
+"{визита}}"
 
 #. placeholder {0}: sent.length
 #. placeholder {1}: smsParts(sent)
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
-msgid "≈ {0, plural, one {# character} other {# characters}}, {1, plural, one {# SMS} other {# SMS}} per client."
-msgstr "≈ {0, plural, one {# символ} few {# символа} many {# символов} other {# символа}}, {1, plural, one {# SMS} few {# SMS} many {# SMS} other {# SMS}} на клиента."
+msgid "≈ {0, plural, one {# character} other {# characters}}, {1, plural, one "
+"{# SMS} other {# SMS}} per client."
+msgstr "≈ {0, plural, one {# символ} few {# символа} many {# символов} other {# "
+"символа}}, {1, plural, one {# SMS} few {# SMS} many {# SMS} other {# "
+"SMS}} на клиента."
 
 #: src/views/forBusiness/ui/OrbitScene.tsx
 msgid "★ 4.9 · 128 reviews"
@@ -1060,24 +1174,31 @@ msgid "A bit of everything"
 msgstr "Всё понемногу"
 
 #: src/app/[lang]/business/page.tsx
-msgid "A booking page for a salon or a specialist in five minutes: services, specialists, hours and reminders."
-msgstr "Страница записи для салона или мастера за пять минут: услуги, мастера, часы работы и напоминания."
+msgid "A booking page for a salon or a specialist in five minutes: services, "
+"specialists, hours and reminders."
+msgstr "Страница записи для салона или мастера за пять минут: услуги, мастера, "
+"часы работы и напоминания."
 
 #: src/views/manage/ui/TimeOffDialog/TimeOffDialog.tsx
 msgid "A break, training or a day off: clients cannot book this time."
-msgstr "Перерыв, обучение или выходной - клиенты не смогут записаться на это время."
+msgstr "Перерыв, обучение или выходной - клиенты не смогут записаться на это "
+"время."
 
 #: src/views/forBusiness/ForBusinessPage.tsx
-msgid "A column per specialist. Drag to reschedule, tap a time to book a walk-in."
-msgstr "Колонка на мастера. Перенос перетаскиванием, запись с улицы - нажатием на время."
+msgid "A column per specialist. Drag to reschedule, tap a time to book a "
+"walk-in."
+msgstr "Колонка на мастера. Перенос перетаскиванием, запись с улицы - нажатием "
+"на время."
 
 #: src/views/booking/ui/NotifyOptions/NotifyOptions.tsx
 msgid "A day before"
 msgstr "За день"
 
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-msgid "A deposit on online bookings protects against no-shows: <0>turn it on in services</0>."
-msgstr "Предоплата при онлайн-записи защищает от неявок: <0>включите её в услугах</0>."
+msgid "A deposit on online bookings protects against no-shows: <0>turn it on in "
+"services</0>."
+msgstr "Предоплата при онлайн-записи защищает от неявок: <0>включите её в "
+"услугах</0>."
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "A deposit on online bookings protects against no-shows."
@@ -1092,19 +1213,24 @@ msgid "A few words about you: what you are good at and for whom"
 msgstr "Пара слов о вас: чем вы хороши и для кого"
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "A gift certificate for an amount: the client spends it in parts, the balance shows by its code."
-msgstr "Подарочный сертификат на сумму: клиент тратит его частями, остаток виден по коду."
+msgid "A gift certificate for an amount: the client spends it in parts, the "
+"balance shows by its code."
+msgstr "Подарочный сертификат на сумму: клиент тратит его частями, остаток "
+"виден по коду."
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "A gift certificate on the place’s page: the client picks an amount, pays by card and gets a code."
-msgstr "Подарочный сертификат на странице места: клиент выбирает сумму, платит картой и получает код."
+msgid "A gift certificate on the place’s page: the client picks an amount, pays "
+"by card and gets a code."
+msgstr "Подарочный сертификат на странице места: клиент выбирает сумму, платит "
+"картой и получает код."
 
 #: src/features/profileStyle/ui/ProfileStyleSheet/ProfileStyleSheet.tsx
 msgid "A handle or a link: shown as icons on your page."
 msgstr "Ник или ссылка - покажем значками на вашей странице."
 
 #: src/views/manage/ui/BusinessSheet/BusinessSheet.tsx
-msgid "A hidden page is not found in the catalog. Bookings and the cabinet stay."
+msgid "A hidden page is not found in the catalog. Bookings and the cabinet "
+"stay."
 msgstr "Скрытую страницу не найдут в каталоге. Записи и кабинет остаются."
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
@@ -1116,20 +1242,27 @@ msgid "a month. No subscription fee, no commission per booking."
 msgstr "в месяц. Без абонплаты и комиссии с записи."
 
 #: src/views/forBusiness/ForBusinessPage.tsx
-msgid "A page with services and prices, specialists’ schedules, client reminders and Wallet passes. Free, with no subscription fee or commission."
-msgstr "Страница с услугами и ценами, расписание мастеров, напоминания клиентам и талоны в Wallet. Бесплатно, без абонплаты и комиссии."
+msgid "A page with services and prices, specialists’ schedules, client "
+"reminders and Wallet passes. Free, with no subscription fee or "
+"commission."
+msgstr "Страница с услугами и ценами, расписание мастеров, напоминания клиентам "
+"и талоны в Wallet. Бесплатно, без абонплаты и комиссии."
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
 msgid "A partial month is counted by its days."
 msgstr "За неполный месяц считается его часть по дням."
 
 #: src/features/profileStyle/ui/ProfileStyleSheet/ProfileStyleSheet.tsx
-msgid "A public profile is seen by its link and from your reviews. Level and achievements come from visits and reviews."
-msgstr "Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения - за визиты и отзывы."
+msgid "A public profile is seen by its link and from your reviews. Level and "
+"achievements come from visits and reviews."
+msgstr "Открытый профиль видят по ссылке и из ваших отзывов. Уровень и "
+"достижения - за визиты и отзывы."
 
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
-msgid "A receipt is issued by itself after a sale and after “Arrived” paid in money; cancelling a sale issues a refund receipt."
-msgstr "Чек выходит сам после продажи и после «Пришёл» с оплатой деньгами; отмена продажи даёт чек возврата."
+msgid "A receipt is issued by itself after a sale and after “Arrived” paid in "
+"money; cancelling a sale issues a refund receipt."
+msgstr "Чек выходит сам после продажи и после «Пришёл» с оплатой деньгами; "
+"отмена продажи даёт чек возврата."
 
 #: src/entities/profile/lib/achievementTitle.ts
 msgid "A regular at {place}"
@@ -1242,8 +1375,10 @@ msgid "Add an administrator"
 msgstr "Добавить администратора"
 
 #: src/views/forBusiness/forBusinessContent.ts
-msgid "Add branches with addresses and map pins, assign specialists, and clients pick the nearest."
-msgstr "Добавьте филиалы с адресами и метками на карте, привяжите мастеров - клиент выберет ближайший."
+msgid "Add branches with addresses and map pins, assign specialists, and "
+"clients pick the nearest."
+msgstr "Добавьте филиалы с адресами и метками на карте, привяжите мастеров - "
+"клиент выберет ближайший."
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 msgid "Add expense"
@@ -1468,8 +1603,10 @@ msgid "Amounts saved"
 msgstr "Суммы сохранены"
 
 #: src/views/manage/ui/TeamTab/TeamTab.tsx
-msgid "An administrator sees the schedule, clients and reviews, without money or settings."
-msgstr "Администратор видит расписание, клиентов и отзывы - без денег и настроек."
+msgid "An administrator sees the schedule, clients and reviews, without money "
+"or settings."
+msgstr "Администратор видит расписание, клиентов и отзывы - без денег и "
+"настроек."
 
 #: src/views/manage/manageTabs.ts
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
@@ -1477,8 +1614,10 @@ msgid "Analytics"
 msgstr "Аналитика"
 
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
-msgid "Analytics will show how much you have and whether the current pace will get you there by the end of the month."
-msgstr "Аналитика покажет, сколько уже есть и хватит ли текущего темпа до конца месяца."
+msgid "Analytics will show how much you have and whether the current pace will "
+"get you there by the end of the month."
+msgstr "Аналитика покажет, сколько уже есть и хватит ли текущего темпа до конца "
+"месяца."
 
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
 msgid "And {count} more."
@@ -1716,7 +1855,8 @@ msgstr "Ждёт оплаты"
 
 #: src/views/publicProfile/ui/ProfileContent.tsx
 msgid "Awaiting rating: {awaiting, plural, one {# visit} other {# visits}} ›"
-msgstr "Ждут оценки: {awaiting, plural, one {# визит} few {# визита} many {# визитов} other {# визита}} ›"
+msgstr "Ждут оценки: {awaiting, plural, one {# визит} few {# визита} many {# "
+"визитов} other {# визита}} ›"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 #: src/shared/lib/cabinetFrom.ts
@@ -1759,8 +1899,10 @@ msgid "barber"
 msgstr "барбер"
 
 #: src/views/forBusiness/ui/FeatureVisuals.tsx
-msgid "Barber Pro: a reminder, men’s haircut today at 14:30 with Timur. See you soon!"
-msgstr "Barber Pro: напоминаем - сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!"
+msgid "Barber Pro: a reminder, men’s haircut today at 14:30 with Timur. See you "
+"soon!"
+msgstr "Barber Pro: напоминаем - сегодня в 14:30 мужская стрижка, мастер Тимур. "
+"Ждём вас!"
 
 #: src/views/forBusiness/ui/ProductShowcase.tsx
 msgid "Barber Pro. Dashboard"
@@ -2049,12 +2191,17 @@ msgid "Bookings and profile: {name}"
 msgstr "Записи и профиль: {name}"
 
 #: src/features/calendarFeed/ui/CalendarFeedGroup/CalendarFeedSheet.tsx
-msgid "Bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out."
-msgstr "Записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми."
+msgid "Bookings from a month back to three months ahead will appear in iPhone "
+"or Google Calendar and update themselves. Cancellations stay crossed "
+"out."
+msgstr "Записи за месяц назад и три вперёд появятся в Календаре iPhone или "
+"Google и будут обновляться сами. Отмены останутся зачёркнутыми."
 
 #: src/features/calendarFeed/config/copy.ts
-msgid "Bookings in iPhone or Google Calendar: they update themselves, no need to open the dashboard."
-msgstr "Записи в Календаре iPhone или Google: обновляются сами, кабинет открывать не нужно."
+msgid "Bookings in iPhone or Google Calendar: they update themselves, no need "
+"to open the dashboard."
+msgstr "Записи в Календаре iPhone или Google: обновляются сами, кабинет "
+"открывать не нужно."
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
 msgid "Bookings made on this phone stay on it after you sign out."
@@ -2065,8 +2212,10 @@ msgid "Bookings with you are not open this day."
 msgstr "В этот день записи к вам не открыты."
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
-msgid "Bookings, the schedule and the page work. The cash desk, analytics, loyalty and mailings open after payment."
-msgstr "Записи, расписание и страница работают. Касса, аналитика, лояльность и рассылки откроются после оплаты."
+msgid "Bookings, the schedule and the page work. The cash desk, analytics, "
+"loyalty and mailings open after payment."
+msgstr "Записи, расписание и страница работают. Касса, аналитика, лояльность и "
+"рассылки откроются после оплаты."
 
 #: src/widgets/TabBar/TabBar.tsx
 msgid "Bottom menu"
@@ -2331,7 +2480,8 @@ msgid "Cash for visits"
 msgstr "Наличные за визиты"
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
-msgid "Cash for visits: visits marked “Arrived” during the shift at this branch."
+msgid "Cash for visits: visits marked “Arrived” during the shift at this "
+"branch."
 msgstr "Наличные за визиты: отмеченные «Пришёл» за время смены в этом филиале."
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
@@ -2483,7 +2633,8 @@ msgstr "Дешевле"
 
 #: src/views/booking/BookingPage.tsx
 msgid "Check the cards above and book. Tap a card to change it."
-msgstr "Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы изменить."
+msgstr "Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы "
+"изменить."
 
 #: src/views/booking/ui/BookingUnavailable/BookingUnavailable.tsx
 msgid "Check the connection and try again."
@@ -2654,20 +2805,27 @@ msgid "Clients and bookings from Altegio or YCLIENTS in one file."
 msgstr "Клиенты и записи из Altegio или YCLIENTS одним файлом."
 
 #: src/views/manage/ui/ReviewsTab/QuestionsPanel.tsx
-msgid "Clients ask on the place page; the answer appears there and comes to Telegram."
-msgstr "Клиенты спрашивают на странице места; ответ появится там же, и придёт в Telegram."
+msgid "Clients ask on the place page; the answer appears there and comes to "
+"Telegram."
+msgstr "Клиенты спрашивают на странице места; ответ появится там же, и придёт в "
+"Telegram."
 
 #: src/views/manage/ui/PhotosSection/PhotosSection.tsx
 msgid "Clients book from photos: add up to 30, several at once if you like."
-msgstr "Клиенты записываются с фото: добавьте до 30 штук, можно сразу несколько."
+msgstr "Клиенты записываются с фото: добавьте до 30 штук, можно сразу "
+"несколько."
 
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
-msgid "Clients buy it on the place’s page and when booking, paying by card. The pass is theirs once paid."
-msgstr "Клиенты купят его на странице места и при записи, оплатив картой. Абонемент появится у клиента после оплаты."
+msgid "Clients buy it on the place’s page and when booking, paying by card. The "
+"pass is theirs once paid."
+msgstr "Клиенты купят его на странице места и при записи, оплатив картой. "
+"Абонемент появится у клиента после оплаты."
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "Clients buy on the place’s page and pay by card. The certificate appears below once paid; the code goes to the buyer and the recipient."
-msgstr "Клиенты покупают на странице места и платят картой. Сертификат появится ниже после оплаты, код придёт покупателю и получателю."
+msgid "Clients buy on the place’s page and pay by card. The certificate appears "
+"below once paid; the code goes to the buyer and the recipient."
+msgstr "Клиенты покупают на странице места и платят картой. Сертификат появится "
+"ниже после оплаты, код придёт покупателю и получателю."
 
 #: src/views/manage/ui/PageTab/PageTab.tsx
 msgid "Clients choose a specialist by photo when booking."
@@ -2678,8 +2836,10 @@ msgid "Clients for the period"
 msgstr "Клиенты за период"
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "Clients get {percent}% of what they pay in money and spend it on later visits: 1 bonus = 1 som."
-msgstr "Клиент получает {percent}% от оплаты деньгами и тратит их на следующих визитах: 1 бонус = 1 сом."
+msgid "Clients get {percent}% of what they pay in money and spend it on later "
+"visits: 1 bonus = 1 som."
+msgstr "Клиент получает {percent}% от оплаты деньгами и тратит их на следующих "
+"визитах: 1 бонус = 1 сом."
 
 #: src/views/manage/ui/Hours/HoursSheet.tsx
 msgid "Clients only see times within these hours that are not already booked."
@@ -2690,8 +2850,10 @@ msgid "Clients see the price and duration before booking."
 msgstr "Клиент видит цену и длительность до записи."
 
 #: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
-msgid "Clients see the specialist’s times only in these hours and only while the salon is open."
-msgstr "Клиенты видят время мастера только в эти часы и только пока салон открыт."
+msgid "Clients see the specialist’s times only in these hours and only while "
+"the salon is open."
+msgstr "Клиенты видят время мастера только в эти часы и только пока салон "
+"открыт."
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
 msgid "Clients who came during the period will show here."
@@ -2772,7 +2934,8 @@ msgstr "Возвращаются к мастеру"
 
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 msgid "Come back: clients who booked this specialist again within 6 weeks."
-msgstr "Возвращаются: клиенты, которые снова записались к этому мастеру в течение 6 недель."
+msgstr "Возвращаются: клиенты, которые снова записались к этому мастеру в "
+"течение 6 недель."
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "Coming soon"
@@ -2853,8 +3016,10 @@ msgid "consumables {amount}"
 msgstr "расходники {amount}"
 
 #: src/views/manage/ui/StockTab/StockTab.tsx
-msgid "Consumables are written off when a visit is marked “Arrived”, products when sold."
-msgstr "Расходники списываются, когда визит отмечен «Пришёл», товары при продаже."
+msgid "Consumables are written off when a visit is marked “Arrived”, products "
+"when sold."
+msgstr "Расходники списываются, когда визит отмечен «Пришёл», товары при "
+"продаже."
 
 #: src/shared/ui/ContactRows/ContactRows.tsx
 #: src/views/business/ui/Place/PlaceActions.tsx
@@ -2971,8 +3136,10 @@ msgid "Couldn’t load"
 msgstr "Не удалось загрузить"
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
-msgid "Count the cash in the “{branch}” till: the balance is worked out from this amount."
-msgstr "Пересчитайте наличные в кассе «{branch}»: от этой суммы считается остаток."
+msgid "Count the cash in the “{branch}” till: the balance is worked out from "
+"this amount."
+msgstr "Пересчитайте наличные в кассе «{branch}»: от этой суммы считается "
+"остаток."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
 msgid "Count the cash: the balance is worked out from this amount."
@@ -3003,8 +3170,10 @@ msgid "Cover updated"
 msgstr "Обложка обновлена"
 
 #: src/views/manage/ManageIndexPage.tsx
-msgid "Create a business page: it takes five minutes, and clients can start booking."
-msgstr "Создайте страницу бизнеса - это пять минут, и клиенты смогут записываться."
+msgid "Create a business page: it takes five minutes, and clients can start "
+"booking."
+msgstr "Создайте страницу бизнеса - это пять минут, и клиенты смогут "
+"записываться."
 
 #: src/views/forBusiness/CreateBusinessPage.tsx
 #: src/views/forBusiness/ForBusinessPage.tsx
@@ -3209,8 +3378,10 @@ msgid "Dentistry and osteopathy in Bishkek: online booking"
 msgstr "Стоматология и остеопатия в Бишкеке: онлайн-запись"
 
 #: src/views/catalog/config/kindSeo.ts
-msgid "Dentists, osteopaths and health specialists in Bishkek: prices, reviews and free times. Book online, no calls."
-msgstr "Стоматологи, остеопаты и специалисты по здоровью в Бишкеке: цены, отзывы и свободное время. Запись онлайн без звонков."
+msgid "Dentists, osteopaths and health specialists in Bishkek: prices, reviews "
+"and free times. Book online, no calls."
+msgstr "Стоматологи, остеопаты и специалисты по здоровью в Бишкеке: цены, "
+"отзывы и свободное время. Запись онлайн без звонков."
 
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
 #: src/views/insights/config/labels.ts
@@ -3225,8 +3396,10 @@ msgstr "предоплата {amount}"
 
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
 #: src/views/booking/ui/BookingSummary/BookingSummary.tsx
-msgid "Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead."
-msgstr "Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки."
+msgid "Deposit {amount} - by card right after booking, the rest at the salon. "
+"Refunded if you cancel a day ahead."
+msgstr "Предоплата {amount} - картой сразу после записи, остальное в салоне. "
+"Вернём при отмене за сутки."
 
 #: src/entities/booking/lib/paymentText.ts
 msgid "Deposit {amount} {status}"
@@ -3428,16 +3601,20 @@ msgid "Duration"
 msgstr "Длительность"
 
 #: src/views/manage/ui/StockTab/StockTab.tsx
-msgid "Dye, shampoo, gloves: set the price per unit and how much a service uses, and analytics will show the cost."
-msgstr "Краска, шампунь, перчатки: укажите цену за единицу и сколько уходит на услугу - аналитика покажет себестоимость."
+msgid "Dye, shampoo, gloves: set the price per unit and how much a service "
+"uses, and analytics will show the cost."
+msgstr "Краска, шампунь, перчатки: укажите цену за единицу и сколько уходит на "
+"услугу - аналитика покажет себестоимость."
 
 #: src/entities/booking/ui/Ticket/Ticket.tsx
 msgid "E-ticket"
 msgstr "Электронный талон"
 
 #: src/views/manage/ui/BranchesTab/BranchesTab.tsx
-msgid "Each address has its own pin on the map. Clients pick the nearest when booking."
-msgstr "Каждый адрес - своя метка на карте. Клиент выбирает ближайший при записи."
+msgid "Each address has its own pin on the map. Clients pick the nearest when "
+"booking."
+msgstr "Каждый адрес - своя метка на карте. Клиент выбирает ближайший при "
+"записи."
 
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
 msgid "Each gets their own name and booking link."
@@ -3548,8 +3725,10 @@ msgid "Every review has a reply"
 msgstr "На все отзывы есть ответ"
 
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
-msgid "Every year at 11:00 on the birthday: one SMS to each client with it on their card."
-msgstr "Каждый год в 11:00 в день рождения: одно SMS клиенту, у которого он указан в карточке."
+msgid "Every year at 11:00 on the birthday: one SMS to each client with it on "
+"their card."
+msgstr "Каждый год в 11:00 в день рождения: одно SMS клиенту, у которого он "
+"указан в карточке."
 
 #: src/views/manage/ui/ScheduleTab.tsx
 msgid "Everyone arrived, paid the list price in cash: fix any that differ"
@@ -3560,8 +3739,10 @@ msgid "Everyone came"
 msgstr "Все пришли"
 
 #: src/views/manage/ui/ReviewsTab/QuestionsPanel.tsx
-msgid "Everyone sees an answered question on the place page. An empty answer takes it down."
-msgstr "Вопрос с ответом увидят все на странице места. Пустой ответ снимает его."
+msgid "Everyone sees an answered question on the place page. An empty answer "
+"takes it down."
+msgstr "Вопрос с ответом увидят все на странице места. Пустой ответ снимает "
+"его."
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
 msgid "Everything"
@@ -3671,12 +3852,16 @@ msgid "File"
 msgstr "Файл"
 
 #: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
-msgid "Fill quiet hours with a discount, bring in new clients or hand out a promo code."
-msgstr "Заполните тихие часы скидкой, приведите новых клиентов или раздайте промокод."
+msgid "Fill quiet hours with a discount, bring in new clients or hand out a "
+"promo code."
+msgstr "Заполните тихие часы скидкой, приведите новых клиентов или раздайте "
+"промокод."
 
 #: src/views/manage/ui/PromotionsTab/PromotionSheet.tsx
-msgid "Fill quiet hours: the discount applies on the chosen days by the visit’s start time."
-msgstr "Заполните тихие часы: скидка действует в выбранные дни и время начала визита."
+msgid "Fill quiet hours: the discount applies on the chosen days by the visit’s "
+"start time."
+msgstr "Заполните тихие часы: скидка действует в выбранные дни и время начала "
+"визита."
 
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
 msgid "Find"
@@ -3735,7 +3920,8 @@ msgid "Fiscal receipts for products and paid visits."
 msgstr "Фискальные чеки на товары и оплату визитов."
 
 #: src/views/manage/ui/PlanLock/PlanLock.tsx
-msgid "Fiscal receipts for visits and sales go to the tax service by themselves."
+msgid "Fiscal receipts for visits and sales go to the tax service by "
+"themselves."
 msgstr "Фискальные чеки за визиты и продажи уходят в ГНС сами."
 
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
@@ -3780,8 +3966,10 @@ msgid "For everyone"
 msgstr "Для всех"
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "For example, “5 haircuts for 4”: the client pays up front, visits are redeemed in “Visit outcome”."
-msgstr "Например, «5 стрижек за 4»: клиент платит сразу, визиты списываются в «Итоге визита»."
+msgid "For example, “5 haircuts for 4”: the client pays up front, visits are "
+"redeemed in “Visit outcome”."
+msgstr "Например, «5 стрижек за 4»: клиент платит сразу, визиты списываются в "
+"«Итоге визита»."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
 msgid "For example, “Change”"
@@ -3967,8 +4155,10 @@ msgid "Funnels"
 msgstr "Воронки"
 
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
-msgid "Future bookings only: export the booking log from today and save it as CSV."
-msgstr "Только будущие записи: выгрузите журнал записей с сегодняшнего дня и сохраните как CSV."
+msgid "Future bookings only: export the booking log from today and save it as "
+"CSV."
+msgstr "Только будущие записи: выгрузите журнал записей с сегодняшнего дня и "
+"сохраните как CSV."
 
 #: src/views/manage/ui/StockTab/stockUnits.ts
 msgid "g"
@@ -4021,8 +4211,10 @@ msgid "Give bonuses"
 msgstr "Начислять бонусы"
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
-msgid "Give clients part of their payment back as bonuses: they’ll come back to spend them."
-msgstr "Возвращайте клиенту часть оплаты бонусами: он придёт снова, чтобы их потратить."
+msgid "Give clients part of their payment back as bonuses: they’ll come back to "
+"spend them."
+msgstr "Возвращайте клиенту часть оплаты бонусами: он придёт снова, чтобы их "
+"потратить."
 
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
 msgid "Goal"
@@ -4104,12 +4296,16 @@ msgid "Haircuts"
 msgstr "Стрижки"
 
 #: src/views/catalog/config/kindSeo.ts
-msgid "Haircuts, colouring, styling and make-up in Bishkek salons: prices, reviewed specialists and free times. Book online, no calls."
-msgstr "Стрижки, окрашивание, укладки и макияж в салонах Бишкека: цены, мастера с отзывами и свободное время. Запись онлайн без звонков."
+msgid "Haircuts, colouring, styling and make-up in Bishkek salons: prices, "
+"reviewed specialists and free times. Book online, no calls."
+msgstr "Стрижки, окрашивание, укладки и макияж в салонах Бишкека: цены, мастера "
+"с отзывами и свободное время. Запись онлайн без звонков."
 
 #: src/app/[lang]/feed/page.tsx
-msgid "Haircuts, manicures and colouring by specialists nearby, and booking the same in one tap."
-msgstr "Стрижки, маникюр и окрашивание от мастеров рядом и запись на то же в одно касание."
+msgid "Haircuts, manicures and colouring by specialists nearby, and booking the "
+"same in one tap."
+msgstr "Стрижки, маникюр и окрашивание от мастеров рядом и запись на то же в "
+"одно касание."
 
 #: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
 msgid "Happy hours"
@@ -4298,11 +4494,13 @@ msgstr "через {days} дней"
 
 #: src/views/manage/ui/NowBar/NowBar.tsx
 msgid "in {hours, plural, one {# hour} other {# hours}}"
-msgstr "через {hours, plural, one {# час} few {# часа} many {# часов} other {# часа}}"
+msgstr "через {hours, plural, one {# час} few {# часа} many {# часов} other {# "
+"часа}}"
 
 #: src/views/manage/ui/NowBar/NowBar.tsx
 msgid "in {minutes, plural, one {# minute} other {# minutes}}"
-msgstr "через {minutes, plural, one {# минуту} few {# минуты} many {# минут} other {# минуты}}"
+msgstr "через {minutes, plural, one {# минуту} few {# минуты} many {# минут} "
+"other {# минуты}}"
 
 #: src/views/manage/ui/NowBar/NowBar.tsx
 #: src/views/masterDay/MasterDayPage.tsx
@@ -4342,7 +4540,8 @@ msgid "In numbers"
 msgstr "В цифрах"
 
 #: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
-msgid "In the “Work” feed the photo shows the price, the next free time and “Book”."
+msgid "In the “Work” feed the photo shows the price, the next free time and "
+"“Book”."
 msgstr "В ленте «Работы» под фото будет цена, ближайшее время и «Записаться»."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
@@ -4497,8 +4696,10 @@ msgid "latest {0}"
 msgstr "последние {0}"
 
 #: src/features/profileStyle/ui/ProfileStyleSheet/ProfileStyleSheet.tsx
-msgid "Latin letters, digits, “_” and “.”, 3 or more: a short link for your bio and stories."
-msgstr "Латиница, цифры, «_» и «.», от 3 символов - короткая ссылка для био и сторис."
+msgid "Latin letters, digits, “_” and “.”, 3 or more: a short link for your bio "
+"and stories."
+msgstr "Латиница, цифры, «_» и «.», от 3 символов - короткая ссылка для био и "
+"сторис."
 
 #: src/views/forBusiness/CreateBusinessPage.tsx
 msgid "Latin letters, numbers and hyphens"
@@ -4540,8 +4741,10 @@ msgid "Level {level}"
 msgstr "Уровень {level}"
 
 #: src/app/[lang]/u/[id]/opengraph-image.tsx
-msgid "Level {level} · {achievements, plural, one {# achievement} other {# achievements}}"
-msgstr "Уровень {level} · {achievements, plural, one {# достижение} few {# достижения} many {# достижений} other {# достижения}}"
+msgid "Level {level} · {achievements, plural, one {# achievement} other {# "
+"achievements}}"
+msgstr "Уровень {level} · {achievements, plural, one {# достижение} few {# "
+"достижения} many {# достижений} other {# достижения}}"
 
 #: src/app/[lang]/u/[id]/story/route.tsx
 msgid "Level {level} on Awaisa"
@@ -4806,7 +5009,8 @@ msgstr "Отмечено: решено"
 #. placeholder {0}: ids.length
 #: src/views/manage/ui/ScheduleTab.tsx
 msgid "Marked: {0, plural, one {# visit} other {# visits}}"
-msgstr "Отмечено: {0, plural, one {# визит} few {# визита} many {# визитов} other {# визита}}"
+msgstr "Отмечено: {0, plural, one {# визит} few {# визита} many {# визитов} "
+"other {# визита}}"
 
 #: src/views/masterDay/MasterDayPage.tsx
 msgid "Marked: arrived"
@@ -4826,8 +5030,10 @@ msgid "Massage and SPA"
 msgstr "Массаж и SPA"
 
 #: src/views/catalog/config/kindSeo.ts
-msgid "Massage, spa and body care in Bishkek: prices, reviewed specialists and free times. Book online, no calls."
-msgstr "Массаж, SPA и уход за телом в Бишкеке: цены, мастера с отзывами и свободное время. Запись онлайн без звонков."
+msgid "Massage, spa and body care in Bishkek: prices, reviewed specialists and "
+"free times. Book online, no calls."
+msgstr "Массаж, SPA и уход за телом в Бишкеке: цены, мастера с отзывами и "
+"свободное время. Запись онлайн без звонков."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
 msgid "Matches what was expected."
@@ -4875,8 +5081,10 @@ msgid "Men's haircut"
 msgstr "Мужская стрижка"
 
 #: src/views/catalog/config/kindSeo.ts
-msgid "Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, reviewed barbers and free times. Book online, no calls."
-msgstr "Мужские стрижки, борода и бритьё в барбершопах Бишкека: цены, барберы с отзывами и свободное время. Запись онлайн без звонков."
+msgid "Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, "
+"reviewed barbers and free times. Book online, no calls."
+msgstr "Мужские стрижки, борода и бритьё в барбершопах Бишкека: цены, барберы с "
+"отзывами и свободное время. Запись онлайн без звонков."
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
 #: src/views/business/ui/Place/PlaceActions.tsx
@@ -5020,7 +5228,8 @@ msgid "Move or cancel by the link in the SMS."
 msgstr "Перенести или отменить можно по ссылке из SMS."
 
 #: src/views/manage/ui/BranchesTab/BranchDialog.tsx
-msgid "Move the map so the pin points at the entrance: the address fills itself in."
+msgid "Move the map so the pin points at the entrance: the address fills itself "
+"in."
 msgstr "Передвиньте карту, чтобы метка указала на вход: адрес подставится сам."
 
 #: src/features/rescheduleBooking/ui/RescheduleSheet/RescheduleSheet.tsx
@@ -5103,8 +5312,10 @@ msgid "Nail studios"
 msgstr "Ногтевые студии"
 
 #: src/views/catalog/config/kindSeo.ts
-msgid "Nail studios in Bishkek: manicure, pedicure and extensions, prices, reviewed specialists and free times. Book online, no calls."
-msgstr "Ногтевые студии Бишкека: маникюр, педикюр и наращивание, цены, мастера с отзывами и свободное время. Запись онлайн без звонков."
+msgid "Nail studios in Bishkek: manicure, pedicure and extensions, prices, "
+"reviewed specialists and free times. Book online, no calls."
+msgstr "Ногтевые студии Бишкека: маникюр, педикюр и наращивание, цены, мастера "
+"с отзывами и свободное время. Запись онлайн без звонков."
 
 #: src/views/leaderboard/config/boards.ts
 msgid "Nails"
@@ -5208,20 +5419,27 @@ msgid "New bookings will appear here."
 msgstr "Новые записи появятся здесь сами."
 
 #: src/features/pushAlerts/config/copy.ts
-msgid "New bookings with you, moves and cancellations, even when the page is closed."
+msgid "New bookings with you, moves and cancellations, even when the page is "
+"closed."
 msgstr "Новые записи к вам, переносы и отмены, даже когда страница закрыта."
 
 #: src/views/manage/ui/TelegramSection/TelegramSection.tsx
-msgid "New bookings, cancellations and reviews arrive at once, the day's schedule at 9:00. In the bot: /today (today's bookings), /stop (turn off)."
-msgstr "Новые записи, отмены и отзывы - сразу, расписание на день - в 9:00. В боте: /today - записи на сегодня, /stop - отключить."
+msgid "New bookings, cancellations and reviews arrive at once, the day's "
+"schedule at 9:00. In the bot: /today (today's bookings), /stop (turn "
+"off)."
+msgstr "Новые записи, отмены и отзывы - сразу, расписание на день - в 9:00. В "
+"боте: /today - записи на сегодня, /stop - отключить."
 
 #: src/features/pushAlerts/config/copy.ts
-msgid "New bookings, moves and cancellations from clients, even when the dashboard is closed."
+msgid "New bookings, moves and cancellations from clients, even when the "
+"dashboard is closed."
 msgstr "Новые записи, переносы и отмены клиентов, даже когда кабинет закрыт."
 
 #: src/views/manage/ui/NotificationsTab/NotificationsTab.tsx
-msgid "New bookings, moves and cancellations: on your phone and in Telegram, as they happen."
-msgstr "Новые записи, переносы и отмены: на телефоне и в Telegram, сразу как они случаются."
+msgid "New bookings, moves and cancellations: on your phone and in Telegram, as "
+"they happen."
+msgstr "Новые записи, переносы и отмены: на телефоне и в Telegram, сразу как "
+"они случаются."
 
 #: src/views/manage/ui/BranchesTab/BranchDialog.tsx
 msgid "New branch"
@@ -5371,8 +5589,10 @@ msgid "No clients yet"
 msgstr "Клиентов пока нет"
 
 #: src/views/manage/ui/ImportSheet/ImportSheet.tsx
-msgid "No confirmations are sent: the clients are already booked. Services and specialists are matched by name."
-msgstr "Подтверждения не отправим: клиенты уже записаны. Услуги и мастеров ищем по названию."
+msgid "No confirmations are sent: the clients are already booked. Services and "
+"specialists are matched by name."
+msgstr "Подтверждения не отправим: клиенты уже записаны. Услуги и мастеров ищем "
+"по названию."
 
 #: src/entities/booking/ui/Ticket/Ticket.tsx
 msgid "No date chosen"
@@ -5438,7 +5658,8 @@ msgid "No new bookings will open on these days"
 msgstr "Новые записи на эти дни не откроются"
 
 #: src/views/feed/ui/WorkReviewsSheet.tsx
-msgid "No one has written about this service yet: be the first after your visit."
+msgid "No one has written about this service yet: be the first after your "
+"visit."
 msgstr "Об этой услуге ещё не писали - станьте первым после визита."
 
 #: src/views/insights/InsightsPage.tsx
@@ -5536,7 +5757,8 @@ msgstr "Без SMS"
 
 #: src/views/insights/InsightsPage.tsx
 msgid "No such devices in this period: pick another period or clear the filter."
-msgstr "За этот период таких устройств здесь не было - выберите другой период или уберите отбор."
+msgstr "За этот период таких устройств здесь не было - выберите другой период "
+"или уберите отбор."
 
 #: src/views/publicProfile/ui/VisitYear.tsx
 msgid "no visits"
@@ -5569,15 +5791,18 @@ msgstr "Не пришёл"
 #. placeholder {0}: client.noShows
 #: src/views/manage/ui/NewBookingDialog/NewBookingDialog.tsx
 msgid "no-show {0, plural, one {# time} other {# times}}"
-msgstr "{0, plural, one {не пришёл # раз} few {не пришёл # раза} many {не пришёл # раз} other {не пришёл # раза}}"
+msgstr "{0, plural, one {не пришёл # раз} few {не пришёл # раза} many {не "
+"пришёл # раз} other {не пришёл # раза}}"
 
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx
 msgid "No-shows"
 msgstr "Неявки"
 
 #: src/views/forBusiness/forBusinessContent.ts
-msgid "No. You get a page at awaisa.kg/your-name, which you can add to Instagram, WhatsApp and 2GIS."
-msgstr "Нет. У вас будет страница awaisa.kg/ваше-название - её можно поставить в Instagram, WhatsApp и 2ГИС."
+msgid "No. You get a page at awaisa.kg/your-name, which you can add to "
+"Instagram, WhatsApp and 2GIS."
+msgstr "Нет. У вас будет страница awaisa.kg/ваше-название - её можно поставить "
+"в Instagram, WhatsApp и 2ГИС."
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "Nobody found"
@@ -5759,12 +5984,16 @@ msgid "Notifications"
 msgstr "Уведомления"
 
 #: src/features/pushAlerts/config/copy.ts
-msgid "Notifications are blocked for this site in your browser settings: allow them there."
-msgstr "Уведомления запрещены в настройках браузера для этого сайта: разрешите их там."
+msgid "Notifications are blocked for this site in your browser settings: allow "
+"them there."
+msgstr "Уведомления запрещены в настройках браузера для этого сайта: разрешите "
+"их там."
 
 #: src/features/pushAlerts/config/copy.ts
-msgid "Notifications for Awaisa are blocked in your phone settings: allow them there."
-msgstr "Уведомления запрещены в настройках телефона для Awaisa: разрешите их там."
+msgid "Notifications for Awaisa are blocked in your phone settings: allow them "
+"there."
+msgstr "Уведомления запрещены в настройках телефона для Awaisa: разрешите их "
+"там."
 
 #: src/features/pushAlerts/ui/PushAlertsGroup/PushAlertsGroup.tsx
 msgid "Notifications off"
@@ -5846,8 +6075,10 @@ msgid "of all bookings"
 msgstr "от всех записей"
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
-msgid "Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count."
-msgstr "От суммы товаров, которые мастер продал в «Кассе» (поле «Продал»). Отменённые продажи не считаются."
+msgid "Of the products the specialist sold in “Till” (the “Sold by” field). "
+"Cancelled sales do not count."
+msgstr "От суммы товаров, которые мастер продал в «Кассе» (поле «Продал»). "
+"Отменённые продажи не считаются."
 
 #: src/views/manage/ui/PromotionsTab/PromotionsTab.tsx
 #: src/views/manage/ui/SettingsNav/SettingsNav.tsx
@@ -5871,8 +6102,10 @@ msgid "On a patent a till is optional: you may issue receipts if you wish."
 msgstr "На патенте касса не обязательна: чеки можно выдавать по желанию."
 
 #: src/features/pushAlerts/config/copy.ts
-msgid "On iPhone, notifications only come from the app: “Share” → “Add to Home Screen”, then turn them on there."
-msgstr "На iPhone уведомления приходят только из приложения: «Поделиться» → «На экран Домой», затем включите их там."
+msgid "On iPhone, notifications only come from the app: “Share” → “Add to Home "
+"Screen”, then turn them on there."
+msgstr "На iPhone уведомления приходят только из приложения: «Поделиться» → «На "
+"экран Домой», затем включите их там."
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "On leave"
@@ -5895,7 +6128,8 @@ msgid "on the Page"
 msgstr "на Странице"
 
 #: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
-msgid "On these days the specialist is not offered for booking; existing bookings stay."
+msgid "On these days the specialist is not offered for booking; existing "
+"bookings stay."
 msgstr "В эти дни мастер не появится в записи; уже сделанные записи останутся."
 
 #: src/features/pushAlerts/ui/PushAlertsGroup/PushAlertsGroup.tsx
@@ -5941,7 +6175,8 @@ msgid "Online booking, no calls"
 msgstr "Онлайн-запись без звонков"
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
-msgid "Online payment is not available yet: write to us and we will extend it by hand."
+msgid "Online payment is not available yet: write to us and we will extend it "
+"by hand."
 msgstr "Онлайн-оплата пока недоступна: напишите нам, продлим вручную."
 
 #: src/views/manage/ui/LoyaltyTab/LoyaltyTab.tsx
@@ -5961,24 +6196,30 @@ msgid "Only for you"
 msgstr "Только для вас"
 
 #: src/views/forBusiness/ForBusinessPage.tsx
-msgid "Only free slots that respect schedules and durations. Double bookings can’t happen."
-msgstr "Только свободные окна с учётом графика и длительности. Двойная запись невозможна."
+msgid "Only free slots that respect schedules and durations. Double bookings "
+"can’t happen."
+msgstr "Только свободные окна с учётом графика и длительности. Двойная запись "
+"невозможна."
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
 msgid "Open"
 msgstr "Открыта"
 
 #: src/views/manage/ui/ScheduleTab.tsx
-msgid "Open “Specialists” and add at least yourself: the schedule will appear here."
-msgstr "Откройте раздел «Мастера» и добавьте хотя бы себя - здесь появится расписание."
+msgid "Open “Specialists” and add at least yourself: the schedule will appear "
+"here."
+msgstr "Откройте раздел «Мастера» и добавьте хотя бы себя - здесь появится "
+"расписание."
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "Open {from}–{to} again"
 msgstr "Открыть время {from}–{to}"
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
-msgid "Open a shift and the till will work out how much cash there should be by evening. Without a shift, visits and sales work as usual."
-msgstr "Откройте смену, и касса посчитает, сколько наличных должно быть к вечеру. Без смены визиты и продажи работают как обычно."
+msgid "Open a shift and the till will work out how much cash there should be by "
+"evening. Without a shift, visits and sales work as usual."
+msgstr "Откройте смену, и касса посчитает, сколько наличных должно быть к "
+"вечеру. Без смены визиты и продажи работают как обычно."
 
 #: src/widgets/DayCalendar/DayCalendar.tsx
 msgid "Open booking"
@@ -6230,8 +6471,10 @@ msgid "paid by card now, this visit is the first"
 msgstr "оплата картой сейчас, этот визит первый"
 
 #: src/views/business/ui/Place/SubscriptionSheet.tsx
-msgid "Paid by card. The membership shows in your profile right after payment, and visits are used when you come in."
-msgstr "Оплата картой. Абонемент появится в профиле сразу после оплаты, а визиты спишутся, когда вы придёте."
+msgid "Paid by card. The membership shows in your profile right after payment, "
+"and visits are used when you come in."
+msgstr "Оплата картой. Абонемент появится в профиле сразу после оплаты, а "
+"визиты спишутся, когда вы придёте."
 
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 msgid "Paid out"
@@ -6347,7 +6590,8 @@ msgstr "Оплатить {amount}"
 
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
 msgid "Pay at the salon - cash or card. Move or cancel by the link in the SMS."
-msgstr "Оплата в салоне - наличными или картой. Перенести или отменить можно по ссылке из SMS."
+msgstr "Оплата в салоне - наличными или картой. Перенести или отменить можно по "
+"ссылке из SMS."
 
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
 msgid "Pay at the salon:"
@@ -6635,8 +6879,10 @@ msgid "point at an hour"
 msgstr "наведите на час"
 
 #: src/views/manage/ui/PageTab/ShareSheet.tsx
-msgid "Point the camera to open the page. Print it for the counter or the window."
-msgstr "Наведите камеру, чтобы открыть страницу. Распечатайте для стойки или витрины."
+msgid "Point the camera to open the page. Print it for the counter or the "
+"window."
+msgstr "Наведите камеру, чтобы открыть страницу. Распечатайте для стойки или "
+"витрины."
 
 #: src/views/business/ui/Place/ServicesBrowser.tsx
 #: src/views/catalog/ui/OffersFeed/OffersFeed.tsx
@@ -6887,8 +7133,10 @@ msgid "Put in or take out"
 msgstr "Внести или изъять"
 
 #: src/views/manage/ui/BranchesTab/BookingLinks.tsx
-msgid "Put the branch link on its 2GIS card, on Instagram or on a QR code by the door: clients land straight on booking at that branch."
-msgstr "Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа: клиент сразу попадёт в запись в нужный филиал."
+msgid "Put the branch link on its 2GIS card, on Instagram or on a QR code by "
+"the door: clients land straight on booking at that branch."
+msgstr "Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у "
+"входа: клиент сразу попадёт в запись в нужный филиал."
 
 #: src/views/manage/ui/PageTab/ShareSheet.tsx
 msgid "QR code of the {name} page"
@@ -7216,8 +7464,10 @@ msgid "Rent"
 msgstr "Аренда"
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
-msgid "Rent, supplies, salaries, marketing: \"Analytics\" works out profit from these and revenue."
-msgstr "Аренда, закупки, зарплаты, реклама: из них и выручки «Аналитика» считает прибыль."
+msgid "Rent, supplies, salaries, marketing: \"Analytics\" works out profit from "
+"these and revenue."
+msgstr "Аренда, закупки, зарплаты, реклама: из них и выручки «Аналитика» "
+"считает прибыль."
 
 #: src/views/manage/ui/PageTab/PageTab.tsx
 msgid "Replace cover"
@@ -7229,7 +7479,8 @@ msgstr "Заменить логотип"
 
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
 msgid "Replied to {count, plural, one {# review} other {# reviews}}"
-msgstr "Ответили на {count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}}"
+msgstr "Ответили на {count, plural, one {# отзыв} few {# отзыва} many {# "
+"отзывов} other {# отзыва}}"
 
 #: src/entities/review/ui/ReviewItem.tsx
 #: src/views/manage/ui/ReviewsTab/QuestionsPanel.tsx
@@ -7262,7 +7513,8 @@ msgstr "Ответить всем"
 #. placeholder {0}: quiet.fourAndUp
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
 msgid "Reply to all: {0, plural, one {# rating} other {# ratings}} without text"
-msgstr "Ответить всем: {0, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценки}} без текста"
+msgstr "Ответить всем: {0, plural, one {# оценка} few {# оценки} many {# "
+"оценок} other {# оценки}} без текста"
 
 #: src/views/manage/ui/ReviewsTab/ReplySettingsSheet.tsx
 msgid "Reply to good reviews"
@@ -7477,8 +7729,10 @@ msgid "Sales"
 msgstr "Продажи"
 
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
-msgid "Sales and visits are recorded in “Till” as before, without fiscal receipts."
-msgstr "Продажи и визиты записываются в «Кассе» как раньше, без фискальных чеков."
+msgid "Sales and visits are recorded in “Till” as before, without fiscal "
+"receipts."
+msgstr "Продажи и визиты записываются в «Кассе» как раньше, без фискальных "
+"чеков."
 
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
 msgid "Sales tax"
@@ -7780,7 +8034,8 @@ msgstr "Отправили отзыв"
 #. placeholder {0}: result.recipients
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
 msgid "Sent to {0, plural, one {# client} other {# clients}}"
-msgstr "Отправлено {0, plural, one {# клиенту} few {# клиентам} many {# клиентам} other {# клиентам}}"
+msgstr "Отправлено {0, plural, one {# клиенту} few {# клиентам} many {# "
+"клиентам} other {# клиентам}}"
 
 #: src/views/business/ui/Place/SubscriptionSheet.tsx
 msgid "Separately {full}, you save {saving}."
@@ -7788,7 +8043,8 @@ msgstr "По отдельности {full}, выгода {saving}."
 
 #: src/views/manage/ui/LoyaltyTab/PlanSheet.tsx
 msgid "Separately, {visits} visits cost {full}: the client saves {saving}."
-msgstr "По отдельности визиты ({visits}) стоят {full}: клиент экономит {saving}."
+msgstr "По отдельности визиты ({visits}) стоят {full}: клиент экономит "
+"{saving}."
 
 #: src/views/manage/ui/ClientSheet/BirthdayField.tsx
 #: src/views/masterDay/MasterDayPage.tsx
@@ -7884,8 +8140,10 @@ msgid "Set a goal for {month}"
 msgstr "Задать цель на {month}"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
-msgid "Set pay on the specialist’s card in “Page”, and what each is owed will show here."
-msgstr "Задайте зарплату в карточке мастера на «Странице», и здесь появится, сколько кому выплатить."
+msgid "Set pay on the specialist’s card in “Page”, and what each is owed will "
+"show here."
+msgstr "Задайте зарплату в карточке мастера на «Странице», и здесь появится, "
+"сколько кому выплатить."
 
 #: src/views/forBusiness/forBusinessContent.ts
 msgid "Set the schedule and share your link on Instagram and 2GIS."
@@ -7893,7 +8151,8 @@ msgstr "Укажите график - и делитесь ссылкой в Inst
 
 #: src/views/manage/ui/PhotosSection/WorkPhotoSheet.tsx
 msgid "Set the service: in the “Work” feed the photo gets “Book” for it."
-msgstr "Укажите услугу - в ленте «Работы» под фото появится «Записаться» на неё."
+msgstr "Укажите услугу - в ленте «Работы» под фото появится «Записаться» на "
+"неё."
 
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
 msgid "Set your location"
@@ -7938,8 +8197,10 @@ msgid "share your free times"
 msgstr "поделитесь окнами"
 
 #: src/views/manage/ui/AnalyticsTab/AnalyticsTab.tsx
-msgid "Share your page link, and revenue, clients and specialists’ load will show here."
-msgstr "Поделитесь ссылкой на страницу, и здесь появятся выручка, клиенты и загрузка мастеров."
+msgid "Share your page link, and revenue, clients and specialists’ load will "
+"show here."
+msgstr "Поделитесь ссылкой на страницу, и здесь появятся выручка, клиенты и "
+"загрузка мастеров."
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 msgid "Shift"
@@ -8294,7 +8555,8 @@ msgid "specialists masters staff schedule leave holiday percent pay salary"
 msgstr "мастера сотрудники график отпуск выходной процент зарплата"
 
 #: src/views/feed/FeedPage.tsx
-msgid "Specialists’ work photos will appear here, with prices and one-tap booking."
+msgid "Specialists’ work photos will appear here, with prices and one-tap "
+"booking."
 msgstr "Здесь появятся фото работ мастеров - с ценой и записью в один тап."
 
 #: src/views/bookings/ui/LoyaltyCard/LoyaltyCard.tsx
@@ -8320,8 +8582,10 @@ msgid "Start over"
 msgstr "Начать заново"
 
 #: src/views/manage/ui/BranchesTab/BranchDialog.tsx
-msgid "Start typing the address or move the map: the address and the pin fill each other in."
-msgstr "Начните вводить адрес или передвиньте карту: адрес и метка заполнят друг друга."
+msgid "Start typing the address or move the map: the address and the pin fill "
+"each other in."
+msgstr "Начните вводить адрес или передвиньте карту: адрес и метка заполнят "
+"друг друга."
 
 #: src/views/insights/InsightsPage.tsx
 msgid "Started in “Looks”"
@@ -8471,8 +8735,10 @@ msgid "Takes bookings"
 msgstr "Принимает записи"
 
 #: src/views/manage/ui/CashDeskTab/ShiftSheet.tsx
-msgid "Taking cash out lowers the expected balance. Record business costs in “Expenses”."
-msgstr "Изъятие уменьшает ожидаемый остаток. Расходы бизнеса записывайте в «Расходы»."
+msgid "Taking cash out lowers the expected balance. Record business costs in "
+"“Expenses”."
+msgstr "Изъятие уменьшает ожидаемый остаток. Расходы бизнеса записывайте в "
+"«Расходы»."
 
 #: src/views/auth/LoginPage.tsx
 msgid "Tap “Share my number” in the chat with the bot, then come back here"
@@ -8483,8 +8749,10 @@ msgid "Tap ♡ on a service in the"
 msgstr "Нажмите ♡ на услуге в"
 
 #: src/views/forBusiness/forBusinessContent.ts
-msgid "Tap a free time in the schedule: the booking appears at once and the client gets a confirmation SMS."
-msgstr "Нажмите на свободное время в расписании - запись появится сразу, клиенту придёт SMS с подтверждением."
+msgid "Tap a free time in the schedule: the booking appears at once and the "
+"client gets a confirmation SMS."
+msgstr "Нажмите на свободное время в расписании - запись появится сразу, "
+"клиенту придёт SMS с подтверждением."
 
 #: src/features/rateVisit/ui/StarRating/StarRating.tsx
 msgid "Tap a star"
@@ -8508,8 +8776,10 @@ msgid "Tax regime"
 msgstr "Режим налогообложения"
 
 #: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
-msgid "Taxes are included in the price: the receipt shows how much of the total they are. Check the rates with your accountant."
-msgstr "Налоги уже в цене: чек показывает, сколько их в сумме. Уточните ставки у бухгалтера."
+msgid "Taxes are included in the price: the receipt shows how much of the total "
+"they are. Check the rates with your accountant."
+msgstr "Налоги уже в цене: чек показывает, сколько их в сумме. Уточните ставки "
+"у бухгалтера."
 
 #: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
 msgid "Taxes on the receipt"
@@ -8554,7 +8824,8 @@ msgid "Tell us more"
 msgstr "Расскажите подробнее"
 
 #: src/views/map/MapPage.tsx
-msgid "Tell us where you are: we will show the nearest places and a dot on the map."
+msgid "Tell us where you are: we will show the nearest places and a dot on the "
+"map."
 msgstr "Укажите, где вы, - покажем ближайшие места и точку на карте."
 
 #: src/views/manage/ui/BillingTab/BillingTab.tsx
@@ -8611,7 +8882,8 @@ msgid "The client earns {percent}% of the money paid in bonuses."
 msgstr "Клиенту начислится {percent}% бонусами от оплаты деньгами."
 
 #: src/views/manage/ui/PromotionsTab/PromotionSheet.tsx
-msgid "The client enters the code when booking. Share it on Instagram or a business card."
+msgid "The client enters the code when booking. Share it on Instagram or a "
+"business card."
 msgstr "Клиент вводит код при записи. Раздайте его в Instagram или на визитке."
 
 #: src/views/forBusiness/forBusinessContent.ts
@@ -8623,24 +8895,32 @@ msgid "The client gets an SMS in 15 seconds"
 msgstr "Клиенту уйдёт SMS через 15 секунд"
 
 #: src/views/manage/ui/Services/ServiceDialog.tsx
-msgid "The client gets one SMS with a link to the same specialist, unless they have booked already."
-msgstr "Клиенту придёт одно SMS со ссылкой к тому же мастеру, если он ещё не записался сам."
+msgid "The client gets one SMS with a link to the same specialist, unless they "
+"have booked already."
+msgstr "Клиенту придёт одно SMS со ссылкой к тому же мастеру, если он ещё не "
+"записался сам."
 
 #: src/views/manage/ui/PageTab/ShareSheet.tsx
-msgid "The client lands in booking with this branch chosen. Put the page link in your Instagram bio and on 2GIS."
-msgstr "Клиент попадёт в запись сразу с этим филиалом. Ссылку на страницу поставьте в шапку Instagram и в 2ГИС."
+msgid "The client lands in booking with this branch chosen. Put the page link "
+"in your Instagram bio and on 2GIS."
+msgstr "Клиент попадёт в запись сразу с этим филиалом. Ссылку на страницу "
+"поставьте в шапку Instagram и в 2ГИС."
 
 #: src/views/manage/ui/ReviewsTab/QuietReplySheet.tsx
 msgid "The client name, specialist and service fill into each reply."
 msgstr "Имя клиента, мастер и услуга подставятся в каждый ответ."
 
 #: src/views/manage/ui/Services/ServiceDialog.tsx
-msgid "The client pays {amount} by card, or the time is freed after 15 minutes. Refunded if cancelled a day ahead; kept by you if cancelled later."
-msgstr "Клиент оплатит {amount} картой, иначе через 15 минут время освободится. Вернём, если отменит за сутки; при поздней отмене останется у вас."
+msgid "The client pays {amount} by card, or the time is freed after 15 minutes. "
+"Refunded if cancelled a day ahead; kept by you if cancelled later."
+msgstr "Клиент оплатит {amount} картой, иначе через 15 минут время освободится. "
+"Вернём, если отменит за сутки; при поздней отмене останется у вас."
 
 #: src/views/manage/ui/LoyaltyTab/CertificateAmountsSheet.tsx
-msgid "The client picks one amount on the place’s page. From 100 som, up to six amounts."
-msgstr "Клиент выбирает одну из сумм на странице места. От 100 сом, до шести сумм."
+msgid "The client picks one amount on the place’s page. From 100 som, up to six "
+"amounts."
+msgstr "Клиент выбирает одну из сумм на странице места. От 100 сом, до шести "
+"сумм."
 
 #: src/views/manage/ui/ShareWindowsSheet/ShareWindowsSheet.tsx
 msgid "The client sees this text and the booking link."
@@ -8715,15 +8995,18 @@ msgid "The message comes from the official Telegram chat"
 msgstr "Сообщение придёт от официального чата Telegram"
 
 #: src/views/manage/ui/ReviewsTab/ContactClientSheet.tsx
-msgid "The messenger opens with this text. Once you agree, mark the review “Resolved”."
-msgstr "Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв «Решено»."
+msgid "The messenger opens with this text. Once you agree, mark the review "
+"“Resolved”."
+msgstr "Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв "
+"«Решено»."
 
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
 msgid "The no-show shows on the client card and in analytics."
 msgstr "Неявка видна в карточке клиента и в аналитике."
 
 #: src/shared/lib/inputMasks.ts
-msgid "The number is incomplete: it needs {nationalDigits} digits after +{callingCode}"
+msgid "The number is incomplete: it needs {nationalDigits} digits after "
+"+{callingCode}"
 msgstr "Номер неполный: нужно {nationalDigits} цифр после +{callingCode}"
 
 #: src/views/manage/ui/PlanLock/PlanLock.tsx
@@ -8731,16 +9014,22 @@ msgid "The owner changes the plan."
 msgstr "Тариф меняет владелец."
 
 #: src/views/forBusiness/forBusinessContent.ts
-msgid "The page, booking and schedule are free. SMS reminders to clients are included too."
-msgstr "Страница, запись и расписание бесплатны. SMS-напоминания клиентам тоже включены."
+msgid "The page, booking and schedule are free. SMS reminders to clients are "
+"included too."
+msgstr "Страница, запись и расписание бесплатны. SMS-напоминания клиентам тоже "
+"включены."
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
 msgid "The percent cannot be more than 100."
 msgstr "Процент не может быть больше 100."
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
-msgid "The percent is of what was paid in money, as in “Analytics”: discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price."
-msgstr "Процент считается от оплаченного деньгами, как в «Аналитике»: скидки, сертификаты, абонементы и бонусы его уменьшают. Без отметки об оплате: от цены со скидкой."
+msgid "The percent is of what was paid in money, as in “Analytics”: discounts, "
+"certificates, passes and bonuses lower it. Without a payment mark: of "
+"the discounted price."
+msgstr "Процент считается от оплаченного деньгами, как в «Аналитике»: скидки, "
+"сертификаты, абонементы и бонусы его уменьшают. Без отметки об оплате: "
+"от цены со скидкой."
 
 #: src/features/myPlace/ui/PlacePickerSheet.tsx
 msgid "The phone did not share your location. Choose a district below."
@@ -8751,8 +9040,12 @@ msgid "The photo goes to the specialist’s “Looks” marked “Client’s pho
 msgstr "Фото попадёт в «Образы» мастера с пометкой «Фото клиента»"
 
 #: src/views/leaderboard/ui/LeaderboardBoard.tsx
-msgid "The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes."
-msgstr "Место зависит от оценок после визитов: средняя подтягивается к 4,3, пока отзывов мало; мастеру нужно хотя бы три отзыва, месту - пять. Обновляется каждые несколько минут."
+msgid "The place depends on ratings after visits: the average leans toward 4.3 "
+"while there are few reviews; a specialist needs at least three reviews, "
+"a place five. Updated every few minutes."
+msgstr "Место зависит от оценок после визитов: средняя подтягивается к 4,3, "
+"пока отзывов мало; мастеру нужно хотя бы три отзыва, месту - пять. "
+"Обновляется каждые несколько минут."
 
 #: src/views/manage/ui/CashDeskTab/CashDeskTab.tsx
 msgid "The products are back in stock."
@@ -8771,12 +9064,19 @@ msgid "The receipt didn't open"
 msgstr "Чек не открылся"
 
 #: src/views/manage/ui/ReviewsTab/ReplySettingsSheet.tsx
-msgid "The reply goes out an hour after the review, to new reviews only. The client name, specialist and service fill in by themselves. Answer 3 ★ and below yourself: Telegram will remind you."
-msgstr "Ответ уйдёт через час после отзыва, только на новые отзывы. Имя клиента, мастер и услуга подставятся сами. На 3 ★ и ниже ответьте сами: Telegram напомнит."
+msgid "The reply goes out an hour after the review, to new reviews only. The "
+"client name, specialist and service fill in by themselves. Answer 3 ★ "
+"and below yourself: Telegram will remind you."
+msgstr "Ответ уйдёт через час после отзыва, только на новые отзывы. Имя "
+"клиента, мастер и услуга подставятся сами. На 3 ★ и ниже ответьте сами: "
+"Telegram напомнит."
 
 #: src/views/manage/ui/ReviewsTab/QuietReplySheet.tsx
-msgid "The reply goes to {count, plural, one {# review} other {# reviews}} without text. Answer reviews with text yourself."
-msgstr "Ответ уйдёт на {count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзыва}} без текста. На отзывы с текстом ответьте сами."
+msgid "The reply goes to {count, plural, one {# review} other {# reviews}} "
+"without text. Answer reviews with text yourself."
+msgstr "Ответ уйдёт на {count, plural, one {# отзыв} few {# отзыва} many {# "
+"отзывов} other {# отзыва}} без текста. На отзывы с текстом ответьте "
+"сами."
 
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
 msgid "The rest at the salon:"
@@ -8815,7 +9115,8 @@ msgid "The Telegram bot is not connected to the platform yet."
 msgstr "Telegram-бот ещё не подключён к платформе."
 
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
-msgid "The till refused them 20 times in a row. Open the receipt and send it again."
+msgid "The till refused them 20 times in a row. Open the receipt and send it "
+"again."
 msgstr "Касса не приняла их 20 раз подряд. Откройте чек и отправьте снова."
 
 #: src/views/bookings/model/useMyBookings.ts
@@ -8840,16 +9141,22 @@ msgid "Theme: {theme}. Change"
 msgstr "Тема: {theme}. Сменить"
 
 #: src/views/manage/ui/Masters/MasterScheduleSheet.tsx
-msgid "There are already {conflictingBookings, plural, one {# booking} other {# bookings}} on these days: move or cancel them"
-msgstr "На эти дни уже {conflictingBookings, plural, one {# запись} few {# записи} many {# записей} other {# записи}}: перенесите или отмените их"
+msgid "There are already {conflictingBookings, plural, one {# booking} other {# "
+"bookings}} on these days: move or cancel them"
+msgstr "На эти дни уже {conflictingBookings, plural, one {# запись} few {# "
+"записи} many {# записей} other {# записи}}: перенесите или отмените их"
 
 #: src/views/manage/ui/ReviewsTab/ReviewsTab.tsx
-msgid "They appear after the first visits: clients rate the specialist by the SMS link or in “My bookings”."
-msgstr "Они появятся после первых визитов: клиенты оценивают мастера по ссылке из SMS или в «Моих записях»."
+msgid "They appear after the first visits: clients rate the specialist by the "
+"SMS link or in “My bookings”."
+msgstr "Они появятся после первых визитов: клиенты оценивают мастера по ссылке "
+"из SMS или в «Моих записях»."
 
 #: src/views/manage/ui/ReviewsTab/ReplySettingsSheet.tsx
-msgid "They appear by the reply field: one tap puts the text in, with the client name."
-msgstr "Появляются над полем ответа: одно нажатие, и текст уже в поле с именем клиента."
+msgid "They appear by the reply field: one tap puts the text in, with the "
+"client name."
+msgstr "Появляются над полем ответа: одно нажатие, и текст уже в поле с именем "
+"клиента."
 
 #: src/views/manage/ui/ClientsTab/ClientsTab.tsx
 msgid "They appear with the first booking, or load your base through “Import”."
@@ -8880,8 +9187,10 @@ msgid "This number is not linked to a specialist"
 msgstr "Этот номер не привязан к мастеру"
 
 #: src/views/masterDay/MasterDayPage.tsx
-msgid "This number is not linked to a specialist. Ask the owner to add it to the specialist card."
-msgstr "Этот номер не привязан к мастеру. Попросите владельца указать его в карточке мастера."
+msgid "This number is not linked to a specialist. Ask the owner to add it to "
+"the specialist card."
+msgstr "Этот номер не привязан к мастеру. Попросите владельца указать его в "
+"карточке мастера."
 
 #: src/app/[lang]/not-found.tsx
 msgid "This page does not exist - the link may be out of date."
@@ -8972,8 +9281,10 @@ msgstr "Время закрыто"
 
 #. placeholder {0}: conflictingBookingIds.length
 #: src/views/manage/model/useAdminSchedule.ts
-msgid "Time blocked. It has {0, plural, one {# booking} other {# bookings}}: cancel or move them"
-msgstr "Время закрыто. В нём {0, plural, one {# запись} few {# записи} many {# записей} other {# записи}}: отмените или перенесите их"
+msgid "Time blocked. It has {0, plural, one {# booking} other {# bookings}}: "
+"cancel or move them"
+msgstr "Время закрыто. В нём {0, plural, one {# запись} few {# записи} many {# "
+"записей} other {# записи}}: отмените или перенесите их"
 
 #: src/views/manage/model/useAdminSchedule.ts
 msgid "Time open again"
@@ -9142,7 +9453,8 @@ msgstr "Завтра с {time}"
 
 #: src/views/leaderboard/ui/LeaderboardBoard.tsx
 msgid "Too few reviews for a rating yet. It will appear once there are more."
-msgstr "Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок станет больше."
+msgstr "Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок "
+"станет больше."
 
 #: src/views/manage/ui/AnalyticsTab/MasterStatsSheet.tsx
 msgid "too little data"
@@ -9275,8 +9587,10 @@ msgid "Turn on in services"
 msgstr "Включить в услугах"
 
 #: src/views/manage/ui/FiscalTab/FiscalTab.tsx
-msgid "Turn on so sales and paid visits get a fiscal receipt with a link and QR code for the client."
-msgstr "Включите, чтобы продажи и оплаченные визиты получали фискальный чек со ссылкой и QR для клиента."
+msgid "Turn on so sales and paid visits get a fiscal receipt with a link and QR "
+"code for the client."
+msgstr "Включите, чтобы продажи и оплаченные визиты получали фискальный чек со "
+"ссылкой и QR для клиента."
 
 #: src/views/leaderboard/ui/LeaderboardBoard.tsx
 #: src/views/manage/ui/PageTab/EditPageSheet.tsx
@@ -9442,7 +9756,8 @@ msgstr "Визит"
 
 #: src/views/manage/ui/NotificationsTab/ClientChannelNote.tsx
 msgid "Visit confirmations and reminders go to WhatsApp, or by SMS without it."
-msgstr "Подтверждения и напоминания о визитах приходят в WhatsApp, а без него по SMS."
+msgstr "Подтверждения и напоминания о визитах приходят в WhatsApp, а без него "
+"по SMS."
 
 #: src/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection.tsx
 msgid "Visit outcome"
@@ -9540,12 +9855,18 @@ msgid "Warn at"
 msgstr "Предупредить, когда"
 
 #: src/app/[lang]/error.tsx
-msgid "We couldn't load the page. Try again in a minute - your bookings are safe."
-msgstr "Не получилось загрузить страницу. Попробуйте через минуту - ваши записи на месте."
+msgid "We couldn't load the page. Try again in a minute - your bookings are "
+"safe."
+msgstr "Не получилось загрузить страницу. Попробуйте через минуту - ваши записи "
+"на месте."
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-msgid "We delete your profile, photo, sign-in and notifications and cancel upcoming bookings. Past visits stay in the places’ records, and your reviews will be signed “Client”."
-msgstr "Удалим профиль, фото, вход и уведомления и отменим будущие записи. Прошлые визиты останутся в учёте мест, а отзывы будут подписаны «Клиент»."
+msgid "We delete your profile, photo, sign-in and notifications and cancel "
+"upcoming bookings. Past visits stay in the places’ records, and your "
+"reviews will be signed “Client”."
+msgstr "Удалим профиль, фото, вход и уведомления и отменим будущие записи. "
+"Прошлые визиты останутся в учёте мест, а отзывы будут подписаны "
+"«Клиент»."
 
 #: src/views/forBusiness/forBusinessContent.ts
 msgid "We have several branches."
@@ -9560,12 +9881,18 @@ msgid "We remind the client to book again with the same specialist."
 msgstr "Напомним клиенту записаться снова - к тому же мастеру."
 
 #: src/views/manage/ui/LoyaltyTab/CertificateSheet.tsx
-msgid "We show the 8-character code right away. With a number, the certificate shows on the client’s card."
-msgstr "Код из 8 символов покажем сразу. С номером сертификат виден в карточке клиента."
+msgid "We show the 8-character code right away. With a number, the certificate "
+"shows on the client’s card."
+msgstr "Код из 8 символов покажем сразу. С номером сертификат виден в карточке "
+"клиента."
 
 #: src/views/manage/ui/BusinessSheet/BusinessSheet.tsx
-msgid "We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books."
-msgstr "Будущие записи отменим и напишем клиентам, предоплату вернём. Страница пропадёт, адрес освободится, команда потеряет доступ. Прошлые визиты и чеки останутся в учёте."
+msgid "We will cancel upcoming bookings, message the clients and refund "
+"deposits. The page goes, its address is freed and the team loses access. "
+"Past visits and receipts stay in the books."
+msgstr "Будущие записи отменим и напишем клиентам, предоплату вернём. Страница "
+"пропадёт, адрес освободится, команда потеряет доступ. Прошлые визиты и "
+"чеки останутся в учёте."
 
 #: src/views/booking/ui/BookingReview/BookingReview.tsx
 msgid "we will pick"
@@ -9600,8 +9927,10 @@ msgid "We will text you if a slot opens"
 msgstr "Сообщим по SMS, если освободится"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-msgid "We will write when a master has free time or moves to another place. At most once a week."
-msgstr "Напишем, когда у мастера освободится время или он сменит место. Не чаще раза в неделю."
+msgid "We will write when a master has free time or moves to another place. At "
+"most once a week."
+msgstr "Напишем, когда у мастера освободится время или он сменит место. Не чаще "
+"раза в неделю."
 
 #: src/features/followMaster/ui/FollowButton.tsx
 msgid "We will write when the specialist has free time"
@@ -9814,8 +10143,10 @@ msgid "Who is coming"
 msgstr "Кого записываете"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-msgid "Who it is for, your interests and budget: we pick services by them in the catalogue and after booking."
-msgstr "Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи."
+msgid "Who it is for, your interests and budget: we pick services by them in "
+"the catalogue and after booking."
+msgstr "Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и "
+"после записи."
 
 #: src/views/manage/ui/SaleSheet/SaleSheet.tsx
 msgid "Who sold it"
@@ -9879,8 +10210,10 @@ msgid "Without a date: until you turn it off."
 msgstr "Без даты - пока не выключите."
 
 #: src/views/manage/ui/BranchesTab/BranchesTab.tsx
-msgid "Without a pin a branch isn't on the map. Specialists without a branch work at all of them."
-msgstr "Без метки филиал не виден на карте. Мастера без филиала принимают во всех."
+msgid "Without a pin a branch isn't on the map. Specialists without a branch "
+"work at all of them."
+msgstr "Без метки филиал не виден на карте. Мастера без филиала принимают во "
+"всех."
 
 #: src/features/calendarFeed/config/copy.ts
 msgid "Without this the calendar shows only the last digits: +996 ••• ••• 456."
@@ -9911,16 +10244,20 @@ msgstr "Фото работы"
 
 #. placeholder {0}: day.photos.weekVisits
 #: src/views/masterDay/MasterDayPage.tsx
-msgid "Work photos this week: {done} of {0, plural, one {# visit} other {# visits}}"
-msgstr "Фото работ за неделю: {done} из {0, plural, one {# визита} few {# визитов} many {# визитов} other {# визита}}"
+msgid "Work photos this week: {done} of {0, plural, one {# visit} other {# "
+"visits}}"
+msgstr "Фото работ за неделю: {done} из {0, plural, one {# визита} few {# "
+"визитов} many {# визитов} other {# визита}}"
 
 #: src/views/feed/ui/FeedCard.tsx
 msgid "Work: {name}"
 msgstr "Работа: {name}"
 
 #: src/views/manage/ui/Masters/MasterPaySheet.tsx
-msgid "Working days come from the specialist’s schedule: days off and leave are not paid."
-msgstr "Рабочие дни берутся из графика мастера: выходные и отпуск не оплачиваются."
+msgid "Working days come from the specialist’s schedule: days off and leave are "
+"not paid."
+msgstr "Рабочие дни берутся из графика мастера: выходные и отпуск не "
+"оплачиваются."
 
 #: src/views/manage/ui/MailingSheet/MailingSheet.tsx
 msgid "Write the mailing text"
@@ -9951,8 +10288,10 @@ msgid "Year not needed"
 msgstr "Год не важен"
 
 #: src/views/forBusiness/forBusinessContent.ts
-msgid "Yes: the owner and staff sign in to one dashboard with their own phone numbers."
-msgstr "Да: владелец и сотрудники заходят в один кабинет по своим номерам телефона."
+msgid "Yes: the owner and staff sign in to one dashboard with their own phone "
+"numbers."
+msgstr "Да: владелец и сотрудники заходят в один кабинет по своим номерам "
+"телефона."
 
 #: src/features/rateVisit/ui/RateRecent/RateRecent.tsx
 #: src/views/publicProfile/lib/since.ts
@@ -10002,8 +10341,10 @@ msgid "You follow {name}"
 msgstr "Вы следите за мастером {name}"
 
 #: src/views/business/ui/Place/GiftCertificateSheet.tsx
-msgid "You get the code after paying. The gift card never expires and can be spent in parts."
-msgstr "Код придёт после оплаты. Сертификат бессрочный, тратить можно по частям."
+msgid "You get the code after paying. The gift card never expires and can be "
+"spent in parts."
+msgstr "Код придёт после оплаты. Сертификат бессрочный, тратить можно по "
+"частям."
 
 #: src/views/booking/ui/BookingSuccess/BookingSuccess.tsx
 msgid "You may like"
@@ -10026,8 +10367,10 @@ msgid "Your answers"
 msgstr "Ваши ответы"
 
 #: src/features/forYou/ui/PreferencesSheet.tsx
-msgid "Your answers stay on this phone and, with your visits, decide what goes into “For you”."
-msgstr "Ответы остаются на этом телефоне и вместе с вашими визитами решают, что попадёт в «Для вас»."
+msgid "Your answers stay on this phone and, with your visits, decide what goes "
+"into “For you”."
+msgstr "Ответы остаются на этом телефоне и вместе с вашими визитами решают, что "
+"попадёт в «Для вас»."
 
 #: src/app/[lang]/v/[id]/page.tsx
 #: src/entities/booking/ui/Ticket/Ticket.tsx
@@ -10040,19 +10383,25 @@ msgid "Your bookings"
 msgstr "Ваши записи"
 
 #: src/features/calendarFeed/ui/CalendarFeedGroup/CalendarFeedSheet.tsx
-msgid "Your bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out."
-msgstr "Ваши записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми."
+msgid "Your bookings from a month back to three months ahead will appear in "
+"iPhone or Google Calendar and update themselves. Cancellations stay "
+"crossed out."
+msgstr "Ваши записи за месяц назад и три вперёд появятся в Календаре iPhone или "
+"Google и будут обновляться сами. Отмены останутся зачёркнутыми."
 
 #: src/features/calendarFeed/config/copy.ts
-msgid "Your bookings in iPhone or Google Calendar: they update themselves, no need to open “My day”."
-msgstr "Ваши записи в Календаре iPhone или Google: обновляются сами, «Мой день» открывать не нужно."
+msgid "Your bookings in iPhone or Google Calendar: they update themselves, no "
+"need to open “My day”."
+msgstr "Ваши записи в Календаре iPhone или Google: обновляются сами, «Мой день» "
+"открывать не нужно."
 
 #: src/views/forBusiness/forBusinessContent.ts
 msgid "Your business name and type: we’ll fill in typical services and prices."
 msgstr "Название и вид бизнеса - мы подставим типичные услуги и цены."
 
 #: src/views/manage/ui/FiscalTab/FiscalSheet.tsx
-msgid "Your cloud till in eKassa under your TIN. The password is stored encrypted."
+msgid "Your cloud till in eKassa under your TIN. The password is stored "
+"encrypted."
 msgstr "Ваша облачная касса в eKassa на ваш ИНН. Пароль хранится зашифрованным."
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
@@ -10098,11 +10447,13 @@ msgid "Your profile card for stories"
 msgstr "Карточка профиля для сторис"
 
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
-msgid "Your profile, bookings, reviews, bonuses, notifications and favourites in one file."
+msgid "Your profile, bookings, reviews, bonuses, notifications and favourites "
+"in one file."
 msgstr "Профиль, записи, отзывы, бонусы, уведомления и избранное в одном файле."
 
 #: src/views/business/ui/Place/QuestionsSection.tsx
-msgid "Your question shows once the place answers: with your name, without your number."
+msgid "Your question shows once the place answers: with your name, without your "
+"number."
 msgstr "Вопрос увидят после ответа места - с вашим именем, без номера."
 
 #: src/views/bookings/ui/BookingHistory/BookingHistory.tsx

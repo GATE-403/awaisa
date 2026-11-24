@@ -50,11 +50,11 @@ test.describe('Languages', () => {
 
   test('the footer switches the page to another language', async ({ page, isMobile }) => {
     test.skip(isMobile, 'The footer folds its controls on phones; the switch is the same')
-    await page.goto('/map?kind=barber')
+    await page.goto('/top?kind=barber')
     await page.getByRole('combobox', { name: 'Language' }).click()
     await page.getByRole('option', { name: 'Кыргызча' }).click()
 
-    await expect(page).toHaveURL(/\/ky\/map\?kind=barber$/)
+    await expect(page).toHaveURL(/\/ky\/top\?kind=barber$/)
     await expect(page.locator('html')).toHaveAttribute('lang', 'ky-KG')
     await expect(page.getByRole('combobox', { name: 'Тил' })).toBeVisible()
   })
