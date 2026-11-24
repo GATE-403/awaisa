@@ -13,6 +13,7 @@ import { MasterScheduleService } from '../catalog/master-schedule.service.js'
 import {
   addDays,
   businessDateTimeToUtc,
+  businessDayBounds,
   formatMinutes,
   parseTime,
   toBusinessParts,
@@ -31,8 +32,15 @@ import {
 } from './booking-shared.js'
 import { BookingsService } from './bookings.service.js'
 import { mastersForAll, visitCost } from './visit-services.js'
+import { visitPrice } from './visit-sql.js'
 
 const MAX_RECENT_BOOKINGS = 20
+
+// UPDATE … RETURNING comes back as [rows, affected] from TypeORM on Postgres.
+const returnedIds = (result: unknown) => {
+  const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result
+  return (rows as { id: string }[]).map((row) => row.id)
+}
 
 type OutcomeInput = {
   outcome: 'arrived' | 'no_show' | null
@@ -119,9 +127,6 @@ export class SalonBookingsService {
       const settled = planned ?? (await this.loyalty.applyToVisit(visit, input))
       covered = settled.covered
       coveredBy = settled.method
-    } else {
-      await this.loyalty.revertVisits([id])
-      await this.inventory.revertVisits([id])
     }
     const paidAmount = isArrived ? (input.paidAmount ?? Math.max(due - covered, 0)) : null
     await this.bookings.update(
@@ -142,15 +147,48 @@ export class SalonBookingsService {
       },
     )
     if (isArrived) {
-      await this.loyalty.earnForVisits([id])
-      await this.inventory.useForVisits([id])
+      await this.afterArrived(businessId, [id])
+    } else {
+      await this.afterUnmarked(businessId, [id])
     }
-    // Money taken at the visit gets its receipt (or the old one refunded); never fails the save.
-    await this.fiscal.syncVisits(businessId, [id])
 
     return toAdminView(
       await bookingViewQuery(this.bookings).where('booking.id = :id', { id }).getOneOrFail(),
     )
+  }
+
+  // «Все пришли»: every ended visit of the day without an outcome counts as arrived, paid the
+  // price in cash. The ids come back so the toast can undo exactly these.
+  async closeDay(businessId: string, date: string) {
+    const { dayStart, dayEnd } = businessDayBounds(date)
+    const result = (await this.bookings.query(
+      `UPDATE "bookings" AS b SET "outcome" = 'arrived', "paid_amount" = ${visitPrice()} - COALESCE(b."discount_amount", 0),
+         "payment_method" = 'cash', "outcome_at" = now()
+       FROM "services" AS s
+       WHERE s."id" = b."service_id" AND b."business_id" = $1 AND b."status" = 'confirmed'
+         AND b."outcome" IS NULL AND b."ends_at" < now()
+         AND b."starts_at" >= $2 AND b."starts_at" < $3
+       RETURNING b."id"`,
+      [businessId, dayStart, dayEnd],
+    )) as unknown
+    const ids = returnedIds(result)
+    // Visits booked to be paid by a subscription draw on it before bonuses are counted.
+    await this.loyalty.usePlannedSubscriptions(ids)
+    await this.afterArrived(businessId, ids)
+
+    return { ids }
+  }
+
+  /** «Вернуть» after «Все пришли»: only this business's visits go back to unmarked. */
+  async reopen(businessId: string, ids: string[]) {
+    const result = (await this.bookings.query(
+      `UPDATE "bookings" SET "outcome" = NULL, "paid_amount" = NULL, "payment_method" = NULL,
+         "outcome_at" = NULL
+       WHERE "business_id" = $1 AND "id" = ANY($2::uuid[])
+       RETURNING "id"`,
+      [businessId, ids],
+    )) as unknown
+    await this.afterUnmarked(businessId, returnedIds(result))
   }
 
   /** Bookings clients made after `since`, for the cabinet's new-booking alerts. */
@@ -269,6 +307,22 @@ export class SalonBookingsService {
       customerPhone: booking.customerPhone,
       wasConfirmed,
     }
+  }
+
+  // What an «arrived» mark sets off, the same for one visit and for «Все пришли»: bonuses on the
+  // money paid, materials written off, the receipt (which never fails the save).
+  private async afterArrived(businessId: string, ids: string[]) {
+    await this.loyalty.earnForVisits(ids)
+    await this.inventory.useForVisits(ids)
+    await this.fiscal.syncVisits(businessId, ids)
+  }
+
+  // A visit back to «Ждём» or «Не пришёл»: what it drew on and used comes back, the receipt is
+  // refunded.
+  private async afterUnmarked(businessId: string, ids: string[]) {
+    await this.loyalty.revertVisits(ids)
+    await this.inventory.revertVisits(ids)
+    await this.fiscal.syncVisits(businessId, ids)
   }
 }
 
