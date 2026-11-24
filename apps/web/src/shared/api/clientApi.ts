@@ -314,8 +314,7 @@ const getWalletLinks = (id: string, token: string | null) =>
       })
     : request<WalletLinks>(`/me/bookings/${id}/wallet`, { method: 'POST' })
 
-const requestOtp = (phone: string, channel: 'auto' | 'sms' = 'auto') =>
-  post<OtpRequest>('/auth/otp', { phone, channel })
+const requestOtp = (phone: string) => post<OtpRequest>('/auth/otp', { phone })
 
 const verifyOtp = (phone: string, code: string) => post<Customer>('/auth/verify', { phone, code })
 

@@ -574,18 +574,22 @@ type Customer = {
 /** `GET /session`: the signed-in account, or null for a guest (200 either way). */
 type Session = { customer: Customer | null }
 
+// Sign-in codes go to Telegram only; `sms` is left on codes sent before that.
 type OtpChannel = 'telegram' | 'sms'
 
 type OtpRequest = {
   phone: string
-  channel: OtpChannel
+  channel: 'telegram'
   resendAfterSeconds: number
 }
 
 /** `GET /auth/telegram`: whether «Войти через Telegram» can be offered, and the bot to open. */
 type TelegramLoginConfig = {
+  /** The bot sign-in («Войти через Telegram»). */
   isAvailable: boolean
   botUsername: string | null
+  /** A code to the number in Telegram (the Telegram Gateway, or the log outside production). */
+  isCodeAvailable: boolean
 }
 
 /**

@@ -28,6 +28,8 @@ const newToken = () => {
  */
 export const useTelegramLogin = (onSignedIn: (customer: Customer) => void) => {
   const [bot, setBot] = useState<string | null>(null)
+  // Assumed until the config answers, so the number field does not flash in and out.
+  const [isCodeAvailable, setIsCodeAvailable] = useState(true)
   const [token, setToken] = useState<string | null>(null)
   const [isWaiting, setIsWaiting] = useState(false)
   const [isExpired, setIsExpired] = useState(false)
@@ -40,7 +42,10 @@ export const useTelegramLogin = (onSignedIn: (customer: Customer) => void) => {
   useEffect(() => {
     const controller = new AbortController()
     getTelegramLoginConfig(controller.signal)
-      .then((config) => setBot(config.isAvailable ? config.botUsername : null))
+      .then((config) => {
+        setBot(config.isAvailable ? config.botUsername : null)
+        setIsCodeAvailable(config.isCodeAvailable)
+      })
       .catch(() => undefined)
     return () => controller.abort()
   }, [])
@@ -90,6 +95,8 @@ export const useTelegramLogin = (onSignedIn: (customer: Customer) => void) => {
 
   return {
     isAvailable: Boolean(bot && token),
+    /** A code to the number in Telegram can be sent (the Telegram Gateway). */
+    isCodeAvailable,
     href: bot && token ? `https://t.me/${bot}?start=login_${token}` : undefined,
     isWaiting,
     isExpired,

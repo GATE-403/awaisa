@@ -50,7 +50,7 @@ const findFreeSlot = async (specialistIndex = 0, fromDay = 1) => {
 /** A request context signed in with the test code; cookies stay inside it. */
 const signedInRequest = async (phone: string, name: string) => {
   const context = await request.newContext({ baseURL: BASE_URL })
-  const otp = await context.post('/api/auth/otp', { data: { phone, channel: 'sms' } })
+  const otp = await context.post('/api/auth/otp', { data: { phone } })
   if (!otp.ok()) throw new Error(`OTP ${otp.status()}: ${await otp.text()}`)
   const verify = await context.post('/api/auth/verify', { data: { phone, code: TEST_CODE } })
   if (!verify.ok()) throw new Error(`Verify ${verify.status()}: ${await verify.text()}`)

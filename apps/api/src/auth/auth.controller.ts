@@ -41,7 +41,7 @@ export class AuthController {
   @HttpCode(200)
   @Throttle({ default: { limit: getCodeRateLimit, ttl: 60_000 } })
   requestCode(@Body({ schema: requestCodeSchema }) body: RequestCodeInput): Promise<OtpRequest> {
-    return this.auth.requestCode(body.phone, body.channel)
+    return this.auth.requestCode(body.phone)
   }
 
   @Post('verify')
@@ -60,7 +60,11 @@ export class AuthController {
   @Get('telegram')
   telegramConfig(): TelegramLoginConfig {
     const botUsername = this.telegramLogin.botUsername
-    return { isAvailable: Boolean(botUsername), botUsername }
+    return {
+      isAvailable: Boolean(botUsername),
+      botUsername,
+      isCodeAvailable: this.auth.isCodeAvailable,
+    }
   }
 
   @Post('telegram')
