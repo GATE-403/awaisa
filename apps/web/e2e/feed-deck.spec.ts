@@ -269,8 +269,13 @@ test.describe('«Образы» feed', () => {
       // Three reports from different devices take it out of the feed until someone looks.
       const viewers = await browser.newContext()
       for (let report = 0; report < 3; report += 1) {
-        const response = await viewers.request.post(`/api/feed/${photoId}/report`, {
-          data: { reason: 'spam', session: `e2e-feed-${photoId}-${report}` },
+        const response = await viewers.request.post('/api/reports', {
+          data: {
+            targetType: 'photo',
+            targetId: photoId,
+            reason: 'spam',
+            session: `e2e-feed-${photoId}-${report}`,
+          },
         })
         expect(response.status()).toBe(204)
       }
