@@ -303,7 +303,7 @@ Follows https://react-typescript-style-guide.com/, enforced by Biome where possi
 
 ## Conventions
 
-- `main` is the default branch and is protected by a ruleset: changes land only through pull requests whose CI is green (lint, types, unit tests, build, the `db` job and every e2e shard), no force pushes or deletion; the release-notes workflow (GitHub Actions) may commit to it directly. Auto-merge is on.
+- `main` is the default branch and is protected by a ruleset: changes land only through pull requests whose CI is green (lint, types, unit tests, build, the `db` job and every e2e shard), no force pushes or deletion; the release-notes workflow commits to it directly with the deploy key in the `UPDATES_DEPLOY_KEY` secret, the ruleset's only bypass. Auto-merge is on.
 - Commits and PR titles follow Conventional Commits 1.0.0 in English: `type(scope): description` (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert; a lowercase scope such as `booking`, `cabinet`, `api`), imperative, no trailing period, no Cyrillic. No `Co-Authored-By` or other AI attribution lines. The «Что нового» section of a PR description stays in Russian: it becomes text people read in the app.
 - Lint/format: Biome only (root `biome.json`, per-app overrides in `apps/*/biome.json`). No ESLint/Prettier.
 - API: Biome `useImportType` is off - Nest DI needs runtime imports for constructor-injected classes.
