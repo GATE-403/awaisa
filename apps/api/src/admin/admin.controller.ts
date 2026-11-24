@@ -82,7 +82,7 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Body({ schema: closeDaySchema }) body: CloseDayInput,
   ): Promise<ClosedDay> {
-    return this.admin.closeDay(business, body.date)
+    return this.salonBookings.closeDay(business.id, body.date)
   }
 
   @Post('bookings/reopen')
@@ -91,7 +91,7 @@ export class AdminController {
     @CurrentBusiness() business: Business,
     @Body({ schema: reopenSchema }) body: ReopenInput,
   ) {
-    await this.admin.reopen(business, body.ids)
+    await this.salonBookings.reopen(business.id, body.ids)
   }
 
   @Get('bookings/unclosed')
