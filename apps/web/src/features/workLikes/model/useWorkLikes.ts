@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react'
 import { likeFeedItem } from '@/shared/api/clientApi'
+import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 import { deviceSession } from '@/shared/lib/telemetry'
 
 const KEY = 'awaisa:liked-works:v1'
@@ -11,22 +12,14 @@ let cache: string[] | null = null
 
 const read = () => {
   if (cache) return cache
-  try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? '[]')
-    cache = Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
-  } catch {
-    cache = []
-  }
+  cache = onlyStrings(readJson(KEY, isArray))
   return cache
 }
 
 const write = (ids: string[]) => {
   cache = ids.slice(-500)
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify(cache))
-  } catch {
-    // Private mode: the like still counts on the server for this visit.
-  }
+  // Private mode: the like still counts on the server for this visit.
+  writeJson(KEY, cache)
   for (const listener of listeners) listener()
 }
 

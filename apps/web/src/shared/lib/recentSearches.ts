@@ -1,3 +1,5 @@
+import { isArray, onlyStrings, readJson, removeKey, writeJson } from './storage'
+
 const RECENT_KEY = 'awaisa:recent-searches:v1'
 const MAX_RECENT = 5
 
@@ -12,23 +14,12 @@ const addRecent = (list: string[], query: string) => {
   )
 }
 
-const readRecentSearches = (): string[] => {
-  try {
-    const parsed: unknown = JSON.parse(window.localStorage.getItem(RECENT_KEY) ?? '[]')
-    return Array.isArray(parsed) ? parsed.filter((item) => typeof item === 'string') : []
-  } catch {
-    // Blocked or broken storage: nothing recent.
-    return []
-  }
-}
+// Blocked or broken storage: nothing recent.
+const readRecentSearches = (): string[] => onlyStrings(readJson(RECENT_KEY, isArray))
 
 const writeRecentSearches = (list: string[]) => {
-  try {
-    if (list.length === 0) window.localStorage.removeItem(RECENT_KEY)
-    else window.localStorage.setItem(RECENT_KEY, JSON.stringify(list))
-  } catch {
-    // Same as above.
-  }
+  if (list.length === 0) removeKey(RECENT_KEY)
+  else writeJson(RECENT_KEY, list)
 }
 
 const rememberSearch = (query: string) =>

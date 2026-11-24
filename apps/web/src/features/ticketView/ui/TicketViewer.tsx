@@ -9,6 +9,7 @@ import type { Booking } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { saveFile } from '@/shared/lib/share'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -47,28 +48,10 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
       if (!blob) throw new Error('empty image')
       const file = new File([blob], toFileName(booking), { type: 'image/png' })
 
-      // Phones save pictures through the share sheet («Сохранить изображение»). Desktop browsers
-      // can share files too, but their sheet offers «Копировать» first, so they get a real file.
-      const isTouch = window.matchMedia('(pointer: coarse)').matches
-      if (isTouch && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: t('Талон: {service}', { service: booking.serviceName }),
-        })
-      } else {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = file.name
-        document.body.append(link)
-        link.click()
-        link.remove()
-        // Safari starts the download after this tick: revoking at once can cancel it.
-        window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-      }
+      const result = await saveFile(file, t('Талон: {service}', { service: booking.serviceName }))
+      if (result === 'cancelled') return
       haptic('success')
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
+    } catch {
       toast.show({ title: t('Не получилось сохранить талон'), type: 'error' })
     } finally {
       setIsSaving(false)

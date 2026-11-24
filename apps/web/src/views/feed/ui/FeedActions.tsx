@@ -10,6 +10,7 @@ import { useNextSlot } from '@/entities/booking'
 import { ReportReasons, useReport } from '@/features/report'
 import type { FeedItem } from '@/shared/api/types'
 import { type Translate, useT } from '@/shared/i18n'
+import { shareLink } from '@/shared/lib/share'
 import styles from '../FeedPage.module.css'
 import { WorkReviewsSheet } from './WorkReviewsSheet'
 
@@ -53,16 +54,9 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
   const share = async () => {
     const url = `${window.location.origin}/feed?start=${item.id}`
     const title = service ? `${service.name} — ${business.name}` : business.name
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, url })
-        return
-      }
-      await navigator.clipboard.writeText(url)
-      toast.show({ title: t('Ссылка скопирована'), type: 'success' })
-    } catch {
-      // The share sheet was closed: nothing to do.
-    }
+    // The share sheet was closed: nothing to do.
+    const result = await shareLink({ title, url })
+    if (result === 'copied') toast.show({ title: t('Ссылка скопирована'), type: 'success' })
   }
 
   const report = useReport('photo', item.id, onReported)

@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { formatClock } from '@/entities/business'
 import type { AdminSchedule, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { copyText } from '@/shared/lib/share'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -102,12 +103,10 @@ export const ShareWindowsSheet = ({
   const text = `${body}\n\n${t('Запись онлайн: {link}', { link })}`
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text)
+    const isCopied = await copyText(text)
+    if (isCopied)
       toast.show({ title: t('Скопировано — вставьте в чат или сторис'), type: 'success' })
-    } catch {
-      toast.show({ title: t('Не получилось скопировать'), type: 'error' })
-    }
+    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
   }
 
   return (
