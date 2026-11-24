@@ -1,5 +1,16 @@
 [
   {
+    "id": "pr159-1",
+    "date": "2026-11-24",
+    "audience": "everyone",
+    "title": "Awaisa in English",
+    "text": "The whole app, messages and notifications are now in English.",
+    "link": {
+      "href": "/",
+      "label": "Open the catalogue"
+    }
+  },
+  {
     "id": "pr155-1",
     "date": "2026-11-24",
     "audience": "everyone",
