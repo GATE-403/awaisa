@@ -20,6 +20,9 @@ importers:
       '@awaisa/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@awaisa/region':
+        specifier: workspace:*
+        version: link:../../packages/region
       '@aws-sdk/client-s3':
         specifier: ^3.1164.0
         version: 3.1164.0
@@ -190,6 +193,9 @@ importers:
       '@awaisa/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@awaisa/region':
+        specifier: workspace:*
+        version: link:../../packages/region
       '@awaisa/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -272,6 +278,18 @@ importers:
       '@biomejs/biome':
         specifier: 2.4.2
         version: 2.4.2
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/region:
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 2.4.2
+        version: 2.4.2
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.19.2
       typescript:
         specifier: ^5
         version: 5.9.3

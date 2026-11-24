@@ -1,9 +1,12 @@
+import { loadRegionFile } from '@awaisa/region/node'
 import { normalizePhone } from '../common/phone.js'
 import { ALGORITHM, ALGORITHMS, type Algorithm } from '../recommendations/recommend-score.js'
 import { type ProcessRole, parseProcessRole } from '../runtime/process-role.js'
 
 type Env = {
   NODE_ENV: 'development' | 'production' | 'test'
+  /** The installation's `region.json` (its country and city); found above the working folder by default. */
+  REGION_FILE?: string
   PROCESS_ROLE: ProcessRole
   API_PORT: number
   DATABASE_URL: string
@@ -97,6 +100,15 @@ const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 const MIN_SECRET_LENGTH = 32
 
 const NODE_ENVS: Env['NODE_ENV'][] = ['development', 'production', 'test']
+
+// Production needs the installation's own region.json; development and tests may use the
+// repository's region.example.json.
+const parseRegionFile = (value: unknown, nodeEnv: Env['NODE_ENV']) =>
+  loadRegionFile({
+    file: optionalString(value),
+    from: process.cwd(),
+    allowExample: nodeEnv !== 'production',
+  }).file
 
 const parseNodeEnv = (value: unknown): Env['NODE_ENV'] => {
   if (value === undefined) return 'development'
@@ -400,6 +412,8 @@ const validateEnv = (config: Record<string, unknown>): Env => {
 
   return {
     NODE_ENV: nodeEnv,
+    // A missing or wrong region.json stops the start here, not at the first phone number.
+    REGION_FILE: parseRegionFile(config.REGION_FILE, nodeEnv),
     PROCESS_ROLE: parseRole(config),
     API_PORT: parsePort(config.API_PORT ?? config.PORT),
     DATABASE_URL: parseDatabaseUrl(config.DATABASE_URL),

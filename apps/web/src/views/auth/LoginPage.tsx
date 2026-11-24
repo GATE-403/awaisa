@@ -8,6 +8,7 @@ import { CaretLeft, X } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
 import { type FormEvent, useEffect, useRef } from 'react'
 import { PersonAvatar } from '@/entities/business'
+import { PHONE_PREFIX } from '@/shared/config/region'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskLocalPhoneInput } from '@/shared/lib/inputMasks'
@@ -19,6 +20,9 @@ import { useTelegramLogin } from '@/views/auth/model/useTelegramLogin'
 import { GradientFlow } from '@/views/auth/ui/GradientFlow/GradientFlow'
 import { SignInTransition } from '@/views/auth/ui/SignInTransition/SignInTransition'
 import styles from './LoginPage.module.css'
+
+// The fixed «+996» before the field: the field holds only what follows it.
+const PREFIX_PATTERN = new RegExp(`^\\${PHONE_PREFIX}\\s?`)
 
 const handleSubmit = (action: () => void) => (event: FormEvent) => {
   event.preventDefault()
@@ -114,7 +118,7 @@ export const LoginPage = () => {
                         phoneInputRef.current?.focus()
                       }}
                     >
-                      +996
+                      {PHONE_PREFIX}
                     </span>
                     <Input
                       ref={phoneInputRef}
@@ -122,7 +126,7 @@ export const LoginPage = () => {
                       inputMode='tel'
                       autoComplete='tel'
                       placeholder='555 123 456'
-                      value={form.phone.replace(/^\+996\s?/, '')}
+                      value={form.phone.replace(PREFIX_PATTERN, '')}
                       onValueChange={(value) => form.setPhone(maskLocalPhoneInput(value))}
                       className={styles.numberInput}
                       autoFocus

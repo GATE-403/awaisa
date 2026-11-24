@@ -1,9 +1,23 @@
 import path from 'node:path'
+import { loadRegionFile } from '@awaisa/region/node'
 import type { NextConfig } from 'next'
 import { API_URL, CLIENT_API_PREFIX } from './src/shared/config/api'
 import { EMOJI_DATA_URL, EMOJIBASE_VERSION } from './src/shared/ui/EmojiPicker/config'
 
+// The installation's country and city (region.json above this folder, or REGION_FILE), inlined
+// into the bundle: the code knows no country of its own. Without one the repository's
+// region.example.json is used, with a warning (the API refuses to start in production then).
+const installationRegion = loadRegionFile({
+  file: process.env.REGION_FILE,
+  from: import.meta.dirname,
+  allowExample: true,
+})
+if (installationRegion.isExample && process.env.NODE_ENV === 'production') {
+  console.warn(`No region.json: building with ${installationRegion.file}`)
+}
+
 const nextConfig: NextConfig = {
+  env: { NEXT_PUBLIC_REGION: JSON.stringify(installationRegion.region) },
   // E2E builds into its own folder so `next build` never touches a running `next dev`'s files.
   distDir: process.env.NEXT_DIST_DIR || '.next',
   // Links from before the platform (bookmarks, old SMS) pointed at the single salon.
@@ -41,7 +55,7 @@ const nextConfig: NextConfig = {
   // sides, and the Docker image of the web (turbo prune web) has no apps/api. `pnpm typecheck`
   // still checks everything with tsconfig.json.
   typescript: { tsconfigPath: 'tsconfig.build.json' },
-  transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts'],
+  transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts', '@awaisa/region'],
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   experimental: {
     agentFeedback: true,

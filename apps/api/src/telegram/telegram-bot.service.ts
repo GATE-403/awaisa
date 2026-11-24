@@ -40,10 +40,10 @@ import {
   LOGIN_DONE,
   LOGIN_EXPIRED,
   LOGIN_NOT_OWN,
-  LOGIN_REFUSED,
   LOGIN_SHARE_BUTTON,
   linkedText,
   loginKnownText,
+  loginRefusedText,
   unclosedText,
 } from './telegram-messages.js'
 
@@ -560,7 +560,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     }
     const result = await this.telegramLogin.confirmContact(chatId, contact.phone_number)
     const removeKeyboard = { remove_keyboard: true }
-    if (result === 'refused') return this.send(chatId, LOGIN_REFUSED, removeKeyboard)
+    if (result === 'refused') return this.send(chatId, loginRefusedText(), removeKeyboard)
     if (result === 'none') return this.send(chatId, LOGIN_EXPIRED, removeKeyboard)
     const phone = normalizePhone(contact.phone_number)
     if (phone) await this.clientMessages.linkPhone(chatId, phone)

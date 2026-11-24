@@ -1,10 +1,13 @@
+import { utcOffsetMinutes } from '@awaisa/region'
 import type { BusinessKind } from '@/shared/api/types'
+import { REGION } from '@/shared/config/region'
 
 const PLATFORM = {
   name: 'Awaisa',
-  tagline: 'Online booking with Bishkek salons and specialists: no calls.',
-  // Kyrgyzstan has a single time zone; every business on the platform books in UTC+6.
-  utcOffsetMinutes: 6 * 60,
+  tagline: 'Online booking with salons and specialists: no calls.',
+  // Every business of the installation books in its region's time (its offset when the page is
+  // built or opened).
+  utcOffsetMinutes: utcOffsetMinutes(REGION),
 }
 
 const BUSINESS_KINDS: { value: BusinessKind; label: string }[] = [

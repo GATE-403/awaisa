@@ -10,6 +10,7 @@ import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addTeamMember, getTeam, removeTeamMember } from '@/shared/api/clientApi'
 import type { TeamMember } from '@/shared/api/types'
+import { PHONE_PLACEHOLDER } from '@/shared/config/region'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
@@ -135,7 +136,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
               type='tel'
               inputMode='tel'
               aria-label={t("Administrator's phone")}
-              placeholder='+996 555 123 456'
+              placeholder={PHONE_PLACEHOLDER}
               value={phone}
               onValueChange={(value) => setPhone(maskPhoneInput(value))}
             />

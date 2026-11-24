@@ -1,3 +1,11 @@
-const KG_PHONE = /^\+996(\d{3})(\d{3})(\d{3})$/
+import { formatNationalPhone } from '@awaisa/region'
+import { REGION } from '@/shared/config/region'
 
-export const formatPhone = (phone: string) => phone.replace(KG_PHONE, '+996 $1 $2 $3')
+const { callingCode, nationalDigits } = REGION.phone
+const NATIONAL_NUMBER = new RegExp(`^\\+${callingCode}(\\d{${nationalDigits}})$`)
+
+/** «+996555123456» → «+996 555 123 456»; a number of another country stays as it is. */
+export const formatPhone = (phone: string) => {
+  const national = NATIONAL_NUMBER.exec(phone)?.[1]
+  return national ? formatNationalPhone(REGION, national) : phone
+}

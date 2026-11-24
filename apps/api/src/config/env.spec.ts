@@ -1,7 +1,17 @@
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { validateEnv } from './env.js'
 
+const EXAMPLE_REGION = fileURLToPath(new URL('../../../../region.example.json', import.meta.url))
+
 const base = { DATABASE_URL: 'postgres://awaisa:awaisa@localhost:5432/awaisa' }
+
+const production = {
+  ...base,
+  NODE_ENV: 'production',
+  AUTH_SECRET: 'x'.repeat(32),
+  REGION_FILE: EXAMPLE_REGION,
+}
 
 describe('TRUST_PROXY', () => {
   it('trusts only our own network by default', () => {
@@ -27,12 +37,6 @@ describe('TRUST_PROXY', () => {
 })
 
 describe('production guards', () => {
-  const production = {
-    ...base,
-    NODE_ENV: 'production',
-    AUTH_SECRET: 'x'.repeat(32),
-  }
-
   it('refuses a short secret and test-only drivers', () => {
     expect(() => validateEnv({ ...production, AUTH_SECRET: 'short' })).toThrow('AUTH_SECRET')
     expect(() => validateEnv({ ...production, OTP_TEST_CODE: '111111' })).toThrow('OTP_TEST_CODE')
@@ -45,5 +49,18 @@ describe('production guards', () => {
     expect(env.PAYMENT_DRIVER).toBe('none')
     expect(env.FISCAL_DRIVER).toBe('off')
     expect(env.WHATSAPP_DRIVER).toBe('off')
+  })
+})
+
+describe('REGION_FILE', () => {
+  it('uses the repository example outside production', () => {
+    expect(validateEnv(base).REGION_FILE).toMatch(/region\.example\.json$/)
+  })
+
+  it('needs the installation’s own region.json in production', () => {
+    expect(() => validateEnv({ ...production, REGION_FILE: undefined })).toThrow('No region.json')
+    expect(() => validateEnv({ ...production, REGION_FILE: 'missing.json' })).toThrow(
+      'does not exist',
+    )
   })
 })

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@awaisa/contracts": "workspace:*",
+    "@awaisa/region": "workspace:*",
     "@awaisa/tokens": "workspace:*",
     "@awaisa/ui": "workspace:*",
     "@phosphor-icons/react": "^2.1.10",

@@ -20,6 +20,7 @@ import { rememberService, trackBookedPick } from '@/features/forYou'
 import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
+import { PHONE_PLACEHOLDER, WHOLE_PHONE_DIGITS } from '@/shared/config/region'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
@@ -873,7 +874,10 @@ export const BookingPage = ({
                               form.setPhone(masked)
                               // A whole number (+996 and nine digits) with a name: the card folds,
                               // like a code field moving on once full.
-                              if (masked.replace(/\D/g, '').length === 12 && form.name.trim()) {
+                              if (
+                                masked.replace(/\D/g, '').length === WHOLE_PHONE_DIGITS &&
+                                form.name.trim()
+                              ) {
                                 window.clearTimeout(foldTimer.current)
                                 foldTimer.current = window.setTimeout(
                                   () => setIsContactsDone(true),
@@ -881,7 +885,7 @@ export const BookingPage = ({
                                 )
                               }
                             }}
-                            placeholder='+996 555 123 456'
+                            placeholder={PHONE_PLACEHOLDER}
                           />
                         </Field>
                       )}

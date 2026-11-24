@@ -19,6 +19,7 @@ import { readRef } from '@/features/invite'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { createBooking } from '@/shared/api/clientApi'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
+import { NATIONAL_PHONE_DIGITS } from '@/shared/config/region'
 import { readChannel } from '@/shared/lib/bookingChannel'
 import { distanceKm, knownPosition } from '@/shared/lib/geo'
 import { useToday } from '@/shared/lib/hooks/useToday'
@@ -39,8 +40,6 @@ type AddNotice =
   | { kind: 'time'; time: string; minutes: number }
 
 const STEP_ORDER: BookingStepId[] = ['service', 'specialist', 'datetime', 'contacts']
-
-const MIN_PHONE_DIGITS = 9
 
 const CONFLICT_STATUS = 409
 
@@ -323,7 +322,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const isPaidBySubscription = Boolean(subscriptionPayment.subscription || subscriptionPayment.plan)
   const name = nameInput ?? session.customer?.name ?? ''
   const phoneDigits = phone.replace(/\D/g, '')
-  const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
+  const isPhoneValid = accountPhone !== null || phoneDigits.length >= NATIONAL_PHONE_DIGITS
   const errors = {
     name: hasTriedSubmit && !name.trim() ? 'Enter a name' : undefined,
     phone:

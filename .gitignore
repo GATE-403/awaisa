@@ -48,3 +48,6 @@ reports/ux/*
 .next-lh/
 .next-3001/
 .next-prod/
+
+# The installation's own country and city (copy region.example.json)
+region.json

@@ -15,11 +15,6 @@ type PhotonFeature = {
   }
 }
 
-/** Kyrgyzstan as Photon's box (lon, lat), so a street name finds the one here first. */
-const KYRGYZSTAN_BBOX = '69.2,39.1,80.3,43.3'
-/** Bishkek, where most places are: results near it rank first. */
-const BISHKEK = { latitude: 42.8746, longitude: 74.5698 }
-
 // «Bishkek Park, проспект Чуй, 155» for a mall, «Киевская улица, 77» for a house: what the owner
 // would type into 'Address', and the district and city as the line under it.
 const toPlace = (feature: PhotonFeature): GeoPlace | null => {
@@ -61,4 +56,4 @@ const toPlaces = (features: PhotonFeature[]): GeoPlace[] => {
 }
 
 export type { PhotonFeature }
-export { BISHKEK, KYRGYZSTAN_BBOX, toPlace, toPlaces }
+export { toPlace, toPlaces }

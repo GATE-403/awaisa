@@ -1,8 +1,25 @@
+import { parseRegion } from '@awaisa/region'
 import { describe, expect, it } from 'vitest'
+import { formatPhone } from '../formatPhone'
 import { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem } from '../inputMasks'
 
+// Another installation's shape of number: the rules come from its region, the code knows none.
+const ALMATY = parseRegion({
+  country: 'KZ',
+  timeZone: 'Asia/Almaty',
+  phone: {
+    callingCode: '7',
+    nationalDigits: 10,
+    trunkPrefix: '8',
+    groups: [3, 3, 2, 2],
+    example: '7011234567',
+  },
+  currency: { code: 'KZT', label: 'тг' },
+  city: { name: 'Алматы', center: { latitude: 43.24, longitude: 76.89 } },
+})
+
 describe('maskPhoneInput', () => {
-  it('formats a Kyrgyz number however it is typed', () => {
+  it('formats a number of the region however it is typed', () => {
     for (const typed of [
       '0555123456',
       '555123456',
@@ -46,7 +63,7 @@ describe('phoneProblem', () => {
 
   it('names what is wrong', () => {
     expect(phoneProblem(' ')).toBe('Enter a phone number')
-    expect(phoneProblem('+7 999 1234567')).toBe('For now we only take Kyrgyz numbers: +996')
+    expect(phoneProblem('+7 999 1234567')).toBe('For now we only take numbers with the code +996')
     expect(phoneProblem('+996 555 12')).toBe(
       'The number is incomplete: it needs 9 digits after +996',
     )
@@ -61,5 +78,22 @@ describe('maskAmountInput', () => {
     expect(maskAmountInput('')).toBe('')
     expect(maskAmountInput('1 500')).toBe('1,500')
     expect(maskAmountInput('12,5000')).toBe('125,000')
+  })
+})
+
+describe('another region', () => {
+  it('masks, checks and reads numbers by its own code, length and grouping', () => {
+    expect(maskPhoneInput('8 701 123 45 67', ALMATY)).toBe('+7 701 123 45 67')
+    expect(maskLocalPhoneInput('7011234567', ALMATY)).toBe('+7 701 123 45 67')
+    expect(phoneProblem('+7 701 123 45 67', ALMATY)).toBeNull()
+    expect(phoneProblem('+996 555 123 456', ALMATY)).toBe('For now we only take numbers with the code +7')
+    expect(phoneProblem('+7 701 12', ALMATY)).toBe('The number is incomplete: it needs 10 digits after +7')
+  })
+})
+
+describe('formatPhone', () => {
+  it('groups a number of the region and leaves others as they are', () => {
+    expect(formatPhone('+996555123456')).toBe('+996 555 123 456')
+    expect(formatPhone('+77011234567')).toBe('+77011234567')
   })
 })

@@ -1,5 +1,6 @@
 import { ANY_SPECIALIST_ID, BOOKING_DAYS_AHEAD } from '@/entities/booking/config/bookingConstants'
 import type { Catalog } from '@/shared/api/types'
+import { REGION } from '@/shared/config/region'
 
 type BookingDay = {
   key: string
@@ -11,7 +12,7 @@ type BookingDay = {
   isClosed?: boolean
 }
 
-const priceFormatter = new Intl.NumberFormat('en-GB')
+const priceFormatter = new Intl.NumberFormat(REGION.locale.numbers)
 const weekdayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' })
 const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'short' })
 const longDateFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -20,7 +21,7 @@ const longDateFormatter = new Intl.DateTimeFormat('en-GB', {
   month: 'long',
 })
 
-const CURRENCY = 'som'
+const CURRENCY = REGION.currency.label
 
 const formatAmount = (price: number) => priceFormatter.format(price)
 

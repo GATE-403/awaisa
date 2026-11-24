@@ -1,4 +1,5 @@
 import { toBusinessParts } from '../common/business-time.js'
+import { formatPhone, hidePhone } from '../common/phone.js'
 import type { IcsEvent } from './ics.js'
 
 /** One visit as the feed reads it from the database. */
@@ -32,19 +33,6 @@ type FeedOptions = {
 }
 
 const UID_DOMAIN = 'awaisa.kg'
-
-const formatPhone = (phone: string) => {
-  const match = /^\+996(\d{3})(\d{3})(\d{3})$/.exec(phone)
-  return match ? `+996 ${match[1]} ${match[2]} ${match[3]}` : phone
-}
-
-/** «+996 ••• ••• 456»: enough to tell two clients apart, not enough to call. */
-const hidePhone = (phone: string) => {
-  const digits = phone.replace(/\D/g, '')
-  if (digits.length < 6) return ''
-  const country = phone.startsWith('+996') ? '+996 ' : '+'
-  return `${country}••• ••• ${digits.slice(-3)}`
-}
 
 const formatSom = (amount: number) => `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} som`
 
