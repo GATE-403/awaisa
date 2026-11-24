@@ -14,19 +14,26 @@ export const useInertOutside = (ref: RefObject<HTMLElement | null>, key?: unknow
   useEffect(() => {
     const layer = ref.current
     if (!layer) return
+    // What surrounds the layer as it opens. A layer opened from inside it while the delay runs
+    // (the waitlist sheet over the booking sheet, portalled into <body>) sits above it and must
+    // stay usable: it was made inert with the page and never answered a tap again.
+    const around: HTMLElement[] = []
+    for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
+      const parent: HTMLElement | null = node.parentElement
+      if (!parent) break
+      for (const sibling of parent.children) {
+        if (sibling !== node && sibling instanceof HTMLElement) around.push(sibling)
+      }
+      node = parent
+    }
     const made: HTMLElement[] = []
     const makeInert = () => {
-      for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
-        const parent: HTMLElement | null = node.parentElement
-        if (!parent) break
-        for (const sibling of parent.children) {
-          if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue
-          if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
-          if (sibling.querySelector('[aria-live]')) continue
-          sibling.inert = true
-          made.push(sibling)
-        }
-        node = parent
+      for (const sibling of around) {
+        if (!sibling.isConnected || sibling.inert) continue
+        if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
+        if (sibling.querySelector('[aria-live]')) continue
+        sibling.inert = true
+        made.push(sibling)
       }
     }
     const timer = delayMs ? window.setTimeout(makeInert, delayMs) : 0
