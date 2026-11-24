@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -14,11 +15,10 @@ import { hashToken } from '../common/hash.js'
 import { normalizePhone } from '../common/phone.js'
 import type { Env } from '../config/env.js'
 import { Customer } from '../customers/customer.entity.js'
-import { otpMessage } from '../notifications/messages.js'
 import { SmsService } from '../notifications/sms.service.js'
 import { TelegramGatewayService } from '../notifications/telegram-gateway.service.js'
 import { OTP, SESSION_TTL_DAYS } from './auth.constants.js'
-import { type OtpChannel, OtpCode } from './otp-code.entity.js'
+import { OtpCode } from './otp-code.entity.js'
 import { Session } from './session.entity.js'
 
 const MINUTE_MS = 60_000
@@ -31,8 +31,12 @@ const parsePhone = (value: string) => {
   return phone
 }
 
+// Codes go to Telegram only (the Telegram Gateway), never by SMS: SMS cost tens of times more.
+// Without a gateway the code is only logged, outside production (development, e2e).
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name)
+
   constructor(
     @InjectRepository(OtpCode) private readonly codes: Repository<OtpCode>,
     @InjectRepository(Session) private readonly sessions: Repository<Session>,
@@ -42,13 +46,23 @@ export class AuthService {
     private readonly telegram: TelegramGatewayService,
   ) {}
 
-  async requestCode(rawPhone: string, preferred: 'auto' | 'sms' = 'auto') {
+  /** Whether a code can reach anyone: the gateway is set, or codes are only logged here. */
+  get isCodeAvailable() {
+    return this.telegram.isEnabled || this.isLoggingCodes
+  }
+
+  async requestCode(rawPhone: string) {
     const phone = parsePhone(rawPhone)
-    // Codes cost money on either channel: none go where SMS is off (SMS_ALLOWED_COUNTRY_CODES).
+    // Codes cost money: none go where messages are off (SMS_ALLOWED_COUNTRY_CODES).
     if (!this.sms.canSendTo(phone)) {
       const codes = this.config.get('SMS_ALLOWED_COUNTRY_CODES', { infer: true })
       throw new BadRequestException(
         `Вход пока доступен только по номерам ${codes.map((code) => `+${code}`).join(', ')}`,
+      )
+    }
+    if (!this.isCodeAvailable) {
+      throw new ServiceUnavailableException(
+        'Код в Telegram сейчас не отправить. Войдите через Telegram-бота',
       )
     }
     const now = Date.now()
@@ -57,11 +71,7 @@ export class AuthService {
       order: { createdAt: 'DESC' },
     })
     const testCode = this.config.get('OTP_TEST_CODE', { infer: true })
-    // The cooldown is per channel, so "send by SMS instead" works right after a Telegram code.
-    const wantsSms = preferred === 'sms' || !this.telegram.isEnabled
-    const last = testCode
-      ? undefined
-      : recent.find((item) => (wantsSms ? item.channel === 'sms' : item.channel === 'telegram'))
+    const last = testCode ? undefined : recent[0]
     const waitSeconds = last
       ? Math.ceil((last.createdAt.getTime() + OTP.resendSeconds * 1000 - now) / 1000)
       : 0
@@ -79,15 +89,15 @@ export class AuthService {
     }
 
     const code = testCode ?? String(randomInt(0, 1_000_000)).padStart(6, '0')
-    const telegramRequestId = wantsSms
-      ? null
-      : await this.telegram.sendCode(phone, code, OTP.ttlMinutes * 60)
-    const channel: OtpChannel = telegramRequestId ? 'telegram' : 'sms'
-    if (channel === 'sms') {
-      try {
-        await this.sms.send(phone, otpMessage(code))
-      } catch {
-        throw new ServiceUnavailableException('Не удалось отправить SMS. Попробуйте через минуту')
+    let providerRequestId: string | null = null
+    if (this.isLoggingCodes) {
+      this.logger.log(`[not sent to Telegram] Sign-in code for ${phone}: ${code}`)
+    } else {
+      providerRequestId = await this.telegram.sendCode(phone, code, OTP.ttlMinutes * 60)
+      if (!providerRequestId) {
+        throw new BadRequestException(
+          'Не получилось отправить код в Telegram на этот номер. Проверьте номер или войдите через Telegram-бота',
+        )
       }
     }
 
@@ -96,12 +106,12 @@ export class AuthService {
         phone,
         codeHash: this.hashCode(phone, code),
         expiresAt: new Date(now + OTP.ttlMinutes * MINUTE_MS),
-        channel,
-        providerRequestId: telegramRequestId,
+        channel: 'telegram',
+        providerRequestId,
       }),
     )
 
-    return { phone, channel, resendAfterSeconds: OTP.resendSeconds }
+    return { phone, channel: 'telegram' as const, resendAfterSeconds: OTP.resendSeconds }
   }
 
   async verifyCode(rawPhone: string, code: string) {
@@ -174,6 +184,13 @@ export class AuthService {
 
   async logout(token: string | undefined) {
     if (token) await this.sessions.delete({ tokenHash: hashToken(token) })
+  }
+
+  // A fixed test code, or no gateway outside production: the code goes to the log, not Telegram.
+  private get isLoggingCodes() {
+    if (this.config.get('OTP_TEST_CODE', { infer: true })) return true
+    if (this.telegram.isEnabled) return false
+    return this.config.get('NODE_ENV', { infer: true }) !== 'production'
   }
 
   private hashCode(phone: string, code: string) {

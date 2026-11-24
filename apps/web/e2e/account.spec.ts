@@ -8,7 +8,7 @@ import {
   submitBooking,
 } from './helpers'
 
-test.describe('Account: sign in by SMS', () => {
+test.describe('Account: sign in with a code in Telegram', () => {
   test.afterEach(async ({ page }) => {
     const stored = await readStoredBookings(page).catch(() => [])
     await Promise.all(stored.map(cancelViaApi))
@@ -21,8 +21,11 @@ test.describe('Account: sign in by SMS', () => {
     await page.goto('/login?next=/bookings')
 
     await page.getByLabel('Номер телефона').fill(phone)
-    await page.getByRole('button', { name: 'Получить код' }).click()
-    await expect(page.getByText(`Код отправлен по SMS на ${formatPhone(phone)}`)).toBeVisible()
+    await expect(page.getByText('Код придёт в Telegram')).toBeVisible()
+    await page.getByRole('button', { name: 'Получить код в Telegram' }).click()
+    await expect(page.getByText(`Код отправлен в Telegram на ${formatPhone(phone)}`)).toBeVisible()
+    // No SMS anywhere: the code goes to Telegram only.
+    await expect(page.getByText(/SMS/)).toHaveCount(0)
 
     const code = page.getByLabel('Код подтверждения')
     await expect(code).toHaveAttribute('autocomplete', 'one-time-code')
@@ -116,6 +119,24 @@ test.describe('Account: sign in by SMS', () => {
     await page.getByRole('menuitem', { name: 'Удалить фото' }).click()
     await expect(profile.getByRole('img', { name: 'E2E Фото' })).toHaveCount(0)
     expect((await (await page.request.get('/api/me')).json()).avatarUrl).toBeNull()
+  })
+
+  test('without a Telegram Gateway only the bot is offered', async ({ page }) => {
+    await page.route('**/api/auth/telegram', (route) =>
+      route.fulfill({
+        json: { isAvailable: true, botUsername: 'awaisa_e2e_bot', isCodeAvailable: false },
+      }),
+    )
+    await page.route('**/api/auth/telegram/check', (route) =>
+      route.fulfill({ json: { status: 'pending' } }),
+    )
+    await page.goto('/login')
+
+    const bot = page.getByRole('link', { name: 'Войти через Telegram' })
+    await expect(bot).toBeVisible()
+    await expect(bot).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=login_/)
+    await expect(page.getByLabel('Номер телефона')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Получить код/ })).toHaveCount(0)
   })
 
   test('a half-typed number is not sent: the page says what is missing', async ({ page }) => {

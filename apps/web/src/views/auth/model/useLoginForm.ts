@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
-import type { Customer, OtpChannel } from '@/shared/api/types'
+import type { Customer } from '@/shared/api/types'
 import { isSignInOnlyPath } from '@/shared/config/navigation'
 import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
@@ -26,7 +26,6 @@ export const useLoginForm = () => {
   const [step, setStep] = useState<LoginStep>('phone')
   const [phone, setPhoneValue] = useState('')
   const [normalizedPhone, setNormalizedPhone] = useState('')
-  const [channel, setChannel] = useState<OtpChannel>('sms')
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -68,7 +67,8 @@ export const useLoginForm = () => {
     }
   }
 
-  const sendCode = (preferred: 'auto' | 'sms' = 'auto') => {
+  // Codes go to Telegram only (the API never texts them).
+  const sendCode = () => {
     // Checked here, not by disabling the button: the person learns what is missing.
     const problem = normalizedPhone ? null : phoneProblem(phone)
     if (problem) {
@@ -77,10 +77,9 @@ export const useLoginForm = () => {
       return
     }
     return run(async () => {
-      const result = await requestOtp(normalizedPhone || phone, preferred)
+      const result = await requestOtp(normalizedPhone || phone)
       trackStep('otp_sent', undefined, { channel: result.channel })
       setNormalizedPhone(result.phone)
-      setChannel(result.channel)
       setResendIn(result.resendAfterSeconds)
       setCode('')
       setIsCodeInvalid(false)
@@ -131,8 +130,6 @@ export const useLoginForm = () => {
       setIsSignedIn(true)
     })
 
-  const sendBySms = () => sendCode('sms')
-
   const setPhone = (value: string) => {
     setPhoneValue(value)
     setError(null)
@@ -163,7 +160,6 @@ export const useLoginForm = () => {
     reset,
     phone,
     normalizedPhone,
-    channel,
     code,
     name,
     error,
@@ -177,7 +173,6 @@ export const useLoginForm = () => {
     setName,
     changeCode,
     sendCode,
-    sendBySms,
     verify,
     saveName,
     finishSignIn,

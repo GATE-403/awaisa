@@ -181,7 +181,7 @@ const flows: Flow[] = [
   },
   {
     id: 'login',
-    title: 'Вход по SMS',
+    title: 'Вход по коду в Telegram',
     goal: 'Войти по номеру и коду и попасть в профиль',
     run: async (ux) => {
       const { page } = ux
@@ -201,7 +201,7 @@ const flows: Flow[] = [
       await ux.tap(page.getByRole('button', { name: 'Получить код' }))
       const code = page.getByLabel('Код подтверждения')
       await code.waitFor()
-      await ux.step('Код из SMS', FILES.login)
+      await ux.step('Код из Telegram', FILES.login)
 
       await ux.uncounted(() => ux.fill(code, '000000'))
       await ux.expectFieldError(code, /Неверный код/)

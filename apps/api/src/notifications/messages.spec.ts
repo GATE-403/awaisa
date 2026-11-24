@@ -1,6 +1,5 @@
 import {
   confirmationMessage,
-  otpMessage,
   reminderMessage,
   returnVisitMessage,
   waitlistFreedMessage,
@@ -15,10 +14,6 @@ const booking = {
 }
 
 describe('SMS messages', () => {
-  it('puts the code first so phones can autofill it', () => {
-    expect(otpMessage('123456')).toMatch(/^123456 /)
-  })
-
   it('confirmation has the date, time, master and a cancel link', () => {
     expect(confirmationMessage(booking, 'https://awaisa.kg/v/1?s=x')).toBe(
       'Awaisa Studio: вы записаны - Женская стрижка, 12 ноября в 14:30, мастер Айгерим Садыкова. Перенести или отменить: https://awaisa.kg/v/1?s=x',

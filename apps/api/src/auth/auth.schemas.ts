@@ -4,7 +4,6 @@ const PHONE_SCHEMA = z.string().trim().min(1, 'Укажите номер тел�
 
 const requestCodeSchema = z.object({
   phone: PHONE_SCHEMA,
-  channel: z.enum(['auto', 'sms']).default('auto'),
 })
 
 const verifyCodeSchema = z.object({

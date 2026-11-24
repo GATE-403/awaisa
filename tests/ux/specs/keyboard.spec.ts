@@ -78,8 +78,8 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
     ux.complete()
   })
 
-  test('Вход по SMS', async ({ ux }) => {
-    ux.begin('keyboard', 'Клавиатура: вход по SMS')
+  test('Вход по коду', async ({ ux }) => {
+    ux.begin('keyboard', 'Клавиатура: вход по коду')
     const { page } = ux
     const keys = new KeyboardWalker(ux)
     await ux.goto('/login?next=/bookings')

@@ -82,9 +82,11 @@ export const LoginPage = () => {
               >
                 {t('Открыть Telegram снова')}
               </ButtonLink>
-              <Button variant='link' size='sm' onClick={telegram.cancel}>
-                {t('Войти по SMS')}
-              </Button>
+              {telegram.isCodeAvailable && (
+                <Button variant='link' size='sm' onClick={telegram.cancel}>
+                  {t('Ввести номер')}
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -99,45 +101,52 @@ export const LoginPage = () => {
               </h1>
               {/* The number is typed right on the colour in big digits, no box around it. Still
                   a real tel input (keyboard, contact autofill, paste, the label); «+996» is
-                  already there and the caret starts after it. */}
-              <Field label={t('Номер телефона')} error={form.error} className={styles.number}>
-                <span className={styles.numberRow}>
-                  <span
-                    className={styles.numberPrefix}
-                    aria-hidden='true'
-                    onPointerDown={(event) => {
-                      event.preventDefault()
-                      phoneInputRef.current?.focus()
-                    }}
-                  >
-                    +996
+                  already there and the caret starts after it. Without a way to send the code
+                  (no Telegram Gateway in production) only the bot is offered. */}
+              {telegram.isCodeAvailable && (
+                <Field label={t('Номер телефона')} error={form.error} className={styles.number}>
+                  <span className={styles.numberRow}>
+                    <span
+                      className={styles.numberPrefix}
+                      aria-hidden='true'
+                      onPointerDown={(event) => {
+                        event.preventDefault()
+                        phoneInputRef.current?.focus()
+                      }}
+                    >
+                      +996
+                    </span>
+                    <Input
+                      ref={phoneInputRef}
+                      type='tel'
+                      inputMode='tel'
+                      autoComplete='tel'
+                      placeholder='555 123 456'
+                      value={form.phone.replace(/^\+996\s?/, '')}
+                      onValueChange={(value) => form.setPhone(maskLocalPhoneInput(value))}
+                      className={styles.numberInput}
+                      autoFocus
+                    />
                   </span>
-                  <Input
-                    ref={phoneInputRef}
-                    type='tel'
-                    inputMode='tel'
-                    autoComplete='tel'
-                    placeholder='555 123 456'
-                    value={form.phone.replace(/^\+996\s?/, '')}
-                    onValueChange={(value) => form.setPhone(maskLocalPhoneInput(value))}
-                    className={styles.numberInput}
-                    autoFocus
-                  />
-                </span>
-              </Field>
+                </Field>
+              )}
             </div>
             <div className={styles.actions}>
-              <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
-                {form.isSubmitting ? t('Отправляем…') : t('Получить код')}
-              </Button>
-              {telegram.isAvailable && <span className={styles.or}>{t('или')}</span>}
+              {telegram.isCodeAvailable && (
+                <Button type='submit' size='lg' fullWidth disabled={form.isSubmitting}>
+                  {form.isSubmitting ? t('Отправляем…') : t('Получить код в Telegram')}
+                </Button>
+              )}
+              {telegram.isCodeAvailable && telegram.isAvailable && (
+                <span className={styles.or}>{t('или')}</span>
+              )}
               {telegram.isAvailable && (
                 // Without typing the number: the bot asks for it with one button.
                 <ButtonLink
                   href={telegram.href}
                   target='_blank'
                   rel='noreferrer'
-                  variant='secondary'
+                  variant={telegram.isCodeAvailable ? 'secondary' : 'primary'}
                   size='lg'
                   fullWidth
                   onClick={telegram.start}
@@ -151,7 +160,9 @@ export const LoginPage = () => {
                   {t('Ссылка для входа устарела - нажмите «Войти через Telegram» ещё раз')}
                 </p>
               ) : (
-                <p className={styles.note}>{t('Код придёт в Telegram или по SMS')}</p>
+                telegram.isCodeAvailable && (
+                  <p className={styles.note}>{t('Код придёт в Telegram')}</p>
+                )
               )}
             </div>
           </form>
@@ -161,12 +172,9 @@ export const LoginPage = () => {
           <form className={styles.form} onSubmit={handleSubmit(() => form.verify(form.code))}>
             <h1 className={styles.title}>{t('Введите код')}</h1>
             <p className={styles.lead}>
-              {t(
-                form.channel === 'telegram'
-                  ? 'Код отправлен в Telegram на {phone}'
-                  : 'Код отправлен по SMS на {phone}',
-                { phone: formatPhone(form.normalizedPhone) },
-              )}
+              {t('Код отправлен в Telegram на {phone}', {
+                phone: formatPhone(form.normalizedPhone),
+              })}
             </p>
             <OtpField
               key={form.wrongAttempts}
@@ -187,33 +195,20 @@ export const LoginPage = () => {
               <p className={styles.note}>
                 {form.isSubmitting
                   ? t('Проверяем…')
-                  : form.channel === 'telegram'
-                    ? t('Сообщение придёт от официального чата Telegram')
-                    : t('Войдём, как только наберёте все цифры')}
+                  : t('Сообщение придёт от официального чата Telegram')}
               </p>
             )}
             <div className={styles.links}>
-              {form.channel === 'telegram' ? (
-                <Button
-                  variant='link'
-                  size='sm'
-                  onClick={form.sendBySms}
-                  disabled={form.isSubmitting}
-                >
-                  {t('Нет Telegram? Получить SMS')}
-                </Button>
-              ) : (
-                <Button
-                  variant='link'
-                  size='sm'
-                  onClick={form.sendBySms}
-                  disabled={form.resendIn > 0 || form.isSubmitting}
-                >
-                  {form.resendIn > 0
-                    ? t('Отправить снова через {seconds} с', { seconds: form.resendIn })
-                    : t('Отправить снова')}
-                </Button>
-              )}
+              <Button
+                variant='link'
+                size='sm'
+                onClick={() => form.sendCode()}
+                disabled={form.resendIn > 0 || form.isSubmitting}
+              >
+                {form.resendIn > 0
+                  ? t('Отправить снова через {seconds} с', { seconds: form.resendIn })
+                  : t('Отправить снова')}
+              </Button>
             </div>
           </form>
         )}
