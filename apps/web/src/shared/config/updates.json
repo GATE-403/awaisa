@@ -1,5 +1,16 @@
 [
   {
+    "id": "pr160-1",
+    "date": "2026-11-24",
+    "audience": "everyone",
+    "title": "Russian and Kyrgyz are back",
+    "text": "Awaisa opens in English, Russian or Kyrgyz: choose the language at the foot of any page or in your profile's settings.",
+    "link": {
+      "href": "/ru",
+      "label": "Open in Russian"
+    }
+  },
+  {
     "id": "pr159-1",
     "date": "2026-11-24",
     "audience": "everyone",
