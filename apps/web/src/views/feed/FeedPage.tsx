@@ -1,13 +1,13 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
 import { useFavorites } from '@/features/favorites'
 import { useWorkLikes } from '@/features/workLikes'
 import { getFeed } from '@/shared/api/clientApi'
 import type { BusinessKind, FeedItem, FeedPage as FeedPageData } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { knownPosition } from '@/shared/lib/geo'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from './FeedPage.module.css'
@@ -36,7 +36,7 @@ const FLICK_WINDOW_MS = 90
 // A swipe brings the next card in; each is a service with its price, the first free time and
 // «Book».
 export const FeedPage = ({ kind, business, start, initialPage, isPending }: FeedPageProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [items, setItems] = useState<FeedItem[]>(initialPage?.items ?? [])
   const [nextOffset, setNextOffset] = useState(initialPage?.nextOffset ?? null)
   const [active, setActive] = useState(0)
@@ -272,7 +272,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.visuallyHidden}>{t('Looks')}</h1>
+      <h1 className={styles.visuallyHidden}>{t`Looks`}</h1>
 
       <div
         className={styles.stage}
@@ -283,11 +283,11 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (
           <EmptyState
-            title={t('No looks yet')}
-            text={t('Specialists’ work photos will appear here, with prices and one-tap booking.')}
+            title={t`No looks yet`}
+            text={t`Specialists’ work photos will appear here, with prices and one-tap booking.`}
             action={
               <NextLink href='/' className={styles.emptyLink}>
-                {t('Open the catalogue ›')}
+                {t`Open the catalogue ›`}
               </NextLink>
             }
           />
@@ -298,7 +298,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         <div
           className={styles.deck}
           role='feed'
-          aria-label={t('Looks')}
+          aria-label={t`Looks`}
           aria-busy={isPending || undefined}
         >
           {shown.map((item, index) => {
@@ -338,7 +338,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='left'
-            aria-label={t('Previous work')}
+            aria-label={t`Previous work`}
             disabled={active === 0}
             onClick={() => turn(-1)}
           >
@@ -348,7 +348,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='right'
-            aria-label={t('Next work')}
+            aria-label={t`Next work`}
             disabled={active >= shown.length - 1}
             onClick={() => turn(1)}
           >
@@ -359,7 +359,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       {active > 0 && (
         <p className={styles.hint} aria-hidden>
-          {t('Pull up to bring back the last one')}
+          {t`Pull up to bring back the last one`}
         </p>
       )}
     </main>

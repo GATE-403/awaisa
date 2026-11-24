@@ -3,8 +3,10 @@
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { getClientLoyalty, listVisitReceipts, listVisitSales } from '@/shared/api/clientApi'
 import type {
   AdminBooking,
@@ -14,7 +16,7 @@ import type {
   PaymentMethod,
   Sale,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
@@ -37,25 +39,25 @@ interface VisitOutcomeSectionProps {
 
 type OutcomeChoice = 'pending' | 'arrived' | 'no_show'
 
-const OUTCOMES: { value: OutcomeChoice; label: string }[] = [
-  { value: 'pending', label: 'Waiting' },
-  { value: 'arrived', label: 'Arrived' },
-  { value: 'no_show', label: 'No-show' },
+const OUTCOMES: { value: OutcomeChoice; label: MessageDescriptor }[] = [
+  { value: 'pending', label: msg`Waiting` },
+  { value: 'arrived', label: msg`Arrived` },
+  { value: 'no_show', label: msg`No-show` },
 ]
 
-const PAID_BY: Partial<Record<PaymentMethod, string>> = {
-  subscription: 'Paid with a membership',
-  certificate: 'Paid with a certificate',
+const PAID_BY: Partial<Record<PaymentMethod, MessageDescriptor>> = {
+  subscription: msg`Paid with a membership`,
+  certificate: msg`Paid with a certificate`,
 }
 
 // The receipt goes out right after the save; look again shortly while it is on its way.
 const RECEIPT_RECHECK_MS = 2000
 const RECEIPT_RECHECKS = 3
 
-const METHODS: { value: PaymentMethod; label: string }[] = [
-  { value: 'cash', label: 'Cash' },
-  { value: 'card', label: 'Card' },
-  { value: 'transfer', label: 'Transfer' },
+const METHODS: { value: PaymentMethod; label: MessageDescriptor }[] = [
+  { value: 'cash', label: msg({ message: 'Cash', context: 'payment method' }) },
+  { value: 'card', label: msg({ message: 'Card', context: 'payment method' }) },
+  { value: 'transfer', label: msg({ message: 'Transfer', context: 'payment method' }) },
 ]
 
 // Staff close the visit in two taps: "Arrived" fills the price and cash; the amount and the way
@@ -68,7 +70,8 @@ export const VisitOutcomeSection = ({
   controlSize = isCompact ? 'sm' : 'md',
   onSellProducts,
 }: VisitOutcomeSectionProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const [current, setCurrent] = useState(booking)
   const [loyalty, setLoyalty] = useState<ClientLoyalty | null>(null)
   const [sales, setSales] = useState<Sale[]>([])
@@ -87,6 +90,7 @@ export const VisitOutcomeSection = ({
     ) ?? []
   const isPaidByLoyalty =
     current.paymentMethod === 'subscription' || current.paymentMethod === 'certificate'
+  const paidBy = PAID_BY[current.paymentMethod ?? 'cash']
 
   // The client's bonuses and subscriptions, once the visit is marked arrived.
   // biome-ignore lint/correctness/useExhaustiveDependencies: reload after each saved outcome
@@ -153,12 +157,12 @@ export const VisitOutcomeSection = ({
   }
 
   return (
-    <section className={sheet.group} aria-label={t('Visit outcome')}>
-      {!isCompact && <SectionCaption>{t('Visit outcome')}</SectionCaption>}
+    <section className={sheet.group} aria-label={t`Visit outcome`}>
+      {!isCompact && <SectionCaption>{t`Visit outcome`}</SectionCaption>}
       {/* The control stands on its own, like a macOS segmented control in a form. */}
       <div className={styles.outcomeRow}>
         <SegmentedControl
-          label={t('Visit outcome')}
+          label={t`Visit outcome`}
           size={controlSize}
           value={choice}
           items={outcomes}
@@ -169,28 +173,26 @@ export const VisitOutcomeSection = ({
         <div className={sheet.list}>
           {isPaidByLoyalty ? (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>
-                {t(PAID_BY[current.paymentMethod ?? 'cash'] ?? '')}
-              </span>
+              <span className={sheet.rowLabel}>{paidBy ? t(paidBy) : ''}</span>
             </div>
           ) : (
             <>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Paid, som')}</span>
+                <span className={sheet.rowLabel}>{t`Paid, som`}</span>
                 <Input
                   variant='plain'
                   inputMode='numeric'
-                  aria-label={t('Paid, som')}
-                  value={maskAmountInput(amount.replace(/\D/g, ''))}
+                  aria-label={t`Paid, som`}
+                  value={maskAmountInput(amount.replace(/\D/g, ''), format.locale)}
                   onChange={(event) => setAmount(event.target.value)}
                   onBlur={handleAmountBlur}
                 />
               </label>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Method')}</span>
+                <span className={sheet.rowLabel}>{t`Method`}</span>
                 <Select
                   variant='plain'
-                  aria-label={t('Payment method')}
+                  aria-label={t`Payment method`}
                   items={methods}
                   value={current.paymentMethod ?? 'cash'}
                   onValueChange={(method) =>
@@ -205,7 +207,7 @@ export const VisitOutcomeSection = ({
               </div>
               {receipt && (
                 <button type='button' className={sheet.row} onClick={() => setIsReceiptOpen(true)}>
-                  <span className={sheet.rowLabel}>{t('Receipt')}</span>
+                  <span className={sheet.rowLabel}>{t`Receipt`}</span>
                   <span
                     className={
                       describeReceipt(receipt, t).isAlert ? styles.rowAlert : styles.rowLink
@@ -213,7 +215,7 @@ export const VisitOutcomeSection = ({
                   >
                     {receipt.status === 'issued'
                       ? receipt.kind === 'refund'
-                        ? t('Refund №{number}', { number: receipt.fiscalNumber ?? '' })
+                        ? t`Refund №${ph({ number: receipt.fiscalNumber ?? '' })}`
                         : `№${receipt.fiscalNumber}`
                       : describeReceipt(receipt, t).text}{' '}
                     ›
@@ -227,15 +229,15 @@ export const VisitOutcomeSection = ({
                       {item.quantity === 1 ? item.name : `${item.name} × ${item.quantity}`}
                     </span>
                     <span className={styles.rowValue}>
-                      {formatPrice(item.quantity * item.price)}
+                      {format.price(item.quantity * item.price)}
                     </span>
                   </div>
                 )),
               )}
               {onSellProducts && (
                 <button type='button' className={sheet.row} onClick={onSellProducts}>
-                  <span className={sheet.rowLabel}>{t('Products')}</span>
-                  <span className={styles.rowLink}>{t('Add')} ›</span>
+                  <span className={sheet.rowLabel}>{t`Products`}</span>
+                  <span className={styles.rowLink}>{t`Add`} ›</span>
                 </button>
               )}
               {/* A certificate is rare: a row that opens its field only when asked. */}
@@ -244,8 +246,8 @@ export const VisitOutcomeSection = ({
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
-                      aria-label={t('Certificate code')}
-                      placeholder={t('Certificate code')}
+                      aria-label={t`Certificate code`}
+                      placeholder={t`Certificate code`}
                       autoFocus
                       value={certificateCode}
                       onValueChange={(value) =>
@@ -268,7 +270,7 @@ export const VisitOutcomeSection = ({
                       })
                     }
                   >
-                    {t('Apply')}
+                    {t`Apply`}
                   </Button>
                 </div>
               ) : (
@@ -277,8 +279,8 @@ export const VisitOutcomeSection = ({
                   className={sheet.row}
                   onClick={() => setIsCertificateOpen(true)}
                 >
-                  <span className={sheet.rowLabel}>{t('Certificate')}</span>
-                  <span className={styles.rowLink}>{t('Enter code')} ›</span>
+                  <span className={sheet.rowLabel}>{t`Certificate`}</span>
+                  <span className={styles.rowLink}>{t`Enter code`} ›</span>
                 </button>
               )}
             </>
@@ -289,28 +291,26 @@ export const VisitOutcomeSection = ({
         loyalty &&
         !isPaidByLoyalty &&
         (subscriptions.length > 0 || loyalty.bonusBalance > 0) && (
-          <section className={sheet.list} aria-label={t('Client loyalty')}>
+          <section className={sheet.list} aria-label={t`Client loyalty`}>
             {subscriptions.map((subscription) => (
               <div key={subscription.id} className={sheet.row}>
                 <span className={sheet.rowLabel}>
                   {subscription.title} ·{' '}
-                  {t('{count} left', {
-                    count: t.count(subscription.visitsLeft, ['visit', 'visits']),
-                  })}
+                  {t`${plural(subscription.visitsLeft, { one: '# visit left', other: '# visits left' })}`}
                 </span>
                 <Button
                   size='sm'
                   variant='outline'
                   onClick={() => void save({ outcome: 'arrived', subscriptionId: subscription.id })}
                 >
-                  {t('Use a visit')}
+                  {t`Use a visit`}
                 </Button>
               </div>
             ))}
             {loyalty.bonusBalance > 0 && (
               <div className={sheet.row}>
                 <span className={sheet.rowLabel}>
-                  {t('Bonuses · {amount}', { amount: formatPrice(loyalty.bonusBalance) })}
+                  {t`Bonuses · ${ph({ amount: format.price(loyalty.bonusBalance) })}`}
                 </span>
                 <Button
                   size='sm'
@@ -323,7 +323,7 @@ export const VisitOutcomeSection = ({
                     })
                   }
                 >
-                  {t('Use')}
+                  {t`Use`}
                 </Button>
               </div>
             )}
@@ -331,9 +331,7 @@ export const VisitOutcomeSection = ({
         )}
       {current.outcome === 'arrived' && loyalty?.bonusPercent && !isPaidByLoyalty && (
         <p className={sheet.groupFooter}>
-          {t('The client earns {percent}% of the money paid in bonuses.', {
-            percent: loyalty.bonusPercent,
-          })}
+          {t`The client earns ${ph({ percent: loyalty.bonusPercent })}% of the money paid in bonuses.`}
         </p>
       )}
       {isReceiptOpen && receipt && (
@@ -346,7 +344,7 @@ export const VisitOutcomeSection = ({
       )}
       {current.outcome === 'no_show' && (
         <p className={sheet.groupFooter}>
-          {t('The no-show shows on the client card and in analytics.')}
+          {t`The no-show shows on the client card and in analytics.`}
         </p>
       )}
     </section>

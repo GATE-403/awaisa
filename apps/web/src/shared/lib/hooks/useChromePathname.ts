@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useSyncExternalStore } from 'react'
 import { isBookingPath } from '@/shared/config/navigation'
+import { usePathname } from '@/shared/i18n/navigation'
 
 type PageUnderBooking = { bookingPath: string; href: string } | null
 

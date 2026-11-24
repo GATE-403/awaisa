@@ -1,10 +1,10 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
-import NextLink from 'next/link'
+import { useLingui } from '@lingui/react/macro'
 import type { CSSProperties } from 'react'
 import { achievementLook, achievementTitle } from '@/entities/profile'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import type { Goal } from '../lib/goals'
 import styles from '../ProfilePage.module.css'
 
@@ -17,7 +17,7 @@ const RING = 2 * Math.PI * 22
 // «Next goal» over the medals on one's own profile: the closest medal in a ring that fills
 // to its progress, what is left and the one tap that brings it nearer (the owner: make it more interactive).
 export const NextGoal = ({ goal }: NextGoalProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const { achievement } = goal
   const look = achievementLook(achievement.id)
   const share = achievement.progress.current / achievement.progress.target
@@ -43,7 +43,7 @@ export const NextGoal = ({ goal }: NextGoalProps) => {
         <span className={styles.goalEmoji}>{look.emoji}</span>
       </span>
       <span className={styles.goalText}>
-        <span className={styles.goalCaption}>{t('Next goal')}</span>
+        <span className={styles.goalCaption}>{t`Next goal`}</span>
         <span id='next-goal-title' className={styles.goalTitle}>
           {achievementTitle(achievement.title, t)}
         </span>
@@ -51,7 +51,7 @@ export const NextGoal = ({ goal }: NextGoalProps) => {
           {goal.hint}
           <span className={styles.srOnly}>
             {' · '}
-            {achievement.progress.current} {t('of')} {achievement.progress.target}
+            {achievement.progress.current} {t`of`} {achievement.progress.target}
           </span>
         </span>
       </span>

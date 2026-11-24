@@ -1,8 +1,8 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -27,15 +27,15 @@ export const CalendarFeedGroup = ({
   canSetPhones,
   listClassName,
 }: CalendarFeedGroupProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const state = useCalendarFeed(scope)
   const [isOpen, setIsOpen] = useState(false)
 
   if (state.error) return null
 
   return (
-    <section className={sheet.group} aria-label={t('Calendar')}>
-      <SectionCaption>{t('Calendar')}</SectionCaption>
+    <section className={sheet.group} aria-label={t`Calendar`}>
+      <SectionCaption>{t`Calendar`}</SectionCaption>
       <div className={listClassName}>
         <button
           type='button'
@@ -43,9 +43,9 @@ export const CalendarFeedGroup = ({
           disabled={!state.feed}
           onClick={() => setIsOpen(true)}
         >
-          <span className={sheet.rowLabel}>{t('Calendar on your phone')}</span>
+          <span className={sheet.rowLabel}>{t`Calendar on your phone`}</span>
           <span className={styles.value}>
-            {state.feed?.isActive && t('Connected')}
+            {state.feed?.isActive && t`Connected`}
             <CaretRight className={styles.chevron} aria-hidden />
           </span>
         </button>

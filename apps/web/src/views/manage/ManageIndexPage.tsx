@@ -2,14 +2,15 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Plus } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { type CSSProperties, useEffect, useMemo, useState } from 'react'
 import { useRequireSession } from '@/entities/session'
 import { getBusinessesAttention, getMyBusinesses } from '@/shared/api/clientApi'
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
@@ -31,8 +32,6 @@ import styles from './ManageIndexPage.module.css'
 /** How often the open list reads today's figures again. */
 const REFRESH_MS = 60_000
 
-const AMOUNT = new Intl.NumberFormat('en-GB')
-
 /** From this many businesses the list gets a search field. */
 const SEARCH_FROM = 7
 
@@ -42,8 +41,9 @@ interface ManageIndexPageProps {
 }
 
 export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPageProps) => {
+  const format = useFormat()
   const session = useRequireSession()
-  const t = useT()
+  const { t } = useLingui()
   const router = useRouter()
   const [businesses, setBusinesses] = useState<BusinessLink[] | null>(initialBusinesses)
   const [attention, setAttention] = useState<Map<string, BusinessAttention>>(new Map())
@@ -113,39 +113,38 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
   return (
     <main className={styles.page}>
       {/* The owner's side looks like the cabinet: its own toolbar, not the client's header. */}
-      <CabinetBar title={t('My businesses')} />
+      <CabinetBar title={t`My businesses`} />
       <Container size='md' className={styles.content}>
         {/* The head right on the page: the title and today's line on
             the left, the search on the same line on the right ("can be one line"). */}
         <header className={styles.head}>
           <div className={styles.headText}>
-            <PageTitle size='sm' title={t('My businesses.')} />
+            <PageTitle size='sm' title={t`My businesses.`} />
             {/* Today over every business in view, in one line of bold figures; nothing on a quiet day. */}
             {summary && summary.visits > 0 && (
               <p className={styles.summary}>
-                {t('Today')} <strong>{t.count(summary.visits, ['visit', 'visits'])}</strong>
+                {t`Today`}{' '}
+                <strong>{t`${plural(summary.visits, { one: '# visit', other: '# visits' })}`}</strong>
                 {summary.revenue !== null && summary.revenue > 0 && (
                   <>
                     {' · '}
-                    <strong>{t('{amount} som', { amount: AMOUNT.format(summary.revenue) })}</strong>
+                    <strong>{format.price(summary.revenue)}</strong>
                   </>
                 )}
                 {summary.next && (
                   <>
                     {' · '}
-                    {t('next at {time}, {name}', {
-                      time: summary.next.time,
-                      name: summary.next.name,
-                    })}
+                    {t`next at ${ph({ time: summary.next.time })}, ${ph({ name: summary.next.name })}`}
                   </>
                 )}
               </p>
             )}
             {summary && summary.visits === 0 && week.views + week.bookings > 0 && (
               <p className={styles.summary}>
-                {t('This week')} <strong>{t.count(week.bookings, ['booking', 'bookings'])}</strong>
+                {t`This week`}{' '}
+                <strong>{t`${plural(week.bookings, { one: '# booking', other: '# bookings' })}`}</strong>
                 {' · '}
-                <strong>{t.count(week.views, ['view', 'views'])}</strong>
+                <strong>{t`${plural(week.views, { one: '# view', other: '# views' })}`}</strong>
               </p>
             )}
           </div>
@@ -155,8 +154,8 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
               <SearchField
                 value={query}
                 onChange={setQuery}
-                placeholder={t('Search')}
-                label={t('Search businesses')}
+                placeholder={t`Search`}
+                label={t`Search businesses`}
               />
             </FloatingToolbar>
           )}
@@ -166,14 +165,10 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
 
         {businesses?.length === 0 && (
           <EmptyState
-            title={t('Create your first page')}
-            text={t(
-              'Create a business page: it takes five minutes, and clients can start booking.',
-            )}
+            title={t`Create your first page`}
+            text={t`Create a business page: it takes five minutes, and clients can start booking.`}
             action={
-              <ButtonLink render={<NextLink href='/business/new' />}>
-                {t('Create a page')}
-              </ButtonLink>
+              <ButtonLink render={<NextLink href='/business/new' />}>{t`Create a page`}</ButtonLink>
             }
           />
         )}
@@ -201,13 +196,13 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
                     <span className={styles.addTile} aria-hidden='true'>
                       <Plus />
                     </span>
-                    {t('New page')}
+                    {t`New page`}
                   </NextLink>
                 </li>
               )}
             </ul>
           ) : (
-            <EmptyState variant='inline' title={t('Nothing found')} text={t('Try another word.')} />
+            <EmptyState variant='inline' title={t`Nothing found`} text={t`Try another word.`} />
           ))}
       </Container>
     </main>

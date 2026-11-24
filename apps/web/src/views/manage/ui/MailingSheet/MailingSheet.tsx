@@ -3,6 +3,9 @@
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useEffect, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
@@ -12,7 +15,6 @@ import {
   setBirthdayGreeting,
 } from '@/shared/api/clientApi'
 import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -31,10 +33,10 @@ interface MailingSheetProps {
 
 const FORM_ID = 'mailing-form'
 
-const SEGMENTS: { value: MailingSegment; label: string }[] = [
-  { value: 'lapsed', label: 'Lapsed' },
-  { value: 'birthday', label: 'Birthday' },
-  { value: 'all', label: 'All' },
+const SEGMENTS: { value: MailingSegment; label: MessageDescriptor }[] = [
+  { value: 'lapsed', label: msg`Lapsed` },
+  { value: 'birthday', label: msg`Birthday` },
+  { value: 'all', label: msg`All` },
 ]
 
 const LAPSED_DAYS = [30, 60, 90, 180]
@@ -52,8 +54,8 @@ const templates = (name: string): Record<MailingSegment, string> => ({
 // The placeholders a mailing takes, as pills in the shared template editor (the same as replies).
 // The keys are what the API fills in; it still reads `{имя}` and `{ссылка}` of older templates.
 const MAILING_TOKENS = [
-  { key: 'name', aliases: ['имя'], label: 'Client name' },
-  { key: 'link', aliases: ['ссылка'], label: 'Booking link' },
+  { key: 'name', aliases: ['имя'], label: msg`Client name` },
+  { key: 'link', aliases: ['ссылка'], label: msg`Booking link` },
 ] as const
 
 // An SMS in plain Latin (GSM-7) holds 160 characters, 153 per part when longer; any other
@@ -70,7 +72,7 @@ export const MailingSheet = ({
   initialSegment = 'lapsed',
   onClose,
 }: MailingSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const [segment, setSegment] = useState<MailingSegment>(initialSegment)
   const [days, setDays] = useState(60)
@@ -112,14 +114,12 @@ export const MailingSheet = ({
     try {
       const result = await sendMailing(slug, { segment, days, text })
       toast.show({
-        title: t('Sent to {clients}', {
-          clients: t.count(result.recipients, ['client', 'clients']),
-        }),
+        title: t`Sent to ${plural(result.recipients, { one: '# client', other: '# clients' })}`,
         type: 'success',
       })
       onClose()
     } catch (error) {
-      toast.show({ title: t('Not sent'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not sent`, description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSending(false)
     }
@@ -133,44 +133,44 @@ export const MailingSheet = ({
       await setBirthdayGreeting(slug, greeting)
       setOverview((current) => (current ? { ...current, birthdayGreeting: greeting } : current))
       toast.show({
-        title: isOn ? t('Greetings on') : t('Greetings off'),
+        title: isOn ? t`Greetings on` : t`Greetings off`,
         type: 'success',
       })
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
     }
   }
 
   return (
     <Sheet
-      title={t('Mailing')}
+      title={t`Mailing`}
       onClose={onClose}
       action={{
-        label: isSending ? t('Sending…') : t('Send'),
+        label: isSending ? t`Sending…` : t`Send`,
         form: FORM_ID,
         disabled: !preview?.count || isSending || text.trim().length < 10,
       }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <SegmentedControl
-          label={t('To')}
+          label={t({ message: 'To', context: 'recipient' })}
           value={segment}
           items={SEGMENTS.map((item) => ({ ...item, label: t(item.label) }))}
           onChange={changeSegment}
         />
 
-        <section className={sheet.group} aria-label={t('To')}>
+        <section className={sheet.group} aria-label={t({ message: 'To', context: 'recipient' })}>
           <div className={sheet.list}>
             {segment === 'lapsed' && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Not seen for')}</span>
+                <span className={sheet.rowLabel}>{t`Not seen for`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Not seen for longer than')}
+                    aria-label={t`Not seen for longer than`}
                     items={LAPSED_DAYS.map((value) => ({
                       value,
-                      label: t.count(value, ['day', 'days']),
+                      label: t`${plural(value, { one: '# day', other: '# days' })}`,
                     }))}
                     value={days}
                     onValueChange={(value) => value && setDays(value)}
@@ -179,51 +179,47 @@ export const MailingSheet = ({
               </div>
             )}
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Recipients')}</span>
+              <span className={sheet.rowLabel}>{t`Recipients`}</span>
               <span className={styles.count} aria-live='polite'>
-                {preview === null ? '…' : t.count(preview.count, ['client', 'clients'])}
+                {preview === null
+                  ? '…'
+                  : t`${plural(preview.count, { one: '# client', other: '# clients' })}`}
               </span>
             </div>
           </div>
           <p className={sheet.groupFooter}>
             {preview && preview.names.length > 0
-              ? t('{names}. Only those who kept SMS on.', {
-                  names:
-                    preview.count > preview.names.length
-                      ? t('{names} and others', { names: preview.names.join(', ') })
-                      : preview.names.join(', '),
-                })
+              ? preview.count > preview.names.length
+                ? t`${ph({ names: preview.names.join(', ') })} and others. Only those who kept SMS on.`
+                : t`${ph({ names: preview.names.join(', ') })}. Only those who kept SMS on.`
               : segment === 'birthday'
-                ? t('Birthdays in the coming week: from the client cards.')
-                : t('Only clients who kept SMS on.')}
+                ? t`Birthdays in the coming week: from the client cards.`
+                : t`Only clients who kept SMS on.`}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Text')}>
-          <SectionCaption>{t('Text')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Text`}>
+          <SectionCaption>{t`Text`}</SectionCaption>
           <div className={sheet.list}>
             <TemplateField
-              label={t('Mailing text')}
+              label={t`Mailing text`}
               value={text}
               onChange={setText}
               tokens={MAILING_TOKENS}
-              placeholder={t('Write the mailing text')}
+              placeholder={t`Write the mailing text`}
               preview={sample}
             />
           </div>
           <p className={sheet.groupFooter}>
-            {t('≈ {chars}, {parts} per client.', {
-              chars: t.count(sent.length, ['character', 'characters']),
-              parts: t.count(smsParts(sent), ['SMS', 'SMS']),
-            })}{' '}
-            {t('Each gets their own name and booking link.')}
+            {t`≈ ${plural(sent.length, { one: '# character', other: '# characters' })}, ${plural(smsParts(sent), { one: '# SMS', other: '# SMS' })} per client.`}{' '}
+            {t`Each gets their own name and booking link.`}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Greetings')}>
+        <section className={sheet.group} aria-label={t`Greetings`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Send birthday greetings')}</span>
+              <span className={sheet.rowLabel}>{t`Send birthday greetings`}</span>
               <Switch
                 checked={Boolean(overview?.birthdayGreeting)}
                 onCheckedChange={(checked) => void toggleBirthday(checked)}
@@ -231,23 +227,24 @@ export const MailingSheet = ({
             </label>
           </div>
           <p className={sheet.groupFooter}>
-            {t(
-              'Every year at 11:00 on the birthday: one SMS to each client with it on their card.',
-            )}
+            {t`Every year at 11:00 on the birthday: one SMS to each client with it on their card.`}
           </p>
         </section>
 
         {overview && overview.history.length > 0 && (
-          <section className={sheet.group} aria-label={t('Sent')}>
-            <SectionCaption>{t('Sent')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`Sent`}>
+            <SectionCaption>{t`Sent`}</SectionCaption>
             <div className={sheet.list}>
               {overview.history.slice(0, 5).map((item) => (
                 <div key={item.id} className={sheet.row}>
                   <span className={sheet.rowLabel}>
-                    {t(SEGMENTS.find((option) => option.value === item.segment)?.label ?? '')} ·{' '}
-                    {formatMomentDay(item.createdAt, t)}
+                    {t(
+                      SEGMENTS.find((option) => option.value === item.segment)?.label ??
+                        msg`Mailing`,
+                    )}{' '}
+                    · {formatMomentDay(item.createdAt, t)}
                   </span>
-                  <span>{t.count(item.recipients, ['client', 'clients'])}</span>
+                  <span>{t`${plural(item.recipients, { one: '# client', other: '# clients' })}`}</span>
                 </div>
               ))}
             </div>

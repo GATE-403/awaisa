@@ -1,7 +1,7 @@
-import NextLink from 'next/link'
+import { Trans, useLingui } from '@lingui/react/macro'
 import type { CSSProperties } from 'react'
 import { ForYouShelfPlaceholder } from '@/features/forYou'
-import { T } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { Block, Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import pageStyles from '../../CatalogPage.module.css'
 import resultStyles from '../CatalogResults/CatalogResults.module.css'
@@ -15,49 +15,57 @@ const CARDS = 8
 // The catalog while it streams in, built from the page's own classes: «For you» with its frames,
 // the results' tabs and sorting, then the grid of 3:4 service cards - the same sizes, so the
 // page fills in place instead of jumping.
-export const CatalogSkeleton = () => (
-  <div className={pageStyles.contained} data-page-skeleton='' aria-busy='true'>
-    <FirstVisitNote />
-    <ForYouShelfPlaceholder
-      variant='stories'
-      headAction={
-        <NextLink href='/top' className={pageStyles.topLink}>
-          <T>Rating ›</T>
-        </NextLink>
-      }
-    />
-    {/* «Popular searches» - wide screens only, like the real row. */}
-    <div className={chipStyles.row} aria-hidden='true'>
-      <span className={chipStyles.label}>
-        <T>Popular searches</T>
-      </span>
-      {[12, 9, 14, 10, 11].map((chars) => (
-        <Block key={chars} className={styles.chip} style={{ '--chars': chars } as CSSProperties} />
-      ))}
-    </div>
-    <section className={resultStyles.results} aria-label='Loading services'>
-      {/* Browsing everything, the results' heading is visually hidden but keeps its row. */}
-      <div className={resultStyles.header} />
-      <div className={resultStyles.toolbar}>
-        <span className={styles.tabs}>
-          <TextLine chars={11} />
-          <TextLine chars={9} />
+export const CatalogSkeleton = () => {
+  const { t } = useLingui()
+
+  return (
+    <div className={pageStyles.contained} data-page-skeleton='' aria-busy='true'>
+      <FirstVisitNote />
+      <ForYouShelfPlaceholder
+        variant='stories'
+        headAction={
+          <NextLink href='/top' className={pageStyles.topLink}>
+            <Trans>Rating ›</Trans>
+          </NextLink>
+        }
+      />
+      {/* «Popular searches» - wide screens only, like the real row. */}
+      <div className={chipStyles.row} aria-hidden='true'>
+        <span className={chipStyles.label}>
+          <Trans>Popular searches</Trans>
         </span>
-        <span className={styles.sort}>
-          <TextLine chars={12} />
-        </span>
-      </div>
-      <ul className={feedStyles.grid} aria-hidden='true'>
-        {Array.from({ length: CARDS }, (_, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: identical placeholders
-          <li key={index}>
-            <Picture className={feedStyles.placeholder} />
-          </li>
+        {[12, 9, 14, 10, 11].map((chars) => (
+          <Block
+            key={chars}
+            className={styles.chip}
+            style={{ '--chars': chars } as CSSProperties}
+          />
         ))}
-      </ul>
-    </section>
-  </div>
-)
+      </div>
+      <section className={resultStyles.results} aria-label={t`Loading services`}>
+        {/* Browsing everything, the results' heading is visually hidden but keeps its row. */}
+        <div className={resultStyles.header} />
+        <div className={resultStyles.toolbar}>
+          <span className={styles.tabs}>
+            <TextLine chars={11} />
+            <TextLine chars={9} />
+          </span>
+          <span className={styles.sort}>
+            <TextLine chars={12} />
+          </span>
+        </div>
+        <ul className={feedStyles.grid} aria-hidden='true'>
+          {Array.from({ length: CARDS }, (_, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: identical placeholders
+            <li key={index}>
+              <Picture className={feedStyles.placeholder} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )
+}
 
 // The skeleton on its own, outside the catalog's page (under a booking reloaded over the
 // catalog): the page's wrapper comes with it, or it stood 8px higher than the catalog from 768px.

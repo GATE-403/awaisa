@@ -1,11 +1,13 @@
 'use client'
 
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Fragment } from 'react'
 import { useNextFree } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { FavoriteButton } from '@/features/favorites'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { Picture } from '@/shared/ui/Placeholder/Placeholder'
 import { WorkTile } from '../WorkTile/WorkTile'
@@ -26,10 +28,10 @@ interface OffersFeedProps {
   onEndReached?: () => void
 }
 
-const FEED_SORTS: { value: FeedSort; label: string }[] = [
-  { value: 'popular', label: 'Popular' },
-  { value: 'soon', label: 'Soonest' },
-  { value: 'price', label: 'Cheapest' },
+const FEED_SORTS: { value: FeedSort; label: MessageDescriptor }[] = [
+  { value: 'popular', label: msg`Popular` },
+  { value: 'soon', label: msg`Soonest` },
+  { value: 'price', label: msg`Cheapest` },
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
@@ -56,7 +58,7 @@ export const OffersFeed = ({
   isLoading = false,
   onEndReached,
 }: OffersFeedProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const nextFree = useNextFree()
   const end = useEndReached(() => onEndReached?.(), hasMore && !isLoading)
   const sorted =
@@ -120,7 +122,7 @@ export const OffersFeed = ({
           ))}
       </ul>
       {hasMore && <div ref={end} className={styles.sentinel} aria-hidden />}
-      {isLoading && <output className={styles.loadingNote}>{t('Loading more…')}</output>}
+      {isLoading && <output className={styles.loadingNote}>{t`Loading more…`}</output>}
     </div>
   )
 }

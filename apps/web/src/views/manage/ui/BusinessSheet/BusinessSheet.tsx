@@ -2,14 +2,14 @@
 
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { CheckCircle, Eye, EyeSlash, Link } from '@phosphor-icons/react/ssr'
-import { useRouter } from 'next/navigation'
 import { useId, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { deleteBusiness, getMyBusinesses, updateBusiness } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
-import { useT } from '@/shared/i18n'
+import { useRouter } from '@/shared/i18n/navigation'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
@@ -41,7 +41,7 @@ export const BusinessSheet = ({
   run,
   onClose,
 }: BusinessSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const router = useRouter()
   const session = useSession()
@@ -53,7 +53,7 @@ export const BusinessSheet = ({
   const isConfirmed = typed.trim().toLowerCase() === slug
 
   const savePublished = async (isOpen: boolean) => {
-    const title = isOpen ? 'Page is open' : 'Page hidden'
+    const title = isOpen ? t`Page is open` : t`Page hidden`
     const save = () => updateBusiness(slug, { isPublished: isOpen })
     if (run) {
       if (await run(save, title)) onPublishedChange(isOpen)
@@ -62,10 +62,10 @@ export const BusinessSheet = ({
     try {
       await save()
       onPublishedChange(isOpen)
-      toast.show({ title: t(title), type: 'success' })
+      toast.show({ title, type: 'success' })
       void refreshBusiness(slug)
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -78,40 +78,38 @@ export const BusinessSheet = ({
         getMyBusinesses().catch(() => []),
         session.refreshSession(),
       ])
-      toast.show({ title: t('Business deleted'), type: 'success' })
+      toast.show({ title: t`Business deleted`, type: 'success' })
       router.replace(others.length > 0 ? '/manage' : '/bookings')
     } catch (error) {
       setIsDeleting(false)
-      toast.show({ title: t('Not deleted'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not deleted`, description: getErrorMessage(error), type: 'error' })
     }
   }
 
   const Glyph = isPublished ? Eye : EyeSlash
 
   return (
-    <Sheet title={t('Hide or delete')} onClose={onClose} cancelLabel='Done'>
+    <Sheet title={t`Hide or delete`} onClose={onClose} cancelLabel='Done'>
       <div className={sheet.form}>
         {/* Right on the sheet, no inset fill: the glyph, the switch and a ↳ note under it. */}
-        <section className={styles.group} aria-label={t('Publishing')}>
+        <section className={styles.group} aria-label={t`Publishing`}>
           <label className={styles.row}>
             <Glyph className={styles.glyph} aria-hidden />
-            <span className={styles.label}>{t('Page is open')}</span>
+            <span className={styles.label}>{t`Page is open`}</span>
             <Switch checked={isPublished} onCheckedChange={(value) => void savePublished(value)} />
           </label>
           <RowNote>
-            {t('A hidden page is not found in the catalog. Bookings and the cabinet stay.')}
+            {t`A hidden page is not found in the catalog. Bookings and the cabinet stay.`}
           </RowNote>
         </section>
 
         {/* What happens is read before the button, not after it. */}
-        <section className={styles.group} aria-label={t('Delete business')}>
+        <section className={styles.group} aria-label={t`Delete business`}>
           <p className={styles.note}>
-            {t(
-              'We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books.',
-            )}
+            {t`We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books.`}
           </p>
           <label className={styles.note} htmlFor={confirmId}>
-            {t('To delete, type the page address:')} <strong className={styles.slug}>{slug}</strong>
+            {t`To delete, type the page address:`} <strong className={styles.slug}>{slug}</strong>
           </label>
           {/* The address as it reads in a link, typed in place: no box, a hairline under it. */}
           <div className={styles.address} data-confirmed={isConfirmed || undefined}>
@@ -133,7 +131,7 @@ export const BusinessSheet = ({
             {isConfirmed && <CheckCircle className={styles.check} weight='fill' aria-hidden />}
           </div>
           <HoldButton disabled={!isConfirmed || isDeleting} onConfirm={() => void handleDelete()}>
-            {t('Delete business')}
+            {t`Delete business`}
           </HoldButton>
         </section>
       </div>

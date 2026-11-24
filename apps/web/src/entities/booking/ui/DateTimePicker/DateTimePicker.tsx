@@ -3,9 +3,11 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { Toggle, ToggleGroup } from '@awaisa/ui/ToggleGroup'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type ReactNode, useEffect, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { addDayKey, type BookingDay } from '../../lib/bookingUtils'
 import styles from './DateTimePicker.module.css'
@@ -80,7 +82,8 @@ export const DateTimePicker = ({
   durationMinutes = 0,
   onCenteredTimeChange,
 }: DateTimePickerProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   // Another day loading keeps the day before on the ruler (dimmed) until it arrives: swapping
   // the dial for a skeleton and back made the whole step jump.
   const [lastSlots, setLastSlots] = useState<TimeSlot[]>([])
@@ -111,8 +114,8 @@ export const DateTimePicker = ({
     if (node && node.scrollWidth > node.clientWidth + 1) setIsShortRelative(true)
   }
   const relativeDay = (key: string) => {
-    if (key === todayKey) return isShortRelative ? t('Tod.') : t('Today')
-    if (key === tomorrowKey) return isShortRelative ? t('Tmrw') : t('Tomorrow')
+    if (key === todayKey) return isShortRelative ? t`Tod.` : t`Today`
+    if (key === tomorrowKey) return isShortRelative ? t`Tmrw` : t`Tomorrow`
     return null
   }
 
@@ -121,7 +124,7 @@ export const DateTimePicker = ({
   const dayRow = (
     <ToggleGroup
       data-day-row=''
-      aria-label={t('Day')}
+      aria-label={t`Day`}
       layout='scroll'
       className={styles.days}
       data-edge-fade=''
@@ -141,15 +144,17 @@ export const DateTimePicker = ({
             data-relative={relativeDay(day.key) ? '' : undefined}
             ref={relativeDay(day.key) ? measureRelative : undefined}
           >
-            {relativeDay(day.key) ?? t.weekdayShort(day.key)}
+            {relativeDay(day.key) ?? format.weekdayShort(day.key)}
           </span>
           <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-          <span className={styles.month}>{t.monthShort(day.key)}</span>
+          <span className={styles.month}>{format.monthShort(day.key)}</span>
           {/* The whole date is read after what the card shows, not instead of it: the name keeps
               the visible words, so voice control finds «Today» (WCAG 2.5.3). */}
           <span className={styles.srOnly}>
             {`, ${
-              day.isClosed ? t('{day}, closed', { day: t.dayLong(day.key) }) : t.dayLong(day.key)
+              day.isClosed
+                ? t`${ph({ day: format.dayLong(day.key) })}, closed`
+                : format.dayLong(day.key)
             }`}
           </span>
         </Toggle>
@@ -164,7 +169,7 @@ export const DateTimePicker = ({
           sheet's scroll. */}
       {dayRow}
 
-      {!isSpecialistSelected && <p className={styles.hint}>{t('Choose a specialist first')}</p>}
+      {!isSpecialistSelected && <p className={styles.hint}>{t`Choose a specialist first`}</p>}
       {isSpecialistSelected &&
         isLoading &&
         !isRulerShown &&
@@ -173,7 +178,7 @@ export const DateTimePicker = ({
         <div className={styles.hint}>
           <p>{error}</p>
           <Button variant='link' size='sm' onClick={onRetry}>
-            {t('Retry')}
+            {t`Retry`}
           </Button>
         </div>
       )}
@@ -181,8 +186,8 @@ export const DateTimePicker = ({
         // The app's one empty place, not a white card with an apology in it.
         <EmptyState
           variant='inline'
-          title={t('This day is fully booked')}
-          text={t('Choose another day')}
+          title={t`This day is fully booked`}
+          text={t`Choose another day`}
           action={fullDayAction}
         />
       )}
@@ -200,13 +205,17 @@ export const DateTimePicker = ({
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
         <p className={styles.caption} aria-hidden>
-          {time ? t('Chosen {time}', { time }) : t('Choose a time')}
-          <span className={styles.captionCount}>{t.count(availableCount, ['free', 'free'])}</span>
+          {time
+            ? t`Chosen ${time}`
+            : t({ message: 'Choose a time', context: 'instruction to the client' })}
+          <span
+            className={styles.captionCount}
+          >{t`${plural(availableCount, { one: '# free', other: '# free' })}`}</span>
         </p>
       )}
       {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup
-          aria-label={t('Time')}
+          aria-label={t`Time`}
           layout='grid'
           className={styles.slots}
           value={time ? [time] : []}

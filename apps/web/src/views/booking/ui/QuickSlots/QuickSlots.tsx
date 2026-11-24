@@ -1,8 +1,11 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { addDayKey } from '@/entities/booking'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Format, Translate } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import type { QuickSlot } from '@/views/booking/model/useQuickSlots'
 import styles from './QuickSlots.module.css'
 
@@ -18,10 +21,11 @@ interface QuickSlotsProps {
 
 const PLACEHOLDERS = ['first', 'second', 'third']
 
-const dayLabel = (dayKey: string, todayKey: string | null, t: Translate) => {
-  if (todayKey && dayKey === todayKey) return t('Today')
-  if (todayKey && dayKey === addDayKey(todayKey, 1)) return t('Tomorrow')
-  return t.dayLong(dayKey).split(',')[0] ?? dayKey
+const dayLabel = (dayKey: string, todayKey: string | null, t: Translate, format: Format) => {
+  if (todayKey && dayKey === todayKey) return t(msg`Today`)
+  if (todayKey && dayKey === addDayKey(todayKey, 1)) return t(msg`Tomorrow`)
+  const weekday = format.weekdayLong(dayKey)
+  return weekday.charAt(0).toUpperCase() + weekday.slice(1)
 }
 
 // One tap books the nearest time: a quiet line and the kit's own capsules, nothing louder than
@@ -34,7 +38,8 @@ export const QuickSlots = ({
   todayKey,
   onPick,
 }: QuickSlotsProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   if (!isLoading && slots.length === 0) return null
 
   return (
@@ -53,7 +58,7 @@ export const QuickSlots = ({
                 className={styles.slot}
                 onClick={() => onPick(slot)}
               >
-                <span className={styles.day}>{dayLabel(slot.dayKey, todayKey, t)}</span>
+                <span className={styles.day}>{dayLabel(slot.dayKey, todayKey, t, format)}</span>
                 {slot.time}
               </Button>
             ))}

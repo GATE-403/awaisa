@@ -1,7 +1,8 @@
 'use client'
 
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Compass, MapPin, SquaresFour, Storefront, Ticket, Trophy } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
@@ -13,7 +14,7 @@ import {
   isStandalonePath,
 } from '@/shared/config/navigation'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
@@ -23,10 +24,10 @@ import { HeaderSearch } from '@/widgets/HeaderSearch'
 import styles from './Header.module.css'
 
 const ACTIONS = [
-  { href: '/feed', label: 'Looks', icon: FanCardsIcon },
-  { href: '/map', label: 'Map', icon: MapPin },
-  { href: '/top', label: 'Rating', icon: Trophy },
-  { href: '/business', label: 'Business', icon: Storefront },
+  { href: '/feed', label: msg`Looks`, icon: FanCardsIcon },
+  { href: '/map', label: msg`Map`, icon: MapPin },
+  { href: '/top', label: msg`Rating`, icon: Trophy },
+  { href: '/business', label: msg`Business`, icon: Storefront },
 ]
 
 interface HeaderContentProps {
@@ -36,14 +37,14 @@ interface HeaderContentProps {
 
 // A marketplace header: logo, Catalogue, the search field, labelled actions; categories below.
 const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const pathname = useChromePathname()
   const isScrolled = useIsScrolled()
   const { status, customer } = useSession()
   const _isSignedIn = status === 'signedIn'
   const accountLabel = customer
-    ? t('Bookings and profile: {name}', { name: customer.name || customer.phone })
-    : t('Bookings and profile')
+    ? t`Bookings and profile: ${ph({ name: customer.name || customer.phone })}`
+    : t`Bookings and profile`
   const currentKind = pathname === '/' ? catalogKind : null
   const headerRef = useRef<HTMLElement>(null)
   // The cabinet and sign-in are screens of their own: no site navigation there.
@@ -53,7 +54,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
     customer && hasCabinet(customer)
       ? ACTIONS.map((action) =>
           action.href === '/business'
-            ? { href: getCabinetHref(customer), label: 'Dashboard', icon: action.icon }
+            ? { href: getCabinetHref(customer), label: msg`Dashboard`, icon: action.icon }
             : action,
         )
       : ACTIONS
@@ -120,7 +121,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
       }
     >
       <div className={styles.inner}>
-        <NextLink href='/' className={styles.home} aria-label={t('Home')}>
+        <NextLink href='/' className={styles.home} aria-label={t`Home`}>
           <Logo />
         </NextLink>
         <NextLink
@@ -129,14 +130,14 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
           aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
         >
           <Compass aria-hidden />
-          {t('Catalogue')}
+          {t`Catalogue`}
         </NextLink>
         {!isSlim && (
           <div className={styles.search}>
             <HeaderSearch />
           </div>
         )}
-        <nav className={styles.actions} aria-label={t('Main menu')}>
+        <nav className={styles.actions} aria-label={t`Main menu`}>
           {actions.map(({ href, label, icon: Icon }) => (
             <NextLink
               key={href}
@@ -160,7 +161,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             {/* Signed in, the profile is the person's own face (their photo or initials). */}
             {customer ? (
               <PersonAvatar
-                name={customer.name || t('Profile')}
+                name={customer.name || t`Profile`}
                 src={customer.avatarUrl ?? undefined}
                 size='sm'
                 className={styles.accountAvatar}
@@ -171,13 +172,13 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             )}
             {/* Bookings like the other actions' one-word labels (the page leads with the
                 visits; My profile is the public one). The face already says whose it is. */}
-            <span>{t('Bookings')}</span>
+            <span>{t`Bookings`}</span>
           </NextLink>
         </nav>
       </div>
 
       {hasCategories && (
-        <nav className={styles.categories} aria-label={t('Categories')}>
+        <nav className={styles.categories} aria-label={t`Categories`}>
           <div className={styles.categoriesInner}>
             <ul className={styles.categoryList}>
               <li>
@@ -187,7 +188,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
                   aria-current={pathname === '/' && !currentKind ? 'page' : undefined}
                 >
                   <SquaresFour weight='duotone' aria-hidden />
-                  {t('All')}
+                  {t`All`}
                 </NextLink>
               </li>
               {BUSINESS_KINDS.map((kind) => {
@@ -211,13 +212,13 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             <NextLink
               href='/map'
               className={styles.city}
-              aria-label={t('Bishkek · nearby on the map')}
+              aria-label={t`Bishkek · nearby on the map`}
             >
               <MapPin aria-hidden />
-              {t('Bishkek')}
+              {t`Bishkek`}
               <span className={styles.cityMore}>
                 {' · '}
-                <span className={styles.cityLink}>{t('nearby on the map')}</span>
+                <span className={styles.cityLink}>{t`nearby on the map`}</span>
               </span>
             </NextLink>
           </div>

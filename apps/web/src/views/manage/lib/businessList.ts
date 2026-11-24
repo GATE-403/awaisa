@@ -1,6 +1,7 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, plural } from '@lingui/core/macro'
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
-import { pluralize } from '@/shared/lib/plural'
 import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 
 // "My businesses": what waits in a business, the order of the list and its search (pure,
@@ -16,29 +17,34 @@ const RECENT_KEY = 'awaisa:cabinet-recent:v1'
 const RECENT_LIMIT = 20
 
 /** One short line per thing that waits, most urgent first; nothing for zero. */
-const attentionItems = (attention: BusinessAttention | undefined, t?: Translate) => {
+const attentionItems = (attention: BusinessAttention | undefined, t: Translate) => {
   if (!attention) return []
-  const count = (value: number, forms: [string, string]) =>
-    t ? t.count(value, forms) : pluralize(value, forms)
   const items: AttentionItem[] = []
-  if (attention.unmarkedVisits > 0) {
+  const { unmarkedVisits, unansweredReviews, failedReceipts } = attention
+  if (unmarkedVisits > 0) {
     items.push({
       key: 'unmarkedVisits',
-      text: `${count(attention.unmarkedVisits, ['visit', 'visits'])} ${t ? t('unmarked') : 'unmarked'}`,
+      text: t(
+        msg`${plural(unmarkedVisits, { one: '# visit unmarked', other: '# visits unmarked' })}`,
+      ),
       tab: 'schedule',
     })
   }
-  if (attention.unansweredReviews > 0) {
+  if (unansweredReviews > 0) {
     items.push({
       key: 'unansweredReviews',
-      text: `${count(attention.unansweredReviews, ['review', 'reviews'])} ${t ? t('unanswered') : 'unanswered'}`,
+      text: t(
+        msg`${plural(unansweredReviews, { one: '# review unanswered', other: '# reviews unanswered' })}`,
+      ),
       tab: 'reviews',
     })
   }
-  if (attention.failedReceipts > 0) {
+  if (failedReceipts > 0) {
     items.push({
       key: 'failedReceipts',
-      text: `${count(attention.failedReceipts, ['receipt', 'receipts'])} failed`,
+      text: t(
+        msg`${plural(failedReceipts, { one: '# receipt failed', other: '# receipts failed' })}`,
+      ),
       tab: 'fiscal',
     })
   }
@@ -128,10 +134,10 @@ type StatusLine =
   | { kind: 'week'; views: number; bookings: number; trend: 'up' | 'down' | null }
   | { kind: 'share' }
 
-const SETUP_TEXTS: Record<'services' | 'masters' | 'hours', string> = {
-  services: 'Add services',
-  masters: 'Add specialists',
-  hours: 'Check the opening hours',
+const SETUP_TEXTS: Record<'services' | 'masters' | 'hours', MessageDescriptor> = {
+  services: msg`Add services`,
+  masters: msg`Add specialists`,
+  hours: msg`Check the opening hours`,
 }
 
 /**
@@ -142,18 +148,17 @@ const SETUP_TEXTS: Record<'services' | 'masters' | 'hours', string> = {
 const statusLine = (
   attention: BusinessAttention | undefined,
   isQuiet: boolean,
-  t?: Translate,
+  t: Translate,
   isPublished = true,
 ): StatusLine | null => {
   if (!attention) return null
   const { setup, week } = attention
   if (setup.next) {
-    const step = SETUP_TEXTS[setup.next]
     return {
       kind: 'setup',
       done: setup.done,
       total: setup.total,
-      text: t ? t(step) : step,
+      text: t(SETUP_TEXTS[setup.next]),
       tab: setup.next,
     }
   }

@@ -1,102 +1,111 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { BookingChannel, FunnelFlow, FunnelSegment, FunnelStep } from '@/shared/api/types'
 
 // Words for the codes the funnel telemetry stores (apps/api/src/telemetry/telemetry.schemas.ts).
 
-const FLOW_LABELS: Record<Exclude<FunnelFlow, 'signals'>, string> = {
-  booking: 'Booking',
-  search: 'Search',
-  login: 'Sign-in',
-  manage_booking: 'Ticket and cancellation',
-  prepayment: 'Deposit',
-  waitlist: 'Waitlist',
-  review: 'Review',
-  owner: 'Owners',
+const FLOW_LABELS: Record<Exclude<FunnelFlow, 'signals'>, MessageDescriptor> = {
+  booking: msg`Booking`,
+  search: msg`Search`,
+  login: msg`Sign-in`,
+  manage_booking: msg`Ticket and cancellation`,
+  prepayment: msg`Deposit`,
+  waitlist: msg`Waitlist`,
+  review: msg`Review`,
+  owner: msg`Owners`,
 }
 
-const STEP_LABELS: Record<FunnelStep, string> = {
-  catalog: 'Opened the catalogue',
-  business: 'Opened a place',
-  booking_open: 'Opened booking',
-  service: 'Picked a service',
-  specialist: 'Picked a specialist',
-  time: 'Picked a time',
-  contacts: 'Entered contacts',
-  booked: 'Booked',
-  search_open: 'Opened search',
-  search_typed: 'Started typing',
-  search_results: 'Saw results',
-  search_pick: 'Opened a result',
-  login_open: 'Opened sign-in',
-  otp_sent: 'Got a code',
-  otp_ok: 'Confirmed the number',
-  login_done: 'Signed in',
-  ticket_open: 'Opened the ticket',
-  reschedule_open: 'Started rescheduling',
-  reschedule_done: 'Rescheduled',
-  cancel: 'Cancelled',
-  cancel_undone: 'Restored a cancelled one',
-  deposit_shown: 'Saw the deposit terms',
-  checkout_open: 'Opened payment',
-  pay_click: 'Tapped “Pay”',
-  paid: 'Paid',
-  full_day_shown: 'Hit a fully booked day',
-  waitlist_open: 'Opened the waitlist',
-  waitlist_joined: 'Joined the waitlist',
-  review_open: 'Opened a review',
-  review_rated: 'Gave a rating',
-  review_sent: 'Sent a review',
-  business_landing: 'Opened “For business”',
-  register_name: 'Step 1: name',
-  register_kind: 'Step 2: business type',
-  register_services: 'Step 3: services',
-  register_contacts: 'Step 4: contacts',
-  register_done: 'Created a page',
-  form_error: 'Field error',
-  toast_action: 'Tapped in a notification',
-  search_empty: 'Search with no results',
-  otp_error: 'Wrong code',
-  pay_failed: 'Payment failed',
+const STEP_LABELS: Record<FunnelStep, MessageDescriptor> = {
+  catalog: msg`Opened the catalogue`,
+  business: msg`Opened a place`,
+  booking_open: msg`Opened booking`,
+  service: msg`Picked a service`,
+  specialist: msg`Picked a specialist`,
+  time: msg`Picked a time`,
+  contacts: msg`Entered contacts`,
+  booked: msg`Booked`,
+  search_open: msg`Opened search`,
+  search_typed: msg`Started typing`,
+  search_results: msg`Saw results`,
+  search_pick: msg`Opened a result`,
+  login_open: msg`Opened sign-in`,
+  otp_sent: msg`Got a code`,
+  otp_ok: msg`Confirmed the number`,
+  login_done: msg`Signed in`,
+  ticket_open: msg`Opened the ticket`,
+  reschedule_open: msg`Started rescheduling`,
+  reschedule_done: msg`Rescheduled`,
+  cancel: msg({ message: 'Cancelled', context: 'funnel step: people who cancelled' }),
+  cancel_undone: msg`Restored a cancelled one`,
+  deposit_shown: msg`Saw the deposit terms`,
+  checkout_open: msg`Opened payment`,
+  pay_click: msg`Tapped “Pay”`,
+  paid: msg({ message: 'Paid', context: 'funnel step: people who paid' }),
+  full_day_shown: msg`Hit a fully booked day`,
+  waitlist_open: msg`Opened the waitlist`,
+  waitlist_joined: msg`Joined the waitlist`,
+  review_open: msg`Opened a review`,
+  review_rated: msg`Gave a rating`,
+  review_sent: msg`Sent a review`,
+  business_landing: msg`Opened “For business”`,
+  register_name: msg`Step 1: name`,
+  register_kind: msg`Step 2: business type`,
+  register_services: msg`Step 3: services`,
+  register_contacts: msg`Step 4: contacts`,
+  register_done: msg`Created a page`,
+  form_error: msg`Field error`,
+  toast_action: msg`Tapped in a notification`,
+  search_empty: msg`Search with no results`,
+  otp_error: msg`Wrong code`,
+  pay_failed: msg`Payment failed`,
 }
 
 // `meta` codes: which field, which toast action, which channel.
-const VALUE_LABELS: Record<string, string> = {
-  phone: 'Phone',
-  name: 'Name',
-  rating: 'Rating in a review',
-  waitlist_name: 'Name in the waitlist',
-  waitlist_phone: 'Phone in the waitlist',
-  business_name: 'Business name',
-  business_slug: 'Business page address',
-  undo_cancel: '“Undo” on a cancelled booking',
-  staff_undo_cancel: 'Dashboard: "Undo" a cancellation',
-  staff_undo_move: 'Dashboard: "Undo" a move',
-  staff_undo_close_day: 'Dashboard: "Undo" on "Everyone came"',
-  sms: 'SMS',
-  telegram: 'Telegram',
+const VALUE_LABELS: Record<string, MessageDescriptor | undefined> = {
+  phone: msg`Phone`,
+  name: msg`Name`,
+  rating: msg`Rating in a review`,
+  waitlist_name: msg`Name in the waitlist`,
+  waitlist_phone: msg`Phone in the waitlist`,
+  business_name: msg`Business name`,
+  business_slug: msg`Business page address`,
+  undo_cancel: msg`“Undo” on a cancelled booking`,
+  staff_undo_cancel: msg`Dashboard: "Undo" a cancellation`,
+  staff_undo_move: msg`Dashboard: "Undo" a move`,
+  staff_undo_close_day: msg`Dashboard: "Undo" on "Everyone came"`,
+  sms: msg`SMS`,
+  telegram: msg`Telegram`,
 }
 
 type SegmentKey = keyof FunnelSegment
 
-const SEGMENT_LABELS: Record<SegmentKey, { title: string; values: Record<string, string> }> = {
+const SEGMENT_LABELS: Record<
+  SegmentKey,
+  { title: MessageDescriptor; values: Record<string, MessageDescriptor | undefined> }
+> = {
   type: {
-    title: 'Device',
-    values: { phone: 'Phone', tablet: 'Tablet', desktop: 'Computer' },
+    title: msg`Device`,
+    values: { phone: msg`Phone`, tablet: msg`Tablet`, desktop: msg`Computer` },
   },
   textScale: {
-    title: 'Browser font size',
-    values: { normal: 'Normal', large: 'Large', huge: 'Very large' },
+    title: msg`Browser font size`,
+    values: { normal: msg`Normal`, large: msg`Large`, huge: msg`Very large` },
   },
   net: {
-    title: 'Network',
-    values: { slow: 'Slow', fast: 'Fast', unknown: 'Unknown' },
+    title: msg`Network`,
+    values: { slow: msg`Slow`, fast: msg`Fast`, unknown: msg`Unknown` },
   },
   os: {
-    title: 'System',
-    values: { ios: 'iOS', android: 'Android', other: 'Other' },
+    title: msg({ message: 'System', context: 'operating system' }),
+    values: {
+      ios: msg`iOS`,
+      android: msg`Android`,
+      other: msg({ message: 'Other', context: 'operating system, feminine' }),
+    },
   },
   app: {
-    title: 'Source',
-    values: { web: 'Website', native: 'App' },
+    title: msg`Source`,
+    values: { web: msg`Website`, native: msg`App` },
   },
 }
 
@@ -104,14 +113,14 @@ const SEGMENT_LABELS: Record<SegmentKey, { title: string; values: Record<string,
 const FILTER_KEYS: SegmentKey[] = ['type', 'textScale', 'net']
 
 export type { SegmentKey }
-const CHANNEL_LABELS: Record<BookingChannel, string> = {
-  catalog: 'Catalogue',
-  for_you: '“For you”',
-  feed: '“Looks”',
-  search: 'Search',
-  map: 'Map',
-  salon_link: 'Salon’s link',
-  other: 'Other',
+const CHANNEL_LABELS: Record<BookingChannel, MessageDescriptor> = {
+  catalog: msg`Catalogue`,
+  for_you: msg`“For you”`,
+  feed: msg`“Looks”`,
+  search: msg`Search`,
+  map: msg`Map`,
+  salon_link: msg`Salon’s link`,
+  other: msg`Other`,
 }
 
 export { CHANNEL_LABELS, FILTER_KEYS, FLOW_LABELS, SEGMENT_LABELS, STEP_LABELS, VALUE_LABELS }

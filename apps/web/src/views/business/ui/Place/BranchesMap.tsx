@@ -1,11 +1,11 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import dynamic from 'next/dynamic'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { pickTint } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import styles from './BranchesMap.module.css'
 
 const MapView = dynamic(
@@ -18,7 +18,7 @@ interface BranchesMapProps {
 }
 
 export const BranchesMap = ({ business }: BranchesMapProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const router = useRouter()
   const markers = business.branches.flatMap((branch) =>
     branch.latitude !== null && branch.longitude !== null
@@ -40,7 +40,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
       <MapView
         markers={markers}
         fitKey={business.slug}
-        label={t('{name} on the map', { name: business.name })}
+        label={t`${ph({ name: business.name })} on the map`}
         className={styles.map}
         isStatic
         onSelect={(id) =>
@@ -48,7 +48,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
         }
       />
       <NextLink href='/map' className={styles.mapLink}>
-        {t('Open on the map')}
+        {t`Open on the map`}
       </NextLink>
     </div>
   )

@@ -1,5 +1,5 @@
+import { Trans, useLingui } from '@lingui/react/macro'
 import { CaretRight, ChatCircle, Phone } from '@phosphor-icons/react/ssr'
-import { T } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { WhatsappMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import styles from './ContactRows.module.css'
@@ -14,17 +14,18 @@ interface ContactRowsProps {
 // Ways to reach a person as iOS Settings rows: a quiet glyph (WhatsApp keeps its own mark), the
 // action, and the number on the call row: one tap each, nothing to guess.
 export const ContactRows = ({ phone, surface = 'sheet' }: ContactRowsProps) => {
+  const { t } = useLingui()
   const digits = phone.replace(/\D/g, '')
 
   return (
-    <ul className={styles.list} data-surface={surface} aria-label='Contact'>
+    <ul className={styles.list} data-surface={surface} aria-label={t`Contact`}>
       <li>
         <a href={`tel:${phone}`} className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <Phone />
           </span>
           <span className={styles.label}>
-            <T>Call</T>
+            <Trans>Call</Trans>
           </span>
           <span className={styles.value}>{formatPhone(phone)}</span>
         </a>

@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { isBookingPath } from '@/shared/config/navigation'
+import { usePathname } from '@/shared/i18n/navigation'
 import { useFocusedFieldInView } from '@/shared/lib/hooks/useFocusedFieldInView'
 import { useInertOutside } from '@/shared/lib/hooks/useInertOutside'
 import { usePageScrollLock } from '@/shared/lib/hooks/usePageScrollLock'

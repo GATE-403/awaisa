@@ -1,6 +1,6 @@
+import { Trans, useLingui } from '@lingui/react/macro'
 import type { CSSProperties } from 'react'
 import { AchievementsPlaceholder } from '@/entities/profile'
-import { T } from '@/shared/i18n'
 import { Block, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '../ProfilePage.module.css'
@@ -9,43 +9,47 @@ import skeleton from './ProfileSkeleton.module.css'
 // A profile while it streams in, on the page's own classes: a neutral wash (the colour is the
 // person's, not known yet), the face, name, status, the facts and level lines, two small
 // capsules, then «Medals» with grey medals.
-export const ProfileSkeleton = () => (
-  <main
-    className={styles.page}
-    style={{ '--accent': 'var(--color-muted-foreground)' } as CSSProperties}
-    data-page-skeleton=''
-    aria-busy='true'
-    aria-label='Loading the profile'
-  >
-    <div className={styles.column}>
-      <p className={`${styles.crumbs} ${skeleton.crumbs}`}>
-        <TextLine chars={16} />
-      </p>
-      <header className={styles.head}>
-        <Block className={skeleton.face} />
-        <p className={styles.name}>
-          <TextLine chars={10} />
+export const ProfileSkeleton = () => {
+  const { t } = useLingui()
+
+  return (
+    <main
+      className={styles.page}
+      style={{ '--accent': 'var(--color-muted-foreground)' } as CSSProperties}
+      data-page-skeleton=''
+      aria-busy='true'
+      aria-label={t`Loading the profile`}
+    >
+      <div className={styles.column}>
+        <p className={`${styles.crumbs} ${skeleton.crumbs}`}>
+          <TextLine chars={16} />
         </p>
-        <p className={styles.status}>
-          <TextLine chars={18} />
-        </p>
-        <p className={styles.facts}>
-          <TextLine chars={20} />
-        </p>
-        <p className={styles.level}>
-          <TextLine chars={34} />
-        </p>
-        <div className={styles.actions}>
-          <Block className={skeleton.action} />
-          <Block className={skeleton.action} />
-        </div>
-      </header>
-      <section className={styles.section}>
-        <SectionCaption as='p' isInset={false}>
-          <T>Achievements</T>
-        </SectionCaption>
-        <AchievementsPlaceholder />
-      </section>
-    </div>
-  </main>
-)
+        <header className={styles.head}>
+          <Block className={skeleton.face} />
+          <p className={styles.name}>
+            <TextLine chars={10} />
+          </p>
+          <p className={styles.status}>
+            <TextLine chars={18} />
+          </p>
+          <p className={styles.facts}>
+            <TextLine chars={20} />
+          </p>
+          <p className={styles.level}>
+            <TextLine chars={34} />
+          </p>
+          <div className={styles.actions}>
+            <Block className={skeleton.action} />
+            <Block className={skeleton.action} />
+          </div>
+        </header>
+        <section className={styles.section}>
+          <SectionCaption as='p' isInset={false}>
+            <Trans>Achievements</Trans>
+          </SectionCaption>
+          <AchievementsPlaceholder />
+        </section>
+      </div>
+    </main>
+  )
+}

@@ -1,7 +1,7 @@
 'use client'
 
-import NextLink from 'next/link'
 import type { ReactNode } from 'react'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { TextTabs } from '../TextTabs/TextTabs'
 import styles from './ProfileTabs.module.css'
 

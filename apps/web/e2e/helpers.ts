@@ -153,7 +153,32 @@ const waitForToastsToLeave = async (page: Page) => {
   await expect(page.locator('[role="dialog"][data-type]')).toHaveCount(0, { timeout: 20_000 })
 }
 
+// A press made while the page is still hydrating can land on an element whose handlers are not
+// there yet: the click or the typed text is then lost (seen on slow CI runners, also on slow
+// phones). These repeat the action until the page answers.
+
+/** Clicks a link until the address matches; a soft navigation that never started is tried again. */
+const clickUntilUrl = async (page: Page, target: Locator, url: RegExp) => {
+  await expect(async () => {
+    if (url.test(page.url())) return
+    await target.click({ timeout: 3000 })
+    await page.waitForURL(url, { timeout: 4000 })
+  }).toPass({ timeout: 30_000 })
+}
+
+/** Searches the catalog from the header until the address carries the query. */
+const searchCatalog = async (page: Page, text: string) => {
+  const field = page.getByRole('searchbox', { name: 'Search salons and specialists' })
+  await expect(async () => {
+    await field.fill(text)
+    await field.press('Enter')
+    await page.waitForURL(/[?&]q=/, { timeout: 4000 })
+  }).toPass({ timeout: 30_000 })
+}
+
 export {
+  clickUntilUrl,
+  searchCatalog,
   editStep,
   waitForToastsToLeave,
   settledBox,

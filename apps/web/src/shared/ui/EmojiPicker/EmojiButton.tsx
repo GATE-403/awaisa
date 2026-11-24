@@ -1,6 +1,7 @@
 'use client'
 
 import { Popover } from '@awaisa/ui/Popover'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { Smiley } from '@phosphor-icons/react/ssr'
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
@@ -9,7 +10,11 @@ import styles from './EmojiPicker.module.css'
 // The picker's code and data load only once someone opens it.
 const EmojiPanel = dynamic(() => import('./EmojiPanel').then((module) => module.EmojiPanel), {
   ssr: false,
-  loading: () => <p className={styles.note}>Loading…</p>,
+  loading: () => (
+    <p className={styles.note}>
+      <Trans>Loading…</Trans>
+    </p>
+  ),
 })
 
 interface EmojiButtonProps {
@@ -20,6 +25,7 @@ interface EmojiButtonProps {
 // A thin ☺ glyph beside a comment field that opens the emoji picker in the kit's popover, above
 // the field. Choosing one closes it, so the person goes back to typing.
 export const EmojiButton = ({ onPick }: EmojiButtonProps) => {
+  const { t } = useLingui()
   const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -32,13 +38,13 @@ export const EmojiButton = ({ onPick }: EmojiButtonProps) => {
         // Keeps the field's caret where it was, so the emoji lands there.
         onPointerDown={(event) => event.preventDefault()}
         onClick={() => setIsOpen((open) => !open)}
-        aria-label='Emoji'
+        aria-label={t`Emoji`}
         aria-expanded={isOpen}
-        title='Emoji'
+        title={t`Emoji`}
       >
         <Smiley aria-hidden />
       </button>
-      <Popover open={isOpen} onOpenChange={setIsOpen} anchor={anchor} label='Emoji' side='top'>
+      <Popover open={isOpen} onOpenChange={setIsOpen} anchor={anchor} label={t`Emoji`} side='top'>
         {isOpen && (
           <EmojiPanel
             onPick={(emoji) => {

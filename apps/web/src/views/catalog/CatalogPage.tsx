@@ -1,4 +1,5 @@
-import NextLink from 'next/link'
+import { msg } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 import { Suspense } from 'react'
 import { NextFreeProvider, toPlaceCard } from '@/entities/business'
 import { ForYouShelf } from '@/features/forYou'
@@ -11,7 +12,8 @@ import {
 } from '@/shared/api/serverApi'
 import type { BusinessKind } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { T } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { initLingui } from '@/shared/i18n/server'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { placesJsonLd, siteJsonLd } from '@/shared/lib/seo/siteJsonLd'
 import styles from './CatalogPage.module.css'
@@ -36,6 +38,7 @@ const toSort = (value: unknown): FeedSort =>
 // Data comes from the server cache ('use cache'); the query string makes this part dynamic,
 // so it streams into the prerendered shell (Partial Prerendering).
 const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
+  const i18n = await initLingui()
   const params = await searchParams
   const kind = toKind(params.kind)
   const query = toQuery(params.q)
@@ -69,12 +72,13 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   const matchesPlace = businesses.some((business) =>
     business.name.toLocaleLowerCase('ru').includes(needle),
   )
-  const kindLabel = BUSINESS_KINDS.find((item) => item.value === kind)?.label
+  const kindDescriptor = BUSINESS_KINDS.find((item) => item.value === kind)?.label
+  const kindLabel = kindDescriptor ? i18n._(kindDescriptor) : undefined
 
   return (
     <NextFreeProvider slugs={slugs}>
       {isBrowsing && businesses.length > 0 && (
-        <JsonLd data={placesJsonLd(kindLabel ?? 'Places to book', businesses)} />
+        <JsonLd data={placesJsonLd(kindLabel ?? i18n._(msg`Places to book`), businesses)} />
       )}
       <div className={styles.contained}>
         {/* Picked for this client (or, with nothing known, popular and free soon) leads the page. */}
@@ -86,7 +90,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
             variant='stories'
             headAction={
               <NextLink href='/top' className={styles.topLink}>
-                <T>Rating ›</T>
+                <Trans>Rating ›</Trans>
               </NextLink>
             }
           />
@@ -96,7 +100,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           key={`${kind ?? ''}|${query}`}
           kind={kind}
           query={query || undefined}
-          title={query ? `“${shown}”` : (kindLabel ?? 'Where to book')}
+          title={query ? `“${shown}”` : (kindLabel ?? i18n._(msg`Where to book`))}
           searchedFor={resolved?.corrected ? query : undefined}
           businesses={businesses.map(toPlaceCard)}
           offers={offers}
@@ -112,11 +116,15 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
 }
 
 // A marketplace, not a landing: search, categories, offers, then the places themselves.
-export const CatalogPage = ({ searchParams }: CatalogPageProps) => (
-  <main className={styles.page}>
-    <JsonLd data={siteJsonLd()} />
-    <Suspense fallback={<CatalogSkeleton />}>
-      <CatalogContent searchParams={searchParams} />
-    </Suspense>
-  </main>
-)
+export const CatalogPage = async ({ searchParams }: CatalogPageProps) => {
+  const i18n = await initLingui()
+
+  return (
+    <main className={styles.page}>
+      <JsonLd data={siteJsonLd(i18n)} />
+      <Suspense fallback={<CatalogSkeleton />}>
+        <CatalogContent searchParams={searchParams} />
+      </Suspense>
+    </main>
+  )
+}

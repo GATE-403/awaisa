@@ -1,3 +1,5 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { isCabinetPath } from '@/shared/config/navigation'
 
 // Where the person was before entering the business side, so the cabinet's «‹» leads back there
@@ -26,16 +28,17 @@ const readCabinetFrom = () => {
   }
 }
 
-const LABELS: Record<string, string> = {
-  '/': 'Catalogue',
-  '/bookings': 'Profile',
-  '/map': 'Map',
-  '/feed': 'Looks',
-  '/top': 'Rating',
-  '/business': 'Business',
+const LABELS: Record<string, MessageDescriptor> = {
+  '/': msg`Catalogue`,
+  '/bookings': msg`Profile`,
+  '/map': msg`Map`,
+  '/feed': msg`Looks`,
+  '/top': msg`Rating`,
+  '/business': msg`Business`,
 }
 
 /** The word on «‹» for a path to go back to. */
-const getBackLabel = (path: string) => LABELS[path.split('?')[0] ?? ''] ?? 'Back'
+const getBackLabel = (path: string): MessageDescriptor =>
+  LABELS[path.split('?')[0] ?? ''] ?? msg`Back`
 
 export { getBackLabel, readCabinetFrom, rememberCabinetFrom }

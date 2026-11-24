@@ -4,6 +4,8 @@ import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { BellRinging, CheckCircle } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useEffect, useState } from 'react'
 import { readContact, saveContact } from '@/entities/booking'
@@ -11,7 +13,6 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { joinWaitlist } from '@/shared/api/clientApi'
 import { NATIONAL_PHONE_DIGITS, PHONE_PLACEHOLDER } from '@/shared/config/region'
-import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -45,7 +46,7 @@ export const WaitlistJoin = ({
 }: WaitlistJoinProps) => {
   const session = useSession()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const stored = useStoredWaitlist()
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
@@ -84,12 +85,12 @@ export const WaitlistJoin = ({
     // Field errors sit under their field and mark it invalid; the alert below the form is for
     // what the server says.
     if (!name.trim()) {
-      setFieldError({ field: 'name', message: 'Enter a name' })
+      setFieldError({ field: 'name', message: t`Enter a name` })
       trackFormError('waitlist_name')
       return
     }
     if (!accountPhone && phone.replace(/\D/g, '').length < NATIONAL_PHONE_DIGITS) {
-      setFieldError({ field: 'phone', message: t('Enter a number: the SMS goes to it') })
+      setFieldError({ field: 'phone', message: t`Enter a number: the SMS goes to it` })
       trackFormError('waitlist_phone')
       return
     }
@@ -111,8 +112,8 @@ export const WaitlistJoin = ({
       haptic('success')
       setIsOpen(false)
       toast.show({
-        title: t('We will tell you if a slot opens up'),
-        description: t('{day}: an SMS comes as soon as a time opens up', { day: dayLabel }),
+        title: t`We will tell you if a slot opens up`,
+        description: t`${ph({ day: dayLabel })}: an SMS comes as soon as a time opens up`,
         type: 'success',
       })
     } catch (joinError) {
@@ -126,7 +127,7 @@ export const WaitlistJoin = ({
     return (
       <p className={styles.joined} aria-live='polite'>
         <CheckCircle weight='fill' aria-hidden />
-        {t('Waiting for a slot on this day: we will send an SMS')}
+        {t`Waiting for a slot on this day: we will send an SMS`}
       </p>
     )
   }
@@ -137,37 +138,35 @@ export const WaitlistJoin = ({
           specialist»; the sheet's one primary action stays the booking bar's. */}
       <Button variant='secondary' size='sm' onClick={open} className={styles.button}>
         <BellRinging aria-hidden />
-        {t('Tell me when a slot opens')}
+        {t`Tell me when a slot opens`}
       </Button>
       {isOpen && (
         <Sheet
-          title='Waitlist'
+          title={t`Waitlist`}
           onClose={() => setIsOpen(false)}
           action={{
-            label: isSending ? 'Sending…' : 'Done',
+            label: isSending ? t`Sending…` : t`Done`,
             form: FORM_ID,
             disabled: isSending,
           }}
         >
           <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit} noValidate>
             <p className={styles.lead}>
-              {t('{day}: if someone cancels, we will send one SMS with a link to that time.', {
-                day: dayLabel,
-              })}
+              {t`${ph({ day: dayLabel })}: if someone cancels, we will send one SMS with a link to that time.`}
             </p>
             <Field
-              label='Name'
+              label={t`Name`}
               error={fieldError?.field === 'name' ? fieldError.message : undefined}
             >
               <Input value={name} onValueChange={setName} autoComplete='name' />
             </Field>
             {accountPhone ? (
               <p className={styles.phone}>
-                {t('The SMS goes to {phone}', { phone: formatPhone(accountPhone) })}
+                {t`The SMS goes to ${ph({ phone: formatPhone(accountPhone) })}`}
               </p>
             ) : (
               <Field
-                label='Phone'
+                label={t`Phone`}
                 error={fieldError?.field === 'phone' ? fieldError.message : undefined}
               >
                 <Input

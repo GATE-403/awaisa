@@ -1,4 +1,7 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
 import type { WorkingDay } from '@/shared/api/types'
+import type { Translate } from '@/shared/i18n'
 
 type OpeningStatus = {
   isOpen: boolean
@@ -9,11 +12,36 @@ const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const WEEKDAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const DAYS_IN_WEEK = 7
 
-/** `useT()`'s `t`, so the words stay marked for translation; plain English when left out. */
-type Say = (text: string, vars?: Record<string, string | number>) => string
+/** The same days as words people read: `t(WEEKDAY_SHORT_NAMES[0])`. */
+const WEEKDAY_SHORT_NAMES: MessageDescriptor[] = [
+  msg`Mon`,
+  msg`Tue`,
+  msg`Wed`,
+  msg`Thu`,
+  msg`Fri`,
+  msg`Sat`,
+  msg`Sun`,
+]
+const WEEKDAY_NAMES: MessageDescriptor[] = [
+  msg`Monday`,
+  msg`Tuesday`,
+  msg`Wednesday`,
+  msg`Thursday`,
+  msg`Friday`,
+  msg`Saturday`,
+  msg`Sunday`,
+]
 
-const plain: Say = (text, vars) =>
-  text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars?.[key] ?? match))
+/** `t(WEEKDAY_SHORT_NAMES[weekday])`, empty for a weekday out of range. */
+const weekdayShortName = (t: Translate, weekday: number) => {
+  const name = WEEKDAY_SHORT_NAMES[weekday]
+  return name ? t(name) : ''
+}
+
+const weekdayName = (t: Translate, weekday: number) => {
+  const name = WEEKDAY_NAMES[weekday]
+  return name ? t(name) : ''
+}
 
 const formatClock = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
@@ -36,20 +64,20 @@ const getOpeningStatus = (
   hours: WorkingDay[],
   dayKey: string,
   minutes: number,
-  t: Say = plain,
+  t: Translate,
 ): OpeningStatus => {
   const weekday = weekdayOf(dayKey)
   const today = findDay(hours, weekday)
   if (today && minutes >= today.opensMinutes && minutes < today.closesMinutes) {
     return {
       isOpen: true,
-      label: t('Open until {time}', { time: formatClock(today.closesMinutes) }),
+      label: t(msg`Open until ${ph({ time: formatClock(today.closesMinutes) })}`),
     }
   }
   if (today && minutes < today.opensMinutes) {
     return {
       isOpen: false,
-      label: t('Opens at {time}', { time: formatClock(today.opensMinutes) }),
+      label: t(msg`Opens at ${ph({ time: formatClock(today.opensMinutes) })}`),
     }
   }
 
@@ -57,18 +85,17 @@ const getOpeningStatus = (
     const next = findDay(hours, (weekday + offset) % DAYS_IN_WEEK)
     if (!next) continue
     const time = formatClock(next.opensMinutes)
-    if (offset === 1) return { isOpen: false, label: t('Opens tomorrow at {time}', { time }) }
-    const short = WEEKDAYS_SHORT[next.weekday] ?? ''
-    const day = t(short)
+    if (offset === 1) return { isOpen: false, label: t(msg`Opens tomorrow at ${time}`) }
+    const day = weekdayShortName(t, next.weekday)
 
-    return { isOpen: false, label: t('Opens {day} at {time}', { day, time }) }
+    return { isOpen: false, label: t(msg`Opens ${day} at ${time}`) }
   }
 
-  return { isOpen: false, label: t('Not taking bookings now') }
+  return { isOpen: false, label: t(msg`Not taking bookings now`) }
 }
 
 // "Daily 10:00-20:00" or "Mon-Fri 10:00-19:00, Sat 11:00-16:00".
-const formatWeekSchedule = (hours: WorkingDay[], t: Say = plain) => {
+const formatWeekSchedule = (hours: WorkingDay[], t: Translate) => {
   const groups: { from: number; to: number; range: string }[] = []
 
   for (let weekday = 0; weekday < DAYS_IN_WEEK; weekday += 1) {
@@ -80,16 +107,16 @@ const formatWeekSchedule = (hours: WorkingDay[], t: Say = plain) => {
     else groups.push({ from: weekday, to: weekday, range })
   }
 
-  if (groups.length === 0) return t('Booking is closed for now')
+  if (groups.length === 0) return t(msg`Booking is closed for now`)
   const [only] = groups
   if (groups.length === 1 && only && only.from === 0 && only.to === DAYS_IN_WEEK - 1) {
-    return t('Daily {range}', { range: only.range })
+    return t(msg`Daily ${ph({ range: only.range })}`)
   }
 
   return groups
     .map(({ from, to, range }) => {
-      const first = t(WEEKDAYS_SHORT[from] ?? '')
-      const days = from === to ? first : `${first}–${t(WEEKDAYS_SHORT[to] ?? '')}`
+      const first = weekdayShortName(t, from)
+      const days = from === to ? first : `${first}–${weekdayShortName(t, to)}`
       return `${days} ${range}`
     })
     .join(', ')
@@ -124,7 +151,11 @@ export {
   formatWeekSchedule,
   getOpeningStatus,
   parseClock,
+  WEEKDAY_NAMES,
+  WEEKDAY_SHORT_NAMES,
   WEEKDAYS_FULL,
   WEEKDAYS_SHORT,
+  weekdayName,
   weekdayOf,
+  weekdayShortName,
 }

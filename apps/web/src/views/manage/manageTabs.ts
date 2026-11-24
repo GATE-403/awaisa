@@ -1,3 +1,5 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { PlanFeature } from '@/shared/api/types'
 
 type ManageTab =
@@ -22,7 +24,7 @@ type ManageTab =
   /** The settings list itself: on phones the iOS Settings root, on wide screens the first section. */
   | 'settings'
 
-type TabItem = { value: ManageTab; label: string }
+type TabItem = { value: ManageTab; label: MessageDescriptor }
 
 type SettingsTone = 'blue' | 'green' | 'orange' | 'red' | 'gray'
 
@@ -31,23 +33,29 @@ type SettingsItem = TabItem & { tone: SettingsTone }
 // Setting the business up, grouped like macOS System Settings: the place and its people, the
 // sales. Services, masters and hours live on "Page", where clients see them (old links to
 // them land there, `toManageTab`); the settings search still finds them.
-const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
+const SETTINGS_GROUPS: {
+  key: 'business' | 'sales'
+  label: MessageDescriptor
+  items: SettingsItem[]
+}[] = [
   {
-    label: 'Business',
+    key: 'business',
+    label: msg`Business`,
     items: [
-      { value: 'branches', label: 'Branches', tone: 'green' },
-      { value: 'notifications', label: 'Notifications', tone: 'red' },
-      { value: 'team', label: 'Team', tone: 'gray' },
-      { value: 'billing', label: 'Plan', tone: 'blue' },
+      { value: 'branches', label: msg`Branches`, tone: 'green' },
+      { value: 'notifications', label: msg`Notifications`, tone: 'red' },
+      { value: 'team', label: msg`Team`, tone: 'gray' },
+      { value: 'billing', label: msg`Plan`, tone: 'blue' },
     ],
   },
   {
-    label: 'Sales',
+    key: 'sales',
+    label: msg`Sales`,
     items: [
-      { value: 'promotions', label: 'Promotions', tone: 'red' },
-      { value: 'loyalty', label: 'Loyalty', tone: 'green' },
-      { value: 'stock', label: 'Stock', tone: 'blue' },
-      { value: 'fiscal', label: 'Till', tone: 'gray' },
+      { value: 'promotions', label: msg`Promotions`, tone: 'red' },
+      { value: 'loyalty', label: msg`Loyalty`, tone: 'green' },
+      { value: 'stock', label: msg`Stock`, tone: 'blue' },
+      { value: 'fiscal', label: msg`Till`, tone: 'gray' },
     ],
   },
 ]
@@ -55,20 +63,20 @@ const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
 const SETTINGS_TABS: TabItem[] = SETTINGS_GROUPS.flatMap((group) => group.items)
 
 const MAIN_TABS: TabItem[] = [
-  { value: 'schedule', label: 'Schedule' },
-  { value: 'clients', label: 'Clients' },
-  { value: 'analytics', label: 'Analytics' },
+  { value: 'schedule', label: msg`Schedule` },
+  { value: 'clients', label: msg`Clients` },
+  { value: 'analytics', label: msg`Analytics` },
   // The counter is daily work (shifts, sales), so it sits beside the schedule, not in settings.
-  { value: 'cash', label: 'Till' },
-  { value: 'reviews', label: 'Reviews' },
+  { value: 'cash', label: msg`Till` },
+  { value: 'reviews', label: msg`Reviews` },
   // The public page itself, edited in place: the business's profile, not a settings row.
-  { value: 'page', label: 'Page' },
+  { value: 'page', label: msg`Page` },
 ]
 
 const ALL_TABS: TabItem[] = [
   ...MAIN_TABS,
   ...SETTINGS_TABS,
-  { value: 'settings', label: 'Settings' },
+  { value: 'settings', label: msg`Settings` },
 ]
 
 /** Sections that moved to "Page" (its tab of the same name opens): old links land there. */

@@ -2,6 +2,9 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Plus, Tag } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -13,7 +16,6 @@ import {
 } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, Promotion, PromotionInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { describePromotion } from '@/shared/lib/promotionText'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -25,15 +27,15 @@ interface PromotionsTabProps {
   catalog: Catalog
 }
 
-const KIND_LABEL: Record<Promotion['kind'], string> = {
-  happy_hours: 'Happy hours',
-  first_visit: 'First visit',
-  promo_code: 'Promo code',
+const KIND_LABEL: Record<Promotion['kind'], MessageDescriptor> = {
+  happy_hours: msg`Happy hours`,
+  first_visit: msg`First visit`,
+  promo_code: msg`Promo code`,
 }
 
 // "Promotions": discounts the business runs - by hours, for first visits, by promo code.
 export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const [promotions, setPromotions] = useState<Promotion[] | null>(null)
   const [editing, setEditing] = useState<Promotion | 'new' | null>(null)
@@ -52,12 +54,12 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
     try {
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
-      toast.show({ title: t('Promotion saved'), type: 'success' })
+      toast.show({ title: t`Promotion saved`, type: 'success' })
       await load()
       void refreshBusiness(slug)
       return true
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -65,12 +67,12 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   const remove = async (promotion: Promotion) => {
     try {
       await deletePromotion(slug, promotion.id)
-      toast.show({ title: t('Promotion deleted'), type: 'success' })
+      toast.show({ title: t`Promotion deleted`, type: 'success' })
       await load()
       void refreshBusiness(slug)
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -78,26 +80,24 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   }
 
   return (
-    <section className={styles.section} aria-label={t('Promotions')}>
+    <section className={styles.section} aria-label={t`Promotions`}>
       <SectionHeader
-        title={t('Promotions')}
-        description={t('Discounts don’t add up: the client gets the biggest one.')}
+        title={t`Promotions`}
+        description={t`Discounts don’t add up: the client gets the biggest one.`}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             <Plus aria-hidden />
-            {t('New promotion')}
+            {t`New promotion`}
           </Button>
         }
       />
 
       {promotions?.length === 0 && (
         <EmptyState
-          title={t('Launch your first promotion')}
-          text={t(
-            'Fill quiet hours with a discount, bring in new clients or hand out a promo code.',
-          )}
-          action={<Button onClick={() => setEditing('new')}>{t('New promotion')}</Button>}
+          title={t`Launch your first promotion`}
+          text={t`Fill quiet hours with a discount, bring in new clients or hand out a promo code.`}
+          action={<Button onClick={() => setEditing('new')}>{t`New promotion`}</Button>}
         />
       )}
 
@@ -118,15 +118,14 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
                   </span>
                   <span className={styles.rowMeta}>
                     {[
-                      !promotion.isActive && t('Off'),
+                      !promotion.isActive &&
+                        t({ message: 'Off', context: 'promotion is off, feminine' }),
                       t(KIND_LABEL[promotion.kind]),
                       promotion.kind === 'promo_code'
                         ? promotion.code
                         : describePromotion(promotion),
                       promotion.endsOn &&
-                        t('until {date}', {
-                          date: promotion.endsOn.split('-').reverse().join('.'),
-                        }),
+                        t`until ${ph({ date: promotion.endsOn.split('-').reverse().join('.') })}`,
                     ]
                       .filter(Boolean)
                       .join(' · ')}

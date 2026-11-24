@@ -1,10 +1,10 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { ListBullets, Trophy } from '@phosphor-icons/react/ssr'
 import { type ReactNode, useEffect, useState } from 'react'
 import { getOpeningStatus, WeekHours, weekdayOf } from '@/entities/business'
 import type { Business, Catalog } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 import { ProfileTabAction, ProfileTabs } from '@/shared/ui/ProfileTabs/ProfileTabs'
@@ -34,7 +34,7 @@ const sectionOfHash = (hash: string) =>
 // each and the open tab's one action at the row's end. People come to book a service, so the page
 // opens on «Services»; a tab with nothing in it is left out.
 export const PlaceTabs = ({ business, catalog, services, masters, works }: PlaceTabsProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const today = useToday()
   const [section, setSection] = useState<PlaceSection>('services')
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes, t) : null
@@ -62,28 +62,28 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
   const items = [
     business.photos.length > 0 && {
       value: 'works' as const,
-      label: t('Work'),
+      label: t`Work`,
       count: business.photos.length,
       panelId: PANELS.works,
       panel: works,
     },
     catalog.services.length > 0 && {
       value: 'services' as const,
-      label: t('Services'),
+      label: t`Services`,
       count: catalog.services.length,
       panelId: PANELS.services,
       panel: services,
     },
     catalog.specialists.length > 0 && {
       value: 'masters' as const,
-      label: t('Specialists'),
+      label: t`Specialists`,
       count: catalog.specialists.length,
       panelId: PANELS.masters,
       panel: masters,
     },
     {
       value: 'hours' as const,
-      label: t('Time'),
+      label: t`Time`,
       panelId: PANELS.hours,
       panel: (
         <WeekHours
@@ -100,7 +100,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     works: (
       <ProfileTabAction
         href={`/feed?business=${business.slug}`}
-        label={t('See with prices')}
+        label={t`See with prices`}
         icon={<FanCardsIcon aria-hidden />}
         isHiddenOnPhone
       />
@@ -108,7 +108,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     services: (
       <ProfileTabAction
         href={`/${business.slug}/services`}
-        label={t('Full menu')}
+        label={t`Full menu`}
         icon={<ListBullets aria-hidden />}
         isHiddenOnPhone
       />
@@ -116,7 +116,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     masters: (
       <ProfileTabAction
         href={ratingHref}
-        label={t('Rating')}
+        label={t`Rating`}
         icon={<Trophy aria-hidden />}
         isHiddenOnPhone
       />
@@ -126,7 +126,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
 
   return (
     <ProfileTabs
-      label={t('Place sections')}
+      label={t`Place sections`}
       items={items}
       value={shown}
       onChange={setSection}

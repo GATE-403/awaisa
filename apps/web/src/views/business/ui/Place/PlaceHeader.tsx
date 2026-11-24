@@ -1,3 +1,4 @@
+import { Plural, useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import { ViewTransition } from 'react'
 import {
@@ -10,10 +11,9 @@ import {
 } from '@/entities/business'
 import type { Business, Catalog, PublicPromotion, ReviewSummary } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
-import { T } from '@/shared/i18n'
+import { makeFormat } from '@/shared/i18n/format'
 import { fluidImage } from '@/shared/lib/imageSizes'
 import { AddressLine } from './AddressLine'
-import { Counted } from './Counted'
 import { OpenStatus } from './OpenStatus'
 import styles from './Place.module.css'
 import { PlaceActions } from './PlaceActions'
@@ -30,6 +30,8 @@ interface PlaceHeaderProps {
 // logo on its edge with «Book» and the thin glyphs across from it, then a bio set close
 // (name, kind · street, the rating, whether it is open, the description) and open promotions.
 export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHeaderProps) => {
+  const { t, i18n } = useLingui()
+  const format = makeFormat(i18n)
   const rated = catalog.specialists.filter((specialist) => specialist.rating !== null)
   // Real reviews once there are any; until then the masters' ratings.
   const rating =
@@ -63,9 +65,7 @@ export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHea
     >
       <PlaceName as='h1'>{business.name}</PlaceName>
       <p className={styles.handle}>
-        <span>
-          <T>{getKindLabel(business.kind)}</T>
-        </span>
+        <span>{t(getKindLabel(business.kind))}</span>
         {address && <AddressLine address={address} />}
       </p>
       {rating !== null && (
@@ -73,14 +73,14 @@ export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHea
           {reviews.count > 0 ? (
             <a href='#reviews' className={styles.stat}>
               <Star weight='fill' aria-hidden className={styles.factStar} />
-              <strong>{rating.toFixed(1)}</strong>
+              <strong>{format.rating(rating)}</strong>
               {' · '}
-              <Counted count={reviews.count} forms={['review', 'reviews']} />
+              <Plural value={reviews.count} one='# review' other='# reviews' />
             </a>
           ) : (
             <span className={styles.stat}>
               <Star weight='fill' aria-hidden className={styles.factStar} />
-              <strong>{rating.toFixed(1)}</strong>
+              <strong>{format.rating(rating)}</strong>
             </span>
           )}
         </PlaceLine>

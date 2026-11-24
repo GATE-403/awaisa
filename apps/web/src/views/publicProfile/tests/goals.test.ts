@@ -1,5 +1,11 @@
+import { setupI18n } from '@lingui/core'
 import { describe, expect, it } from 'vitest'
-import { describeGoal, pickNextGoal } from '../lib/goals'
+import { describeGoal as describeGoalIn, pickNextGoal } from '../lib/goals'
+
+const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+type GoalArgs = Parameters<typeof describeGoalIn>
+const describeGoal = (achievement: GoalArgs[0], places: GoalArgs[1]) =>
+  describeGoalIn(achievement, places, i18n._.bind(i18n))
 
 const medal = (id: string, current: number, target: number, earned = false) => ({
   id,

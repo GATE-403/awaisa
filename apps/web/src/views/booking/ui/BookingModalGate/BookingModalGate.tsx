@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { getBusinessSlug, isBookingPath } from '@/shared/config/navigation'
+import { usePathname } from '@/shared/i18n/navigation'
 
 interface BookingModalGateProps {
   slug: string

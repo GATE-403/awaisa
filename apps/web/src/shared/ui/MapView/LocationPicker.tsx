@@ -1,5 +1,6 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import 'leaflet/dist/leaflet.css'
 import { NavigationArrow } from '@phosphor-icons/react/ssr'
 import type { Map as LeafletMap } from 'leaflet'
@@ -21,6 +22,7 @@ const PICK_ZOOM = 16
 
 // Like dropping a pin in Maps: the map moves under a fixed pin, so no exact tap is needed.
 export const LocationPicker = ({ value, onChange, target = null }: LocationPickerProps) => {
+  const { t } = useLingui()
   const { theme } = useTheme()
   const containerRef = useRef<HTMLElement>(null)
   const mapRef = useRef<LeafletMap | null>(null)
@@ -87,11 +89,12 @@ export const LocationPicker = ({ value, onChange, target = null }: LocationPicke
       <section
         ref={containerRef}
         className={styles.map}
-        aria-label='Map: move it so the pin points at the entrance'
+        aria-label={t`Map: move it so the pin points at the entrance`}
       />
       <span className={styles.pin} aria-hidden='true' />
       <button type='button' className={styles.locate} onClick={locate}>
-        <NavigationArrow aria-hidden />I am here
+        <NavigationArrow aria-hidden />
+        {t`I am here`}
       </button>
     </div>
   )

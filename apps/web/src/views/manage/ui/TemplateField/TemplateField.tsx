@@ -1,12 +1,15 @@
 'use client'
 
+import type { MessageDescriptor } from '@lingui/core'
+import { useLingui } from '@lingui/react/macro'
 import { Plus } from '@phosphor-icons/react/ssr'
 import { type ClipboardEvent, type KeyboardEvent, useEffect, useRef } from 'react'
-import { useT } from '@/shared/i18n'
 import styles from './TemplateField.module.css'
 
 /** `aliases`: older keys of the same placeholder, read as its pill and saved back as `key`. */
-type TemplateToken = { key: string; aliases?: readonly string[]; label: string }
+type TemplateToken = { key: string; aliases?: readonly string[]; label: MessageDescriptor }
+/** A token with its label in the page's language, as the field shows it. */
+type ShownToken = { key: string; aliases?: readonly string[]; label: string }
 
 interface TemplateFieldProps {
   /** The template as stored: plain text with `{key}` placeholders (`{name}`, `{link}` …). */
@@ -24,13 +27,13 @@ const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 // Stored text → the field's HTML: placeholders become pills nobody has to decode ("what is {name}").
-const toHtml = (value: string, tokens: readonly TemplateToken[]) =>
+const toHtml = (value: string, tokens: readonly ShownToken[]) =>
   escapeHtml(value)
     .replace(/\{([^{}\s]+)\}/gu, (_, name: string) => {
       const key = name.toLowerCase()
       const token = tokens.find((item) => item.key === key || item.aliases?.includes(key))
       return token
-        ? `<span class="${styles.pill}" contenteditable="false" data-token="${token.key}">${token.label}</span>`
+        ? `<span class="${styles.pill}" contenteditable="false" data-token="${token.key}">${escapeHtml(token.label)}</span>`
         : `{${name}}`
     })
     .replace(/\n/g, '<br>')
@@ -61,7 +64,7 @@ export const TemplateField = ({
   placeholder,
   preview,
 }: TemplateFieldProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const fieldRef = useRef<HTMLDivElement>(null)
   // The last text this field reported, so a re-render from its own typing never resets the caret.
   const reported = useRef<string | null>(null)

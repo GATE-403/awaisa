@@ -2,6 +2,9 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   CaretRight,
   Check,
@@ -17,7 +20,7 @@ import {
 } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type ReactNode, useState } from 'react'
 import { CITY_AREAS } from '@/shared/config/areas'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { type MyPlace, saveMyPlace, useMyPlace } from '@/shared/lib/myPlace'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -40,37 +43,43 @@ type Gender = Preferences['gender']
 
 const STEPS: Step[] = ['gender', 'interests', 'budget', 'priority', 'place']
 
-const TITLES: Record<Step, { title: string; note: string }> = {
-  gender: { title: 'Who are we picking for?', note: 'We will show services that suit you.' },
-  interests: { title: 'What are you into?', note: 'Pick a few: the picks start with them.' },
-  budget: { title: 'How much per visit?', note: 'We will rarely show pricier ones.' },
-  priority: { title: 'What matters most?', note: 'We will put this first in your picks.' },
-  place: { title: 'Where suits you?', note: 'We will show places nearby first.' },
+const TITLES: Record<Step, { title: MessageDescriptor; note: MessageDescriptor }> = {
+  gender: { title: msg`Who are we picking for?`, note: msg`We will show services that suit you.` },
+  interests: { title: msg`What are you into?`, note: msg`Pick a few: the picks start with them.` },
+  budget: { title: msg`How much per visit?`, note: msg`We will rarely show pricier ones.` },
+  priority: { title: msg`What matters most?`, note: msg`We will put this first in your picks.` },
+  place: { title: msg`Where suits you?`, note: msg`We will show places nearby first.` },
 }
 
-const GENDERS: { value: Gender; label: string; glyph: ReactNode }[] = [
-  { value: 'female', label: 'Woman', glyph: <GenderFemale /> },
-  { value: 'male', label: 'Man', glyph: <GenderMale /> },
-  { value: null, label: 'Any', glyph: <Users /> },
+const GENDERS: { value: Gender; label: MessageDescriptor; glyph: ReactNode }[] = [
+  { value: 'female', label: msg`Woman`, glyph: <GenderFemale /> },
+  { value: 'male', label: msg`Man`, glyph: <GenderMale /> },
+  { value: null, label: msg`Any`, glyph: <Users /> },
 ]
 
-const BUDGETS: { value: number | null; label: string }[] = [
-  { value: 1000, label: 'Up to 1 000 som' },
-  { value: 2500, label: 'Up to 2 500 som' },
-  { value: 5000, label: 'Up to 5 000 som' },
-  { value: null, label: 'Any' },
-]
+// Budgets per visit; the last means any.
+const BUDGETS: (number | null)[] = [1000, 2500, 5000, null]
 
-const PRIORITIES: { value: Priority; label: string; note: string; glyph: ReactNode }[] = [
-  { value: 'near', label: 'Nearby', note: 'Nearest places first', glyph: <MapPin /> },
+const PRIORITIES: {
+  value: Priority
+  label: MessageDescriptor
+  note: MessageDescriptor
+  glyph: ReactNode
+}[] = [
+  { value: 'near', label: msg`Nearby`, note: msg`Nearest places first`, glyph: <MapPin /> },
   {
     value: 'soon',
-    label: 'Free today',
-    note: 'To book without waiting',
+    label: msg`Free today`,
+    note: msg`To book without waiting`,
     glyph: <Clock />,
   },
-  { value: 'rating', label: 'Top rated', note: 'Places with the best reviews', glyph: <Star /> },
-  { value: 'price', label: 'Cheaper', note: 'Affordable services first', glyph: <Coins /> },
+  {
+    value: 'rating',
+    label: msg`Top rated`,
+    note: msg`Places with the best reviews`,
+    glyph: <Star />,
+  },
+  { value: 'price', label: msg`Cheaper`, note: msg`Affordable services first`, glyph: <Coins /> },
 ]
 
 interface ChoiceProps {
@@ -116,7 +125,8 @@ const Choice = ({ label, note, glyph, isChosen, isBusy, isMulti, onPick }: Choic
 // ride above the question as capsules back to their step (the owner wanted to see what was chosen before). The answers
 // stay on the device and shape «For you»; the place is the device's own «Where are you?».
 export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const toast = useToast()
   const myPlace = useMyPlace()
   const [stepIndex, setStepIndex] = useState(0)
@@ -140,8 +150,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
       priorities,
     })
     toast.show({
-      title: t('Picks updated'),
-      description: t('See “For you” in your profile'),
+      title: t`Picks updated`,
+      description: t`See “For you” in your profile`,
       type: 'success',
     })
     onClose()
@@ -158,28 +168,29 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
     )
 
   // What was answered on the steps before this one, each a capsule back to its step.
+  const budgetText = (value: number | null) =>
+    value === null ? t`Any` : t`Up to ${ph({ amount: format.price(value) })}`
   const genderLabel = GENDERS.find((item) => item.value === gender)?.label
-  const budgetLabel = BUDGETS.find((item) => item.value === budget)?.label
   const interestLabels = interests
     .map((value) => INTERESTS.find((item) => item.value === value)?.label)
-    .filter((label): label is string => Boolean(label))
+    .filter((label) => label !== undefined)
     .map((label) => t(label))
   const answers: { step: Step; text: string }[] = [
-    { step: 'gender' as const, text: gender ? t(genderLabel ?? '') : t('For everyone') },
+    { step: 'gender' as const, text: gender && genderLabel ? t(genderLabel) : t`For everyone` },
     {
       step: 'interests' as const,
       text:
         interestLabels.length > 2
           ? `${interestLabels.slice(0, 2).join(', ')} +${interestLabels.length - 2}`
-          : interestLabels.join(', ') || t('Everything'),
+          : interestLabels.join(', ') || t`Everything`,
     },
-    { step: 'budget' as const, text: budget ? t(budgetLabel ?? '') : t('Any budget') },
+    { step: 'budget' as const, text: budget ? budgetText(budget) : t`Any budget` },
     {
       step: 'priority' as const,
       text:
         PRIORITIES.filter((item) => priorities.includes(item.value))
           .map((item) => t(item.label))
-          .join(', ') || t('A bit of everything'),
+          .join(', ') || t`A bit of everything`,
     },
   ].filter((answer) => STEPS.indexOf(answer.step) < stepIndex)
 
@@ -204,8 +215,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
   return (
     <Sheet
-      title={t('Picks for you')}
-      cancelLabel={stepIndex > 0 ? t('Back') : t('Cancel')}
+      title={t`Picks for you`}
+      cancelLabel={stepIndex > 0 ? t`Back` : t`Cancel`}
       onCancel={stepIndex > 0 ? () => setStepIndex((index) => index - 1) : undefined}
       onClose={onClose}
     >
@@ -213,10 +224,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         <div
           className={styles.stepBar}
           role='progressbar'
-          aria-label={t('Question {done} of {total}', {
-            done: stepIndex + 1,
-            total: STEPS.length,
-          })}
+          aria-label={t`Question ${ph({ done: stepIndex + 1 })} of ${ph({ total: STEPS.length })}`}
           aria-valuemin={1}
           aria-valuemax={STEPS.length}
           aria-valuenow={stepIndex + 1}
@@ -231,14 +239,14 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         </div>
 
         {answers.length > 0 && (
-          <ul className={styles.answers} aria-label={t('Your answers')}>
+          <ul className={styles.answers} aria-label={t`Your answers`}>
             {answers.map((answer) => (
               <li key={answer.step}>
                 <button
                   type='button'
                   className={styles.answer}
                   onClick={() => setStepIndex(STEPS.indexOf(answer.step))}
-                  aria-label={t('Change: {answer}', { answer: answer.text })}
+                  aria-label={t`Change: ${ph({ answer: answer.text })}`}
                 >
                   {answer.text}
                 </button>
@@ -254,10 +262,10 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           </div>
 
           {step === 'gender' && (
-            <ul className={styles.choices} aria-label={t('For whom')}>
+            <ul className={styles.choices} aria-label={t`For whom`}>
               {GENDERS.map((item) => (
                 <Choice
-                  key={item.label}
+                  key={String(item.value)}
                   label={t(item.label)}
                   glyph={item.glyph}
                   isChosen={initial !== null && gender === item.value}
@@ -272,7 +280,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
           {step === 'interests' && (
             <fieldset className={styles.interestGrid}>
-              <legend className={styles.srOnly}>{t('Interests')}</legend>
+              <legend className={styles.srOnly}>{t`Interests`}</legend>
               {shown.map((item) => (
                 <label key={item.value} className={styles.interestCell}>
                   {t(item.label)}
@@ -288,14 +296,14 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           )}
 
           {step === 'budget' && (
-            <ul className={styles.choices} aria-label={t('Budget per visit')}>
-              {BUDGETS.map((item) => (
+            <ul className={styles.choices} aria-label={t`Budget per visit`}>
+              {BUDGETS.map((value) => (
                 <Choice
-                  key={item.label}
-                  label={t(item.label)}
-                  isChosen={initial !== null && budget === item.value}
+                  key={String(value)}
+                  label={budgetText(value)}
+                  isChosen={initial !== null && budget === value}
                   onPick={() => {
-                    setBudget(item.value)
+                    setBudget(value)
                     next()
                   }}
                 />
@@ -304,7 +312,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           )}
 
           {step === 'priority' && (
-            <ul className={styles.choices} aria-label={t('What matters most?')}>
+            <ul className={styles.choices} aria-label={t`What matters most?`}>
               {PRIORITIES.map((item) => (
                 <Choice
                   key={item.value}
@@ -318,8 +326,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
               ))}
               {/* Nothing in particular: clears the ticks and moves on. */}
               <Choice
-                label={t('A bit of everything')}
-                note={t('Nothing in particular')}
+                label={t`A bit of everything`}
+                note={t`Nothing in particular`}
                 glyph={<Shuffle />}
                 isChosen={initial !== null && priorities.length === 0}
                 onPick={() => {
@@ -332,13 +340,13 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
           {step === 'place' && (
             <>
-              <ul className={styles.choices} aria-label={t('Where suits you?')}>
+              <ul className={styles.choices} aria-label={t`Where suits you?`}>
                 <Choice
-                  label={locating === 'busy' ? t('Locating…') : t('Detect automatically')}
+                  label={locating === 'busy' ? t`Locating…` : t`Detect automatically`}
                   note={
                     locating === 'denied'
-                      ? t('That did not work: pick a district below')
-                      : t('By your phone location')
+                      ? t`That did not work: pick a district below`
+                      : t`By your phone location`
                   }
                   glyph={<NavigationArrow />}
                   isChosen={myPlace?.source === 'gps'}
@@ -346,8 +354,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
                   onPick={locate}
                 />
               </ul>
-              <SectionCaption isInset={false}>{t('Or pick a district')}</SectionCaption>
-              <ul className={styles.choices} aria-label={t('District')}>
+              <SectionCaption isInset={false}>{t`Or pick a district`}</SectionCaption>
+              <ul className={styles.choices} aria-label={t`District`}>
                 {CITY_AREAS.map((area) => (
                   <Choice
                     key={area.label}
@@ -359,7 +367,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
                   />
                 ))}
                 <Choice
-                  label={t('Ignore my location')}
+                  label={t`Ignore my location`}
                   isChosen={initial !== null && !myPlace}
                   onPick={() => finish(null)}
                 />
@@ -369,9 +377,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         </div>
 
         <p className={styles.stepFooter}>
-          {t(
-            'Your answers stay on this phone and, with your visits, decide what goes into “For you”.',
-          )}
+          {t`Your answers stay on this phone and, with your visits, decide what goes into “For you”.`}
         </p>
 
         {/* Back is the bar's left button, as in every sheet with steps; the one-answer steps move
@@ -379,15 +385,13 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         {(step === 'interests' || step === 'priority') && (
           <div className={styles.stepActions}>
             <Button onClick={next}>
-              {(step === 'interests' ? interests : priorities).length > 0 ? t('Next') : t('Skip')}
+              {(step === 'interests' ? interests : priorities).length > 0 ? t`Next` : t`Skip`}
             </Button>
           </div>
         )}
         {step === 'place' && myPlace && (
           <div className={styles.stepActions}>
-            <Button onClick={() => finish()}>
-              {t('Keep “{place}”', { place: myPlace.label })}
-            </Button>
+            <Button onClick={() => finish()}>{t`Keep “${ph({ place: myPlace.label })}”`}</Button>
           </div>
         )}
       </div>

@@ -1,10 +1,10 @@
 'use client'
 
 import { Input } from '@awaisa/ui/Input'
+import { useLingui } from '@lingui/react/macro'
 import { CheckCircle } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import type { PriceQuote } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import styles from './PromoCodeField.module.css'
 
 interface PromoCodeFieldProps {
@@ -30,7 +30,7 @@ export const PromoCodeField = ({
   onApply,
   onClear,
 }: PromoCodeFieldProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [draft, setDraft] = useState(code ?? '')
   const isApplied = Boolean(code) && !error
   const percent = quote?.discount?.percent
@@ -38,16 +38,16 @@ export const PromoCodeField = ({
   if (isApplied && code) {
     return (
       <div className={className} data-action=''>
-        <span className={styles.label}>{t('Promo code')}</span>
+        <span className={styles.label}>{t`Promo code`}</span>
         <span className={styles.applied}>
           <CheckCircle weight='fill' aria-hidden />
           {code}
           <span className={styles.note}>
             {isWaitingForTime
-              ? t('checked with the time')
+              ? t`checked with the time`
               : percent
                 ? `−${percent}%`
-                : t('not for this time')}
+                : t`not for this time`}
           </span>
         </span>
         <button
@@ -58,7 +58,7 @@ export const PromoCodeField = ({
             onClear()
           }}
         >
-          {t('Remove')}
+          {t`Remove`}
         </button>
       </div>
     )
@@ -67,11 +67,11 @@ export const PromoCodeField = ({
   return (
     <>
       <div className={className} data-action=''>
-        <span className={styles.label}>{t('Promo code')}</span>
+        <span className={styles.label}>{t`Promo code`}</span>
         <Input
           variant='plain'
-          aria-label={t('Promo code')}
-          placeholder={t('Enter')}
+          aria-label={t`Promo code`}
+          placeholder={t`Enter`}
           autoCapitalize='characters'
           value={draft}
           onValueChange={(value) => setDraft(value.toUpperCase().replace(/\s/g, ''))}
@@ -81,7 +81,7 @@ export const PromoCodeField = ({
         />
         {draft ? (
           <button type='button' className={styles.action} onClick={() => onApply(draft)}>
-            {t('Apply')}
+            {t`Apply`}
           </button>
         ) : (
           <span />

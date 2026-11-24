@@ -1,12 +1,14 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Fire, Star } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
-import { addDayKey, formatPrice } from '@/entities/booking'
+import { addDayKey } from '@/entities/booking'
 import { BusinessTile, pickTint, useNextFree } from '@/entities/business'
 import type { Offer } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { gridImage } from '@/shared/lib/imageSizes'
 import { cheaperThan } from '../../lib/cheaperThan'
@@ -43,10 +45,11 @@ export const OfferCard = ({
   slotText,
   isPlaceHidden = false,
   isPriority = false,
-  actionLabel = 'Book',
+  actionLabel,
   onSelect,
 }: OfferCardProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const today = useToday()
   const nextFree = useNextFree()
   const slot = nextFree?.[offer.slug]
@@ -98,7 +101,7 @@ export const OfferCard = ({
           <span className={styles.discountBadge}>−{offer.discountPercent}%</span>
         ) : null}
         {isHit && (
-          <span className={styles.badge} role='img' aria-label={t('Hit')} title={t('Hit')}>
+          <span className={styles.badge} role='img' aria-label={t`Hit`} title={t`Hit`}>
             <Fire weight='fill' aria-hidden />
           </span>
         )}
@@ -129,23 +132,23 @@ export const OfferCard = ({
             {offer.rating !== null && (
               <span className={styles.rating}>
                 <Star weight='fill' aria-hidden />
-                {offer.rating.toFixed(1)}
+                {format.rating(offer.rating)}
               </span>
             )}
           </p>
         )}
         <div className={styles.footer}>
-          <p className={styles.price}>{formatPrice(offer.price)}</p>
+          <p className={styles.price}>{format.price(offer.price)}</p>
           {/* Less on the picture: the length is in the booking form, and only a time today is
               worth a line here («Tomorrow» and «No times soon» said little and crowded it). */}
           {(slotText || (slot && when === 'Today')) && (
             <span className={styles.slot} data-state={slotText ? 'soon' : 'today'}>
-              {slotText ?? t('Today from {time}', { time: slot?.time ?? '' })}
+              {slotText ?? t`Today from ${ph({ time: slot?.time ?? '' })}`}
             </span>
           )}
           {cheaperShare !== null && (
             <span className={styles.cheaper}>
-              {t('Cheaper than {percent}% of places', { percent: cheaperShare })}
+              {t`Cheaper than ${ph({ percent: cheaperShare })}% of places`}
             </span>
           )}
         </div>
@@ -153,7 +156,7 @@ export const OfferCard = ({
             One capsule of one look on every card: a time on it broke the row (the owner: the buttons
             did not fit the design), so the time keeps its own line above. */}
         <span className={styles.book} aria-hidden>
-          {t(actionLabel)}
+          {actionLabel ?? t`Book`}
         </span>
       </div>
     </article>

@@ -3,9 +3,10 @@
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
-import { formatAmount, formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   deleteSubscriptionPlan,
@@ -18,7 +19,7 @@ import {
 } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { Catalog, LoyaltyOverview, SubscriptionPlan } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -39,7 +40,8 @@ const PERCENTS = [3, 5, 7, 10, 15].map((value) => ({ value, label: `${value}%` }
 // "Loyalty": what keeps clients coming back - bonuses, subscriptions, gift certificates.
 // Everything is spent at the desk through the visit's outcome ("Visit outcome").
 export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const toast = useToast()
   const [data, setData] = useState<LoyaltyOverview | null>(null)
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | 'new' | null>(null)
@@ -71,11 +73,11 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       await action()
       // Plans sold online show on the public page: refresh it at once.
       void refreshBusiness(slug)
-      toast.show({ title: t(title), type: 'success' })
+      toast.show({ title, type: 'success' })
       await load()
       return true
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -97,43 +99,43 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
     }
     void run(
       () => saveSale({ isOnline, amounts: sale.amounts }),
-      isOnline ? 'Certificates are on sale online' : 'Online sales turned off',
+      isOnline ? t`Certificates are on sale online` : t`Online sales turned off`,
     )
   }
 
   return (
-    <section className={styles.section} aria-label={t('Loyalty')}>
+    <section className={styles.section} aria-label={t`Loyalty`}>
       <SectionHeader
-        title={t('Loyalty')}
-        description={t('Bonuses, passes and certificates are redeemed in “Visit outcome”.')}
+        title={t`Loyalty`}
+        description={t`Bonuses, passes and certificates are redeemed in “Visit outcome”.`}
       />
 
-      <section className={sheet.group} aria-label={t('Bonuses')}>
-        <SectionCaption>{t('Bonuses')}</SectionCaption>
+      <section className={sheet.group} aria-label={t`Bonuses`}>
+        <SectionCaption>{t`Bonuses`}</SectionCaption>
         <div className={styles.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Give bonuses')}</span>
+            <span className={sheet.rowLabel}>{t`Give bonuses`}</span>
             <Switch
               checked={data.bonusPercent !== null}
               onCheckedChange={(checked) =>
                 void run(
                   () => setBonusPercent(slug, checked ? 5 : null),
-                  checked ? 'Bonuses on' : 'Bonuses off',
+                  checked ? t`Bonuses on` : t`Bonuses off`,
                 )
               }
             />
           </label>
           {data.bonusPercent !== null && (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('From each payment')}</span>
+              <span className={sheet.rowLabel}>{t`From each payment`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Bonus percentage')}
+                  aria-label={t`Bonus percentage`}
                   items={PERCENTS}
                   value={data.bonusPercent}
                   onValueChange={(value) =>
-                    value && void run(() => setBonusPercent(slug, value), 'Saved')
+                    value && void run(() => setBonusPercent(slug, value), t`Saved`)
                   }
                 />
               </span>
@@ -142,28 +144,21 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         </div>
         <RowNote>
           {data.bonusPercent !== null
-            ? t(
-                'Clients get {percent}% of what they pay in money and spend it on later visits: 1 bonus = 1 som.',
-                { percent: data.bonusPercent },
-              )
-            : t(
-                'Give clients part of their payment back as bonuses: they’ll come back to spend them.',
-              )}
+            ? t`Clients get ${ph({ percent: data.bonusPercent })}% of what they pay in money and spend it on later visits: 1 bonus = 1 som.`
+            : t`Give clients part of their payment back as bonuses: they’ll come back to spend them.`}
         </RowNote>
       </section>
 
-      <section className={sheet.group} aria-label={t('Passes')}>
+      <section className={sheet.group} aria-label={t`Passes`}>
         <div className={sheet.groupHeader}>
-          <SectionCaption isInset={false}>{t('Passes')}</SectionCaption>
+          <SectionCaption isInset={false}>{t`Passes`}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setEditingPlan('new')}>
-            <Plus aria-hidden /> {t('New')}
+            <Plus aria-hidden /> {t({ message: 'New', context: 'add a new pass, masculine' })}
           </button>
         </div>
         {data.plans.length === 0 ? (
           <RowNote>
-            {t(
-              'For example, “5 haircuts for 4”: the client pays up front, visits are redeemed in “Visit outcome”.',
-            )}
+            {t`For example, “5 haircuts for 4”: the client pays up front, visits are redeemed in “Visit outcome”.`}
           </RowNote>
         ) : (
           <ul className={styles.list}>
@@ -179,17 +174,17 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                     <span className={styles.rowTitle}>{plan.title}</span>
                     <span className={styles.rowMeta}>
                       {[
-                        !plan.isActive && t('Not on sale'),
-                        plan.isActive && plan.isOnline && t('Online'),
-                        t.count(plan.visits, ['visit', 'visits']),
-                        plan.serviceName ?? t('any service'),
-                        t('{days} days', { days: plan.validDays }),
+                        !plan.isActive && t`Not on sale`,
+                        plan.isActive && plan.isOnline && t`Online`,
+                        t`${plural(plan.visits, { one: '# visit', other: '# visits' })}`,
+                        plan.serviceName ?? t`any service`,
+                        t`${ph({ days: plan.validDays })} days`,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
                     </span>
                   </span>
-                  <span className={styles.cellValue}>{formatPrice(plan.price)}</span>
+                  <span className={styles.cellValue}>{format.price(plan.price)}</span>
                   <CaretRight className={styles.chevron} aria-hidden />
                 </button>
               </li>
@@ -199,11 +194,11 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       </section>
 
       {(canSellOnline || sale.isOnline) && (
-        <section className={sheet.group} aria-label={t('Certificates online')}>
-          <SectionCaption>{t('Certificates online')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Certificates online`}>
+          <SectionCaption>{t`Certificates online`}</SectionCaption>
           <div className={styles.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Sell certificates online')}</span>
+              <span className={sheet.rowLabel}>{t`Sell certificates online`}</span>
               <Switch checked={sale.isOnline} onCheckedChange={handleOnlineChange} />
             </label>
             {sale.isOnline && (
@@ -212,36 +207,33 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                 className={`${sheet.row} ${own.amountsRow}`}
                 onClick={() => setIsEditingAmounts(true)}
               >
-                <span className={sheet.rowLabel}>{t('Amounts')}</span>
+                <span className={sheet.rowLabel}>{t`Amounts`}</span>
                 <span className={own.amounts}>
-                  {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} {t('som')}
+                  {sale.amounts.map((amount) => format.amount(amount)).join(' · ')}{' '}
+                  {format.currency}
                 </span>
                 <CaretRight className={styles.chevron} aria-hidden />
               </button>
             )}
           </div>
           <RowNote>
-            {t(
-              sale.isOnline
-                ? 'Clients buy on the place’s page and pay by card. The certificate appears below once paid; the code goes to the buyer and the recipient.'
-                : 'A gift certificate on the place’s page: the client picks an amount, pays by card and gets a code.',
-            )}
+            {sale.isOnline
+              ? t`Clients buy on the place’s page and pay by card. The certificate appears below once paid; the code goes to the buyer and the recipient.`
+              : t`A gift certificate on the place’s page: the client picks an amount, pays by card and gets a code.`}
           </RowNote>
         </section>
       )}
 
-      <section className={sheet.group} aria-label={t('Certificates')}>
+      <section className={sheet.group} aria-label={t`Certificates`}>
         <div className={sheet.groupHeader}>
-          <SectionCaption isInset={false}>{t('Certificates')}</SectionCaption>
+          <SectionCaption isInset={false}>{t`Certificates`}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setIsIssuing(true)}>
-            <Plus aria-hidden /> {t('Issue')}
+            <Plus aria-hidden /> {t`Issue`}
           </button>
         </div>
         {data.certificates.length === 0 ? (
           <RowNote>
-            {t(
-              'A gift certificate for an amount: the client spends it in parts, the balance shows by its code.',
-            )}
+            {t`A gift certificate for an amount: the client spends it in parts, the balance shows by its code.`}
           </RowNote>
         ) : (
           <ul className={styles.list}>
@@ -249,21 +241,19 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
               <li key={certificate.id} className={own.certificate}>
                 <span className={own.code}>{certificate.code}</span>
                 <span className={styles.rowBody}>
-                  <span className={styles.rowTitle}>{certificate.recipient || t('No name')}</span>
+                  <span className={styles.rowTitle}>{certificate.recipient || t`No name`}</span>
                   <span className={styles.rowMeta}>
                     {certificate.expiresOn
-                      ? t('until {date}', {
-                          date: certificate.expiresOn.split('-').reverse().join('.'),
-                        })
-                      : t('no expiry')}
+                      ? t`until ${ph({ date: certificate.expiresOn.split('-').reverse().join('.') })}`
+                      : t`no expiry`}
                   </span>
                 </span>
                 <span className={styles.cellValue}>
-                  {formatPrice(certificate.balance)}
+                  {format.price(certificate.balance)}
                   {certificate.balance !== certificate.amount && (
                     <span className={own.of}>
                       {' '}
-                      {t('of {amount}', { amount: formatPrice(certificate.amount) })}
+                      {t`of ${ph({ amount: format.price(certificate.amount) })}`}
                     </span>
                   )}
                 </span>
@@ -287,13 +277,13 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                   input,
                   editingPlan === 'new' ? undefined : editingPlan.id,
                 ),
-              'Pass saved',
+              t`Pass saved`,
             )
           }
           onDelete={
             editingPlan === 'new'
               ? undefined
-              : () => void run(() => deleteSubscriptionPlan(slug, editingPlan.id), 'Deleted')
+              : () => void run(() => deleteSubscriptionPlan(slug, editingPlan.id), t`Deleted`)
           }
         />
       )}
@@ -304,7 +294,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           onSave={(amounts) =>
             run(
               () => saveSale({ isOnline: true, amounts }),
-              sale.isOnline ? 'Amounts saved' : 'Certificates are on sale online',
+              sale.isOnline ? t`Amounts saved` : t`Certificates are on sale online`,
             )
           }
         />
@@ -316,17 +306,15 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
             try {
               const certificate = await issueCertificate(slug, input)
               toast.show({
-                title: t('Certificate {code}', { code: certificate.code }),
-                description: t('{amount}: tell the client the code', {
-                  amount: formatPrice(certificate.amount),
-                }),
+                title: t`Certificate ${ph({ code: certificate.code })}`,
+                description: t`${ph({ amount: format.price(certificate.amount) })}: tell the client the code`,
                 type: 'success',
               })
               await load()
               return true
             } catch (error) {
               toast.show({
-                title: t('Something went wrong'),
+                title: t`Something went wrong`,
                 description: getErrorMessage(error),
                 type: 'error',
               })

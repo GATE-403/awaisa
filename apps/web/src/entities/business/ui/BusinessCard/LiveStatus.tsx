@@ -1,8 +1,9 @@
 'use client'
 
-import NextLink from 'next/link'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { addDayKey } from '@/entities/booking'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import styles from './BusinessCard.module.css'
 import { useNextFree } from './NextFreeProvider'
@@ -14,7 +15,7 @@ interface LiveStatusProps {
 // What a client actually asks first («can I come today?»), answered with the times themselves:
 // each capsule opens the booking on that time, the service still to choose.
 export const LiveStatus = ({ slug }: LiveStatusProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const today = useToday()
   const nextFree = useNextFree()
   if (!today) return <span className={styles.live}>&nbsp;</span>
@@ -30,13 +31,13 @@ export const LiveStatus = ({ slug }: LiveStatusProps) => {
   if (!slot || !when) {
     return (
       <span className={styles.live}>
-        {nextFree !== undefined && <span className={styles.busy}>{t('Fully booked for now')}</span>}
+        {nextFree !== undefined && <span className={styles.busy}>{t`Fully booked for now`}</span>}
       </span>
     )
   }
 
   const times = slot.times?.length ? slot.times : [slot.time]
-  const dayWord = when === 'today' ? t('Today') : t('Tomorrow')
+  const dayWord = when === 'today' ? t`Today` : t`Tomorrow`
 
   return (
     <span className={styles.live}>
@@ -52,7 +53,7 @@ export const LiveStatus = ({ slug }: LiveStatusProps) => {
           {time}
           <span className={styles.srOnly}>
             {' '}
-            {t('book for {day}', { day: dayWord.toLowerCase() })}
+            {t`book for ${ph({ day: dayWord.toLowerCase() })}`}
           </span>
         </NextLink>
       ))}

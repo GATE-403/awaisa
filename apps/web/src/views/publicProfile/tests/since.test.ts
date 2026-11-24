@@ -1,9 +1,9 @@
+import { setupI18n } from '@lingui/core'
 import { describe, expect, it } from 'vitest'
-import type { Translate } from '@/shared/i18n'
 import { agoLabel } from '../lib/since'
 
-const t = ((text: string, vars?: Record<string, unknown>) =>
-  text.replace(/\{(\w+)\}/g, (_, key: string) => String(vars?.[key] ?? ''))) as Translate
+const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+const t = i18n._.bind(i18n)
 
 describe('agoLabel', () => {
   it('says how long ago in the shortest words that still read', () => {

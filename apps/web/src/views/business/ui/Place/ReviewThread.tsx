@@ -1,10 +1,11 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { ReportMenu } from '@/features/report'
 import type { Business, Review } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './Place.module.css'
 
@@ -17,7 +18,7 @@ const FIRST = 3
 
 // Three reviews to read, the rest a tap away: the score card above already says how it splits.
 export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [isAll, setIsAll] = useState(false)
   // A reported review leaves the thread at once for whoever reported it.
   const [reported, setReported] = useState<string[]>([])
@@ -32,7 +33,9 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
         hiddenCount={hidden}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={t.count(hidden, ['review', 'reviews']).slice(String(hidden).length + 1)}
+        label={t`${plural(hidden, { one: '# review', other: '# reviews' })}`.slice(
+          String(hidden).length + 1,
+        )}
       >
         <ul className={styles.reviews}>
           {visible.slice(0, shown).map((review) => (
@@ -45,7 +48,7 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
                 <ReportMenu
                   targetType='review'
                   targetId={review.id}
-                  label={t('Report review: {name}', { name: review.authorName })}
+                  label={t`Report review: ${ph({ name: review.authorName })}`}
                   onReported={() => setReported((ids) => [...ids, review.id])}
                 />
               }

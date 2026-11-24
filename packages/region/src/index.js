@@ -109,6 +109,19 @@ const parseRegion = (input) => {
   const currency = isRecord(root.currency) ? root.currency : {}
   const currencyCode = text(currency.code)?.toUpperCase() ?? ''
   if (!isCurrency(currencyCode)) problems.push('currency.code: an ISO 4217 code like «KGS»')
+  /** @type {Record<string, string>} */
+  const currencyLabels = {}
+  if (currency.labels !== undefined && currency.labels !== null) {
+    const labels = isRecord(currency.labels) ? currency.labels : null
+    const entries = labels ? Object.entries(labels) : []
+    for (const [language, value] of entries) {
+      const label = text(value)
+      if (label && /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(language)) currencyLabels[language] = label
+    }
+    if (!labels || Object.keys(currencyLabels).length !== entries.length) {
+      problems.push('currency.labels: { "en": "som", "ru": "сом" }, a label per language code')
+    }
+  }
 
   const city = isRecord(root.city) ? root.city : {}
   const cityName = text(city.name) ?? ''
@@ -134,6 +147,7 @@ const parseRegion = (input) => {
     currency: {
       code: currencyCode,
       label: text(currency.label) ?? currencyLabelOf(numbers, currencyCode),
+      labels: currencyLabels,
     },
     locale: { default: defaultLocale, available, numbers },
     city: {

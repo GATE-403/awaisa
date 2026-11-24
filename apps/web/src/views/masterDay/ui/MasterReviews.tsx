@@ -1,11 +1,13 @@
 'use client'
 
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { getMasterReviews } from '@/shared/api/clientApi'
 import type { MasterReviews as MasterReviewsData } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '../MasterDayPage.module.css'
@@ -16,13 +18,13 @@ interface MasterReviewsProps {
 }
 
 const SHOWN = 3
-const REVIEW_WORDS: [string, string] = ['review', 'reviews']
 
 // What clients said about this master, under the day: the average and the latest reviews as the
 // business page's thread, three and the rest behind "More". Only their own reviews; nothing when
 // there are none yet.
 export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [data, setData] = useState<MasterReviewsData | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -41,13 +43,14 @@ export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
   const hiddenCount = isOpen ? data.items.length - SHOWN : data.items.length - shown.length
 
   return (
-    <section className={styles.reviews} aria-label={t('Your reviews')}>
+    <section className={styles.reviews} aria-label={t`Your reviews`}>
       <SectionCaption isInset={false} className={styles.reviewsCaption}>
-        {t('Your reviews')}
+        {t`Your reviews`}
         {data.average !== null && (
           <span className={styles.reviewsScore}>
             <Star weight='fill' aria-hidden />
-            {data.average.toFixed(1).replace('.', ',')} · {t.count(data.count, REVIEW_WORDS)}
+            {format.rating(data.average)} ·{' '}
+            {t`${plural(data.count, { one: '# review', other: '# reviews' })}`}
           </span>
         )}
       </SectionCaption>
@@ -55,7 +58,7 @@ export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
         hiddenCount={Math.max(0, hiddenCount)}
         isOpen={isOpen}
         onToggle={() => setIsOpen((current) => !current)}
-        label={t.count(Math.max(0, hiddenCount), REVIEW_WORDS).replace(/^\d+\s/, '')}
+        label={t`${plural(Math.max(0, hiddenCount), { one: 'review', other: 'reviews' })}`}
       >
         <ul className={styles.reviewList}>
           {shown.map((review) => (

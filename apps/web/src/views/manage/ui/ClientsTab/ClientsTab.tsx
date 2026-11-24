@@ -2,6 +2,9 @@
 
 import { Select } from '@awaisa/ui/Select'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowUp,
   CaretRight,
@@ -10,9 +13,7 @@ import {
   PaperPlaneTilt,
   ShoppingBag,
 } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClients } from '@/shared/api/clientApi'
@@ -24,7 +25,8 @@ import type {
   MailingSegment,
   Specialist,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useIsScrolledPast } from '@/shared/lib/hooks/useIsScrolledPast'
 import { useIsStuck } from '@/shared/lib/hooks/useIsStuck'
@@ -56,27 +58,22 @@ const SEARCH_DELAY_MS = 250
 // The list shows this many, then "N more clients" adds as many again; rows are loaded in batches.
 const PAGE = 30
 const BATCH = 200
-const CLIENT_WORDS: [string, string] = ['client', 'clients']
-// Whom "Invite" calls: "1 client", "3 clients", "12 clients".
-const CALLED_WORDS: [string, string] = ['client', 'clients']
-const VISIT_WORDS: [string, string] = ['visit', 'visits']
-const NO_SHOW_WORDS: [string, string] = ['no-show', 'no-shows']
 
-const SEGMENTS: { value: ClientSegment; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'upcoming', label: 'Coming soon' },
-  { value: 'new', label: 'New' },
-  { value: 'regular', label: 'Regulars' },
-  { value: 'lapsed', label: 'Lapsed' },
-  { value: 'noShows', label: 'With no-shows' },
-  { value: 'birthday', label: 'Birthday' },
+const SEGMENTS: { value: ClientSegment; label: MessageDescriptor }[] = [
+  { value: 'all', label: msg`All` },
+  { value: 'upcoming', label: msg`Coming soon` },
+  { value: 'new', label: msg({ message: 'New', context: 'client segment, plural' }) },
+  { value: 'regular', label: msg`Regulars` },
+  { value: 'lapsed', label: msg`Lapsed` },
+  { value: 'noShows', label: msg`With no-shows` },
+  { value: 'birthday', label: msg`Birthday` },
 ]
 
-const SORTS: { value: ClientSort; label: string }[] = [
-  { value: 'recent', label: 'Most recent first' },
-  { value: 'spent', label: 'By spend' },
-  { value: 'visits', label: 'By visits' },
-  { value: 'name', label: 'By name' },
+const SORTS: { value: ClientSort; label: MessageDescriptor }[] = [
+  { value: 'recent', label: msg`Most recent first` },
+  { value: 'spent', label: msg`By spend` },
+  { value: 'visits', label: msg`By visits` },
+  { value: 'name', label: msg`By name` },
 ]
 
 // Segments a mailing reaches: "Invite" opens it on the same group.
@@ -90,7 +87,8 @@ const MAILING_SEGMENT: Partial<Record<ClientSegment, MailingSegment>> = {
 // it in one line ("Invite 12 clients ›" opens the mailing on that group). Rows lie on the page
 // with hairlines, each one tap target to the client's card; long groups come thirty at a time.
 export const ClientsTab = ({ slug, businessName, specialists, branches }: ClientsTabProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const shortDate = (iso: string) => formatMomentDay(iso, t)
   const canSeeMoney = useCanSeeMoney()
   const canImport = useHasFeature('import')
@@ -155,7 +153,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
 
   return (
     <section className={`${forms.section} ${styles.page}`}>
-      <h2 className={styles.title}>{t('Clients')}</h2>
+      <h2 className={styles.title}>{t`Clients`}</h2>
 
       <div ref={searchRef} className={styles.searchPin} data-stuck={isStuck || undefined}>
         <FloatingToolbar className={styles.searchBar}>
@@ -165,14 +163,14 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
               setQuery(value)
               setShown(PAGE)
             }}
-            placeholder={t('Name or number')}
-            label={t('Find a client')}
+            placeholder={t`Name or number`}
+            label={t`Find a client`}
           />
           {
-            <GlyphGroup label={t('Client base')}>
+            <GlyphGroup label={t`Client base`}>
               <GlyphButton
                 icon={<ArrowUp />}
-                label={t('Back to top')}
+                label={t`Back to top`}
                 isHidden={!isFar}
                 className={styles.toTop}
                 onClick={scrollToTop}
@@ -180,21 +178,21 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
               {canSeeMoney && canImport && (
                 <GlyphButton
                   icon={<DownloadSimple />}
-                  label={t('Import')}
+                  label={t`Import`}
                   onClick={() => setIsImporting(true)}
                 />
               )}
               {canSeeMoney && canMail && (
                 <GlyphButton
                   icon={<PaperPlaneTilt />}
-                  label={t('Mailing')}
+                  label={t`Mailing`}
                   onClick={() => setMailing(mailingSegment ?? 'lapsed')}
                 />
               )}
               {canSell && (
                 <GlyphButton
                   icon={<ShoppingBag />}
-                  label={t('Sell a product')}
+                  label={t`Sell a product`}
                   onClick={() => setIsSelling(true)}
                 />
               )}
@@ -204,7 +202,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
       </div>
       <div className={styles.controls}>
         <TextTabs
-          label={t('Client groups')}
+          label={t`Client groups`}
           items={tabs.map((item) => ({
             label: t(item.label),
             count: counts?.[item.value],
@@ -224,7 +222,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
           />
           <Select
             variant='plain'
-            aria-label={t('Sort')}
+            aria-label={t`Sort`}
             items={(canSeeMoney ? SORTS : SORTS.filter((item) => item.value !== 'spent')).map(
               (item) => ({ ...item, label: t(item.label) }),
             )}
@@ -239,15 +237,13 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
       {!list && !error && <Skeleton className={styles.skeleton} />}
       {list && items.length === 0 && (
         <EmptyState
-          title={
-            query ? t('Nobody found') : segment === 'all' ? t('No clients yet') : t('Nothing here')
-          }
+          title={query ? t`Nobody found` : segment === 'all' ? t`No clients yet` : t`Nothing here`}
           text={
             query
-              ? t('Check the name or number.')
+              ? t`Check the name or number.`
               : segment === 'all'
-                ? t('They appear with the first booking, or load your base through “Import”.')
-                : t('Nobody in this group yet.')
+                ? t`They appear with the first booking, or load your base through “Import”.`
+                : t`Nobody in this group yet.`
           }
         />
       )}
@@ -256,7 +252,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
           hiddenCount={hiddenCount}
           isOpen={false}
           onToggle={() => setShown((count) => count + PAGE)}
-          label={t.count(hiddenCount, CLIENT_WORDS).replace(/^\d+ /, '')}
+          label={t`${plural(hiddenCount, { one: 'client', other: 'clients' })}`}
         >
           <ul className={styles.rows}>
             {items.slice(0, shown).map((client) => (
@@ -273,26 +269,26 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
                         {client.name || formatPhone(client.phone)}
                       </span>
                       {client.hasNote && (
-                        <NotePencil aria-label={t('Has a note')} className={styles.noteIcon} />
+                        <NotePencil aria-label={t`Has a note`} className={styles.noteIcon} />
                       )}
                       {client.noShows > 0 && (
                         <span className={styles.noShow}>
-                          {t.count(client.noShows, NO_SHOW_WORDS)}
+                          {t`${plural(client.noShows, { one: '# no-show', other: '# no-shows' })}`}
                         </span>
                       )}
                     </span>
                     <span className={styles.meta}>
                       {client.visits === 0
-                        ? t('no visits yet')
-                        : t.count(client.visits, VISIT_WORDS)}
+                        ? t`no visits yet`
+                        : t`${plural(client.visits, { one: '# visit', other: '# visits' })}`}
                       {client.lastVisit &&
-                        ` · ${t('last {date}', { date: shortDate(client.lastVisit) })}`}
+                        ` · ${t`last ${ph({ date: shortDate(client.lastVisit) })}`}`}
                       {client.nextVisit &&
-                        ` · ${t('next {date}', { date: shortDate(client.nextVisit) })}`}
+                        ` · ${t`next ${ph({ date: shortDate(client.nextVisit) })}`}`}
                     </span>
                   </span>
                   <span className={styles.spent}>
-                    {client.spent ? formatPrice(client.spent) : ''}
+                    {client.spent ? format.price(client.spent) : ''}
                   </span>
                   <CaretRight aria-hidden className={styles.chevron} />
                 </button>
@@ -347,16 +343,15 @@ interface SegmentNoteProps {
 
 // One line under the tabs: what the open group is and what to do with it.
 const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) => {
-  const t = useT()
-  const clients = t.count(count, CLIENT_WORDS)
+  const { t } = useLingui()
   if (onCall) {
     return (
       <p className={styles.note}>
         {segment === 'lapsed'
-          ? t('Not seen for over {days} days.', { days: lapsedDays })
-          : t('Birthday within the coming week.')}{' '}
+          ? t`Not seen for over ${ph({ days: lapsedDays })} days.`
+          : t`Birthday within the coming week.`}{' '}
         <button type='button' className={styles.noteAction} onClick={onCall}>
-          {t('Invite {clients}', { clients: t.count(count, CALLED_WORDS) })}
+          {t`${plural(count, { one: 'Invite # client', other: 'Invite # clients' })}`}
           <CaretRight aria-hidden />
         </button>
       </p>
@@ -365,20 +360,23 @@ const SegmentNote = ({ segment, count, lapsedDays, onCall }: SegmentNoteProps) =
   if (segment === 'noShows') {
     return (
       <p className={styles.note}>
-        {t('A deposit on online bookings protects against no-shows.')}{' '}
+        {t`A deposit on online bookings protects against no-shows.`}{' '}
         <NextLink className={styles.noteAction} href='?tab=services'>
-          {t('Turn on in services')}
+          {t`Turn on in services`}
           <CaretRight aria-hidden />
         </NextLink>
       </p>
     )
   }
   const notes: Partial<Record<ClientSegment, string>> = {
-    all: clients,
-    upcoming: t('{clients} with a booking ahead', { clients }),
-    new: t('{clients} came once', { clients }),
-    regular: t('{clients} with three visits or more', { clients }),
+    upcoming: t`${plural(count, { one: '# client with a booking ahead', other: '# clients with a booking ahead' })}`,
+    new: t`${plural(count, { one: '# client came once', other: '# clients came once' })}`,
+    regular: t`${plural(count, { one: '# client with three visits or more', other: '# clients with three visits or more' })}`,
   }
 
-  return <p className={styles.note}>{notes[segment] ?? clients}</p>
+  return (
+    <p className={styles.note}>
+      {notes[segment] ?? t`${plural(count, { one: '# client', other: '# clients' })}`}
+    </p>
+  )
 }

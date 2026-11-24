@@ -1,11 +1,11 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Check, Fire } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { pickTint } from '@/entities/business'
 import type { Category, Service } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { gridImage } from '@/shared/lib/imageSizes'
 import chipStyles from '@/shared/ui/Chip/Chip.module.css'
 import styles from './ServicePicker.module.css'
@@ -44,7 +44,8 @@ export const ServicePicker = ({
   businessName,
   soonLabel,
 }: ServicePickerProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [categoryId, setCategoryId] = useState<string | null>(null)
   const shownCategories = categories.filter((category) =>
     services.some((service) => service.categoryId === category.id),
@@ -59,7 +60,7 @@ export const ServicePicker = ({
     <div className={styles.picker}>
       {shownCategories.length > 1 && (
         <div className={styles.chips} data-edge-fade=''>
-          {[{ id: null, name: t('All') }, ...shownCategories].map((category) => (
+          {[{ id: null, name: t`All` }, ...shownCategories].map((category) => (
             <button
               key={category.id ?? 'all'}
               type='button'
@@ -77,8 +78,8 @@ export const ServicePicker = ({
         // Checkboxes when the visit is changed from its ticket, radios when its first service is
         // picked (one tap, and the form moves on).
         {...(isMultiple
-          ? { role: 'group' as const, 'aria-label': t('Services of the visit') }
-          : { role: 'radiogroup' as const, 'aria-label': t('Service') })}
+          ? { role: 'group' as const, 'aria-label': t`Services of the visit` }
+          : { role: 'radiogroup' as const, 'aria-label': t`Service` })}
       >
         {shown.map((service) => {
           const picture = photos?.[service.id] ?? coverUrl ?? null
@@ -106,7 +107,7 @@ export const ServicePicker = ({
                 onClick={() => {
                   if (!isMultiple && isChosen) onReselect?.()
                 }}
-                aria-label={`${service.name}, ${formatPrice(service.price)}, ${t.duration(service.durationMinutes)}`}
+                aria-label={`${service.name}, ${format.price(service.price)}, ${format.duration(service.durationMinutes)}`}
               />
               {service.isPopular && (
                 <span className={styles.hit} aria-hidden>
@@ -117,7 +118,7 @@ export const ServicePicker = ({
               <span className={styles.caption}>
                 <span className={styles.name}>{service.name}</span>
                 <span className={styles.meta}>
-                  {formatPrice(service.price)} · {t.duration(service.durationMinutes)}
+                  {format.price(service.price)} · {format.duration(service.durationMinutes)}
                 </span>
                 {soon && <span className={styles.soon}>{soon}</span>}
               </span>

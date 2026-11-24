@@ -76,7 +76,7 @@ const scaledTextVars = (scale: number) => {
   return vars
 }
 
-const PERSONAL = /^(Имя|Телефон|Номер телефона|Ваше имя|Код подтверждения)/
+const PERSONAL = /^(Name|Phone|Phone number|Your name|Confirmation code)\b/
 
 class UxContext {
   readonly page: Page
@@ -491,10 +491,10 @@ class UxContext {
     await this.paused(async () => {
       const text = `${this.seenText} ${await visibleText(this.page)}`
       const facts: [string, RegExp][] = [
-        ['цена', /\d[\d\s  ]*\s?сом/],
-        ['длительность', /\d+\s?(мин|ч\b|час)/],
+        ['цена', /\d[\d,\s  ]*\s?som\b/],
+        ['длительность', /\d+\s?(min|h\b|hour)/],
         ['адрес', /(ул\.|улица|просп|пр\.|мкр|бульв|пер\.)/i],
-        ['условия оплаты и отмены', /(оплат|отмен|перенести|предоплат)/i],
+        ['условия оплаты и отмены', /(pay|cancel|reschedul|deposit)/i],
       ]
       const missing = facts.filter(([, regex]) => !regex.test(text)).map(([name]) => name)
       if (missing.length)

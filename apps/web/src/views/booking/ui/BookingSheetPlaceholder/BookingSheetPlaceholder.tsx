@@ -1,9 +1,10 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { X } from '@phosphor-icons/react/ssr'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import type { CSSProperties } from 'react'
-import { useT } from '@/shared/i18n'
+import { useRouter } from '@/shared/i18n/navigation'
 import { Container } from '@/shared/ui/Container/Container'
 import { Block, Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import pageStyles from '../../BookingPage.module.css'
@@ -33,7 +34,7 @@ const STEP_INDEX: Record<OpenStep, number> = { service: 0, specialist: 1, dateti
 // The open step follows the link: the service pictures swapped for the masters read as a flicker.
 export const BookingSheetPlaceholder = () => {
   const router = useRouter()
-  const t = useT()
+  const { t } = useLingui()
   const step = getOpenStep(useSearchParams())
   const doneCount = STEP_INDEX[step]
 
@@ -45,7 +46,7 @@ export const BookingSheetPlaceholder = () => {
           <button
             type='button'
             className={barStyles.close}
-            aria-label={t('Close booking')}
+            aria-label={t`Close booking`}
             onClick={() => router.back()}
           >
             <X aria-hidden />
@@ -53,7 +54,7 @@ export const BookingSheetPlaceholder = () => {
           <span className={barStyles.title}>
             <Block className={styles.tile} />
             <span className={barStyles.text}>
-              <span className={barStyles.heading}>{t('Booking')}</span>
+              <span className={barStyles.heading}>{t`Booking`}</span>
             </span>
           </span>
           <span className={barStyles.spacer} aria-hidden />

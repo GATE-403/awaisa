@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { loadRegionFile } from '@awaisa/region/node'
+import { linguiMacroSwcPlugin } from '@lingui/swc-plugin/options'
 import type { NextConfig } from 'next'
 import { API_URL, CLIENT_API_PREFIX } from './src/shared/config/api'
 import { EMOJI_DATA_URL, EMOJIBASE_VERSION } from './src/shared/ui/EmojiPicker/config'
@@ -58,6 +59,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@awaisa/ui', '@awaisa/tokens', '@awaisa/contracts', '@awaisa/region'],
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
   experimental: {
+    // Lingui's macros (`t`, `Trans`, `Plural`) are compiled to message ids at build time.
+    swcPlugins: [linguiMacroSwcPlugin()],
     agentFeedback: true,
     // Icons and the UI kit are imported per name: only those modules are compiled and shipped
     // (faster dev starts on a phone, smaller bundles).

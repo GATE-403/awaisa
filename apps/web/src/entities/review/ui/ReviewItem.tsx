@@ -1,11 +1,12 @@
 'use client'
 
-import NextLink from 'next/link'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { ReactNode } from 'react'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { Review } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import styles from './ReviewItem.module.css'
 import { ReviewPhotos } from './ReviewPhotos'
@@ -26,12 +27,7 @@ interface ReviewItemProps {
   headAction?: ReactNode
 }
 
-const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
-  day: 'numeric',
-  month: 'long',
-  timeZone: BUSINESS_TIME_ZONE,
-}
-const dateFormatter = new Intl.DateTimeFormat('en-GB', DATE_OPTIONS)
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
 // One review as a thread, the same on the business page and in the cabinet: the person's face,
 // name and date on one line, stars, the words; the owner's reply hangs under it on a line from
@@ -45,7 +41,8 @@ export const ReviewItem = ({
   authorHref,
   headAction,
 }: ReviewItemProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
 
   return (
     <li className={styles.review}>
@@ -74,14 +71,14 @@ export const ReviewItem = ({
               <NextLink
                 href={authorHref}
                 className={styles.authorButton}
-                aria-label={t('{name}: profile', { name: review.authorName })}
+                aria-label={t`${ph({ name: review.authorName })}: profile`}
               >
                 {review.authorName}
               </NextLink>
             ) : (
               <p className={styles.author}>{review.authorName}</p>
             )}
-            <span className={styles.date}>{dateFormatter.format(new Date(review.createdAt))}</span>
+            <span className={styles.date}>{format.date(review.createdAt, DATE_OPTIONS)}</span>
             {headAction && <span className={styles.headAction}>{headAction}</span>}
           </div>
           <Stars rating={review.rating} />
@@ -100,7 +97,7 @@ export const ReviewItem = ({
             <div className={styles.head}>
               <p className={styles.author}>
                 {businessName}
-                <span className={styles.badge}>{t('Reply')}</span>
+                <span className={styles.badge}>{t`Reply`}</span>
               </p>
               {replyAction}
             </div>

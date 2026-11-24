@@ -1,9 +1,10 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
-import { formatPrice } from '@/entities/booking'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { ClientSubscription, OnlineSubscriptionPlan } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import type { PaymentChoice } from '../../model/useSubscriptionPayment'
 
@@ -32,25 +33,26 @@ export const SubscriptionPaymentRow = ({
   plans,
   onChange,
 }: SubscriptionPaymentRowProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const items: { value: PaymentChoice; label: string }[] = [
-    { value: 'salon', label: t('At the salon') },
+    { value: 'salon', label: t`At the salon` },
     ...subscriptions.map((item) => ({
       value: `subscription:${item.id}` as const,
-      label: t('By subscription · {count} left', { count: item.visitsLeft }),
+      label: t`By subscription · ${ph({ count: item.visitsLeft })} left`,
     })),
     ...plans.map((plan) => ({
       value: `plan:${plan.id}` as const,
-      label: t('New subscription · {price}', { price: formatPrice(plan.price) }),
+      label: t`New subscription · ${ph({ price: format.price(plan.price) })}`,
     })),
   ]
 
   return (
     <div className={className}>
-      <span className={labelClassName}>{t('Payment')}</span>
+      <span className={labelClassName}>{t`Payment`}</span>
       <Select
         variant='plain'
-        aria-label={t('Payment')}
+        aria-label={t`Payment`}
         items={items}
         value={choice}
         onValueChange={(value) => value && onChange(value)}
@@ -61,13 +63,12 @@ export const SubscriptionPaymentRow = ({
 
 // What the choice means, said under the group: when the visit is drawn, or what is bought.
 export const SubscriptionPaymentNote = ({ subscription, plan }: SubscriptionPaymentNoteProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   if (subscription) {
     return (
       <RowNote>
-        {t('“{title}”: the visit is deducted once the specialist marks it', {
-          title: subscription.title,
-        })}
+        {t`“${ph({ title: subscription.title })}”: the visit is deducted once the specialist marks it`}
       </RowNote>
     )
   }
@@ -77,10 +78,10 @@ export const SubscriptionPaymentNote = ({ subscription, plan }: SubscriptionPaym
   return (
     <RowNote>
       {[
-        `“${plan.title}”: ${t.count(plan.visits, ['visit', 'visits'])}`,
-        t.count(plan.validDays, ['day', 'days']),
-        saving > 0 ? t('save {amount}', { amount: formatPrice(saving) }) : null,
-        t('paid by card now, this visit is the first'),
+        `“${plan.title}”: ${t`${plural(plan.visits, { one: '# visit', other: '# visits' })}`}`,
+        t`${plural(plan.validDays, { one: '# day', other: '# days' })}`,
+        saving > 0 ? t`save ${ph({ amount: format.price(saving) })}` : null,
+        t`paid by card now, this visit is the first`,
       ]
         .filter(Boolean)
         .join(' · ')}

@@ -1,8 +1,13 @@
+import type { I18n } from '@lingui/core'
 import { PLATFORM } from '@/shared/config/platform'
+import { localeOf, SITE_TAGLINE } from './seoText'
 import { absoluteUrl, SITE_URL } from './siteUrl'
 
-/** schema.org `WebSite` + `Organization`: the site's name and logo in search results. */
-const siteJsonLd = () => ({
+/**
+ * schema.org `WebSite` + `Organization`: the site's name and logo in search results, described in
+ * the page's language when `i18n` is given (English without it).
+ */
+const siteJsonLd = (i18n?: I18n) => ({
   '@context': 'https://schema.org',
   '@graph': [
     {
@@ -10,8 +15,8 @@ const siteJsonLd = () => ({
       '@id': `${SITE_URL}/#website`,
       url: absoluteUrl('/'),
       name: PLATFORM.name,
-      description: PLATFORM.tagline,
-      inLanguage: 'en',
+      description: i18n ? i18n._(SITE_TAGLINE) : PLATFORM.tagline,
+      inLanguage: i18n ? localeOf(i18n) : 'en',
       publisher: { '@id': `${SITE_URL}/#organization` },
     },
     {

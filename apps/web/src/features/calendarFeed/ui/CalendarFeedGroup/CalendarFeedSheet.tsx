@@ -4,11 +4,12 @@ import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ArrowsClockwise, Copy, GoogleLogo } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { formatDate, type Locale, useLocale } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { copyText } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -35,13 +36,8 @@ interface CalendarFeedSheetProps {
 
 const ALL = 'all'
 
-const readTime = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: BUSINESS_TIME_ZONE,
-})
+const formatReadTime = (date: Date, locale: Locale) =>
+  formatDate(locale, date, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
 
 // «Calendar on your phone»: subscribe once and the visits stay in the phone's own calendar. The
 // address is secret and shown only when made, so a device without it asks for a new one.
@@ -53,7 +49,8 @@ export const CalendarFeedSheet = ({
   onClose,
 }: CalendarFeedSheetProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
+  const locale = useLocale()
   const { feed, url, issue, setMaster, setPhones } = state
   const [isBusy, setIsBusy] = useState(false)
   const [specialistId, setSpecialistId] = useState<string | null>(feed?.specialistId ?? null)
@@ -65,7 +62,7 @@ export const CalendarFeedSheet = ({
       await action()
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -81,7 +78,7 @@ export const CalendarFeedSheet = ({
       haptic('success')
       if (wasActive)
         toast.show({
-          title: t('The link has changed, the old one no longer works'),
+          title: t`The link has changed, the old one no longer works`,
           type: 'success',
         })
     })
@@ -95,46 +92,40 @@ export const CalendarFeedSheet = ({
   const handleCopy = async () => {
     if (!url) return
     const isCopied = await copyText(url)
-    if (isCopied) toast.show({ title: t('Link copied'), type: 'success' })
-    else toast.show({ title: t('Could not copy'), type: 'error' })
+    if (isCopied) toast.show({ title: t`Link copied`, type: 'success' })
+    else toast.show({ title: t`Could not copy`, type: 'error' })
   }
 
   const status = (() => {
     if (!feed?.isActive) return null
     if (feed.lastReadAt)
-      return t('Calendar last updated {date}.', {
-        date: readTime.format(new Date(feed.lastReadAt)),
-      })
-    if (!url) return t('The link was issued on another device. A new one turns the old one off.')
+      return t`Calendar last updated ${ph({ date: formatReadTime(new Date(feed.lastReadAt), locale) })}.`
+    if (!url) return t`The link was issued on another device. A new one turns the old one off.`
     return null
   })()
 
   return (
-    <Sheet title={t('Calendar on your phone')} onClose={onClose} cancelLabel={t('Close')}>
+    <Sheet title={t`Calendar on your phone`} onClose={onClose} cancelLabel={t`Close`}>
       <div className={sheet.form}>
         <p className={styles.intro}>
           {isBusiness
-            ? t(
-                'Bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.',
-              )
-            : t(
-                'Your bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.',
-              )}
+            ? t`Bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.`
+            : t`Your bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.`}
         </p>
 
         {isBusiness && (
-          <section className={sheet.group} aria-label={t('What to show')}>
-            <SectionCaption>{t('What to show')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`What to show`}>
+            <SectionCaption>{t`What to show`}</SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Specialist')}</span>
+                <span className={sheet.rowLabel}>{t`Specialist`}</span>
                 <Select
                   variant='plain'
-                  aria-label={t('Specialist')}
+                  aria-label={t`Specialist`}
                   value={specialistId ?? ALL}
                   disabled={isBusy}
                   items={[
-                    { value: ALL, label: t('All specialists') },
+                    { value: ALL, label: t`All specialists` },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   onValueChange={(value) => handleMaster(String(value))}
@@ -142,7 +133,7 @@ export const CalendarFeedSheet = ({
               </div>
               {canSetPhones && (
                 <label className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Full client numbers')}</span>
+                  <span className={sheet.rowLabel}>{t`Full client numbers`}</span>
                   <Switch
                     checked={feed?.isPhoneShown ?? false}
                     disabled={isBusy || !feed}
@@ -153,7 +144,7 @@ export const CalendarFeedSheet = ({
             </div>
             {canSetPhones && (
               <RowNote>
-                {t(HIDDEN_PHONE_NOTE)} {t("Applies to all of the business's calendars.")}
+                {t(HIDDEN_PHONE_NOTE)} {t`Applies to all of the business's calendars.`}
               </RowNote>
             )}
           </section>
@@ -164,27 +155,27 @@ export const CalendarFeedSheet = ({
         <div className={styles.actions}>
           {url ? (
             <>
-              <GlyphGroup label={t('More')}>
+              <GlyphGroup label={t`More`}>
                 <GlyphButton
                   icon={<GoogleLogo />}
-                  label={t('Add to Google Calendar')}
+                  label={t`Add to Google Calendar`}
                   onClick={() => window.open(toGoogleCalendar(url), '_blank', 'noopener')}
                 />
                 <GlyphButton
                   icon={<Copy />}
-                  label={t('Copy link')}
+                  label={t`Copy link`}
                   onClick={() => void handleCopy()}
                 />
                 <GlyphButton
                   icon={<ArrowsClockwise />}
-                  label={t('Change the link')}
+                  label={t`Change the link`}
                   disabled={isBusy}
                   onClick={() => void handleIssue()}
                 />
               </GlyphGroup>
               {/* The sheet's main action comes last: nothing follows it. */}
               <ButtonLink href={toWebcal(url)} size='sm' className={styles.primary}>
-                {t('Subscribe')}
+                {t`Subscribe`}
               </ButtonLink>
             </>
           ) : (
@@ -195,7 +186,7 @@ export const CalendarFeedSheet = ({
               disabled={isBusy || !feed}
               onClick={() => void handleIssue()}
             >
-              {feed?.isActive ? t('Get a new link') : t('Get the link')}
+              {feed?.isActive ? t`Get a new link` : t`Get the link`}
             </Button>
           )}
         </div>

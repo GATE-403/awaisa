@@ -1,12 +1,14 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { addDayKey, formatPrice } from '@/entities/booking'
+import { addDayKey } from '@/entities/booking'
 import { BusinessTile, useNextFree } from '@/entities/business'
 import type { MapPlace } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from '@/views/map/MapPage.module.css'
@@ -19,7 +21,8 @@ interface PlaceRowProps {
 }
 
 export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const today = useToday()
   const nextFree = useNextFree()
   const slot = nextFree?.[place.slug]
@@ -63,11 +66,11 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
             {slot && when ? (
               <span className={styles.free} data-today={when === 'today' || undefined}>
                 {when === 'today'
-                  ? t('Today from {time}', { time: slot.time })
-                  : t('Tomorrow from {time}', { time: slot.time })}
+                  ? t`Today from ${ph({ time: slot.time })}`
+                  : t`Tomorrow from ${ph({ time: slot.time })}`}
               </span>
             ) : (
-              <span>{t('from {price}', { price: formatPrice(place.minPrice) })}</span>
+              <span>{t`from ${ph({ price: format.price(place.minPrice) })}`}</span>
             )}
             {' · '}
             {place.address || place.branchName || t(getKindLabel(place.kind))}

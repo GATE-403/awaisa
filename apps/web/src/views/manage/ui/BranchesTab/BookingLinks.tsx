@@ -1,10 +1,11 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Copy } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { copyText } from '@/shared/lib/share'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -20,7 +21,7 @@ interface BookingLinksProps {
 // their branch already chosen.
 export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   // The page's own origin, read after hydration so server and client render the same.
   const [origin, setOrigin] = useState('')
 
@@ -29,8 +30,8 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   }, [])
   const items = [
     ...(branches.length > 1
-      ? [{ id: 'all', title: t('All branches'), path: `/${slug}/book` }]
-      : [{ id: 'one', title: branches[0]?.name ?? t('Booking'), path: `/${slug}/book` }]),
+      ? [{ id: 'all', title: t`All branches`, path: `/${slug}/book` }]
+      : [{ id: 'one', title: branches[0]?.name ?? t`Booking`, path: `/${slug}/book` }]),
     ...(branches.length > 1
       ? branches
           .filter((branch) => branch.isActive !== false)
@@ -44,13 +45,13 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
 
   const handleCopy = async (url: string) => {
     const isCopied = await copyText(url)
-    if (isCopied) toast.show({ title: t('Link copied'), description: url, type: 'success' })
-    else toast.show({ title: t('Could not copy'), description: url, type: 'error' })
+    if (isCopied) toast.show({ title: t`Link copied`, description: url, type: 'success' })
+    else toast.show({ title: t`Could not copy`, description: url, type: 'error' })
   }
 
   return (
     <div className={styles.group}>
-      <SectionCaption>{t('Booking links')}</SectionCaption>
+      <SectionCaption>{t`Booking links`}</SectionCaption>
       <ul className={styles.list}>
         {items.map((item) => {
           const url = `${origin}${item.path}`
@@ -64,19 +65,17 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
                 type='button'
                 className={links.copy}
                 onClick={() => handleCopy(url)}
-                aria-label={t('Copy link: {name}', { name: item.title })}
+                aria-label={t`Copy link: ${ph({ name: item.title })}`}
               >
                 <Copy aria-hidden />
-                {t('Copy')}
+                {t`Copy`}
               </button>
             </li>
           )
         })}
       </ul>
       <RowNote>
-        {t(
-          'Put the branch link on its 2GIS card, on Instagram or on a QR code by the door: clients land straight on booking at that branch.',
-        )}
+        {t`Put the branch link on its 2GIS card, on Instagram or on a QR code by the door: clients land straight on booking at that branch.`}
       </RowNote>
     </div>
   )

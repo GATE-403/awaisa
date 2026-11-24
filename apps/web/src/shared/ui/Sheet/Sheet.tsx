@@ -1,8 +1,8 @@
 'use client'
 
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@awaisa/ui/Dialog'
+import { useLingui } from '@lingui/react/macro'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { useFocusedFieldInView } from '@/shared/lib/hooks/useFocusedFieldInView'
 import styles from './Sheet.module.css'
 import { useSheetDrag } from './useSheetDrag'
@@ -36,12 +36,14 @@ export const Sheet = ({
   title,
   onClose,
   action,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   onCancel,
   barEnd,
   children,
 }: SheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  // Left out: «Cancel»; `null`: no button.
+  const cancelText = cancelLabel === undefined ? t`Cancel` : cancelLabel
   const dragHandlers = useSheetDrag(onClose)
   const [isOpen, setIsOpen] = useState(false)
   // The body is portalled in only once the dialog opens, so the hook follows the element itself.
@@ -64,12 +66,12 @@ export const Sheet = ({
       <DialogContent variant='sheet'>
         <header className={styles.bar} {...dragHandlers}>
           <span className={styles.grabber} aria-hidden='true' />
-          {cancelLabel && onCancel ? (
+          {cancelText && onCancel ? (
             <button type='button' className={styles.barButton} onClick={onCancel}>
-              {t(cancelLabel)}
+              {cancelText}
             </button>
-          ) : cancelLabel ? (
-            <DialogClose className={styles.barButton}>{t(cancelLabel)}</DialogClose>
+          ) : cancelText ? (
+            <DialogClose className={styles.barButton}>{cancelText}</DialogClose>
           ) : (
             <span />
           )}

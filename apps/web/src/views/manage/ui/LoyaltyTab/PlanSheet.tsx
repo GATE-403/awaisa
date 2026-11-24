@@ -3,10 +3,12 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useEffect, useState } from 'react'
 import { getPaymentConfig } from '@/shared/api/clientApi'
 import type { Service, SubscriptionPlan, SubscriptionPlanInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -26,7 +28,8 @@ const VALIDITY_DAYS = [30, 60, 90, 180, 365]
 const YEAR_DAYS = 365
 
 export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanSheetProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const [title, setTitle] = useState(plan?.title ?? '')
   const [serviceId, setServiceId] = useState<string>(plan?.serviceId ?? 'any')
   const [visits, setVisits] = useState(String(plan?.visits ?? 5))
@@ -42,7 +45,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
   const fullPrice = service ? service.price * Number(visits || 0) : null
   const validity = VALIDITY_DAYS.map((days) => ({
     value: days,
-    label: days === YEAR_DAYS ? t('Year') : t('{days} days', { days }),
+    label: days === YEAR_DAYS ? t`Year` : t`${days} days`,
   }))
 
   useEffect(() => {
@@ -72,33 +75,38 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
 
   return (
     <Sheet
-      title={t(plan ? 'Pass' : 'New pass')}
+      title={plan ? t`Pass` : t`New pass`}
       onClose={onClose}
-      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t`Save`, form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Pass')}>
+        <section className={sheet.group} aria-label={t`Pass`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Name')}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Name', context: 'name of a thing, not a person' })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Pass name')}
-                  placeholder={t('5 haircuts for 4')}
+                  aria-label={t`Pass name`}
+                  placeholder={t`5 haircuts for 4`}
                   value={title}
                   onValueChange={setTitle}
                 />
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Service')}</span>
+              <span className={sheet.rowLabel}>{t`Service`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Pass service')}
+                  aria-label={t`Pass service`}
                   items={[
-                    { value: 'any', label: t('Any') },
+                    {
+                      value: 'any',
+                      label: t({ message: 'Any', context: 'any service, feminine' }),
+                    },
                     ...services.map((item) => ({ value: item.id, label: item.name })),
                   ]}
                   value={serviceId}
@@ -107,11 +115,13 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Visits')}</span>
+              <span className={sheet.rowLabel}>
+                {t({ message: 'Visits', context: 'number of visits in a pass' })}
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Visits')}
+                  aria-label={t({ message: 'Visits', context: 'number of visits in a pass' })}
                   inputMode='numeric'
                   value={visits}
                   onValueChange={(value) => setVisits(value.replace(/\D/g, '').slice(0, 3))}
@@ -119,25 +129,25 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Price')}</span>
+              <span className={sheet.rowLabel}>{t`Price`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Pass price, som')}
+                  aria-label={t`Pass price, som`}
                   inputMode='numeric'
                   placeholder='0'
-                  value={maskAmountInput(price)}
+                  value={maskAmountInput(price, format.locale)}
                   onValueChange={(value) => setPrice(value.replace(/\D/g, ''))}
                 />
-                <span className={sheet.suffix}>{t('som')}</span>
+                <span className={sheet.suffix}>{format.currency}</span>
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Valid for')}</span>
+              <span className={sheet.rowLabel}>{t`Valid for`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Validity')}
+                  aria-label={t`Validity`}
                   items={validity}
                   value={validDays}
                   onValueChange={(value) => value && setValidDays(value)}
@@ -145,30 +155,24 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('On sale')}</span>
+              <span className={sheet.rowLabel}>{t`On sale`}</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
             {canPayOnline && isActive && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Sell online')}</span>
+                <span className={sheet.rowLabel}>{t`Sell online`}</span>
                 <Switch checked={isOnline} onCheckedChange={setIsOnline} />
               </label>
             )}
           </div>
           {fullPrice !== null && price !== '' && Number(price) < fullPrice && (
             <p className={sheet.groupFooter}>
-              {t('Separately, {visits} visits cost {full} som: the client saves {saving} som.', {
-                visits: Number(visits),
-                full: fullPrice.toLocaleString('en-GB'),
-                saving: (fullPrice - Number(price)).toLocaleString('en-GB'),
-              })}
+              {t`Separately, ${ph({ visits: Number(visits) })} visits cost ${ph({ full: format.price(fullPrice) })}: the client saves ${ph({ saving: format.price(fullPrice - Number(price)) })}.`}
             </p>
           )}
           {canPayOnline && isActive && isOnline && (
             <p className={sheet.groupFooter}>
-              {t(
-                'Clients buy it on the place’s page and when booking, paying by card. The pass is theirs once paid.',
-              )}
+              {t`Clients buy it on the place’s page and when booking, paying by card. The pass is theirs once paid.`}
             </p>
           )}
         </section>
@@ -179,7 +183,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               onClose()
             }}
           >
-            {t('Delete pass')}
+            {t`Delete pass`}
           </HoldButton>
         )}
       </form>

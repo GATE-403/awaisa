@@ -2,9 +2,10 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Menu } from '@awaisa/ui/Menu'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretDown, Check, CircleDashed, X } from '@phosphor-icons/react/ssr'
 import type { AdminBooking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { VisitMenuItems } from '@/shared/ui/VisitMenuItem/VisitMenuItem'
 import styles from './CloseDayBar.module.css'
 
@@ -33,16 +34,19 @@ export const CloseDayBar = ({
   onShowOther,
   onDismiss,
 }: CloseDayBarProps) => {
-  const t = useT()
+  const { t } = useLingui()
   if (openHere === 0 && openElsewhere === 0) return null
   const isListed = openHere > 0 && visitsHere.length > 0 && Boolean(onOpen)
-  const visits = (count: number) => t.count(count, ['visit', 'visits'])
-  const passed = openHere === 1 ? t('passed unmarked') : t('passed unmarked')
+  const visits = (count: number) => t`${plural(count, { one: '# visit', other: '# visits' })}`
+  const passed =
+    openHere === 1
+      ? t({ message: 'passed unmarked', context: 'one visit, singular' })
+      : t({ message: 'passed unmarked', context: 'several visits, plural' })
 
   return (
     <section
       className={styles.bar}
-      aria-label={t('Unmarked visits')}
+      aria-label={t`Unmarked visits`}
       data-glyph-inside={isListed || undefined}
     >
       {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
@@ -54,7 +58,7 @@ export const CloseDayBar = ({
             // The count opens the list of who it is: time, client, service · master - a tap scrolls
             // the calendar to that visit's card (with "✓ Arrived" on it).
             <Menu
-              label={t('{visits} {passed}: show who', { visits: visits(openHere), passed })}
+              label={t`${ph({ visits: visits(openHere) })} ${passed}: show who`}
               className={styles.who}
               trigger={
                 <>
@@ -62,7 +66,7 @@ export const CloseDayBar = ({
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
                     <span className={styles.long}>{passed}</span>
-                    <span className={styles.short}>{t('unmarked')}</span>
+                    <span className={styles.short}>{t`unmarked`}</span>
                   </span>
                   <CaretDown aria-hidden className={styles.caret} />
                 </>
@@ -73,26 +77,26 @@ export const CloseDayBar = ({
           ) : (
             <span className={styles.text}>
               <strong>{visits(openHere)}</strong> <span className={styles.long}>{passed}</span>
-              <span className={styles.short}>{t('unmarked')}</span>
+              <span className={styles.short}>{t`unmarked`}</span>
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>
             <Check aria-hidden />
-            {t('Everyone came')}
+            {t`Everyone came`}
           </Button>
         </>
       ) : (
         <>
           <span className={styles.text}>
-            <span className={styles.elsewhereLong}>{t('More')} </span>
-            <strong>{visits(openElsewhere)}</strong> {t('on other days')}
+            <span className={styles.elsewhereLong}>{t`More`} </span>
+            <strong>{visits(openElsewhere)}</strong> {t`on other days`}
           </span>
           <Button size='sm' variant='secondary' onClick={onShowOther}>
-            {t('Show')}
+            {t`Show`}
           </Button>
         </>
       )}
-      <button type='button' className={styles.close} onClick={onDismiss} aria-label={t('Hide')}>
+      <button type='button' className={styles.close} onClick={onDismiss} aria-label={t`Hide`}>
         <X aria-hidden />
       </button>
     </section>

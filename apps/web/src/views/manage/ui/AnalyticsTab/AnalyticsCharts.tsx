@@ -1,5 +1,7 @@
 'use client'
 
+import { msg, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useSyncExternalStore } from 'react'
 import {
   Area,
@@ -14,9 +16,9 @@ import {
   YAxis,
 } from 'recharts'
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent'
-import { type Translate, useT } from '@/shared/i18n'
+import { type Format, type Translate, useFormat } from '@/shared/i18n'
 import styles from './AnalyticsCharts.module.css'
-import { analyticsFormat, type Bucket, formatTick } from './analyticsFormat'
+import { analyticsFormat, type Bucket } from './analyticsFormat'
 
 // Recharts lives only here: the analytics tab loads this file on demand, so the rest of the
 // cabinet never ships it. Colours are our tokens, passed as CSS variables to the SVG.
@@ -41,21 +43,26 @@ type RevenueRow = Bucket & { previous: number; previousTitle: string }
 const changeOf = (current: number, previous: number) =>
   previous === 0 ? null : Math.round(((current - previous) / previous) * 100)
 
-type RevenueTooltipProps = TooltipContentProps<ValueType, NameType> & { t: Translate }
+type RevenueTooltipProps = TooltipContentProps<ValueType, NameType> & {
+  t: Translate
+  format: Format
+}
 
 // Recharts calls `content` as a plain function, not a component, so `t` comes in from the chart.
-const RevenueTooltip = ({ active, payload, t }: RevenueTooltipProps) => {
+const RevenueTooltip = ({ active, payload, t, format }: RevenueTooltipProps) => {
   // Recharts' payload is untyped: each item carries the row it was drawn from.
   const row = payload?.[0]?.payload as RevenueRow | undefined
   if (!active || !row) return null
-  const { formatMoney } = analyticsFormat(t)
+  const { formatMoney } = analyticsFormat(t, format)
   const change = changeOf(row.revenue, row.previous)
 
   return (
     <div className={styles.tooltip}>
       <span className={styles.tooltipTitle}>{row.title}</span>
       <span className={styles.tooltipValue}>{formatMoney(row.revenue)}</span>
-      <span className={styles.tooltipMeta}>{t.count(row.visits, ['visit', 'visits'])}</span>
+      <span className={styles.tooltipMeta}>
+        {t(msg`${plural(row.visits, { one: '# visit', other: '# visits' })}`)}
+      </span>
       <span className={styles.tooltipCompare}>
         <i data-series='previous' aria-hidden='true' />
         {row.previousTitle}: {formatMoney(row.previous)}
@@ -81,8 +88,9 @@ interface RevenueChartProps {
 // the picture itself; the tooltip carries exact values, a hidden table carries all of them.
 const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) => {
   const animate = useAnimate()
-  const t = useT()
-  const { formatMoney } = analyticsFormat(t)
+  const { t } = useLingui()
+  const format = useFormat()
+  const { formatMoney, formatTick } = analyticsFormat(t, format)
   const rows: RevenueRow[] = buckets.map((bucket, index) => ({
     ...bucket,
     previous: previous[index]?.revenue ?? 0,
@@ -101,7 +109,7 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.chart}>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart
-            title={t('Revenue by period')}
+            title={t`Revenue by period`}
             data={rows}
             barGap={2}
             barCategoryGap='18%'
@@ -147,7 +155,7 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
               tick={{ fill: 'var(--color-muted-foreground)', fontSize: 12 }}
             />
             <Tooltip
-              content={(props) => <RevenueTooltip {...props} t={t} />}
+              content={(props) => <RevenueTooltip {...props} t={t} format={format} />}
               cursor={{ fill: 'var(--color-fill)', radius: 8 }}
               animationDuration={animate ? 160 : 0}
             />
@@ -176,24 +184,24 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.legend} aria-hidden='true'>
         <span>
           <i data-series='current' />
-          {t('This period')}
+          {t`This period`}
         </span>
         <span>
           <i data-series='previous' />
-          {t('Previous')}
+          {t`Previous`}
         </span>
       </div>
       {/* A table keeps its content's width whatever it is told, so a block hides it: the table
           itself stretched the page sideways on phones. */}
       <div className={styles.srOnly}>
         <table>
-          <caption>{t('Revenue by period and the same stretch of the previous period')}</caption>
+          <caption>{t`Revenue by period and the same stretch of the previous period`}</caption>
           <thead>
             <tr>
-              <th scope='col'>{t('Period')}</th>
-              <th scope='col'>{t('Revenue')}</th>
-              <th scope='col'>{t('Visits')}</th>
-              <th scope='col'>{t('Previous period')}</th>
+              <th scope='col'>{t`Period`}</th>
+              <th scope='col'>{t`Revenue`}</th>
+              <th scope='col'>{t`Visits`}</th>
+              <th scope='col'>{t`Previous period`}</th>
             </tr>
           </thead>
           <tbody>

@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { CalendarFeedGroup } from '@/features/calendarFeed'
 import { PushAlertsGroup } from '@/features/pushAlerts'
 import type { Specialist } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { ClientChannelNote } from '@/views/manage/ui/NotificationsTab/ClientChannelNote'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
@@ -15,15 +15,13 @@ interface NotificationsTabProps {
 }
 
 export const NotificationsTab = ({ slug, specialists }: NotificationsTabProps) => {
-  const t = useT()
+  const { t } = useLingui()
 
   return (
     <section className={forms.section}>
       <SectionHeader
-        title={t('Notifications')}
-        description={t(
-          'New bookings, moves and cancellations: on your phone and in Telegram, as they happen.',
-        )}
+        title={t`Notifications`}
+        description={t`New bookings, moves and cancellations: on your phone and in Telegram, as they happen.`}
       />
       <PushAlertsGroup audience='business' listClassName={forms.list} />
       <CalendarFeedGroup
@@ -36,7 +34,7 @@ export const NotificationsTab = ({ slug, specialists }: NotificationsTabProps) =
         slug={slug}
         fallback={
           <p className={forms.groupEmpty}>
-            {t('The Telegram bot is not connected to the platform yet.')}
+            {t`The Telegram bot is not connected to the platform yet.`}
           </p>
         }
       />

@@ -1,7 +1,8 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Globe, Star, TiktokLogo } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type ComponentType, type ReactNode, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
@@ -15,7 +16,8 @@ import {
 import { EditProfileButton } from '@/features/profileStyle'
 import { ReportMenu } from '@/features/report'
 import type { ProfileLinkKind, PublicProfile } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { InstagramMark, TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { ProfileTabs } from '@/shared/ui/ProfileTabs/ProfileTabs'
@@ -58,7 +60,8 @@ const LINK_GLYPHS: Record<
 }
 
 export const ProfileContent = ({ profile }: ProfileContentProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const actionsSlot = useProfileActionsSlot()
   const earned = profile.achievements.filter((item) => item.earned).length
   const [awaiting, setAwaiting] = useState(profile.isOwn ? (profile.awaitingReview ?? 0) : 0)
@@ -84,9 +87,9 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   }, [])
   const yearMonths = profile.activity?.filter((month) => month.visits > 0).length ?? 0
   const facts = [
-    t('Level {level}', { level: profile.level.level }),
-    t.count(profile.stats.visits, ['visit', 'visits']),
-    t.count(profile.stats.places, ['place', 'places']),
+    t`Level ${ph({ level: profile.level.level })}`,
+    t`${plural(profile.stats.visits, { one: '# visit', other: '# visits' })}`,
+    t`${plural(profile.stats.places, { one: '# place', other: '# places' })}`,
   ]
   // The data rows, as in Telegram: the value over a small caption, only what is filled in.
   const rows: {
@@ -96,12 +99,13 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
     href?: string
     glyph?: ProfileLinkKind
   }[] = [
-    ...(profile.status ? [{ key: 'status', value: profile.status, caption: t('status') }] : []),
-    ...(profile.about ? [{ key: 'about', value: profile.about, caption: t('about') }] : []),
+    ...(profile.status ? [{ key: 'status', value: profile.status, caption: t`status` }] : []),
+    ...(profile.about ? [{ key: 'about', value: profile.about, caption: t`about` }] : []),
     ...(profile.links ?? []).map((link) => ({
       key: link.kind,
       value: link.text,
-      caption: t(link.label),
+      // Named by the API (Instagram, Website), shown as it comes.
+      caption: link.label,
       href: link.url,
       glyph: link.kind,
     })),
@@ -111,7 +115,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   const tabs = [
     {
       value: 'medals' as const,
-      label: t('Medals'),
+      label: t`Medals`,
       count: earned,
       panelId: PANELS.medals,
       panel: (
@@ -135,7 +139,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'masters' as const,
-            label: t('Specialists'),
+            label: t`Specialists`,
             count: profile.masters.length,
             panelId: PANELS.masters,
             panel: <ProfileMasters masters={profile.masters} />,
@@ -146,7 +150,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'places' as const,
-            label: t('Places'),
+            label: t`Places`,
             count: profile.stats.places,
             panelId: PANELS.places,
             panel: (
@@ -178,7 +182,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'reviews' as const,
-            label: t('Reviews'),
+            label: t`Reviews`,
             count: profile.reviews.length || undefined,
             panelId: PANELS.reviews,
             panel: (
@@ -186,7 +190,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                 {profile.stats.average !== null && (
                   <p className={styles.average}>
                     <Star weight='fill' aria-hidden className={styles.star} />
-                    {profile.stats.average.toLocaleString('en-GB')}
+                    {format.number(profile.stats.average)}
                   </p>
                 )}
                 {/* The latest visit waiting for stars, rated right here; the rest by the count. */}
@@ -195,9 +199,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                 )}
                 {awaiting > 1 && (
                   <NextLink href='/bookings' className={styles.awaiting}>
-                    {t('Awaiting rating: {visits} ›', {
-                      visits: t.count(awaiting, ['visit', 'visits']),
-                    })}
+                    {t`Awaiting rating: ${plural(awaiting, { one: '# visit', other: '# visits' })} ›`}
                   </NextLink>
                 )}
                 {profile.reviews.length > 0 && (
@@ -211,7 +213,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   ]
 
   const actions = (
-    <GlyphGroup label={t('Profile actions')}>
+    <GlyphGroup label={t`Profile actions`}>
       <ShareProfile
         name={profile.name}
         address={profile.handle ?? profile.id}
@@ -224,7 +226,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
         <ReportMenu
           targetType='profile'
           targetId={profile.id}
-          label={t('Report profile: {name}', { name: profile.name })}
+          label={t`Report profile: ${ph({ name: profile.name })}`}
           className=''
         />
       )}
@@ -277,7 +279,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
               }
             >
               {profile.isOwn && !profile.isPublic && (
-                <p className={styles.hidden}>{t('Profile hidden: only you can see it')}</p>
+                <p className={styles.hidden}>{t`Profile hidden: only you can see it`}</p>
               )}
             </ProfileHeadText>
           </ProfileHead>
@@ -289,7 +291,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
         {actionsSlot && createPortal(actions, actionsSlot)}
 
         {(rows.length > 0 || master) && (
-          <ul className={styles.info} aria-label={t('About the profile')}>
+          <ul className={styles.info} aria-label={t`About the profile`}>
             {rows.map((row) => (
               <li key={row.key}>
                 {row.href ? (
@@ -338,7 +340,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                   <span className={styles.infoValue}>
                     {master.name.split(' ')[0]} · {master.businessName}
                   </span>
-                  <span className={styles.infoCaption}>{t('my master')}</span>
+                  <span className={styles.infoCaption}>{t`my master`}</span>
                   <CaretRight aria-hidden className={styles.infoChevron} />
                 </NextLink>
               </li>
@@ -349,7 +351,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
 
       <section className={styles.tabs}>
         <ProfileTabs
-          label={t('Profile sections')}
+          label={t`Profile sections`}
           items={tabs}
           value={tabs.some((item) => item.value === tab) ? tab : 'medals'}
           onChange={setTab}

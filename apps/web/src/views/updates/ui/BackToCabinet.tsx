@@ -1,5 +1,6 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
@@ -10,6 +11,7 @@ import { CabinetBar } from '@/widgets/CabinetBar'
 // back to that business and tab, then the tools - instead of the client header, which has no way
 // back there. Read after mount (the page itself is static) and forgotten when the page is left.
 export const BackToCabinet = () => {
+  const { t } = useLingui()
   const [from, setFrom] = useState<string | null>(null)
   useRootFlag(from ? 'cabinet-chrome' : null)
 
@@ -21,5 +23,5 @@ export const BackToCabinet = () => {
 
   if (!from) return null
 
-  return <CabinetBar title="What's new" back={{ href: from, label: 'Dashboard' }} />
+  return <CabinetBar title={t`What's new`} back={{ href: from, label: t`Dashboard` }} />
 }

@@ -16,10 +16,10 @@ const Star = ({ size }: { size: number }) => (
   </svg>
 )
 
-const Footer = () => (
+const Footer = ({ slogan }: { slogan: string }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 30 }}>
     <span style={{ color: theme.foreground }}>{PLATFORM.name}</span>
-    <span style={{ color: theme.mutedForeground }}>Online booking, no calls</span>
+    <span style={{ color: theme.mutedForeground }}>{slogan}</span>
   </div>
 )
 
@@ -29,6 +29,8 @@ interface BusinessOgCardProps {
   address: string
   rating: number | null
   reviewsCount: number
+  /** «Online booking, no calls» in the page's language: images cannot read the i18n context. */
+  slogan: string
 }
 
 export const BusinessOgCard = ({
@@ -37,6 +39,7 @@ export const BusinessOgCard = ({
   address,
   rating,
   reviewsCount,
+  slogan,
 }: BusinessOgCardProps) => {
   const tint = pickTintHex(name)
 
@@ -100,16 +103,17 @@ export const BusinessOgCard = ({
         </div>
         <div style={{ display: 'flex', fontSize: 30, color: theme.mutedForeground }}>{address}</div>
       </div>
-      <Footer />
+      <Footer slogan={slogan} />
     </div>
   )
 }
 
 interface PlatformOgCardProps {
   kinds: string[]
+  tagline: string
 }
 
-export const PlatformOgCard = ({ kinds }: PlatformOgCardProps) => (
+export const PlatformOgCard = ({ kinds, tagline }: PlatformOgCardProps) => (
   <div
     style={{
       width: '100%',
@@ -133,7 +137,7 @@ export const PlatformOgCard = ({ kinds }: PlatformOgCardProps) => (
         color: theme.mutedForeground,
       }}
     >
-      {PLATFORM.tagline}
+      {tagline}
     </div>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
       {kinds.map((kind) => (

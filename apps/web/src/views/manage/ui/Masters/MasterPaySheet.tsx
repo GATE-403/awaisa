@@ -5,6 +5,9 @@ import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
 import { Select } from '@awaisa/ui/Select'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretUpDown, Check, Plus } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -16,7 +19,7 @@ import type {
   Service,
   Specialist,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { type Locale, useFormat } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -40,28 +43,27 @@ type Draft = {
   productsPercent: string
 }
 
-const SALARY_ITEMS: { value: SalaryKind | 'none'; label: string }[] = [
-  { value: 'none', label: 'No' },
-  { value: 'month', label: 'Per month' },
-  { value: 'day', label: 'Per working day' },
+const SALARY_ITEMS: { value: SalaryKind | 'none'; label: MessageDescriptor }[] = [
+  { value: 'none', label: msg`No` },
+  { value: 'month', label: msg`Per month` },
+  { value: 'day', label: msg`Per working day` },
 ]
-
-const UNIT: Record<PayRateKind, string> = { percent: '%', fixed: 'som' }
 
 const digits = (value: string) => value.replace(/\D/g, '')
 const toNumber = (value: string) => (digits(value) === '' ? null : Number(digits(value)))
-const toText = (value: number | null) => (value === null ? '' : maskAmountInput(String(value)))
+const toText = (value: number | null, locale: Locale) =>
+  value === null ? '' : maskAmountInput(String(value), locale)
 
-const toDraft = (scheme: MasterPayScheme): Draft => ({
+const toDraft = (scheme: MasterPayScheme, locale: Locale): Draft => ({
   percent: scheme.percent === null ? '' : String(scheme.percent),
   rates: scheme.rates.map((rate) => ({
     serviceId: rate.serviceId,
     kind: rate.kind,
-    value: rate.kind === 'fixed' ? toText(rate.value) : String(rate.value),
+    value: rate.kind === 'fixed' ? toText(rate.value, locale) : String(rate.value),
   })),
   salaryKind: scheme.salary?.kind ?? 'none',
-  salary: toText(scheme.salary?.amount ?? null),
-  minimum: toText(scheme.minimum),
+  salary: toText(scheme.salary?.amount ?? null, locale),
+  minimum: toText(scheme.minimum, locale),
   productsPercent: scheme.productsPercent === null ? '' : String(scheme.productsPercent),
 })
 
@@ -87,8 +89,9 @@ const toScheme = (draft: Draft): MasterPayScheme => {
 // for some services, the percent of the products they sell, a salary per month or per working day, and a minimum per month. The parts
 // add up; the pay is never below the minimum.
 export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPaySheetProps) => {
+  const format = useFormat()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [saved, setSaved] = useState<MasterPayScheme | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -111,12 +114,12 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
     getMasterPay(slug, master.id, controller.signal)
       .then((loaded) => {
         setSaved(loaded)
-        setDraft(toDraft(loaded))
+        setDraft(toDraft(loaded, format.locale))
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           toast.show({
-            title: t('Something went wrong'),
+            title: t`Something went wrong`,
             description: getErrorMessage(error),
             type: 'error',
           })
@@ -166,11 +169,11 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
     setIsSaving(true)
     try {
       await setMasterPay(slug, master.id, toScheme(draft))
-      toast.show({ title: t('Pay for {name} saved', { name: master.name }), type: 'success' })
+      toast.show({ title: t`Pay for ${ph({ name: master.name })} saved`, type: 'success' })
       onClose()
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -181,10 +184,10 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
 
   return (
     <Sheet
-      title={t('Pay')}
+      title={t({ message: 'Pay', context: 'specialist pay, noun' })}
       onClose={onClose}
       action={{
-        label: isDirty ? t('Save') : t('Done'),
+        label: isDirty ? t`Save` : t`Done`,
         onClick: handleDone,
         disabled: isSaving,
       }}
@@ -193,16 +196,16 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
       {draft && (
         <div className={sheet.form}>
           <section className={sheet.group} aria-labelledby='pay-services'>
-            <SectionCaption id='pay-services'>{t('From services')}</SectionCaption>
+            <SectionCaption id='pay-services'>{t`From services`}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Specialist’s percent')}</span>
+                <span className={sheet.rowLabel}>{t`Specialist’s percent`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Specialist’s percent')}
-                    placeholder={t('Not set')}
+                    aria-label={t`Specialist’s percent`}
+                    placeholder={t({ message: 'Not set', context: 'empty percent, masculine' })}
                     value={draft.percent}
                     onValueChange={(value) => update({ percent: digits(value).slice(0, 3) })}
                   />
@@ -210,7 +213,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                 </span>
               </label>
               {draft.rates.map((rate) => {
-                const name = serviceName.get(rate.serviceId) ?? t('Service')
+                const name = serviceName.get(rate.serviceId) ?? t`Service`
                 return (
                   <div key={rate.serviceId} className={sheet.row}>
                     <span className={styles.rateName}>{name}</span>
@@ -218,27 +221,24 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                       <Input
                         variant='plain'
                         inputMode='numeric'
-                        aria-label={t('{name}: rate', { name })}
+                        aria-label={t`${name}: rate`}
                         placeholder={draft.percent === '' ? '0' : draft.percent}
                         value={rate.value}
                         onValueChange={(value) =>
                           updateRate(rate.serviceId, {
                             value:
                               rate.kind === 'fixed'
-                                ? maskAmountInput(digits(value))
+                                ? maskAmountInput(digits(value), format.locale)
                                 : digits(value).slice(0, 3),
                           })
                         }
                       />
                       <Menu
-                        label={t('{unit}, {name}: percent or amount per visit', {
-                          unit: t(UNIT[rate.kind]),
-                          name,
-                        })}
+                        label={t`${ph({ unit: rate.kind === 'percent' ? '%' : format.currency })}, ${name}: percent or amount per visit`}
                         className={styles.unit}
                         trigger={
                           <>
-                            {t(UNIT[rate.kind])}
+                            {rate.kind === 'percent' ? '%' : format.currency}
                             <CaretUpDown aria-hidden className={styles.unitGlyph} />
                           </>
                         }
@@ -247,17 +247,17 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                           icon={rate.kind === 'percent' ? <Check aria-hidden /> : undefined}
                           onClick={() => updateRate(rate.serviceId, { kind: 'percent', value: '' })}
                         >
-                          {t('Percent of payment')}
+                          {t`Percent of payment`}
                         </MenuItem>
                         <MenuItem
                           icon={rate.kind === 'fixed' ? <Check aria-hidden /> : undefined}
                           onClick={() => updateRate(rate.serviceId, { kind: 'fixed', value: '' })}
                         >
-                          {t('Amount per visit')}
+                          {t`Amount per visit`}
                         </MenuItem>
                         <MenuSeparator />
                         <MenuItem variant='danger' onClick={() => removeRate(rate.serviceId)}>
-                          {t('Remove rate')}
+                          {t`Remove rate`}
                         </MenuItem>
                       </Menu>
                     </span>
@@ -266,13 +266,13 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               })}
               {free.length > 0 && (
                 <Menu
-                  label={t('Another rate for a service')}
+                  label={t`Another rate for a service`}
                   align='start'
                   className={`${sheet.row} ${styles.addRate}`}
                   trigger={
                     <>
                       <Plus aria-hidden className={styles.addGlyph} />
-                      {t('Another rate for a service')}
+                      {t`Another rate for a service`}
                     </>
                   }
                 >
@@ -286,24 +286,22 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
             </div>
             <p className={sheet.groupFooter}>
               {percentError || rateError
-                ? t('The percent cannot be more than 100.')
-                : t(
-                    'The percent is of what was paid in money, as in “Analytics”: discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price.',
-                  )}
+                ? t`The percent cannot be more than 100.`
+                : t`The percent is of what was paid in money, as in “Analytics”: discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price.`}
             </p>
           </section>
 
           <section className={sheet.group} aria-labelledby='pay-products'>
-            <SectionCaption id='pay-products'>{t('From products')}</SectionCaption>
+            <SectionCaption id='pay-products'>{t`From products`}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Percent of sales')}</span>
+                <span className={sheet.rowLabel}>{t`Percent of sales`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Percent of sales')}
-                    placeholder={t('No')}
+                    aria-label={t`Percent of sales`}
+                    placeholder={t`No`}
                     value={draft.productsPercent}
                     onValueChange={(value) =>
                       update({ productsPercent: digits(value).slice(0, 3) })
@@ -315,22 +313,20 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
             </div>
             <p className={sheet.groupFooter}>
               {productsError
-                ? t('The percent cannot be more than 100.')
-                : t(
-                    'Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count.',
-                  )}
+                ? t`The percent cannot be more than 100.`
+                : t`Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count.`}
             </p>
           </section>
 
           <section className={sheet.group} aria-labelledby='pay-salary'>
-            <SectionCaption id='pay-salary'>{t('Salary and minimum')}</SectionCaption>
+            <SectionCaption id='pay-salary'>{t`Salary and minimum`}</SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Salary')}</span>
+                <span className={sheet.rowLabel}>{t`Salary`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Salary')}
+                    aria-label={t`Salary`}
                     items={SALARY_ITEMS.map((item) => ({ ...item, label: t(item.label) }))}
                     value={draft.salaryKind}
                     onValueChange={(value) =>
@@ -341,42 +337,46 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               </div>
               {draft.salaryKind !== 'none' && (
                 <label className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Amount')}</span>
+                  <span className={sheet.rowLabel}>{t`Amount`}</span>
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
                       inputMode='numeric'
-                      aria-label={t('Salary amount')}
+                      aria-label={t`Salary amount`}
                       placeholder='0'
                       value={draft.salary}
-                      onValueChange={(value) => update({ salary: maskAmountInput(digits(value)) })}
+                      onValueChange={(value) =>
+                        update({ salary: maskAmountInput(digits(value), format.locale) })
+                      }
                     />
-                    <span className={sheet.suffix}>{t('som')}</span>
+                    <span className={sheet.suffix}>{format.currency}</span>
                   </span>
                 </label>
               )}
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Minimum per month')}</span>
+                <span className={sheet.rowLabel}>{t`Minimum per month`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Minimum per month')}
-                    placeholder={t('No')}
+                    aria-label={t`Minimum per month`}
+                    placeholder={t`No`}
                     value={draft.minimum}
-                    onValueChange={(value) => update({ minimum: maskAmountInput(digits(value)) })}
+                    onValueChange={(value) =>
+                      update({ minimum: maskAmountInput(digits(value), format.locale) })
+                    }
                   />
-                  {draft.minimum !== '' && <span className={sheet.suffix}>{t('som')}</span>}
+                  {draft.minimum !== '' && <span className={sheet.suffix}>{format.currency}</span>}
                 </span>
               </label>
             </div>
             <p className={sheet.groupFooter}>
               {draft.salaryKind === 'day'
-                ? `${t('Working days come from the specialist’s schedule: days off and leave are not paid.')} `
+                ? `${t`Working days come from the specialist’s schedule: days off and leave are not paid.`} `
                 : draft.salaryKind === 'month'
-                  ? `${t('A partial month is counted by its days.')} `
+                  ? `${t`A partial month is counted by its days.`} `
                   : ''}
-              {t('If less than the minimum is earned in a month, the minimum is paid.')}
+              {t`If less than the minimum is earned in a month, the minimum is paid.`}
             </p>
           </section>
         </div>

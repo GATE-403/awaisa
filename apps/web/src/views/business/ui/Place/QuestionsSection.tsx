@@ -2,14 +2,15 @@
 
 import { Button, ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
-import NextLink from 'next/link'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { askQuestion } from '@/shared/api/clientApi'
 import type { Business, QuestionList } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -26,7 +27,7 @@ const ASK_FORM = 'ask-question'
 // What people asked before booking and what the place answered: parking, children, cards.
 export const QuestionsSection = ({ business, questions }: QuestionsSectionProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const session = useSession()
   const [isAll, setIsAll] = useState(false)
   const [isAsking, setIsAsking] = useState(false)
@@ -39,15 +40,15 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
   const handleAsk = async (event: React.FormEvent) => {
     event.preventDefault()
     if (text.trim().length < 3) {
-      setError(t('Write your question'))
+      setError(t`Write your question`)
       return
     }
     setIsSending(true)
     try {
       await askQuestion(business.slug, text.trim())
       toast.show({
-        title: t('Question sent'),
-        description: t('The answer will appear here once the place replies'),
+        title: t`Question sent`,
+        description: t`The answer will appear here once the place replies`,
         type: 'success',
       })
       setText('')
@@ -63,7 +64,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
     <section id='questions' className={styles.section} aria-labelledby='place-questions'>
       <div className={styles.head}>
         <h2 id='place-questions' className={styles.title}>
-          {t('Questions')}
+          {t`Questions`}
         </h2>
         {questions.count > 0 && <span className={styles.count}>{questions.count}</span>}
         {isSignedIn ? (
@@ -73,7 +74,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
             className={styles.ask}
             onClick={() => setIsAsking(true)}
           >
-            {t('Ask a question')}
+            {t`Ask a question`}
           </Button>
         ) : (
           <ButtonLink
@@ -82,21 +83,23 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
             size='sm'
             className={styles.ask}
           >
-            {t('Ask a question')}
+            {t`Ask a question`}
           </ButtonLink>
         )}
       </div>
       {questions.items.length === 0 ? (
         <EmptyState
           variant='inline'
-          text={t('Ask about parking, payment or children: the place will answer here.')}
+          text={t`Ask about parking, payment or children: the place will answer here.`}
         />
       ) : (
         <MoreFade
           hiddenCount={hidden}
           isOpen={isAll}
           onToggle={() => setIsAll((value) => !value)}
-          label={t.count(hidden, ['question', 'questions']).slice(String(hidden).length + 1)}
+          label={t`${plural(hidden, { one: '# question', other: '# questions' })}`.slice(
+            String(hidden).length + 1,
+          )}
         >
           <ul className={styles.list}>
             {questions.items.slice(0, isAll ? undefined : FIRST).map((question) => (
@@ -121,13 +124,13 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
       )}
       {isAsking && (
         <Sheet
-          title={t('Question')}
+          title={t`Question`}
           onClose={() => setIsAsking(false)}
-          action={{ label: isSending ? t('Sending…') : t('Send'), form: ASK_FORM }}
+          action={{ label: isSending ? t`Sending…` : t`Send`, form: ASK_FORM }}
         >
           <form id={ASK_FORM} className={styles.form} onSubmit={handleAsk} noValidate>
             <textarea
-              aria-label={t('Question for {name}', { name: business.name })}
+              aria-label={t`Question for ${ph({ name: business.name })}`}
               className={styles.textarea}
               value={text}
               onChange={(event) => {
@@ -136,7 +139,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
               }}
               maxLength={500}
               rows={4}
-              placeholder={t('Is there parking? Can I pay by card?')}
+              placeholder={t`Is there parking? Can I pay by card?`}
             />
             {error && (
               <p className={styles.error} role='alert'>
@@ -144,9 +147,7 @@ export const QuestionsSection = ({ business, questions }: QuestionsSectionProps)
               </p>
             )}
             <p className={styles.hint}>
-              {t(
-                'Your question shows once the place answers: with your name, without your number.',
-              )}
+              {t`Your question shows once the place answers: with your name, without your number.`}
             </p>
           </form>
         </Sheet>

@@ -2,11 +2,11 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Select } from '@awaisa/ui/Select'
+import { useLingui } from '@lingui/react/macro'
 import { ChatCircle, Phone, WhatsappLogo } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { getManagedPromotions } from '@/shared/api/clientApi'
 import type { ManagedReview, Promotion } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -39,7 +39,7 @@ export const ContactClientSheet = ({
   canOfferCode,
   onClose,
 }: ContactClientSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const firstName = review.authorName.split(' ')[0] ?? review.authorName
   const [text, setText] = useState(() => apologyText(firstName, businessName))
   const [codes, setCodes] = useState<Promotion[]>([])
@@ -64,18 +64,21 @@ export const ContactClientSheet = ({
   }, [slug, canOfferCode])
 
   const codeItems = [
-    { value: NO_CODE, label: t('No promo code') },
+    { value: NO_CODE, label: t`No promo code` },
     ...codes.map((item) => ({ value: item.code ?? '', label: `${item.code} · −${item.percent}%` })),
   ]
 
   return (
-    <Sheet title={t('Message the client')} onClose={onClose} cancelLabel={t('Close')}>
+    <Sheet title={t`Message the client`} onClose={onClose} cancelLabel={t`Close`}>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Message')}>
+        <section
+          className={sheet.group}
+          aria-label={t({ message: 'Message', context: 'noun: text of a message' })}
+        >
           <SectionCaption>{`${review.authorName} · ${formatPhone(review.customerPhone)}`}</SectionCaption>
           <div className={sheet.list}>
             <textarea
-              aria-label={t('Message text')}
+              aria-label={t`Message text`}
               className={styles.message}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -84,11 +87,11 @@ export const ContactClientSheet = ({
             />
             {codes.length > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Promo code')}</span>
+                <span className={sheet.rowLabel}>{t`Promo code`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Promo code as a gift')}
+                    aria-label={t`Promo code as a gift`}
                     items={codeItems}
                     value={code}
                     onValueChange={(value) => setCode(value ?? NO_CODE)}
@@ -99,10 +102,8 @@ export const ContactClientSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {chosen
-              ? t('The promo code is added at the end of the message.')
-              : t(
-                  'The messenger opens with this text. Once you agree, mark the review “Resolved”.',
-                )}
+              ? t`The promo code is added at the end of the message.`
+              : t`The messenger opens with this text. Once you agree, mark the review “Resolved”.`}
           </p>
         </section>
 
@@ -114,16 +115,16 @@ export const ContactClientSheet = ({
             className={styles.contactPrimary}
           >
             <WhatsappLogo aria-hidden />
-            {t('Message on WhatsApp')}
+            {t`Message on WhatsApp`}
           </ButtonLink>
-          <GlyphGroup label={t('Other ways to reach them')}>
+          <GlyphGroup label={t`Other ways to reach them`}>
             <a href={`sms:${review.customerPhone}?&body=${body}`} title='SMS' aria-label='SMS'>
               <ChatCircle aria-hidden />
             </a>
             <a
               href={`tel:${review.customerPhone}`}
               title={formatPhone(review.customerPhone)}
-              aria-label={t('Call')}
+              aria-label={t`Call`}
             >
               <Phone aria-hidden />
             </a>

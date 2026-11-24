@@ -1,21 +1,23 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { Icon } from '@phosphor-icons/react'
 import { Compass, MapPin, Storefront, Ticket } from '@phosphor-icons/react/ssr'
 import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
 
 type NavItem = {
   href: string
-  label: string
+  label: MessageDescriptor
   icon: Icon
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Catalogue', icon: Compass },
+  { href: '/', label: msg`Catalogue`, icon: Compass },
   // Finished work as a vertical feed, each photo one tap from booking it.
-  { href: '/feed', label: 'Looks', icon: FanCardsIcon },
-  { href: '/map', label: 'Map', icon: MapPin },
-  { href: '/business', label: 'Business', icon: Storefront },
+  { href: '/feed', label: msg`Looks`, icon: FanCardsIcon },
+  { href: '/map', label: msg`Map`, icon: MapPin },
+  { href: '/business', label: msg`Business`, icon: Storefront },
   // The records lead that page («Bookings»): «My profile» is the public profile, one of each.
-  { href: '/bookings', label: 'Bookings', icon: Ticket },
+  { href: '/bookings', label: msg`Bookings`, icon: Ticket },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.

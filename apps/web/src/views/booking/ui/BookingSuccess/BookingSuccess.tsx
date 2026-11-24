@@ -2,17 +2,19 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CalendarPlus, Check, MapPin } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { downloadCalendarFile, formatPrice, Ticket } from '@/entities/booking'
+import { downloadCalendarFile, Ticket } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { FollowButton } from '@/features/followMaster'
 import { ForYouShelf } from '@/features/forYou'
 import { TelegramReminderLink } from '@/features/telegramReminders'
 import { TicketViewer } from '@/features/ticketView'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { LightWave, type Point } from '@/shared/ui/LightWave/LightWave'
@@ -36,8 +38,9 @@ const endOf = (booking: Booking) => {
 }
 
 export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) => {
+  const format = useFormat()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const session = useSession()
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const pondRef = useRef<HTMLDivElement>(null)
@@ -80,8 +83,8 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
     toast.show({
-      title: t('Calendar event is ready'),
-      description: t('Open the file to add it'),
+      title: t`Calendar event is ready`,
+      description: t`Open the file to add it`,
     })
   }
 
@@ -97,22 +100,18 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <span ref={checkRef} className={styles.check} aria-hidden>
         <Check />
       </span>
-      <h1 className={styles.title}>{t('You are booked')}</h1>
+      <h1 className={styles.title}>{t`You are booked`}</h1>
       <p className={styles.lead}>
-        {t('{day} at {time} · {place}', {
-          day: t.dayLong(booking.date),
-          time: booking.time,
-          place: booking.business.name,
-        })}
+        {t`${ph({ day: format.dayLong(booking.date) })} at ${ph({ time: booking.time })} · ${ph({ place: booking.business.name })}`}
       </p>
       {/* What to do now, in plain words: someone new to this does not read a barcode. */}
       <p className={styles.nextStep}>
-        {t('Come at {time}', { time: booking.time })}
-        {booking.business.address ? t(' to {address}', { address: booking.business.address }) : ''}.{' '}
+        {t`Come at ${ph({ time: booking.time })}`}
+        {booking.business.address ? t` to ${ph({ address: booking.business.address })}` : ''}.{' '}
         {/* The sum itself, in bold: "Pay at the salon" alone sent people looking in the ticket. */}
-        {isDepositPaid ? t('The rest at the salon:') : t('Pay at the salon:')}{' '}
-        <b className={styles.amount}>{formatPrice(toPay)}</b>.{' '}
-        {t('Move or cancel by the link in the SMS.')}
+        {isDepositPaid ? t`The rest at the salon:` : t`Pay at the salon:`}{' '}
+        <b className={styles.amount}>{format.price(toPay)}</b>.{' '}
+        {t`Move or cancel by the link in the SMS.`}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
       {/* The ticket itself opens the full one: details, place, download. Its own stretched
@@ -125,10 +124,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           the same place and day after this visit, the name and number kept. */}
       {onBookAnother && (
         <button type='button' className={styles.another} onClick={onBookAnother}>
-          {t('Another booking at {place} · after {time} ›', {
-            place: booking.business.name,
-            time: endOf(booking),
-          })}
+          {t`Another booking at ${ph({ place: booking.business.name })} · after ${ph({ time: endOf(booking) })} ›`}
         </button>
       )}
       {/* One line of actions: the one primary My bookings and the rest as thin glyphs in one
@@ -140,12 +136,12 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           size='md'
           className={styles.primaryAction}
         >
-          {t('My bookings')}
+          {t`My bookings`}
         </ButtonLink>
-        <GlyphGroup label={t('More')}>
+        <GlyphGroup label={t`More`}>
           <GlyphButton
             icon={<CalendarPlus />}
-            label={t('To calendar')}
+            label={t`To calendar`}
             onClick={handleAddToCalendar}
           />
           {booking.business.mapUrl && (
@@ -153,8 +149,8 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
               href={booking.business.mapUrl}
               target='_blank'
               rel='noreferrer'
-              aria-label={t('Directions')}
-              title={t('Directions')}
+              aria-label={t`Directions`}
+              title={t`Directions`}
             >
               <MapPin aria-hidden />
             </a>
@@ -170,11 +166,11 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       {/* Guests keep bookings on this device only: say so at the moment it matters. */}
       {session.status === 'guest' && (
         <p className={styles.keep}>
-          {t('The booking is saved on this phone.')}{' '}
+          {t`The booking is saved on this phone.`}{' '}
           <NextLink href='/login?next=/bookings' className={styles.keepLink}>
-            {t('Sign in with your number')}
+            {t`Sign in with your number`}
           </NextLink>
-          {t(' to see bookings on any device.')}
+          {t` to see bookings on any device.`}
         </p>
       )}
       {/* What to look at next, chosen from this visit and the client's answers - a reason to
@@ -182,14 +178,14 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <div className={styles.next}>
         <ForYouShelf
           surface='success'
-          title={t('You may like')}
+          title={t`You may like`}
           seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
           likeServiceId={booking.serviceId}
           excludeServiceId={booking.serviceId}
           isInline
         />
         <NextLink href='/' className={styles.catalogLink}>
-          {t('All places and services ›')}
+          {t`All places and services ›`}
         </NextLink>
       </div>
       {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}

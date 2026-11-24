@@ -1,3 +1,5 @@
+import type { I18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { BusinessKind, BusinessPage, ReviewSummary, WorkingDay } from '@/shared/api/types'
 import { absoluteUrl } from './siteUrl'
 
@@ -38,7 +40,14 @@ const toOpeningHours = (hours: WorkingDay[]) =>
       closes: toSchemaTime(day.closesMinutes),
     }))
 
-const buildBusinessJsonLd = ({ business, catalog }: BusinessPage, reviews: ReviewSummary) => {
+const SERVICES_AND_PRICES = msg`Services and prices`
+
+/** `i18n` names the offer catalog in the page's language; English without it. */
+const buildBusinessJsonLd = (
+  { business, catalog }: BusinessPage,
+  reviews: ReviewSummary,
+  i18n?: I18n,
+) => {
   const url = absoluteUrl(`/${business.slug}`)
   const pinned = business.branches.find(
     (branch) => branch.latitude !== null && branch.longitude !== null,
@@ -104,7 +113,7 @@ const buildBusinessJsonLd = ({ business, catalog }: BusinessPage, reviews: Revie
     ...(sections.length > 0 && {
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
-        name: 'Services and prices',
+        name: i18n ? i18n._(SERVICES_AND_PRICES) : 'Services and prices',
         itemListElement: sections,
       },
     }),

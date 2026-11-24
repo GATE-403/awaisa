@@ -1,12 +1,13 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { createTelegramLink, getTelegramStatus, removeTelegramChat } from '@/shared/api/clientApi'
 import type { TelegramStatus } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { formatDate, useLocale } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { TelegramMark } from '@/shared/ui/BrandLogo/BrandLogo'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -22,17 +23,12 @@ interface TelegramSectionProps {
 const POLL_MS = 3_000
 const POLL_LIMIT = 40
 
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: BUSINESS_TIME_ZONE,
-})
-
 // New bookings, cancellations, reviews and the morning schedule in the owner's Telegram.
 // Linking is one tap: the bot opens with a one-time code, the cabinet notices the new chat.
 export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
+  const locale = useLocale()
   const [status, setStatus] = useState<TelegramStatus | null>(null)
   const [isWaiting, setIsWaiting] = useState(false)
   const [link, setLink] = useState<string | null>(null)
@@ -73,7 +69,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
         setStatus(next)
         setIsWaiting(false)
         haptic('success')
-        toast.show({ title: t('Telegram connected'), type: 'success' })
+        toast.show({ title: t`Telegram connected`, type: 'success' })
       }
       if ((next && next.chats.length > known) || attempts >= POLL_LIMIT) {
         if (pollRef.current) window.clearInterval(pollRef.current)
@@ -88,10 +84,10 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
     try {
       await removeTelegramChat(slug, id)
       setStatus({ ...status, chats: status.chats.filter((chat) => chat.id !== id) })
-      toast.show({ title: t('Notifications turned off'), type: 'success' })
+      toast.show({ title: t`Notifications turned off`, type: 'success' })
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -100,7 +96,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
 
   return (
     <div className={forms.group}>
-      <SectionCaption>{t('Telegram notifications')}</SectionCaption>
+      <SectionCaption>{t`Telegram notifications`}</SectionCaption>
       <div className={forms.list}>
         {status.chats.map((chat) => (
           <div key={chat.id} className={styles.row}>
@@ -109,22 +105,20 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
             </span>
             <span className={styles.text}>
               <span className={styles.title}>
-                {chat.username ? `@${chat.username}` : t('Telegram chat')}
+                {chat.username ? `@${chat.username}` : t`Telegram chat`}
               </span>
               <span className={styles.meta}>
-                {t('Connected {date}', { date: dateFormatter.format(new Date(chat.createdAt)) })}
+                {t`Connected ${ph({ date: formatDate(locale, chat.createdAt, { day: 'numeric', month: 'long' }) })}`}
               </span>
             </span>
             <button type='button' className={styles.remove} onClick={() => handleRemove(chat.id)}>
-              {t('Disconnect')}
+              {t`Disconnect`}
             </button>
           </div>
         ))}
         {isWaiting || !link ? (
           <span className={styles.connect} data-waiting=''>
-            {isWaiting
-              ? t('Waiting for you to tap “Start” in Telegram…')
-              : t('Preparing the link…')}
+            {isWaiting ? t`Waiting for you to tap “Start” in Telegram…` : t`Preparing the link…`}
           </span>
         ) : (
           <a
@@ -134,14 +128,12 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
             className={styles.connect}
             onClick={() => waitForChat(status.chats.length)}
           >
-            {status.chats.length > 0 ? t('Connect another chat') : t('Connect Telegram')}
+            {status.chats.length > 0 ? t`Connect another chat` : t`Connect Telegram`}
           </a>
         )}
       </div>
       <p className={styles.footer}>
-        {t(
-          "New bookings, cancellations and reviews arrive at once, the day's schedule at 9:00. In the bot: /today (today's bookings), /stop (turn off).",
-        )}
+        {t`New bookings, cancellations and reviews arrive at once, the day's schedule at 9:00. In the bot: /today (today's bookings), /stop (turn off).`}
       </p>
     </div>
   )

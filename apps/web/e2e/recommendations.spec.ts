@@ -24,15 +24,15 @@ test.describe('Recommendations', () => {
     await sheet.getByText('Manicure', { exact: true }).click()
     await expect(sheet.getByRole('checkbox', { name: 'Manicure' })).toBeChecked()
     await sheet.getByRole('button', { name: 'Next' }).click()
-    await sheet.getByRole('button', { name: 'Up to 2 500 som' }).click()
+    await sheet.getByRole('button', { name: 'Up to 2,500 som' }).click()
     await expect(sheet.getByRole('heading', { name: 'What matters most?' })).toBeVisible()
     // “Back” returns to the step before with its answer kept.
     await sheet.getByRole('button', { name: 'Back' }).click()
     await expect(sheet.getByRole('heading', { name: 'How much per visit?' })).toBeVisible()
-    await sheet.getByRole('button', { name: 'Up to 2 500 som' }).click()
+    await sheet.getByRole('button', { name: 'Up to 2,500 som' }).click()
     // The answers so far ride above the question; one leads back to its step.
     const answers = sheet.getByRole('list', { name: 'Your answers' })
-    await expect(answers.getByRole('button')).toHaveText(['Woman', 'Manicure', 'Up to 2 500 som'])
+    await expect(answers.getByRole('button')).toHaveText(['Woman', 'Manicure', 'Up to 2,500 som'])
     // Several things may matter at once: they tick, “Next” moves on.
     await sheet.getByRole('button', { name: /Free today/ }).click()
     await sheet.getByRole('button', { name: /Top rated/ }).click()

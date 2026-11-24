@@ -1,8 +1,9 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { WorkingDay } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import { groupWeek, WEEKDAYS_FULL, WEEKDAYS_SHORT } from '../../lib/workingHours'
+import { groupWeek, weekdayName, weekdayShortName } from '../../lib/workingHours'
 import styles from './WeekHours.module.css'
 
 interface WeekHoursProps {
@@ -20,21 +21,22 @@ const DAYS_IN_WEEK = 7
 // marked. Seven identical bars on a shared scale said nothing a row could not (the owner asked
 // for it to be redone).
 export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const groups = groupWeek(hours)
   const isEveryDay = groups.length === 1
 
   const daysLabel = (from: number, to: number) => {
-    if (isEveryDay) return t('Daily')
-    const first = t(WEEKDAYS_SHORT[from] ?? '')
-    return from === to ? first : `${first}–${t(WEEKDAYS_SHORT[to] ?? '')}`
+    if (isEveryDay) return t`Daily`
+    const first = weekdayShortName(t, from)
+    return from === to ? first : `${first}–${weekdayShortName(t, to)}`
   }
 
   // Screen readers hear the days in full: «Monday to Friday».
-  const daysFull = (from: number, to: number) =>
-    from === to
-      ? t(WEEKDAYS_FULL[from] ?? '')
-      : `${t(WEEKDAYS_FULL[from] ?? '')} to ${t(WEEKDAYS_FULL[to] ?? '')}`
+  const daysFull = (from: number, to: number) => {
+    const first = weekdayName(t, from)
+    if (from === to) return first
+    return t`${first} to ${ph({ last: weekdayName(t, to) })}`
+  }
 
   return (
     <div className={styles.weekHours}>
@@ -43,7 +45,7 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
           {status.label}
         </p>
       )}
-      <ul className={styles.weekRows} aria-label={t('Hours by day')}>
+      <ul className={styles.weekRows} aria-label={t`Hours by day`}>
         {groups.map(({ from, to, range }) => {
           // Every day the same: «Today» would add nothing to «Daily».
           const isToday =
@@ -58,11 +60,11 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
               <span className={styles.weekDays}>
                 <span aria-hidden='true'>{daysLabel(from, to)}</span>
                 <span className={styles.srOnly}>
-                  {isEveryDay && to - from === DAYS_IN_WEEK - 1 ? t('Daily') : daysFull(from, to)}
+                  {isEveryDay && to - from === DAYS_IN_WEEK - 1 ? t`Daily` : daysFull(from, to)}
                 </span>
-                {isToday && <span className={styles.today}>{t('Today')}</span>}
+                {isToday && <span className={styles.today}>{t`Today`}</span>}
               </span>
-              <span className={styles.weekRange}>{range ?? t('Closed')}</span>
+              <span className={styles.weekRange}>{range ?? t`Closed`}</span>
             </li>
           )
         })}

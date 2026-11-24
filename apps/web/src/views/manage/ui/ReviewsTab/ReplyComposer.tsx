@@ -1,8 +1,8 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { ArrowBendDownRight, ArrowUp } from '@phosphor-icons/react/ssr'
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { EmojiButton } from '@/shared/ui/EmojiPicker/EmojiButton'
 import { fillReplyTemplate, type ReplyContext } from '@/views/manage/lib/replyTemplate'
 import styles from './ReviewsTab.module.css'
@@ -36,7 +36,7 @@ export const ReplyComposer = ({
   context,
   isNextFocused = false,
 }: ReplyComposerProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [text, setText] = useState(initial)
   const [isSaving, setIsSaving] = useState(false)
   const fieldRef = useRef<HTMLTextAreaElement>(null)
@@ -133,7 +133,7 @@ export const ReplyComposer = ({
         <EmojiButton onPick={insertEmoji} />
         <textarea
           ref={fieldRef}
-          aria-label={t('Reply to the review')}
+          aria-label={t`Reply to the review`}
           data-reply-field=''
           className={styles.composerField}
           value={text}
@@ -162,8 +162,8 @@ export const ReplyComposer = ({
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => void save()}
             disabled={isSaving}
-            aria-label={isEditing && !text.trim() ? t('Delete reply') : t('Send reply')}
-            title={t('Send (⌘ Enter)')}
+            aria-label={isEditing && !text.trim() ? t`Delete reply` : t`Send reply`}
+            title={t`Send (⌘ Enter)`}
           >
             <ArrowUp aria-hidden />
           </button>
@@ -178,7 +178,7 @@ export const ReplyComposer = ({
           className={styles.suggestions}
           data-quick-replies=''
           role='listbox'
-          aria-label={t('Quick replies')}
+          aria-label={t`Quick replies`}
           onKeyDown={handleListKeyDown}
           onBlur={(event) => {
             const next = event.relatedTarget

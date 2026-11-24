@@ -1,5 +1,5 @@
+import { useLingui } from '@lingui/react/macro'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 
@@ -29,14 +29,14 @@ export const BookingDetailsDialog = ({
   onBookAgain,
   onSellProducts,
 }: BookingDetailsDialogProps) => {
-  const t = useT()
+  const { t } = useLingui()
 
   return (
     <Sheet
-      title={t('Booking')}
+      title={t`Booking`}
       onClose={onClose}
       cancelLabel={null}
-      action={{ label: t('Done'), onClick: onClose }}
+      action={{ label: t`Done`, onClick: onClose }}
     >
       <BookingInspector
         slug={slug}

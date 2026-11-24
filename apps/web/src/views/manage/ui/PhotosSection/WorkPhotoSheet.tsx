@@ -2,9 +2,10 @@
 
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import type { Service, Specialist, WorkPhoto, WorkPhotoInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -36,7 +37,7 @@ export const WorkPhotoSheet = ({
   step,
   onMakeFirst,
 }: WorkPhotoSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const isLastStep = !step || step.index >= step.total
   const [serviceId, setServiceId] = useState(photo.serviceId ?? NONE)
   const [specialistId, setSpecialistId] = useState(photo.specialistId ?? NONE)
@@ -60,30 +61,31 @@ export const WorkPhotoSheet = ({
   return (
     <Sheet
       title={
-        step
-          ? t('Photo {index} of {total}', { index: step.index, total: step.total })
-          : t('Work photo')
+        step ? t`Photo ${ph({ index: step.index })} of ${ph({ total: step.total })}` : t`Work photo`
       }
       onClose={onClose}
       action={{
-        label: isLastStep ? t('Done') : t('Next'),
+        label: isLastStep ? t`Done` : t`Next`,
         onClick: () => void save(),
         disabled: isSaving,
       }}
     >
       <div className={sheet.form}>
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-        <img src={photo.url} alt={t('Work photo')} className={styles.preview} />
-        <section className={sheet.group} aria-label={t('What is in the photo')}>
+        <img src={photo.url} alt={t`Finished work`} className={styles.preview} />
+        <section className={sheet.group} aria-label={t`What is in the photo`}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Service')}</span>
+              <span className={sheet.rowLabel}>{t`Service`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Service in the photo')}
+                  aria-label={t`Service in the photo`}
                   items={[
-                    { value: NONE, label: t('Not set') },
+                    {
+                      value: NONE,
+                      label: t({ message: 'Not set', context: 'no service chosen, feminine' }),
+                    },
                     ...services.map((service) => ({ value: service.id, label: service.name })),
                   ]}
                   value={serviceId}
@@ -99,13 +101,16 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Specialist')}</span>
+              <span className={sheet.rowLabel}>{t`Specialist`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Specialist in the photo')}
+                  aria-label={t`Specialist in the photo`}
                   items={[
-                    { value: NONE, label: t('Any') },
+                    {
+                      value: NONE,
+                      label: t({ message: 'Any', context: 'any specialist, masculine' }),
+                    },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   value={specialistId}
@@ -114,7 +119,7 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Show to clients')}</span>
+              <span className={sheet.rowLabel}>{t`Show to clients`}</span>
               <Switch checked={isShown} onCheckedChange={setIsShown} />
             </label>
             {onMakeFirst && (
@@ -123,18 +128,16 @@ export const WorkPhotoSheet = ({
                 className={`${sheet.row} ${styles.rowAction}`}
                 onClick={onMakeFirst}
               >
-                {t('Put first')}
+                {t`Put first`}
               </button>
             )}
           </div>
           <p className={sheet.groupFooter}>
             {photo.reports > 0 && photo.isHidden
-              ? t('Hidden after reports ({count}). Turn it on if the photo is fine.', {
-                  count: photo.reports,
-                })
+              ? t`Hidden after reports (${ph({ count: photo.reports })}). Turn it on if the photo is fine.`
               : serviceId === NONE
-                ? t('Set the service: in the “Work” feed the photo gets “Book” for it.')
-                : t('In the “Work” feed the photo shows the price, the next free time and “Book”.')}
+                ? t`Set the service: in the “Work” feed the photo gets “Book” for it.`
+                : t`In the “Work” feed the photo shows the price, the next free time and “Book”.`}
           </p>
         </section>
         <HoldButton
@@ -143,7 +146,7 @@ export const WorkPhotoSheet = ({
             onClose()
           }}
         >
-          {t('Delete photo')}
+          {t`Delete photo`}
         </HoldButton>
       </div>
     </Sheet>

@@ -1,6 +1,6 @@
+import { msg, plural } from '@lingui/core/macro'
 import type { PublicProfile } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
-import { pluralize } from '@/shared/lib/plural'
 
 // «Next goal» on one's own profile: which medal is closest, what is left and where to go
 // for it (pure, unit-tested in `tests/goals.test.ts`).
@@ -32,74 +32,74 @@ const pickNextGoal = (items: Achievement[]) =>
       return left(first) - left(second)
     })[0] ?? null
 
-/** What is left and where to go for it; `t` translates (plain English without it, for tests). */
-const describeGoal = (achievement: Achievement, places: Place[], t?: Translate): Goal => {
-  const say = (text: string, vars?: Record<string, string | number>) =>
-    t ? t(text, vars) : text.replace(/\{(\w+)\}/g, (_, key: string) => String(vars?.[key] ?? ''))
-  const count = (value: number, forms: [string, string]) =>
-    t ? t.count(value, forms) : pluralize(value, forms)
+/** What is left and where to go for it, in the page's language. */
+const describeGoal = (achievement: Achievement, places: Place[], t: Translate): Goal => {
   const left = Math.max(1, achievement.progress.target - achievement.progress.current)
-  const book = { label: say('Book'), href: '/' }
+  const book = { label: t(msg`Book`), href: '/' }
   const top = places[0]
 
   switch (achievement.id) {
-    case 'regular':
+    case 'regular': {
+      if (!top) {
+        return {
+          achievement,
+          hint: t(
+            msg`${plural(left, { one: '# visit more to one place', other: '# visits more to one place' })}`,
+          ),
+          action: book,
+        }
+      }
+      const place = top.name
       return {
         achievement,
-        hint: top
-          ? say('{visits} more at {place}', {
-              visits: count(left, ['visit', 'visits']),
-              place: top.name,
-            })
-          : say('{visits} more to one place', {
-              visits: count(left, ['visit', 'visits']),
-            }),
-        action: top ? { label: say('Book'), href: `/${top.slug}/book` } : book,
+        hint: t(
+          msg`${plural(left, { one: `# visit more at ${place}`, other: `# visits more at ${place}` })}`,
+        ),
+        action: { label: t(msg`Book`), href: `/${top.slug}/book` },
       }
+    }
     case 'explorer':
       return {
         achievement,
-        hint: say('Try {kinds} more', {
-          kinds: count(left, ['kind of service', 'kinds of service']),
-        }),
+        hint: t(
+          msg`${plural(left, { one: 'Try # kind of service more', other: 'Try # kinds of service more' })}`,
+        ),
         action: book,
       }
     case 'places-5':
       return {
         achievement,
-        hint: say('{places} more', {
-          places: count(left, ['new place', 'new places']),
-        }),
-        action: { label: say('On the map'), href: '/map' },
+        hint: t(msg`${plural(left, { one: '# new place more', other: '# new places more' })}`),
+        action: { label: t(msg`On the map`), href: '/map' },
       }
     case 'early-bird':
       return {
         achievement,
-        hint: say('{visits} more before 10:00', {
-          visits: count(left, ['visit', 'visits']),
-        }),
+        hint: t(
+          msg`${plural(left, { one: '# visit more before 10:00', other: '# visits more before 10:00' })}`,
+        ),
         action: book,
       }
     case 'first-review':
     case 'critic':
       return {
         achievement,
-        hint: say('{reviews} more', { reviews: count(left, ['review', 'reviews']) }),
-        action: { label: say('Rate'), href: '#profile-reviews' },
+        hint: t(msg`${plural(left, { one: '# review more', other: '# reviews more' })}`),
+        action: { label: t(msg`Rate`), href: '#profile-reviews' },
       }
     case 'friend':
     case 'friends-3':
       return {
         achievement,
-        hint: say('{friends} more by your link', {
-          friends: count(left, ['friend', 'friends']),
-        }),
+        hint: t(
+          msg`${plural(left, { one: '# friend more by your link', other: '# friends more by your link' })}`,
+        ),
         action: null,
       }
     default:
       return {
         achievement,
-        hint: say('{visits} more', { visits: count(left, ['visit', 'visits']) }),
+        hint: t(msg`${plural(left, { one: '# visit more', other: '# visits more' })}`),
         action: book,
       }
   }

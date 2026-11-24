@@ -1,6 +1,7 @@
 'use client'
 
-import NextLink from 'next/link'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { CSSProperties } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { getCabinetHref, hasCabinet, useSession } from '@/entities/session'
@@ -11,14 +12,14 @@ import {
   isStandalonePath,
   NAV_ITEMS,
 } from '@/shared/config/navigation'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useCabinetEntry } from '@/shared/lib/hooks/useCabinetEntry'
 import { useChromePathname } from '@/shared/lib/hooks/useChromePathname'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './TabBar.module.css'
 
 export const TabBar = () => {
-  const t = useT()
+  const { t } = useLingui()
   const pathname = useChromePathname()
   const { customer } = useSession()
   // Reading down a long page, the bar steps aside like Safari's toolbar; any scroll up brings it
@@ -31,7 +32,7 @@ export const TabBar = () => {
     customer && hasCabinet(customer)
       ? NAV_ITEMS.map((item) =>
           item.href === '/business'
-            ? { ...item, href: getCabinetHref(customer), label: 'Dashboard' }
+            ? { ...item, href: getCabinetHref(customer), label: msg`Dashboard` }
             : item,
         )
       : NAV_ITEMS
@@ -42,7 +43,7 @@ export const TabBar = () => {
 
   return (
     <nav
-      aria-label={t('Bottom menu')}
+      aria-label={t`Bottom menu`}
       data-site-tabbar
       className={styles.tabBar}
       data-tucked={isTucked || undefined}
@@ -66,7 +67,7 @@ export const TabBar = () => {
           >
             {href === '/bookings' && customer ? (
               <PersonAvatar
-                name={customer.name || t('Profile')}
+                name={customer.name || t`Profile`}
                 src={customer.avatarUrl ?? undefined}
                 size='sm'
                 className={styles.avatar}

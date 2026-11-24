@@ -5,8 +5,9 @@ import { Checkbox } from '@awaisa/ui/Checkbox'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Check, X } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type CSSProperties, type FormEvent, useEffect, useState } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
@@ -14,7 +15,8 @@ import { KIND_ICONS, KIND_TINTS } from '@/shared/config/kindStyles'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { WHOLE_PHONE_DIGITS } from '@/shared/config/region'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -26,31 +28,38 @@ import styles from './CreateBusinessPage.module.css'
 const TINT_DELAY_MS = 400
 
 const STEP_TITLES = {
-  name: { title: 'What’s it called?', subtitle: ' This is how people find you in the catalogue.' },
-  kind: { title: 'What do you do?', subtitle: ' We’ll fill in services for your menu.' },
+  name: {
+    title: msg`What’s it called?`,
+    subtitle: msg` This is how people find you in the catalogue.`,
+  },
+  kind: { title: msg`What do you do?`, subtitle: msg` We’ll fill in services for your menu.` },
   services: {
-    title: 'What’s on the menu?',
-    subtitle: ' Remove what you don’t need and fix the prices.',
+    title: msg`What’s on the menu?`,
+    subtitle: msg` Remove what you don’t need and fix the prices.`,
   },
   contacts: {
-    title: 'Where can clients find you?',
-    subtitle: ' Set up the rest in the dashboard.',
+    title: msg`Where can clients find you?`,
+    subtitle: msg` Set up the rest in the dashboard.`,
   },
 }
 
 export const CreateBusinessPage = () => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const session = useRequireSession()
   const form = useCreateBusinessForm()
   const heading = STEP_TITLES[form.step]
   const isLast = form.stepNumber === form.stepCount
   const [tintName, setTintName] = useState(form.name)
-  const kindLabel = BUSINESS_KINDS.find((kind) => kind.value === form.kind)?.label ?? ''
+  const kindLabel = BUSINESS_KINDS.find((kind) => kind.value === form.kind)?.label
   const where = [form.city.trim(), form.address.trim()].filter(Boolean).join(', ')
   const previewFacts =
     form.step === 'name' || form.step === 'kind'
       ? [`awaisa.kg/${form.slug || 'barber-pro'}`]
-      : [t(kindLabel), form.step === 'contacts' && where ? where : `awaisa.kg/${form.slug}`]
+      : [
+          kindLabel ? t(kindLabel) : '',
+          form.step === 'contacts' && where ? where : `awaisa.kg/${form.slug}`,
+        ]
   // How much of each step is filled: the open step's segment grows as its fields are filled in.
   const stepFill = {
     name: (form.name.trim().length >= 2 ? 0.5 : 0) + (form.isSlugAvailable ? 0.5 : 0),
@@ -91,16 +100,13 @@ export const CreateBusinessPage = () => {
         {/* A screen of its own, like sign-in: ✕ back to the business landing, beside it how far
             along (done steps lit, the open one filling up as its fields are filled in). */}
         <div className={styles.topBar}>
-          <NextLink href='/business' className={styles.close} aria-label={t('Close')}>
+          <NextLink href='/business' className={styles.close} aria-label={t`Close`}>
             <X aria-hidden />
           </NextLink>
           <div
             className={styles.progress}
             role='progressbar'
-            aria-label={t('{done} of {total} done', {
-              done: form.stepNumber - 1,
-              total: form.stepCount,
-            })}
+            aria-label={t`${ph({ done: form.stepNumber - 1 })} of ${ph({ total: form.stepCount })} done`}
             aria-valuemin={0}
             aria-valuemax={form.stepCount}
             aria-valuenow={form.stepNumber - 1}
@@ -122,7 +128,7 @@ export const CreateBusinessPage = () => {
           <BusinessTile name={tintName || 'awaisa'} size='md' />
           <span className={styles.previewText}>
             <span className={styles.previewName} data-empty={!form.name.trim() || undefined}>
-              {form.name.trim() || t('Your page')}
+              {form.name.trim() || t`Your page`}
             </span>
             <span className={styles.previewFacts}>
               {previewFacts.map((fact) => (
@@ -146,27 +152,29 @@ export const CreateBusinessPage = () => {
               {form.step === 'name' && (
                 // Settings rows right on the page: the label on the left, the value typed on the right.
                 <div className={styles.rows}>
-                  <Field label={t('Name')} error={form.errors.name} className={styles.fieldRow}>
+                  <Field
+                    label={t({ message: 'Name', context: 'name of a thing, not a person' })}
+                    error={form.errors.name}
+                    className={styles.fieldRow}
+                  >
                     <Input
                       variant='plain'
                       value={form.name}
                       onValueChange={form.setName}
-                      placeholder={t('For example, Barber Pro')}
+                      placeholder={t`For example, Barber Pro`}
                       autoComplete='organization'
                       enterKeyHint='next'
                       autoFocus
                     />
                   </Field>
                   <Field
-                    label={t('Link')}
+                    label={t`Link`}
                     error={form.errors.slug}
                     // "Address" read as the street: the link is said to be what clients get.
                     description={
                       form.isSlugAvailable
-                        ? t('Available: awaisa.kg/{slug}, the link clients get', {
-                            slug: form.slug,
-                          })
-                        : t('Latin letters, numbers and hyphens')
+                        ? t`Available: awaisa.kg/${ph({ slug: form.slug })}, the link clients get`
+                        : t`Latin letters, numbers and hyphens`
                     }
                     className={styles.fieldRow}
                   >
@@ -192,7 +200,7 @@ export const CreateBusinessPage = () => {
               {form.step === 'kind' && (
                 // One tap picks the kind and moves on, like the first pick in booking: rows on
                 // the page, the glyph bare in its colour, a check on the one chosen before.
-                <ul className={styles.kinds} aria-label={t('What you do')}>
+                <ul className={styles.kinds} aria-label={t`What you do`}>
                   {BUSINESS_KINDS.map((kind) => {
                     const Glyph = KIND_ICONS[kind.value]
                     const examples = SERVICE_TEMPLATES[kind.value]
@@ -215,9 +223,7 @@ export const CreateBusinessPage = () => {
                           <span className={styles.kindBody}>
                             <span className={styles.kindTitle}>{t(kind.label)}</span>
                             <span className={styles.kindNote}>
-                              {examples.length > 0
-                                ? examples.join(', ')
-                                : t('Your own service menu')}
+                              {examples.length > 0 ? examples.join(', ') : t`Your own service menu`}
                             </span>
                           </span>
                           {isChosen ? (
@@ -234,7 +240,7 @@ export const CreateBusinessPage = () => {
 
               {form.step === 'services' &&
                 (form.templates.length > 0 ? (
-                  <section className={styles.group} aria-label={t('Services')}>
+                  <section className={styles.group} aria-label={t`Services`}>
                     <ul className={styles.list}>
                       {form.templates.map((template) => (
                         <li key={template.name} className={styles.serviceRow}>
@@ -251,15 +257,15 @@ export const CreateBusinessPage = () => {
                           >
                             <span className={styles.serviceName}>{template.name}</span>
                             <span className={styles.serviceMeta}>
-                              {t.duration(template.durationMinutes)}
+                              {format.duration(template.durationMinutes)}
                             </span>
                           </span>
                           <span className={styles.price}>
                             <Input
                               variant='plain'
                               inputMode='numeric'
-                              aria-label={t('Price: {name}, som', { name: template.name })}
-                              value={maskAmountInput(template.price)}
+                              aria-label={t`Price: ${ph({ name: template.name })}, som`}
+                              value={maskAmountInput(template.price, format.locale)}
                               onValueChange={(value) =>
                                 form.editTemplate(template.name, {
                                   price: value.replace(/\D/g, ''),
@@ -268,24 +274,24 @@ export const CreateBusinessPage = () => {
                               }
                               disabled={!template.isChecked}
                             />
-                            <span className={styles.suffix}>{t('som')}</span>
+                            <span className={styles.suffix}>{format.currency}</span>
                           </span>
                         </li>
                       ))}
                     </ul>
                     <p className={styles.groupFooter}>
-                      {t('You can change prices and durations in the dashboard any time.')}
+                      {t`You can change prices and durations in the dashboard any time.`}
                     </p>
                   </section>
                 ) : (
                   <p className={styles.groupFooter}>
-                    {t('Add services in the dashboard: name, duration and price.')}
+                    {t`Add services in the dashboard: name, duration and price.`}
                   </p>
                 ))}
 
               {form.step === 'contacts' && (
                 <div className={styles.rows}>
-                  <Field label={t('City')} className={styles.fieldRow}>
+                  <Field label={t`City`} className={styles.fieldRow}>
                     <Input
                       variant='plain'
                       value={form.city}
@@ -295,19 +301,19 @@ export const CreateBusinessPage = () => {
                       autoFocus
                     />
                   </Field>
-                  <Field label={t('Address')} className={styles.fieldRow}>
+                  <Field label={t`Address`} className={styles.fieldRow}>
                     <Input
                       variant='plain'
                       value={form.address}
                       onValueChange={form.setAddress}
-                      placeholder={t('Optional')}
+                      placeholder={t`Optional`}
                       autoComplete='street-address'
                       enterKeyHint='next'
                     />
                   </Field>
                   <Field
-                    label={t('Phone')}
-                    description={t('Shown on the page and the WhatsApp button')}
+                    label={t`Phone`}
+                    description={t`Shown on the page and the WhatsApp button`}
                     className={styles.fieldRow}
                   >
                     <Input
@@ -329,12 +335,12 @@ export const CreateBusinessPage = () => {
             <div className={styles.actions}>
               {form.stepNumber > 1 && (
                 <Button type='button' variant='ghost' onClick={form.goBack} className={styles.back}>
-                  {t('Back')}
+                  {t`Back`}
                 </Button>
               )}
               {form.step !== 'kind' && (
                 <Button type='submit' disabled={form.isSubmitting} className={styles.next}>
-                  {isLast ? t(form.isSubmitting ? 'Creating…' : 'Create a page') : t('Next')}
+                  {isLast ? (form.isSubmitting ? t`Creating…` : t`Create a page`) : t`Next`}
                 </Button>
               )}
             </div>

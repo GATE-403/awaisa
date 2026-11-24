@@ -1,15 +1,19 @@
 'use client'
 
 import { Button, ButtonLink } from '@awaisa/ui/Button'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { CheckCircle, LockSimple, WarningCircle } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { formatDayLong, formatPrice } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { completeTestPayment, syncPayment } from '@/shared/api/clientApi'
 import type { PaymentPage } from '@/shared/api/types'
+import { useLocale } from '@/shared/i18n'
+import { INTL_LOCALES } from '@/shared/i18n/locales'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackStep } from '@/shared/lib/telemetry'
 import { Container } from '@/shared/ui/Container/Container'
@@ -20,40 +24,40 @@ const businessOf = (payment: PaymentPage) =>
   payment.booking?.business ?? payment.order?.business ?? { name: '', slug: '' }
 
 type OrderCopy = {
-  doneTitle: string
+  doneTitle: MessageDescriptor
   doneHref: (slug: string) => string
-  doneLabel: string
-  expiredText: string
+  doneLabel: MessageDescriptor
+  expiredText: MessageDescriptor
   retryHref: (slug: string) => string
-  retryLabel: string
+  retryLabel: MessageDescriptor
 }
 
 // What a paid or expired order says and where it leads, per order kind.
 const GIFT_COPY: OrderCopy = {
-  doneTitle: 'Paid. Your certificate is ready',
+  doneTitle: msg`Paid. Your certificate is ready`,
   doneHref: (slug) => `/${slug}`,
-  doneLabel: "To the place's page",
-  expiredText: 'No money was taken. Order the certificate again.',
+  doneLabel: msg`To the place's page`,
+  expiredText: msg`No money was taken. Order the certificate again.`,
   retryHref: (slug) => `/${slug}#gift`,
-  retryLabel: 'To certificates',
+  retryLabel: msg`To certificates`,
 }
 
 const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
   subscription: {
-    doneTitle: 'Paid. The pass is yours',
+    doneTitle: msg`Paid. The pass is yours`,
     doneHref: () => '/bookings',
-    doneLabel: 'My passes and bookings',
-    expiredText: 'No money was taken. Order the pass again.',
+    doneLabel: msg`My passes and bookings`,
+    expiredText: msg`No money was taken. Order the pass again.`,
     retryHref: (slug) => `/${slug}#subscriptions`,
-    retryLabel: 'To passes',
+    retryLabel: msg`To passes`,
   },
   billing: {
-    doneTitle: 'Paid',
+    doneTitle: msg`Paid`,
     doneHref: (slug) => `/manage/${slug}?tab=billing`,
-    doneLabel: 'Back to the dashboard',
-    expiredText: 'No money was taken. Pay again in “Plan”.',
+    doneLabel: msg`Back to the dashboard`,
+    expiredText: msg`No money was taken. Pay again in “Plan”.`,
     retryHref: (slug) => `/manage/${slug}?tab=billing`,
-    retryLabel: 'To the plan',
+    retryLabel: msg`To the plan`,
   },
 }
 
@@ -66,6 +70,9 @@ interface PayPageProps {
 // is the acquirer; a real one sends the client to its own form and back here. A paid deposit
 // goes on to /bookings?paid=<booking>; a paid order says so right here.
 export const PayPage = ({ payment, signature }: PayPageProps) => {
+  const { t } = useLingui()
+  const format = useFormat()
+  const locale = useLocale()
   const router = useRouter()
   const [isPaying, setIsPaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -107,10 +114,14 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               data-tone='danger'
               aria-hidden
             />
-            <h1 className={styles.title}>The link didn't open</h1>
-            <p className={styles.text}>Check the link or open the booking in your profile.</p>
+            <h1 className={styles.title}>
+              <Trans>The link didn't open</Trans>
+            </h1>
+            <p className={styles.text}>
+              <Trans>Check the link or open the booking in your profile.</Trans>
+            </p>
             <NextLink href='/bookings' className={styles.link}>
-              My bookings ›
+              <Trans>My bookings ›</Trans>
             </NextLink>
           </div>
         </Container>
@@ -131,6 +142,14 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     payment.status === 'failed'
   const dueAt = booking?.dueAt ?? order?.dueAt ?? null
   const copy = (order && ORDER_COPY[order.kind]) ?? GIFT_COPY
+  const rest = booking ? format.price(Math.max(booking.price - payment.amount, 0)) : ''
+  const dueTime = dueAt
+    ? new Date(dueAt).toLocaleTimeString(INTL_LOCALES[locale], {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Bishkek',
+      })
+    : ''
 
   const handlePay = async () => {
     const slug = business.slug
@@ -164,19 +183,18 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               <p className={styles.placeName}>{business.name}</p>
               <p className={styles.placeMeta}>
                 {booking
-                  ? `${booking.serviceName} · ${formatDayLong(booking.date)}, ${booking.time}`
+                  ? `${booking.serviceName} · ${format.dayLong(booking.date)}, ${booking.time}`
                   : order?.title}
               </p>
             </div>
           </div>
 
           <div className={styles.amount}>
-            <p className={styles.amountLabel}>{booking ? 'Deposit' : 'To pay'}</p>
-            <p className={styles.amountValue}>{formatPrice(payment.amount)}</p>
+            <p className={styles.amountLabel}>{booking ? t`Deposit` : t`To pay`}</p>
+            <p className={styles.amountValue}>{format.price(payment.amount)}</p>
             {booking ? (
               <p className={styles.amountNote}>
-                The rest, {formatPrice(Math.max(booking.price - payment.amount, 0))}, at the salon.
-                Refunded if you cancel a day ahead.
+                <Trans>The rest, {rest}, at the salon. Refunded if you cancel a day ahead.</Trans>
               </p>
             ) : (
               order?.details && <p className={styles.amountNote}>{order.details}</p>
@@ -191,14 +209,14 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='success'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>{copy.doneTitle}</p>
+              <p className={styles.stateTitle}>{t(copy.doneTitle)}</p>
               <p className={styles.text}>{order.doneText}</p>
               <ButtonLink
                 render={<NextLink href={copy.doneHref(business.slug)} />}
                 size='lg'
                 fullWidth
               >
-                {copy.doneLabel}
+                {t(copy.doneLabel)}
               </ButtonLink>
             </div>
           ) : isPaid ? (
@@ -209,9 +227,11 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='success'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Paid - you're booked</p>
+              <p className={styles.stateTitle}>
+                <Trans>Paid - you're booked</Trans>
+              </p>
               <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
-                My bookings
+                <Trans>My bookings</Trans>
               </ButtonLink>
             </div>
           ) : isExpired && order ? (
@@ -222,14 +242,16 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='danger'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Time to pay has run out</p>
-              <p className={styles.text}>{copy.expiredText}</p>
+              <p className={styles.stateTitle}>
+                <Trans>Time to pay has run out</Trans>
+              </p>
+              <p className={styles.text}>{t(copy.expiredText)}</p>
               <ButtonLink
                 render={<NextLink href={copy.retryHref(business.slug)} />}
                 size='lg'
                 fullWidth
               >
-                {copy.retryLabel}
+                {t(copy.retryLabel)}
               </ButtonLink>
             </div>
           ) : isExpired ? (
@@ -240,18 +262,22 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='danger'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Time to pay has run out</p>
+              <p className={styles.stateTitle}>
+                <Trans>Time to pay has run out</Trans>
+              </p>
               <p className={styles.text}>
-                The booking was released and the time is free again. Choose it again.
+                <Trans>The booking was released and the time is free again. Choose it again.</Trans>
               </p>
               <ButtonLink render={<NextLink href={`/${business.slug}/book`} />} size='lg' fullWidth>
-                Book again
+                <Trans context='client books again'>Book again</Trans>
               </ButtonLink>
             </div>
           ) : (
             <div className={styles.state}>
               {payment.driver === 'test' && (
-                <p className={styles.testBadge}>Test mode - no money is taken</p>
+                <p className={styles.testBadge}>
+                  <Trans>Test mode - no money is taken</Trans>
+                </p>
               )}
               {payment.driver === 'freedompay' && payment.checkoutUrl ? (
                 <ButtonLink
@@ -266,26 +292,26 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                   }
                 >
                   <LockSimple aria-hidden />
-                  {isChecking ? 'Checking the payment…' : `Pay ${formatPrice(payment.amount)}`}
+                  {isChecking
+                    ? t`Checking the payment…`
+                    : t`Pay ${ph({ amount: format.price(payment.amount) })}`}
                 </ButtonLink>
               ) : (
                 <Button size='lg' fullWidth onClick={handlePay} disabled={isPaying}>
                   <LockSimple aria-hidden />
-                  {isPaying ? 'Paying…' : `Pay ${formatPrice(payment.amount)}`}
+                  {isPaying ? t`Paying…` : t`Pay ${ph({ amount: format.price(payment.amount) })}`}
                 </Button>
               )}
               {payment.driver === 'freedompay' && (
-                <p className={styles.text}>Card payment through Freedom Pay.</p>
+                <p className={styles.text}>
+                  <Trans>Card payment through Freedom Pay.</Trans>
+                </p>
               )}
               {dueAt && (
                 <p className={styles.text}>
-                  {booking ? 'We hold the time until ' : 'Pay by '}
-                  {new Date(dueAt).toLocaleTimeString('en-GB', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    timeZone: 'Asia/Bishkek',
-                  })}
-                  {booking ? ', then it is released.' : '.'}
+                  {booking
+                    ? t`We hold the time until ${ph({ time: dueTime })}, then it is released.`
+                    : t`Pay by ${ph({ time: dueTime })}.`}
                 </p>
               )}
               {error && (

@@ -2,10 +2,11 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Copy, DownloadSimple, ShareNetwork } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { canShareLinks, copyText, shareLink } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -30,7 +31,7 @@ const QR_PNG_SIZE = 1024
 // branch chosen). On a phone the system share sheet is one tap away too.
 export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheetProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [origin, setOrigin] = useState('')
   const [qr, setQr] = useState<QrMatrix | null>(null)
   const pageUrl = `${origin}/${slug}`
@@ -57,7 +58,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
   const copy = async (url: string, title: string) => {
     const isCopied = await copyText(url)
     if (isCopied) toast.show({ title, type: 'success' })
-    else toast.show({ title: t('Could not copy'), type: 'error' })
+    else toast.show({ title: t`Could not copy`, type: 'error' })
   }
 
   const download = async () => {
@@ -71,7 +72,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
 
   const share = async () => {
     const result = await shareLink({ title: businessName, url: pageUrl })
-    if (result === 'failed') toast.show({ title: t('Could not share'), type: 'error' })
+    if (result === 'failed') toast.show({ title: t`Could not share`, type: 'error' })
   }
 
   // One path of unit squares: crisp at any size, no image to load.
@@ -84,7 +85,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
     : ''
 
   return (
-    <Sheet title={t('Share')} onClose={onClose} cancelLabel={t('Close')}>
+    <Sheet title={t`Share`} onClose={onClose} cancelLabel={t`Close`}>
       <div className={sheet.form}>
         <figure className={styles.qr}>
           {qr ? (
@@ -92,7 +93,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
               viewBox={`-2 -2 ${qr.size + 4} ${qr.size + 4}`}
               className={styles.qrCode}
               role='img'
-              aria-label={t('QR code of the {name} page', { name: businessName })}
+              aria-label={t`QR code of the ${ph({ name: businessName })} page`}
               shapeRendering='crispEdges'
             >
               <rect x={-2} y={-2} width={qr.size + 4} height={qr.size + 4} fill='#fff' />
@@ -103,7 +104,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
           )}
           <figcaption className={styles.qrCaption}>
             <span className={styles.qrUrl}>{pageUrl.replace(/^https?:\/\//, '')}</span>
-            {t('Point the camera to open the page. Print it for the counter or the window.')}
+            {t`Point the camera to open the page. Print it for the counter or the window.`}
           </figcaption>
         </figure>
         {/* One line: the link copied as the main action, the QR and the system share as glyphs. */}
@@ -112,26 +113,26 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
             type='button'
             size='sm'
             className={styles.shareCopy}
-            onClick={() => void copy(pageUrl, t('Page link copied'))}
+            onClick={() => void copy(pageUrl, t`Page link copied`)}
           >
             <Copy aria-hidden />
-            {t('Copy link')}
+            {t`Copy link`}
           </Button>
-          <GlyphGroup label={t('More')}>
+          <GlyphGroup label={t`More`}>
             <GlyphButton
               icon={<DownloadSimple />}
-              label={t('Download QR')}
+              label={t`Download QR`}
               onClick={() => void download()}
             />
             {canShare && (
-              <GlyphButton icon={<ShareNetwork />} label={t('Send')} onClick={() => void share()} />
+              <GlyphButton icon={<ShareNetwork />} label={t`Send`} onClick={() => void share()} />
             )}
           </GlyphGroup>
         </div>
 
         {activeBranches.length > 1 && (
-          <section className={sheet.group} aria-label={t('Booking links')}>
-            <SectionCaption>{t('Booking by branch')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`Booking links`}>
+            <SectionCaption>{t`Booking by branch`}</SectionCaption>
             <div className={sheet.list}>
               {activeBranches.map((branch) => (
                 <button
@@ -141,22 +142,20 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
                   onClick={() =>
                     void copy(
                       `${pageUrl}/book?branch=${branch.id}`,
-                      t('Booking link for “{name}” copied', { name: branch.name }),
+                      t`Booking link for “${ph({ name: branch.name })}” copied`,
                     )
                   }
                 >
                   <span className={sheet.rowLabel}>{branch.name}</span>
                   <span className={styles.sheetValue}>
-                    {t('Copy')}
+                    {t`Copy`}
                     <Copy aria-hidden />
                   </span>
                 </button>
               ))}
             </div>
             <p className={sheet.groupFooter}>
-              {t(
-                'The client lands in booking with this branch chosen. Put the page link in your Instagram bio and on 2GIS.',
-              )}
+              {t`The client lands in booking with this branch chosen. Put the page link in your Instagram bio and on 2GIS.`}
             </p>
           </section>
         )}

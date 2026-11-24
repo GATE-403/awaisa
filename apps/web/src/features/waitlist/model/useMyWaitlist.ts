@@ -1,6 +1,7 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
@@ -11,7 +12,6 @@ import {
   leaveWaitlist,
 } from '@/shared/api/clientApi'
 import type { WaitlistEntry } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import {
   forgetWaitlistEntry,
@@ -28,7 +28,7 @@ export const useMyWaitlist = () => {
   const session = useSession()
   const today = useToday()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [account, setAccount] = useState<WaitlistEntry[]>([])
   const isSignedIn = session.status === 'signedIn'
   const idsKey = stored.map((item) => item.id).join(',')
@@ -76,10 +76,10 @@ export const useMyWaitlist = () => {
       else await leaveMyWaitlist(id)
       forgetWaitlistEntry(id)
       setAccount((current) => current.filter((entry) => entry.id !== id))
-      toast.show({ title: t('No longer waiting'), type: 'success' })
+      toast.show({ title: t`No longer waiting`, type: 'success' })
     } catch (error) {
       toast.show({
-        title: 'Something went wrong',
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })

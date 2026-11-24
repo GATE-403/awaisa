@@ -1,12 +1,13 @@
 'use client'
 
-import NextLink from 'next/link'
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { ReviewPhotos, Stars } from '@/entities/review'
 import type { PublicProfile } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from '../ProfilePage.module.css'
 
@@ -16,15 +17,12 @@ interface ProfileReviewsProps {
 }
 
 const FIRST = 3
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: BUSINESS_TIME_ZONE,
-})
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }
 
 // Three reviews as a thread on the page, the rest behind «N more» on a fade.
 export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [isAll, setIsAll] = useState(false)
   const hidden = Math.max(0, reviews.length - FIRST)
 
@@ -33,7 +31,7 @@ export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => 
       hiddenCount={hidden}
       isOpen={isAll}
       onToggle={() => setIsAll((value) => !value)}
-      label={t.count(hidden, ['review', 'reviews']).replace(/^\d+ /, '')}
+      label={t`${plural(hidden, { one: '# review', other: '# reviews' })}`.replace(/^\d+ /, '')}
     >
       <ul className={styles.reviews}>
         {reviews.slice(0, isAll ? reviews.length : FIRST).map((review) => (
@@ -46,7 +44,7 @@ export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => 
               />
               <span className={styles.reviewPlaceName}>{review.business.name}</span>
               <span className={styles.reviewDate}>
-                {dateFormatter.format(new Date(review.createdAt))}
+                {format.date(review.createdAt, DATE_OPTIONS)}
               </span>
             </NextLink>
             <div className={styles.reviewBody}>

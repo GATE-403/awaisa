@@ -1,4 +1,6 @@
 import { useToast } from '@awaisa/ui/Toast'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useCallback, useEffect, useState } from 'react'
 import { markOwnBooking } from '@/features/bookingAlerts'
 import { getErrorMessage } from '@/shared/api/apiError'
@@ -19,7 +21,6 @@ import type {
   CreateTimeOffInput,
   OutcomeInput,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackToastAction } from '@/shared/lib/telemetry'
 
@@ -28,7 +29,7 @@ const UNDO_TIMEOUT_MS = 12_000
 
 export const useAdminSchedule = (slug: string, date: string | null, refreshKey = 0) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [schedule, setSchedule] = useState<AdminSchedule | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [version, setVersion] = useState(0)
@@ -58,7 +59,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return true
     } catch (actionError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(actionError),
         type: 'error',
       })
@@ -69,10 +70,10 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const restore = async (id: string) => {
     try {
       await restoreBookingAsSalon(slug, id)
-      toast.show({ title: t('Booking restored'), type: 'success' })
+      toast.show({ title: t`Booking restored`, type: 'success' })
     } catch (restoreError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(restoreError),
         type: 'error',
       })
@@ -85,12 +86,12 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     try {
       await cancelBookingAsSalon(slug, id)
       toast.show({
-        title: t('Booking cancelled'),
-        description: t('The client gets an SMS in 15 seconds'),
+        title: t`Booking cancelled`,
+        description: t`The client gets an SMS in 15 seconds`,
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: t('Undo'),
+          label: t`Undo`,
           onClick: () => {
             trackToastAction('staff_undo_cancel')
             void restore(id)
@@ -101,7 +102,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return true
     } catch (cancelError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(cancelError),
         type: 'error',
       })
@@ -113,10 +114,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     runAction(async () => {
       const booking = await createStaffBooking(slug, input)
       markOwnBooking(booking.id)
-      return t('{name} is booked for {time}, the client got an SMS', {
-        name: booking.customerName,
-        time: booking.time,
-      })
+      return t`${ph({ name: booking.customerName })} is booked for ${ph({ time: booking.time })}, the client got an SMS`
     })
 
   const moveBooking = async (booking: AdminBooking, specialistId: string, time: string) => {
@@ -125,26 +123,23 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       const moved = await moveBookingAsSalon(slug, booking.id, { date, time, specialistId })
       haptic('success')
       toast.show({
-        title: t('Moved to {time}', { time: moved.time }),
-        description: t('{name} · {master}. The client gets an SMS in 15 seconds', {
-          name: moved.customerName,
-          master: moved.specialistName,
-        }),
+        title: t`Moved to ${ph({ time: moved.time })}`,
+        description: t`${ph({ name: moved.customerName })} · ${ph({ master: moved.specialistName })}. The client gets an SMS in 15 seconds`,
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: t('Undo'),
+          label: t`Undo`,
           onClick: () =>
             void runAction(async () => {
               trackToastAction('staff_undo_move')
               await moveBookingAsSalon(slug, booking.id, moved.previous)
-              return t('The booking is back in place')
+              return t`The booking is back in place`
             }),
         },
       })
     } catch (moveError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(moveError),
         type: 'error',
       })
@@ -155,11 +150,9 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const addTimeOff = (input: CreateTimeOffInput) =>
     runAction(async () => {
       const { conflictingBookingIds } = await createTimeOff(slug, input)
-      if (conflictingBookingIds.length === 0) return t('Time blocked')
+      if (conflictingBookingIds.length === 0) return t`Time blocked`
 
-      return t('Time blocked. It has {count}: cancel or move them', {
-        count: t.count(conflictingBookingIds.length, ['booking', 'bookings']),
-      })
+      return t`Time blocked. It has ${plural(conflictingBookingIds.length, { one: '# booking', other: '# bookings' })}: cancel or move them`
     })
 
   // Marking a visit is quiet (a tick, no toast): staff do it many times a day.
@@ -178,7 +171,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
       return updated
     } catch (outcomeError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(outcomeError),
         type: 'error',
       })
@@ -189,7 +182,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
   const removeTimeOff = (id: string) =>
     runAction(async () => {
       await deleteTimeOff(slug, id)
-      return t('Time open again')
+      return t`Time open again`
     })
 
   return {

@@ -16,7 +16,7 @@ const readAppSegments = () => {
 }
 
 const readRouteFolders = () =>
-  readdirSync(join(WEB_SRC, 'app'), { withFileTypes: true })
+  readdirSync(join(WEB_SRC, 'app/[lang]'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && /^[a-z]/.test(entry.name))
     .map((entry) => entry.name)
 

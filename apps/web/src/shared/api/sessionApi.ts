@@ -1,8 +1,8 @@
 import 'server-only'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { connection } from 'next/server'
 import { API_URL } from '@/shared/config/api'
+import { redirect } from '@/shared/i18n/server'
 import { ApiError, getErrorMessage, toApiError } from './apiError'
 import type {
   Booking,
@@ -53,7 +53,7 @@ const getSessionCustomer = async (): Promise<Customer | null> => {
 // Guests go to the sign-in page before anything renders, then come back here.
 const requireCustomer = async (next: string): Promise<Customer> => {
   const customer = await getSessionCustomer()
-  if (!customer) redirect(`/login?${new URLSearchParams({ next })}`)
+  if (!customer) return redirect(`/login?${new URLSearchParams({ next })}`)
 
   return customer
 }

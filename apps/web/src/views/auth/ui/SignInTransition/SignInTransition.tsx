@@ -1,7 +1,8 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef } from 'react'
-import { useT } from '@/shared/i18n'
 import styles from './SignInTransition.module.css'
 
 interface SignInTransitionProps {
@@ -18,7 +19,7 @@ const LEAVE_QUICKLY = 900
 export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
   // The form re-renders every second (the resend countdown) with a new callback: the timer runs
   // once from the start and calls the latest one.
-  const t = useT()
+  const { t } = useLingui()
   const onDoneRef = useRef(onDone)
   const firstName = name.trim().split(/\s+/)[0] ?? ''
 
@@ -42,11 +43,11 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
       <span className={styles.greeting}>
         {firstName ? (
           <>
-            <span className={styles.hello}>{t('Hi, {name}', { name: firstName })}</span>
-            <span className={styles.note}>{t('You are signed in')}</span>
+            <span className={styles.hello}>{t`Hi, ${ph({ name: firstName })}`}</span>
+            <span className={styles.note}>{t`You are signed in`}</span>
           </>
         ) : (
-          <span className={styles.hello}>{t('You are signed in')}</span>
+          <span className={styles.hello}>{t`You are signed in`}</span>
         )}
       </span>
     </output>

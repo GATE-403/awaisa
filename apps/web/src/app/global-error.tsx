@@ -6,7 +6,7 @@ import '@awaisa/ui/styles.css'
 import { useEffect } from 'react'
 import { reportError } from '@/shared/lib/telemetry'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
-import styles from './error.module.css'
+import styles from './[lang]/error.module.css'
 
 interface GlobalErrorProps {
   error: Error & { digest?: string }

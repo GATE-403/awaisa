@@ -1,19 +1,20 @@
 'use client'
 
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import styles from './OrbitScene.module.css'
 
 const CHIPS = [
-  { text: '10:30 · free', tone: 'free' },
-  { text: '★ 4.9 · 128 reviews', tone: 'rating' },
-  { text: 'New booking · Daniyar', tone: 'accent' },
-  { text: 'Reminder sent', tone: 'plain' },
-  { text: 'Haircut · 900 som', tone: 'plain' },
-  { text: 'Timur · barber', tone: 'plain' },
-  { text: 'Today from 15:00', tone: 'free' },
-  { text: 'Pass in Wallet', tone: 'accent' },
+  { text: msg`10:30 · free`, tone: 'free' },
+  { text: msg`★ 4.9 · 128 reviews`, tone: 'rating' },
+  { text: msg`New booking · Daniyar`, tone: 'accent' },
+  { text: msg`Reminder sent`, tone: 'plain' },
+  { text: msg`Haircut · 900 som`, tone: 'plain' },
+  { text: msg`Timur · barber`, tone: 'plain' },
+  { text: msg`Today from 15:00`, tone: 'free' },
+  { text: msg`Pass in Wallet`, tone: 'accent' },
 ]
 
 const RAYS = 96
@@ -46,7 +47,7 @@ const rays = Array.from({ length: RAYS }, (_, index) => {
 // A small 3D scene with plain CSS transforms: the app icon as a thick glass tile, product chips
 // orbiting around it. The pointer tilts the scene, dragging spins the orbit, a tap sends a pulse.
 export const OrbitScene = () => {
-  const t = useT()
+  const { t } = useLingui()
   const sceneRef = useRef<HTMLDivElement>(null)
   const state = useRef({
     tiltX: 0,
@@ -147,7 +148,7 @@ export const OrbitScene = () => {
         <div className={styles.orbit}>
           {CHIPS.map((chip, index) => (
             <span
-              key={chip.text}
+              key={chip.text.id}
               className={styles.chip}
               data-tone={chip.tone}
               style={

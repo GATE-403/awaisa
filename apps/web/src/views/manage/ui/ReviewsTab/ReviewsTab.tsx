@@ -2,6 +2,8 @@
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowBendDoubleUpLeft,
   ChatCircle,
@@ -29,7 +31,7 @@ import type {
   ReviewReplySettings,
   ReviewSummary,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { useIsStuck } from '@/shared/lib/hooks/useIsStuck'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { FloatingToolbar } from '@/shared/ui/FloatingToolbar/FloatingToolbar'
@@ -40,7 +42,7 @@ import { useCanSeeMoney } from '@/views/manage/model/useManageRole'
 import forms from '@/views/manage/ui/manageForms.module.css'
 import { SectionHeader } from '@/views/manage/ui/SectionHeader/SectionHeader'
 import { ContactClientSheet } from './ContactClientSheet'
-import { PAGE_SIZE, POOR_RATING, REVIEW_WORDS } from './config'
+import { PAGE_SIZE, POOR_RATING } from './config'
 import { QuestionsPanel } from './QuestionsPanel'
 import { QuietReplySheet } from './QuietReplySheet'
 import { ReplyComposer } from './ReplyComposer'
@@ -67,7 +69,8 @@ const needsPerson = (review: ManagedReview, settledNow: Set<string>) =>
 // ratings without words can be thanked all at once; poor ones offer "Write to the client" and
 // "Resolved".
 export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const toast = useToast()
   const [data, setData] = useState<ReviewSummary<ManagedReview> | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -147,12 +150,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       setEditingId(null)
       void refreshBusiness(slug)
       toast.show({
-        title: saved.reply ? t('Reply published') : t('Reply deleted'),
+        title: saved.reply ? t`Reply published` : t`Reply deleted`,
         type: 'success',
       })
     } catch (replyError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(replyError),
         type: 'error',
       })
@@ -175,10 +178,10 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       const saved = await setReviewResolved(slug, review.id, isResolved)
       updateItem(review.id, { resolvedAt: saved.resolvedAt })
       setSettledNow((current) => new Set(current).add(review.id))
-      if (isResolved) toast.show({ title: t('Marked as resolved'), type: 'success' })
+      if (isResolved) toast.show({ title: t`Marked as resolved`, type: 'success' })
     } catch (resolveError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(resolveError),
         type: 'error',
       })
@@ -194,13 +197,13 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       toast.show({
         title:
           count > 0
-            ? t('Replied to {reviews}', { reviews: t.count(count, [...REVIEW_WORDS]) })
-            : t('Nobody to reply to'),
+            ? t`Replied to ${plural(count, { one: '# review', other: '# reviews' })}`
+            : t`Nobody to reply to`,
         type: 'success',
       })
     } catch (sendError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(sendError),
         type: 'error',
       })
@@ -212,12 +215,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
     try {
       setReplySettings(await saveReviewReplySettings(slug, next))
       toast.show({
-        title: next.autoReply.isEnabled ? t('Auto reply on') : t('Saved'),
+        title: next.autoReply.isEnabled ? t`Auto reply on` : t`Saved`,
         type: 'success',
       })
     } catch (saveError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(saveError),
         type: 'error',
       })
@@ -230,28 +233,28 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       {/* One line: the tabs on the left, the rating on the right; no hint line of its own. */}
       <div ref={toolbarRef} className={styles.toolbar} data-stuck={isStuck || undefined}>
         <SectionHeader
-          title={t('Reviews')}
+          title={t`Reviews`}
           description={
             <TextTabs
-              label={t('Reviews and questions')}
+              label={t`Reviews and questions`}
               items={[
                 {
-                  label: t('Unanswered'),
+                  label: t`Unanswered`,
                   count: data ? unanswered - answeredNow.size : undefined,
                   isActive: view === 'open',
                   onSelect: () => chooseView('open'),
                 },
                 {
-                  label: t('All'),
+                  label: t`All`,
                   count: data?.count,
                   isActive: view === 'all',
                   onSelect: () => chooseView('all'),
                 },
                 {
-                  label: t('Questions'),
+                  label: t`Questions`,
                   count:
                     openQuestions > 0
-                      ? t('{count} unanswered', { count: openQuestions })
+                      ? t`${ph({ count: openQuestions })} unanswered`
                       : questions?.length,
                   isActive: view === 'questions',
                   onSelect: () => chooseView('questions'),
@@ -264,12 +267,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
               {data && data.count > 0 && (
                 <p className={styles.rating}>
                   <Star weight='fill' aria-hidden />
-                  <b>{data.average.toFixed(1).replace('.', ',')}</b>
-                  {` · ${t.count(data.count, [...REVIEW_WORDS])}`}
+                  <b>{format.rating(data.average)}</b>
+                  {` · ${t`${plural(data.count, { one: '# review', other: '# reviews' })}`}`}
                 </p>
               )}
               {isOwner && replySettings && (
-                <GlyphGroup label={t('Reviews')}>
+                <GlyphGroup label={t`Reviews`}>
                   {canReplyToQuiet && quiet && (
                     <GlyphButton
                       icon={
@@ -280,15 +283,13 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                           </span>
                         </>
                       }
-                      label={t('Reply to all: {ratings} without text', {
-                        ratings: t.count(quiet.fourAndUp, ['rating', 'ratings']),
-                      })}
+                      label={t`Reply to all: ${plural(quiet.fourAndUp, { one: '# rating', other: '# ratings' })} without text`}
                       onClick={() => setIsQuietOpen(true)}
                     />
                   )}
                   <GlyphButton
                     icon={<GearSix />}
-                    label={t('Review replies')}
+                    label={t`Review replies`}
                     onClick={() => setIsSettingsOpen(true)}
                   />
                 </GlyphGroup>
@@ -304,14 +305,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       {view !== 'questions' && !data && !error && <Skeleton className={styles.skeleton} />}
       {view !== 'questions' && data?.count === 0 && (
         <EmptyState
-          title={t('No reviews yet')}
-          text={t(
-            'They appear after the first visits: clients rate the specialist by the SMS link or in “My bookings”.',
-          )}
+          title={t`No reviews yet`}
+          text={t`They appear after the first visits: clients rate the specialist by the SMS link or in “My bookings”.`}
         />
       )}
       {view !== 'questions' && data && data.count > 0 && shown.length === 0 && (
-        <EmptyState variant='inline' text={t('Every review has a reply')} />
+        <EmptyState variant='inline' text={t`Every review has a reply`} />
       )}
       {view !== 'questions' && shown.length > 0 && (
         <>
@@ -319,7 +318,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
             hiddenCount={hiddenCount}
             isOpen={false}
             onToggle={() => setShownCount((count) => count + PAGE_SIZE)}
-            label={t.count(hiddenCount, [...REVIEW_WORDS]).replace(/^\d+ /, '')}
+            label={t`${plural(hiddenCount, { one: 'review', other: 'reviews' })}`}
           >
             <ul className={styles.thread}>
               {shown.map((review) => {
@@ -340,7 +339,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                             onClick={() => setContacting(review)}
                           >
                             <ChatCircle aria-hidden />
-                            {t('Message the client')}
+                            {t`Message the client`}
                           </button>
                           <button
                             type='button'
@@ -352,7 +351,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                               weight={review.resolvedAt ? 'fill' : 'regular'}
                               aria-hidden
                             />
-                            {t('Resolved')}
+                            {t`Resolved`}
                           </button>
                         </div>
                       )
@@ -361,7 +360,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                       review.reply && !isEditing ? (
                         <>
                           {review.isAutoReply && (
-                            <span className={styles.autoMark}>{t('Auto reply')}</span>
+                            <span className={styles.autoMark}>{t`Auto reply`}</span>
                           )}
                           <button
                             type='button'
@@ -369,14 +368,14 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                             onClick={() => setEditingId(review.id)}
                           >
                             <PencilSimple aria-hidden />
-                            {t('Change')}
+                            {t`Change`}
                           </button>
                         </>
                       ) : (
                         <ReplyComposer
                           key={isEditing ? 'edit' : 'new'}
                           initial={isEditing ? (review.reply ?? '') : ''}
-                          placeholder={t('Reply to {name}…', { name: firstName })}
+                          placeholder={t`Reply to ${ph({ name: firstName })}…`}
                           onSave={(text) => saveReply(review, text)}
                           isNextFocused={view === 'open' && !isEditing}
                           onCancel={isEditing ? () => setEditingId(null) : undefined}
@@ -396,10 +395,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
           </MoreFade>
           {hiddenCount === 0 && serverTotal > matching.length && (
             <p className={styles.more}>
-              {t('Showing the latest {shown} of {total}', {
-                shown: matching.length,
-                total: serverTotal,
-              })}
+              {t`Showing the latest ${ph({ shown: matching.length })} of ${ph({ total: serverTotal })}`}
             </p>
           )}
         </>

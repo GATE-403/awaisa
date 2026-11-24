@@ -1,8 +1,9 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import type { Business } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { PhotoGrid, PhotoGridTile } from '@/shared/ui/PhotoGrid/PhotoGrid'
 import { PhotoViewer } from '@/shared/ui/PhotoViewer/PhotoViewer'
 
@@ -13,7 +14,7 @@ interface PhotosSectionProps {
 // «Work»: the owner's grid as clients see it, square photos three a row in the owner's order.
 // A tap opens them full screen, every one of them.
 export const PhotosSection = ({ business }: PhotosSectionProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
@@ -23,10 +24,7 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
           <PhotoGridTile
             key={url}
             src={url}
-            label={t('Open photo {index} of {total}', {
-              index: index + 1,
-              total: business.photos.length,
-            })}
+            label={t`Open photo ${ph({ index: index + 1 })} of ${ph({ total: business.photos.length })}`}
             onOpen={() => setOpenIndex(index)}
           />
         ))}

@@ -1,5 +1,8 @@
 import { formatNationalPhone, type Region } from '@awaisa/region'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { REGION } from '@/shared/config/region'
+import { INTL_LOCALES, type Locale } from '@/shared/i18n/locales'
 
 /** The national digits once the calling code and the trunk prefix («0555…») are taken off. */
 const localPart = (digits: string, region: Region) => {
@@ -39,25 +42,27 @@ const maskLocalPhoneInput = (value: string, region: Region = REGION) => {
 
 // What is wrong with a typed phone before it is sent, or null when it is a whole number of the
 // region (+996 and 9 digits) - a half-typed number must not go out as a sign-in request.
-const phoneProblem = (value: string, region: Region = REGION): string | null => {
+const phoneProblem = (value: string, region: Region = REGION): MessageDescriptor | null => {
   const { callingCode, nationalDigits } = region.phone
   const trimmed = value.trim()
   const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return 'Enter a phone number'
+  if (!digits) return msg`Enter a phone number`
   if (trimmed.startsWith('+') && !digits.startsWith(callingCode)) {
-    return `For now we only take numbers with the code +${callingCode}`
+    return msg`For now we only take numbers with the code +${callingCode}`
   }
   if (localPart(digits, region).length < nationalDigits) {
-    return `The number is incomplete: it needs ${nationalDigits} digits after +${callingCode}`
+    return msg`The number is incomplete: it needs ${nationalDigits} digits after +${callingCode}`
   }
   return null
 }
 
-// Groups thousands while a price is typed: «1500» → «1,500». Spaces and commas typed or pasted
-// in between are dropped first.
-const maskAmountInput = (value: string) => {
+// Groups thousands while a price is typed, the page language's way: «1500» → «1,500» in English,
+// «1 500» in Russian and Kyrgyz (a plain space, which a text field keeps as typed). Spaces, commas
+// and no-break spaces typed or pasted in between are dropped first; read it back with
+// `value.replace(/\D/g, '')`.
+const maskAmountInput = (value: string, locale: Locale) => {
   const digits = value.replace(/\D/g, '')
-  return digits ? Number(digits).toLocaleString(REGION.locale.numbers).replace(/\s/g, ' ') : ''
+  return digits ? Number(digits).toLocaleString(INTL_LOCALES[locale]).replace(/\s/g, ' ') : ''
 }
 
 export { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem }

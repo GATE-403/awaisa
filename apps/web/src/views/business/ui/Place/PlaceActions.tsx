@@ -2,11 +2,11 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { ChatCircleText, NavigationArrow, Phone, ShareNetwork } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type ComponentType, useEffect } from 'react'
 import type { Business } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { shareLink } from '@/shared/lib/share'
 import { trackStep } from '@/shared/lib/telemetry'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
@@ -39,7 +39,7 @@ const directionsOf = (business: Business) => {
 // One primary action (book) and the quiet ones beside it: call, write, route, share.
 export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const directions = directionsOf(business)
 
   useEffect(() => {
@@ -49,23 +49,23 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const handleShare = async () => {
     // A sheet that failed or was closed says nothing.
     const result = await shareLink({ title: business.name, url: window.location.href })
-    if (result === 'copied') toast.show({ title: t('Link copied'), type: 'success' })
+    if (result === 'copied') toast.show({ title: t`Link copied`, type: 'success' })
   }
 
   const actions: Action[] = [
-    business.phone ? { label: t('Call'), icon: Phone, href: `tel:${business.phone}` } : null,
+    business.phone ? { label: t`Call`, icon: Phone, href: `tel:${business.phone}` } : null,
     business.whatsapp
       ? {
-          label: t('Message'),
+          label: t({ message: 'Message', context: 'verb: write to someone' }),
           icon: ChatCircleText,
           href: toWhatsappHref(business.whatsapp),
           isExternal: true,
         }
       : null,
     directions
-      ? { label: t('Directions'), icon: NavigationArrow, href: directions, isExternal: true }
+      ? { label: t`Directions`, icon: NavigationArrow, href: directions, isExternal: true }
       : null,
-    { label: t('Share'), icon: ShareNetwork, onClick: handleShare },
+    { label: t`Share`, icon: ShareNetwork, onClick: handleShare },
   ].filter((action) => action !== null)
 
   return (
@@ -79,9 +79,9 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
         // just below looked like the button did nothing.
         render={<NextLink href={`/${business.slug}/book`} />}
       >
-        {t('Book')}
+        {t`Book`}
       </ButtonLink>
-      <GlyphGroup label={t('Contact')}>
+      <GlyphGroup label={t`Contact`}>
         {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) =>
           href ? (
             <a

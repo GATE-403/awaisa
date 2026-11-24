@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
-import { API_URL } from './helpers'
+import { API_URL, clickUntilUrl } from './helpers'
 import { createPastVisit, withDb } from './visits'
 
 type Summary = { items: { authorId: string | null; authorName: string; serviceId: string }[] }
@@ -125,7 +125,9 @@ test.describe('Own profile', () => {
     // “To stories” shows the picture first, with a download for a mouse.
     await page.getByRole('button', { name: 'To stories' }).click()
     const storySheet = page.getByRole('dialog', { name: 'For stories' })
-    await expect(storySheet.getByRole('img', { name: 'Profile picture for stories' })).toBeVisible()
+    await expect(
+      storySheet.getByRole('img', { name: 'Your profile card for stories' }),
+    ).toBeVisible()
     // Saving it is one glyph in the sheet's bar (a download with a mouse).
     await expect(storySheet.getByRole('button', { name: 'Download picture' })).toBeVisible()
     await storySheet.getByRole('button', { name: 'Close', exact: true }).click()
@@ -227,11 +229,11 @@ test.describe('Client profiles', () => {
     // The author's name on the business page opens that profile as a sheet over the page, like a
     // booking; “Close” goes back to the place.
     await page.goto(`/${found.slug}`)
-    await page
-      .getByRole('link', { name: `${found.review.authorName}: profile` })
-      .first()
-      .click()
-    await page.waitForURL(new RegExp(`/u/${found.review.authorId}$`))
+    await clickUntilUrl(
+      page,
+      page.getByRole('link', { name: `${found.review.authorName}: profile` }).first(),
+      new RegExp(`/u/${found.review.authorId}$`),
+    )
     const sheet = page.getByRole('dialog', { name: 'Profile' })
     await expect(sheet.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(sheet.getByText(/Level \d+/).first()).toBeVisible()

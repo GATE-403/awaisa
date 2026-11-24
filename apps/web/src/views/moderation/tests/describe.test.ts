@@ -1,5 +1,15 @@
+import { setupI18n } from '@lingui/core'
 import { describe, expect, it } from 'vitest'
-import { describeItem, describeReasons } from '../lib/describe'
+import {
+  describeItem as describeItemIn,
+  describeReasons as describeReasonsIn,
+} from '../lib/describe'
+
+const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+const t = i18n._.bind(i18n)
+const describeItem = (item: Parameters<typeof describeItemIn>[0]) => describeItemIn(item, t)
+const describeReasons = (reasons: Parameters<typeof describeReasonsIn>[0]) =>
+  describeReasonsIn(reasons, t)
 
 describe('describeItem', () => {
   it('names the kind, the place and the count', () => {

@@ -1,13 +1,13 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Heart } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import { listOffersByIds } from '@/shared/api/clientApi'
 import type { Offer } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { useFavorites } from '../model/useFavorites'
 import { FavoriteButton } from './FavoriteButton'
@@ -21,7 +21,7 @@ interface FavoritesShelfProps {
 }
 
 export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const { ids } = useFavorites()
   const [offers, setOffers] = useState<Offer[] | null>(null)
   const key = ids.join(',')
@@ -48,18 +48,21 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
     <section className={styles.shelf} aria-labelledby='favorites-title'>
       <div className={styles.head} data-hidden={layout === 'grid' || undefined}>
         <h2 id='favorites-title' className={styles.title}>
-          {t('Favourites')}
+          {t`Favourites`}
         </h2>
         {shown.length > 0 && <span className={styles.count}>{shown.length}</span>}
       </div>
       {offers !== null && shown.length === 0 ? (
         <EmptyState
           icon={<Heart className={styles.heart} />}
-          title={t('Save services')}
+          title={t`Save services`}
           text={
             <>
-              {t('Tap ♡ on a service in the')} <NextLink href='/'>{t('catalogue')}</NextLink>
-              {t(' and it will appear here.')}
+              {t`Tap ♡ on a service in the`}{' '}
+              <NextLink href='/'>
+                {t({ message: 'catalogue', context: 'in the catalogue, prepositional' })}
+              </NextLink>
+              {t` and it will appear here.`}
             </>
           }
         />

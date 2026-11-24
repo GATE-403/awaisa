@@ -1,6 +1,8 @@
 'use client'
 
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowSquareOut,
   CaretLeft,
@@ -11,12 +13,11 @@ import {
   Sun,
   UserCircle,
 } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { ThemeToggle } from '@/features/theme'
-import { useT } from '@/shared/i18n'
+import { localizePath } from '@/shared/i18n/locales'
+import { Link as NextLink, useLocale, useRouter } from '@/shared/i18n/navigation'
 import { getBackLabel, readCabinetFrom } from '@/shared/lib/cabinetFrom'
 import { useIsScrolled } from '@/shared/lib/hooks/useIsScrolled'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
@@ -26,7 +27,7 @@ import { rememberUpdatesFrom } from '@/shared/lib/updatesFrom'
 import { BusinessSwitcher } from './BusinessSwitcher'
 import styles from './CabinetBar.module.css'
 
-const THEME_LABELS = { system: 'as the system', light: 'light', dark: 'dark' } as const
+const THEME_LABELS = { system: msg`as the system`, light: msg`light`, dark: msg`dark` }
 const THEME_ICONS = { system: CircleHalf, light: Sun, dark: Moon }
 
 interface CabinetBarProps {
@@ -53,7 +54,8 @@ export const CabinetBar = ({
   logoUrl = null,
   back,
 }: CabinetBarProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const locale = useLocale()
   const { theme, cycleTheme } = useTheme()
   const ThemeIcon = THEME_ICONS[theme]
   const isScrolled = useIsScrolled()
@@ -88,8 +90,8 @@ export const CabinetBar = ({
   }, [])
 
   const backHref = back?.href ?? entry ?? '/bookings'
-  // Labels are the Russian dictionary keys (`getBackLabel`, callers' `back.label`).
-  const backLabel = t(back?.label ?? getBackLabel(backHref))
+  // Callers pass `back.label` already in the page's language.
+  const backLabel = back?.label ?? t(getBackLabel(backHref))
 
   return (
     <div
@@ -102,7 +104,7 @@ export const CabinetBar = ({
         <NextLink
           href={backHref}
           className={styles.back}
-          aria-label={nav ? t('Back: {label}', { label: backLabel }) : undefined}
+          aria-label={nav ? t`Back: ${ph({ label: backLabel })}` : undefined}
         >
           <CaretLeft aria-hidden />
           {!nav && (back || entry !== undefined) && backLabel}
@@ -119,7 +121,7 @@ export const CabinetBar = ({
         ) : (
           <p className={styles.title} aria-hidden={!isScrolled}>
             {title}
-            {!isPublished && <span className={styles.hidden}> · {t('hidden')}</span>}
+            {!isPublished && <span className={styles.hidden}> · {t`hidden`}</span>}
           </p>
         )}
         {nav && <div className={styles.nav}>{nav}</div>}
@@ -130,8 +132,8 @@ export const CabinetBar = ({
                 href={`/${slug}`}
                 target='_blank'
                 className={`${styles.icon} ${styles.wideOnly}`}
-                aria-label={t('Open the business page')}
-                title={t('Open the business page')}
+                aria-label={t`Open the business page`}
+                title={t`Open the business page`}
               >
                 <ArrowSquareOut aria-hidden />
               </NextLink>
@@ -144,8 +146,8 @@ export const CabinetBar = ({
               }
               className={styles.icon}
               data-unread={hasUnread || undefined}
-              aria-label={hasUnread ? t("What's new: there are updates") : t("What's new")}
-              title={t("What's new")}
+              aria-label={hasUnread ? t`What's new: there are updates` : t`What's new`}
+              title={t`What's new`}
             >
               <Megaphone aria-hidden />
             </NextLink>
@@ -157,26 +159,24 @@ export const CabinetBar = ({
             {/* The way out to the client side: one's own profile and bookings, or the catalog. */}
             <Menu
               label={
-                customer
-                  ? t('Profile: {name}', { name: customer.name || customer.phone })
-                  : t('Profile')
+                customer ? t`Profile: ${ph({ name: customer.name || customer.phone })}` : t`Profile`
               }
               className={styles.icon}
               trigger={<UserCircle aria-hidden />}
             >
               <MenuItem icon={<UserCircle aria-hidden />} onClick={() => router.push('/bookings')}>
-                {t('Profile and bookings')}
+                {t`Profile and bookings`}
               </MenuItem>
               <MenuItem icon={<Compass aria-hidden />} onClick={() => router.push('/')}>
-                {t('Catalogue')}
+                {t`Catalogue`}
               </MenuItem>
               {slug && (
                 <MenuItem
                   icon={<ArrowSquareOut aria-hidden />}
                   className={styles.phoneOnly}
-                  onClick={() => window.open(`/${slug}`, '_blank')}
+                  onClick={() => window.open(localizePath(`/${slug}`, locale), '_blank')}
                 >
-                  {t('Open the business page')}
+                  {t`Open the business page`}
                 </MenuItem>
               )}
               <MenuItem
@@ -185,7 +185,7 @@ export const CabinetBar = ({
                 closeOnClick={false}
                 onClick={cycleTheme}
               >
-                {t('Theme: {theme}', { theme: t(THEME_LABELS[theme]) })}
+                {t`Theme: ${ph({ theme: t(THEME_LABELS[theme]) })}`}
               </MenuItem>
             </Menu>
           </span>

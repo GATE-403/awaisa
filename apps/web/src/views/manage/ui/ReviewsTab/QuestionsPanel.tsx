@@ -2,13 +2,13 @@
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { PencilSimple } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { answerQuestion, removeQuestion } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessQuestion } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -25,7 +25,7 @@ const ANSWER_FORM = 'question-answer'
 
 // Questions from the business page, open ones first; an answer puts the question on the page.
 export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const [editing, setEditing] = useState<BusinessQuestion | null>(null)
   const [text, setText] = useState('')
@@ -34,8 +34,8 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
   if (questions.length === 0) {
     return (
       <EmptyState
-        title={t('No questions yet')}
-        text={t('Clients ask on the place page; the answer appears there and comes to Telegram.')}
+        title={t`No questions yet`}
+        text={t`Clients ask on the place page; the answer appears there and comes to Telegram.`}
       />
     )
   }
@@ -53,13 +53,13 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       onChange(questions.map((item) => (item.id === saved.id ? saved : item)))
       void refreshBusiness(slug)
       toast.show({
-        title: saved.answer ? t('Reply published') : t('Answer removed'),
+        title: saved.answer ? t`Reply published` : t`Answer removed`,
         type: 'success',
       })
       setEditing(null)
     } catch (answerError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(answerError),
         type: 'error',
       })
@@ -72,11 +72,11 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       await removeQuestion(slug, editing.id)
       onChange(questions.filter((item) => item.id !== editing.id))
       void refreshBusiness(slug)
-      toast.show({ title: t('Question deleted') })
+      toast.show({ title: t`Question deleted` })
       setEditing(null)
     } catch (removeError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(removeError),
         type: 'error',
       })
@@ -92,7 +92,7 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
             <p className={styles.meta}>
               {question.authorName} · {formatMomentDay(question.createdAt, t)}
               {!question.answer && (
-                <span className={styles.openMark}> · {t('awaiting an answer')}</span>
+                <span className={styles.openMark}> · {t`awaiting an answer`}</span>
               )}
             </p>
             {question.answer && <p className={styles.answerText}>{question.answer}</p>}
@@ -104,10 +104,10 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
               {question.answer ? (
                 <>
                   <PencilSimple aria-hidden />
-                  {t('Change')}
+                  {t`Change`}
                 </>
               ) : (
-                t('Answer')
+                t`Answer`
               )}
             </button>
           </li>
@@ -115,16 +115,16 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       </ul>
       {editing && (
         <Sheet
-          title={t('Answer to the question')}
+          title={t`Answer to the question`}
           onClose={() => setEditing(null)}
-          action={{ label: t('Done'), form: ANSWER_FORM }}
+          action={{ label: t`Done`, form: ANSWER_FORM }}
         >
           <form id={ANSWER_FORM} className={styles.form} onSubmit={handleAnswer}>
             <p className={styles.quote}>
               {editing.authorName}: "{editing.text}"
             </p>
             <textarea
-              aria-label={t('Reply')}
+              aria-label={t`Reply`}
               className={styles.textarea}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -132,12 +132,10 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
               rows={5}
             />
             <p className={styles.hint}>
-              {t(
-                'Everyone sees an answered question on the place page. An empty answer takes it down.',
-              )}
+              {t`Everyone sees an answered question on the place page. An empty answer takes it down.`}
             </p>
           </form>
-          <HoldButton onConfirm={handleRemove}>{t('Delete question')}</HoldButton>
+          <HoldButton onConfirm={handleRemove}>{t`Delete question`}</HoldButton>
         </Sheet>
       )}
     </>

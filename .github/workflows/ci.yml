@@ -13,7 +13,7 @@ jobs:
   check:
     name: Lint, types, unit tests, build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,6 +23,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+      # The translation catalogs must match the code: run `pnpm --filter web i18n:extract` and
+      # `i18n:compile` after changing interface text, and translate the new ru/ky entries.
+      - run: pnpm --filter web i18n:check
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
@@ -64,7 +67,7 @@ jobs:
   e2e:
     name: E2E (${{ matrix.project }} ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

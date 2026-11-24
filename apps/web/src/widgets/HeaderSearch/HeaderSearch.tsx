@@ -1,5 +1,7 @@
 'use client'
 
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowRight,
   ClockCounterClockwise,
@@ -7,18 +9,16 @@ import {
   NavigationArrow,
   X,
 } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
 import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import { PlacePickerSheet } from '@/features/myPlace'
 import { RecentVisits } from '@/features/rebook'
 import { listOffersPage, searchBusinesses, searchMasters } from '@/shared/api/clientApi'
 import type { BusinessCard, MasterSuggestion, Offer } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
-import { useT } from '@/shared/i18n'
-import { useMyPlace } from '@/shared/lib/myPlace'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink, usePathname, useRouter } from '@/shared/i18n/navigation'
+import { myPlaceLabel, useMyPlace } from '@/shared/lib/myPlace'
 import {
   readRecentSearches,
   rememberSearch,
@@ -28,18 +28,26 @@ import { trackStep } from '@/shared/lib/telemetry'
 import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
 import styles from './HeaderSearch.module.css'
 
-const QUICK_SEARCHES = ["Men's haircut", 'Manicure', 'Colouring', 'Massage', 'Brows']
+// The search itself is the English words; the button shows them in the page's language.
+const QUICK_SEARCHES = [
+  { query: "Men's haircut", label: msg`Men's haircut` },
+  { query: 'Manicure', label: msg`Manicure` },
+  { query: 'Colouring', label: msg`Colouring` },
+  { query: 'Massage', label: msg`Massage` },
+  { query: 'Brows', label: msg`Brows` },
+]
 
 // What the empty field suggests, one at a time: real searches, so the field reads as “ask me”
 // rather than a blank box. They change every few seconds (the words only; still with reduced motion).
 const HINTS = [
-  'manicure nearby',
-  'haircut today',
-  'barber',
-  'back massage',
-  'brows and lashes',
-  'hair colouring',
+  msg`manicure nearby`,
+  msg`haircut today`,
+  msg`barber`,
+  msg`back massage`,
+  msg`brows and lashes`,
+  msg`hair colouring`,
 ]
+const FIRST_HINT = msg`manicure nearby`
 const HINT_MS = 3200
 
 const MIN_QUERY_LENGTH = 2
@@ -82,7 +90,8 @@ interface HeaderSearchFieldProps {
 
 // The store's search field lives in the header, like on a marketplace: type, see places, press Enter.
 const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const myPlace = useMyPlace()
   const [isPicking, setIsPicking] = useState(false)
   const [hintIndex, setHintIndex] = useState(0)
@@ -197,9 +206,9 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
           <span className={styles.field}>
             {!query && (
               <span className={styles.hint} aria-hidden>
-                {t('Find')}{' '}
+                {t`Find`}{' '}
                 <span key={hintIndex} className={styles.hintWord}>
-                  {t(HINTS[hintIndex] ?? '')}
+                  {t(HINTS[hintIndex] ?? FIRST_HINT)}
                 </span>
               </span>
             )}
@@ -216,7 +225,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 setIsOpen(true)
                 trackStep('search_open')
               }}
-              aria-label={t('Search salons and specialists')}
+              aria-label={t`Search salons and specialists`}
               aria-describedby={isOpen ? listId : undefined}
               enterKeyHint='search'
               autoComplete='off'
@@ -226,7 +235,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
             <button
               type='button'
               className={styles.clear}
-              aria-label={t('Clear search')}
+              aria-label={t`Clear search`}
               onClick={() => {
                 setDraft('')
                 setSuggestions([])
@@ -244,24 +253,24 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               onClick={() => setIsPicking(true)}
               aria-label={
                 myPlace
-                  ? t('Location: {place}. Change', { place: t(myPlace.label) })
-                  : t('Set your location')
+                  ? t`Location: ${ph({ place: myPlaceLabel(myPlace, t) })}. Change`
+                  : t`Where are you? Set your location`
               }
             >
               <NavigationArrow aria-hidden />
               <span className={styles.whereLabel}>
-                {myPlace ? t(myPlace.label) : t('Where are you?')}
+                {myPlace ? myPlaceLabel(myPlace, t) : t`Where are you?`}
               </span>
             </button>
           )}
-          <button type='submit' className={styles.submit} aria-label={t('Find')}>
+          <button type='submit' className={styles.submit} aria-label={t`Find`}>
             <MagnifyingGlass aria-hidden />
           </button>
         </form>
         {/* Phones, like iOS search: Cancel beside the field while the suggestions are open. */}
         {isOpen && (
           <button type='button' className={styles.cancel} onClick={cancel}>
-            {t('Cancel')}
+            {t`Cancel`}
           </button>
         )}
       </search>
@@ -270,10 +279,10 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
       {isOpen && (
         <div id={listId} className={styles.panel}>
           {hasQuery ? (
-            <section aria-label={t('Suggestions')}>
+            <section aria-label={t`Suggestions`}>
               {services.length > 0 && (
                 <>
-                  <p className={styles.heading}>{t('Services')}</p>
+                  <p className={styles.heading}>{t`Services`}</p>
                   <ul className={styles.list}>
                     {services.map((service) => (
                       <li key={service.name}>
@@ -286,8 +295,8 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                           <span className={styles.placeText}>
                             <span className={styles.placeName}>{service.name}</span>
                             <span className={styles.placeMeta}>
-                              {t('from {price}', { price: formatPrice(service.minPrice) })} ·{' '}
-                              {t.count(service.places, ['place', 'places'])}
+                              {t`from ${ph({ price: format.price(service.minPrice) })}`} ·{' '}
+                              {t`${plural(service.places, { one: '# place', other: '# places' })}`}
                             </span>
                           </span>
                         </button>
@@ -298,7 +307,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               )}
               {masters.length > 0 && (
                 <>
-                  <p className={styles.heading}>{t('Specialists')}</p>
+                  <p className={styles.heading}>{t`Specialists`}</p>
                   <ul className={styles.list}>
                     {masters.map((master) => (
                       <li key={master.id}>
@@ -330,7 +339,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               )}
               {(suggestions.length > 0 || services.length === 0) && (
                 <p className={styles.heading}>
-                  {suggestions.length > 0 ? t('Places') : t('Press Enter to search services')}
+                  {suggestions.length > 0 ? t`Places` : t`Press Enter to search services`}
                 </p>
               )}
               <ul className={styles.list}>
@@ -359,7 +368,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 <li>
                   <button type='button' className={styles.all} onClick={() => search(trimmed)}>
                     <ArrowRight aria-hidden />
-                    {t('All services and places for “{query}”', { query: trimmed })}
+                    {t`All services and places for “${ph({ query: trimmed })}”`}
                   </button>
                 </li>
               </ul>
@@ -368,9 +377,9 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
             <>
               <RecentVisits onSelect={close} />
               {recent.length > 0 && (
-                <section aria-label={t('Recent')}>
+                <section aria-label={t`Recent`}>
                   <p className={styles.heading}>
-                    {t('Recent')}
+                    {t`Recent`}
                     <button
                       type='button'
                       className={styles.clear}
@@ -379,7 +388,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                         setRecent([])
                       }}
                     >
-                      {t('Clear')}
+                      {t`Clear`}
                     </button>
                   </p>
                   <ul className={styles.list}>
@@ -394,15 +403,18 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                   </ul>
                 </section>
               )}
-              <section aria-label={t('Popular searches')}>
-                <p className={styles.heading}>{t('Popular searches')}</p>
+              <section aria-label={t`Popular searches`}>
+                <p className={styles.heading}>{t`Popular searches`}</p>
                 <ul className={styles.list}>
                   {QUICK_SEARCHES.map((item) => (
-                    <li key={item}>
-                      <button type='button' className={styles.quick} onClick={() => search(item)}>
+                    <li key={item.query}>
+                      <button
+                        type='button'
+                        className={styles.quick}
+                        onClick={() => search(item.query)}
+                      >
                         <MagnifyingGlass className={styles.quickIcon} aria-hidden />
-                        {/* Shown in the chosen language; the search itself stays Russian, like the menus. */}
-                        {t(item)}
+                        {t(item.label)}
                       </button>
                     </li>
                   ))}

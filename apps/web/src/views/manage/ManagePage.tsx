@@ -1,13 +1,13 @@
 'use client'
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { useLingui } from '@lingui/react/macro'
 import { CaretLeft } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useRequireSession } from '@/entities/session'
 import { useNewBookingAlerts } from '@/features/bookingAlerts'
 import type { BusinessPage } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { Container } from '@/shared/ui/Container/Container'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
@@ -52,7 +52,7 @@ const FORBIDDEN = 403
 
 export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const session = useRequireSession()
-  const t = useT()
+  const { t } = useLingui()
   const searchParams = useSearchParams()
   const { data, error, run } = useManagedBusiness(slug, session.status === 'signedIn', initialData)
   const role = data?.role ?? 'owner'
@@ -61,6 +61,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
   const isSettings = isSettingsTab(allowed)
   // The settings root opens the first section beside the sidebar; phones show only the list.
   const tab = allowed === 'settings' ? 'branches' : allowed
+  const settingsTitle = SETTINGS_TABS.find((item) => item.value === tab)?.label
   const alertsVersion = useNewBookingAlerts(slug, data !== null)
   const access = data?.access ?? null
   const feature = tabFeature(tab)
@@ -74,15 +75,13 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
         <Container size='sm' className={styles.error}>
           <PageTitle
             size='sm'
-            title={error.status === FORBIDDEN ? t('No access.') : t('Something went wrong.')}
+            title={error.status === FORBIDDEN ? t`No access.` : t`Something went wrong.`}
             subtitle={
-              error.status === FORBIDDEN
-                ? t('Another account manages this business.')
-                : error.message
+              error.status === FORBIDDEN ? t`Another account manages this business.` : error.message
             }
           />
           <NextLink href='/manage' className={styles.link}>
-            {t('My businesses')} ›
+            {t`My businesses`} ›
           </NextLink>
         </Container>
       </main>
@@ -100,7 +99,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             isPublished={data?.business.isPublished ?? true}
             nav={
               <TextTabs
-                label={t('Dashboard sections')}
+                label={t`Dashboard sections`}
                 items={[
                   ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
                     ({ value, label }) => ({
@@ -113,7 +112,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                     ? [
                         {
                           href: `/manage/${slug}?tab=settings`,
-                          label: t('Settings'),
+                          label: t`Settings`,
                           isActive: isSettings,
                         },
                       ]
@@ -150,14 +149,12 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                       href={`/manage/${slug}?tab=settings`}
                       scroll={false}
                       className={styles.backLink}
-                      aria-label={t('Back to settings')}
+                      aria-label={t`Back to settings`}
                     >
                       <CaretLeft aria-hidden />
-                      {t('Back')}
+                      {t`Back`}
                     </NextLink>
-                    <h2 className={styles.backTitle}>
-                      {t(SETTINGS_TABS.find((item) => item.value === tab)?.label ?? '')}
-                    </h2>
+                    <h2 className={styles.backTitle}>{settingsTitle ? t(settingsTitle) : ''}</h2>
                   </div>
                 )}
                 {/* In the section's own column, so it lines up with what is under it. */}

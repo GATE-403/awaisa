@@ -3,14 +3,17 @@
 import { Button } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useId, useState } from 'react'
-import { formatPrice, getDateParts } from '@/entities/booking'
+import { getDateParts } from '@/entities/booking'
 import { PersonAvatar, pickTint } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getClient, updateClient } from '@/shared/api/clientApi'
 import type { ClientCard } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import { type Format, type Translate, useFormat } from '@/shared/i18n'
 import { ContactRows } from '@/shared/ui/ContactRows/ContactRows'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -30,10 +33,15 @@ interface ClientSheetProps {
   onBook?: (client: { name: string; phone: string; serviceName: string | null }) => void
 }
 
-const METHOD_LABELS: Record<string, string> = {
-  cash: 'cash',
-  card: 'card',
-  transfer: 'transfer',
+const METHOD_LABELS: Record<string, MessageDescriptor> = {
+  cash: msg`cash`,
+  card: msg`card`,
+  transfer: msg`transfer`,
+}
+
+const methodLabel = (method: string, t: Translate) => {
+  const label = METHOD_LABELS[method]
+  return label ? t(label) : method
 }
 
 const sinceLabel = (iso: string, t: Translate) => {
@@ -42,28 +50,26 @@ const sinceLabel = (iso: string, t: Translate) => {
 }
 
 const FIRST_VISITS = 4
-const VISIT_WORDS: [string, string] = ['visit', 'visits']
-// "No-show twice": the "many" form keys the counted word.
-const TIMES_WORDS: [string, string] = ['time', 'times']
 
-const visitStatus = (item: ClientCard['history'][number], t: Translate) => {
-  if (item.status === 'cancelled') return { label: t('Cancelled'), tone: 'muted' }
-  if (item.outcome === 'no_show') return { label: t('No-show'), tone: 'danger' }
+const visitStatus = (item: ClientCard['history'][number], t: Translate, format: Format) => {
+  if (item.status === 'cancelled') return { label: t(msg`Cancelled`), tone: 'muted' }
+  if (item.outcome === 'no_show') return { label: t(msg`No-show`), tone: 'danger' }
   if (item.outcome === 'arrived') {
     const paid = item.paidAmount ?? item.price
     return {
-      label: `${formatPrice(paid)}${item.paymentMethod ? `, ${t(METHOD_LABELS[item.paymentMethod] ?? item.paymentMethod)}` : ''}`,
+      label: `${format.price(paid)}${item.paymentMethod ? `, ${methodLabel(item.paymentMethod, t)}` : ''}`,
       tone: 'ok',
     }
   }
 
-  return { label: formatPrice(item.price), tone: 'plain' }
+  return { label: format.price(item.price), tone: 'plain' }
 }
 
 // Everything the business knows about one client: what they come for, how reliable they are,
 // private notes. Contacts are one tap away.
 export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientSheetProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const hasLoyalty = useHasFeature('loyalty')
   const toast = useToast()
   const noteId = useId()
@@ -97,29 +103,29 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
     }
     try {
       await updateClient(slug, card.phone, { note, birthday: birthday || null })
-      toast.show({ title: t('Card saved'), type: 'success' })
+      toast.show({ title: t`Card saved`, type: 'success' })
       onSaved?.()
       onClose()
     } catch (saveError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(saveError),
         type: 'error',
       })
     }
   }
 
-  const name = card?.name || t('No name')
+  const name = card?.name || t`No name`
   const stats = card?.stats
   const history = card?.history ?? []
   const shownHistory = isAllHistory ? history : history.slice(0, FIRST_VISITS)
 
   return (
     <Sheet
-      title={t('Client')}
+      title={t`Client`}
       onClose={onClose}
       cancelLabel={null}
-      action={{ label: isDirty ? t('Save') : t('Done'), onClick: handleDone }}
+      action={{ label: isDirty ? t`Save` : t`Done`, onClick: handleDone }}
     >
       {error && <p className={styles.error}>{error}</p>}
       {!card && !error && <Skeleton className={styles.skeleton} />}
@@ -134,34 +140,34 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
             <h3 className={styles.name}>{name}</h3>
             {stats.visits > 0 && (
               <p className={styles.facts}>
-                <strong>{stats.visits}</strong>{' '}
-                {t.count(stats.visits, VISIT_WORDS).replace(/^\d+ /, '')}
+                <Trans>
+                  <strong>{stats.visits}</strong>{' '}
+                  <Plural value={stats.visits} one='visit' other='visits' />
+                </Trans>
                 {stats.spent ? (
                   <>
                     {' · '}
-                    <strong>{formatPrice(stats.spent)}</strong>
+                    <strong>{format.price(stats.spent)}</strong>
                   </>
                 ) : null}
                 {stats.firstVisit &&
-                  ` · ${t('since {date}', { date: sinceLabel(stats.firstVisit, t) })}`}
+                  ` · ${t`since ${ph({ date: sinceLabel(stats.firstVisit, t) })}`}`}
               </p>
             )}
             {stats.favoriteService && (
               <p className={styles.usual}>
-                {t('Usually: {service}', { service: stats.favoriteService })}
+                {t`Usually: ${ph({ service: stats.favoriteService })}`}
                 {stats.favoriteMaster && ` · ${stats.favoriteMaster}`}
               </p>
             )}
             {stats.nextVisit && (
               <p className={styles.next}>
-                {t('Next visit {date}', {
-                  date: formatMomentDay(stats.nextVisit, t),
-                })}
+                {t`Next visit ${ph({ date: formatMomentDay(stats.nextVisit, t) })}`}
               </p>
             )}
             {stats.noShows > 0 && (
               <p className={styles.warning}>
-                {t('No-show {times}', { times: t.count(stats.noShows, TIMES_WORDS) })}
+                {t`${plural(stats.noShows, { one: 'No-show # time', other: 'No-show # times' })}`}
               </p>
             )}
             {onBook && (
@@ -176,7 +182,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
                     })
                   }
                 >
-                  {t('Book again')}
+                  {t({ message: 'Book again', context: 'staff books the client again' })}
                 </Button>
               </div>
             )}
@@ -184,19 +190,19 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
 
           <ContactRows phone={card.phone} />
 
-          <section className={sheet.group} aria-label={t('Only for you')}>
-            <SectionCaption>{t('Only for you')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`Only for you`}>
+            <SectionCaption>{t`Only for you`}</SectionCaption>
             <div className={sheet.list}>
               <BirthdayField value={birthday} onChange={setBirthday} />
               <textarea
                 id={noteId}
-                aria-label={t('Note about the client')}
+                aria-label={t`Note about the client`}
                 className={styles.note}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 maxLength={2000}
                 rows={2}
-                placeholder={t('Note: allergies, favourite specialist, how to address them')}
+                placeholder={t`Note: allergies, favourite specialist, how to address them`}
               />
             </div>
           </section>
@@ -204,22 +210,23 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
           {hasLoyalty && <ClientLoyaltySection slug={slug} phone={card.phone} />}
 
           {history.length > 0 && (
-            <section className={sheet.group} aria-label={t('History')}>
+            <section className={sheet.group} aria-label={t`History`}>
               <SectionCaption>
-                {t('History')} <span className={styles.count}>{history.length}</span>
+                {t`History`} <span className={styles.count}>{history.length}</span>
               </SectionCaption>
               <MoreFade
                 hiddenCount={Math.max(0, history.length - FIRST_VISITS)}
                 isOpen={isAllHistory}
                 onToggle={() => setIsAllHistory((value) => !value)}
-                label={t.count(history.length - FIRST_VISITS, VISIT_WORDS).replace(/^\d+ /, '')}
+                label={t`${plural(history.length - FIRST_VISITS, { one: 'visit', other: 'visits' })}`}
                 surface='sheet'
                 isLessFloating={false}
               >
                 <ul className={`${sheet.list} ${styles.history}`}>
                   {shownHistory.map((item) => {
-                    const status = visitStatus(item, t)
-                    const { day, month } = getDateParts(item.date)
+                    const status = visitStatus(item, t, format)
+                    const { day } = getDateParts(item.date)
+                    const month = format.monthShort(item.date)
                     return (
                       <li key={item.id} className={styles.visit}>
                         <span className={styles.leaf} aria-hidden='true'>

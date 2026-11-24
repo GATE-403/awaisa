@@ -2,6 +2,8 @@
 
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowsClockwise,
   CalendarPlus,
@@ -12,20 +14,14 @@ import {
   XCircle,
 } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import {
-  downloadCalendarFile,
-  formatPrice,
-  getDateParts,
-  parseBookings,
-  readRaw,
-} from '@/entities/booking'
+import { downloadCalendarFile, getDateParts, parseBookings, readRaw } from '@/entities/booking'
 import { WalletButton } from '@/features/addToWallet'
 import { RescheduleSheet } from '@/features/rescheduleBooking'
 import { TicketViewer } from '@/features/ticketView'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getCheckoutUrl } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { trackStep } from '@/shared/lib/telemetry'
 import styles from './UpcomingBooking.module.css'
 
@@ -53,11 +49,12 @@ export const UpcomingBooking = ({
   onMoved,
   variant = 'next',
 }: UpcomingBookingProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [isMoving, setIsMoving] = useState(false)
   const [isTicketOpen, setIsTicketOpen] = useState(false)
   const { day } = getDateParts(booking.date)
-  const month = t.monthShort(booking.date)
+  const month = format.monthShort(booking.date)
   const code = booking.id.replace(/-/g, '').slice(0, 8).toUpperCase()
   const isAwaitingPayment = booking.status === 'confirmed' && booking.payment?.status === 'pending'
   const toast = useToast()
@@ -78,7 +75,7 @@ export const UpcomingBooking = ({
       window.location.assign(url)
     } catch (payError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(payError),
         type: 'error',
       })
@@ -92,7 +89,7 @@ export const UpcomingBooking = ({
         className={styles.card}
         data-status={booking.status}
         data-variant={variant}
-        aria-label={t('Booking {code}', { code })}
+        aria-label={t`Booking ${code}`}
       >
         <button
           type='button'
@@ -101,7 +98,7 @@ export const UpcomingBooking = ({
             setIsTicketOpen(true)
             trackStep('ticket_open', booking.business.slug)
           }}
-          aria-label={t('Show the ticket')}
+          aria-label={t`Show the ticket`}
         />
         <span className={styles.leaf} aria-hidden='true'>
           <span className={styles.leafMonth}>{month}</span>
@@ -112,9 +109,9 @@ export const UpcomingBooking = ({
             {booking.time}
             <span className={styles.countdown} data-pending={isAwaitingPayment || undefined}>
               {booking.status === 'cancelled'
-                ? t('Cancelled')
+                ? t`Cancelled`
                 : isAwaitingPayment
-                  ? t('Awaiting payment')
+                  ? t`Awaiting payment`
                   : countdown}
             </span>
           </span>
@@ -123,16 +120,16 @@ export const UpcomingBooking = ({
             {booking.specialistName} · {booking.business.name}
           </span>
         </span>
-        <Menu label={t('More')} className={styles.more} trigger={<DotsThree aria-hidden />}>
+        <Menu label={t`More`} className={styles.more} trigger={<DotsThree aria-hidden />}>
           {/* A later visit keeps all its actions here; the nearest one shows the everyday ones. */}
           {isRow && isConfirmed && !isAwaitingPayment && (
             <MenuItem icon={<ArrowsClockwise aria-hidden />} onClick={startMoving}>
-              {t('Reschedule')}
+              {t`Reschedule`}
             </MenuItem>
           )}
           {isRow && booking.business.mapUrl && (
             <MenuItem icon={<MapPin aria-hidden />} onClick={openMap}>
-              {t('Directions')}
+              {t`Directions`}
             </MenuItem>
           )}
           {isConfirmed && !isAwaitingPayment && (
@@ -140,7 +137,7 @@ export const UpcomingBooking = ({
               icon={<CalendarPlus aria-hidden />}
               onClick={() => downloadCalendarFile(booking, booking.business)}
             >
-              {t('To calendar')}
+              {t`To calendar`}
             </MenuItem>
           )}
           {isConfirmed && (
@@ -150,7 +147,7 @@ export const UpcomingBooking = ({
               disabled={isCancelling}
               onClick={onCancel}
             >
-              {isCancelling ? t('Cancelling…') : t('Cancel booking')}
+              {isCancelling ? t`Cancelling…` : t`Cancel booking`}
             </MenuItem>
           )}
         </Menu>
@@ -160,25 +157,25 @@ export const UpcomingBooking = ({
             {isAwaitingPayment ? (
               <button type='button' className={styles.link} onClick={() => void handlePay()}>
                 <CreditCard aria-hidden />
-                {t('Pay {amount}', { amount: formatPrice(booking.payment?.amount ?? 0) })}
+                {t`Pay ${ph({ amount: format.price(booking.payment?.amount ?? 0) })}`}
               </button>
             ) : (
               <>
                 {booking.business.mapUrl && (
                   <button type='button' className={styles.link} onClick={openMap}>
                     <MapPin aria-hidden />
-                    {t('Directions')}
+                    {t`Directions`}
                   </button>
                 )}
                 {phone && (
                   <a className={styles.link} href={`tel:${phone}`}>
                     <Phone aria-hidden />
-                    {t('Call')}
+                    {t`Call`}
                   </a>
                 )}
                 <button type='button' className={styles.link} onClick={startMoving}>
                   <ArrowsClockwise aria-hidden />
-                  {t('Reschedule')}
+                  {t`Reschedule`}
                 </button>
               </>
             )}

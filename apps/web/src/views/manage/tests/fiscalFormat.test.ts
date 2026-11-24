@@ -6,6 +6,7 @@ import {
   isInnValid,
   regimeLabel,
 } from '../ui/FiscalTab/fiscalFormat'
+import { t } from './translator'
 
 const SETTINGS: FiscalSettings = {
   driver: 'log',
@@ -32,16 +33,16 @@ describe('fiscal settings wording', () => {
   })
 
   it('reads the taxes as one value each', () => {
-    expect(describeTaxes(SETTINGS)).toEqual({ vat: '12%', salesTax: 'services 2% · goods 1%' })
-    expect(describeTaxes({ ...SETTINGS, isVatPayer: false, salesTaxServices: 2.5 }).vat).toBe(
+    expect(describeTaxes(SETTINGS, t)).toEqual({ vat: '12%', salesTax: 'services 2% · goods 1%' })
+    expect(describeTaxes({ ...SETTINGS, isVatPayer: false, salesTaxServices: 2.5 }, t).vat).toBe(
       'Not a payer',
     )
-    expect(describeTaxes({ ...SETTINGS, salesTaxServices: 2.5 }).salesTax).toBe(
+    expect(describeTaxes({ ...SETTINGS, salesTaxServices: 2.5 }, t).salesTax).toBe(
       'services 2.5% · goods 1%',
     )
   })
 
   it('names the regimes', () => {
-    expect(regimeLabel('single')).toBe('Single tax')
+    expect(regimeLabel('single', t)).toBe('Single tax')
   })
 })

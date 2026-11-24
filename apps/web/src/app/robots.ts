@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next'
+import { LOCALES, localizePath } from '@/shared/i18n/locales'
 import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 
 const APP_ONLY_PAGES = [
@@ -16,12 +17,17 @@ const robots = (): MetadataRoute.Robots => ({
     userAgent: '*',
     allow: '/',
     // Anchored with `$`, `/` and `?` so a slug like /ui-studio stays crawlable.
+    // Every language's copy of them too (`/ru/manage`); `/api/` exists once.
     disallow: [
-      ...APP_ONLY_PAGES.flatMap((page) => [`${page}$`, `${page}/`, `${page}?`]),
-      '/pay/',
-      '/receipt/',
-      '/review/',
-      '/v/',
+      ...LOCALES.flatMap((locale) =>
+        [
+          ...APP_ONLY_PAGES.flatMap((page) => [`${page}$`, `${page}/`, `${page}?`]),
+          '/pay/',
+          '/receipt/',
+          '/review/',
+          '/v/',
+        ].map((rule) => localizePath(rule, locale)),
+      ),
       '/api/',
       '/*/book',
     ],

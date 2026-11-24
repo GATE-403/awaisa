@@ -1,12 +1,14 @@
 'use client'
 
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Heart } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type CSSProperties, useRef, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { FeedItem } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { gridImage } from '@/shared/lib/imageSizes'
 import styles from '../FeedPage.module.css'
 
@@ -37,8 +39,8 @@ const TAP_SLOP = 12
 
 const distanceText = (t: Translate, km: number | null) => {
   if (km === null) return ''
-  if (km < 1) return ` · ${t('{count} m', { count: Math.round(km * 1000) })}`
-  return ` · ${t('{count} km', { count: km })}`
+  if (km < 1) return ` · ${t(msg`${ph({ count: Math.round(km * 1000) })} m`)}`
+  return ` · ${t(msg`${ph({ count: km })} km`)}`
 }
 
 // One look as a card of the hand: the picture is the card, who made it, the service and its price
@@ -51,7 +53,8 @@ export const FeedCard = ({
   onDoubleTap,
   onSelect,
 }: FeedCardProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [bursts, setBursts] = useState<Burst[]>([])
   const lastTap = useRef<{ time: number; x: number; y: number } | null>(null)
   const pointerStart = useRef<{ x: number; y: number } | null>(null)
@@ -110,8 +113,8 @@ export const FeedCard = ({
           {...gridImage(item.url, DECK_IMAGE)}
           alt={
             service
-              ? t('Work: {name}', { name: service.name })
-              : t('Work at {name}', { name: business.name })
+              ? t`Work: ${ph({ name: service.name })}`
+              : t`Work at ${ph({ name: business.name })}`
           }
           className={styles.photo}
           loading='eager'
@@ -140,9 +143,7 @@ export const FeedCard = ({
           <NextLink
             href={masterHref}
             className={styles.bylineFace}
-            aria-label={
-              specialist ? t('Book with {name}', { name: specialist.name }) : business.name
-            }
+            aria-label={specialist ? t`Book with ${ph({ name: specialist.name })}` : business.name}
           >
             {specialist ? (
               <PersonAvatar
@@ -168,16 +169,16 @@ export const FeedCard = ({
           <p className={styles.meta}>
             {service && (
               <>
-                <strong>{formatPrice(service.price)}</strong>
+                <strong>{format.price(service.price)}</strong>
                 <span className={styles.metaDot}>·</span>
-                {t.duration(service.durationMinutes)}
+                {format.duration(service.durationMinutes)}
               </>
             )}
             {/* Shared from a client's review: their result, not the salon's showcase. */}
             {item.isFromClient && (
               <>
                 {service && <span className={styles.metaDot}>·</span>}
-                {t('Client’s photo')}
+                {t`Client’s photo`}
               </>
             )}
           </p>

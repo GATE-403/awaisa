@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { CLIENT_API_PREFIX } from '@/shared/config/api'
-import { useT } from '@/shared/i18n'
 import styles from '../ForBusinessPage.module.css'
 
 type Place = { slug: string; name: string }
@@ -12,7 +12,7 @@ const MIN_MARQUEE = 6
 
 // Fetched in the browser: the page itself stays fully static (SSG) and never waits for the API.
 export const TrustRow = () => {
-  const t = useT()
+  const { t } = useLingui()
   const [places, setPlaces] = useState<Place[]>([])
 
   useEffect(() => {
@@ -30,13 +30,11 @@ export const TrustRow = () => {
   const items = isMarquee ? [...places, ...places, ...places] : places
 
   return (
-    <section className={styles.trust} aria-label={t('Already on Awaisa')}>
+    <section className={styles.trust} aria-label={t`Already on Awaisa`}>
       <p className={styles.trustCaption}>
-        {t(
-          places.length > 0
-            ? 'Salons, barbershops and studios in Bishkek. Already on Awaisa:'
-            : 'Salons, barbershops and studios in Bishkek. Already on Awaisa.',
-        )}
+        {places.length > 0
+          ? t`Salons, barbershops and studios in Bishkek. Already on Awaisa:`
+          : t`Salons, barbershops and studios in Bishkek. Already on Awaisa.`}
       </p>
       {items.length > 0 && (
         <div className={styles.marquee} data-static={!isMarquee || undefined}>

@@ -123,7 +123,7 @@ test.describe('Rating in one tap', () => {
       mimeType: 'image/png',
       buffer: PIXEL,
     })
-    await expect(sheet.getByRole('img', { name: 'Photo 1' })).toBeVisible()
+    await expect(sheet.getByRole('img', { name: 'Your shot 1' })).toBeVisible()
     const comment = `E2E фото ${Date.now()}`
     await sheet.getByLabel(/Tell us more/).fill(comment)
     await sheet.getByRole('button', { name: 'Send review' }).click()

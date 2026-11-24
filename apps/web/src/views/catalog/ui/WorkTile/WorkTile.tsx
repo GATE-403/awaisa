@@ -1,14 +1,14 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Heart } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { type CSSProperties, type MouseEvent, useEffect, useRef, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { useFavorites } from '@/features/favorites'
 import { useWorkLikes } from '@/features/workLikes'
 import type { BusinessKind, FeedItem } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import { gridImage } from '@/shared/lib/imageSizes'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { FanCardsIcon } from '@/shared/ui/FanCardsIcon'
@@ -32,7 +32,7 @@ type Burst = { id: number; x: number; y: number }
 // this look», which books that service with that master and hands the photo over as the look wanted.
 // A tap opens «Looks» on this photo; on a touch screen a double tap likes it, as in the deck.
 export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: WorkTileProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const router = useRouter()
   const likes = useWorkLikes()
   const favorites = useFavorites()
@@ -105,16 +105,16 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
       <span className={styles.marks}>
         <span className={styles.kind}>
           <FanCardsIcon aria-hidden />
-          {t('Look')}
+          {t`Look`}
         </span>
         {/* A client's own photo from their review: trusted more than the salon's own shots. */}
-        {item.isFromClient && <span className={styles.client}>{t('Client’s photo')}</span>}
+        {item.isFromClient && <span className={styles.client}>{t`Client’s photo`}</span>}
       </span>
       <button
         type='button'
         className={styles.like}
         aria-pressed={isLiked}
-        aria-label={t('Likes: {count}', { count: likesCount })}
+        aria-label={t`Likes: ${ph({ count: likesCount })}`}
         data-liked={isLiked || undefined}
         onClick={() => setLiked(!isLiked)}
       >
@@ -156,7 +156,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
           </NextLink>
         </h3>
         <NextLink href={lookHref} className={styles.want}>
-          {t('I want this look')}
+          {t`I want this look`}
         </NextLink>
       </span>
     </div>

@@ -1,11 +1,11 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Check, EyeSlash, Prohibit, Trash } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { PersonAvatar } from '@/entities/business'
 import { Stars } from '@/entities/review'
 import type { ModerationAction, ModerationItem } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { describeItem, describeReasons } from '../lib/describe'
 import styles from '../ModerationPage.module.css'
@@ -19,9 +19,9 @@ interface QueueItemProps {
 // One reported thing as it looks on the site (the photo, the review's stars and words, the
 // person's face and status), what was said about it, and the decisions as thin glyphs.
 export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const { preview } = item
-  const title = preview?.title ?? t('Already deleted')
+  const title = preview?.title ?? t`Already deleted`
 
   return (
     <li className={styles.item} aria-busy={isPending}>
@@ -56,35 +56,35 @@ export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
         <p className={styles.meta}>{describeReasons(item.reasons, t)}</p>
         {(item.isHidden || item.isKept) && (
           <p className={styles.state} data-state={item.isHidden ? 'hidden' : 'kept'}>
-            {t(item.isHidden ? 'Hidden until you decide' : 'Kept before: won’t hide on its own')}
+            {item.isHidden ? t`Hidden until you decide` : t`Kept before: won’t hide on its own`}
           </p>
         )}
       </div>
-      <GlyphGroup label={t('Decision: {title}', { title })}>
+      <GlyphGroup label={t`Decision: ${title}`}>
         <GlyphButton
           icon={<Check aria-hidden />}
-          label={t('Keep')}
+          label={t`Keep`}
           disabled={isPending}
           onClick={() => onDecide('keep')}
         />
         {preview && (
           <GlyphButton
             icon={<EyeSlash aria-hidden />}
-            label={t('Hide')}
+            label={t`Hide`}
             disabled={isPending || item.isHidden}
             onClick={() => onDecide('hide')}
           />
         )}
         <GlyphButton
           icon={<Trash aria-hidden />}
-          label={t('Delete')}
+          label={t`Delete`}
           disabled={isPending}
           onClick={() => onDecide('delete')}
         />
         {item.targetType === 'profile' && preview && (
           <GlyphButton
             icon={<Prohibit aria-hidden />}
-            label={t('Block the author')}
+            label={t`Block the author`}
             disabled={isPending}
             onClick={() => onDecide('block')}
           />

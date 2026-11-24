@@ -1,9 +1,10 @@
 'use client'
 
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { type KeyboardEvent, useRef, useState } from 'react'
 import type { AnalyticsReport, WorkingDay } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import styles from './AnalyticsTab.module.css'
 
 interface LoadHeatmapProps {
@@ -15,7 +16,15 @@ interface LoadHeatmapProps {
 
 type Cell = { weekday: number; hour: number }
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const WEEKDAYS = [
+  { key: 'mon', label: msg`Mon` },
+  { key: 'tue', label: msg`Tue` },
+  { key: 'wed', label: msg`Wed` },
+  { key: 'thu', label: msg`Thu` },
+  { key: 'fri', label: msg`Fri` },
+  { key: 'sat', label: msg`Sat` },
+  { key: 'sun', label: msg`Sun` },
+]
 const STEPS = 4
 
 const span = (hour: number) => `${hour}:00–${hour + 1}:00`
@@ -33,7 +42,7 @@ const ARROWS: Record<string, [number, number]> = {
 // rings the cell and lights its day and hour. With nothing picked the line names the peak, so the
 // headline never depends on reading a colour.
 export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [hovered, setHovered] = useState<Cell | null>(null)
   const [picked, setPicked] = useState<Cell | null>(null)
   const gridRef = useRef<HTMLTableElement>(null)
@@ -54,8 +63,11 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
       weekday: 0,
       hour: columns[0] ?? opens,
     }
-  const visitsLabel = (count: number) => t.count(count, ['visit', 'visits'])
-  const weekdayOf = (index: number) => t(WEEKDAYS[index] ?? '')
+  const visitsLabel = (count: number) => t`${plural(count, { one: '# visit', other: '# visits' })}`
+  const weekdayOf = (index: number) => {
+    const weekday = WEEKDAYS[index]
+    return weekday ? t(weekday.label) : ''
+  }
   const isPeak = (cell: Cell) => peak?.weekday === cell.weekday && peak.hour === cell.hour
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, cell: Cell) => {
@@ -72,9 +84,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
   }
 
   if (!peak) {
-    return (
-      <p className={styles.cardHint}>{t('No visits yet, the map fills in as bookings come')}</p>
-    )
+    return <p className={styles.cardHint}>{t`No visits yet, the map fills in as bookings come`}</p>
   }
 
   return (
@@ -86,22 +96,14 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
             {!isPeak(active) && (
               <span className={styles.hintMuted}>
                 {' · '}
-                {t('peak {day} {hour}:00, {visits}', {
-                  day: weekdayOf(peak.weekday),
-                  hour: peak.hour,
-                  visits: visitsLabel(peak.visits),
-                })}
+                {t`peak ${ph({ day: weekdayOf(peak.weekday) })} ${ph({ hour: peak.hour })}:00, ${ph({ visits: visitsLabel(peak.visits) })}`}
               </span>
             )}
           </>
         ) : (
           <>
-            {t('Peak: {day}, {hours} · {visits}', {
-              day: weekdayOf(peak.weekday),
-              hours: span(peak.hour),
-              visits: visitsLabel(peak.visits),
-            })}
-            <span className={styles.hintMuted}> · {t('point at an hour')}</span>
+            {t`Peak: ${ph({ day: weekdayOf(peak.weekday) })}, ${ph({ hours: span(peak.hour) })} · ${ph({ visits: visitsLabel(peak.visits) })}`}
+            <span className={styles.hintMuted}> · {t`point at an hour`}</span>
           </>
         )}
       </p>
@@ -112,10 +114,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           className={styles.heatmapAction}
           onClick={() => onMakePromotion(picked)}
         >
-          {t('Discount on {day} {hours} to fill the hour', {
-            day: weekdayOf(picked.weekday),
-            hours: span(picked.hour),
-          })}
+          {t`Discount on ${ph({ day: weekdayOf(picked.weekday) })} ${ph({ hours: span(picked.hour) })} to fill the hour`}
           <CaretRight aria-hidden />
         </button>
       )}
@@ -126,7 +125,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           style={{ '--heatmap-columns': columns.length } as React.CSSProperties}
           onMouseLeave={() => setHovered(null)}
         >
-          <caption className={styles.srOnly}>{t('Visits by weekday and hour')}</caption>
+          <caption className={styles.srOnly}>{t`Visits by weekday and hour`}</caption>
           <thead>
             <tr>
               <td />
@@ -152,7 +151,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           </thead>
           <tbody>
             {WEEKDAYS.map((weekday, weekdayIndex) => (
-              <tr key={weekday}>
+              <tr key={weekday.key}>
                 <th
                   scope='row'
                   className={styles.heatmapDay}
@@ -189,11 +188,11 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
         </table>
       </div>
       <div className={styles.scale} aria-hidden='true'>
-        <span>{t('Fewer')}</span>
+        <span>{t`Fewer`}</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <span key={level} className={styles.heatmapCell} data-level={level} />
         ))}
-        <span>{t('More')}</span>
+        <span>{t({ message: 'More', context: 'heatmap legend: more bookings' })}</span>
       </div>
     </div>
   )

@@ -1,15 +1,15 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ArrowRight, CalendarBlank, X } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { usePathname } from 'next/navigation'
 import {
   getBusinessSlug,
   isBookingPath,
   isCabinetPath,
   isStandalonePath,
 } from '@/shared/config/navigation'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, usePathname } from '@/shared/i18n/navigation'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import { clearDraft, DRAFT_STEPS, draftHref } from '../lib/bookingDraft'
 import { useBookingDraft } from '../model/useBookingDraft'
@@ -19,7 +19,7 @@ import styles from './ResumeBooking.module.css'
 export const ResumeBooking = () => {
   const pathname = usePathname()
   const draft = useBookingDraft()
-  const t = useT()
+  const { t } = useLingui()
   const isTucked = useTuckOnScroll()
   // On another place's page that place's «Next free time» takes the spot: one pill at a time.
   const pageSlug = getBusinessSlug(pathname)
@@ -41,19 +41,14 @@ export const ResumeBooking = () => {
   return (
     <aside
       className={styles.resume}
-      aria-label={t('Unfinished booking')}
+      aria-label={t`Unfinished booking`}
       data-resume-booking=''
       data-tucked={isTucked || undefined}
     >
       <NextLink
         href={draftHref(draft)}
         className={styles.link}
-        aria-label={t('Continue booking: {service}, {place}. {done} of {total} steps done', {
-          service: draft.serviceName,
-          place: draft.businessName,
-          done: stepsDone,
-          total: DRAFT_STEPS,
-        })}
+        aria-label={t`Continue booking: ${ph({ service: draft.serviceName })}, ${ph({ place: draft.businessName })}. ${ph({ done: stepsDone })} of ${ph({ total: DRAFT_STEPS })} steps done`}
       >
         {/* How far the booking got, like a download ring, with a calendar glyph in the
             capsule's own colour (a tinted monogram vanished on the inverted fill). */}
@@ -74,12 +69,12 @@ export const ResumeBooking = () => {
         <span className={styles.text}>
           <span className={styles.title}>{draft.serviceName}</span>
           <span className={styles.meta}>
-            {t('{done} of {total} done', { done: stepsDone, total: DRAFT_STEPS })} ·{' '}
+            {t`${ph({ done: stepsDone })} of ${ph({ total: DRAFT_STEPS })} done`} ·{' '}
             {draft.businessName}
           </span>
         </span>
         <span className={styles.go} aria-hidden>
-          <span className={styles.goLabel}>{t('Continue')}</span>
+          <span className={styles.goLabel}>{t`Continue`}</span>
           <ArrowRight />
         </span>
       </NextLink>
@@ -87,7 +82,7 @@ export const ResumeBooking = () => {
         type='button'
         className={styles.dismiss}
         onClick={clearDraft}
-        aria-label={t('Do not continue')}
+        aria-label={t`Do not continue`}
       >
         <X aria-hidden />
       </button>

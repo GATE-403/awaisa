@@ -1,11 +1,13 @@
 'use client'
 
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { listPlaceReviews } from '@/shared/api/clientApi'
 import type { ReviewSummary, Service } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './PlaceReviews.module.css'
 
@@ -24,7 +26,8 @@ type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 const SHOWN = 3
 const OPENED = 8
 export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const serviceId = service?.id
@@ -52,23 +55,22 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
     <section className={styles.reviews} aria-labelledby='booking-reviews'>
       <div className={styles.head}>
         <h2 id='booking-reviews' className={styles.title}>
-          {t('Reviews')}
+          {t`Reviews`}
           {isForService && service && <span className={styles.about}> · {service.name}</span>}
         </h2>
       </div>
       <p className={styles.score}>
         <Star weight='fill' aria-hidden className={styles.star} />
-        <strong>{summary.average.toLocaleString('en-GB')}</strong>
+        <strong>{format.number(summary.average)}</strong>
         {' · '}
-        {t.count(summary.count, ['review', 'reviews'])}
+        {t`${plural(summary.count, { one: '# review', other: '# reviews' })}`}
       </p>
       <MoreFade
         hiddenCount={Math.min(summary.items.length, OPENED) - SHOWN}
         isOpen={isOpen}
         isLessFloating={false}
         onToggle={() => setIsOpen((current) => !current)}
-        label={t
-          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['review', 'reviews'])
+        label={t`${plural(Math.min(summary.items.length, OPENED) - SHOWN, { one: '# review', other: '# reviews' })}`
           .split(' ')
           .slice(1)
           .join(' ')}

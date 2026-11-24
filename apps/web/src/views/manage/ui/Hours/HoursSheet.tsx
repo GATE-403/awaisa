@@ -1,10 +1,11 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
 import { setWorkingHours, updateBusiness } from '@/shared/api/clientApi'
 import type { WorkingDay } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { type DayDraft, findInvalidDay, toDrafts, toHours, WeekHoursRows } from './WeekHoursRows'
@@ -23,7 +24,7 @@ const STEPS = [15, 30, 60]
 
 // The week's hours and the slot step, changed where they are shown (the page's "Hours").
 export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [days, setDays] = useState(() => toDrafts(hours))
   const [step, setStep] = useState(slotMinutes)
   const [isSaving, setIsSaving] = useState(false)
@@ -43,36 +44,36 @@ export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursShee
     const isSaved = await run(async () => {
       await setWorkingHours(slug, toHours(days))
       if (step !== slotMinutes) await updateBusiness(slug, { slotMinutes: step })
-    }, 'Hours saved')
+    }, t`Hours saved`)
     setIsSaving(false)
     if (isSaved) onClose()
   }
 
   return (
     <Sheet
-      title={t('Opening hours')}
+      title={t`Opening hours`}
       onClose={onClose}
-      action={{ label: t('Done'), form: FORM_ID, disabled: !canSave }}
+      action={{ label: t`Done`, form: FORM_ID, disabled: !canSave }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Opening hours')}>
+        <section className={sheet.group} aria-label={t`Opening hours`}>
           <WeekHoursRows days={days} onChange={updateDay} />
           <p className={sheet.groupFooter}>
-            {t('Clients only see times within these hours that are not already booked.')}
+            {t`Clients only see times within these hours that are not already booked.`}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Booking')}>
+        <section className={sheet.group} aria-label={t`Booking`}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Booking interval')}</span>
+              <span className={sheet.rowLabel}>{t`Booking interval`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Booking interval')}
+                  aria-label={t`Booking interval`}
                   items={STEPS.map((value) => ({
                     value,
-                    label: t('{minutes} min', { minutes: value }),
+                    label: t`${ph({ minutes: value })} min`,
                   }))}
                   value={step}
                   onValueChange={(value) => value && setStep(value)}
@@ -80,7 +81,7 @@ export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursShee
               </span>
             </div>
           </div>
-          <p className={sheet.groupFooter}>{t('How often slots start: 10:00, 10:30…')}</p>
+          <p className={sheet.groupFooter}>{t`How often slots start: 10:00, 10:30…`}</p>
         </section>
       </form>
     </Sheet>

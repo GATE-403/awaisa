@@ -30,8 +30,10 @@ type Region = {
   currency: {
     /** ISO 4217, e.g. «KGS». */
     code: string
-    /** What follows a price in the app's texts, e.g. «сом». */
+    /** What follows a price in the app's texts, e.g. «som»; the fallback for any language. */
     label: string
+    /** The label per interface language, e.g. { en: «som», ru: «сом» }; empty when not given. */
+    labels: Record<string, string>
   }
   locale: {
     /** The language the server renders and texts are sent in. */

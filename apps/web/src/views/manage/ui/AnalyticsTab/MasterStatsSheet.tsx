@@ -3,12 +3,14 @@
 import { Button } from '@awaisa/ui/Button'
 import { Input } from '@awaisa/ui/Input'
 import { useToast } from '@awaisa/ui/Toast'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addMasterPayout, removeMasterPayout } from '@/shared/api/clientApi'
 import type { AnalyticsReport, MasterPayout } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import { type Translate, useFormat } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { DateField } from '@/shared/ui/DateField/DateField'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
@@ -18,7 +20,6 @@ import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import { describeRate } from '@/views/manage/lib/payText'
 import styles from './AnalyticsTab.module.css'
 import { analyticsFormat } from './analyticsFormat'
-import { Filled } from './Filled'
 
 interface MasterStatsSheetProps {
   master: AnalyticsReport['masters'][number]
@@ -34,8 +35,10 @@ interface MasterStatsSheetProps {
   onClose: () => void
 }
 
-const visits = (t: Translate, count: number) => t.count(count, ['visit', 'visits'])
-const workDays = (t: Translate, count: number) => t.count(count, ['working day', 'working days'])
+const visits = (t: Translate, count: number) =>
+  t(msg`${plural(count, { one: '# visit', other: '# visits' })}`)
+const workDays = (t: Translate, count: number) =>
+  t(msg`${plural(count, { one: '# working day', other: '# working days' })}`)
 const digits = (value: string) => value.replace(/\D/g, '')
 
 // One master's period in the quiet profile style: the face, the name, one line of bold facts, how
@@ -51,8 +54,9 @@ export const MasterStatsSheet = ({
   onClose,
 }: MasterStatsSheetProps) => {
   const toast = useToast()
-  const t = useT()
-  const { formatDay, formatMoney } = analyticsFormat(t)
+  const { t } = useLingui()
+  const format = useFormat()
+  const { formatDay, formatMoney } = analyticsFormat(t, format)
   const pay = master.pay
   const [payout, setPayout] = useState<{ amount: string; paidOn: string; note: string } | null>(
     null,
@@ -65,7 +69,7 @@ export const MasterStatsSheet = ({
 
   const fail = (error: unknown) =>
     toast.show({
-      title: t('Something went wrong'),
+      title: t`Something went wrong`,
       description: getErrorMessage(error),
       type: 'error',
     })
@@ -91,9 +95,9 @@ export const MasterStatsSheet = ({
       await removeMasterPayout(slug, item.id)
       onPayoutsChange()
       toast.show({
-        title: t('Payout cancelled'),
+        title: t`Payout cancelled`,
         description: formatMoney(item.amount),
-        action: { label: t('Undo'), onClick: () => void restore(item) },
+        action: { label: t`Undo`, onClick: () => void restore(item) },
       })
     } catch (error) {
       fail(error)
@@ -103,7 +107,11 @@ export const MasterStatsSheet = ({
   // Marking a payout is reversible: no confirmation, "Undo" in the toast takes it back.
   const markPaid = async () => {
     if (!payout) {
-      setPayout({ amount: maskAmountInput(String(pay?.due ?? '')), paidOn: period.to, note: '' })
+      setPayout({
+        amount: maskAmountInput(String(pay?.due ?? ''), format.locale),
+        paidOn: period.to,
+        note: '',
+      })
       return
     }
     const amount = Number(digits(payout.amount))
@@ -121,11 +129,11 @@ export const MasterStatsSheet = ({
       setPayout(null)
       onPayoutsChange()
       toast.show({
-        title: t('Payout marked'),
+        title: t`Payout marked`,
         description: `${master.name} · ${formatMoney(amount)}`,
         type: 'success',
         action: {
-          label: t('Undo'),
+          label: t`Undo`,
           onClick: () => void removeMasterPayout(slug, added.id).then(onPayoutsChange).catch(fail),
         },
       })
@@ -137,17 +145,19 @@ export const MasterStatsSheet = ({
   }
 
   return (
-    <Sheet title={master.name} onClose={onClose} cancelLabel={t('Close')}>
+    <Sheet title={master.name} onClose={onClose} cancelLabel={t`Close`}>
       <div className={sheet.form}>
         <div className={styles.masterHead}>
           <PersonAvatar name={master.name} size='lg' />
           <p className={styles.masterFacts}>
             <b>{visits(t, master.visits)}</b> · <b>{formatMoney(master.revenue)}</b> ·{' '}
-            <Filled text={t('load {load}')} parts={{ load: <b>{master.load}%</b> }} />
+            <Trans>
+              load <b>{master.load}%</b>
+            </Trans>
             {master.rating !== null && (
               <>
                 {' '}
-                · ★ <b>{master.rating.toFixed(1).replace('.', ',')}</b>
+                · ★ <b>{format.rating(master.rating)}</b>
               </>
             )}
           </p>
@@ -160,36 +170,36 @@ export const MasterStatsSheet = ({
           )}
         </div>
 
-        <section className={sheet.group} aria-label={t('Figures')}>
+        <section className={sheet.group} aria-label={t`Figures`}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Come back to them')}</span>
+              <span className={sheet.rowLabel}>{t`Come back to them`}</span>
               <span className={styles.sheetValue}>
-                {master.retention === null ? t('too little data') : `${master.retention}%`}
+                {master.retention === null ? t`too little data` : `${master.retention}%`}
               </span>
             </div>
             {master.reviews > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Reviews for the period')}</span>
+                <span className={sheet.rowLabel}>{t`Reviews for the period`}</span>
                 <span className={styles.sheetValue}>{master.reviews}</span>
               </div>
             )}
           </div>
           <p className={sheet.groupFooter}>
-            {t('Come back: clients who booked this specialist again within 6 weeks.')}
+            {t`Come back: clients who booked this specialist again within 6 weeks.`}
           </p>
         </section>
 
         {pay && (
           <section className={sheet.group} aria-labelledby='master-pay'>
-            <SectionCaption id='master-pay'>{t('Pay for the period')}</SectionCaption>
+            <SectionCaption id='master-pay'>{t`Pay for the period`}</SectionCaption>
             <div className={sheet.list}>
               {pay.lines.map((line) => (
                 <div key={line.serviceId} className={sheet.row}>
                   <span className={styles.payLabel}>
                     {line.name}
                     <span className={sheet.rowHint}>
-                      {visits(t, line.visits)} · {describeRate(line, t)}
+                      {visits(t, line.visits)} · {describeRate(line, t, format)}
                     </span>
                   </span>
                   <span className={styles.sheetValue}>{formatMoney(line.amount)}</span>
@@ -198,10 +208,10 @@ export const MasterStatsSheet = ({
               {pay.productsSold > 0 && (
                 <div className={sheet.row}>
                   <span className={styles.payLabel}>
-                    {t('Products')}
+                    {t`Products`}
                     <span className={sheet.rowHint}>
-                      {t('sold {amount}', { amount: formatMoney(pay.productsSold) })}
-                      {pay.products === 0 && ` · ${t('no percent')}`}
+                      {t`sold ${ph({ amount: formatMoney(pay.productsSold) })}`}
+                      {pay.products === 0 && ` · ${t`no percent`}`}
                     </span>
                   </span>
                   <span className={styles.sheetValue}>{formatMoney(pay.products)}</span>
@@ -210,11 +220,9 @@ export const MasterStatsSheet = ({
               {pay.salaryKind && (
                 <div className={sheet.row}>
                   <span className={styles.payLabel}>
-                    {t('Salary')}
+                    {t`Salary`}
                     <span className={sheet.rowHint}>
-                      {pay.salaryKind === 'day'
-                        ? workDays(t, pay.workDays)
-                        : t('per month, by day')}
+                      {pay.salaryKind === 'day' ? workDays(t, pay.workDays) : t`per month, by day`}
                     </span>
                   </span>
                   <span className={styles.sheetValue}>{formatMoney(pay.salary)}</span>
@@ -222,30 +230,30 @@ export const MasterStatsSheet = ({
               )}
               {pay.minimum !== null && (
                 <div className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Minimum for the period')}</span>
+                  <span className={sheet.rowLabel}>{t`Minimum for the period`}</span>
                   <span className={styles.sheetValue}>{formatMoney(pay.minimum)}</span>
                 </div>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Earned')}</span>
+                <span className={sheet.rowLabel}>
+                  {t({ message: 'Earned', context: 'pay accrued to a specialist' })}
+                </span>
                 <span className={styles.payTotal}>{formatMoney(pay.total)}</span>
               </div>
               {pay.paid > 0 && (
                 <div className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Paid out')}</span>
+                  <span className={sheet.rowLabel}>{t`Paid out`}</span>
                   <span className={styles.sheetValue}>{formatMoney(pay.paid)}</span>
                 </div>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Due')}</span>
+                <span className={sheet.rowLabel}>{t`Due`}</span>
                 <span className={styles.payTotal}>{formatMoney(pay.due)}</span>
               </div>
             </div>
             {pay.total > pay.earned && (
               <RowNote>
-                {t('Earned {amount}, under the minimum: the minimum is paid.', {
-                  amount: formatMoney(pay.earned),
-                })}
+                {t`Earned ${ph({ amount: formatMoney(pay.earned) })}, under the minimum: the minimum is paid.`}
               </RowNote>
             )}
           </section>
@@ -253,7 +261,7 @@ export const MasterStatsSheet = ({
 
         {pay && pay.payouts.length > 0 && (
           <section className={sheet.group} aria-labelledby='master-payouts'>
-            <SectionCaption id='master-payouts'>{t('Payouts')}</SectionCaption>
+            <SectionCaption id='master-payouts'>{t`Payouts`}</SectionCaption>
             <div className={sheet.list}>
               {pay.payouts.map((item) => (
                 <div key={item.id} className={sheet.row}>
@@ -268,11 +276,9 @@ export const MasterStatsSheet = ({
                     type='button'
                     className={sheet.groupLink}
                     onClick={() => void undo(item)}
-                    aria-label={t('Cancel payout of {amount}', {
-                      amount: formatMoney(item.amount),
-                    })}
+                    aria-label={t`Cancel payout of ${ph({ amount: formatMoney(item.amount) })}`}
                   >
-                    {t('Cancel')}
+                    {t({ message: 'Cancel', context: 'verb: undo a payout' })}
                   </button>
                 </div>
               ))}
@@ -282,28 +288,31 @@ export const MasterStatsSheet = ({
 
         {pay && payout && (
           <section className={sheet.group} aria-labelledby='master-payout'>
-            <SectionCaption id='master-payout'>{t('Payout')}</SectionCaption>
+            <SectionCaption id='master-payout'>{t`Payout`}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Amount')}</span>
+                <span className={sheet.rowLabel}>{t`Amount`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Payout amount')}
+                    aria-label={t`Payout amount`}
                     value={payout.amount}
                     onValueChange={(value) =>
-                      setPayout({ ...payout, amount: maskAmountInput(digits(value)) })
+                      setPayout({
+                        ...payout,
+                        amount: maskAmountInput(digits(value), format.locale),
+                      })
                     }
                     autoFocus
                   />
-                  <span className={sheet.suffix}>{t('som')}</span>
+                  <span className={sheet.suffix}>{format.currency}</span>
                 </span>
               </label>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Date')}</span>
+                <span className={sheet.rowLabel}>{t`Date`}</span>
                 <DateField
-                  label={t('Payout date')}
+                  label={t`Payout date`}
                   value={payout.paidOn}
                   onChange={(paidOn) => setPayout({ ...payout, paidOn })}
                 />
@@ -311,8 +320,8 @@ export const MasterStatsSheet = ({
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label={t('Payout comment')}
-                  placeholder={t('Comment, e.g. “advance”')}
+                  aria-label={t`Payout comment`}
+                  placeholder={t`Comment, e.g. “advance”`}
                   value={payout.note}
                   maxLength={200}
                   onValueChange={(note) => setPayout({ ...payout, note })}
@@ -320,17 +329,14 @@ export const MasterStatsSheet = ({
               </div>
             </div>
             <p className={sheet.groupFooter}>
-              {t('For {from} to {to}', {
-                from: formatDay(period.from),
-                to: formatDay(period.to),
-              })}
+              {t`For ${ph({ from: formatDay(period.from) })} to ${ph({ to: formatDay(period.to) })}`}
             </p>
           </section>
         )}
 
         {master.topServices.length > 0 && (
           <section className={sheet.group} aria-labelledby='master-top-services'>
-            <SectionCaption id='master-top-services'>{t('Most often')}</SectionCaption>
+            <SectionCaption id='master-top-services'>{t`Most often`}</SectionCaption>
             <div className={sheet.list}>
               {master.topServices.map((service) => (
                 <div key={service.name} className={sheet.row}>
@@ -346,10 +352,11 @@ export const MasterStatsSheet = ({
           // The sheet's one main action, last and as wide as the groups above it.
           <Button fullWidth onClick={() => void markPaid()} disabled={isSaving}>
             {payout
-              ? t('Pay {amount}', {
-                  amount: t('{amount} som', { amount: payout.amount || '0' }),
+              ? t({
+                  message: `Pay ${ph({ amount: format.price(Number(digits(payout.amount)) || 0) })}`,
+                  context: 'pay out to a specialist',
                 })
-              : t('Mark payout of {amount}', { amount: formatMoney(pay.due) })}
+              : t`Mark payout of ${ph({ amount: formatMoney(pay.due) })}`}
           </Button>
         )}
       </div>

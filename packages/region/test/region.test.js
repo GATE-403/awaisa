@@ -53,6 +53,24 @@ describe('parseRegion', () => {
     assert.deepEqual(berlin.locale, { default: 'de', available: ['de'], numbers: 'de' })
     // Without a label of its own the currency is called what the locale calls it.
     assert.equal(berlin.currency.label, 'Euro')
+    assert.deepEqual(berlin.currency.labels, {})
+  })
+
+  it('reads a currency label per language', () => {
+    const region = parseRegion({
+      ...ALMATY,
+      currency: { code: 'KZT', label: 'tenge', labels: { en: 'tenge', ru: ' тг ', kk: 'тг' } },
+    })
+    assert.equal(region.currency.label, 'tenge')
+    assert.deepEqual(region.currency.labels, { en: 'tenge', ru: 'тг', kk: 'тг' })
+    assert.throws(
+      () => parseRegion({ ...ALMATY, currency: { code: 'KZT', labels: ['тг'] } }),
+      /currency\.labels/,
+    )
+    assert.throws(
+      () => parseRegion({ ...ALMATY, currency: { code: 'KZT', labels: { ru: '' } } }),
+      /currency\.labels/,
+    )
   })
 
   it('names every field that is missing or wrong at once', () => {
@@ -128,6 +146,7 @@ describe('loadRegionFile', () => {
       allowExample: false,
     })
     assert.equal(phonePlaceholder(region), '+996 555 123 456')
+    assert.equal(region.currency.labels.ru, 'сом')
     assert.equal(utcOffsetMinutes(region), 360)
   })
 })

@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
 import { getTelegramLink } from '@/shared/api/clientApi'
-import { useT } from '@/shared/i18n'
 import styles from './TelegramReminderLink.module.css'
 
 interface TelegramReminderLinkProps {
@@ -15,7 +15,7 @@ type Link = { url: string | null; isLinked: boolean }
 // Reminders in Telegram instead of SMS: free for the salon, and the message carries a
 // «Reschedule or cancel» button. One quiet line; nothing when the bot is not set up.
 export const TelegramReminderLink = ({ bookingId }: TelegramReminderLinkProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [link, setLink] = useState<Link | null>(null)
 
   useEffect(() => {
@@ -27,12 +27,12 @@ export const TelegramReminderLink = ({ bookingId }: TelegramReminderLinkProps) =
 
   if (!link?.url) return null
   if (link.isLinked) {
-    return <p className={styles.line}>{t('We will remind you in Telegram')}</p>
+    return <p className={styles.line}>{t`We will remind you in Telegram`}</p>
   }
 
   return (
     <a href={link.url} target='_blank' rel='noreferrer' className={styles.link}>
-      {t('Remind me in Telegram instead of SMS ›')}
+      {t`Remind me in Telegram instead of SMS ›`}
     </a>
   )
 }

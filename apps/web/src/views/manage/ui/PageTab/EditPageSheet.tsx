@@ -3,11 +3,13 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
 import type { Business, BusinessKind, UpdateBusinessInput } from '@/shared/api/types'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
-import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -27,12 +29,17 @@ interface EditPageSheetProps {
 
 type ContactField = 'city' | 'address' | 'phone' | 'whatsapp' | 'mapUrl'
 
-const CONTACTS: { key: ContactField; label: string; placeholder?: string; type?: string }[] = [
-  { key: 'city', label: 'City' },
-  { key: 'address', label: 'Address', placeholder: '125 Toktogul St' },
-  { key: 'phone', label: 'Phone', type: 'tel' },
-  { key: 'whatsapp', label: 'WhatsApp', type: 'tel', placeholder: 'Optional' },
-  { key: 'mapUrl', label: 'Map link', placeholder: 'Optional' },
+const CONTACTS: {
+  key: ContactField
+  label: MessageDescriptor
+  placeholder?: MessageDescriptor
+  type?: string
+}[] = [
+  { key: 'city', label: msg`City` },
+  { key: 'address', label: msg`Address`, placeholder: msg`125 Toktogul St` },
+  { key: 'phone', label: msg`Phone`, type: 'tel' },
+  { key: 'whatsapp', label: msg`WhatsApp`, type: 'tel', placeholder: msg`Optional` },
+  { key: 'mapUrl', label: msg`Map link`, placeholder: msg`Optional` },
 ]
 
 const FORM_ID = 'edit-page'
@@ -46,7 +53,7 @@ export const EditPageSheet = ({
   onSave,
   onClose,
 }: EditPageSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [draft, setDraft] = useState<UpdateBusinessInput>({})
   const [isSaving, setIsSaving] = useState(false)
   const values = { ...business, ...draft }
@@ -66,18 +73,20 @@ export const EditPageSheet = ({
 
   return (
     <Sheet
-      title={t('Edit')}
+      title={t`Edit`}
       onClose={onClose}
-      action={{ label: t('Done'), form: FORM_ID, disabled: !canSave }}
+      action={{ label: t`Done`, form: FORM_ID, disabled: !canSave }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Name')}</span>
+            <span className={sheet.rowLabel}>
+              {t({ message: 'Name', context: 'name of a thing, not a person' })}
+            </span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label={t('Name')}
+                aria-label={t({ message: 'Name', context: 'name of a thing, not a person' })}
                 value={values.name}
                 maxLength={80}
                 onValueChange={(name) => change({ name })}
@@ -85,11 +94,11 @@ export const EditPageSheet = ({
             </span>
           </div>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Type')}</span>
+            <span className={sheet.rowLabel}>{t`Type`}</span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'
-                aria-label={t('What you do')}
+                aria-label={t`What you do`}
                 items={BUSINESS_KINDS.map((kind) => ({ ...kind, label: t(kind.label) }))}
                 value={values.kind}
                 onValueChange={(kind) => kind && change({ kind: kind as BusinessKind })}
@@ -99,18 +108,18 @@ export const EditPageSheet = ({
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <textarea
               className={styles.sheetText}
-              aria-label={t('About you in brief')}
+              aria-label={t`About you in brief`}
               value={values.description}
               maxLength={500}
               rows={3}
-              placeholder={t('A few words about you: what you are good at and for whom')}
+              placeholder={t`A few words about you: what you are good at and for whom`}
               onChange={(event) => change({ description: event.target.value })}
             />
           </div>
         </div>
 
-        <section className={sheet.group} aria-label={t('Contacts')}>
-          <SectionCaption>{t('Contacts')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Contacts`}>
+          <SectionCaption>{t`Contacts`}</SectionCaption>
           <div className={sheet.list}>
             {CONTACTS.map(({ key, label, placeholder, type }) => (
               <label key={key} className={sheet.row}>
@@ -121,7 +130,9 @@ export const EditPageSheet = ({
                     type={type}
                     inputMode={type === 'tel' ? 'tel' : undefined}
                     value={type === 'tel' ? maskPhoneInput(values[key]) : values[key]}
-                    placeholder={t(placeholder ?? 'Not set')}
+                    placeholder={t(
+                      placeholder ?? msg({ message: 'Not set', context: 'empty contact field' }),
+                    )}
                     onValueChange={(value) =>
                       change({ [key]: type === 'tel' ? maskPhoneInput(value) : value })
                     }
@@ -134,7 +145,7 @@ export const EditPageSheet = ({
               className={`${sheet.row} ${styles.sheetLink}`}
               onClick={onEditHours}
             >
-              <span className={sheet.rowLabel}>{t('Hours')}</span>
+              <span className={sheet.rowLabel}>{t`Hours`}</span>
               <span className={styles.sheetValue}>
                 {hoursText}
                 <CaretRight aria-hidden />
@@ -143,17 +154,17 @@ export const EditPageSheet = ({
           </div>
         </section>
 
-        <section className={sheet.group} aria-label={t('Publishing')}>
+        <section className={sheet.group} aria-label={t`Publishing`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Page is open')}</span>
+              <span className={sheet.rowLabel}>{t`Page is open`}</span>
               <Switch
                 checked={values.isPublished}
                 onCheckedChange={(isPublished) => change({ isPublished })}
               />
             </label>
           </div>
-          <p className={sheet.groupFooter}>{t('Turn off to pause booking for a while.')}</p>
+          <p className={sheet.groupFooter}>{t`Turn off to pause booking for a while.`}</p>
         </section>
       </form>
     </Sheet>

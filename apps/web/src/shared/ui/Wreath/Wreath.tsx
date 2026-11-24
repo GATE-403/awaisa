@@ -1,3 +1,6 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { CSSProperties, ReactNode } from 'react'
 import { useId } from 'react'
 import styles from './Wreath.module.css'
@@ -5,10 +8,10 @@ import styles from './Wreath.module.css'
 type Rank = 1 | 2 | 3
 
 // Gold, silver and bronze, each as a light-to-deep gradient so the leaves read as metal.
-const METAL: Record<Rank, { light: string; deep: string; label: string }> = {
-  1: { light: '#ffe08a', deep: '#c8921a', label: 'First place' },
-  2: { light: '#f1f3f6', deep: '#9aa1ab', label: 'Second place' },
-  3: { light: '#f3b98a', deep: '#a0582a', label: 'Third place' },
+const METAL: Record<Rank, { light: string; deep: string; label: MessageDescriptor }> = {
+  1: { light: '#ffe08a', deep: '#c8921a', label: msg`First place` },
+  2: { light: '#f1f3f6', deep: '#9aa1ab', label: msg`Second place` },
+  3: { light: '#f3b98a', deep: '#a0582a', label: msg`Third place` },
 }
 
 const LEAVES = 9
@@ -39,14 +42,16 @@ interface WreathProps {
 
 /** An emperor's laurel wreath around a face, for the top three masters and clients. */
 export const Wreath = ({ rank, children, hasNumber = true, className }: WreathProps) => {
+  const { t } = useLingui()
   const id = useId()
   const metal = METAL[rank]
+  const place = t(metal.label)
 
   return (
     <span
       className={className ? `${styles.wrap} ${className}` : styles.wrap}
       style={{ '--metal-deep': metal.deep } as CSSProperties}
-      title={`${metal.label} on Awaisa`}
+      title={t`${place} on Awaisa`}
     >
       {children}
       <svg className={styles.laurel} viewBox='0 0 100 100' aria-hidden='true'>
@@ -87,7 +92,7 @@ export const Wreath = ({ rank, children, hasNumber = true, className }: WreathPr
           {rank}
         </span>
       )}
-      <span className={styles.srOnly}>{metal.label}</span>
+      <span className={styles.srOnly}>{place}</span>
     </span>
   )
 }
