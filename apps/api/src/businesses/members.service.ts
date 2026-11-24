@@ -1,0 +1,68 @@
+import type { TeamMember } from '@awaisa/contracts'
+import { BadRequestException, Injectable } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { InjectDataSource } from '@nestjs/typeorm'
+import { DataSource } from 'typeorm'
+import { normalizePhone } from '../common/phone.js'
+import type { Env } from '../config/env.js'
+import { adminInviteMessage } from '../notifications/messages.js'
+import { SmsService } from '../notifications/sms.service.js'
+import type { Business } from './business.entity.js'
+
+// The team: the owner adds administrators by phone; they sign in by SMS like anyone else and
+// get the cabinet without money or settings.
+@Injectable()
+export class MembersService {
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly sms: SmsService,
+    private readonly config: ConfigService<Env, true>,
+  ) {}
+
+  async list(businessId: string): Promise<TeamMember[]> {
+    const rows = (await this.dataSource.query(
+      `SELECT c."id", c."phone", c."name", m."role", m."created_at" AS "createdAt"
+       FROM "business_members" m JOIN "customers" c ON c."id" = m."customer_id"
+       WHERE m."business_id" = $1 ORDER BY m."role" = 'owner' DESC, m."created_at"`,
+      [businessId],
+    )) as { id: string; phone: string; name: string; role: string; createdAt: Date }[]
+    return rows.map(
+      (row): TeamMember => ({
+        id: row.id,
+        phone: row.phone,
+        name: row.name,
+        role: row.role === 'owner' ? 'owner' : 'admin',
+      }),
+    )
+  }
+
+  async add(business: Business, rawPhone: string): Promise<TeamMember[]> {
+    const phone = normalizePhone(rawPhone)
+    if (!phone) throw new BadRequestException('Проверьте номер телефона')
+    // The number may never have signed in: it gets an account now, named when it first does.
+    const [customer] = (await this.dataSource.query(
+      `INSERT INTO "customers" ("phone") VALUES ($1)
+       ON CONFLICT ("phone") DO UPDATE SET "phone" = EXCLUDED."phone" RETURNING "id"`,
+      [phone],
+    )) as { id: string }[]
+    const inserted = (await this.dataSource.query(
+      `INSERT INTO "business_members" ("business_id", "customer_id", "role") VALUES ($1, $2, 'staff')
+       ON CONFLICT DO NOTHING RETURNING "customer_id"`,
+      [business.id, customer?.id],
+    )) as unknown[]
+    if (inserted.length > 0) {
+      const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/manage/${business.slug}`
+      void this.sms.sendSafely(phone, adminInviteMessage(business.name, link))
+    }
+    return this.list(business.id)
+  }
+
+  async remove(businessId: string, customerId: string, meId: string): Promise<void> {
+    if (customerId === meId) throw new BadRequestException('Себя удалить нельзя')
+    // Only administrators leave this way; the owner stays.
+    await this.dataSource.query(
+      `DELETE FROM "business_members" WHERE "business_id" = $1 AND "customer_id" = $2 AND "role" = 'staff'`,
+      [businessId, customerId],
+    )
+  }
+}
