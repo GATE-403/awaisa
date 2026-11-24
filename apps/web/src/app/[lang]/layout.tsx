@@ -10,7 +10,6 @@ import { ChannelTracker } from '@/features/bookingChannel'
 import { ResumeBooking } from '@/features/bookingDraft'
 import { InviteRefCapture } from '@/features/invite'
 import { PLATFORM } from '@/shared/config/platform'
-import { CATALOGS } from '@/shared/i18n/instances'
 import { LinguiClientProvider } from '@/shared/i18n/LinguiClientProvider'
 import { INTL_LOCALES, LOCALES } from '@/shared/i18n/locales'
 import { getLocale, initLingui } from '@/shared/i18n/server'
@@ -83,7 +82,7 @@ const RootLayout = async ({ children, modal }: LayoutProps<'/[lang]'>) => {
           dangerouslySetInnerHTML={{ __html: `<script>${THEME_BOOT_SCRIPT}</script>` }}
         />
         <Splash />
-        <LinguiClientProvider locale={locale} messages={CATALOGS[locale]}>
+        <LinguiClientProvider locale={locale}>
           <ToastProvider>
             <div className='root'>
               <Suspense fallback={<HeaderFallback />}>
