@@ -4,6 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { CacheService } from '../cache/cache.service.js'
+import { returnedRows } from '../common/sql.js'
 import { LoyaltyService } from '../loyalty/loyalty.service.js'
 import { StorageService } from '../media/storage.service.js'
 import { WaitlistService } from '../waitlist/waitlist.service.js'
@@ -18,10 +19,6 @@ import type { Customer } from './customer.entity.js'
 type Row = Record<string, unknown>
 
 const iso = (value: unknown) => (value ? new Date(value as string).toISOString() : null)
-
-// `UPDATE … RETURNING` through TypeORM comes back as [rows, count].
-const returnedRows = (result: unknown) =>
-  (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
 
 // «Скачать мои данные» and «Удалить аккаунт» (the law on personal data): what the platform keeps
 // about a client, and taking it away. What stays and why is in `account-erasure.ts`.

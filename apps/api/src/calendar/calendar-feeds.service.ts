@@ -1,10 +1,11 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { randomBytes } from 'node:crypto'
 import type { CalendarFeed, CalendarFeedLink } from '@awaisa/contracts'
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { CacheService } from '../cache/cache.service.js'
+import { hashToken } from '../common/hash.js'
 import type { Env } from '../config/env.js'
 import { bookingEvent, type FeedBooking } from './calendar-events.js'
 import { buildCalendar } from './ics.js'
@@ -33,8 +34,6 @@ type FeedRow = {
   createdAt: Date
   lastReadAt: Date | null
 }
-
-const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
 @Injectable()
 export class CalendarFeedsService {

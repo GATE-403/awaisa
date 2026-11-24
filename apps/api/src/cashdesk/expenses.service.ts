@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { addDays, toBusinessParts } from '../common/business-time.js'
+import { returnedRows, toNumber } from '../common/sql.js'
 import { roundMoney } from './cash-math.js'
 import type { ExpenseBody } from './cashdesk.schemas.js'
 
@@ -10,8 +11,6 @@ type Row = Record<string, unknown>
 
 /** Categories offered first; anything else the owner types is kept as their own. */
 const PRESET_CATEGORIES = ['rent', 'materials', 'salaries', 'utilities', 'marketing', 'other']
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 /** What the business spends, by category, day and branch: the other half of the profit. */
 @Injectable()
@@ -80,7 +79,7 @@ export class ExpensesService {
         input.branchId,
       ],
     )
-    const [row] = this.rows(result)
+    const [row] = returnedRows(result)
     if (!row) throw new NotFoundException('Расход не найден')
     return this.toExpense(row)
   }
@@ -102,10 +101,6 @@ export class ExpensesService {
       note: row.note ? String(row.note) : null,
       isFromStock: Boolean(row.stock_movement_id),
     }
-  }
-
-  private rows(result: unknown) {
-    return (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
   }
 
   private query(sql: string, params: unknown[]) {

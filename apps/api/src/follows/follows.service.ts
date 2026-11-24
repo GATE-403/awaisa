@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm'
 import { AvailabilityService } from '../bookings/availability.service.js'
 import { UNDO_WINDOW_SECONDS } from '../bookings/booking-rules.js'
 import { addDays, formatMinutes, toBusinessParts } from '../common/business-time.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { ClientMessagesService } from '../notifications/client-messages.service.js'
 import { dayWords, freedText, movedText, worksText } from './follow-messages.js'
@@ -20,9 +21,6 @@ const FRESH_CANCEL_MINUTES = 30
 // Only freed time worth acting on: from an hour ahead to two days ahead.
 const FREED_FROM_MINUTES = 60
 const FREED_UNTIL_HOURS = 48
-
-const rowsOf = (result: unknown) =>
-  (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as Row[]
 
 /**
  * Clients follow their master (in beauty they are loyal to the master, not the salon) and hear
@@ -142,7 +140,7 @@ export class FollowsService {
     })
     if (!slots.some((slot) => slot.time === time && slot.isAvailable)) return
 
-    const claimed = rowsOf(
+    const claimed = returnedRows(
       await this.dataSource.query(
         `INSERT INTO "master_follow_notices" ("specialist_id", "day") VALUES ($1, $2)
          ON CONFLICT DO NOTHING RETURNING "specialist_id"`,
@@ -151,7 +149,7 @@ export class FollowsService {
     )
     if (claimed.length === 0) return
 
-    const followers = rowsOf(
+    const followers = returnedRows(
       await this.dataSource.query(
         `UPDATE "master_follows" f SET "last_notified_at" = now()
          FROM "customers" c
@@ -198,7 +196,7 @@ export class FollowsService {
    */
   @Cron('0 5 * * *')
   async notifyMoved() {
-    const moved = rowsOf(
+    const moved = returnedRows(
       await this.dataSource.query(
         `UPDATE "master_follows" f SET "moved_notified_to" = n."id"
          FROM "specialists" o, "specialists" n, "businesses" nb, "customers" c
@@ -228,7 +226,7 @@ export class FollowsService {
   /** Mondays at noon in Bishkek: new works of a followed master, for those who asked for them. */
   @Cron('0 6 * * 1')
   async notifyWorks() {
-    const due = rowsOf(
+    const due = returnedRows(
       await this.dataSource.query(
         `WITH fresh AS (
            SELECT f."customer_id", f."specialist_id", COUNT(w.*)::int AS "count",

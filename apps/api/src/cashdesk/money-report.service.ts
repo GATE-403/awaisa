@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm'
 import { visitPrice } from '../bookings/visit-sql.js'
 import type { Business } from '../businesses/business.entity.js'
 import { addDays, businessDateTimeToUtc, toBusinessParts } from '../common/business-time.js'
+import { toNumber } from '../common/sql.js'
 import { changeOf, profitOf, roundMoney } from './cash-math.js'
 
 type Row = Record<string, unknown>
@@ -19,8 +20,6 @@ const LOCAL_VISIT = `(b."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')::da
 const LOCAL_SALE = `(x."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 const LOCAL_CERTIFICATE = `(g."paid_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 const LOCAL_SUBSCRIPTION = `(c."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 /**
  * «Прибыль»: revenue from services, products and subscriptions sold (a visit paid by a

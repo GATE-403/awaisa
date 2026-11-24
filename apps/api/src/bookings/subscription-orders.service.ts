@@ -12,6 +12,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
 import { BillingService } from '../billing/billing.service.js'
+import { returnedRows, toNumber } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { BookingPaymentsService } from './booking-payments.service.js'
 import { PAYMENT_HOLD_MINUTES } from './booking-rules.js'
@@ -33,8 +34,6 @@ type Row = Record<string, unknown>
 type Buyer = { customerId: string | null; phone: string }
 
 type PlacedOrder = { id: string; amount: number; title: string; businessName: string }
-
-const toNumber = (value: unknown) => Number(value ?? 0)
 
 const visitsWord = (count: number) => {
   const mod10 = count % 10
@@ -282,9 +281,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
       `UPDATE "subscription_orders" SET "status" = 'expired'
        WHERE "status" = 'pending' AND "due_at" < now() RETURNING "id"`,
     )
-    const rows = (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
-      id: string
-    }[]
+    const rows = returnedRows<{ id: string }>(result)
     await this.payments.failPendingOrders(
       KIND,
       rows.map((row) => row.id),

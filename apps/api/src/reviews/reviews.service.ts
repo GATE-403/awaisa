@@ -16,6 +16,7 @@ import { BookingsService } from '../bookings/bookings.service.js'
 import type { Business } from '../businesses/business.entity.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import { saltOf } from '../common/public-id.js'
+import { returnedRows } from '../common/sql.js'
 import type { Env } from '../config/env.js'
 import { anonymizeReview } from '../customers/account-erasure.js'
 import type { Customer } from '../customers/customer.entity.js'
@@ -334,12 +335,12 @@ export class ReviewsService {
          b."business_id" AS "businessId"`,
       [REQUEST_AFTER_HOURS, REQUEST_WITHIN_HOURS],
     )
-    const due = (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as {
+    const due = returnedRows<{
       id: string
       phone: string
       businessName: string
       businessId: string
-    }[]
+    }>(result)
     if (due.length === 0) return
 
     this.logger.log(`Asking ${due.length} client(s) for a review`)

@@ -2,6 +2,7 @@ import type { BillingPlan, PlanAccess, PlanFeature } from '@awaisa/contracts'
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
+import { returnedRows } from '../common/sql.js'
 import {
   type Access,
   extendUntil,
@@ -225,7 +226,7 @@ export class BillingService {
       await count()
       return true
     }
-    const taken = rowsOf(
+    const taken = returnedRows(
       await this.dataSource.query(
         `UPDATE "business_subscriptions" SET "sms_extra" = "sms_extra" - 1
          WHERE "business_id" = $1 AND "sms_extra" > 0 RETURNING "sms_extra"`,
@@ -246,9 +247,6 @@ export class BillingService {
     )
   }
 }
-
-const rowsOf = (result: unknown) =>
-  (Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result) as unknown[]
 
 const toPlanView = (plan: PlanRow): BillingPlan => ({
   key: plan.key,
@@ -279,4 +277,4 @@ const toAccessView = (access: Access, plan: PlanRow, plans: PlanRow[]): PlanAcce
   }
 }
 
-export { PlanRequiredException, rowsOf, toAccessView, toPlanView }
+export { PlanRequiredException, toAccessView, toPlanView }

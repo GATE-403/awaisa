@@ -1,4 +1,4 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -14,6 +14,7 @@ import {
   parseTime,
   toBusinessParts,
 } from '../common/business-time.js'
+import { hashToken } from '../common/hash.js'
 import { normalizePhone } from '../common/phone.js'
 import { isSignedToken, visitLink } from '../common/visit-link.js'
 import type { Env } from '../config/env.js'
@@ -38,8 +39,6 @@ import { coversService } from './subscription-orders.js'
 import { SubscriptionOrdersService } from './subscription-orders.service.js'
 
 const MAX_CUSTOMER_BOOKINGS = 50
-
-const hashToken = (token: string) => createHash('sha256').update(token).digest('hex')
 
 export class BookingsService {
   constructor(
