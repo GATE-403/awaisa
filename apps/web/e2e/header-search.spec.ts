@@ -25,10 +25,15 @@ test.describe('Header search', () => {
 
     await page.goto('/')
     const field = page.getByRole('searchbox', { name: 'Search salons and specialists' })
-    await field.fill(first)
     const hints = page.getByRole('region', { name: 'Suggestions' })
     const link = hints.getByRole('link', { name: new RegExp(master.name) })
-    await expect(link).toBeVisible()
+    // Typed before the page has hydrated, the letters land in the field but no one hears them (a
+    // slow CI runner): type again until the suggestions answer.
+    await expect(async () => {
+      await field.fill('')
+      await field.fill(first)
+      await expect(link).toBeVisible({ timeout: 3000 })
+    }).toPass({ timeout: 20_000 })
     await expect(link).toHaveAttribute('href', `/lumiere-salon/book?specialist=${master.id}`)
 
     await field.fill('маникюр')
