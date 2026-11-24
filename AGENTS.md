@@ -303,6 +303,7 @@ Follows https://react-typescript-style-guide.com/, enforced by Biome where possi
 
 ## Conventions
 
+- Commits and PR titles follow Conventional Commits 1.0.0 in English: `type(scope): description` (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert; a lowercase scope such as `booking`, `cabinet`, `api`), imperative, no trailing period, no Cyrillic. No `Co-Authored-By` or other AI attribution lines. The «Что нового» section of a PR description stays in Russian: it becomes text people read in the app.
 - Lint/format: Biome only (root `biome.json`, per-app overrides in `apps/*/biome.json`). No ESLint/Prettier.
 - API: Biome `useImportType` is off - Nest DI needs runtime imports for constructor-injected classes.
 - API DB: entities are `*.entity.ts` (auto-loaded), `synchronize` is off. Schema changes go through migrations:
