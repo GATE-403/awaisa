@@ -53,7 +53,7 @@ test.describe('Cabinet “Page”', () => {
     await checklist.getByRole('button', { name: 'About me' }).click()
     const sheet = page.getByRole('dialog', { name: 'Edit' })
     const newName = `${business.name} Plus`
-    await sheet.getByLabel('Name').fill(newName)
+    await sheet.getByLabel('Name', { exact: true }).fill(newName)
     await sheet.getByLabel('About you in brief').fill('E2E Neat haircuts without a queue')
     await sheet.getByRole('button', { name: 'Done' }).click()
     await expect(sheet).toHaveCount(0)

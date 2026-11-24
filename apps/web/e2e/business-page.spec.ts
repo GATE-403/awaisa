@@ -92,7 +92,7 @@ test.describe('Business page', () => {
     await expect(page.getByRole('dialog', { name: /: photo \d of 6$/ })).toHaveCount(0)
 
     await work.getByRole('button', { name: 'Open photo 1 of 6' }).click()
-    await page.getByRole('button', { name: 'Close' }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(page.getByRole('dialog', { name: /: photo \d of 6$/ })).toHaveCount(0)
   })
 

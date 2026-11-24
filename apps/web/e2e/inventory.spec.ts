@@ -32,7 +32,7 @@ test.describe('Inventory', () => {
         .first()
         .click()
       const sheet = page.getByRole('dialog', { name: 'New consumable' })
-      await sheet.getByLabel('Name').fill('E2E Краска')
+      await sheet.getByLabel('Name', { exact: true }).fill('E2E Краска')
       await sheet.getByLabel('Price per unit, som').fill('4')
       await sheet.getByLabel('Minimum stock').fill('60')
       await sheet.getByLabel(`Use: ${service.name}`).fill('50')

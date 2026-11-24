@@ -364,7 +364,7 @@ test.describe('Settings: change and remove what was made', () => {
     await page.goto(`/manage/${business.slug}?tab=stock`)
     await settingsRow(page, /E2E Шампунь/).click()
     const sheet = page.getByRole('dialog', { name: 'Consumable', exact: true })
-    await sheet.getByLabel('Name').fill('E2E Шампунь мятный')
+    await sheet.getByLabel('Name', { exact: true }).fill('E2E Шампунь мятный')
     await sheet.getByLabel('Price per unit, som').fill('3')
     await sheet.getByRole('button', { name: 'Save' }).click()
     await expect(sheet).toHaveCount(0)

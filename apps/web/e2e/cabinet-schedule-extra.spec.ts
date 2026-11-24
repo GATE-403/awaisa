@@ -183,7 +183,7 @@ test.describe('Schedule: more on a visit and the day', () => {
     const visit = await book(business, 'E2E Свайп')
     await page.goto(`/manage/${business.slug}?tab=schedule&date=${visit.date}`)
     await expect(visitCard(page, visit.name)).toBeVisible()
-    const strip = page.getByRole('group', { name: 'Day' })
+    const strip = page.getByRole('group', { name: 'Day', exact: true })
     const next = await strip
       .locator(`[data-day="${visit.date}"] ~ [data-day]`)
       .first()

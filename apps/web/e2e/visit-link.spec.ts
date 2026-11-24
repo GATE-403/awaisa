@@ -54,7 +54,9 @@ test.describe('Client flow from outside the site', () => {
     const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) await anyMaster.click()
     await pickFirstFreeSlot(page)
-    await expect(page.locator('#step-contacts').getByLabel('Name')).toHaveValue('E2E Постоянный')
+    await expect(page.locator('#step-contacts').getByLabel('Name', { exact: true })).toHaveValue(
+      'E2E Постоянный',
+    )
     await expect(page.locator('#step-contacts').getByLabel('Phone')).toHaveValue('+996 555 000 111')
   })
 

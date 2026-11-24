@@ -164,7 +164,7 @@ test.describe('Fiscal receipts', () => {
       await expect(paper.getByText(receipt.fiscalNumber as string)).toBeVisible()
       await expect(paper.getByRole('img', { name: 'Receipt QR code' })).toBeVisible()
       await expect(receiptSheet.getByRole('button', { name: 'Copy link' })).toBeVisible()
-      await receiptSheet.getByRole('button', { name: 'Close' }).click()
+      await receiptSheet.getByRole('button', { name: 'Close', exact: true }).click()
 
       // The client's link opens the receipt without signing in; a wrong signature does not.
       const link = new URL(receipt.viewUrl)

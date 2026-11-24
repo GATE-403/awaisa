@@ -61,7 +61,7 @@ test.describe('Schedule around “now”', () => {
     // Half of the visit is done: its fill runs half way.
     await expect(currentCard).toHaveAttribute('style', /--progress:\s*50%/)
     await expect(visitCard(page, ended.name)).toHaveAttribute('data-tone', 'warning')
-    await expect(visitCard(page, ended.name)).toContainText('Unmarked')
+    await expect(visitCard(page, ended.name)).toContainText('Not marked')
     await expect(visitCard(page, next.name)).toHaveAttribute('data-tone', 'plain')
 
     // A capsule opens its visit, the same as its card.

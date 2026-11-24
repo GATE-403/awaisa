@@ -41,7 +41,7 @@ test.describe('User flow: booking', () => {
     // Service and time already lie in the stack of done cards: only the contacts are asked.
     await expect(steps.service).toBeVisible()
     await expect(steps.datetime).toContainText(time)
-    await expect(steps.contacts.getByLabel('Name')).toBeVisible()
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toBeVisible()
     await expect(primaryAction(page)).toHaveText(/^(Enter contacts|Book)$/)
   })
 
@@ -58,7 +58,7 @@ test.describe('User flow: booking', () => {
     const time = await pickFirstFreeSlot(page)
 
     await expect(steps.datetime).toContainText(time)
-    await steps.contacts.getByLabel('Name').fill('E2E Тест')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await steps.contacts.getByLabel('Phone').fill('+996 555 000 111')
     await expect(primaryAction(page)).toHaveText('Book')
     const booked = page.waitForResponse(
@@ -94,7 +94,7 @@ test.describe('User flow: booking', () => {
     const ticketSheet = page.getByRole('dialog', { name: 'Ticket' })
     await expect(ticketSheet.getByRole('article', { name: /^Booking / })).toBeVisible()
     await expect(ticketSheet.getByRole('button', { name: 'Download', exact: true })).toBeEnabled()
-    await ticketSheet.getByRole('button', { name: 'Close' }).click()
+    await ticketSheet.getByRole('button', { name: 'Close', exact: true }).click()
     // Sheets also close by pulling the top bar down.
     await ticket.getByRole('button', { name: 'Show the ticket' }).click()
     const title = ticketSheet.getByRole('heading', { name: 'Ticket' })

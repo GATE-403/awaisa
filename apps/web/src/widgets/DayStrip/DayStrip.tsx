@@ -51,12 +51,22 @@ export const DayStrip = ({
     // Glide from the second placement on: the first one (the page opening) lands in place.
     if (knob.hasAttribute('data-placed')) knob.setAttribute('data-ready', '')
     knob.setAttribute('data-placed', '')
-    knob.style.setProperty('--x', `${selected.offsetLeft}px`)
-    knob.style.setProperty('--w', `${selected.offsetWidth}px`)
-    knob.style.setProperty('--h', `${selected.offsetHeight}px`)
-    knob.style.setProperty('--y', `${selected.offsetTop}px`)
+    const place = () => {
+      knob.style.setProperty('--x', `${selected.offsetLeft}px`)
+      knob.style.setProperty('--w', `${selected.offsetWidth}px`)
+      knob.style.setProperty('--h', `${selected.offsetHeight}px`)
+      knob.style.setProperty('--y', `${selected.offsetTop}px`)
+    }
+    place()
     // Not `data-today`: that names the day buttons, and a knob carrying it matched them too.
     knob.toggleAttribute('data-on-today', selected.hasAttribute('data-today'))
+    // Chips change width after the first layout (the web font arrives, a load bar or mark is
+    // added): measured once, the knob stayed where the chip used to be.
+    const row = daysRef.current
+    if (!row || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(place)
+    for (const chip of row.querySelectorAll('[data-day]')) observer.observe(chip)
+    return () => observer.disconnect()
   }, [value, days])
 
   return (

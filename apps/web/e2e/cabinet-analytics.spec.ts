@@ -53,7 +53,7 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
     await expect(sheet.getByText('Earned')).toBeVisible()
     await expect(sheet).toContainText(money(1000))
     await expect(sheet).toContainText('Haircut')
-    await sheet.getByRole('button', { name: 'Close' }).click()
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
     await expect(sheet).toHaveCount(0)
 
     const downloading = page.waitForEvent('download')
@@ -134,7 +134,7 @@ test.describe('Cabinet analytics: goal, export and masters', () => {
       ),
     ).toBeVisible()
 
-    await page.getByRole('button', { name: 'Change' }).click()
+    await page.getByRole('button', { name: 'Change', exact: true }).click()
     await page
       .getByRole('dialog', { name: 'Monthly goal' })
       .getByRole('button', { name: 'Remove goal' })

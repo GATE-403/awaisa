@@ -43,7 +43,7 @@ test.describe('Cabinet analytics: the charts lead somewhere', () => {
     await columns.first().click()
     await expect(page).toHaveURL(new RegExp(`[?&]tab=schedule&date=${older.date}$`))
     await expect(
-      page.getByRole('group', { name: 'Day' }).locator(`[data-day="${older.date}"]`),
+      page.getByRole('group', { name: 'Day', exact: true }).locator(`[data-day="${older.date}"]`),
     ).toHaveAttribute('aria-pressed', 'true')
   })
 

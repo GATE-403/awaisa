@@ -201,7 +201,7 @@ test.describe('Moving around the app', () => {
     await expect(action).toHaveText(/^Choose \d{2}:\d{2}$/)
     await action.click()
     const steps = bookingSteps(page)
-    await steps.contacts.getByLabel('Name').fill('E2E Тест')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await steps.contacts.getByLabel('Phone').fill('+996 555 000 111')
     await submitBooking(page)
     await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
@@ -311,19 +311,19 @@ test.describe('Leaving sign-in', () => {
     page,
   }) => {
     await page.goto('/login?next=%2Fmanage')
-    await page.getByRole('link', { name: 'Close' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/')
   })
 
   test('✕ on sign-in for the setup leads to the business landing', async ({ page }) => {
     await page.goto('/login?next=%2Fbusiness%2Fnew')
-    await page.getByRole('link', { name: 'Close' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/business')
   })
 
   test('✕ on sign-in for a page guests can open goes back to it', async ({ page }) => {
     await page.goto('/login?next=%2Fbookings')
-    await page.getByRole('link', { name: 'Close' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/bookings')
   })
 })

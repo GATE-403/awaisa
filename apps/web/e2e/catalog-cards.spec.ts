@@ -48,7 +48,7 @@ test.describe('Catalog cards', () => {
     const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) await anyMaster.click()
     await pickFirstFreeSlot(page)
-    await steps.contacts.getByLabel('Name').fill('E2E Тест')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await steps.contacts.getByLabel('Phone').fill(randomClientPhone())
     // The look waits beside the note, with a way to drop it.
     const look = page.getByRole('img', { name: 'Photo of the look you want' })

@@ -84,7 +84,7 @@ test.describe('A visit of several services', () => {
       await expect(steps.specialist).toContainText('Aida')
       const time = await pickFirstFreeSlot(guest)
 
-      await steps.contacts.getByLabel('Name').fill('E2E Two services')
+      await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Two services')
       await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await submitBooking(guest)
       await expect(guest.getByRole('heading', { name: 'You are booked' })).toBeVisible()
@@ -189,7 +189,7 @@ test.describe('A visit of several services', () => {
       await guest.goto(
         `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
       )
-      await steps.contacts.getByLabel('Name').fill('E2E Another booking')
+      await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Another booking')
       await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await submitBooking(guest)
       await expect(guest.getByRole('heading', { name: 'You are booked' })).toBeVisible()
@@ -209,7 +209,9 @@ test.describe('A visit of several services', () => {
       expect(offered >= '11:00').toBe(true)
       await action.click()
       // The name and number are already known: the form is ready to book.
-      await expect(steps.contacts.getByLabel('Name')).toHaveValue('E2E Another booking')
+      await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveValue(
+        'E2E Another booking',
+      )
     } finally {
       await guestContext.close()
     }

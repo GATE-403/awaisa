@@ -13,7 +13,7 @@ import {
 
 const fillContacts = async (page: import('@playwright/test').Page) => {
   const { contacts } = bookingSteps(page)
-  await contacts.getByLabel('Name').fill('E2E Тест')
+  await contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
   await contacts.getByLabel('Phone').fill('+996 555 000 111')
 }
 
@@ -80,8 +80,8 @@ test.describe('UX: guidance and feedback', () => {
     await specialist.getByRole('radio', { name: /Any specialist/ }).click()
     await pickFirstFreeSlot(page)
 
-    await contacts.getByLabel('Name').fill('A')
-    await contacts.getByLabel('Name').fill('')
+    await contacts.getByLabel('Name', { exact: true }).fill('A')
+    await contacts.getByLabel('Name', { exact: true }).fill('')
     await contacts.getByLabel('Phone').fill('12')
 
     await expect(page.getByText('Enter a name')).toHaveCount(0)
@@ -102,7 +102,10 @@ test.describe('UX: guidance and feedback', () => {
       steps.contacts.getByText('Enter a number so we can confirm the booking'),
     ).toBeVisible()
     await expect(steps.contacts.getByLabel('Phone')).toHaveValue('+996 555')
-    await expect(steps.contacts.getByLabel('Name')).toHaveAttribute('aria-invalid', 'true')
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
     await expect(steps.contacts).toBeInViewport()
   })
 
@@ -128,7 +131,7 @@ test.describe('UX: guidance and feedback', () => {
     await expect(primaryAction(page)).toHaveText(/^Choose (a time|\d{2}:\d{2})$/)
     // Contacts wait under the time: a new time brings them back as typed.
     await pickFirstFreeSlot(page)
-    await expect(steps.contacts.getByLabel('Name')).toHaveValue('E2E Тест')
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveValue('E2E Тест')
   })
 
   test("a failed request for the services' free times is tried again", async ({ page }) => {
@@ -167,7 +170,9 @@ test.describe('UX: guidance and feedback', () => {
     await expect(action).toHaveText('Choose 12:00')
 
     // Another day, full: the bar no longer offers the first day's 12:00.
-    const days = page.getByRole('group', { name: 'Day' }).getByRole('button', { disabled: false })
+    const days = page
+      .getByRole('group', { name: 'Day', exact: true })
+      .getByRole('button', { disabled: false })
     await days.nth(1).click()
     await expect(page.getByText('This day is fully booked')).toBeVisible()
     await expect(action).toHaveText('Choose a time')
@@ -519,7 +524,7 @@ test.describe('UX: layout and ergonomics', () => {
     await freeSlot.focus()
     await page.keyboard.press('Enter')
 
-    await page.getByLabel('Name').focus()
+    await page.getByLabel('Name', { exact: true }).focus()
     await page.keyboard.type('E2E Тест')
     await page.keyboard.press('Tab')
     await page.keyboard.type('+996555000111')

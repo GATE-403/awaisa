@@ -25,7 +25,7 @@ test.describe('Booking for someone else, Telegram and telemetry', () => {
     // Signed in: no phone field until “Booking for someone else” is switched on.
     await expect(steps.contacts.getByLabel('Phone')).toHaveCount(0)
     await steps.contacts.getByRole('switch', { name: 'Booking for someone else' }).click()
-    await steps.contacts.getByLabel('Name').fill('E2E Мама')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Мама')
     await steps.contacts.getByLabel('Phone').fill(mumPhone)
     await submitBooking(page)
     await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()

@@ -30,7 +30,7 @@ test.describe('Platform: a new business goes live', () => {
 
     await page.goto('/business')
     await page.getByRole('link', { name: 'Create a page' }).click()
-    await page.getByLabel('Name').fill(name)
+    await page.getByLabel('Name', { exact: true }).fill(name)
     await expect(page.getByLabel('Link')).toHaveValue(slug)
     await expect(page.getByText(`Available: awaisa.kg/${slug}`)).toBeVisible()
     // The progress bar and the live preview of the page follow what is typed.
@@ -57,7 +57,7 @@ test.describe('Platform: a new business goes live', () => {
     // Back to «Create a page»: the kept-alive form starts over instead of replaying the launch.
     await page.goBack()
     await page.getByRole('link', { name: 'Create a page' }).click()
-    await expect(page.getByLabel('Name')).toHaveValue('')
+    await expect(page.getByLabel('Name', { exact: true })).toHaveValue('')
     await page.waitForTimeout(3000)
     await expect(page).toHaveURL(/\/business\/new$/)
     // Every other tab carries «Opening for bookings» as a banner under the cabinet bar.
@@ -67,7 +67,7 @@ test.describe('Platform: a new business goes live', () => {
 
     await page.getByRole('button', { name: 'Add a service' }).first().click()
     const serviceDialog = page.getByRole('dialog')
-    await serviceDialog.getByLabel('Name').fill('Haircut')
+    await serviceDialog.getByLabel('Name', { exact: true }).fill('Haircut')
     await serviceDialog.getByLabel('Price, som').fill('700')
     await serviceDialog.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByRole('button', { name: /Haircut/ })).toBeVisible()
@@ -76,7 +76,7 @@ test.describe('Platform: a new business goes live', () => {
     await page.getByRole('tab', { name: /Specialists/ }).click()
     await page.getByRole('button', { name: 'Add a specialist' }).first().click()
     const masterDialog = page.getByRole('dialog')
-    await masterDialog.getByLabel('Name').fill('Azamat')
+    await masterDialog.getByLabel('Name', { exact: true }).fill('Azamat')
     await expect(masterDialog.getByRole('checkbox', { name: 'Haircut' })).toBeChecked()
     await masterDialog.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByRole('heading', { name: 'Opening for bookings' })).toHaveCount(0)
@@ -86,7 +86,7 @@ test.describe('Platform: a new business goes live', () => {
     await expect(page.getByRole('button', { name: /^Main/ })).toBeVisible()
     await page.getByRole('button', { name: 'Add a branch' }).click()
     const branchDialog = page.getByRole('dialog', { name: 'New branch' })
-    await branchDialog.getByLabel('Name').fill('Jal')
+    await branchDialog.getByLabel('Name', { exact: true }).fill('Jal')
     await branchDialog.getByLabel('Address').fill('Jal district, 15')
     await branchDialog.getByRole('button', { name: 'Save' }).click()
     await expect(page.getByRole('button', { name: /Jal.*No pin/ })).toBeVisible()
@@ -123,7 +123,7 @@ test.describe('Platform: a new business goes live', () => {
     await expect(steps.specialist).toContainText('Azamat')
     const time = await pickFirstFreeSlot(clientPage)
     const clientPhone = randomClientPhone()
-    await steps.contacts.getByLabel('Name').fill('E2E Client')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Client')
     await steps.contacts.getByLabel('Phone').fill(clientPhone)
     await submitBooking(clientPage)
     await expect(clientPage.getByRole('heading', { name: 'You are booked' })).toBeVisible()
@@ -183,7 +183,7 @@ test.describe('Platform: a new business goes live', () => {
       .getByRole('dialog', { name: 'New booking' })
       .and(page.locator(':not([data-type])'))
     await expect(sheet.getByRole('combobox', { name: 'Time' })).toBeVisible()
-    await sheet.getByLabel('Name').fill('E2E Guest')
+    await sheet.getByLabel('Name', { exact: true }).fill('E2E Guest')
     await sheet.getByLabel('Phone').fill(randomClientPhone())
     await sheet.getByRole('button', { name: 'Add' }).click()
     await expect(sheet).toHaveCount(0)
@@ -218,7 +218,7 @@ test.describe('Platform: a new business goes live', () => {
     await signInViaApi(page, randomClientPhone(), 'E2E Owner')
     await page.goto('/business/new')
 
-    await page.getByLabel('Name').fill('Login')
+    await page.getByLabel('Name', { exact: true }).fill('Login')
     await expect(page.getByText('This address is taken')).toBeVisible()
     await page.getByLabel('Link').fill('awaisa-studio')
     await expect(page.getByText('This address is taken')).toBeVisible()
@@ -233,7 +233,7 @@ test.describe('Platform: a new business goes live', () => {
   test('closed days cannot be picked for booking', async ({ page }) => {
     await page.goto('/awaisa-studio/book')
     const closedDays = page
-      .getByRole('group', { name: 'Day' })
+      .getByRole('group', { name: 'Day', exact: true })
       .getByRole('button', { name: /, closed$/ })
     for (const day of await closedDays.all()) await expect(day).toBeDisabled()
   })

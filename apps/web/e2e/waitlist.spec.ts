@@ -66,7 +66,7 @@ test.describe('Waitlist', () => {
       )
       await guestPage.getByRole('button', { name: 'Tell me when a slot opens' }).click()
       const sheet = guestPage.getByRole('dialog', { name: 'Waitlist' })
-      await sheet.getByLabel('Name').fill(guestName)
+      await sheet.getByLabel('Name', { exact: true }).fill(guestName)
       await sheet.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await sheet.getByRole('button', { name: 'Done' }).click()
       await expect(guestPage.getByText('We will tell you if a slot opens up')).toBeVisible()
@@ -95,7 +95,7 @@ test.describe('Waitlist', () => {
         page
           .getByRole('dialog', { name: 'New booking' })
           .and(page.locator(':not([data-type])'))
-          .getByLabel('Name'),
+          .getByLabel('Name', { exact: true }),
       ).toHaveValue(guestName)
       await page.keyboard.press('Escape')
 

@@ -85,7 +85,7 @@ test.describe('Cabinet schedule', () => {
     const today = bishkekDay()
 
     await page.goto(scheduleUrl(business))
-    const strip = page.getByRole('group', { name: 'Day' })
+    const strip = page.getByRole('group', { name: 'Day', exact: true })
     await expect(strip.locator(`[data-day="${today}"]`)).toHaveAttribute('aria-pressed', 'true')
     await expect(visitCard(page, visit.name)).toHaveCount(0)
 
@@ -233,7 +233,7 @@ test.describe('Cabinet schedule', () => {
     test.setTimeout(60_000)
     const business = await createOwnBusiness(page)
     await page.goto(scheduleUrl(business))
-    await expect(page.getByRole('group', { name: 'Day' })).toBeVisible()
+    await expect(page.getByRole('group', { name: 'Day', exact: true })).toBeVisible()
 
     const visit = await firstVisit(business, { name: 'E2E Новый клиент', fromDay: 2 })
     const toast = page.locator('[role="dialog"][data-type]').filter({ hasText: 'New booking' })

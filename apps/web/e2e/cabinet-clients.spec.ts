@@ -109,7 +109,7 @@ test.describe('Cabinet client base', () => {
       await sheet.getByRole('combobox', { name: 'Year' }).click()
       await page.getByRole('option', { name: year, exact: true }).click()
     }
-    await sheet.getByRole('combobox', { name: 'Day' }).click()
+    await sheet.getByRole('combobox', { name: 'Day', exact: true }).click()
     await page.getByRole('option', { name: '15', exact: true }).click()
     await sheet.getByRole('combobox', { name: 'Month' }).click()
     await page.getByRole('option', { name: 'March' }).click()

@@ -134,7 +134,7 @@ test.describe('Cognitive load: booking', () => {
       await pickFirstFreeSlot(page)
     }
 
-    await act(() => steps.contacts.getByLabel('Name').fill('E2E Тест'))
+    await act(() => steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест'))
     await act(() => steps.contacts.getByLabel('Phone').fill('+996 555 000 111'))
     // Everything filled: one press books.
     await act(() => primaryAction(page).click())
@@ -152,7 +152,7 @@ test.describe('Cognitive load: booking', () => {
       .filter({ has: page.getByRole('radio', { name: /Укладка/ }) })
 
     await expect(card).toContainText(/\d[\d,]*\ssom/)
-    await expect(card).toContainText(/\d+\s?(min|h)\b/)
+    await expect(card).toContainText(/\d+\s?(min|h)(?![a-z]{2})/)
     await option.click()
     await expect(
       page
@@ -260,7 +260,7 @@ test.describe("Tesler's law: the system takes the complexity it can", () => {
     await phone.fill('0555123456')
     await expect(phone).toHaveValue('+996 555 123 456')
 
-    await bookingSteps(page).contacts.getByLabel('Name').fill('E2E Тест')
+    await bookingSteps(page).contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await submitBooking(page)
     await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
     const posted = payloads.at(-1) as { phone?: string } | undefined

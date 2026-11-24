@@ -10,7 +10,7 @@ const finishBooking = async (page: Page) => {
   const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
   if (await anyMaster.isVisible()) await anyMaster.click()
   await pickFirstFreeSlot(page)
-  await steps.contacts.getByLabel('Name').fill('E2E Тест')
+  await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
   await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
   const request = page.waitForRequest(
     (sent) => sent.method() === 'POST' && new URL(sent.url()).pathname === '/api/bookings',

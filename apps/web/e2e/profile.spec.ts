@@ -61,7 +61,7 @@ test.describe('Own profile', () => {
     // Laid out like Telegram: the tiles, then the sections as tabs, medals first; with nothing
     // earned yet the goals are shown open with their progress.
     await expect(page.getByRole('button', { name: 'Invite' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Change' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Change', exact: true })).toBeVisible()
     await expect(page.getByRole('tab', { name: /Medals/ })).toHaveAttribute('aria-selected', 'true')
     await expect(page.getByRole('list', { name: 'Goals' })).toBeVisible()
 
@@ -93,7 +93,7 @@ test.describe('Own profile', () => {
     await expect(page.getByText('Profile hidden: only you can see it')).toBeVisible()
 
     // “Change” on one's own page opens the editor with the live preview.
-    await page.getByRole('button', { name: 'Change' }).click()
+    await page.getByRole('button', { name: 'Change', exact: true }).click()
     const sheet = page.getByRole('dialog', { name: 'Profile' })
     await expect(sheet.getByRole('combobox', { name: 'Profile colour' })).toContainText('Pink')
     // The status emoji is a plain Select row now; it shows the saved one.
@@ -128,7 +128,7 @@ test.describe('Own profile', () => {
     await expect(storySheet.getByRole('img', { name: 'Profile picture for stories' })).toBeVisible()
     // Saving it is one glyph in the sheet's bar (a download with a mouse).
     await expect(storySheet.getByRole('button', { name: 'Download picture' })).toBeVisible()
-    await storySheet.getByRole('button', { name: 'Close' }).click()
+    await storySheet.getByRole('button', { name: 'Close', exact: true }).click()
 
     // A friend books by the link: once they have come, they count - points and “Brought a friend”.
     const friendPhone = randomClientPhone()
@@ -235,7 +235,7 @@ test.describe('Client profiles', () => {
     const sheet = page.getByRole('dialog', { name: 'Profile' })
     await expect(sheet.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(sheet.getByText(/Level \d+/).first()).toBeVisible()
-    await sheet.getByRole('button', { name: 'Close' }).click()
+    await sheet.getByRole('button', { name: 'Close', exact: true }).click()
     await page.waitForURL(new RegExp(`/${found.slug}$`))
     await expect(page.getByRole('dialog', { name: 'Profile' })).toHaveCount(0)
 

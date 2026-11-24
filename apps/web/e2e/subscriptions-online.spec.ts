@@ -82,7 +82,9 @@ test.describe('Subscriptions online', () => {
 
       // 2. The booking form offers it under “Payment”; the visit is booked by the subscription.
       await client.goto(`/${SLUG}/book?service=${serviceId}&specialist=${master.id}`)
-      await expect(bookingSteps(client).datetime.getByRole('group', { name: 'Day' })).toBeVisible()
+      await expect(
+        bookingSteps(client).datetime.getByRole('group', { name: 'Day', exact: true }),
+      ).toBeVisible()
       await pickFirstFreeSlot(client)
       await client.getByRole('combobox', { name: 'Payment' }).click()
       await client.getByRole('option', { name: 'By subscription · 3 left' }).click()

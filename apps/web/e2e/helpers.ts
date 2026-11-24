@@ -21,7 +21,7 @@ const bookingSteps = (page: Page) => ({
 const editStep = async (page: Page, step: keyof ReturnType<typeof bookingSteps>) => {
   const reveal = page.getByRole('button', { name: 'Show your choices' })
   if (await reveal.isVisible()) await reveal.click()
-  await bookingSteps(page)[step].getByRole('button', { name: 'Change' }).click()
+  await bookingSteps(page)[step].getByRole('button', { name: 'Change', exact: true }).click()
 }
 
 const primaryAction = (page: Page) =>
@@ -43,7 +43,7 @@ const pickFirstFreeSlot = async (page: Page) => {
   if (preset && (await page.locator('#step-datetime').textContent())?.includes(preset))
     return preset
 
-  const days = page.getByRole('group', { name: 'Day' }).getByRole('button')
+  const days = page.getByRole('group', { name: 'Day', exact: true }).getByRole('button')
   // A link that already chose the master lands on the time step at once: wait for the days to be
   // drawn before counting them, or a slow runner counts none.
   await days.first().waitFor()

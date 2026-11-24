@@ -56,7 +56,7 @@ test.describe('Questions on a business page', () => {
     await expect(section).toContainText('Да, во дворе')
 
     // Removed by the owner, it leaves the page.
-    await item.getByRole('button', { name: 'Change' }).click()
+    await item.getByRole('button', { name: 'Change', exact: true }).click()
     await ownerPage.getByRole('button', { name: 'Delete question' }).click({ delay: 1300 })
     await expect(ownerPage.getByText('Question deleted')).toBeVisible()
     await owner.close()

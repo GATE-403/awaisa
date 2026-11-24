@@ -33,7 +33,7 @@ test.describe('Account: sign in with a code in Telegram', () => {
     await expect(code).toHaveAttribute('autocomplete', 'one-time-code')
     await code.fill(TEST_CODE)
 
-    await page.getByLabel('Name').fill('E2E Тест')
+    await page.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await page.getByRole('button', { name: 'Done' }).click()
 
     // The greeting is spoken (an `output`) and uses the first name only.
@@ -92,7 +92,7 @@ test.describe('Account: sign in with a code in Telegram', () => {
     await page.getByLabel('Phone number').fill(randomClientPhone())
     await page.getByRole('button', { name: 'Get a code in Telegram' }).click()
     await page.getByLabel('Confirmation code').fill(TEST_CODE)
-    await page.getByLabel('Name').fill('E2E Тест')
+    await page.getByLabel('Name', { exact: true }).fill('E2E Тест')
     await page.getByRole('button', { name: 'Done' }).click()
 
     await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/bookings$/)
@@ -192,7 +192,7 @@ test.describe('Account: sign in with a code in Telegram', () => {
 
     await steps.specialist.getByRole('radio', { name: /Any specialist/ }).click()
     const time = await pickFirstFreeSlot(page)
-    await expect(steps.contacts.getByLabel('Name')).toHaveValue('E2E Тест')
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveValue('E2E Тест')
     await expect(steps.contacts.getByLabel('Phone')).toHaveCount(0)
     await expect(steps.contacts).toContainText(formatPhone(phone))
     await submitBooking(page)
@@ -222,7 +222,10 @@ test.describe('Salon admin', () => {
 
     await expect(page.getByRole('region', { name: 'Айгерим Садыкова' })).toBeVisible()
     // Tomorrow: the strip also holds past days, which can't be closed.
-    await page.getByRole('group', { name: 'Day' }).locator('[data-today] + button').click()
+    await page
+      .getByRole('group', { name: 'Day', exact: true })
+      .locator('[data-today] + button')
+      .click()
 
     // The phone and desktop runs close time for the same master and day at once: each finds its
     // own block by its own reason.
@@ -264,7 +267,7 @@ test.describe('Salon admin', () => {
 
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto('/manage/awaisa-studio')
-    const dayButtons = page.getByRole('group', { name: 'Day' }).getByRole('button')
+    const dayButtons = page.getByRole('group', { name: 'Day', exact: true }).getByRole('button')
     await dayButtons.first().waitFor()
     const dayIndex = await dayButtons.evaluateAll(
       (buttons, date) => buttons.findIndex((button) => button.getAttribute('data-day') === date),

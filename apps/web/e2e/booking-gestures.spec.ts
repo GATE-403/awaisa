@@ -79,8 +79,8 @@ test.describe('Booking: the stack of done steps', () => {
     // Pulled past a third, the stack stays fanned: every card shows “Change”.
     await dragStack(page, 0, 90)
     await expect(stack).toHaveAttribute('data-fanned', 'true')
-    await expect(stack.getByRole('button', { name: 'Change' })).toHaveCount(3)
-    for (const button of await stack.getByRole('button', { name: 'Change' }).all()) {
+    await expect(stack.getByRole('button', { name: 'Change', exact: true })).toHaveCount(3)
+    for (const button of await stack.getByRole('button', { name: 'Change', exact: true }).all()) {
       await expect(button).toBeVisible()
     }
     // The first tap after the pull counts (the pull's own click used to swallow it).
@@ -101,7 +101,7 @@ test.describe('Booking: the stack of done steps', () => {
     await expect(stack).toHaveAttribute('data-movable', 'true')
 
     await stack.getByRole('button', { name: 'Show your choices' }).click()
-    await bookingSteps(page).service.getByRole('button', { name: 'Change' }).click()
+    await bookingSteps(page).service.getByRole('button', { name: 'Change', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'What are we doing?' })).toBeVisible()
   })
 })
@@ -152,6 +152,6 @@ test.describe('Booking: the time ruler', () => {
     await free.scrollIntoViewIfNeeded()
     await free.click()
     await expect(bookingSteps(page).datetime).toContainText(time)
-    await expect(bookingSteps(page).contacts.getByLabel('Name')).toBeVisible()
+    await expect(bookingSteps(page).contacts.getByLabel('Name', { exact: true })).toBeVisible()
   })
 })

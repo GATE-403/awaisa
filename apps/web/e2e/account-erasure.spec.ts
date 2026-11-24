@@ -84,7 +84,7 @@ test.describe('Account data: export and deletion', () => {
     const business = await createOwnBusiness(page)
     const response = await page.request.delete('/api/me')
     expect(response.status()).toBe(409)
-    expect((await response.json()).message).toContain(`the only owner of ‘${business.name}’`)
+    expect((await response.json()).message).toContain(`the only owner of “${business.name}”`)
     expect((await page.request.get('/api/me')).ok()).toBe(true)
   })
 })

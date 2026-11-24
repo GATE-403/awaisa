@@ -106,7 +106,7 @@ test.describe('Sign-in through the Telegram bot', () => {
 
     // A new client: the page asks for a name, then goes where it was asked to.
     await expect(page.getByRole('heading', { name: 'You are signed in' })).toBeVisible()
-    await page.getByLabel('Name').fill('E2E Telegram')
+    await page.getByLabel('Name', { exact: true }).fill('E2E Telegram')
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(page).toHaveURL(/\/bookings$/)
 
