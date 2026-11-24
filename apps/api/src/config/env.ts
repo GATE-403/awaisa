@@ -10,6 +10,8 @@ type Env = {
   DATABASE_POOL_SIZE: number
   DATABASE_STATEMENT_TIMEOUT_MS: number
   WEB_ORIGIN: string[]
+  /** Express `trust proxy`: which hops may say who the client is (rate limits count by that IP). */
+  TRUST_PROXY: string | number
   RATE_LIMIT_PER_MINUTE: number
   BOOKING_RATE_LIMIT_PER_MINUTE: number
   AUTH_RATE_LIMIT_PER_MINUTE: number
@@ -136,6 +138,32 @@ const parseOrigins = (value: unknown): string[] =>
 
 const optionalString = (value: unknown) =>
   typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined
+
+const DEFAULT_TRUST_PROXY = 'loopback, linklocal, uniquelocal'
+const TRUST_PROXY_NAMES = ['loopback', 'linklocal', 'uniquelocal']
+
+// Only proxies on our own network are trusted by default: behind a public one (Cloudflare) every
+// request would look like the proxy's own address and share one rate limit. Set a hop count
+// (`2`: Cloudflare, then the web server) or the proxies' names and CIDRs.
+const parseTrustProxy = (value: unknown): string | number => {
+  const raw = optionalString(value)
+  if (!raw) return DEFAULT_TRUST_PROXY
+  if (/^\d+$/.test(raw)) {
+    const hops = Number(raw)
+    if (hops < 1 || hops > 10) throw new Error('TRUST_PROXY hop count must be 1–10')
+    return hops
+  }
+  const parts = raw.split(',').map((part) => part.trim())
+  const isValid = (part: string) =>
+    TRUST_PROXY_NAMES.includes(part) || /^[\d.:a-fA-F]+(\/\d{1,3})?$/.test(part)
+  const invalid = parts.find((part) => !isValid(part))
+  if (invalid !== undefined) {
+    throw new Error(
+      `TRUST_PROXY must be a hop count or ${TRUST_PROXY_NAMES.join(', ')} and IP/CIDR ranges (got «${invalid}»)`,
+    )
+  }
+  return parts.join(', ')
+}
 
 const parseAuthSecret = (value: unknown, nodeEnv: Env['NODE_ENV']) => {
   const secret = optionalString(value)
@@ -386,6 +414,7 @@ const validateEnv = (config: Record<string, unknown>): Env => {
       30_000,
     ),
     WEB_ORIGIN: webOrigins,
+    TRUST_PROXY: parseTrustProxy(config.TRUST_PROXY),
     RATE_LIMIT_PER_MINUTE: parsePositiveInt(
       'RATE_LIMIT_PER_MINUTE',
       config.RATE_LIMIT_PER_MINUTE,
