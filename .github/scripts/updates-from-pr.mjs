@@ -1,28 +1,37 @@
-// Copies a merged PR's «## Что нового» section into apps/web/src/shared/config/updates.json, the
+// Copies a merged PR's «## What's new» section into apps/web/src/shared/config/updates.json, the
 // entries «Что нового» (/updates) shows next to the hand-written ones. One line per entry:
 //
-//   - Для бизнеса: Заголовок - Текст в одно-два предложения. [Попробовать](/manage)
+//   - For business: Заголовок - Текст в одно-два предложения. [Попробовать](/manage)
 //
-// Audience: «Для клиентов», «Для бизнеса» or «Для всех». The link is optional and must be a path
-// on the site. «- нет», an empty section or no section adds nothing. Run by the updates workflow
-// with PR_NUMBER, PR_BODY and MERGED_AT in the environment; `parseSection` is exported for tests.
+// Audience: «For clients», «For business» or «For everyone». The title, text and link label are
+// shown in the app as written, so they stay in Russian, the app's language; the rest of the PR
+// description is English. The link is optional and must be a path on the site. «- none», an
+// empty section or no section adds nothing. Older Russian descriptions («## Что нового», «Для
+// клиентов», «- нет») still parse. Run by the updates workflow with PR_NUMBER, PR_BODY and
+// MERGED_AT in the environment; `parseSection` is exported for tests.
 import { readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const FILE = 'apps/web/src/shared/config/updates.json'
 
 const AUDIENCES = {
+  'for clients': 'clients',
+  'for business': 'business',
+  'for everyone': 'everyone',
   'для клиентов': 'clients',
   'для бизнеса': 'business',
   'для всех': 'everyone',
 }
 
-const ENTRY = /^[-*]\s+(Для клиентов|Для бизнеса|Для всех)\s*:\s*(.+?)\s+[-–—]\s+(.+)$/i
+const ENTRY =
+  /^[-*]\s+(For clients|For business|For everyone|Для клиентов|Для бизнеса|Для всех)\s*:\s*(.+?)\s+[-\u2013\u2014]\s+(.+)$/i
 const LINK = /\s*\[([^\]]+)\]\((\/[^)\s]*)\)\s*$/
 
 const section = (body) => {
   const lines = body.replace(/\r/g, '').split('\n')
-  const start = lines.findIndex((line) => /^#{2,3}\s*Что нового\s*$/i.test(line.trim()))
+  const start = lines.findIndex((line) =>
+    /^#{2,3}\s*(What's new|Что нового)\s*$/i.test(line.trim()),
+  )
   if (start === -1) return []
   const rest = lines.slice(start + 1)
   const end = rest.findIndex((line) => /^#{1,3}\s/.test(line.trim()))

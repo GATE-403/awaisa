@@ -1,15 +1,16 @@
-## Что изменилось
+## Changes
 
 -
 
-## Что нового
+## What's new
 
-<!-- Попадёт на /updates после мержа. Одна строка на заметное людям изменение:
-- Для клиентов | Для бизнеса | Для всех: Заголовок - Текст в одно-два предложения. [Где попробовать](/путь)
-Ничего заметного (рефакторинг, CI) - оставьте «- нет». -->
+<!-- Shown on /updates after the merge. One line per change people will notice:
+- For clients | For business | For everyone: Заголовок - Текст в одно-два предложения. [Где попробовать](/путь)
+The title, text and link label appear in the app as written, so they stay in Russian; everything
+else in the description is English. Nothing noticeable (refactoring, CI): leave «- none». -->
 
-- нет
+- none
 
-## Проверка
+## Testing
 
 -
