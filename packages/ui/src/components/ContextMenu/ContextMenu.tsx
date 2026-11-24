@@ -2,9 +2,8 @@
 
 import { ContextMenu as BaseContextMenu } from '@base-ui/react/context-menu'
 import type { ReactNode } from 'react'
-import { cx } from '../../utils/className'
-import menuStyles from '../Menu/Menu.module.css'
-import styles from './ContextMenu.module.css'
+import { cn } from '../../utils/className'
+import { MENU_POPUP, MENU_POSITIONER } from '../Menu/menuClasses'
 
 interface ContextMenuProps {
   /** The area that opens the menu on a right click (or a long press on touch screens). */
@@ -20,12 +19,18 @@ interface ContextMenuProps {
 // takes no box of its own (`display: contents`), so it wraps any area without changing its layout.
 const ContextMenu = ({ children, menu, disabled = false, className }: ContextMenuProps) => (
   <BaseContextMenu.Root disabled={disabled}>
-    <BaseContextMenu.Trigger className={cx(styles.trigger, className)}>
+    <BaseContextMenu.Trigger
+      data-slot='context-menu-trigger'
+      className={cn('contents select-none', className)}
+    >
       {children}
     </BaseContextMenu.Trigger>
     <BaseContextMenu.Portal>
-      <BaseContextMenu.Positioner className={menuStyles.positioner}>
-        <BaseContextMenu.Popup className={cx(menuStyles.popup, styles.popup)}>
+      <BaseContextMenu.Positioner className={MENU_POSITIONER}>
+        <BaseContextMenu.Popup
+          data-slot='context-menu-content'
+          className={cn(MENU_POPUP, 'min-w-36')}
+        >
           {menu}
         </BaseContextMenu.Popup>
       </BaseContextMenu.Positioner>

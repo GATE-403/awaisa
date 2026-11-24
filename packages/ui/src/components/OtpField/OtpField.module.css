@@ -1,45 +1,6 @@
-/* A row of the kit's capsule fields, squared off into cells. */
-.root {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  gap: var(--space-2);
-  width: 100%;
-  max-width: 340px;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
-/* Square cells, the same in every browser. The cell is the kit's `Input`, whose `.input` makes a
-   capsule: one class against one class left the winner to the order the CSS modules happened to
-   load in, so some browsers drew ovals. Two classes always win. */
-.root .cell {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  max-height: 56px;
-  padding: 0;
-  border-radius: var(--radius-md);
-  font-size: var(--text-title2);
-  font-weight: var(--font-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-}
-
-/* A crisp accent edge, no soft ring around it: the halo read as a smudge on the dark scene. */
-.root .cell:focus-visible {
-  box-shadow: inset 0 0 0 2px var(--color-primary);
-}
-
-.root[data-invalid] .cell {
-  box-shadow: inset 0 0 0 1px var(--color-danger);
-  color: var(--color-danger-text);
-}
-
+/* A wrong code shakes the row once. */
 .root[data-invalid] {
-  animation: shake 360ms var(--ease-standard);
+  animation: shake 360ms ease-in-out;
 }
 
 @keyframes shake {
@@ -57,12 +18,5 @@
 @media (prefers-reduced-motion: reduce) {
   .root[data-invalid] {
     animation: none;
-  }
-}
-
-/* iPhone SE and other narrow phones: the gap gives way so each cell stays 44pt wide. */
-@media (max-width: 400px) {
-  .root {
-    gap: var(--space-1);
   }
 }

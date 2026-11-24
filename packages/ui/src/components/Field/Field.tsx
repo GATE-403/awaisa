@@ -1,7 +1,6 @@
 import { Field as BaseField } from '@base-ui/react/field'
 import type { ReactNode } from 'react'
 import { mergeClassName } from '../../utils/className'
-import styles from './Field.module.css'
 
 interface FieldProps extends BaseField.Root.Props {
   label?: ReactNode
@@ -9,19 +8,40 @@ interface FieldProps extends BaseField.Root.Props {
   error?: ReactNode
 }
 
+// shadcn's Field on Base UI's, which ties the label, the description and the error to the control.
 const Field = ({ label, description, error, className, children, ...props }: FieldProps) => (
   <BaseField.Root
+    data-slot='field'
     invalid={Boolean(error) || props.invalid}
-    className={mergeClassName(styles.root, className)}
+    className={mergeClassName(
+      'group/field flex w-full flex-col gap-2 data-invalid:text-destructive',
+      className,
+    )}
     {...props}
   >
-    {label && <BaseField.Label className={styles.label}>{label}</BaseField.Label>}
+    {label && (
+      <BaseField.Label
+        data-slot='field-label'
+        className='flex w-fit items-center gap-2 text-sm leading-snug font-medium select-none group-data-disabled/field:opacity-50'
+      >
+        {label}
+      </BaseField.Label>
+    )}
     {children}
     {description && (
-      <BaseField.Description className={styles.description}>{description}</BaseField.Description>
+      <BaseField.Description
+        data-slot='field-description'
+        className='text-start text-sm leading-normal font-normal text-muted-foreground'
+      >
+        {description}
+      </BaseField.Description>
     )}
     {error && (
-      <BaseField.Error className={styles.error} match>
+      <BaseField.Error
+        data-slot='field-error'
+        className='text-sm font-normal text-destructive'
+        match
+      >
         {error}
       </BaseField.Error>
     )}

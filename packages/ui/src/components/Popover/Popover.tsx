@@ -2,8 +2,7 @@
 
 import { Popover as BasePopover } from '@base-ui/react/popover'
 import type { ReactNode } from 'react'
-import { cx } from '../../utils/className'
-import styles from './Popover.module.css'
+import { cn } from '../../utils/className'
 
 interface PopoverProps {
   open: boolean
@@ -17,9 +16,8 @@ interface PopoverProps {
   className?: string
 }
 
-// A macOS inspector: a small surface beside what it is about, with an arrow to it and no dimmed
-// page behind - Escape or a click elsewhere closes it. Controlled and anchored to any element, so
-// a board can open it from its own cards without a trigger of its own.
+// shadcn's popover, controlled and anchored to any element, so a board can open it from its own
+// cards without a trigger of its own. Escape or a click elsewhere closes it.
 const Popover = ({
   open,
   onOpenChange,
@@ -32,17 +30,21 @@ const Popover = ({
   <BasePopover.Root open={open} onOpenChange={(next) => onOpenChange(next)}>
     <BasePopover.Portal>
       <BasePopover.Positioner
-        className={styles.positioner}
+        className='isolate z-[85]'
         anchor={anchor}
         side={side}
-        sideOffset={10}
+        sideOffset={8}
         collisionPadding={12}
       >
-        <BasePopover.Popup className={cx(styles.popup, className)} aria-label={label}>
-          <BasePopover.Arrow className={styles.arrow} />
-          {/* The content scrolls inside its own box: the popup itself never clips or scrolls, so
-              the arrow hanging off its edge stays whole and adds no scrollbar. */}
-          <div className={styles.body}>{children}</div>
+        <BasePopover.Popup
+          data-slot='popover-content'
+          aria-label={label}
+          className={cn(
+            'flex max-h-[min(var(--available-height),640px)] w-[min(352px,calc(100vw-24px))] origin-(--transform-origin) flex-col overflow-y-auto overscroll-contain rounded-lg bg-popover p-2.5 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+            className,
+          )}
+        >
+          {children}
         </BasePopover.Popup>
       </BasePopover.Positioner>
     </BasePopover.Portal>

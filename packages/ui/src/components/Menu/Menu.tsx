@@ -1,9 +1,10 @@
 'use client'
 
 import { Menu as BaseMenu } from '@base-ui/react/menu'
+import { CaretRightIcon } from '@phosphor-icons/react/ssr'
 import type { ComponentProps, ReactNode } from 'react'
-import { cx } from '../../utils/className'
-import styles from './Menu.module.css'
+import { cn } from '../../utils/className'
+import { MENU_ITEM, MENU_LABEL, MENU_POPUP, MENU_POSITIONER, MENU_SEPARATOR } from './menuClasses'
 
 interface MenuProps {
   /** The button that opens the menu (rendered as the trigger). */
@@ -23,28 +24,37 @@ interface MenuItemProps extends Omit<ComponentProps<typeof BaseMenu.Item>, 'clas
   className?: string
 }
 
-// iOS pull-down menu: a few actions next to the button that opened them, no sheet over the page.
+// shadcn's dropdown menu: a few actions next to the button that opened them.
 const Menu = ({ trigger, label, children, className, align = 'end', onOpenChange }: MenuProps) => (
   <BaseMenu.Root onOpenChange={(isOpen) => onOpenChange?.(isOpen)}>
-    <BaseMenu.Trigger className={className} aria-label={label}>
+    <BaseMenu.Trigger data-slot='dropdown-menu-trigger' className={className} aria-label={label}>
       {trigger}
     </BaseMenu.Trigger>
     <BaseMenu.Portal>
-      <BaseMenu.Positioner className={styles.positioner} sideOffset={6} align={align}>
-        <BaseMenu.Popup className={styles.popup}>{children}</BaseMenu.Popup>
+      <BaseMenu.Positioner className={MENU_POSITIONER} sideOffset={4} align={align}>
+        <BaseMenu.Popup data-slot='dropdown-menu-content' className={MENU_POPUP}>
+          {children}
+        </BaseMenu.Popup>
       </BaseMenu.Positioner>
     </BaseMenu.Portal>
   </BaseMenu.Root>
 )
 
 const MenuItem = ({ icon, variant = 'default', className, children, ...props }: MenuItemProps) => (
-  <BaseMenu.Item className={cx(styles.item, className)} data-variant={variant} {...props}>
-    <span>{children}</span>
-    {icon && <span className={styles.icon}>{icon}</span>}
+  <BaseMenu.Item
+    data-slot='dropdown-menu-item'
+    data-variant={variant}
+    className={cn(MENU_ITEM, className)}
+    {...props}
+  >
+    <span className='flex-1'>{children}</span>
+    {icon && <span className='flex text-muted-foreground'>{icon}</span>}
   </BaseMenu.Item>
 )
 
-const MenuSeparator = () => <BaseMenu.Separator className={styles.separator} />
+const MenuSeparator = () => (
+  <BaseMenu.Separator data-slot='dropdown-menu-separator' className={MENU_SEPARATOR} />
+)
 
 interface MenuGroupProps {
   /** A quiet caption over the group's rows («Пожаловаться»). */
@@ -53,8 +63,10 @@ interface MenuGroupProps {
 }
 
 const MenuGroup = ({ label, children }: MenuGroupProps) => (
-  <BaseMenu.Group>
-    <BaseMenu.GroupLabel className={styles.groupLabel}>{label}</BaseMenu.GroupLabel>
+  <BaseMenu.Group data-slot='dropdown-menu-group'>
+    <BaseMenu.GroupLabel data-slot='dropdown-menu-label' className={MENU_LABEL}>
+      {label}
+    </BaseMenu.GroupLabel>
     {children}
   </BaseMenu.Group>
 )
@@ -66,16 +78,26 @@ interface MenuSubmenuProps {
   children: ReactNode
 }
 
-// A row that opens its own menu beside it, like a submenu on macOS (a tap opens it on phones).
+// A row that opens its own menu beside it (a tap opens it on phones).
 const MenuSubmenu = ({ label, icon, variant = 'default', children }: MenuSubmenuProps) => (
   <BaseMenu.SubmenuRoot>
-    <BaseMenu.SubmenuTrigger className={styles.item} data-variant={variant}>
-      <span>{label}</span>
-      {icon && <span className={styles.icon}>{icon}</span>}
+    <BaseMenu.SubmenuTrigger
+      data-slot='dropdown-menu-sub-trigger'
+      data-variant={variant}
+      className={MENU_ITEM}
+    >
+      <span className='flex-1'>{label}</span>
+      {icon && <span className='flex text-muted-foreground'>{icon}</span>}
+      <CaretRightIcon className='ms-auto rtl:rotate-180' />
     </BaseMenu.SubmenuTrigger>
     <BaseMenu.Portal>
-      <BaseMenu.Positioner className={styles.positioner} sideOffset={4} alignOffset={-6}>
-        <BaseMenu.Popup className={styles.popup}>{children}</BaseMenu.Popup>
+      <BaseMenu.Positioner className={MENU_POSITIONER} sideOffset={0} alignOffset={-3}>
+        <BaseMenu.Popup
+          data-slot='dropdown-menu-sub-content'
+          className={cn(MENU_POPUP, 'shadow-lg')}
+        >
+          {children}
+        </BaseMenu.Popup>
       </BaseMenu.Positioner>
     </BaseMenu.Portal>
   </BaseMenu.SubmenuRoot>

@@ -2,9 +2,8 @@
 
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
-import { cx } from '../../utils/className'
-import type { ButtonSize, ButtonVariant } from './Button'
-import styles from './Button.module.css'
+import { cn } from '../../utils/className'
+import { type ButtonSize, type ButtonVariant, buttonVariants } from './buttonVariants'
 
 interface ButtonLinkProps extends useRender.ComponentProps<'a'> {
   variant?: ButtonVariant
@@ -25,7 +24,11 @@ const ButtonLink = ({
     defaultTagName: 'a',
     render,
     props: {
-      ...mergeProps<'a'>({ className: cx(styles.button, className) }, props),
+      ...mergeProps<'a'>(
+        { className: cn(buttonVariants({ variant, size, fullWidth }), className) },
+        props,
+      ),
+      'data-slot': 'button',
       'data-variant': variant,
       'data-size': size,
       'data-full-width': fullWidth || undefined,

@@ -1,32 +1,24 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox'
+import { CheckIcon, MinusIcon } from '@phosphor-icons/react/ssr'
 import { mergeClassName } from '../../utils/className'
-import styles from './Checkbox.module.css'
 
 interface CheckboxProps extends BaseCheckbox.Root.Props {}
 
-const CheckIcon = () => (
-  <svg viewBox='0 0 16 16' fill='none' aria-hidden='true' className={styles.checkIcon}>
-    <path
-      d='M3.5 8.5 6.5 11.5 12.5 4.5'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-    />
-  </svg>
-)
-
-const MinusIcon = () => (
-  <svg viewBox='0 0 16 16' fill='none' aria-hidden='true' className={styles.minusIcon}>
-    <path d='M4 8h8' stroke='currentColor' strokeWidth='2' strokeLinecap='round' />
-  </svg>
-)
-
 const Checkbox = ({ className, ...props }: CheckboxProps) => (
-  <BaseCheckbox.Root className={mergeClassName(styles.root, className)} {...props}>
-    <BaseCheckbox.Indicator className={styles.indicator}>
-      <CheckIcon />
-      <MinusIcon />
+  <BaseCheckbox.Root
+    data-slot='checkbox'
+    className={mergeClassName(
+      'peer relative flex size-4 shrink-0 items-center justify-center rounded-[4px] border border-input transition-colors outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 data-disabled:cursor-not-allowed data-disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:border-primary data-checked:bg-primary data-checked:text-primary-foreground data-indeterminate:border-primary data-indeterminate:bg-primary data-indeterminate:text-primary-foreground dark:data-checked:bg-primary',
+      className,
+    )}
+    {...props}
+  >
+    <BaseCheckbox.Indicator
+      data-slot='checkbox-indicator'
+      className='group/indicator grid place-content-center text-current transition-none [&>svg]:size-3.5'
+    >
+      <CheckIcon weight='bold' className='group-data-indeterminate/indicator:hidden' />
+      <MinusIcon weight='bold' className='hidden group-data-indeterminate/indicator:block' />
     </BaseCheckbox.Indicator>
   </BaseCheckbox.Root>
 )

@@ -19,6 +19,7 @@
       "!**/dist-e2e",
       "!**/build",
       "!**/coverage",
+      "!**/storybook-static",
       "!!**/.claude"
     ]
   },
@@ -80,8 +81,12 @@
         "**/src/app/global-error.tsx",
         "**/src/app/**/loading.tsx",
         "**/*.config.ts",
+        "**/*.config.mjs",
         "**/*.d.ts",
-        "**/e2e/globalTeardown.ts"
+        "**/e2e/globalTeardown.ts",
+        "**/*.stories.tsx",
+        "**/.storybook/*.ts",
+        "**/.storybook/*.tsx"
       ],
       "linter": {
         "rules": {
@@ -101,7 +106,8 @@
   },
   "css": {
     "parser": {
-      "cssModules": true
+      "cssModules": true,
+      "tailwindDirectives": true
     }
   }
 }

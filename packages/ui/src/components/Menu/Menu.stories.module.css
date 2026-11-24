@@ -1,0 +1,13 @@
+/* A capsule trigger for the stories, like the secondary kit button the app opens menus from. */
+.trigger {
+  min-height: var(--control-height-sm);
+  padding: var(--space-1) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-fill);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: var(--text-footnote);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}

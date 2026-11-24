@@ -1,11 +1,15 @@
 import type { ComponentProps } from 'react'
-import { cx } from '../../utils/className'
-import styles from './Skeleton.module.css'
+import { cn } from '../../utils/className'
 
 interface SkeletonProps extends ComponentProps<'div'> {}
 
 const Skeleton = ({ className, ...props }: SkeletonProps) => (
-  <div aria-hidden='true' className={cx(styles.skeleton, className)} {...props} />
+  <div
+    aria-hidden='true'
+    data-slot='skeleton'
+    className={cn('animate-pulse rounded-md bg-muted', className)}
+    {...props}
+  />
 )
 
 export type { SkeletonProps }

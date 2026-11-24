@@ -158,11 +158,12 @@ test.describe('Account: sign in with a code in Telegram', () => {
     await page.goto('/login')
     await page.getByLabel('Phone number').fill(randomClientPhone())
     await page.getByRole('button', { name: 'Get a code in Telegram' }).click()
-    // Square cells in every browser: the kit's capsule `.input` must not win over `.cell`.
+    // Square cells in every browser, joined into one group (shadcn's input-otp): only the first
+    // cell rounds its start corners.
     const cell = page.getByLabel('Confirmation code')
     const box = await cell.boundingBox()
     expect(box && Math.round(box.width)).toBe(box && Math.round(box.height))
-    await expect(cell).toHaveCSS('border-radius', '12px')
+    await expect(cell).toHaveCSS('border-top-right-radius', '0px')
     await page.getByLabel('Confirmation code').fill('000000')
 
     await expect(page.getByText('Wrong code, attempts left: 4')).toBeVisible()

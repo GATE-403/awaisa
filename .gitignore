@@ -51,3 +51,4 @@ reports/ux/*
 
 # The installation's own country and city (copy region.example.json)
 region.json
+storybook-static/

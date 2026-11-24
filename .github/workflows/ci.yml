@@ -28,6 +28,7 @@ jobs:
       - run: pnpm build
         env:
           API_URL: http://localhost:4000
+      - run: pnpm --filter @awaisa/ui storybook:build
 
   # The SQL the cron jobs pick rows with, against a fresh migrated database (`pnpm --filter api test:db`).
   db:

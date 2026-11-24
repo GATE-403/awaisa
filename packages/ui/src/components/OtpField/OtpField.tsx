@@ -1,7 +1,7 @@
 'use client'
 
 import { type KeyboardEvent, useRef } from 'react'
-import { cx } from '../../utils/className'
+import { cn } from '../../utils/className'
 import { Input } from '../Input'
 import styles from './OtpField.module.css'
 
@@ -63,7 +63,12 @@ const OtpField = ({
 
   return (
     // The cells as one fieldset; the first cell carries the code's name (see below).
-    <fieldset className={cx(styles.root, className)} data-invalid={isInvalid || undefined}>
+    // shadcn's input-otp look: one joined group of square cells.
+    <fieldset
+      data-slot='input-otp'
+      className={cn('flex w-fit items-center', styles.root, className)}
+      data-invalid={isInvalid || undefined}
+    >
       {Array.from({ length }, (_, index) => (
         <Input
           // biome-ignore lint/suspicious/noArrayIndexKey: cells are positions, not items
@@ -71,7 +76,7 @@ const OtpField = ({
           ref={(element) => {
             cells.current[index] = element
           }}
-          className={styles.cell}
+          className='relative size-9 rounded-none border-s-0 px-0 text-center text-base tabular-nums first:rounded-s-lg first:border-s last:rounded-e-lg focus-visible:z-10 md:text-base'
           type='text'
           inputMode='numeric'
           pattern='[0-9]*'

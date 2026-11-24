@@ -1,21 +1,13 @@
 import type { MetadataRoute } from 'next'
 import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 
-const APP_ONLY_PAGES = [
-  '/manage',
-  '/master',
-  '/bookings',
-  '/login',
-  '/ui',
-  '/insights',
-  '/moderation',
-]
+const APP_ONLY_PAGES = ['/manage', '/master', '/bookings', '/login', '/insights', '/moderation']
 
 const robots = (): MetadataRoute.Robots => ({
   rules: {
     userAgent: '*',
     allow: '/',
-    // Anchored with `$`, `/` and `?` so a slug like /ui-studio stays crawlable.
+    // Anchored with `$`, `/` and `?` so a slug like /manager-studio stays crawlable.
     disallow: [
       ...APP_ONLY_PAGES.flatMap((page) => [`${page}$`, `${page}/`, `${page}?`]),
       '/pay/',
