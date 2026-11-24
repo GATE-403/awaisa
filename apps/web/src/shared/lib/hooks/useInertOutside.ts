@@ -9,31 +9,30 @@ import { type RefObject, useEffect } from 'react'
 // `usePageScrollLock`: React Activity runs the cleanup when it hides the route.
 // `delayMs` waits for a layer that slides in: making the page inert restyles all of it, which on a
 // phone cost frames of the slide.
+const DIALOGS = '[role="dialog"], [role="alertdialog"]'
+
 export const useInertOutside = (ref: RefObject<HTMLElement | null>, key?: unknown, delayMs = 0) => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: `key` re-runs it when the layer's element is replaced
   useEffect(() => {
     const layer = ref.current
     if (!layer) return
-    // What surrounds the layer as it opens. A layer opened from inside it while the delay runs
-    // (the waitlist sheet over the booking sheet, portalled into <body>) sits above it and must
-    // stay usable: it was made inert with the page and never answered a tap again.
-    const around: HTMLElement[] = []
-    for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
-      const parent: HTMLElement | null = node.parentElement
-      if (!parent) break
-      for (const sibling of parent.children) {
-        if (sibling !== node && sibling instanceof HTMLElement) around.push(sibling)
-      }
-      node = parent
-    }
     const made: HTMLElement[] = []
     const makeInert = () => {
-      for (const sibling of around) {
-        if (!sibling.isConnected || sibling.inert) continue
-        if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
-        if (sibling.querySelector('[aria-live]')) continue
-        sibling.inert = true
-        made.push(sibling)
+      for (let node: HTMLElement | null = layer; node && node !== document.body; ) {
+        const parent: HTMLElement | null = node.parentElement
+        if (!parent) break
+        for (const sibling of parent.children) {
+          if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue
+          if (sibling.matches('script, style, [data-keep-interactive], [aria-live]')) continue
+          if (sibling.querySelector('[aria-live]')) continue
+          // A dialog opened from inside the layer while the delay ran (the waitlist sheet over the
+          // booking sheet, portalled into <body>) lies above it: made inert with the page, it never
+          // answered a tap again. The page itself is walked only now, since it may stream in later.
+          if (sibling.matches(DIALOGS) || sibling.querySelector(DIALOGS)) continue
+          sibling.inert = true
+          made.push(sibling)
+        }
+        node = parent
       }
     }
     const timer = delayMs ? window.setTimeout(makeInert, delayMs) : 0
