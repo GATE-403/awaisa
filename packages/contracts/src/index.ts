@@ -1922,6 +1922,7 @@ type PlanFeature =
   | 'payroll'
   | 'team'
   | 'deposits'
+  | 'fiscal'
 
 type BillingPlan = {
   key: string

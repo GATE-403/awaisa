@@ -12,6 +12,7 @@ const PLAN_FEATURES = [
   'payroll',
   'team',
   'deposits',
+  'fiscal',
 ] as const
 
 type PlanFeature = (typeof PLAN_FEATURES)[number]

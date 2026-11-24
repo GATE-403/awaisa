@@ -55,6 +55,7 @@ describe('tabFeature', () => {
     expect(tabFeature('cash')).toBe('cashdesk')
     expect(tabFeature('stock')).toBe('inventory')
     expect(tabFeature('analytics')).toBe('analytics')
+    expect(tabFeature('fiscal')).toBe('fiscal')
     expect(tabFeature('schedule')).toBeNull()
     expect(tabFeature('billing')).toBeNull()
   })

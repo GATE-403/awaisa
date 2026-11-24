@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
+import { RequiresFeature } from '../billing/plan.guard.js'
 import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
@@ -27,6 +28,7 @@ import {
 import { FiscalService } from './fiscal.service.js'
 
 // The tax settings are the owner's; staff see a visit's receipt and may send a refused one again.
+@RequiresFeature('fiscal')
 @Controller('manage/:slug/fiscal')
 @UseGuards(BusinessAccessGuard)
 export class FiscalController {

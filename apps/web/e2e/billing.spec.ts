@@ -31,6 +31,7 @@ test.describe('Business plans', () => {
     // The trial opens everything the paid plan has.
     expect(await access()).toMatchObject({ planKey: 'business', status: 'trial' })
     expect((await page.request.get(`${manage}/cash`)).status()).toBe(200)
+    expect((await page.request.get(`${manage}/fiscal`)).status()).toBe(200)
 
     await endTrial(business.slug)
     expect(await access()).toMatchObject({ planKey: 'start', status: 'expired', features: [] })
@@ -40,6 +41,8 @@ test.describe('Business plans', () => {
     expect(cash.status()).toBe(402)
     expect((await cash.json()).message).toBe('Доступно на тарифе «Бизнес»')
     expect((await page.request.get(`${manage}/analytics?days=7`)).status()).toBe(402)
+    // Fiscal receipts too: back on «Старт» nothing new is issued.
+    expect((await page.request.get(`${manage}/fiscal`)).status()).toBe(402)
     const third = await page.request.post(`${manage}/specialists`, {
       data: { name: 'Третий', role: 'Мастер', serviceIds: [business.service.id] },
     })
@@ -75,6 +78,7 @@ test.describe('Business plans', () => {
 
     expect(await access()).toMatchObject({ planKey: 'business', status: 'active' })
     expect((await page.request.get(`${manage}/cash`)).status()).toBe(200)
+    expect((await page.request.get(`${manage}/fiscal`)).status()).toBe(200)
   })
 
   test('platform admins extend a plan by hand; owners cannot', async ({
