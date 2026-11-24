@@ -16,7 +16,7 @@ interface MasterReviewsProps {
 }
 
 const SHOWN = 3
-const REVIEW_WORDS: [string, string, string] = ['отзыв', 'отзыва', 'отзывов']
+const REVIEW_WORDS: [string, string] = ['review', 'reviews']
 
 // What clients said about this master, under the day: the average and the latest reviews as the
 // business page's thread, three and the rest behind «Ещё». Only their own reviews; nothing when
@@ -41,9 +41,9 @@ export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
   const hiddenCount = isOpen ? data.items.length - SHOWN : data.items.length - shown.length
 
   return (
-    <section className={styles.reviews} aria-label={t('Ваши отзывы')}>
+    <section className={styles.reviews} aria-label={t('Your reviews')}>
       <SectionCaption isInset={false} className={styles.reviewsCaption}>
-        {t('Ваши отзывы')}
+        {t('Your reviews')}
         {data.average !== null && (
           <span className={styles.reviewsScore}>
             <Star weight='fill' aria-hidden />

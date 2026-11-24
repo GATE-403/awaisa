@@ -14,7 +14,7 @@ interface WeekHoursRowsProps {
   onChange: (weekday: number, patch: Partial<DayDraft>) => void
 }
 
-const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const TIME_ITEMS = TIME_OPTIONS.map((time) => ({ value: time, label: time }))
 
 const toDrafts = (hours: WorkingDay[]): DayDraft[] =>
@@ -57,7 +57,7 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
               <span className={styles.timeRange}>
                 <Select
                   variant='plain'
-                  aria-label={t('{day}: открытие', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
+                  aria-label={t('{day}: opens', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
                   items={TIME_ITEMS}
                   value={day.from}
                   onValueChange={(value) => value && onChange(weekday, { from: value })}
@@ -67,17 +67,17 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
                 </span>
                 <Select
                   variant='plain'
-                  aria-label={t('{day}: закрытие', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
+                  aria-label={t('{day}: closes', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
                   items={TIME_ITEMS}
                   value={day.to}
                   onValueChange={(value) => value && onChange(weekday, { to: value })}
                 />
               </span>
             ) : (
-              <span className={styles.cellMuted}>{t('Выходной')}</span>
+              <span className={styles.cellMuted}>{t('Closed')}</span>
             )}
             <Switch
-              aria-label={t('{day}: рабочий день', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
+              aria-label={t('{day}: working day', { day: t(WEEKDAYS_FULL[weekday] ?? '') })}
               checked={day.isOpen}
               onCheckedChange={(isOpen) => onChange(weekday, { isOpen })}
             />
@@ -86,7 +86,7 @@ export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
       </ul>
       {invalidDay !== -1 && (
         <p className={styles.fieldError} role='alert'>
-          {t('{day}: закрытие должно быть позже открытия', {
+          {t('{day}: closing must be after opening', {
             day: t(WEEKDAYS_FULL[invalidDay] ?? ''),
           })}
         </p>

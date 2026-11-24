@@ -26,9 +26,9 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
   const when =
     slot && today
       ? slot.date === today.dayKey
-        ? 'сегодня'
+        ? 'today'
         : slot.date === addDayKey(today.dayKey, 1)
-          ? 'завтра'
+          ? 'tomorrow'
           : null
       : null
 
@@ -61,13 +61,13 @@ export const PlaceRow = ({ place, isSelected, onSelect }: PlaceRowProps) => {
           <span className={styles.rowTitle}>{place.name}</span>
           <span className={styles.rowMeta}>
             {slot && when ? (
-              <span className={styles.free} data-today={when === 'сегодня' || undefined}>
-                {when === 'сегодня'
-                  ? t('Сегодня с {time}', { time: slot.time })
-                  : t('Завтра с {time}', { time: slot.time })}
+              <span className={styles.free} data-today={when === 'today' || undefined}>
+                {when === 'today'
+                  ? t('Today from {time}', { time: slot.time })
+                  : t('Tomorrow from {time}', { time: slot.time })}
               </span>
             ) : (
-              <span>{t('от {price}', { price: formatPrice(place.minPrice) })}</span>
+              <span>{t('from {price}', { price: formatPrice(place.minPrice) })}</span>
             )}
             {' · '}
             {place.address || place.branchName || t(getKindLabel(place.kind))}

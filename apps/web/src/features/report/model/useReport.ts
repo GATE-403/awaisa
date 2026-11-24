@@ -17,7 +17,7 @@ const useReport = (targetType: ReportTargetType, targetId: string, onReported?: 
     try {
       await reportContent({ targetType, targetId, reason, session: deviceSession() ?? undefined })
       onReported?.()
-      toast.show({ title: t('Спасибо, жалобу проверит модератор'), type: 'info' })
+      toast.show({ title: t('Thanks, a moderator will review the report'), type: 'info' })
     } catch (error) {
       toast.show({ title: getErrorMessage(error), type: 'error' })
     }

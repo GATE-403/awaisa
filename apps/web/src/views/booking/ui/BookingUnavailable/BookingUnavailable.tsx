@@ -15,14 +15,14 @@ export const BookingUnavailable = () => {
     <div className={styles.scrim} role='presentation'>
       <div className={styles.card} role='alertdialog' aria-labelledby='booking-unavailable'>
         <p id='booking-unavailable' className={styles.title}>
-          {t('Не получилось открыть запись')}
+          {t('Could not open booking')}
         </p>
-        <p className={styles.text}>{t('Проверьте соединение и попробуйте ещё раз.')}</p>
+        <p className={styles.text}>{t('Check the connection and try again.')}</p>
         <div className={styles.actions}>
           <Button variant='secondary' onClick={() => router.back()}>
-            {t('Закрыть')}
+            {t('Close')}
           </Button>
-          <Button onClick={() => window.location.reload()}>{t('Повторить')}</Button>
+          <Button onClick={() => window.location.reload()}>{t('Retry')}</Button>
         </div>
       </div>
     </div>

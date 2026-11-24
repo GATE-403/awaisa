@@ -27,15 +27,15 @@ const readCabinetFrom = () => {
 }
 
 const LABELS: Record<string, string> = {
-  '/': 'Каталог',
-  '/bookings': 'Профиль',
-  '/map': 'Карта',
-  '/feed': 'Образы',
-  '/top': 'Рейтинг',
-  '/business': 'Бизнес',
+  '/': 'Catalogue',
+  '/bookings': 'Profile',
+  '/map': 'Map',
+  '/feed': 'Looks',
+  '/top': 'Rating',
+  '/business': 'Business',
 }
 
 /** The word on «‹» for a path to go back to. */
-const getBackLabel = (path: string) => LABELS[path.split('?')[0] ?? ''] ?? 'Назад'
+const getBackLabel = (path: string) => LABELS[path.split('?')[0] ?? ''] ?? 'Back'
 
 export { getBackLabel, readCabinetFrom, rememberCabinetFrom }

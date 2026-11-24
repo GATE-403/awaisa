@@ -6,7 +6,7 @@ import { ProfilePage, ProfileSkeleton } from '@/views/publicProfile'
 
 export const generateMetadata = async ({ params }: PageProps<'/u/[id]'>): Promise<Metadata> => {
   const profile = await getProfileOnServer((await params).id)
-  if (!profile) return { title: 'Профиль', robots: { index: false } }
+  if (!profile) return { title: 'Profile', robots: { index: false } }
   return {
     title: `${profile.name} - профиль`,
     description: `${profile.name} в Awaisa: уровень ${profile.level.level}, ${profile.badges.length} значков`,

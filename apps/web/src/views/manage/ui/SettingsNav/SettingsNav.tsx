@@ -82,23 +82,23 @@ const KEYWORDS: Partial<Record<ManageTab, string>> = {
 const PAGE_ENTRIES: SearchEntry[] = [
   {
     tab: 'services',
-    label: 'Услуги',
+    label: 'Services',
     tone: 'blue',
-    place: 'на Странице',
+    place: 'on the Page',
     words: 'услуги цены категории длительность предоплата',
   },
   {
     tab: 'masters',
-    label: 'Мастера',
+    label: 'Specialists',
     tone: 'orange',
-    place: 'на Странице',
+    place: 'on the Page',
     words: 'мастера график отпуск процент зарплата',
   },
   {
     tab: 'hours',
-    label: 'Часы работы',
+    label: 'Opening hours',
     tone: 'orange',
-    place: 'на Странице',
+    place: 'on the Page',
     words: 'часы график выходной шаг записи слоты',
   },
 ]
@@ -157,47 +157,47 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
     ...(access && {
       billing: {
         text:
-          access.status === 'trial' ? t('{plan} · пробный', { plan: access.title }) : access.title,
+          access.status === 'trial' ? t('{plan} · trial', { plan: access.title }) : access.title,
         isAlert: access.status === 'expired',
       },
     }),
     ...(summary && {
-      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : t('Выкл.') },
+      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : t('Off') },
       ...(summary.team > 0 && { team: { text: String(summary.team) } }),
       promotions: {
         text:
           summary.activePromotions > 0
-            ? t(summary.activePromotions === 1 ? '{count} действует' : '{count} действуют', {
+            ? t(summary.activePromotions === 1 ? '{count} running' : '{count} running', {
                 count: summary.activePromotions,
               })
-            : t('Нет'),
+            : t('No'),
       },
       loyalty: {
         text:
           summary.bonusPercent !== null
-            ? t('Бонусы {percent}%', { percent: summary.bonusPercent })
+            ? t('Bonuses {percent}%', { percent: summary.bonusPercent })
             : summary.plans > 0
-              ? t.count(summary.plans, ['абонемент', 'абонемента', 'абонементов'])
-              : t('Выкл.'),
+              ? t.count(summary.plans, ['pass', 'passes'])
+              : t('Off'),
       },
       stock:
         summary.lowStock > 0
           ? {
-              text: t(summary.lowStock === 1 ? '{count} заканчивается' : '{count} заканчиваются', {
+              text: t(summary.lowStock === 1 ? '{count} running low' : '{count} running low', {
                 count: summary.lowStock,
               }),
               isAlert: true,
             }
-          : { text: summary.stockItems > 0 ? String(summary.stockItems) : t('Пусто') },
+          : { text: summary.stockItems > 0 ? String(summary.stockItems) : t('Empty') },
       fiscal:
         summary.failedReceipts > 0
           ? {
-              text: t(summary.failedReceipts === 1 ? '{count} не прошёл' : '{count} не прошли', {
+              text: t(summary.failedReceipts === 1 ? '{count} failed' : '{count} failed', {
                 count: summary.failedReceipts,
               }),
               isAlert: true,
             }
-          : { text: summary.isFiscalOn ? t('Чеки') : t('Выкл.') },
+          : { text: summary.isFiscalOn ? t('Receipts') : t('Off') },
     }),
   }
 
@@ -243,27 +243,23 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
   }
 
   return (
-    <nav aria-label={t('Настройки')} className={styles.nav}>
+    <nav aria-label={t('Settings')} className={styles.nav}>
       {/* With a mouse over the list; on phones it floats at the window's foot, under the thumb. */}
       <FloatingToolbar className={styles.search}>
         <SearchField
           value={query}
           onChange={search}
-          placeholder={t('Поиск')}
-          label={t('Поиск по настройкам')}
+          placeholder={t('Search')}
+          label={t('Search settings')}
         />
       </FloatingToolbar>
       {results ? (
         results.length > 0 ? (
-          <ul className={styles.list} aria-label={t('Найдено')}>
+          <ul className={styles.list} aria-label={t('Found')}>
             {results.map(row)}
           </ul>
         ) : (
-          <EmptyState
-            variant='inline'
-            title={t('Ничего не нашли')}
-            text={t('Попробуйте другое слово.')}
-          />
+          <EmptyState variant='inline' title={t('Nothing found')} text={t('Try another word.')} />
         )
       ) : (
         SETTINGS_GROUPS.map((group) => (
@@ -277,7 +273,7 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
               )}
               {/* Hiding and deleting the business: a row of its own that opens its sheet, so the
                   red action is never in plain view. */}
-              {group.label === 'Бизнес' && (
+              {group.label === 'Business' && (
                 <li>
                   <button
                     type='button'
@@ -288,10 +284,10 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
                       <Storefront />
                     </span>
                     <span className={styles.label}>
-                      <span className={styles.labelText}>{t('Скрыть или удалить')}</span>
+                      <span className={styles.labelText}>{t('Hide or delete')}</span>
                     </span>
                     {/* Only the state that asks for attention: an open page says nothing. */}
-                    {!isPublished && <span className={styles.value}>{t('Скрыта')}</span>}
+                    {!isPublished && <span className={styles.value}>{t('Hidden')}</span>}
                     <CaretRight className={styles.chevron} aria-hidden />
                   </button>
                 </li>

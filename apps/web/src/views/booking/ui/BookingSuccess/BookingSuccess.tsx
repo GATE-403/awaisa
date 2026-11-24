@@ -80,8 +80,8 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
   const handleAddToCalendar = () => {
     downloadCalendarFile(booking, booking.business)
     toast.show({
-      title: t('Событие для календаря готово'),
-      description: t('Откройте файл, чтобы добавить'),
+      title: t('Calendar event is ready'),
+      description: t('Open the file to add it'),
     })
   }
 
@@ -97,9 +97,9 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <span ref={checkRef} className={styles.check} aria-hidden>
         <Check />
       </span>
-      <h1 className={styles.title}>{t('Вы записаны')}</h1>
+      <h1 className={styles.title}>{t('You are booked')}</h1>
       <p className={styles.lead}>
-        {t('{day} в {time} · {place}', {
+        {t('{day} at {time} · {place}', {
           day: t.dayLong(booking.date),
           time: booking.time,
           place: booking.business.name,
@@ -107,15 +107,12 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       </p>
       {/* What to do now, in plain words: someone new to this does not read a barcode. */}
       <p className={styles.nextStep}>
-        {t('Приходите к {time}', { time: booking.time })}
-        {booking.business.address
-          ? t(' по адресу {address}', { address: booking.business.address })
-          : ''}
-        .{' '}
+        {t('Come at {time}', { time: booking.time })}
+        {booking.business.address ? t(' to {address}', { address: booking.business.address }) : ''}.{' '}
         {/* The sum itself, in bold: «Оплата в салоне» alone sent people looking in the ticket. */}
-        {isDepositPaid ? t('Остаток в салоне -') : t('Оплата в салоне -')}{' '}
+        {isDepositPaid ? t('The rest at the salon:') : t('Pay at the salon:')}{' '}
         <b className={styles.amount}>{formatPrice(toPay)}</b>.{' '}
-        {t('Перенести или отменить можно по ссылке из SMS.')}
+        {t('Move or cancel by the link in the SMS.')}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
       {/* The ticket itself opens the full one: details, place, download. Its own stretched
@@ -128,7 +125,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           the same place and day after this visit, the name and number kept. */}
       {onBookAnother && (
         <button type='button' className={styles.another} onClick={onBookAnother}>
-          {t('Ещё запись в {place} · после {time} ›', {
+          {t('Another booking at {place} · after {time} ›', {
             place: booking.business.name,
             time: endOf(booking),
           })}
@@ -143,12 +140,12 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           size='md'
           className={styles.primaryAction}
         >
-          {t('Мои записи')}
+          {t('My bookings')}
         </ButtonLink>
-        <GlyphGroup label={t('Ещё')}>
+        <GlyphGroup label={t('More')}>
           <GlyphButton
             icon={<CalendarPlus />}
-            label={t('В календарь')}
+            label={t('To calendar')}
             onClick={handleAddToCalendar}
           />
           {booking.business.mapUrl && (
@@ -156,8 +153,8 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
               href={booking.business.mapUrl}
               target='_blank'
               rel='noreferrer'
-              aria-label={t('Маршрут')}
-              title={t('Маршрут')}
+              aria-label={t('Directions')}
+              title={t('Directions')}
             >
               <MapPin aria-hidden />
             </a>
@@ -173,11 +170,11 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       {/* Guests keep bookings on this device only: say so at the moment it matters. */}
       {session.status === 'guest' && (
         <p className={styles.keep}>
-          {t('Запись сохранена на этом телефоне.')}{' '}
+          {t('The booking is saved on this phone.')}{' '}
           <NextLink href='/login?next=/bookings' className={styles.keepLink}>
-            {t('Войдите по номеру')}
+            {t('Sign in with your number')}
           </NextLink>
-          {t(', чтобы видеть записи на любом устройстве.')}
+          {t(' to see bookings on any device.')}
         </p>
       )}
       {/* What to look at next, chosen from this visit and the client's answers - a reason to
@@ -185,14 +182,14 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <div className={styles.next}>
         <ForYouShelf
           surface='success'
-          title={t('Вам может понравиться')}
+          title={t('You may like')}
           seedVisit={`${booking.serviceId}~${booking.startsAt.slice(0, 10)}`}
           likeServiceId={booking.serviceId}
           excludeServiceId={booking.serviceId}
           isInline
         />
         <NextLink href='/' className={styles.catalogLink}>
-          {t('Все места и услуги ›')}
+          {t('All places and services ›')}
         </NextLink>
       </div>
       {isTicketOpen && <TicketViewer booking={booking} onClose={() => setIsTicketOpen(false)} />}

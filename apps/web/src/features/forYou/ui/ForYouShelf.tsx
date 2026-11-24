@@ -23,9 +23,9 @@ import { PreferencesSheet } from './PreferencesSheet'
 // Reasons with no « · » get a short form of their own: «Похоже на просмотренное» was cut to
 // «Похоже на просмотре…».
 const SHORT_LEADS: [RegExp, string][] = [
-  [/^Похоже на просмотренное/, 'Похожее'],
-  [/^Как в ваших визитах/, 'Как обычно'],
-  [/^Часто берут/, 'Берут вместе'],
+  [/^Похоже на просмотренное/, 'Similar'],
+  [/^Как в ваших визитах/, 'As usual'],
+  [/^Часто берут/, 'Often paired'],
 ]
 
 const shortReason = (reason: string) => {
@@ -37,26 +37,26 @@ const shortReason = (reason: string) => {
 // Under a 76pt story tile there is room for about 12 characters: the reason in its shortest words.
 const storyNote = (reason: string) => {
   const lead = reason.split(' · ')[0] ?? reason
-  if (lead.startsWith('Часто выбирают')) return 'Популярное'
-  if (lead.startsWith('Часто берут')) return 'Берут вместе'
+  if (lead.startsWith('Popular')) return 'Popular'
+  if (lead.startsWith('Часто берут')) return 'Often paired'
   // Reasons that ran past a story's width, said in a word or two («Похоже на прос…»).
-  if (lead === 'Похоже на просмотренное') return 'Похожее'
-  if (lead === 'Как в ваших визитах') return 'Как обычно'
-  if (lead === 'Вы были здесь') return 'Были здесь'
+  if (lead === 'Похоже на просмотренное') return 'Similar'
+  if (lead === 'Как в ваших визитах') return 'As usual'
+  if (lead === 'You have been here') return 'Been here'
   return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
 }
 
 // Reasons come from the API in Russian; the short ones the cards show are read here per language.
 // Shortened first (above), so a card's length rules stay the Russian ones.
 const REASON_PATTERNS: [RegExp, string, string][] = [
-  [/^Пора снова · (\d+) нед\.$/, 'Пора снова · {weeks} нед.', 'weeks'],
-  [/^Рядом · ([\d,]+) км$/, 'Рядом · {km} км', 'km'],
-  [/^Рядом · (\d+) м$/, 'Рядом · {meters} м', 'meters'],
-  [/^Сегодня с (.+)$/, 'Сегодня с {time}', 'time'],
-  [/^Завтра с (.+)$/, 'Завтра с {time}', 'time'],
-  [/^Сегодня (\d.*)$/, 'Сегодня {time}', 'time'],
-  [/^Завтра (\d.*)$/, 'Завтра {time}', 'time'],
-  [/^Рейтинг (.+)$/, 'Рейтинг {rating}', 'rating'],
+  [/^Пора снова · (\d+) нед\.$/, 'Due again · {weeks} wk', 'weeks'],
+  [/^Рядом · ([\d,]+) км$/, 'Nearby · {km} km', 'km'],
+  [/^Рядом · (\d+) м$/, 'Nearby · {meters} m', 'meters'],
+  [/^Сегодня с (.+)$/, 'Today from {time}', 'time'],
+  [/^Завтра с (.+)$/, 'Tomorrow from {time}', 'time'],
+  [/^Сегодня (\d.*)$/, 'Today {time}', 'time'],
+  [/^Завтра (\d.*)$/, 'Tomorrow {time}', 'time'],
+  [/^Рейтинг (.+)$/, 'Rating {rating}', 'rating'],
 ]
 
 const translateReason = (t: Translate, reason: string) => {
@@ -78,7 +78,7 @@ const pickOf = (item: Recommendation) => ({
 // «Для вас»: services picked for this client - their answers, their visits («Пора снова»), where
 // they are and who is free soon. Each card says why it is here.
 // The reason the score gives a service due again (`recommend-score.ts`).
-const DUE_REASON = 'Пора снова'
+const DUE_REASON = 'Due again'
 
 interface ForYouShelfProps {
   /** The shelf's heading. */
@@ -106,7 +106,7 @@ interface ForYouShelfProps {
 }
 
 export const ForYouShelf = ({
-  title = 'Для вас',
+  title = 'For you',
   seedVisit,
   excludeServiceId,
   likeServiceId,
@@ -217,8 +217,10 @@ export const ForYouShelf = ({
         <button type='button' className={styles.prompt} onClick={() => setIsAsking(true)}>
           <Sparkle aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
-            <span className={styles.promptTitle}>{t('Подберём для вас')}</span>
-            <span className={styles.promptMeta}>{t('3 вопроса - и подборка услуг рядом')}</span>
+            <span className={styles.promptTitle}>{t('Picks for you')}</span>
+            <span className={styles.promptMeta}>
+              {t('3 questions, then services picked near you')}
+            </span>
           </span>
         </button>
         {sheet}
@@ -238,7 +240,7 @@ export const ForYouShelf = ({
         {isTunable && (
           <button type='button' className={styles.tune} onClick={() => setIsAsking(true)}>
             <Sliders aria-hidden />
-            {t('Настроить')}
+            {t('Adjust')}
           </button>
         )}
         {headAction}

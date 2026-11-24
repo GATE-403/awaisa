@@ -3,8 +3,6 @@ import type { Translate } from '@/shared/i18n'
 
 type Bucket = { key: string; label: string; title: string; revenue: number; visits: number }
 
-const LOCALES: Record<Translate['language'], string> = { ru: 'ru-RU', ky: 'ky-KG', en: 'en-GB' }
-
 const numberFormatter = new Intl.NumberFormat('ru-RU')
 const compactFormatter = new Intl.NumberFormat('ru-RU', {
   notation: 'compact',
@@ -14,29 +12,22 @@ const compactFormatter = new Intl.NumberFormat('ru-RU', {
 const toDate = (key: string) => new Date(`${key}T00:00:00Z`)
 
 const dateFormat = (t: Translate, options: Intl.DateTimeFormatOptions) =>
-  new Intl.DateTimeFormat(LOCALES[t.language], { ...options, timeZone: 'UTC' })
+  new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'UTC' })
 
 // Axis ticks: in full under 10 000, compact above (10 тыс.).
 const formatTick = (value: number) =>
   value < 10_000 ? numberFormatter.format(value) : compactFormatter.format(value)
 
-// Browsers ship few Kyrgyz date names, so Kyrgyz days are built from `t`'s own month names.
 const analyticsFormat = (t: Translate) => {
   const dayFormatter = dateFormat(t, { day: 'numeric', month: 'short' })
   const monthLongFormatter = dateFormat(t, { month: 'long', year: 'numeric' })
 
   const formatMoney = (value: number) =>
-    t('{amount} сом', { amount: numberFormatter.format(value) })
+    t('{amount} som', { amount: numberFormatter.format(value) })
 
-  const formatDay = (key: string) =>
-    t.language === 'ky'
-      ? `${toDate(key).getUTCDate()}-${t.monthShort(key)}`
-      : dayFormatter.format(toDate(key))
+  const formatDay = (key: string) => dayFormatter.format(toDate(key))
 
-  const formatMonth = (key: string) =>
-    t.language === 'ky'
-      ? `${toDate(key).getUTCFullYear()}, ${t.monthShort(key)}`
-      : monthLongFormatter.format(toDate(key))
+  const formatMonth = (key: string) => monthLongFormatter.format(toDate(key))
 
   // A column per day for a week or a month, per week for a quarter, per month for a year:
   // never more than ~31 columns, so they stay thin bars instead of a smear.
@@ -60,7 +51,7 @@ const analyticsFormat = (t: Translate) => {
         key,
         label: days <= 120 ? formatDay(day.date) : t.monthShort(day.date),
         title:
-          days <= 120 ? t('Неделя с {day}', { day: formatDay(day.date) }) : formatMonth(day.date),
+          days <= 120 ? t('Week from {day}', { day: formatDay(day.date) }) : formatMonth(day.date),
         revenue: 0,
         visits: 0,
       }

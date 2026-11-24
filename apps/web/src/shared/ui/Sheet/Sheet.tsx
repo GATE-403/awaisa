@@ -36,7 +36,7 @@ export const Sheet = ({
   title,
   onClose,
   action,
-  cancelLabel = 'Отмена',
+  cancelLabel = 'Cancel',
   onCancel,
   barEnd,
   children,

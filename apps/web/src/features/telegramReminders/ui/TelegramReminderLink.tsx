@@ -27,12 +27,12 @@ export const TelegramReminderLink = ({ bookingId }: TelegramReminderLinkProps) =
 
   if (!link?.url) return null
   if (link.isLinked) {
-    return <p className={styles.line}>{t('Напомним в Telegram')}</p>
+    return <p className={styles.line}>{t('We will remind you in Telegram')}</p>
   }
 
   return (
     <a href={link.url} target='_blank' rel='noreferrer' className={styles.link}>
-      {t('Напоминать в Telegram вместо SMS ›')}
+      {t('Remind me in Telegram instead of SMS ›')}
     </a>
   )
 }

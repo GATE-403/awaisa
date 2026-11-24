@@ -44,7 +44,7 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
 
   return (
     <Sheet
-      title='Абонемент'
+      title='Pass'
       onClose={onClose}
       action={{
         label: isSignedIn
@@ -65,7 +65,7 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
             </div>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Услуга</span>
-              <span className={sheet.rowControl}>{plan.serviceName ?? 'Любая'}</span>
+              <span className={sheet.rowControl}>{plan.serviceName ?? 'Any'}</span>
             </div>
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Визитов</span>
@@ -74,7 +74,7 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
             <div className={sheet.row}>
               <span className={sheet.rowLabel}>Действует</span>
               <span className={sheet.rowControl}>
-                {pluralize(plan.validDays, ['день', 'дня', 'дней'])} с оплаты
+                {pluralize(plan.validDays, ['day', 'days'])} с оплаты
               </span>
             </div>
             <div className={sheet.row}>

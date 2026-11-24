@@ -54,12 +54,12 @@ export const AchievementCard = ({
           <p className={styles.medalCardTitle}>{achievementTitle(achievement.title, t)}</p>
           <p className={styles.medalCardText}>{t(achievement.description)}</p>
           {achievement.earned ? (
-            <p className={styles.medalCardDone}>{t('Получено')}</p>
+            <p className={styles.medalCardDone}>{t('Earned')}</p>
           ) : (
             <>
               <span className={styles.medalCardTrack} aria-hidden />
               <p className={styles.medalCardText}>
-                {achievement.progress.current} {t('из')} {achievement.progress.target}
+                {achievement.progress.current} {t('of')} {achievement.progress.target}
                 {isOwn && goal ? ` · ${goal.hint}` : ''}
               </p>
               {isOwn && goal?.action && (

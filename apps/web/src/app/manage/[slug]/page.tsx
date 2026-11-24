@@ -6,7 +6,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ManagePage } from '@/views/manage'
 
 export const metadata: Metadata = {
-  title: 'Кабинет',
+  title: 'Dashboard',
   robots: { index: false },
 }
 

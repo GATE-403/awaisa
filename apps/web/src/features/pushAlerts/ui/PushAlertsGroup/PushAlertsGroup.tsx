@@ -39,27 +39,31 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
       if (isDone) {
         haptic('success')
         toast.show({
-          title: isOn ? t('Уведомления включены') : t('Уведомления выключены'),
+          title: isOn ? t('Notifications on') : t('Notifications off'),
           type: 'success',
         })
       }
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsBusy(false)
     }
   }
 
   return (
-    <section className={sheet.group} aria-label={t('Уведомления на этом устройстве')}>
-      <SectionCaption>{t('На этом устройстве')}</SectionCaption>
+    <section className={sheet.group} aria-label={t('Notifications on this device')}>
+      <SectionCaption>{t('On this device')}</SectionCaption>
       {state === 'install' ? (
         <RowNote>{t(INSTALL_HINT)}</RowNote>
       ) : (
         <>
           <div className={listClassName}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Уведомлять о записях')}</span>
+              <span className={sheet.rowLabel}>{t('Notify about bookings')}</span>
               <Switch
                 checked={state === 'on'}
                 disabled={isBusy || state === 'denied'}

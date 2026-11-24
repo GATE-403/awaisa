@@ -1,5 +1,3 @@
-export type { LanguageCode } from './language'
-export { setLanguage, useLanguage } from './language'
 export { T } from './T'
 export type { Translate } from './useT'
-export { useT } from './useT'
+export { t, useT } from './useT'

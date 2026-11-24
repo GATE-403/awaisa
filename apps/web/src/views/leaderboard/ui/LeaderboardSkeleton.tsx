@@ -25,7 +25,7 @@ export const LeaderboardSkeleton = () => (
           <TextLine chars={14} />
         </p>
         <p className={styles.lead}>
-          <T>По отзывам клиентов в Awaisa</T>
+          <T>By client reviews on Awaisa</T>
         </p>
       </header>
       <div className={styles.controls}>

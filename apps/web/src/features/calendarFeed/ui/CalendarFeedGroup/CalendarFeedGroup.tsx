@@ -34,8 +34,8 @@ export const CalendarFeedGroup = ({
   if (state.error) return null
 
   return (
-    <section className={sheet.group} aria-label={t('Календарь')}>
-      <SectionCaption>{t('Календарь')}</SectionCaption>
+    <section className={sheet.group} aria-label={t('Calendar')}>
+      <SectionCaption>{t('Calendar')}</SectionCaption>
       <div className={listClassName}>
         <button
           type='button'
@@ -43,9 +43,9 @@ export const CalendarFeedGroup = ({
           disabled={!state.feed}
           onClick={() => setIsOpen(true)}
         >
-          <span className={sheet.rowLabel}>{t('Календарь на телефоне')}</span>
+          <span className={sheet.rowLabel}>{t('Calendar on your phone')}</span>
           <span className={styles.value}>
-            {state.feed?.isActive && t('Подключён')}
+            {state.feed?.isActive && t('Connected')}
             <CaretRight className={styles.chevron} aria-hidden />
           </span>
         </button>

@@ -16,7 +16,7 @@ export const ProductShowcase = () => (
           <span />
         </span>
         <span className={styles.windowTitle}>
-          <T>Barber Pro. Кабинет</T>
+          <T>Barber Pro. Dashboard</T>
         </span>
       </div>
       <div className={styles.schedule}>
@@ -55,10 +55,10 @@ export const ProductShowcase = () => (
       <span className={styles.toastIcon}>A</span>
       <span>
         <strong>
-          <T>Новая запись</T>
+          <T>New booking</T>
         </strong>
         <span className={styles.toastText}>
-          <T>Данияр · 20 ноября, 14:30 · Стрижка</T>
+          <T>Данияр · 20 November, 14:30 · Haircut</T>
         </span>
       </span>
     </div>

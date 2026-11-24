@@ -22,8 +22,8 @@ interface NextSlotCardProps {
 const subscribeNoop = () => () => {}
 
 const getSlotText = (t: Translate, slot: ReturnType<typeof useNextSlot>) => {
-  if (slot === undefined) return t('Ищем ближайшее окно…')
-  if (slot === null) return t('Окна появятся скоро')
+  if (slot === undefined) return t('Looking for a free time…')
+  if (slot === null) return t('Free times coming soon')
 
   return `${t(slot.dayLabel)}, ${slot.time}`
 }
@@ -72,14 +72,14 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
     // «Продолжить запись», tucking away while the page scrolls down.
     <aside
       className={styles.slotCard}
-      aria-label={t('Ближайшее окно')}
+      aria-label={t('Next free time')}
       data-tucked={isTucked || isHeadBookVisible || undefined}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
       <NextLink href={href} className={styles.slotLink}>
         {/* Said before what the card shows, not instead of it: the name keeps the visible
             words (WCAG 2.5.3), so voice control finds «Сегодня, 18:30». */}
-        <span className={styles.srOnly}>{slot ? t('Записаться на ') : t('Записаться: ')}</span>
+        <span className={styles.srOnly}>{slot ? t('Book for ') : t('Book: ')}</span>
         <span className={styles.slotText}>
           <span
             className={styles.slotWhen}

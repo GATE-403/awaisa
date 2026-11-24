@@ -73,7 +73,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
         setStatus(next)
         setIsWaiting(false)
         haptic('success')
-        toast.show({ title: t('Telegram подключён'), type: 'success' })
+        toast.show({ title: t('Telegram connected'), type: 'success' })
       }
       if ((next && next.chats.length > known) || attempts >= POLL_LIMIT) {
         if (pollRef.current) window.clearInterval(pollRef.current)
@@ -88,15 +88,19 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
     try {
       await removeTelegramChat(slug, id)
       setStatus({ ...status, chats: status.chats.filter((chat) => chat.id !== id) })
-      toast.show({ title: t('Уведомления отключены'), type: 'success' })
+      toast.show({ title: t('Notifications turned off'), type: 'success' })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
   return (
     <div className={forms.group}>
-      <SectionCaption>{t('Уведомления в Telegram')}</SectionCaption>
+      <SectionCaption>{t('Telegram notifications')}</SectionCaption>
       <div className={forms.list}>
         {status.chats.map((chat) => (
           <div key={chat.id} className={styles.row}>
@@ -105,20 +109,22 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
             </span>
             <span className={styles.text}>
               <span className={styles.title}>
-                {chat.username ? `@${chat.username}` : t('Чат Telegram')}
+                {chat.username ? `@${chat.username}` : t('Telegram chat')}
               </span>
               <span className={styles.meta}>
-                {t('Подключён {date}', { date: dateFormatter.format(new Date(chat.createdAt)) })}
+                {t('Connected {date}', { date: dateFormatter.format(new Date(chat.createdAt)) })}
               </span>
             </span>
             <button type='button' className={styles.remove} onClick={() => handleRemove(chat.id)}>
-              {t('Отключить')}
+              {t('Disconnect')}
             </button>
           </div>
         ))}
         {isWaiting || !link ? (
           <span className={styles.connect} data-waiting=''>
-            {isWaiting ? t('Ждём, когда вы нажмёте «Start» в Telegram…') : t('Готовим ссылку…')}
+            {isWaiting
+              ? t('Waiting for you to tap «Start» in Telegram…')
+              : t('Preparing the link…')}
           </span>
         ) : (
           <a
@@ -128,13 +134,13 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
             className={styles.connect}
             onClick={() => waitForChat(status.chats.length)}
           >
-            {status.chats.length > 0 ? t('Подключить ещё один чат') : t('Подключить Telegram')}
+            {status.chats.length > 0 ? t('Connect another chat') : t('Connect Telegram')}
           </a>
         )}
       </div>
       <p className={styles.footer}>
         {t(
-          'Новые записи, отмены и отзывы - сразу, расписание на день - в 9:00. В боте: /today - записи на сегодня, /stop - отключить.',
+          "New bookings, cancellations and reviews arrive at once, the day's schedule at 9:00. In the bot: /today (today's bookings), /stop (turn off).",
         )}
       </p>
     </div>

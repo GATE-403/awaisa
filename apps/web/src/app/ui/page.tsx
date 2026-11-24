@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 }
 
 const CITY_ITEMS = [
-  { value: 'bishkek', label: 'Бишкек' },
+  { value: 'bishkek', label: 'Bishkek' },
   { value: 'osh', label: 'Ош' },
   { value: 'karakol', label: 'Каракол' },
 ]
@@ -57,10 +57,10 @@ const UiKitPage = () => (
       <Field label='Email' description='Мы не передаём почту третьим лицам'>
         <Input type='email' placeholder='name@example.com' />
       </Field>
-      <Field label='Пароль' error='Минимум 8 символов'>
+      <Field label='Password' error='Минимум 8 символов'>
         <Input type='password' defaultValue='123' />
       </Field>
-      <Select items={CITY_ITEMS} placeholder='Выберите город' aria-label='Город' />
+      <Select items={CITY_ITEMS} placeholder='Выберите город' aria-label='City' />
     </section>
 
     <section className={styles.section}>
@@ -79,7 +79,7 @@ const UiKitPage = () => (
           Уведомления
         </label>
       </div>
-      <RadioGroup defaultValue='card' aria-label='Способ оплаты' className={styles.row}>
+      <RadioGroup defaultValue='card' aria-label='Payment method' className={styles.row}>
         <label className={styles.row}>
           <Radio value='card' />
           Картой
@@ -93,7 +93,7 @@ const UiKitPage = () => (
 
     <section className={styles.section}>
       <h2 className={styles.heading}>RadioCard</h2>
-      <RadioGroup defaultValue='pro' aria-label='Тариф' className={styles.cards}>
+      <RadioGroup defaultValue='pro' aria-label='Plan' className={styles.cards}>
         <RadioCard value='basic' title='Базовый' description='Для знакомства' />
         <RadioCard value='pro' title='Pro' description='Всё без ограничений' size='lg' />
       </RadioGroup>

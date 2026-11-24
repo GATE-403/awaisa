@@ -24,23 +24,23 @@ export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
   const share = async () => {
     const url = isOwn ? inviteUrl(address) : `${window.location.origin}/u/${address}`
     const text = isOwn
-      ? t('Записывайся к мастерам через Awaisa - вот мой профиль')
-      : t('{name} в Awaisa', { name })
+      ? t('Book specialists through Awaisa, here is my profile')
+      : t('{name} on Awaisa', { name })
     const result = await shareLink({ title: text, text, url, isTouchOnly: true })
     if (result === 'copied') {
       toast.show({
-        title: isOwn ? t('Ссылка-приглашение скопирована') : t('Ссылка на профиль скопирована'),
+        title: isOwn ? t('Invite link copied') : t('Profile link copied'),
         type: 'success',
       })
     }
-    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
+    if (result === 'failed') toast.show({ title: t('Could not share'), type: 'error' })
   }
 
   return (
     <GlyphButton
       // What it gives is a link (an invitation on one's own profile).
       icon={<LinkSimple aria-hidden />}
-      label={isOwn ? t('Пригласить') : t('Поделиться')}
+      label={isOwn ? t('Invite') : t('Share')}
       onClick={share}
     />
   )

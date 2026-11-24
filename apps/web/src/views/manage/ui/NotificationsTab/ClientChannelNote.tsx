@@ -29,9 +29,9 @@ export const ClientChannelNote = () => {
 
   return (
     <div className={forms.group}>
-      <SectionCaption>{t('Клиентам')}</SectionCaption>
+      <SectionCaption>{t('To clients')}</SectionCaption>
       <p className={forms.groupEmpty}>
-        {t('Подтверждения и напоминания о визитах приходят в WhatsApp, а без него по SMS.')}
+        {t('Visit confirmations and reminders go to WhatsApp, or by SMS without it.')}
       </p>
     </div>
   )

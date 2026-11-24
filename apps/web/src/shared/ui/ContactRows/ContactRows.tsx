@@ -17,14 +17,14 @@ export const ContactRows = ({ phone, surface = 'sheet' }: ContactRowsProps) => {
   const digits = phone.replace(/\D/g, '')
 
   return (
-    <ul className={styles.list} data-surface={surface} aria-label='Связаться'>
+    <ul className={styles.list} data-surface={surface} aria-label='Contact'>
       <li>
         <a href={`tel:${phone}`} className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <Phone />
           </span>
           <span className={styles.label}>
-            <T>Позвонить</T>
+            <T>Call</T>
           </span>
           <span className={styles.value}>{formatPhone(phone)}</span>
         </a>

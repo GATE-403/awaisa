@@ -5,16 +5,8 @@ type OpeningStatus = {
   label: string
 }
 
-const WEEKDAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-const WEEKDAYS_FULL = [
-  'Понедельник',
-  'Вторник',
-  'Среда',
-  'Четверг',
-  'Пятница',
-  'Суббота',
-  'Воскресенье',
-]
+const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const WEEKDAYS_FULL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const DAYS_IN_WEEK = 7
 
 /** `useT()`'s `t`, so callers get the words in the chosen language; Russian when left out. */
@@ -51,13 +43,13 @@ const getOpeningStatus = (
   if (today && minutes >= today.opensMinutes && minutes < today.closesMinutes) {
     return {
       isOpen: true,
-      label: t('Открыто до {time}', { time: formatClock(today.closesMinutes) }),
+      label: t('Open until {time}', { time: formatClock(today.closesMinutes) }),
     }
   }
   if (today && minutes < today.opensMinutes) {
     return {
       isOpen: false,
-      label: t('Откроемся в {time}', { time: formatClock(today.opensMinutes) }),
+      label: t('Opens at {time}', { time: formatClock(today.opensMinutes) }),
     }
   }
 
@@ -65,16 +57,16 @@ const getOpeningStatus = (
     const next = findDay(hours, (weekday + offset) % DAYS_IN_WEEK)
     if (!next) continue
     const time = formatClock(next.opensMinutes)
-    if (offset === 1) return { isOpen: false, label: t('Откроемся завтра в {time}', { time }) }
+    if (offset === 1) return { isOpen: false, label: t('Opens tomorrow at {time}', { time }) }
     const short = WEEKDAYS_SHORT[next.weekday] ?? ''
     // Russian reads «откроемся пт в 10:00»; other languages keep their own capitals («Opens Fri»).
     const translated = t(short)
     const day = translated === short ? short.toLowerCase() : translated
 
-    return { isOpen: false, label: t('Откроемся {day} в {time}', { day, time }) }
+    return { isOpen: false, label: t('Opens {day} at {time}', { day, time }) }
   }
 
-  return { isOpen: false, label: t('Сейчас не принимаем') }
+  return { isOpen: false, label: t('Not taking bookings now') }
 }
 
 // "Ежедневно 10:00–20:00" or "Пн–Пт 10:00–19:00, Сб 11:00–16:00".
@@ -90,10 +82,10 @@ const formatWeekSchedule = (hours: WorkingDay[], t: Say = russian) => {
     else groups.push({ from: weekday, to: weekday, range })
   }
 
-  if (groups.length === 0) return t('Запись временно закрыта')
+  if (groups.length === 0) return t('Booking is closed for now')
   const [only] = groups
   if (groups.length === 1 && only && only.from === 0 && only.to === DAYS_IN_WEEK - 1) {
-    return t('Ежедневно {range}', { range: only.range })
+    return t('Daily {range}', { range: only.range })
   }
 
   return groups

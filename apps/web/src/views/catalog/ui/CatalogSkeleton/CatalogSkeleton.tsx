@@ -22,14 +22,14 @@ export const CatalogSkeleton = () => (
       variant='stories'
       headAction={
         <NextLink href='/top' className={pageStyles.topLink}>
-          <T>Рейтинг ›</T>
+          <T>Rating ›</T>
         </NextLink>
       }
     />
     {/* «Часто ищут» - wide screens only, like the real row. */}
     <div className={chipStyles.row} aria-hidden='true'>
       <span className={chipStyles.label}>
-        <T>Часто ищут</T>
+        <T>Popular searches</T>
       </span>
       {[12, 9, 14, 10, 11].map((chars) => (
         <Block key={chars} className={styles.chip} style={{ '--chars': chars } as CSSProperties} />

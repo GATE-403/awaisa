@@ -93,10 +93,10 @@ export const CatalogResults = ({
     // While more pages wait, the count says «24+» rather than a total it does not know yet.
     {
       value: 'services' as const,
-      label: t('Услуги'),
+      label: t('Services'),
       count: feed.hasMore ? `${feed.offers.length}+` : feed.offers.length,
     },
-    { value: 'places' as const, label: t('Места'), count: businesses.length },
+    { value: 'places' as const, label: t('Places'), count: businesses.length },
   ]
 
   return (
@@ -110,19 +110,21 @@ export const CatalogResults = ({
           </h2>
           {searchedFor && (
             // Like a big search engine: say what was searched instead, without making a fuss.
-            <p className={styles.searchedFor}>{t('Вы искали «{query}»', { query: searchedFor })}</p>
+            <p className={styles.searchedFor}>
+              {t('You searched for «{query}»', { query: searchedFor })}
+            </p>
           )}
         </div>
         {canReset && (
           <NextLink href='/' className={styles.reset}>
-            {t('Сбросить')}
+            {t('Reset')}
           </NextLink>
         )}
       </div>
       <div className={styles.toolbar}>
         {/* Two big text tabs, like «Shop by» on apple.com: first where, then what. */}
         <TextTabs
-          label={t('Что показать')}
+          label={t('What to show')}
           size='lg'
           items={views.map((item) => ({
             label: item.label,
@@ -134,7 +136,7 @@ export const CatalogResults = ({
         {view === 'services' && offers.length > 1 && (
           <Select
             variant='plain'
-            aria-label={t('Сортировка')}
+            aria-label={t('Sort')}
             items={FEED_SORTS.map((item) => ({ ...item, label: t(item.label) }))}
             value={sort}
             onValueChange={(value) => value && setSort(value as FeedSort)}
@@ -147,12 +149,12 @@ export const CatalogResults = ({
         (businesses.length === 0 ? (
           <EmptyState
             variant='inline'
-            text={t('Мест не нашли - попробуйте другую категорию или услугу.')}
+            text={t('No places found. Try another category or service.')}
           />
         ) : (
           <ul
             className={styles.places}
-            aria-label={t.count(businesses.length, ['место', 'места', 'мест'])}
+            aria-label={t.count(businesses.length, ['place', 'places'])}
           >
             {shownPlaces.map((business) => (
               <li key={business.slug}>
@@ -167,7 +169,7 @@ export const CatalogResults = ({
 
       {view === 'services' &&
         (feed.offers.length === 0 ? (
-          <EmptyState variant='inline' text={t('Услуг не нашли - попробуйте другое слово.')} />
+          <EmptyState variant='inline' text={t('No services found. Try another word.')} />
         ) : (
           <OffersFeed
             offers={feed.offers}
@@ -183,7 +185,7 @@ export const CatalogResults = ({
           nothing was found, so the page does not end in an empty state. */}
       {view === 'services' && query && !feed.hasMore && feed.offers.length < FEW_RESULTS && (
         <ForYouShelf
-          title='Похожие услуги'
+          title='Similar services'
           likeServiceId={feed.offers[0]?.id}
           excludeServiceId={feed.offers.length === 1 ? feed.offers[0]?.id : undefined}
           isForEveryone

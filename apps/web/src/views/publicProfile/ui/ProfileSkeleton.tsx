@@ -42,7 +42,7 @@ export const ProfileSkeleton = () => (
       </header>
       <section className={styles.section}>
         <SectionCaption as='p' isInset={false}>
-          <T>Достижения</T>
+          <T>Achievements</T>
         </SectionCaption>
         <AchievementsPlaceholder />
       </section>

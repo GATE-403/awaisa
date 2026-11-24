@@ -87,47 +87,45 @@ export const ShareWindowsSheet = ({
     .map(({ from, to, names }) => `${formatClock(from)}–${formatClock(to)} - ${names.join(', ')}`)
 
   const day =
-    nowMinutes !== null
-      ? t('сегодня, {date}', { date: dayLabel.split(', ').pop() ?? '' })
-      : dayLabel
+    nowMinutes !== null ? t('today, {date}', { date: dayLabel.split(', ').pop() ?? '' }) : dayLabel
   const query = `${service ? `service=${service.id}&` : ''}date=${schedule.date}`
   const path = `/${slug}/book?${query}`
   const link = typeof window === 'undefined' ? path : `${window.location.origin}${path}`
   const heading = service
-    ? t('Свободное время на «{service}» · {day}', { service: service.name, day })
-    : t('Свободное время · {day}', { day })
+    ? t('Free time for «{service}» · {day}', { service: service.name, day })
+    : t('Free time · {day}', { day })
   const body = [heading, ...lines].join('\n')
   // Shown without the query: «awaisa.kg/kings-barbershop/book».
   const shortLink =
     typeof window === 'undefined' ? `${slug}/book` : `${window.location.host}/${slug}/book`
-  const text = `${body}\n\n${t('Запись онлайн: {link}', { link })}`
+  const text = `${body}\n\n${t('Book online: {link}', { link })}`
 
   const handleCopy = async () => {
     const isCopied = await copyText(text)
     if (isCopied)
-      toast.show({ title: t('Скопировано - вставьте в чат или сторис'), type: 'success' })
-    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
+      toast.show({ title: t('Copied: paste it into a chat or a story'), type: 'success' })
+    else toast.show({ title: t('Could not copy'), type: 'error' })
   }
 
   return (
     <Sheet
-      title={t('Свободные окна')}
+      title={t('Free slots')}
       onClose={onClose}
       cancelLabel={null}
-      action={{ label: t('Готово'), onClick: onClose }}
+      action={{ label: t('Done'), onClick: onClose }}
     >
       {/* One group: the service, the message as the client will read it, the link - then one
           wide action (copy) with the messengers as thin glyphs beside it. */}
       <div className={sheet.group}>
-        <section className={sheet.list} aria-label={t('Сообщение для клиентов')}>
+        <section className={sheet.list} aria-label={t('Message for clients')}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Услуга')}</span>
+            <span className={sheet.rowLabel}>{t('Service')}</span>
             <Select
-              aria-label={t('Услуга')}
+              aria-label={t('Service')}
               variant='plain'
               value={serviceId}
               items={[
-                { value: ANY_SERVICE, label: t('Любая') },
+                { value: ANY_SERVICE, label: t('Any') },
                 ...services.map((item) => ({ value: item.id, label: item.name })),
               ]}
               onValueChange={(value) => value && setServiceId(value)}
@@ -137,7 +135,7 @@ export const ShareWindowsSheet = ({
             <>
               <p className={styles.message}>{body}</p>
               <a className={sheet.row} href={link} target='_blank' rel='noreferrer'>
-                <span className={sheet.rowLabel}>{t('Ссылка')}</span>
+                <span className={sheet.rowLabel}>{t('Link')}</span>
                 <span className={styles.link}>
                   <span className={styles.linkText}>{shortLink}</span>
                   <ArrowUpRight aria-hidden />
@@ -150,13 +148,13 @@ export const ShareWindowsSheet = ({
           <EmptyState
             variant='inline'
             text={
-              service
-                ? t('На этот день окна под эту услугу нет.')
-                : t('На этот день свободного времени нет.')
+              service ? t('No slot for this service on this day.') : t('No free time on this day.')
             }
           />
         ) : (
-          <p className={sheet.groupFooter}>{t('Клиент увидит этот текст и ссылку на запись.')}</p>
+          <p className={sheet.groupFooter}>
+            {t('The client sees this text and the booking link.')}
+          </p>
         )}
       </div>
 
@@ -164,9 +162,9 @@ export const ShareWindowsSheet = ({
         <div className={styles.send}>
           <Button className={styles.copy} onClick={() => void handleCopy()}>
             <Copy aria-hidden />
-            {t('Скопировать')}
+            {t('Copy')}
           </Button>
-          <GlyphGroup label={t('Отправить в мессенджер')}>
+          <GlyphGroup label={t('Send to a messenger')}>
             <a
               href={`https://wa.me/?text=${encodeURIComponent(text)}`}
               target='_blank'

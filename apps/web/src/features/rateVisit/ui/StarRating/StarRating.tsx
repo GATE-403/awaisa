@@ -10,7 +10,7 @@ interface StarRatingProps {
   onChange: (value: number) => void
 }
 
-const LABELS = ['Плохо', 'Так себе', 'Нормально', 'Хорошо', 'Отлично']
+const LABELS = ['Bad', 'So-so', 'OK', 'Good', 'Excellent']
 
 // Five big stars over native radios: arrows move the rating, the word under them says what it means.
 export const StarRating = ({ value, onChange }: StarRatingProps) => {
@@ -19,7 +19,7 @@ export const StarRating = ({ value, onChange }: StarRatingProps) => {
 
   return (
     <fieldset className={styles.rating}>
-      <legend className={styles.legend}>{t('Оценка')}</legend>
+      <legend className={styles.legend}>{t('Rating')}</legend>
       <span className={styles.stars}>
         {LABELS.map((label, index) => {
           const stars = index + 1
@@ -32,7 +32,7 @@ export const StarRating = ({ value, onChange }: StarRatingProps) => {
                 checked={value === stars}
                 onChange={() => onChange(stars)}
                 className={styles.input}
-                aria-label={t('{stars} из 5 - {label}', { stars, label: t(label) })}
+                aria-label={t('{stars} of 5: {label}', { stars, label: t(label) })}
               />
               <Star weight={stars <= value ? 'fill' : 'regular'} aria-hidden />
             </label>
@@ -40,7 +40,7 @@ export const StarRating = ({ value, onChange }: StarRatingProps) => {
         })}
       </span>
       <span className={styles.caption} aria-live='polite'>
-        {value > 0 ? t(LABELS[value - 1] ?? '') : t('Коснитесь звезды')}
+        {value > 0 ? t(LABELS[value - 1] ?? '') : t('Tap a star')}
       </span>
     </fieldset>
   )

@@ -45,7 +45,7 @@ const WRITTEN_BY_HAND: UpdateEntry[] = [
     audience: 'everyone',
     title: 'Новый вход',
     text: 'Вход по номеру или через Telegram на одном экране, а после входа вас встречает приветствие по имени.',
-    link: { href: '/login', label: 'Войти' },
+    link: { href: '/login', label: 'Sign in' },
   },
   {
     id: '2026-11-18-schedule-cards',
@@ -72,7 +72,7 @@ const WRITTEN_BY_HAND: UpdateEntry[] = [
     id: '2026-11-18-client-card',
     date: '2026-11-18',
     audience: 'business',
-    title: 'Карточка клиента',
+    title: 'Client card',
     text: 'Визиты, траты, обычная услуга и мастер, следующий визит и день рождения - коротко, без пустых строк. Оттуда же можно записать клиента снова.',
   },
   {
@@ -81,7 +81,7 @@ const WRITTEN_BY_HAND: UpdateEntry[] = [
     audience: 'clients',
     title: 'Сумма к оплате - крупно',
     text: 'После записи цена видна сразу: на талоне и на экране «Вы записаны». Скидка и внесённая предоплата уже учтены.',
-    link: { href: '/bookings', label: 'Мои записи' },
+    link: { href: '/bookings', label: 'My bookings' },
   },
   {
     id: '2026-11-18-tab-bar',
@@ -118,7 +118,7 @@ const WRITTEN_BY_HAND: UpdateEntry[] = [
     audience: 'everyone',
     title: 'Вход через Telegram',
     text: 'Войти можно без SMS: подтвердите номер в нашем боте. Это тот же аккаунт, что и по SMS.',
-    link: { href: '/login', label: 'Войти' },
+    link: { href: '/login', label: 'Sign in' },
   },
   {
     id: '2026-11-16-booking-stack',

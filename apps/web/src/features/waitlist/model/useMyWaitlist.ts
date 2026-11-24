@@ -76,7 +76,11 @@ export const useMyWaitlist = () => {
       setAccount((current) => current.filter((entry) => entry.id !== id))
       toast.show({ title: 'Больше не ждём', type: 'success' })
     } catch (error) {
-      toast.show({ title: 'Не получилось', description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: 'Something went wrong',
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 

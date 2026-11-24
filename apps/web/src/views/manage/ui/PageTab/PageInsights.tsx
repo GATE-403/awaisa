@@ -75,25 +75,25 @@ export const PageInsights = ({
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
       setPromotions(await getManagedPromotions(slug))
-    }, t('Акция сохранена'))
+    }, t('Promotion saved'))
 
   const remove = (promotion: Promotion) =>
     void run(async () => {
       await deletePromotion(slug, promotion.id)
       setPromotions(await getManagedPromotions(slug))
-    }, t('Акция удалена'))
+    }, t('Promotion deleted'))
 
   const facts = stats
     ? [
         stats.bookings > 0 && {
           key: 'bookings',
           count: stats.bookings,
-          words: wordsOf(t.count(stats.bookings, ['запись', 'записи', 'записей'])),
+          words: wordsOf(t.count(stats.bookings, ['booking', 'bookings'])),
         },
         stats.views > 0 && {
           key: 'views',
           count: stats.views,
-          words: wordsOf(t.count(stats.views, ['просмотр', 'просмотра', 'просмотров'])),
+          words: wordsOf(t.count(stats.views, ['view', 'views'])),
         },
       ].filter((fact) => fact !== false)
     : []
@@ -102,9 +102,7 @@ export const PageInsights = ({
     <>
       {facts.length > 0 && (
         <NextLink href={analyticsHref} scroll={false} className={styles.insights}>
-          <span>
-            {t('За {period}:', { period: t.count(stats?.days ?? 0, ['день', 'дня', 'дней']) })}
-          </span>
+          <span>{t('In {period}:', { period: t.count(stats?.days ?? 0, ['day', 'days']) })}</span>
           {facts.map((fact, index) => (
             <span key={fact.key}>
               {index > 0 && ' · '}
@@ -114,7 +112,7 @@ export const PageInsights = ({
           <CaretRight aria-hidden />
         </NextLink>
       )}
-      <ul className={styles.promotions} aria-label={t('Акции')}>
+      <ul className={styles.promotions} aria-label={t('Promotions')}>
         {running.map((promotion) => (
           <li key={promotion.id}>
             <button
@@ -132,10 +130,10 @@ export const PageInsights = ({
             className={styles.promotion}
             data-add
             onClick={() => setEditing('new')}
-            aria-label={t('Новая акция')}
+            aria-label={t('New promotion')}
           >
             <Plus aria-hidden />
-            {t('Акция')}
+            {t('Promotion')}
           </button>
         </li>
       </ul>

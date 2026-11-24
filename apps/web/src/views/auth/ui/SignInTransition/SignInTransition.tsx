@@ -42,11 +42,11 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
       <span className={styles.greeting}>
         {firstName ? (
           <>
-            <span className={styles.hello}>{t('Привет, {name}', { name: firstName })}</span>
-            <span className={styles.note}>{t('Вы вошли')}</span>
+            <span className={styles.hello}>{t('Hi, {name}', { name: firstName })}</span>
+            <span className={styles.note}>{t('You are signed in')}</span>
           </>
         ) : (
-          <span className={styles.hello}>{t('Вы вошли')}</span>
+          <span className={styles.hello}>{t('You are signed in')}</span>
         )}
       </span>
     </output>

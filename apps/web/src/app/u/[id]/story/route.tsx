@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
-import { pluralize } from '@/shared/lib/plural'
+import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { OgMascot } from '@/shared/lib/seo/OgMascot'
 import { loadProfilePhoto } from '@/shared/lib/seo/profilePhoto'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
@@ -122,15 +122,15 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
   const facts = [
     {
       value: profile.stats.visits,
-      label: pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']).replace(/^\d+ /, ''),
+      label: pluralize(profile.stats.visits, ['visit', 'visits']).replace(/^\d+ /, ''),
     },
     {
       value: profile.stats.places,
-      label: pluralize(profile.stats.places, ['место', 'места', 'мест']).replace(/^\d+ /, ''),
+      label: pluralize(profile.stats.places, ['place', 'places']).replace(/^\d+ /, ''),
     },
     {
       value: earned.length,
-      label: pluralize(earned.length, ['медаль', 'медали', 'медалей']).replace(/^\d+ /, ''),
+      label: pluralWord(earned.length, ['medal', 'medals']),
     },
   ]
   const fonts = await loadFonts()

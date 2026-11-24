@@ -5,7 +5,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { PayPage } from '@/views/pay'
 
 export const metadata: Metadata = {
-  title: 'Оплата',
+  title: 'Payment',
   robots: { index: false },
 }
 

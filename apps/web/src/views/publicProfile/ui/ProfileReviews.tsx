@@ -33,7 +33,7 @@ export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => 
       hiddenCount={hidden}
       isOpen={isAll}
       onToggle={() => setIsAll((value) => !value)}
-      label={t.count(hidden, ['отзыв', 'отзыва', 'отзывов']).replace(/^\d+ /, '')}
+      label={t.count(hidden, ['review', 'reviews']).replace(/^\d+ /, '')}
     >
       <ul className={styles.reviews}>
         {reviews.slice(0, isAll ? reviews.length : FIRST).map((review) => (

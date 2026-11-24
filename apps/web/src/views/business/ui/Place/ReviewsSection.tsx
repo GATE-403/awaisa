@@ -18,10 +18,10 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
     <section id='reviews' className={styles.section} aria-labelledby='place-reviews'>
       <div className={styles.sectionHead}>
         <h2 id='place-reviews' className={styles.sectionTitle}>
-          <T>Отзывы</T>
+          <T>Reviews</T>
         </h2>
         <span className={styles.sectionCount}>
-          <T vars={{ count: reviews.items.length }}>{'{count} последних'}</T>
+          <T vars={{ count: reviews.items.length }}>{'latest {count}'}</T>
         </span>
       </div>
       {/* The score first, like an app's ratings: the average large, how it splits by stars. */}
@@ -42,7 +42,7 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
             ))}
           </span>
           <span className={styles.reviewTotal}>
-            <Counted count={reviews.count} forms={['оценка', 'оценки', 'оценок']} />
+            <Counted count={reviews.count} forms={['rating', 'ratings']} />
           </span>
         </div>
         <ul className={styles.reviewBars} aria-label='Как распределились оценки'>

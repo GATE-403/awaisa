@@ -31,7 +31,7 @@ export const TabBar = () => {
     customer && hasCabinet(customer)
       ? NAV_ITEMS.map((item) =>
           item.href === '/business'
-            ? { ...item, href: getCabinetHref(customer), label: 'Кабинет' }
+            ? { ...item, href: getCabinetHref(customer), label: 'Dashboard' }
             : item,
         )
       : NAV_ITEMS
@@ -42,7 +42,7 @@ export const TabBar = () => {
 
   return (
     <nav
-      aria-label={t('Нижнее меню')}
+      aria-label={t('Bottom menu')}
       data-site-tabbar
       className={styles.tabBar}
       data-tucked={isTucked || undefined}
@@ -66,7 +66,7 @@ export const TabBar = () => {
           >
             {href === '/bookings' && customer ? (
               <PersonAvatar
-                name={customer.name || t('Профиль')}
+                name={customer.name || t('Profile')}
                 src={customer.avatarUrl ?? undefined}
                 size='sm'
                 className={styles.avatar}

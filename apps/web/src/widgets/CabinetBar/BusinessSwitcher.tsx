@@ -60,14 +60,14 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
     <Menu
       align='start'
       onOpenChange={load}
-      label={t('{name}: другие бизнесы и разделы', { name: title ?? t('Бизнес') })}
+      label={t('{name}: other businesses and sections', { name: title ?? t('Business') })}
       className={styles.switcher}
       trigger={
         <>
           {title && <BusinessTile name={title} logoUrl={logoUrl} size='sm' />}
           <span className={styles.businessName}>
             {title}
-            {!isPublished && <span className={styles.hidden}> · {t('скрыта')}</span>}
+            {!isPublished && <span className={styles.hidden}> · {t('hidden')}</span>}
           </span>
           <CaretDown className={styles.switcherCaret} aria-hidden />
         </>
@@ -92,7 +92,7 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
       <MenuSeparator />
       {businesses.length > 1 && (
         <MenuItem icon={<SquaresFour aria-hidden />} onClick={() => router.push('/manage')}>
-          {t('Все бизнесы')}
+          {t('All businesses')}
         </MenuItem>
       )}
       <MenuSeparator />
@@ -103,21 +103,21 @@ export const BusinessSwitcher = ({ slug, title, logoUrl, isPublished }: Business
             router.push(masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master')
           }
         >
-          {t('Мой день')}
+          {t('My day')}
         </MenuItem>
       )}
       {isAdmin && (
         <MenuItem icon={<Funnel aria-hidden />} onClick={() => router.push('/insights')}>
-          {t('Воронки')}
+          {t('Funnels')}
         </MenuItem>
       )}
       {isAdmin && (
         <MenuItem icon={<Flag aria-hidden />} onClick={() => router.push('/moderation')}>
-          {t('Модерация')}
+          {t('Moderation')}
         </MenuItem>
       )}
       <MenuItem icon={<Plus aria-hidden />} onClick={() => router.push('/business/new')}>
-        {t('Новая страница')}
+        {t('New page')}
       </MenuItem>
     </Menu>
   )

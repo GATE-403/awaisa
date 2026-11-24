@@ -62,28 +62,28 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
   const items = [
     business.photos.length > 0 && {
       value: 'works' as const,
-      label: t('Работы'),
+      label: t('Work'),
       count: business.photos.length,
       panelId: PANELS.works,
       panel: works,
     },
     catalog.services.length > 0 && {
       value: 'services' as const,
-      label: t('Услуги'),
+      label: t('Services'),
       count: catalog.services.length,
       panelId: PANELS.services,
       panel: services,
     },
     catalog.specialists.length > 0 && {
       value: 'masters' as const,
-      label: t('Мастера'),
+      label: t('Specialists'),
       count: catalog.specialists.length,
       panelId: PANELS.masters,
       panel: masters,
     },
     {
       value: 'hours' as const,
-      label: t('Время'),
+      label: t('Time'),
       panelId: PANELS.hours,
       panel: (
         <WeekHours
@@ -100,7 +100,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     works: (
       <ProfileTabAction
         href={`/feed?business=${business.slug}`}
-        label={t('Смотреть с ценами')}
+        label={t('See with prices')}
         icon={<FanCardsIcon aria-hidden />}
         isHiddenOnPhone
       />
@@ -108,7 +108,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     services: (
       <ProfileTabAction
         href={`/${business.slug}/services`}
-        label={t('Всё меню')}
+        label={t('Full menu')}
         icon={<ListBullets aria-hidden />}
         isHiddenOnPhone
       />
@@ -116,7 +116,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
     masters: (
       <ProfileTabAction
         href={ratingHref}
-        label={t('Рейтинг')}
+        label={t('Rating')}
         icon={<Trophy aria-hidden />}
         isHiddenOnPhone
       />
@@ -126,7 +126,7 @@ export const PlaceTabs = ({ business, catalog, services, masters, works }: Place
 
   return (
     <ProfileTabs
-      label={t('Разделы места')}
+      label={t('Place sections')}
       items={items}
       value={shown}
       onChange={setSection}

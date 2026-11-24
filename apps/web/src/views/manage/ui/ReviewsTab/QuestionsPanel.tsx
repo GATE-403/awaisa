@@ -23,11 +23,6 @@ interface QuestionsPanelProps {
 }
 
 const ANSWER_FORM = 'question-answer'
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: BUSINESS_TIME_ZONE,
-})
 
 // Questions from the business page, open ones first; an answer puts the question on the page.
 export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProps) => {
@@ -40,10 +35,8 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
   if (questions.length === 0) {
     return (
       <EmptyState
-        title={t('Вопросов пока нет')}
-        text={t(
-          'Клиенты спрашивают на странице места; ответ появится там же, и придёт в Telegram.',
-        )}
+        title={t('No questions yet')}
+        text={t('Clients ask on the place page; the answer appears there and comes to Telegram.')}
       />
     )
   }
@@ -61,13 +54,13 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       onChange(questions.map((item) => (item.id === saved.id ? saved : item)))
       void refreshBusiness(slug)
       toast.show({
-        title: saved.answer ? t('Ответ опубликован') : t('Ответ убран'),
+        title: saved.answer ? t('Reply published') : t('Answer removed'),
         type: 'success',
       })
       setEditing(null)
     } catch (answerError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(answerError),
         type: 'error',
       })
@@ -80,11 +73,11 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       await removeQuestion(slug, editing.id)
       onChange(questions.filter((item) => item.id !== editing.id))
       void refreshBusiness(slug)
-      toast.show({ title: t('Вопрос удалён') })
+      toast.show({ title: t('Question deleted') })
       setEditing(null)
     } catch (removeError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(removeError),
         type: 'error',
       })
@@ -98,11 +91,10 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
           <li key={question.id} className={styles.questionItem}>
             <p className={styles.questionText}>{question.text}</p>
             <p className={styles.meta}>
-              {question.authorName} ·{' '}
-              {t.language === 'ru'
-                ? dateFormatter.format(new Date(question.createdAt))
-                : formatMomentDay(question.createdAt, t)}
-              {!question.answer && <span className={styles.openMark}> · {t('ждёт ответа')}</span>}
+              {question.authorName} · {formatMomentDay(question.createdAt, t)}
+              {!question.answer && (
+                <span className={styles.openMark}> · {t('awaiting an answer')}</span>
+              )}
             </p>
             {question.answer && <p className={styles.answerText}>{question.answer}</p>}
             <button
@@ -113,10 +105,10 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
               {question.answer ? (
                 <>
                   <PencilSimple aria-hidden />
-                  {t('Изменить')}
+                  {t('Change')}
                 </>
               ) : (
-                t('Ответить')
+                t('Answer')
               )}
             </button>
           </li>
@@ -124,16 +116,16 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
       </ul>
       {editing && (
         <Sheet
-          title={t('Ответ на вопрос')}
+          title={t('Answer to the question')}
           onClose={() => setEditing(null)}
-          action={{ label: t('Готово'), form: ANSWER_FORM }}
+          action={{ label: t('Done'), form: ANSWER_FORM }}
         >
           <form id={ANSWER_FORM} className={styles.form} onSubmit={handleAnswer}>
             <p className={styles.quote}>
               {editing.authorName}: «{editing.text}»
             </p>
             <textarea
-              aria-label={t('Ответ')}
+              aria-label={t('Reply')}
               className={styles.textarea}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -141,10 +133,12 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
               rows={5}
             />
             <p className={styles.hint}>
-              {t('Вопрос с ответом увидят все на странице места. Пустой ответ снимает его.')}
+              {t(
+                'Everyone sees an answered question on the place page. An empty answer takes it down.',
+              )}
             </p>
           </form>
-          <HoldButton onConfirm={handleRemove}>{t('Удалить вопрос')}</HoldButton>
+          <HoldButton onConfirm={handleRemove}>{t('Delete question')}</HoldButton>
         </Sheet>
       )}
     </>

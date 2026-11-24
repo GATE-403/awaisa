@@ -4,7 +4,7 @@ import type { Translate } from '@/shared/i18n'
 import { pluralize } from '@/shared/lib/plural'
 import { TARGET_LABELS } from '../config/labels'
 
-const REPORTS: [string, string, string] = ['жалоба', 'жалобы', 'жалоб']
+const REPORTS: [string, string] = ['report', 'reports']
 
 // Without a translator (tests, Russian) the words stay as they are.
 const word = (text: string, t?: Translate) => (t ? t(text) : text)

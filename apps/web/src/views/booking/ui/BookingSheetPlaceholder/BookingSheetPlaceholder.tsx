@@ -45,7 +45,7 @@ export const BookingSheetPlaceholder = () => {
           <button
             type='button'
             className={barStyles.close}
-            aria-label={t('Закрыть запись')}
+            aria-label={t('Close booking')}
             onClick={() => router.back()}
           >
             <X aria-hidden />
@@ -53,7 +53,7 @@ export const BookingSheetPlaceholder = () => {
           <span className={barStyles.title}>
             <Block className={styles.tile} />
             <span className={barStyles.text}>
-              <span className={barStyles.heading}>{t('Запись')}</span>
+              <span className={barStyles.heading}>{t('Booking')}</span>
             </span>
           </span>
           <span className={barStyles.spacer} aria-hidden />

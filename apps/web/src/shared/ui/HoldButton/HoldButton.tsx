@@ -126,10 +126,10 @@ export const HoldButton = ({
       <span className={styles.fill} aria-hidden />
       <span className={styles.label}>
         {icon}
-        {isHintShown ? t('Удерживайте') : children}
+        {isHintShown ? t('Hold') : children}
       </span>
       <span id={hintId} className={styles.srOnly}>
-        {t('Удерживайте, чтобы подтвердить')}
+        {t('Hold to confirm')}
       </span>
     </button>
   )

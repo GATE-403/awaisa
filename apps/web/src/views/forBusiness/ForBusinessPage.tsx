@@ -18,24 +18,24 @@ const BLOCKS = [
     id: 'booking',
     icon: CalendarCheck,
     tint: 'var(--system-blue)',
-    title: 'Онлайн-запись',
-    text: 'Только свободные окна с учётом графика и длительности. Двойная запись невозможна.',
+    title: 'Online booking',
+    text: 'Only free slots that respect schedules and durations. Double bookings can’t happen.',
     visual: <SlotsVisual />,
   },
   {
     id: 'reminders',
     icon: Bell,
     tint: 'var(--system-orange)',
-    title: 'Напоминания',
-    text: 'Подтверждение сразу и напоминание за два часа - меньше пустых кресел.',
+    title: 'Reminders',
+    text: 'Instant confirmation and a reminder two hours ahead: fewer empty chairs.',
     visual: <ReminderVisual />,
   },
   {
     id: 'schedule',
     icon: Columns,
     tint: 'var(--system-green)',
-    title: 'Расписание',
-    text: 'Колонка на мастера. Перенос перетаскиванием, запись с улицы - нажатием на время.',
+    title: 'Schedule',
+    text: 'A column per specialist. Drag to reschedule, tap a time to book a walk-in.',
     visual: <DragVisual />,
   },
 ]
@@ -47,11 +47,11 @@ export const ForBusinessPage = () => (
     <header className={styles.hero}>
       <div className={styles.heroCopy}>
         <h1 className={styles.title}>
-          <T>Онлайн-запись, которая работает сама</T>
+          <T>Online booking that runs itself</T>
         </h1>
         <div className={styles.actions}>
           <ButtonLink size='lg' className={styles.pill} render={<NextLink href='/business/new' />}>
-            <T>Создать страницу</T>
+            <T>Create a page</T>
             <ArrowRight aria-hidden />
           </ButtonLink>
           <ButtonLink
@@ -60,7 +60,7 @@ export const ForBusinessPage = () => (
             className={styles.pill}
             render={<NextLink href='/manage' />}
           >
-            <T>Войти в кабинет</T>
+            <T>Sign in to the dashboard</T>
           </ButtonLink>
         </div>
       </div>
@@ -70,15 +70,15 @@ export const ForBusinessPage = () => (
       <div className={styles.heroAside}>
         <NextLink href='/map' className={styles.news}>
           <span className={styles.newsBadge}>
-            <T>Новое</T>
+            <T>New</T>
           </span>
-          <T>Филиалы и карта</T>
+          <T>Branches and map</T>
           <ArrowRight aria-hidden />
         </NextLink>
         <p className={styles.lead}>
           <T>
             {
-              'Страница с услугами и ценами, расписание мастеров, напоминания клиентам и талоны в Wallet. Бесплатно, без абонплаты и комиссии.'
+              'A page with services and prices, specialists’ schedules, client reminders and Wallet passes. Free, with no subscription fee or commission.'
             }
           </T>
         </p>
@@ -89,9 +89,9 @@ export const ForBusinessPage = () => (
 
     <section className={styles.panel} aria-labelledby='blocks-title'>
       <h2 id='blocks-title' className={styles.panelTitle}>
-        <T>Всё для записи</T>
+        <T>Everything for bookings</T>
         <span className={styles.titleMuted}>
-          <T>{' - из коробки'}</T>
+          <T>{', out of the box'}</T>
         </span>
       </h2>
       <ProductShowcase />
@@ -115,7 +115,7 @@ export const ForBusinessPage = () => (
       </div>
     </section>
 
-    <LabelledSection className={styles.stats} label='В цифрах'>
+    <LabelledSection className={styles.stats} label='In numbers'>
       {STATS.map((stat) => (
         <div key={stat.value} className={styles.stat}>
           <p className={styles.statValue}>
@@ -130,9 +130,9 @@ export const ForBusinessPage = () => (
 
     <section className={styles.steps} aria-labelledby='steps-title'>
       <h2 id='steps-title' className={styles.sectionTitle}>
-        <T>Три шага</T>
+        <T>Three steps</T>
         <span className={styles.titleMuted}>
-          <T>{' до первой записи'}</T>
+          <T>{' to the first booking'}</T>
         </span>
       </h2>
       <ol className={styles.stepList}>
@@ -154,9 +154,9 @@ export const ForBusinessPage = () => (
 
     <section className={styles.faq} aria-labelledby='faq-title'>
       <h2 id='faq-title' className={styles.sectionTitle}>
-        <T>Вопросы</T>
+        <T>Questions</T>
         <span className={styles.titleMuted}>
-          <T>{' и ответы'}</T>
+          <T>{' and answers'}</T>
         </span>
       </h2>
       <div className={styles.faqList}>
@@ -174,9 +174,9 @@ export const ForBusinessPage = () => (
       </div>
     </section>
 
-    <LabelledSection className={styles.closing} label='Начать'>
+    <LabelledSection className={styles.closing} label='Get started'>
       <h2 className={styles.closingTitle}>
-        <T>Первая запись - уже сегодня.</T>
+        <T>Your first booking, today.</T>
       </h2>
       <ButtonLink
         variant='contrast'
@@ -184,7 +184,7 @@ export const ForBusinessPage = () => (
         className={styles.pill}
         render={<NextLink href='/business/new' />}
       >
-        <T>Начать бесплатно</T>
+        <T>Start for free</T>
       </ButtonLink>
     </LabelledSection>
   </main>

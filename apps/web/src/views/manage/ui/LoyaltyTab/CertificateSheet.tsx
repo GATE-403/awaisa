@@ -46,59 +46,59 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
 
   return (
     <Sheet
-      title={t('Сертификат')}
+      title={t('Certificate')}
       onClose={onClose}
-      action={{ label: t('Выпустить'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Issue'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Сертификат')}>
+        <section className={sheet.group} aria-label={t('Certificate')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Сумма')}</span>
+              <span className={sheet.rowLabel}>{t('Amount')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Сумма сертификата, сом')}
+                  aria-label={t('Certificate amount, som')}
                   inputMode='numeric'
                   placeholder='3 000'
                   value={maskAmountInput(amount)}
                   onValueChange={(value) => setAmount(value.replace(/\D/g, ''))}
                 />
-                <span className={sheet.suffix}>{t('сом')}</span>
+                <span className={sheet.suffix}>{t('som')}</span>
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Кому')}</span>
+              <span className={sheet.rowLabel}>{t('To')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Кому')}
-                  placeholder={t('Имя')}
+                  aria-label={t('To')}
+                  placeholder={t('Name')}
                   value={recipient}
                   onValueChange={setRecipient}
                 />
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Телефон')}</span>
+              <span className={sheet.rowLabel}>{t('Phone')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  aria-label={t('Телефон получателя')}
-                  placeholder={t('необязательно')}
+                  aria-label={t('Recipient’s phone')}
+                  placeholder={t('optional')}
                   value={phone}
                   onValueChange={(value) => setPhone(maskPhoneInput(value))}
                 />
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Действует до')}</span>
+              <span className={sheet.rowLabel}>{t('Valid until')}</span>
               <span className={sheet.rowControl}>
                 <DateField
-                  label={t('Действует до')}
-                  placeholder={t('Без срока')}
+                  label={t('Valid until')}
+                  placeholder={t('No end date')}
                   value={expiresOn}
                   onChange={setExpiresOn}
                   isClearable
@@ -107,7 +107,9 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
             </div>
           </div>
           <p className={sheet.groupFooter}>
-            {t('Код из 8 символов покажем сразу. С номером сертификат виден в карточке клиента.')}
+            {t(
+              'We show the 8-character code right away. With a number, the certificate shows on the client’s card.',
+            )}
           </p>
         </section>
       </form>

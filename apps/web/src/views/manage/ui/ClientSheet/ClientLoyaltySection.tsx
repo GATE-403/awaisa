@@ -39,9 +39,13 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
   const sell = async (planId: string) => {
     try {
       setLoyalty(await sellSubscription(slug, phone, planId))
-      toast.show({ title: t('Абонемент оформлен'), type: 'success' })
+      toast.show({ title: t('Subscription sold'), type: 'success' })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
@@ -55,12 +59,12 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
   if (!hasAnything) return null
 
   return (
-    <section className={sheet.group} aria-label={t('Лояльность')}>
-      <SectionCaption>{t('Лояльность')}</SectionCaption>
+    <section className={sheet.group} aria-label={t('Loyalty')}>
+      <SectionCaption>{t('Loyalty')}</SectionCaption>
       <div className={sheet.list}>
         {(loyalty.bonusPercent !== null || loyalty.bonusBalance > 0) && (
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Бонусы')}</span>
+            <span className={sheet.rowLabel}>{t('Bonuses')}</span>
             <span>{formatPrice(loyalty.bonusBalance)}</span>
           </div>
         )}
@@ -68,8 +72,8 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
           <div key={subscription.id} className={sheet.row}>
             <span className={sheet.rowLabel}>{subscription.title}</span>
             <span>
-              {t('{visits} · до {date}', {
-                visits: t.count(subscription.visitsLeft, ['визит', 'визита', 'визитов']),
+              {t('{visits} · until {date}', {
+                visits: t.count(subscription.visitsLeft, ['visit', 'visits']),
                 date: formatDate(subscription.expiresOn),
               })}
             </span>
@@ -78,19 +82,19 @@ export const ClientLoyaltySection = ({ slug, phone }: ClientLoyaltySectionProps)
         {loyalty.certificates.map((certificate) => (
           <div key={certificate.id} className={sheet.row}>
             <span className={sheet.rowLabel}>
-              {t('Сертификат {code}', { code: certificate.code })}
+              {t('Certificate {code}', { code: certificate.code })}
             </span>
             <span>{formatPrice(certificate.balance)}</span>
           </div>
         ))}
         {plans.length > 0 && (
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Продать абонемент')}</span>
+            <span className={sheet.rowLabel}>{t('Sell a subscription')}</span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'
-                aria-label={t('Продать абонемент')}
-                placeholder={t('Выбрать')}
+                aria-label={t('Sell a subscription')}
+                placeholder={t('Choose')}
                 items={plans.map((plan) => ({
                   value: plan.id,
                   label: `${plan.title} · ${formatPrice(plan.price)}`,

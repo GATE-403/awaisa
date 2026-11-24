@@ -83,7 +83,7 @@ export const BookingInspector = ({
       {isCancelled && (
         <p className={styles.status}>
           <Prohibit aria-hidden />
-          {t('Запись отменена')}
+          {t('Booking cancelled')}
         </p>
       )}
       {/* Who and what in two lines beside the face; the price on the right. */}
@@ -97,7 +97,7 @@ export const BookingInspector = ({
           >
             {booking.customerName}
             <CaretRight aria-hidden />
-            <span className={styles.srOnly}>: {t('карточка клиента')}</span>
+            <span className={styles.srOnly}>: {t('client card')}</span>
           </button>
           <span className={styles.what}>
             {booking.serviceName} · {master}
@@ -119,9 +119,9 @@ export const BookingInspector = ({
         {day}, {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
         {t.duration(booking.durationMinutes)}
         {booking.discount && ` · ${booking.discount.title}`}
-        {booking.isBySubscription && ` · ${t('по абонементу')}`}
+        {booking.isBySubscription && ` · ${t('with a membership')}`}
         {booking.payment &&
-          ` · ${t('предоплата {amount}, {status}', {
+          ` · ${t('deposit {amount}, {status}', {
             amount: formatPrice(booking.payment.amount),
             status: t(PAYMENT_STATUS_TEXT[booking.payment.status]).toLowerCase(),
           })}`}
@@ -146,22 +146,22 @@ export const BookingInspector = ({
             onClick={() => onBookAgain(booking)}
           >
             <ArrowCounterClockwise aria-hidden />
-            {t('Записать снова')}
+            {t('Book again')}
           </Button>
         ) : (
           <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
             <Phone aria-hidden />
-            {t('Позвонить')}
+            {t('Call')}
           </a>
         )}
-        <GlyphGroup label={t('Связаться с клиентом')}>
+        <GlyphGroup label={t('Contact the client')}>
           <a
             className={styles.callGlyph}
             href={`tel:${booking.customerPhone}`}
             title={formatPhone(booking.customerPhone)}
           >
             <Phone aria-hidden />
-            <span className={styles.actionLabel}>{t('Позвонить')}</span>
+            <span className={styles.actionLabel}>{t('Call')}</span>
           </a>
           <a href={`https://wa.me/${digits}`} target='_blank' rel='noreferrer' title='WhatsApp'>
             <WhatsappLogo aria-hidden />
@@ -172,30 +172,30 @@ export const BookingInspector = ({
             <span className={styles.actionLabel}>SMS</span>
           </a>
           <Menu
-            label={t('Ещё действия')}
+            label={t('More actions')}
             trigger={
               <>
                 <DotsThree aria-hidden />
-                <span className={styles.actionLabel}>{t('Ещё')}</span>
+                <span className={styles.actionLabel}>{t('More')}</span>
               </>
             }
           >
             <MenuItem onClick={() => onOpenClient(booking.customerPhone)}>
-              {t('Карточка клиента')}
+              {t('Client card')}
             </MenuItem>
             <MenuItem onClick={handleCopyPhone}>
-              {t('Скопировать {phone}', { phone: formatPhone(booking.customerPhone) })}
+              {t('Copy {phone}', { phone: formatPhone(booking.customerPhone) })}
             </MenuItem>
             {booking.outcome === 'arrived' && (
               <MenuItem onClick={() => visitPhoto.pick(booking.id)}>
-                {visitPhoto.uploadingId ? t('Загружаем фото…') : t('Фото работы')}
+                {visitPhoto.uploadingId ? t('Uploading the photo…') : t('Work photo')}
               </MenuItem>
             )}
             {!isCancelled && (
               <>
                 <MenuSeparator />
                 <MenuItem variant='danger' onClick={() => void handleCancel()}>
-                  {t('Отменить запись')}
+                  {t('Cancel booking')}
                 </MenuItem>
               </>
             )}

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { UpdatesPage } from '@/views/updates'
 
 export const metadata: Metadata = {
-  title: 'Что нового',
+  title: "What's new",
   description: 'Обновления Awaisa: что изменилось для клиентов и для бизнеса.',
 }
 

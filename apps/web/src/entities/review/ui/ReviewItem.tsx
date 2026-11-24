@@ -31,12 +31,7 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   month: 'long',
   timeZone: BUSINESS_TIME_ZONE,
 }
-// Browsers have no Kyrgyz month names (they fall back to Russian), so Kyrgyz keeps the Russian date.
-const dateFormatters = {
-  ru: new Intl.DateTimeFormat('ru-RU', DATE_OPTIONS),
-  ky: new Intl.DateTimeFormat('ru-RU', DATE_OPTIONS),
-  en: new Intl.DateTimeFormat('en-GB', DATE_OPTIONS),
-}
+const dateFormatter = new Intl.DateTimeFormat('en-GB', DATE_OPTIONS)
 
 // One review as a thread, the same on the business page and in the cabinet: the person's face,
 // name and date on one line, stars, the words; the owner's reply hangs under it on a line from
@@ -79,16 +74,14 @@ export const ReviewItem = ({
               <NextLink
                 href={authorHref}
                 className={styles.authorButton}
-                aria-label={t('{name}: профиль', { name: review.authorName })}
+                aria-label={t('{name}: profile', { name: review.authorName })}
               >
                 {review.authorName}
               </NextLink>
             ) : (
               <p className={styles.author}>{review.authorName}</p>
             )}
-            <span className={styles.date}>
-              {dateFormatters[t.language].format(new Date(review.createdAt))}
-            </span>
+            <span className={styles.date}>{dateFormatter.format(new Date(review.createdAt))}</span>
             {headAction && <span className={styles.headAction}>{headAction}</span>}
           </div>
           <Stars rating={review.rating} />
@@ -107,7 +100,7 @@ export const ReviewItem = ({
             <div className={styles.head}>
               <p className={styles.author}>
                 {businessName}
-                <span className={styles.badge}>{t('Ответ')}</span>
+                <span className={styles.badge}>{t('Reply')}</span>
               </p>
               {replyAction}
             </div>

@@ -21,5 +21,5 @@ export const BackToCabinet = () => {
 
   if (!from) return null
 
-  return <CabinetBar title='Что нового' back={{ href: from, label: 'Кабинет' }} />
+  return <CabinetBar title="What's new" back={{ href: from, label: 'Dashboard' }} />
 }

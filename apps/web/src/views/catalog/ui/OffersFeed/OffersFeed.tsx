@@ -27,9 +27,9 @@ interface OffersFeedProps {
 }
 
 const FEED_SORTS: { value: FeedSort; label: string }[] = [
-  { value: 'popular', label: 'Популярные' },
-  { value: 'soon', label: 'Ближе по времени' },
-  { value: 'price', label: 'Дешевле' },
+  { value: 'popular', label: 'Popular' },
+  { value: 'soon', label: 'Soonest' },
+  { value: 'price', label: 'Cheapest' },
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
@@ -120,7 +120,7 @@ export const OffersFeed = ({
           ))}
       </ul>
       {hasMore && <div ref={end} className={styles.sentinel} aria-hidden />}
-      {isLoading && <output className={styles.loadingNote}>{t('Загружаем ещё…')}</output>}
+      {isLoading && <output className={styles.loadingNote}>{t('Loading more…')}</output>}
     </div>
   )
 }

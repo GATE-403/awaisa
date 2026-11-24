@@ -18,7 +18,7 @@ export const ProfilePage = ({ profile }: ProfilePageProps) => (
       <Breadcrumbs
         className={styles.crumbs}
         items={[
-          { label: 'Каталог', href: '/' },
+          { label: 'Catalogue', href: '/' },
           { label: profile.name, href: `/u/${profile.handle ?? profile.id}` },
         ]}
       />

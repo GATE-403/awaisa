@@ -28,18 +28,18 @@ interface PromotionSheetProps {
 const FORM_ID = 'promotion-form'
 
 const KINDS: { value: PromotionKind; label: string }[] = [
-  { value: 'happy_hours', label: 'По часам' },
-  { value: 'first_visit', label: 'Новым' },
-  { value: 'promo_code', label: 'Промокод' },
+  { value: 'happy_hours', label: 'By hours' },
+  { value: 'first_visit', label: 'New clients' },
+  { value: 'promo_code', label: 'Promo code' },
 ]
 
 const DEFAULT_TITLE: Record<PromotionKind, string> = {
   happy_hours: 'Утренние часы',
-  first_visit: 'Первый визит',
-  promo_code: 'Промокод',
+  first_visit: 'First visit',
+  promo_code: 'Promo code',
 }
 
-const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 const TIMES = Array.from({ length: 49 }, (_, index) => index * 30).map((minutes) => ({
   value: minutes,
@@ -119,37 +119,37 @@ export const PromotionSheet = ({
 
   return (
     <Sheet
-      title={t(promotion ? 'Акция' : 'Новая акция')}
+      title={t(promotion ? 'Promotion' : 'New promotion')}
       onClose={onClose}
-      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <SegmentedControl
-          label={t('Тип акции')}
+          label={t('Promotion type')}
           value={kind}
           items={KINDS.map((item) => ({ ...item, label: t(item.label) }))}
           onChange={changeKind}
         />
 
-        <section className={sheet.group} aria-label={t('Скидка')}>
+        <section className={sheet.group} aria-label={t('Discount')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Название')}</span>
+              <span className={sheet.rowLabel}>{t('Name')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Название акции')}
+                  aria-label={t('Promotion name')}
                   value={title}
                   onValueChange={setTitle}
                 />
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Скидка')}</span>
+              <span className={sheet.rowLabel}>{t('Discount')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Скидка, %')}
+                  aria-label={t('Discount, %')}
                   inputMode='numeric'
                   value={percent}
                   onValueChange={(value) => setPercent(value.replace(/\D/g, '').slice(0, 2))}
@@ -159,11 +159,11 @@ export const PromotionSheet = ({
             </label>
             {kind === 'promo_code' && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Промокод')}</span>
+                <span className={sheet.rowLabel}>{t('Promo code')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={t('Промокод')}
+                    aria-label={t('Promo code')}
                     placeholder='OSEN20'
                     value={code}
                     onValueChange={(value) => setCode(value.toUpperCase().replace(/\s/g, ''))}
@@ -174,19 +174,23 @@ export const PromotionSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {kind === 'happy_hours' &&
-              t('Заполните тихие часы: скидка действует в выбранные дни и время начала визита.')}
+              t(
+                'Fill quiet hours: the discount applies on the chosen days by the visit’s start time.',
+              )}
             {kind === 'first_visit' &&
-              t('Для тех, кто записывается к вам впервые - по номеру телефона.')}
+              t('For people booking with you for the first time, by phone number.')}
             {kind === 'promo_code' &&
-              t('Клиент вводит код при записи. Раздайте его в Instagram или на визитке.')}
+              t(
+                'The client enters the code when booking. Share it on Instagram or a business card.',
+              )}
           </p>
         </section>
 
         {kind === 'happy_hours' && (
-          <section className={sheet.group} aria-label={t('Когда')}>
-            <SectionCaption>{t('Когда')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('When')}>
+            <SectionCaption>{t('When')}</SectionCaption>
             <fieldset className={styles.days}>
-              <legend className={styles.legend}>{t('Дни недели')}</legend>
+              <legend className={styles.legend}>{t('Days of the week')}</legend>
               {WEEKDAYS.map((day, index) => (
                 <button
                   key={day}
@@ -201,11 +205,11 @@ export const PromotionSheet = ({
             </fieldset>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('С')}</span>
+                <span className={sheet.rowLabel}>{t('From')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Начало')}
+                    aria-label={t('Start')}
                     items={TIMES}
                     value={fromMinutes}
                     onValueChange={(value) => value !== null && setFromMinutes(value)}
@@ -213,11 +217,11 @@ export const PromotionSheet = ({
                 </span>
               </div>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('До')}</span>
+                <span className={sheet.rowLabel}>{t('Until')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Конец')}
+                    aria-label={t('End')}
                     items={TIMES}
                     value={toMinutes}
                     onValueChange={(value) => value !== null && setToMinutes(value)}
@@ -228,11 +232,11 @@ export const PromotionSheet = ({
           </section>
         )}
 
-        <section className={sheet.group} aria-label={t('Услуги')}>
+        <section className={sheet.group} aria-label={t('Services')}>
           <div className={sheet.groupHeader}>
-            <SectionCaption isInset={false}>{t('Услуги')}</SectionCaption>
+            <SectionCaption isInset={false}>{t('Services')}</SectionCaption>
             <button type='button' className={sheet.groupLink} onClick={() => setServiceIds(null)}>
-              {t('Все')}
+              {t('All')}
             </button>
           </div>
           <div className={sheet.list}>
@@ -250,14 +254,14 @@ export const PromotionSheet = ({
           </div>
         </section>
 
-        <section className={sheet.group} aria-label={t('Срок')}>
+        <section className={sheet.group} aria-label={t('Term')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('До даты')}</span>
+              <span className={sheet.rowLabel}>{t('Until date')}</span>
               <span className={sheet.rowControl}>
                 <DateField
-                  label={t('Действует до')}
-                  placeholder={t('Без срока')}
+                  label={t('Valid until')}
+                  placeholder={t('No end date')}
                   value={endsOn}
                   onChange={setEndsOn}
                   isClearable
@@ -265,11 +269,11 @@ export const PromotionSheet = ({
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Включена')}</span>
+              <span className={sheet.rowLabel}>{t('On')}</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
           </div>
-          <p className={sheet.groupFooter}>{t('Без даты - пока не выключите.')}</p>
+          <p className={sheet.groupFooter}>{t('Without a date: until you turn it off.')}</p>
         </section>
 
         {onDelete && (
@@ -279,7 +283,7 @@ export const PromotionSheet = ({
               onClose()
             }}
           >
-            {t('Удалить акцию')}
+            {t('Delete promotion')}
           </HoldButton>
         )}
       </form>

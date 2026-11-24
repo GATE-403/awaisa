@@ -147,12 +147,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       setEditingId(null)
       void refreshBusiness(slug)
       toast.show({
-        title: saved.reply ? t('Ответ опубликован') : t('Ответ удалён'),
+        title: saved.reply ? t('Reply published') : t('Reply deleted'),
         type: 'success',
       })
     } catch (replyError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(replyError),
         type: 'error',
       })
@@ -175,10 +175,10 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       const saved = await setReviewResolved(slug, review.id, isResolved)
       updateItem(review.id, { resolvedAt: saved.resolvedAt })
       setSettledNow((current) => new Set(current).add(review.id))
-      if (isResolved) toast.show({ title: t('Отмечено: решено'), type: 'success' })
+      if (isResolved) toast.show({ title: t('Marked as resolved'), type: 'success' })
     } catch (resolveError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(resolveError),
         type: 'error',
       })
@@ -194,13 +194,13 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       toast.show({
         title:
           count > 0
-            ? t('Ответили на {reviews}', { reviews: t.count(count, [...REVIEW_WORDS]) })
-            : t('Отвечать некому'),
+            ? t('Replied to {reviews}', { reviews: t.count(count, [...REVIEW_WORDS]) })
+            : t('Nobody to reply to'),
         type: 'success',
       })
     } catch (sendError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(sendError),
         type: 'error',
       })
@@ -212,12 +212,12 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
     try {
       setReplySettings(await saveReviewReplySettings(slug, next))
       toast.show({
-        title: next.autoReply.isEnabled ? t('Автоответ включён') : t('Сохранено'),
+        title: next.autoReply.isEnabled ? t('Auto reply on') : t('Saved'),
         type: 'success',
       })
     } catch (saveError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(saveError),
         type: 'error',
       })
@@ -230,28 +230,28 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       {/* One line: the tabs on the left, the rating on the right; no hint line of its own. */}
       <div ref={toolbarRef} className={styles.toolbar} data-stuck={isStuck || undefined}>
         <SectionHeader
-          title={t('Отзывы')}
+          title={t('Reviews')}
           description={
             <TextTabs
-              label={t('Отзывы и вопросы')}
+              label={t('Reviews and questions')}
               items={[
                 {
-                  label: t('Без ответа'),
+                  label: t('Unanswered'),
                   count: data ? unanswered - answeredNow.size : undefined,
                   isActive: view === 'open',
                   onSelect: () => chooseView('open'),
                 },
                 {
-                  label: t('Все'),
+                  label: t('All'),
                   count: data?.count,
                   isActive: view === 'all',
                   onSelect: () => chooseView('all'),
                 },
                 {
-                  label: t('Вопросы'),
+                  label: t('Questions'),
                   count:
                     openQuestions > 0
-                      ? t('{count} без ответа', { count: openQuestions })
+                      ? t('{count} unanswered', { count: openQuestions })
                       : questions?.length,
                   isActive: view === 'questions',
                   onSelect: () => chooseView('questions'),
@@ -269,7 +269,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                 </p>
               )}
               {isOwner && replySettings && (
-                <GlyphGroup label={t('Отзывы')}>
+                <GlyphGroup label={t('Reviews')}>
                   {canReplyToQuiet && quiet && (
                     <GlyphButton
                       icon={
@@ -280,15 +280,15 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                           </span>
                         </>
                       }
-                      label={t('Ответить всем: {ratings} без текста', {
-                        ratings: t.count(quiet.fourAndUp, ['оценка', 'оценки', 'оценок']),
+                      label={t('Reply to all: {ratings} without text', {
+                        ratings: t.count(quiet.fourAndUp, ['rating', 'ratings']),
                       })}
                       onClick={() => setIsQuietOpen(true)}
                     />
                   )}
                   <GlyphButton
                     icon={<GearSix />}
-                    label={t('Ответы на отзывы')}
+                    label={t('Review replies')}
                     onClick={() => setIsSettingsOpen(true)}
                   />
                 </GlyphGroup>
@@ -304,14 +304,14 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
       {view !== 'questions' && !data && !error && <Skeleton className={styles.skeleton} />}
       {view !== 'questions' && data?.count === 0 && (
         <EmptyState
-          title={t('Отзывов пока нет')}
+          title={t('No reviews yet')}
           text={t(
-            'Они появятся после первых визитов: клиенты оценивают мастера по ссылке из SMS или в «Моих записях».',
+            'They appear after the first visits: clients rate the specialist by the SMS link or in «My bookings».',
           )}
         />
       )}
       {view !== 'questions' && data && data.count > 0 && shown.length === 0 && (
-        <EmptyState variant='inline' text={t('На все отзывы есть ответ')} />
+        <EmptyState variant='inline' text={t('Every review has a reply')} />
       )}
       {view !== 'questions' && shown.length > 0 && (
         <>
@@ -340,7 +340,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                             onClick={() => setContacting(review)}
                           >
                             <ChatCircle aria-hidden />
-                            {t('Написать клиенту')}
+                            {t('Message the client')}
                           </button>
                           <button
                             type='button'
@@ -352,7 +352,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                               weight={review.resolvedAt ? 'fill' : 'regular'}
                               aria-hidden
                             />
-                            {t('Решено')}
+                            {t('Resolved')}
                           </button>
                         </div>
                       )
@@ -361,7 +361,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                       review.reply && !isEditing ? (
                         <>
                           {review.isAutoReply && (
-                            <span className={styles.autoMark}>{t('Автоответ')}</span>
+                            <span className={styles.autoMark}>{t('Auto reply')}</span>
                           )}
                           <button
                             type='button'
@@ -369,14 +369,14 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
                             onClick={() => setEditingId(review.id)}
                           >
                             <PencilSimple aria-hidden />
-                            {t('Изменить')}
+                            {t('Change')}
                           </button>
                         </>
                       ) : (
                         <ReplyComposer
                           key={isEditing ? 'edit' : 'new'}
                           initial={isEditing ? (review.reply ?? '') : ''}
-                          placeholder={t('Ответить {name}…', { name: firstName })}
+                          placeholder={t('Reply to {name}…', { name: firstName })}
                           onSave={(text) => saveReply(review, text)}
                           isNextFocused={view === 'open' && !isEditing}
                           onCancel={isEditing ? () => setEditingId(null) : undefined}
@@ -396,7 +396,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
           </MoreFade>
           {hiddenCount === 0 && serverTotal > matching.length && (
             <p className={styles.more}>
-              {t('Показаны последние {shown} из {total}', {
+              {t('Showing the latest {shown} of {total}', {
                 shown: matching.length,
                 total: serverTotal,
               })}

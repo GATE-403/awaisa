@@ -224,7 +224,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 onEdit?.(card.id)
               }}
             >
-              {t('Изменить')}
+              {t('Change')}
             </button>
           </section>
         )
@@ -248,7 +248,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
           aria-expanded={false}
           onClick={() => setIsFanned(true)}
         >
-          <span className={styles.srOnly}>{t('Показать выбор')}</span>
+          <span className={styles.srOnly}>{t('Show your choices')}</span>
         </button>
       )}
       {(offer || (isOpen && (onStartOver || (isFanned && count > 1)))) && (
@@ -278,7 +278,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 onStartOver()
               }}
             >
-              {t('Начать заново')}
+              {t('Start over')}
             </button>
           )}
           {isFanned && count > 1 && (
@@ -291,7 +291,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 setShift(0)
               }}
             >
-              {t('Свернуть')}
+              {t('Hide')}
             </button>
           )}
         </div>

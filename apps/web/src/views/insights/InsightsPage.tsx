@@ -27,16 +27,16 @@ interface InsightsPageProps {
 }
 
 const PERIODS: { value: `${InsightsDays}`; label: string }[] = [
-  { value: '7', label: 'Неделя' },
-  { value: '30', label: 'Месяц' },
-  { value: '90', label: '3 месяца' },
+  { value: '7', label: 'Week' },
+  { value: '30', label: 'Month' },
+  { value: '90', label: '3 months' },
 ]
 
 const ANY = 'any'
 
-const DEVICES: [string, string, string] = ['устройство', 'устройства', 'устройств']
+const DEVICES: [string, string] = ['device', 'devices']
 
-const BOOKINGS: [string, string, string] = ['запись', 'записи', 'записей']
+const BOOKINGS: [string, string] = ['booking', 'bookings']
 
 const formatWeek = (week: string) =>
   new Date(`${week}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
@@ -79,19 +79,19 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
 
   return (
     <>
-      <CabinetBar title={t('Воронки')} />
+      <CabinetBar title={t('Funnels')} />
       <main className={styles.page}>
         <Container className={styles.content}>
           {/* Laid out like the cabinet's «Аналитика»: the hint and the period on one line (the
               period floats at the foot on phones), then everything right on the page, no cards
               («как в табе аналитике в бизнесе»). */}
           <header className={styles.head}>
-            <h1 className={styles.srOnly}>{t('Воронки')}</h1>
-            <p className={styles.hint}>{t('Где люди бросают и на каких устройствах')}</p>
+            <h1 className={styles.srOnly}>{t('Funnels')}</h1>
+            <p className={styles.hint}>{t('Where people drop out and on which devices')}</p>
             <FloatingToolbar className={styles.tools}>
               <SegmentedControl
                 size='sm'
-                label={t('Период')}
+                label={t('Period')}
                 value={`${insights.days}`}
                 items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
                 onChange={(value) => insights.setDays(Number(value) as InsightsDays)}
@@ -107,42 +107,42 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
             {strategy && (
               <section className={styles.group} aria-labelledby='insights-strategy'>
                 <SectionCaption as='h2' id='insights-strategy' isInset={false}>
-                  {t('Стратегия')}
+                  {t('Strategy')}
                 </SectionCaption>
                 <dl className={styles.stats}>
                   <div className={styles.stat}>
-                    <dt className={styles.statLabel}>{t('Ведут день в кабинете')}</dt>
+                    <dt className={styles.statLabel}>{t('Run their day in the cabinet')}</dt>
                     <dd className={styles.statValue}>{thisWeek.toLocaleString('ru-RU')}</dd>
                     <dd className={styles.statMeta}>
                       {weeks.length > 1
-                        ? t('По неделям: {counts}, с {date}', {
+                        ? t('By week: {counts}, since {date}', {
                             counts: weeks.map((week) => week.count).join(' · '),
                             date: formatWeek(weeks[0].week),
                           })
-                        : t('Салоны, отметившие итог визита за неделю')}
+                        : t('Places that marked a visit’s outcome this week')}
                     </dd>
                   </div>
                   <div className={styles.stat}>
-                    <dt className={styles.statLabel}>{t('Начаты в «Образах»')}</dt>
+                    <dt className={styles.statLabel}>{t('Started in «Looks»')}</dt>
                     <dd className={styles.statValue}>{fromFeed.toLocaleString('ru-RU')}</dd>
                     <dd className={styles.statMeta}>
                       {online
-                        ? `${formatShare(shareOf(fromFeed))} · ${t('Из {bookings} онлайн', {
+                        ? `${formatShare(shareOf(fromFeed))} · ${t('Of {bookings} online', {
                             bookings: t.count(online, BOOKINGS),
                           })}`
-                        : t('Онлайн-записей пока нет')}
+                        : t('No online bookings yet')}
                     </dd>
                   </div>
                   <div className={styles.stat}>
-                    <dt className={styles.statLabel}>{t('Записались снова')}</dt>
+                    <dt className={styles.statLabel}>{t('Booked again')}</dt>
                     <dd className={styles.statValue}>{formatShare(strategy.repeat.share)}</dd>
                     <dd className={styles.statMeta}>
                       {strategy.repeat.clients
-                        ? t('{returned} из {clients} новых клиентов, за 60 дней', {
+                        ? t('{returned} of {clients} new clients, within 60 days', {
                             returned: strategy.repeat.returned,
                             clients: strategy.repeat.clients,
                           })
-                        : t('Новым клиентам ещё не прошло 60 дней')}
+                        : t('60 days have not passed for new clients yet')}
                     </dd>
                   </div>
                 </dl>
@@ -153,7 +153,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                 end), the device cuts, then its steps with their share on the row's hairline. */}
             <section className={styles.funnel} aria-labelledby='insights-steps'>
               <TextTabs
-                label={t('Сценарий')}
+                label={t('Scenario')}
                 items={(Object.keys(FLOW_LABELS) as (keyof typeof FLOW_LABELS)[]).map((flow) => ({
                   label: t(FLOW_LABELS[flow]),
                   isActive: insights.flow === flow,
@@ -164,14 +164,14 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
               <div className={styles.hero}>
                 <div className={styles.heroHead}>
                   <span className={styles.label} id='insights-steps'>
-                    {t('Дошли до конца')}
+                    {t('Reached the end')}
                   </span>
                   <span className={styles.heroValue}>
                     {formatShare(started ? finishedShare : 0)}
                   </span>
                   <span className={styles.heroMeta}>
                     {started
-                      ? t('{finished} из {started} · {flow}', {
+                      ? t('{finished} of {started} · {flow}', {
                           finished: (finished?.sessions ?? 0).toLocaleString('ru-RU'),
                           started: t.count(started, DEVICES),
                           flow: flowLabel.toLowerCase(),
@@ -189,7 +189,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                           aria-label={t(SEGMENT_LABELS[key].title)}
                           value={insights.segment[key] ?? ANY}
                           items={[
-                            { value: ANY, label: t('Все') },
+                            { value: ANY, label: t('All') },
                             ...Object.entries(SEGMENT_LABELS[key].values).map(([value, label]) => ({
                               value,
                               label: t(label),
@@ -211,7 +211,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                 <EmptyState
                   variant='inline'
                   text={t(
-                    'За этот период таких устройств здесь не было - выберите другой период или уберите отбор.',
+                    'No such devices in this period: pick another period or clear the filter.',
                   )}
                 />
               ) : (
@@ -222,10 +222,10 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                         <span className={styles.rowTitle}>{t(STEP_LABELS[row.step])}</span>
                         <span className={styles.rowMeta}>
                           {index === 0
-                            ? t('Начало')
+                            ? t('Start')
                             : row.fromPrevious === null
-                              ? t('До прошлого шага не дошли')
-                              : t('{share} от прошлого шага', {
+                              ? t('Didn’t reach the previous step')
+                              : t('{share} of the previous step', {
                                   share: formatShare(row.fromPrevious),
                                 })}
                         </span>
@@ -244,12 +244,12 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
             <div className={styles.pairs}>
               <section className={styles.group} aria-labelledby='insights-signals'>
                 <SectionCaption as='h2' id='insights-signals' isInset={false}>
-                  {t('Где спотыкаются')}
+                  {t('Where people stumble')}
                 </SectionCaption>
                 {insights.signals?.items.length ? (
                   <ScrollArea
-                    label={t('Где спотыкаются')}
-                    moreLabel={(count) => t('Ещё {count}', { count })}
+                    label={t('Where people stumble')}
+                    moreLabel={(count) => t('{count} more', { count })}
                   >
                     <ul className={styles.rows}>
                       {insights.signals.items.map((item) => (
@@ -265,7 +265,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                           <span className={styles.rowValue}>
                             {item.sessions.toLocaleString('ru-RU')}
                             <span className={styles.rowShare}>
-                              {t.count(item.count, ['раз', 'раза', 'раз'])}
+                              {t.count(item.count, ['time', 'times'])}
                             </span>
                           </span>
                         </li>
@@ -275,7 +275,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                 ) : (
                   <EmptyState
                     variant='inline'
-                    text={t('Ошибок в полях и сбоев за этот период нет.')}
+                    text={t('No field errors or failures in this period.')}
                   />
                 )}
               </section>
@@ -283,7 +283,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
               {channels.length > 0 && (
                 <section className={styles.group} aria-labelledby='insights-channels'>
                   <SectionCaption as='h2' id='insights-channels' isInset={false}>
-                    {t('Откуда записи')}
+                    {t('Where bookings come from')}
                     <span className={styles.count}>{t.count(online, BOOKINGS)}</span>
                   </SectionCaption>
                   <ul className={styles.rows}>
@@ -307,11 +307,11 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
 
             <section className={styles.group} aria-labelledby='insights-devices'>
               <SectionCaption as='h2' id='insights-devices' isInset={false}>
-                {t('Кто приходит')}
+                {t('Who comes')}
                 <span className={styles.count}>{devices ? t.count(devices, DEVICES) : null}</span>
               </SectionCaption>
               {devices === 0 ? (
-                <EmptyState variant='inline' text={t('Пока нет данных об устройствах.')} />
+                <EmptyState variant='inline' text={t('No device data yet.')} />
               ) : (
                 <div className={styles.dimensions}>
                   {dimensions.map(({ key, items }) => (

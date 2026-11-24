@@ -32,7 +32,7 @@ export const LoyaltyCard = () => {
   return (
     <section className={styles.section} aria-labelledby='loyalty-title'>
       <h2 id='loyalty-title' className={styles.title}>
-        {t('Бонусы и абонементы')}
+        {t('Bonuses and passes')}
       </h2>
       <ul className={styles.list}>
         {places.map((place) => (
@@ -44,10 +44,9 @@ export const LoyaltyCard = () => {
                 <span className={styles.meta}>
                   {[
                     ...place.subscriptions.map(
-                      (item) =>
-                        `${item.title}: ${t.count(item.visitsLeft, ['визит', 'визита', 'визитов'])}`,
+                      (item) => `${item.title}: ${t.count(item.visitsLeft, ['visit', 'visits'])}`,
                     ),
-                  ].join(' · ') || t('Потратьте на следующем визите')}
+                  ].join(' · ') || t('Spend on your next visit')}
                 </span>
               </span>
               {place.bonusBalance > 0 && (

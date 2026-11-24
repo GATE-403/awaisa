@@ -19,8 +19,8 @@ interface QuickSlotsProps {
 const PLACEHOLDERS = ['first', 'second', 'third']
 
 const dayLabel = (dayKey: string, todayKey: string | null, t: Translate) => {
-  if (todayKey && dayKey === todayKey) return t('Сегодня')
-  if (todayKey && dayKey === addDayKey(todayKey, 1)) return t('Завтра')
+  if (todayKey && dayKey === todayKey) return t('Today')
+  if (todayKey && dayKey === addDayKey(todayKey, 1)) return t('Tomorrow')
   return t.dayLong(dayKey).split(',')[0] ?? dayKey
 }
 

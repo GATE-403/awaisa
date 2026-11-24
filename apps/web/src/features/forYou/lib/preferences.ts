@@ -31,16 +31,16 @@ const STORAGE_KEY = 'awaisa:preferences:v1'
 const EVENT = 'awaisa:preferences'
 
 const INTERESTS: { value: Interest; label: string; for?: 'male' | 'female' }[] = [
-  { value: 'haircut', label: 'Стрижки' },
-  { value: 'beard', label: 'Борода', for: 'male' },
-  { value: 'coloring', label: 'Окрашивание' },
-  { value: 'nails', label: 'Маникюр' },
-  { value: 'brows', label: 'Брови и ресницы' },
-  { value: 'face', label: 'Уход за лицом' },
-  { value: 'massage', label: 'Массаж и SPA' },
-  { value: 'waxing', label: 'Депиляция' },
-  { value: 'tattoo', label: 'Тату' },
-  { value: 'health', label: 'Здоровье' },
+  { value: 'haircut', label: 'Haircuts' },
+  { value: 'beard', label: 'Beard', for: 'male' },
+  { value: 'coloring', label: 'Colouring' },
+  { value: 'nails', label: 'Manicure' },
+  { value: 'brows', label: 'Brows and lashes' },
+  { value: 'face', label: 'Facial care' },
+  { value: 'massage', label: 'Massage and SPA' },
+  { value: 'waxing', label: 'Hair removal' },
+  { value: 'tattoo', label: 'Tattoo' },
+  { value: 'health', label: 'Health' },
 ]
 
 let cachedRaw: string | null = null

@@ -1,6 +1,5 @@
 import { CaretDown } from '@phosphor-icons/react/ssr'
 import NextLink from 'next/link'
-import { LanguageSwitcher } from '@/features/language'
 import { ThemeSwitcher } from '@/features/theme'
 import { PLATFORM } from '@/shared/config/platform'
 import { T } from '@/shared/i18n'
@@ -10,27 +9,27 @@ import { FooterColumn } from './FooterColumn'
 
 const COLUMNS = [
   {
-    title: 'Записаться',
+    title: 'Book',
     links: [
-      { href: '/', label: 'Каталог' },
-      { href: '/map', label: 'Рядом на карте' },
-      { href: '/top', label: 'Рейтинг мастеров' },
+      { href: '/', label: 'Catalogue' },
+      { href: '/map', label: 'Nearby on the map' },
+      { href: '/top', label: 'Top specialists' },
     ],
   },
   {
-    title: 'Для бизнеса',
+    title: 'For business',
     links: [
-      { href: '/business', label: 'Как это работает' },
-      { href: '/business/new', label: 'Подключить бизнес' },
-      { href: '/manage', label: 'Кабинет' },
-      { href: '/updates', label: 'Что нового' },
+      { href: '/business', label: 'How it works' },
+      { href: '/business/new', label: 'Add your business' },
+      { href: '/manage', label: 'Dashboard' },
+      { href: '/updates', label: "What's new" },
     ],
   },
   {
-    title: 'Аккаунт',
+    title: 'Account',
     links: [
-      { href: '/bookings', label: 'Профиль и записи' },
-      { href: '/login', label: 'Войти по номеру' },
+      { href: '/bookings', label: 'Profile and bookings' },
+      { href: '/login', label: 'Sign in with your number' },
     ],
   },
 ]
@@ -64,7 +63,6 @@ export const Footer = () => (
           <span className={styles.name}>{PLATFORM.name}</span> · <T>{PLATFORM.tagline}</T>
         </p>
         <div className={styles.settings}>
-          <LanguageSwitcher />
           <ThemeSwitcher />
         </div>
       </div>

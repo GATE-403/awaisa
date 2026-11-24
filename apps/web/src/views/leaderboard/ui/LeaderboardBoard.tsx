@@ -30,7 +30,7 @@ const toMasterEntry = (master: LeaderboardMaster): Entry => ({
   key: master.id,
   place: master.place,
   href: `/${master.business.slug}/book?specialist=${master.id}`,
-  action: 'Записаться',
+  action: 'Book',
   name: master.name,
   subtitle: master.business.name,
   average: master.average,
@@ -73,7 +73,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
     <>
       <header className={styles.head}>
         <h1 className={styles.title}>{t((isPlaces ? board?.places : board?.masters) ?? '')}</h1>
-        <p className={styles.lead}>{t('По отзывам клиентов в Awaisa')}</p>
+        <p className={styles.lead}>{t('By client reviews on Awaisa')}</p>
       </header>
 
       <div className={styles.controls}>
@@ -84,7 +84,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
         {/* Kinds as the app's text tabs: only the chosen one underlined. */}
         <div className={styles.kinds}>
           <TextTabs
-            label={t('Вид')}
+            label={t('Type')}
             items={BOARDS.map((item) => ({
               label: t(item.tab),
               href: boardHref(view, item.kind),
@@ -97,9 +97,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
       {entries.length === 0 ? (
         <EmptyState
           variant='inline'
-          text={t(
-            'Пока мало отзывов, чтобы составить рейтинг. Он появится, когда оценок станет больше.',
-          )}
+          text={t('Too few reviews for a rating yet. It will appear once there are more.')}
         />
       ) : (
         <>
@@ -116,7 +114,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
                           number was read as «1 -е место». */}
                     <span aria-hidden>{entry.place}</span>
                     <span className={styles.srOnly}>
-                      {t('{place}-е место', { place: entry.place })}
+                      {t('place {place}', { place: entry.place })}
                     </span>
                   </span>
                   {entry.face}
@@ -131,7 +129,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
                       {formatScore(entry.average)}
                     </span>
                     <span className={styles.muted}>
-                      {t.count(entry.reviews, ['отзыв', 'отзыва', 'отзывов'])}
+                      {t.count(entry.reviews, ['review', 'reviews'])}
                     </span>
                   </span>
                 </NextLink>
@@ -141,7 +139,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
 
           <p className={styles.footnote}>
             {t(
-              'Место зависит от оценок после визитов: средняя подтягивается к 4,3, пока отзывов мало; мастеру нужно хотя бы три отзыва, месту - пять. Обновляется каждые несколько минут.',
+              'The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes.',
             )}
           </p>
         </>

@@ -26,7 +26,7 @@ import { rememberUpdatesFrom } from '@/shared/lib/updatesFrom'
 import { BusinessSwitcher } from './BusinessSwitcher'
 import styles from './CabinetBar.module.css'
 
-const THEME_LABELS = { system: 'как в системе', light: 'светлая', dark: 'тёмная' } as const
+const THEME_LABELS = { system: 'as the system', light: 'light', dark: 'dark' } as const
 const THEME_ICONS = { system: CircleHalf, light: Sun, dark: Moon }
 
 interface CabinetBarProps {
@@ -102,7 +102,7 @@ export const CabinetBar = ({
         <NextLink
           href={backHref}
           className={styles.back}
-          aria-label={nav ? t('Назад: {label}', { label: backLabel }) : undefined}
+          aria-label={nav ? t('Back: {label}', { label: backLabel }) : undefined}
         >
           <CaretLeft aria-hidden />
           {!nav && (back || entry !== undefined) && backLabel}
@@ -119,7 +119,7 @@ export const CabinetBar = ({
         ) : (
           <p className={styles.title} aria-hidden={!isScrolled}>
             {title}
-            {!isPublished && <span className={styles.hidden}> · {t('скрыта')}</span>}
+            {!isPublished && <span className={styles.hidden}> · {t('hidden')}</span>}
           </p>
         )}
         {nav && <div className={styles.nav}>{nav}</div>}
@@ -130,8 +130,8 @@ export const CabinetBar = ({
                 href={`/${slug}`}
                 target='_blank'
                 className={`${styles.icon} ${styles.wideOnly}`}
-                aria-label={t('Открыть страницу бизнеса')}
-                title={t('Открыть страницу бизнеса')}
+                aria-label={t('Open the business page')}
+                title={t('Open the business page')}
               >
                 <ArrowSquareOut aria-hidden />
               </NextLink>
@@ -144,8 +144,8 @@ export const CabinetBar = ({
               }
               className={styles.icon}
               data-unread={hasUnread || undefined}
-              aria-label={hasUnread ? t('Что нового: есть обновления') : t('Что нового')}
-              title={t('Что нового')}
+              aria-label={hasUnread ? t("What's new: there are updates") : t("What's new")}
+              title={t("What's new")}
             >
               <Megaphone aria-hidden />
             </NextLink>
@@ -158,17 +158,17 @@ export const CabinetBar = ({
             <Menu
               label={
                 customer
-                  ? t('Профиль: {name}', { name: customer.name || customer.phone })
-                  : t('Профиль')
+                  ? t('Profile: {name}', { name: customer.name || customer.phone })
+                  : t('Profile')
               }
               className={styles.icon}
               trigger={<UserCircle aria-hidden />}
             >
               <MenuItem icon={<UserCircle aria-hidden />} onClick={() => router.push('/bookings')}>
-                {t('Профиль и записи')}
+                {t('Profile and bookings')}
               </MenuItem>
               <MenuItem icon={<Compass aria-hidden />} onClick={() => router.push('/')}>
-                {t('Каталог')}
+                {t('Catalogue')}
               </MenuItem>
               {slug && (
                 <MenuItem
@@ -176,7 +176,7 @@ export const CabinetBar = ({
                   className={styles.phoneOnly}
                   onClick={() => window.open(`/${slug}`, '_blank')}
                 >
-                  {t('Открыть страницу бизнеса')}
+                  {t('Open the business page')}
                 </MenuItem>
               )}
               <MenuItem
@@ -185,7 +185,7 @@ export const CabinetBar = ({
                 closeOnClick={false}
                 onClick={cycleTheme}
               >
-                {t('Тема: {theme}', { theme: t(THEME_LABELS[theme]) })}
+                {t('Theme: {theme}', { theme: t(THEME_LABELS[theme]) })}
               </MenuItem>
             </Menu>
           </span>

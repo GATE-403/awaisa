@@ -71,7 +71,7 @@ export const CategoryNav = ({ items }: CategoryNavProps) => {
     // The app's text tabs (only the chosen one underlined), as links to the sections.
     <nav
       ref={barRef}
-      aria-label={t('Категории')}
+      aria-label={t('Categories')}
       className={styles.bar}
       data-category-nav=''
       data-stuck={isStuck || undefined}

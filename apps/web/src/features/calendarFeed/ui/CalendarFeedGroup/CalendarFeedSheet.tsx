@@ -64,7 +64,11 @@ export const CalendarFeedSheet = ({
     try {
       await action()
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsBusy(false)
     }
@@ -76,7 +80,10 @@ export const CalendarFeedSheet = ({
       await issue(specialistId)
       haptic('success')
       if (wasActive)
-        toast.show({ title: t('Ссылка сменилась, старая больше не работает'), type: 'success' })
+        toast.show({
+          title: t('The link has changed, the old one no longer works'),
+          type: 'success',
+        })
     })
 
   const handleMaster = (next: string) => {
@@ -88,44 +95,46 @@ export const CalendarFeedSheet = ({
   const handleCopy = async () => {
     if (!url) return
     const isCopied = await copyText(url)
-    if (isCopied) toast.show({ title: t('Ссылка скопирована'), type: 'success' })
-    else toast.show({ title: t('Не удалось скопировать'), type: 'error' })
+    if (isCopied) toast.show({ title: t('Link copied'), type: 'success' })
+    else toast.show({ title: t('Could not copy'), type: 'error' })
   }
 
   const status = (() => {
     if (!feed?.isActive) return null
     if (feed.lastReadAt)
-      return t('Календарь обновлялся {date}.', { date: readTime.format(new Date(feed.lastReadAt)) })
-    if (!url) return t('Ссылка выдана на другом устройстве. Новая отключит прежнюю.')
+      return t('Calendar last updated {date}.', {
+        date: readTime.format(new Date(feed.lastReadAt)),
+      })
+    if (!url) return t('The link was issued on another device. A new one turns the old one off.')
     return null
   })()
 
   return (
-    <Sheet title={t('Календарь на телефоне')} onClose={onClose} cancelLabel={t('Закрыть')}>
+    <Sheet title={t('Calendar on your phone')} onClose={onClose} cancelLabel={t('Close')}>
       <div className={sheet.form}>
         <p className={styles.intro}>
           {isBusiness
             ? t(
-                'Записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми.',
+                'Bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.',
               )
             : t(
-                'Ваши записи за месяц назад и три вперёд появятся в Календаре iPhone или Google и будут обновляться сами. Отмены останутся зачёркнутыми.',
+                'Your bookings from a month back to three months ahead will appear in iPhone or Google Calendar and update themselves. Cancellations stay crossed out.',
               )}
         </p>
 
         {isBusiness && (
-          <section className={sheet.group} aria-label={t('Что показывать')}>
-            <SectionCaption>{t('Что показывать')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('What to show')}>
+            <SectionCaption>{t('What to show')}</SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Мастер')}</span>
+                <span className={sheet.rowLabel}>{t('Specialist')}</span>
                 <Select
                   variant='plain'
-                  aria-label={t('Мастер')}
+                  aria-label={t('Specialist')}
                   value={specialistId ?? ALL}
                   disabled={isBusy}
                   items={[
-                    { value: ALL, label: t('Все мастера') },
+                    { value: ALL, label: t('All specialists') },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   onValueChange={(value) => handleMaster(String(value))}
@@ -133,7 +142,7 @@ export const CalendarFeedSheet = ({
               </div>
               {canSetPhones && (
                 <label className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Номера клиентов целиком')}</span>
+                  <span className={sheet.rowLabel}>{t('Full client numbers')}</span>
                   <Switch
                     checked={feed?.isPhoneShown ?? false}
                     disabled={isBusy || !feed}
@@ -144,7 +153,7 @@ export const CalendarFeedSheet = ({
             </div>
             {canSetPhones && (
               <RowNote>
-                {t(HIDDEN_PHONE_NOTE)} {t('Касается всех календарей бизнеса.')}
+                {t(HIDDEN_PHONE_NOTE)} {t("Applies to all of the business's calendars.")}
               </RowNote>
             )}
           </section>
@@ -155,27 +164,27 @@ export const CalendarFeedSheet = ({
         <div className={styles.actions}>
           {url ? (
             <>
-              <GlyphGroup label={t('Ещё')}>
+              <GlyphGroup label={t('More')}>
                 <GlyphButton
                   icon={<GoogleLogo />}
-                  label={t('Добавить в Google Календарь')}
+                  label={t('Add to Google Calendar')}
                   onClick={() => window.open(toGoogleCalendar(url), '_blank', 'noopener')}
                 />
                 <GlyphButton
                   icon={<Copy />}
-                  label={t('Скопировать ссылку')}
+                  label={t('Copy link')}
                   onClick={() => void handleCopy()}
                 />
                 <GlyphButton
                   icon={<ArrowsClockwise />}
-                  label={t('Сменить ссылку')}
+                  label={t('Change the link')}
                   disabled={isBusy}
                   onClick={() => void handleIssue()}
                 />
               </GlyphGroup>
               {/* The sheet's main action comes last: nothing follows it. */}
               <ButtonLink href={toWebcal(url)} size='sm' className={styles.primary}>
-                {t('Подписаться')}
+                {t('Subscribe')}
               </ButtonLink>
             </>
           ) : (
@@ -186,7 +195,7 @@ export const CalendarFeedSheet = ({
               disabled={isBusy || !feed}
               onClick={() => void handleIssue()}
             >
-              {feed?.isActive ? t('Получить новую ссылку') : t('Получить ссылку')}
+              {feed?.isActive ? t('Get a new link') : t('Get the link')}
             </Button>
           )}
         </div>

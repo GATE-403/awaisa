@@ -33,9 +33,7 @@ export const ProfileMasters = ({ masters }: ProfileMastersProps) => {
             <MasterCard
               specialist={{ ...master, rating: null }}
               href={`/${master.slug}/book?specialist=${master.id}`}
-              meta={[t.count(master.visits, ['визит', 'визита', 'визитов']), ago]
-                .filter(Boolean)
-                .join(' · ')}
+              meta={[t.count(master.visits, ['visit', 'visits']), ago].filter(Boolean).join(' · ')}
             />
           </li>
         )

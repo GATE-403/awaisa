@@ -7,7 +7,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { InsightsPage } from '@/views/insights'
 
 export const metadata: Metadata = {
-  title: 'Воронки',
+  title: 'Funnels',
   robots: { index: false },
 }
 

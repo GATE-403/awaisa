@@ -24,7 +24,7 @@ export const EditProfileButton = () => {
     <>
       <GlyphButton
         icon={<PencilSimple aria-hidden />}
-        label={t('Изменить')}
+        label={t('Change')}
         onClick={() => (host ? host.open() : setIsOpen(true))}
         disabled={!myProfile.settings}
       />
@@ -32,7 +32,7 @@ export const EditProfileButton = () => {
         <ProfileStyleSheet
           settings={myProfile.settings}
           profile={myProfile.profile}
-          name={customer.name || t('Вы')}
+          name={customer.name || t('You')}
           avatarUrl={customer.avatarUrl ?? null}
           onSave={async (input) => {
             await myProfile.save(input)

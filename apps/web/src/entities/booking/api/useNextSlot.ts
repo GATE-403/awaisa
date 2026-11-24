@@ -14,7 +14,7 @@ type NextSlot = {
 }
 
 const DAYS_TO_CHECK = 2
-const DAY_LABELS = ['Сегодня', 'Завтра']
+const DAY_LABELS = ['Today', 'Tomorrow']
 
 export const useNextSlot = (
   serviceId: string | null,

@@ -68,26 +68,26 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
 
   return (
     <Sheet
-      title={t('Касса')}
+      title={t('Till')}
       onClose={onClose}
       action={{
-        label: t(isEnabling ? 'Включить' : 'Сохранить'),
+        label: t(isEnabling ? 'Turn on' : 'Save'),
         form: FORM_ID,
         disabled: isInnMissing || isInnWrong || isSaving,
       }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Реквизиты')}>
-          <SectionCaption>{t('Реквизиты')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Details')}>
+          <SectionCaption>{t('Details')}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('ИНН')}</span>
+              <span className={sheet.rowLabel}>{t('TIN')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   inputMode='numeric'
-                  aria-label={t('ИНН')}
-                  placeholder={t('14 цифр')}
+                  aria-label={t('TIN')}
+                  placeholder={t('14 digits')}
                   autoFocus={isEnabling && !settings.inn}
                   aria-invalid={isInnWrong || undefined}
                   value={inn}
@@ -96,10 +96,10 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Режим')}</span>
+              <span className={sheet.rowLabel}>{t('Regime')}</span>
               <Select
                 variant='plain'
-                aria-label={t('Режим налогообложения')}
+                aria-label={t('Tax regime')}
                 items={TAX_REGIMES.map((item) => ({ ...item, label: t(item.label) }))}
                 value={taxRegime}
                 onValueChange={(value) => value && setTaxRegime(value)}
@@ -108,28 +108,28 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
           </div>
           <p className={sheet.groupFooter}>
             {isInnWrong
-              ? t('ИНН: 14 цифр.')
+              ? t('TIN: 14 digits.')
               : taxRegime === 'patent'
-                ? t('На патенте касса не обязательна: чеки можно выдавать по желанию.')
-                : t('Как в свидетельстве о регистрации и в карточке ККМ.')}
+                ? t('On a patent a till is optional: you may issue receipts if you wish.')
+                : t('As in the registration certificate and the cash register card.')}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Налоги в чеке')}>
-          <SectionCaption>{t('Налоги в чеке')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Taxes on the receipt')}>
+          <SectionCaption>{t('Taxes on the receipt')}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Плательщик НДС')}</span>
+              <span className={sheet.rowLabel}>{t('VAT payer')}</span>
               <Switch checked={isVatPayer} onCheckedChange={changeVatPayer} />
             </label>
             {isVatPayer && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('НДС')}</span>
+                <span className={sheet.rowLabel}>{t('VAT')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='decimal'
-                    aria-label={t('НДС, %')}
+                    aria-label={t('VAT, %')}
                     value={vatRate}
                     onValueChange={(value) => setVatRate(cleanRate(value))}
                   />
@@ -138,12 +138,12 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
               </label>
             )}
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('НсП на услуги')}</span>
+              <span className={sheet.rowLabel}>{t('Sales tax on services')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   inputMode='decimal'
-                  aria-label={t('НсП на услуги, %')}
+                  aria-label={t('Sales tax on services, %')}
                   value={services}
                   onValueChange={(value) => setServices(cleanRate(value))}
                 />
@@ -151,12 +151,12 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('НсП на товары')}</span>
+              <span className={sheet.rowLabel}>{t('Sales tax on goods')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   inputMode='decimal'
-                  aria-label={t('НсП на товары, %')}
+                  aria-label={t('Sales tax on goods, %')}
                   value={goods}
                   onValueChange={(value) => setGoods(cleanRate(value))}
                 />
@@ -166,7 +166,7 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
           </div>
           <p className={sheet.groupFooter}>
             {t(
-              'Налоги уже в цене: чек показывает, сколько их в сумме. Уточните ставки у бухгалтера.',
+              'Taxes are included in the price: the receipt shows how much of the total they are. Check the rates with your accountant.',
             )}
           </p>
         </section>
@@ -176,27 +176,27 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
             <SectionCaption>eKassa</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Логин')}</span>
+                <span className={sheet.rowLabel}>{t('Login')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={t('Логин eKassa')}
+                    aria-label={t('eKassa login')}
                     autoComplete='off'
-                    placeholder={t('Почта в eKassa')}
+                    placeholder={t('eKassa email')}
                     value={login}
                     onValueChange={setLogin}
                   />
                 </span>
               </label>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Пароль')}</span>
+                <span className={sheet.rowLabel}>{t('Password')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     type='password'
-                    aria-label={t('Пароль eKassa')}
+                    aria-label={t('eKassa password')}
                     autoComplete='new-password'
-                    placeholder={t(settings.hasPassword ? 'Сохранён' : 'Пароль')}
+                    placeholder={t(settings.hasPassword ? 'Saved' : 'Password')}
                     value={password}
                     onValueChange={setPassword}
                   />
@@ -204,7 +204,7 @@ export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalShe
               </label>
             </div>
             <p className={sheet.groupFooter}>
-              {t('Ваша облачная касса в eKassa на ваш ИНН. Пароль хранится зашифрованным.')}
+              {t('Your cloud till in eKassa under your TIN. The password is stored encrypted.')}
             </p>
           </section>
         )}

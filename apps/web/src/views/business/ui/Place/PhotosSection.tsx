@@ -23,7 +23,7 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
           <PhotoGridTile
             key={url}
             src={url}
-            label={t('Открыть фото {index} из {total}', {
+            label={t('Open photo {index} of {total}', {
               index: index + 1,
               total: business.photos.length,
             })}

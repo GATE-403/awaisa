@@ -29,8 +29,8 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   }, [])
   const items = [
     ...(branches.length > 1
-      ? [{ id: 'all', title: t('Все филиалы'), path: `/${slug}/book` }]
-      : [{ id: 'one', title: branches[0]?.name ?? t('Запись'), path: `/${slug}/book` }]),
+      ? [{ id: 'all', title: t('All branches'), path: `/${slug}/book` }]
+      : [{ id: 'one', title: branches[0]?.name ?? t('Booking'), path: `/${slug}/book` }]),
     ...(branches.length > 1
       ? branches
           .filter((branch) => branch.isActive !== false)
@@ -44,13 +44,13 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
 
   const handleCopy = async (url: string) => {
     const isCopied = await copyText(url)
-    if (isCopied) toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
-    else toast.show({ title: t('Не удалось скопировать'), description: url, type: 'error' })
+    if (isCopied) toast.show({ title: t('Link copied'), description: url, type: 'success' })
+    else toast.show({ title: t('Could not copy'), description: url, type: 'error' })
   }
 
   return (
     <div className={styles.group}>
-      <SectionCaption>{t('Ссылки для записи')}</SectionCaption>
+      <SectionCaption>{t('Booking links')}</SectionCaption>
       <ul className={styles.list}>
         {items.map((item) => {
           const url = `${origin}${item.path}`
@@ -64,10 +64,10 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
                 type='button'
                 className={links.copy}
                 onClick={() => handleCopy(url)}
-                aria-label={t('Скопировать ссылку: {name}', { name: item.title })}
+                aria-label={t('Copy link: {name}', { name: item.title })}
               >
                 <Copy aria-hidden />
-                {t('Скопировать')}
+                {t('Copy')}
               </button>
             </li>
           )
@@ -75,7 +75,7 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
       </ul>
       <RowNote>
         {t(
-          'Поставьте ссылку филиала в его карточку в 2ГИС, в Instagram или на QR у входа: клиент сразу попадёт в запись в нужный филиал.',
+          'Put the branch link on its 2GIS card, on Instagram or on a QR code by the door: clients land straight on booking at that branch.',
         )}
       </RowNote>
     </div>

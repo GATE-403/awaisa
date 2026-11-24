@@ -18,11 +18,11 @@ export const BoardViewSwitch = ({ view, hrefs }: BoardViewSwitchProps) => {
 
   return (
     <SegmentedControl
-      label={t('Рейтинг')}
+      label={t('Rating')}
       value={view}
       items={[
-        { value: 'masters', label: t('Мастера') },
-        { value: 'places', label: t('Места') },
+        { value: 'masters', label: t('Specialists') },
+        { value: 'places', label: t('Places') },
       ]}
       onChange={(next) => router.push(hrefs[next], { scroll: false })}
     />

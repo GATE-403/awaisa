@@ -38,8 +38,8 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
                   <span className={own.title}>{plan.title}</span>
                   <span className={own.meta}>
                     {[
-                      pluralize(plan.visits, ['визит', 'визита', 'визитов']),
-                      plan.serviceName ?? 'любая услуга',
+                      pluralize(plan.visits, ['visit', 'visits']),
+                      plan.serviceName ?? 'any service',
                       `${plan.validDays} дн.`,
                     ].join(' · ')}
                   </span>

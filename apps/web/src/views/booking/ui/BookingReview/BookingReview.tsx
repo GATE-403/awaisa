@@ -33,11 +33,10 @@ const relativeDay = (dayKey: string, todayKey: string | null, t: Translate) => {
   const days = Math.round(
     (Date.parse(`${dayKey}T00:00:00Z`) - Date.parse(`${todayKey}T00:00:00Z`)) / 86_400_000,
   )
-  if (days === 0) return t('сегодня')
-  if (days === 1) return t('завтра')
-  if (days === 2) return t('послезавтра')
-  if (t.language !== 'ru') return t('через {days} дней', { days })
-  return `через ${days} ${days < 5 ? 'дня' : 'дней'}`
+  if (days === 0) return t('today')
+  if (days === 1) return t('tomorrow')
+  if (days === 2) return t('the day after tomorrow')
+  return t('in {days} days', { days })
 }
 
 // The last step before «Записаться», shaped like the ticket it becomes: the place on its cover,
@@ -60,8 +59,8 @@ export const BookingReview = ({
 }: BookingReviewProps) => {
   const t = useT()
   const today = useToday()
-  const { day, month: ruMonth } = getDateParts(dayKey)
-  const month = t.language === 'ru' ? ruMonth : t.monthShort(dayKey)
+  const { day } = getDateParts(dayKey)
+  const month = t.monthShort(dayKey)
   const weekday = t.weekdayLong(dayKey)
   const relative = relativeDay(dayKey, today?.dayKey ?? null, t)
   const total = quote?.total ?? service.price
@@ -70,7 +69,7 @@ export const BookingReview = ({
   return (
     <section className={styles.review} aria-labelledby='review-title'>
       <h2 id='review-title' className={styles.title}>
-        {t('Проверьте запись')}
+        {t('Check your booking')}
       </h2>
 
       <div className={styles.ticket} style={{ '--tint': pickTint(business.name) } as CSSProperties}>
@@ -112,7 +111,7 @@ export const BookingReview = ({
               {relative && ` · ${relative}`}
             </span>
           </span>
-          <span className={styles.edit}>{t('Изменить')}</span>
+          <span className={styles.edit}>{t('Change')}</span>
         </button>
 
         <div className={styles.perforation} aria-hidden />
@@ -120,7 +119,7 @@ export const BookingReview = ({
         <ul className={styles.rows}>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('service')}>
-              <span className={styles.rowLabel}>{t('Услуга')}</span>
+              <span className={styles.rowLabel}>{t('Service')}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{service.name}</span>
                 <span className={styles.rowMeta}>{t.duration(service.durationMinutes)}</span>
@@ -130,7 +129,7 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('specialist')}>
-              <span className={styles.rowLabel}>{t('Мастер')}</span>
+              <span className={styles.rowLabel}>{t('Specialist')}</span>
               <span className={styles.master}>
                 {specialist ? (
                   <>
@@ -152,8 +151,8 @@ export const BookingReview = ({
                   </>
                 ) : (
                   <span className={styles.rowValue}>
-                    <span className={styles.rowName}>{t('Любой свободный')}</span>
-                    <span className={styles.rowMeta}>{t('подберём')}</span>
+                    <span className={styles.rowName}>{t('Anyone free')}</span>
+                    <span className={styles.rowMeta}>{t('we will pick')}</span>
                   </span>
                 )}
               </span>
@@ -162,7 +161,7 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('На кого')}</span>
+              <span className={styles.rowLabel}>{t('For')}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{name}</span>
                 <span className={styles.rowMeta}>{formatPhone(phone)}</span>
@@ -173,10 +172,10 @@ export const BookingReview = ({
           {/* The extras read as rows of the same ticket, each opening the contacts step. */}
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('Комментарий')}</span>
+              <span className={styles.rowLabel}>{t('Comment')}</span>
               <span className={styles.rowValue}>
                 <span className={comment ? styles.rowName : styles.rowEmpty}>
-                  {comment || t('Добавить')}
+                  {comment || t('Add')}
                 </span>
               </span>
               <CaretRight aria-hidden className={styles.chevron} />
@@ -184,10 +183,10 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('Промокод')}</span>
+              <span className={styles.rowLabel}>{t('Promo code')}</span>
               <span className={styles.rowValue}>
                 <span className={discount ? styles.rowName : styles.rowEmpty}>
-                  {discount ? `${discount.title} · −${discount.percent}%` : t('Ввести')}
+                  {discount ? `${discount.title} · −${discount.percent}%` : t('Enter')}
                 </span>
               </span>
               <CaretRight aria-hidden className={styles.chevron} />
@@ -204,7 +203,7 @@ export const BookingReview = ({
             </p>
           )}
           <p className={styles.totalMain}>
-            <span>{t('К оплате')}</span>
+            <span>{t('To pay')}</span>
             <span>
               {discount && <s className={styles.old}>{formatPrice(service.price)}</s>}
               {formatPrice(total)}
@@ -213,12 +212,10 @@ export const BookingReview = ({
           <p className={styles.terms}>
             {service.deposit
               ? t(
-                  'Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+                  'Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
                   { amount: formatPrice(service.deposit) },
                 )
-              : t(
-                  'Оплата в салоне - наличными или картой. Перенести или отменить можно по ссылке из SMS.',
-                )}
+              : t('Pay at the salon - cash or card. Move or cancel by the link in the SMS.')}
           </p>
         </div>
         {action && <div className={styles.action}>{action}</div>}

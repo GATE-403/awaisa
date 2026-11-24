@@ -44,7 +44,7 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
       )
       setStory({ file, url: URL.createObjectURL(blob) })
     } catch {
-      toast.show({ title: t('Не получилось сделать картинку'), type: 'error' })
+      toast.show({ title: t('Could not make the picture'), type: 'error' })
     } finally {
       setIsBusy(false)
     }
@@ -64,7 +64,7 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
       await navigator.share({ files: [story.file] })
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
+      toast.show({ title: t('Could not share'), type: 'error' })
     }
   }
 
@@ -73,7 +73,7 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
       <GlyphButton
         // The picture it makes is the profile as a card.
         icon={<IdentificationBadge aria-hidden />}
-        label={isBusy ? t('Готовим…') : t('В сторис')}
+        label={isBusy ? t('Preparing…') : t('To stories')}
         onClick={open}
         disabled={isBusy}
       />
@@ -82,18 +82,18 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
         // было бы сделать иконкой справа сверху»): the share sheet on a phone, a download with
         // a mouse.
         <Sheet
-          title={t('Для сторис')}
-          cancelLabel={t('Закрыть')}
+          title={t('For stories')}
+          cancelLabel={t('Close')}
           onClose={() => setStory(null)}
           action={
             canShare
               ? {
-                  label: t('Поделиться'),
+                  label: t('Share'),
                   icon: <Export aria-hidden />,
                   onClick: () => void share(),
                 }
               : {
-                  label: t('Скачать картинку'),
+                  label: t('Download picture'),
                   icon: <DownloadSimple aria-hidden />,
                   onClick: download,
                 }
@@ -101,7 +101,7 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
         >
           <div className={styles.preview}>
             {/* biome-ignore lint/performance/noImgElement: a generated picture (blob: URL) */}
-            <img src={story.url} alt={t('Картинка профиля для сторис')} className={styles.image} />
+            <img src={story.url} alt={t('Profile picture for stories')} className={styles.image} />
           </div>
         </Sheet>
       )}

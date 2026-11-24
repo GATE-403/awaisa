@@ -5,7 +5,7 @@ import { getMyBookingsOnServer, getSessionCustomer } from '@/shared/api/sessionA
 import { BookingsPage } from '@/views/bookings'
 
 export const metadata: Metadata = {
-  title: 'Профиль и записи',
+  title: 'Profile and bookings',
 }
 
 // The account and its bookings come from the server with the page; device bookings (guests)

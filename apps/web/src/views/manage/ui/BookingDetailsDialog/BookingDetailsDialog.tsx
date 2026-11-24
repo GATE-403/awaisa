@@ -33,10 +33,10 @@ export const BookingDetailsDialog = ({
 
   return (
     <Sheet
-      title={t('Запись')}
+      title={t('Booking')}
       onClose={onClose}
       cancelLabel={null}
-      action={{ label: t('Готово'), onClick: onClose }}
+      action={{ label: t('Done'), onClick: onClose }}
     >
       <BookingInspector
         slug={slug}

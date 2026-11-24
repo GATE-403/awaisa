@@ -34,7 +34,7 @@ export const SubscriptionPaymentRow = ({
 }: SubscriptionPaymentRowProps) => {
   const t = useT()
   const items: { value: PaymentChoice; label: string }[] = [
-    { value: 'salon', label: t('В салоне') },
+    { value: 'salon', label: t('At the salon') },
     ...subscriptions.map((item) => ({
       value: `subscription:${item.id}` as const,
       label: t('Абонементом · осталось {count}', { count: item.visitsLeft }),
@@ -47,10 +47,10 @@ export const SubscriptionPaymentRow = ({
 
   return (
     <div className={className}>
-      <span className={labelClassName}>{t('Оплата')}</span>
+      <span className={labelClassName}>{t('Payment')}</span>
       <Select
         variant='plain'
-        aria-label={t('Оплата')}
+        aria-label={t('Payment')}
         items={items}
         value={choice}
         onValueChange={(value) => value && onChange(value)}
@@ -75,7 +75,7 @@ export const SubscriptionPaymentNote = ({ subscription, plan }: SubscriptionPaym
   return (
     <RowNote>
       {[
-        `«${plan.title}»: ${t.count(plan.visits, ['визит', 'визита', 'визитов'])}`,
+        `«${plan.title}»: ${t.count(plan.visits, ['visit', 'visits'])}`,
         t('на {days} дн.', { days: plan.validDays }),
         saving > 0 ? t('экономия {amount}', { amount: formatPrice(saving) }) : null,
         t('оплата картой сейчас, этот визит первый'),

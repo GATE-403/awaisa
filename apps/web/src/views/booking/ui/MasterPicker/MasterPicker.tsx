@@ -20,13 +20,13 @@ interface MasterPickerProps {
 export const MasterPicker = ({ specialists, value, onChange, onReselect }: MasterPickerProps) => {
   const t = useT()
   return (
-    <div className={styles.row} role='radiogroup' aria-label={t('Мастер')} data-edge-fade=''>
+    <div className={styles.row} role='radiogroup' aria-label={t('Specialist')} data-edge-fade=''>
       <MasterCard
         specialist={null}
         className={styles.card}
         icon={<UsersThree />}
-        title={t('Любой')}
-        meta={t('кто свободен')}
+        title={t('Any')}
+        meta={t('whoever is free')}
       >
         <input
           type='radio'
@@ -37,7 +37,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
           onClick={() => {
             if (value === ANY_SPECIALIST_ID) onReselect?.()
           }}
-          aria-label={t('Любой мастер - подберём свободного на выбранное время')}
+          aria-label={t('Any specialist - we pick whoever is free at that time')}
         />
         <Check className={styles.check} aria-hidden />
       </MasterCard>

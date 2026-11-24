@@ -3,14 +3,14 @@ import type { CSSProperties } from 'react'
 // The colour a client picks for their profile (the API keeps the key): a soft wash at the top of
 // the page and the level line. Drawn from system tokens, in both themes.
 const ACCENTS: Record<string, { label: string; color: string }> = {
-  blue: { label: 'Синий', color: 'var(--system-blue)' },
-  indigo: { label: 'Индиго', color: 'var(--system-indigo)' },
-  purple: { label: 'Фиолетовый', color: 'var(--system-purple)' },
-  pink: { label: 'Розовый', color: 'var(--system-pink)' },
-  red: { label: 'Красный', color: 'var(--system-red)' },
-  orange: { label: 'Оранжевый', color: 'var(--system-orange)' },
-  green: { label: 'Зелёный', color: 'var(--system-green)' },
-  teal: { label: 'Бирюзовый', color: 'var(--system-teal)' },
+  blue: { label: 'Blue', color: 'var(--system-blue)' },
+  indigo: { label: 'Indigo', color: 'var(--system-indigo)' },
+  purple: { label: 'Purple', color: 'var(--system-purple)' },
+  pink: { label: 'Pink', color: 'var(--system-pink)' },
+  red: { label: 'Red', color: 'var(--system-red)' },
+  orange: { label: 'Orange', color: 'var(--system-orange)' },
+  green: { label: 'Green', color: 'var(--system-green)' },
+  teal: { label: 'Teal', color: 'var(--system-teal)' },
 }
 
 /** CSS variables for a profile's look: `--accent`. */

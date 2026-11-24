@@ -48,11 +48,11 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
       if (!blob) throw new Error('empty image')
       const file = new File([blob], toFileName(booking), { type: 'image/png' })
 
-      const result = await saveFile(file, t('Талон: {service}', { service: booking.serviceName }))
+      const result = await saveFile(file, t('Ticket: {service}', { service: booking.serviceName }))
       if (result === 'cancelled') return
       haptic('success')
     } catch {
-      toast.show({ title: t('Не получилось сохранить талон'), type: 'error' })
+      toast.show({ title: t('Could not save the ticket'), type: 'error' })
     } finally {
       setIsSaving(false)
     }
@@ -60,11 +60,11 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
 
   return (
     <Sheet
-      title={t('Талон')}
-      cancelLabel={t('Закрыть')}
+      title={t('Ticket')}
+      cancelLabel={t('Close')}
       onClose={onClose}
       action={{
-        label: isSaving ? t('Сохраняем…') : t('Скачать'),
+        label: isSaving ? t('Saving…') : t('Download'),
         onClick: download,
         disabled: isSaving,
       }}
@@ -73,38 +73,38 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
         <div ref={ticketRef} className={styles.ticket}>
           <Ticket booking={booking} />
         </div>
-        <p className={styles.hint}>{t('Покажите на ресепшене. «Скачать» сохранит картинкой.')}</p>
+        <p className={styles.hint}>{t('Show it at the desk. «Download» saves it as a picture.')}</p>
         {extra}
       </div>
 
       {/* Everything about the visit, not just what fits on the ticket. */}
-      <section className={sheet.group} aria-label={t('О визите')}>
-        <SectionCaption>{t('О визите')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('About the visit')}>
+        <SectionCaption>{t('About the visit')}</SectionCaption>
         <dl className={`${sheet.list} ${styles.details}`}>
           <div className={styles.detail}>
-            <dt>{t('Когда')}</dt>
+            <dt>{t('When')}</dt>
             <dd>
               {t.dayLong(booking.date)}, {booking.time}–
               {addMinutes(booking.time, booking.durationMinutes)}
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>{t('Услуга')}</dt>
+            <dt>{t('Service')}</dt>
             <dd>
               {booking.serviceName} · {t.duration(booking.durationMinutes)}
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>{t('Мастер')}</dt>
+            <dt>{t('Specialist')}</dt>
             <dd>{booking.specialistName}</dd>
           </div>
           <div className={styles.detail}>
-            <dt>{t('Стоимость')}</dt>
+            <dt>{t('Price')}</dt>
             <dd>
               {formatPrice(booking.price - (booking.discount?.amount ?? 0))}
               {booking.discount && (
                 <span className={styles.note}>
-                  {t('со скидкой «{title}» −{amount}', {
+                  {t('with the «{title}» discount −{amount}', {
                     title: booking.discount.title,
                     amount: formatPrice(booking.discount.amount),
                   })}
@@ -112,28 +112,28 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
               )}
               <span className={styles.note}>
                 {booking.isBySubscription
-                  ? t('по абонементу: визит спишется, когда мастер отметит его')
+                  ? t('with a pass: the visit is taken off when the specialist marks it')
                   : booking.payment
-                    ? `${t('Предоплата {amount} {status}', {
+                    ? `${t('Deposit {amount} {status}', {
                         amount: formatPrice(booking.payment.amount),
                         status: t(PAYMENT_STATUS_TEXT[booking.payment.status]),
-                      })}${booking.payment.status === 'paid' ? t(', остальное в салоне') : ''}`
-                    : t('оплата в салоне - наличными или картой')}
+                      })}${booking.payment.status === 'paid' ? t(', the rest at the salon') : ''}`
+                    : t('pay at the salon: cash or card')}
               </span>
             </dd>
           </div>
           <div className={styles.detail}>
-            <dt>{t('Номер')}</dt>
+            <dt>{t('Number')}</dt>
             <dd className={styles.code}>{code}</dd>
           </div>
           <div className={styles.detail}>
-            <dt>{t('Статус')}</dt>
-            <dd>{booking.status === 'cancelled' ? t('Отменена') : t('Подтверждена')}</dd>
+            <dt>{t('Status')}</dt>
+            <dd>{booking.status === 'cancelled' ? t('Cancelled') : t('Confirmed')}</dd>
           </div>
         </dl>
       </section>
 
-      <section className={sheet.group} aria-label={t('Где')}>
+      <section className={sheet.group} aria-label={t('Where')}>
         <SectionCaption>{booking.business.name}</SectionCaption>
         <div className={sheet.list}>
           {booking.business.address && (
@@ -150,7 +150,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 <MapPin weight='regular' aria-hidden />
                 {booking.business.address}
               </span>
-              <span className={styles.rowAction}>{t('Маршрут')}</span>
+              <span className={styles.rowAction}>{t('Directions')}</span>
             </a>
           )}
           {booking.business.phone && (
@@ -159,7 +159,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
                 <Phone weight='regular' aria-hidden />
                 {formatPhone(booking.business.phone)}
               </span>
-              <span className={styles.rowAction}>{t('Позвонить')}</span>
+              <span className={styles.rowAction}>{t('Call')}</span>
             </a>
           )}
         </div>

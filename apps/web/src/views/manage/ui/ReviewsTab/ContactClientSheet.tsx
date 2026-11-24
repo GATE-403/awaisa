@@ -64,18 +64,18 @@ export const ContactClientSheet = ({
   }, [slug, canOfferCode])
 
   const codeItems = [
-    { value: NO_CODE, label: t('Без промокода') },
+    { value: NO_CODE, label: t('No promo code') },
     ...codes.map((item) => ({ value: item.code ?? '', label: `${item.code} · −${item.percent}%` })),
   ]
 
   return (
-    <Sheet title={t('Написать клиенту')} onClose={onClose} cancelLabel={t('Закрыть')}>
+    <Sheet title={t('Message the client')} onClose={onClose} cancelLabel={t('Close')}>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Сообщение')}>
+        <section className={sheet.group} aria-label={t('Message')}>
           <SectionCaption>{`${review.authorName} · ${formatPhone(review.customerPhone)}`}</SectionCaption>
           <div className={sheet.list}>
             <textarea
-              aria-label={t('Текст сообщения')}
+              aria-label={t('Message text')}
               className={styles.message}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -84,11 +84,11 @@ export const ContactClientSheet = ({
             />
             {codes.length > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Промокод')}</span>
+                <span className={sheet.rowLabel}>{t('Promo code')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Промокод в подарок')}
+                    aria-label={t('Promo code as a gift')}
                     items={codeItems}
                     value={code}
                     onValueChange={(value) => setCode(value ?? NO_CODE)}
@@ -99,9 +99,9 @@ export const ContactClientSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {chosen
-              ? t('Промокод добавится в конце сообщения.')
+              ? t('The promo code is added at the end of the message.')
               : t(
-                  'Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв «Решено».',
+                  'The messenger opens with this text. Once you agree, mark the review «Resolved».',
                 )}
           </p>
         </section>
@@ -114,16 +114,16 @@ export const ContactClientSheet = ({
             className={styles.contactPrimary}
           >
             <WhatsappLogo aria-hidden />
-            {t('Написать в WhatsApp')}
+            {t('Message on WhatsApp')}
           </ButtonLink>
-          <GlyphGroup label={t('Другие способы связи')}>
+          <GlyphGroup label={t('Other ways to reach them')}>
             <a href={`sms:${review.customerPhone}?&body=${body}`} title='SMS' aria-label='SMS'>
               <ChatCircle aria-hidden />
             </a>
             <a
               href={`tel:${review.customerPhone}`}
               title={formatPhone(review.customerPhone)}
-              aria-label={t('Позвонить')}
+              aria-label={t('Call')}
             >
               <Phone aria-hidden />
             </a>

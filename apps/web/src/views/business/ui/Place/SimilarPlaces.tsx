@@ -27,16 +27,16 @@ export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
       <div className={styles.similarInner}>
         <div className={styles.sectionHead}>
           <h2 id='place-similar' className={styles.sectionTitle}>
-            {t('Похожие места')}
+            {t('Similar places')}
             <span className={styles.similarMuted}>
               {' '}
               {kind
-                ? t('Ещё {kind} рядом.', { kind: t(kind).toLowerCase() })
-                : t('Ещё места рядом.')}
+                ? t('More {kind} nearby.', { kind: t(kind).toLowerCase() })
+                : t('More places nearby.')}
             </span>
           </h2>
           <NextLink href={`/?kind=${business.kind}`} className={styles.sectionLink}>
-            {t('Смотреть все ›')}
+            {t('See all ›')}
           </NextLink>
         </div>
         <NextFreeProvider slugs={others.map((place) => place.slug)}>

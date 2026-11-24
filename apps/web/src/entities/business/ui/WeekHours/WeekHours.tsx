@@ -25,7 +25,7 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
   const isEveryDay = groups.length === 1
 
   const daysLabel = (from: number, to: number) => {
-    if (isEveryDay) return t('Ежедневно')
+    if (isEveryDay) return t('Daily')
     const first = t(WEEKDAYS_SHORT[from] ?? '')
     return from === to ? first : `${first}–${t(WEEKDAYS_SHORT[to] ?? '')}`
   }
@@ -43,7 +43,7 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
           {status.label}
         </p>
       )}
-      <ul className={styles.weekRows} aria-label={t('Часы по дням')}>
+      <ul className={styles.weekRows} aria-label={t('Hours by day')}>
         {groups.map(({ from, to, range }) => {
           // Every day the same: «Сегодня» would add nothing to «Ежедневно».
           const isToday =
@@ -58,13 +58,11 @@ export const WeekHours = ({ hours, todayWeekday, status }: WeekHoursProps) => {
               <span className={styles.weekDays}>
                 <span aria-hidden='true'>{daysLabel(from, to)}</span>
                 <span className={styles.srOnly}>
-                  {isEveryDay && to - from === DAYS_IN_WEEK - 1
-                    ? t('Ежедневно')
-                    : daysFull(from, to)}
+                  {isEveryDay && to - from === DAYS_IN_WEEK - 1 ? t('Daily') : daysFull(from, to)}
                 </span>
-                {isToday && <span className={styles.today}>{t('Сегодня')}</span>}
+                {isToday && <span className={styles.today}>{t('Today')}</span>}
               </span>
-              <span className={styles.weekRange}>{range ?? t('Выходной')}</span>
+              <span className={styles.weekRange}>{range ?? t('Closed')}</span>
             </li>
           )
         })}

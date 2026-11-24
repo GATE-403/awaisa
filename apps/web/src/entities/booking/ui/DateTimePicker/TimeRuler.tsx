@@ -153,10 +153,10 @@ export const TimeRuler = ({
           {!current
             ? ''
             : isFree
-              ? t('до {time} · свободно', {
+              ? t('until {time} · free', {
                   time: toTime(toMinutes(current.time) + durationMinutes),
                 })
-              : t('Занято - прокрутите дальше')}
+              : t('Taken - scroll on')}
         </span>
       </div>
 
@@ -164,7 +164,7 @@ export const TimeRuler = ({
         <fieldset
           ref={trackRef}
           className={styles.track}
-          aria-label={t('Время')}
+          aria-label={t('Time')}
           onPointerDown={() => {
             setHasMoved(true)
             isHolding.current = true
@@ -224,17 +224,17 @@ export const TimeRuler = ({
           for free, a low one for taken - with counts. Two lines made the step taller than
           short phones. */}
       {!hasMoved ? (
-        <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>
+        <p className={styles.hint}>{t('Scroll the dial or tap a time')}</p>
       ) : (
         <p className={styles.legend}>
           <span className={styles.legendItem}>
             <span className={styles.swatch} data-free='' aria-hidden />
-            {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
+            {t.count(freeCount, ['free slot', 'free slots'])}
           </span>
           {takenCount > 0 && (
             <span className={styles.legendItem}>
               <span className={styles.swatch} aria-hidden />
-              {t('{count} занято', { count: takenCount })}
+              {t('{count} taken', { count: takenCount })}
             </span>
           )}
         </p>

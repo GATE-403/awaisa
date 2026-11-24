@@ -7,7 +7,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ManageIndexPage } from '@/views/manage'
 
 export const metadata: Metadata = {
-  title: 'Мои бизнесы',
+  title: 'My businesses',
   robots: { index: false },
 }
 

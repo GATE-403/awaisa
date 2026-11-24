@@ -105,16 +105,16 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
       <span className={styles.marks}>
         <span className={styles.kind}>
           <FanCardsIcon aria-hidden />
-          {t('Образ')}
+          {t('Look')}
         </span>
         {/* A client's own photo from their review: trusted more than the salon's own shots. */}
-        {item.isFromClient && <span className={styles.client}>{t('Фото клиента')}</span>}
+        {item.isFromClient && <span className={styles.client}>{t('Client’s photo')}</span>}
       </span>
       <button
         type='button'
         className={styles.like}
         aria-pressed={isLiked}
-        aria-label={t('Нравится: {count}', { count: likesCount })}
+        aria-label={t('Likes: {count}', { count: likesCount })}
         data-liked={isLiked || undefined}
         onClick={() => setLiked(!isLiked)}
       >
@@ -156,7 +156,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
           </NextLink>
         </h3>
         <NextLink href={lookHref} className={styles.want}>
-          {t('Хочу так')}
+          {t('I want this look')}
         </NextLink>
       </span>
     </div>

@@ -11,7 +11,7 @@ const fill = (text: string, vars?: Record<string, string | number>) =>
 
 const sayer = (t?: Translate) => ({
   say: t ?? fill,
-  count: (count: number, forms: [string, string, string]) =>
+  count: (count: number, forms: [string, string]) =>
     t ? t.count(count, forms) : pluralize(count, forms),
 })
 
@@ -20,20 +20,20 @@ const describePayScheme = (scheme: MasterPayScheme, t?: Translate) => {
   const { say, count } = sayer(t)
   const parts = [
     scheme.percent === null ? null : `${scheme.percent}%`,
-    scheme.rates.length === 0 ? null : count(scheme.rates.length, ['ставка', 'ставки', 'ставок']),
+    scheme.rates.length === 0 ? null : count(scheme.rates.length, ['rate', 'rates']),
     scheme.productsPercent === null
       ? null
-      : say('{percent}% с товаров', { percent: scheme.productsPercent }),
+      : say('{percent}% of products', { percent: scheme.productsPercent }),
     scheme.salary === null
       ? null
-      : say(scheme.salary.kind === 'month' ? 'оклад {amount} в месяц' : 'оклад {amount} в день', {
+      : say(scheme.salary.kind === 'month' ? 'salary {amount} a month' : 'salary {amount} a day', {
           amount: money.format(scheme.salary.amount),
         }),
     scheme.minimum === null
       ? null
-      : say('минимум {amount}', { amount: money.format(scheme.minimum) }),
+      : say('minimum {amount}', { amount: money.format(scheme.minimum) }),
   ].filter(Boolean)
-  return parts.length === 0 ? say('Не задана') : parts.join(' · ')
+  return parts.length === 0 ? say('Not set') : parts.join(' · ')
 }
 
 /** The master's percent when it alone decided the pay («к выплате 1 000 сом · 40%»). */
@@ -49,12 +49,12 @@ const plainPercent = (pay: MasterPay, percent: number | null) =>
 /** How a service line was counted: «40%», «300 сом × 2», «без ставки». */
 const describeRate = (line: MasterPay['lines'][number], t?: Translate) => {
   const { say } = sayer(t)
-  const amount = (value: number) => say('{amount} сом', { amount: money.format(value) })
+  const amount = (value: number) => say('{amount} som', { amount: money.format(value) })
   if (line.kind === 'fixed') return `${amount(line.rate ?? 0)} × ${line.visits}`
   if (line.kind === 'percent') {
-    return say('{percent}% от {base}', { percent: line.rate ?? 0, base: amount(line.base) })
+    return say('{percent}% of {base}', { percent: line.rate ?? 0, base: amount(line.base) })
   }
-  return say('без ставки')
+  return say('no rate')
 }
 
 export { describePayScheme, describeRate, plainPercent, som }

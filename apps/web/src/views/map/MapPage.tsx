@@ -38,9 +38,9 @@ type Detent = 'peek' | 'half' | 'full'
 const MAP_SHARE: Record<Detent, number> = { peek: 0.72, half: 0.42, full: 0 }
 const NEXT_DETENT: Record<Detent, Detent> = { peek: 'half', half: 'full', full: 'peek' }
 const DETENT_LABEL: Record<Detent, string> = {
-  peek: 'Список свёрнут',
-  half: 'Список наполовину',
-  full: 'Список на весь экран',
+  peek: 'List collapsed',
+  half: 'List half open',
+  full: 'List full screen',
 }
 
 // Like Apple Maps' search results: the list and the map show the same places, nearest first.
@@ -275,19 +275,19 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             <button
               type='button'
               className={styles.grabber}
-              aria-label={t('{state}. Изменить высоту списка', { state: t(DETENT_LABEL[detent]) })}
+              aria-label={t('{state}. Change the list height', { state: t(DETENT_LABEL[detent]) })}
               onClick={() => settle(NEXT_DETENT[detent])}
             />
             <h1 id='map-title' className={styles.title}>
-              {t('Рядом.')}
+              {t('Nearby.')}
               <span className={styles.titleMuted}>
                 {' '}
-                {t('Выберите место на карте или в списке.')}
+                {t('Pick a place on the map or in the list.')}
               </span>
             </h1>
             <TextTabs
-              label={t('Виды бизнеса')}
-              items={[{ value: undefined, label: t('Все') }, ...BUSINESS_KINDS].map((item) => ({
+              label={t('Business types')}
+              items={[{ value: undefined, label: t('All') }, ...BUSINESS_KINDS].map((item) => ({
                 href: item.value ? `/map?kind=${item.value}` : '/map',
                 label: t(item.label),
                 isActive: kind === item.value,
@@ -296,12 +296,12 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             <div className={styles.toolbar}>
               <p className={styles.count} aria-live='polite'>
                 {isLoading
-                  ? t('Ищем…')
+                  ? t('Searching…')
                   : location
-                    ? t('{count}, ближайшие сверху', {
-                        count: t.count(places.length, ['место', 'места', 'мест']),
+                    ? t('{count}, nearest first', {
+                        count: t.count(places.length, ['place', 'places']),
                       })
-                    : t.count(places.length, ['место', 'места', 'мест'])}
+                    : t.count(places.length, ['place', 'places'])}
               </p>
               {/* Where the visitor is: the browser's location or a district by name - the list
                   is sorted from there and the map shows the spot. */}
@@ -311,12 +311,12 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
                 onClick={() => setIsPicking(true)}
               >
                 <NavigationArrow aria-hidden />
-                {myPlace ? t(myPlace.label) : t('Где вы?')}
+                {myPlace ? t(myPlace.label) : t('Where are you?')}
               </Button>
             </div>
             {!location && (
               <p className={styles.hint}>
-                {t('Укажите, где вы, - покажем ближайшие места и точку на карте.')}
+                {t('Tell us where you are: we will show the nearest places and a dot on the map.')}
               </p>
             )}
             {error && (
@@ -333,8 +333,8 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
               variant='inline'
               text={
                 <>
-                  {t('Здесь пока нет мест на карте. Попробуйте другой вид или')}{' '}
-                  <NextLink href='/'>{t('каталог')}</NextLink>.
+                  {t('No places on the map here yet. Try another type or the')}{' '}
+                  <NextLink href='/'>{t('catalogue')}</NextLink>.
                 </>
               }
             />
@@ -367,7 +367,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             }}
           >
             <MapPin aria-hidden />
-            {t('Карта')}
+            {t('Map')}
           </button>
         )}
         <div className={styles.mapArea}>
@@ -377,7 +377,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
             userLocation={location}
             onSelect={select}
             fitKey={`${kind ?? 'all'}|${location?.latitude ?? ''}|${places.length}`}
-            label={t('Карта салонов и мастеров')}
+            label={t('Map of salons and specialists')}
           />
         </div>
       </div>

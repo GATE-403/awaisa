@@ -133,7 +133,7 @@ export const ReplyComposer = ({
         <EmojiButton onPick={insertEmoji} />
         <textarea
           ref={fieldRef}
-          aria-label={t('Ответ на отзыв')}
+          aria-label={t('Reply to the review')}
           data-reply-field=''
           className={styles.composerField}
           value={text}
@@ -162,8 +162,8 @@ export const ReplyComposer = ({
             onPointerDown={(event) => event.preventDefault()}
             onClick={() => void save()}
             disabled={isSaving}
-            aria-label={isEditing && !text.trim() ? t('Удалить ответ') : t('Отправить ответ')}
-            title={t('Отправить (⌘ Enter)')}
+            aria-label={isEditing && !text.trim() ? t('Delete reply') : t('Send reply')}
+            title={t('Send (⌘ Enter)')}
           >
             <ArrowUp aria-hidden />
           </button>
@@ -178,7 +178,7 @@ export const ReplyComposer = ({
           className={styles.suggestions}
           data-quick-replies=''
           role='listbox'
-          aria-label={t('Быстрые ответы')}
+          aria-label={t('Quick replies')}
           onKeyDown={handleListKeyDown}
           onBlur={(event) => {
             const next = event.relatedTarget

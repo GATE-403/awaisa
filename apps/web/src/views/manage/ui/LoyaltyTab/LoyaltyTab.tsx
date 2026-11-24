@@ -75,7 +75,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       await load()
       return true
     } catch (error) {
-      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -97,43 +97,43 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
     }
     void run(
       () => saveSale({ isOnline, amounts: sale.amounts }),
-      isOnline ? 'Сертификаты продаются онлайн' : 'Онлайн-продажа выключена',
+      isOnline ? 'Certificates are on sale online' : 'Online sales turned off',
     )
   }
 
   return (
-    <section className={styles.section} aria-label={t('Лояльность')}>
+    <section className={styles.section} aria-label={t('Loyalty')}>
       <SectionHeader
-        title={t('Лояльность')}
-        description={t('Бонусы, абонементы и сертификаты списываются в «Итоге визита».')}
+        title={t('Loyalty')}
+        description={t('Bonuses, passes and certificates are redeemed in «Visit outcome».')}
       />
 
-      <section className={sheet.group} aria-label={t('Бонусы')}>
-        <SectionCaption>{t('Бонусы')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('Bonuses')}>
+        <SectionCaption>{t('Bonuses')}</SectionCaption>
         <div className={styles.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Начислять бонусы')}</span>
+            <span className={sheet.rowLabel}>{t('Give bonuses')}</span>
             <Switch
               checked={data.bonusPercent !== null}
               onCheckedChange={(checked) =>
                 void run(
                   () => setBonusPercent(slug, checked ? 5 : null),
-                  checked ? 'Бонусы включены' : 'Бонусы выключены',
+                  checked ? 'Bonuses on' : 'Bonuses off',
                 )
               }
             />
           </label>
           {data.bonusPercent !== null && (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('С каждой оплаты')}</span>
+              <span className={sheet.rowLabel}>{t('From each payment')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Процент бонусов')}
+                  aria-label={t('Bonus percentage')}
                   items={PERCENTS}
                   value={data.bonusPercent}
                   onValueChange={(value) =>
-                    value && void run(() => setBonusPercent(slug, value), 'Сохранено')
+                    value && void run(() => setBonusPercent(slug, value), 'Saved')
                   }
                 />
               </span>
@@ -143,24 +143,26 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
         <RowNote>
           {data.bonusPercent !== null
             ? t(
-                'Клиент получает {percent}% от оплаты деньгами и тратит их на следующих визитах: 1 бонус = 1 сом.',
+                'Clients get {percent}% of what they pay in money and spend it on later visits: 1 bonus = 1 som.',
                 { percent: data.bonusPercent },
               )
-            : t('Возвращайте клиенту часть оплаты бонусами: он придёт снова, чтобы их потратить.')}
+            : t(
+                'Give clients part of their payment back as bonuses: they’ll come back to spend them.',
+              )}
         </RowNote>
       </section>
 
-      <section className={sheet.group} aria-label={t('Абонементы')}>
+      <section className={sheet.group} aria-label={t('Passes')}>
         <div className={sheet.groupHeader}>
-          <SectionCaption isInset={false}>{t('Абонементы')}</SectionCaption>
+          <SectionCaption isInset={false}>{t('Passes')}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setEditingPlan('new')}>
-            <Plus aria-hidden /> {t('Новый')}
+            <Plus aria-hidden /> {t('New')}
           </button>
         </div>
         {data.plans.length === 0 ? (
           <RowNote>
             {t(
-              'Например, «5 стрижек за 4»: клиент платит сразу, визиты списываются в «Итоге визита».',
+              'For example, «5 haircuts for 4»: the client pays up front, visits are redeemed in «Visit outcome».',
             )}
           </RowNote>
         ) : (
@@ -177,11 +179,11 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                     <span className={styles.rowTitle}>{plan.title}</span>
                     <span className={styles.rowMeta}>
                       {[
-                        !plan.isActive && t('Не продаётся'),
-                        plan.isActive && plan.isOnline && t('Онлайн'),
-                        t.count(plan.visits, ['визит', 'визита', 'визитов']),
-                        plan.serviceName ?? t('любая услуга'),
-                        t('{days} дн.', { days: plan.validDays }),
+                        !plan.isActive && t('Not on sale'),
+                        plan.isActive && plan.isOnline && t('Online'),
+                        t.count(plan.visits, ['visit', 'visits']),
+                        plan.serviceName ?? t('any service'),
+                        t('{days} days', { days: plan.validDays }),
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -197,11 +199,11 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
       </section>
 
       {(canSellOnline || sale.isOnline) && (
-        <section className={sheet.group} aria-label={t('Сертификаты онлайн')}>
-          <SectionCaption>{t('Сертификаты онлайн')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Certificates online')}>
+          <SectionCaption>{t('Certificates online')}</SectionCaption>
           <div className={styles.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Продавать сертификаты онлайн')}</span>
+              <span className={sheet.rowLabel}>{t('Sell certificates online')}</span>
               <Switch checked={sale.isOnline} onCheckedChange={handleOnlineChange} />
             </label>
             {sale.isOnline && (
@@ -210,9 +212,9 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                 className={`${sheet.row} ${own.amountsRow}`}
                 onClick={() => setIsEditingAmounts(true)}
               >
-                <span className={sheet.rowLabel}>{t('Суммы')}</span>
+                <span className={sheet.rowLabel}>{t('Amounts')}</span>
                 <span className={own.amounts}>
-                  {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} {t('сом')}
+                  {sale.amounts.map((amount) => formatAmount(amount)).join(' · ')} {t('som')}
                 </span>
                 <CaretRight className={styles.chevron} aria-hidden />
               </button>
@@ -221,23 +223,25 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           <RowNote>
             {t(
               sale.isOnline
-                ? 'Клиенты покупают на странице места и платят картой. Сертификат появится ниже после оплаты, код придёт покупателю и получателю.'
-                : 'Подарочный сертификат на странице места: клиент выбирает сумму, платит картой и получает код.',
+                ? 'Clients buy on the place’s page and pay by card. The certificate appears below once paid; the code goes to the buyer and the recipient.'
+                : 'A gift certificate on the place’s page: the client picks an amount, pays by card and gets a code.',
             )}
           </RowNote>
         </section>
       )}
 
-      <section className={sheet.group} aria-label={t('Сертификаты')}>
+      <section className={sheet.group} aria-label={t('Certificates')}>
         <div className={sheet.groupHeader}>
-          <SectionCaption isInset={false}>{t('Сертификаты')}</SectionCaption>
+          <SectionCaption isInset={false}>{t('Certificates')}</SectionCaption>
           <button type='button' className={sheet.groupLink} onClick={() => setIsIssuing(true)}>
-            <Plus aria-hidden /> {t('Выпустить')}
+            <Plus aria-hidden /> {t('Issue')}
           </button>
         </div>
         {data.certificates.length === 0 ? (
           <RowNote>
-            {t('Подарочный сертификат на сумму: клиент тратит его частями, остаток виден по коду.')}
+            {t(
+              'A gift certificate for an amount: the client spends it in parts, the balance shows by its code.',
+            )}
           </RowNote>
         ) : (
           <ul className={styles.list}>
@@ -245,13 +249,13 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
               <li key={certificate.id} className={own.certificate}>
                 <span className={own.code}>{certificate.code}</span>
                 <span className={styles.rowBody}>
-                  <span className={styles.rowTitle}>{certificate.recipient || t('Без имени')}</span>
+                  <span className={styles.rowTitle}>{certificate.recipient || t('No name')}</span>
                   <span className={styles.rowMeta}>
                     {certificate.expiresOn
-                      ? t('до {date}', {
+                      ? t('until {date}', {
                           date: certificate.expiresOn.split('-').reverse().join('.'),
                         })
-                      : t('бессрочный')}
+                      : t('no expiry')}
                   </span>
                 </span>
                 <span className={styles.cellValue}>
@@ -259,7 +263,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                   {certificate.balance !== certificate.amount && (
                     <span className={own.of}>
                       {' '}
-                      {t('из {amount}', { amount: formatPrice(certificate.amount) })}
+                      {t('of {amount}', { amount: formatPrice(certificate.amount) })}
                     </span>
                   )}
                 </span>
@@ -283,13 +287,13 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
                   input,
                   editingPlan === 'new' ? undefined : editingPlan.id,
                 ),
-              'Абонемент сохранён',
+              'Pass saved',
             )
           }
           onDelete={
             editingPlan === 'new'
               ? undefined
-              : () => void run(() => deleteSubscriptionPlan(slug, editingPlan.id), 'Удалено')
+              : () => void run(() => deleteSubscriptionPlan(slug, editingPlan.id), 'Deleted')
           }
         />
       )}
@@ -300,7 +304,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
           onSave={(amounts) =>
             run(
               () => saveSale({ isOnline: true, amounts }),
-              sale.isOnline ? 'Суммы сохранены' : 'Сертификаты продаются онлайн',
+              sale.isOnline ? 'Amounts saved' : 'Certificates are on sale online',
             )
           }
         />
@@ -312,8 +316,8 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
             try {
               const certificate = await issueCertificate(slug, input)
               toast.show({
-                title: t('Сертификат {code}', { code: certificate.code }),
-                description: t('{amount}: назовите код клиенту', {
+                title: t('Certificate {code}', { code: certificate.code }),
+                description: t('{amount}: tell the client the code', {
                   amount: formatPrice(certificate.amount),
                 }),
                 type: 'success',
@@ -322,7 +326,7 @@ export const LoyaltyTab = ({ slug, catalog }: LoyaltyTabProps) => {
               return true
             } catch (error) {
               toast.show({
-                title: t('Не получилось'),
+                title: t('Something went wrong'),
                 description: getErrorMessage(error),
                 type: 'error',
               })

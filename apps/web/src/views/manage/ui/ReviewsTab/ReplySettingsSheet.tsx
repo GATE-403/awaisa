@@ -58,16 +58,16 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
 
   return (
     <Sheet
-      title={t('Ответы на отзывы')}
+      title={t('Review replies')}
       onClose={onClose}
-      action={{ label: t('Готово'), form: FORM_ID, disabled: !canSave }}
+      action={{ label: t('Done'), form: FORM_ID, disabled: !canSave }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Автоответ')}>
-          <SectionCaption>{t('Автоответ')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Auto reply')}>
+          <SectionCaption>{t('Auto reply')}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Отвечать на хорошие отзывы')}</span>
+              <span className={sheet.rowLabel}>{t('Reply to good reviews')}</span>
               <Switch
                 checked={auto.isEnabled}
                 onCheckedChange={(checked) => setAuto({ isEnabled: checked })}
@@ -75,11 +75,11 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
             </label>
             {auto.isEnabled && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Какие')}</span>
+                <span className={sheet.rowLabel}>{t('Which')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('На какие оценки отвечать')}
+                    aria-label={t('Which ratings get a reply')}
                     items={AUTO_REPLY_RATINGS.map((item) => ({ ...item, label: t(item.label) }))}
                     value={auto.minRating}
                     onValueChange={(value) => value && setAuto({ minRating: value })}
@@ -89,46 +89,44 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
             )}
             {auto.isEnabled && (
               <TemplateField
-                label={t('Текст автоответа')}
+                label={t('Auto reply text')}
                 value={auto.template}
                 onChange={(template) => setAuto({ template })}
-                placeholder={t('Напишите текст ответа')}
+                placeholder={t('Write the reply')}
                 tokens={TEMPLATE_TOKENS}
-                preview={
-                  fillReplyTemplate(auto.template, SAMPLE_REVIEW) || t('Напишите текст ответа')
-                }
+                preview={fillReplyTemplate(auto.template, SAMPLE_REVIEW) || t('Write the reply')}
               />
             )}
           </div>
           <p className={sheet.groupFooter}>
             {auto.isEnabled
               ? t(
-                  'Ответ уйдёт через час после отзыва, только на новые отзывы. Имя клиента, мастер и услуга подставятся сами. На 3 ★ и ниже ответьте сами: Telegram напомнит.',
+                  'The reply goes out an hour after the review, to new reviews only. The client name, specialist and service fill in by themselves. Answer 3 ★ and below yourself: Telegram will remind you.',
                 )
-              : t('Хорошие отзывы получат ваш ответ сами, а плохие останутся вам.')}
+              : t('Good reviews get your reply by themselves; poor ones stay with you.')}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Быстрые ответы')}>
-          <SectionCaption>{t('Быстрые ответы')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Quick replies')}>
+          <SectionCaption>{t('Quick replies')}</SectionCaption>
           <div className={sheet.list}>
             {quickReplies.map((text, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: rows are edited in place, order is the key
               <div key={index} className={styles.quickRow}>
                 <TemplateField
-                  label={t('Быстрый ответ {number}', { number: index + 1 })}
+                  label={t('Quick reply {number}', { number: index + 1 })}
                   value={text}
                   onChange={(next) =>
                     setQuick(quickReplies.map((item, at) => (at === index ? next : item)))
                   }
                   tokens={TEMPLATE_TOKENS}
-                  placeholder={t('Текст ответа')}
+                  placeholder={t('Reply text')}
                 />
                 <button
                   type='button'
                   className={styles.quickRemove}
                   onClick={() => setQuick(quickReplies.filter((_, at) => at !== index))}
-                  aria-label={t('Удалить ответ')}
+                  aria-label={t('Delete reply')}
                 >
                   <X aria-hidden />
                 </button>
@@ -141,12 +139,12 @@ export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsS
                 onClick={() => setQuick([...quickReplies, ''])}
               >
                 <Plus aria-hidden />
-                {t('Добавить ответ')}
+                {t('Add a reply')}
               </button>
             )}
           </div>
           <p className={sheet.groupFooter}>
-            {t('Появляются над полем ответа: одно нажатие, и текст уже в поле с именем клиента.')}
+            {t('They appear by the reply field: one tap puts the text in, with the client name.')}
           </p>
         </section>
       </form>

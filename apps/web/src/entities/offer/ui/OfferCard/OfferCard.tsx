@@ -43,7 +43,7 @@ export const OfferCard = ({
   slotText,
   isPlaceHidden = false,
   isPriority = false,
-  actionLabel = 'Записаться',
+  actionLabel = 'Book',
   onSelect,
 }: OfferCardProps) => {
   const t = useT()
@@ -53,9 +53,9 @@ export const OfferCard = ({
   const when =
     slot && today
       ? slot.date === today.dayKey
-        ? 'Сегодня'
+        ? 'Today'
         : slot.date === addDayKey(today.dayKey, 1)
-          ? 'Завтра'
+          ? 'Tomorrow'
           : null
       : null
   const cheaperShare = cheaperThan(offer.cheaperThanPercent)
@@ -98,7 +98,7 @@ export const OfferCard = ({
           <span className={styles.discountBadge}>−{offer.discountPercent}%</span>
         ) : null}
         {isHit && (
-          <span className={styles.badge} role='img' aria-label={t('Хит')} title={t('Хит')}>
+          <span className={styles.badge} role='img' aria-label={t('Hit')} title={t('Hit')}>
             <Fire weight='fill' aria-hidden />
           </span>
         )}
@@ -138,14 +138,14 @@ export const OfferCard = ({
           <p className={styles.price}>{formatPrice(offer.price)}</p>
           {/* Less on the picture: the length is in the booking form, and only a time today is
               worth a line here («Завтра» and «Нет окон рядом» said little and crowded it). */}
-          {(slotText || (slot && when === 'Сегодня')) && (
+          {(slotText || (slot && when === 'Today')) && (
             <span className={styles.slot} data-state={slotText ? 'soon' : 'today'}>
-              {slotText ?? t('Сегодня с {time}', { time: slot?.time ?? '' })}
+              {slotText ?? t('Today from {time}', { time: slot?.time ?? '' })}
             </span>
           )}
           {cheaperShare !== null && (
             <span className={styles.cheaper}>
-              {t('Дешевле {percent}% мест', { percent: cheaperShare })}
+              {t('Cheaper than {percent}% of places', { percent: cheaperShare })}
             </span>
           )}
         </div>

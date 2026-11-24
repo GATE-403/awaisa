@@ -31,7 +31,7 @@ export const ReportMenu = ({
 
   return (
     <Menu label={label} className={className ?? styles.trigger} trigger={<Flag aria-hidden />}>
-      <MenuGroup label={t('Пожаловаться')}>
+      <MenuGroup label={t('Report')}>
         <ReportReasons onPick={(reason) => void report(reason)} />
       </MenuGroup>
     </Menu>

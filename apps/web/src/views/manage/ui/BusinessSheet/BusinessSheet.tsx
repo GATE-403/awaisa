@@ -53,7 +53,7 @@ export const BusinessSheet = ({
   const isConfirmed = typed.trim().toLowerCase() === slug
 
   const savePublished = async (isOpen: boolean) => {
-    const title = isOpen ? 'Страница открыта' : 'Страница скрыта'
+    const title = isOpen ? 'Page is open' : 'Page hidden'
     const save = () => updateBusiness(slug, { isPublished: isOpen })
     if (run) {
       if (await run(save, title)) onPublishedChange(isOpen)
@@ -65,7 +65,7 @@ export const BusinessSheet = ({
       toast.show({ title: t(title), type: 'success' })
       void refreshBusiness(slug)
     } catch (error) {
-      toast.show({ title: t('Не сохранили'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -78,41 +78,40 @@ export const BusinessSheet = ({
         getMyBusinesses().catch(() => []),
         session.refreshSession(),
       ])
-      toast.show({ title: t('Бизнес удалён'), type: 'success' })
+      toast.show({ title: t('Business deleted'), type: 'success' })
       router.replace(others.length > 0 ? '/manage' : '/bookings')
     } catch (error) {
       setIsDeleting(false)
-      toast.show({ title: t('Не удалили'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not deleted'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
   const Glyph = isPublished ? Eye : EyeSlash
 
   return (
-    <Sheet title={t('Скрыть или удалить')} onClose={onClose} cancelLabel='Готово'>
+    <Sheet title={t('Hide or delete')} onClose={onClose} cancelLabel='Done'>
       <div className={sheet.form}>
         {/* Right on the sheet, no inset fill: the glyph, the switch and a ↳ note under it. */}
-        <section className={styles.group} aria-label={t('Публикация')}>
+        <section className={styles.group} aria-label={t('Publishing')}>
           <label className={styles.row}>
             <Glyph className={styles.glyph} aria-hidden />
-            <span className={styles.label}>{t('Страница открыта')}</span>
+            <span className={styles.label}>{t('Page is open')}</span>
             <Switch checked={isPublished} onCheckedChange={(value) => void savePublished(value)} />
           </label>
           <RowNote>
-            {t('Скрытую страницу не найдут в каталоге. Записи и кабинет остаются.')}
+            {t('A hidden page is not found in the catalog. Bookings and the cabinet stay.')}
           </RowNote>
         </section>
 
         {/* What happens is read before the button, not after it. */}
-        <section className={styles.group} aria-label={t('Удалить бизнес')}>
+        <section className={styles.group} aria-label={t('Delete business')}>
           <p className={styles.note}>
             {t(
-              'Будущие записи отменим и напишем клиентам, предоплату вернём. Страница пропадёт, адрес освободится, команда потеряет доступ. Прошлые визиты и чеки останутся в учёте.',
+              'We will cancel upcoming bookings, message the clients and refund deposits. The page goes, its address is freed and the team loses access. Past visits and receipts stay in the books.',
             )}
           </p>
           <label className={styles.note} htmlFor={confirmId}>
-            {t('Чтобы удалить, введите адрес страницы:')}{' '}
-            <strong className={styles.slug}>{slug}</strong>
+            {t('To delete, type the page address:')} <strong className={styles.slug}>{slug}</strong>
           </label>
           {/* The address as it reads in a link, typed in place: no box, a hairline under it. */}
           <div className={styles.address} data-confirmed={isConfirmed || undefined}>
@@ -134,7 +133,7 @@ export const BusinessSheet = ({
             {isConfirmed && <CheckCircle className={styles.check} weight='fill' aria-hidden />}
           </div>
           <HoldButton disabled={!isConfirmed || isDeleting} onConfirm={() => void handleDelete()}>
-            {t('Удалить бизнес')}
+            {t('Delete business')}
           </HoldButton>
         </section>
       </div>

@@ -39,9 +39,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
         hiddenCount={Math.max(0, bookings.length - FIRST)}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={t
-          .count(bookings.length - FIRST, ['запись', 'записи', 'записей'])
-          .replace(/^\d+ /, '')}
+        label={t.count(bookings.length - FIRST, ['booking', 'bookings']).replace(/^\d+ /, '')}
         surface='card'
       >
         <ul className={styles.list}>
@@ -55,7 +53,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
               <li key={booking.id}>
                 <article
                   className={styles.row}
-                  aria-label={t('Запись {code}', { code: getCode(booking.id) })}
+                  aria-label={t('Booking {code}', { code: getCode(booking.id) })}
                 >
                   <span className={styles.leaf} aria-hidden='true'>
                     <span className={styles.leafMonth}>{month}</span>
@@ -66,9 +64,9 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                     {/* The status leads: cut at the end of a narrow row, it used to go first. */}
                     <span className={styles.meta}>
                       {isCancelled ? (
-                        <span className={styles.cancelled}>{t('Отменена')}</span>
+                        <span className={styles.cancelled}>{t('Cancelled')}</span>
                       ) : (
-                        t('Состоялась')
+                        t('Completed')
                       )}
                       {` · ${booking.time} · ${booking.business.name}`}
                     </span>
@@ -78,7 +76,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                       <span
                         className={styles.stars}
                         role='img'
-                        aria-label={t('Ваша оценка: {stars} из 5', { stars })}
+                        aria-label={t('Your rating: {stars} of 5', { stars })}
                       >
                         <Star weight='fill' aria-hidden />
                         {stars}
@@ -90,7 +88,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         className={styles.rate}
                         onClick={() => setRating(booking)}
                       >
-                        {t('Оценить')}
+                        {t('Rate')}
                       </button>
                     )}
                     {isCancelled && canForget(booking.id) && (
@@ -98,16 +96,16 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         type='button'
                         className={styles.textButton}
                         onClick={() => onForget(booking.id)}
-                        aria-label={t('Убрать из списка')}
+                        aria-label={t('Remove from the list')}
                       >
-                        {t('Убрать')}
+                        {t('Remove')}
                       </button>
                     )}
                     <NextLink
                       href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
                       className={styles.again}
                     >
-                      {t('Снова')}
+                      {t('Again')}
                     </NextLink>
                   </span>
                 </article>

@@ -7,9 +7,9 @@ import type { Theme } from '@/shared/lib/theme'
 import styles from './ThemeToggle.module.css'
 
 const LABELS: Record<Theme, string> = {
-  system: 'как в системе',
-  light: 'светлая',
-  dark: 'тёмная',
+  system: 'as the system',
+  light: 'light',
+  dark: 'dark',
 }
 
 const ICONS = { system: CircleHalf, light: Sun, dark: Moon }
@@ -24,8 +24,8 @@ export const ThemeToggle = () => {
       type='button'
       className={styles.toggle}
       onClick={cycleTheme}
-      aria-label={t('Тема: {theme}. Сменить', { theme: t(LABELS[theme]) })}
-      title={t('Тема: {theme}', { theme: t(LABELS[theme]) })}
+      aria-label={t('Theme: {theme}. Change', { theme: t(LABELS[theme]) })}
+      title={t('Theme: {theme}', { theme: t(LABELS[theme]) })}
     >
       <Icon weight={theme === 'system' ? 'regular' : 'fill'} aria-hidden />
     </button>

@@ -32,7 +32,7 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
         hiddenCount={hidden}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={t.count(hidden, ['отзыв', 'отзыва', 'отзывов']).slice(String(hidden).length + 1)}
+        label={t.count(hidden, ['review', 'reviews']).slice(String(hidden).length + 1)}
       >
         <ul className={styles.reviews}>
           {visible.slice(0, shown).map((review) => (
@@ -45,7 +45,7 @@ export const ReviewThread = ({ business, items }: ReviewThreadProps) => {
                 <ReportMenu
                   targetType='review'
                   targetId={review.id}
-                  label={t('Пожаловаться на отзыв: {name}', { name: review.authorName })}
+                  label={t('Report review: {name}', { name: review.authorName })}
                   onReported={() => setReported((ids) => [...ids, review.id])}
                 />
               }

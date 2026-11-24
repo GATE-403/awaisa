@@ -80,7 +80,7 @@ const buildBusinessJsonLd = ({ business, catalog }: BusinessPage, reviews: Revie
     address: {
       '@type': 'PostalAddress',
       streetAddress: business.address,
-      addressLocality: business.city || 'Бишкек',
+      addressLocality: business.city || 'Bishkek',
       addressCountry: 'KG',
     },
     ...(pinned && {
@@ -104,7 +104,7 @@ const buildBusinessJsonLd = ({ business, catalog }: BusinessPage, reviews: Revie
     ...(sections.length > 0 && {
       hasOfferCatalog: {
         '@type': 'OfferCatalog',
-        name: 'Услуги и цены',
+        name: 'Services and prices',
         itemListElement: sections,
       },
     }),

@@ -40,7 +40,7 @@ const PopularCard = ({ offer, isHit }: ServiceCardProps) => {
         offer={offer}
         isHit={isHit}
         isPlaceHidden
-        linkLabel={t('Часто выбирают: {name}', { name: offer.name })}
+        linkLabel={t('Popular: {name}', { name: offer.name })}
       />
     </li>
   )
@@ -120,7 +120,7 @@ export const ServicesBrowser = ({
     <NextFreeProvider slugs={[business.slug]}>
       <div className={styles.menu}>
         {catalog.services.length >= SEARCH_FROM && (
-          <SearchField value={query} onChange={setQuery} placeholder={t('Найти услугу')} />
+          <SearchField value={query} onChange={setQuery} placeholder={t('Find a service')} />
         )}
         {/* Only the category chips stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (
@@ -128,8 +128,8 @@ export const ServicesBrowser = ({
             {/* The app's filter chips (the booking form's too), each with how many it holds:
                 a second row of tabs under the page's own read as one more level of pages. */}
             {/* biome-ignore lint/a11y/useSemanticElements: a fieldset would add a legend over the row. */}
-            <div className={styles.chips} role='group' aria-label={t('Разделы услуг')}>
-              {[{ id: ALL, name: t('Все') }, ...catalog.categories].map((item) => (
+            <div className={styles.chips} role='group' aria-label={t('Service sections')}>
+              {[{ id: ALL, name: t('All') }, ...catalog.categories].map((item) => (
                 <button
                   key={item.id}
                   type='button'
@@ -151,7 +151,7 @@ export const ServicesBrowser = ({
 
         {hasPopular && (
           <div className={styles.group}>
-            <SectionCaption>{t('Часто выбирают')}</SectionCaption>
+            <SectionCaption>{t('Popular')}</SectionCaption>
             <ul className={styles.serviceGrid}>
               {popular.map((service, index) => (
                 <PopularCard key={service.id} offer={toOffer(service)} isHit={index === 0} />
@@ -161,10 +161,10 @@ export const ServicesBrowser = ({
         )}
         {needle && groups.length > 0 && (
           <p className={styles.found} aria-live='polite'>
-            {t('Нашли {count}', {
+            {t('Found {count}', {
               count: t.count(
                 groups.reduce((sum, group) => sum + group.services.length, 0),
-                ['услугу', 'услуги', 'услуг'],
+                ['service', 'services'],
               ),
             })}
           </p>
@@ -172,7 +172,7 @@ export const ServicesBrowser = ({
         {groups.length === 0 && (
           <EmptyState
             variant='inline'
-            text={t('Ничего не нашли: попробуйте другое слово или раздел «Все».')}
+            text={t('Nothing found: try another word or the «All» section.')}
           />
         )}
         {groups.map(({ category: group, services }) => (
@@ -180,7 +180,7 @@ export const ServicesBrowser = ({
             {/* With «Часто выбирают» above, the rest always gets a heading so the two lists read apart. */}
             {(catalog.categories.length > 1 || needle || hasPopular) && (
               <SectionCaption>
-                {catalog.categories.length > 1 ? group.name : t('Все услуги')}
+                {catalog.categories.length > 1 ? group.name : t('All services')}
               </SectionCaption>
             )}
             <ul className={styles.serviceGrid}>

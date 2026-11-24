@@ -25,7 +25,7 @@ const fillReplyTemplate = (template: string, context: ReplyContext) =>
 const SAMPLE_REVIEW: ReplyContext = {
   authorName: 'Асель Т.',
   specialistName: 'Мээрим Сатыбалдиева',
-  serviceName: 'Маникюр',
+  serviceName: 'Manicure',
 }
 
 export type { ReplyContext }

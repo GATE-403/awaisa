@@ -89,13 +89,13 @@ export const NewBookingDialog = ({
   const isPhoneValid = phone.replace(/\D/g, '').length >= MIN_PHONE_DIGITS
   const canSubmit = Boolean(service && selectedTime && name.trim() && isPhoneValid)
   const timeHint = availability.isLoading
-    ? t('Ищем свободное время…')
+    ? t('Looking for free time…')
     : availability.error
       ? availability.error
       : freeTimes.length === 0
-        ? t('У мастера нет свободного времени в этот день.')
+        ? t('The specialist has no free time this day.')
         : service
-          ? t('{service}: {duration}, {price}. Клиенту придёт SMS с подтверждением.', {
+          ? t('{service}: {duration}, {price}. The client gets a confirmation SMS.', {
               service: service.name,
               duration: t.duration(service.durationMinutes),
               price: formatPrice(service.price),
@@ -122,7 +122,7 @@ export const NewBookingDialog = ({
   const renderSuggestions = (field: ClientField) =>
     typing === field &&
     suggestions.length > 0 && (
-      <ul className={styles.suggestions} aria-label={t('Были у вас')}>
+      <ul className={styles.suggestions} aria-label={t('Were here before')}>
         {suggestions.map((client) => (
           <li key={client.phone}>
             <button
@@ -137,13 +137,12 @@ export const NewBookingDialog = ({
                 </span>
                 <span className={styles.suggestionMeta}>
                   {formatPhone(client.phone)}
-                  {client.visits > 0 &&
-                    ` · ${t.count(client.visits, ['визит', 'визита', 'визитов'])}`}
+                  {client.visits > 0 && ` · ${t.count(client.visits, ['visit', 'visits'])}`}
                   {client.noShows > 0 && (
                     <span className={styles.noShows}>
                       {' · '}
-                      {t('не пришёл {count}', {
-                        count: t.count(client.noShows, ['раз', 'раза', 'раз']),
+                      {t('no-show {count}', {
+                        count: t.count(client.noShows, ['time', 'times']),
                       })}
                     </span>
                   )}
@@ -175,20 +174,20 @@ export const NewBookingDialog = ({
 
   return (
     <Sheet
-      title={t('Новая запись')}
+      title={t('New booking')}
       onClose={onClose}
-      action={{ label: t('Добавить'), form: FORM_ID, disabled: isSubmitting || !canSubmit }}
+      action={{ label: t('Add'), form: FORM_ID, disabled: isSubmitting || !canSubmit }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Визит')}>
+        <section className={sheet.group} aria-label={t('Visit')}>
           <SectionCaption>{dayLabel}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Мастер')}</span>
+              <span className={sheet.rowLabel}>{t('Specialist')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Мастер')}
+                  aria-label={t('Specialist')}
                   items={specialists.map(({ id, name: label }) => ({ value: id, label }))}
                   value={specialistId}
                   onValueChange={(value) => value && setSpecialistId(value)}
@@ -196,28 +195,28 @@ export const NewBookingDialog = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Услуга')}</span>
+              <span className={sheet.rowLabel}>{t('Service')}</span>
               <span className={sheet.rowControl}>
                 {offered.length > 0 ? (
                   <Select
                     variant='plain'
-                    aria-label={t('Услуга')}
+                    aria-label={t('Service')}
                     items={offered.map(({ id, name: label }) => ({ value: id, label }))}
                     value={service?.id ?? null}
                     onValueChange={(value) => value && setServiceId(value)}
                   />
                 ) : (
-                  <span className={sheet.rowHint}>{t('Нет услуг')}</span>
+                  <span className={sheet.rowHint}>{t('No services')}</span>
                 )}
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Время')}</span>
+              <span className={sheet.rowLabel}>{t('Time')}</span>
               <span className={sheet.rowControl}>
                 {freeTimes.length > 0 ? (
                   <Select
                     variant='plain'
-                    aria-label={t('Время')}
+                    aria-label={t('Time')}
                     items={freeTimes.map((value) => ({ value, label: value }))}
                     value={selectedTime}
                     onValueChange={(value) => value && setTime(value)}
@@ -233,15 +232,15 @@ export const NewBookingDialog = ({
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Клиент')}>
-          <SectionCaption>{t('Клиент')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Client')}>
+          <SectionCaption>{t('Client')}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Имя')}</span>
+              <span className={sheet.rowLabel}>{t('Name')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  placeholder={t('Как зовут')}
+                  placeholder={t('Name')}
                   value={name}
                   onValueChange={typeName}
                   maxLength={120}
@@ -251,7 +250,7 @@ export const NewBookingDialog = ({
             </label>
             {renderSuggestions('name')}
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Телефон')}</span>
+              <span className={sheet.rowLabel}>{t('Phone')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
@@ -270,8 +269,8 @@ export const NewBookingDialog = ({
             <div className={`${sheet.row} ${sheet.textRow}`}>
               <textarea
                 className={styles.comment}
-                aria-label={t('Комментарий')}
-                placeholder={t('Комментарий, если нужен')}
+                aria-label={t('Comment')}
+                placeholder={t('Comment, if needed')}
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
                 onFocus={() => setTyping(null)}

@@ -10,5 +10,5 @@ interface ServicesCountProps {
 // The card itself renders on the server too; only the counted word needs the chosen language.
 export const ServicesCount = ({ count, className }: ServicesCountProps) => {
   const t = useT()
-  return <span className={className}>{t.count(count, ['услуга', 'услуги', 'услуг'])}</span>
+  return <span className={className}>{t.count(count, ['service', 'services'])}</span>
 }

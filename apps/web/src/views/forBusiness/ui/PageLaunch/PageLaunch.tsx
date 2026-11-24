@@ -55,7 +55,7 @@ export const PageLaunch = ({ name, slug, onDone }: PageLaunchProps) => {
         <BusinessTile name={name} size='lg' className={styles.tile} />
         <span className={styles.name}>{name}</span>
         <span className={styles.note}>
-          {t('Страница готова')} · awaisa.kg/{slug}
+          {t('Your page is ready')} · awaisa.kg/{slug}
         </span>
       </span>
     </output>,

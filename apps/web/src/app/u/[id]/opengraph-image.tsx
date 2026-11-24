@@ -76,7 +76,7 @@ const ProfileOgImage = async ({ params }: { params: Promise<{ id: string }> }) =
         )}
       </div>
       <div style={{ display: 'flex', marginTop: 28, fontSize: 64, fontWeight: 700 }}>
-        {profile?.name ?? 'Профиль'}
+        {profile?.name ?? 'Profile'}
       </div>
       <div style={{ display: 'flex', marginTop: 8, fontSize: 30, color: '#a1a1a6' }}>
         {profile

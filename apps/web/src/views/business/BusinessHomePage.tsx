@@ -51,7 +51,7 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
       {/* The business bar shows this trail; search engines get it as markup. */}
       <JsonLd
         data={breadcrumbJsonLd([
-          { label: 'Каталог', href: '/' },
+          { label: 'Catalogue', href: '/' },
           { label: business.name, href: `/${business.slug}` },
         ])}
       />

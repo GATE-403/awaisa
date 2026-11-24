@@ -24,13 +24,13 @@ const getPermission = () => ('Notification' in window ? Notification.permission 
 
 const formatWait = (minutes: number, t: Translate) => {
   if (minutes < 60) {
-    return t('через {time}', { time: t.count(minutes, ['минуту', 'минуты', 'минут']) })
+    return t('in {time}', { time: t.count(minutes, ['minute', 'minutes']) })
   }
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
 
-  return t('через {time}', {
-    time: rest === 0 ? t.count(hours, ['час', 'часа', 'часов']) : t.duration(minutes),
+  return t('in {time}', {
+    time: rest === 0 ? t.count(hours, ['hour', 'hours']) : t.duration(minutes),
   })
 }
 
@@ -66,7 +66,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
   const enableNotifications = async () => {
     if (push.state === 'install') {
       toast.show({
-        title: t('Уведомления на iPhone'),
+        title: t('Notifications on iPhone'),
         description: t(INSTALL_HINT),
         type: 'info',
       })
@@ -78,16 +78,16 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
     }
     try {
       const isOn = await push.enable()
-      if (isOn) toast.show({ title: t('Уведомления включены'), type: 'success' })
+      if (isOn) toast.show({ title: t('Notifications on'), type: 'success' })
     } catch {
-      toast.show({ title: t('Не получилось включить уведомления'), type: 'error' })
+      toast.show({ title: t('Could not turn on notifications'), type: 'error' })
     }
   }
 
   return (
     // One slim row over the day: who is in the chair and who is next, as capsules that open their
     // visit - the day's own cards say the rest.
-    <section className={styles.bar} aria-label={t('Сейчас')}>
+    <section className={styles.bar} aria-label={t('Now')}>
       {current && (
         <button
           type='button'
@@ -96,9 +96,9 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           onClick={() => onOpen(current)}
         >
           <HourglassMedium className={styles.glyph} aria-hidden />
-          <span className={styles.srOnly}>{t('Сейчас')}: </span>
+          <span className={styles.srOnly}>{t('Now')}: </span>
           <span className={styles.who}>{current.customerName}</span>
-          <span className={styles.meta}>{t('ещё {count} мин', { count: left })}</span>
+          <span className={styles.meta}>{t('{count} min left', { count: left })}</span>
         </button>
       )}
       {next && (
@@ -110,7 +110,7 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             onClick={() => onOpen(next)}
           >
             <Clock className={styles.glyph} aria-hidden />
-            <span className={styles.srOnly}>{t('Далее')}: </span>
+            <span className={styles.srOnly}>{t('Next')}: </span>
             <span className={styles.who}>
               {next.time} {next.customerName}
             </span>
@@ -120,8 +120,8 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
             <a
               href={`tel:${next.customerPhone}`}
               className={styles.call}
-              aria-label={t('Позвонить: {name}', { name: next.customerName })}
-              title={t('Позвонить')}
+              aria-label={t('Call {name}', { name: next.customerName })}
+              title={t('Call')}
             >
               <Phone aria-hidden />
             </a>
@@ -133,10 +133,10 @@ export const NowBar = ({ bookings, nowMinutes, onOpen }: NowBarProps) => {
           type='button'
           className={styles.notify}
           onClick={() => void enableNotifications()}
-          title={t('Уведомлять о новых записях')}
+          title={t('Notify me of new bookings')}
         >
           <Bell aria-hidden />
-          <span className={styles.srOnly}>{t('Уведомлять о записях')}</span>
+          <span className={styles.srOnly}>{t('Notify about bookings')}</span>
         </button>
       )}
     </section>

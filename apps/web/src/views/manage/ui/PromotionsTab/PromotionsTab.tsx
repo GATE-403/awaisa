@@ -26,9 +26,9 @@ interface PromotionsTabProps {
 }
 
 const KIND_LABEL: Record<Promotion['kind'], string> = {
-  happy_hours: 'Скидка по часам',
-  first_visit: 'Первый визит',
-  promo_code: 'Промокод',
+  happy_hours: 'Happy hours',
+  first_visit: 'First visit',
+  promo_code: 'Promo code',
 }
 
 // «Акции»: discounts the business runs - by hours, for first visits, by promo code.
@@ -52,12 +52,12 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
     try {
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
-      toast.show({ title: t('Акция сохранена'), type: 'success' })
+      toast.show({ title: t('Promotion saved'), type: 'success' })
       await load()
       void refreshBusiness(slug)
       return true
     } catch (error) {
-      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -65,33 +65,39 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   const remove = async (promotion: Promotion) => {
     try {
       await deletePromotion(slug, promotion.id)
-      toast.show({ title: t('Акция удалена'), type: 'success' })
+      toast.show({ title: t('Promotion deleted'), type: 'success' })
       await load()
       void refreshBusiness(slug)
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
   return (
-    <section className={styles.section} aria-label={t('Акции')}>
+    <section className={styles.section} aria-label={t('Promotions')}>
       <SectionHeader
-        title={t('Акции')}
-        description={t('Скидки не суммируются - клиент получает самую большую.')}
+        title={t('Promotions')}
+        description={t('Discounts don’t add up: the client gets the biggest one.')}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             <Plus aria-hidden />
-            {t('Новая акция')}
+            {t('New promotion')}
           </Button>
         }
       />
 
       {promotions?.length === 0 && (
         <EmptyState
-          title={t('Запустите первую акцию')}
-          text={t('Заполните тихие часы скидкой, приведите новых клиентов или раздайте промокод.')}
-          action={<Button onClick={() => setEditing('new')}>{t('Новая акция')}</Button>}
+          title={t('Launch your first promotion')}
+          text={t(
+            'Fill quiet hours with a discount, bring in new clients or hand out a promo code.',
+          )}
+          action={<Button onClick={() => setEditing('new')}>{t('New promotion')}</Button>}
         />
       )}
 
@@ -112,13 +118,15 @@ export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
                   </span>
                   <span className={styles.rowMeta}>
                     {[
-                      !promotion.isActive && t('Выключена'),
+                      !promotion.isActive && t('Off'),
                       t(KIND_LABEL[promotion.kind]),
                       promotion.kind === 'promo_code'
                         ? promotion.code
                         : describePromotion(promotion),
                       promotion.endsOn &&
-                        t('до {date}', { date: promotion.endsOn.split('-').reverse().join('.') }),
+                        t('until {date}', {
+                          date: promotion.endsOn.split('-').reverse().join('.'),
+                        }),
                     ]
                       .filter(Boolean)
                       .join(' · ')}

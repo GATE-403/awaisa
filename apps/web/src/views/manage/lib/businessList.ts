@@ -1,6 +1,6 @@
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { pluralize } from '@/shared/lib/plural'
 import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 
 // «Мои бизнесы»: what waits in a business, the order of the list and its search (pure,
@@ -18,37 +18,27 @@ const RECENT_LIMIT = 20
 /** One short line per thing that waits, most urgent first; nothing for zero. */
 const attentionItems = (attention: BusinessAttention | undefined, t?: Translate) => {
   if (!attention) return []
-  const count = (value: number, forms: [string, string, string]) =>
+  const count = (value: number, forms: [string, string]) =>
     t ? t.count(value, forms) : pluralize(value, forms)
   const items: AttentionItem[] = []
   if (attention.unmarkedVisits > 0) {
     items.push({
       key: 'unmarkedVisits',
-      text: `${count(attention.unmarkedVisits, ['визит', 'визита', 'визитов'])} ${t ? t('без отметки') : 'без отметки'}`,
+      text: `${count(attention.unmarkedVisits, ['visit', 'visits'])} ${t ? t('unmarked') : 'unmarked'}`,
       tab: 'schedule',
     })
   }
   if (attention.unansweredReviews > 0) {
     items.push({
       key: 'unansweredReviews',
-      text: `${count(attention.unansweredReviews, ['отзыв', 'отзыва', 'отзывов'])} ${t ? t('без ответа') : 'без ответа'}`,
+      text: `${count(attention.unansweredReviews, ['review', 'reviews'])} ${t ? t('unanswered') : 'unanswered'}`,
       tab: 'reviews',
     })
   }
   if (attention.failedReceipts > 0) {
     items.push({
       key: 'failedReceipts',
-      // «1 чек не прошёл», «2 чека не прошли»: the verb follows the number too.
-      text: `${count(attention.failedReceipts, ['чек', 'чека', 'чеков'])} ${
-        pluralWord(attention.failedReceipts, ['не прошёл', 'не прошли', 'не прошли']) ===
-        'не прошёл'
-          ? t
-            ? t('не прошёл')
-            : 'не прошёл'
-          : t
-            ? t('не прошли')
-            : 'не прошли'
-      }`,
+      text: `${count(attention.failedReceipts, ['receipt', 'receipts'])} failed`,
       tab: 'fiscal',
     })
   }
@@ -139,9 +129,9 @@ type StatusLine =
   | { kind: 'share' }
 
 const SETUP_TEXTS: Record<'services' | 'masters' | 'hours', string> = {
-  services: 'Добавьте услуги',
-  masters: 'Добавьте мастеров',
-  hours: 'Проверьте график',
+  services: 'Add services',
+  masters: 'Add specialists',
+  hours: 'Check the opening hours',
 }
 
 /**

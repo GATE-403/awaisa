@@ -37,8 +37,8 @@ const TAP_SLOP = 12
 
 const distanceText = (t: Translate, km: number | null) => {
   if (km === null) return ''
-  if (km < 1) return ` · ${t('{count} м', { count: Math.round(km * 1000) })}`
-  return ` · ${t('{count} км', { count: km })}`
+  if (km < 1) return ` · ${t('{count} m', { count: Math.round(km * 1000) })}`
+  return ` · ${t('{count} km', { count: km })}`
 }
 
 // One look as a card of the hand: the picture is the card, who made it, the service and its price
@@ -110,8 +110,8 @@ export const FeedCard = ({
           {...gridImage(item.url, DECK_IMAGE)}
           alt={
             service
-              ? t('Работа: {name}', { name: service.name })
-              : t('Работа в {name}', { name: business.name })
+              ? t('Work: {name}', { name: service.name })
+              : t('Work at {name}', { name: business.name })
           }
           className={styles.photo}
           loading='eager'
@@ -141,9 +141,7 @@ export const FeedCard = ({
             href={masterHref}
             className={styles.bylineFace}
             aria-label={
-              specialist
-                ? t('Записаться к мастеру {name}', { name: specialist.name })
-                : business.name
+              specialist ? t('Book with {name}', { name: specialist.name }) : business.name
             }
           >
             {specialist ? (
@@ -179,7 +177,7 @@ export const FeedCard = ({
             {item.isFromClient && (
               <>
                 {service && <span className={styles.metaDot}>·</span>}
-                {t('Фото клиента')}
+                {t('Client’s photo')}
               </>
             )}
           </p>

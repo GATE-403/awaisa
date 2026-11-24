@@ -8,7 +8,7 @@ import { MarkUpdatesSeen } from './ui/MarkUpdatesSeen'
 
 const AUDIENCE_LABELS: Record<UpdateAudience, string | null> = {
   clients: 'Для клиентов',
-  business: 'Для бизнеса',
+  business: 'For business',
   everyone: null,
 }
 

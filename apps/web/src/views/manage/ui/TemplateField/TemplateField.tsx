@@ -63,18 +63,15 @@ export const TemplateField = ({
   const fieldRef = useRef<HTMLDivElement>(null)
   // The last text this field reported, so a re-render from its own typing never resets the caret.
   const reported = useRef<string | null>(null)
-  // The language the pills were drawn in: another one redraws them with its labels.
-  const drawnIn = useRef<string | null>(null)
   const labelled = tokens.map((token) => ({ ...token, label: t(token.label) }))
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `labelled` is new each render; the language decides it
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `labelled` is new each render
   useEffect(() => {
     const field = fieldRef.current
-    if (!field || (value === reported.current && drawnIn.current === t.language)) return
+    if (!field || value === reported.current) return
     field.innerHTML = toHtml(value, labelled)
     reported.current = value
-    drawnIn.current = t.language
-  }, [value, tokens, t])
+  }, [value, tokens])
 
   const report = () => {
     const field = fieldRef.current

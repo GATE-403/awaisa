@@ -30,12 +30,12 @@ export const TrustRow = () => {
   const items = isMarquee ? [...places, ...places, ...places] : places
 
   return (
-    <section className={styles.trust} aria-label={t('Уже на Awaisa')}>
+    <section className={styles.trust} aria-label={t('Already on Awaisa')}>
       <p className={styles.trustCaption}>
         {t(
           places.length > 0
-            ? 'Салоны, барбершопы и студии Бишкека. Уже на Awaisa:'
-            : 'Салоны, барбершопы и студии Бишкека. Уже на Awaisa.',
+            ? 'Salons, barbershops and studios in Bishkek. Already on Awaisa:'
+            : 'Salons, barbershops and studios in Bishkek. Already on Awaisa.',
         )}
       </p>
       {items.length > 0 && (

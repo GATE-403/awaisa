@@ -34,9 +34,8 @@ interface MasterStatsSheetProps {
   onClose: () => void
 }
 
-const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
-const workDays = (t: Translate, count: number) =>
-  t.count(count, ['рабочий день', 'рабочих дня', 'рабочих дней'])
+const visits = (t: Translate, count: number) => t.count(count, ['visit', 'visits'])
+const workDays = (t: Translate, count: number) => t.count(count, ['working day', 'working days'])
 const digits = (value: string) => value.replace(/\D/g, '')
 
 // One master's period in the quiet profile style: the face, the name, one line of bold facts, how
@@ -65,7 +64,11 @@ export const MasterStatsSheet = ({
       : null
 
   const fail = (error: unknown) =>
-    toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+    toast.show({
+      title: t('Something went wrong'),
+      description: getErrorMessage(error),
+      type: 'error',
+    })
 
   const restore = async (removed: MasterPayout) => {
     try {
@@ -88,9 +91,9 @@ export const MasterStatsSheet = ({
       await removeMasterPayout(slug, item.id)
       onPayoutsChange()
       toast.show({
-        title: t('Выплата отменена'),
+        title: t('Payout cancelled'),
         description: formatMoney(item.amount),
-        action: { label: t('Вернуть'), onClick: () => void restore(item) },
+        action: { label: t('Undo'), onClick: () => void restore(item) },
       })
     } catch (error) {
       fail(error)
@@ -118,11 +121,11 @@ export const MasterStatsSheet = ({
       setPayout(null)
       onPayoutsChange()
       toast.show({
-        title: t('Выплата отмечена'),
+        title: t('Payout marked'),
         description: `${master.name} · ${formatMoney(amount)}`,
         type: 'success',
         action: {
-          label: t('Вернуть'),
+          label: t('Undo'),
           onClick: () => void removeMasterPayout(slug, added.id).then(onPayoutsChange).catch(fail),
         },
       })
@@ -134,13 +137,13 @@ export const MasterStatsSheet = ({
   }
 
   return (
-    <Sheet title={master.name} onClose={onClose} cancelLabel={t('Закрыть')}>
+    <Sheet title={master.name} onClose={onClose} cancelLabel={t('Close')}>
       <div className={sheet.form}>
         <div className={styles.masterHead}>
           <PersonAvatar name={master.name} size='lg' />
           <p className={styles.masterFacts}>
             <b>{visits(t, master.visits)}</b> · <b>{formatMoney(master.revenue)}</b> ·{' '}
-            <Filled text={t('загрузка {load}')} parts={{ load: <b>{master.load}%</b> }} />
+            <Filled text={t('load {load}')} parts={{ load: <b>{master.load}%</b> }} />
             {master.rating !== null && (
               <>
                 {' '}
@@ -157,31 +160,29 @@ export const MasterStatsSheet = ({
           )}
         </div>
 
-        <section className={sheet.group} aria-label={t('Показатели')}>
+        <section className={sheet.group} aria-label={t('Figures')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Возвращаются к мастеру')}</span>
+              <span className={sheet.rowLabel}>{t('Come back to them')}</span>
               <span className={styles.sheetValue}>
-                {master.retention === null ? t('мало данных') : `${master.retention}%`}
+                {master.retention === null ? t('too little data') : `${master.retention}%`}
               </span>
             </div>
             {master.reviews > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Отзывы за период')}</span>
+                <span className={sheet.rowLabel}>{t('Reviews for the period')}</span>
                 <span className={styles.sheetValue}>{master.reviews}</span>
               </div>
             )}
           </div>
           <p className={sheet.groupFooter}>
-            {t(
-              'Возвращаются: клиенты, которые снова записались к этому мастеру в течение 6 недель.',
-            )}
+            {t('Come back: clients who booked this specialist again within 6 weeks.')}
           </p>
         </section>
 
         {pay && (
           <section className={sheet.group} aria-labelledby='master-pay'>
-            <SectionCaption id='master-pay'>{t('Зарплата за период')}</SectionCaption>
+            <SectionCaption id='master-pay'>{t('Pay for the period')}</SectionCaption>
             <div className={sheet.list}>
               {pay.lines.map((line) => (
                 <div key={line.serviceId} className={sheet.row}>
@@ -197,10 +198,10 @@ export const MasterStatsSheet = ({
               {pay.productsSold > 0 && (
                 <div className={sheet.row}>
                   <span className={styles.payLabel}>
-                    {t('Товары')}
+                    {t('Products')}
                     <span className={sheet.rowHint}>
-                      {t('продал на {amount}', { amount: formatMoney(pay.productsSold) })}
-                      {pay.products === 0 && ` · ${t('без процента')}`}
+                      {t('sold {amount}', { amount: formatMoney(pay.productsSold) })}
+                      {pay.products === 0 && ` · ${t('no percent')}`}
                     </span>
                   </span>
                   <span className={styles.sheetValue}>{formatMoney(pay.products)}</span>
@@ -209,9 +210,11 @@ export const MasterStatsSheet = ({
               {pay.salaryKind && (
                 <div className={sheet.row}>
                   <span className={styles.payLabel}>
-                    {t('Оклад')}
+                    {t('Salary')}
                     <span className={sheet.rowHint}>
-                      {pay.salaryKind === 'day' ? workDays(t, pay.workDays) : t('в месяц, по дням')}
+                      {pay.salaryKind === 'day'
+                        ? workDays(t, pay.workDays)
+                        : t('per month, by day')}
                     </span>
                   </span>
                   <span className={styles.sheetValue}>{formatMoney(pay.salary)}</span>
@@ -219,28 +222,28 @@ export const MasterStatsSheet = ({
               )}
               {pay.minimum !== null && (
                 <div className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Минимум за период')}</span>
+                  <span className={sheet.rowLabel}>{t('Minimum for the period')}</span>
                   <span className={styles.sheetValue}>{formatMoney(pay.minimum)}</span>
                 </div>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Начислено')}</span>
+                <span className={sheet.rowLabel}>{t('Earned')}</span>
                 <span className={styles.payTotal}>{formatMoney(pay.total)}</span>
               </div>
               {pay.paid > 0 && (
                 <div className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Выплачено')}</span>
+                  <span className={sheet.rowLabel}>{t('Paid out')}</span>
                   <span className={styles.sheetValue}>{formatMoney(pay.paid)}</span>
                 </div>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('К выплате')}</span>
+                <span className={sheet.rowLabel}>{t('Due')}</span>
                 <span className={styles.payTotal}>{formatMoney(pay.due)}</span>
               </div>
             </div>
             {pay.total > pay.earned && (
               <RowNote>
-                {t('Заработано {amount}, меньше минимума: выплачивается минимум.', {
+                {t('Earned {amount}, under the minimum: the minimum is paid.', {
                   amount: formatMoney(pay.earned),
                 })}
               </RowNote>
@@ -250,7 +253,7 @@ export const MasterStatsSheet = ({
 
         {pay && pay.payouts.length > 0 && (
           <section className={sheet.group} aria-labelledby='master-payouts'>
-            <SectionCaption id='master-payouts'>{t('Выплаты')}</SectionCaption>
+            <SectionCaption id='master-payouts'>{t('Payouts')}</SectionCaption>
             <div className={sheet.list}>
               {pay.payouts.map((item) => (
                 <div key={item.id} className={sheet.row}>
@@ -265,11 +268,11 @@ export const MasterStatsSheet = ({
                     type='button'
                     className={sheet.groupLink}
                     onClick={() => void undo(item)}
-                    aria-label={t('Отменить выплату {amount}', {
+                    aria-label={t('Cancel payout of {amount}', {
                       amount: formatMoney(item.amount),
                     })}
                   >
-                    {t('Отменить')}
+                    {t('Cancel')}
                   </button>
                 </div>
               ))}
@@ -279,28 +282,28 @@ export const MasterStatsSheet = ({
 
         {pay && payout && (
           <section className={sheet.group} aria-labelledby='master-payout'>
-            <SectionCaption id='master-payout'>{t('Выплата')}</SectionCaption>
+            <SectionCaption id='master-payout'>{t('Payout')}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Сумма')}</span>
+                <span className={sheet.rowLabel}>{t('Amount')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Сумма выплаты')}
+                    aria-label={t('Payout amount')}
                     value={payout.amount}
                     onValueChange={(value) =>
                       setPayout({ ...payout, amount: maskAmountInput(digits(value)) })
                     }
                     autoFocus
                   />
-                  <span className={sheet.suffix}>{t('сом')}</span>
+                  <span className={sheet.suffix}>{t('som')}</span>
                 </span>
               </label>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Дата')}</span>
+                <span className={sheet.rowLabel}>{t('Date')}</span>
                 <DateField
-                  label={t('Дата выплаты')}
+                  label={t('Payout date')}
                   value={payout.paidOn}
                   onChange={(paidOn) => setPayout({ ...payout, paidOn })}
                 />
@@ -308,8 +311,8 @@ export const MasterStatsSheet = ({
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label={t('Комментарий к выплате')}
-                  placeholder={t('Комментарий, например «аванс»')}
+                  aria-label={t('Payout comment')}
+                  placeholder={t('Comment, e.g. «advance»')}
                   value={payout.note}
                   maxLength={200}
                   onValueChange={(note) => setPayout({ ...payout, note })}
@@ -317,7 +320,7 @@ export const MasterStatsSheet = ({
               </div>
             </div>
             <p className={sheet.groupFooter}>
-              {t('За период с {from} по {to}', {
+              {t('For {from} to {to}', {
                 from: formatDay(period.from),
                 to: formatDay(period.to),
               })}
@@ -327,7 +330,7 @@ export const MasterStatsSheet = ({
 
         {master.topServices.length > 0 && (
           <section className={sheet.group} aria-labelledby='master-top-services'>
-            <SectionCaption id='master-top-services'>{t('Чаще всего')}</SectionCaption>
+            <SectionCaption id='master-top-services'>{t('Most often')}</SectionCaption>
             <div className={sheet.list}>
               {master.topServices.map((service) => (
                 <div key={service.name} className={sheet.row}>
@@ -343,10 +346,10 @@ export const MasterStatsSheet = ({
           // The sheet's one main action, last and as wide as the groups above it.
           <Button fullWidth onClick={() => void markPaid()} disabled={isSaving}>
             {payout
-              ? t('Выплатить {amount}', {
-                  amount: t('{amount} сом', { amount: payout.amount || '0' }),
+              ? t('Pay {amount}', {
+                  amount: t('{amount} som', { amount: payout.amount || '0' }),
                 })
-              : t('Отметить выплату {amount}', { amount: formatMoney(pay.due) })}
+              : t('Mark payout of {amount}', { amount: formatMoney(pay.due) })}
           </Button>
         )}
       </div>

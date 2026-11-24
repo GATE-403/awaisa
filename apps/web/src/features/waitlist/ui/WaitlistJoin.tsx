@@ -81,7 +81,7 @@ export const WaitlistJoin = ({
     // Field errors sit under their field and mark it invalid; the alert below the form is for
     // what the server says.
     if (!name.trim()) {
-      setFieldError({ field: 'name', message: 'Укажите имя' })
+      setFieldError({ field: 'name', message: 'Enter a name' })
       trackFormError('waitlist_name')
       return
     }
@@ -138,10 +138,10 @@ export const WaitlistJoin = ({
       </Button>
       {isOpen && (
         <Sheet
-          title='Лист ожидания'
+          title='Waitlist'
           onClose={() => setIsOpen(false)}
           action={{
-            label: isSending ? 'Отправляем…' : 'Готово',
+            label: isSending ? 'Sending…' : 'Done',
             form: FORM_ID,
             disabled: isSending,
           }}
@@ -151,7 +151,7 @@ export const WaitlistJoin = ({
               {dayLabel}: если кто-то отменит запись, пришлём одно SMS со ссылкой на это время.
             </p>
             <Field
-              label='Имя'
+              label='Name'
               error={fieldError?.field === 'name' ? fieldError.message : undefined}
             >
               <Input value={name} onValueChange={setName} autoComplete='name' />
@@ -160,7 +160,7 @@ export const WaitlistJoin = ({
               <p className={styles.phone}>SMS придёт на {formatPhone(accountPhone)}</p>
             ) : (
               <Field
-                label='Телефон'
+                label='Phone'
                 error={fieldError?.field === 'phone' ? fieldError.message : undefined}
               >
                 <Input

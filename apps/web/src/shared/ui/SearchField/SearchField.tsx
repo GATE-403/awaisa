@@ -33,7 +33,7 @@ export const SearchField = ({ value, onChange, placeholder, label }: SearchField
           type='button'
           className={styles.clear}
           onClick={() => onChange('')}
-          aria-label={t('Очистить поиск')}
+          aria-label={t('Clear search')}
         >
           <X aria-hidden />
         </button>

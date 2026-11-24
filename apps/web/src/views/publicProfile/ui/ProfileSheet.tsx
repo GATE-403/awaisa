@@ -41,15 +41,15 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
 
   return (
     <Sheet
-      title={t('Профиль')}
-      cancelLabel={isEditing ? 'Отмена' : 'Закрыть'}
+      title={t('Profile')}
+      cancelLabel={isEditing ? 'Cancel' : 'Close'}
       onCancel={isEditing ? () => setIsEditing(false) : undefined}
       onClose={() => router.back()}
       barEnd={isEditing ? undefined : <span ref={setActionsSlot} />}
       action={
         isEditing
           ? {
-              label: isSaving ? t('Сохраняем…') : t('Готово'),
+              label: isSaving ? t('Saving…') : t('Done'),
               form: EDIT_FORM_ID,
               disabled: isSaving || !settings,
             }
@@ -63,7 +63,7 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
             formId={EDIT_FORM_ID}
             settings={settings}
             profile={myProfile.profile}
-            name={customer.name || t('Вы')}
+            name={customer.name || t('You')}
             avatarUrl={customer.avatarUrl ?? null}
             onSave={async (input) => {
               await myProfile.save(input)

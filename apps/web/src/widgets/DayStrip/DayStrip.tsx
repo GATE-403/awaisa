@@ -62,7 +62,7 @@ export const DayStrip = ({
   return (
     <div className={styles.strip} data-variant={variant}>
       <fieldset
-        aria-label={t('День')}
+        aria-label={t('Day')}
         className={styles.days}
         ref={daysRef}
         data-edge-fade={variant === 'compact' || undefined}
@@ -91,11 +91,11 @@ export const DayStrip = ({
             )}
             {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
-              {`, ${t.language === 'ru' ? day.label : t.dayLong(day.key)}${
-                marks?.has(day.key) ? `, ${t('есть незакрытые визиты')}` : ''
+              {`, ${t.dayLong(day.key)}${
+                marks?.has(day.key) ? `, ${t('has unclosed visits')}` : ''
               }${
                 loads?.has(day.key)
-                  ? `, ${t('занято на {percent}%', {
+                  ? `, ${t('{percent}% booked', {
                       percent: Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100),
                     })}`
                   : ''
@@ -118,7 +118,7 @@ export const DayStrip = ({
           }}
           disabled={variant === 'default' && value === today.key}
         >
-          {t('Сегодня')}
+          {t('Today')}
         </button>
       )}
     </div>

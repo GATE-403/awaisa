@@ -13,7 +13,7 @@ export const Stars = ({ rating }: StarsProps) => {
   const t = useT()
 
   return (
-    <span className={styles.stars} role='img' aria-label={t('{rating} из 5', { rating })}>
+    <span className={styles.stars} role='img' aria-label={t('{rating} of 5', { rating })}>
       {[1, 2, 3, 4, 5].map((value) => (
         <Star key={value} weight={value <= Math.round(rating) ? 'fill' : 'regular'} aria-hidden />
       ))}

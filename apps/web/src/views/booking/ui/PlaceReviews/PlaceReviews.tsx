@@ -52,7 +52,7 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
     <section className={styles.reviews} aria-labelledby='booking-reviews'>
       <div className={styles.head}>
         <h2 id='booking-reviews' className={styles.title}>
-          {t('Отзывы')}
+          {t('Reviews')}
           {isForService && service && <span className={styles.about}> · {service.name}</span>}
         </h2>
       </div>
@@ -60,7 +60,7 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         <Star weight='fill' aria-hidden className={styles.star} />
         <strong>{summary.average.toLocaleString('ru-RU')}</strong>
         {' · '}
-        {t.count(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
+        {t.count(summary.count, ['review', 'reviews'])}
       </p>
       <MoreFade
         hiddenCount={Math.min(summary.items.length, OPENED) - SHOWN}
@@ -68,7 +68,7 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         isLessFloating={false}
         onToggle={() => setIsOpen((current) => !current)}
         label={t
-          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['отзыв', 'отзыва', 'отзывов'])
+          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['review', 'reviews'])
           .split(' ')
           .slice(1)
           .join(' ')}

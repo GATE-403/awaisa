@@ -18,7 +18,7 @@ export const ServicesSkeleton = () => (
   >
     <Container className={styles.hero}>
       <p className={styles.title}>
-        <T>Услуги и цены</T>{' '}
+        <T>Services and prices</T>{' '}
         <span className={styles.titleMuted}>
           <TextLine chars={7} />
         </span>

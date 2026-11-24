@@ -27,8 +27,8 @@ const whenLabel = (date: string, today: { dayKey: string }) => {
   const days = Math.round(
     (Date.parse(`${today.dayKey}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / DAY_MS,
   )
-  if (days <= 0) return 'сегодня'
-  if (days === 1) return 'вчера'
+  if (days <= 0) return 'today'
+  if (days === 1) return 'yesterday'
   return null
 }
 
@@ -77,21 +77,21 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
   return (
     <section className={styles.card} aria-labelledby='rate-recent-title'>
       <h2 id='rate-recent-title' className={styles.title}>
-        {t('Как прошло?')}
+        {t('How was it?')}
       </h2>
       <p className={styles.meta}>
         {[visit.serviceName, firstName, visit.business.name, when].filter(Boolean).join(' · ')}
       </p>
       <div className={styles.row}>
         <fieldset className={styles.stars}>
-          <legend className={styles.legend}>{t('Оценка визита')}</legend>
+          <legend className={styles.legend}>{t('Rate the visit')}</legend>
           {[1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
               type='button'
               className={styles.star}
               data-on={value <= picked || undefined}
-              aria-label={t('{value} из 5', { value })}
+              aria-label={t('{value} of 5', { value })}
               onClick={() => setPicked(value)}
             >
               <Star weight={value <= picked ? 'fill' : 'regular'} aria-hidden />
@@ -99,7 +99,7 @@ export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
           ))}
         </fieldset>
         <button type='button' className={styles.later} onClick={handleDismiss}>
-          {t('Не сейчас')}
+          {t('Not now')}
         </button>
       </div>
       {picked > 0 && (

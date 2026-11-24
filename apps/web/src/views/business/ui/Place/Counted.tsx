@@ -4,7 +4,7 @@ import { useT } from '@/shared/i18n'
 
 interface CountedProps {
   count: number
-  forms: [one: string, few: string, many: string]
+  forms: [one: string, other: string]
   /** The word alone, for layouts that show the number separately (bold «6» over «услуг»). */
   isWordOnly?: boolean
 }

@@ -7,9 +7,9 @@ const russian: Tr = (text, vars) =>
   vars ? text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars[key] ?? match)) : text
 
 const TAX_REGIMES: { value: TaxRegime; label: string }[] = [
-  { value: 'general', label: 'Общий' },
-  { value: 'single', label: 'Единый налог' },
-  { value: 'patent', label: 'Патент' },
+  { value: 'general', label: 'General' },
+  { value: 'single', label: 'Single tax' },
+  { value: 'patent', label: 'Patent' },
 ]
 
 /** НсП by the Tax Code (ст. 368): lower for VAT payers, lower on goods than on services. */
@@ -22,8 +22,8 @@ const formatRate = (value: number) => `${String(value).replace('.', ',')}%`
 
 /** «НсП: услуги 2% · товары 1%» in one value. */
 const describeTaxes = (settings: FiscalSettings, t: Tr = russian) => ({
-  vat: settings.isVatPayer ? formatRate(settings.vatRate) : t('Не плательщик'),
-  salesTax: t('услуги {services} · товары {goods}', {
+  vat: settings.isVatPayer ? formatRate(settings.vatRate) : t('Not a payer'),
+  salesTax: t('services {services} · goods {goods}', {
     services: formatRate(settings.salesTaxServices),
     goods: formatRate(settings.salesTaxGoods),
   }),

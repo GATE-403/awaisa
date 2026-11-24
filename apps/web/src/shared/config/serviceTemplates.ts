@@ -10,16 +10,16 @@ type ServiceTemplate = {
 // Starter menus with typical Bishkek prices: the owner unticks what they don't do and fixes prices.
 const SERVICE_TEMPLATES: Record<BusinessKind, ServiceTemplate[]> = {
   barber: [
-    { name: 'Мужская стрижка', durationMinutes: 45, price: 900, isPopular: true },
+    { name: "Men's haircut", durationMinutes: 45, price: 900, isPopular: true },
     { name: 'Стрижка машинкой', durationMinutes: 30, price: 600 },
-    { name: 'Борода', durationMinutes: 30, price: 500 },
-    { name: 'Стрижка и борода', durationMinutes: 75, price: 1300, isPopular: true },
+    { name: 'Beard', durationMinutes: 30, price: 500 },
+    { name: 'Haircut and beard', durationMinutes: 75, price: 1300, isPopular: true },
     { name: 'Детская стрижка', durationMinutes: 30, price: 600 },
     { name: 'Королевское бритьё', durationMinutes: 45, price: 800 },
   ],
   beauty: [
     { name: 'Женская стрижка', durationMinutes: 60, price: 1200, isPopular: true },
-    { name: 'Укладка', durationMinutes: 45, price: 900 },
+    { name: 'Styling', durationMinutes: 45, price: 900 },
     { name: 'Окрашивание в один тон', durationMinutes: 120, price: 3500 },
     { name: 'Мелирование', durationMinutes: 150, price: 4500 },
     { name: 'Брови: коррекция и окрашивание', durationMinutes: 45, price: 800, isPopular: true },
@@ -36,7 +36,7 @@ const SERVICE_TEMPLATES: Record<BusinessKind, ServiceTemplate[]> = {
     { name: 'Классический массаж', durationMinutes: 60, price: 2000, isPopular: true },
     { name: 'Массаж спины', durationMinutes: 30, price: 1200 },
     { name: 'Антицеллюлитный массаж', durationMinutes: 60, price: 2500 },
-    { name: 'Уход за лицом', durationMinutes: 60, price: 2200 },
+    { name: 'Facial care', durationMinutes: 60, price: 2200 },
     { name: 'SPA-программа', durationMinutes: 120, price: 4500 },
   ],
   health: [

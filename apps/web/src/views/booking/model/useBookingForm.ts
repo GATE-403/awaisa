@@ -325,9 +325,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= MIN_PHONE_DIGITS
   const errors = {
-    name: hasTriedSubmit && !name.trim() ? 'Укажите имя' : undefined,
+    name: hasTriedSubmit && !name.trim() ? 'Enter a name' : undefined,
     phone:
-      hasTriedSubmit && !isPhoneValid ? 'Укажите номер, чтобы мы подтвердили запись' : undefined,
+      hasTriedSubmit && !isPhoneValid ? 'Enter a number so we can confirm the booking' : undefined,
   }
   const firstIncompleteStep: BookingStepId | null = !service
     ? 'service'

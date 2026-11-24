@@ -85,16 +85,16 @@ export const GiftCertificateSheet = ({
 
   return (
     <Sheet
-      title='Сертификат'
+      title='Certificate'
       onClose={onClose}
       action={{
-        label: isPaying ? 'Секунду…' : 'Оплатить',
+        label: isPaying ? 'Секунду…' : 'Pay',
         form: FORM_ID,
         disabled: isPaying,
       }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit} noValidate>
-        <section className={sheet.group} aria-label='Сумма'>
+        <section className={sheet.group} aria-label='Amount'>
           {items.length <= SEGMENTS_MAX ? (
             <SegmentedControl
               label='Сумма сертификата'
@@ -120,7 +120,7 @@ export const GiftCertificateSheet = ({
           )}
         </section>
 
-        <section className={sheet.group} aria-label='Кому'>
+        <section className={sheet.group} aria-label='To'>
           <SectionCaption>Кому</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
@@ -143,8 +143,8 @@ export const GiftCertificateSheet = ({
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  aria-label='Телефон получателя'
-                  placeholder='необязательно'
+                  aria-label='Recipient’s phone'
+                  placeholder='optional'
                   autoComplete='off'
                   value={recipientPhone}
                   onValueChange={(value) => setRecipientPhone(maskPhoneInput(value))}
@@ -174,8 +174,8 @@ export const GiftCertificateSheet = ({
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label='Ваше имя'
-                  placeholder='Ваше имя'
+                  aria-label='Your name'
+                  placeholder='Your name'
                   autoComplete='given-name'
                   value={buyerName}
                   onValueChange={setBuyerName}

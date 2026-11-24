@@ -15,8 +15,8 @@ type QrMatrix = { size: number; dark: boolean[] }
 
 const TAX_REGIMES: Record<FiscalReceipt['taxRegime'], string> = {
   general: 'Общий режим',
-  single: 'Единый налог',
-  patent: 'Патент',
+  single: 'Single tax',
+  patent: 'Patent',
 }
 
 const moneyFormat = new Intl.NumberFormat('ru-RU', {
@@ -78,7 +78,7 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
         {receipt.inn && <span>ИНН {receipt.inn}</span>}
         <span>{TAX_REGIMES[receipt.taxRegime]}</span>
         <span className={styles.kind}>
-          {receipt.kind === 'refund' ? 'Возврат прихода' : 'Приход'}
+          {receipt.kind === 'refund' ? 'Возврат прихода' : 'Delivery'}
           {receipt.isTest && ' · тестовый'}
         </span>
       </header>
@@ -113,7 +113,7 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
           </div>
         )}
         <div>
-          <dt>{receipt.payment === 'cash' ? 'Наличными' : 'Безналичными'}</dt>
+          <dt>{receipt.payment === 'cash' ? 'Cash' : 'Безналичными'}</dt>
           <dd>{money(receipt.total)}</dd>
         </div>
       </dl>

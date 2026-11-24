@@ -79,33 +79,33 @@ interface StatProps {
 }
 
 const PERIODS: { value: `${AnalyticsDays}`; label: string }[] = [
-  { value: '7', label: 'Неделя' },
-  { value: '30', label: 'Месяц' },
-  { value: '90', label: 'Квартал' },
-  { value: '365', label: 'Год' },
+  { value: '7', label: 'Week' },
+  { value: '30', label: 'Month' },
+  { value: '90', label: 'Quarter' },
+  { value: '365', label: 'Year' },
 ]
 
 const COMPARED: Record<AnalyticsDays, string> = {
-  7: 'к прошлой неделе',
-  30: 'к прошлому месяцу',
-  90: 'к прошлому кварталу',
-  365: 'к прошлому году',
+  7: 'vs last week',
+  30: 'vs last month',
+  90: 'vs last quarter',
+  365: 'vs last year',
 }
 
 const SAME: Record<AnalyticsDays, string> = {
-  7: 'Как на прошлой неделе',
-  30: 'Как в прошлом месяце',
-  90: 'Как в прошлом квартале',
-  365: 'Как в прошлом году',
+  7: 'Same as last week',
+  30: 'Same as last month',
+  90: 'Same as last quarter',
+  365: 'Same as last year',
 }
 
-const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
+const visits = (t: Translate, count: number) => t.count(count, ['visit', 'visits'])
 
 // Direction is shown twice - arrow and sign - so it never relies on colour.
 const Delta = ({ value }: DeltaProps) => {
   const t = useT()
   if (value === null) {
-    return <span className={styles.deltaNone}>{t('нет данных для сравнения')}</span>
+    return <span className={styles.deltaNone}>{t('nothing to compare with')}</span>
   }
   const Icon = value >= 0 ? ArrowUpRight : ArrowDownRight
 
@@ -147,21 +147,21 @@ const Stat = ({ label, value, delta, trend, children }: StatProps) => {
 const toCsv = (report: AnalyticsReport, money: MoneyReport | null) => {
   const quote = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`
   const rows = [
-    ['Дата', 'Выручка', 'Визиты', 'Отмены'],
+    ['Date', 'Revenue', 'Visits', 'Cancellations'],
     ...report.daily.map((day) => [day.date, day.revenue, day.visits, day.cancelled]),
     [],
     [
-      'Мастер',
-      'Визиты',
-      'Выручка',
+      'Specialist',
+      'Visits',
+      'Revenue',
       'Процент',
-      'С услуг',
-      'С товаров',
-      'Оклад',
+      'From services',
+      'From products',
+      'Salary',
       'Минимум',
-      'Начислено',
-      'Выплачено',
-      'К выплате',
+      'Earned',
+      'Paid out',
+      'Due',
     ],
     ...report.masters.map((master) => [
       master.name,
@@ -177,29 +177,21 @@ const toCsv = (report: AnalyticsReport, money: MoneyReport | null) => {
       master.pay?.due ?? '',
     ]),
     [],
-    ['Клиент', 'Телефон', 'Визиты', 'Потратил', 'Последний визит', 'Новый'],
+    ['Client', 'Phone', 'Visits', 'Потратил', 'Последний визит', 'New'],
     ...report.clients.map((client) => [
       client.name,
       client.phone,
       client.visits,
       client.revenue,
       client.lastVisit,
-      client.isNew ? 'да' : 'нет',
+      client.isNew ? 'да' : 'none',
     ]),
     ...moneyCsvRows(money),
   ]
   return `﻿${rows.map((row) => row.map(quote).join(';')).join('\n')}`
 }
 
-const WEEKDAY_NAMES = [
-  'Понедельник',
-  'Вторник',
-  'Среда',
-  'Четверг',
-  'Пятница',
-  'Суббота',
-  'Воскресенье',
-]
+const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
 
 export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => {
@@ -235,7 +227,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
       setGoal(goal)
     } catch (goalError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(goalError),
         type: 'error',
       })
@@ -246,11 +238,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   const savePromotion = async (input: PromotionInput) => {
     try {
       await createPromotion(slug, input)
-      toast.show({ title: t('Акция создана'), type: 'success' })
+      toast.show({ title: t('Promotion created'), type: 'success' })
       return true
     } catch (promotionError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(promotionError),
         type: 'error',
       })
@@ -288,28 +280,28 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
   return (
     <section className={`${forms.section} ${styles.page}`}>
       <SectionHeader
-        title={t('Аналитика')}
+        title={t('Analytics')}
         description={
           report
-            ? t('{from} – {to} · по прошедшим визитам', {
+            ? t('{from} to {to} · past visits', {
                 from: formatDay(report.period.from),
                 to: formatDay(report.period.to),
               })
-            : t('Выручка, клиенты и загрузка')
+            : t('Revenue, clients and load')
         }
         actions={
           <FloatingToolbar className={styles.tools}>
             <SegmentedControl
               size='sm'
-              label={t('Период')}
+              label={t('Period')}
               value={String(days) as `${AnalyticsDays}`}
               items={PERIODS.map((period) => ({ ...period, label: t(period.label) }))}
               onChange={(value) => setDays(Number(value) as AnalyticsDays)}
             />
-            <GlyphGroup label={t('Отчёт')}>
+            <GlyphGroup label={t('Report')}>
               <GlyphButton
                 icon={<DownloadSimple />}
-                label={t('Скачать CSV')}
+                label={t('Download CSV')}
                 onClick={handleExport}
                 disabled={!report}
               />
@@ -323,9 +315,9 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
       {isEmpty && (
         <EmptyState
-          title={t('Визитов пока нет')}
+          title={t('No visits yet')}
           text={t(
-            'Поделитесь ссылкой на страницу, и здесь появятся выручка, клиенты и загрузка мастеров.',
+            'Share your page link, and revenue, clients and specialists’ load will show here.',
           )}
         />
       )}
@@ -338,10 +330,10 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
           {/* Money: the one number the tab leads with, what is booked ahead, its chart and how
               people paid. Right on the page, no card. */}
-          <section className={styles.revenue} aria-label={t('Выручка')}>
+          <section className={styles.revenue} aria-label={t('Revenue')}>
             <div className={styles.revenueTop}>
               <div className={styles.revenueHead}>
-                <span className={styles.label}>{t('Выручка')}</span>
+                <span className={styles.label}>{t('Revenue')}</span>
                 <span className={styles.revenueValue}>{formatMoney(totals.revenue)}</span>
                 <span className={styles.revenueMeta}>
                   <Delta value={totals.revenueChange} />
@@ -354,19 +346,19 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
               <dl className={styles.facts}>
                 {totals.upcomingVisits > 0 && (
                   <div className={styles.fact}>
-                    <dt className={styles.label}>{t('Впереди')}</dt>
+                    <dt className={styles.label}>{t('Ahead')}</dt>
                     <dd className={styles.factValue}>{formatMoney(totals.upcomingRevenue)}</dd>
                     <dd className={styles.muted}>
-                      {t('{visits} записано', { visits: visits(t, totals.upcomingVisits) })}
+                      {t('{visits} booked', { visits: visits(t, totals.upcomingVisits) })}
                     </dd>
                   </div>
                 )}
                 {totals.materialsCost > 0 && (
                   <div className={styles.fact}>
-                    <dt className={styles.label}>{t('Без материалов')}</dt>
+                    <dt className={styles.label}>{t('Less materials')}</dt>
                     <dd className={styles.factValue}>{formatMoney(totals.margin)}</dd>
                     <dd className={styles.muted}>
-                      {t('расходники {amount}', { amount: formatMoney(totals.materialsCost) })}
+                      {t('consumables {amount}', { amount: formatMoney(totals.materialsCost) })}
                     </dd>
                   </div>
                 )}
@@ -385,11 +377,11 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
           <section className={styles.group} aria-labelledby='analytics-visits'>
             <SectionCaption id='analytics-visits' isInset={false}>
-              {t('Визиты и клиенты')}
+              {t('Visits and clients')}
             </SectionCaption>
             <div className={styles.stats}>
               <Stat
-                label={t('Визиты')}
+                label={t('Visits')}
                 value={numberFormatter.format(totals.visits)}
                 delta={totals.visitsChange}
                 trend={{
@@ -399,7 +391,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                 }}
               />
               <Stat
-                label={t('Средний чек')}
+                label={t('Average bill')}
                 value={formatMoney(totals.averageCheck)}
                 delta={totals.averageCheckChange}
                 trend={{
@@ -410,12 +402,12 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                   format: formatMoney,
                 }}
               />
-              <Stat label={t('Клиенты')} value={numberFormatter.format(totals.clients)}>
+              <Stat label={t('Clients')} value={numberFormatter.format(totals.clients)}>
                 <ClientsSplit newClients={totals.newClients} returning={totals.returningClients} />
                 {report.retention.rate !== null && (
                   <span className={styles.deltaNone}>
                     <Filled
-                      text={t('возвращаются {rate} за 6 недель')}
+                      text={t('{rate} return within 6 weeks')}
                       parts={{
                         rate: <b className={styles.strong}>{report.retention.rate}%</b>,
                       }}
@@ -423,14 +415,14 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                   </span>
                 )}
               </Stat>
-              <Stat label={t('Отмены')} value={`${totals.cancellationRate}%`}>
+              <Stat label={t('Cancellations')} value={`${totals.cancellationRate}%`}>
                 <span className={styles.deltaNone}>
                   {totals.noShows > 0
-                    ? t('и неявки {rate}% · {count}', {
+                    ? t('and no-shows {rate}% · {count}', {
                         rate: totals.noShowRate,
                         count: totals.noShows,
                       })
-                    : t('от всех записей')}
+                    : t('of all bookings')}
                 </span>
               </Stat>
             </div>
@@ -443,18 +435,18 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
             <MastersGroup masters={report.masters} onOpen={setOpenMasterId} />
             <section className={styles.group} aria-labelledby='analytics-services'>
               <SectionCaption id='analytics-services' isInset={false}>
-                {t('Услуги')} <span className={forms.groupCount}>{report.services.length}</span>
+                {t('Services')} <span className={forms.groupCount}>{report.services.length}</span>
               </SectionCaption>
               {report.services.length === 0 ? (
                 <EmptyState
                   variant='inline'
-                  text={t('Здесь появятся услуги, которые приносят больше всего.')}
+                  text={t('The services that bring in the most will show here.')}
                 />
               ) : (
                 <ScrollArea
-                  label={t('Услуги за период')}
+                  label={t('Services for the period')}
                   moreLabel={(count) =>
-                    t('Ещё {count}', { count: t.count(count, ['услуга', 'услуги', 'услуг']) })
+                    t('{count} more', { count: t.count(count, ['service', 'services']) })
                   }
                 >
                   <ol className={styles.rows}>
@@ -465,7 +457,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                           <span className={styles.rowMeta}>
                             {visits(t, service.visits)}
                             {service.materialsCost > 0 &&
-                              ` · ${t('материалы {amount}', { amount: formatMoney(service.materialsCost) })}`}
+                              ` · ${t('materials {amount}', { amount: formatMoney(service.materialsCost) })}`}
                           </span>
                         </span>
                         <span className={styles.rowValue}>{formatMoney(service.revenue)}</span>
@@ -490,18 +482,18 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
           >
             <section className={styles.group} aria-labelledby='analytics-clients'>
               <SectionCaption id='analytics-clients' isInset={false}>
-                {t('Клиенты')} <span className={forms.groupCount}>{report.clients.length}</span>
+                {t('Clients')} <span className={forms.groupCount}>{report.clients.length}</span>
               </SectionCaption>
               {report.clients.length === 0 ? (
                 <EmptyState
                   variant='inline'
-                  text={t('Здесь появятся клиенты, которые пришли за период.')}
+                  text={t('Clients who came during the period will show here.')}
                 />
               ) : (
                 <ScrollArea
-                  label={t('Клиенты за период')}
+                  label={t('Clients for the period')}
                   moreLabel={(count) =>
-                    t('Ещё {count}', { count: t.count(count, ['клиент', 'клиента', 'клиентов']) })
+                    t('{count} more', { count: t.count(count, ['client', 'clients']) })
                   }
                 >
                   <ul className={styles.rows}>
@@ -515,10 +507,10 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
                           <span className={styles.rowText}>
                             <span className={styles.rowTitle}>
                               {client.name || formatPhone(client.phone)}
-                              {client.isNew && <span className={styles.badge}>{t('Новый')}</span>}
+                              {client.isNew && <span className={styles.badge}>{t('New')}</span>}
                             </span>
                             <span className={styles.rowMeta}>
-                              {t('{visits} · был {day}', {
+                              {t('{visits} · last {day}', {
                                 visits: visits(t, client.visits),
                                 day: formatDay(client.lastVisit),
                               })}{' '}
@@ -537,7 +529,7 @@ export const AnalyticsTab = ({ slug, business, catalog }: AnalyticsTabProps) => 
 
             <section className={styles.group} aria-labelledby='analytics-heatmap'>
               <SectionCaption id='analytics-heatmap' isInset={false}>
-                {t('Загрузка по часам')}
+                {t('Load by hour')}
               </SectionCaption>
               <LoadHeatmap
                 cells={report.heatmap}
@@ -635,12 +627,12 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-masters'>
       <SectionCaption id='analytics-masters' isInset={false}>
-        {t('Мастера')} <span className={forms.groupCount}>{masters.length}</span>
+        {t('Specialists')} <span className={forms.groupCount}>{masters.length}</span>
       </SectionCaption>
       <ScrollArea
-        label={t('Мастера за период')}
+        label={t('Specialists for the period')}
         moreLabel={(count) =>
-          t('Ещё {count}', { count: t.count(count, ['мастер', 'мастера', 'мастеров']) })
+          t('{count} more', { count: t.count(count, ['specialist', 'specialists']) })
         }
       >
         <ul className={styles.rows}>
@@ -663,7 +655,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
                   )}
                 </span>
                 <span className={styles.rowValue}>
-                  {master.load}%<span className={styles.srOnly}> {t('загрузки')}</span>
+                  {master.load}%<span className={styles.srOnly}> {t('load')}</span>
                 </span>
                 <CaretRight aria-hidden className={styles.rowChevron} />
                 {master.load > 0 && (
@@ -680,19 +672,15 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
         {paid.length > 0 ? (
           <>
             <Filled
-              text={
-                paidOut > 0
-                  ? t('Итого к выплате {due}, выплачено {paid}.')
-                  : t('Итого к выплате {due}.')
-              }
+              text={paidOut > 0 ? t('Total due {due}, paid out {paid}.') : t('Total due {due}.')}
               parts={{ due: <b>{formatMoney(due)}</b>, paid: <b>{formatMoney(paidOut)}</b> }}
             />{' '}
-            {isPayMissing && `${t('У части мастеров зарплата не задана.')} `}
+            {isPayMissing && `${t('Some specialists have no pay set.')} `}
           </>
         ) : (
-          `${t('Задайте зарплату в карточке мастера на «Странице», и здесь появится, сколько кому выплатить.')} `
+          `${t('Set pay on the specialist’s card in «Page», and what each is owed will show here.')} `
         )}
-        {t('Загрузка: доля рабочих часов, занятых визитами.')}
+        {t('Load: the share of working hours taken by visits.')}
       </p>
     </section>
   )
@@ -711,14 +699,14 @@ const PayLine = ({ pay, percent }: PayLineProps) => {
   if (pay.due === 0) {
     return (
       <span className={styles.rowMeta}>
-        <Filled text={t('выплачено {amount}')} parts={{ amount: <b>{formatMoney(pay.paid)}</b> }} />
+        <Filled text={t('paid out {amount}')} parts={{ amount: <b>{formatMoney(pay.paid)}</b> }} />
       </span>
     )
   }
   return (
     <span className={styles.rowMeta}>
-      <Filled text={t('к выплате {amount}')} parts={{ amount: <b>{formatMoney(pay.due)}</b> }} />
-      {pay.paid > 0 && ` · ${t('выплачено {amount}', { amount: formatMoney(pay.paid) })}`}
+      <Filled text={t('due {amount}')} parts={{ amount: <b>{formatMoney(pay.due)}</b> }} />
+      {pay.paid > 0 && ` · ${t('paid out {amount}', { amount: formatMoney(pay.paid) })}`}
       {plain !== null && pay.paid === 0 && ` · ${plain}%`}
     </span>
   )
@@ -729,10 +717,10 @@ interface PaymentsSplitProps {
 }
 
 const PAYMENT_PARTS = [
-  { key: 'cash', label: 'Наличными' },
-  { key: 'card', label: 'Картой' },
-  { key: 'transfer', label: 'Переводом' },
-  { key: 'unmarked', label: 'Не отмечено' },
+  { key: 'cash', label: 'Cash' },
+  { key: 'card', label: 'Card' },
+  { key: 'transfer', label: 'Transfer' },
+  { key: 'unmarked', label: 'Not marked' },
 ] as const
 
 // Where the money came in, as staff marked it: one thin bar of shares and a legend that names
@@ -748,7 +736,7 @@ const PaymentsSplit = ({ payments }: PaymentsSplitProps) => {
 
   return (
     <div className={styles.payments}>
-      <span className={styles.label}>{t('Как платили')}</span>
+      <span className={styles.label}>{t('How they paid')}</span>
       <span className={styles.paymentsBar} aria-hidden='true'>
         {parts.map((part) => (
           <span key={part.key} data-part={part.key} style={{ flexGrow: part.value }} />
@@ -788,11 +776,11 @@ const ClientsSplit = ({ newClients, returning }: ClientsSplitProps) => {
       <span className={styles.splitLegend}>
         <span>
           <i data-part='new' aria-hidden='true' />
-          {t.count(newClients, ['новый', 'новых', 'новых'])}
+          {t.count(newClients, ['new', 'new'])}
         </span>
         <span>
           <i data-part='returning' aria-hidden='true' />
-          {t.count(returning, ['вернулся', 'вернулись', 'вернулись'])}
+          {t.count(returning, ['returning', 'returning'])}
         </span>
       </span>
     </span>

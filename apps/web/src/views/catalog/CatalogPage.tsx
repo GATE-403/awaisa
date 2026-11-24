@@ -86,7 +86,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
             variant='stories'
             headAction={
               <NextLink href='/top' className={styles.topLink}>
-                <T>Рейтинг ›</T>
+                <T>Rating ›</T>
               </NextLink>
             }
           />
@@ -96,7 +96,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           key={`${kind ?? ''}|${query}`}
           kind={kind}
           query={query || undefined}
-          title={query ? `«${shown}»` : (kindLabel ?? 'Куда записаться')}
+          title={query ? `«${shown}»` : (kindLabel ?? 'Where to book')}
           searchedFor={resolved?.corrected ? query : undefined}
           businesses={businesses.map(toPlaceCard)}
           offers={offers}

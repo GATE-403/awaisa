@@ -47,20 +47,20 @@ export const TimeOffDialog = ({
 
   return (
     <Sheet
-      title={t('Закрыть время')}
+      title={t('Block time')}
       onClose={onClose}
-      action={{ label: t('Готово'), form: FORM_ID, disabled: isSubmitting || !isRangeValid }}
+      action={{ label: t('Done'), form: FORM_ID, disabled: isSubmitting || !isRangeValid }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Время')}>
+        <section className={sheet.group} aria-label={t('Time')}>
           <SectionCaption>{dayLabel}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Мастер')}</span>
+              <span className={sheet.rowLabel}>{t('Specialist')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Мастер')}
+                  aria-label={t('Specialist')}
                   items={specialists.map(({ id, name }) => ({ value: id, label: name }))}
                   value={specialistId}
                   onValueChange={(value) => value && setSpecialistId(value)}
@@ -68,11 +68,11 @@ export const TimeOffDialog = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Начало')}</span>
+              <span className={sheet.rowLabel}>{t('Start')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Начало')}
+                  aria-label={t('Start')}
                   items={toItems(TIME_OPTIONS.slice(0, -1))}
                   value={from}
                   onValueChange={(value) => value && setFrom(value)}
@@ -80,11 +80,11 @@ export const TimeOffDialog = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Конец')}</span>
+              <span className={sheet.rowLabel}>{t('End')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Конец')}
+                  aria-label={t('End')}
                   items={toItems(TIME_OPTIONS.slice(1))}
                   value={to}
                   onValueChange={(value) => value && setTo(value)}
@@ -94,16 +94,16 @@ export const TimeOffDialog = ({
           </div>
           <p className={sheet.groupFooter}>
             {isRangeValid
-              ? t('Перерыв, обучение или выходной - клиенты не смогут записаться на это время.')
-              : t('Конец должен быть позже начала.')}
+              ? t('A break, training or a day off: clients cannot book this time.')
+              : t('The end must be after the start.')}
           </p>
         </section>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Причина')}
-              placeholder={t('Причина - необязательно')}
+              aria-label={t('Reason')}
+              placeholder={t('Reason (optional)')}
               value={reason}
               onValueChange={setReason}
               maxLength={160}

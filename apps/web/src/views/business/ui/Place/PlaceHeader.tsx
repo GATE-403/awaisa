@@ -75,7 +75,7 @@ export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHea
               <Star weight='fill' aria-hidden className={styles.factStar} />
               <strong>{rating.toFixed(1)}</strong>
               {' · '}
-              <Counted count={reviews.count} forms={['отзыв', 'отзыва', 'отзывов']} />
+              <Counted count={reviews.count} forms={['review', 'reviews']} />
             </a>
           ) : (
             <span className={styles.stat}>

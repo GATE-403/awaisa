@@ -7,7 +7,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ModerationPage } from '@/views/moderation'
 
 export const metadata: Metadata = {
-  title: 'Модерация',
+  title: 'Moderation',
   robots: { index: false },
 }
 

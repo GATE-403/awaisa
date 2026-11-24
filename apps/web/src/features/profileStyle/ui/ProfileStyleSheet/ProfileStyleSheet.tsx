@@ -41,10 +41,10 @@ import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './ProfileStyleSheet.module.css'
 
 const LINK_FIELDS: { kind: ProfileLinkKind; label: string; placeholder: string }[] = [
-  { kind: 'instagram', label: 'Instagram', placeholder: '@ник' },
-  { kind: 'telegram', label: 'Telegram', placeholder: '@ник' },
-  { kind: 'tiktok', label: 'TikTok', placeholder: '@ник' },
-  { kind: 'website', label: 'Сайт', placeholder: 'example.kg' },
+  { kind: 'instagram', label: 'Instagram', placeholder: '@handle' },
+  { kind: 'telegram', label: 'Telegram', placeholder: '@handle' },
+  { kind: 'tiktok', label: 'TikTok', placeholder: '@handle' },
+  { kind: 'website', label: 'Website', placeholder: 'example.kg' },
 ]
 
 const MAX_FEATURED = 3
@@ -95,10 +95,10 @@ export const ProfileStyleSheet = ({ onClose, ...props }: ProfileStyleSheetProps)
 
   return (
     <Sheet
-      title={t('Профиль')}
+      title={t('Profile')}
       onClose={onClose}
       action={{
-        label: isSaving ? t('Сохраняем…') : t('Готово'),
+        label: isSaving ? t('Saving…') : t('Done'),
         form: SHEET_FORM_ID,
         disabled: isSaving,
       }}
@@ -167,12 +167,12 @@ export const ProfileStyleForm = ({
         isPublic,
         showPlaces,
       })
-      toast.show({ title: t('Профиль обновлён'), type: 'success' })
+      toast.show({ title: t('Profile updated'), type: 'success' })
       onSavingChange?.(false)
       onDone()
     } catch (error) {
       toast.show({
-        title: t('Не получилось сохранить'),
+        title: t('Could not save'),
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -190,7 +190,7 @@ export const ProfileStyleForm = ({
             emoji={statusEmoji}
             meta={
               <span className={styles.previewLevel}>
-                {t('Уровень {level}', { level: profile?.level.level ?? 1 })}
+                {t('Level {level}', { level: profile?.level.level ?? 1 })}
                 {featured.map((id) => (
                   <span key={id} className={styles.previewBadge}>
                     {achievementLook(id).emoji}
@@ -210,10 +210,10 @@ export const ProfileStyleForm = ({
       <div className={styles.group}>
         <div className={styles.row}>
           <Palette className={styles.glyph} aria-hidden />
-          <span className={styles.label}>{t('Цвет')}</span>
+          <span className={styles.label}>{t('Colour')}</span>
           <Select
             variant='plain'
-            aria-label={t('Цвет профиля')}
+            aria-label={t('Profile colour')}
             items={Object.entries(ACCENTS).map(([key, item]) => ({
               value: key,
               label: (
@@ -229,12 +229,12 @@ export const ProfileStyleForm = ({
         </div>
         <div className={styles.row}>
           <Smiley className={styles.glyph} aria-hidden />
-          <span className={styles.label}>{t('Эмодзи')}</span>
+          <span className={styles.label}>{t('Emoji')}</span>
           <Select
             variant='plain'
-            aria-label={t('Эмодзи статуса')}
+            aria-label={t('Status emoji')}
             items={[
-              { value: '', label: t('Без эмодзи') },
+              { value: '', label: t('No emoji') },
               ...STATUS_EMOJI.map((emoji) => ({ value: emoji, label: emoji })),
             ]}
             value={statusEmoji}
@@ -246,8 +246,8 @@ export const ProfileStyleForm = ({
           <span className={styles.field}>
             <Input
               variant='plain'
-              aria-label={t('Статус')}
-              placeholder={t('Статус, например «Хожу к Азамату с 2024»')}
+              aria-label={t('Status')}
+              placeholder={t('Status, e.g. «Going to Azamat since 2024»')}
               value={status}
               maxLength={STATUS_MAX}
               onValueChange={setStatus}
@@ -259,8 +259,8 @@ export const ProfileStyleForm = ({
           <TextAlignLeft className={styles.glyph} aria-hidden />
           <textarea
             className={styles.about}
-            aria-label={t('О себе')}
-            placeholder={t('О себе: что любите, к кому ходите')}
+            aria-label={t('About me')}
+            placeholder={t('About you: what you love, who you go to')}
             value={about}
             maxLength={ABOUT_MAX}
             rows={2}
@@ -277,8 +277,8 @@ export const ProfileStyleForm = ({
           <span className={styles.field}>
             <Input
               variant='plain'
-              aria-label={t('Адрес профиля')}
-              placeholder={t('ваш-ник')}
+              aria-label={t('Profile address')}
+              placeholder={t('your-handle')}
               value={handle}
               maxLength={20}
               autoCapitalize='none'
@@ -289,7 +289,9 @@ export const ProfileStyleForm = ({
           </span>
         </label>
         <RowNote>
-          {t('Латиница, цифры, «_» и «.», от 3 символов - короткая ссылка для био и сторис.')}
+          {t(
+            'Latin letters, digits, «_» and «.», 3 or more: a short link for your bio and stories.',
+          )}
         </RowNote>
       </div>
 
@@ -319,7 +321,7 @@ export const ProfileStyleForm = ({
             </label>
           )
         })}
-        <RowNote>{t('Ник или ссылка - покажем значками на вашей странице.')}</RowNote>
+        <RowNote>{t('A handle or a link: shown as icons on your page.')}</RowNote>
       </div>
 
       {earned.length > 0 && (
@@ -328,16 +330,16 @@ export const ProfileStyleForm = ({
         <div className={styles.group}>
           <div className={styles.row}>
             <Medal className={styles.glyph} aria-hidden />
-            <span className={styles.label}>{t('Витрина')}</span>
+            <span className={styles.label}>{t('Showcase')}</span>
             <Menu
-              label={t('Витрина: достижения рядом с уровнем')}
+              label={t('Showcase: achievements by your level')}
               className={styles.menuTrigger}
               trigger={
                 <>
                   <span className={styles.menuValue}>
                     {featured.length > 0
                       ? featured.map((id) => achievementLook(id).emoji).join(' ')
-                      : t('Не выбрано')}
+                      : t('None')}
                   </span>
                   <CaretUpDown aria-hidden />
                 </>
@@ -359,7 +361,7 @@ export const ProfileStyleForm = ({
               })}
             </Menu>
           </div>
-          <RowNote>{t('До трёх достижений - рядом с вашим уровнем.')}</RowNote>
+          <RowNote>{t('Up to three achievements, next to your level.')}</RowNote>
         </div>
       )}
 
@@ -367,12 +369,12 @@ export const ProfileStyleForm = ({
         {masters.length > 0 && (
           <div className={styles.row}>
             <User className={styles.glyph} aria-hidden />
-            <span className={styles.label}>{t('Мой мастер')}</span>
+            <span className={styles.label}>{t('My specialist')}</span>
             <Select
               variant='plain'
-              aria-label={t('Мой мастер')}
+              aria-label={t('My specialist')}
               items={[
-                { value: '', label: t('Не показывать') },
+                { value: '', label: t('Do not show') },
                 ...masters.map((master) => ({
                   value: master.id,
                   label: `${master.name.split(' ')[0]} · ${master.businessName}`,
@@ -389,17 +391,17 @@ export const ProfileStyleForm = ({
           ) : (
             <EyeSlash className={styles.glyph} aria-hidden />
           )}
-          <span className={styles.label}>{t('Открытый профиль')}</span>
+          <span className={styles.label}>{t('Public profile')}</span>
           <Switch checked={isPublic} onCheckedChange={setIsPublic} />
         </label>
         <label className={styles.row}>
           <MapPin className={styles.glyph} aria-hidden />
-          <span className={styles.label}>{t('Мастера и места')}</span>
+          <span className={styles.label}>{t('Specialists and places')}</span>
           <Switch checked={showPlaces} onCheckedChange={setShowPlaces} />
         </label>
         <RowNote>
           {t(
-            'Открытый профиль видят по ссылке и из ваших отзывов. Уровень и достижения - за визиты и отзывы.',
+            'A public profile is seen by its link and from your reviews. Level and achievements come from visits and reviews.',
           )}
         </RowNote>
       </div>

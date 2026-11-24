@@ -2,16 +2,19 @@
 
 // iPhone Safari cannot take pushes: the site has to be on the home screen first (iOS 16.4+).
 const INSTALL_HINT =
-  'На iPhone уведомления приходят только из приложения: «Поделиться» → «На экран Домой», затем включите их там.'
+  'On iPhone, notifications only come from the app: «Share» → «Add to Home Screen», then turn them on there.'
 
-const DENIED_HINT = 'Уведомления запрещены в настройках браузера для этого сайта: разрешите их там.'
+const DENIED_HINT =
+  'Notifications are blocked for this site in your browser settings: allow them there.'
 
 // In the app the answer lives in the phone's settings, not a browser's.
-const APP_DENIED_HINT = 'Уведомления запрещены в настройках телефона для Awaisa: разрешите их там.'
+const APP_DENIED_HINT =
+  'Notifications for Awaisa are blocked in your phone settings: allow them there.'
 
 const AUDIENCE_NOTES = {
-  business: 'Новые записи, переносы и отмены клиентов, даже когда кабинет закрыт.',
-  master: 'Новые записи к вам, переносы и отмены, даже когда страница закрыта.',
+  business:
+    'New bookings, moves and cancellations from clients, even when the dashboard is closed.',
+  master: 'New bookings with you, moves and cancellations, even when the page is closed.',
 }
 
 export { APP_DENIED_HINT, AUDIENCE_NOTES, DENIED_HINT, INSTALL_HINT }

@@ -19,9 +19,9 @@ const MIN_SLUG_LENGTH = 3
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,46}[a-z0-9])$/
 
 const getSlugFormatProblem = (slug: string) => {
-  if (slug.length < MIN_SLUG_LENGTH) return 'Ссылка: от 3 символов'
+  if (slug.length < MIN_SLUG_LENGTH) return 'Link: at least 3 characters'
   if (!SLUG_PATTERN.test(slug) || slug.includes('--')) {
-    return 'Ссылка: латиница, цифры и дефис, без дефиса в начале и в конце'
+    return 'Link: Latin letters, numbers and hyphens, no hyphen at the start or end'
   }
   return null
 }
@@ -43,7 +43,7 @@ export const useCreateBusinessForm = () => {
   const [kind, setKind] = useState<BusinessKind>('beauty')
   const [hasPickedKind, setHasPickedKind] = useState(false)
   const [edits, setEdits] = useState<Record<string, TemplateEdit>>({})
-  const [city, setCity] = useState('Бишкек')
+  const [city, setCity] = useState('Bishkek')
   const [address, setAddress] = useState('')
   const [phoneInput, setPhone] = useState<string | null>(null)
   const [slugCheck, setSlugCheck] = useState<(SlugCheck & { slug: string }) | null>(null)
@@ -72,7 +72,7 @@ export const useCreateBusinessForm = () => {
   const isSlugTaken = currentCheck !== null && !currentCheck.available
   const isNameValid = name.trim().length >= 2 && slugFormatProblem === null && !isSlugTaken
   const errors = {
-    name: hasTriedSubmit && name.trim().length < 2 ? t('Укажите название') : undefined,
+    name: hasTriedSubmit && name.trim().length < 2 ? t('Enter a name') : undefined,
     slug: getSlugError(),
   }
 
@@ -165,11 +165,11 @@ export const useCreateBusinessForm = () => {
   const openCabinet = () => {
     if (!launched) return
     toast.show({
-      title: t('Страница создана'),
+      title: t('Page created'),
       description: t(
         launched.hasServices
-          ? 'Осталось добавить мастеров - и можно принимать записи'
-          : 'Добавьте услуги и мастеров - и можно принимать записи',
+          ? 'Add specialists and you can start taking bookings'
+          : 'Add services and specialists and you can start taking bookings',
       ),
       type: 'success',
     })
@@ -185,7 +185,7 @@ export const useCreateBusinessForm = () => {
     setKind('beauty')
     setHasPickedKind(false)
     setEdits({})
-    setCity('Бишкек')
+    setCity('Bishkek')
     setAddress('')
     setPhone(null)
     setSlugCheck(null)
@@ -227,7 +227,11 @@ export const useCreateBusinessForm = () => {
         hasServices: services.length > 0,
       })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
       setIsSubmitting(false)
     }
   }

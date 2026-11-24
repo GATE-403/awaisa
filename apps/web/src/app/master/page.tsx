@@ -7,7 +7,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { MasterPlacesPage } from '@/views/masterDay'
 
 export const metadata: Metadata = {
-  title: 'Мой день',
+  title: 'My day',
   robots: { index: false },
 }
 

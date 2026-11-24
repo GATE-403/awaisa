@@ -20,7 +20,7 @@ const longDateFormatter = new Intl.DateTimeFormat('ru-RU', {
   month: 'long',
 })
 
-const CURRENCY = 'сом'
+const CURRENCY = 'som'
 
 const formatAmount = (price: number) => priceFormatter.format(price)
 
@@ -87,7 +87,7 @@ const getSpecialistsForService = (catalog: Catalog, serviceId: string | null) =>
   )
 
 const getSpecialistLabel = (catalog: Catalog, id: string | null) =>
-  id === ANY_SPECIALIST_ID ? 'Любой мастер' : (findSpecialist(catalog, id)?.name ?? '')
+  id === ANY_SPECIALIST_ID ? 'Any specialist' : (findSpecialist(catalog, id)?.name ?? '')
 
 export type { BookingDay }
 export {

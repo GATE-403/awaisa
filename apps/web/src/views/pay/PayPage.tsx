@@ -48,7 +48,7 @@ const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
     retryLabel: 'К абонементам',
   },
   billing: {
-    doneTitle: 'Оплачено',
+    doneTitle: 'Paid',
     doneHref: (slug) => `/manage/${slug}?tab=billing`,
     doneLabel: 'Вернуться в кабинет',
     expiredText: 'Деньги не списаны. Оплатите снова в «Тарифе».',
@@ -171,7 +171,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
           </div>
 
           <div className={styles.amount}>
-            <p className={styles.amountLabel}>{booking ? 'Предоплата' : 'К оплате'}</p>
+            <p className={styles.amountLabel}>{booking ? 'Deposit' : 'To pay'}</p>
             <p className={styles.amountValue}>{formatPrice(payment.amount)}</p>
             {booking ? (
               <p className={styles.amountNote}>

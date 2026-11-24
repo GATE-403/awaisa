@@ -272,7 +272,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
   return (
     <main className={styles.page}>
-      <h1 className={styles.visuallyHidden}>{t('Образы')}</h1>
+      <h1 className={styles.visuallyHidden}>{t('Looks')}</h1>
 
       <div
         className={styles.stage}
@@ -283,11 +283,11 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         {isPending && <div className={styles.placeholder} />}
         {!isPending && shown.length === 0 && (
           <EmptyState
-            title={t('Образов пока нет')}
-            text={t('Здесь появятся фото работ мастеров - с ценой и записью в один тап.')}
+            title={t('No looks yet')}
+            text={t('Specialists’ work photos will appear here, with prices and one-tap booking.')}
             action={
               <NextLink href='/' className={styles.emptyLink}>
-                {t('Открыть каталог ›')}
+                {t('Open the catalogue ›')}
               </NextLink>
             }
           />
@@ -298,7 +298,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
         <div
           className={styles.deck}
           role='feed'
-          aria-label={t('Образы')}
+          aria-label={t('Looks')}
           aria-busy={isPending || undefined}
         >
           {shown.map((item, index) => {
@@ -338,7 +338,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='left'
-            aria-label={t('Предыдущая работа')}
+            aria-label={t('Previous work')}
             disabled={active === 0}
             onClick={() => turn(-1)}
           >
@@ -348,7 +348,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
             type='button'
             className={styles.turn}
             data-side='right'
-            aria-label={t('Следующая работа')}
+            aria-label={t('Next work')}
             disabled={active >= shown.length - 1}
             onClick={() => turn(1)}
           >
@@ -359,7 +359,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
 
       {active > 0 && (
         <p className={styles.hint} aria-hidden>
-          {t('Потяните вверх - вернуть прошлую')}
+          {t('Pull up to bring back the last one')}
         </p>
       )}
     </main>

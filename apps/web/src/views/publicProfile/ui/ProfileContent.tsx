@@ -84,9 +84,9 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   }, [])
   const yearMonths = profile.activity?.filter((month) => month.visits > 0).length ?? 0
   const facts = [
-    t('Уровень {level}', { level: profile.level.level }),
-    t.count(profile.stats.visits, ['визит', 'визита', 'визитов']),
-    t.count(profile.stats.places, ['место', 'места', 'мест']),
+    t('Level {level}', { level: profile.level.level }),
+    t.count(profile.stats.visits, ['visit', 'visits']),
+    t.count(profile.stats.places, ['place', 'places']),
   ]
   // The data rows, as in Telegram: the value over a small caption, only what is filled in.
   const rows: {
@@ -96,8 +96,8 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
     href?: string
     glyph?: ProfileLinkKind
   }[] = [
-    ...(profile.status ? [{ key: 'status', value: profile.status, caption: t('статус') }] : []),
-    ...(profile.about ? [{ key: 'about', value: profile.about, caption: t('о себе') }] : []),
+    ...(profile.status ? [{ key: 'status', value: profile.status, caption: t('status') }] : []),
+    ...(profile.about ? [{ key: 'about', value: profile.about, caption: t('about') }] : []),
     ...(profile.links ?? []).map((link) => ({
       key: link.kind,
       value: link.text,
@@ -111,7 +111,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   const tabs = [
     {
       value: 'medals' as const,
-      label: t('Медали'),
+      label: t('Medals'),
       count: earned,
       panelId: PANELS.medals,
       panel: (
@@ -135,7 +135,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'masters' as const,
-            label: t('Мастера'),
+            label: t('Specialists'),
             count: profile.masters.length,
             panelId: PANELS.masters,
             panel: <ProfileMasters masters={profile.masters} />,
@@ -146,7 +146,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'places' as const,
-            label: t('Места'),
+            label: t('Places'),
             count: profile.stats.places,
             panelId: PANELS.places,
             panel: (
@@ -178,7 +178,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
       ? [
           {
             value: 'reviews' as const,
-            label: t('Отзывы'),
+            label: t('Reviews'),
             count: profile.reviews.length || undefined,
             panelId: PANELS.reviews,
             panel: (
@@ -195,8 +195,8 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                 )}
                 {awaiting > 1 && (
                   <NextLink href='/bookings' className={styles.awaiting}>
-                    {t('Ждут оценки: {visits} ›', {
-                      visits: t.count(awaiting, ['визит', 'визита', 'визитов']),
+                    {t('Awaiting rating: {visits} ›', {
+                      visits: t.count(awaiting, ['visit', 'visits']),
                     })}
                   </NextLink>
                 )}
@@ -211,7 +211,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   ]
 
   const actions = (
-    <GlyphGroup label={t('Действия с профилем')}>
+    <GlyphGroup label={t('Profile actions')}>
       <ShareProfile
         name={profile.name}
         address={profile.handle ?? profile.id}
@@ -224,7 +224,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
         <ReportMenu
           targetType='profile'
           targetId={profile.id}
-          label={t('Пожаловаться на профиль: {name}', { name: profile.name })}
+          label={t('Report profile: {name}', { name: profile.name })}
           className=''
         />
       )}
@@ -277,7 +277,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
               }
             >
               {profile.isOwn && !profile.isPublic && (
-                <p className={styles.hidden}>{t('Профиль скрыт - его видите только вы')}</p>
+                <p className={styles.hidden}>{t('Profile hidden: only you can see it')}</p>
               )}
             </ProfileHeadText>
           </ProfileHead>
@@ -289,7 +289,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
         {actionsSlot && createPortal(actions, actionsSlot)}
 
         {(rows.length > 0 || master) && (
-          <ul className={styles.info} aria-label={t('О профиле')}>
+          <ul className={styles.info} aria-label={t('About the profile')}>
             {rows.map((row) => (
               <li key={row.key}>
                 {row.href ? (
@@ -338,7 +338,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                   <span className={styles.infoValue}>
                     {master.name.split(' ')[0]} · {master.businessName}
                   </span>
-                  <span className={styles.infoCaption}>{t('мой мастер')}</span>
+                  <span className={styles.infoCaption}>{t('my master')}</span>
                   <CaretRight aria-hidden className={styles.infoChevron} />
                 </NextLink>
               </li>
@@ -349,7 +349,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
 
       <section className={styles.tabs}>
         <ProfileTabs
-          label={t('Разделы профиля')}
+          label={t('Profile sections')}
           items={tabs}
           value={tabs.some((item) => item.value === tab) ? tab : 'medals'}
           onChange={setTab}

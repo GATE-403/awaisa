@@ -14,9 +14,9 @@ export const SearchChips = ({ kind, services }: SearchChipsProps) => {
   if (services.length === 0) return null
 
   return (
-    <nav className={styles.row} aria-label='Часто ищут'>
+    <nav className={styles.row} aria-label='Popular searches'>
       <span className={styles.label}>
-        <T>Часто ищут</T>
+        <T>Popular searches</T>
       </span>
       {services.map((service) => (
         <NextLink

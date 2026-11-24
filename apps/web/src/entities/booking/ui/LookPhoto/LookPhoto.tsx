@@ -22,13 +22,13 @@ export const LookPhoto = ({ url, clientName }: LookPhotoProps) => {
       <button type='button' className={styles.look} onClick={() => setIsOpen(true)}>
         {/* biome-ignore lint/performance/noImgElement: uploads are already resized WebP */}
         <img src={url} alt='' loading='lazy' decoding='async' className={styles.picture} />
-        <span className={styles.caption}>{t('Хочет так')}</span>
+        <span className={styles.caption}>{t('Wants this look')}</span>
       </button>
       {isOpen && (
         <PhotoViewer
           photos={[url]}
           startIndex={0}
-          label={t('Образец от клиента: {name}', { name: clientName })}
+          label={t('Reference from the client: {name}', { name: clientName })}
           onClose={() => setIsOpen(false)}
         />
       )}

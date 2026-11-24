@@ -43,7 +43,7 @@ export const NextGoal = ({ goal }: NextGoalProps) => {
         <span className={styles.goalEmoji}>{look.emoji}</span>
       </span>
       <span className={styles.goalText}>
-        <span className={styles.goalCaption}>{t('Следующая цель')}</span>
+        <span className={styles.goalCaption}>{t('Next goal')}</span>
         <span id='next-goal-title' className={styles.goalTitle}>
           {achievementTitle(achievement.title, t)}
         </span>
@@ -51,7 +51,7 @@ export const NextGoal = ({ goal }: NextGoalProps) => {
           {goal.hint}
           <span className={styles.srOnly}>
             {' · '}
-            {achievement.progress.current} {t('из')} {achievement.progress.target}
+            {achievement.progress.current} {t('of')} {achievement.progress.target}
           </span>
         </span>
       </span>
