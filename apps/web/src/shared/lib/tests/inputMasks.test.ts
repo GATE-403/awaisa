@@ -86,8 +86,12 @@ describe('another region', () => {
     expect(maskPhoneInput('8 701 123 45 67', ALMATY)).toBe('+7 701 123 45 67')
     expect(maskLocalPhoneInput('7011234567', ALMATY)).toBe('+7 701 123 45 67')
     expect(phoneProblem('+7 701 123 45 67', ALMATY)).toBeNull()
-    expect(phoneProblem('+996 555 123 456', ALMATY)).toBe('For now we only take numbers with the code +7')
-    expect(phoneProblem('+7 701 12', ALMATY)).toBe('The number is incomplete: it needs 10 digits after +7')
+    expect(phoneProblem('+996 555 123 456', ALMATY)).toBe(
+      'For now we only take numbers with the code +7',
+    )
+    expect(phoneProblem('+7 701 12', ALMATY)).toBe(
+      'The number is incomplete: it needs 10 digits after +7',
+    )
   })
 })
 
