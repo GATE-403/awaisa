@@ -38,26 +38,6 @@
   );
 }
 
-.live {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--color-success-text, var(--color-success));
-  font-weight: var(--font-weight-medium);
-}
-
-.live::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: currentColor;
-}
-
-.label {
-  color: var(--color-muted-foreground);
-}
-
 .who {
   overflow: hidden;
   font-weight: var(--font-weight-medium);

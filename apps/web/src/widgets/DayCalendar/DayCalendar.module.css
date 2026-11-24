@@ -278,87 +278,6 @@
   flex: 1;
 }
 
-.chips {
-  display: flex;
-  gap: 4px;
-  min-width: 0;
-  overflow: hidden;
-  margin-bottom: 1px;
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  flex-shrink: 0;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: var(--radius-full);
-  /* The neutral chips (time, price) take the same pastel, a step deeper than the card. */
-  background: color-mix(in srgb, var(--tint) 12%, transparent);
-  color: color-mix(in srgb, var(--tint) 35%, var(--color-foreground));
-  font-size: var(--text-xs);
-  line-height: 1;
-  font-weight: var(--font-weight-medium);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.chip:last-child {
-  flex-shrink: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chip svg {
-  width: 11px;
-  height: 11px;
-}
-
-.chip[data-tone="accent"] {
-  background: var(--color-primary-subtle);
-  color: var(--color-link);
-}
-
-.chip[data-tone="warning"] {
-  background: color-mix(in srgb, var(--color-highlight) 14%, transparent);
-  color: var(--color-highlight);
-}
-
-.chip[data-tone="success"] {
-  background: color-mix(in srgb, var(--color-success) 14%, transparent);
-  color: color-mix(in srgb, var(--color-success) 70%, var(--color-foreground));
-}
-
-.chip[data-tone="danger"] {
-  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
-  color: var(--color-danger-text);
-}
-
-.stateDot {
-  flex-shrink: 0;
-  width: 7px;
-  height: 7px;
-  border-radius: var(--radius-full);
-  background: var(--color-tertiary-foreground);
-}
-
-.stateDot[data-tone="accent"] {
-  background: var(--color-primary);
-}
-
-.stateDot[data-tone="warning"] {
-  background: var(--color-rating);
-}
-
-.stateDot[data-tone="success"] {
-  background: var(--color-success);
-}
-
-.stateDot[data-tone="danger"] {
-  background: var(--color-danger);
-}
-
 .blockFooter {
   display: flex;
   justify-content: space-between;
@@ -971,11 +890,6 @@
   font-size: var(--text-body);
 }
 
-.filters .filterChip .chipFace {
-  width: 24px;
-  height: 24px;
-}
-
 /* The masters' track (variant «В»): the kit's segmented look — a capsule of fill, a raised white
    pill under the chosen one — with each face ringed by how full its day is. */
 .track {
@@ -1244,13 +1158,6 @@
   height: 11px;
 }
 
-.liveDot {
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: currentColor;
-}
-
 .progressTrack {
   display: block;
   height: 3px;
@@ -1358,29 +1265,6 @@
     0 6px 14px color-mix(in srgb, var(--tint) 18%, transparent);
   color: var(--color-foreground);
   font-size: var(--text-xs);
-}
-
-.ghostTitle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: color-mix(in srgb, var(--tint) 55%, var(--color-foreground));
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-semibold);
-  line-height: 20px;
-}
-
-.ghostTitle svg {
-  width: 13px;
-  height: 13px;
-}
-
-.ghostWho {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-muted-foreground);
-  font-size: var(--text-footnote);
 }
 
 .grid .ghost .cardFace {
@@ -1598,20 +1482,17 @@
   overflow: hidden;
 }
 
-.grid[data-layout="timeline"] .ghost :is(.ghostTitle, .blockRange) {
+.grid[data-layout="timeline"] .ghost .blockRange {
   color: color-mix(in srgb, var(--tint) 42%, black);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"])
-    .grid[data-layout="timeline"]
-    .ghost
-    :is(.ghostTitle, .blockRange) {
+  :root:not([data-theme="light"]) .grid[data-layout="timeline"] .ghost .blockRange {
     color: color-mix(in srgb, var(--tint) 55%, white);
   }
 }
 
-[data-theme="dark"] .grid[data-layout="timeline"] .ghost :is(.ghostTitle, .blockRange) {
+[data-theme="dark"] .grid[data-layout="timeline"] .ghost .blockRange {
   color: color-mix(in srgb, var(--tint) 55%, white);
 }
 
@@ -1630,86 +1511,6 @@
   height: 7px;
   border-radius: var(--radius-full);
   background: currentColor;
-}
-
-/* A narrow free gap: the preview says only «+» and the time. */
-.ghost[data-narrow] :is(.ghostLabel, .ghostWho) {
-  display: none;
-}
-
-.ghost[data-narrow] .rangeEndGhost {
-  display: none;
-}
-
-/* «✓ Пришёл» on an ended, unmarked visit: a small white capsule at the card's corner, shown when
-   the card is pointed at (always on touch screens); one press marks it. */
-.quickMark {
-  position: absolute;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 28px;
-  padding: 0 10px;
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-elevated);
-  box-shadow:
-    0 0 0 0.5px rgb(0 0 0 / 0.08),
-    0 2px 8px rgb(0 0 0 / 0.14);
-  color: var(--color-success-text, color-mix(in srgb, var(--system-green) 55%, black));
-  font: inherit;
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  opacity: 0;
-  translate: -100% -100%;
-  transition:
-    opacity var(--duration-fast) var(--ease-standard),
-    scale var(--duration-fast) var(--ease-standard);
-}
-
-/* A 44pt target around the 28pt capsule. */
-.quickMark::before {
-  content: "";
-  position: absolute;
-  inset: -8px -4px;
-}
-
-.quickMark[data-layout="timeline"] {
-  top: auto;
-  bottom: 18px;
-  translate: -100% 0;
-}
-
-.quickMark[data-layout="columns"] {
-  translate: 0 -100%;
-}
-
-.quickMark svg {
-  width: 12px;
-  height: 12px;
-}
-
-.booking:hover + .quickMark,
-.quickMark:hover,
-.quickMark:focus-visible {
-  opacity: 1;
-}
-
-.quickMark:active {
-  scale: 0.95;
-}
-
-.quickMark:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-@media (hover: none) {
-  .quickMark {
-    opacity: 1;
-  }
 }
 
 .srOnlyText {
@@ -2195,21 +1996,6 @@
   align-items: center;
   gap: 4px;
   color: inherit;
-}
-
-/* «✓ Пришёл» on the card speaks in the card's ink too, on a white capsule. */
-.grid .quickMark {
-  color: color-mix(in srgb, var(--tint) 42%, black);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .grid .quickMark {
-    color: color-mix(in srgb, var(--tint) 65%, white);
-  }
-}
-
-[data-theme="dark"] .grid .quickMark {
-  color: color-mix(in srgb, var(--tint) 65%, white);
 }
 
 /* Over a floating bar at the window's foot, the corner controls rise by what it covers. */

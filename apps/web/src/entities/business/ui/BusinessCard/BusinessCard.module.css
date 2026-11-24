@@ -221,15 +221,6 @@
   padding: var(--space-3);
 }
 
-.eyebrow {
-  color: var(--color-muted-foreground);
-  font-size: var(--text-xs);
-  line-height: var(--text-xs-line-height);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
 .title {
   min-width: 0;
   overflow: hidden;
@@ -324,8 +315,7 @@
   vertical-align: 1px;
 }
 
-.busy,
-.opening {
+.busy {
   color: rgb(255 255 255 / 0.75);
 }
 

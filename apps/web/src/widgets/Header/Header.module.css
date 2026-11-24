@@ -126,27 +126,6 @@
   color: var(--color-link);
 }
 
-.cta {
-  position: relative;
-  display: inline-flex;
-  grid-area: cta;
-  align-items: center;
-  height: 32px;
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-primary-foreground);
-  font-size: var(--text-footnote);
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
-}
-
-.cta::before {
-  content: "";
-  position: absolute;
-  inset: -6px -4px;
-}
-
 /* Phones: categories as a chip row under the search. It stays put on scroll: animating the
    header's height re-laid out every sticky element on each frame and stuttered on Android. */
 .categories {
@@ -227,10 +206,6 @@
     color: var(--color-foreground);
   }
 
-  .cta:hover {
-    background: var(--color-primary-hover);
-  }
-
   .category:hover,
   .city:hover {
     color: var(--color-foreground);
@@ -277,11 +252,6 @@
 
   .action[data-mobile] > span {
     display: inline;
-  }
-
-  .cta {
-    height: 36px;
-    padding: 0 var(--space-4);
   }
 
   /* Second row: categories with glyphs, the city on the right. */
