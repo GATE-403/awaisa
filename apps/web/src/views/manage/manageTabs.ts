@@ -101,6 +101,7 @@ const TAB_FEATURES: Partial<Record<ManageTab, PlanFeature>> = {
   promotions: 'promotions',
   loyalty: 'loyalty',
   stock: 'inventory',
+  fiscal: 'fiscal',
 }
 
 /** The plan feature a section needs, or null when every plan has it. */
