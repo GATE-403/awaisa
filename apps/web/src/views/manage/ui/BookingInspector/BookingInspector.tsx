@@ -19,6 +19,7 @@ import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
+import { copyText } from '@/shared/lib/share'
 import { GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { VisitOutcomeSection } from '@/views/manage/ui/BookingDetailsDialog/VisitOutcomeSection'
 import styles from './BookingInspector.module.css'
@@ -71,7 +72,7 @@ export const BookingInspector = ({
   }
 
   const handleCopyPhone = () => {
-    void navigator.clipboard?.writeText(booking.customerPhone)
+    void copyText(booking.customerPhone)
   }
 
   return (

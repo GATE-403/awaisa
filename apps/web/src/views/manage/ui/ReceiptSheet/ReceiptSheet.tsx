@@ -8,6 +8,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { retryReceipt } from '@/shared/api/clientApi'
 import type { FiscalReceipt } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { canShareLinks, copyText, shareLink } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { ReceiptPaper } from '@/shared/ui/ReceiptPaper/ReceiptPaper'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -30,25 +31,21 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
   const t = useT()
   const [receipt, setReceipt] = useState(initial)
   const [isSending, setIsSending] = useState(false)
-  const canShare = typeof navigator !== 'undefined' && 'share' in navigator
+  const canShare = canShareLinks()
   const link = receipt.providerUrl ?? receipt.viewUrl
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link)
-      toast.show({ title: t('Ссылка на чек скопирована'), type: 'success' })
-    } catch {
-      toast.show({ title: t('Не получилось скопировать'), type: 'error' })
-    }
+    const isCopied = await copyText(link)
+    if (isCopied) toast.show({ title: t('Ссылка на чек скопирована'), type: 'success' })
+    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
   }
 
   const share = async () => {
-    try {
-      await navigator.share({ title: t('Чек {name}', { name: receipt.businessName }), url: link })
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
-    }
+    const result = await shareLink({
+      title: t('Чек {name}', { name: receipt.businessName }),
+      url: link,
+    })
+    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
   }
 
   const retry = async () => {

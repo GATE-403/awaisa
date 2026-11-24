@@ -5,6 +5,7 @@ import { Copy } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { copyText } from '@/shared/lib/share'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import styles from '@/views/manage/ui/manageForms.module.css'
@@ -42,12 +43,9 @@ export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   ]
 
   const handleCopy = async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
-    } catch {
-      toast.show({ title: t('Не удалось скопировать'), description: url, type: 'error' })
-    }
+    const isCopied = await copyText(url)
+    if (isCopied) toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
+    else toast.show({ title: t('Не удалось скопировать'), description: url, type: 'error' })
   }
 
   return (

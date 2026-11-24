@@ -17,6 +17,7 @@ import { BusinessTile } from '@/entities/business'
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { useToday } from '@/shared/lib/hooks/useToday'
+import { copyText } from '@/shared/lib/share'
 import {
   type AttentionItem,
   attentionItems,
@@ -54,12 +55,9 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
 
   const copyLink = async () => {
     const url = `${window.location.origin}/${business.slug}`
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
-    } catch {
-      toast.show({ title: t('Не получилось скопировать'), description: url, type: 'error' })
-    }
+    const isCopied = await copyText(url)
+    if (isCopied) toast.show({ title: t('Ссылка скопирована'), description: url, type: 'success' })
+    else toast.show({ title: t('Не получилось скопировать'), description: url, type: 'error' })
   }
   const cabinet = `/manage/${business.slug}`
   const nextLabel = !next

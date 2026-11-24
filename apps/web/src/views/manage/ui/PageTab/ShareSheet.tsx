@@ -6,6 +6,7 @@ import { Copy, DownloadSimple, ShareNetwork } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import type { Branch } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { canShareLinks, copyText, shareLink } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -34,7 +35,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
   const [qr, setQr] = useState<QrMatrix | null>(null)
   const pageUrl = `${origin}/${slug}`
   const activeBranches = branches.filter((branch) => branch.isActive !== false)
-  const canShare = typeof navigator !== 'undefined' && 'share' in navigator
+  const canShare = canShareLinks()
 
   useEffect(() => {
     setOrigin(window.location.origin)
@@ -54,12 +55,9 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
   }, [origin, slug])
 
   const copy = async (url: string, title: string) => {
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.show({ title, type: 'success' })
-    } catch {
-      toast.show({ title: t('Не получилось скопировать'), type: 'error' })
-    }
+    const isCopied = await copyText(url)
+    if (isCopied) toast.show({ title, type: 'success' })
+    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
   }
 
   const download = async () => {
@@ -72,12 +70,8 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
   }
 
   const share = async () => {
-    try {
-      await navigator.share({ title: businessName, url: pageUrl })
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
-    }
+    const result = await shareLink({ title: businessName, url: pageUrl })
+    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
   }
 
   // One path of unit squares: crisp at any size, no image to load.

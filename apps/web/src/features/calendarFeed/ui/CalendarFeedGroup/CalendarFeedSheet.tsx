@@ -10,6 +10,7 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { useT } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { haptic } from '@/shared/lib/nativeBridge'
+import { copyText } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -86,12 +87,9 @@ export const CalendarFeedSheet = ({
 
   const handleCopy = async () => {
     if (!url) return
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.show({ title: t('Ссылка скопирована'), type: 'success' })
-    } catch {
-      toast.show({ title: t('Не удалось скопировать'), type: 'error' })
-    }
+    const isCopied = await copyText(url)
+    if (isCopied) toast.show({ title: t('Ссылка скопирована'), type: 'success' })
+    else toast.show({ title: t('Не удалось скопировать'), type: 'error' })
   }
 
   const status = (() => {

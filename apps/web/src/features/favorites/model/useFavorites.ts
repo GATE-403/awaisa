@@ -1,6 +1,7 @@
 'use client'
 
 import { useSyncExternalStore } from 'react'
+import { isArray, onlyStrings, parseJson, readText, writeJson } from '@/shared/lib/storage'
 
 const STORAGE_KEY = 'awaisa:favorites:v1'
 const EMPTY: string[] = []
@@ -8,19 +9,10 @@ const EMPTY: string[] = []
 let cached: { raw: string | null; ids: string[] } = { raw: null, ids: EMPTY }
 const listeners = new Set<() => void>()
 
+// useSyncExternalStore needs the same array for the same storage value.
 const read = () => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw !== cached.raw) {
-      const parsed: unknown = raw ? JSON.parse(raw) : []
-      cached = {
-        raw,
-        ids: Array.isArray(parsed) ? parsed.filter((id) => typeof id === 'string') : EMPTY,
-      }
-    }
-  } catch {
-    cached = { raw: null, ids: EMPTY }
-  }
+  const raw = readText(STORAGE_KEY)
+  if (raw !== cached.raw) cached = { raw, ids: onlyStrings(parseJson(raw, isArray)) }
 
   return cached.ids
 }
@@ -41,11 +33,7 @@ export const useFavorites = () => {
 
   const toggle = (id: string) => {
     const next = ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    } catch {
-      return
-    }
+    if (!writeJson(STORAGE_KEY, next)) return
     for (const listener of listeners) listener()
   }
 

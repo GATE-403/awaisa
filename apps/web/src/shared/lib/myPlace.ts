@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { readJson, removeKey, writeJson } from './storage'
 
 /** Where the visitor said they are: their geolocation, or a district picked by hand. */
 type MyPlace = { label: string; lat: number; lng: number; source: 'gps' | 'area' }
@@ -7,28 +8,24 @@ const KEY = 'awaisa:my-place:v1'
 const listeners = new Set<() => void>()
 let cache: MyPlace | null | undefined
 
+const isMyPlace = (value: unknown): value is MyPlace =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as MyPlace).lat === 'number' &&
+  typeof (value as MyPlace).lng === 'number' &&
+  Boolean((value as MyPlace).label)
+
 const read = (): MyPlace | null => {
   if (cache !== undefined) return cache
-  try {
-    const value = JSON.parse(window.localStorage.getItem(KEY) ?? 'null') as MyPlace | null
-    cache =
-      value && typeof value.lat === 'number' && typeof value.lng === 'number' && value.label
-        ? value
-        : null
-  } catch {
-    cache = null
-  }
+  cache = readJson(KEY, isMyPlace)
   return cache
 }
 
 const saveMyPlace = (place: MyPlace | null) => {
   cache = place
-  try {
-    if (place) window.localStorage.setItem(KEY, JSON.stringify(place))
-    else window.localStorage.removeItem(KEY)
-  } catch {
-    // Private mode: the choice lasts for this visit.
-  }
+  // Private mode: the choice lasts for this visit.
+  if (place) writeJson(KEY, place)
+  else removeKey(KEY)
   for (const listener of listeners) listener()
 }
 

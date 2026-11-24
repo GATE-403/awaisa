@@ -1,5 +1,7 @@
 'use client'
 
+import { readJson, removeKey, writeJson } from '@/shared/lib/storage'
+
 type BookingDraft = {
   slug: string
   businessName: string
@@ -21,38 +23,26 @@ const STORAGE_KEY = 'awaisa:booking-draft:v1'
 const MAX_AGE_MS = 24 * 60 * 60_000
 const EVENT = 'awaisa:booking-draft'
 
-const readDraft = (): BookingDraft | null => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const draft = JSON.parse(raw) as BookingDraft
-    if (!draft.slug || !draft.serviceId || Date.now() - draft.updatedAt > MAX_AGE_MS) return null
+const isObject = (value: unknown): value is BookingDraft =>
+  typeof value === 'object' && value !== null
 
-    return draft
-  } catch {
-    return null
-  }
+const readDraft = (): BookingDraft | null => {
+  const draft = readJson(STORAGE_KEY, isObject)
+  if (!draft?.slug || !draft.serviceId || Date.now() - draft.updatedAt > MAX_AGE_MS) return null
+
+  return draft
 }
 
 const notify = () => window.dispatchEvent(new Event(EVENT))
 
 // A booking left half-way is kept on the device, so the client can pick it up again.
+// Storage may be unavailable (private mode): resuming is a convenience only.
 const saveDraft = (draft: Omit<BookingDraft, 'updatedAt'>) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...draft, updatedAt: Date.now() }))
-    notify()
-  } catch {
-    // Storage may be unavailable (private mode): resuming is a convenience only.
-  }
+  if (writeJson(STORAGE_KEY, { ...draft, updatedAt: Date.now() })) notify()
 }
 
 const clearDraft = () => {
-  try {
-    window.localStorage.removeItem(STORAGE_KEY)
-    notify()
-  } catch {
-    // Same as above.
-  }
+  if (removeKey(STORAGE_KEY)) notify()
 }
 
 const draftHref = (draft: BookingDraft) => {

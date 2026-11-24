@@ -6,6 +6,7 @@ import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
+import { copyText } from '@/shared/lib/share'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
 
@@ -54,7 +55,7 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
       timeout: 12_000,
       action: {
         label: t('Скопировать ссылку'),
-        onClick: () => void navigator.clipboard?.writeText(url).catch(() => undefined),
+        onClick: () => void copyText(url),
       },
     })
   }, [isComplete, business.slug, toast, t])
