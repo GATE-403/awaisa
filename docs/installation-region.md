@@ -42,37 +42,33 @@ Telegram, WhatsApp, Twilio, Photon и OpenStreetMap международные: 
 
 ## 3. Как устроить регион
 
-Один пакет `packages/region` (как `packages/tokens`): обычный TypeScript, который читают и API, и веб, и мобильное приложение.
+**Код не знает ни одной страны.** Страну и город описывает сама установка в файле `region.json` в корне репозитория, как `.env`: файл не коммитится, в репозитории лежит только пример `region.example.json` (это наша бишкекская настройка).
 
-```ts
-// packages/region/src/kg.ts
-export const KG: Region = {
-  key: 'kg',
-  country: 'KG',
-  timeZone: 'Asia/Bishkek',
-  phone: { countryCode: '996', localDigits: 9, trunkPrefix: '0', mask: '### ### ###' },
-  currency: { code: 'KGS', symbol: 'сом', minorUnits: 0 },
-  locale: { default: 'ru', available: ['ru', 'ky', 'en'] },
-  city: { name: 'Бишкек', center: { latitude: 42.8746, longitude: 74.5698 }, areas: [/* районы */] },
-  geocoderBox: [69.2, 39.1, 80.3, 43.3],
-  fiscal: 'kg-ekassa',
-  payments: ['freedompay'],
+```json
+{
+  "country": "KG",
+  "timeZone": "Asia/Bishkek",
+  "phone": { "callingCode": "996", "nationalDigits": 9, "trunkPrefix": "0", "groups": [3, 3, 3], "example": "555123456" },
+  "currency": { "code": "KGS", "label": "сом" },
+  "locale": { "default": "ru", "available": ["ru", "ky", "en"], "numbers": "ru-RU" },
+  "city": { "name": "Бишкек", "center": { "latitude": 42.8746, "longitude": 74.5698 }, "areas": [] },
+  "geocoderBox": "69.2,39.1,80.3,43.3"
 }
 ```
 
-- Выбор региона: `REGION=kg` в окружении API и `NEXT_PUBLIC_REGION=kg` в аргументах сборки веба (как `NEXT_PUBLIC_SITE_URL` в `docs/launch.md`). Без переменной `kg`, то есть ровно сегодняшнее поведение.
-- Новая страна: файл `packages/region/src/kz.ts` в PR, без правок остального кода. Это и есть «кастомизация без форка».
-- Мелкие правки без нового пресета (другой город той же страны): переменные `REGION_CITY`, `REGION_CENTER` поверх пресета.
-- `GET /region` в API не нужен: и веб, и API читают один и тот же пакет при старте или сборке.
+- Пакет `packages/region` знает только формат: `parseRegion` проверяет описание и называет сразу все неверные поля, а помощники считают префикс номера, группировку, подсказку и смещение пояса (через `Intl`, с летним временем). Своих таблиц стран в нём нет: символ валюты, если `label` не задан, берётся из `Intl`.
+- Файл ищется так: `REGION_FILE`, иначе ближайший `region.json` выше рабочей папки, иначе (только не в продакшене) `region.example.json`. API в продакшене без `region.json` не запускается, веб при сборке берёт пример и предупреждает.
+- API читает регион при первом обращении (`currentRegion()`), веб получает его при сборке: `next.config.ts` вшивает описание в бандл.
+- Новая страна или город: свой `region.json`, без правок кода и без PR в этот репозиторий.
 
 ## 4. План по шагам
 
 Оценки для одного разработчика с Claude, в днях работы. Каждый шаг отдельным PR, после каждого CI и e2e зелёные, для Кыргызстана видимых изменений нет.
 
-### Шаг 1. Пакет региона и простые константы (2-3 дня), можно в декабре
+### Шаг 1. Пакет региона и простые константы (2-3 дня), можно в декабре (сделан: PR #158)
 
-- `packages/region` с пресетом `kg` и юнит-тестами.
-- Заменить константами из пресета: код страны и разбор номера (`phone.ts`, `inputMasks.ts`, `formatPhone.ts`), валюту (`formatPrice` через `Intl.NumberFormat` с кодом валюты и коротким названием из пресета), центр карты, районы, рамку Photon, `PLATFORM.name` и `tagline`, `Asia/Bishkek` в `ics.ts` и `businessTime.ts`.
+- `packages/region` (формат и проверка) и `region.example.json`, юнит-тесты на выдуманных установках.
+- Брать из региона вместо констант: код страны и разбор номера (`phone.ts`, `inputMasks.ts`, `formatPhone.ts`), валюту (`formatPrice` через `Intl.NumberFormat` с кодом валюты и коротким названием из пресета), центр карты, районы, рамку Photon, `PLATFORM.name` и `tagline`, `Asia/Bishkek` в `ics.ts` и `businessTime.ts`.
 - Проверка: юнит-тесты `normalizePhone` и масок на кыргызских номерах дают то же, e2e целиком.
 - Риск низкий: значения те же, меняется только откуда они берутся.
 
@@ -80,7 +76,7 @@ export const KG: Region = {
 
 - SQL: 15 мест `AT TIME ZONE 'UTC' + interval '6 hours'` заменить на `AT TIME ZONE $tz` с поясом из региона (Postgres сам знает летнее время). Сначала одно выражение-хелпер (`localDate(column)`), потом подстановка. Это пересекается с пунктом 8 из `docs/architecture-review.md` (SQL-хелперы денег и визитов): делать вместе.
 - `business-time.ts`: перевод «день и минуты бизнеса ↔ UTC» через `Intl.DateTimeFormat` с `timeZone`, без фиксированного смещения. Свободное время (`buildSlots`) от этого зависит напрямую, юнит-тесты уже есть.
-- Cron: `@Cron('0 10 * * *', { timeZone: REGION.timeZone })` с локальными часами вместо пересчитанных в UTC (9 задач).
+- Cron: `@Cron('0 10 * * *', { timeZone: currentRegion().timeZone })` с локальными часами вместо пересчитанных в UTC (9 задач).
 - Проверка: отчёты «Аналитика», «Прибыль», зарплата и `test:db` на демо-данных до и после: суммы совпадают до сома. Плюс новые юнит-тесты на пояс с переходом на летнее время (`Europe/Moscow` без перехода, `Europe/Berlin` с ним): запись через ночь перехода, слоты дня перехода.
 - Риск средний: трогает деньги. Именно поэтому до запуска, когда ошибку ловит сравнение на демо-данных, а не жалоба владельца салона.
 
