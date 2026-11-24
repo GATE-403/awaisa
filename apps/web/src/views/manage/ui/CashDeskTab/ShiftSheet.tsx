@@ -192,7 +192,7 @@ export const ShiftSheet = ({
             {mode === 'open' &&
               (branchName
                 ? t(
-                    'Count the cash in the "{branch}" till: the balance is worked out from this amount.',
+                    'Count the cash in the “{branch}” till: the balance is worked out from this amount.',
                     {
                       branch: branchName,
                     },

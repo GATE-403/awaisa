@@ -38,7 +38,7 @@ export const PlanLock = ({ slug, feature }: PlanLockProps) => {
 
   return (
     <EmptyState
-      title={plan ? t('Available on the "{plan}" plan', { plan }) : t('Not available on your plan')}
+      title={plan ? t('Available on the “{plan}” plan', { plan }) : t('Not available on your plan')}
       text={
         isOwner
           ? t(FEATURE_TEXT[feature])

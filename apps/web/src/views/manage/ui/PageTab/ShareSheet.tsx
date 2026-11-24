@@ -141,7 +141,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
                   onClick={() =>
                     void copy(
                       `${pageUrl}/book?branch=${branch.id}`,
-                      t('Booking link for "{name}" copied', { name: branch.name }),
+                      t('Booking link for “{name}” copied', { name: branch.name }),
                     )
                   }
                 >

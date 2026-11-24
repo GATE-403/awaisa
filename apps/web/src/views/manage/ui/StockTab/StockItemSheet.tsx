@@ -287,7 +287,7 @@ export const StockItemSheet = ({
             </div>
             <p className={sheet.groupFooter}>
               {example && exampleCost > 0
-                ? t('"{name}": {amount} som of materials per visit.', {
+                ? t('“{name}”: {amount} som of materials per visit.', {
                     name: example.name,
                     amount: maskAmountInput(String(exampleCost)),
                   })

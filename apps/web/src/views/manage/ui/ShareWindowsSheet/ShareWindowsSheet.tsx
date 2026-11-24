@@ -92,7 +92,7 @@ export const ShareWindowsSheet = ({
   const path = `/${slug}/book?${query}`
   const link = typeof window === 'undefined' ? path : `${window.location.origin}${path}`
   const heading = service
-    ? t('Free time for "{service}" · {day}', { service: service.name, day })
+    ? t('Free time for “{service}” · {day}', { service: service.name, day })
     : t('Free time · {day}', { day })
   const body = [heading, ...lines].join('\n')
   // Shown without the query: "awaisa.kg/kings-barbershop/book".

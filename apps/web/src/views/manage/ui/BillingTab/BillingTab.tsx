@@ -52,7 +52,7 @@ const describeStatus = (t: Translate, access: PlanAccess) => {
     trial: t('trial until {day}', { day: until }),
     free: t('free'),
     expired: access.upgradeTitle
-      ? t('"{plan}" ended {day}', { plan: access.upgradeTitle, day: until })
+      ? t('“{plan}” ended {day}', { plan: access.upgradeTitle, day: until })
       : t('ended {day}', { day: until }),
   }
   return texts[access.status]
@@ -340,13 +340,13 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               }
             >
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 1 })}>
-                {t('"{plan}" for a month', { plan: paidPlan.title })}
+                {t('“{plan}” for a month', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 12 })}>
-                {t('"{plan}" for a year', { plan: paidPlan.title })}
+                {t('“{plan}” for a year', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, isLifetime: true })}>
-                {t('"{plan}" for good', { plan: paidPlan.title })}
+                {t('“{plan}” for good', { plan: paidPlan.title })}
               </MenuItem>
             </Menu>
           </div>

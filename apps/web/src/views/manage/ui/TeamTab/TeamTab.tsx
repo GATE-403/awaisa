@@ -118,7 +118,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       )}
       {!canAdd && (
         <RowNote>
-          {t('Administrators are available on the "{plan}" plan.', {
+          {t('Administrators are available on the “{plan}” plan.', {
             plan: access?.upgradeTitle ?? t('Business'),
           })}{' '}
           <NextLink href={`/manage/${slug}?tab=billing`} className={own.planLink}>

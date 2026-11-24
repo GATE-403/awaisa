@@ -506,7 +506,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         // While the gaps for a service are lit, one capsule names it and turns the search off.
         <div className={styles.fitBar}>
           <span className={styles.fitText}>
-            {t('Room for "{service}"', { service: fitService.name })} ·{' '}
+            {t('Room for “{service}”', { service: fitService.name })} ·{' '}
             {t.duration(fitService.durationMinutes)}
           </span>
           <Button variant='outline' size='sm' onClick={() => setFitServiceId(null)}>

@@ -408,8 +408,8 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                                 isHit={service.isPopular}
                                 linkLabel={t(
                                   service.isActive === false
-                                    ? 'Change "{name}", hidden'
-                                    : 'Change "{name}"',
+                                    ? 'Change “{name}”, hidden'
+                                    : 'Change “{name}”',
                                   { name: service.name },
                                 )}
                                 actionLabel={t('Change')}

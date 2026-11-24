@@ -111,7 +111,7 @@ test.describe('Schedule around “now”', () => {
     await page.getByRole('button', { name: 'Find room for a service' }).click()
     await page.getByRole('menuitem', { name: new RegExp(business.service.name) }).click()
 
-    await expect(page.getByText(`Room for "${business.service.name}" · 1 h`)).toBeVisible()
+    await expect(page.getByText(`Room for “${business.service.name}” · 1 h`)).toBeVisible()
     const gaps = board(page).getByRole('button', {
       name: new RegExp(`book with ${business.master.name}`),
     })
@@ -129,6 +129,6 @@ test.describe('Schedule around “now”', () => {
 
     await page.getByRole('button', { name: 'Done' }).click()
     await expect(gaps).toHaveCount(0)
-    await expect(page.getByText(`Room for "${business.service.name}"`)).toHaveCount(0)
+    await expect(page.getByText(`Room for “${business.service.name}”`)).toHaveCount(0)
   })
 })
