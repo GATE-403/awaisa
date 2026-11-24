@@ -4,12 +4,14 @@ import { Button } from '@awaisa/ui/Button'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { FileArrowUp } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { importBookings, importClients } from '@/shared/api/clientApi'
 import type { ImportReport } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -24,45 +26,50 @@ interface ImportSheetProps {
 
 type Kind = 'clients' | 'bookings'
 
-type Field = { key: string; label: string; names: string[]; isRequired?: boolean }
+type Field = { key: string; label: MessageDescriptor; names: string[]; isRequired?: boolean }
 
 // Header names as Altegio, YCLIENTS and hand-made tables write them.
 const FIELDS: Record<Kind, Field[]> = {
   clients: [
-    { key: 'name', label: 'Name', names: ['имя', 'фио', 'клиент', 'name'] },
+    { key: 'name', label: msg`Name`, names: ['имя', 'фио', 'клиент', 'name'] },
     {
       key: 'phone',
-      label: 'Phone',
+      label: msg`Phone`,
       names: ['телефон', 'phone', 'тел', 'мобильный'],
       isRequired: true,
     },
-    { key: 'birthday', label: 'Birthday', names: ['дата рождения', 'день рождения', 'birth'] },
-    { key: 'note', label: 'Note', names: ['комментарий', 'примечание', 'заметка', 'comment'] },
+    { key: 'birthday', label: msg`Birthday`, names: ['дата рождения', 'день рождения', 'birth'] },
+    { key: 'note', label: msg`Note`, names: ['комментарий', 'примечание', 'заметка', 'comment'] },
   ],
   bookings: [
     {
       key: 'date',
-      label: 'Date',
+      label: msg`Date`,
       names: ['дата', 'дата визита', 'дата записи', 'date'],
       isRequired: true,
     },
-    { key: 'time', label: 'Time', names: ['время', 'начало', 'time'] },
-    { key: 'service', label: 'Service', names: ['услуга', 'услуги', 'service'], isRequired: true },
+    { key: 'time', label: msg`Time`, names: ['время', 'начало', 'time'] },
+    {
+      key: 'service',
+      label: msg`Service`,
+      names: ['услуга', 'услуги', 'service'],
+      isRequired: true,
+    },
     {
       key: 'master',
-      label: 'Specialist',
+      label: msg`Specialist`,
       names: ['сотрудник', 'мастер', 'исполнитель', 'specialist', 'staff'],
       isRequired: true,
     },
-    { key: 'name', label: 'Client', names: ['клиент', 'имя', 'фио', 'client', 'name'] },
-    { key: 'phone', label: 'Phone', names: ['телефон', 'phone', 'тел'], isRequired: true },
-    { key: 'comment', label: 'Comment', names: ['комментарий', 'примечание', 'comment'] },
+    { key: 'name', label: msg`Client`, names: ['клиент', 'имя', 'фио', 'client', 'name'] },
+    { key: 'phone', label: msg`Phone`, names: ['телефон', 'phone', 'тел'], isRequired: true },
+    { key: 'comment', label: msg`Comment`, names: ['комментарий', 'примечание', 'comment'] },
   ],
 }
 
-const KINDS: { value: Kind; label: string }[] = [
-  { value: 'clients', label: 'Clients' },
-  { value: 'bookings', label: 'Bookings' },
+const KINDS: { value: Kind; label: MessageDescriptor }[] = [
+  { value: 'clients', label: msg`Clients` },
+  { value: 'bookings', label: msg`Bookings` },
 ]
 
 const NONE = '-1'
@@ -70,7 +77,7 @@ const NONE = '-1'
 // Moving from Altegio or YCLIENTS: the owner exports clients or upcoming bookings as CSV, we
 // guess the columns from the headers, the owner checks them and the rows go in at once.
 export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
   const [kind, setKind] = useState<Kind>('clients')
@@ -84,10 +91,10 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
   const fields = FIELDS[kind]
   const isMapped = fields.every((field) => !field.isRequired || (columns[field.key] ?? -1) >= 0)
   const options = [
-    { value: NONE, label: t('No') },
+    { value: NONE, label: t`No` },
     ...(headers ?? []).map((header, index) => ({
       value: String(index),
-      label: header || t('Column {number}', { number: index + 1 }),
+      label: header || t`Column ${ph({ number: index + 1 })}`,
     })),
   ]
 
@@ -131,7 +138,7 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
       setResult(report)
       if (report.imported > 0) onImported()
     } catch (error) {
-      toast.show({ title: t('Not loaded'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not loaded`, description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsImporting(false)
     }
@@ -139,13 +146,13 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
 
   return (
     <Sheet
-      title={t('Import')}
+      title={t`Import`}
       onClose={onClose}
       action={
         result
-          ? { label: t('Done'), onClick: onClose }
+          ? { label: t`Done`, onClick: onClose }
           : {
-              label: t('Load'),
+              label: t`Load`,
               onClick: () => void handleImport(),
               disabled: data.length === 0 || !isMapped || isImporting,
             }
@@ -153,19 +160,19 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
     >
       <div className={sheet.form}>
         <SegmentedControl
-          label={t('What to load')}
+          label={t`What to load`}
           value={kind}
           items={KINDS.map((item) => ({ ...item, label: t(item.label) }))}
           onChange={changeKind}
         />
 
-        <section className={sheet.group} aria-label={t('File')}>
+        <section className={sheet.group} aria-label={t`File`}>
           <div className={sheet.list}>
             <button type='button' className={sheet.row} onClick={() => fileInput.current?.click()}>
               <span className={sheet.rowLabel}>
                 {fileName
-                  ? `${fileName} · ${t.count(data.length, ['row', 'rows'])}`
-                  : t('Choose a CSV file')}
+                  ? `${fileName} · ${t`${plural(data.length, { one: '# row', other: '# rows' })}`}`
+                  : t`Choose a CSV file`}
               </span>
               <FileArrowUp aria-hidden className={sheet.suffix} />
             </button>
@@ -174,20 +181,20 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
               type='file'
               accept='.csv,text/csv,text/plain'
               hidden
-              aria-label={t('CSV file')}
+              aria-label={t`CSV file`}
               onChange={(event) => void handleFile(event)}
             />
           </div>
           <p className={sheet.groupFooter}>
             {kind === 'clients'
-              ? t('In Altegio or YCLIENTS: Clients → Export. Save the table as CSV.')
-              : t('Future bookings only: export the booking log from today and save it as CSV.')}
+              ? t`In Altegio or YCLIENTS: Clients → Export. Save the table as CSV.`
+              : t`Future bookings only: export the booking log from today and save it as CSV.`}
           </p>
         </section>
 
         {headers && !result && (
-          <section className={sheet.group} aria-label={t('Columns')}>
-            <SectionCaption>{t('Columns')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`Columns`}>
+            <SectionCaption>{t`Columns`}</SectionCaption>
             <div className={sheet.list}>
               {fields.map((field) => (
                 <div key={field.key} className={sheet.row}>
@@ -195,7 +202,7 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
                   <span className={sheet.rowControl}>
                     <Select
                       variant='plain'
-                      aria-label={t('Column: {name}', { name: t(field.label) })}
+                      aria-label={t`Column: ${ph({ name: t(field.label) })}`}
                       items={options}
                       value={String(columns[field.key] ?? -1)}
                       onValueChange={(value) =>
@@ -208,51 +215,46 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
             </div>
             <p className={sheet.groupFooter}>
               {isMapped
-                ? t('First row: {values}', {
+                ? t`First row: ${ph({
                     values: Object.values(toRecords()[0] ?? {})
                       .filter(Boolean)
                       .join(' · '),
-                  })
-                : t('Pick the columns: {fields}.', {
+                  })}`
+                : t`Pick the columns: ${ph({
                     fields: fields
                       .filter((field) => field.isRequired && (columns[field.key] ?? -1) < 0)
                       .map((field) => t(field.label).toLowerCase())
                       .join(', '),
-                  })}
+                  })}.`}
             </p>
           </section>
         )}
 
         {kind === 'bookings' && headers && !result && (
-          <section className={sheet.group} aria-label={t('Reminders')}>
+          <section className={sheet.group} aria-label={t`Reminders`}>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Remind clients by SMS')}</span>
+                <span className={sheet.rowLabel}>{t`Remind clients by SMS`}</span>
                 <Switch checked={remind} onCheckedChange={setRemind} />
               </label>
             </div>
             <p className={sheet.groupFooter}>
-              {t(
-                'No confirmations are sent: the clients are already booked. Services and specialists are matched by name.',
-              )}
+              {t`No confirmations are sent: the clients are already booked. Services and specialists are matched by name.`}
             </p>
           </section>
         )}
 
         {result && (
-          <section className={sheet.group} aria-label={t('Import result')}>
+          <section className={sheet.group} aria-label={t`Import result`}>
             <SectionCaption>
-              {t('Loaded {count}', { count: result.imported })}
-              {result.skippedCount > 0 &&
-                ` · ${t('skipped {count}', { count: result.skippedCount })}`}
+              {t`Loaded ${ph({ count: result.imported })}`}
+              {result.skippedCount > 0 && ` · ${t`skipped ${ph({ count: result.skippedCount })}`}`}
             </SectionCaption>
             {result.skipped.length > 0 && (
               <div className={sheet.list}>
                 {result.skipped.map((item) => (
                   <div key={item.row} className={sheet.row}>
-                    <span className={sheet.rowLabel}>
-                      {t('Row {number}', { number: item.row + 1 })}
-                    </span>
+                    <span className={sheet.rowLabel}>{t`Row ${ph({ number: item.row + 1 })}`}</span>
                     <span className={sheet.suffix}>{item.reason}</span>
                   </div>
                 ))}
@@ -260,12 +262,12 @@ export const ImportSheet = ({ slug, onClose, onImported }: ImportSheetProps) => 
             )}
             {result.skippedCount > result.skipped.length && (
               <p className={sheet.groupFooter}>
-                {t('And {count} more.', { count: result.skippedCount - result.skipped.length })}
+                {t`And ${ph({ count: result.skippedCount - result.skipped.length })} more.`}
               </p>
             )}
             {result.skippedCount > 0 && (
               <Button variant='secondary' onClick={() => setResult(null)}>
-                {t('Fix the columns')}
+                {t`Fix the columns`}
               </Button>
             )}
           </section>

@@ -1,8 +1,9 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import type { TimeSlot } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './TimeRuler.module.css'
 
@@ -40,7 +41,7 @@ export const TimeRuler = ({
   isPending = false,
   onCenter,
 }: TimeRulerProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const trackRef = useRef<HTMLFieldSetElement>(null)
   const hasShown = useRef(false)
   const settleTimer = useRef<number | undefined>(undefined)
@@ -153,10 +154,8 @@ export const TimeRuler = ({
           {!current
             ? ''
             : isFree
-              ? t('until {time} · free', {
-                  time: toTime(toMinutes(current.time) + durationMinutes),
-                })
-              : t('Taken - scroll on')}
+              ? t`until ${ph({ time: toTime(toMinutes(current.time) + durationMinutes) })} · free`
+              : t`Taken - scroll on`}
         </span>
       </div>
 
@@ -164,7 +163,7 @@ export const TimeRuler = ({
         <fieldset
           ref={trackRef}
           className={styles.track}
-          aria-label={t('Time')}
+          aria-label={t`Time`}
           onPointerDown={() => {
             setHasMoved(true)
             isHolding.current = true
@@ -224,17 +223,17 @@ export const TimeRuler = ({
           for free, a low one for taken - with counts. Two lines made the step taller than
           short phones. */}
       {!hasMoved ? (
-        <p className={styles.hint}>{t('Scroll the dial or tap a time')}</p>
+        <p className={styles.hint}>{t`Scroll the dial or tap a time`}</p>
       ) : (
         <p className={styles.legend}>
           <span className={styles.legendItem}>
             <span className={styles.swatch} data-free='' aria-hidden />
-            {t.count(freeCount, ['free slot', 'free slots'])}
+            {t`${plural(freeCount, { one: '# free slot', other: '# free slots' })}`}
           </span>
           {takenCount > 0 && (
             <span className={styles.legendItem}>
               <span className={styles.swatch} aria-hidden />
-              {t('{count} taken', { count: takenCount })}
+              {t`${ph({ count: takenCount })} taken`}
             </span>
           )}
         </p>

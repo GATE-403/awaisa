@@ -1,10 +1,10 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Check, UsersThree } from '@phosphor-icons/react/ssr'
 import { ANY_SPECIALIST_ID } from '@/entities/booking'
 import { MasterCard } from '@/entities/business'
 import type { Specialist } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import styles from './MasterPicker.module.css'
 
 interface MasterPickerProps {
@@ -18,15 +18,15 @@ interface MasterPickerProps {
 // Masters as the business page's picture cards (`MasterCard`), so the face picked here is the
 // one seen there. The chosen card gets an accent ring and a check; native radios cover each card.
 export const MasterPicker = ({ specialists, value, onChange, onReselect }: MasterPickerProps) => {
-  const t = useT()
+  const { t } = useLingui()
   return (
-    <div className={styles.row} role='radiogroup' aria-label={t('Specialist')} data-edge-fade=''>
+    <div className={styles.row} role='radiogroup' aria-label={t`Specialist`} data-edge-fade=''>
       <MasterCard
         specialist={null}
         className={styles.card}
         icon={<UsersThree />}
-        title={t('Any')}
-        meta={t('whoever is free')}
+        title={t`Any`}
+        meta={t`whoever is free`}
       >
         <input
           type='radio'
@@ -37,7 +37,7 @@ export const MasterPicker = ({ specialists, value, onChange, onReselect }: Maste
           onClick={() => {
             if (value === ANY_SPECIALIST_ID) onReselect?.()
           }}
-          aria-label={t('Any specialist - we pick whoever is free at that time')}
+          aria-label={t`Any specialist - we pick whoever is free at that time`}
         />
         <Check className={styles.check} aria-hidden />
       </MasterCard>

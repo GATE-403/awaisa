@@ -1,5 +1,11 @@
+import { setupI18n } from '@lingui/core'
 import { describe, expect, it } from 'vitest'
-import { shortReason, storyNote } from '../lib/reasons'
+import { shortReason as shortReasonIn, storyNote as storyNoteIn } from '../lib/reasons'
+
+const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+const t = i18n._.bind(i18n)
+const shortReason = (reason: string) => shortReasonIn(reason, t)
+const storyNote = (reason: string) => storyNoteIn(reason, t)
 
 describe('shortReason', () => {
   it('keeps reasons that fit the card capsule', () => {

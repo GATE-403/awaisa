@@ -1,6 +1,6 @@
-import NextLink from 'next/link'
+import { Trans, useLingui } from '@lingui/react/macro'
 import type { BusinessKind, PopularService } from '@/shared/api/types'
-import { T } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import chip from '@/shared/ui/Chip/Chip.module.css'
 import styles from './SearchChips.module.css'
 
@@ -11,12 +11,13 @@ interface SearchChipsProps {
 
 // «Popular searches»: one-tap searches built from what places actually offer.
 export const SearchChips = ({ kind, services }: SearchChipsProps) => {
+  const { t } = useLingui()
   if (services.length === 0) return null
 
   return (
-    <nav className={styles.row} aria-label='Popular searches'>
+    <nav className={styles.row} aria-label={t`Popular searches`}>
       <span className={styles.label}>
-        <T>Popular searches</T>
+        <Trans>Popular searches</Trans>
       </span>
       {services.map((service) => (
         <NextLink

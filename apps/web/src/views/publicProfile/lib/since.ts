@@ -1,3 +1,4 @@
+import { msg, ph } from '@lingui/core/macro'
 import type { Translate } from '@/shared/i18n'
 
 const DAY_MS = 86_400_000
@@ -10,10 +11,10 @@ const toUtc = (dayKey: string) => {
 /** How long ago a visit was, short: «today», «5 d ago», «3 wk ago», «4 mo ago». */
 export const agoLabel = (visitDayKey: string, todayKey: string, t: Translate) => {
   const days = Math.max(0, Math.round((toUtc(todayKey) - toUtc(visitDayKey)) / DAY_MS))
-  if (days === 0) return t('today')
-  if (days === 1) return t('yesterday')
-  if (days < 14) return t('{count} d ago', { count: days })
-  if (days < 60) return t('{count} wk ago', { count: Math.floor(days / 7) })
-  if (days < 365) return t('{count} mo ago', { count: Math.floor(days / 30) })
-  return t('{count} yr ago', { count: Math.floor(days / 365) })
+  if (days === 0) return t(msg`today`)
+  if (days === 1) return t(msg`yesterday`)
+  if (days < 14) return t(msg`${ph({ count: days })} d ago`)
+  if (days < 60) return t(msg`${ph({ count: Math.floor(days / 7) })} wk ago`)
+  if (days < 365) return t(msg`${ph({ count: Math.floor(days / 30) })} mo ago`)
+  return t(msg`${ph({ count: Math.floor(days / 365) })} yr ago`)
 }

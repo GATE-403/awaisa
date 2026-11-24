@@ -1,4 +1,5 @@
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import {
   forgetBooking,
@@ -18,7 +19,6 @@ import {
   restoreMyBooking,
 } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { trackStep, trackToastAction } from '@/shared/lib/telemetry'
 
@@ -35,7 +35,7 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
   const hasInitial = useRef(initial !== null)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const idsKey = stored.map((booking) => booking.id).join(',')
   const isSignedIn = session.status === 'signedIn'
   const accountIds = new Set(accountBookings?.map((booking) => booking.id))
@@ -103,12 +103,12 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
       haptic('warning')
       trackStep('cancel', cancelled.business.slug)
       toast.show({
-        title: t('Booking cancelled'),
-        description: t('The time is free for others now'),
+        title: t`Booking cancelled`,
+        description: t`The time is free for others now`,
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: t('Undo'),
+          label: t`Undo`,
           onClick: () => {
             trackToastAction('undo_cancel')
             void restore(id)
@@ -117,7 +117,7 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
       })
     } catch (cancelError) {
       toast.show({
-        title: t('Could not cancel'),
+        title: t`Could not cancel`,
         description: getErrorMessage(cancelError),
         type: 'error',
       })
@@ -138,10 +138,10 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
         (current) => current?.map((item) => (item.id === id ? restored : item)) ?? null,
       )
       trackStep('cancel_undone', restored.business.slug)
-      toast.show({ title: t('Booking restored'), type: 'success' })
+      toast.show({ title: t`Booking restored`, type: 'success' })
     } catch (restoreError) {
       toast.show({
-        title: t('Could not restore'),
+        title: t`Could not restore`,
         description: getErrorMessage(restoreError),
         type: 'error',
       })
@@ -158,15 +158,15 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
 
   const forget = (id: string) => {
     forgetBooking(id)
-    toast.show({ title: t('Removed from the list') })
+    toast.show({ title: t`Removed from the list` })
   }
 
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code)
-      toast.show({ title: t('Number copied'), description: code, type: 'success' })
+      toast.show({ title: t`Number copied`, description: code, type: 'success' })
     } catch {
-      toast.show({ title: t('Could not copy'), type: 'error' })
+      toast.show({ title: t`Could not copy`, type: 'error' })
     }
   }
 

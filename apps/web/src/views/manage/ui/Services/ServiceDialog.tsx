@@ -1,11 +1,12 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useEffect, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { getPaymentConfig } from '@/shared/api/clientApi'
 import type { Category, Service, ServiceInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -22,19 +23,20 @@ interface ServiceDialogProps {
 const FORM_ID = 'service-form'
 
 const REBOOK_OPTIONS = [
-  { value: 0, label: 'No reminder' },
-  { value: 14, label: 'In 2 weeks' },
-  { value: 21, label: 'In 3 weeks' },
-  { value: 28, label: 'In 4 weeks' },
-  { value: 42, label: 'In 6 weeks' },
-  { value: 56, label: 'In 8 weeks' },
-  { value: 90, label: 'In 3 months' },
+  { value: 0, label: msg`No reminder` },
+  { value: 14, label: msg`In 2 weeks` },
+  { value: 21, label: msg`In 3 weeks` },
+  { value: 28, label: msg`In 4 weeks` },
+  { value: 42, label: msg`In 6 weeks` },
+  { value: 56, label: msg`In 8 weeks` },
+  { value: 90, label: msg`In 3 months` },
 ]
 
 const DURATIONS = [...Array.from({ length: 16 }, (_, index) => (index + 1) * 15), 300, 360, 480]
 
 export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceDialogProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [name, setName] = useState(service?.name ?? '')
   const [categoryId, setCategoryId] = useState(service?.categoryId ?? categories[0]?.id ?? '')
   const [durationMinutes, setDuration] = useState(service?.durationMinutes ?? 60)
@@ -84,17 +86,17 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
 
   return (
     <Sheet
-      title={service ? t('Service') : t('New service')}
+      title={service ? t`Service` : t`New service`}
       onClose={onClose}
-      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t`Save`, form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Name')}
-              placeholder={t('Name, for example “Men’s haircut”')}
+              aria-label={t`Name`}
+              placeholder={t`Name, for example “Men’s haircut”`}
               value={name}
               onValueChange={setName}
               autoFocus
@@ -103,26 +105,26 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Description')}
-              placeholder={t('What is included (optional)')}
+              aria-label={t`Description`}
+              placeholder={t`What is included (optional)`}
               value={description}
               onValueChange={setDescription}
             />
           </div>
         </div>
 
-        <section className={sheet.group} aria-label={t('Price and time')}>
-          <SectionCaption>{t('Price and time')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Price and time`}>
+          <SectionCaption>{t`Price and time`}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Duration')}</span>
+              <span className={sheet.rowLabel}>{t`Duration`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Duration')}
+                  aria-label={t`Duration`}
                   items={DURATIONS.map((minutes) => ({
                     value: minutes,
-                    label: t.duration(minutes),
+                    label: format.duration(minutes),
                   }))}
                   value={durationMinutes}
                   onValueChange={(value) => value && setDuration(value)}
@@ -130,26 +132,26 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Price')}</span>
+              <span className={sheet.rowLabel}>{t`Price`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Price, som')}
+                  aria-label={t`Price, som`}
                   inputMode='numeric'
                   placeholder='0'
-                  value={maskAmountInput(price)}
+                  value={maskAmountInput(price, format.locale)}
                   onValueChange={(value) => setPrice(value.replace(/\D/g, ''))}
                 />
-                <span className={sheet.suffix}>{t('som')}</span>
+                <span className={sheet.suffix}>{format.currency}</span>
               </span>
             </label>
             {categories.length > 1 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Category')}</span>
+                <span className={sheet.rowLabel}>{t`Category`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Category')}
+                    aria-label={t`Category`}
                     items={categories.map(({ id, name: label }) => ({ value: id, label }))}
                     value={categoryId}
                     onValueChange={(value) => value && setCategoryId(value)}
@@ -159,19 +161,19 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
             )}
           </div>
           <p className={sheet.groupFooter}>
-            {t('Clients see the price and duration before booking.')}
+            {t`Clients see the price and duration before booking.`}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Time to come again')}>
-          <SectionCaption>{t('Time to come again')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Time to come again`}>
+          <SectionCaption>{t`Time to come again`}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Remind by SMS')}</span>
+              <span className={sheet.rowLabel}>{t`Remind by SMS`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Remind to come again')}
+                  aria-label={t`Remind to come again`}
                   items={REBOOK_OPTIONS.map((option) => ({ ...option, label: t(option.label) }))}
                   value={rebookDays ?? 0}
                   onValueChange={(value) => setRebookDays(value ? value : null)}
@@ -181,56 +183,51 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
           </div>
           <p className={sheet.groupFooter}>
             {rebookDays
-              ? t(
-                  'The client gets one SMS with a link to the same specialist, unless they have booked already.',
-                )
-              : t('We remind the client to book again with the same specialist.')}
+              ? t`The client gets one SMS with a link to the same specialist, unless they have booked already.`
+              : t`We remind the client to book again with the same specialist.`}
           </p>
         </section>
 
         {canTakeDeposits && (
-          <section className={sheet.group} aria-label={t('Deposit')}>
-            <SectionCaption>{t('Deposit')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`Deposit`}>
+            <SectionCaption>{t`Deposit`}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('When booking online')}</span>
+                <span className={sheet.rowLabel}>{t`When booking online`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={t('Deposit, som')}
+                    aria-label={t`Deposit, som`}
                     inputMode='numeric'
-                    placeholder={t('none')}
-                    value={maskAmountInput(deposit)}
+                    placeholder={t`none`}
+                    value={maskAmountInput(deposit, format.locale)}
                     onValueChange={(value) => setDeposit(value.replace(/\D/g, ''))}
                   />
-                  <span className={sheet.suffix}>{t('som')}</span>
+                  <span className={sheet.suffix}>{format.currency}</span>
                 </span>
               </label>
             </div>
             <p className={sheet.groupFooter}>
               {!isDepositValid
-                ? t('The deposit cannot be more than the price.')
+                ? t`The deposit cannot be more than the price.`
                 : depositAmount > 0
-                  ? t(
-                      'The client pays {amount} by card, or the time is freed after 15 minutes. Refunded if cancelled a day ahead; kept by you if cancelled later.',
-                      { amount: formatPrice(depositAmount) },
-                    )
-                  : t('Protects long services from no-shows: the client pays part when booking.')}
+                  ? t`The client pays ${ph({ amount: format.price(depositAmount) })} by card, or the time is freed after 15 minutes. Refunded if cancelled a day ahead; kept by you if cancelled later.`
+                  : t`Protects long services from no-shows: the client pays part when booking.`}
             </p>
           </section>
         )}
 
-        <section className={sheet.group} aria-label={t('Display')}>
+        <section className={sheet.group} aria-label={t`Display`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
-                {t('Popular')}
-                <span className={sheet.rowHint}>{t('Shown first on the page')}</span>
+                {t`Popular`}
+                <span className={sheet.rowHint}>{t`Shown first on the page`}</span>
               </span>
               <Switch checked={isPopular} onCheckedChange={setIsPopular} />
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Open for booking')}</span>
+              <span className={sheet.rowLabel}>{t`Open for booking`}</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
           </div>

@@ -1,15 +1,14 @@
 'use client'
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { BusinessTile } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { getMasterPlaces } from '@/shared/api/clientApi'
 import type { MasterPlace } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PageTitle } from '@/shared/ui/PageTitle/PageTitle'
@@ -24,7 +23,7 @@ interface MasterPlacesPageProps {
 export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps) => {
   const session = useRequireSession()
   const router = useRouter()
-  const t = useT()
+  const { t } = useLingui()
   const [places, setPlaces] = useState<MasterPlace[] | null>(initialPlaces)
   const isSignedIn = session.status === 'signedIn'
 
@@ -45,12 +44,12 @@ export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
-        <PageTitle size='sm' title={t('My day.')} subtitle={t('Where you work as a specialist.')} />
+        <PageTitle size='sm' title={t`My day.`} subtitle={t`Where you work as a specialist.`} />
         {!places && <Skeleton className={styles.skeleton} />}
         {places?.length === 0 && (
           <EmptyState
-            title={t('This number is not linked to a specialist')}
-            text={t('Ask the owner to add it to the specialist card: Dashboard → Specialists.')}
+            title={t`This number is not linked to a specialist`}
+            text={t`Ask the owner to add it to the specialist card: Dashboard → Specialists.`}
           />
         )}
         {places && places.length > 0 && (

@@ -1,7 +1,19 @@
 import { parseRegion } from '@awaisa/region'
+import { setupI18n } from '@lingui/core'
 import { describe, expect, it } from 'vitest'
 import { formatPhone } from '../formatPhone'
-import { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem } from '../inputMasks'
+import {
+  maskAmountInput,
+  maskLocalPhoneInput,
+  maskPhoneInput,
+  phoneProblem as phoneProblemOf,
+} from '../inputMasks'
+
+const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+const phoneProblem = (...args: Parameters<typeof phoneProblemOf>) => {
+  const problem = phoneProblemOf(...args)
+  return problem ? i18n._(problem) : null
+}
 
 // Another installation's shape of number: the rules come from its region, the code knows none.
 const ALMATY = parseRegion({
@@ -71,13 +83,20 @@ describe('phoneProblem', () => {
 })
 
 describe('maskAmountInput', () => {
-  it('groups thousands with commas and ignores typed separators', () => {
-    expect(maskAmountInput('1500')).toBe('1,500')
-    expect(maskAmountInput('1250000')).toBe('1,250,000')
-    expect(maskAmountInput('900')).toBe('900')
-    expect(maskAmountInput('')).toBe('')
-    expect(maskAmountInput('1 500')).toBe('1,500')
-    expect(maskAmountInput('12,5000')).toBe('125,000')
+  it('groups thousands with commas in English and ignores typed separators', () => {
+    expect(maskAmountInput('1500', 'en')).toBe('1,500')
+    expect(maskAmountInput('1250000', 'en')).toBe('1,250,000')
+    expect(maskAmountInput('900', 'en')).toBe('900')
+    expect(maskAmountInput('', 'en')).toBe('')
+    expect(maskAmountInput('1 500', 'en')).toBe('1,500')
+    expect(maskAmountInput('12,5000', 'en')).toBe('125,000')
+  })
+
+  it('groups with a plain space in Russian and Kyrgyz', () => {
+    expect(maskAmountInput('1500', 'ru')).toBe('1 500')
+    expect(maskAmountInput('1,250,000', 'ru')).toBe('1 250 000')
+    expect(maskAmountInput('1 500', 'ky')).toBe('1 500')
+    expect(maskAmountInput('1 500', 'ky')).toBe('1 500')
   })
 })
 

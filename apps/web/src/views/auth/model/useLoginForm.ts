@@ -1,10 +1,12 @@
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useLingui } from '@lingui/react/macro'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { requestOtp, updateMe, verifyOtp } from '@/shared/api/clientApi'
 import type { Customer } from '@/shared/api/types'
 import { isSignInOnlyPath } from '@/shared/config/navigation'
+import { useRouter } from '@/shared/i18n/navigation'
 import { phoneProblem } from '@/shared/lib/inputMasks'
 import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 import { trackFormError, trackStep } from '@/shared/lib/telemetry'
@@ -20,6 +22,7 @@ const getCloseTarget = (redirectTo: string) => {
 }
 
 export const useLoginForm = () => {
+  const { t } = useLingui()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { setCustomer } = useSession()
@@ -72,7 +75,7 @@ export const useLoginForm = () => {
     // Checked here, not by disabling the button: the person learns what is missing.
     const problem = normalizedPhone ? null : phoneProblem(phone)
     if (problem) {
-      setError(problem)
+      setError(t(problem))
       trackFormError('phone')
       return
     }

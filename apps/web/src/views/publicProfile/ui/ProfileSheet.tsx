@@ -1,10 +1,10 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
+import { useLingui } from '@lingui/react/macro'
 import { type ReactNode, useMemo, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { ProfileEditorHostContext, ProfileStyleForm, useMyProfile } from '@/features/profileStyle'
-import { useT } from '@/shared/i18n'
+import { usePathname, useRouter } from '@/shared/i18n/navigation'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import { ProfileActionsSlotContext } from '../model/profileActionsSlot'
 
@@ -25,7 +25,7 @@ interface ProfileSheetProps {
 export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
   const pathname = usePathname()
   const router = useRouter()
-  const t = useT()
+  const { t } = useLingui()
   const session = useSession()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -41,15 +41,15 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
 
   return (
     <Sheet
-      title={t('Profile')}
-      cancelLabel={isEditing ? 'Cancel' : 'Close'}
+      title={t`Profile`}
+      cancelLabel={isEditing ? t`Cancel` : t`Close`}
       onCancel={isEditing ? () => setIsEditing(false) : undefined}
       onClose={() => router.back()}
       barEnd={isEditing ? undefined : <span ref={setActionsSlot} />}
       action={
         isEditing
           ? {
-              label: isSaving ? t('Saving…') : t('Done'),
+              label: isSaving ? t`Saving…` : t`Done`,
               form: EDIT_FORM_ID,
               disabled: isSaving || !settings,
             }
@@ -63,7 +63,7 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
             formId={EDIT_FORM_ID}
             settings={settings}
             profile={myProfile.profile}
-            name={customer.name || t('You')}
+            name={customer.name || t`You`}
             avatarUrl={customer.avatarUrl ?? null}
             onSave={async (input) => {
               await myProfile.save(input)

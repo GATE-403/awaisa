@@ -1,13 +1,15 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
 import { PersonAvatar } from '@/entities/business'
 import { getMasterPay } from '@/shared/api/clientApi'
 import type { Branch, Service, Specialist, SpecialistInput } from '@/shared/api/types'
 import { PHONE_PREFIX } from '@/shared/config/region'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -43,7 +45,8 @@ export const MasterDialog = ({
   onOpenPay,
   slug,
 }: MasterDialogProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const [branchId, setBranchId] = useState<string | null>(master?.branchId ?? null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [photoUrl, setPhotoUrl] = useState(master?.photoUrl ?? null)
@@ -65,11 +68,11 @@ export const MasterDialog = ({
     if (!canOpenPay || !slug || !masterId) return
     const controller = new AbortController()
     getMasterPay(slug, masterId, controller.signal)
-      .then((scheme) => setPaySummary(describePayScheme(scheme, t)))
+      .then((scheme) => setPaySummary(describePayScheme(scheme, t, format)))
       // The row still opens the sheet, which says what went wrong.
       .catch(() => undefined)
     return () => controller.abort()
-  }, [canOpenPay, slug, masterId, t])
+  }, [canOpenPay, slug, masterId, t, format])
 
   const toggleService = (id: string, checked: boolean) =>
     setServiceIds((current) => (checked ? [...current, id] : current.filter((item) => item !== id)))
@@ -111,9 +114,9 @@ export const MasterDialog = ({
 
   return (
     <Sheet
-      title={master ? t('Specialist') : t('New specialist')}
+      title={master ? t`Specialist` : t`New specialist`}
       onClose={onClose}
-      action={{ label: t('Save'), form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t`Save`, form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.photoHeader}>
@@ -126,7 +129,7 @@ export const MasterDialog = ({
                 onClick={() => fileInput.current?.click()}
                 disabled={isUploading}
               >
-                {isUploading ? t('Loading…') : photoUrl ? t('Change photo') : t('Add photo')}
+                {isUploading ? t`Loading…` : photoUrl ? t`Change photo` : t`Add photo`}
               </button>
               {photoUrl && !isUploading && (
                 <button
@@ -134,7 +137,7 @@ export const MasterDialog = ({
                   className={sheet.photoButton}
                   onClick={() => void changePhoto(null)}
                 >
-                  {t('Delete')}
+                  {t`Delete`}
                 </button>
               )}
               <input
@@ -143,19 +146,19 @@ export const MasterDialog = ({
                 accept='image/jpeg,image/png,image/webp,image/heic,image/heif'
                 hidden
                 onChange={handleFile}
-                aria-label={t('Specialist photo')}
+                aria-label={t`Specialist photo`}
               />
             </span>
           ) : (
-            <span className={sheet.photoHint}>{t('Add a photo after saving')}</span>
+            <span className={sheet.photoHint}>{t`Add a photo after saving`}</span>
           )}
         </div>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Name')}
-              placeholder={t('First and last name')}
+              aria-label={t`Name`}
+              placeholder={t`First and last name`}
               value={name}
               onValueChange={setName}
               autoFocus
@@ -164,19 +167,19 @@ export const MasterDialog = ({
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Role')}
-              placeholder={t('Role, for example “Stylist”')}
+              aria-label={t`Role`}
+              placeholder={t`Role, for example “Stylist”`}
               value={role}
               onValueChange={setRole}
             />
           </div>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Sign-in phone')}</span>
+            <span className={sheet.rowLabel}>{t`Sign-in phone`}</span>
             <Input
               variant='plain'
               type='tel'
               inputMode='tel'
-              aria-label={t('Sign-in phone')}
+              aria-label={t`Sign-in phone`}
               placeholder={`${PHONE_PREFIX} …`}
               value={phone}
               onValueChange={(value) => setPhone(maskPhoneInput(value))}
@@ -184,13 +187,13 @@ export const MasterDialog = ({
           </label>
           {branches.length > 1 && (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Branch')}</span>
+              <span className={sheet.rowLabel}>{t`Branch`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Branch')}
+                  aria-label={t`Branch`}
                   items={[
-                    { value: 'all', label: t('All branches') },
+                    { value: 'all', label: t`All branches` },
                     ...branches.map(({ id, name: label }) => ({ value: id, label })),
                   ]}
                   value={branchId ?? 'all'}
@@ -202,11 +205,11 @@ export const MasterDialog = ({
         </div>
 
         {services.length > 0 && (
-          <section className={sheet.group} aria-label={t('Specialist’s services')}>
+          <section className={sheet.group} aria-label={t`Specialist’s services`}>
             <div className={sheet.groupHeader}>
-              <SectionCaption isInset={false}>{t('Does these services')}</SectionCaption>
+              <SectionCaption isInset={false}>{t`Does these services`}</SectionCaption>
               <button type='button' className={sheet.groupLink} onClick={toggleAll}>
-                {allSelected ? t('Clear all') : t('Select all')}
+                {allSelected ? t`Clear all` : t`Select all`}
               </button>
             </div>
             <div className={sheet.list}>
@@ -223,13 +226,7 @@ export const MasterDialog = ({
               ))}
             </div>
             <p className={sheet.groupFooter}>
-              {t(
-                '{count} of {total} ticked. Clients can choose this specialist only for these services.',
-                {
-                  count: serviceIds.length,
-                  total: services.length,
-                },
-              )}
+              {t`${ph({ count: serviceIds.length })} of ${ph({ total: services.length })} ticked. Clients can choose this specialist only for these services.`}
             </p>
           </section>
         )}
@@ -237,7 +234,7 @@ export const MasterDialog = ({
         <div className={sheet.list}>
           {onOpenPay && (
             <button type='button' className={sheet.row} onClick={onOpenPay}>
-              <span className={sheet.rowLabel}>{t('Pay')}</span>
+              <span className={sheet.rowLabel}>{t`Pay`}</span>
               <span className={sheet.rowControl}>
                 <span className={payStyles.summary}>{paySummary ?? ''}</span>
                 <span className={sheet.suffix}>›</span>
@@ -246,12 +243,12 @@ export const MasterDialog = ({
           )}
           {onOpenSchedule && (
             <button type='button' className={sheet.row} onClick={onOpenSchedule}>
-              <span className={sheet.rowLabel}>{t('Schedule and leave')}</span>
+              <span className={sheet.rowLabel}>{t`Schedule and leave`}</span>
               <span className={sheet.suffix}>›</span>
             </button>
           )}
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Takes bookings')}</span>
+            <span className={sheet.rowLabel}>{t`Takes bookings`}</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </label>
         </div>

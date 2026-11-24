@@ -1,7 +1,7 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
+import { usePathname } from '@/shared/i18n/navigation'
 import { rememberCabinetFrom } from '@/shared/lib/cabinetFrom'
 
 /** Notes the page someone came from into the cabinet (once per navigation, read by `CabinetBar`). */

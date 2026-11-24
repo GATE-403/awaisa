@@ -3,9 +3,9 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretLeft } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { FavoritesShelf, useFavorites } from '@/features/favorites'
@@ -13,7 +13,7 @@ import { ForYouShelf } from '@/features/forYou'
 import { RateRecent } from '@/features/rateVisit'
 import { WaitlistList } from '@/features/waitlist'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { Container } from '@/shared/ui/Container/Container'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
@@ -44,7 +44,7 @@ type ProfileTab = (typeof PROFILE_TABS)[number]
 const OLD_TABS: Record<string, ProfileTab> = { upcoming: 'bookings', history: 'bookings' }
 
 export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const today = useToday()
   const { bookings, isReady, canForget, cancellingId, cancel, replace, forget } =
     useMyBookings(initialAccountBookings)
@@ -81,8 +81,8 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).has('paid')) return
     toast.show({
-      title: t('Deposit paid'),
-      description: t('You are booked, see you soon'),
+      title: t`Deposit paid`,
+      description: t`You are booked, see you soon`,
       type: 'success',
     })
     router.replace('/bookings', { scroll: false })
@@ -112,10 +112,10 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 settings open from the account's gear as a screen of their own. */}
             {view !== 'settings' && (
               <TextTabs
-                label={t('Profile')}
+                label={t`Profile`}
                 items={[
                   {
-                    label: t('Bookings'),
+                    label: t`Bookings`,
                     count: upcoming.length || undefined,
                     isActive: view === 'bookings',
                     onSelect: () => setTab('bookings'),
@@ -123,7 +123,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                     controls: 'panel-bookings',
                   },
                   {
-                    label: t('Favourites'),
+                    label: t`Favourites`,
                     count: favoriteIds.length || undefined,
                     isActive: view === 'favorites',
                     onSelect: () => setTab('favorites'),
@@ -144,16 +144,16 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 {/* The page answers «when and where do I go» first: the nearest visit, large. */}
                 {bookings.length === 0 ? (
                   <EmptyState
-                    title={t('Book a specialist')}
-                    text={t('Find a salon and pick a time: the booking will show up here')}
+                    title={t`Book a specialist`}
+                    text={t`Find a salon and pick a time: the booking will show up here`}
                     action={
                       <ButtonLink render={<NextLink href='/' />} size='lg'>
-                        {t('Find where to book')}
+                        {t`Find where to book`}
                       </ButtonLink>
                     }
                   />
                 ) : next ? (
-                  <section className={styles.next} aria-label={t('Next visit')}>
+                  <section className={styles.next} aria-label={t`Next visit`}>
                     <UpcomingBooking
                       booking={next}
                       countdown={getCountdown(next, today, t)}
@@ -164,7 +164,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                   </section>
                 ) : (
                   <p className={styles.panelEmpty}>
-                    {t('Nothing ahead.')} <NextLink href='/'>{t('Find where to book ›')}</NextLink>
+                    {t`Nothing ahead.`} <NextLink href='/'>{t`Find where to book ›`}</NextLink>
                   </p>
                 )}
 
@@ -172,15 +172,16 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 {later.length > 0 && (
                   <section className={styles.section} aria-labelledby='later-title'>
                     <SectionCaption as='h2' id='later-title' isInset={false}>
-                      {t('Later')}
+                      {t`Later`}
                     </SectionCaption>
                     <MoreFade
                       hiddenCount={Math.max(0, later.length - LATER_FIRST)}
                       isOpen={isAllUpcoming}
                       onToggle={() => setIsAllUpcoming((value) => !value)}
-                      label={t
-                        .count(later.length - LATER_FIRST, ['booking', 'bookings'])
-                        .replace(/^\d+ /, '')}
+                      label={t`${plural(later.length - LATER_FIRST, { one: '# booking', other: '# bookings' })}`.replace(
+                        /^\d+ /,
+                        '',
+                      )}
                       surface='card'
                     >
                       <div className={styles.upcoming}>
@@ -202,7 +203,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
 
                 {/* Nothing ahead: what to book next, picked for this person. */}
                 {bookings.length > 0 && !next && (
-                  <ForYouShelf title={t('Where to book')} surface='profile' />
+                  <ForYouShelf title={t`Where to book`} surface='profile' />
                 )}
                 <WaitlistList />
                 <LoyaltyCard />
@@ -212,11 +213,11 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                 {history.length > 0 && (
                   <section className={styles.section} aria-labelledby='past-title'>
                     <SectionCaption as='h2' id='past-title' isInset={false}>
-                      {t('Past')}
+                      {t`Past`}
                       <span className={styles.captionCount}>{history.length}</span>
                     </SectionCaption>
                     <RateRecent history={history} today={today} onRated={replace} />
-                    <ForYouShelf title={t('Due again')} surface='due' isOnlyDue />
+                    <ForYouShelf title={t`Due again`} surface='due' isOnlyDue />
                     <BookingHistory
                       bookings={history}
                       canForget={canForget}
@@ -251,10 +252,10 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
                     onClick={() => setTab('bookings')}
                   >
                     <CaretLeft aria-hidden />
-                    {t('Bookings')}
+                    {t`Bookings`}
                   </button>
                   <h2 id='settings-title' className={styles.settingsTitle}>
-                    {t('Settings')}
+                    {t`Settings`}
                   </h2>
                 </div>
                 <AccountSettings isTitleHidden />

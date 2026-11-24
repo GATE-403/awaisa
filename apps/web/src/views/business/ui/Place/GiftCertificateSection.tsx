@@ -1,9 +1,10 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import type { Business } from '@/shared/api/types'
+import { useFormat } from '@/shared/i18n'
 import styles from './GiftCertificate.module.css'
 import { GiftCertificateSheet } from './GiftCertificateSheet'
 
@@ -14,21 +15,25 @@ interface GiftCertificateSectionProps {
 
 // «Gift card»: the amounts the owner put on sale; a tap opens the order on that one.
 export const GiftCertificateSection = ({ business, amounts }: GiftCertificateSectionProps) => {
+  const format = useFormat()
+  const { t } = useLingui()
   const [chosen, setChosen] = useState<number | null>(null)
 
   return (
     <section id='gift' className={styles.section} aria-labelledby='place-gift'>
       <div>
         <h2 id='place-gift' className={styles.title}>
-          Gift card
+          <Trans>Gift card</Trans>
         </h2>
-        <p className={styles.text}>The code comes by SMS right after you pay by card.</p>
+        <p className={styles.text}>
+          <Trans>The code comes by SMS right after you pay by card.</Trans>
+        </p>
       </div>
-      <ul className={styles.amounts} aria-label='Gift card amounts'>
+      <ul className={styles.amounts} aria-label={t`Gift card amounts`}>
         {amounts.map((amount) => (
           <li key={amount}>
             <Button variant='secondary' size='sm' onClick={() => setChosen(amount)}>
-              {formatPrice(amount)}
+              {format.price(amount)}
             </Button>
           </li>
         ))}

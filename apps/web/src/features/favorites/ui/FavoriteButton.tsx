@@ -1,7 +1,8 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Heart } from '@phosphor-icons/react/ssr'
-import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { useFavorites } from '../model/useFavorites'
 import styles from './FavoriteButton.module.css'
@@ -12,7 +13,7 @@ interface FavoriteButtonProps {
 }
 
 export const FavoriteButton = ({ id, label }: FavoriteButtonProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const { isFavorite, toggle } = useFavorites()
   const isOn = isFavorite(id)
 
@@ -23,8 +24,8 @@ export const FavoriteButton = ({ id, label }: FavoriteButtonProps) => {
       aria-pressed={isOn}
       aria-label={
         isOn
-          ? t('Remove from favourites: {name}', { name: label })
-          : t('Add to favourites: {name}', { name: label })
+          ? t`Remove from favourites: ${ph({ name: label })}`
+          : t`Add to favourites: ${ph({ name: label })}`
       }
       onClick={(event) => {
         event.preventDefault()

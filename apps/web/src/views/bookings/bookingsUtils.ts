@@ -1,3 +1,4 @@
+import { msg, plural } from '@lingui/core/macro'
 import { parseClock } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
@@ -21,10 +22,10 @@ const getCountdown = (booking: Booking, today: Today | null, t: Translate) => {
   if (!today) return booking.time
   const days = daysBetween(today.dayKey, booking.date)
   // The card shows the time already; the countdown only says which day.
-  if (days === 0) return t('Today')
-  if (days === 1) return t('Tomorrow')
+  if (days === 0) return t(msg`Today`)
+  if (days === 1) return t(msg`Tomorrow`)
 
-  return t('In {days}', { days: t.count(days, ['day', 'days']) })
+  return t(msg`${plural(days, { one: 'In # day', other: 'In # days' })}`)
 }
 
 export type { Today }

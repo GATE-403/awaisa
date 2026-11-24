@@ -1,12 +1,11 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { X } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { useRouter } from 'next/navigation'
 import type { MouseEvent } from 'react'
 import { BusinessTile } from '@/entities/business'
 import type { Business } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink, useRouter } from '@/shared/i18n/navigation'
 import { useSheetDrag } from '@/shared/ui/Sheet/useSheetDrag'
 import styles from './BookingTopBar.module.css'
 
@@ -34,7 +33,7 @@ const useClose = (isModal: boolean) => {
 export const BookingTopBar = ({ business, isModal = false, progress }: BookingTopBarProps) => {
   const close = useClose(isModal)
   const router = useRouter()
-  const t = useT()
+  const { t } = useLingui()
   // Pulled down by its bar, the sheet leaves the same way ✕ does.
   const drag = useSheetDrag(() =>
     isModal ? router.back() : router.push(`/${business.slug}`, { scroll: false }),
@@ -47,7 +46,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <NextLink
           href={`/${business.slug}`}
           className={styles.close}
-          aria-label={t('Close booking')}
+          aria-label={t`Close booking`}
           onClick={close}
         >
           <X aria-hidden />
@@ -56,7 +55,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <NextLink href={`/${business.slug}`} className={styles.title}>
           <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
           <span className={styles.text}>
-            <h1 className={styles.heading}>{t('Booking')}</h1>
+            <h1 className={styles.heading}>{t`Booking`}</h1>
             <span className={styles.place}>{business.name}</span>
           </span>
         </NextLink>
@@ -68,7 +67,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <div
           className={styles.progress}
           role='progressbar'
-          aria-label={t('Booking steps')}
+          aria-label={t`Booking steps`}
           aria-valuemin={0}
           aria-valuemax={progress.length}
           aria-valuenow={progress.filter((step) => step.isDone).length}

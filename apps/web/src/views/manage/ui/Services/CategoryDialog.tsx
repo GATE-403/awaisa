@@ -1,6 +1,6 @@
 import { Input } from '@awaisa/ui/Input'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -12,7 +12,7 @@ interface CategoryDialogProps {
 const FORM_ID = 'category-form'
 
 export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [name, setName] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
@@ -28,27 +28,25 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
 
   return (
     <Sheet
-      title={t('New category')}
+      title={t`New category`}
       onClose={onClose}
-      action={{ label: t('Add'), form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t`Add`, form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Category')}>
+        <section className={sheet.group} aria-label={t`Category`}>
           <div className={sheet.list}>
             <div className={`${sheet.row} ${sheet.textRow}`}>
               <Input
                 variant='plain'
-                aria-label={t('Name')}
-                placeholder={t('For example, “Nails”')}
+                aria-label={t`Name`}
+                placeholder={t`For example, “Nails”`}
                 value={name}
                 onValueChange={setName}
                 autoFocus
               />
             </div>
           </div>
-          <p className={sheet.groupFooter}>
-            {t('Categories group services on the business page.')}
-          </p>
+          <p className={sheet.groupFooter}>{t`Categories group services on the business page.`}</p>
         </section>
       </form>
     </Sheet>

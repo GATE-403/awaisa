@@ -1,7 +1,7 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import { Container } from '@/shared/ui/Container/Container'
 import tabs from '@/shared/ui/TextTabs/TextTabs.module.css'
@@ -19,7 +19,7 @@ interface CategoryNavProps {
 const ACTIVE_ZONE = '-35% 0px -55% 0px'
 
 export const CategoryNav = ({ items }: CategoryNavProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [activeId, setActiveId] = useState(items[0]?.id ?? null)
   const barRef = useRef<HTMLElement>(null)
   const [isStuck, setIsStuck] = useState(false)
@@ -71,7 +71,7 @@ export const CategoryNav = ({ items }: CategoryNavProps) => {
     // The app's text tabs (only the chosen one underlined), as links to the sections.
     <nav
       ref={barRef}
-      aria-label={t('Categories')}
+      aria-label={t`Categories`}
       className={styles.bar}
       data-category-nav=''
       data-stuck={isStuck || undefined}

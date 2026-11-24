@@ -1,7 +1,8 @@
-import NextLink from 'next/link'
 import { type CSSProperties, ViewTransition } from 'react'
 import { BusinessTile, pickTint } from '@/entities/business/ui/BusinessTile/BusinessTile'
 import type { BusinessCard as BusinessCardData } from '@/shared/api/types'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import styles from './BusinessCard.module.css'
 import { CardGallery } from './CardGallery'
 import { LiveStatus } from './LiveStatus'
@@ -42,6 +43,7 @@ interface BusinessCardProps {
 // what a place has (rating, how many services) instead of a price, its pictures to leaf through
 // (dots at the top, like stories) and its next free times as capsules that book them.
 export const BusinessCard = ({ business }: BusinessCardProps) => {
+  const format = useFormat()
   const href = `/${business.slug}`
   const pictures = [
     ...(business.coverUrl ? [business.coverUrl] : []),
@@ -94,7 +96,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => {
         </span>
         <span className={styles.footer}>
           {business.rating ? (
-            <span className={styles.rating}>★ {business.rating.toLocaleString('en-GB')}</span>
+            <span className={styles.rating}>★ {format.number(business.rating)}</span>
           ) : null}
           <ServicesCount count={business.servicesCount} className={styles.services} />
           <span className={styles.address}>{business.address}</span>

@@ -4,6 +4,8 @@ import { Button } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { Select } from '@awaisa/ui/Select'
 import { useToast } from '@awaisa/ui/Toast'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowsDownUp,
   CaretRight,
@@ -13,7 +15,6 @@ import {
   Plus,
 } from '@phosphor-icons/react/ssr'
 import { useCallback, useEffect, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import {
   addCashMovement,
@@ -34,7 +35,14 @@ import type {
   ExpenseList,
   Sale,
 } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import {
+  type Format,
+  formatDate,
+  type Locale,
+  type Translate,
+  useFormat,
+  useLocale,
+} from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
@@ -77,31 +85,32 @@ const timeFormat = new Intl.DateTimeFormat('en-GB', {
   minute: '2-digit',
   timeZone: BUSINESS_TIME_ZONE,
 })
-const dayFormat = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'short',
-  timeZone: BUSINESS_TIME_ZONE,
-})
 
 const formatTime = (iso: string) => timeFormat.format(new Date(iso))
-const formatDay = (iso: string) => dayFormat.format(new Date(iso))
-const formatDateKey = (key: string) => formatDay(`${key}T12:00:00+06:00`)
+const formatDay = (iso: string, locale: Locale) =>
+  formatDate(locale, iso, { day: 'numeric', month: 'short' })
+const formatDateKey = (key: string, locale: Locale) => formatDay(`${key}T12:00:00+06:00`, locale)
 
-const describeDifference = (difference: number | null, t: Translate) => {
-  if (difference === null || difference === 0) return { text: t('balanced'), tone: undefined }
+const describeDifference = (difference: number | null, t: Translate, format: Format) => {
+  if (difference === null || difference === 0) return { text: t(msg`balanced`), tone: undefined }
   return difference < 0
     ? {
-        text: t('short by {amount}', { amount: formatPrice(-difference) }),
+        text: t(msg`short by ${ph({ amount: format.price(-difference) })}`),
         tone: 'danger' as const,
       }
-    : { text: t('over by {amount}', { amount: formatPrice(difference) }), tone: 'success' as const }
+    : {
+        text: t(msg`over by ${ph({ amount: format.price(difference) })}`),
+        tone: 'success' as const,
+      }
 }
 
 // "Till": the day's money at the counter. Shifts of a branch's till (optional: without one
 // visits and sales work as before), sales of products, and for the owner the expenses.
 export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
+  const format = useFormat()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
+  const locale = useLocale()
   const isOwner = useCanSeeMoney()
   const today = useToday()
   const branches = business.branches.filter((branch) => branch.isActive !== false)
@@ -156,7 +165,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
       toast.show({ title, description, type: 'success' })
       return true
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -168,7 +177,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
       toast.show({ title, type: 'success' })
       return true
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -179,79 +188,77 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
       const closedShift = await closeCashShift(slug, open.id, { countedCash, note })
       await reload()
       const difference = closedShift.difference ?? 0
-      const amount = formatPrice(Math.abs(difference))
+      const amount = format.price(Math.abs(difference))
       toast.show({
-        title: t('Shift closed'),
+        title: t`Shift closed`,
         description:
           difference === 0
-            ? t('Cash balanced.')
-            : t(difference < 0 ? 'Short by {amount}.' : 'Over by {amount}.', { amount }),
+            ? t`Cash balanced.`
+            : difference < 0
+              ? t`Short by ${amount}.`
+              : t`Over by ${amount}.`,
         type: difference < 0 ? 'info' : 'success',
       })
       return true
     } catch (error) {
-      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not saved`, description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
 
   const handleCancelSale = (sale: Sale) =>
-    void run(
-      () => cancelSale(slug, sale.id),
-      t('Sale cancelled'),
-      t('The products are back in stock.'),
-    )
+    void run(() => cancelSale(slug, sale.id), t`Sale cancelled`, t`The products are back in stock.`)
 
   if (!desk) return null
 
   const headline = shift ? (
     <>
-      {t('Shift since {time} · in the till', { time: formatTime(shift.openedAt) })}{' '}
-      <strong>{formatPrice(shift.expectedCash)}</strong>
+      {t`Shift since ${ph({ time: formatTime(shift.openedAt) })} · in the till`}{' '}
+      <strong>{format.price(shift.expectedCash)}</strong>
     </>
   ) : (
-    t('No shift open')
+    t`No shift open`
   )
 
   const primary =
     view === 'expenses' ? (
       <Button size='sm' onClick={() => setEditingExpense('new')}>
         <Plus aria-hidden />
-        {t('Expense')}
+        {t`Expense`}
       </Button>
     ) : (
       <Button size='sm' onClick={() => setIsSelling(true)}>
         <Plus aria-hidden />
-        {t('Sale')}
+        {t`Sale`}
       </Button>
     )
 
   return (
-    <section className={`${forms.section} ${styles.page}`} aria-label={t('Till')}>
+    <section className={`${forms.section} ${styles.page}`} aria-label={t`Till`}>
       <SectionHeader
-        title={t('Till')}
+        title={t`Till`}
         description={headline}
         isFloatingOnPhone
         actions={
           <>
-            <GlyphGroup label={t('Shift')}>
+            <GlyphGroup label={t`Shift`}>
               {shift ? (
                 <>
                   <GlyphButton
                     icon={<ArrowsDownUp aria-hidden />}
-                    label={t('Put in or take out')}
+                    label={t`Put in or take out`}
                     onClick={() => setShiftSheet('move')}
                   />
                   <GlyphButton
                     icon={<LockSimple aria-hidden />}
-                    label={t('Close shift')}
+                    label={t`Close shift`}
                     onClick={() => setShiftSheet('close')}
                   />
                 </>
               ) : (
                 <GlyphButton
                   icon={<LockSimpleOpen aria-hidden />}
-                  label={t('Open shift')}
+                  label={t`Open shift`}
                   onClick={() => setShiftSheet('open')}
                 />
               )}
@@ -263,11 +270,11 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
 
       <div className={styles.head}>
         <TextTabs
-          label={t('Till sections')}
+          label={t`Till sections`}
           items={[
-            { label: t('Shift'), isActive: view === 'shift', onSelect: () => setView('shift') },
+            { label: t`Shift`, isActive: view === 'shift', onSelect: () => setView('shift') },
             {
-              label: t('Sales'),
+              label: t`Sales`,
               count: liveSales.length || undefined,
               isActive: view === 'sales',
               onSelect: () => setView('sales'),
@@ -275,7 +282,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
             ...(isOwner
               ? [
                   {
-                    label: t('Expenses'),
+                    label: t`Expenses`,
                     isActive: view === 'expenses',
                     onSelect: () => setView('expenses'),
                   },
@@ -286,7 +293,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
         {branches.length > 1 && view === 'shift' && (
           <Select
             variant='plain'
-            aria-label={t('Branch')}
+            aria-label={t`Branch`}
             items={branches.map((branch) => ({ value: branch.id, label: branch.name }))}
             value={branchId}
             onValueChange={(value) => value && setBranchId(value)}
@@ -300,33 +307,31 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
         ) : (
           <EmptyState
             variant='inline'
-            title={t('No shift open')}
-            text={t(
-              'Open a shift and the till will work out how much cash there should be by evening. Without a shift, visits and sales work as usual.',
-            )}
+            title={t`No shift open`}
+            text={t`Open a shift and the till will work out how much cash there should be by evening. Without a shift, visits and sales work as usual.`}
             action={
               <Button variant='secondary' onClick={() => setShiftSheet('open')}>
-                {t('Open shift')}
+                {t`Open shift`}
               </Button>
             }
           />
         ))}
 
       {view === 'shift' && closed.length > 0 && (
-        <section className={forms.group} aria-label={t('Past shifts')}>
-          <SectionCaption>{t('Past shifts')}</SectionCaption>
+        <section className={forms.group} aria-label={t`Past shifts`}>
+          <SectionCaption>{t`Past shifts`}</SectionCaption>
           <ul className={forms.list}>
             {closed.map((item) => {
-              const difference = describeDifference(item.difference, t)
+              const difference = describeDifference(item.difference, t, format)
               return (
                 <li key={item.id} className={`${forms.settingRow} ${styles.row}`}>
                   <span className={`${forms.rowBody} ${styles.grow}`}>
                     <span className={forms.rowTitle}>
-                      {formatDay(item.openedAt)}, {formatTime(item.openedAt)}-
+                      {formatDay(item.openedAt, locale)}, {formatTime(item.openedAt)}-
                       {item.closedAt ? formatTime(item.closedAt) : ''}
                     </span>
                     <span className={forms.rowMeta}>
-                      {formatPrice(item.openingCash)} → {formatPrice(item.countedCash ?? 0)}
+                      {format.price(item.openingCash)} → {format.price(item.countedCash ?? 0)}
                       {item.note ? ` · ${item.note}` : ''}
                     </span>
                   </span>
@@ -344,15 +349,15 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
         (desk.sales.length === 0 ? (
           <EmptyState
             variant='inline'
-            title={t('No sales today')}
+            title={t`No sales today`}
             text={
               desk.products.length > 0
-                ? t('Sell a product on its own or add it to a visit in “Visit outcome”.')
-                : t('Mark stock items “Sold to clients” to sell them here.')
+                ? t`Sell a product on its own or add it to a visit in “Visit outcome”.`
+                : t`Mark stock items “Sold to clients” to sell them here.`
             }
           />
         ) : (
-          <section className={forms.group} aria-label={t('Sales today')}>
+          <section className={forms.group} aria-label={t`Sales today`}>
             <ul className={forms.list}>
               {desk.sales.map((sale) => (
                 <li
@@ -367,17 +372,17 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                         .map((item) =>
                           item.quantity === 1
                             ? item.name
-                            : `${item.name} × ${formatCount(item.quantity)}`,
+                            : `${item.name} × ${formatCount(format, item.quantity)}`,
                         )
                         .join(', ')}
                     </span>
                     <span className={forms.rowMeta}>
                       {[
-                        sale.isCancelled ? t('cancelled') : t(METHOD_LABEL[sale.paymentMethod]),
+                        sale.isCancelled ? t`cancelled` : t(METHOD_LABEL[sale.paymentMethod]),
                         sale.customerName ??
                           (sale.customerPhone ? formatPhone(sale.customerPhone) : null),
-                        sale.sellerName ? t('sold by {name}', { name: sale.sellerName }) : null,
-                        sale.bookingId ? t('with a visit') : null,
+                        sale.sellerName ? t`sold by ${ph({ name: sale.sellerName })}` : null,
+                        sale.bookingId ? t`with a visit` : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
@@ -396,24 +401,24 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                     </span>
                   </span>
                   <span className={styles.amount} data-struck={sale.isCancelled || undefined}>
-                    {formatPrice(sale.total)}
+                    {format.price(sale.total)}
                   </span>
                   {sale.isCancelled && !sale.receipt ? (
                     <span className={styles.moreSpace} aria-hidden='true' />
                   ) : (
                     <Menu
-                      label={t('Sale actions')}
+                      label={t`Sale actions`}
                       className={styles.more}
                       trigger={<DotsThree aria-hidden />}
                     >
                       {sale.receipt && (
                         <MenuItem onClick={() => setOpenReceipt(sale.receipt)}>
-                          {t(sale.receipt.kind === 'refund' ? 'Refund receipt' : 'Receipt')}
+                          {sale.receipt.kind === 'refund' ? t`Refund receipt` : t`Receipt`}
                         </MenuItem>
                       )}
                       {!sale.isCancelled && (
                         <MenuItem variant='danger' onClick={() => handleCancelSale(sale)}>
-                          {t('Cancel sale')}
+                          {t`Cancel sale`}
                         </MenuItem>
                       )}
                     </Menu>
@@ -422,10 +427,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
               ))}
             </ul>
             <RowNote>
-              {t('{sales} for {amount}. Cancelling puts the products back in stock.', {
-                sales: t.count(liveSales.length, ['sale', 'sales']),
-                amount: formatPrice(salesTotal),
-              })}
+              {t`${plural(liveSales.length, { one: '# sale', other: '# sales' })} for ${ph({ amount: format.price(salesTotal) })}. Cancelling puts the products back in stock.`}
             </RowNote>
           </section>
         ))}
@@ -435,14 +437,12 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
         (expenses.items.length === 0 ? (
           <EmptyState
             variant='inline'
-            title={t('Add your first expense')}
-            text={t(
-              'Rent, supplies, salaries, marketing: "Analytics" works out profit from these and revenue.',
-            )}
-            action={<Button onClick={() => setEditingExpense('new')}>{t('Add expense')}</Button>}
+            title={t`Add your first expense`}
+            text={t`Rent, supplies, salaries, marketing: "Analytics" works out profit from these and revenue.`}
+            action={<Button onClick={() => setEditingExpense('new')}>{t`Add expense`}</Button>}
           />
         ) : (
-          <section className={forms.group} aria-label={t('Expenses')}>
+          <section className={forms.group} aria-label={t`Expenses`}>
             <ul className={forms.list}>
               {expenses.items.map((expense) => (
                 <li key={expense.id}>
@@ -456,20 +456,19 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                         {expenseCategoryLabel(expense.category, t)}
                       </span>
                       <span className={forms.rowMeta}>
-                        {[formatDateKey(expense.date), expense.note].filter(Boolean).join(' · ')}
+                        {[formatDateKey(expense.date, locale), expense.note]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </span>
                     </span>
-                    <span className={forms.cellValue}>{formatPrice(expense.amount)}</span>
+                    <span className={forms.cellValue}>{format.price(expense.amount)}</span>
                     <CaretRight className={forms.chevron} aria-hidden />
                   </button>
                 </li>
               ))}
             </ul>
             <RowNote>
-              {t('{amount} over {days} days. Profit by period is in "Analytics".', {
-                days: EXPENSE_DAYS,
-                amount: formatPrice(expenses.total),
-              })}
+              {t`${ph({ amount: format.price(expenses.total) })} over ${ph({ days: EXPENSE_DAYS })} days. Profit by period is in "Analytics".`}
             </RowNote>
           </section>
         ))}
@@ -481,13 +480,13 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
           branchName={branches.length > 1 ? branchName : undefined}
           onClose={() => setShiftSheet(null)}
           onOpen={(openingCash) =>
-            run(() => openCashShift(slug, { branchId, openingCash }), t('Shift opened'))
+            run(() => openCashShift(slug, { branchId, openingCash }), t`Shift opened`)
           }
           onMove={(kind, amount, reason) =>
             shift
               ? run(
                   () => addCashMovement(slug, shift.id, { kind, amount, reason }),
-                  t(kind === 'in' ? 'Put in' : 'Taken out'),
+                  kind === 'in' ? t`Put in` : t`Taken out`,
                 )
               : Promise.resolve(false)
           }
@@ -532,17 +531,14 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
             runExpense(
               () =>
                 saveExpense(slug, input, editingExpense === 'new' ? undefined : editingExpense.id),
-              t('Expense recorded'),
+              t`Expense recorded`,
             )
           }
           onDelete={
             editingExpense === 'new'
               ? undefined
               : () =>
-                  void runExpense(
-                    () => deleteExpense(slug, editingExpense.id),
-                    t('Expense deleted'),
-                  )
+                  void runExpense(() => deleteExpense(slug, editingExpense.id), t`Expense deleted`)
           }
         />
       )}
@@ -553,42 +549,53 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
 // The open shift line by line: what it started with, what came in and went out, what should be
 // in the till now; then the cash moved, with why.
 const ShiftDetails = ({ shift }: { shift: CashShift }) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const lines = [
-    { label: 'At shift start', amount: shift.openingCash, isShown: true },
-    { label: 'Cash for visits', amount: shift.visitsCash, isShown: shift.visitsCash > 0 },
-    { label: 'Cash for products', amount: shift.salesCash, isShown: shift.salesCash > 0 },
-    { label: 'Put in', amount: shift.cashIn, isShown: shift.cashIn > 0 },
-    { label: 'Taken out', amount: -shift.cashOut, isShown: shift.cashOut > 0 },
+    { key: 'start', label: t`At shift start`, amount: shift.openingCash, isShown: true },
+    {
+      key: 'visits',
+      label: t`Cash for visits`,
+      amount: shift.visitsCash,
+      isShown: shift.visitsCash > 0,
+    },
+    {
+      key: 'products',
+      label: t`Cash for products`,
+      amount: shift.salesCash,
+      isShown: shift.salesCash > 0,
+    },
+    { key: 'in', label: t`Put in`, amount: shift.cashIn, isShown: shift.cashIn > 0 },
+    { key: 'out', label: t`Taken out`, amount: -shift.cashOut, isShown: shift.cashOut > 0 },
   ].filter((line) => line.isShown)
 
   return (
     <>
-      <section className={forms.group} aria-label={t('Cash in the shift')}>
+      <section className={forms.group} aria-label={t`Cash in the shift`}>
         <ul className={forms.list}>
           {lines.map((line) => (
-            <li key={line.label} className={`${forms.settingRow} ${styles.row}`}>
-              <span className={`${forms.rowTitle} ${styles.grow}`}>{t(line.label)}</span>
+            <li key={line.key} className={`${forms.settingRow} ${styles.row}`}>
+              <span className={`${forms.rowTitle} ${styles.grow}`}>{line.label}</span>
               <span className={styles.amount}>
                 {line.amount < 0 ? '−' : ''}
-                {formatPrice(Math.abs(line.amount))}
+                {format.price(Math.abs(line.amount))}
               </span>
             </li>
           ))}
           <li className={`${forms.settingRow} ${styles.row}`}>
-            <span className={`${forms.rowTitle} ${styles.grow}`}>{t('Should be in the till')}</span>
+            <span className={`${forms.rowTitle} ${styles.grow}`}>{t`Should be in the till`}</span>
             <span className={styles.amount} data-strong>
-              {formatPrice(shift.expectedCash)}
+              {format.price(shift.expectedCash)}
             </span>
           </li>
         </ul>
         <RowNote>
-          {t('Cash for visits: visits marked “Arrived” during the shift at this branch.')}
+          {t`Cash for visits: visits marked “Arrived” during the shift at this branch.`}
         </RowNote>
       </section>
       {shift.movements.length > 0 && (
-        <section className={forms.group} aria-label={t('Cash movements')}>
-          <SectionCaption>{t('Cash in and out')}</SectionCaption>
+        <section className={forms.group} aria-label={t`Cash movements`}>
+          <SectionCaption>{t`Cash in and out`}</SectionCaption>
           <ul className={forms.list}>
             {shift.movements.map((move) => (
               <li key={move.id} className={`${forms.settingRow} ${styles.row}`}>
@@ -599,7 +606,7 @@ const ShiftDetails = ({ shift }: { shift: CashShift }) => {
                   data-tone={move.kind === 'out' ? undefined : 'success'}
                 >
                   {move.kind === 'out' ? '−' : '+'}
-                  {formatPrice(move.amount)}
+                  {format.price(move.amount)}
                 </span>
               </li>
             ))}

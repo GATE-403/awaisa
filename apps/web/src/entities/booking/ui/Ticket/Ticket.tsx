@@ -1,14 +1,10 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import type { ReactNode } from 'react'
-import {
-  CURRENCY,
-  formatAmount,
-  formatPrice,
-  getDateParts,
-} from '@/entities/booking/lib/bookingUtils'
+import { getDateParts } from '@/entities/booking/lib/bookingUtils'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { Barcode } from './Barcode'
 import styles from './Ticket.module.css'
@@ -36,25 +32,22 @@ export const Ticket = ({
   headerAction,
   isDraft = false,
 }: TicketProps) => {
-  const t = useT()
-  const weekdayName = booking.date ? t.weekdayLong(booking.date) : ''
+  const { t } = useLingui()
+  const format = useFormat()
+  const weekdayName = booking.date ? format.weekdayLong(booking.date) : ''
   const { day, month, weekday } = booking.date
     ? {
         day: getDateParts(booking.date).day,
-        month: t.monthShort(booking.date),
+        month: format.monthShort(booking.date),
         weekday: weekdayName.charAt(0).toUpperCase() + weekdayName.slice(1),
       }
-    : { day: '-', month: '', weekday: t('No date chosen') }
+    : { day: '-', month: '', weekday: t`No date chosen` }
   const code = isDraft ? '-' : getBookingCode(booking.id)
   const isCancelled = booking.status === 'cancelled'
   const price = booking.price - (booking.discount?.amount ?? 0)
   const isDepositPaid = booking.payment?.status === 'paid'
   const toPay = isDepositPaid ? Math.max(0, price - (booking.payment?.amount ?? 0)) : price
-  const payLabel = isCancelled
-    ? t('Nothing to pay')
-    : isDepositPaid
-      ? t('At the salon')
-      : t('To pay')
+  const payLabel = isCancelled ? t`Nothing to pay` : isDepositPaid ? t`At the salon` : t`To pay`
 
   return (
     <article
@@ -62,7 +55,7 @@ export const Ticket = ({
       data-status={booking.status}
       data-draft={isDraft || undefined}
       data-interactive={onOpen ? '' : undefined}
-      aria-label={isDraft ? t('Your booking') : t('Booking {code}', { code })}
+      aria-label={isDraft ? t`Your booking` : t`Booking ${code}`}
     >
       <div className={styles.ticket}>
         {onOpen && (
@@ -71,7 +64,7 @@ export const Ticket = ({
             type='button'
             className={styles.open}
             onClick={onOpen}
-            aria-label={t('Show the ticket')}
+            aria-label={t`Show the ticket`}
           />
         )}
         <div className={styles.main}>
@@ -79,11 +72,11 @@ export const Ticket = ({
             <Mascot className={styles.brandMark} />
             <span>{booking.business.name}</span>
             {isCancelled ? (
-              <span className={styles.status}>{t('Cancelled')}</span>
+              <span className={styles.status}>{t`Cancelled`}</span>
             ) : headerAction ? (
               <span className={styles.headerAction}>{headerAction}</span>
             ) : (
-              <span className={styles.kind}>{isDraft ? t('Draft') : t('E-ticket')}</span>
+              <span className={styles.kind}>{isDraft ? t`Draft` : t`E-ticket`}</span>
             )}
           </header>
 
@@ -111,15 +104,15 @@ export const Ticket = ({
               {payLabel}
               {/* On the label's line, so the stub keeps two lines and its fixed height. */}
               {booking.discount && !isCancelled && (
-                <s className={styles.oldAmount}>{formatPrice(booking.price)}</s>
+                <s className={styles.oldAmount}>{format.price(booking.price)}</s>
               )}
             </span>
             <span className={styles.amount}>
-              {formatAmount(toPay)} <small>{CURRENCY}</small>
+              {format.amount(toPay)} <small>{format.currency}</small>
             </span>
           </div>
           <div className={styles.stubInfo}>
-            <span className={styles.stubLabel}>{t('Number')}</span>
+            <span className={styles.stubLabel}>{t`Number`}</span>
             {onCodeClick ? (
               <button type='button' className={styles.code} onClick={() => onCodeClick(code)}>
                 {code}

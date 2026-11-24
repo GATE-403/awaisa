@@ -1,11 +1,12 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Phone, X } from '@phosphor-icons/react/ssr'
 import { PersonAvatar } from '@/entities/business'
 import type { ManagedWaitlistEntry } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
+import { formatDate, useLocale } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from './WaitlistSheet.module.css'
@@ -27,22 +28,18 @@ export const WaitlistSheet = ({
   onRemove,
   onClose,
 }: WaitlistSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const locale = useLocale()
 
   return (
     <Sheet
-      title={t('Waiting for a slot')}
+      title={t`Waiting for a slot`}
       cancelLabel={null}
-      action={{ label: t('Done'), onClick: onClose }}
+      action={{ label: t`Done`, onClick: onClose }}
       onClose={onClose}
     >
       <p className={styles.lead}>
-        {t(
-          '{day}. When time frees up, clients get an SMS on their own; you can also book them now.',
-          {
-            day: dayLabel,
-          },
-        )}
+        {t`${ph({ day: dayLabel })}. When time frees up, clients get an SMS on their own; you can also book them now.`}
       </p>
       <ul className={styles.list}>
         {entries.map((entry) => (
@@ -51,22 +48,18 @@ export const WaitlistSheet = ({
             <div className={styles.text}>
               <p className={styles.name}>{entry.customerName}</p>
               <p className={styles.meta}>
-                {entry.service.name} · {entry.specialist?.name ?? t('any specialist')}
+                {entry.service.name} · {entry.specialist?.name ?? t`any specialist`}
               </p>
               <p className={styles.status} data-notified={entry.status === 'notified' || undefined}>
                 {entry.status === 'notified'
-                  ? t('SMS sent: {time} is free', { time: entry.notifiedTime ?? '' })
-                  : t('Waiting since {date}', {
-                      date: new Date(entry.createdAt).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        timeZone: BUSINESS_TIME_ZONE,
-                      }),
-                    })}
+                  ? t`SMS sent: ${ph({ time: entry.notifiedTime ?? '' })} is free`
+                  : t`Waiting since ${ph({
+                      date: formatDate(locale, entry.createdAt, { day: 'numeric', month: 'short' }),
+                    })}`}
               </p>
               <div className={styles.actions}>
                 <Button size='sm' onClick={() => onBook(entry)}>
-                  {t('Book')}
+                  {t`Book`}
                 </Button>
                 <a href={`tel:${entry.customerPhone}`} className={styles.call}>
                   <Phone aria-hidden />
@@ -77,7 +70,7 @@ export const WaitlistSheet = ({
             <button
               type='button'
               className={styles.remove}
-              aria-label={t('Remove {name} from the waiting list', { name: entry.customerName })}
+              aria-label={t`Remove ${ph({ name: entry.customerName })} from the waiting list`}
               onClick={() => onRemove(entry)}
             >
               <X aria-hidden />

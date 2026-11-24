@@ -1,12 +1,13 @@
 import { useToast } from '@awaisa/ui/Toast'
-import { useRouter } from 'next/navigation'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { checkSlug, createBusiness } from '@/shared/api/clientApi'
 import type { BusinessKind, SlugCheck } from '@/shared/api/types'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
-import { useT } from '@/shared/i18n'
+import { useRouter } from '@/shared/i18n/navigation'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { slugify } from '@/shared/lib/slugify'
 import { trackFormError, trackStep } from '@/shared/lib/telemetry'
@@ -19,9 +20,9 @@ const MIN_SLUG_LENGTH = 3
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,46}[a-z0-9])$/
 
 const getSlugFormatProblem = (slug: string) => {
-  if (slug.length < MIN_SLUG_LENGTH) return 'Link: at least 3 characters'
+  if (slug.length < MIN_SLUG_LENGTH) return msg`Link: at least 3 characters`
   if (!SLUG_PATTERN.test(slug) || slug.includes('--')) {
-    return 'Link: Latin letters, numbers and hyphens, no hyphen at the start or end'
+    return msg`Link: Latin letters, numbers and hyphens, no hyphen at the start or end`
   }
   return null
 }
@@ -33,7 +34,7 @@ type CreateStep = (typeof STEPS)[number]
 type TemplateEdit = { isChecked: boolean; price: string }
 
 export const useCreateBusinessForm = () => {
-  const t = useT()
+  const { t } = useLingui()
   const router = useRouter()
   const toast = useToast()
   const { customer } = useSession()
@@ -72,7 +73,7 @@ export const useCreateBusinessForm = () => {
   const isSlugTaken = currentCheck !== null && !currentCheck.available
   const isNameValid = name.trim().length >= 2 && slugFormatProblem === null && !isSlugTaken
   const errors = {
-    name: hasTriedSubmit && name.trim().length < 2 ? t('Enter a name') : undefined,
+    name: hasTriedSubmit && name.trim().length < 2 ? t`Enter a name` : undefined,
     slug: getSlugError(),
   }
 
@@ -165,12 +166,10 @@ export const useCreateBusinessForm = () => {
   const openCabinet = () => {
     if (!launched) return
     toast.show({
-      title: t('Page created'),
-      description: t(
-        launched.hasServices
-          ? 'Add specialists and you can start taking bookings'
-          : 'Add services and specialists and you can start taking bookings',
-      ),
+      title: t`Page created`,
+      description: launched.hasServices
+        ? t`Add specialists and you can start taking bookings`
+        : t`Add services and specialists and you can start taking bookings`,
       type: 'success',
     })
     router.replace(`/manage/${launched.slug}?tab=${launched.hasServices ? 'masters' : 'services'}`)
@@ -228,7 +227,7 @@ export const useCreateBusinessForm = () => {
       })
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })

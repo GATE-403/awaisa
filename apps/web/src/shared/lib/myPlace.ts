@@ -1,4 +1,6 @@
+import { msg } from '@lingui/core/macro'
 import { useSyncExternalStore } from 'react'
+import type { Translate } from '@/shared/i18n'
 import { readJson, removeKey, writeJson } from './storage'
 
 /** Where the visitor said they are: their geolocation, or a district picked by hand. */
@@ -40,5 +42,9 @@ const useMyPlace = () => useSyncExternalStore(subscribe, read, () => null)
 /** Read outside React (geo helpers); null on the server. */
 const readMyPlace = () => (typeof window === 'undefined' ? null : read())
 
+/** The place's name to show: a district by its name, one's location in the page's language. */
+const myPlaceLabel = (place: MyPlace, t: Translate) =>
+  place.source === 'gps' ? t(msg`My location`) : place.label
+
 export type { MyPlace }
-export { readMyPlace, saveMyPlace, useMyPlace }
+export { myPlaceLabel, readMyPlace, saveMyPlace, useMyPlace }

@@ -1,9 +1,9 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
 import { TIME_OPTIONS } from '@/entities/business'
 import type { CreateTimeOffInput, Specialist } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
@@ -27,7 +27,7 @@ export const TimeOffDialog = ({
   onClose,
   onSubmit,
 }: TimeOffDialogProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [specialistId, setSpecialistId] = useState(specialists[0]?.id ?? '')
   const [from, setFrom] = useState('13:00')
   const [to, setTo] = useState('14:00')
@@ -47,20 +47,20 @@ export const TimeOffDialog = ({
 
   return (
     <Sheet
-      title={t('Block time')}
+      title={t`Block time`}
       onClose={onClose}
-      action={{ label: t('Done'), form: FORM_ID, disabled: isSubmitting || !isRangeValid }}
+      action={{ label: t`Done`, form: FORM_ID, disabled: isSubmitting || !isRangeValid }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Time')}>
+        <section className={sheet.group} aria-label={t`Time`}>
           <SectionCaption>{dayLabel}</SectionCaption>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Specialist')}</span>
+              <span className={sheet.rowLabel}>{t`Specialist`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Specialist')}
+                  aria-label={t`Specialist`}
                   items={specialists.map(({ id, name }) => ({ value: id, label: name }))}
                   value={specialistId}
                   onValueChange={(value) => value && setSpecialistId(value)}
@@ -68,11 +68,11 @@ export const TimeOffDialog = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Start')}</span>
+              <span className={sheet.rowLabel}>{t`Start`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Start')}
+                  aria-label={t`Start`}
                   items={toItems(TIME_OPTIONS.slice(0, -1))}
                   value={from}
                   onValueChange={(value) => value && setFrom(value)}
@@ -80,11 +80,11 @@ export const TimeOffDialog = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('End')}</span>
+              <span className={sheet.rowLabel}>{t`End`}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('End')}
+                  aria-label={t`End`}
                   items={toItems(TIME_OPTIONS.slice(1))}
                   value={to}
                   onValueChange={(value) => value && setTo(value)}
@@ -94,16 +94,16 @@ export const TimeOffDialog = ({
           </div>
           <p className={sheet.groupFooter}>
             {isRangeValid
-              ? t('A break, training or a day off: clients cannot book this time.')
-              : t('The end must be after the start.')}
+              ? t`A break, training or a day off: clients cannot book this time.`
+              : t`The end must be after the start.`}
           </p>
         </section>
         <div className={sheet.list}>
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Reason')}
-              placeholder={t('Reason (optional)')}
+              aria-label={t`Reason`}
+              placeholder={t`Reason (optional)`}
               value={reason}
               onValueChange={setReason}
               maxLength={160}

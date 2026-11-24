@@ -3,13 +3,15 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Menu, MenuItem, MenuSubmenu } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ChatCircle, DotsThree, Flag, Heart, ShareFat } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useState } from 'react'
 import { useNextSlot } from '@/entities/booking'
 import { ReportReasons, useReport } from '@/features/report'
 import type { FeedItem } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { shareLink } from '@/shared/lib/share'
 import styles from '../FeedPage.module.css'
 import { WorkReviewsSheet } from './WorkReviewsSheet'
@@ -25,14 +27,14 @@ const ANY = 'any'
 
 const compact = (t: Translate, count: number) =>
   count >= 1000
-    ? t('{count}k', { count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })
+    ? t(msg`${ph({ count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })}k`)
     : `${count}`
 
 // Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Book»
 // with the first free time, and ♥ with its count.
 export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [isReviewsOpen, setIsReviewsOpen] = useState(false)
   // The cached feed may not include this device's like yet: count it once, on top. (Rendered
   // with the work's id as its key, so this is read once per work.)
@@ -56,28 +58,28 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
     const title = service ? `${service.name} - ${business.name}` : business.name
     // The share sheet was closed: nothing to do.
     const result = await shareLink({ title, url })
-    if (result === 'copied') toast.show({ title: t('Link copied'), type: 'success' })
+    if (result === 'copied') toast.show({ title: t`Link copied`, type: 'success' })
   }
 
   const report = useReport('photo', item.id, onReported)
 
   return (
     <div className={styles.actions}>
-      <Menu label={t('More')} className={styles.roundButton} trigger={<DotsThree aria-hidden />}>
+      <Menu label={t`More`} className={styles.roundButton} trigger={<DotsThree aria-hidden />}>
         {service && (
           <MenuItem icon={<ChatCircle aria-hidden />} onClick={() => setIsReviewsOpen(true)}>
-            {`${t('Reviews')}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
+            {`${t`Reviews`}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
           </MenuItem>
         )}
         <MenuItem icon={<ShareFat aria-hidden />} onClick={() => void share()}>
-          {t('Share')}
+          {t`Share`}
         </MenuItem>
-        <MenuSubmenu label={t('Report')} variant='danger' icon={<Flag aria-hidden />}>
+        <MenuSubmenu label={t`Report`} variant='danger' icon={<Flag aria-hidden />}>
           <ReportReasons onPick={(reason) => void report(reason)} />
         </MenuSubmenu>
       </Menu>
       <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
-        {service ? t('Book') : t('Choose a service')}
+        {service ? t`Book` : t`Choose a service`}
         {/* The second line is always there (its time arrives a moment later), so the button never
             jumps from one line to two when a card comes in. */}
         {service && (
@@ -91,7 +93,7 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
         type='button'
         className={styles.roundButton}
         aria-pressed={isLiked}
-        aria-label={t('Likes: {count}', { count: likes })}
+        aria-label={t`Likes: ${ph({ count: likes })}`}
         data-liked={isLiked || undefined}
         onClick={() => onLike(!isLiked)}
       >

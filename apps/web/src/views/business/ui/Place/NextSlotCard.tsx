@@ -1,16 +1,18 @@
 'use client'
 
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ArrowRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
-import { usePathname } from 'next/navigation'
 import { type CSSProperties, useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
-import { formatPrice, useNextSlot } from '@/entities/booking'
+import { useNextSlot } from '@/entities/booking'
 import { pickTint } from '@/entities/business'
 import { useBookingDraft } from '@/features/bookingDraft'
 import type { Business, Service } from '@/shared/api/types'
 import { isBookingPath } from '@/shared/config/navigation'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
+import { Link as NextLink, usePathname } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import styles from './Place.module.css'
 
@@ -22,15 +24,16 @@ interface NextSlotCardProps {
 const subscribeNoop = () => () => {}
 
 const getSlotText = (t: Translate, slot: ReturnType<typeof useNextSlot>) => {
-  if (slot === undefined) return t('Looking for a free time…')
-  if (slot === null) return t('Free times coming soon')
+  if (slot === undefined) return t(msg`Looking for a free time…`)
+  if (slot === null) return t(msg`Free times coming soon`)
 
   return `${t(slot.dayLabel)}, ${slot.time}`
 }
 
 // The quickest way in: the first free time for the most booked service, with any master.
 export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const slot = useNextSlot(service.id)
   const draft = useBookingDraft()
   const isTucked = useTuckOnScroll()
@@ -72,14 +75,14 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
     // «Continue booking», tucking away while the page scrolls down.
     <aside
       className={styles.slotCard}
-      aria-label={t('Next free time')}
+      aria-label={t`Next free time`}
       data-tucked={isTucked || isHeadBookVisible || undefined}
       style={{ '--tint': pickTint(business.name) } as CSSProperties}
     >
       <NextLink href={href} className={styles.slotLink}>
         {/* Said before what the card shows, not instead of it: the name keeps the visible
             words (WCAG 2.5.3), so voice control finds «Today, 18:30». */}
-        <span className={styles.srOnly}>{slot ? t('Book for ') : t('Book: ')}</span>
+        <span className={styles.srOnly}>{slot ? t`Book for ` : t`Book: `}</span>
         <span className={styles.slotText}>
           <span
             className={styles.slotWhen}
@@ -89,7 +92,8 @@ export const NextSlotCard = ({ business, service }: NextSlotCardProps) => {
             {getSlotText(t, slot)}
           </span>
           <span className={styles.slotMeta}>
-            {service.name} · {t.duration(service.durationMinutes)} · {formatPrice(service.price)}
+            {service.name} · {format.duration(service.durationMinutes)} ·{' '}
+            {format.price(service.price)}
           </span>
         </span>
         <span className={styles.slotArrow} aria-hidden>

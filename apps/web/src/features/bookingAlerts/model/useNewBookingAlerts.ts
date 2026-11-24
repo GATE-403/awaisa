@@ -1,11 +1,13 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
-import { useRouter } from 'next/navigation'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
-import { formatDayLong } from '@/entities/booking'
 import { getRecentBookings } from '@/shared/api/clientApi'
 import type { AdminBooking } from '@/shared/api/types'
+import type { Format } from '@/shared/i18n'
+import { useRouter } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { playChime } from '@/shared/lib/chime'
 import { isAlreadyNotified } from '@/shared/lib/pushWorker'
 
@@ -16,12 +18,14 @@ const ownBookingIds = new Set<string>()
 
 const markOwnBooking = (id: string) => ownBookingIds.add(id)
 
-const describe = (booking: AdminBooking) =>
-  `${booking.customerName} · ${formatDayLong(booking.date)}, ${booking.time} · ${booking.serviceName}`
+const describe = (booking: AdminBooking, format: Format) =>
+  `${booking.customerName} · ${format.dayLong(booking.date)}, ${booking.time} · ${booking.serviceName}`
 
 // While the cabinet is open, new client bookings arrive as a toast, a chime and - when the tab is
 // in the background and the owner allowed it - a system notification.
 export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
+  const { t } = useLingui()
+  const format = useFormat()
   const toast = useToast()
   const router = useRouter()
   const sinceRef = useRef<string | null>(null)
@@ -52,8 +56,8 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
               scroll: false,
             })
           toast.show({
-            title: 'New booking',
-            description: describe(booking),
+            title: t`New booking`,
+            description: describe(booking, format),
             type: 'info',
             onOpen: open,
           })
@@ -62,8 +66,8 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
           // A push has already shown this booking (the same tag): one notice is enough.
           const isShown = canNotify && (await isAlreadyNotified(booking.id).catch(() => false))
           if (canNotify && !isShown) {
-            const notification = new Notification('New booking', {
-              body: describe(booking),
+            const notification = new Notification(t`New booking`, {
+              body: describe(booking, format),
               tag: booking.id,
             })
             notification.onclick = () => {

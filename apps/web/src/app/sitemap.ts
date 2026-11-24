@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { listAllBusinesses, listLeaderboard, listPlacesLeaderboard } from '@/shared/api/serverApi'
 import type { BusinessCard } from '@/shared/api/types'
+import { languageAlternates } from '@/shared/lib/seo/languageAlternates'
 import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 import { INDEXED_KINDS, kindHref } from '@/views/catalog'
 import { BOARDS, boardHref } from '@/views/leaderboard'
@@ -47,10 +48,17 @@ const loadBoards = async (): Promise<MetadataRoute.Sitemap> => {
     .map((href) => ({ url: absoluteUrl(href), changeFrequency: 'weekly', priority: 0.6 }))
 }
 
+// Each page is listed at its English address with its Russian and Kyrgyz twins as hreflang
+// alternates, so search engines show the language people search in.
+const withLanguages = (entry: MetadataRoute.Sitemap[number]): MetadataRoute.Sitemap[number] => {
+  const path = new URL(entry.url).pathname + new URL(entry.url).search
+  return { ...entry, alternates: { languages: languageAlternates(path) } }
+}
+
 const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   const [businesses, boards] = await Promise.all([loadBusinesses(), loadBoards()])
 
-  return [
+  const entries: MetadataRoute.Sitemap = [
     ...STATIC_PAGES,
     ...KIND_PAGES,
     ...boards,
@@ -63,6 +71,7 @@ const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
       },
     ]),
   ]
+  return entries.map(withLanguages)
 }
 
 // biome-ignore lint/style/noDefaultExport: Next reads metadata routes from the default export

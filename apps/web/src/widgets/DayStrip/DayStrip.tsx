@@ -1,9 +1,11 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CircleDashed } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef } from 'react'
 import type { BookingDay } from '@/entities/booking'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import styles from './DayStrip.module.css'
 
 interface DayStripProps {
@@ -26,7 +28,8 @@ export const DayStrip = ({
   loads,
   variant = 'default',
 }: DayStripProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const daysRef = useRef<HTMLFieldSetElement>(null)
   const knobRef = useRef<HTMLSpanElement>(null)
   const today = days.find((day) => day.isToday)
@@ -72,7 +75,7 @@ export const DayStrip = ({
   return (
     <div className={styles.strip} data-variant={variant}>
       <fieldset
-        aria-label={t('Day')}
+        aria-label={t`Day`}
         className={styles.days}
         ref={daysRef}
         data-edge-fade={variant === 'compact' || undefined}
@@ -89,7 +92,7 @@ export const DayStrip = ({
             data-marked={marks?.has(day.key) || undefined}
             onClick={() => onChange(day.key)}
           >
-            <span className={styles.weekday}>{t.weekdayShort(day.key)}</span>
+            <span className={styles.weekday}>{format.weekdayShort(day.key)}</span>
             <span className={styles.number}>{day.dayOfMonth}</span>
             {marks?.has(day.key) && <CircleDashed className={styles.markGlyph} aria-hidden />}
             {variant === 'compact' && loads?.has(day.key) && (
@@ -101,13 +104,11 @@ export const DayStrip = ({
             )}
             {/* The full date after the visible "Sat 7", not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
-              {`, ${t.dayLong(day.key)}${
-                marks?.has(day.key) ? `, ${t('has unclosed visits')}` : ''
+              {`, ${format.dayLong(day.key)}${
+                marks?.has(day.key) ? `, ${t`has unclosed visits`}` : ''
               }${
                 loads?.has(day.key)
-                  ? `, ${t('{percent}% booked', {
-                      percent: Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100),
-                    })}`
+                  ? `, ${t`${ph({ percent: Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100) })}% booked`}`
                   : ''
               }`}
             </span>
@@ -128,7 +129,7 @@ export const DayStrip = ({
           }}
           disabled={variant === 'default' && value === today.key}
         >
-          {t('Today')}
+          {t`Today`}
         </button>
       )}
     </div>

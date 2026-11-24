@@ -1,7 +1,7 @@
+import { Plural, Trans, useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
 import type { Business, ReviewSummary } from '@/shared/api/types'
-import { T } from '@/shared/i18n'
-import { Counted } from './Counted'
+import { makeFormat } from '@/shared/i18n/format'
 import styles from './Place.module.css'
 import { ReviewThread } from './ReviewThread'
 
@@ -12,26 +12,29 @@ interface ReviewsSectionProps {
 
 // Real reviews after real visits: the score and how it splits, then what people wrote.
 export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
+  const { t, i18n } = useLingui()
+  const format = makeFormat(i18n)
+
   if (reviews.count === 0) return null
 
   return (
     <section id='reviews' className={styles.section} aria-labelledby='place-reviews'>
       <div className={styles.sectionHead}>
         <h2 id='place-reviews' className={styles.sectionTitle}>
-          <T>Reviews</T>
+          <Trans>Reviews</Trans>
         </h2>
         <span className={styles.sectionCount}>
-          <T vars={{ count: reviews.items.length }}>{'latest {count}'}</T>
+          <Trans>latest {reviews.items.length}</Trans>
         </span>
       </div>
       {/* The score first, like an app's ratings: the average large, how it splits by stars. */}
       <div className={styles.reviewSummary}>
         <div className={styles.reviewScore}>
-          <span className={styles.reviewAverage}>{reviews.average.toFixed(1)}</span>
+          <span className={styles.reviewAverage}>{format.rating(reviews.average)}</span>
           <span
             className={styles.reviewStars}
             role='img'
-            aria-label={`${reviews.average.toFixed(1)} out of 5`}
+            aria-label={t`${format.rating(reviews.average)} out of 5`}
           >
             {[1, 2, 3, 4, 5].map((value) => (
               <Star
@@ -42,10 +45,10 @@ export const ReviewsSection = ({ business, reviews }: ReviewsSectionProps) => {
             ))}
           </span>
           <span className={styles.reviewTotal}>
-            <Counted count={reviews.count} forms={['rating', 'ratings']} />
+            <Plural value={reviews.count} one='# rating' other='# ratings' />
           </span>
         </div>
-        <ul className={styles.reviewBars} aria-label='How the ratings split'>
+        <ul className={styles.reviewBars} aria-label={t`How the ratings split`}>
           {[5, 4, 3, 2, 1].map((stars) => {
             const count = reviews.distribution.find((item) => item.stars === stars)?.count ?? 0
             const share = reviews.count > 0 ? (count / reviews.count) * 100 : 0

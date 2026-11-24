@@ -1,11 +1,12 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
 import type { Business, Catalog } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { copyText } from '@/shared/lib/share'
 import type { ManageTab } from '@/views/manage/manageTabs'
 import styles from './SetupProgress.module.css'
@@ -17,22 +18,22 @@ interface SetupProgressProps {
 
 export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const wasIncomplete = useRef(false)
   const steps: { label: string; tab: ManageTab; isDone: boolean }[] = [
     {
-      label: t('Add services'),
+      label: t`Add services`,
       tab: 'services',
       isDone: catalog.services.some((service) => service.isActive !== false),
     },
     {
-      label: t('Add specialists'),
+      label: t`Add specialists`,
       tab: 'masters',
       isDone: catalog.specialists.some(
         (master) => master.isActive !== false && master.serviceIds.length > 0,
       ),
     },
-    { label: t('Check the opening hours'), tab: 'hours', isDone: business.hours.length > 0 },
+    { label: t`Check the opening hours`, tab: 'hours', isDone: business.hours.length > 0 },
   ]
   const doneCount = steps.filter((step) => step.isDone).length
   const next = steps.find((step) => !step.isDone)
@@ -49,12 +50,12 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
     wasIncomplete.current = false
     const url = `${window.location.origin}/${business.slug}`
     toast.show({
-      title: t('Booking is open'),
-      description: t('Send clients the link to your page'),
+      title: t`Booking is open`,
+      description: t`Send clients the link to your page`,
       type: 'success',
       timeout: 12_000,
       action: {
-        label: t('Copy link'),
+        label: t`Copy link`,
         onClick: () => void copyText(url),
       },
     })
@@ -75,10 +76,10 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
       >
         <div className={styles.head}>
           <h2 id='setup-title' className={styles.caption}>
-            {t('Opening for bookings')}
+            {t`Opening for bookings`}
           </h2>
           <span className={styles.count}>
-            {t('{done} of {total}', { done: doneCount, total: steps.length })}
+            {t`${ph({ done: doneCount })} of ${ph({ total: steps.length })}`}
           </span>
         </div>
         <span className={styles.steps} aria-hidden='true'>
@@ -95,13 +96,11 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
           <span className={styles.text}>
             <span className={styles.title}>{next.label}</span>
             <span className={styles.note}>
-              {t('{count} more, and clients can book', {
-                count: steps.length - doneCount,
-              })}
+              {t`${ph({ count: steps.length - doneCount })} more, and clients can book`}
             </span>
           </span>
           <span className={styles.start}>
-            {t('Get started')}
+            {t`Get started`}
             <CaretRight aria-hidden />
           </span>
         </span>

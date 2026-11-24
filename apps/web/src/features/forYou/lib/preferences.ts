@@ -1,5 +1,7 @@
 'use client'
 
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import { useSyncExternalStore } from 'react'
 import { parseJson, readText, writeJson } from '@/shared/lib/storage'
 
@@ -30,17 +32,17 @@ type Preferences = {
 const STORAGE_KEY = 'awaisa:preferences:v1'
 const EVENT = 'awaisa:preferences'
 
-const INTERESTS: { value: Interest; label: string; for?: 'male' | 'female' }[] = [
-  { value: 'haircut', label: 'Haircuts' },
-  { value: 'beard', label: 'Beard', for: 'male' },
-  { value: 'coloring', label: 'Colouring' },
-  { value: 'nails', label: 'Manicure' },
-  { value: 'brows', label: 'Brows and lashes' },
-  { value: 'face', label: 'Facial care' },
-  { value: 'massage', label: 'Massage and SPA' },
-  { value: 'waxing', label: 'Hair removal' },
-  { value: 'tattoo', label: 'Tattoo' },
-  { value: 'health', label: 'Health' },
+const INTERESTS: { value: Interest; label: MessageDescriptor; for?: 'male' | 'female' }[] = [
+  { value: 'haircut', label: msg`Haircuts` },
+  { value: 'beard', label: msg`Beard`, for: 'male' },
+  { value: 'coloring', label: msg`Colouring` },
+  { value: 'nails', label: msg`Manicure` },
+  { value: 'brows', label: msg`Brows and lashes` },
+  { value: 'face', label: msg`Facial care` },
+  { value: 'massage', label: msg`Massage and SPA` },
+  { value: 'waxing', label: msg`Hair removal` },
+  { value: 'tattoo', label: msg`Tattoo` },
+  { value: 'health', label: msg`Health` },
 ]
 
 let cachedRaw: string | null = null

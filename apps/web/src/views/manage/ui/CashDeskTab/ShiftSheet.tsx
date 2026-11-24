@@ -1,10 +1,12 @@
 'use client'
 
 import { Input } from '@awaisa/ui/Input'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import type { CashShift } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import { type Format, type Translate, useFormat } from '@/shared/i18n'
 import { maskAmountInput } from '@/shared/lib/inputMasks'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -25,32 +27,32 @@ interface ShiftSheetProps {
 
 const FORM_ID = 'shift-form'
 
-const MOVES: { value: 'in' | 'out'; label: string }[] = [
-  { value: 'in', label: 'Put in' },
-  { value: 'out', label: 'Take out' },
+const MOVES: { value: 'in' | 'out'; label: MessageDescriptor }[] = [
+  { value: 'in', label: msg`Put in` },
+  { value: 'out', label: msg`Take out` },
 ]
 
-const TITLES: Record<ShiftSheetMode, string> = {
-  open: 'Open shift',
-  move: 'Cash in the till',
-  close: 'Close shift',
+const TITLES: Record<ShiftSheetMode, MessageDescriptor> = {
+  open: msg`Open shift`,
+  move: msg`Cash in the till`,
+  close: msg`Close shift`,
 }
 
-const ACTIONS: Record<ShiftSheetMode, string> = {
-  open: 'Open',
-  move: 'Record',
-  close: 'Close',
+const ACTIONS: Record<ShiftSheetMode, MessageDescriptor> = {
+  open: msg`Open`,
+  move: msg`Record`,
+  close: msg`Close`,
 }
 
 const toAmount = (value: string) => Number(value.replace(/\D/g, '') || 0)
 
 // What the difference at closing means, in words: a shortage, a surplus or a match.
-const describeDifference = (difference: number, t: Translate) => {
-  if (difference === 0) return { text: t('Matches what was expected.'), tone: undefined }
-  const amount = formatPrice(Math.abs(difference))
+const describeDifference = (difference: number, t: Translate, format: Format) => {
+  if (difference === 0) return { text: t(msg`Matches what was expected.`), tone: undefined }
+  const amount = format.price(Math.abs(difference))
   return difference < 0
-    ? { text: t('Short by {amount}.', { amount }), tone: 'danger' as const }
-    : { text: t('Over by {amount}.', { amount }), tone: 'success' as const }
+    ? { text: t(msg`Short by ${amount}.`), tone: 'danger' as const }
+    : { text: t(msg`Over by ${amount}.`), tone: 'success' as const }
 }
 
 // One sheet for the till: open a shift with the counted cash, put cash in or take it out with
@@ -64,7 +66,8 @@ export const ShiftSheet = ({
   onMove,
   onCloseShift,
 }: ShiftSheetProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const [amount, setAmount] = useState('')
   const [kind, setKind] = useState<'in' | 'out'>('out')
   const [reason, setReason] = useState('')
@@ -91,11 +94,21 @@ export const ShiftSheet = ({
   // The shift's cash, line by line, so a difference can be traced; zero lines are left out.
   const summary = shift
     ? [
-        { label: 'At shift start', amount: shift.openingCash, isShown: true },
-        { label: 'Cash for visits', amount: shift.visitsCash, isShown: shift.visitsCash > 0 },
-        { label: 'Cash for products', amount: shift.salesCash, isShown: shift.salesCash > 0 },
-        { label: 'Put in', amount: shift.cashIn, isShown: shift.cashIn > 0 },
-        { label: 'Taken out', amount: -shift.cashOut, isShown: shift.cashOut > 0 },
+        { key: 'start', label: t`At shift start`, amount: shift.openingCash, isShown: true },
+        {
+          key: 'visits',
+          label: t`Cash for visits`,
+          amount: shift.visitsCash,
+          isShown: shift.visitsCash > 0,
+        },
+        {
+          key: 'products',
+          label: t`Cash for products`,
+          amount: shift.salesCash,
+          isShown: shift.salesCash > 0,
+        },
+        { key: 'in', label: t`Put in`, amount: shift.cashIn, isShown: shift.cashIn > 0 },
+        { key: 'out', label: t`Taken out`, amount: -shift.cashOut, isShown: shift.cashOut > 0 },
       ].filter((line) => line.isShown)
     : []
 
@@ -109,7 +122,7 @@ export const ShiftSheet = ({
         {mode === 'move' && (
           <div className={styles.segment}>
             <SegmentedControl
-              label={t('Action')}
+              label={t`Action`}
               value={kind}
               items={MOVES.map((move) => ({ ...move, label: t(move.label) }))}
               onChange={setKind}
@@ -118,54 +131,54 @@ export const ShiftSheet = ({
         )}
 
         {mode === 'close' && shift && (
-          <section className={sheet.group} aria-label={t('Expected')}>
+          <section className={sheet.group} aria-label={t`Expected`}>
             <div className={sheet.list}>
               {summary.map((line) => (
-                <div key={line.label} className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t(line.label)}</span>
+                <div key={line.key} className={sheet.row}>
+                  <span className={sheet.rowLabel}>{line.label}</span>
                   <span className={styles.value}>
                     {line.amount < 0 ? '−' : ''}
-                    {formatPrice(Math.abs(line.amount))}
+                    {format.price(Math.abs(line.amount))}
                   </span>
                 </div>
               ))}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Should be in the till')}</span>
+                <span className={sheet.rowLabel}>{t`Should be in the till`}</span>
                 <span className={styles.value} data-strong>
-                  {formatPrice(shift.expectedCash)}
+                  {format.price(shift.expectedCash)}
                 </span>
               </div>
             </div>
           </section>
         )}
 
-        <section className={sheet.group} aria-label={t('Amount')}>
+        <section className={sheet.group} aria-label={t`Amount`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
-                {t(mode === 'move' ? 'Amount' : mode === 'open' ? 'In the till now' : 'Counted')}
+                {mode === 'move' ? t`Amount` : mode === 'open' ? t`In the till now` : t`Counted`}
               </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t(mode === 'close' ? 'Cash counted, som' : 'Amount, som')}
+                  aria-label={mode === 'close' ? t`Cash counted, som` : t`Amount, som`}
                   inputMode='numeric'
                   placeholder='0'
                   autoFocus
-                  value={maskAmountInput(amount.replace(/\D/g, ''))}
+                  value={maskAmountInput(amount.replace(/\D/g, ''), format.locale)}
                   onValueChange={setAmount}
                 />
-                <span className={sheet.suffix}>{t('som')}</span>
+                <span className={sheet.suffix}>{format.currency}</span>
               </span>
             </label>
             {mode === 'move' && (
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label={t('Reason')}
-                  placeholder={t(
-                    kind === 'out' ? 'For example, “Water and coffee”' : 'For example, “Change”',
-                  )}
+                  aria-label={t`Reason`}
+                  placeholder={
+                    kind === 'out' ? t`For example, “Water and coffee”` : t`For example, “Change”`
+                  }
                   value={reason}
                   onValueChange={setReason}
                   maxLength={160}
@@ -176,8 +189,8 @@ export const ShiftSheet = ({
               <div className={`${sheet.row} ${sheet.textRow}`}>
                 <Input
                   variant='plain'
-                  aria-label={t('Comment')}
-                  placeholder={t('Comment, if needed')}
+                  aria-label={t`Comment`}
+                  placeholder={t`Comment, if needed`}
                   value={note}
                   onValueChange={setNote}
                   maxLength={240}
@@ -187,27 +200,22 @@ export const ShiftSheet = ({
           </div>
           <p
             className={`${sheet.groupFooter} ${styles.footer}`}
-            data-tone={difference === null ? undefined : describeDifference(difference, t).tone}
+            data-tone={
+              difference === null ? undefined : describeDifference(difference, t, format).tone
+            }
           >
             {mode === 'open' &&
               (branchName
-                ? t(
-                    'Count the cash in the “{branch}” till: the balance is worked out from this amount.',
-                    {
-                      branch: branchName,
-                    },
-                  )
-                : t('Count the cash: the balance is worked out from this amount.'))}
+                ? t`Count the cash in the “${ph({ branch: branchName })}” till: the balance is worked out from this amount.`
+                : t`Count the cash: the balance is worked out from this amount.`)}
             {mode === 'move' &&
               (kind === 'out'
-                ? t(
-                    'Taking cash out lowers the expected balance. Record business costs in “Expenses”.',
-                  )
-                : t('For example, change at the start of the day.'))}
+                ? t`Taking cash out lowers the expected balance. Record business costs in “Expenses”.`
+                : t`For example, change at the start of the day.`)}
             {mode === 'close' &&
               (difference === null
-                ? t('Count the cash: we will show any difference.')
-                : describeDifference(difference, t).text)}
+                ? t`Count the cash: we will show any difference.`
+                : describeDifference(difference, t, format).text)}
           </p>
         </section>
       </form>

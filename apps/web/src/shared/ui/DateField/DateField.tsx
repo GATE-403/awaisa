@@ -1,7 +1,10 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { X } from '@phosphor-icons/react/ssr'
 import type { MouseEvent } from 'react'
+import { formatDate, type Locale, useLocale } from '@/shared/i18n'
 import styles from './DateField.module.css'
 
 interface DateFieldProps {
@@ -19,17 +22,16 @@ interface DateFieldProps {
   id?: string
 }
 
-const formatter = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-})
-
 // A day key is a local date: read it as one, never through a time zone.
-const toWords = (value: string) => {
+const toWords = (value: string, locale: Locale) => {
   const [year = 0, month = 1, day = 1] = value.split('-').map(Number)
   // «31 December 2026».
-  return formatter.format(new Date(year, month - 1, day))
+  return formatDate(locale, new Date(Date.UTC(year, month - 1, day, 12)), {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 }
 
 // A date in a Settings row as words («25 December 2026», «No end date»), the system's own date
@@ -39,12 +41,14 @@ export const DateField = ({
   value,
   onChange,
   label,
-  placeholder = 'Choose',
+  placeholder,
   min,
   max,
   isClearable = false,
   id,
 }: DateFieldProps) => {
+  const { t } = useLingui()
+  const locale = useLocale()
   const openPicker = (event: MouseEvent<HTMLInputElement>) => {
     try {
       event.currentTarget.showPicker?.()
@@ -56,7 +60,7 @@ export const DateField = ({
   return (
     <span className={styles.field}>
       <span className={styles.text} data-empty={!value || undefined} aria-hidden='true'>
-        {value ? toWords(value) : placeholder}
+        {value ? toWords(value, locale) : (placeholder ?? t`Choose`)}
       </span>
       <input
         id={id}
@@ -73,7 +77,7 @@ export const DateField = ({
         <button
           type='button'
           className={styles.clear}
-          aria-label={`${label}: remove the date`}
+          aria-label={t`${ph({ label })}: remove the date`}
           onClick={() => onChange('')}
         >
           <X aria-hidden />

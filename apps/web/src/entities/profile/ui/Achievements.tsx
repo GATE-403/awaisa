@@ -1,9 +1,11 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretDown } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type MouseEvent, useState } from 'react'
 import type { PublicProfile } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { toBusinessDayKey } from '@/shared/lib/businessTime'
 import { achievementTitle } from '../lib/achievementTitle'
 import styles from './Achievements.module.css'
@@ -43,7 +45,8 @@ const share = (item: Achievement) => item.progress.current / item.progress.targe
 // shelf, each with the month it came; the goals fold into one line naming the two closest and
 // open in place (the owner: a plain list of achievements is dull).
 export const Achievements = ({ items, onSelect }: AchievementsProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [isOpen, setIsOpen] = useState(false)
   const earned = items.filter((item) => item.earned)
   const goals = items
@@ -84,10 +87,7 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
           {isGoal ? (
             <>
               <span className={styles.description}>
-                {t('{current} of {total}', {
-                  current: item.progress.current,
-                  total: item.progress.target,
-                })}
+                {t`${ph({ current: item.progress.current })} of ${ph({ total: item.progress.target })}`}
               </span>
               <span
                 className={styles.track}
@@ -99,12 +99,12 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
             // The month it came, like the date on a trophy; the description lives in its card.
             dayKey && (
               <span className={styles.description}>
-                {t.monthShort(dayKey)} {dayKey.slice(0, 4)}
+                {format.monthShort(dayKey)} {dayKey.slice(0, 4)}
               </span>
             )
           )}
           <span className={styles.srOnly}>
-            {item.earned ? t('Earned') : t('Goal: {goal}', { goal: t(item.description) })}
+            {item.earned ? t`Earned` : t`Goal: ${ph({ goal: item.description })}`}
           </span>
         </Tag>
       </li>
@@ -114,7 +114,7 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
   return (
     <div className={styles.collection}>
       {earned.length > 0 && (
-        <ul className={styles.shelf} data-edge-fade aria-label={t('Earned')}>
+        <ul className={styles.shelf} data-edge-fade aria-label={t`Earned`}>
           {earned.map((item, index) => renderMedal(item, index, false))}
         </ul>
       )}
@@ -126,20 +126,20 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
           onClick={() => setIsOpen((value) => !value)}
         >
           {isOpen ? (
-            t('Hide goals')
+            t`Hide goals`
           ) : (
             // One text box: as flex items the bold count and the rest broke into columns.
             <span>
-              <strong>{t.count(goals.length, ['goal', 'goals'])}</strong>
+              <strong>{t`${plural(goals.length, { one: '# goal', other: '# goals' })}`}</strong>
               {' · '}
-              {t('closest: {names}', { names: closest })}
+              {t`closest: ${ph({ names: closest })}`}
             </span>
           )}
           <CaretDown className={styles.moreCaret} data-open={isOpen || undefined} aria-hidden />
         </button>
       )}
       {goals.length > 0 && areGoalsShown && (
-        <ul className={styles.grid} aria-label={t('Goals')}>
+        <ul className={styles.grid} aria-label={t`Goals`}>
           {goals.map((item, index) => renderMedal(item, index, true))}
         </ul>
       )}

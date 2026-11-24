@@ -2,11 +2,11 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { Bell, BellRinging } from '@phosphor-icons/react/ssr'
-import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { useT } from '@/shared/i18n'
+import { usePathname, useRouter } from '@/shared/i18n/navigation'
 import { haptic } from '@/shared/lib/nativeBridge'
 import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { useFollows } from '../model/useFollows'
@@ -24,7 +24,7 @@ interface FollowButtonProps {
 // «Follow»: freed time with the master, a move to another place. Guests sign in first and
 // come back to the same page.
 export const FollowButton = ({ specialistId, name, variant = 'capsule' }: FollowButtonProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const router = useRouter()
   const pathname = usePathname()
@@ -46,14 +46,14 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
         await follows.follow(specialistId)
         haptic('success')
         toast.show({
-          title: t('You follow {name}', { name }),
-          description: t('We will write when the specialist has free time'),
+          title: t`You follow ${name}`,
+          description: t`We will write when the specialist has free time`,
           type: 'success',
         })
       }
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -62,7 +62,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
     }
   }
 
-  const label = isOn ? t('Unfollow {name}', { name }) : t('Follow {name}', { name })
+  const label = isOn ? t`Unfollow ${name}` : t`Follow ${name}`
 
   if (variant === 'groupItem') {
     return (
@@ -101,7 +101,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
       onClick={(event) => void handleClick(event)}
     >
       {isOn ? <BellRinging weight='fill' aria-hidden /> : <Bell aria-hidden />}
-      {isOn ? t('Following') : t('Follow the specialist')}
+      {isOn ? t`Following` : t`Follow the specialist`}
     </Button>
   )
 }

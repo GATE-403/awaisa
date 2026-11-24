@@ -4,13 +4,14 @@ import { Button } from '@awaisa/ui/Button'
 import { Field } from '@awaisa/ui/Field'
 import { Input } from '@awaisa/ui/Input'
 import { Switch } from '@awaisa/ui/Switch'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Check, MapPin, UsersThree } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import {
   ANY_SPECIALIST_ID,
   addDayKey,
   DateTimePicker,
-  formatPrice,
   getSpecialistLabel,
   getSpecialistsForService,
   Ticket,
@@ -21,7 +22,9 @@ import { useRecentVisits } from '@/features/rebook'
 import { WaitlistJoin } from '@/features/waitlist'
 import type { Booking, Business, Catalog } from '@/shared/api/types'
 import { PHONE_PLACEHOLDER, WHOLE_PHONE_DIGITS } from '@/shared/config/region'
-import { useT } from '@/shared/i18n'
+import { localizePath } from '@/shared/i18n/locales'
+import { useLocale } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { formatDistance } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
@@ -73,7 +76,9 @@ export const BookingPage = ({
   isModal = false,
   servicePhotos,
 }: BookingPageProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
+  const locale = useLocale()
   const form = useBookingForm(business, catalog)
   // The service step opened from its ticket (Change) is the visit's own list: several services
   // can be ticked, one master does them one after another. The first pick stays one tap.
@@ -94,8 +99,8 @@ export const BookingPage = ({
     const next = serviceTimes?.[serviceId]
     const todayKey = form.today?.dayKey
     if (!next || !todayKey) return null
-    if (next.date === todayKey) return t('Today from {time}', { time: next.time })
-    if (next.date === addDayKey(todayKey, 1)) return t('Tomorrow from {time}', { time: next.time })
+    if (next.date === todayKey) return t`Today from ${ph({ time: next.time })}`
+    if (next.date === addDayKey(todayKey, 1)) return t`Tomorrow from ${ph({ time: next.time })}`
     return null
   }
   // The deposit's terms reached the screen before the name and number were asked for.
@@ -111,7 +116,7 @@ export const BookingPage = ({
   // The free time under the ruler's needle: the bar's one action takes it ("Choose 12:00").
   const [rulerTime, setRulerTime] = useState<string | null>(null)
   const foldTimer = useRef<number | undefined>(undefined)
-  const specialistLabel = t(getSpecialistLabel(catalog, form.specialistId))
+  const specialistLabel = getSpecialistLabel(catalog, form.specialistId, t)
   const recentVisits = useRecentVisits()
   const chosenServiceId = form.serviceId
   const bookedServiceId = form.createdBooking?.serviceId ?? null
@@ -182,8 +187,8 @@ export const BookingPage = ({
   })
   const quickMaster =
     quickSpecialistId === ANY_SPECIALIST_ID
-      ? t('any specialist')
-      : getSpecialistLabel(catalog, quickSpecialistId)
+      ? t`any specialist`
+      : getSpecialistLabel(catalog, quickSpecialistId, t)
 
   // One open step under a stack of done ones: the step being changed, else the first unfinished,
   // and contacts once everything is chosen.
@@ -241,10 +246,7 @@ export const BookingPage = ({
 
   // "Step 2 of 4" over the question: where one is, said where one looks (the bar's line was missed).
   const stepEyebrow = (step: BookingStepId) =>
-    t('Step {step} of {total}', {
-      step: ['service', 'specialist', 'datetime', 'contacts'].indexOf(step) + 1,
-      total: 4,
-    })
+    t`Step ${ph({ step: ['service', 'specialist', 'datetime', 'contacts'].indexOf(step) + 1 })} of ${ph({ total: 4 })}`
 
   const openStep = (step: BookingStepId | 'branch') => {
     setIsReviewRequested(false)
@@ -278,7 +280,7 @@ export const BookingPage = ({
     const distance = form.branchDistances?.[chosenBranch.id]
     chosenCards.push({
       id: 'branch',
-      title: t('Branch'),
+      title: t`Branch`,
       tone: cardTone(0),
       media: (
         <span className={styles.stackPin}>
@@ -295,7 +297,7 @@ export const BookingPage = ({
     const picture = servicePhotos?.[form.service.id] ?? business.coverUrl
     chosenCards.push({
       id: 'service',
-      title: t('Service'),
+      title: t`Service`,
       tone: cardTone(1),
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
@@ -313,16 +315,16 @@ export const BookingPage = ({
       // The price on the card itself, not only in the bar: it was missed down there.
       secondary: [
         ...form.chosenServices.slice(1).map((added) => `+ ${added.name}`),
-        t.duration(form.service.durationMinutes),
-        formatPrice(form.quote?.total ?? form.service.price),
+        format.duration(form.service.durationMinutes),
+        format.price(form.quote?.total ?? form.service.price),
       ].join(' · '),
-      trailing: formatPrice(form.quote?.total ?? form.service.price),
+      trailing: format.price(form.quote?.total ?? form.service.price),
     })
   }
   if (form.specialistId) {
     chosenCards.push({
       id: 'specialist',
-      title: t('Specialist'),
+      title: t`Specialist`,
       tone: cardTone(2),
       media: chosenSpecialist ? (
         <PersonAvatar
@@ -336,37 +338,37 @@ export const BookingPage = ({
           <UsersThree />
         </span>
       ),
-      primary: chosenSpecialist ? chosenSpecialist.name : t('Any specialist'),
+      primary: chosenSpecialist ? chosenSpecialist.name : t`Any specialist`,
       secondary: chosenSpecialist
         ? [
-            chosenSpecialist.rating ? `★ ${chosenSpecialist.rating.toFixed(1)}` : null,
+            chosenSpecialist.rating ? `★ ${format.rating(chosenSpecialist.rating)}` : null,
             chosenSpecialist.role,
           ]
             .filter(Boolean)
             .join(' · ')
-        : t('whoever is free'),
+        : t`whoever is free`,
     })
   }
   if (form.time && form.dayKey && form.service) {
     chosenCards.push({
       id: 'datetime',
-      title: t('Date and time'),
+      title: t`Date and time`,
       tone: cardTone(3),
       media: (
         <span className={styles.stackLeaf}>
-          <span className={styles.stackLeafMonth}>{t.monthShort(form.dayKey)}</span>
+          <span className={styles.stackLeafMonth}>{format.monthShort(form.dayKey)}</span>
           <span className={styles.stackLeafDay}>{Number(form.dayKey.slice(8))}</span>
         </span>
       ),
       primary: `${form.time}–${addMinutes(form.time, form.service.durationMinutes)}`,
-      secondary: t.dayLong(form.dayKey),
+      secondary: format.dayLong(form.dayKey),
     })
   }
 
   if (isContactsFolded) {
     chosenCards.push({
       id: 'contacts',
-      title: t('Contacts'),
+      title: t`Contacts`,
       tone: cardTone(4),
       media: <PersonAvatar name={form.name.trim()} size='md' className={styles.stackFace} />,
       primary: form.name.trim(),
@@ -382,14 +384,14 @@ export const BookingPage = ({
     id: 'draft',
     status: 'confirmed',
     serviceId: form.service?.id ?? '',
-    serviceName: form.service?.name ?? t('No service chosen'),
+    serviceName: form.service?.name ?? t`No service chosen`,
     price: form.service?.price ?? 0,
     discount: form.quote?.discount
       ? { title: form.quote.discount.title, amount: form.quote.discount.amount }
       : null,
     durationMinutes: form.service?.durationMinutes ?? 0,
     specialistId: form.specialistId ?? '',
-    specialistName: chosenSpecialist?.name ?? (form.specialistId ? t('Any specialist') : ''),
+    specialistName: chosenSpecialist?.name ?? (form.specialistId ? t`Any specialist` : ''),
     date: form.time && form.dayKey ? form.dayKey : '',
     time: form.time ?? '',
     startsAt: '',
@@ -412,7 +414,7 @@ export const BookingPage = ({
   const choosePayment = (choice: typeof payment.choice) => {
     if (choice.startsWith('plan:') && !payment.isSignedIn) {
       const back = `${window.location.pathname}${window.location.search}`
-      window.location.assign(`/login?next=${encodeURIComponent(back)}`)
+      window.location.assign(localizePath(`/login?next=${encodeURIComponent(back)}`, locale))
       return
     }
     payment.setChoice(choice)
@@ -432,14 +434,14 @@ export const BookingPage = ({
     ...(activeStep === 'datetime' && !isBranchOpen && rulerTime
       ? {
           onSubmit: () => form.selectTime(rulerTime),
-          submitLabel: t('Choose {time}', { time: rulerTime }),
+          submitLabel: t`Choose ${ph({ time: rulerTime })}`,
         }
       : isEditingServices && !isBranchOpen
-        ? { onSubmit: form.finishEditing, submitLabel: t('Done') }
+        ? { onSubmit: form.finishEditing, submitLabel: t`Done` }
         : activeStep === 'specialist' && !isBranchOpen && !form.specialistId
           ? {
               onSubmit: () => form.selectSpecialist(ANY_SPECIALIST_ID),
-              submitLabel: t('Any specialist'),
+              submitLabel: t`Any specialist`,
             }
           : {
               onSubmit: form.submit,
@@ -453,10 +455,10 @@ export const BookingPage = ({
       null,
     onStepOpen: openStep,
     paidWith: payment.subscription
-      ? { label: t('By subscription'), total: null }
+      ? { label: t`By subscription`, total: null }
       : payment.plan
         ? {
-            label: t('Subscription “{title}”', { title: payment.plan.title }),
+            label: t`Subscription “${ph({ title: payment.plan.title })}”`,
             total: payment.plan.price,
           }
         : null,
@@ -477,10 +479,10 @@ export const BookingPage = ({
           : [],
       master: form.specialistId
         ? form.specialistId === ANY_SPECIALIST_ID
-          ? t('Any specialist')
+          ? t`Any specialist`
           : (specialistLabel.split(' ')[0] ?? specialistLabel)
         : null,
-      when: form.dayKey && form.time ? `${t.dayShort(form.dayKey)}, ${form.time}` : null,
+      when: form.dayKey && form.time ? `${format.dayShort(form.dayKey)}, ${form.time}` : null,
     }),
   }
 
@@ -508,23 +510,23 @@ export const BookingPage = ({
         {/* "I want this" from a work: the look goes to the master with the booking. */}
         {form.lookPhoto && (
           <div className={styles.fieldRow} data-action=''>
-            <span className={styles.extraLabel}>{t('Reference')}</span>
+            <span className={styles.extraLabel}>{t`Reference`}</span>
             {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
             <img
               src={form.lookPhoto.url}
-              alt={t('Photo of the look you want')}
+              alt={t`The look you want`}
               className={styles.lookThumb}
               decoding='async'
             />
             <button type='button' className={styles.rowAction} onClick={form.removeLookPhoto}>
-              {t('Remove')}
+              {t`Remove`}
             </button>
           </div>
         )}
         {isCommentOpen || form.comment ? (
           <>
             <div className={styles.fieldRow} data-action=''>
-              <span className={styles.extraLabel}>{t('Comment')}</span>
+              <span className={styles.extraLabel}>{t`Comment`}</span>
               <span />
               {/* Folds back and forgets the note: an extra is never a trap. */}
               <button
@@ -535,15 +537,15 @@ export const BookingPage = ({
                   setIsCommentOpen(false)
                 }}
               >
-                {t('Remove')}
+                {t`Remove`}
               </button>
             </div>
             <textarea
               className={styles.commentArea}
-              aria-label={t('Comment')}
+              aria-label={t`Comment`}
               value={form.comment}
               onChange={(event) => form.setComment(event.target.value)}
-              placeholder={t('For example, “need parking”')}
+              placeholder={t`For example, “need parking”`}
               rows={3}
               maxLength={500}
             />
@@ -555,8 +557,8 @@ export const BookingPage = ({
             data-action=''
             onClick={() => setIsCommentOpen(true)}
           >
-            <span className={styles.extraLabel}>{t('Comment')}</span>
-            <span className={styles.extraValue}>{t('Add')}</span>
+            <span className={styles.extraLabel}>{t`Comment`}</span>
+            <span className={styles.extraValue}>{t`Add`}</span>
             <CaretRight aria-hidden className={styles.extraChevron} />
           </button>
         )}
@@ -606,7 +608,7 @@ export const BookingPage = ({
         <div className={styles.steps}>
           {isQuickShown && quickService && (
             <QuickSlots
-              title={isLastVisitShown ? t('Same as last time') : t('Next free time')}
+              title={isLastVisitShown ? t`Same as last time` : t`Next free time`}
               subtitle={`${quickService.name}, ${quickMaster}`}
               slots={quick.slots}
               isLoading={quick.isLoading}
@@ -638,7 +640,7 @@ export const BookingPage = ({
               action={
                 <>
                   <Button size='lg' fullWidth onClick={form.submit} disabled={form.isSubmitting}>
-                    {form.isSubmitting ? t('Booking…') : t('Book')}
+                    {form.isSubmitting ? t`Booking…` : t`Book`}
                   </Button>
                   {form.submitError && (
                     <p className={styles.submitError} role='alert'>
@@ -658,7 +660,7 @@ export const BookingPage = ({
                   offeredService && activeStep !== 'service'
                     ? {
                         name: offeredService.name,
-                        price: formatPrice(offeredService.price),
+                        price: format.price(offeredService.price),
                         onAdd: () => {
                           setIsReviewRequested(false)
                           setIsContactsDone(false)
@@ -670,11 +672,11 @@ export const BookingPage = ({
               />
 
               {isBranchOpen && (
-                <BookingStep id='branch' title={t('Which branch?')}>
+                <BookingStep id='branch' title={t`Which branch?`}>
                   {/* Each branch a row with its full address and how far it is, the chosen
                         one checked; picking one folds it back into its card. */}
                   <fieldset className={`${styles.group} ${styles.branchList}`}>
-                    <legend className={styles.srOnly}>{t('Branch')}</legend>
+                    <legend className={styles.srOnly}>{t`Branch`}</legend>
                     {form.branches.map((branch) => {
                       const distance = form.branchDistances?.[branch.id]
                       const isChosen = form.branchId === branch.id
@@ -712,7 +714,7 @@ export const BookingPage = ({
                         rel='noreferrer'
                         className={styles.branchRoute}
                       >
-                        {t('Directions to “{name}” ›', { name: chosen.name })}
+                        {t`Directions to “${ph({ name: chosen.name })}” ›`}
                       </a>
                     )
                   })()}
@@ -722,13 +724,8 @@ export const BookingPage = ({
               {form.addNotice && (
                 <RowNote>
                   {form.addNotice.kind === 'master'
-                    ? t('{master} does not do “{service}”, choose a master', {
-                        master: form.addNotice.masterName.split(' ')[0] ?? '',
-                        service: form.addNotice.serviceName,
-                      })
-                    : t('The visit no longer fits at {time}, choose a time', {
-                        time: form.addNotice.time,
-                      })}
+                    ? t`${ph({ master: form.addNotice.masterName.split(' ')[0] ?? '' })} does not do “${ph({ service: form.addNotice.serviceName })}”, choose a master`
+                    : t`The visit no longer fits at ${ph({ time: form.addNotice.time })}, choose a time`}
                 </RowNote>
               )}
 
@@ -737,10 +734,10 @@ export const BookingPage = ({
                   id='service'
                   eyebrow={
                     isEditingServices
-                      ? t('You can pick several · one master, one after another')
+                      ? t`You can pick several · one master, one after another`
                       : stepEyebrow('service')
                   }
-                  title={t('What are we doing?')}
+                  title={t`What are we doing?`}
                 >
                   <ServicePicker
                     services={isEditingServices ? visitServices : form.services}
@@ -761,7 +758,7 @@ export const BookingPage = ({
                 <BookingStep
                   id='specialist'
                   eyebrow={stepEyebrow('specialist')}
-                  title={t('Who would you like?')}
+                  title={t`Who would you like?`}
                 >
                   <MasterPicker
                     specialists={form.specialists}
@@ -776,7 +773,7 @@ export const BookingPage = ({
                 <BookingStep
                   id='datetime'
                   eyebrow={stepEyebrow('datetime')}
-                  title={t('When suits you?')}
+                  title={t`When suits you?`}
                 >
                   <DateTimePicker
                     view='ruler'
@@ -800,7 +797,7 @@ export const BookingPage = ({
                           specialistId={form.specialistId}
                           branchId={form.branchId ?? undefined}
                           date={form.dayKey}
-                          dayLabel={t.dayLong(form.dayKey)}
+                          dayLabel={format.dayLong(form.dayKey)}
                         />
                       ) : null
                     }
@@ -812,23 +809,21 @@ export const BookingPage = ({
                 <BookingStep
                   id='contacts'
                   eyebrow={stepEyebrow('contacts')}
-                  title={t('Whose name is it?')}
+                  title={t`Whose name is it?`}
                 >
                   <div className={styles.fields}>
                     {/* Said before the name and number are asked for: what is paid now, when it
                           comes back and where to go. The side panel has no summary card for it. */}
                     {form.service?.deposit ? (
                       <p className={styles.terms} ref={trackDepositShown}>
-                        {t('Deposit {amount}, refunded if you cancel a day ahead', {
-                          amount: formatPrice(form.service.deposit),
-                        })}
+                        {t`Deposit ${ph({ amount: format.price(form.service.deposit) })}, refunded if you cancel a day ahead`}
                         {summaryProps.address ? ` · ${summaryProps.address}` : ''}
                       </p>
                     ) : null}
                     {/* Settings-style rows: the label on the left, the value typed on the right. */}
                     <div className={styles.group}>
                       <Field
-                        label={t('Name')}
+                        label={t`Name`}
                         error={form.errors.name && t(form.errors.name)}
                         className={styles.fieldRow}
                       >
@@ -848,12 +843,12 @@ export const BookingPage = ({
                             if (phoneInput) phoneInput.focus()
                             else foldContacts()
                           }}
-                          placeholder={t(form.isForOther ? 'Who is coming' : 'Your name')}
+                          placeholder={form.isForOther ? t`Who is coming` : t`Your name`}
                         />
                       </Field>
                       {form.accountPhone ? null : (
                         <Field
-                          label={t('Phone')}
+                          label={t`Phone`}
                           error={form.errors.phone && t(form.errors.phone)}
                           className={styles.fieldRow}
                         >
@@ -894,7 +889,7 @@ export const BookingPage = ({
                           stays in this account. */}
                       {form.canBookForOther && (
                         <label className={styles.switchRow}>
-                          <span>{t('Booking for someone else')}</span>
+                          <span>{t`Booking for someone else`}</span>
                           <Switch checked={form.isForOther} onCheckedChange={form.setForOther} />
                         </label>
                       )}
@@ -905,9 +900,9 @@ export const BookingPage = ({
               )}
 
               {!isBranchOpen && isContactsFolded && (
-                <BookingStep id='ready' title={t('All set')}>
+                <BookingStep id='ready' title={t`All set`}>
                   <p className={styles.readyNote}>
-                    {t('Check the cards above and book. Tap a card to change it.')}
+                    {t`Check the cards above and book. Tap a card to change it.`}
                   </p>
                   {contactExtras}
                 </BookingStep>
@@ -918,7 +913,7 @@ export const BookingPage = ({
           {/* Under the form and set well apart from it (a wide gap), so it reads as something to
                 look at, not another step. Nothing here leads away: picks of other places live on
                 the success screen, not in the middle of a booking. */}
-          <aside className={styles.after} aria-label={t('More')}>
+          <aside className={styles.after} aria-label={t`More`}>
             <PlaceReviews
               slug={business.slug}
               businessName={business.name}

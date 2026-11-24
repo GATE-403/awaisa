@@ -1,14 +1,15 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Sliders, Sparkle } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type ReactNode, useEffect, useId, useRef, useState } from 'react'
-import { formatPrice, useStoredBookings } from '@/entities/booking'
+import { useStoredBookings } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { knownPosition } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { StoryRow, StoryTile } from '@/shared/ui/StoryTile/StoryTile'
@@ -55,7 +56,7 @@ interface ForYouShelfProps {
 }
 
 export const ForYouShelf = ({
-  title = 'For you',
+  title,
   seedVisit,
   excludeServiceId,
   likeServiceId,
@@ -67,7 +68,8 @@ export const ForYouShelf = ({
   variant = 'cards',
   isOnlyDue = false,
 }: ForYouShelfProps = {}) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const trackRef = useRef<HTMLUListElement>(null)
   const preferences = usePreferences()
   const { bookings: stored, isReady } = useStoredBookings()
@@ -166,9 +168,9 @@ export const ForYouShelf = ({
         <button type='button' className={styles.prompt} onClick={() => setIsAsking(true)}>
           <Sparkle aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
-            <span className={styles.promptTitle}>{t('Picks for you')}</span>
+            <span className={styles.promptTitle}>{t`Picks for you`}</span>
             <span className={styles.promptMeta}>
-              {t('3 questions, then services picked near you')}
+              {t`3 questions, then services picked near you`}
             </span>
           </span>
         </button>
@@ -184,12 +186,12 @@ export const ForYouShelf = ({
     <section className={styles.shelf} data-inline={isInline || undefined} aria-labelledby={titleId}>
       <div className={styles.head}>
         <h2 id={titleId} className={styles.title}>
-          {t(title)}
+          {title ?? t`For you`}
         </h2>
         {isTunable && (
           <button type='button' className={styles.tune} onClick={() => setIsAsking(true)}>
             <Sliders aria-hidden />
-            {t('Adjust')}
+            {t`Adjust`}
           </button>
         )}
         {headAction}
@@ -201,11 +203,11 @@ export const ForYouShelf = ({
               key={item.id}
               href={`/${item.slug}/book?service=${item.id}`}
               label={item.name}
-              details={`${item.businessName}, ${formatPrice(item.price)}`}
+              details={`${item.businessName}, ${format.price(item.price)}`}
               imageUrl={item.coverUrl}
               fallback={<BusinessTile name={item.businessName} logoUrl={item.logoUrl} size='lg' />}
               tint={pickTint(item.businessName)}
-              note={t(storyNote(item.reason))}
+              note={storyNote(item.reason, t)}
               isEager={position < 5}
               onOpen={() => trackPickClick({ ...pickOf(item), surface, position })}
             />
@@ -235,11 +237,11 @@ export const ForYouShelf = ({
                     decoding='async'
                   />
                 )}
-                <span className={styles.reason}>{t(shortReason(item.reason))}</span>
+                <span className={styles.reason}>{shortReason(item.reason, t)}</span>
                 <span className={styles.caption}>
                   <span className={styles.name}>{item.name}</span>
                   <span className={styles.meta}>
-                    <strong>{formatPrice(item.price)}</strong> · {item.businessName}
+                    <strong>{format.price(item.price)}</strong> · {item.businessName}
                   </span>
                 </span>
               </NextLink>

@@ -1,5 +1,5 @@
-import NextLink from 'next/link'
 import type { CSSProperties, ReactNode, Ref } from 'react'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import styles from './StoryTile.module.css'
 

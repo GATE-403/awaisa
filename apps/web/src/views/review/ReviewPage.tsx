@@ -1,13 +1,14 @@
 'use client'
 
 import { ButtonLink } from '@awaisa/ui/Button'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useState } from 'react'
-import { formatDayLong } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import { RateVisitForm } from '@/features/rateVisit'
 import type { VisitReview } from '@/shared/api/types'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { Container } from '@/shared/ui/Container/Container'
 import styles from './ReviewPage.module.css'
 
@@ -22,9 +23,12 @@ interface ReviewPageProps {
 // Opened from the «how was your visit?» SMS: the visit, five stars, a comment - nothing else.
 // The visit arrives rendered from the server; only the rating form is interactive.
 export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProps) => {
+  const { t } = useLingui()
+  const format = useFormat()
   const [rated, setRated] = useState<number | null>(null)
 
   const visit = data?.visit
+  const firstName = visit?.specialistName.trim().split(/\s+/)[0] ?? ''
   const stars = rated ?? visit?.review?.rating ?? null
 
   return (
@@ -32,10 +36,12 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
       <Container size='sm' className={styles.content}>
         {error && (
           <div className={styles.card}>
-            <h1 className={styles.title}>The link did not open</h1>
+            <h1 className={styles.title}>
+              <Trans>The link did not open</Trans>
+            </h1>
             <p className={styles.text}>{error}</p>
             <NextLink href='/bookings' className={styles.link}>
-              My bookings ›
+              <Trans>My bookings ›</Trans>
             </NextLink>
           </div>
         )}
@@ -46,7 +52,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
               <BusinessTile name={visit.business.name} size='lg' />
               <h1 className={styles.title}>{visit.business.name}</h1>
               <p className={styles.text}>
-                {visit.serviceName} · {formatDayLong(visit.date)}, {visit.time}
+                {visit.serviceName} · {format.dayLong(visit.date)}, {visit.time}
               </p>
             </div>
 
@@ -55,14 +61,14 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                 <p
                   className={styles.doneStars}
                   role='img'
-                  aria-label={`Your rating: ${stars} out of 5`}
+                  aria-label={t`Your rating: ${stars} out of 5`}
                 >
                   {[1, 2, 3, 4, 5].map((value) => (
                     <Star key={value} weight={value <= stars ? 'fill' : 'regular'} aria-hidden />
                   ))}
                 </p>
                 <p className={styles.doneTitle}>
-                  Thank you! Your review helps others choose a specialist.
+                  <Trans>Thank you! Your review helps others choose a specialist.</Trans>
                 </p>
                 {/* Liked the master → book them again in one tap; didn't → the same service,
                     another master. */}
@@ -74,7 +80,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                       />
                     }
                   >
-                    Book {visit.specialistName.trim().split(/\s+/)[0]} again
+                    <Trans>Book {firstName} again</Trans>
                   </ButtonLink>
                 ) : (
                   <ButtonLink
@@ -83,7 +89,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                       <NextLink href={`/${visit.business.slug}/book?service=${visit.serviceId}`} />
                     }
                   >
-                    Choose another specialist
+                    <Trans>Choose another specialist</Trans>
                   </ButtonLink>
                 )}
               </div>
@@ -98,8 +104,8 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
             ) : (
               <p className={styles.text}>
                 {visit.status === 'cancelled'
-                  ? 'This booking was cancelled: there is nothing to rate.'
-                  : 'You can rate it after the visit.'}
+                  ? t`This booking was cancelled: there is nothing to rate.`
+                  : t`You can rate it after the visit.`}
               </p>
             )}
           </div>

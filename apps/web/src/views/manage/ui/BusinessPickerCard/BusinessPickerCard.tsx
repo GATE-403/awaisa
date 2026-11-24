@@ -1,4 +1,6 @@
 import { useToast } from '@awaisa/ui/Toast'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import type { Icon } from '@phosphor-icons/react'
 import {
   ArrowUpRight,
@@ -10,12 +12,12 @@ import {
   TrendDown,
   TrendUp,
 } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import type { CSSProperties } from 'react'
 import { addDayKey } from '@/entities/booking'
 import { BusinessTile } from '@/entities/business'
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { copyText } from '@/shared/lib/share'
 import {
@@ -44,7 +46,8 @@ interface BusinessPickerCardProps {
 // before clients can book, else the week in figures with its direction, else a nudge to share.
 // Only what is unusual is drawn: "Hidden", never "Open"; no role or kind every row repeats.
 export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const today = useToday()
   const next = business.next
   const items = attentionItems(attention, t)
@@ -56,21 +59,17 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
   const copyLink = async () => {
     const url = `${window.location.origin}/${business.slug}`
     const isCopied = await copyText(url)
-    if (isCopied) toast.show({ title: t('Link copied'), description: url, type: 'success' })
-    else toast.show({ title: t('Could not copy'), description: url, type: 'error' })
+    if (isCopied) toast.show({ title: t`Link copied`, description: url, type: 'success' })
+    else toast.show({ title: t`Could not copy`, description: url, type: 'error' })
   }
   const cabinet = `/manage/${business.slug}`
   const nextLabel = !next
     ? null
     : today && next.date === today.dayKey
-      ? t('Next: today at {time}', { time: next.time })
+      ? t`Next: today at ${ph({ time: next.time })}`
       : today && next.date === addDayKey(today.dayKey, 1)
-        ? t('Next: tomorrow at {time}', { time: next.time })
-        : t('Next: {day}, {time}', {
-            // English keeps the weekday's capital letter.
-            day: t.dayLong(next.date),
-            time: next.time,
-          })
+        ? t`Next: tomorrow at ${ph({ time: next.time })}`
+        : t`Next: ${ph({ day: format.dayLong(next.date) })}, ${ph({ time: next.time })}`
 
   return (
     <article className={styles.row} aria-label={business.name}>
@@ -92,7 +91,7 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
           >
             {business.name}
           </NextLink>
-          {!business.isPublished && <span className={styles.hidden}>{t('Hidden')}</span>}
+          {!business.isPublished && <span className={styles.hidden}>{t`Hidden`}</span>}
         </span>
         {status?.kind === 'setup' && (
           // How far from taking bookings: three small segments and the step left, a link to it.
@@ -111,41 +110,37 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
                 />
               ))}
             </span>
-            {t('Setup {done} of {total} · {step}', {
-              done: status.done,
-              total: status.total,
-              step: status.text,
-            })}
+            {t`Setup ${ph({ done: status.done })} of ${ph({ total: status.total })} · ${ph({ step: status.text })}`}
           </NextLink>
         )}
         {nextLabel && <span className={styles.next}>{nextLabel}</span>}
         {status?.kind === 'week' && (
           <span className={styles.next}>
-            {t('This week:')} <strong>{status.views}</strong>{' '}
-            {t.count(status.views, ['view', 'views']).replace(/^\d+\s/, '')}
+            {t`This week:`} <strong>{status.views}</strong>{' '}
+            {t`${plural(status.views, { one: '# view', other: '# views' })}`.replace(/^\d+\s/, '')}
             {' · '}
             <strong>{status.bookings}</strong>{' '}
-            {t.count(status.bookings, ['booking', 'bookings']).replace(/^\d+\s/, '')}
+            {t`${plural(status.bookings, { one: '# booking', other: '# bookings' })}`.replace(
+              /^\d+\s/,
+              '',
+            )}
             {status.trend === 'up' && (
-              <TrendUp className={styles.trendUp} aria-label={t('more than the week before')} />
+              <TrendUp className={styles.trendUp} aria-label={t`more than the week before`} />
             )}
             {status.trend === 'down' && (
-              <TrendDown
-                className={styles.trendDown}
-                aria-label={t('fewer than the week before')}
-              />
+              <TrendDown className={styles.trendDown} aria-label={t`fewer than the week before`} />
             )}
           </span>
         )}
         {status?.kind === 'share' && (
           <span className={styles.share}>
-            {t('Share the link and the first clients will come')}
+            {t`Share the link and the first clients will come`}
             <button
               type='button'
               className={styles.copy}
               onClick={() => void copyLink()}
-              aria-label={t('Copy the link to {name}', { name: business.name })}
-              title={t('Copy link')}
+              aria-label={t`Copy the link to ${ph({ name: business.name })}`}
+              title={t`Copy link`}
             >
               <Copy aria-hidden />
             </button>
@@ -173,14 +168,14 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
       {business.todayCount > 0 && (
         <span className={styles.today}>
           <span className={styles.todayCount}>{business.todayCount}</span>
-          <span className={styles.todayLabel}> {t('today')}</span>
+          <span className={styles.todayLabel}> {t`today`}</span>
           {/* How full today is: booked time over the masters' open hours, like the day strip's
               bars in the schedule. */}
           {load !== null && (
             <span
               className={styles.load}
               role='img'
-              aria-label={t('The day is {percent}% booked', { percent: Math.round(load * 100) })}
+              aria-label={t`The day is ${ph({ percent: Math.round(load * 100) })}% booked`}
               style={{ '--load': load } as CSSProperties}
             />
           )}
@@ -190,8 +185,8 @@ export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardPr
       <NextLink
         href={`/${business.slug}`}
         className={styles.page}
-        aria-label={t('{name} page', { name: business.name })}
-        title={t('Open the page')}
+        aria-label={t`${ph({ name: business.name })} page`}
+        title={t`Open the page`}
       >
         <ArrowUpRight aria-hidden />
       </NextLink>

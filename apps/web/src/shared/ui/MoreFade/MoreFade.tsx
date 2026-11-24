@@ -1,8 +1,9 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretDown, CaretUp } from '@phosphor-icons/react/ssr'
 import type { ReactNode } from 'react'
-import { useT } from '@/shared/i18n'
 import styles from './MoreFade.module.css'
 
 interface MoreFadeProps {
@@ -31,7 +32,7 @@ export const MoreFade = ({
   surface = 'page',
   isLessFloating = true,
 }: MoreFadeProps) => {
-  const t = useT()
+  const { t } = useLingui()
   if (hiddenCount <= 0 && !isOpen) return <>{children}</>
 
   return (
@@ -45,12 +46,12 @@ export const MoreFade = ({
           onClick={onToggle}
           aria-expanded
         >
-          {t('Hide')}
+          {t`Hide`}
           <CaretUp aria-hidden />
         </button>
       ) : (
         <button type='button' className={styles.more} onClick={onToggle} aria-expanded={false}>
-          {t('{count} more {label}', { count: hiddenCount, label })}
+          {t`${ph({ count: hiddenCount })} more ${label}`}
           <CaretDown aria-hidden />
         </button>
       )}

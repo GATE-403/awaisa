@@ -1,20 +1,32 @@
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { BusinessKind } from '@/shared/api/types'
 
 type BoardView = 'masters' | 'places'
 
 // What each board is called, in the order of the tabs.
-const BOARDS: { kind: BusinessKind; tab: string; masters: string; places: string }[] = [
-  { kind: 'barber', tab: 'Barbers', masters: 'Top barbers', places: 'Top barbershops' },
-  { kind: 'beauty', tab: 'Stylists', masters: 'Top stylists', places: 'Top salons' },
+const BOARDS: {
+  kind: BusinessKind
+  tab: MessageDescriptor
+  masters: MessageDescriptor
+  places: MessageDescriptor
+}[] = [
+  { kind: 'barber', tab: msg`Barbers`, masters: msg`Top barbers`, places: msg`Top barbershops` },
+  { kind: 'beauty', tab: msg`Stylists`, masters: msg`Top stylists`, places: msg`Top salons` },
   {
     kind: 'nails',
-    tab: 'Nails',
-    masters: 'Top manicurists',
-    places: 'Top nail studios',
+    tab: msg`Nails`,
+    masters: msg`Top manicurists`,
+    places: msg`Top nail studios`,
   },
-  { kind: 'spa', tab: 'Massage', masters: 'Top massage therapists', places: 'Top SPAs' },
-  { kind: 'health', tab: 'Health', masters: 'Top specialists', places: 'Top clinics' },
-  { kind: 'other', tab: 'Tattoo', masters: 'Top tattoo artists', places: 'Top tattoo studios' },
+  { kind: 'spa', tab: msg`Massage`, masters: msg`Top massage therapists`, places: msg`Top SPAs` },
+  { kind: 'health', tab: msg`Health`, masters: msg`Top specialists`, places: msg`Top clinics` },
+  {
+    kind: 'other',
+    tab: msg`Tattoo`,
+    masters: msg`Top tattoo artists`,
+    places: msg`Top tattoo studios`,
+  },
 ]
 
 const DEFAULT_BOARD_KIND: BusinessKind = 'barber'

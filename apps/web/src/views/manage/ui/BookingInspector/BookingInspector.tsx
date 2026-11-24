@@ -2,6 +2,8 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { Menu, MenuItem, MenuSeparator } from '@awaisa/ui/Menu'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import {
   ArrowCounterClockwise,
   CaretRight,
@@ -11,12 +13,12 @@ import {
   Prohibit,
   WhatsappLogo,
 } from '@phosphor-icons/react/ssr'
-import { formatPrice, LookPhoto, PAYMENT_STATUS_TEXT } from '@/entities/booking'
+import { LookPhoto, PAYMENT_STATUS_TEXT } from '@/entities/booking'
 import { addMinutes, PersonAvatar } from '@/entities/business'
 import { useVisitPhoto } from '@/features/visitPhoto'
 import { addBookingPhoto } from '@/shared/api/clientApi'
 import type { AdminBooking, OutcomeInput } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery'
 import { copyText } from '@/shared/lib/share'
@@ -56,13 +58,18 @@ export const BookingInspector = ({
   onClose,
 }: BookingInspectorProps) => {
   const isTouch = useMediaQuery('(pointer: coarse)')
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const isCancelled = booking.status === 'cancelled'
   const canBookAgain = isCancelled && onBookAgain !== undefined
   const digits = booking.customerPhone.replace(/\D/g, '')
   const total = booking.price - (booking.discount?.amount ?? 0)
-  const day = capitalizeFirst(t.dayShort(booking.date))
+  const day = capitalizeFirst(format.dayShort(booking.date))
   const master = booking.specialistName.split(' ')[0]
+  // The status reads inside a sentence ("deposit 500 som, paid").
+  const paymentStatus = booking.payment
+    ? t(PAYMENT_STATUS_TEXT[booking.payment.status]).toLowerCase()
+    : ''
   const visitPhoto = useVisitPhoto({
     upload: (bookingId, file) => addBookingPhoto(slug, bookingId, file),
   })
@@ -83,7 +90,7 @@ export const BookingInspector = ({
       {isCancelled && (
         <p className={styles.status}>
           <Prohibit aria-hidden />
-          {t('Booking cancelled')}
+          {t`Booking cancelled`}
         </p>
       )}
       {/* Who and what in two lines beside the face; the price on the right. */}
@@ -97,7 +104,7 @@ export const BookingInspector = ({
           >
             {booking.customerName}
             <CaretRight aria-hidden />
-            <span className={styles.srOnly}>: {t('client card')}</span>
+            <span className={styles.srOnly}>: {t`client card`}</span>
           </button>
           <span className={styles.what}>
             {booking.serviceName} · {master}
@@ -105,26 +112,23 @@ export const BookingInspector = ({
         </span>
         <span className={styles.price}>
           {booking.discount && !isCancelled && (
-            <s className={styles.oldPrice}>{formatPrice(booking.price)}</s>
+            <s className={styles.oldPrice}>{format.price(booking.price)}</s>
           )}
           {isCancelled ? (
-            <s className={styles.lostPrice}>{formatPrice(total)}</s>
+            <s className={styles.lostPrice}>{format.price(total)}</s>
           ) : (
-            formatPrice(total)
+            format.price(total)
           )}
         </span>
       </header>
 
       <p className={styles.when}>
         {day}, {booking.time}–{addMinutes(booking.time, booking.durationMinutes)} ·{' '}
-        {t.duration(booking.durationMinutes)}
+        {format.duration(booking.durationMinutes)}
         {booking.discount && ` · ${booking.discount.title}`}
-        {booking.isBySubscription && ` · ${t('with a membership')}`}
+        {booking.isBySubscription && ` · ${t`with a membership`}`}
         {booking.payment &&
-          ` · ${t('deposit {amount}, {status}', {
-            amount: formatPrice(booking.payment.amount),
-            status: t(PAYMENT_STATUS_TEXT[booking.payment.status]).toLowerCase(),
-          })}`}
+          ` · ${t`deposit ${ph({ amount: format.price(booking.payment.amount) })}, ${ph({ status: paymentStatus })}`}`}
       </p>
       {booking.comment && <p className={styles.comment}>"{booking.comment}"</p>}
       {booking.lookPhotoUrl && (
@@ -146,22 +150,22 @@ export const BookingInspector = ({
             onClick={() => onBookAgain(booking)}
           >
             <ArrowCounterClockwise aria-hidden />
-            {t('Book again')}
+            {t`Book again`}
           </Button>
         ) : (
           <a className={styles.callPrimary} href={`tel:${booking.customerPhone}`}>
             <Phone aria-hidden />
-            {t('Call')}
+            {t`Call`}
           </a>
         )}
-        <GlyphGroup label={t('Contact the client')}>
+        <GlyphGroup label={t`Contact the client`}>
           <a
             className={styles.callGlyph}
             href={`tel:${booking.customerPhone}`}
             title={formatPhone(booking.customerPhone)}
           >
             <Phone aria-hidden />
-            <span className={styles.actionLabel}>{t('Call')}</span>
+            <span className={styles.actionLabel}>{t`Call`}</span>
           </a>
           <a href={`https://wa.me/${digits}`} target='_blank' rel='noreferrer' title='WhatsApp'>
             <WhatsappLogo aria-hidden />
@@ -172,30 +176,30 @@ export const BookingInspector = ({
             <span className={styles.actionLabel}>SMS</span>
           </a>
           <Menu
-            label={t('More actions')}
+            label={t`More actions`}
             trigger={
               <>
                 <DotsThree aria-hidden />
-                <span className={styles.actionLabel}>{t('More')}</span>
+                <span className={styles.actionLabel}>{t`More`}</span>
               </>
             }
           >
             <MenuItem onClick={() => onOpenClient(booking.customerPhone)}>
-              {t('Client card')}
+              {t`Client card`}
             </MenuItem>
             <MenuItem onClick={handleCopyPhone}>
-              {t('Copy {phone}', { phone: formatPhone(booking.customerPhone) })}
+              {t`Copy ${ph({ phone: formatPhone(booking.customerPhone) })}`}
             </MenuItem>
             {booking.outcome === 'arrived' && (
               <MenuItem onClick={() => visitPhoto.pick(booking.id)}>
-                {visitPhoto.uploadingId ? t('Uploading the photo…') : t('Work photo')}
+                {visitPhoto.uploadingId ? t`Uploading the photo…` : t`Work photo`}
               </MenuItem>
             )}
             {!isCancelled && (
               <>
                 <MenuSeparator />
                 <MenuItem variant='danger' onClick={() => void handleCancel()}>
-                  {t('Cancel booking')}
+                  {t`Cancel booking`}
                 </MenuItem>
               </>
             )}

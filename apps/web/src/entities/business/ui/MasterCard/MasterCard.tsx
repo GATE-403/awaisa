@@ -1,7 +1,7 @@
 import { Star } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
 import type { Specialist } from '@/shared/api/types'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { WreathBadge } from '@/shared/ui/Wreath/Wreath'

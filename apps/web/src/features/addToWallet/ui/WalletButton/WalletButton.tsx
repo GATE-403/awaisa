@@ -1,12 +1,14 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Wallet } from '@phosphor-icons/react/ssr'
 import { useEffect, useState } from 'react'
 import { parseBookings, readRaw } from '@/entities/booking'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { getWalletConfig, getWalletLinks } from '@/shared/api/clientApi'
-import { useT } from '@/shared/i18n'
 import styles from './WalletButton.module.css'
 
 interface WalletButtonProps {
@@ -27,14 +29,14 @@ const pickWallet = (config: { apple: boolean; google: boolean }): WalletKind | n
   return config.apple ? 'apple' : null
 }
 
-const LABELS: Record<WalletKind, string> = {
-  apple: 'Add to Apple Wallet',
-  google: 'Save to Google Wallet',
+const LABELS: Record<WalletKind, MessageDescriptor> = {
+  apple: msg`Add to Apple Wallet`,
+  google: msg`Save to Google Wallet`,
 }
 
 // A real pass, not a picture of one: Wallet brings it to the lock screen before the visit.
 export const WalletButton = ({ bookingId }: WalletButtonProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const [kind, setKind] = useState<WalletKind | null>(null)
   const [isOpening, setIsOpening] = useState(false)
@@ -62,7 +64,7 @@ export const WalletButton = ({ bookingId }: WalletButtonProps) => {
       if (url) window.location.assign(url)
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })

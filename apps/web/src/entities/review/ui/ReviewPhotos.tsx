@@ -1,7 +1,8 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
-import { useT } from '@/shared/i18n'
 import { PhotoViewer } from '@/shared/ui/PhotoViewer/PhotoViewer'
 import styles from './ReviewItem.module.css'
 
@@ -13,7 +14,7 @@ interface ReviewPhotosProps {
 
 // The client's own pictures under their words: small squares that open full screen.
 export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   if (photos.length === 0) return null
@@ -26,7 +27,7 @@ export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
             <button
               type='button'
               className={styles.photo}
-              aria-label={t('Photo {index} of {total}', { index: index + 1, total: photos.length })}
+              aria-label={t`Photo ${ph({ index: index + 1 })} of ${ph({ total: photos.length })}`}
               onClick={() => setOpenIndex(index)}
             >
               {/* biome-ignore lint/performance/noImgElement: uploads are already 1400px WebP */}
@@ -39,7 +40,7 @@ export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
         <PhotoViewer
           photos={photos}
           startIndex={openIndex}
-          label={t('Review photo: {name}', { name: authorName })}
+          label={t`Review photo: ${ph({ name: authorName })}`}
           onClose={() => setOpenIndex(null)}
         />
       )}

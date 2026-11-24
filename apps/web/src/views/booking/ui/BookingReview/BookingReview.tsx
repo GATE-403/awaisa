@@ -1,11 +1,14 @@
 'use client'
 
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, MapPin, Star } from '@phosphor-icons/react/ssr'
 import type { CSSProperties, ReactNode } from 'react'
-import { formatPrice, getDateParts } from '@/entities/booking'
+import { getDateParts } from '@/entities/booking'
 import { addMinutes, BusinessTile, PersonAvatar, pickTint } from '@/entities/business'
 import type { Business, PriceQuote, Service, Specialist } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { sizedImage } from '@/shared/lib/imageSizes'
@@ -33,10 +36,10 @@ const relativeDay = (dayKey: string, todayKey: string | null, t: Translate) => {
   const days = Math.round(
     (Date.parse(`${dayKey}T00:00:00Z`) - Date.parse(`${todayKey}T00:00:00Z`)) / 86_400_000,
   )
-  if (days === 0) return t('today')
-  if (days === 1) return t('tomorrow')
-  if (days === 2) return t('the day after tomorrow')
-  return t('in {days} days', { days })
+  if (days === 0) return t(msg`today`)
+  if (days === 1) return t(msg`tomorrow`)
+  if (days === 2) return t(msg`the day after tomorrow`)
+  return t(msg`in ${days} days`)
 }
 
 // The last step before Book, shaped like the ticket it becomes: the place on its cover,
@@ -57,11 +60,12 @@ export const BookingReview = ({
   onEdit,
   action,
 }: BookingReviewProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const today = useToday()
   const { day } = getDateParts(dayKey)
-  const month = t.monthShort(dayKey)
-  const weekday = t.weekdayLong(dayKey)
+  const month = format.monthShort(dayKey)
+  const weekday = format.weekdayLong(dayKey)
   const relative = relativeDay(dayKey, today?.dayKey ?? null, t)
   const total = quote?.total ?? service.price
   const discount = quote?.discount ?? null
@@ -69,7 +73,7 @@ export const BookingReview = ({
   return (
     <section className={styles.review} aria-labelledby='review-title'>
       <h2 id='review-title' className={styles.title}>
-        {t('Check your booking')}
+        {t`Check your booking`}
       </h2>
 
       <div className={styles.ticket} style={{ '--tint': pickTint(business.name) } as CSSProperties}>
@@ -111,7 +115,7 @@ export const BookingReview = ({
               {relative && ` · ${relative}`}
             </span>
           </span>
-          <span className={styles.edit}>{t('Change')}</span>
+          <span className={styles.edit}>{t`Change`}</span>
         </button>
 
         <div className={styles.perforation} aria-hidden />
@@ -119,17 +123,17 @@ export const BookingReview = ({
         <ul className={styles.rows}>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('service')}>
-              <span className={styles.rowLabel}>{t('Service')}</span>
+              <span className={styles.rowLabel}>{t`Service`}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{service.name}</span>
-                <span className={styles.rowMeta}>{t.duration(service.durationMinutes)}</span>
+                <span className={styles.rowMeta}>{format.duration(service.durationMinutes)}</span>
               </span>
               <CaretRight aria-hidden className={styles.chevron} />
             </button>
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('specialist')}>
-              <span className={styles.rowLabel}>{t('Specialist')}</span>
+              <span className={styles.rowLabel}>{t`Specialist`}</span>
               <span className={styles.master}>
                 {specialist ? (
                   <>
@@ -144,15 +148,15 @@ export const BookingReview = ({
                       {specialist.rating !== null && (
                         <span className={styles.rowMeta}>
                           <Star weight='fill' aria-hidden className={styles.star} />
-                          {specialist.rating.toFixed(1)}
+                          {format.rating(specialist.rating)}
                         </span>
                       )}
                     </span>
                   </>
                 ) : (
                   <span className={styles.rowValue}>
-                    <span className={styles.rowName}>{t('Anyone free')}</span>
-                    <span className={styles.rowMeta}>{t('we will pick')}</span>
+                    <span className={styles.rowName}>{t`Anyone free`}</span>
+                    <span className={styles.rowMeta}>{t`we will pick`}</span>
                   </span>
                 )}
               </span>
@@ -161,7 +165,7 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('For')}</span>
+              <span className={styles.rowLabel}>{t`For`}</span>
               <span className={styles.rowValue}>
                 <span className={styles.rowName}>{name}</span>
                 <span className={styles.rowMeta}>{formatPhone(phone)}</span>
@@ -172,10 +176,10 @@ export const BookingReview = ({
           {/* The extras read as rows of the same ticket, each opening the contacts step. */}
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('Comment')}</span>
+              <span className={styles.rowLabel}>{t`Comment`}</span>
               <span className={styles.rowValue}>
                 <span className={comment ? styles.rowName : styles.rowEmpty}>
-                  {comment || t('Add')}
+                  {comment || t`Add`}
                 </span>
               </span>
               <CaretRight aria-hidden className={styles.chevron} />
@@ -183,10 +187,10 @@ export const BookingReview = ({
           </li>
           <li>
             <button type='button' className={styles.row} onClick={() => onEdit('contacts')}>
-              <span className={styles.rowLabel}>{t('Promo code')}</span>
+              <span className={styles.rowLabel}>{t`Promo code`}</span>
               <span className={styles.rowValue}>
                 <span className={discount ? styles.rowName : styles.rowEmpty}>
-                  {discount ? `${discount.title} · −${discount.percent}%` : t('Enter')}
+                  {discount ? `${discount.title} · −${discount.percent}%` : t`Enter`}
                 </span>
               </span>
               <CaretRight aria-hidden className={styles.chevron} />
@@ -199,23 +203,20 @@ export const BookingReview = ({
           {discount && (
             <p className={styles.totalLine}>
               <span>{discount.title}</span>
-              <span className={styles.discount}>−{formatPrice(discount.amount)}</span>
+              <span className={styles.discount}>−{format.price(discount.amount)}</span>
             </p>
           )}
           <p className={styles.totalMain}>
-            <span>{t('To pay')}</span>
+            <span>{t`To pay`}</span>
             <span>
-              {discount && <s className={styles.old}>{formatPrice(service.price)}</s>}
-              {formatPrice(total)}
+              {discount && <s className={styles.old}>{format.price(service.price)}</s>}
+              {format.price(total)}
             </span>
           </p>
           <p className={styles.terms}>
             {service.deposit
-              ? t(
-                  'Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
-                  { amount: formatPrice(service.deposit) },
-                )
-              : t('Pay at the salon - cash or card. Move or cancel by the link in the SMS.')}
+              ? t`Deposit ${ph({ amount: format.price(service.deposit) })} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.`
+              : t`Pay at the salon - cash or card. Move or cancel by the link in the SMS.`}
           </p>
         </div>
         {action && <div className={styles.action}>{action}</div>}

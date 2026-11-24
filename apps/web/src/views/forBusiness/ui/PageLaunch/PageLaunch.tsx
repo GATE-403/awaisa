@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { BusinessTile, pickTint } from '@/entities/business'
-import { useT } from '@/shared/i18n'
 import { LightWave } from '@/shared/ui/LightWave/LightWave'
 import styles from './PageLaunch.module.css'
 
@@ -23,7 +23,7 @@ const ORIGIN = { x: 0.5, y: 0.42 }
 // into a dark scene, the place's tile lights up, a wave of light in the place's colour and the
 // spectrum runs out from it, then the name rises with a glint over "Your page is ready".
 export const PageLaunch = ({ name, slug, onDone }: PageLaunchProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const onDoneRef = useRef(onDone)
   const tint = pickTint(name)
 
@@ -55,7 +55,7 @@ export const PageLaunch = ({ name, slug, onDone }: PageLaunchProps) => {
         <BusinessTile name={name} size='lg' className={styles.tile} />
         <span className={styles.name}>{name}</span>
         <span className={styles.note}>
-          {t('Your page is ready')} · awaisa.kg/{slug}
+          {t`Your page is ready`} · awaisa.kg/{slug}
         </span>
       </span>
     </output>,

@@ -1,12 +1,13 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
-import NextLink from 'next/link'
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import { BusinessCard, type PlaceCardData } from '@/entities/business'
 import { ForYouShelf } from '@/features/forYou'
 import type { BusinessKind, FeedItem, Offer } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useEndReached } from '@/shared/lib/hooks/useEndReached'
 import { trackStep } from '@/shared/lib/telemetry'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
@@ -53,7 +54,7 @@ export const CatalogResults = ({
   kind,
   query,
 }: CatalogResultsProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [view, setView] = useState(initialView)
   const [sort, setSort] = useState(initialSort)
   const [placesShown, setPlacesShown] = useState(PLACES_STEP)
@@ -93,10 +94,10 @@ export const CatalogResults = ({
     // While more pages wait, the count says «24+» rather than a total it does not know yet.
     {
       value: 'services' as const,
-      label: t('Services'),
+      label: t`Services`,
       count: feed.hasMore ? `${feed.offers.length}+` : feed.offers.length,
     },
-    { value: 'places' as const, label: t('Places'), count: businesses.length },
+    { value: 'places' as const, label: t`Places`, count: businesses.length },
   ]
 
   return (
@@ -105,26 +106,26 @@ export const CatalogResults = ({
         {/* Browsing everything, the tabs say it all; a search or a kind keeps its heading. */}
         <div className={styles.titleBlock}>
           <h2 id='results-title' className={styles.title} data-quiet={!canReset || undefined}>
-            {/* A search's title is what was typed; a kind's or the default one is ours. */}
-            {query ? title : t(title)}
+            {/* Already in the page's language: what was typed, or a kind's or the default title. */}
+            {title}
           </h2>
           {searchedFor && (
             // Like a big search engine: say what was searched instead, without making a fuss.
             <p className={styles.searchedFor}>
-              {t('You searched for “{query}”', { query: searchedFor })}
+              {t`You searched for “${ph({ query: searchedFor })}”`}
             </p>
           )}
         </div>
         {canReset && (
           <NextLink href='/' className={styles.reset}>
-            {t('Reset')}
+            {t`Reset`}
           </NextLink>
         )}
       </div>
       <div className={styles.toolbar}>
         {/* Two big text tabs, like «Shop by» on apple.com: first where, then what. */}
         <TextTabs
-          label={t('What to show')}
+          label={t`What to show`}
           size='lg'
           items={views.map((item) => ({
             label: item.label,
@@ -136,7 +137,7 @@ export const CatalogResults = ({
         {view === 'services' && offers.length > 1 && (
           <Select
             variant='plain'
-            aria-label={t('Sort')}
+            aria-label={t`Sort`}
             items={FEED_SORTS.map((item) => ({ ...item, label: t(item.label) }))}
             value={sort}
             onValueChange={(value) => value && setSort(value as FeedSort)}
@@ -149,12 +150,12 @@ export const CatalogResults = ({
         (businesses.length === 0 ? (
           <EmptyState
             variant='inline'
-            text={t('No places found. Try another category or service.')}
+            text={t`No places found. Try another category or service.`}
           />
         ) : (
           <ul
             className={styles.places}
-            aria-label={t.count(businesses.length, ['place', 'places'])}
+            aria-label={t`${plural(businesses.length, { one: '# place', other: '# places' })}`}
           >
             {shownPlaces.map((business) => (
               <li key={business.slug}>
@@ -169,7 +170,7 @@ export const CatalogResults = ({
 
       {view === 'services' &&
         (feed.offers.length === 0 ? (
-          <EmptyState variant='inline' text={t('No services found. Try another word.')} />
+          <EmptyState variant='inline' text={t`No services found. Try another word.`} />
         ) : (
           <OffersFeed
             offers={feed.offers}
@@ -185,7 +186,7 @@ export const CatalogResults = ({
           nothing was found, so the page does not end in an empty state. */}
       {view === 'services' && query && !feed.hasMore && feed.offers.length < FEW_RESULTS && (
         <ForYouShelf
-          title='Similar services'
+          title={t`Similar services`}
           likeServiceId={feed.offers[0]?.id}
           excludeServiceId={feed.offers.length === 1 ? feed.offers[0]?.id : undefined}
           isForEveryone

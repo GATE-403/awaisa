@@ -1,8 +1,11 @@
 'use client'
 
 import { Select } from '@awaisa/ui/Select'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './ClientSheet.module.css'
@@ -18,18 +21,49 @@ interface BirthdayFieldProps {
 const NO_YEAR = '1904'
 
 const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  msg`January`,
+  msg`February`,
+  msg`March`,
+  msg`April`,
+  msg`May`,
+  msg`June`,
+  msg`July`,
+  msg`August`,
+  msg`September`,
+  msg`October`,
+  msg`November`,
+  msg`December`,
+]
+
+// One message per month, so each language can say the day its own way ("14 марта").
+const DAY_MONTH: ((day: number) => MessageDescriptor)[] = [
+  (day) => msg`${day} January`,
+  (day) => msg`${day} February`,
+  (day) => msg`${day} March`,
+  (day) => msg`${day} April`,
+  (day) => msg`${day} May`,
+  (day) => msg`${day} June`,
+  (day) => msg`${day} July`,
+  (day) => msg`${day} August`,
+  (day) => msg`${day} September`,
+  (day) => msg`${day} October`,
+  (day) => msg`${day} November`,
+  (day) => msg`${day} December`,
+]
+
+const MONTH_YEAR: ((year: number) => MessageDescriptor)[] = [
+  (year) => msg`January ${year}`,
+  (year) => msg`February ${year}`,
+  (year) => msg`March ${year}`,
+  (year) => msg`April ${year}`,
+  (year) => msg`May ${year}`,
+  (year) => msg`June ${year}`,
+  (year) => msg`July ${year}`,
+  (year) => msg`August ${year}`,
+  (year) => msg`September ${year}`,
+  (year) => msg`October ${year}`,
+  (year) => msg`November ${year}`,
+  (year) => msg`December ${year}`,
 ]
 
 const pad = (value: number) => String(value).padStart(2, '0')
@@ -44,12 +78,16 @@ const parse = (value: string) => {
 }
 
 /** "14 March". */
-const formatDayMonth = (day: number, month: number, t: Translate) =>
-  `${day} ${t(MONTH_NAMES[month - 1] ?? '')}`
+const formatDayMonth = (day: number, month: number, t: Translate) => {
+  const message = DAY_MONTH[month - 1]
+  return message ? t(message(day)) : String(day)
+}
 
 /** "November 2026". */
-const formatMonthYear = (month: number, year: number, t: Translate) =>
-  `${t(MONTH_NAMES[month - 1] ?? '')} ${year}`
+const formatMonthYear = (month: number, year: number, t: Translate) => {
+  const message = MONTH_YEAR[month - 1]
+  return message ? t(message(year)) : String(year)
+}
 
 const bishkekParts = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
@@ -79,7 +117,7 @@ const describeBirthday = (value: string, t: Translate) => {
 
 // The row reads the birthday as words; a tap opens day · month · year (optional) pickers in place.
 const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [isEditing, setIsEditing] = useState(false)
   const parsed = parse(value)
   const thisYear = new Date().getFullYear()
@@ -89,7 +127,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
   }))
   const monthItems = MONTH_NAMES.map((label, index) => ({ value: index + 1, label: t(label) }))
   const yearItems = [
-    { value: NO_YEAR, label: t('Year not needed') },
+    { value: NO_YEAR, label: t`Year not needed` },
     ...Array.from({ length: 90 }, (_, index) => {
       const year = String(thisYear - 10 - index)
       return { value: year, label: year }
@@ -107,7 +145,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
   return (
     <>
       <div className={sheet.row}>
-        <span className={sheet.rowLabel}>{t('Birthday')}</span>
+        <span className={sheet.rowLabel}>{t`Birthday`}</span>
         <span className={styles.birthdayValue}>
           {label && !isEditing && <span>{label}</span>}
           <button
@@ -116,7 +154,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
             aria-expanded={isEditing}
             onClick={() => setIsEditing((current) => !current)}
           >
-            {isEditing ? t('Done') : label ? t('Change') : t('Add')}
+            {isEditing ? t`Done` : label ? t`Change` : t`Add`}
           </button>
         </span>
       </div>
@@ -124,31 +162,31 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
         <div className={styles.birthdayPickers}>
           <span>
             <Select
-              aria-label={t('Day')}
+              aria-label={t`Day`}
               className={styles.picker}
               items={dayItems}
               value={parsed.day}
-              placeholder={t('Day')}
+              placeholder={t`Day`}
               onValueChange={(day) => day && update({ day })}
             />
           </span>
           <span>
             <Select
-              aria-label={t('Month')}
+              aria-label={t`Month`}
               className={styles.picker}
               items={monthItems}
               value={parsed.month}
-              placeholder={t('Month')}
+              placeholder={t`Month`}
               onValueChange={(month) => month && update({ month })}
             />
           </span>
           <span>
             <Select
-              aria-label={t('Year')}
+              aria-label={t`Year`}
               className={styles.picker}
               items={yearItems}
               value={value ? parsed.year : null}
-              placeholder={t('Year')}
+              placeholder={t`Year`}
               onValueChange={(year) => year && update({ year })}
             />
           </span>
@@ -162,7 +200,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
                 setIsEditing(false)
               }}
             >
-              {t('Remove')}
+              {t`Remove`}
             </button>
           )}
         </div>

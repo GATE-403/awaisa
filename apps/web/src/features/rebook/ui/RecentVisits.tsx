@@ -1,10 +1,11 @@
 'use client'
 
-import NextLink from 'next/link'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useNextSlot } from '@/entities/booking'
 import { PersonAvatar } from '@/entities/business'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { useRecentVisits } from '../model/useRecentVisits'
 import styles from './RecentVisits.module.css'
 
@@ -14,7 +15,7 @@ interface RecentVisitsProps {
 }
 
 const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => void }) => {
-  const t = useT()
+  const { t } = useLingui()
   const slot = useNextSlot(booking.serviceId, { specialistId: booking.specialistId })
   const dayLabel = slot ? t(slot.dayLabel) : ''
   const firstName = booking.specialistName.split(' ')[0]
@@ -30,7 +31,7 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
         href={href}
         className={styles.row}
         onClick={onSelect}
-        aria-label={`${t('Book again: {service}, {name}', { service: booking.serviceName, name: firstName })}${slot ? `, ${t('{day} from {time}', { day: dayLabel.toLowerCase(), time: slot.time })}` : ''}`}
+        aria-label={`${t`Book again: ${ph({ service: booking.serviceName })}, ${ph({ name: firstName })}`}${slot ? `, ${t`${ph({ day: dayLabel.toLowerCase() })} from ${ph({ time: slot.time })}`}` : ''}`}
       >
         <PersonAvatar name={booking.specialistName} size='sm' />
         <span className={styles.text}>
@@ -39,7 +40,7 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
             {firstName} · {booking.business.name}
           </span>
         </span>
-        <span className={styles.slot}>{slot ? `${dayLabel} ${slot.time}` : t('Book')}</span>
+        <span className={styles.slot}>{slot ? `${dayLabel} ${slot.time}` : t`Book`}</span>
       </NextLink>
     </li>
   )
@@ -48,13 +49,13 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
 // «Again with your specialist» where people start looking - the search panel, like recent searches:
 // one tap books the same service with the same master at their next free time.
 export const RecentVisits = ({ onSelect }: RecentVisitsProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const visits = useRecentVisits()
   if (visits.length === 0) return null
 
   return (
-    <section aria-label={t('Book again')}>
-      <p className={styles.heading}>{t('Book again')}</p>
+    <section aria-label={t`Book again`}>
+      <p className={styles.heading}>{t`Book again`}</p>
       <ul className={styles.list}>
         {visits.map((booking) => (
           <VisitRow key={booking.id} booking={booking} onSelect={onSelect} />

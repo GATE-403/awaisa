@@ -9,6 +9,7 @@ import {
   todaySummary,
   weekSummary,
 } from '@/views/manage/lib/businessList'
+import { t } from './translator'
 
 const business = (slug: string, name: string, role: BusinessLink['role'] = 'owner') =>
   ({
@@ -37,22 +38,24 @@ const quiet = (slug: string): BusinessAttention => ({
 describe('attentionItems', () => {
   it('names only what waits, each with its tab', () => {
     expect(
-      attentionItems({ ...quiet('a'), unmarkedVisits: 3, failedReceipts: 1 }).map(
+      attentionItems({ ...quiet('a'), unmarkedVisits: 3, failedReceipts: 1 }, t).map(
         ({ text, tab }) => [text, tab],
       ),
     ).toEqual([
       ['3 visits unmarked', 'schedule'],
       ['1 receipt failed', 'fiscal'],
     ])
-    expect(attentionItems({ ...quiet('a'), failedReceipts: 2 })[0]?.text).toBe('2 receipts failed')
-    expect(attentionItems({ ...quiet('a'), unansweredReviews: 5 })[0]?.text).toBe(
+    expect(attentionItems({ ...quiet('a'), failedReceipts: 2 }, t)[0]?.text).toBe(
+      '2 receipts failed',
+    )
+    expect(attentionItems({ ...quiet('a'), unansweredReviews: 5 }, t)[0]?.text).toBe(
       '5 reviews unanswered',
     )
   })
 
   it('draws nothing for zero or before the counts arrive', () => {
-    expect(attentionItems(quiet('a'))).toEqual([])
-    expect(attentionItems(undefined)).toEqual([])
+    expect(attentionItems(quiet('a'), t)).toEqual([])
+    expect(attentionItems(undefined, t)).toEqual([])
   })
 })
 
@@ -130,7 +133,7 @@ describe('todaySummary', () => {
 describe('statusLine', () => {
   it('names the step left before clients can book, even on a busy row', () => {
     const attention = { ...quiet('a'), setup: { done: 2, total: 3, next: 'masters' as const } }
-    expect(statusLine(attention, false)).toEqual({
+    expect(statusLine(attention, false, t)).toEqual({
       kind: 'setup',
       done: 2,
       total: 3,
@@ -140,12 +143,12 @@ describe('statusLine', () => {
   })
 
   it('says nothing more on a ready row that has a visit ahead or something waiting', () => {
-    expect(statusLine(quiet('a'), false)).toBeNull()
+    expect(statusLine(quiet('a'), false, t)).toBeNull()
   })
 
   it('gives a quiet ready row its week, going up or down by bookings', () => {
     const week = { views: 40, previousViews: 50, bookings: 3, previousBookings: 1 }
-    expect(statusLine({ ...quiet('a'), week }, true)).toEqual({
+    expect(statusLine({ ...quiet('a'), week }, true, t)).toEqual({
       kind: 'week',
       views: 40,
       bookings: 3,
@@ -155,12 +158,12 @@ describe('statusLine', () => {
 
   it('goes by views when there were no bookings in either week', () => {
     const week = { views: 4, previousViews: 9, bookings: 0, previousBookings: 0 }
-    expect(statusLine({ ...quiet('a'), week }, true)).toMatchObject({ trend: 'down' })
+    expect(statusLine({ ...quiet('a'), week }, true, t)).toMatchObject({ trend: 'down' })
   })
 
   it('asks to share the page when nobody has come yet, unless it is hidden', () => {
-    expect(statusLine(quiet('a'), true)).toEqual({ kind: 'share' })
-    expect(statusLine(quiet('a'), true, undefined, false)).toBeNull()
+    expect(statusLine(quiet('a'), true, t)).toEqual({ kind: 'share' })
+    expect(statusLine(quiet('a'), true, t, false)).toBeNull()
   })
 })
 

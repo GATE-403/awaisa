@@ -1,10 +1,11 @@
 'use client'
 
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import dynamic from 'next/dynamic'
-import { useRouter } from 'next/navigation'
 import { pickTint } from '@/entities/business'
 import type { PublicProfile } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useRouter } from '@/shared/i18n/navigation'
 import styles from '../ProfilePage.module.css'
 
 const MapView = dynamic(
@@ -19,7 +20,7 @@ interface PlacesMapProps {
 // Where the person has been, as pins on the city (the «Knows the city» medal made visible): each
 // place in its own colour, the visits as its label; a pin opens the place.
 export const PlacesMap = ({ places }: PlacesMapProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const router = useRouter()
   const markers = places.flatMap((place) =>
     place.latitude != null && place.longitude != null
@@ -29,7 +30,7 @@ export const PlacesMap = ({ places }: PlacesMapProps) => {
             latitude: place.latitude,
             longitude: place.longitude,
             label: String(place.visits),
-            title: `${place.name}: ${t.count(place.visits, ['visit', 'visits'])}`,
+            title: `${place.name}: ${t`${plural(place.visits, { one: '# visit', other: '# visits' })}`}`,
             tint: pickTint(place.name),
           },
         ]
@@ -42,7 +43,7 @@ export const PlacesMap = ({ places }: PlacesMapProps) => {
       <MapView
         markers={markers}
         fitKey={markers.map((marker) => marker.id).join()}
-        label={t('Places on the map')}
+        label={t`Places on the map`}
         className={styles.map}
         isStatic
         onSelect={(slug) => router.push(`/${slug}`)}

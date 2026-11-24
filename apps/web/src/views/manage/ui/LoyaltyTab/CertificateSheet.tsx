@@ -1,8 +1,9 @@
 'use client'
 
 import { Input } from '@awaisa/ui/Input'
+import { useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
 import { DateField } from '@/shared/ui/DateField/DateField'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -22,7 +23,8 @@ const FORM_ID = 'certificate-form'
 
 // A gift certificate sold at the desk: the code is generated and shown once issued.
 export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) => {
-  const t = useT()
+  const format = useFormat()
+  const { t } = useLingui()
   const [amount, setAmount] = useState('')
   const [recipient, setRecipient] = useState('')
   const [phone, setPhone] = useState('')
@@ -46,59 +48,59 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
 
   return (
     <Sheet
-      title={t('Certificate')}
+      title={t`Certificate`}
       onClose={onClose}
-      action={{ label: t('Issue'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t`Issue`, form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Certificate')}>
+        <section className={sheet.group} aria-label={t`Certificate`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Amount')}</span>
+              <span className={sheet.rowLabel}>{t`Amount`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Certificate amount, som')}
+                  aria-label={t`Certificate amount, som`}
                   inputMode='numeric'
                   placeholder='3 000'
-                  value={maskAmountInput(amount)}
+                  value={maskAmountInput(amount, format.locale)}
                   onValueChange={(value) => setAmount(value.replace(/\D/g, ''))}
                 />
-                <span className={sheet.suffix}>{t('som')}</span>
+                <span className={sheet.suffix}>{format.currency}</span>
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('To')}</span>
+              <span className={sheet.rowLabel}>{t`To`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('To')}
-                  placeholder={t('Name')}
+                  aria-label={t`To`}
+                  placeholder={t`Name`}
                   value={recipient}
                   onValueChange={setRecipient}
                 />
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Phone')}</span>
+              <span className={sheet.rowLabel}>{t`Phone`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  aria-label={t('Recipient’s phone')}
-                  placeholder={t('optional')}
+                  aria-label={t`Recipient’s phone`}
+                  placeholder={t`optional`}
                   value={phone}
                   onValueChange={(value) => setPhone(maskPhoneInput(value))}
                 />
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Valid until')}</span>
+              <span className={sheet.rowLabel}>{t`Valid until`}</span>
               <span className={sheet.rowControl}>
                 <DateField
-                  label={t('Valid until')}
-                  placeholder={t('No end date')}
+                  label={t`Valid until`}
+                  placeholder={t`No end date`}
                   value={expiresOn}
                   onChange={setExpiresOn}
                   isClearable
@@ -107,9 +109,7 @@ export const CertificateSheet = ({ onClose, onIssue }: CertificateSheetProps) =>
             </div>
           </div>
           <p className={sheet.groupFooter}>
-            {t(
-              'We show the 8-character code right away. With a number, the certificate shows on the client’s card.',
-            )}
+            {t`We show the 8-character code right away. With a number, the certificate shows on the client’s card.`}
           </p>
         </section>
       </form>

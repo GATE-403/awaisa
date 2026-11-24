@@ -1,5 +1,5 @@
+import { Trans } from '@lingui/react/macro'
 import type { ReactNode } from 'react'
-import { T } from '@/shared/i18n'
 import { Picture, TextLine } from '@/shared/ui/Placeholder/Placeholder'
 import storyStyles from '@/shared/ui/StoryTile/StoryTile.module.css'
 import styles from './ForYou.module.css'
@@ -13,16 +13,14 @@ interface ForYouShelfPlaceholderProps {
 // The shelf before its picks arrive: the same head and its frames with the mascot (3:4 cards, or
 // the stories row), so the page under it stays put. Also the catalog's loading skeleton.
 export const ForYouShelfPlaceholder = ({
-  title = 'For you',
+  title,
   headAction,
   variant = 'cards',
 }: ForYouShelfPlaceholderProps) => (
   // Not a named region: tests and screen readers find the real shelf «For you», not this stand-in.
   <div className={styles.shelf} aria-busy='true'>
     <div className={styles.head}>
-      <p className={styles.title}>
-        <T>{title}</T>
-      </p>
+      <p className={styles.title}>{title ?? <Trans>For you</Trans>}</p>
       {headAction}
     </div>
     {variant === 'stories' ? (

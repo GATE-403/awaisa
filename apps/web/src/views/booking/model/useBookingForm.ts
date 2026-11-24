@@ -1,4 +1,6 @@
 import { useToast } from '@awaisa/ui/Toast'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
@@ -152,6 +154,7 @@ const focusNameSoon = () => {
 }
 
 export const useBookingForm = (business: Business, catalog: Catalog) => {
+  const { t } = useLingui()
   const searchParams = useSearchParams()
   const toast = useToast()
   const today = useToday()
@@ -324,9 +327,12 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= NATIONAL_PHONE_DIGITS
   const errors = {
-    name: hasTriedSubmit && !name.trim() ? 'Enter a name' : undefined,
+    // Descriptors: the form shows them with `t(form.errors.name)`.
+    name: hasTriedSubmit && !name.trim() ? msg`Enter a name` : undefined,
     phone:
-      hasTriedSubmit && !isPhoneValid ? 'Enter a number so we can confirm the booking' : undefined,
+      hasTriedSubmit && !isPhoneValid
+        ? msg`Enter a number so we can confirm the booking`
+        : undefined,
   }
   const firstIncompleteStep: BookingStepId | null = !service
     ? 'service'
@@ -395,8 +401,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setTime(null)
       toast.show({
         title: presetService
-          ? `${presetTime} has just been taken, choose another time`
-          : `This service does not fit at ${presetTime}. Choose another time`,
+          ? t`${ph({ time: presetTime ?? '' })} has just been taken, choose another time`
+          : t`This service does not fit at ${ph({ time: presetTime ?? '' })}. Choose another time`,
         type: 'info',
       })
     }
@@ -410,6 +416,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     presetTime,
     presetService,
     toast,
+    t,
   ])
 
   useEffect(() => {
@@ -417,10 +424,13 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setIsBranchTimeChecked(true)
     if (!time || availability.error) return
     if (!availability.slots.some((slot) => slot.isAvailable && slot.time === time)) {
-      toast.show({ title: `${time} is taken at this branch, choose another time`, type: 'info' })
+      toast.show({
+        title: t`${ph({ time })} is taken at this branch, choose another time`,
+        type: 'info',
+      })
       setTime(null)
     }
-  }, [isBranchTimeChecked, availability, time, toast])
+  }, [isBranchTimeChecked, availability, time, toast, t])
 
   // Adding a service kept the time: once the free times for the longer visit are in, keep it if
   // it fits, else say why it went and open the time step.
@@ -753,7 +763,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setSubmitError(getErrorMessage(error))
       haptic('error')
       toast.show({
-        title: 'Could not book',
+        title: t`Could not book`,
         description: getErrorMessage(error),
         type: 'error',
       })

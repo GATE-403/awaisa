@@ -1,6 +1,7 @@
 'use client'
 
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { decideModeration } from '@/shared/api/clientApi'
@@ -11,7 +12,6 @@ import type {
   ModerationLog,
   ModerationQueue,
 } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { ACTION_LABELS } from '../config/labels'
 
 type InitialModeration = { queue: ModerationQueue | null; log: ModerationLog | null }
@@ -22,7 +22,7 @@ const keyOf = (item: Pick<ModerationItem, 'targetType' | 'targetId'>) =>
 // The queue and the journal, both from the server; a decision takes the thing off the queue and
 // puts the decision on top of the journal, and the public page it lived on is read afresh.
 const useModeration = (initial: InitialModeration) => {
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const [items, setItems] = useState(initial.queue?.items ?? [])
   const [log, setLog] = useState(initial.log?.items ?? [])

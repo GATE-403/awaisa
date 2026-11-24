@@ -1,24 +1,27 @@
 'use client'
 
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { BusinessTile, PersonAvatar } from '@/entities/business'
 import type { BusinessKind, LeaderboardMaster, LeaderboardPlace } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { TextTabs } from '@/shared/ui/TextTabs/TextTabs'
 import { BOARDS, type BoardView, boardHref } from '../config/boards'
 import styles from '../LeaderboardPage.module.css'
 import { BoardViewSwitch } from './BoardViewSwitch'
 
-const formatScore = (value: number) => value.toLocaleString('en-GB', { minimumFractionDigits: 1 })
+const SCORE_OPTIONS: Intl.NumberFormatOptions = { minimumFractionDigits: 1 }
 
 type Entry = {
   key: string
   place: number
   href: string
   /** Said after the row to screen readers: what a tap does. */
-  action?: string
+  action?: MessageDescriptor
   name: string
   subtitle: string
   average: number
@@ -30,7 +33,7 @@ const toMasterEntry = (master: LeaderboardMaster): Entry => ({
   key: master.id,
   place: master.place,
   href: `/${master.business.slug}/book?specialist=${master.id}`,
-  action: 'Book',
+  action: msg`Book`,
   name: master.name,
   subtitle: master.business.name,
   average: master.average,
@@ -64,16 +67,18 @@ interface LeaderboardBoardProps {
 }
 
 export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoardProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const board = BOARDS.find((item) => item.kind === kind) ?? BOARDS[0]
+  const heading = view === 'places' ? board?.places : board?.masters
   const isPlaces = view === 'places'
   const entries = isPlaces ? places.map(toPlaceEntry) : masters.map(toMasterEntry)
 
   return (
     <>
       <header className={styles.head}>
-        <h1 className={styles.title}>{t((isPlaces ? board?.places : board?.masters) ?? '')}</h1>
-        <p className={styles.lead}>{t('By client reviews on Awaisa')}</p>
+        <h1 className={styles.title}>{heading ? t(heading) : null}</h1>
+        <p className={styles.lead}>{t`By client reviews on Awaisa`}</p>
       </header>
 
       <div className={styles.controls}>
@@ -84,7 +89,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
         {/* Kinds as the app's text tabs: only the chosen one underlined. */}
         <div className={styles.kinds}>
           <TextTabs
-            label={t('Type')}
+            label={t`Type`}
             items={BOARDS.map((item) => ({
               label: t(item.tab),
               href: boardHref(view, item.kind),
@@ -97,7 +102,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
       {entries.length === 0 ? (
         <EmptyState
           variant='inline'
-          text={t('Too few reviews for a rating yet. It will appear once there are more.')}
+          text={t`Too few reviews for a rating yet. It will appear once there are more.`}
         />
       ) : (
         <>
@@ -113,9 +118,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
                     {/* The visible number stays hidden from screen readers, which read «place 1» instead:
                           a suffix glued after the number was read as a separate word. */}
                     <span aria-hidden>{entry.place}</span>
-                    <span className={styles.srOnly}>
-                      {t('place {place}', { place: entry.place })}
-                    </span>
+                    <span className={styles.srOnly}>{t`place ${ph({ place: entry.place })}`}</span>
                   </span>
                   {entry.face}
                   <span className={styles.who}>
@@ -126,10 +129,10 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
                   <span className={styles.rating}>
                     <span className={styles.ratingValue}>
                       <Star weight='fill' aria-hidden className={styles.star} />
-                      {formatScore(entry.average)}
+                      {format.number(entry.average, SCORE_OPTIONS)}
                     </span>
                     <span className={styles.muted}>
-                      {t.count(entry.reviews, ['review', 'reviews'])}
+                      {t`${plural(entry.reviews, { one: '# review', other: '# reviews' })}`}
                     </span>
                   </span>
                 </NextLink>
@@ -138,9 +141,7 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
           </ol>
 
           <p className={styles.footnote}>
-            {t(
-              'The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes.',
-            )}
+            {t`The place depends on ratings after visits: the average leans toward 4.3 while there are few reviews; a specialist needs at least three reviews, a place five. Updated every few minutes.`}
           </p>
         </>
       )}

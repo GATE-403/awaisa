@@ -1,12 +1,14 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Star } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useState } from 'react'
 import { getDateParts, parseBookings, readRaw } from '@/entities/booking'
 import { RateVisitSheet } from '@/features/rateVisit'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import styles from './BookingHistory.module.css'
 
@@ -24,7 +26,8 @@ const FIRST = 5
 const getCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()
 
 export const BookingHistory = ({ bookings, canForget, onForget, onRated }: BookingHistoryProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const [rated, setRated] = useState<Record<string, number>>({})
   const [rating, setRating] = useState<Booking | null>(null)
   const [isAll, setIsAll] = useState(false)
@@ -39,13 +42,16 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
         hiddenCount={Math.max(0, bookings.length - FIRST)}
         isOpen={isAll}
         onToggle={() => setIsAll((value) => !value)}
-        label={t.count(bookings.length - FIRST, ['booking', 'bookings']).replace(/^\d+ /, '')}
+        label={t`${plural(bookings.length - FIRST, { one: '# booking', other: '# bookings' })}`.replace(
+          /^\d+ /,
+          '',
+        )}
         surface='card'
       >
         <ul className={styles.list}>
           {shown.map((booking) => {
             const { day } = getDateParts(booking.date)
-            const month = t.monthShort(booking.date)
+            const month = format.monthShort(booking.date)
             const isCancelled = booking.status === 'cancelled'
             const stars = rated[booking.id] ?? booking.review?.rating ?? null
 
@@ -53,7 +59,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
               <li key={booking.id}>
                 <article
                   className={styles.row}
-                  aria-label={t('Booking {code}', { code: getCode(booking.id) })}
+                  aria-label={t`Booking ${ph({ code: getCode(booking.id) })}`}
                 >
                   <span className={styles.leaf} aria-hidden='true'>
                     <span className={styles.leafMonth}>{month}</span>
@@ -64,9 +70,9 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                     {/* The status leads: cut at the end of a narrow row, it used to go first. */}
                     <span className={styles.meta}>
                       {isCancelled ? (
-                        <span className={styles.cancelled}>{t('Cancelled')}</span>
+                        <span className={styles.cancelled}>{t`Cancelled`}</span>
                       ) : (
-                        t('Completed')
+                        t`Completed`
                       )}
                       {` · ${booking.time} · ${booking.business.name}`}
                     </span>
@@ -76,7 +82,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                       <span
                         className={styles.stars}
                         role='img'
-                        aria-label={t('Your rating: {stars} of 5', { stars })}
+                        aria-label={t`Your rating: ${stars} of 5`}
                       >
                         <Star weight='fill' aria-hidden />
                         {stars}
@@ -88,7 +94,7 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         className={styles.rate}
                         onClick={() => setRating(booking)}
                       >
-                        {t('Rate')}
+                        {t`Rate`}
                       </button>
                     )}
                     {isCancelled && canForget(booking.id) && (
@@ -96,16 +102,16 @@ export const BookingHistory = ({ bookings, canForget, onForget, onRated }: Booki
                         type='button'
                         className={styles.textButton}
                         onClick={() => onForget(booking.id)}
-                        aria-label={t('Remove from the list')}
+                        aria-label={t`Remove from the list`}
                       >
-                        {t('Remove')}
+                        {t`Remove`}
                       </button>
                     )}
                     <NextLink
                       href={`/${booking.business.slug}/book?service=${booking.serviceId}&specialist=${booking.specialistId}`}
                       className={styles.again}
                     >
-                      {t('Again')}
+                      {t`Again`}
                     </NextLink>
                   </span>
                 </article>

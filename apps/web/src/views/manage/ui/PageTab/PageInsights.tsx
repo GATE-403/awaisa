@@ -1,7 +1,8 @@
 'use client'
 
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, Plus } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useEffect, useState } from 'react'
 import {
   createPromotion,
@@ -11,7 +12,7 @@ import {
   updatePromotion,
 } from '@/shared/api/clientApi'
 import type { PageStats, Promotion, PromotionInput, Service } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { describePromotion } from '@/shared/lib/promotionText'
 import { PromotionSheet } from '@/views/manage/ui/PromotionsTab/PromotionSheet'
 import styles from './PageTab.module.css'
@@ -48,7 +49,7 @@ export const PageInsights = ({
   run,
   todayKey,
 }: PageInsightsProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [stats, setStats] = useState<PageStats | null>(null)
   const [promotions, setPromotions] = useState<Promotion[]>([])
   // Promotions are changed in their sheet right here, never in another tab.
@@ -75,25 +76,25 @@ export const PageInsights = ({
       if (editing && editing !== 'new') await updatePromotion(slug, editing.id, input)
       else await createPromotion(slug, input)
       setPromotions(await getManagedPromotions(slug))
-    }, t('Promotion saved'))
+    }, t`Promotion saved`)
 
   const remove = (promotion: Promotion) =>
     void run(async () => {
       await deletePromotion(slug, promotion.id)
       setPromotions(await getManagedPromotions(slug))
-    }, t('Promotion deleted'))
+    }, t`Promotion deleted`)
 
   const facts = stats
     ? [
         stats.bookings > 0 && {
           key: 'bookings',
           count: stats.bookings,
-          words: wordsOf(t.count(stats.bookings, ['booking', 'bookings'])),
+          words: wordsOf(t`${plural(stats.bookings, { one: '# booking', other: '# bookings' })}`),
         },
         stats.views > 0 && {
           key: 'views',
           count: stats.views,
-          words: wordsOf(t.count(stats.views, ['view', 'views'])),
+          words: wordsOf(t`${plural(stats.views, { one: '# view', other: '# views' })}`),
         },
       ].filter((fact) => fact !== false)
     : []
@@ -102,7 +103,7 @@ export const PageInsights = ({
     <>
       {facts.length > 0 && (
         <NextLink href={analyticsHref} scroll={false} className={styles.insights}>
-          <span>{t('In {period}:', { period: t.count(stats?.days ?? 0, ['day', 'days']) })}</span>
+          <span>{t`In ${plural(stats?.days ?? 0, { one: '# day', other: '# days' })}:`}</span>
           {facts.map((fact, index) => (
             <span key={fact.key}>
               {index > 0 && ' · '}
@@ -112,7 +113,7 @@ export const PageInsights = ({
           <CaretRight aria-hidden />
         </NextLink>
       )}
-      <ul className={styles.promotions} aria-label={t('Promotions')}>
+      <ul className={styles.promotions} aria-label={t`Promotions`}>
         {running.map((promotion) => (
           <li key={promotion.id}>
             <button
@@ -130,10 +131,10 @@ export const PageInsights = ({
             className={styles.promotion}
             data-add
             onClick={() => setEditing('new')}
-            aria-label={t('New promotion')}
+            aria-label={t`New promotion`}
           >
             <Plus aria-hidden />
-            {t('Promotion')}
+            {t`Promotion`}
           </button>
         </li>
       </ul>

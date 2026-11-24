@@ -1,9 +1,9 @@
 'use client'
 
 import { Menu, MenuGroup } from '@awaisa/ui/Menu'
+import { useLingui } from '@lingui/react/macro'
 import { Flag } from '@phosphor-icons/react/ssr'
 import type { ReportTargetType } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { useReport } from '../model/useReport'
 import styles from './ReportMenu.module.css'
 import { ReportReasons } from './ReportReasons'
@@ -27,11 +27,11 @@ export const ReportMenu = ({
   onReported,
 }: ReportMenuProps) => {
   const report = useReport(targetType, targetId, onReported)
-  const t = useT()
+  const { t } = useLingui()
 
   return (
     <Menu label={label} className={className ?? styles.trigger} trigger={<Flag aria-hidden />}>
-      <MenuGroup label={t('Report')}>
+      <MenuGroup label={t`Report`}>
         <ReportReasons onPick={(reason) => void report(reason)} />
       </MenuGroup>
     </Menu>

@@ -2,11 +2,13 @@
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
 import { useToast } from '@awaisa/ui/Toast'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ChatText, Phone } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { formatPrice, getDaysAround, LookPhoto } from '@/entities/booking'
+import { getDaysAround, LookPhoto } from '@/entities/booking'
 import { addMinutes, formatClock, parseClock } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { CalendarFeedGroup } from '@/features/calendarFeed'
@@ -15,7 +17,9 @@ import { useVisitPhoto } from '@/features/visitPhoto'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { addVisitPhoto, getMasterDay, setMasterOutcome } from '@/shared/api/clientApi'
 import type { AdminBooking, MasterDay, VisitOutcome } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Format, Translate } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useToday } from '@/shared/lib/hooks/useToday'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -36,39 +40,44 @@ interface MasterDayPageProps {
 type Choice = 'pending' | VisitOutcome
 
 const DAYS_SHOWN = 14
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+const MONTHS: MessageDescriptor[] = [
+  msg`January`,
+  msg`February`,
+  msg`March`,
+  msg`April`,
+  msg`May`,
+  msg`June`,
+  msg`July`,
+  msg`August`,
+  msg`September`,
+  msg`October`,
+  msg`November`,
+  msg`December`,
 ]
 const PAST_DAYS = 7
 const FORBIDDEN = 403
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
-const OUTCOMES: { value: Choice; label: string }[] = [
-  { value: 'pending', label: 'Waiting' },
-  { value: 'arrived', label: 'Arrived' },
-  { value: 'no_show', label: 'No-show' },
+const OUTCOMES: { value: Choice; label: MessageDescriptor }[] = [
+  { value: 'pending', label: msg`Waiting` },
+  { value: 'arrived', label: msg`Arrived` },
+  { value: 'no_show', label: msg`No-show` },
 ]
 
-const minutesUntil = (from: number, to: number, t: Translate) =>
-  t('in {time}', { time: t.duration(to - from) })
+const minutesUntil = (from: number, to: number, t: Translate, format: Format) =>
+  t(msg`in ${ph({ time: format.duration(to - from) })}`)
 
 // The master's own day, phone first: who comes when, how to reach them, and closing each visit.
 // Nothing about other masters or the business settings.
 export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
   const session = useRequireSession()
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
+  const monthName = (dayKey: string) => {
+    const month = MONTHS[Number(dayKey.slice(5, 7)) - 1]
+    return month ? t(month) : ''
+  }
   const today = useToday()
   // A push about a booking links to its day (`?date=`), as the cabinet's schedule does.
   const linkedDate = useSearchParams().get('date')
@@ -150,9 +159,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
       // The result is still in front of the master: the camera is one tap away.
       if (choice === 'arrived' && !day?.photos.bookingIds.includes(booking.id)) {
         toast.show({
-          title: t('Marked: arrived'),
+          title: t`Marked: arrived`,
           type: 'success',
-          action: { label: t('Take a photo'), onClick: () => visitPhoto.pick(booking.id) },
+          action: { label: t`Take a photo`, onClick: () => visitPhoto.pick(booking.id) },
         })
       }
       // The week's photo count follows the mark: an arrived visit of the last seven days counts.
@@ -170,7 +179,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
       )
     } catch (outcomeError) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(outcomeError),
         type: 'error',
       })
@@ -183,13 +192,11 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
         <Container size='sm' className={styles.content}>
           <PageTitle
             size='sm'
-            title={t('No access.')}
-            subtitle={t(
-              'This number is not linked to a specialist. Ask the owner to add it to the specialist card.',
-            )}
+            title={t`No access.`}
+            subtitle={t`This number is not linked to a specialist. Ask the owner to add it to the specialist card.`}
           />
           <NextLink href='/bookings' className={styles.link}>
-            {t('To profile')} ›
+            {t`To profile`} ›
           </NextLink>
         </Container>
       </main>
@@ -201,18 +208,15 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
     : day.leaveReason
       ? day.leaveReason
       : day.hours
-        ? t('You work {from}–{to}', {
-            from: formatClock(day.hours.opensMinutes),
-            to: formatClock(day.hours.closesMinutes),
-          })
-        : t('Closed')
+        ? t`You work ${ph({ from: formatClock(day.hours.opensMinutes) })}–${ph({ to: formatClock(day.hours.closesMinutes) })}`
+        : t`Closed`
 
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
         <PageTitle
           size='sm'
-          title={t('My day.')}
+          title={t`My day.`}
           subtitle={day ? `${day.master.name} · ${day.business.name}` : ' '}
         />
 
@@ -227,15 +231,18 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 (three tiles parted by lines read as a dashboard: "does not fit the philosophy"). */}
             <p className={styles.facts}>
               <b>{live.length}</b>{' '}
-              {t.count(live.length, ['booking', 'bookings']).replace(/^\d+\s/, '')}
+              {t`${plural(live.length, { one: '# booking', other: '# bookings' })}`.replace(
+                /^\d+\s/,
+                '',
+              )}
               {' · '}
-              <b>{formatPrice(day.pay === null ? total : day.pay.day)}</b>{' '}
+              <b>{format.price(day.pay === null ? total : day.pay.day)}</b>{' '}
               <span>
                 {day.pay === null
-                  ? t('for the day')
+                  ? t`for the day`
                   : day.pay.percent === null
-                    ? t('earned')
-                    : t('your {percent}%', { percent: day.pay.percent })}
+                    ? t`earned`
+                    : t`your ${ph({ percent: day.pay.percent })}%`}
               </span>
               {hoursLine && (
                 <>
@@ -247,7 +254,10 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 <>
                   {' · '}
                   <b>{day.followers}</b>{' '}
-                  {t.count(day.followers, ['follower', 'followers']).replace(/^\d+ /, '')}
+                  {t`${plural(day.followers, { one: '# follower', other: '# followers' })}`.replace(
+                    /^\d+ /,
+                    '',
+                  )}
                 </>
               )}
             </p>
@@ -255,19 +265,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
             {/* The month only when it says more than the day (on the month's first working day they match). */}
             {day.pay !== null && day.pay.month !== day.pay.day && (
               <RowNote className={styles.monthPay}>
-                {t('Earned in {month}', {
-                  month: t(MONTHS[Number(day.pay.monthFrom.slice(5, 7)) - 1] ?? ''),
-                })}{' '}
-                <b>{formatPrice(day.pay.month)}</b>
+                {t`Earned in ${ph({ month: monthName(day.pay.monthFrom) })}`}{' '}
+                <b>{format.price(day.pay.month)}</b>
               </RowNote>
             )}
 
             {day.photos.weekVisits > 0 && (
               <RowNote className={styles.monthPay}>
-                {t('Work photos this week: {done} of {visits}', {
-                  done: day.photos.weekWithPhoto,
-                  visits: t.count(day.photos.weekVisits, ['visit', 'visits']),
-                })}
+                {t`Work photos this week: ${ph({ done: day.photos.weekWithPhoto })} of ${plural(day.photos.weekVisits, { one: '# visit', other: '# visits' })}`}
               </RowNote>
             )}
 
@@ -275,22 +280,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               <div className={styles.now} aria-live='polite'>
                 {current && (
                   <p>
-                    <strong>{t('Now')}:</strong>{' '}
-                    {t('{name}, {service} until {time}', {
-                      name: current.customerName,
-                      service: current.serviceName,
-                      time: addMinutes(current.time, current.durationMinutes),
-                    })}
+                    <strong>{t`Now`}:</strong>{' '}
+                    {t`${ph({ name: current.customerName })}, ${ph({ service: current.serviceName })} until ${ph({ time: addMinutes(current.time, current.durationMinutes) })}`}
                   </p>
                 )}
                 {next && now !== null && (
                   <p>
-                    <strong>{t('Next')}:</strong>{' '}
-                    {t('{name} at {time}, {wait}', {
-                      name: next.customerName,
-                      time: next.time,
-                      wait: minutesUntil(now, parseClock(next.time), t),
-                    })}
+                    <strong>{t`Next`}:</strong>{' '}
+                    {t`${ph({ name: next.customerName })} at ${ph({ time: next.time })}, ${ph({ wait: minutesUntil(now, parseClock(next.time), t, format) })}`}
                   </p>
                 )}
               </div>
@@ -298,11 +295,11 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
 
             {day.bookings.length === 0 ? (
               <EmptyState
-                title={day.hours ? t('No bookings yet') : (hoursLine ?? undefined)}
+                title={day.hours ? t`No bookings yet` : (hoursLine ?? undefined)}
                 text={
                   day.hours
-                    ? t('New bookings will appear here.')
-                    : t('Bookings with you are not open this day.')
+                    ? t`New bookings will appear here.`
+                    : t`Bookings with you are not open this day.`
                 }
               />
             ) : (
@@ -325,7 +322,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                       <span className={styles.body}>
                         <span className={styles.service}>
                           {booking.serviceName}
-                          {isCancelled && <span className={styles.badge}>{t('Cancelled')}</span>}
+                          {isCancelled && <span className={styles.badge}>{t`Cancelled`}</span>}
                         </span>
                         <span className={styles.client}>
                           {booking.customerName} · {formatPhone(booking.customerPhone)}
@@ -350,7 +347,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                         <a
                           href={`tel:${booking.customerPhone}`}
                           className={styles.call}
-                          aria-label={t('Call {name}', { name: booking.customerName })}
+                          aria-label={t`Call ${ph({ name: booking.customerName })}`}
                         >
                           <Phone aria-hidden />
                         </a>
@@ -358,7 +355,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                       {canMark && !isCancelled && (
                         <span className={styles.outcome}>
                           <SegmentedControl
-                            label={t('Visit outcome {time}', { time: booking.time })}
+                            label={t`Visit outcome ${ph({ time: booking.time })}`}
                             value={booking.outcome ?? 'pending'}
                             items={OUTCOMES.map((item) => ({ ...item, label: t(item.label) }))}
                             onChange={(choice) => void handleOutcome(booking, choice)}

@@ -1,3 +1,4 @@
+import { msg } from '@lingui/core/macro'
 import {
   getBusiness,
   getCertificateSale,
@@ -8,6 +9,7 @@ import {
   listSimilarPlaces,
   listSubscriptionPlans,
 } from '@/shared/api/serverApi'
+import { initLingui } from '@/shared/i18n/server'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { buildBusinessJsonLd } from '@/shared/lib/seo/businessJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
@@ -30,6 +32,7 @@ interface BusinessHomePageProps {
 }
 
 export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
+  const i18n = await initLingui()
   const [{ business, catalog }, reviews, promotions, questions] = await Promise.all([
     getBusiness(slug),
     listReviews(slug),
@@ -47,11 +50,11 @@ export const BusinessHomePage = async ({ slug }: BusinessHomePageProps) => {
   return (
     // The cover runs the full width of the window; everything else keeps the page column.
     <main className={styles.shell}>
-      <JsonLd data={buildBusinessJsonLd({ business, catalog }, reviews)} />
+      <JsonLd data={buildBusinessJsonLd({ business, catalog }, reviews, i18n)} />
       {/* The business bar shows this trail; search engines get it as markup. */}
       <JsonLd
         data={breadcrumbJsonLd([
-          { label: 'Catalogue', href: '/' },
+          { label: i18n._(msg`Catalogue`), href: '/' },
           { label: business.name, href: `/${business.slug}` },
         ])}
       />

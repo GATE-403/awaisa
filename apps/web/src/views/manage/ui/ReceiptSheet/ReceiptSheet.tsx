@@ -2,12 +2,13 @@
 
 import { Button } from '@awaisa/ui/Button'
 import { useToast } from '@awaisa/ui/Toast'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { ArrowClockwise, ArrowSquareOut, Copy, ShareNetwork } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { retryReceipt } from '@/shared/api/clientApi'
 import type { FiscalReceipt } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { canShareLinks, copyText, shareLink } from '@/shared/lib/share'
 import { GlyphButton, GlyphGroup } from '@/shared/ui/GlyphGroup/GlyphGroup'
 import { ReceiptPaper } from '@/shared/ui/ReceiptPaper/ReceiptPaper'
@@ -28,7 +29,7 @@ interface ReceiptSheetProps {
 // refused is sent again from here instead.
 export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: ReceiptSheetProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [receipt, setReceipt] = useState(initial)
   const [isSending, setIsSending] = useState(false)
   const canShare = canShareLinks()
@@ -36,16 +37,16 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
 
   const copy = async () => {
     const isCopied = await copyText(link)
-    if (isCopied) toast.show({ title: t('Receipt link copied'), type: 'success' })
-    else toast.show({ title: t('Could not copy'), type: 'error' })
+    if (isCopied) toast.show({ title: t`Receipt link copied`, type: 'success' })
+    else toast.show({ title: t`Could not copy`, type: 'error' })
   }
 
   const share = async () => {
     const result = await shareLink({
-      title: t('Receipt from {name}', { name: receipt.businessName }),
+      title: t`Receipt from ${ph({ name: receipt.businessName })}`,
       url: link,
     })
-    if (result === 'failed') toast.show({ title: t('Could not share'), type: 'error' })
+    if (result === 'failed') toast.show({ title: t`Could not share`, type: 'error' })
   }
 
   const retry = async () => {
@@ -55,11 +56,11 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
       setReceipt(next)
       onChange?.(next)
       toast.show({
-        title: t(next.status === 'issued' ? 'Receipt issued' : 'Receipt queued again'),
+        title: next.status === 'issued' ? t`Receipt issued` : t`Receipt queued again`,
         type: next.status === 'issued' ? 'success' : 'info',
       })
     } catch (error) {
-      toast.show({ title: t('Not sent'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t`Not sent`, description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSending(false)
     }
@@ -67,9 +68,9 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
 
   return (
     <Sheet
-      title={t(receipt.kind === 'refund' ? 'Refund receipt' : 'Receipt')}
+      title={receipt.kind === 'refund' ? t`Refund receipt` : t`Receipt`}
       onClose={onClose}
-      cancelLabel={t('Close')}
+      cancelLabel={t`Close`}
     >
       <div className={sheet.form}>
         <ReceiptPaper receipt={receipt} surface='sheet' />
@@ -77,20 +78,16 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
           <div className={styles.actions}>
             <Button type='button' size='sm' className={styles.main} onClick={() => void copy()}>
               <Copy aria-hidden />
-              {t('Copy link')}
+              {t`Copy link`}
             </Button>
-            <GlyphGroup label={t('More')}>
+            <GlyphGroup label={t`More`}>
               <GlyphButton
                 icon={<ArrowSquareOut />}
-                label={t('Open receipt')}
+                label={t`Open receipt`}
                 onClick={() => window.open(link, '_blank', 'noopener')}
               />
               {canShare && (
-                <GlyphButton
-                  icon={<ShareNetwork />}
-                  label={t('Send')}
-                  onClick={() => void share()}
-                />
+                <GlyphButton icon={<ShareNetwork />} label={t`Send`} onClick={() => void share()} />
               )}
             </GlyphGroup>
           </div>
@@ -105,7 +102,7 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
               onClick={() => void retry()}
             >
               <ArrowClockwise aria-hidden />
-              {t('Send again')}
+              {t`Send again`}
             </Button>
           </div>
         )}

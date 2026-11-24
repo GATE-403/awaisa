@@ -1,10 +1,11 @@
 'use client'
 
-import NextLink from 'next/link'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { BusinessCard, NextFreeProvider } from '@/entities/business'
 import type { Business, BusinessCard as BusinessCardData } from '@/shared/api/types'
 import { getKindLabel } from '@/shared/config/platform'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import styles from './Place.module.css'
 
 interface SimilarPlacesProps {
@@ -17,8 +18,8 @@ const SHOWN = 10
 // «Similar places» at the foot of a place: others of the same kind, as the catalog shows them -
 // somewhere to go next when this one is full or far.
 export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
-  const t = useT()
-  const kind = getKindLabel(business.kind)
+  const { t } = useLingui()
+  const kind = business.kind === 'other' ? null : t(getKindLabel(business.kind))
   const others = places.filter((place) => place.slug !== business.slug).slice(0, SHOWN)
   if (others.length === 0) return null
 
@@ -27,16 +28,14 @@ export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
       <div className={styles.similarInner}>
         <div className={styles.sectionHead}>
           <h2 id='place-similar' className={styles.sectionTitle}>
-            {t('Similar places')}
+            {t`Similar places`}
             <span className={styles.similarMuted}>
               {' '}
-              {kind
-                ? t('More {kind} nearby.', { kind: t(kind).toLowerCase() })
-                : t('More places nearby.')}
+              {kind ? t`More ${ph({ kind: kind.toLowerCase() })} nearby.` : t`More places nearby.`}
             </span>
           </h2>
           <NextLink href={`/?kind=${business.kind}`} className={styles.sectionLink}>
-            {t('See all ›')}
+            {t`See all ›`}
           </NextLink>
         </div>
         <NextFreeProvider slugs={others.map((place) => place.slug)}>

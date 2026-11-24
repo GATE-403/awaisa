@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { Check, NavigationArrow } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import { CITY_AREAS } from '@/shared/config/areas'
-import { useT } from '@/shared/i18n'
 import { type MyPlace, saveMyPlace, useMyPlace } from '@/shared/lib/myPlace'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -18,7 +18,7 @@ interface PlacePickerSheetProps {
 // «Where are you?» - the browser's location in one tap, or a district by name for those who do not
 // share it (or do not know how). The choice stays on the device for the map, branches and picks.
 export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const current = useMyPlace()
   const [state, setState] = useState<'idle' | 'locating' | 'denied'>('idle')
 
@@ -43,7 +43,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
   }
 
   return (
-    <Sheet title={t('Where are you?')} cancelLabel={t('Close')} onClose={onClose}>
+    <Sheet title={t`Where are you?`} cancelLabel={t`Close`} onClose={onClose}>
       <div className={sheet.group}>
         <div className={sheet.list}>
           <button
@@ -53,18 +53,18 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
             disabled={state === 'locating'}
           >
             <NavigationArrow aria-hidden className={styles.locateIcon} />
-            <span>{state === 'locating' ? t('Locating…') : t('Detect automatically')}</span>
+            <span>{state === 'locating' ? t`Locating…` : t`Detect automatically`}</span>
           </button>
         </div>
         <p className={sheet.groupFooter}>
           {state === 'denied'
-            ? t('The phone did not share your location. Choose a district below.')
-            : t('Your phone will ask for permission. Or skip it and choose a district.')}
+            ? t`The phone did not share your location. Choose a district below.`
+            : t`Your phone will ask for permission. Or skip it and choose a district.`}
         </p>
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>{t('Bishkek district')}</SectionCaption>
+        <SectionCaption>{t`Bishkek district`}</SectionCaption>
         <div className={sheet.list}>
           {CITY_AREAS.map((area) => {
             const isChosen = current?.source === 'area' && current.label === area.label
@@ -95,7 +95,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
                 onClose()
               }}
             >
-              {t('Ignore my location')}
+              {t`Ignore my location`}
             </button>
           </div>
         </div>

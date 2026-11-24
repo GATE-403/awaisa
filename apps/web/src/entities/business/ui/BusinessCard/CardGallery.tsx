@@ -1,9 +1,9 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { useRef, useState } from 'react'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { gridImage } from '@/shared/lib/imageSizes'
 import styles from './BusinessCard.module.css'
 
@@ -19,7 +19,7 @@ interface CardGalleryProps {
 // momentum), dots at the top saying there are more, like stories; ‹ › with a mouse. Every
 // picture is a link to the place, so a tap anywhere on it still opens the place.
 export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const trackRef = useRef<HTMLSpanElement>(null)
   const frame = useRef(0)
   const [index, setIndex] = useState(0)
@@ -91,7 +91,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             type='button'
             className={styles.turn}
             data-side='start'
-            aria-label={t('Previous photo: {name}', { name })}
+            aria-label={t`Previous photo: ${name}`}
             hidden={index === 0}
             onClick={() => turn(-1)}
           >
@@ -101,7 +101,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             type='button'
             className={styles.turn}
             data-side='end'
-            aria-label={t('Next photo: {name}', { name })}
+            aria-label={t`Next photo: ${name}`}
             hidden={index === pictures.length - 1}
             onClick={() => turn(1)}
           >

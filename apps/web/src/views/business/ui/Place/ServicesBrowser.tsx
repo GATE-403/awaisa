@@ -1,10 +1,11 @@
 'use client'
 
+import { ph, plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useRef, useState } from 'react'
 import { NextFreeProvider } from '@/entities/business'
 import { OfferCard } from '@/entities/offer'
 import type { Business, Catalog, Offer, Service } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { useRootFlag } from '@/shared/lib/hooks/useRootFlag'
 import chipStyles from '@/shared/ui/Chip/Chip.module.css'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
@@ -32,7 +33,7 @@ const POPULAR_LIMIT = 3
 // place's one next-free answer (NextFreeProvider), not a request per card; «Next free time»
 // links straight to a time.
 const PopularCard = ({ offer, isHit }: ServiceCardProps) => {
-  const t = useT()
+  const { t } = useLingui()
 
   return (
     <li>
@@ -40,7 +41,7 @@ const PopularCard = ({ offer, isHit }: ServiceCardProps) => {
         offer={offer}
         isHit={isHit}
         isPlaceHidden
-        linkLabel={t('Popular: {name}', { name: offer.name })}
+        linkLabel={t`Popular: ${ph({ name: offer.name })}`}
       />
     </li>
   )
@@ -53,7 +54,7 @@ export const ServicesBrowser = ({
   catalog,
   servicePhotos = {},
 }: ServicesBrowserProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [category, setCategory] = useState(ALL)
   const [query, setQuery] = useState('')
   // The chips row continues the business bar: the bar drops its hairline (one line under both).
@@ -116,11 +117,12 @@ export const ServicesBrowser = ({
   const isBrowsing = category === ALL && !needle
   const hasPopular = isBrowsing && popular.length > 0
 
+  const foundCount = groups.reduce((sum, group) => sum + group.services.length, 0)
   return (
     <NextFreeProvider slugs={[business.slug]}>
       <div className={styles.menu}>
         {catalog.services.length >= SEARCH_FROM && (
-          <SearchField value={query} onChange={setQuery} placeholder={t('Find a service')} />
+          <SearchField value={query} onChange={setQuery} placeholder={t`Find a service`} />
         )}
         {/* Only the category chips stay pinned under the business bar; the search scrolls away. */}
         {catalog.categories.length > 1 && (
@@ -128,8 +130,8 @@ export const ServicesBrowser = ({
             {/* The app's filter chips (the booking form's too), each with how many it holds:
                 a second row of tabs under the page's own read as one more level of pages. */}
             {/* biome-ignore lint/a11y/useSemanticElements: a fieldset would add a legend over the row. */}
-            <div className={styles.chips} role='group' aria-label={t('Service sections')}>
-              {[{ id: ALL, name: t('All') }, ...catalog.categories].map((item) => (
+            <div className={styles.chips} role='group' aria-label={t`Service sections`}>
+              {[{ id: ALL, name: t`All` }, ...catalog.categories].map((item) => (
                 <button
                   key={item.id}
                   type='button'
@@ -151,7 +153,7 @@ export const ServicesBrowser = ({
 
         {hasPopular && (
           <div className={styles.group}>
-            <SectionCaption>{t('Popular')}</SectionCaption>
+            <SectionCaption>{t`Popular`}</SectionCaption>
             <ul className={styles.serviceGrid}>
               {popular.map((service, index) => (
                 <PopularCard key={service.id} offer={toOffer(service)} isHit={index === 0} />
@@ -161,18 +163,13 @@ export const ServicesBrowser = ({
         )}
         {needle && groups.length > 0 && (
           <p className={styles.found} aria-live='polite'>
-            {t('Found {count}', {
-              count: t.count(
-                groups.reduce((sum, group) => sum + group.services.length, 0),
-                ['service', 'services'],
-              ),
-            })}
+            {t`${plural(foundCount, { one: 'Found # service', other: 'Found # services' })}`}
           </p>
         )}
         {groups.length === 0 && (
           <EmptyState
             variant='inline'
-            text={t('Nothing found: try another word or the All section.')}
+            text={t`Nothing found: try another word or the All section.`}
           />
         )}
         {groups.map(({ category: group, services }) => (
@@ -180,7 +177,7 @@ export const ServicesBrowser = ({
             {/* With «Popular» above, the rest always gets a heading so the two lists read apart. */}
             {(catalog.categories.length > 1 || needle || hasPopular) && (
               <SectionCaption>
-                {catalog.categories.length > 1 ? group.name : t('All services')}
+                {catalog.categories.length > 1 ? group.name : t`All services`}
               </SectionCaption>
             )}
             <ul className={styles.serviceGrid}>

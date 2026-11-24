@@ -1,9 +1,10 @@
 'use client'
 
+import { Trans } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import type { Business, OnlineSubscriptionPlan } from '@/shared/api/types'
+import { useFormat } from '@/shared/i18n'
 import { pluralize } from '@/shared/lib/plural'
 import styles from './Place.module.css'
 import { SubscriptionSheet } from './SubscriptionSheet'
@@ -17,6 +18,7 @@ interface SubscriptionsSectionProps {
 // «Memberships»: the plans the owner sells online, as rows right on the page (what, for how long,
 // the price and what it saves); a row opens the purchase.
 export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionProps) => {
+  const format = useFormat()
   const [chosen, setChosen] = useState<OnlineSubscriptionPlan | null>(null)
   if (plans.length === 0) return null
 
@@ -24,7 +26,7 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
     <section id='subscriptions' className={styles.section} aria-labelledby='place-subscriptions'>
       <div className={styles.sectionHead}>
         <h2 id='place-subscriptions' className={styles.sectionTitle}>
-          Memberships
+          <Trans>Memberships</Trans>
         </h2>
         <span className={styles.sectionCount}>{plans.length}</span>
       </div>
@@ -45,8 +47,8 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
                   </span>
                 </span>
                 <span className={own.money}>
-                  <span className={own.price}>{formatPrice(plan.price)}</span>
-                  {saving > 0 && <span className={own.saving}>save {formatPrice(saving)}</span>}
+                  <span className={own.price}>{format.price(plan.price)}</span>
+                  {saving > 0 && <span className={own.saving}>save {format.price(saving)}</span>}
                 </span>
                 <CaretRight className={own.chevron} aria-hidden />
               </button>

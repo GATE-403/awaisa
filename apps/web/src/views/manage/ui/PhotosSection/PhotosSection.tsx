@@ -1,5 +1,7 @@
 'use client'
 
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { EyeSlash } from '@phosphor-icons/react/ssr'
 import { type ChangeEvent, type DragEvent, useEffect, useState } from 'react'
 import {
@@ -10,7 +12,6 @@ import {
   updateWorkPhoto,
 } from '@/shared/api/clientApi'
 import type { Catalog, WorkPhoto } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { PhotoGrid, PhotoGridTile } from '@/shared/ui/PhotoGrid/PhotoGrid'
 import styles from './PhotosSection.module.css'
@@ -48,7 +49,7 @@ export const PhotosSection = ({
   onPhotosChange,
   inputId,
 }: PhotosSectionProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [isBusy, setIsBusy] = useState(false)
   const [photos, setPhotos] = useState<WorkPhoto[]>([])
   const [openId, setOpenId] = useState<string | null>(null)
@@ -95,7 +96,7 @@ export const PhotosSection = ({
           setPhotos(next)
         }
       },
-      files.length > 1 ? t('Photos added: {count}', { count: files.length }) : t('Photo added'),
+      files.length > 1 ? t`Photos added: ${ph({ count: files.length })}` : t`Photo added`,
     )
     setIsBusy(false)
     // Right away: what is on each, like tagging photos after taking them.
@@ -116,7 +117,7 @@ export const PhotosSection = ({
   }
 
   const saveOrder = (ids: string[]) =>
-    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), t('Order saved'))
+    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), t`Order saved`)
 
   const handleDragOver = (event: DragEvent, overId: string) => {
     if (!draggedId || draggedId === overId) return
@@ -134,19 +135,17 @@ export const PhotosSection = ({
   }
 
   return (
-    <section className={styles.group} aria-label={t('Work')}>
+    <section className={styles.group} aria-label={t`Work`}>
       <PhotoGrid isBusy={isBusy}>
         {shown.map((photo, index) => (
           <PhotoGridTile
             key={photo.id}
             src={photo.url}
-            label={t(
-              photo.isHidden ? 'Photo {index}: {service}, hidden' : 'Photo {index}: {service}',
-              {
-                index: index + 1,
-                service: photo.serviceName ?? t('no service set'),
-              },
-            )}
+            label={
+              photo.isHidden
+                ? t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? t`no service set` })}, hidden`
+                : t`Photo ${ph({ index: index + 1 })}: ${ph({ service: photo.serviceName ?? t`no service set` })}`
+            }
             onOpen={() => setOpenId(photo.id)}
             isDimmed={photo.isHidden}
             data-dragged={draggedId === photo.id || undefined}
@@ -172,12 +171,12 @@ export const PhotosSection = ({
       {photos.length === 0 && (
         <EmptyState
           variant='inline'
-          title={t('Show your work')}
-          text={t('Clients book from photos: add up to 30, several at once if you like.')}
+          title={t`Show your work`}
+          text={t`Clients book from photos: add up to 30, several at once if you like.`}
         />
       )}
       {photos.length > 1 && (
-        <p className={styles.hint}>{t('The first five photos lead the page.')}</p>
+        <p className={styles.hint}>{t`The first five photos lead the page.`}</p>
       )}
       <input
         id={inputId}
@@ -186,7 +185,7 @@ export const PhotosSection = ({
         multiple
         hidden
         onChange={handlePhotos}
-        aria-label={t('Photo file')}
+        aria-label={t`Photo file`}
       />
       {open && (
         <WorkPhotoSheet
@@ -197,7 +196,7 @@ export const PhotosSection = ({
           step={queue.length > 1 ? { index: queueIndex + 1, total: queue.length } : undefined}
           onClose={closeSheet}
           onSave={(input) =>
-            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), t('Saved'))
+            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), t`Saved`)
           }
           onMakeFirst={
             photos[0]?.id === open.id
@@ -212,7 +211,7 @@ export const PhotosSection = ({
                   )
           }
           onDelete={() =>
-            void run(async () => setPhotos(await removePhoto(slug, open.id)), t('Photo deleted'))
+            void run(async () => setPhotos(await removePhoto(slug, open.id)), t`Photo deleted`)
           }
         />
       )}

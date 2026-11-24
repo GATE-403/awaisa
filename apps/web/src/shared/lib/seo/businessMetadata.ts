@@ -1,17 +1,22 @@
+import type { I18n } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
 import type { Metadata } from 'next'
 import type { Business } from '@/shared/api/types'
 import { getKindLabel, PLATFORM } from '@/shared/config/platform'
+import { ogLocale, say } from './seoText'
 import { absoluteUrl } from './siteUrl'
 
 const DESCRIPTION_LIMIT = 160
 
 const OG_IMAGE_SIZE = { width: 1200, height: 630 }
 
-const BASE_OPEN_GRAPH = {
-  type: 'website',
-  siteName: PLATFORM.name,
-  locale: 'en_GB',
-} as const
+/** What every page's Open Graph shares, in the page's language. */
+const baseOpenGraph = (i18n: I18n) =>
+  ({
+    type: 'website',
+    siteName: PLATFORM.name,
+    locale: ogLocale(i18n),
+  }) as const
 
 // The site's generated share image (`app/opengraph-image.tsx`), for pages that set their own
 // openGraph: it replaces the layout's whole, the image included.
@@ -28,15 +33,20 @@ const truncate = (text: string, limit: number) => {
   return `${clean.slice(0, limit - 1).trimEnd()}…`
 }
 
-const describeBusiness = (business: Business) =>
-  truncate(
+const describeBusiness = (business: Business, i18n: I18n) => {
+  const kind = say(i18n, getKindLabel(business.kind))
+  const address = business.address
+
+  return truncate(
     business.description ||
-      `${getKindLabel(business.kind)} · ${business.address}. Prices, specialists and online booking, no calls.`,
+      i18n._(msg`${kind} · ${address}. Prices, specialists and online booking, no calls.`),
     DESCRIPTION_LIMIT,
   )
+}
 
 interface BusinessMetadataOptions {
   business: Business
+  i18n: I18n
   path: string
   title: string
   description?: string
@@ -47,9 +57,10 @@ interface BusinessMetadataOptions {
 
 const buildBusinessMetadata = ({
   business,
+  i18n,
   path,
   title,
-  description = describeBusiness(business),
+  description = describeBusiness(business, i18n),
   fallbackImage,
 }: BusinessMetadataOptions): Metadata => {
   const image = business.coverUrl
@@ -64,7 +75,7 @@ const buildBusinessMetadata = ({
     alternates: { canonical: path },
     ...(!business.isPublished && { robots: { index: false, follow: false } }),
     openGraph: {
-      ...BASE_OPEN_GRAPH,
+      ...baseOpenGraph(i18n),
       url: path,
       title,
       description,
@@ -74,10 +85,4 @@ const buildBusinessMetadata = ({
   }
 }
 
-export {
-  BASE_OPEN_GRAPH,
-  buildBusinessMetadata,
-  describeBusiness,
-  OG_IMAGE_SIZE,
-  PLATFORM_OG_IMAGE,
-}
+export { baseOpenGraph, buildBusinessMetadata, describeBusiness, OG_IMAGE_SIZE, PLATFORM_OG_IMAGE }

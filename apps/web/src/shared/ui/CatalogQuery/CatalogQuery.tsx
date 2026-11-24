@@ -1,7 +1,8 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { usePathname } from '@/shared/i18n/navigation'
 import { useChromePathname, usePageUnderBooking } from '@/shared/lib/hooks/useChromePathname'
 
 interface CatalogQueryProps {

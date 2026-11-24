@@ -1,5 +1,6 @@
 'use client'
 
+import { useLingui } from '@lingui/react/macro'
 import {
   type CSSProperties,
   type PointerEvent,
@@ -8,7 +9,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useT } from '@/shared/i18n'
 import { haptic } from '@/shared/lib/nativeBridge'
 import styles from './CardStack.module.css'
 
@@ -44,7 +44,7 @@ const PULL_DISTANCE = 140
 // (the front card goes to the back, the next one comes forward, like passes in Wallet); one tap
 // fans it out so each card can be changed; a single card is changed straight away.
 export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [isFanned, setIsFanned] = useState(false)
   // How many times the folded stack was shuffled; the front card is the newest one moved by that.
   const [shift, setShift] = useState(0)
@@ -224,7 +224,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 onEdit?.(card.id)
               }}
             >
-              {t('Change')}
+              {t`Change`}
             </button>
           </section>
         )
@@ -248,7 +248,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
           aria-expanded={false}
           onClick={() => setIsFanned(true)}
         >
-          <span className={styles.srOnly}>{t('Show your choices')}</span>
+          <span className={styles.srOnly}>{t`Show your choices`}</span>
         </button>
       )}
       {(offer || (isOpen && (onStartOver || (isFanned && count > 1)))) && (
@@ -278,7 +278,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 onStartOver()
               }}
             >
-              {t('Start over')}
+              {t`Start over`}
             </button>
           )}
           {isFanned && count > 1 && (
@@ -291,7 +291,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
                 setShift(0)
               }}
             >
-              {t('Hide')}
+              {t`Hide`}
             </button>
           )}
         </div>

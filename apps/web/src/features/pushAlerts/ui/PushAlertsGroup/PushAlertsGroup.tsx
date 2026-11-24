@@ -2,9 +2,9 @@
 
 import { Switch } from '@awaisa/ui/Switch'
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { getErrorMessage } from '@/shared/api/apiError'
-import { useT } from '@/shared/i18n'
 import { getNativeApp, haptic } from '@/shared/lib/nativeBridge'
 import { RowNote } from '@/shared/ui/RowNote/RowNote'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -23,7 +23,7 @@ interface PushAlertsGroupProps {
 // comes only from this switch, never on load.
 export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProps) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const { state, enable, disable } = usePushAlerts()
   const [isBusy, setIsBusy] = useState(false)
 
@@ -39,13 +39,13 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
       if (isDone) {
         haptic('success')
         toast.show({
-          title: isOn ? t('Notifications on') : t('Notifications off'),
+          title: isOn ? t`Notifications on` : t`Notifications off`,
           type: 'success',
         })
       }
     } catch (error) {
       toast.show({
-        title: t('Something went wrong'),
+        title: t`Something went wrong`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -55,15 +55,15 @@ export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProp
   }
 
   return (
-    <section className={sheet.group} aria-label={t('Notifications on this device')}>
-      <SectionCaption>{t('On this device')}</SectionCaption>
+    <section className={sheet.group} aria-label={t`Notifications on this device`}>
+      <SectionCaption>{t`On this device`}</SectionCaption>
       {state === 'install' ? (
         <RowNote>{t(INSTALL_HINT)}</RowNote>
       ) : (
         <>
           <div className={listClassName}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Notify about bookings')}</span>
+              <span className={sheet.rowLabel}>{t`Notify about bookings`}</span>
               <Switch
                 checked={state === 'on'}
                 disabled={isBusy || state === 'denied'}

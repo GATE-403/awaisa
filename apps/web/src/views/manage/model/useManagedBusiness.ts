@@ -1,10 +1,10 @@
 import { useToast } from '@awaisa/ui/Toast'
+import { useLingui } from '@lingui/react/macro'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { getManagedBusiness } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessPage } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 
 type LoadError = { status: number | null; message: string }
 
@@ -14,7 +14,7 @@ export const useManagedBusiness = (
   initial: BusinessPage | null = null,
 ) => {
   const toast = useToast()
-  const t = useT()
+  const { t } = useLingui()
   const [data, setData] = useState<BusinessPage | null>(initial)
   // Rendered from the server's read: the first load is already here.
   const hasInitial = useRef(initial !== null)
@@ -49,17 +49,17 @@ export const useManagedBusiness = (
   const reload = useCallback(() => setVersion((value) => value + 1), [])
 
   // Runs a change, reports it with a toast and refreshes the cabinet; returns whether it worked.
-  // Callers pass the Russian title: it is the dictionary key, translated here.
+  // Callers pass the toast's title already translated (``t`Branch saved` ``).
   const run = async (action: () => Promise<unknown>, successTitle: string) => {
     try {
       await action()
-      toast.show({ title: t(successTitle), type: 'success' })
+      toast.show({ title: successTitle, type: 'success' })
       reload()
       void refreshBusiness(slug)
       return true
     } catch (actionError) {
       toast.show({
-        title: t('Not saved'),
+        title: t`Not saved`,
         description: getErrorMessage(actionError),
         type: 'error',
       })

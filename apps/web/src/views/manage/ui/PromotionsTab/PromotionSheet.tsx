@@ -3,10 +3,12 @@
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
 import { Switch } from '@awaisa/ui/Switch'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { Check } from '@phosphor-icons/react/ssr'
 import { type FormEvent, useState } from 'react'
 import type { Promotion, PromotionInput, PromotionKind, Service } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { DateField } from '@/shared/ui/DateField/DateField'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -27,10 +29,10 @@ interface PromotionSheetProps {
 
 const FORM_ID = 'promotion-form'
 
-const KINDS: { value: PromotionKind; label: string }[] = [
-  { value: 'happy_hours', label: 'By hours' },
-  { value: 'first_visit', label: 'New clients' },
-  { value: 'promo_code', label: 'Promo code' },
+const KINDS: { value: PromotionKind; label: MessageDescriptor }[] = [
+  { value: 'happy_hours', label: msg`By hours` },
+  { value: 'first_visit', label: msg`New clients` },
+  { value: 'promo_code', label: msg`Promo code` },
 ]
 
 const DEFAULT_TITLE: Record<PromotionKind, string> = {
@@ -39,7 +41,16 @@ const DEFAULT_TITLE: Record<PromotionKind, string> = {
   promo_code: 'Promo code',
 }
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+// 0 = Monday, the API's numbering.
+const WEEKDAYS = [
+  { key: 'mon', label: msg`Mon` },
+  { key: 'tue', label: msg`Tue` },
+  { key: 'wed', label: msg`Wed` },
+  { key: 'thu', label: msg`Thu` },
+  { key: 'fri', label: msg`Fri` },
+  { key: 'sat', label: msg`Sat` },
+  { key: 'sun', label: msg`Sun` },
+]
 
 const TIMES = Array.from({ length: 49 }, (_, index) => index * 30).map((minutes) => ({
   value: minutes,
@@ -54,7 +65,7 @@ export const PromotionSheet = ({
   onSave,
   onDelete,
 }: PromotionSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [kind, setKind] = useState<PromotionKind>(promotion?.kind ?? draft?.kind ?? 'happy_hours')
   const [title, setTitle] = useState(promotion?.title ?? draft?.title ?? DEFAULT_TITLE.happy_hours)
   const [percent, setPercent] = useState(String(promotion?.percent ?? 20))
@@ -119,37 +130,37 @@ export const PromotionSheet = ({
 
   return (
     <Sheet
-      title={t(promotion ? 'Promotion' : 'New promotion')}
+      title={promotion ? t`Promotion` : t`New promotion`}
       onClose={onClose}
-      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t`Save`, form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <SegmentedControl
-          label={t('Promotion type')}
+          label={t`Promotion type`}
           value={kind}
           items={KINDS.map((item) => ({ ...item, label: t(item.label) }))}
           onChange={changeKind}
         />
 
-        <section className={sheet.group} aria-label={t('Discount')}>
+        <section className={sheet.group} aria-label={t`Discount`}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Name')}</span>
+              <span className={sheet.rowLabel}>{t`Name`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Promotion name')}
+                  aria-label={t`Promotion name`}
                   value={title}
                   onValueChange={setTitle}
                 />
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Discount')}</span>
+              <span className={sheet.rowLabel}>{t`Discount`}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Discount, %')}
+                  aria-label={t`Discount, %`}
                   inputMode='numeric'
                   value={percent}
                   onValueChange={(value) => setPercent(value.replace(/\D/g, '').slice(0, 2))}
@@ -159,11 +170,11 @@ export const PromotionSheet = ({
             </label>
             {kind === 'promo_code' && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Promo code')}</span>
+                <span className={sheet.rowLabel}>{t`Promo code`}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={t('Promo code')}
+                    aria-label={t`Promo code`}
                     placeholder='OSEN20'
                     value={code}
                     onValueChange={(value) => setCode(value.toUpperCase().replace(/\s/g, ''))}
@@ -174,42 +185,38 @@ export const PromotionSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {kind === 'happy_hours' &&
-              t(
-                'Fill quiet hours: the discount applies on the chosen days by the visit’s start time.',
-              )}
+              t`Fill quiet hours: the discount applies on the chosen days by the visit’s start time.`}
             {kind === 'first_visit' &&
-              t('For people booking with you for the first time, by phone number.')}
+              t`For people booking with you for the first time, by phone number.`}
             {kind === 'promo_code' &&
-              t(
-                'The client enters the code when booking. Share it on Instagram or a business card.',
-              )}
+              t`The client enters the code when booking. Share it on Instagram or a business card.`}
           </p>
         </section>
 
         {kind === 'happy_hours' && (
-          <section className={sheet.group} aria-label={t('When')}>
-            <SectionCaption>{t('When')}</SectionCaption>
+          <section className={sheet.group} aria-label={t`When`}>
+            <SectionCaption>{t`When`}</SectionCaption>
             <fieldset className={styles.days}>
-              <legend className={styles.legend}>{t('Days of the week')}</legend>
+              <legend className={styles.legend}>{t`Days of the week`}</legend>
               {WEEKDAYS.map((day, index) => (
                 <button
-                  key={day}
+                  key={day.key}
                   type='button'
                   className={styles.day}
                   aria-pressed={weekdays.includes(index)}
                   onClick={() => toggleDay(index)}
                 >
-                  {t(day)}
+                  {t(day.label)}
                 </button>
               ))}
             </fieldset>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('From')}</span>
+                <span className={sheet.rowLabel}>{t`From`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Start')}
+                    aria-label={t`Start`}
                     items={TIMES}
                     value={fromMinutes}
                     onValueChange={(value) => value !== null && setFromMinutes(value)}
@@ -217,11 +224,11 @@ export const PromotionSheet = ({
                 </span>
               </div>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Until')}</span>
+                <span className={sheet.rowLabel}>{t`Until`}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('End')}
+                    aria-label={t`End`}
                     items={TIMES}
                     value={toMinutes}
                     onValueChange={(value) => value !== null && setToMinutes(value)}
@@ -232,11 +239,11 @@ export const PromotionSheet = ({
           </section>
         )}
 
-        <section className={sheet.group} aria-label={t('Services')}>
+        <section className={sheet.group} aria-label={t`Services`}>
           <div className={sheet.groupHeader}>
-            <SectionCaption isInset={false}>{t('Services')}</SectionCaption>
+            <SectionCaption isInset={false}>{t`Services`}</SectionCaption>
             <button type='button' className={sheet.groupLink} onClick={() => setServiceIds(null)}>
-              {t('All')}
+              {t`All`}
             </button>
           </div>
           <div className={sheet.list}>
@@ -254,14 +261,14 @@ export const PromotionSheet = ({
           </div>
         </section>
 
-        <section className={sheet.group} aria-label={t('Term')}>
+        <section className={sheet.group} aria-label={t`Term`}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Until date')}</span>
+              <span className={sheet.rowLabel}>{t`Until date`}</span>
               <span className={sheet.rowControl}>
                 <DateField
-                  label={t('Valid until')}
-                  placeholder={t('No end date')}
+                  label={t`Valid until`}
+                  placeholder={t`No end date`}
                   value={endsOn}
                   onChange={setEndsOn}
                   isClearable
@@ -269,11 +276,11 @@ export const PromotionSheet = ({
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('On')}</span>
+              <span className={sheet.rowLabel}>{t`On`}</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
           </div>
-          <p className={sheet.groupFooter}>{t('Without a date: until you turn it off.')}</p>
+          <p className={sheet.groupFooter}>{t`Without a date: until you turn it off.`}</p>
         </section>
 
         {onDelete && (
@@ -283,7 +290,7 @@ export const PromotionSheet = ({
               onClose()
             }}
           >
-            {t('Delete promotion')}
+            {t`Delete promotion`}
           </HoldButton>
         )}
       </form>

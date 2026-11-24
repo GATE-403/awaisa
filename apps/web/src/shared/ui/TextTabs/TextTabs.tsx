@@ -1,7 +1,7 @@
 'use client'
 
-import NextLink from 'next/link'
 import { useEffect, useRef } from 'react'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import styles from './TextTabs.module.css'
 
 type TextTab = {

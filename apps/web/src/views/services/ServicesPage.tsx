@@ -1,5 +1,7 @@
+import { msg } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 import { getBusiness, listServicePhotos } from '@/shared/api/serverApi'
-import { T } from '@/shared/i18n'
+import { initLingui } from '@/shared/i18n/server'
 import { breadcrumbJsonLd } from '@/shared/lib/seo/breadcrumbJsonLd'
 import { JsonLd } from '@/shared/lib/seo/JsonLd'
 import { Container } from '@/shared/ui/Container/Container'
@@ -12,6 +14,7 @@ interface ServicesPageProps {
 }
 
 export const ServicesPage = async ({ slug }: ServicesPageProps) => {
+  const i18n = await initLingui()
   const [{ business, catalog }, servicePhotos] = await Promise.all([
     getBusiness(slug),
     listServicePhotos(slug),
@@ -22,16 +25,17 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
     <main className={styles.page}>
       <JsonLd
         data={breadcrumbJsonLd([
-          { label: 'Catalogue', href: '/' },
+          { label: i18n._(msg`Catalogue`), href: '/' },
           { label: business.name, href: `/${business.slug}` },
-          { label: 'Services and prices', href: `/${business.slug}/services` },
+          { label: i18n._(msg`Services and prices`), href: `/${business.slug}/services` },
         ])}
       />
       <Container className={styles.hero}>
         <h1 className={styles.title}>
-          <T>Services and prices</T>
+          <Trans>Services and prices</Trans>
           <span className={styles.titleMuted}>
-            <T vars={{ name: business.name }}>{' at {name}'}</T>
+            {' '}
+            <Trans>at {business.name}</Trans>
           </span>
         </h1>
         {/* The facts that decide, bold numbers in one quiet line - like the place's head. */}

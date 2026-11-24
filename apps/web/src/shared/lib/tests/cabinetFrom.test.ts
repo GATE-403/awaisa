@@ -1,3 +1,4 @@
+import { setupI18n } from '@lingui/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getBackLabel, readCabinetFrom, rememberCabinetFrom } from '../cabinetFrom'
 
@@ -54,10 +55,13 @@ describe('rememberCabinetFrom', () => {
 })
 
 describe('getBackLabel', () => {
+  const i18n = setupI18n({ locale: 'en', messages: { en: {} } })
+  const label = (path: string) => i18n._(getBackLabel(path))
+
   it('names the page “‹” leads to', () => {
-    expect(getBackLabel('/')).toBe('Catalogue')
-    expect(getBackLabel('/map?kind=nails')).toBe('Map')
-    expect(getBackLabel('/bookings')).toBe('Profile')
-    expect(getBackLabel('/awaisa-studio')).toBe('Back')
+    expect(label('/')).toBe('Catalogue')
+    expect(label('/map?kind=nails')).toBe('Map')
+    expect(label('/bookings')).toBe('Profile')
+    expect(label('/awaisa-studio')).toBe('Back')
   })
 })

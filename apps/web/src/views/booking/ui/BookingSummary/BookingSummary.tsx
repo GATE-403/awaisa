@@ -1,12 +1,15 @@
 'use client'
 
 import { Button } from '@awaisa/ui/Button'
+import type { MessageDescriptor } from '@lingui/core'
+import { msg, ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CaretRight, CaretUp } from '@phosphor-icons/react/ssr'
 import { type CSSProperties, type ReactNode, useState } from 'react'
-import { formatPrice } from '@/entities/booking'
 import { BusinessTile, pickTint } from '@/entities/business'
 import type { PriceQuote, Service } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import type { Translate } from '@/shared/i18n'
+import { useFormat } from '@/shared/i18n/useFormat'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import type { BookingStepId } from '@/views/booking/model/useBookingForm'
@@ -49,18 +52,18 @@ interface BookingSummaryProps {
 
 // The button names the next thing to do (a bare Next left people unsure that a time was still
 // to be picked); the line over it says how far along they are.
-const NEXT_STEP_ACTIONS: Record<BookingStepId, string> = {
-  service: 'Choose a service',
-  specialist: 'Choose a specialist',
-  datetime: 'Choose a time',
-  contacts: 'Enter contacts',
+const NEXT_STEP_ACTIONS: Record<BookingStepId, MessageDescriptor> = {
+  service: msg`Choose a service`,
+  specialist: msg`Choose a specialist`,
+  datetime: msg`Choose a time`,
+  contacts: msg`Enter contacts`,
 }
 
-const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
-  service: 'Choose a service',
-  specialist: 'Choose a specialist',
-  datetime: 'Choose a time',
-  contacts: 'Leave your contacts',
+const NEXT_STEP_HINTS: Record<BookingStepId, MessageDescriptor> = {
+  service: msg`Choose a service`,
+  specialist: msg`Choose a specialist`,
+  datetime: msg`Choose a time`,
+  contacts: msg`Leave your contacts`,
 }
 
 const getButtonLabel = (
@@ -68,10 +71,10 @@ const getButtonLabel = (
   isSubmitting: boolean,
   t: Translate,
 ) => {
-  if (isSubmitting) return t('Booking…')
+  if (isSubmitting) return t(msg`Booking…`)
   if (firstIncompleteStep) return t(NEXT_STEP_ACTIONS[firstIncompleteStep])
 
-  return t('Book')
+  return t(msg`Book`)
 }
 
 export const BookingSummary = ({
@@ -95,52 +98,50 @@ export const BookingSummary = ({
   masterShort = null,
   branchName = null,
 }: BookingSummaryProps) => {
-  const t = useT()
+  const { t } = useLingui()
+  const format = useFormat()
   const total = paidWith ? paidWith.total : (quote?.total ?? service?.price ?? null)
   const discount = paidWith ? null : (quote?.discount ?? null)
   const deposit = paidWith ? null : (service?.deposit ?? null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const whenLabel = dayKey && time ? `${t.dayLong(dayKey)}, ${time}` : null
+  const whenLabel = dayKey && time ? `${format.dayLong(dayKey)}, ${time}` : null
   const details = [
-    { label: t('Service'), value: service?.name },
-    { label: t('Specialist'), value: specialistLabel },
-    { label: t('When'), value: whenLabel },
-    { label: t('Duration'), value: service ? t.duration(service.durationMinutes) : null },
+    { label: t`Service`, value: service?.name },
+    { label: t`Specialist`, value: specialistLabel },
+    { label: t`When`, value: whenLabel },
+    { label: t`Duration`, value: service ? format.duration(service.durationMinutes) : null },
     ...(discount
       ? [
           {
-            label: t('Discount “{title}”', { title: discount.title }),
-            value: `−${formatPrice(discount.amount)}`,
+            label: t`Discount “${ph({ title: discount.title })}”`,
+            value: `−${format.price(discount.amount)}`,
           },
         ]
       : []),
-    { label: t('Total'), value: total !== null ? formatPrice(total) : (paidWith?.label ?? null) },
-    ...(paidWith ? [{ label: t('Payment'), value: paidWith.label }] : []),
+    { label: t`Total`, value: total !== null ? format.price(total) : (paidWith?.label ?? null) },
+    ...(paidWith ? [{ label: t`Payment`, value: paidWith.label }] : []),
     ...(deposit
       ? [
           {
-            label: t('Deposit'),
-            value: t('{amount} by card when booking', { amount: formatPrice(deposit) }),
+            label: t`Deposit`,
+            value: t`${ph({ amount: format.price(deposit) })} by card when booking`,
           },
         ]
       : []),
   ]
   // With the ticket shown, only what it does not say: the discount and a deposit (its stub
   // already carries the price to pay).
-  const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t('Total')) : details
+  const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t`Total`) : details
   const buttonLabel =
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line - a place with two addresses must not be a surprise.
-  const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
+  const shortWhen = dayKey && time ? `${format.dayShort(dayKey)}, ${time}` : null
   // While steps remain the line says what is chosen so far, not "Step 2 of 4": the step's own
   // caption above its question already counts, and two counters read as clutter.
   const hint = firstIncompleteStep ? (
-    choice || place?.name || t('Online booking')
+    choice || place?.name || t`Online booking`
   ) : deposit ? (
-    t('{when} · deposit {amount}', {
-      when: whenLabel ?? '',
-      amount: formatPrice(deposit),
-    })
+    t`${ph({ when: whenLabel ?? '' })} · deposit ${ph({ amount: format.price(deposit) })}`
   ) : address ? (
     // Two unbreakable parts: the line breaks between the time and the address, never inside
     // the address (a lone "7" of "Asanbay mic., 7" hung on the second line).
@@ -156,10 +157,8 @@ export const BookingSummary = ({
   // then the time and the total over one quiet line, the master and where or how long.
   const isReady = !firstIncompleteStep && Boolean(dayKey && time)
   const readyLine = deposit
-    ? [masterShort, t('deposit {amount}', { amount: formatPrice(deposit) })]
-        .filter(Boolean)
-        .join(' · ')
-    : [masterShort, branchName ?? (service ? t.duration(service.durationMinutes) : null)]
+    ? [masterShort, t`deposit ${ph({ amount: format.price(deposit) })}`].filter(Boolean).join(' · ')
+    : [masterShort, branchName ?? (service ? format.duration(service.durationMinutes) : null)]
         .filter(Boolean)
         .join(' · ')
 
@@ -174,14 +173,14 @@ export const BookingSummary = ({
           onClick={() => setIsDetailsOpen(true)}
         >
           <span className={styles.barLeaf} aria-hidden='true'>
-            <span className={styles.barLeafMonth}>{t.monthShort(dayKey)}</span>
+            <span className={styles.barLeafMonth}>{format.monthShort(dayKey)}</span>
             <span className={styles.barLeafDay}>{Number(dayKey.slice(8))}</span>
           </span>
           <span className={styles.barLines}>
             {/* The total stays the first line, where it was while steps remained: nothing jumps
                 and nothing runs under the button. */}
             <span className={styles.barPrice}>
-              {total !== null ? formatPrice(total) : (paidWith?.label ?? '')}
+              {total !== null ? format.price(total) : (paidWith?.label ?? '')}
               {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
               <CaretUp className={styles.barChevron} aria-hidden />
             </span>
@@ -192,14 +191,14 @@ export const BookingSummary = ({
             >
               {errorMessage ?? (
                 <>
-                  <span className={styles.srOnly}>{`${t.dayLong(dayKey)}, `}</span>
+                  <span className={styles.srOnly}>{`${format.dayLong(dayKey)}, `}</span>
                   <span className={styles.barTime}>{time}</span>
                   {readyLine ? ` · ${readyLine}` : ''}
                 </>
               )}
             </span>
           </span>
-          <span className={styles.srOnly}>{`, ${t('Show what is chosen')}`}</span>
+          <span className={styles.srOnly}>{`, ${t`Show what is chosen`}`}</span>
         </button>
         {/* While it books the button folds into a round spinner; "You're booked" then opens with
             its own check. The words stay for screen readers. */}
@@ -215,8 +214,8 @@ export const BookingSummary = ({
         </Button>
         {isDetailsOpen && (
           <Sheet
-            title={t('Your booking')}
-            cancelLabel={t('Done')}
+            title={t`Your booking`}
+            cancelLabel={t`Done`}
             onClose={() => setIsDetailsOpen(false)}
           >
             {ticket && <div className={styles.ticket}>{ticket}</div>}
@@ -244,9 +243,9 @@ export const BookingSummary = ({
           <span className={styles.barPrice}>
             {/* The discount shows before the client commits: the old price struck, the percent. */}
             {discount && service && (
-              <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
+              <s className={styles.barOldPrice}>{format.price(service.price)}</s>
             )}
-            {total !== null ? formatPrice(total) : (paidWith?.label ?? t('Online booking'))}
+            {total !== null ? format.price(total) : (paidWith?.label ?? t`Online booking`)}
             {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span
@@ -258,15 +257,15 @@ export const BookingSummary = ({
             {errorMessage ?? hint}
           </span>
           {/* After the visible total, not instead of it: the name keeps what is written (2.5.3). */}
-          <span className={styles.srOnly}>{`, ${t('Show what is chosen')}`}</span>
+          <span className={styles.srOnly}>{`, ${t`Show what is chosen`}`}</span>
         </button>
         <Button size='lg' className={styles.barButton} onClick={onSubmit} disabled={isSubmitting}>
           {buttonLabel}
         </Button>
         {isDetailsOpen && (
           <Sheet
-            title={t('Your booking')}
-            cancelLabel={t('Done')}
+            title={t`Your booking`}
+            cancelLabel={t`Done`}
             onClose={() => setIsDetailsOpen(false)}
           >
             {ticket && <div className={styles.ticket}>{ticket}</div>}
@@ -289,12 +288,12 @@ export const BookingSummary = ({
   const rows: { step: BookingStepId; label: string; value: string | null; extra?: string }[] = [
     {
       step: 'service',
-      label: t('Service'),
+      label: t`Service`,
       value: service?.name ?? null,
-      extra: service ? t.duration(service.durationMinutes) : undefined,
+      extra: service ? format.duration(service.durationMinutes) : undefined,
     },
-    { step: 'specialist', label: t('Specialist'), value: specialistLabel || null },
-    { step: 'datetime', label: t('When'), value: whenLabel },
+    { step: 'specialist', label: t`Specialist`, value: specialistLabel || null },
+    { step: 'datetime', label: t`When`, value: whenLabel },
   ]
 
   return (
@@ -315,7 +314,7 @@ export const BookingSummary = ({
           </span>
         </div>
       )}
-      <h2 className={styles.cardTitle}>{t('Your booking')}</h2>
+      <h2 className={styles.cardTitle}>{t`Your booking`}</h2>
       <ul className={styles.rows}>
         {rows.map((row) => {
           const isNext = firstIncompleteStep === row.step
@@ -352,24 +351,21 @@ export const BookingSummary = ({
           <span>
             {discount.title} · −{discount.percent}%
           </span>
-          <span>−{formatPrice(discount.amount)}</span>
+          <span>−{format.price(discount.amount)}</span>
         </div>
       )}
       <div className={styles.total}>
-        <span>{t('Total')}</span>
+        <span>{t`Total`}</span>
         <span>
-          {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
-          {total !== null ? formatPrice(total) : (paidWith?.label ?? '-')}
+          {discount && service && <s className={styles.oldPrice}>{format.price(service.price)}</s>}
+          {total !== null ? format.price(total) : (paidWith?.label ?? '-')}
         </span>
       </div>
       {paidWith && <p className={styles.deposit}>{paidWith.label}</p>}
       {/* Said before the click: the deposit is paid right after, the rest at the salon. */}
       {deposit ? (
         <p className={styles.deposit}>
-          {t(
-            'Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
-            { amount: formatPrice(deposit) },
-          )}
+          {t`Deposit ${ph({ amount: format.price(deposit) })} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.`}
         </p>
       ) : null}
       {firstIncompleteStep === 'contacts' && (

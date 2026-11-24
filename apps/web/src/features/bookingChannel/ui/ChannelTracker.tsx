@@ -1,7 +1,7 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { usePathname } from '@/shared/i18n/navigation'
 import { rememberPage } from '@/shared/lib/bookingChannel'
 
 // Every page the tab shows tells where the next booking will come from (`bookingChannel.ts`).

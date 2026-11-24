@@ -1,11 +1,11 @@
 'use client'
 
 import { Skeleton } from '@awaisa/ui/Skeleton'
+import { useLingui } from '@lingui/react/macro'
 import { useEffect, useState } from 'react'
 import { ReviewItem } from '@/entities/review'
 import { listPlaceReviews } from '@/shared/api/clientApi'
 import type { FeedItem, ReviewSummary } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import styles from '../FeedPage.module.css'
 
@@ -17,7 +17,7 @@ interface WorkReviewsSheetProps {
 // What people said about this very service with this master - read over the feed, like the
 // comments under a reel, without leaving it.
 export const WorkReviewsSheet = ({ item, onClose }: WorkReviewsSheetProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [summary, setSummary] = useState<ReviewSummary | null>(null)
   const { business, service, specialist } = item
 
@@ -36,14 +36,14 @@ export const WorkReviewsSheet = ({ item, onClose }: WorkReviewsSheetProps) => {
 
   return (
     <Sheet
-      title={specialist ? `${t('Reviews')} · ${specialist.name.split(' ')[0]}` : t('Reviews')}
-      cancelLabel={t('Done')}
+      title={specialist ? `${t`Reviews`} · ${specialist.name.split(' ')[0]}` : t`Reviews`}
+      cancelLabel={t`Done`}
       onClose={onClose}
     >
       {!summary && <Skeleton className={styles.reviewsSkeleton} />}
       {summary && summary.count === 0 && (
         <p className={styles.reviewsEmpty}>
-          {t('No one has written about this service yet: be the first after your visit.')}
+          {t`No one has written about this service yet: be the first after your visit.`}
         </p>
       )}
       {summary && summary.count > 0 && (

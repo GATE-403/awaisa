@@ -1,10 +1,11 @@
 import { Input } from '@awaisa/ui/Input'
 import { Switch } from '@awaisa/ui/Switch'
+import { ph } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import dynamic from 'next/dynamic'
 import { type FormEvent, useRef, useState } from 'react'
 import { reverseAddress, searchAddress } from '@/shared/api/clientApi'
 import type { Branch, BranchInput, GeoPlace } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import type { Point } from '@/shared/ui/MapView/MapView'
@@ -39,7 +40,7 @@ export const BranchDialog = ({
   onSave,
   onDelete,
 }: BranchDialogProps) => {
-  const t = useT()
+  const { t } = useLingui()
   const [name, setName] = useState(branch?.name ?? '')
   const [address, setAddress] = useState(branch?.address ?? '')
   const [phone, setPhone] = useState(branch?.phone ?? '')
@@ -147,18 +148,18 @@ export const BranchDialog = ({
 
   return (
     <Sheet
-      title={branch ? t('Branch') : t('New branch')}
+      title={branch ? t`Branch` : t`New branch`}
       onClose={onClose}
-      action={{ label: t('Save'), form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t`Save`, form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Name')}</span>
+            <span className={sheet.rowLabel}>{t`Name`}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                placeholder={t('Centre, Dzhal, Asanbai')}
+                placeholder={t`Centre, Dzhal, Asanbai`}
                 value={name}
                 onValueChange={setName}
                 maxLength={120}
@@ -167,11 +168,11 @@ export const BranchDialog = ({
             </span>
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Address')}</span>
+            <span className={sheet.rowLabel}>{t`Address`}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                placeholder={t('125 Toktogul St')}
+                placeholder={t`125 Toktogul St`}
                 value={address}
                 onValueChange={changeAddress}
                 maxLength={200}
@@ -180,13 +181,13 @@ export const BranchDialog = ({
             </span>
           </label>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Phone')}</span>
+            <span className={sheet.rowLabel}>{t`Phone`}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
                 type='tel'
                 inputMode='tel'
-                placeholder={t('Same as the business')}
+                placeholder={t`Same as the business`}
                 value={phone}
                 onValueChange={(value) => setPhone(maskPhoneInput(value))}
               />
@@ -195,7 +196,7 @@ export const BranchDialog = ({
         </div>
 
         {places.length > 0 && (
-          <section className={sheet.group} aria-label={t('Addresses found')}>
+          <section className={sheet.group} aria-label={t`Addresses found`}>
             <ul className={sheet.list}>
               {places.map((place) => (
                 <li key={`${place.address}-${place.latitude}`}>
@@ -213,41 +214,39 @@ export const BranchDialog = ({
               ))}
             </ul>
             <p className={sheet.groupFooter}>
-              {t('Pick an address and the pin will move on the map by itself.')}
+              {t`Pick an address and the pin will move on the map by itself.`}
             </p>
           </section>
         )}
 
-        <section className={sheet.group} aria-label={t('Map pin')}>
-          <SectionCaption>{t('Map pin')}</SectionCaption>
+        <section className={sheet.group} aria-label={t`Map pin`}>
+          <SectionCaption>{t`Map pin`}</SectionCaption>
           <LocationPicker value={point} onChange={changePoint} target={target} />
           {pinPlace ? (
             <p className={sheet.groupFooter}>
-              {t('From the pin: {address}.', { address: pinPlace.address })}{' '}
+              {t`From the pin: ${ph({ address: pinPlace.address })}.`}{' '}
               <button type='button' className={styles.useAddress} onClick={applyPinAddress}>
-                {t('Use this address')}
+                {t`Use this address`}
               </button>
             </p>
           ) : (
             <p className={sheet.groupFooter}>
               {point
-                ? t('Move the map so the pin points at the entrance: the address fills itself in.')
-                : t(
-                    'Start typing the address or move the map: the address and the pin fill each other in.',
-                  )}
+                ? t`Move the map so the pin points at the entrance: the address fills itself in.`
+                : t`Start typing the address or move the map: the address and the pin fill each other in.`}
             </p>
           )}
         </section>
 
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Accepts clients')}</span>
+            <span className={sheet.rowLabel}>{t`Accepts clients`}</span>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </label>
         </div>
 
         {branch && canDelete && (
-          <HoldButton onConfirm={handleDelete}>{t('Delete branch')}</HoldButton>
+          <HoldButton onConfirm={handleDelete}>{t`Delete branch`}</HoldButton>
         )}
       </form>
     </Sheet>

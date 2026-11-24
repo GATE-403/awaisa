@@ -1,8 +1,8 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { getBusinessSlug, isBookingPath } from '@/shared/config/navigation'
+import { useRouter } from '@/shared/i18n/navigation'
 import { setPageUnderBooking } from '@/shared/lib/hooks/useChromePathname'
 import {
   clearBookingOrigin,

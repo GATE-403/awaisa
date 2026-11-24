@@ -2,13 +2,15 @@
 
 import { Input } from '@awaisa/ui/Input'
 import { Select } from '@awaisa/ui/Select'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { type FormEvent, useState } from 'react'
-import { formatPrice, readContact } from '@/entities/booking'
+import { readContact } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { orderCertificate } from '@/shared/api/clientApi'
 import type { Business } from '@/shared/api/types'
 import { PHONE_PLACEHOLDER, WHOLE_PHONE_DIGITS } from '@/shared/config/region'
+import { useFormat } from '@/shared/i18n'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
@@ -37,6 +39,8 @@ export const GiftCertificateSheet = ({
   initialAmount,
   onClose,
 }: GiftCertificateSheetProps) => {
+  const format = useFormat()
+  const { t } = useLingui()
   const session = useSession()
   const isSignedIn = session.status === 'signedIn'
   const [saved] = useState(() => (typeof window === 'undefined' ? null : readContact()))
@@ -48,20 +52,20 @@ export const GiftCertificateSheet = ({
   const [message, setMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isPaying, setIsPaying] = useState(false)
-  const items = amounts.map((value) => ({ value: String(value), label: formatPrice(value) }))
+  const items = amounts.map((value) => ({ value: String(value), label: format.price(value) }))
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!buyerName.trim()) {
-      setError('Say who the gift card is from')
+      setError(t`Say who the gift card is from`)
       return
     }
     if (!isSignedIn && !isWholePhone(buyerPhone)) {
-      setError('Check your number: the code will be sent to it')
+      setError(t`Check your number: the code will be sent to it`)
       return
     }
     if (recipientPhone && !isWholePhone(recipientPhone)) {
-      setError('Check the recipient’s number or leave it empty')
+      setError(t`Check the recipient’s number or leave it empty`)
       return
     }
     setIsPaying(true)
@@ -85,19 +89,19 @@ export const GiftCertificateSheet = ({
 
   return (
     <Sheet
-      title='Gift card'
+      title={t`Gift card`}
       onClose={onClose}
       action={{
-        label: isPaying ? 'One moment…' : 'Pay',
+        label: isPaying ? t`One moment…` : t`Pay`,
         form: FORM_ID,
         disabled: isPaying,
       }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit} noValidate>
-        <section className={sheet.group} aria-label='Amount'>
+        <section className={sheet.group} aria-label={t`Amount`}>
           {items.length <= SEGMENTS_MAX ? (
             <SegmentedControl
-              label='Gift card amount'
+              label={t`Gift card amount`}
               value={String(amount)}
               items={items}
               onChange={(value) => setAmount(Number(value))}
@@ -105,11 +109,13 @@ export const GiftCertificateSheet = ({
           ) : (
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Amount</span>
+                <span className={sheet.rowLabel}>
+                  <Trans>Amount</Trans>
+                </span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label='Gift card amount'
+                    aria-label={t`Gift card amount`}
                     items={items}
                     value={String(amount)}
                     onValueChange={(value) => value && setAmount(Number(value))}
@@ -120,16 +126,18 @@ export const GiftCertificateSheet = ({
           )}
         </section>
 
-        <section className={sheet.group} aria-label='To'>
+        <section className={sheet.group} aria-label={t`To`}>
           <SectionCaption>To</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Name</span>
+              <span className={sheet.rowLabel}>
+                <Trans>Name</Trans>
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label='Recipient’s name'
-                  placeholder='Aigul'
+                  aria-label={t`Recipient’s name`}
+                  placeholder={t`Aigul`}
                   autoComplete='off'
                   value={recipientName}
                   onValueChange={setRecipientName}
@@ -137,13 +145,15 @@ export const GiftCertificateSheet = ({
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Phone</span>
+              <span className={sheet.rowLabel}>
+                <Trans>Phone</Trans>
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
                   type='tel'
                   inputMode='tel'
-                  aria-label='Recipient’s phone'
+                  aria-label={t`Recipient’s phone`}
                   placeholder='optional'
                   autoComplete='off'
                   value={recipientPhone}
@@ -153,9 +163,9 @@ export const GiftCertificateSheet = ({
             </label>
             <label className={styles.messageRow}>
               <textarea
-                aria-label='Message'
+                aria-label={t`Message`}
                 className={styles.message}
-                placeholder='A few words'
+                placeholder={t`A few words`}
                 maxLength={300}
                 rows={2}
                 value={message}
@@ -164,20 +174,24 @@ export const GiftCertificateSheet = ({
             </label>
           </div>
           <p className={sheet.groupFooter}>
-            With a number, the code and your words go to the recipient.
+            <Trans>With a number, the code and your words go to the recipient.</Trans>
           </p>
         </section>
 
-        <section className={sheet.group} aria-label='From'>
-          <SectionCaption>From</SectionCaption>
+        <section className={sheet.group} aria-label={t`From`}>
+          <SectionCaption>
+            <Trans>From</Trans>
+          </SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Name</span>
+              <span className={sheet.rowLabel}>
+                <Trans>Name</Trans>
+              </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label='Your name'
-                  placeholder='Your name'
+                  aria-label={t`Your name`}
+                  placeholder={t`Your name`}
                   autoComplete='given-name'
                   value={buyerName}
                   onValueChange={setBuyerName}
@@ -186,13 +200,15 @@ export const GiftCertificateSheet = ({
             </label>
             {!isSignedIn && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Phone</span>
+                <span className={sheet.rowLabel}>
+                  <Trans>Phone</Trans>
+                </span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     type='tel'
                     inputMode='tel'
-                    aria-label='Your phone'
+                    aria-label={t`Your phone`}
                     placeholder={PHONE_PLACEHOLDER}
                     autoComplete='tel'
                     value={buyerPhone}
@@ -203,7 +219,9 @@ export const GiftCertificateSheet = ({
             )}
           </div>
           <p className={sheet.groupFooter}>
-            You get the code after paying. The gift card never expires and can be spent in parts.
+            <Trans>
+              You get the code after paying. The gift card never expires and can be spent in parts.
+            </Trans>
           </p>
         </section>
 

@@ -3,8 +3,9 @@
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Menu, MenuItem } from '@awaisa/ui/Menu'
 import { useToast } from '@awaisa/ui/Toast'
+import { plural } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react/macro'
 import { CalendarCheck, Camera, CaretRight, GearSix, Trash } from '@phosphor-icons/react/ssr'
-import NextLink from 'next/link'
 import { type ChangeEvent, useRef, useState } from 'react'
 import { monogramTint, PersonAvatar } from '@/entities/business'
 import { ProfileHead, ProfileHeadText, profileStyle } from '@/entities/profile'
@@ -13,7 +14,7 @@ import { useMyProfile } from '@/features/profileStyle'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { removeAvatar, uploadAvatar } from '@/shared/api/clientApi'
 import type { Booking } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import { Wreath } from '@/shared/ui/Wreath/Wreath'
 import settings from '../AccountSettings/AccountSettings.module.css'
@@ -35,7 +36,7 @@ const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 // the handiest part). The cabinet lives in the tab bar; masters keep «My day» here.
 export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardProps) => {
   const session = useSession()
-  const t = useT()
+  const { t } = useLingui()
   const toast = useToast()
   const fileInput = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -43,12 +44,10 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   const look = myProfile.settings ? profileStyle(myProfile.settings.accent) : undefined
   const customer = session.customer
   const places = new Set(bookings.map((booking) => booking.business.slug)).size
-  // Bold number, quiet word.
-  const countWord = (count: number, forms: [string, string]) =>
-    t.count(count, forms).replace(/^\d+ /, '')
+  // Bold number, quiet word: the plural forms leave the number out.
   const stats = [
-    visits > 0 && { value: visits, label: countWord(visits, ['visit', 'visits']) },
-    places > 0 && { value: places, label: countWord(places, ['place', 'places']) },
+    visits > 0 && { value: visits, label: t`${plural(visits, { one: 'visit', other: 'visits' })}` },
+    places > 0 && { value: places, label: t`${plural(places, { one: 'place', other: 'places' })}` },
   ].filter((stat): stat is { value: number; label: string } => Boolean(stat))
 
   if (session.status === 'loading') return <div className={styles.placeholder} />
@@ -57,24 +56,24 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
     return (
       // A guest's row like the signed-in account's: the mascot where the face would be, what
       // these records are and «Sign in» at the row's end - not a centred title over the records.
-      <section className={styles.guest} aria-label={t('Profile')} style={look}>
+      <section className={styles.guest} aria-label={t`Profile`} style={look}>
         <span className={styles.guestFace} aria-hidden>
           <Mascot />
         </span>
         <span className={styles.guestText}>
-          <h1 className={styles.guestTitle}>{t('Your bookings')}</h1>
+          <h1 className={styles.guestTitle}>{t`Your bookings`}</h1>
           <span className={styles.guestNote}>
-            {t('On this phone only: sign in to have them everywhere')}
+            {t`On this phone only: sign in to have them everywhere`}
           </span>
         </span>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
-          {t('Sign in')}
+          {t`Sign in`}
         </ButtonLink>
       </section>
     )
   }
 
-  const displayName = customer.name || t('No name')
+  const displayName = customer.name || t`No name`
   const masterOf = customer.masterOf ?? []
 
   const setAvatar = async (file: File | null) => {
@@ -89,7 +88,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
       }
     } catch (error) {
       toast.show({
-        title: t('Photo not saved'),
+        title: t`Photo not saved`,
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -139,7 +138,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   // The same head as the profile itself (`ProfileHead`): the name with the status emoji over
   // one quiet line «Level 4 · 20 visits · 13 places» (the owner: keep one design).
   const meta = [
-    ...(level ? [t('Level {level}', { level })] : []),
+    ...(level ? [t`Level ${level}`] : []),
     ...stats.map((stat) => `${stat.value} ${stat.label}`),
   ].join(' · ')
   const identity = (
@@ -160,7 +159,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   )
 
   return (
-    <section className={styles.header} aria-label={t('Profile')}>
+    <section className={styles.header} aria-label={t`Profile`}>
       {/* Like the Apple Account row at the top of Settings: the face (a tap changes the photo),
           then the name, number and one line of facts; the rest of the row opens the profile. */}
       <div className={`${settings.list} ${styles.plain}`}>
@@ -168,16 +167,16 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
           className={styles.account}
           face={
             customer.avatarUrl ? (
-              <Menu label={t('Profile photo')} className={styles.faceButton} trigger={face}>
+              <Menu label={t`Profile photo`} className={styles.faceButton} trigger={face}>
                 <MenuItem icon={<Camera aria-hidden />} onClick={() => fileInput.current?.click()}>
-                  {t('Choose a photo')}
+                  {t`Choose a photo`}
                 </MenuItem>
                 <MenuItem
                   variant='danger'
                   icon={<Trash aria-hidden />}
                   onClick={() => void setAvatar(null)}
                 >
-                  {t('Delete photo')}
+                  {t`Delete photo`}
                 </MenuItem>
               </Menu>
             ) : (
@@ -185,7 +184,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
                 type='button'
                 className={styles.faceButton}
                 onClick={() => fileInput.current?.click()}
-                aria-label={t('Add a profile photo')}
+                aria-label={t`Add a profile photo`}
               >
                 {face}
               </button>
@@ -197,8 +196,8 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
                 type='button'
                 className={styles.gear}
                 onClick={onOpenSettings}
-                aria-label={t('Settings')}
-                title={t('Settings')}
+                aria-label={t`Settings`}
+                title={t`Settings`}
               >
                 <GearSix aria-hidden />
               </button>
@@ -208,7 +207,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
           {profileHref ? (
             <NextLink href={profileHref} className={styles.accountLink}>
               {identity}
-              <span className={styles.srOnly}>{t('My profile')}</span>
+              <span className={styles.srOnly}>{t`My profile`}</span>
             </NextLink>
           ) : (
             <div className={styles.accountLink}>{identity}</div>
@@ -220,7 +219,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
         type='file'
         accept={ACCEPT}
         hidden
-        aria-label={t('Profile photo file')}
+        aria-label={t`Profile photo file`}
         onChange={handleFile}
       />
 
@@ -232,7 +231,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
               <span className={settings.glyph} aria-hidden>
                 <CalendarCheck />
               </span>
-              <span className={settings.label}>{t('My day')}</span>
+              <span className={settings.label}>{t`My day`}</span>
               {masterOf.length === 1 && <span className={settings.value}>{masterOf[0]?.name}</span>}
               <CaretRight className={settings.chevron} aria-hidden />
             </NextLink>

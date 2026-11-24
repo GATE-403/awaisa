@@ -10,7 +10,8 @@
   },
   "currency": {
     "code": "KGS",
-    "label": "som"
+    "label": "som",
+    "labels": { "en": "som", "ru": "сом", "ky": "сом" }
   },
   "locale": {
     "default": "en",

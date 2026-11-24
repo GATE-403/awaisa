@@ -2,11 +2,11 @@
 
 import { ButtonLink } from '@awaisa/ui/Button'
 import { Popover } from '@awaisa/ui/Popover'
-import NextLink from 'next/link'
+import { useLingui } from '@lingui/react/macro'
 import type { CSSProperties } from 'react'
 import { achievementLook, achievementTitle } from '@/entities/profile'
 import type { PublicProfile } from '@/shared/api/types'
-import { useT } from '@/shared/i18n'
+import { Link as NextLink } from '@/shared/i18n/navigation'
 import { describeGoal } from '../lib/goals'
 import styles from '../ProfilePage.module.css'
 
@@ -28,7 +28,7 @@ export const AchievementCard = ({
   isOwn,
   onClose,
 }: AchievementCardProps) => {
-  const t = useT()
+  const { t } = useLingui()
   if (!achievement) return null
   const look = achievementLook(achievement.id)
   const goal = achievement.earned ? null : describeGoal(achievement, places, t)
@@ -52,14 +52,14 @@ export const AchievementCard = ({
         </span>
         <div className={styles.medalCardBody}>
           <p className={styles.medalCardTitle}>{achievementTitle(achievement.title, t)}</p>
-          <p className={styles.medalCardText}>{t(achievement.description)}</p>
+          <p className={styles.medalCardText}>{achievement.description}</p>
           {achievement.earned ? (
-            <p className={styles.medalCardDone}>{t('Earned')}</p>
+            <p className={styles.medalCardDone}>{t`Earned`}</p>
           ) : (
             <>
               <span className={styles.medalCardTrack} aria-hidden />
               <p className={styles.medalCardText}>
-                {achievement.progress.current} {t('of')} {achievement.progress.target}
+                {achievement.progress.current} {t`of`} {achievement.progress.target}
                 {isOwn && goal ? ` · ${goal.hint}` : ''}
               </p>
               {isOwn && goal?.action && (
