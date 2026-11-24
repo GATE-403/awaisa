@@ -52,7 +52,7 @@
 }
 
 /* Signed in: the Apple Account row, then the work rows, right on the page: no white cards
-(«убери фон»), a hairline across the column between them, rows starting on the column's edge. */
+(the owner: no background), a hairline across the column between them, rows starting on the column's edge. */
 .header {
   display: flex;
   flex-direction: column;
@@ -172,7 +172,7 @@ a.accountLink:focus-visible {
   white-space: nowrap;
 }
 
-/* One row above the records («профиль должен быть самой удобной частью»): a smaller face, the
+/* One row above the records (the owner: the profile must be the handiest part): a smaller face, the
    name and its facts, and the gear for the settings at its end. */
 .account {
   min-height: 64px;

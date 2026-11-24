@@ -49,7 +49,7 @@ const THEMES: { value: Theme; label: string }[] = [
 
 // The account's settings right on the profile, at its foot like iOS Settings - no sheet to open:
 // name and number, the theme, the business side, one's data, signing out and deleting the account.
-// What «что важнее» reads as in the settings' summary line.
+// What «what matters most» reads as in the settings' summary line.
 const PRIORITY_WORDS: Record<NonNullable<Preferences['priorities']>[number], string> = {
   near: 'Nearby',
   soon: 'Free today',
@@ -58,7 +58,7 @@ const PRIORITY_WORDS: Record<NonNullable<Preferences['priorities']>[number], str
 }
 
 interface AccountSettingsProps {
-  /** Inside the «Настройки» tab the tab names it. */
+  /** Inside the «Settings» tab the tab names it. */
   isTitleHidden?: boolean
 }
 
@@ -105,7 +105,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
 
   if (!customer) return null
 
-  // «Женщине · маникюр, брови · до 2 500»: what the picks go by, at a glance.
+  // «Woman · manicure, brows · up to 2,500»: what the picks go by, at a glance.
   const tasteSummary = preferences
     ? [
         preferences.gender === 'female'
@@ -121,7 +121,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           .filter(Boolean)
           .join(', ') || null,
         preferences.budget
-          ? t('up to {amount}', { amount: preferences.budget.toLocaleString('ru-RU') })
+          ? t('up to {amount}', { amount: preferences.budget.toLocaleString('en-GB') })
           : null,
         (preferences.priorities ?? [])
           .map((value) => t(PRIORITY_WORDS[value]).toLowerCase())
@@ -148,9 +148,9 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       const file = new File([blob], `awaisa-${data.exportedAt.slice(0, 10)}.json`, {
         type: 'application/json',
       })
-      await saveFile(file, 'Мои данные Awaisa')
+      await saveFile(file, 'My Awaisa data')
     } catch (error) {
-      toast.show({ title: 'Не скачалось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: 'Download failed', description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsExporting(false)
     }
@@ -162,7 +162,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       const { slugs } = await deleteMyAccount()
       await Promise.all(slugs.map((slug) => refreshBusiness(slug))).catch(() => undefined)
       session.setCustomer(null)
-      toast.show({ title: 'Аккаунт удалён', type: 'success' })
+      toast.show({ title: 'Account deleted', type: 'success' })
       router.replace('/')
     } catch (error) {
       setIsDeleting(false)
@@ -324,13 +324,13 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <span className={styles.glyph} aria-hidden>
               <Flag />
             </span>
-            <span className={styles.label}>Модерация</span>
+            <span className={styles.label}>{t('Moderation')}</span>
             <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
       </div>
 
-      <SectionCaption className={styles.caption}>Ваши данные</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Your data')}</SectionCaption>
       <div className={styles.list}>
         <button
           type='button'
@@ -341,12 +341,12 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <DownloadSimple />
           </span>
-          <span className={styles.label}>Скачать мои данные</span>
+          <span className={styles.label}>{t('Download my data')}</span>
           <span className={styles.value}>{isExporting ? 'Preparing…' : 'JSON'}</span>
         </button>
-        {/* Signing out is a row of this group in red, not a lone word under it («выйти стоит в
-            углу как не свой»). It signs out at once: a menu of one «Выйти из аккаунта» was a
-            second tap asking the same thing («доп подтверждение сделано плохо»). */}
+        {/* Signing out is a row of this group in red, not a lone word under it (the owner: off in a
+            corner it looked out of place). It signs out at once: a menu of one «Sign out of account»
+            was a second tap asking the same thing (the owner: the extra confirmation was bad). */}
         <button
           type='button'
           className={`${styles.row} ${styles.signOutRow}`}
@@ -359,7 +359,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         </button>
       </div>
       <p className={styles.footnote}>
-        Профиль, записи, отзывы, бонусы, уведомления и избранное одним файлом.{' '}
+        {t('Your profile, bookings, reviews, bonuses, notifications and favourites in one file.')}{' '}
         {t('Bookings made on this phone stay on it after you sign out.')}
       </p>
 
@@ -370,11 +370,12 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           disabled={isDeleting}
           onConfirm={() => void handleDelete()}
         >
-          Удалить аккаунт
+          {t('Delete account')}
         </HoldButton>
         <p className={styles.footnote}>
-          Удалим профиль, фото, вход и уведомления, будущие записи отменим. Прошлые визиты останутся
-          в учёте мест, а ваши отзывы будут подписаны «Клиент».
+          {t(
+            'We delete your profile, photo, sign-in and notifications and cancel upcoming bookings. Past visits stay in the places’ records, and your reviews will be signed “Client”.',
+          )}
         </p>
       </div>
 

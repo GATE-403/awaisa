@@ -72,28 +72,20 @@ const EXPENSE_DAYS = 30
 const RECEIPT_RECHECK_MS = 2000
 const RECEIPT_FRESH_MS = 30_000
 
-const timeFormat = new Intl.DateTimeFormat('ru-RU', {
+const timeFormat = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit',
   minute: '2-digit',
   timeZone: BUSINESS_TIME_ZONE,
 })
-// Browsers have no Kyrgyz month names, so Kyrgyz keeps the Russian ones.
-const dayFormats = {
-  ru: new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    timeZone: BUSINESS_TIME_ZONE,
-  }),
-  en: new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    timeZone: BUSINESS_TIME_ZONE,
-  }),
-}
+const dayFormat = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: BUSINESS_TIME_ZONE,
+})
 
 const formatTime = (iso: string) => timeFormat.format(new Date(iso))
-const formatDay = (iso: string, t: Translate) => dayFormats.en.format(new Date(iso))
-const formatDateKey = (key: string, t: Translate) => formatDay(`${key}T12:00:00+06:00`, t)
+const formatDay = (iso: string) => dayFormat.format(new Date(iso))
+const formatDateKey = (key: string) => formatDay(`${key}T12:00:00+06:00`)
 
 const describeDifference = (difference: number | null, t: Translate) => {
   if (difference === null || difference === 0) return { text: t('balanced'), tone: undefined }
@@ -105,7 +97,7 @@ const describeDifference = (difference: number | null, t: Translate) => {
     : { text: t('over by {amount}', { amount: formatPrice(difference) }), tone: 'success' as const }
 }
 
-// «Касса»: the day's money at the counter. Shifts of a branch's till (optional: without one
+// "Till": the day's money at the counter. Shifts of a branch's till (optional: without one
 // visits and sales work as before), sales of products, and for the owner the expenses.
 export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
   const toast = useToast()
@@ -330,7 +322,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                 <li key={item.id} className={`${forms.settingRow} ${styles.row}`}>
                   <span className={`${forms.rowBody} ${styles.grow}`}>
                     <span className={forms.rowTitle}>
-                      {formatDay(item.openedAt, t)}, {formatTime(item.openedAt)}-
+                      {formatDay(item.openedAt)}, {formatTime(item.openedAt)}-
                       {item.closedAt ? formatTime(item.closedAt) : ''}
                     </span>
                     <span className={forms.rowMeta}>
@@ -355,8 +347,8 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
             title={t('No sales today')}
             text={
               desk.products.length > 0
-                ? t('Sell a product on its own or add it to a visit in «Visit outcome».')
-                : t('Mark stock items «Sold to clients» to sell them here.')
+                ? t('Sell a product on its own or add it to a visit in "Visit outcome".')
+                : t('Mark stock items "Sold to clients" to sell them here.')
             }
           />
         ) : (
@@ -445,7 +437,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
             variant='inline'
             title={t('Add your first expense')}
             text={t(
-              'Rent, supplies, salaries, marketing: «Analytics» works out profit from these and revenue.',
+              'Rent, supplies, salaries, marketing: "Analytics" works out profit from these and revenue.',
             )}
             action={<Button onClick={() => setEditingExpense('new')}>{t('Add expense')}</Button>}
           />
@@ -464,7 +456,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
                         {expenseCategoryLabel(expense.category, t)}
                       </span>
                       <span className={forms.rowMeta}>
-                        {[formatDateKey(expense.date, t), expense.note].filter(Boolean).join(' · ')}
+                        {[formatDateKey(expense.date), expense.note].filter(Boolean).join(' · ')}
                       </span>
                     </span>
                     <span className={forms.cellValue}>{formatPrice(expense.amount)}</span>
@@ -474,7 +466,7 @@ export const CashDeskTab = ({ slug, business, catalog }: CashDeskTabProps) => {
               ))}
             </ul>
             <RowNote>
-              {t('{amount} over {days} days. Profit by period is in «Analytics».', {
+              {t('{amount} over {days} days. Profit by period is in "Analytics".', {
                 days: EXPENSE_DAYS,
                 amount: formatPrice(expenses.total),
               })}
@@ -591,7 +583,7 @@ const ShiftDetails = ({ shift }: { shift: CashShift }) => {
           </li>
         </ul>
         <RowNote>
-          {t('Cash for visits: visits marked «Arrived» during the shift at this branch.')}
+          {t('Cash for visits: visits marked "Arrived" during the shift at this branch.')}
         </RowNote>
       </section>
       {shift.movements.length > 0 && (

@@ -89,7 +89,7 @@ export class CashDeskService {
       'SELECT 1 FROM "branches" WHERE "id" = $1 AND "business_id" = $2',
       [input.branchId, businessId],
     )
-    if (!branch) throw new NotFoundException('Филиал не найден')
+    if (!branch) throw new NotFoundException('Branch not found')
     try {
       const [row] = await this.query(
         `INSERT INTO "cash_shifts" ("business_id", "branch_id", "opened_by", "opening_cash")
@@ -99,7 +99,7 @@ export class CashDeskService {
       return this.toShift(row as Row)
     } catch (error) {
       if ((error as { code?: string }).code === UNIQUE_VIOLATION) {
-        throw new ConflictException('В этом филиале смена уже открыта')
+        throw new ConflictException('A shift is already open at this branch')
       }
       throw error
     }
@@ -112,7 +112,7 @@ export class CashDeskService {
     input: CashMovementBody,
   ) {
     const shift = await this.findShift(businessId, shiftId)
-    if (shift.closed_at) throw new BadRequestException('Смена уже закрыта')
+    if (shift.closed_at) throw new BadRequestException('The shift is already closed')
     await this.query(
       `INSERT INTO "cash_movements" ("shift_id", "kind", "amount", "reason", "created_by")
        VALUES ($1, $2, $3, $4, $5)`,
@@ -129,7 +129,7 @@ export class CashDeskService {
     input: CloseShiftBody,
   ) {
     const shift = await this.findShift(businessId, shiftId)
-    if (shift.closed_at) throw new BadRequestException('Смена уже закрыта')
+    if (shift.closed_at) throw new BadRequestException('The shift is already closed')
     const now = new Date()
     const view = await this.toShift(shift, now)
     const [row] = await this.query(
@@ -146,7 +146,7 @@ export class CashDeskService {
         input.note ?? null,
       ],
     ).then((result) => returnedRows(result))
-    if (!row) throw new BadRequestException('Смена уже закрыта')
+    if (!row) throw new BadRequestException('The shift is already closed')
     return this.toShift(row)
   }
 
@@ -194,7 +194,7 @@ export class CashDeskService {
         ),
       )
       if (products.length !== itemIds.length)
-        throw new BadRequestException('Этот товар не продаётся')
+        throw new BadRequestException('This product is not for sale')
       const stock = new Map(
         products.map((row) => [
           String(row.id),
@@ -203,7 +203,7 @@ export class CashDeskService {
       )
       const short = shortages(input.items, stock)
       if (short.length > 0)
-        throw new BadRequestException(`Не хватает на складе: ${short.join(', ')}`)
+        throw new BadRequestException(`Not enough in stock: ${short.join(', ')}`)
 
       const byId = new Map(products.map((row) => [String(row.id), row]))
       const lines = input.items.map((line) => {
@@ -219,7 +219,7 @@ export class CashDeskService {
       const phone = input.customerPhone
         ? normalizePhone(input.customerPhone)
         : ((booking?.customer_phone as string | null) ?? null)
-      if (input.customerPhone && !phone) throw new BadRequestException('Проверьте номер клиента')
+      if (input.customerPhone && !phone) throw new BadRequestException("Check the client's number")
       const sellerId = await this.resolveSeller(
         manager,
         businessId,
@@ -293,7 +293,7 @@ export class CashDeskService {
             businessId,
           ]),
         )
-        if (!exists) throw new NotFoundException('Продажа не найдена')
+        if (!exists) throw new NotFoundException('Sale not found')
         return
       }
       const removed = returnedRows(
@@ -328,7 +328,7 @@ export class CashDeskService {
        WHERE s."id" = $1 AND s."business_id" = $2`,
       [saleId, businessId],
     )
-    if (!row) throw new NotFoundException('Продажа не найдена')
+    if (!row) throw new NotFoundException('Sale not found')
     const [sale] = await this.withReceipts([this.toSale(row)])
     return sale as Sale
   }
@@ -343,7 +343,7 @@ export class CashDeskService {
       'SELECT * FROM "cash_shifts" WHERE "id" = $1 AND "business_id" = $2',
       [shiftId, businessId],
     )
-    if (!row) throw new NotFoundException('Смена не найдена')
+    if (!row) throw new NotFoundException('Shift not found')
     return row
   }
 
@@ -355,8 +355,8 @@ export class CashDeskService {
         [bookingId, businessId],
       ),
     )
-    if (!row) throw new NotFoundException('Запись не найдена')
-    if (row.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    if (!row) throw new NotFoundException('Booking not found')
+    if (row.status !== 'confirmed') throw new BadRequestException('The booking is cancelled')
     return row
   }
 
@@ -369,8 +369,8 @@ export class CashDeskService {
         [businessId, branchId],
       ),
     )
-    if (!row) throw new BadRequestException('Добавьте филиал')
-    if (branchId && row.id !== branchId) throw new NotFoundException('Филиал не найден')
+    if (!row) throw new BadRequestException('Add a branch')
+    if (branchId && row.id !== branchId) throw new NotFoundException('Branch not found')
     return String(row.id)
   }
 
@@ -382,7 +382,7 @@ export class CashDeskService {
         businessId,
       ]),
     )
-    if (!row) throw new BadRequestException('Мастер не найден')
+    if (!row) throw new BadRequestException('Specialist not found')
     return String(row.id)
   }
 

@@ -141,7 +141,7 @@
   min-height: var(--control-height-md);
 }
 
-/* «Отправить снова через 58 с» while it waits: the kit fades a disabled link, which vanished over
+/* «Send again in 58 s» while it waits: the kit fades a disabled link, which vanished over
    the light; here it is plain secondary text until it can be pressed. */
 .form .links > [data-disabled] {
   opacity: 1;
@@ -171,7 +171,7 @@
 }
 
 /* A calm dark patch behind the words, so the band of light passing behind them never takes the
-   white text's contrast («читаемость упала»). The wall's own near-black, so nothing turns grey.
+   white text's contrast (the owner: it got harder to read). The wall's own near-black, so nothing turns grey.
    Every step has it: the code and the name stand on the same light. */
 .hero::after,
 .form::after {
@@ -209,7 +209,7 @@
 }
 
 /* Over the colour the headline is solid white in both themes, two lines, the second one lighter
-   in weight, not in colour: translucent white over the grain read as dirt («грязно»). */
+   in weight, not in colour: translucent white over the grain read as dirt (the owner: it looked dirty). */
 .headline {
   margin-top: var(--space-5);
   color: white;
@@ -239,7 +239,7 @@
   padding-top: var(--space-8);
 }
 
-/* «или» between the number and Telegram: two hairlines and a quiet word. */
+/* «or» between the number and Telegram: two hairlines and a quiet word. */
 .or {
   display: flex;
   align-items: center;
@@ -267,7 +267,7 @@
 
 /* The number on the colour under the headline, where the colour is always solid: a small light
    caption over big white digits, no box and no line, like the code's cells on the next step.
-   No text shadow: over the grain of the colour it read as dirt («грязно»). */
+   No text shadow: over the grain of the colour it read as dirt (the owner: it looked dirty). */
 .number {
   align-items: center;
   gap: var(--space-2);

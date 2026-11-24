@@ -11,7 +11,7 @@ interface BoardViewSwitchProps {
   hrefs: Record<View, string>
 }
 
-// «Мастера · Места» as the kit's segmented control: one obvious switch, the board follows the URL.
+// «Specialists · Places» as the kit's segmented control: one obvious switch, the board follows the URL.
 export const BoardViewSwitch = ({ view, hrefs }: BoardViewSwitchProps) => {
   const t = useT()
   const router = useRouter()

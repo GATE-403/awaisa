@@ -28,7 +28,7 @@ const ARROWS: Record<string, [number, number]> = {
 }
 
 // Weekday × hour: one hue, light → dark (sequential), and something to explore rather than a
-// picture («больше интерактивности, а не как декор»): pointing at an hour, tapping it or moving
+// picture ("more interactive, not decoration"): pointing at an hour, tapping it or moving
 // with the arrows reads it out in the line above (the busiest hour stays beside it to compare),
 // rings the cell and lights its day and hour. With nothing picked the line names the peak, so the
 // headline never depends on reading a colour.

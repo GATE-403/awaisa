@@ -11,7 +11,7 @@ interface LookPhotoProps {
   clientName: string
 }
 
-// «Хочу так»: the work the client booked from, beside the visit for the master. A small square
+// «I want this»: the work the client booked from, beside the visit for the master. A small square
 // with one footnote; a tap opens it full screen.
 export const LookPhoto = ({ url, clientName }: LookPhotoProps) => {
   const t = useT()

@@ -6,7 +6,7 @@ import { useT } from '@/shared/i18n'
 import { useMyWaitlist } from '../model/useMyWaitlist'
 import styles from './WaitlistList.module.css'
 
-// «Жду окна» in the profile: what the client waits for, and the time once one opened up.
+// «Waiting for a slot» in the profile: what the client waits for, and the time once one opened up.
 export const WaitlistList = () => {
   const t = useT()
   const { entries, leave } = useMyWaitlist()

@@ -89,7 +89,7 @@ export class AlertsService implements OnApplicationBootstrap, OnApplicationShutd
           () => null,
           (error: unknown) => String(error),
         )
-      : 'не подключился при старте'
+      : 'did not connect at start'
     if (problem && this.isDue('redis')) await this.telegram.sendAlert(redisAlertText(problem))
   }
 

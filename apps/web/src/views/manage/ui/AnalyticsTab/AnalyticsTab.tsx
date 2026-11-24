@@ -154,11 +154,11 @@ const toCsv = (report: AnalyticsReport, money: MoneyReport | null) => {
       'Specialist',
       'Visits',
       'Revenue',
-      'Процент',
+      'Percent',
       'From services',
       'From products',
       'Salary',
-      'Минимум',
+      'Minimum',
       'Earned',
       'Paid out',
       'Due',
@@ -177,14 +177,14 @@ const toCsv = (report: AnalyticsReport, money: MoneyReport | null) => {
       master.pay?.due ?? '',
     ]),
     [],
-    ['Client', 'Phone', 'Visits', 'Потратил', 'Последний визит', 'New'],
+    ['Client', 'Phone', 'Visits', 'Spent', 'Last visit', 'New'],
     ...report.clients.map((client) => [
       client.name,
       client.phone,
       client.visits,
       client.revenue,
       client.lastVisit,
-      client.isNew ? 'да' : 'none',
+      client.isNew ? 'yes' : 'no',
     ]),
     ...moneyCsvRows(money),
   ]
@@ -678,7 +678,7 @@ const MastersGroup = ({ masters, onOpen }: MastersGroupProps) => {
             {isPayMissing && `${t('Some specialists have no pay set.')} `}
           </>
         ) : (
-          `${t('Set pay on the specialist’s card in «Page», and what each is owed will show here.')} `
+          `${t('Set pay on the specialist’s card in "Page", and what each is owed will show here.')} `
         )}
         {t('Load: the share of working hours taken by visits.')}
       </p>
@@ -691,7 +691,7 @@ interface PayLineProps {
   percent: number | null
 }
 
-// «к выплате 1 000 сом · 40%» while one percent decides it, «выплачено» once it is settled.
+// "1,000 som due · 40%" while one percent decides it, "paid out" once it is settled.
 const PayLine = ({ pay, percent }: PayLineProps) => {
   const t = useT()
   const { formatMoney } = analyticsFormat(t)

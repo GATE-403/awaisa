@@ -94,7 +94,7 @@ export const ExpenseSheet = ({
               <Input
                 variant='plain'
                 aria-label={t('Custom category')}
-                placeholder={t('For example, «Cleaning»')}
+                placeholder={t('For example, "Cleaning"')}
                 autoFocus
                 maxLength={40}
                 value={customCategory}

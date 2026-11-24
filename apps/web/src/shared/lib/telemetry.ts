@@ -44,13 +44,8 @@ const readDevice = (): DeviceProfile => {
     navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }
   ).connection
   const effective = connection?.effectiveType
-  let lang: DeviceProfile['lang'] = 'ru'
-  try {
-    const stored = window.localStorage.getItem('awaisa:lang:v1')
-    if (stored === 'ky' || stored === 'en') lang = stored
-  } catch {
-    // Private mode: the default language.
-  }
+  // The app speaks English only.
+  const lang: DeviceProfile['lang'] = 'en'
   const isIos =
     /iPhone|iPad|iPod/.test(agent) || (/Macintosh/.test(agent) && navigator.maxTouchPoints > 1)
   device = {
@@ -117,7 +112,7 @@ const trackStep = (step: FunnelStep, slug?: string, meta?: FunnelEventMeta) => {
 /** A form refused a value: which field (a code like `phone`), never what was in it. */
 const trackFormError = (field: string, slug?: string) => trackStep('form_error', slug, { field })
 
-/** An action in a toast was used in time («Вернуть»): proof the toast stayed long enough. */
+/** An action in a toast was used in time («Undo»): proof the toast stayed long enough. */
 const trackToastAction = (kind: string) => trackStep('toast_action', undefined, { kind })
 
 /** An error the visitor ran into; the same message is sent once, five at most per page. */

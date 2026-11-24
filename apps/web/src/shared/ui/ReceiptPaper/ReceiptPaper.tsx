@@ -14,16 +14,16 @@ interface ReceiptPaperProps {
 type QrMatrix = { size: number; dark: boolean[] }
 
 const TAX_REGIMES: Record<FiscalReceipt['taxRegime'], string> = {
-  general: 'Общий режим',
+  general: 'General regime',
   single: 'Single tax',
   patent: 'Patent',
 }
 
-const moneyFormat = new Intl.NumberFormat('ru-RU', {
+const moneyFormat = new Intl.NumberFormat('en-GB', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 })
-const dateFormat = new Intl.DateTimeFormat('ru-RU', {
+const dateFormat = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
@@ -35,7 +35,7 @@ const dateFormat = new Intl.DateTimeFormat('ru-RU', {
 const money = (value: number) => moneyFormat.format(value)
 const formatCount = (value: number) => (Number.isInteger(value) ? String(value) : money(value))
 
-/** A rate on the receipt: «НДС 12%», «НсП 2%» - the same rate on every line reads once. */
+/** A rate on the receipt: «VAT 12%», «Sales tax 2%» - the same rate on every line reads once. */
 const rateOf = (receipt: FiscalReceipt, key: 'vatRate' | 'salesTaxRate') => {
   const rates = [...new Set(receipt.lines.map((line) => line[key]))]
   return rates.length === 1 ? ` ${rates[0]}%` : ''
@@ -71,15 +71,15 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
     : ''
 
   return (
-    <article className={styles.paper} data-surface={surface} aria-label='Кассовый чек'>
+    <article className={styles.paper} data-surface={surface} aria-label='Till receipt'>
       <header className={styles.head}>
         <span className={styles.seller}>{receipt.businessName}</span>
         {receipt.address && <span>{receipt.address}</span>}
-        {receipt.inn && <span>ИНН {receipt.inn}</span>}
+        {receipt.inn && <span>Tax ID {receipt.inn}</span>}
         <span>{TAX_REGIMES[receipt.taxRegime]}</span>
         <span className={styles.kind}>
-          {receipt.kind === 'refund' ? 'Возврат прихода' : 'Delivery'}
-          {receipt.isTest && ' · тестовый'}
+          {receipt.kind === 'refund' ? 'Sale refund' : 'Sale'}
+          {receipt.isTest && ' · test'}
         </span>
       </header>
 
@@ -97,23 +97,23 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
 
       <dl className={styles.totals}>
         <div className={styles.total}>
-          <dt>Итого</dt>
+          <dt>Total</dt>
           <dd>{money(receipt.total)}</dd>
         </div>
         {receipt.vatAmount > 0 && (
           <div>
-            <dt>в т. ч. НДС{rateOf(receipt, 'vatRate')}</dt>
+            <dt>incl. VAT{rateOf(receipt, 'vatRate')}</dt>
             <dd>{money(receipt.vatAmount)}</dd>
           </div>
         )}
         {receipt.salesTaxAmount > 0 && (
           <div>
-            <dt>в т. ч. НсП{rateOf(receipt, 'salesTaxRate')}</dt>
+            <dt>incl. sales tax{rateOf(receipt, 'salesTaxRate')}</dt>
             <dd>{money(receipt.salesTaxAmount)}</dd>
           </div>
         )}
         <div>
-          <dt>{receipt.payment === 'cash' ? 'Cash' : 'Безналичными'}</dt>
+          <dt>{receipt.payment === 'cash' ? 'Cash' : 'Cashless'}</dt>
           <dd>{money(receipt.total)}</dd>
         </div>
       </dl>
@@ -122,16 +122,16 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
         <footer className={styles.foot}>
           <dl className={styles.fiscal}>
             <div>
-              <dt>ФД №</dt>
+              <dt>Fiscal doc. no.</dt>
               <dd>{receipt.fiscalNumber}</dd>
             </div>
             <div>
-              <dt>ФП</dt>
+              <dt>Fiscal sign</dt>
               <dd>{receipt.fiscalSign}</dd>
             </div>
             {receipt.issuedAt && (
               <div>
-                <dt>Дата</dt>
+                <dt>Date</dt>
                 <dd>{dateFormat.format(new Date(receipt.issuedAt))}</dd>
               </div>
             )}
@@ -141,7 +141,7 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
               viewBox={`-2 -2 ${qr.size + 4} ${qr.size + 4}`}
               className={styles.qr}
               role='img'
-              aria-label='QR-код чека'
+              aria-label='Receipt QR code'
               shapeRendering='crispEdges'
             >
               <rect x={-2} y={-2} width={qr.size + 4} height={qr.size + 4} fill='#fff' />
@@ -154,10 +154,10 @@ export const ReceiptPaper = ({ receipt, surface = 'page' }: ReceiptPaperProps) =
       ) : (
         <p className={styles.state} data-tone={receipt.status === 'failed' ? 'danger' : undefined}>
           {receipt.status === 'failed'
-            ? `Касса не приняла чек: ${receipt.error ?? 'нет ответа'}`
+            ? `The till refused the receipt: ${receipt.error ?? 'no answer'}`
             : receipt.status === 'cancelled'
-              ? 'Чек отменён до отправки'
-              : 'Чек отправляется в кассу'}
+              ? 'Receipt cancelled before it was sent'
+              : 'Receipt is on its way to the till'}
         </p>
       )}
     </article>

@@ -6,10 +6,10 @@ const optionalText = (max: number) => z.string().trim().max(max).default('')
 const kindSchema = z.enum(BUSINESS_KINDS as [string, ...string[]])
 
 const createBusinessSchema = z.object({
-  name: z.string().trim().min(2, 'Укажите название').max(120),
+  name: z.string().trim().min(2, 'Enter a name').max(120),
   slug: z.string().trim().toLowerCase().min(3).max(48),
   kind: kindSchema.default('beauty'),
-  city: z.string().trim().min(1).max(80).default('Бишкек'),
+  city: z.string().trim().min(1).max(80).default('Bishkek'),
   address: optionalText(200),
   phone: optionalText(32),
   latitude: z.number().min(-90).max(90).nullable().optional(),
@@ -46,7 +46,7 @@ const updateBusinessSchema = z.object({
     .max(500)
     .refine(
       (value) => value === '' || /^https:\/\//.test(value),
-      'Ссылка должна начинаться с https://',
+      'The link must start with https://',
     )
     .optional(),
   slotMinutes: z
@@ -54,7 +54,7 @@ const updateBusinessSchema = z.object({
     .int()
     .refine(
       (value) => (SLOT_STEPS as readonly number[]).includes(value),
-      'Шаг: 15, 30 или 60 минут',
+      'Step: 15, 30 or 60 minutes',
     )
     .optional(),
   isPublished: z.boolean().optional(),
@@ -68,12 +68,12 @@ const hoursSchema = z
         opensMinutes: z.number().int().min(0).max(1440),
         closesMinutes: z.number().int().min(0).max(1440),
       })
-      .refine((day) => day.closesMinutes > day.opensMinutes, 'Закрытие должно быть позже открытия'),
+      .refine((day) => day.closesMinutes > day.opensMinutes, 'Closing must be after opening'),
   )
   .max(7)
   .refine(
     (days) => new Set(days.map((day) => day.weekday)).size === days.length,
-    'Каждый день недели - один раз',
+    'Each weekday only once',
   )
 
 // Pages for the catalog's endless scroll: `offset` and `limit` (≤ 60); `sort=price` orders the
@@ -101,11 +101,11 @@ const catalogQuerySchema = z.object({
 
 const slugQuerySchema = z.object({ slug: z.string().trim().toLowerCase().max(64) })
 
-const categorySchema = z.object({ name: z.string().trim().min(1, 'Укажите название').max(120) })
+const categorySchema = z.object({ name: z.string().trim().min(1, 'Enter a name').max(120) })
 
 const serviceSchema = z.object({
   categoryId: z.string().trim().min(1).max(64),
-  name: z.string().trim().min(1, 'Укажите название').max(160),
+  name: z.string().trim().min(1, 'Enter a name').max(160),
   description: optionalText(500),
   durationMinutes: z
     .number()
@@ -113,7 +113,7 @@ const serviceSchema = z.object({
     .min(5)
     .max(12 * 60),
   price: z.number().int().min(0).max(10_000_000),
-  // Prepayment for online bookings, сом; null or 0 = none.
+  // Prepayment for online bookings, som; null or 0 = none.
   deposit: z
     .number()
     .int()
@@ -122,27 +122,27 @@ const serviceSchema = z.object({
     .nullable()
     .default(null)
     .transform((value) => (value ? value : null)),
-  // «Пора прийти снова» after this many days; null = no reminder.
+  // 'Due again' after this many days; null = no reminder.
   rebookDays: z.number().int().min(1).max(365).nullable().default(null),
   isPopular: z.boolean().default(false),
   isActive: z.boolean().default(true),
 })
 
 const specialistSchema = z.object({
-  name: z.string().trim().min(1, 'Укажите имя').max(160),
+  name: z.string().trim().min(1, 'Enter a name').max(160),
   role: optionalText(120),
   serviceIds: z.array(z.string().trim().min(1).max(64)).max(200).default([]),
   isActive: z.boolean().default(true),
   // null = the master works at every branch.
   branchId: z.uuid().nullable().default(null),
-  // The master's own number for «Мой день»; empty = no access.
+  // The master's own number for 'My day'; empty = no access.
   phone: z.string().trim().max(32).default(''),
-  // Optional: «Зарплата» saves the whole scheme through `PUT …/specialists/:id/pay`.
+  // Optional: 'Pay' saves the whole scheme through `PUT …/specialists/:id/pay`.
   commissionPercent: z.number().int().min(0).max(100).nullable().optional(),
 })
 
 const branchSchema = z.object({
-  name: z.string().trim().min(1, 'Укажите название').max(120),
+  name: z.string().trim().min(1, 'Enter a name').max(120),
   address: z.string().trim().max(200).default(''),
   phone: z.string().trim().max(32).default(''),
   latitude: z.number().min(-90).max(90).nullable().default(null),
@@ -166,7 +166,7 @@ const masterHoursSchema = z.object({
   days: hoursSchema,
 })
 
-const LEAVE_DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата в формате YYYY-MM-DD')
+const LEAVE_DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
 
 const leaveSchema = z
   .object({
@@ -174,7 +174,7 @@ const leaveSchema = z
     endsOn: LEAVE_DATE,
     reason: z.string().trim().max(160).default(''),
   })
-  .refine((leave) => leave.endsOn >= leave.startsOn, 'Конец отпуска раньше начала')
+  .refine((leave) => leave.endsOn >= leave.startsOn, 'The leave ends before it starts')
 
 type MasterHoursInput = z.infer<typeof masterHoursSchema>
 type LeaveBody = z.infer<typeof leaveSchema>

@@ -68,7 +68,7 @@ describe('AuthService.requestCode', () => {
   it('refuses when Telegram cannot take the code, with no SMS instead', async () => {
     const { service, codes, sms } = setup({ gatewayAnswer: null })
 
-    await expect(service.requestCode(PHONE)).rejects.toThrow('Не получилось отправить код')
+    await expect(service.requestCode(PHONE)).rejects.toThrow('Could not send a code')
     expect(sms.send).not.toHaveBeenCalled()
     expect(codes.save).not.toHaveBeenCalled()
   })
@@ -77,7 +77,7 @@ describe('AuthService.requestCode', () => {
     const { service, codes } = setup({ gateway: false })
 
     expect(service.isCodeAvailable).toBe(false)
-    await expect(service.requestCode(PHONE)).rejects.toThrow('Войдите через Telegram-бота')
+    await expect(service.requestCode(PHONE)).rejects.toThrow('Sign in with the Telegram bot')
     expect(codes.find).not.toHaveBeenCalled()
   })
 

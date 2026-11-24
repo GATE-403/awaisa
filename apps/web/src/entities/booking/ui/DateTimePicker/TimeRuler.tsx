@@ -9,7 +9,7 @@ import styles from './TimeRuler.module.css'
 interface TimeRulerProps {
   slots: TimeSlot[]
   time: string | null
-  /** The visit's length, for «до 14:45» under the time. */
+  /** The visit's length, for «until 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
   /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
@@ -31,7 +31,7 @@ const toTime = (minutes: number) =>
 
 // The day as a ruler, like a dial: free times stand tall, taken ones lie low, so the shape of the
 // day - a busy morning, a free evening - reads before any number. Scrolling moves the day under
-// the needle and the big time follows it; a tap on a free tick (or «Выбрать») takes that time.
+// the needle and the big time follows it; a tap on a free tick (or «Choose») takes that time.
 export const TimeRuler = ({
   slots,
   time,

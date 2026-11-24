@@ -18,7 +18,7 @@ interface BookingHistoryProps {
   onRated?: (booking: Booking) => void
 }
 
-// The latest few; the rest behind «Ещё N» on a fade, like the upcoming visits.
+// The latest few; the rest behind «N more» on a fade, like the upcoming visits.
 const FIRST = 5
 
 const getCode = (id: string) => id.replace(/-/g, '').slice(0, 8).toUpperCase()

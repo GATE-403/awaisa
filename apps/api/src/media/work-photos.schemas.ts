@@ -8,7 +8,7 @@ const updateWorkPhotoSchema = z.object({
   isHidden: z.boolean(),
 })
 
-// Every photo of the place, first to last («Работы» arranged by dragging).
+// Every photo of the place, first to last ('Works' arranged by dragging).
 const reorderWorkPhotosSchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(30),
 })

@@ -47,7 +47,7 @@ type SearchEntry = {
   tab: ManageTab
   label: string
   tone: SettingsTone
-  /** Where it lives when not in the settings list («на Странице»). */
+  /** Where it lives when not in the settings list ("on the Page"). */
   place?: string
   words: string
 }
@@ -68,38 +68,38 @@ const ICONS: Partial<Record<ManageTab, Icon>> = {
 
 // Words people look for a setting by, beside its name.
 const KEYWORDS: Partial<Record<ManageTab, string>> = {
-  branches: 'адрес филиал карта метка ссылка запись телефон',
-  notifications: 'telegram телеграм бот уведомления новые записи отзывы',
-  team: 'сотрудники администратор доступ команда',
-  promotions: 'скидка промокод акция счастливые часы первый визит',
-  loyalty: 'бонусы абонемент сертификат кэшбэк',
-  stock: 'склад материалы расход остаток приход',
-  fiscal: 'чеки ккм фискальный инн ндс нсп налог ekassa гнс',
-  billing: 'тариф оплата подписка смс пакет пробный период',
+  branches: 'address branch location map pin link booking phone',
+  notifications: 'telegram bot notifications alerts new bookings reviews',
+  team: 'staff administrator access team employees',
+  promotions: 'discount promo code offer happy hours first visit',
+  loyalty: 'bonuses pass subscription certificate gift cashback',
+  stock: 'stock inventory materials supplies usage balance delivery',
+  fiscal: 'receipts till fiscal tin vat sales tax ekassa',
+  billing: 'plan payment subscription sms pack trial',
 }
 
-// What lives on «Страница» now, still found by the search.
+// What lives on "Page" now, still found by the search.
 const PAGE_ENTRIES: SearchEntry[] = [
   {
     tab: 'services',
     label: 'Services',
     tone: 'blue',
     place: 'on the Page',
-    words: 'услуги цены категории длительность предоплата',
+    words: 'services prices categories duration length deposit prepayment',
   },
   {
     tab: 'masters',
     label: 'Specialists',
     tone: 'orange',
     place: 'on the Page',
-    words: 'мастера график отпуск процент зарплата',
+    words: 'specialists masters staff schedule leave holiday percent pay salary',
   },
   {
     tab: 'hours',
     label: 'Opening hours',
     tone: 'orange',
     place: 'on the Page',
-    words: 'часы график выходной шаг записи слоты',
+    words: 'hours schedule day off slot step',
   },
 ]
 
@@ -112,12 +112,12 @@ const SETTINGS_ENTRIES: SearchEntry[] = SETTINGS_GROUPS.flatMap((group) =>
   })),
 )
 
-const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е')
+const normalize = (text: string) => text.toLowerCase()
 
 // macOS System Settings on wide screens (a search field over a quiet sidebar, the open row on a
 // fill), on phones rows right on the page with hairlines and the search floating at the foot;
 // each row leads with a thin glyph in its colour, no tile. Each row says
-// on its right what is inside («2», «1 действует», «Бонусы 5%», «2 заканчиваются» in red), so the
+// on its right what is inside ("2", "1 running", "Bonuses 5%", "2 running low" in red), so the
 // state of the business reads without opening anything.
 export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsNavProps) => {
   const t = useT()
@@ -201,13 +201,13 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
     }),
   }
 
-  // By the start of words, each typed word somewhere («або» finds «абонемент», not «работы»);
-  // the name is searched as shown too, so the search works in every language.
+  // By the start of words, each typed word somewhere ("pro" finds "promo code", not "improve");
+  // the name is searched as shown too.
   const typed = needle.split(/\s+/).filter(Boolean)
   const results = needle
     ? [...SETTINGS_ENTRIES, ...PAGE_ENTRIES].filter((entry) => {
         const words = normalize(`${t(entry.label)} ${entry.label} ${entry.words}`).split(
-          /[\s«»().,-]+/,
+          /[\s"().,-]+/,
         )
         return typed.every((part) => words.some((word) => word.startsWith(part)))
       })

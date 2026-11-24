@@ -38,9 +38,9 @@ const text = (value: unknown) => (value === null || value === undefined ? null :
 
 /**
  * Reports from viewers and what platform admins decide about them. A thing reported by three
- * different devices or accounts hides itself until a moderator looks (`shouldAutoHide`); «Оставить»
- * settles the reports and stops that for good, «Скрыть», «Удалить» and, for people,
- * «Заблокировать» act on it. Every decision is kept in a journal with what the thing looked like.
+ * different devices or accounts hides itself until a moderator looks (`shouldAutoHide`); 'Keep'
+ * settles the reports and stops that for good, 'Hide', 'Delete' and, for people,
+ * 'Block' act on it. Every decision is kept in a journal with what the thing looked like.
  */
 @Injectable()
 export class ModerationService {
@@ -66,9 +66,9 @@ export class ModerationService {
     customer: Customer | null,
   ) {
     const reporter = reporterKey(customer?.id ?? null, input.session ?? null)
-    if (!reporter) throw new BadRequestException('Не удалось отправить жалобу, обновите страницу')
+    if (!reporter) throw new BadRequestException('Could not send the report, refresh the page')
     const target = await this.load(input.targetType, input.targetId)
-    if (!target) throw new NotFoundException('Не нашли, на что жалоба')
+    if (!target) throw new NotFoundException('Could not find what is being reported')
 
     await this.query(
       `INSERT INTO "reports" ("target_type", "target_id", "reason", "reporter", "customer_id")
@@ -136,12 +136,12 @@ export class ModerationService {
   ): Promise<ModerationDecision> {
     const { targetType, targetId, action } = input
     if (!canApply(targetType, action)) {
-      throw new BadRequestException('Заблокировать можно только автора профиля')
+      throw new BadRequestException("Only a profile's author can be blocked")
     }
     const target = await this.load(targetType, targetId)
     // Gone already (the owner deleted the photo): the reports can still be settled.
     if (!target && action !== 'keep' && action !== 'delete') {
-      throw new NotFoundException('Этого уже нет')
+      throw new NotFoundException('This is already gone')
     }
     const reports = await this.openReports(targetType, targetId)
 
@@ -323,7 +323,7 @@ export class ModerationService {
     return Number(row?.count ?? 0)
   }
 
-  /** The latest decision about it was «Оставить». */
+  /** The latest decision about it was 'Keep'. */
   private async isKept(type: ReportTargetType, id: string) {
     const [row] = await this.query(
       `SELECT "action" FROM "moderation_decisions" WHERE "target_type" = $1 AND "target_id" = $2
@@ -356,7 +356,7 @@ export class ModerationService {
       preview: {
         title:
           [text(row.serviceName), text(row.specialistName)].filter(Boolean).join(' · ') ||
-          'Фото работы',
+          'Work photo',
         text: text(row.serviceName),
         imageUrl: String(row.url),
         rating: null,
@@ -425,7 +425,7 @@ export class ModerationService {
     const about = text(person.about)
     return {
       preview: {
-        title: String(person.name || 'Без имени'),
+        title: String(person.name || 'No name'),
         text: [status, about].filter(Boolean).join('\n') || null,
         imageUrl: text(person.avatarUrl),
         rating: null,

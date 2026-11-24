@@ -3,14 +3,14 @@ import { z } from 'zod'
 const MONEY = z.number().min(0).max(100_000_000)
 const POSITIVE_MONEY = z.number().gt(0).max(100_000_000)
 const METHOD = z.enum(['cash', 'card', 'transfer'])
-const DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD')
+const DATE = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
 
 const openShiftSchema = z.object({ branchId: z.uuid(), openingCash: MONEY })
 
 const cashMovementSchema = z.object({
   kind: z.enum(['in', 'out']),
   amount: POSITIVE_MONEY,
-  reason: z.string().trim().min(1, 'Укажите причину').max(160),
+  reason: z.string().trim().min(1, 'Enter a reason').max(160),
 })
 
 const closeShiftSchema = z.object({
@@ -27,14 +27,14 @@ const saleSchema = z.object({
   paymentMethod: METHOD,
   items: z
     .array(z.object({ itemId: z.uuid(), quantity: z.number().gt(0).max(10_000) }))
-    .min(1, 'Добавьте товар')
+    .min(1, 'Add a product')
     .max(50),
 })
 
 const salesQuerySchema = z.object({ bookingId: z.uuid().optional() })
 
 const expenseSchema = z.object({
-  category: z.string().trim().min(1, 'Выберите статью').max(40),
+  category: z.string().trim().min(1, 'Choose a category').max(40),
   amount: POSITIVE_MONEY,
   date: DATE,
   branchId: z.uuid().nullable().default(null),
@@ -45,7 +45,7 @@ const periodQuerySchema = z.object({
   days: z.coerce
     .number()
     .int()
-    .refine((value) => [7, 30, 90, 365].includes(value), 'Период: 7, 30, 90 или 365 дней')
+    .refine((value) => [7, 30, 90, 365].includes(value), 'Period: 7, 30, 90 or 365 days')
     .default(30),
 })
 

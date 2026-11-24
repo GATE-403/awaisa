@@ -22,9 +22,9 @@ export const TabBar = () => {
   const pathname = useChromePathname()
   const { customer } = useSession()
   // Reading down a long page, the bar steps aside like Safari's toolbar; any scroll up brings it
-  // back. Pages that do not scroll the window (map, «Образы») keep it.
+  // back. Pages that do not scroll the window (map, Looks) keep it.
   const isTucked = useTuckOnScroll()
-  // Notes where someone enters the cabinet from, for its «‹» (the tab bar is always mounted).
+  // Notes where someone enters the cabinet from, for its “‹” (the tab bar is always mounted).
   useCabinetEntry()
   // Owners do not need the pitch for businesses: their tab leads straight into the cabinet.
   const items =

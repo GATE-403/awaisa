@@ -24,7 +24,7 @@ const OPEN_PER_CLIENT = 3
 
 const toAuthorName = (name: string) => {
   const [first = '', last = ''] = name.trim().split(/\s+/)
-  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Клиент'
+  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Client'
 }
 
 const toView = (row: Row) => ({
@@ -39,7 +39,7 @@ const toView = (row: Row) => ({
 const COLUMNS = `"id", "author_name" AS "authorName", "text", "answer", "answered_at" AS "answeredAt",
   "created_at" AS "createdAt"`
 
-/** «Вопросы» on a business page: signed-in clients ask, the owner answers from the cabinet. */
+/** «Questions» on a business page: signed-in clients ask, the owner answers from the cabinet. */
 @Injectable()
 export class QuestionsService {
   constructor(
@@ -73,7 +73,7 @@ export class QuestionsService {
       [business.id, customer.id],
     )) as { count: number }[]
     if ((open?.count ?? 0) >= OPEN_PER_CLIENT) {
-      throw new ConflictException('Дождитесь ответа на прошлые вопросы')
+      throw new ConflictException('Wait for answers to your earlier questions')
     }
     const authorName = toAuthorName(customer.name)
     const [row] = (await this.dataSource.query(
@@ -106,7 +106,7 @@ export class QuestionsService {
       [id, business.id, text],
     )) as unknown
     const [row] = returnedRows<Row>(rows)
-    if (!row) throw new NotFoundException('Вопрос не найден')
+    if (!row) throw new NotFoundException('Question not found')
 
     return toView(row)
   }
@@ -117,6 +117,6 @@ export class QuestionsService {
       [id, business.id],
     )) as unknown
     const removed = returnedRows(rows)
-    if (removed.length === 0) throw new NotFoundException('Вопрос не найден')
+    if (removed.length === 0) throw new NotFoundException('Question not found')
   }
 }

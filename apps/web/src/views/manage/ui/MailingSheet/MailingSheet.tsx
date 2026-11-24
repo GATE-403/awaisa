@@ -13,7 +13,6 @@ import {
 } from '@/shared/api/clientApi'
 import type { MailingSegment, MailingsOverview } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -25,7 +24,7 @@ import styles from './MailingSheet.module.css'
 interface MailingSheetProps {
   slug: string
   businessName: string
-  /** The segment it opens on (a clients tab's «Позвать»); «Давно не были» by default. */
+  /** The segment it opens on (a clients tab's "Invite"); "Lapsed" by default. */
   initialSegment?: MailingSegment
   onClose: () => void
 }
@@ -40,21 +39,29 @@ const SEGMENTS: { value: MailingSegment; label: string }[] = [
 
 const LAPSED_DAYS = [30, 60, 90, 180]
 
+// How a template reads for one client (older templates' Russian keys too, as the API fills them).
+const fillSample = (text: string, link: string) =>
+  text.replace(/\{(?:name|имя)\}/giu, 'Aigerim').replace(/\{(?:link|ссылка)\}/giu, link)
+
 const templates = (name: string): Record<MailingSegment, string> => ({
-  lapsed: `{имя}, давно вас не видели в ${name}! Запишитесь, когда удобно: {ссылка}`,
-  birthday: `{имя}, скоро ваш день рождения! ${name} дарит −10% на визит в эти дни: {ссылка}`,
-  all: `{имя}, новости ${name}: {ссылка}`,
+  lapsed: `{name}, we haven't seen you at ${name} for a while! Book when it suits you: {link}`,
+  birthday: `{name}, your birthday is coming up! ${name} gives you 10% off a visit these days: {link}`,
+  all: `{name}, news from ${name}: {link}`,
 })
 
-// Default words sent to clients: they stay Russian whatever the cabinet's language.
 // The placeholders a mailing takes, as pills in the shared template editor (the same as replies).
+// The keys are what the API fills in; it still reads `{имя}` and `{ссылка}` of older templates.
 const MAILING_TOKENS = [
-  { key: 'имя', label: 'Client name' },
-  { key: 'ссылка', label: 'Booking link' },
+  { key: 'name', aliases: ['имя'], label: 'Client name' },
+  { key: 'link', aliases: ['ссылка'], label: 'Booking link' },
 ] as const
 
-/** Cyrillic SMS: 70 characters in one part, 67 per part when longer. */
-const smsParts = (text: string) => (text.length <= 70 ? 1 : Math.ceil(text.length / 67))
+// An SMS in plain Latin (GSM-7) holds 160 characters, 153 per part when longer; any other
+// character (Cyrillic, emoji, curly quotes) turns it into UCS-2: 70, then 67 per part.
+const smsParts = (text: string) => {
+  const [single, part] = /^[\x20-\x7E\n]*$/.test(text) ? [160, 153] : [70, 67]
+  return text.length <= single ? 1 : Math.ceil(text.length / part)
+}
 
 // A mailing in three choices: whom, what, send. The count is known before sending.
 export const MailingSheet = ({
@@ -72,12 +79,8 @@ export const MailingSheet = ({
   const [overview, setOverview] = useState<MailingsOverview | null>(null)
   const [isSending, setIsSending] = useState(false)
   // How it reads for one client; the SMS parts are counted with the link as it is sent.
-  const sample = text
-    .replaceAll('{имя}', 'Айгерим')
-    .replaceAll('{ссылка}', `awaisa.kg/${slug}/book`)
-  const sent = text
-    .replaceAll('{имя}', 'Айгерим')
-    .replaceAll('{ссылка}', `https://awaisa.kg/${slug}/book`)
+  const sample = fillSample(text, `awaisa.kg/${slug}/book`)
+  const sent = fillSample(text, `https://awaisa.kg/${slug}/book`)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -124,7 +127,9 @@ export const MailingSheet = ({
 
   const toggleBirthday = async (isOn: boolean) => {
     try {
-      const greeting = isOn ? `{имя}, с днём рождения! ${businessName} ждёт вас: {ссылка}` : null
+      const greeting = isOn
+        ? `{name}, happy birthday! ${businessName} is looking forward to seeing you: {link}`
+        : null
       await setBirthdayGreeting(slug, greeting)
       setOverview((current) => (current ? { ...current, birthdayGreeting: greeting } : current))
       toast.show({

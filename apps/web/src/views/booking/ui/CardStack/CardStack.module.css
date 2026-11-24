@@ -45,14 +45,14 @@
   isolation: isolate;
   color: #fff;
   /* Flat: a 3D lean (cards tilted back like on a table) made the strips that peek out hard to
-     read («текст становится нечитаемым»). The older ones only a little smaller behind. */
+     read ("the text becomes unreadable"). The older ones only a little smaller behind. */
   transform: translate(var(--drag), calc(var(--i) * var(--spread))) rotate(var(--tilt))
     scale(calc(1 - var(--depth) * 0.03 * (1 - var(--pull, 0))));
   transform-origin: top center;
   /* A soft settle, no overshoot: a bouncing spring on big cards read as jerky. Only transforms
      move (no filters), so the phone's compositor carries it. */
   /* Only the moves a finger or a tap asks for glide (a shuffle, the fan): a new card simply
-     appears, no landing or dealing («убери всю лишнюю анимацию»: the sheet dropped frames). */
+     appears, no landing or dealing ("remove all the extra animation": the sheet dropped frames). */
   transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
@@ -176,7 +176,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* «Изменить» shows on an open stack (in place of the price); its button covers the card. */
+/* Change shows on an open stack (in place of the price); its button covers the card. */
 .edit {
   position: absolute;
   inset: 0;
@@ -211,8 +211,8 @@
 }
 
 /* The button covers the card so all of it is a tap target, but its word sits at the end: the text
-   leaves it room and ends in an ellipsis before it (a long visit, «Классический массаж + Массаж
-   спины», ran under «Изменить»). In rem, so it grows with the word under large system text. */
+   leaves it room and ends in an ellipsis before it (a long visit, "Classic massage + Back
+   massage", ran under Change). In rem, so it grows with the word under large system text. */
 .stack[data-fanned] .content {
   padding-right: 4.75rem;
 }
@@ -238,7 +238,7 @@
   outline-offset: 2px;
 }
 
-/* Under the open stack: «Начать заново» on the left, «Свернуть» on the right - the stack's own
+/* Under the open stack: Start over on the left, Fold on the right - the stack's own
    controls, not a stray link at the foot of the sheet. */
 .foot {
   position: absolute;
@@ -262,13 +262,13 @@
   cursor: pointer;
 }
 
-/* «Начать заново» and «Свернуть» keep their one line; the offer's name gives way instead. */
+/* Start over and Fold keep their one line; the offer's name gives way instead. */
 .footControl {
   flex: none;
 }
 
 /* The line's first action starts on the page's left edge (its text, not its 8pt padding), in line
-   with «Шаг 2 из 4» and the heading under it. */
+   with "Step 2 of 4" and the heading under it. */
 .foot > :first-child {
   margin-left: calc(-1 * var(--space-2));
 }
@@ -279,7 +279,7 @@
 
 /* The offered service: its name in the link colour, the price after it as a small price tag
    (accent at 12%, like the kit's outline button) so it reads as what it costs; first on the line,
-   from the left edge; the name is cut short only when «Начать заново» leaves it no room. */
+   from the left edge; the name is cut short only when Start over leaves it no room. */
 .offer {
   display: inline-flex;
   align-items: center;

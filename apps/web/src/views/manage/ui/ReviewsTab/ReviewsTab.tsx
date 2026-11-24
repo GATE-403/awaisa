@@ -54,18 +54,18 @@ interface ReviewsTabProps {
 
 type ReviewsView = 'open' | 'all' | 'questions'
 
-// Poor ratings nobody has settled come first in «Без ответа»: they are the ones that cost clients.
+// Poor ratings nobody has settled come first in "Unanswered": they are the ones that cost clients.
 // One settled while the tab is open keeps its place until the tab changes (it used to jump away).
 const needsPerson = (review: ManagedReview, settledNow: Set<string>) =>
   review.rating <= POOR_RATING && (!review.resolvedAt || settledNow.has(review.id))
 
 // What clients said after their visits, as a Threads-like feed right on the page: no cards,
 // fills or glyph rows. Under a review waiting for an answer the reply field is simply there, bare
-// like the number on the sign-in screen; a published reply has «Изменить». One row of tabs:
-// «Без ответа» (the owner's job here, first when there are any; poor ratings not yet settled lead,
-// and sending moves on to the next field), «Все», «Вопросы». Long feeds come ten at a time. Good
-// ratings without words can be thanked all at once; poor ones offer «Написать клиенту» and
-// «Решено».
+// like the number on the sign-in screen; a published reply has "Change". One row of tabs:
+// "Unanswered" (the owner's job here, first when there are any; poor ratings not yet settled lead,
+// and sending moves on to the next field), "All", "Questions". Long feeds come ten at a time. Good
+// ratings without words can be thanked all at once; poor ones offer "Write to the client" and
+// "Resolved".
 export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
   const t = useT()
   const toast = useToast()
@@ -73,9 +73,9 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
   const [error, setError] = useState<string | null>(null)
   // The published reply being changed.
   const [editingId, setEditingId] = useState<string | null>(null)
-  // Chosen by the owner; until then «Без ответа» when there are any.
+  // Chosen by the owner; until then "Unanswered" when there are any.
   const [chosenView, setChosenView] = useState<ReviewsView | null>(null)
-  // Answered while «Без ответа» is open: they stay in view with their reply until the tab changes.
+  // Answered while "Unanswered" is open: they stay in view with their reply until the tab changes.
   const [answeredNow, setAnsweredNow] = useState<Set<string>>(new Set())
   const [settledNow, setSettledNow] = useState<Set<string>>(new Set())
   const [shownCount, setShownCount] = useState(PAGE_SIZE)
@@ -306,7 +306,7 @@ export const ReviewsTab = ({ slug, businessName }: ReviewsTabProps) => {
         <EmptyState
           title={t('No reviews yet')}
           text={t(
-            'They appear after the first visits: clients rate the specialist by the SMS link or in «My bookings».',
+            'They appear after the first visits: clients rate the specialist by the SMS link or in "My bookings".',
           )}
         />
       )}

@@ -92,7 +92,7 @@ const MAX_PHOTOS = 30
 const PHOTO_INPUT_ID = 'page-work-photo'
 
 // The business page laid out like a profile in Instagram: the cover with the logo over its edge, a
-// short bio, «Редактировать · Поделиться» (everything written about the place is edited in one
+// short bio, "Edit · Share" (everything written about the place is edited in one
 // sheet, so the page stays what clients see), then tabs: the work as a grid, the masters, the
 // week's hours. The logo and the cover change from their own buttons.
 export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
@@ -106,7 +106,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const [photos, setPhotos] = useState<WorkPhoto[] | null>(null)
   const photoCount = photos?.length ?? null
   const searchParams = useSearchParams()
-  // Old links to «Услуги», «Мастера» and «График» open that tab of the page.
+  // Old links to "Services", "Specialists" and "Hours" open that tab of the page.
   const [section, setSection] = useState<PageSection>(
     () => PAGE_SECTIONS[searchParams.get('tab') ?? ''] ?? 'works',
   )
@@ -159,7 +159,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     document.getElementById(PHOTO_INPUT_ID)?.click()
   }
 
-  // A link that names a section while the page is open («Запуск записи» → «Добавьте мастеров»)
+  // A link that names a section while the page is open ("Booking setup" → "Add specialists")
   // switches to that tab here too.
   useEffect(() => {
     if (linkedSection) setSection(linkedSection)
@@ -298,7 +298,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
             </button>
           )
         }
-        // Where the public page keeps «Записаться» and its glyphs: one primary «Редактировать»
+        // Where the public page keeps "Book" and its glyphs: one primary "Edit"
         // and the secondary actions as thin glyphs in one capsule.
         actions={
           <>
@@ -322,7 +322,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         isActionsHiddenOnPhone
         footer={
           // The week's facts on a line of their own, then one row of capsules: what the page
-          // still lacks and the promotions («поработать над лаконичностью и иерархией»).
+          // still lacks and the promotions ("work on brevity and hierarchy").
           <div className={styles.pageFooter}>
             <PageInsights
               slug={slug}
@@ -342,7 +342,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         }
       >
         <PlaceName>{business.name}</PlaceName>
-        {/* One quiet line of facts; only «Скрыта» stands out, in red. */}
+        {/* One quiet line of facts; only "Hidden" stands out, in red. */}
         <PlaceLine>
           {[kindText, business.address, status?.label].filter(Boolean).join(' · ')}
         </PlaceLine>
@@ -408,8 +408,8 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                                 isHit={service.isPopular}
                                 linkLabel={t(
                                   service.isActive === false
-                                    ? 'Change «{name}», hidden'
-                                    : 'Change «{name}»',
+                                    ? 'Change "{name}", hidden'
+                                    : 'Change "{name}"',
                                   { name: service.name },
                                 )}
                                 actionLabel={t('Change')}

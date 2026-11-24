@@ -1,8 +1,8 @@
 import type { IconProps } from '@phosphor-icons/react'
 import { forwardRef, useId } from 'react'
 
-// «Образы»: a hand of cards, three fanned out to one side from a point at the bottom left like
-// cards held in a hand («как стопка карт на руках»; a symmetric fan read as a phone in the
+// «Looks»: a hand of cards, three fanned out to one side from a point at the bottom left like
+// cards held in a hand (like a hand of cards; a symmetric fan read as a phone in the
 // middle). Drawn in Phosphor's own grid (256, a 16-wide round stroke), so it sits with the other
 // glyphs and takes the same props: `weight` `fill` for the chosen tab fills the front card. Each
 // card hides the lines of the ones behind it (masks), so no line crosses a card in front.

@@ -17,7 +17,7 @@ import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 import styles from './BusinessSheet.module.css'
 
-/** «awaisa.kg»: the page's address reads as it does in a link. */
+/** "awaisa.kg": the page's address reads as it does in a link. */
 const SITE_HOST = new URL(SITE_URL).host
 
 interface BusinessSheetProps {
@@ -31,8 +31,8 @@ interface BusinessSheetProps {
   onClose: () => void
 }
 
-// «Скрыть или удалить», a sheet of its own behind a settings row, so the red action is never in
-// plain view: hiding the page for a while (the same switch as in «Редактировать») and, last,
+// "Hide or delete", a sheet of its own behind a settings row, so the red action is never in
+// plain view: hiding the page for a while (the same switch as in "Edit") and, last,
 // deleting the business by holding (no dialog on top).
 export const BusinessSheet = ({
   slug,

@@ -7,7 +7,7 @@ import styles from './FloatingToolbar.module.css'
 interface FloatingToolbarProps {
   children: ReactNode
   /** Where it floats on phones: the middle of the foot, or its right corner when the middle is
-   *  taken (a list's «Ещё N …» capsule floats there). */
+   *  taken (a list's «N more …» capsule floats there). */
   align?: 'center' | 'end'
   className?: string
 }

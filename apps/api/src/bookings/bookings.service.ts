@@ -70,7 +70,7 @@ export class BookingsService {
     const now = new Date()
     const isForOther = Boolean(customer && input.forOther && !staffBusinessId)
     const phone = customer && !isForOther ? customer.phone : normalizePhone(input.phone)
-    if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
+    if (!phone) throw new BadRequestException('Enter a valid phone number')
     const request = await this.availability.resolveRequest(
       input.serviceId,
       input.specialistId,
@@ -85,7 +85,7 @@ export class BookingsService {
     const slot = (await this.availability.buildSlotsFor(request, input.date, now)).find(
       (item) => item.time === formatMinutes(minutes),
     )
-    if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
+    if (!slot?.isAvailable) throw new ConflictException('This time is taken, choose another')
 
     const startsAt = businessDateTimeToUtc(input.date, minutes)
     const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
@@ -95,7 +95,7 @@ export class BookingsService {
     // visit's service it is for (any service of a visit of several); the rest is paid as usual.
     const isOwnNumber = Boolean(customer && !isForOther && !staffBusinessId)
     if ((input.subscriptionId || input.subscriptionPlanId) && !isOwnNumber) {
-      throw new BadRequestException('Войдите, чтобы записаться по абонементу')
+      throw new BadRequestException('Sign in to book with a pass')
     }
     const coversVisit = (planServiceId: string | null) =>
       services.some((item) => coversService(planServiceId, item.id))
@@ -105,13 +105,15 @@ export class BookingsService {
         )
       : null
     if (input.subscriptionId && !subscription) {
-      throw new BadRequestException('Абонемент не подходит: закончился, истёк или на другую услугу')
+      throw new BadRequestException(
+        "This pass can't be used: it is used up, expired or for another service",
+      )
     }
     const plan = input.subscriptionPlanId
       ? await this.subscriptionOrders.findOnlinePlan(service.businessId, input.subscriptionPlanId)
       : null
     if (plan && !coversVisit(plan.service_id === null ? null : String(plan.service_id))) {
-      throw new BadRequestException('Этот абонемент на другую услугу')
+      throw new BadRequestException('This pass is for another service')
     }
     const planPrice = plan ? Number(plan.price) : null
     const isBySubscription = Boolean(subscription || plan)
@@ -140,7 +142,7 @@ export class BookingsService {
     const deposit = isDepositOn
       ? Math.min(deposits, request.price - (discount?.amount ?? 0)) || null
       : null
-    // «Хочу так»: a visible photo of this place only; anything else is dropped, never refused.
+    // 'I want this look': a visible photo of this place only; anything else is dropped, never refused.
     const look =
       input.lookPhotoId && !staffBusinessId
         ? await this.findLookPhoto(service.businessId, input.lookPhotoId)
@@ -170,7 +172,7 @@ export class BookingsService {
               (await this.defaultBranchId(service.businessId)),
             smsConfirmation: input.smsConfirmation,
             reminderMinutes: input.reminderMinutes,
-            // «Купить абонемент и записаться» holds the slot like a deposit, for the plan's price.
+            // 'Buy a pass and book' holds the slot like a deposit, for the plan's price.
             depositAmount: deposit ?? planPrice,
             subscriptionId: subscription?.id ?? null,
             source: staffBusinessId ? 'staff' : 'online',
@@ -261,7 +263,7 @@ export class BookingsService {
       }
     }
 
-    throw new ConflictException('Это время только что заняли, выберите другое')
+    throw new ConflictException('Someone just took this time, choose another')
   }
 
   async findByToken(id: string, token: string) {
@@ -283,11 +285,11 @@ export class BookingsService {
     target: { date: string; time: string },
   ) {
     const booking = await this.findAccessible(id, access.token, access.customer)
-    if (!booking) throw new NotFoundException('Запись не найдена')
-    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    if (!booking) throw new NotFoundException('Booking not found')
+    if (booking.status !== 'confirmed') throw new BadRequestException('The booking is cancelled')
     const now = new Date()
     if (booking.startsAt <= now)
-      throw new BadRequestException('Визит уже начался - перенести нельзя')
+      throw new BadRequestException('The visit has started and cannot be moved')
 
     const request = await this.availability.resolveRequest(
       booking.serviceId,
@@ -301,7 +303,7 @@ export class BookingsService {
     const slot = (await this.availability.buildSlotsFor(request, target.date, now, id)).find(
       (item) => item.time === target.time,
     )
-    if (!slot?.isAvailable) throw new ConflictException('Это время уже занято, выберите другое')
+    if (!slot?.isAvailable) throw new ConflictException('This time is taken, choose another')
 
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
     const endsAt = new Date(startsAt.getTime() + request.durationMinutes * 60_000)
@@ -319,7 +321,7 @@ export class BookingsService {
         },
       )
     } catch (error) {
-      if (isOverlapError(error)) throw new ConflictException('Это время только что заняли')
+      if (isOverlapError(error)) throw new ConflictException('Someone just took this time')
       throw error
     }
 
@@ -389,7 +391,7 @@ export class BookingsService {
     const booking = await this.bookings.findOneBy({ id })
     const isOwner =
       booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
-    if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
+    if (!booking || !isOwner) throw new NotFoundException('Booking not found')
     if (booking.status !== 'cancelled') await this.cancelByClient(booking)
 
     return this.getView(id)
@@ -399,7 +401,7 @@ export class BookingsService {
     const booking = await this.bookings.findOneBy({ id })
     const isOwner =
       booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
-    if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
+    if (!booking || !isOwner) throw new NotFoundException('Booking not found')
 
     return this.getView(id)
   }
@@ -408,7 +410,7 @@ export class BookingsService {
     const booking = await this.bookings.findOneBy({ id })
     const isOwner =
       booking && (booking.customerId === customer.id || booking.customerPhone === customer.phone)
-    if (!booking || !isOwner) throw new NotFoundException('Запись не найдена')
+    if (!booking || !isOwner) throw new NotFoundException('Booking not found')
 
     return this.restore(booking)
   }
@@ -454,12 +456,12 @@ export class BookingsService {
   // Undo for a cancellation made moments ago: the slot is taken back unless someone booked it.
   async restore(booking: Booking) {
     if (booking.paymentStatus === 'expired') {
-      throw new BadRequestException('Время на оплату вышло - запишитесь заново')
+      throw new BadRequestException('Time to pay has run out, book again')
     }
     if (booking.status === 'cancelled') {
       const elapsed = booking.cancelledAt ? Date.now() - booking.cancelledAt.getTime() : Infinity
       if (elapsed > UNDO_WINDOW_SECONDS * 1000) {
-        throw new BadRequestException('Вернуть уже нельзя - запишитесь заново')
+        throw new BadRequestException('Too late to undo, book again')
       }
       try {
         await this.bookings.update(
@@ -467,7 +469,7 @@ export class BookingsService {
           { status: 'confirmed', cancelledAt: null, cancelledBy: null },
         )
       } catch (error) {
-        if (isOverlapError(error)) throw new ConflictException('Это время уже заняли')
+        if (isOverlapError(error)) throw new ConflictException('This time has been taken')
         throw error
       }
     }
@@ -475,10 +477,10 @@ export class BookingsService {
     return this.getView(booking.id)
   }
 
-  /** «Напоминать в Telegram»: the bot link for this booking's number, null without a bot. */
+  /** 'Remind me in Telegram': the bot link for this booking's number, null without a bot. */
   async telegramLink(id: string, token: string | null, customer: Customer | null) {
     const booking = await this.findAccessible(id, token, customer)
-    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (!booking) throw new NotFoundException('Booking not found')
     return {
       url: this.clientMessages.linkUrl(booking.id),
       isLinked: await this.clientMessages.isLinked(booking.customerPhone),
@@ -486,7 +488,7 @@ export class BookingsService {
   }
 
   manageButton(id: string) {
-    return { label: 'Перенести или отменить', url: this.linkTo(id) }
+    return { label: 'Reschedule or cancel', url: this.linkTo(id) }
   }
 
   linkTo(id: string) {
@@ -507,7 +509,7 @@ export class BookingsService {
     const expected = Buffer.from(booking?.cancelTokenHash ?? '', 'hex')
     const actual = Buffer.from(hashToken(token), 'hex')
     if (!booking || expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
-      throw new NotFoundException('Запись не найдена')
+      throw new NotFoundException('Booking not found')
     }
 
     return booking

@@ -12,7 +12,7 @@ import { BookingScrim } from '../BookingTopBar/BookingTopBar'
 
 interface BookingSheetProps {
   children: ReactNode
-  /** Opened over another page (the `@modal` slot): closing is «back». */
+  /** Opened over another page (the `@modal` slot): closing is “back”. */
   isModal?: boolean
   /** Opened as a page of its own: where the scrim leads (the place). */
   closeHref?: string

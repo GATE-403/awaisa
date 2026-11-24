@@ -47,7 +47,7 @@ const NO_SELLER = 'none'
 const toQuantity = (value: string) => Number(value.replace(',', '.') || 0)
 
 // Selling products from the shelf: how many of each, who sold, how it was paid. Products go
-// off the stock at once; the toast offers «Вернуть», which puts them back.
+// off the stock at once; the toast offers "Undo", which puts them back.
 export const SaleSheet = ({
   slug,
   specialists,
@@ -143,7 +143,7 @@ export const SaleSheet = ({
         <EmptyState
           variant='inline'
           title={t('No products for sale')}
-          text={t('Mark a stock item «Sold to clients» and set its price.')}
+          text={t('Mark a stock item "Sold to clients" and set its price.')}
           action={
             isOwner ? (
               <ButtonLink href={`/manage/${slug}?tab=stock`} size='sm' variant='secondary'>

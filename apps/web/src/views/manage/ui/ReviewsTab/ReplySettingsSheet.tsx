@@ -26,8 +26,8 @@ interface ReplySettingsSheetProps {
 
 const FORM_ID = 'review-reply-settings'
 
-// «Ответы на отзывы»: the automatic reply to good reviews (on, which ratings, the words) and the
-// quick replies offered above the reply field. Settings rows, edits kept until «Готово».
+// "Review replies": the automatic reply to good reviews (on, which ratings, the words) and the
+// quick replies offered above the reply field. Settings rows, edits kept until "Done".
 export const ReplySettingsSheet = ({ settings, onSave, onClose }: ReplySettingsSheetProps) => {
   const t = useT()
   const [draft, setDraft] = useState(settings)

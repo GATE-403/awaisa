@@ -11,7 +11,7 @@ interface PhotoViewerProps {
   photos: string[]
   /** The photo it opens on. */
   startIndex: number
-  /** «Kings Barbershop, фото 3» - the alt text of each picture. */
+  /** «Kings Barbershop, photo 3» - the alt text of each picture. */
   label: string
   onClose: () => void
 }

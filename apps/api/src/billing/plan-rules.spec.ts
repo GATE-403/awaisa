@@ -7,15 +7,17 @@ import {
   monthlyPrice,
   type PlanRow,
   periodPrice,
+  planTitleOf,
   reminderDue,
   resolveAccess,
   smsAllowance,
   usageMonth,
+  withPlanCopy,
 } from './plan-rules.js'
 
 const start: PlanRow = {
   key: 'start',
-  title: 'Старт',
+  title: 'Start',
   description: '',
   monthlyPrice: 0,
   includedMasters: 0,
@@ -32,7 +34,7 @@ const start: PlanRow = {
 const business: PlanRow = {
   ...start,
   key: 'business',
-  title: 'Бизнес',
+  title: 'Business',
   monthlyPrice: 990,
   includedMasters: 3,
   extraMasterPrice: 290,
@@ -47,7 +49,7 @@ const business: PlanRow = {
 const founders: PlanRow = {
   ...business,
   key: 'founders',
-  title: 'Основатель',
+  title: 'Founder',
   monthlyPrice: 0,
   maxBranches: null,
   smsPerMonth: null,
@@ -130,21 +132,34 @@ describe('limits', () => {
   it('refuses a third master on the free plan and names the paid one', () => {
     expect(limitProblem(plans, start, 'masters', 1)).toBeNull()
     expect(limitProblem(plans, start, 'masters', 2)).toBe(
-      'На тарифе «Старт» до 2 мастеров. Больше на тарифе «Бизнес»',
+      'The «Start» plan allows up to 2 specialists. More on the «Business» plan',
     )
   })
 
   it('names no public plan when none has more room', () => {
-    expect(limitProblem(plans, business, 'branches', 3)).toBe('На тарифе «Бизнес» до 3 филиалов')
+    expect(limitProblem(plans, business, 'branches', 3)).toBe(
+      'The «Business» plan allows up to 3 branches',
+    )
     expect(limitProblem(plans, founders, 'branches', 30)).toBeNull()
   })
 
   it('names the cheapest public plan with a locked feature', () => {
-    expect(featureLockedMessage(plans, 'cashdesk')).toBe('Доступно на тарифе «Бизнес»')
-    expect(featureLockedMessage(plans, 'mailings')).toBe('Недоступно на вашем тарифе')
-    expect(featureLockedMessage(plans, 'fiscal')).toBe('Доступно на тарифе «Бизнес»')
+    expect(featureLockedMessage(plans, 'cashdesk')).toBe('Available on the «Business» plan')
+    expect(featureLockedMessage(plans, 'mailings')).toBe('Not available on your plan')
+    expect(featureLockedMessage(plans, 'fiscal')).toBe('Available on the «Business» plan')
     expect(hasFeature(start, 'fiscal')).toBe(false)
     expect(hasFeature(founders, 'fiscal')).toBe(true)
+  })
+})
+
+describe('plan copy', () => {
+  it('shows the seeded plans in English and leaves a plan added by hand as it is', () => {
+    expect(withPlanCopy({ ...start, title: 'Старт' }).title).toBe('Start')
+    expect(withPlanCopy({ ...founders, title: 'Основатель' }).description).toBe(
+      'Everything, no limits, for the first businesses',
+    )
+    expect(withPlanCopy({ ...start, key: 'pro', title: 'Pro' }).title).toBe('Pro')
+    expect(planTitleOf('business', 'Бизнес')).toBe('Business')
   })
 })
 

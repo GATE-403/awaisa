@@ -160,7 +160,7 @@ export const CreateBusinessPage = () => {
                   <Field
                     label={t('Link')}
                     error={form.errors.slug}
-                    // «Адрес» read as the street: the link is said to be what clients get.
+                    // "Address" read as the street: the link is said to be what clients get.
                     description={
                       form.isSlugAvailable
                         ? t('Available: awaisa.kg/{slug}, the link clients get', {
@@ -324,8 +324,8 @@ export const CreateBusinessPage = () => {
               )}
             </div>
 
-            {/* A content-width capsule at the column's end with «Назад» before it: a full-width
-                bar took all the attention from the form («кнопка забирает всё внимание»). */}
+            {/* A content-width capsule at the column's end with "Back" before it: a full-width
+                bar took all the attention from the form ("the button takes all the attention"). */}
             <div className={styles.actions}>
               {form.stepNumber > 1 && (
                 <Button type='button' variant='ghost' onClick={form.goBack} className={styles.back}>

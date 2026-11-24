@@ -57,6 +57,13 @@ describe('stemsOf', () => {
     expect(stemsOf('подстричься')).toContain('стриж')
     expect(stemsOf('реснички')).toContain('ресниц')
   })
+
+  it('maps English words to Russian and English service names', () => {
+    expect(stemsOf('haircut')).toEqual(expect.arrayContaining(['стриж', 'haircut']))
+    expect(stemsOf('nails')).toEqual(expect.arrayContaining(['маникюр', 'nail']))
+    expect(stemsOf('beard trim')).toContain('бород')
+    expect(stemsOf('brows')).toContain('бров')
+  })
 })
 
 describe('correctQuery', () => {

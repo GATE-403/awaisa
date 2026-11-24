@@ -22,7 +22,7 @@ interface TelegramSectionProps {
 const POLL_MS = 3_000
 const POLL_LIMIT = 40
 
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'long',
   timeZone: BUSINESS_TIME_ZONE,
@@ -123,7 +123,7 @@ export const TelegramSection = ({ slug, fallback = null }: TelegramSectionProps)
         {isWaiting || !link ? (
           <span className={styles.connect} data-waiting=''>
             {isWaiting
-              ? t('Waiting for you to tap «Start» in Telegram…')
+              ? t('Waiting for you to tap "Start" in Telegram…')
               : t('Preparing the link…')}
           </span>
         ) : (

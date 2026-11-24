@@ -57,7 +57,7 @@ export const WaitlistSheet = ({
                 {entry.status === 'notified'
                   ? t('SMS sent: {time} is free', { time: entry.notifiedTime ?? '' })
                   : t('Waiting since {date}', {
-                      date: new Date(entry.createdAt).toLocaleDateString('ru-RU', {
+                      date: new Date(entry.createdAt).toLocaleDateString('en-GB', {
                         day: 'numeric',
                         month: 'short',
                         timeZone: BUSINESS_TIME_ZONE,
@@ -66,7 +66,6 @@ export const WaitlistSheet = ({
               </p>
               <div className={styles.actions}>
                 <Button size='sm' onClick={() => onBook(entry)}>
-                  {/* «Записать» is «record» elsewhere in the cabinet: booking a client has its own key. */}
                   {t('Book')}
                 </Button>
                 <a href={`tel:${entry.customerPhone}`} className={styles.call}>

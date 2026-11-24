@@ -32,9 +32,9 @@ const FLICK_MIN = 10
 /** The flick's speed is read over the finger's last moments, not the whole gesture. */
 const FLICK_WINDOW_MS = 90
 
-// «Образы»: finished work as a hand of cards - one large in the middle, one tilted at each side.
+// «Looks»: finished work as a hand of cards - one large in the middle, one tilted at each side.
 // A swipe brings the next card in; each is a service with its price, the first free time and
-// «Записаться».
+// «Book».
 export const FeedPage = ({ kind, business, start, initialPage, isPending }: FeedPageProps) => {
   const t = useT()
   const [items, setItems] = useState<FeedItem[]>(initialPage?.items ?? [])
@@ -129,7 +129,7 @@ export const FeedPage = ({ kind, business, start, initialPage, isPending }: Feed
   const like = (item: FeedItem, next: boolean) => {
     likes.setLiked(item.id, next)
     if (!next) return
-    // A liked work keeps its service in «Избранное», like saving a post.
+    // A liked work keeps its service in «Favourites», like saving a post.
     if (item.service && !favorites.isFavorite(item.service.id)) favorites.toggle(item.service.id)
   }
 

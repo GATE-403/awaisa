@@ -44,8 +44,8 @@
   padding-inline: 0;
 }
 
-/* «Оплатить «Бизнес»»: an offer card on a soft wash of the accent (the same wash as «Запуск
-   записи», so the owner's side has one look for what moves the business forward), no shadow,
+/* "Pay for Business": an offer card on a soft wash of the accent (the same wash as "Booking
+   setup", so the owner's side has one look for what moves the business forward), no shadow,
    no border; as wide as reads well, not the whole column. */
 .offer {
   display: flex;
@@ -88,7 +88,7 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* The price leads: title1 bold, «в месяц» quiet beside it, the year's gift in green. */
+/* The price leads: title1 bold, "a month" quiet beside it, the year's gift in green. */
 .price {
   display: flex;
   flex-wrap: wrap;

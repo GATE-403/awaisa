@@ -115,7 +115,7 @@ export class ClientsService {
       [business.id, phone],
     )) as Row[]
     const record = await this.records.findOneBy({ businessId: business.id, phone })
-    if (history.length === 0 && !record?.name) throw new NotFoundException('Клиент не найден')
+    if (history.length === 0 && !record?.name) throw new NotFoundException('Client not found')
     const now = Date.now()
     const isVisit = (row: Row) =>
       row.status === 'confirmed' &&
@@ -188,7 +188,7 @@ export class ClientsService {
 
   private toPhone(raw: string) {
     const phone = normalizePhone(raw)
-    if (!phone) throw new NotFoundException('Клиент не найден')
+    if (!phone) throw new NotFoundException('Client not found')
     return phone
   }
 }

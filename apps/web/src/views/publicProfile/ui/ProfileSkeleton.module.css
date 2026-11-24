@@ -15,7 +15,7 @@
   border-radius: var(--radius-full);
 }
 
-/* «Поделиться» and «В сторис»: the kit's small secondary capsules. */
+/* «Share» and «To stories»: the kit's small secondary capsules. */
 .action {
   width: 112px;
   height: var(--control-height-sm);

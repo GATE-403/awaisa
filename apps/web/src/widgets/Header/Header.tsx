@@ -30,11 +30,11 @@ const ACTIONS = [
 ]
 
 interface HeaderContentProps {
-  /** The kind the catalog shows (`?kind=` on «/»), to mark its chip. */
+  /** The kind the catalog shows (`?kind=` on “/”), to mark its chip. */
   catalogKind: string | null
 }
 
-// A marketplace header: logo, «Каталог», the search field, labelled actions; categories below.
+// A marketplace header: logo, Catalogue, the search field, labelled actions; categories below.
 const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
   const t = useT()
   const pathname = useChromePathname()
@@ -57,7 +57,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             : action,
         )
       : ACTIONS
-  // Profile, the business landing and «Что нового» are not shopping: no search, no categories.
+  // Profile, the business landing and What's new are not shopping: no search, no categories.
   const isSlim =
     pathname === '/bookings' ||
     pathname === '/business' ||
@@ -169,8 +169,8 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
             ) : (
               <Ticket weight='light' aria-hidden />
             )}
-            {/* «Записи» like the other actions' one-word labels (the page leads with the
-                visits; «Мой профиль» is the public one). The face already says whose it is. */}
+            {/* Bookings like the other actions' one-word labels (the page leads with the
+                visits; My profile is the public one). The face already says whose it is. */}
             <span>{t('Bookings')}</span>
           </NextLink>
         </nav>
@@ -206,7 +206,7 @@ const HeaderContent = ({ catalogKind }: HeaderContentProps) => {
                 )
               })}
             </ul>
-            {/* On tablets only «Бишкек» shows, so the last categories are not hidden under it;
+            {/* On tablets only Bishkek shows, so the last categories are not hidden under it;
                 the name stays whole and still holds the visible word (WCAG 2.5.3). */}
             <NextLink
               href='/map'

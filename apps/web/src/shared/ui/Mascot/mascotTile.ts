@@ -1,6 +1,6 @@
 import { MASCOT_PATH } from './Mascot'
 
-// A tile for patterns of mascots (an empty cover, the «Мои бизнесы» head): the mascot twice per
+// A tile for patterns of mascots (an empty cover, the «My businesses» head): the mascot twice per
 // 96px tile, the second turned a little and set half a tile over, so the rows do not line up like
 // wallpaper. Use it as a CSS mask (`mask-image: var(--mascot-tile)`) and colour it with the
 // background under the mask.

@@ -10,7 +10,7 @@ interface ScrollAreaProps {
   children: ReactNode
   /** Names the box for screen readers; it takes focus so the keyboard can scroll it too. */
   label: string
-  /** Words for the rows still below, «Ещё 14 клиентов»: gets their count. */
+  /** Words for the rows still below, «14 more clients»: gets their count. */
   moreLabel: (count: number) => string
   /** Rows shown before the list scrolls; one more shows by half under the fade. */
   rows?: number
@@ -21,10 +21,10 @@ const DEFAULT_ROWS = 6
 
 // A list that may run long, in a group of a page. Its height is measured from its own rows: up to
 // `rows` it is a plain list, past them it shows `rows` and a half, the cut row fading under the
-// edge, with «Ещё 14 клиентов ⌄» on the fade (a fade alone did not say there was more: «не понятно,
-// что эти блоки скролятся»). With a mouse the box scrolls inside itself and the capsule moves it a
+// edge, with «14 more clients ⌄» on the fade (a fade alone did not say there was more: the owner could
+// not tell these blocks scrolled). With a mouse the box scrolls inside itself and the capsule moves it a
 // page down. On touch screens it never scrolls inside: nested scrolls made the page hard to scroll
-// with a finger, so the capsule opens the whole list in place and «Свернуть» folds it back, like
+// with a finger, so the capsule opens the whole list in place and «Show less» folds it back, like
 // `MoreFade`. A list that fits is never a scroll box at all (one that could move by a pixel caught
 // the wheel and held the page still under the pointer).
 export const ScrollArea = ({

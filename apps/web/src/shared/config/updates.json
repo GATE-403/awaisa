@@ -3,919 +3,897 @@
     "id": "pr155-1",
     "date": "2026-11-24",
     "audience": "everyone",
-    "title": "Вход через Telegram",
-    "text": "Код для входа теперь приходит в Telegram, а не по SMS. Можно войти и через бота, не вводя номер.",
+    "title": "Sign in with Telegram",
+    "text": "Your sign-in code now arrives in Telegram, not by SMS. You can also sign in through the bot without typing your number.",
     "link": {
       "href": "/login",
-      "label": "Войти"
+      "label": "Sign in"
     }
   },
   {
     "id": "pr138-1",
     "date": "2026-11-24",
     "audience": "business",
-    "title": "Фискальные чеки на тарифе «Бизнес»",
-    "text": "Чеки за визиты и продажи уходят в налоговую сами на тарифе «Бизнес» и в пробный период.",
+    "title": "Fiscal receipts on the Business plan",
+    "text": "Receipts for visits and sales go to the tax office on their own on the Business plan and during the trial.",
     "link": {
       "href": "/manage",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr137-1",
     "date": "2026-11-24",
     "audience": "clients",
-    "title": "Ваши записи на первом месте",
-    "text": "Вкладка «Записи» сразу показывает ближайший визит с маршрутом и звонком, настройки открываются шестерёнкой.",
+    "title": "Your bookings come first",
+    "text": "The Bookings tab opens on your next visit with directions and a call button. Settings open from the gear.",
     "link": {
       "href": "/bookings",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr137-2",
     "date": "2026-11-24",
     "audience": "clients",
-    "title": "Профиль как в Telegram",
-    "text": "Медали, год визитов, любимые мастера и карта мест в одном профиле, им можно поделиться в сторис.",
+    "title": "A profile like Telegram's",
+    "text": "Medals, your year of visits, favourite specialists and a map of places in one profile you can share to your stories.",
     "link": {
       "href": "/bookings",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr137-3",
     "date": "2026-11-24",
     "audience": "clients",
-    "title": "Подборка под вас",
-    "text": "Пять коротких вопросов, и каталог показывает услуги под ваш вкус, бюджет и то, что важнее при выборе.",
+    "title": "Picks made for you",
+    "text": "Answer five short questions and the catalogue shows services that suit your taste, budget and what matters most to you.",
     "link": {
       "href": "/",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr137-4",
     "date": "2026-11-24",
     "audience": "business",
-    "title": "Что ждёт в каждом бизнесе",
-    "text": "В «Мои бизнесы» видно неотмеченные визиты, отзывы без ответа, загрузку и выручку за сегодня.",
+    "title": "What needs you in each business",
+    "text": "My businesses shows unmarked visits, unanswered reviews, today's load and revenue.",
     "link": {
       "href": "/manage",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr137-5",
     "date": "2026-11-24",
     "audience": "business",
-    "title": "Удаление бизнеса защищено",
-    "text": "Чтобы удалить бизнес, нужно ввести адрес его страницы.",
+    "title": "Deleting a business is protected",
+    "text": "To delete a business, type its page address.",
     "link": {
       "href": "/manage",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr136-1",
     "date": "2026-11-23",
     "audience": "business",
-    "title": "Регистрация за четыре коротких шага",
-    "text": "Вид бизнеса выбирается одним касанием, страница видна, пока вы её заполняете, а создание заканчивается эффектным запуском.",
+    "title": "Sign up in four short steps",
+    "text": "Pick your type of business in one tap, watch your page take shape as you fill it in, and finish with a launch to remember.",
     "link": {
       "href": "/business/new",
-      "label": "Создать страницу"
+      "label": "Create a page"
     }
   },
   {
     "id": "pr136-2",
     "date": "2026-11-23",
     "audience": "business",
-    "title": "Скрыть или удалить бизнес",
-    "text": "В «Настройках» появился раздел «Страница и бизнес»: страницу можно скрыть из каталога или удалить бизнес, будущие записи отменятся с уведомлением клиентам.",
+    "title": "Hide or delete a business",
+    "text": "Settings has a new “Page and business” section: hide your page from the catalogue or delete the business. Upcoming bookings are cancelled and clients are told.",
     "link": {
       "href": "/manage",
-      "label": "Настройки"
+      "label": "Settings"
     }
   },
   {
     "id": "pr136-3",
     "date": "2026-11-23",
     "audience": "clients",
-    "title": "«Хочу так»",
-    "text": "На карточке работы мастера можно сразу записаться на такую же услугу к этому мастеру, фото уйдёт мастеру как образец.",
+    "title": "“I want this”",
+    "text": "Book the same service with the same specialist straight from their work's card. The photo goes to the specialist as a reference.",
     "link": {
       "href": "/",
-      "label": "Каталог"
+      "label": "Catalogue"
     }
   },
   {
     "id": "pr135-1",
     "date": "2026-11-23",
     "audience": "clients",
-    "title": "Страница места как профиль",
-    "text": "Работы, услуги, мастера и часы работы теперь в табах, а записаться и связаться можно прямо из шапки.",
+    "title": "A place's page like a profile",
+    "text": "Work, services, specialists and opening hours now sit in tabs, and you can book or get in touch right from the top of the page.",
     "link": {
       "href": "/awaisa-studio",
-      "label": "Посмотреть"
+      "label": "Take a look"
     }
   },
   {
     "id": "pr130-1",
     "date": "2026-11-23",
     "audience": "clients",
-    "title": "Запись удобнее на телефоне",
-    "text": "Дни сразу под вопросом, поле не прячется под клавиатурой, а в панели видно дату, время и сумму перед записью.",
+    "title": "Easier booking on your phone",
+    "text": "The days sit right under the question, fields stay clear of the keyboard, and the bar shows the date, time and total before you book.",
     "link": {
       "href": "/",
-      "label": "Записаться"
+      "label": "Book"
     }
   },
   {
     "id": "pr130-2",
     "date": "2026-11-23",
     "audience": "clients",
-    "title": "Профиль как в Настройках",
-    "text": "Аккаунт на странице записей одной строкой с фото, фактами и уровнем.",
+    "title": "A profile like Settings",
+    "text": "Your account on the bookings page is one row with your photo, facts and level.",
     "link": {
       "href": "/bookings",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr128-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Ищите мастера по имени",
-    "text": "Начните печатать имя в поиске, и мастер появится в подсказках.",
+    "title": "Find a specialist by name",
+    "text": "Start typing a name in search and the specialist shows up in the suggestions.",
     "link": {
       "href": "/",
-      "label": "Каталог"
-    }
-  },
-  {
-    "id": "pr129-1",
-    "date": "2026-11-22",
-    "audience": "business",
-    "title": "Кабинет на кыргызском и английском",
-    "text": "Выберите язык внизу страницы, и кабинет, вход и «Мой день» заговорят на нём.",
-    "link": {
-      "href": "/manage",
-      "label": "Кабинет"
+      "label": "Catalogue"
     }
   },
   {
     "id": "pr125-1",
     "date": "2026-11-22",
     "audience": "business",
-    "title": "Фото работы сразу после визита",
-    "text": "Отметьте «Пришёл» в «Мой день», и камера откроется одним касанием.",
+    "title": "Photo of the work right after a visit",
+    "text": "Mark “Arrived” in My day and the camera opens in one tap.",
     "link": {
       "href": "/master",
-      "label": "Мой день"
+      "label": "My day"
     }
   },
   {
     "id": "pr125-2",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Покажите результат",
-    "text": "Фото к отзыву попадает в «Образы» с подписью «Фото клиента».",
+    "title": "Show the result",
+    "text": "A photo with your review goes to Looks labelled “Client's photo”.",
     "link": {
       "href": "/feed",
-      "label": "Образы"
+      "label": "Looks"
     }
   },
   {
     "id": "pr127-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Пора снова",
-    "text": "В истории визитов видно, к каким услугам пора вернуться.",
+    "title": "Time to come back",
+    "text": "Your visit history shows which services are due again.",
     "link": {
       "href": "/bookings?tab=history",
-      "label": "Профиль"
+      "label": "Profile"
     }
   },
   {
     "id": "pr126-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Следите за своим мастером",
-    "text": "Нажмите колокольчик на карточке мастера, и мы напишем, когда у него освободится время.",
+    "title": "Follow your specialist",
+    "text": "Tap the bell on a specialist's card and we'll let you know when they have free time.",
     "link": {
       "href": "/",
-      "label": "Каталог"
+      "label": "Catalogue"
     }
   },
   {
     "id": "pr126-2",
     "date": "2026-11-22",
     "audience": "business",
-    "title": "Подписчики мастера",
-    "text": "В «Мой день» видно, сколько клиентов следят за мастером.",
+    "title": "A specialist's followers",
+    "text": "My day shows how many clients follow the specialist.",
     "link": {
       "href": "/master",
-      "label": "Мой день"
+      "label": "My day"
     }
   },
   {
     "id": "pr118-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Несколько услуг за один визит",
-    "text": "Нажмите «Изменить» у выбранной услуги и отметьте ещё: мастер сделает их подряд, длительность и сумма считаются сразу.",
+    "title": "Several services in one visit",
+    "text": "Tap “Change” on the chosen service and tick more: the specialist does them back to back, and the length and total update at once.",
     "link": {
       "href": "/",
-      "label": "Попробовать"
+      "label": "Try it"
     }
   },
   {
     "id": "pr118-2",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Ещё запись к другому мастеру",
-    "text": "После записи нажмите «Ещё запись» и запишитесь в то же место на время после визита, имя и номер уже заполнены.",
+    "title": "Another booking with another specialist",
+    "text": "After booking, tap “Another booking” to book the same place for a time after your visit. Your name and number are already filled in.",
     "link": {
       "href": "/",
-      "label": "Попробовать"
+      "label": "Try it"
     }
   },
   {
     "id": "pr118-3",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Быстрый выбор мастера",
-    "text": "На шаге мастера кнопка «Любой мастер» сразу выбирает свободного и ведёт к времени.",
+    "title": "Pick a specialist faster",
+    "text": "On the specialist step, “Any specialist” picks whoever is free and takes you to the time.",
     "link": {
       "href": "/",
-      "label": "Попробовать"
+      "label": "Try it"
     }
   },
   {
     "id": "pr120-1",
     "date": "2026-11-22",
     "audience": "business",
-    "title": "Поиск в настройках не сдвигает страницу",
-    "text": "На Android в приложении поле поиска поднимается над клавиатурой, а страница остаётся на месте."
+    "title": "Settings search keeps the page still",
+    "text": "In the Android app the search field rises above the keyboard while the page stays put."
   },
   {
     "id": "pr114-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Ещё услуга в один тап",
-    "text": "Под выбранной услугой предлагаем то, что к ней берут, например оформление бороды к стрижке: одно нажатие добавляет её к визиту у того же мастера, а выбранное время остаётся, если визит в него помещается.",
+    "title": "One more service in one tap",
+    "text": "Under the chosen service we suggest what goes with it, like a beard trim with a haircut: one tap adds it to the visit with the same specialist, and your time stays if the visit still fits.",
     "link": {
       "href": "/",
-      "label": "Попробовать"
+      "label": "Try it"
     }
   },
   {
     "id": "pr113-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Запись открывается сразу",
-    "text": "Лист записи появляется в момент нажатия и показывает форму по мере загрузки, каталог под ним остаётся на месте, а после обновления страницы запись остаётся поверх каталога.",
+    "title": "Booking opens at once",
+    "text": "The booking sheet appears the moment you tap and fills in as it loads. The catalogue underneath stays put, and after a reload the booking stays on top of it.",
     "link": {
       "href": "/",
-      "label": "Попробовать"
+      "label": "Try it"
     }
   },
   {
     "id": "pr112-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Стопка шагов в записи",
-    "text": "После того как стопку растянули пальцем, «Изменить» срабатывает с первого нажатия.",
+    "title": "The stack of booking steps",
+    "text": "After you spread the stack with your finger, “Change” works on the first tap.",
     "link": {
       "href": "/",
-      "label": "Записаться"
+      "label": "Book"
     }
   },
   {
     "id": "pr107-1",
     "date": "2026-11-22",
     "audience": "clients",
-    "title": "Подарочный сертификат онлайн",
-    "text": "Выберите сумму на странице места, оплатите картой, и код придёт вам и получателю.",
+    "title": "Gift cards online",
+    "text": "Choose an amount on the place's page, pay by card, and the code goes to you and the recipient.",
     "link": {
       "href": "/awaisa-studio#gift",
-      "label": "Посмотреть"
+      "label": "Take a look"
     }
   },
   {
     "id": "pr107-2",
     "date": "2026-11-22",
     "audience": "business",
-    "title": "Сертификаты продаются сами",
-    "text": "Включите онлайн-продажу и суммы в настройках лояльности, оплаченный сертификат появится в списке и в прибыли.",
+    "title": "Gift cards sell themselves",
+    "text": "Turn on online sales and set amounts in the loyalty settings. A paid gift card shows in the list and in profit.",
     "link": {
       "href": "/manage",
-      "label": "Настроить"
+      "label": "Set up"
     }
   },
   {
     "id": "pr110-1",
     "date": "2026-11-22",
     "audience": "everyone",
-    "title": "Жалоба с причиной",
-    "text": "На отзыв и профиль теперь тоже можно пожаловаться: выберите причину во флажке, модератор проверит.",
+    "title": "Report with a reason",
+    "text": "You can now report reviews and profiles too: choose a reason under the flag and a moderator will check it.",
     "link": {
       "href": "/awaisa-studio",
-      "label": "Открыть место"
+      "label": "Open the place"
     }
   },
   {
     "id": "pr110-2",
     "date": "2026-11-22",
     "audience": "business",
-    "title": "Фото, скрытое модератором",
-    "text": "Если модератор скроет фото работы после жалоб клиентов, придёт сообщение в Telegram."
+    "title": "Photo hidden by a moderator",
+    "text": "If a moderator hides a work photo after client reports, you'll get a Telegram message."
   },
   {
     "id": "pr109-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Записи в календаре телефона",
-    "text": "Подпишитесь один раз, и записи сами появятся в Календаре iPhone или Google, отмены останутся зачёркнутыми.",
+    "title": "Bookings in your phone's calendar",
+    "text": "Subscribe once and bookings appear in your iPhone or Google calendar on their own. Cancelled ones stay crossed out.",
     "link": {
       "href": "/manage",
-      "label": "Подключить"
+      "label": "Connect"
     }
   },
   {
     "id": "pr108-1",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Ваши данные под контролем",
-    "text": "В настройках профиля можно скачать все свои данные одним файлом или удалить аккаунт.",
+    "title": "Your data, your control",
+    "text": "In your profile settings you can download all your data in one file or delete your account.",
     "link": {
       "href": "/bookings?tab=settings",
-      "label": "Открыть настройки"
+      "label": "Open settings"
     }
   },
   {
     "id": "pr105-1",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Абонементы онлайн",
-    "text": "купите абонемент на странице места и записывайтесь по нему: визит спишется, когда мастер его отметит.",
+    "title": "Memberships online",
+    "text": "Buy a membership on the place's page and book with it: the visit is taken off when the specialist marks it.",
     "link": {
       "href": "/awaisa-studio#subscriptions",
-      "label": "Посмотреть"
+      "label": "Take a look"
     }
   },
   {
     "id": "pr105-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Продажа абонементов на сайте",
-    "text": "включите «Продавать онлайн» в абонементе, и клиенты купят его картой на вашей странице и при записи.",
+    "title": "Sell memberships on your page",
+    "text": "Turn on “Sell online” for a membership and clients can buy it by card on your page and when booking.",
     "link": {
       "href": "/manage",
-      "label": "Настроить"
+      "label": "Set up"
     }
   },
   {
     "id": "pr104-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Процент мастеру с товаров",
-    "text": "В «Зарплате» мастера можно задать процент с проданных им товаров, он попадёт в начисление и в «Мой день».",
+    "title": "Specialist's share of product sales",
+    "text": "In a specialist's Pay you can set a percentage of the products they sell. It goes into their pay and into My day.",
     "link": {
       "href": "/manage",
-      "label": "Открыть мастеров"
+      "label": "Open specialists"
     }
   },
   {
     "id": "pr106-1",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Похожее после записи",
-    "text": "После записи «Вам может понравиться» подбирает услуги того же вида, что вы только что выбрали.",
+    "title": "Similar picks after booking",
+    "text": "After you book, “You may also like” suggests services of the same kind you just chose.",
     "link": {
       "href": "/",
-      "label": "Записаться"
+      "label": "Book"
     }
   },
   {
     "id": "pr102-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Тариф в кабинете",
-    "text": "В «Настройки → Тариф» видно ваш тариф, сколько мастеров, филиалов и SMS использовано, и его можно оплатить на месяц или год.",
+    "title": "Your plan in the dashboard",
+    "text": "Settings > Plan shows your plan and how many specialists, branches and SMS you've used, and lets you pay for a month or a year.",
     "link": {
       "href": "/manage",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr103-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Фискальные чеки в кассе",
-    "text": "Включите «Выдавать чеки» и укажите ИНН: продажи товаров и оплаченные визиты получают чек со ссылкой и QR для клиента, а отмена продажи даёт чек возврата.",
+    "title": "Fiscal receipts at the till",
+    "text": "Turn on “Issue receipts” and enter your tax number: product sales and paid visits get a receipt with a link and QR for the client, and cancelling a sale issues a refund receipt.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
-    }
-  },
-  {
-    "id": "pr101-1",
-    "date": "2026-11-21",
-    "audience": "clients",
-    "title": "Awaisa на кыргызском и английском",
-    "text": "Каталог, страница места, карта, «Образы», профиль и рейтинг теперь на выбранном языке, не только запись. Язык выбирается внизу страницы.",
-    "link": {
-      "href": "/",
-      "label": "Открыть каталог"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr100-1",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Несколько услуг за один визит",
-    "text": "Маникюр и педикюр или стрижка и борода одной записью у одного мастера: нажмите «Ещё услуга» после выбора первой.",
+    "title": "Several services in one visit",
+    "text": "Manicure and pedicure, or a haircut and beard, in one booking with one specialist: tap “One more service” after choosing the first.",
     "link": {
       "href": "/",
-      "label": "Записаться"
+      "label": "Book"
     }
   },
   {
     "id": "pr100-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Визиты из нескольких услуг",
-    "text": "Такая запись в расписании одним блоком со всеми услугами, выручка, зарплата и склад учитывают каждую."
+    "title": "Visits with several services",
+    "text": "Such a booking is one block in the schedule with all its services, and revenue, pay and stock count each one."
   },
   {
     "id": "pr99-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Уведомления о записях в приложении",
-    "text": "Владельцы, администраторы и мастера получают в приложении Awaisa push о новых записях, переносах и отменах; тап открывает этот день.",
+    "title": "Booking alerts in the app",
+    "text": "Owners, admins and specialists get push notifications in the Awaisa app about new, moved and cancelled bookings. A tap opens that day.",
     "link": {
       "href": "/manage",
-      "label": "Включить"
+      "label": "Turn on"
     }
   },
   {
     "id": "pr98-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Абонементы в прибыли",
-    "text": "Проданные абонементы теперь входят в выручку и прибыль в день продажи, отдельной строкой «Абонементы».",
+    "title": "Memberships in profit",
+    "text": "Memberships sold now count towards revenue and profit on the day of sale, on their own “Memberships” line.",
     "link": {
       "href": "/manage",
-      "label": "Открыть аналитику"
+      "label": "Open analytics"
     }
   },
   {
     "id": "pr96-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Спокойнее «Мой день» и лист мастера",
-    "text": "Факты дня одной строкой, итог визита на всю ширину, «Отметить выплату» внизу листа на всю ширину.",
+    "title": "A calmer My day and specialist sheet",
+    "text": "The day's facts in one line, the visit outcome full width, and “Mark payout” full width at the bottom of the sheet.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr96-2",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Настройки профиля проще",
-    "text": "Иконки без цветных плиток, «Выйти» без лишнего подтверждения.",
+    "title": "Simpler profile settings",
+    "text": "Icons without coloured tiles, and “Sign out” without an extra confirmation.",
     "link": {
       "href": "/bookings?tab=settings",
-      "label": "Профиль"
+      "label": "Profile"
     }
   },
   {
     "id": "pr93-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Зарплата мастеров",
-    "text": "Процент с услуг, своя ставка для отдельных услуг, оклад в месяц или за рабочий день и гарантированный минимум. В «Аналитике» видно, сколько кому выплатить, а выплату можно отметить и отменить.",
+    "title": "Specialists' pay",
+    "text": "A percentage of services, custom rates for some services, a monthly or per-day salary and a guaranteed minimum. Analytics shows how much to pay each person, and you can mark a payout or undo it.",
     "link": {
       "href": "/manage",
-      "label": "Настроить"
+      "label": "Set up"
     }
   },
   {
     "id": "pr93-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Заработок в «Моём дне»",
-    "text": "Мастер видит, сколько заработал за день и за месяц.",
+    "title": "Earnings in My day",
+    "text": "Specialists see how much they earned for the day and the month.",
     "link": {
       "href": "/master",
-      "label": "Открыть"
+      "label": "Open"
     }
   },
   {
     "id": "pr94-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Касса",
-    "text": "открывайте смену, продавайте товары с визитом или отдельно и закрывайте смену с пересчётом наличных.",
+    "title": "Till",
+    "text": "Open a shift, sell products with a visit or on their own, and close the shift with a cash count.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кассу"
+      "label": "Open the till"
     }
   },
   {
     "id": "pr94-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Прибыль в аналитике",
-    "text": "выручка от услуг и товаров минус материалы и расходы по статьям.",
+    "title": "Profit in analytics",
+    "text": "Revenue from services and products minus materials and expenses by category.",
     "link": {
       "href": "/manage",
-      "label": "Посмотреть"
+      "label": "Take a look"
     }
   },
   {
     "id": "pr92-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Уведомления о записях на телефоне",
-    "text": "Новые записи, переносы и отмены приходят на телефон или компьютер, даже когда кабинет закрыт. Мастер получает только свои. Включите в «Настройки → Уведомления» или в «Мой день».",
+    "title": "Booking alerts on your phone",
+    "text": "New, moved and cancelled bookings reach your phone or computer even when the dashboard is closed. Specialists only get their own. Turn it on in Settings > Notifications or in My day.",
     "link": {
       "href": "/manage",
-      "label": "Включить"
+      "label": "Turn on"
     }
   },
   {
     "id": "pr87-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Подсказки клиентов в новой записи",
-    "text": "Начните вводить имя или номер, и под полем появятся клиенты, которые уже были у вас: одним тапом заполнятся имя и телефон.",
+    "title": "Client suggestions in a new booking",
+    "text": "Start typing a name or number and clients who've been before appear under the field: one tap fills in the name and phone.",
     "link": {
       "href": "/manage",
-      "label": "Открыть расписание"
+      "label": "Open the schedule"
     }
   },
   {
     "id": "pr86-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Кабинет в один тап",
-    "text": "На телефоне в нижнем меню вместо «Бизнес» теперь «Кабинет», а «‹» возвращает туда, откуда вы пришли. Нажмите на название бизнеса, чтобы перейти к другому бизнесу или в «Мой день».",
+    "title": "Dashboard in one tap",
+    "text": "On phones the bottom menu now shows “Dashboard” instead of “Business”, and “‹” takes you back where you came from. Tap the business name to switch to another business or to My day.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr85-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Настройки с первого взгляда",
-    "text": "В каждой строке видно, что внутри: сколько филиалов, какие акции действуют, что заканчивается на складе. Есть поиск по настройкам.",
+    "title": "Settings at a glance",
+    "text": "Each row shows what's inside: how many branches, which promotions are running, what's running low in stock. You can also search settings.",
     "link": {
       "href": "/manage",
-      "label": "Настройки"
+      "label": "Settings"
     }
   },
   {
     "id": "pr85-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Адрес филиала без двойной работы",
-    "text": "Начните вводить адрес, и метка на карте встанет сама; сдвиньте карту, и адрес подставится.",
+    "title": "Branch address without the double work",
+    "text": "Start typing the address and the pin drops on the map by itself. Move the map and the address fills in.",
     "link": {
       "href": "/manage",
-      "label": "Филиалы"
+      "label": "Branches"
     }
   },
   {
     "id": "pr85-3",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Услуги, мастера и часы на Странице",
-    "text": "Всё, что видят клиенты, теперь меняется в одном месте, на вкладке «Страница».",
+    "title": "Services, specialists and hours on the Page",
+    "text": "Everything clients see is now edited in one place, on the Page tab.",
     "link": {
       "href": "/manage",
-      "label": "Страница"
+      "label": "Page"
     }
   },
   {
     "id": "pr84-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Страница как профиль в соцсети",
-    "text": "Работы, услуги, мастера и часы на одной странице по табам, всё меняется прямо здесь, без перехода в настройки.",
+    "title": "A page like a social profile",
+    "text": "Work, services, specialists and hours on one page in tabs, all edited right here without going to settings.",
     "link": {
       "href": "/manage",
-      "label": "Страница"
+      "label": "Page"
     }
   },
   {
     "id": "pr84-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "QR-код страницы",
-    "text": "Скачайте QR для стойки или витрины и скопируйте ссылку для Instagram.",
+    "title": "Your page's QR code",
+    "text": "Download a QR for your counter or window and copy the link for Instagram.",
     "link": {
       "href": "/manage",
-      "label": "Страница"
+      "label": "Page"
     }
   },
   {
     "id": "pr84-3",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Несколько фото работ за раз",
-    "text": "Выберите сразу несколько фото и отметьте услугу и мастера по очереди; порядок фото меняется перетаскиванием.",
+    "title": "Several work photos at once",
+    "text": "Pick several photos together and tag the service and specialist one by one. Drag photos to change their order.",
     "link": {
       "href": "/manage",
-      "label": "Страница"
+      "label": "Page"
     }
   },
   {
     "id": "pr83-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Группы клиентов",
-    "text": "Новые, постоянные, давно не были, с неявками и именинники недели отдельно, и сразу можно позвать их рассылкой.",
+    "title": "Client groups",
+    "text": "New, regulars, haven't been in a while, no-shows and this week's birthdays, each on its own, and you can invite them back with a mailing.",
     "link": {
       "href": "/manage",
-      "label": "Клиенты"
+      "label": "Clients"
     }
   },
   {
     "id": "pr83-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Вся база в списке",
-    "text": "Клиенты больше не обрываются на двухсотом, список подгружается по мере листания.",
+    "title": "Your whole client base in the list",
+    "text": "Clients no longer stop at 200: the list loads more as you scroll.",
     "link": {
       "href": "/manage",
-      "label": "Клиенты"
+      "label": "Clients"
     }
   },
   {
     "id": "pr82-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Аналитика подсказывает, что делать",
-    "text": "Сверху то, что требует внимания: неотмеченные визиты, клиенты, которые давно не были, свободные окна завтра. Каждая строка ведёт к действию.",
+    "title": "Analytics tells you what to do",
+    "text": "At the top is what needs attention: unmarked visits, clients who haven't been in a while, free slots tomorrow. Each row leads to an action.",
     "link": {
       "href": "/manage",
-      "label": "Аналитика"
+      "label": "Analytics"
     }
   },
   {
     "id": "pr82-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Цель на месяц",
-    "text": "Задайте цель по выручке и смотрите, хватает ли текущего темпа.",
+    "title": "A goal for the month",
+    "text": "Set a revenue goal and see whether your current pace is enough.",
     "link": {
       "href": "/manage",
-      "label": "Аналитика"
+      "label": "Analytics"
     }
   },
   {
     "id": "pr82-3",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Потери и возвращаемость",
-    "text": "Сколько денег ушло на неявки и поздние отмены и какая доля клиентов возвращается, в целом и к каждому мастеру.",
+    "title": "Losses and return rate",
+    "text": "How much money went on no-shows and late cancellations, and what share of clients come back, overall and for each specialist.",
     "link": {
       "href": "/manage",
-      "label": "Аналитика"
+      "label": "Analytics"
     }
   },
   {
     "id": "pr82-4",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Акция на тихие часы в одно касание",
-    "text": "Выберите тихий час на карте загрузки, и откроется готовая акция на это время.",
+    "title": "A quiet-hours promotion in one tap",
+    "text": "Pick a quiet hour on the load map and a ready promotion for that time opens.",
     "link": {
       "href": "/manage",
-      "label": "Аналитика"
+      "label": "Analytics"
     }
   },
   {
     "id": "pr82-5",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Неделя в Telegram",
-    "text": "По понедельникам приходит сводка: выручка, визиты, лучший мастер, неявки и отзывы.",
+    "title": "Your week in Telegram",
+    "text": "Every Monday you get a summary: revenue, visits, the best specialist, no-shows and reviews.",
     "link": {
       "href": "/manage",
-      "label": "Подключить Telegram"
+      "label": "Connect Telegram"
     }
   },
   {
     "id": "pr81-1",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Отвечайте на отзывы в одно касание",
-    "text": "Поле ответа сразу под отзывом, быстрые ответы и автоответ на хорошие оценки, «Ответить всем» на оценки без текста.",
+    "title": "Answer reviews in one tap",
+    "text": "The reply field sits right under the review, with quick replies, an auto-reply to good ratings and “Reply to all” for ratings without text.",
     "link": {
       "href": "/manage",
-      "label": "Открыть отзывы"
+      "label": "Open reviews"
     }
   },
   {
     "id": "pr81-2",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Плохие отзывы первыми",
-    "text": "«Написать клиенту» с готовым извинением и промокодом, отметка «Решено», когда договорились.",
+    "title": "Poor reviews first",
+    "text": "“Message the client” with a ready apology and promo code, and a “Resolved” mark once you've sorted it out.",
     "link": {
       "href": "/manage",
-      "label": "Открыть отзывы"
+      "label": "Open reviews"
     }
   },
   {
     "id": "pr81-3",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Ответ на отзыв прямо из Telegram",
-    "text": "Кнопки быстрых ответов под новым отзывом и сводка за неделю по понедельникам.",
+    "title": "Reply to reviews from Telegram",
+    "text": "Quick-reply buttons under each new review and a weekly summary every Monday.",
     "link": {
       "href": "/manage",
-      "label": "Подключить Telegram"
+      "label": "Connect Telegram"
     }
   },
   {
     "id": "pr81-4",
     "date": "2026-11-21",
     "audience": "business",
-    "title": "Отзывы о мастерах",
-    "text": "Рейтинг каждого мастера в аналитике, а мастер видит свои отзывы в «Мой день».",
+    "title": "Reviews of specialists",
+    "text": "Each specialist's rating in analytics, and specialists see their own reviews in My day.",
     "link": {
       "href": "/master",
-      "label": "Мой день"
+      "label": "My day"
     }
   },
   {
     "id": "pr81-5",
     "date": "2026-11-21",
     "audience": "clients",
-    "title": "Новый вход",
-    "text": "Номер крупными цифрами на тёмной сцене со светом через призму.",
+    "title": "New sign-in",
+    "text": "Your number in big digits on a dark scene lit through a prism.",
     "link": {
       "href": "/login",
-      "label": "Войти"
+      "label": "Sign in"
     }
   },
   {
     "id": "pr80-1",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Аккуратнее кабинет",
-    "text": "Свободные окна, клиенты, аналитика, график и лояльность выглядят спокойнее: меньше лишних фонов, кнопки одной высоты, график как настройки iPhone.",
+    "title": "A tidier dashboard",
+    "text": "Free slots, clients, analytics, schedules and loyalty look calmer: fewer extra backgrounds, buttons of one height, and schedules laid out like iPhone settings.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr80-2",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Назад из «Что нового»",
-    "text": "Открыли обновления из кабинета - вернётесь в тот же раздел одной кнопкой.",
+    "title": "Back from What's new",
+    "text": "Opened the updates from the dashboard? One button takes you back to the same section.",
     "link": {
       "href": "/updates",
-      "label": "Что нового"
+      "label": "What's new"
     }
   },
   {
     "id": "pr80-3",
     "date": "2026-11-20",
     "audience": "clients",
-    "title": "«Образы» без лишнего",
-    "text": "Над работами больше нет фильтров, а ближние к вам показываются первыми.",
+    "title": "Looks without the clutter",
+    "text": "No more filters above the work, and the nearest to you come first.",
     "link": {
       "href": "/feed",
-      "label": "Образы"
+      "label": "Looks"
     }
   },
   {
     "id": "pr80-4",
     "date": "2026-11-20",
     "audience": "clients",
-    "title": "Спокойнее профиль",
-    "text": "Кнопки под именем по центру, оценка визита и «Выйти» без лишних рамок.",
+    "title": "A calmer profile",
+    "text": "Buttons centred under your name, visit rating and “Sign out” without extra frames.",
     "link": {
       "href": "/bookings",
-      "label": "Профиль"
+      "label": "Profile"
     }
   },
   {
     "id": "pr79-1",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Расписание удобнее на телефоне",
-    "text": "Инструменты в плавающей панели внизу, день во весь экран, два мастера рядом в колонках.",
+    "title": "Schedule made easier on phones",
+    "text": "Tools in a floating bar at the bottom, the day full screen, and two specialists side by side in columns.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr79-2",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Записать снова отменённого клиента",
-    "text": "В отменённой записи одна кнопка вернёт клиента на то же время к тому же мастеру.",
+    "title": "Rebook a cancelled client",
+    "text": "One button in a cancelled booking brings the client back at the same time with the same specialist.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr79-3",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Свободные окна под услугу",
-    "text": "Выберите услугу, и сообщение покажет только подходящие окна со ссылкой сразу на неё; отправьте в WhatsApp или Telegram в одно нажатие.",
+    "title": "Free slots for a service",
+    "text": "Choose a service and the message shows only the slots that fit, with a link straight to it. Send it to WhatsApp or Telegram in one tap.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr78-1",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Отправьте свободные окна клиентам",
-    "text": "Кнопка в расписании собирает свободное время мастеров на день в готовое сообщение для WhatsApp или сторис со ссылкой на запись.",
+    "title": "Send free slots to clients",
+    "text": "A button in the schedule gathers the specialists' free time for the day into a ready message for WhatsApp or stories, with a booking link.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr78-2",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Найдите место под услугу",
-    "text": "Выберите услугу, и расписание подсветит, у кого и когда она помещается; нажмите на подсвеченное место, чтобы записать клиента.",
+    "title": "Find room for a service",
+    "text": "Choose a service and the schedule highlights who has room for it and when. Tap a highlighted slot to book a client.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr78-3",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Быстрые действия по правому клику",
-    "text": "Позвонить, написать в WhatsApp, отметить визит или отменить запись прямо из расписания.",
+    "title": "Quick actions on right-click",
+    "text": "Call, message on WhatsApp, mark a visit or cancel a booking right from the schedule.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr78-4",
     "date": "2026-11-20",
     "audience": "business",
-    "title": "Видно, насколько загружен каждый день",
-    "text": "Под каждой датой полоска загрузки, а на телефоне дни листаются свайпом.",
+    "title": "See how busy each day is",
+    "text": "Each date has a load bar under it, and on phones you swipe between days.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr77-1",
     "date": "2026-11-19",
     "audience": "business",
-    "title": "Расписание лентой",
-    "text": "Переключите «Колонки · Лента» над расписанием: мастера идут дорожками, время - слева направо, масштаб щипком или кнопками «− +».",
+    "title": "Schedule as a timeline",
+    "text": "Switch “Columns · Timeline” above the schedule: specialists run in lanes, time goes left to right, and you zoom with a pinch or the “- +” buttons.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr77-2",
     "date": "2026-11-19",
     "audience": "business",
-    "title": "Карточки записей говорят цветом",
-    "text": "Пришедшие становятся зелёными, неявки - красными, а идущий визит заполняется до текущего времени. Красная линия показывает, который час.",
+    "title": "Booking cards speak in colour",
+    "text": "Arrivals turn green, no-shows red, and the visit under way fills up to the current time. A red line shows the time now.",
     "link": {
       "href": "/manage",
-      "label": "Открыть кабинет"
+      "label": "Open the dashboard"
     }
   },
   {
     "id": "pr76-1",
     "date": "2026-11-19",
     "audience": "business",
-    "title": "Связаться с клиентом",
-    "text": "проще - Позвонить, написать в WhatsApp или SMS теперь отдельными строками в записи и карточке клиента."
+    "title": "Easier to reach a client",
+    "text": "Call, WhatsApp and SMS are now separate rows in the booking and the client card."
   }
 ]

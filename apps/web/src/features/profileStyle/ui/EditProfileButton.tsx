@@ -10,7 +10,7 @@ import { useProfileEditorHost } from '../model/profileEditorHost'
 import { useMyProfile } from '../model/useMyProfile'
 import { ProfileStyleSheet } from './ProfileStyleSheet/ProfileStyleSheet'
 
-// «Оформление» on one's own page: the look is edited where it is seen, then the page redraws.
+// «Appearance» on one's own page: the look is edited where it is seen, then the page redraws.
 export const EditProfileButton = () => {
   const t = useT()
   const router = useRouter()

@@ -58,7 +58,7 @@ const LINK_GLYPHS: Record<ProfileLinkKind, ComponentType> = {
   website: Globe,
 }
 
-// What is left of a field's length, shown only near its end («ставь ограничение»).
+// What is left of a field's length, shown only near its end (the owner asked for a limit).
 const Counter = ({ value, max }: { value: string; max: number }) =>
   value.length >= max * 0.7 ? (
     <span className={styles.counter} aria-live='polite'>
@@ -67,7 +67,7 @@ const Counter = ({ value, max }: { value: string; max: number }) =>
   ) : null
 
 interface ProfileStyleFormProps {
-  /** The form's id: the sheet's «Готово» submits it from the bar. */
+  /** The form's id: the sheet's «Done» submits it from the bar. */
   formId: string
   settings: ProfileSettings
   profile: PublicProfile | null
@@ -88,7 +88,7 @@ const SHEET_FORM_ID = 'profile-style-form'
 
 // How the profile looks to others: a live preview, the colour, a short status and who sees it.
 // A sheet of its own on the profile page; inside the profile's own sheet the same form takes its
-// place («оформление … могла там же внутри поменяться»), so there is no sheet over a sheet.
+// place (the owner wanted the look changed right there), so there is no sheet over a sheet.
 export const ProfileStyleSheet = ({ onClose, ...props }: ProfileStyleSheetProps) => {
   const t = useT()
   const [isSaving, setIsSaving] = useState(false)
@@ -205,7 +205,7 @@ export const ProfileStyleForm = ({
         </ProfileHead>
       </div>
 
-      {/* Laid out like the cabinet's sheets («нужен дизайн из админки»): rows right on the
+      {/* Laid out like the cabinet's sheets (the owner asked for the dashboard look): rows right on the
           sheet, a thin glyph before each label, the control on the right, a ↳ note under a group. */}
       <div className={styles.group}>
         <div className={styles.row}>
@@ -247,7 +247,7 @@ export const ProfileStyleForm = ({
             <Input
               variant='plain'
               aria-label={t('Status')}
-              placeholder={t('Status, e.g. «Going to Azamat since 2024»')}
+              placeholder={t('Status, e.g. “Going to Azamat since 2024”')}
               value={status}
               maxLength={STATUS_MAX}
               onValueChange={setStatus}
@@ -290,7 +290,7 @@ export const ProfileStyleForm = ({
         </label>
         <RowNote>
           {t(
-            'Latin letters, digits, «_» and «.», 3 or more: a short link for your bio and stories.',
+            'Latin letters, digits, “_” and “.”, 3 or more: a short link for your bio and stories.',
           )}
         </RowNote>
       </div>
@@ -325,7 +325,7 @@ export const ProfileStyleForm = ({
       </div>
 
       {earned.length > 0 && (
-        // The showcase as options too («тоже можно опциями сделать»): one row, the chosen medals
+        // The showcase as options too (the owner: options work here too): one row, the chosen medals
         // as emoji on its right, a menu that ticks up to three and stays open while you pick.
         <div className={styles.group}>
           <div className={styles.row}>

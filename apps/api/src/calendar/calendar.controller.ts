@@ -53,7 +53,7 @@ export class CalendarController {
     return this.feeds.render(file.slice(0, -'.ics'.length))
   }
 
-  // A master's own visits («Мой день»).
+  // A master's own visits («My day»).
   @Get('master/:slug/calendar')
   @UseGuards(MasterGuard)
   getMasterFeed(

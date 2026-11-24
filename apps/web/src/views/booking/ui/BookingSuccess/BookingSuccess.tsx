@@ -28,7 +28,7 @@ interface BookingSuccessProps {
   onBookAnother?: () => void
 }
 
-// When the visit ends: «Ещё запись» offers the times after it.
+// When the visit ends: Another booking offers the times after it.
 const endOf = (booking: Booking) => {
   const [hours = 0, minutes = 0] = booking.time.split(':').map(Number)
   const end = hours * 60 + minutes + booking.durationMinutes
@@ -109,14 +109,14 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
       <p className={styles.nextStep}>
         {t('Come at {time}', { time: booking.time })}
         {booking.business.address ? t(' to {address}', { address: booking.business.address }) : ''}.{' '}
-        {/* The sum itself, in bold: «Оплата в салоне» alone sent people looking in the ticket. */}
+        {/* The sum itself, in bold: "Pay at the salon" alone sent people looking in the ticket. */}
         {isDepositPaid ? t('The rest at the salon:') : t('Pay at the salon:')}{' '}
         <b className={styles.amount}>{formatPrice(toPay)}</b>.{' '}
         {t('Move or cancel by the link in the SMS.')}
       </p>
       <TelegramReminderLink bookingId={booking.id} />
       {/* The ticket itself opens the full one: details, place, download. Its own stretched
-          «Показать талон» button, not a button around the whole ticket - an article inside a
+          "Show ticket" button, not a button around the whole ticket - an article inside a
           button read as one long label that did not match what is written (WCAG 2.5.3). */}
       <div className={styles.ticket}>
         <Ticket booking={booking} onOpen={() => setIsTicketOpen(true)} />
@@ -131,7 +131,7 @@ export const BookingSuccess = ({ booking, onBookAnother }: BookingSuccessProps) 
           })}
         </button>
       )}
-      {/* One line of actions: the one primary «Мои записи» and the rest as thin glyphs in one
+      {/* One line of actions: the one primary My bookings and the rest as thin glyphs in one
           capsule of the same height (calendar, route, following the master). Tiles, a link, a big
           button and a small capsule of four sizes read as clutter. The ticket opens itself. */}
       <div className={styles.actions}>

@@ -9,7 +9,7 @@ import styles from './EmojiPicker.module.css'
 // The picker's code and data load only once someone opens it.
 const EmojiPanel = dynamic(() => import('./EmojiPanel').then((module) => module.EmojiPanel), {
   ssr: false,
-  loading: () => <p className={styles.note}>Загружаем…</p>,
+  loading: () => <p className={styles.note}>Loading…</p>,
 })
 
 interface EmojiButtonProps {

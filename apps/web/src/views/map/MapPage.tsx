@@ -357,7 +357,7 @@ export const MapPage = ({ kind, initialPlaces = null, isPending = false }: MapPa
         {isPicking && <PlacePickerSheet onClose={() => setIsPicking(false)} />}
         {detent === 'full' && (
           // The list over the whole screen hides the map: one floating button brings it back,
-          // like «Карта» in a listings app - the grabber alone was not found.
+          // like «Map» in a listings app - the grabber alone was not found.
           <button
             type='button'
             className={styles.showMap}

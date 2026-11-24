@@ -8,7 +8,7 @@ class ApiError extends Error {
   }
 }
 
-const FALLBACK_MESSAGE = 'Не удалось связаться с сервером. Попробуйте ещё раз.'
+const FALLBACK_MESSAGE = 'Could not reach the server. Please try again.'
 
 const toApiError = async (response: Response) => {
   const body: unknown = await response.json().catch(() => null)

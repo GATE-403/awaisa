@@ -19,7 +19,7 @@ interface PushAlertsGroupProps {
   listClassName?: string
 }
 
-// «Уведомлять о записях» on this device, as a Settings row with a switch. The browser's prompt
+// «Notify me of bookings» on this device, as a Settings row with a switch. The browser's prompt
 // comes only from this switch, never on load.
 export const PushAlertsGroup = ({ audience, listClassName }: PushAlertsGroupProps) => {
   const toast = useToast()

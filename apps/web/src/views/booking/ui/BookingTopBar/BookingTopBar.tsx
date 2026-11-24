@@ -18,7 +18,7 @@ interface BookingTopBarProps {
   progress?: { id: string; isDone: boolean; isCurrent: boolean }[]
 }
 
-// Over the page it was opened from, closing is «back» (that page, its scroll, its state); opened
+// Over the page it was opened from, closing is “back” (that page, its scroll, its state); opened
 // by a link from outside, it goes to the place's page.
 const useClose = (isModal: boolean) => {
   const router = useRouter()

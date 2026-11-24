@@ -94,7 +94,7 @@ export const ServiceDialog = ({ service, categories, onClose, onSave }: ServiceD
             <Input
               variant='plain'
               aria-label={t('Name')}
-              placeholder={t('Name, for example «Men’s haircut»')}
+              placeholder={t('Name, for example "Men’s haircut"')}
               value={name}
               onValueChange={setName}
               autoFocus

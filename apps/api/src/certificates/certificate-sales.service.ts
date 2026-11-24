@@ -73,15 +73,15 @@ export class CertificateSalesService implements OnModuleInit {
     customer: Customer | null,
   ): Promise<CertificateOrderCreated> {
     const business = await this.findBusiness(slug)
-    if (!business) throw new NotFoundException('Сертификаты здесь не продаются')
+    if (!business) throw new NotFoundException('Gift cards are not sold here')
     if (!business.amounts.includes(input.amount)) {
-      throw new BadRequestException('Выберите сумму из предложенных')
+      throw new BadRequestException('Pick one of the amounts offered')
     }
     const buyerPhone = customer?.phone ?? normalizePhone(input.buyerPhone)
-    if (!buyerPhone) throw new BadRequestException('Проверьте ваш номер телефона')
+    if (!buyerPhone) throw new BadRequestException('Check your phone number')
     const recipientPhone = input.recipientPhone ? normalizePhone(input.recipientPhone) : null
     if (input.recipientPhone && !recipientPhone) {
-      throw new BadRequestException('Проверьте номер получателя')
+      throw new BadRequestException("Check the recipient's number")
     }
 
     const [order] = await this.query(
@@ -103,7 +103,7 @@ export class CertificateSalesService implements OnModuleInit {
     const id = String(order?.id)
     try {
       const checkout = await this.payments.createOrderCheckout(KIND, id, input.amount, {
-        description: `Подарочный сертификат ${business.name} на ${formatSom(input.amount)}`,
+        description: `${business.name} gift card, ${formatSom(input.amount)}`,
         phone: buyerPhone,
       })
       return { id, checkoutUrl: checkout.url }
@@ -121,19 +121,19 @@ export class CertificateSalesService implements OnModuleInit {
        WHERE o."id" = $1`,
       [orderId],
     )
-    if (!row) throw new NotFoundException('Платёж не найден')
+    if (!row) throw new NotFoundException('Payment not found')
     const status = String(row.status) as PaymentOrder['status']
     return {
       kind: KIND,
-      // A no-break space keeps «3 000 сом» on one line on the pay page.
-      title: `Подарочный сертификат на ${formatSom(Number(row.amount)).replace(/ /g, '\u00a0')}`,
+      // A no-break space keeps «3,000 som» on one line on the pay page.
+      title: `Gift card, ${formatSom(Number(row.amount)).replace(/ /g, '\u00a0')}`,
       details: orderDetails(String(row.recipient_name), String(row.buyer_name)),
       business: { name: String(row.business_name), slug: String(row.business_slug) },
       dueAt: status === 'pending' ? new Date(String(row.due_at)).toISOString() : null,
       status,
       doneText: row.recipient_phone
-        ? 'Код сертификата отправили вам и получателю.'
-        : 'Код сертификата отправили вам - передайте его получателю.',
+        ? 'We have sent the gift card code to you and the recipient.'
+        : 'We have sent the gift card code to you: pass it on to the recipient.',
     }
   }
 
@@ -190,14 +190,14 @@ export class CertificateSalesService implements OnModuleInit {
       message: String(order.message),
       link,
     }
-    const button = { label: 'Записаться', url: link }
+    const button = { label: 'Book', url: link }
     await this.clientMessages.send(buyerPhone, { text: buyerMessage(paid), link: button })
     if (recipientPhone) {
       await this.clientMessages.send(recipientPhone, { text: recipientMessage(paid), link: button })
     }
     void this.telegram.notifyBusiness(
       businessId,
-      `🎁 <b>Купили сертификат</b> на ${formatSom(paid.amount)} · ${escapeHtml(paid.business)}\nОт ${escapeHtml(paid.buyerName)}${paid.recipientName ? ` для ${escapeHtml(paid.recipientName)}` : ''}, код ${paid.code}`,
+      `🎁 <b>Gift card sold</b>, ${formatSom(paid.amount)} · ${escapeHtml(paid.business)}\nFrom ${escapeHtml(paid.buyerName)}${paid.recipientName ? ` for ${escapeHtml(paid.recipientName)}` : ''}, code ${paid.code}`,
     )
     this.logger.log(`Certificate ${certificate.code} issued for order ${orderId}`)
   }

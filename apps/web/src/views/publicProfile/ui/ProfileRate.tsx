@@ -11,8 +11,8 @@ interface ProfileRateProps {
   onRated: () => void
 }
 
-// «Ждут оценки» answered right here on one's own profile: the latest visit without a review, its
-// stars one tap away (the same «Как прошло?» as in the records), then the next one.
+// «Waiting for a rating» answered right here on one's own profile: the latest visit without a review, its
+// stars one tap away (the same «How did it go?» as in the records), then the next one.
 export const ProfileRate = ({ onRated }: ProfileRateProps) => {
   const today = useToday()
   const [past, setPast] = useState<Booking[] | null>(null)

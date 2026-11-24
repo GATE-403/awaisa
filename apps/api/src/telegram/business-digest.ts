@@ -18,48 +18,38 @@ type BusinessWeek = {
 const escapeHtml = (value: string) =>
   value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
-const plural = (count: number, [one, few, many]: [string, string, string]) => {
-  const mod10 = count % 10
-  const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
-}
+const plural = (count: number, [one, other]: [string, string]) => (count === 1 ? one : other)
 
-// Thousands parted by a narrow no-break space, like the cabinet's figures.
+// Thousands parted by a comma, like the dashboard's figures.
 const money = (amount: number) =>
   `${Math.round(amount)
     .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} сом`
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',')} som`
 
 const changeText = (current: number, previous: number) => {
   if (previous === 0) return ''
   const change = Math.round(((current - previous) / previous) * 100)
-  if (change === 0) return ' (как на прошлой неделе)'
-  return ` (${change > 0 ? '▲ +' : '▼ −'}${Math.abs(change)}% к прошлой неделе)`
+  if (change === 0) return ' (same as last week)'
+  return ` (${change > 0 ? '▲ +' : '▼ −'}${Math.abs(change)}% on last week)`
 }
 
 /** The week's summary, or null for a week with no visits and nothing waiting. */
 const businessWeekText = (week: BusinessWeek) => {
   if (week.visits === 0 && week.unmarked === 0) return null
 
-  const lines = [`📈 <b>Неделя · ${escapeHtml(week.business)}</b>`]
-  lines.push(`Выручка ${money(week.revenue)}${changeText(week.revenue, week.previousRevenue)}`)
-  lines.push(`${week.visits} ${plural(week.visits, ['визит', 'визита', 'визитов'])}`)
+  const lines = [`📈 <b>Week · ${escapeHtml(week.business)}</b>`]
+  lines.push(`Revenue ${money(week.revenue)}${changeText(week.revenue, week.previousRevenue)}`)
+  lines.push(`${week.visits} ${plural(week.visits, ['visit', 'visits'])}`)
   if (week.bestMaster) {
-    lines.push(
-      `Больше всех: ${escapeHtml(week.bestMaster.name)}, ${money(week.bestMaster.revenue)}`,
-    )
+    lines.push(`Top earner: ${escapeHtml(week.bestMaster.name)}, ${money(week.bestMaster.revenue)}`)
   }
   if (week.noShows.count > 0) {
-    lines.push(`Неявки: ${week.noShows.count}, недополучено ${money(week.noShows.amount)}`)
+    lines.push(`No-shows: ${week.noShows.count}, missed ${money(week.noShows.amount)}`)
   }
   if (week.unmarked > 0) {
-    lines.push(
-      `⚠️ Без отметки: ${week.unmarked} ${plural(week.unmarked, ['визит', 'визита', 'визитов'])}`,
-    )
+    lines.push(`⚠️ Not marked: ${week.unmarked} ${plural(week.unmarked, ['visit', 'visits'])}`)
   }
-  lines.push(`<a href="${escapeHtml(week.analyticsUrl)}">Аналитика</a>`)
+  lines.push(`<a href="${escapeHtml(week.analyticsUrl)}">Analytics</a>`)
 
   return lines.join('\n')
 }

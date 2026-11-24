@@ -17,7 +17,7 @@ interface ProfitSectionProps {
 
 type Line = { key: string; title: string; meta?: string; amount: number }
 
-// «Прибыль»: what came in (services, products, subscriptions sold) and what went out (materials, products' cost,
+// "Profit": what came in (services, products, subscriptions sold) and what went out (materials, products' cost,
 // expenses by category), the profit at the top. Right on the page, rows with hairlines.
 const ProfitSection = ({ money, delta }: ProfitSectionProps) => {
   const t = useT()
@@ -99,10 +99,10 @@ const moneyCsvRows = (money: MoneyReport | null): (string | number)[][] =>
     ? [
         [],
         ['Profit', 'Amount'],
-        ['Выручка: услуги', money.servicesRevenue],
-        ['Выручка: товары', money.productsRevenue],
-        ['Выручка: абонементы', money.subscriptionsRevenue],
-        ['Выручка: сертификаты', money.certificatesRevenue],
+        ['Revenue: services', money.servicesRevenue],
+        ['Revenue: products', money.productsRevenue],
+        ['Revenue: passes', money.subscriptionsRevenue],
+        ['Revenue: certificates', money.certificatesRevenue],
         ['Materials for visits', money.materialsCost],
         ['Cost of products', money.productsCost],
         ['Expenses', money.expenses],
@@ -114,7 +114,7 @@ const moneyCsvRows = (money: MoneyReport | null): (string | number)[][] =>
           item.amount,
         ]),
         [],
-        ['Product', 'Продано', 'Revenue'],
+        ['Product', 'Sold', 'Revenue'],
         ...money.products.map((product) => [product.name, product.quantity, product.revenue]),
         [],
         ['Date', 'Revenue', 'Expenses', 'Profit'],

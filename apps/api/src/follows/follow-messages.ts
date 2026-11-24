@@ -1,44 +1,38 @@
 // Texts a follower of a master gets (SMS, or Telegram when their number is linked). Names lead
-// the line: a first name cannot be declined reliably («У Азамат» reads wrong).
+// the line, by first name only.
 
 const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name
 
-/** «сегодня», «завтра» or «25 ноября», for a day key against today's key in Bishkek. */
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+]
+
+/** «today», «tomorrow» or «25 November», for a day key against today's key in Bishkek. */
 const dayWords = (date: string, today: string, tomorrow: string) => {
-  if (date === today) return 'сегодня'
-  if (date === tomorrow) return 'завтра'
+  if (date === today) return 'today'
+  if (date === tomorrow) return 'tomorrow'
   const [, month, day] = date.split('-').map(Number)
-  const months = [
-    'января',
-    'февраля',
-    'марта',
-    'апреля',
-    'мая',
-    'июня',
-    'июля',
-    'августа',
-    'сентября',
-    'октября',
-    'ноября',
-    'декабря',
-  ]
-  return `${day} ${months[(month ?? 1) - 1]}`
+  return `${day} ${MONTHS[(month ?? 1) - 1]}`
 }
 
 const freedText = (master: string, place: string, day: string, time: string, link: string) =>
-  `${firstName(master)}, ${place}: освободилось ${day} в ${time}. Записаться: ${link}`
+  `${firstName(master)}, ${place}: a slot opened up ${day} at ${time}. Book: ${link}`
 
 const movedText = (master: string, place: string, link: string) =>
-  `${firstName(master)} теперь работает в «${place}». Записаться: ${link}`
+  `${firstName(master)} now works at «${place}». Book: ${link}`
 
-const worksText = (master: string, count: number, link: string) => {
-  const words =
-    count % 10 === 1 && count % 100 !== 11
-      ? 'новая работа'
-      : [2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)
-        ? 'новые работы'
-        : 'новых работ'
-  return `${firstName(master)}: ${count} ${words} в «Образах». Смотреть: ${link}`
-}
+const worksText = (master: string, count: number, link: string) =>
+  `${firstName(master)}: ${count} new ${count === 1 ? 'look' : 'looks'} in «Looks». See them: ${link}`
 
 export { dayWords, freedText, movedText, worksText }

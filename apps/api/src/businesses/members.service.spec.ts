@@ -25,7 +25,7 @@ describe('MembersService.add', () => {
   it('refuses a number it cannot read before touching the database', async () => {
     const { service, query, sms } = setup()
 
-    await expect(service.add(business, 'abc')).rejects.toThrow('Проверьте номер телефона')
+    await expect(service.add(business, 'abc')).rejects.toThrow('Check the phone number')
     expect(query).not.toHaveBeenCalled()
     expect(sms.sendSafely).not.toHaveBeenCalled()
   })
@@ -35,7 +35,7 @@ describe('MembersService.add', () => {
       if (sql.includes('INSERT INTO "customers"')) return [{ id: 'cust-1' }]
       if (sql.includes('INSERT INTO "business_members"')) return [{ customer_id: 'cust-1' }]
       return [
-        { id: 'owner-1', phone: '+996555000000', name: 'Владелец', role: 'owner' },
+        { id: 'owner-1', phone: '+996555000000', name: 'Owner', role: 'owner' },
         { id: 'cust-1', phone: '+996555123456', name: '', role: 'staff' },
       ]
     })
@@ -66,7 +66,7 @@ describe('MembersService.remove', () => {
   it('never removes yourself', async () => {
     const { service, query } = setup()
 
-    await expect(service.remove('biz-1', 'me', 'me')).rejects.toThrow('Себя удалить нельзя')
+    await expect(service.remove('biz-1', 'me', 'me')).rejects.toThrow("You can't remove yourself")
     expect(query).not.toHaveBeenCalled()
   })
 

@@ -30,7 +30,7 @@ export class ProfilesController {
   ): Promise<PublicProfile> {
     // A public id or a handle (`/u/sabina`).
     if (!PUBLIC_ID_PATTERN.test(id) && !/^[a-z0-9][a-z0-9_.]{2,19}$/i.test(id)) {
-      throw new NotFoundException('Профиль не найден')
+      throw new NotFoundException('Profile not found')
     }
     return this.profiles.profile(id, customer)
   }
@@ -41,7 +41,7 @@ export class ProfilesController {
   @Header('Cache-Control', 'public, max-age=300')
   async avatar(@Param('id') id: string, @Query('w') width?: string) {
     if (!PUBLIC_ID_PATTERN.test(id) && !/^[a-z0-9][a-z0-9_.]{2,19}$/i.test(id)) {
-      throw new NotFoundException('Профиль не найден')
+      throw new NotFoundException('Profile not found')
     }
     const size = Math.min(1080, Math.max(64, Number(width) || 820))
     return new StreamableFile(await this.profiles.avatarPng(id, size))

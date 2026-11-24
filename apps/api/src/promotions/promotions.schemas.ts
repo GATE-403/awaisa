@@ -5,14 +5,14 @@ const MINUTES = z.number().int().min(0).max(1440)
 
 const promotionSchema = z
   .object({
-    title: z.string().trim().min(1, 'Назовите акцию').max(80),
+    title: z.string().trim().min(1, 'Name the promotion').max(80),
     kind: z.enum(['happy_hours', 'first_visit', 'promo_code']),
-    percent: z.number().int().min(1, 'Скидка от 1%').max(90, 'Скидка до 90%'),
+    percent: z.number().int().min(1, 'Discount from 1%').max(90, 'Discount up to 90%'),
     code: z
       .string()
       .trim()
       .max(40)
-      .regex(/^[A-Za-z0-9А-Яа-яЁё_-]*$/, 'Только буквы, цифры, - и _')
+      .regex(/^[A-Za-z0-9А-Яа-яЁё_-]*$/, 'Letters, digits, - and _ only')
       .nullable()
       .default(null),
     weekdays: z.array(z.number().int().min(0).max(6)).max(7).nullable().default(null),
@@ -24,13 +24,13 @@ const promotionSchema = z
     isActive: z.boolean().default(true),
   })
   .refine((value) => value.kind !== 'promo_code' || Boolean(value.code), {
-    message: 'Укажите промокод',
+    message: 'Enter a promo code',
     path: ['code'],
   })
   .refine(
     (value) =>
       value.fromMinutes === null || value.toMinutes === null || value.toMinutes > value.fromMinutes,
-    { message: 'Конец позже начала', path: ['toMinutes'] },
+    { message: 'The end must be after the start', path: ['toMinutes'] },
   )
 
 const quoteQuerySchema = z.object({

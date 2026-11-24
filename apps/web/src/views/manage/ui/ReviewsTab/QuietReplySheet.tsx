@@ -22,7 +22,7 @@ interface QuietReplySheetProps {
 
 const FORM_ID = 'quiet-reply'
 
-// «Ответить всем»: the backlog of good ratings left without a word gets one thank-you, filled per
+// "Reply to all": the backlog of good ratings left without a word gets one thank-you, filled per
 // client. Only reviews without text: whoever wrote something gets a reply of the owner's own.
 export const QuietReplySheet = ({ counts, template, onSend, onClose }: QuietReplySheetProps) => {
   const t = useT()

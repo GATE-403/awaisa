@@ -26,28 +26,28 @@ interface BookingSummaryProps {
   quote?: PriceQuote | null
   /** Opens a step from the summary, so a choice is changed where it was made. */
   onStepOpen?: (step: BookingStepId) => void
-  /** Overrides the button's words once everything is filled («Проверить запись»). */
+  /** Overrides the button's words once everything is filled ("Check booking"). */
   submitLabel?: string
   /** The card's head: the place's cover (or its tint) with its name, like a ticket's header. */
   place?: { name: string; coverUrl: string | null }
-  /** Where to come (the chosen branch's address): said beside «Записаться», where it is read. */
+  /** Where to come (the chosen branch's address): said beside Book, where it is read. */
   address?: string | null
-  /** The «Ваша запись» sheet shows this ticket (the cards of the stack) over the money rows. */
+  /** The Your booking sheet shows this ticket (the cards of the stack) over the money rows. */
   ticket?: ReactNode
   /**
    * Paid by a subscription: its own (`total` null: nothing to pay, the label is said instead)
    * or one bought with the visit (`total` is its price, paid now). No discount or deposit then.
    */
   paidWith?: { label: string; total: number | null } | null
-  /** What is chosen so far («Укладка · Мээрим»), said in the bar while steps remain. */
+  /** What is chosen so far ("Styling · Meerim"), said in the bar while steps remain. */
   choice?: string
-  /** The master as the ready bar names them: a first name or «Любой мастер». */
+  /** The master as the ready bar names them: a first name or Any specialist. */
   masterShort?: string | null
   /** Several branches: the ready bar names the chosen one (with one, nothing to tell apart). */
   branchName?: string | null
 }
 
-// The button names the next thing to do (a bare «Далее» left people unsure that a time was still
+// The button names the next thing to do (a bare Next left people unsure that a time was still
 // to be picked); the line over it says how far along they are.
 const NEXT_STEP_ACTIONS: Record<BookingStepId, string> = {
   service: 'Choose a service',
@@ -109,7 +109,7 @@ export const BookingSummary = ({
     ...(discount
       ? [
           {
-            label: t('Discount «{title}»', { title: discount.title }),
+            label: t('Discount “{title}”', { title: discount.title }),
             value: `−${formatPrice(discount.amount)}`,
           },
         ]
@@ -132,7 +132,7 @@ export const BookingSummary = ({
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line - a place with two addresses must not be a surprise.
   const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
-  // While steps remain the line says what is chosen so far, not «Шаг 2 из 4»: the step's own
+  // While steps remain the line says what is chosen so far, not "Step 2 of 4": the step's own
   // caption above its question already counts, and two counters read as clutter.
   const hint = firstIncompleteStep ? (
     choice || place?.name || t('Online booking')
@@ -143,7 +143,7 @@ export const BookingSummary = ({
     })
   ) : address ? (
     // Two unbreakable parts: the line breaks between the time and the address, never inside
-    // the address (a lone «7» of «мкр. Асанбай, 7» hung on the second line).
+    // the address (a lone "7" of "Asanbay mic., 7" hung on the second line).
     <>
       <span className={styles.barHintPart}>{`${shortWhen} ·`}</span>{' '}
       <span className={styles.barHintPart}>{address}</span>
@@ -166,7 +166,7 @@ export const BookingSummary = ({
   if (variant === 'bar' && isReady && dayKey && time) {
     return (
       <div className={styles.bar} data-ready=''>
-        {/* The leaf, the time and the total open everything chosen («Ваша запись»): ⌃ says so. */}
+        {/* The leaf, the time and the total open everything chosen (Your booking): ⌃ says so. */}
         <button
           type='button'
           className={styles.barInfo}
@@ -201,7 +201,7 @@ export const BookingSummary = ({
           </span>
           <span className={styles.srOnly}>{`, ${t('Show what is chosen')}`}</span>
         </button>
-        {/* While it books the button folds into a round spinner; «Вы записаны» then opens with
+        {/* While it books the button folds into a round spinner; "You're booked" then opens with
             its own check. The words stay for screen readers. */}
         <Button
           size='lg'

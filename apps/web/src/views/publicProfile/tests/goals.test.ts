@@ -9,7 +9,7 @@ const medal = (id: string, current: number, target: number, earned = false) => (
   progress: { current, target },
 })
 
-const places = [{ slug: 'teplo', name: 'Тепло', logoUrl: null, coverUrl: null, visits: 4 }]
+const places = [{ slug: 'teplo', name: 'Teplo', logoUrl: null, coverUrl: null, visits: 4 }]
 
 describe('pickNextGoal', () => {
   it('takes the unearned medal closest to done', () => {
@@ -31,14 +31,14 @@ describe('pickNextGoal', () => {
 describe('describeGoal', () => {
   it('sends a regular to book again where they go most', () => {
     expect(describeGoal(medal('regular', 4, 5), places)).toMatchObject({
-      hint: 'Ещё 1 визит в Тепло',
+      hint: '1 visit more at Teplo',
       action: { href: '/teplo/book' },
     })
   })
 
   it('sends a critic to rate, the explorer to the catalog and the friends with no button', () => {
     expect(describeGoal(medal('critic', 3, 5), places)).toMatchObject({
-      hint: 'Ещё 2 отзыва',
+      hint: '2 reviews more',
       action: { href: '#profile-reviews' },
     })
     expect(describeGoal(medal('explorer', 1, 3), places).action?.href).toBe('/')

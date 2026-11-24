@@ -36,7 +36,7 @@
 }
 
 /* Wide screens only (a mouse): quieter than the stories above and the header's categories - the
-   heaviest thing on the screen was this row («сделать более гармоничным»): regular words of the
+   heaviest thing on the screen was this row (the owner: make it more harmonious): regular words of the
    stories' size on a lighter fill, the count faint. */
 .row .chip {
   height: 28px;

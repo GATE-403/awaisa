@@ -5,7 +5,7 @@ interface MasterGridProps {
   children: ReactNode
 }
 
-// A place's masters as `MasterCard`s three a row, four from 640px (the place's «Мастера» tab).
+// A place's masters as `MasterCard`s three a row, four from 640px (the place's «Specialists» tab).
 export const MasterGrid = ({ children }: MasterGridProps) => (
   <ul className={styles.grid}>{children}</ul>
 )

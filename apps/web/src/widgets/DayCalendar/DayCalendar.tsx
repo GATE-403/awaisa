@@ -78,15 +78,15 @@ interface DayCalendarProps {
   /** A day gone by: every visit on it has ended. */
   isPast?: boolean
   slotMinutes: number
-  /** «Колонки» (default) or «Лента»: masters as rows with time running across. */
+  /** Columns (default) or Timeline: masters as rows with time running across. */
   layout?: CalendarLayout
   /** The timeline's zoom, 1–4 (ignored by the columns). */
   zoom?: number
   /** Pinch or ctrl + wheel over the timeline asks for a new zoom. */
   onZoomChange?: (zoom: number) => void
-  /** «✓ Пришёл» right on an ended, unmarked visit's card. */
+  /** "✓ Arrived" right on an ended, unmarked visit's card. */
   onMarkArrived?: (booking: AdminBooking) => void
-  /** A visit to bring into view and flash (picked from «N визитов прошли без отметки»). */
+  /** A visit to bring into view and flash (picked from "N visits not marked"). */
   focusedBookingId?: string | null
   /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
   bottomInset?: number
@@ -95,11 +95,11 @@ interface DayCalendarProps {
   footCover?: number
   /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
   dayKey?: string
-  /** «Найти место»: light up the gaps where a service this long fits (only these masters). */
+  /** Find a slot: light up the gaps where a service this long fits (only these masters). */
   fit?: { minutes: number; specialistIds: string[] | null } | null
-  /** «Не пришёл» from a card's right-click menu. */
+  /** No-show from a card's right-click menu. */
   onMarkNoShow?: (booking: AdminBooking) => void
-  /** «Отменить запись» from a card's right-click menu (undo comes from the toast). */
+  /** Cancel booking from a card's right-click menu (undo comes from the toast). */
   onCancelBooking?: (booking: AdminBooking) => void
   /** A swipe sideways past the day's edge: the next (1) or previous (-1) day. */
   onSwipeDay?: (step: 1 | -1) => void
@@ -170,13 +170,13 @@ const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
 // hourglass; ended unmarked - a dashed circle, a tick still to be put; came - a ticked circle;
 // did not come - a person taken away; cancelled - a struck circle; deposit not paid - a card.
 const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
-  Ждём: Clock,
-  Сейчас: HourglassMedium,
-  'Не отмечен': CircleDashed,
-  Пришёл: CheckCircle,
-  'Не пришёл': UserMinus,
-  Отменена: Prohibit,
-  'Ждёт оплату': CreditCard,
+  Waiting: Clock,
+  Now: HourglassMedium,
+  'Not marked': CircleDashed,
+  Arrived: CheckCircle,
+  'No-show': UserMinus,
+  Cancelled: Prohibit,
+  'Awaiting payment': CreditCard,
 }
 
 const StateGlyph = ({ label }: { label: string }) => {
@@ -291,12 +291,12 @@ export const DayCalendar = ({
   >(null)
   // The timeline can show one master alone: a tap on their face in the corner stack.
   const [focusId, setFocusId] = useState<string | null>(null)
-  // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
+  // Where “now” is while the day is scrolled away from it: before, after, or null when in view.
   const [nowSide, setNowSide] = useState<'before' | 'after' | null>(null)
-  // The timeline's visible stretch, for the «‹ 2 записи» / «3 записи ›» hints at the lanes' edges.
+  // The timeline's visible stretch, for the "‹ 2 bookings" / "3 bookings ›" hints at the lanes' edges.
   // The part of the day in view, along its axis (the columns' masters row covers `inset` of it).
   const [view, setView] = useState({ start: 0, size: 0, inset: 0 })
-  // Which way the day moved, kept beside the key (the «previous prop in state» pattern): the lanes
+  // Which way the day moved, kept beside the key (the “previous prop in state” pattern): the lanes
   // slide in from the right for a later day, from the left for an earlier one.
   const [shownDay, setShownDay] = useState<{ key?: string; direction?: 'next' | 'prev' }>({
     key: dayKey,
@@ -307,7 +307,7 @@ export const DayCalendar = ({
       direction: dayKey && shownDay.key ? (dayKey > shownDay.key ? 'next' : 'prev') : undefined,
     })
   }
-  // Visits that have just turned «Пришёл» (one at a time, or the whole day by «Все пришли»), in
+  // Visits that have just turned Arrived (one at a time, or the whole day by All arrived), in
   // the day's order: their cards play the check in a wave. Kept beside the outcomes they came
   // from, so a newly loaded day animates nothing.
   const outcomesKey = bookings.map((booking) => `${booking.id}:${booking.outcome ?? ''}`).join('|')
@@ -498,7 +498,7 @@ export const DayCalendar = ({
 
   // The day fills the window down to its foot in both views, so the page itself does not scroll
   // for it: measured from where the box starts (which moves when the bars above it change), with
-  // a small margin under it - floating bars («Все пришли») sit over the day's foot.
+  // a small margin under it - floating bars (All arrived) sit over the day's foot.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
@@ -530,7 +530,7 @@ export const DayCalendar = ({
   }, [bottomInset])
 
   // On a short screen (iPhone SE) the day keeps its least height and runs under the floating
-  // «Все пришли» bar: the corner controls (masters, zoom, «Сейчас») rise above the bar by as much
+  // All arrived bar: the corner controls (masters, zoom, Now) rise above the bar by as much
   // as it covers. Written to a CSS variable on scroll - no re-render.
   useEffect(() => {
     const box = frameRef.current
@@ -570,7 +570,7 @@ export const DayCalendar = ({
     }
   }, [bottomInset, footCover])
 
-  // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
+  // Watch whether “now” is in view, so a Now capsule can bring it back.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller || nowOffset === null) {
@@ -672,7 +672,7 @@ export const DayCalendar = ({
 
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
   // in, once per layout - the minute ticks after that must not pull the view back.
-  // Another day (no «now») forgets it, so coming back to today opens at now again; the scroll waits
+  // Another day (no “now”) forgets it, so coming back to today opens at now again; the scroll waits
   // a frame, until the day's width and the box's height are laid out.
   useEffect(() => {
     const scroller = scrollerRef.current
@@ -899,7 +899,7 @@ export const DayCalendar = ({
   }
   const ringStyle = (specialist: DayCalendarProps['specialists'][number]) =>
     ({ '--load': `${Math.round(loadOf(specialist).share * 360)}deg` }) as CSSProperties
-  // «Барбер · свободен с 15:00»: phones keep only the fact.
+  // "Barber · free from 15:00": phones keep only the fact.
   const roleLine = (specialist: DayCalendarProps['specialists'][number]) => {
     const fact = laneFact(specialist)
     return (
@@ -1179,7 +1179,7 @@ export const DayCalendar = ({
               )}
             </div>
 
-            {/* On the timeline «now» is one line through every lane, its time on top. */}
+            {/* On the timeline “now” is one line through every lane, its time on top. */}
             {showNow && nowMinutes !== null && isTimeline && (
               <span className={styles.nowLine} style={along(nowMinutes)} aria-hidden='true'>
                 <span className={styles.nowLabel}>{formatClock(nowMinutes)}</span>
@@ -1270,7 +1270,7 @@ export const DayCalendar = ({
                         aria-hidden='true'
                       >
                         {/* A time cursor, not a card: a thin line in the master's colour where the
-                        visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
+                        visit would start, and one small capsule "+ 14:00 · Erlan" on it. */}
                         <span className={styles.ghostChip}>
                           <Plus aria-hidden />
                           {formatClock(hovered)}
@@ -1348,7 +1348,6 @@ export const DayCalendar = ({
                       </span>
                       <span className={styles.laneBook}>
                         <Plus aria-hidden />
-                        {/* «Записать» is «record» elsewhere in the cabinet: booking has its own key. */}
                         {t('Book')}
                       </span>
                     </button>
@@ -1561,7 +1560,7 @@ export const DayCalendar = ({
                               <span className={styles.footerNote}>
                                 {booking.comment ? (
                                   <>
-                                    <ChatText aria-hidden />«{booking.comment}»
+                                    <ChatText aria-hidden />“{booking.comment}”
                                   </>
                                 ) : (
                                   formatPhone(booking.customerPhone)

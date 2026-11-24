@@ -16,7 +16,7 @@ interface VisitLinkPageProps {
 }
 
 // Opened from the confirmation or reminder SMS: the signed link becomes this booking's token on
-// the phone, so «Записи» show it with «Перенести» and «Отменить» - no sign-in, no other device.
+// the phone, so «Bookings» show it with «Reschedule» and «Cancel» - no sign-in, no other device.
 export const VisitLinkPage = ({ bookingId }: VisitLinkPageProps) => {
   const router = useRouter()
   const signature = useSearchParams().get('s')
@@ -24,7 +24,7 @@ export const VisitLinkPage = ({ bookingId }: VisitLinkPageProps) => {
 
   useEffect(() => {
     if (!signature) {
-      setError('В ссылке не хватает подписи')
+      setError('The link is missing its signature')
       return
     }
     const controller = new AbortController()
@@ -46,17 +46,17 @@ export const VisitLinkPage = ({ bookingId }: VisitLinkPageProps) => {
       <Container size='sm' className={styles.content}>
         {error ? (
           <>
-            <PageTitle size='sm' title='Ссылка не открылась.' subtitle={error} />
+            <PageTitle size='sm' title='The link did not open.' subtitle={error} />
             <NextLink href='/bookings' className={styles.link}>
-              Мои записи ›
+              My bookings ›
             </NextLink>
           </>
         ) : (
           <>
             <PageTitle
               size='sm'
-              title='Открываем запись…'
-              subtitle='Сохраним её на этом телефоне.'
+              title='Opening your booking…'
+              subtitle='We’ll save it on this phone.'
             />
             <Skeleton className={styles.skeleton} />
           </>

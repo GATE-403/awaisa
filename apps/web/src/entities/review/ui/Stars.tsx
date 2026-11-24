@@ -8,7 +8,7 @@ interface StarsProps {
   rating: number
 }
 
-// Five small stars, the given number filled; read as «4 из 5».
+// Five small stars, the given number filled; read as «4 of 5».
 export const Stars = ({ rating }: StarsProps) => {
   const t = useT()
 

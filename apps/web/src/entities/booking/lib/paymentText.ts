@@ -11,6 +11,6 @@ const PAYMENT_STATUS_TEXT: Record<BookingPayment['status'], string> = {
 }
 
 const describeDeposit = (payment: BookingPayment) =>
-  `Предоплата ${formatPrice(payment.amount)} ${PAYMENT_STATUS_TEXT[payment.status]}`
+  `Deposit ${formatPrice(payment.amount)} ${PAYMENT_STATUS_TEXT[payment.status]}`
 
 export { describeDeposit, PAYMENT_STATUS_TEXT }

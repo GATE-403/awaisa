@@ -5,7 +5,7 @@ import { isCabinetPath } from '@/shared/config/navigation'
 const KEY = 'awaisa:cabinet-from:v1'
 
 // Steps on the way in that are no place to return to: sign-in, the new business form, and
-// «Что нового», which is opened from the cabinet and comes back to it.
+// «What's new», which is opened from the cabinet and comes back to it.
 const isPassage = (pathname: string) =>
   pathname === '/login' || pathname.startsWith('/business/new') || pathname === '/updates'
 

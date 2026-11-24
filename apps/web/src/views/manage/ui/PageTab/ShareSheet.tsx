@@ -25,7 +25,7 @@ type QrMatrix = { size: number; dark: boolean[] }
 /** The printed QR's side in px: sharp on a counter card or a sticker. */
 const QR_PNG_SIZE = 1024
 
-// «Поделиться»: the page's QR for the counter (downloaded as a PNG to print), its link for an
+// "Share": the page's QR for the counter (downloaded as a PNG to print), its link for an
 // Instagram bio, and with several branches a booking link per branch (the client lands with that
 // branch chosen). On a phone the system share sheet is one tap away too.
 export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheetProps) => {
@@ -141,7 +141,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
                   onClick={() =>
                     void copy(
                       `${pageUrl}/book?branch=${branch.id}`,
-                      t('Booking link for «{name}» copied', { name: branch.name }),
+                      t('Booking link for "{name}" copied', { name: branch.name }),
                     )
                   }
                 >

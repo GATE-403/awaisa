@@ -8,7 +8,7 @@ type LookPhoto = { id: string; url: string }
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
- * «Хочу так» from a work in the catalog (`?look=<photo id>`): the photo the client wants to look
+ * "I want this" from a work in the catalog (`?look=<photo id>`): the photo the client wants to look
  * like, read back from the place's own feed, so only a visible photo of this place is shown and
  * sent. Anything else is quietly left out: the booking never fails because of it.
  */

@@ -26,7 +26,7 @@ interface RescheduleSheetProps {
 const DAYS_SHOWN = 14
 
 // Same master, same service, another time - chosen with the very picker of the booking form
-// (day cards with «Сегодня / Завтра», «Выберите время · N свободных», free times only).
+// (day cards with «Today / Tomorrow», «Choose a time · N free», free times only).
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
   const t = useT()
   const toast = useToast()

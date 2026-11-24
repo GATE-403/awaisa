@@ -65,7 +65,7 @@ export class LoyaltyService {
     return this.getSettings(businessId)
   }
 
-  /** «Продавать сертификаты онлайн» and the amounts the place's page offers. */
+  /** 'Sell gift cards online' and the amounts the place's page offers. */
   async getCertificateSale(businessId: string) {
     const [row] = await this.query(
       'SELECT "certificates_online", "certificate_amounts" FROM "businesses" WHERE "id" = $1',
@@ -80,7 +80,7 @@ export class LoyaltyService {
   async setCertificateSale(businessId: string, input: CertificateSaleInput) {
     const amounts = normalizeAmounts(input.amounts)
     if (input.isOnline && amounts.length === 0) {
-      throw new BadRequestException('Добавьте хотя бы одну сумму')
+      throw new BadRequestException('Add at least one amount')
     }
     await this.query(
       'UPDATE "businesses" SET "certificates_online" = $2, "certificate_amounts" = $3 WHERE "id" = $1',
@@ -129,7 +129,7 @@ export class LoyaltyService {
          WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
         [id, businessId, ...values],
       )
-      if (updated.length === 0) throw new NotFoundException('Абонемент не найден')
+      if (updated.length === 0) throw new NotFoundException('Pass not found')
     } else {
       await this.query(
         `INSERT INTO "subscription_plans" ("business_id", "title", "service_id", "visits", "price",
@@ -166,7 +166,7 @@ export class LoyaltyService {
     db: Pick<DataSource, 'query'> = this.dataSource,
   ) {
     const phone = input.phone ? normalizePhone(input.phone) : null
-    if (input.phone && !phone) throw new BadRequestException('Проверьте номер телефона')
+    if (input.phone && !phone) throw new BadRequestException('Check the phone number')
     // Codes are random; a clash with an existing one (unique per business) is simply retried.
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const code = Array.from(
@@ -182,7 +182,7 @@ export class LoyaltyService {
       )
       if (rows[0]) return this.toCertificate(rows[0])
     }
-    throw new BadRequestException('Не получилось выпустить сертификат, попробуйте ещё раз')
+    throw new BadRequestException('Could not issue the gift card, try again')
   }
 
   async findCertificate(businessId: string, code: string) {
@@ -192,7 +192,7 @@ export class LoyaltyService {
        FROM "gift_certificates" WHERE "business_id" = $1 AND "code" = $2`,
       [businessId, code.trim().toUpperCase()],
     )
-    if (!row) throw new NotFoundException('Сертификат не найден')
+    if (!row) throw new NotFoundException('Gift card not found')
     return this.toCertificate(row)
   }
 
@@ -234,12 +234,12 @@ export class LoyaltyService {
 
   async sellSubscription(businessId: string, rawPhone: string, planId: string) {
     const phone = normalizePhone(rawPhone)
-    if (!phone) throw new BadRequestException('Проверьте номер телефона')
+    if (!phone) throw new BadRequestException('Check the phone number')
     const [plan] = await this.query(
       'SELECT * FROM "subscription_plans" WHERE "id" = $1 AND "business_id" = $2 AND "is_active"',
       [planId, businessId],
     )
-    if (!plan) throw new NotFoundException('Абонемент не найден')
+    if (!plan) throw new NotFoundException('Pass not found')
     await this.query(
       `INSERT INTO "client_subscriptions" ("business_id", "plan_id", "phone", "title", "service_id",
          "visits_total", "visits_left", "price_paid", "expires_on")
@@ -289,7 +289,7 @@ export class LoyaltyService {
       .filter((row) => row.bonusBalance > 0 || row.subscriptions.length > 0)
   }
 
-  /** The live subscriptions of a number at one place (the booking form's «Оплатить абонементом»). */
+  /** The live subscriptions of a number at one place (the booking form's 'Pay with a pass'). */
   async subscriptionsAt(businessId: string, phone: string) {
     return (await this.forClient(businessId, phone)).subscriptions
   }
@@ -326,7 +326,7 @@ export class LoyaltyService {
       )
       if (used.length === 0 && !(await this.hasSubscriptionUse(visit.id))) {
         throw new BadRequestException(
-          'Абонемент не подходит: закончился, истёк или на другую услугу',
+          "This pass can't be used: it is used up, expired or for another service",
         )
       }
       // Used just now: add what it pays; used before, `covered` already counts it.
@@ -347,11 +347,11 @@ export class LoyaltyService {
         return this.applyBonuses(visit, extras, covered, method)
       }
       if (certificate.expiresOn && certificate.expiresOn < today()) {
-        throw new BadRequestException('Срок сертификата истёк')
+        throw new BadRequestException('The gift card has expired')
       }
       const wanted = Math.min(extras.certificateAmount ?? visit.due - covered, visit.due - covered)
       const amount = Math.min(wanted, certificate.balance)
-      if (amount <= 0) throw new BadRequestException('На сертификате нет денег')
+      if (amount <= 0) throw new BadRequestException('The gift card has no balance')
       const spent = await this.query(
         `WITH cert AS (
            UPDATE "gift_certificates" SET "balance" = "balance" - $2
@@ -360,7 +360,7 @@ export class LoyaltyService {
          SELECT "id", $3, $2 FROM cert RETURNING "id"`,
         [certificate.id, amount, visit.id],
       )
-      if (spent.length === 0) throw new BadRequestException('На сертификате не хватает денег')
+      if (spent.length === 0) throw new BadRequestException('Not enough balance on the gift card')
       covered += amount
       if (covered >= visit.due) method = method ?? 'certificate'
     }
@@ -384,10 +384,10 @@ export class LoyaltyService {
         'SELECT COALESCE(SUM("amount"), 0)::int AS "balance" FROM "bonus_transactions" WHERE "business_id" = $1 AND "phone" = $2',
         [visit.businessId, visit.phone],
       )
-      if (toNumber(balance?.balance) < amount) throw new BadRequestException('Бонусов не хватает')
+      if (toNumber(balance?.balance) < amount) throw new BadRequestException('Not enough bonuses')
       const spent = await this.query(
         `INSERT INTO "bonus_transactions" ("business_id", "phone", "amount", "kind", "booking_id", "note")
-         VALUES ($1, $2, $3, 'spend', $4, 'Оплата визита')
+         VALUES ($1, $2, $3, 'spend', $4, 'Visit payment')
          ON CONFLICT ("booking_id", "kind") WHERE "booking_id" IS NOT NULL DO NOTHING
          RETURNING "id"`,
         [visit.businessId, visit.phone, -amount, visit.id],
@@ -399,7 +399,7 @@ export class LoyaltyService {
   }
 
   /**
-   * «Все пришли»: visits booked to be paid by a subscription draw a visit from it and are paid
+   * 'All arrived': visits booked to be paid by a subscription draw a visit from it and are paid
    * by it; one whose subscription ran out meanwhile stays paid in cash, as marked.
    */
   async usePlannedSubscriptions(bookingIds: string[]) {
@@ -459,7 +459,7 @@ export class LoyaltyService {
     await this.query(
       `INSERT INTO "bonus_transactions" ("business_id", "phone", "amount", "kind", "booking_id", "note")
        SELECT b."business_id", b."customer_phone", ROUND(b."paid_amount" * bz."bonus_percent" / 100.0)::int,
-         'earn', b."id", 'За визит'
+         'earn', b."id", 'For a visit'
        FROM "bookings" b JOIN "businesses" bz ON bz."id" = b."business_id"
        WHERE b."id" = ANY($1) AND b."outcome" = 'arrived' AND bz."bonus_percent" IS NOT NULL
          AND b."payment_method" IN ('cash', 'card', 'transfer')
@@ -524,7 +524,7 @@ export class LoyaltyService {
       'SELECT 1 FROM "services" WHERE "id" = $1 AND "business_id" = $2',
       [serviceId, businessId],
     )
-    if (rows.length === 0) throw new NotFoundException('Услуга не найдена')
+    if (rows.length === 0) throw new NotFoundException('Service not found')
   }
 
   private toCertificate = (row: Row) => ({

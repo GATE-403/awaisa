@@ -24,7 +24,7 @@
 }
 
 /* The head as in Telegram: the face, the name and one quiet line, tight (12, 4); the tiles and
-   the data group follow 16 apart («отступы … не соблюдают иерархию»). */
+   the data group follow 16 apart (the owner: the spacing did not keep the hierarchy). */
 .head {
   display: flex;
   align-items: center;
@@ -173,7 +173,7 @@
   margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-4));
 }
 
-/* «Следующая цель»: one row over the medals - the closest medal in a ring that fills to its
+/* «Next goal»: one row over the medals - the closest medal in a ring that fills to its
    progress, what is left, and the one tap that brings it nearer. No card: it lies on the page. */
 .goal {
   display: flex;
@@ -264,7 +264,7 @@
    in the medal's colour and, on one's own profile, where to go next. */
 .medalCard {
   /* A compact row like a notification: the coin on the left, what it is and the progress on the
-     right; the tall centred card took half a phone («в мобилке слишком большие»). */
+     right; the tall centred card took half a phone (the owner: far too big on phones). */
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
@@ -466,7 +466,7 @@
 .mapWrap {
   position: relative;
   height: 220px;
-  /* The window's whole width on the page, square edges («на всю ширину и убери закругления»). */
+  /* The window's whole width on the page, square edges (the owner: full width, no rounding). */
   margin-inline: calc(50% - 50vw);
   overflow: hidden;
   isolation: isolate;
@@ -497,7 +497,7 @@
   flex-shrink: 0;
 }
 
-/* A compact line («сделай компактнее»): 32pt rows with an invisible 44pt target. */
+/* A compact line (the owner: make it more compact): 32pt rows with an invisible 44pt target. */
 .placeItem::before {
   content: "";
   position: absolute;
@@ -561,7 +561,7 @@
 }
 
 /* The data as plain rows right on the page, the value over a small caption: no fill and no
-   lines around or between them («убери все оберточные фоны», «эти линии не подходят»). */
+   lines around or between them (the owner: no wrapping fills, and these lines do not fit). */
 .info {
   display: flex;
   flex-direction: column;
@@ -667,7 +667,7 @@ a.infoRow:focus-visible {
 }
 
 /* The profile in a sheet over a page: the same column right on the sheet, no wash or card
-   behind it («убери все оберточные фоны»). */
+   behind it (the owner: no wrapping fills). */
 .sheetBody {
   display: flex;
   flex: 1;
@@ -676,7 +676,7 @@ a.infoRow:focus-visible {
 }
 
 /* In the sheet the tabs' content lies on a darker layer down to the sheet's foot, edge to edge
-   («сделай секцию под табом темного цвета»): the head and the tabs on the sheet, the content a
+   (the owner: make the section under the tabs dark): the head and the tabs on the sheet, the content a
    step below, like a grouped list under its header. */
 .sheetBody .tabs {
   flex: 1;
@@ -686,7 +686,7 @@ a.infoRow:focus-visible {
   flex: 1;
   margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-6));
   padding: var(--space-4) var(--space-4) var(--space-6);
-  /* A step below the sheet, not the page's black («не настолько темным»). */
+  /* A step below the sheet, not the page's black (the owner: not that dark). */
   background: color-mix(in srgb, var(--color-sheet) 55%, var(--color-background));
 }
 
@@ -698,7 +698,7 @@ a.infoRow:focus-visible {
 }
 
 /* Phones: the capsule rides a row of its own over the face, at the right like a bar's buttons;
-   beside the face it squeezed the name into «Локаль-ный А.». */
+   beside the face it squeezed the name into one broken in the middle. */
 @media (max-width: 639px) {
   .pageHead {
     flex-wrap: wrap;

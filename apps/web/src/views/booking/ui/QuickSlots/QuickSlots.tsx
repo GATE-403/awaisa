@@ -8,7 +8,7 @@ import styles from './QuickSlots.module.css'
 
 interface QuickSlotsProps {
   title: string
-  /** What the times are for: «Мужская стрижка, любой мастер». */
+  /** What the times are for: "Men's haircut, any specialist". */
   subtitle: string
   slots: QuickSlot[]
   isLoading: boolean

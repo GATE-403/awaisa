@@ -34,7 +34,7 @@ interface MasterScheduleSheetProps {
 type DayDraft = { isOn: boolean; from: string; to: string }
 
 const TIME_ITEMS = TIME_OPTIONS.map((time) => ({ value: time, label: time }))
-const rangeFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const rangeFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' })
 
 const toDrafts = (hours: WorkingDay[]): DayDraft[] =>
   WEEKDAYS_FULL.map((_, weekday) => {
@@ -56,7 +56,7 @@ const formatRange = (from: string, to: string) => {
   return from === to ? start : `${start} – ${rangeFormatter.format(new Date(`${to}T00:00:00`))}`
 }
 
-// A master's week («как у салона» or their own days) and days away, in one sheet.
+// A master's week ("same as the salon" or their own days) and days away, in one sheet.
 export const MasterScheduleSheet = ({
   slug,
   master,

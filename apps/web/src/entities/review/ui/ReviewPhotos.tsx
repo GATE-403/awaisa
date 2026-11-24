@@ -7,7 +7,7 @@ import styles from './ReviewItem.module.css'
 
 interface ReviewPhotosProps {
   photos: string[]
-  /** «Айгерим С.» - names each picture for screen readers. */
+  /** «Aigerim S.» - names each picture for screen readers. */
   authorName: string
 }
 

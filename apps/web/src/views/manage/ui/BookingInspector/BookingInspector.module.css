@@ -148,7 +148,7 @@
 }
 
 /* --- Phones: like an event in iOS Calendar ---
-   Everything centred: the face, the name, «service · master», when, the price; then the four ways
+   Everything centred: the face, the name, "service · master", when, the price; then the four ways
    to reach the client as bare glyphs with a word under each (no tiles, no fills); the outcome. */
 @media (pointer: coarse), (max-width: 639px) {
   .inspector {
@@ -211,7 +211,7 @@
     justify-content: center;
   }
 
-  /* One wide accent «Позвонить» and the rest as the thin-glyph capsule beside it. */
+  /* One wide accent "Call" and the rest as the thin-glyph capsule beside it. */
   .actions {
     order: 7;
     align-items: center;
@@ -295,7 +295,7 @@
   opacity: 0.6;
 }
 
-/* «Записать снова» shares the row with the glyph capsule, as tall as it, pushed to the end. */
+/* "Book again" shares the row with the glyph capsule, as tall as it, pushed to the end. */
 .actions .bookAgain {
   order: 2;
   min-height: 40px;
@@ -317,7 +317,7 @@
     align-self: center;
   }
 
-  /* Phones: the wide capsule is «Записать снова»; the call is back among the glyphs. */
+  /* Phones: the wide capsule is "Book again"; the call is back among the glyphs. */
   .actions .bookAgain {
     order: 0;
     flex: 1;

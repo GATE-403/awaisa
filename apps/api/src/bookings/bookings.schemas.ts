@@ -4,11 +4,9 @@ import { MAX_EXTRA_SERVICES } from './booking-rules.js'
 
 const ID_SCHEMA = z.string().trim().min(1).max(64)
 
-const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD')
+const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
 
-const TIME_SCHEMA = z
-  .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Время должно быть в формате HH:MM')
+const TIME_SCHEMA = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM')
 
 const availabilityQuerySchema = z.object({
   serviceId: ID_SCHEMA,
@@ -46,7 +44,7 @@ const createBookingSchema = z.object({
   specialistId: ID_SCHEMA,
   date: DATE_SCHEMA,
   time: TIME_SCHEMA,
-  name: z.string().trim().min(1, 'Укажите имя').max(120),
+  name: z.string().trim().min(1, 'Enter a name').max(120),
   // Signed-in clients book with their verified number, so the field may be empty; the service checks it.
   phone: z.string().trim().max(32).default(''),
   /** A signed-in client booking someone else (mum, a child): their own name and number, the
@@ -65,7 +63,7 @@ const createBookingSchema = z.object({
   ref: z.string().trim().max(40).optional(),
   /** Paid by the signed-in client's subscription at this place. */
   subscriptionId: z.uuid().optional(),
-  /** «Купить абонемент и записаться»: an online plan bought with this booking. */
+  /** 'Buy a pass and book': an online plan bought with this booking. */
   subscriptionPlanId: z.uuid().optional(),
   channel: z.enum(BOOKING_CHANNELS).optional(),
   lookPhotoId: z.uuid().optional(),

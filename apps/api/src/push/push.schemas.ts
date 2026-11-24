@@ -17,7 +17,7 @@ const subscribeSchema = z.object({
 const unsubscribeSchema = z.object({ endpoint: ENDPOINT_SCHEMA })
 
 const tokenSchema = z.object({
-  token: z.string().max(160).refine(isExpoPushToken, 'Это не токен Expo'),
+  token: z.string().max(160).refine(isExpoPushToken, 'This is not an Expo token'),
 })
 
 type SubscribeInput = z.infer<typeof subscribeSchema>

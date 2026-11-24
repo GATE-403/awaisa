@@ -69,7 +69,7 @@ const toScheme = (draft: Draft): MasterPayScheme => {
   const salary = toNumber(draft.salary)
   return {
     percent: toNumber(draft.percent),
-    // A rate left empty means «как у мастера».
+    // A rate left empty means "same as the specialist's".
     rates: draft.rates.flatMap((rate) => {
       const value = toNumber(rate.value)
       return value === null ? [] : [{ serviceId: rate.serviceId, kind: rate.kind, value }]
@@ -288,7 +288,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               {percentError || rateError
                 ? t('The percent cannot be more than 100.')
                 : t(
-                    'The percent is of what was paid in money, as in «Analytics»: discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price.',
+                    'The percent is of what was paid in money, as in "Analytics": discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price.',
                   )}
             </p>
           </section>
@@ -317,7 +317,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               {productsError
                 ? t('The percent cannot be more than 100.')
                 : t(
-                    'Of the products the specialist sold in «Till» (the «Sold by» field). Cancelled sales do not count.',
+                    'Of the products the specialist sold in "Till" (the "Sold by" field). Cancelled sales do not count.',
                   )}
             </p>
           </section>

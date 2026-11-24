@@ -1,4 +1,4 @@
-/* «Образы»: a deck of cards on the page - one tall card in play, the next two fanned behind it.
+/* «Looks»: a deck of cards on the page - one tall card in play, the next two fanned behind it.
    Phones: the whole screen, the tab bar floats over it; from 768px under the header. The page keeps
    the theme's own background (a black stage in the light theme looked like another app). */
 .page {
@@ -325,7 +325,7 @@
   pointer-events: none;
 }
 
-/* On the card in play, at its foot: «⋯», the one wide «Записаться», and ♥ with its count. */
+/* On the card in play, at its foot: «⋯», the one wide «Book», and ♥ with its count. */
 .actions {
   position: absolute;
   bottom: calc(50cqh - min(100cqh, var(--width) / 0.6) / 2 + var(--space-4));
@@ -338,7 +338,7 @@
   translate: -50% 0;
 }
 
-/* «Записаться» over the first free time, two short lines instead of one that wraps. */
+/* «Book» over the first free time, two short lines instead of one that wraps. */
 .book {
   flex: 1;
   flex-direction: column;

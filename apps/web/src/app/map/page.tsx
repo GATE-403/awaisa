@@ -6,12 +6,12 @@ import { MapPage } from '@/views/map'
 
 export const metadata: Metadata = {
   title: 'Map',
-  description: 'Салоны и мастера рядом с вами - на карте, со свободным временем.',
+  description: 'Salons and specialists near you on a map, with their free times.',
   // Kinds are views of this one page.
   alternates: { canonical: '/map' },
 }
 
-// The first list comes from the server cache; «Рядом со мной» re-sorts it on the client.
+// The first list comes from the server cache; "Near me" re-sorts it on the client.
 const MapWithPlaces = async ({ kindParam }: { kindParam: unknown }) => {
   const kind = BUSINESS_KINDS.find((item) => item.value === kindParam)?.value
   const places = await listMapPlaces(kind).catch(() => null)

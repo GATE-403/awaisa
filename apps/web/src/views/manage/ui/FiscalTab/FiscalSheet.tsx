@@ -24,7 +24,7 @@ const FORM_ID = 'fiscal-settings'
 const toRate = (value: string) => Number(value.replace(',', '.')) || 0
 const cleanRate = (value: string) => value.replace(/[^\d.,]/g, '').slice(0, 5)
 
-// What a receipt needs from the business: the ИНН, the tax regime and the rates, and its own
+// What a receipt needs from the business: the TIN, the tax regime and the rates, and its own
 // login at the provider. Turning VAT on or off resets the sales tax to the law's rates for it.
 export const FiscalSheet = ({ settings, isEnabling, onClose, onSave }: FiscalSheetProps) => {
   const t = useT()

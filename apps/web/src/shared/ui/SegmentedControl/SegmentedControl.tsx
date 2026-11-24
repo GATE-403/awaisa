@@ -19,7 +19,7 @@ interface SegmentedControlProps<Value extends string> {
 // The macOS 26 segmented control: a capsule track, segments equal while their words fit (each as
 // wide as its words when they do not, on a phone) and a raised knob that slides to the chosen one.
 // The knob takes the chosen segment's own place and width: computed as an equal share it slid
-// under the wrong words once a long label made its segment wider («вёрстка сломалась»). Native
+// under the wrong words once a long label made its segment wider (the layout broke). Native
 // radios underneath give arrow keys and focus for free.
 export const SegmentedControl = <Value extends string>({
   label,

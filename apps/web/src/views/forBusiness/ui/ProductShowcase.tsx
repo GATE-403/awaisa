@@ -58,7 +58,7 @@ export const ProductShowcase = () => (
           <T>New booking</T>
         </strong>
         <span className={styles.toastText}>
-          <T>Данияр · 20 November, 14:30 · Haircut</T>
+          <T>Daniyar · 20 November, 14:30 · Haircut</T>
         </span>
       </span>
     </div>

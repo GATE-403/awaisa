@@ -22,7 +22,7 @@ interface PhotosSectionProps {
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
   /** Every change of the list: the page counts the photos and pictures its services with them. */
   onPhotosChange?: (photos: WorkPhoto[]) => void
-  /** The file input's id: the page's own «Добавить» opens it. */
+  /** The file input's id: the page's own "Add" opens it. */
   inputId: string
 }
 
@@ -36,10 +36,10 @@ const moveTo = (ids: string[], id: string, index: number) => {
   return rest
 }
 
-// «Работы» like a profile's grid in Instagram: square photos three a row, nearly touching; the page
-// adds to it from its own «Добавить». Several photos go up at once and are tagged one after another
-// («Фото 1 из 3»): each names its service and master, so the feed books exactly that. The first five
-// lead the public page, so the order is the owner's: dragged with a mouse, «Поставить первой» in a
+// "Work" like a profile's grid in Instagram: square photos three a row, nearly touching; the page
+// adds to it from its own "Add". Several photos go up at once and are tagged one after another
+// ("Photo 1 of 3"): each names its service and master, so the feed books exactly that. The first five
+// lead the public page, so the order is the owner's: dragged with a mouse, "Put first" in a
 // photo's sheet on a phone.
 export const PhotosSection = ({
   slug,

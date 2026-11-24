@@ -41,14 +41,14 @@ describe('getSlugProblem', () => {
       'a.b',
     ]) {
       expect(getSlugProblem(slug), slug).toBe(
-        'Адрес: латинские буквы, цифры и дефис, от 3 до 48 символов',
+        'Address: Latin letters, digits and hyphens, 3 to 48 characters',
       )
     }
   })
 
   it('refuses the app’s own words', () => {
-    expect(getSlugProblem('manage')).toBe('Этот адрес занят')
-    expect(getSlugProblem('insights')).toBe('Этот адрес занят')
+    expect(getSlugProblem('manage')).toBe('This address is taken')
+    expect(getSlugProblem('insights')).toBe('This address is taken')
   })
 })
 

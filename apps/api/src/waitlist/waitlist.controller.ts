@@ -28,7 +28,7 @@ const getRateLimit = () => validateEnv(process.env).BOOKING_RATE_LIMIT_PER_MINUT
 
 const parseToken = (value: string | undefined) => {
   const result = waitlistTokenSchema.safeParse(value)
-  if (!result.success) throw new NotFoundException('Не найдено')
+  if (!result.success) throw new NotFoundException('Not found')
 
   return result.data
 }

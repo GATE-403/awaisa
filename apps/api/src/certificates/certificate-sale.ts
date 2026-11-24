@@ -22,7 +22,7 @@ const normalizeAmounts = (amounts: number[]) =>
 const orderDueAt = (now: Date) =>
   new Date(now.getTime() + (PAYMENT_HOLD_MINUTES + ORDER_GRACE_MINUTES) * 60_000)
 
-const formatSom = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/\s/g, ' ')} сом`
+const formatSom = (amount: number) => `${amount.toLocaleString('en-GB')} som`
 
 type PaidOrder = {
   business: string
@@ -37,25 +37,26 @@ type PaidOrder = {
 
 /** To the buyer: the code, and whether the recipient got it too. */
 const buyerMessage = (order: PaidOrder) => {
-  const whom = order.recipientName ? ` для ${order.recipientName}` : ''
+  const whom = order.recipientName ? ` for ${order.recipientName}` : ''
   const handOver = order.hasRecipientPhone
-    ? 'Мы отправили его и получателю.'
-    : 'Передайте код получателю.'
-  return `${order.business}: сертификат${whom} на ${formatSom(order.amount)} оплачен. Код ${order.code}. ${handOver} Записаться: ${order.link}`
+    ? 'We have sent it to the recipient too.'
+    : 'Pass the code on to the recipient.'
+  return `${order.business}: your ${formatSom(order.amount)} gift card${whom} is paid. Code ${order.code}. ${handOver} Book: ${order.link}`
 }
 
 /** To the recipient: who it is from, the words, the code and where to book. */
 const recipientMessage = (order: PaidOrder) => {
-  const from = order.buyerName || 'Вам'
   const greeting = order.recipientName ? `${order.recipientName}, ` : ''
   const words = order.message ? ` «${order.message}»` : ''
-  const verb = order.buyerName ? 'дарит вам' : 'подарили'
-  return `${greeting}${from} ${verb} сертификат на ${formatSom(order.amount)} в ${order.business}.${words} Код ${order.code}, назовите его при оплате. Записаться: ${order.link}`
+  const gift = order.buyerName
+    ? `${order.buyerName} has given you`
+    : `${greeting ? 'you have' : 'You have'} been given`
+  return `${greeting}${gift} a ${formatSom(order.amount)} gift card for ${order.business}.${words} Code ${order.code}, give it when you pay. Book: ${order.link}`
 }
 
-/** «Для Айгуль · от Нурлана» under the order's title on /pay. */
+/** «For Aigul · from Nurlan» under the order's title on /pay. */
 const orderDetails = (recipientName: string, buyerName: string) =>
-  [recipientName && `Для ${recipientName}`, buyerName && `от ${buyerName}`]
+  [recipientName && `For ${recipientName}`, buyerName && `from ${buyerName}`]
     .filter(Boolean)
     .join(' · ')
 

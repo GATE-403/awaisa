@@ -67,7 +67,7 @@ export class FollowsService {
        WHERE sp."id" = $1 AND sp."is_active" AND b."is_published"`,
       [specialistId],
     )) as Row[]
-    if (!master) throw new NotFoundException('Мастер не найден')
+    if (!master) throw new NotFoundException('Specialist not found')
     await this.dataSource.query(
       `INSERT INTO "master_follows" ("customer_id", "specialist_id", "notify_works")
        VALUES ($1, $2, COALESCE($3, false))
@@ -86,7 +86,7 @@ export class FollowsService {
     return this.list(customerId)
   }
 
-  /** How many follow the master: «Мой день» shows the number, never the people. */
+  /** How many follow the master: «My day» shows the number, never the people. */
   async countFor(specialistId: string) {
     const [row] = (await this.dataSource.query(
       'SELECT COUNT(*)::int AS "count" FROM "master_follows" WHERE "specialist_id" = $1',
@@ -184,7 +184,7 @@ export class FollowsService {
     for (const follower of followers) {
       void this.messages.send(String(follower.phone), {
         text,
-        link: { label: 'Записаться', url: link },
+        link: { label: 'Book', url: link },
       })
     }
     if (followers.length > 0) this.logger.log(`Freed time to ${followers.length} follower(s)`)
@@ -218,7 +218,7 @@ export class FollowsService {
       const link = `${this.webUrl()}/${String(row.slug)}/book?specialist=${String(row.specialistId)}`
       void this.messages.send(String(row.phone), {
         text: movedText(String(row.masterName), String(row.businessName), link),
-        link: { label: 'Записаться', url: link },
+        link: { label: 'Book', url: link },
       })
     }
   }
@@ -250,7 +250,7 @@ export class FollowsService {
       const link = `${this.webUrl()}/feed?start=${String(row.latest)}`
       void this.messages.send(String(row.phone), {
         text: worksText(String(row.masterName), Number(row.count), link),
-        link: { label: 'Смотреть', url: link },
+        link: { label: 'See them', url: link },
       })
     }
   }

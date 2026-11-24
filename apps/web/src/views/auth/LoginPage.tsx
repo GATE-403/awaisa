@@ -69,7 +69,7 @@ export const LoginPage = () => {
             <TelegramMark className={styles.telegramMark} />
             <h1 className={styles.title}>{t('Confirm in Telegram')}</h1>
             <p className={styles.lead}>
-              {t('Tap «Share my number» in the chat with the bot, then come back here')}
+              {t('Tap “Share my number” in the chat with the bot, then come back here')}
             </p>
             <p className={styles.note}>{t('Waiting for your number…')}</p>
             <div className={styles.links}>
@@ -147,7 +147,7 @@ export const LoginPage = () => {
                   target='_blank'
                   rel='noreferrer'
                   // Alone it is the main action, in white: the accent blue under Telegram's own blue
-                  // mark clashed («синяя кнопка и иконка телеграма не сочетаются»).
+                  // mark clashed (the owner: the blue button and Telegram's icon did not go together).
                   variant={telegram.isCodeAvailable ? 'secondary' : 'contrast'}
                   size='lg'
                   fullWidth
@@ -159,7 +159,7 @@ export const LoginPage = () => {
               )}
               {telegram.isExpired ? (
                 <p className={styles.error} role='alert'>
-                  {t('The sign-in link has expired: tap «Sign in with Telegram» again')}
+                  {t('The sign-in link has expired: tap “Sign in with Telegram” again')}
                 </p>
               ) : (
                 telegram.isCodeAvailable && (

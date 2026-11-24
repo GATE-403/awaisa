@@ -69,7 +69,7 @@ const AFFINITY_TTL_MS = 10 * 60_000
 const NEW_PLACE_REVIEWS = 5
 
 /**
- * «Для вас»: every active service of a published place scored for this client - what they said
+ * 'For you': every active service of a published place scored for this client - what they said
  * they like, what they booked and when, where they are, when the place is free, how good and
  * how booked it is. No accounts needed: guests send their answers and device visits.
  */

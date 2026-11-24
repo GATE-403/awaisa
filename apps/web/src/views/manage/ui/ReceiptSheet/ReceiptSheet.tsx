@@ -19,7 +19,7 @@ interface ReceiptSheetProps {
   slug: string
   receipt: FiscalReceipt
   onClose: () => void
-  /** After «Отправить снова», so the list shows the new state. */
+  /** After "Send again", so the list shows the new state. */
   onChange?: (receipt: FiscalReceipt) => void
 }
 

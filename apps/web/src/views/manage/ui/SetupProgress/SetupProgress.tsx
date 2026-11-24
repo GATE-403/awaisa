@@ -63,8 +63,8 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   if (!next) return null
 
   // A card on a soft wash of the accent, the one place the cabinet lifts something off the page
-  // («добавь фон градиент но чтобы сочетался, а то совсем незаметный»): the caption with
-  // «2 из 3», a bar of three steps, then the next step and a small «Начать ›». The whole card is
+  // ("add a gradient background that matches, it's barely visible"): the caption with
+  // "2 of 3", a bar of three steps, then the next step and a small "Start ›". The whole card is
   // one link to that step.
   return (
     <section className={styles.setup} aria-labelledby='setup-title'>

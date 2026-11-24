@@ -123,11 +123,11 @@ export class Booking {
   @Column({ name: 'discount_title', type: 'varchar', length: 80, nullable: true })
   discountTitle: string | null
 
-  /** When «пора прийти снова» went out for this visit. */
+  /** When 'due again' went out for this visit. */
   @Column({ name: 'rebook_reminded_at', type: 'timestamptz', nullable: true })
   rebookRemindedAt: Date | null
 
-  /** The deposit asked for when booked online (сом); null = none. */
+  /** The deposit asked for when booked online (som); null = none. */
   @Column({ name: 'deposit_amount', type: 'int', nullable: true })
   depositAmount: number | null
 
@@ -144,7 +144,7 @@ export class Booking {
   @Column({ name: 'cancelled_by', type: 'varchar', length: 8, nullable: true })
   cancelledBy: 'client' | 'salon' | null
 
-  /** The client's subscription that pays this visit; drawn when the salon marks «Пришёл». */
+  /** The client's subscription that pays this visit; drawn when the salon marks 'Arrived'. */
   @Column({ name: 'subscription_id', type: 'uuid', nullable: true })
   subscriptionId: string | null
 
@@ -156,7 +156,7 @@ export class Booking {
   @Column({ type: 'varchar', length: 16, nullable: true })
   channel: BookingChannel | null
 
-  /** «Хочу так»: the work photo the client picked as the look they want; null once it is deleted. */
+  /** 'I want this look': the work photo the client picked as the look they want; null once it is deleted. */
   @Column({ name: 'look_photo_id', type: 'uuid', nullable: true })
   lookPhotoId: string | null
 

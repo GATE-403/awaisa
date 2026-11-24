@@ -41,12 +41,12 @@ describe('attentionItems', () => {
         ({ text, tab }) => [text, tab],
       ),
     ).toEqual([
-      ['3 визита без отметки', 'schedule'],
-      ['1 чек не прошёл', 'fiscal'],
+      ['3 visits unmarked', 'schedule'],
+      ['1 receipt failed', 'fiscal'],
     ])
-    expect(attentionItems({ ...quiet('a'), failedReceipts: 2 })[0]?.text).toBe('2 чека не прошли')
+    expect(attentionItems({ ...quiet('a'), failedReceipts: 2 })[0]?.text).toBe('2 receipts failed')
     expect(attentionItems({ ...quiet('a'), unansweredReviews: 5 })[0]?.text).toBe(
-      '5 отзывов без ответа',
+      '5 reviews unanswered',
     )
   })
 
@@ -104,7 +104,7 @@ describe('isOwnBusiness', () => {
 describe('todaySummary', () => {
   const day = '2026-11-23'
   const list = [
-    { ...business('a', 'Борода'), todayCount: 5, next: { date: day, time: '14:30' } },
+    { ...business('a', 'Boroda'), todayCount: 5, next: { date: day, time: '14:30' } },
     { ...business('b', 'Brow Bar'), todayCount: 3, next: { date: day, time: '11:00' } },
     { ...business('c', 'Kans'), todayCount: 0, next: { date: '2026-11-24', time: '09:00' } },
   ]
@@ -134,7 +134,7 @@ describe('statusLine', () => {
       kind: 'setup',
       done: 2,
       total: 3,
-      text: 'Добавьте мастеров',
+      text: 'Add specialists',
       tab: 'masters',
     })
   })

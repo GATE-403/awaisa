@@ -111,10 +111,10 @@ const Choice = ({ label, note, glyph, isChosen, isBusy, isMulti, onPick }: Choic
   </li>
 )
 
-// «Подберём для вас» as steps, like the business setup: one question a screen, a bar of segments
-// for how far along, one tap answers and moves on (several interests or priorities take «Далее»); the answers so far
-// ride above the question as capsules back to their step («хотел бы увидеть что я выбрал до»). The answers
-// stay on the device and shape «Для вас»; the place is the device's own «Где вы?».
+// «Picks for you» as steps, like the business setup: one question a screen, a bar of segments
+// for how far along, one tap answers and moves on (several interests or priorities take «Next»); the answers so far
+// ride above the question as capsules back to their step (the owner wanted to see what was chosen before). The answers
+// stay on the device and shape «For you»; the place is the device's own «Where are you?».
 export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) => {
   const t = useT()
   const toast = useToast()
@@ -141,7 +141,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
     })
     toast.show({
       title: t('Picks updated'),
-      description: t('See «For you» in your profile'),
+      description: t('See “For you” in your profile'),
       type: 'success',
     })
     onClose()
@@ -370,7 +370,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
         <p className={styles.stepFooter}>
           {t(
-            'Your answers stay on this phone and, with your visits, decide what goes into «For you».',
+            'Your answers stay on this phone and, with your visits, decide what goes into “For you”.',
           )}
         </p>
 
@@ -386,7 +386,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         {step === 'place' && myPlace && (
           <div className={styles.stepActions}>
             <Button onClick={() => finish()}>
-              {t('Keep «{place}»', { place: myPlace.label })}
+              {t('Keep “{place}”', { place: myPlace.label })}
             </Button>
           </div>
         )}

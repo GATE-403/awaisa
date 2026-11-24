@@ -80,7 +80,7 @@ export class ExpensesService {
       ],
     )
     const [row] = returnedRows(result)
-    if (!row) throw new NotFoundException('Расход не найден')
+    if (!row) throw new NotFoundException('Expense not found')
     return this.toExpense(row)
   }
 

@@ -22,7 +22,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
   const base = `/${business.slug}`
   const isBooking = pathname === `${base}/book`
   useRootFlag(isBooking ? null : 'business-bar')
-  // The overview has its own big «Записаться», so the bar does not repeat it.
+  // The overview has its own big Book, so the bar does not repeat it.
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes, t) : null
   const sections = [
     { href: base, label: t('Overview'), isActive: pathname === base },

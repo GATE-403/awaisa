@@ -40,9 +40,9 @@ interface BusinessPickerCardProps {
 
 // One row per business right on the page, like Settings: the name, the next visit, a quiet line of
 // what waits (each a link to its tab, only its glyph in orange), today's visits on the right when
-// there are any. A quiet row still says where it stands («просто и нет динамики»): the step left
+// there are any. A quiet row still says where it stands ("plain, no motion"): the step left
 // before clients can book, else the week in figures with its direction, else a nudge to share.
-// Only what is unusual is drawn: «Скрыта», never «Открыта»; no role or kind every row repeats.
+// Only what is unusual is drawn: "Hidden", never "Open"; no role or kind every row repeats.
 export const BusinessPickerCard = ({ business, attention }: BusinessPickerCardProps) => {
   const t = useT()
   const today = useToday()

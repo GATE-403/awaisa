@@ -21,7 +21,7 @@ interface FollowButtonProps {
   variant?: 'glyph' | 'capsule' | 'groupItem'
 }
 
-// «Следить»: freed time with the master, a move to another place. Guests sign in first and
+// «Follow»: freed time with the master, a move to another place. Guests sign in first and
 // come back to the same page.
 export const FollowButton = ({ specialistId, name, variant = 'capsule' }: FollowButtonProps) => {
   const t = useT()
@@ -47,7 +47,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
         haptic('success')
         toast.show({
           title: t('You follow {name}', { name }),
-          description: t('We will write when the master has free time'),
+          description: t('We will write when the specialist has free time'),
           type: 'success',
         })
       }
@@ -101,7 +101,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
       onClick={(event) => void handleClick(event)}
     >
       {isOn ? <BellRinging weight='fill' aria-hidden /> : <Bell aria-hidden />}
-      {isOn ? t('Following') : t('Follow the master')}
+      {isOn ? t('Following') : t('Follow the specialist')}
     </Button>
   )
 }

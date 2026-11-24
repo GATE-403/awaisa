@@ -24,7 +24,7 @@ interface BookingReviewProps {
   comment: string
   quote: PriceQuote | null
   onEdit: (step: BookingStepId) => void
-  /** «Записаться» at the card's foot on wide screens (phones have it in the bottom bar). */
+  /** Book at the card's foot on wide screens (phones have it in the bottom bar). */
   action?: ReactNode
 }
 
@@ -39,7 +39,7 @@ const relativeDay = (dayKey: string, todayKey: string | null, t: Translate) => {
   return t('in {days} days', { days })
 }
 
-// The last step before «Записаться», shaped like the ticket it becomes: the place on its cover,
+// The last step before Book, shaped like the ticket it becomes: the place on its cover,
 // the day as a calendar leaf beside the time span, then who, what and for whom - each a tap
 // away from being changed - and what it costs and how it is paid. Nothing to fill in, only to
 // check.

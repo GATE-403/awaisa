@@ -231,9 +231,9 @@
   white-space: nowrap;
 }
 
-/* «● Сегодня 14:30 · 15:00»: one quiet line like the approved «Сегодня с 18:30», each time a
+/* «● Today 14:30 · 15:00»: one quiet line like the approved «Today from 18:30», each time a
    link that books it. No capsules: white ones over the picture outweighed the place and wrapped
-   on phones («выглядит мягко говоря плохо»). */
+   on phones (the owner: it looked bad, to say the least). */
 .live {
   display: flex;
   align-items: baseline;

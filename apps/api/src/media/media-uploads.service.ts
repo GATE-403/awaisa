@@ -108,15 +108,15 @@ export class MediaUploadsService {
     file: UploadedImage | undefined,
     masterId: string | null,
   ): Promise<UploadedPhoto> {
-    if (!file) throw new BadRequestException('Выберите фото')
+    if (!file) throw new BadRequestException('Choose a photo')
     const [booking] = (await this.dataSource.query(
       `SELECT "service_id" AS "serviceId", "specialist_id" AS "specialistId" FROM "bookings"
        WHERE "id" = $1 AND "business_id" = $2`,
       [bookingId ?? null, business.id],
     )) as { serviceId: string; specialistId: string }[]
-    if (!booking) throw new BadRequestException('Визит не найден')
+    if (!booking) throw new BadRequestException('Visit not found')
     if (masterId && booking.specialistId !== masterId)
-      throw new ForbiddenException('Это визит другого мастера')
+      throw new ForbiddenException('This visit belongs to another specialist')
     const freed = await this.workPhotos.makeRoomForVisit(business.id)
     if (freed) await this.storage.remove(freed).catch(() => undefined)
     const url = await this.storage.put(
@@ -133,7 +133,7 @@ export class MediaUploadsService {
 
   /** The client's own photo for the profile: re-encoded as a 480² avatar like masters' photos. */
   async setAvatar(customer: Customer, file: UploadedImage | undefined): Promise<AvatarUpload> {
-    if (!file) throw new BadRequestException('Выберите фото')
+    if (!file) throw new BadRequestException('Choose a photo')
     const url = await this.storage.put(
       `customers/${randomUUID()}.webp`,
       await processImage(file.buffer, 'avatar'),
@@ -149,7 +149,7 @@ export class MediaUploadsService {
   }
 
   private async save(business: Business, file: UploadedImage | undefined, kind: ImageKind) {
-    if (!file) throw new BadRequestException('Выберите фото')
+    if (!file) throw new BadRequestException('Choose a photo')
 
     return this.storage.put(
       `${business.id}/${randomUUID()}.webp`,
@@ -159,7 +159,7 @@ export class MediaUploadsService {
 
   private async findSpecialist(business: Business, id: string) {
     const specialist = await this.specialists.findOneBy({ id, businessId: business.id })
-    if (!specialist) throw new NotFoundException('Мастер не найден')
+    if (!specialist) throw new NotFoundException('Specialist not found')
 
     return specialist
   }

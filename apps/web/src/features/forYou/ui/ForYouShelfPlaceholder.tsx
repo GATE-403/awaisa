@@ -17,7 +17,7 @@ export const ForYouShelfPlaceholder = ({
   headAction,
   variant = 'cards',
 }: ForYouShelfPlaceholderProps) => (
-  // Not a named region: tests and screen readers find the real shelf «Для вас», not this stand-in.
+  // Not a named region: tests and screen readers find the real shelf «For you», not this stand-in.
   <div className={styles.shelf} aria-busy='true'>
     <div className={styles.head}>
       <p className={styles.title}>

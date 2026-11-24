@@ -39,8 +39,8 @@ const promotionText = (promotion: Promotion) =>
 const wordsOf = (counted: string) => counted.replace(/^\S+\s/, '')
 
 // Under the bio, like a professional account's insights and its highlights: one footnote line
-// «За 7 дней: 18 записей · 120 просмотров ›» (to «Аналитика»), then the running promotions as the
-// clients see them as capsules and «+ Акция»; each opens the promotion's sheet right here.
+// "Last 7 days: 18 bookings · 120 views ›" (to "Analytics"), then the running promotions as the
+// clients see them as capsules and "+ Promotion"; each opens the promotion's sheet right here.
 export const PageInsights = ({
   slug,
   analyticsHref,

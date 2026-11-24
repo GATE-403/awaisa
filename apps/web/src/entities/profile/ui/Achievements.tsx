@@ -41,7 +41,7 @@ const share = (item: Achievement) => item.progress.current / item.progress.targe
 
 // A collection, not a list of grey discs: the medals earned stand in one row like trophies on a
 // shelf, each with the month it came; the goals fold into one line naming the two closest and
-// open in place («просто список разных достижений … не интересно»).
+// open in place (the owner: a plain list of achievements is dull).
 export const Achievements = ({ items, onSelect }: AchievementsProps) => {
   const t = useT()
   const [isOpen, setIsOpen] = useState(false)

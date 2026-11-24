@@ -8,10 +8,10 @@ import styles from './OrbitScene.module.css'
 const CHIPS = [
   { text: '10:30 · free', tone: 'free' },
   { text: '★ 4.9 · 128 reviews', tone: 'rating' },
-  { text: 'New booking · Данияр', tone: 'accent' },
+  { text: 'New booking · Daniyar', tone: 'accent' },
   { text: 'Reminder sent', tone: 'plain' },
   { text: 'Haircut · 900 som', tone: 'plain' },
-  { text: 'Тимур · barber', tone: 'plain' },
+  { text: 'Timur · barber', tone: 'plain' },
   { text: 'Today from 15:00', tone: 'free' },
   { text: 'Pass in Wallet', tone: 'accent' },
 ]

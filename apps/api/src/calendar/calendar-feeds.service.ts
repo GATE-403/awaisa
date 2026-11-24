@@ -83,7 +83,7 @@ export class CalendarFeedsService {
       `UPDATE "calendar_feeds" SET "specialist_id" = $3 WHERE ${this.ownerWhere(owner)} RETURNING "id"`,
       [...this.ownerParams(owner), specialistId],
     )
-    if (rows.length === 0) throw new NotFoundException('Ссылки на календарь ещё нет')
+    if (rows.length === 0) throw new NotFoundException('There is no calendar link yet')
     return this.getFeed(owner)
   }
 
@@ -236,7 +236,7 @@ export class CalendarFeedsService {
       `SELECT 1 FROM "specialists" WHERE "id" = $1 AND "business_id" = $2`,
       [specialistId, businessId],
     )
-    if (rows.length === 0) throw new BadRequestException('Такого мастера нет')
+    if (rows.length === 0) throw new BadRequestException('No such specialist')
   }
 
   private ownerWhere(owner: FeedOwner) {

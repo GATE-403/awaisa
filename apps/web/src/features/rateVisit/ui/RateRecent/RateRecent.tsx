@@ -35,7 +35,7 @@ const whenLabel = (date: string, today: { dayKey: string }) => {
 const tokenOf = (id: string) =>
   parseBookings(readRaw()).find((item) => item.id === id)?.token ?? null
 
-/** «Как прошло?» - the latest visit without a review, rated with one tap on a star. */
+/** «How did it go?» - the latest visit without a review, rated with one tap on a star. */
 export const RateRecent = ({ history, today, onRated }: RateRecentProps) => {
   const t = useT()
   const [dismissed, setDismissed] = useState<string[] | null>(null)

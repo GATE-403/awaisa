@@ -25,7 +25,6 @@ import type {
   Specialist,
 } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useIsScrolledPast } from '@/shared/lib/hooks/useIsScrolledPast'
 import { useIsStuck } from '@/shared/lib/hooks/useIsStuck'
@@ -54,11 +53,11 @@ interface ClientsTabProps {
 }
 
 const SEARCH_DELAY_MS = 250
-// The list shows this many, then «Ещё N клиентов» adds as many again; rows are loaded in batches.
+// The list shows this many, then "N more clients" adds as many again; rows are loaded in batches.
 const PAGE = 30
 const BATCH = 200
 const CLIENT_WORDS: [string, string] = ['client', 'clients']
-// Whom «Позвать» calls: «1 клиента», «3 клиентов», «12 клиентов».
+// Whom "Invite" calls: "1 client", "3 clients", "12 clients".
 const CALLED_WORDS: [string, string] = ['client', 'clients']
 const VISIT_WORDS: [string, string] = ['visit', 'visits']
 const NO_SHOW_WORDS: [string, string] = ['no-show', 'no-shows']
@@ -80,7 +79,7 @@ const SORTS: { value: ClientSort; label: string }[] = [
   { value: 'name', label: 'By name' },
 ]
 
-// Segments a mailing reaches: «Позвать» opens it on the same group.
+// Segments a mailing reaches: "Invite" opens it on the same group.
 const MAILING_SEGMENT: Partial<Record<ClientSegment, MailingSegment>> = {
   lapsed: 'lapsed',
   birthday: 'birthday',
@@ -88,7 +87,7 @@ const MAILING_SEGMENT: Partial<Record<ClientSegment, MailingSegment>> = {
 
 // The client base cut into the groups an owner acts on: who comes soon, the new, the regulars,
 // those who stopped coming, those who do not show up, birthdays. Each group says what to do with
-// it in one line («Позвать 12 клиентов ›» opens the mailing on that group). Rows lie on the page
+// it in one line ("Invite 12 clients ›" opens the mailing on that group). Rows lie on the page
 // with hairlines, each one tap target to the client's card; long groups come thirty at a time.
 export const ClientsTab = ({ slug, businessName, specialists, branches }: ClientsTabProps) => {
   const t = useT()
@@ -115,7 +114,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
   const counts = list?.counts
   const total = counts?.[segment] ?? items.length
   const hiddenCount = total - Math.min(shown, items.length)
-  // The rows to ask for: the next batch once «Ещё» reaches the end of what is loaded.
+  // The rows to ask for: the next batch once "More" reaches the end of what is loaded.
   const limit = Math.ceil(shown / BATCH) * BATCH
   const mailingSegment = MAILING_SEGMENT[segment]
 
@@ -149,7 +148,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
     setShown(PAGE)
   }
 
-  // Empty groups are left out of the tabs (all but «Все» and the one open).
+  // Empty groups are left out of the tabs (all but "All" and the one open).
   const tabs = SEGMENTS.filter(
     (item) => item.value === 'all' || item.value === segment || (counts?.[item.value] ?? 0) > 0,
   )
@@ -247,7 +246,7 @@ export const ClientsTab = ({ slug, businessName, specialists, branches }: Client
             query
               ? t('Check the name or number.')
               : segment === 'all'
-                ? t('They appear with the first booking, or load your base through «Import».')
+                ? t('They appear with the first booking, or load your base through "Import".')
                 : t('Nobody in this group yet.')
           }
         />
@@ -342,7 +341,7 @@ interface SegmentNoteProps {
   segment: ClientSegment
   count: number
   lapsedDays: number
-  /** The group a mailing can reach: «Позвать N клиентов ›». */
+  /** The group a mailing can reach: "Invite N clients ›". */
   onCall?: () => void
 }
 

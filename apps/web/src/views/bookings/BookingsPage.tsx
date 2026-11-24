@@ -29,7 +29,7 @@ import { AccountCard } from './ui/AccountCard/AccountCard'
 import { AccountSettings } from './ui/AccountSettings/AccountSettings'
 import { LoyaltyCard } from './ui/LoyaltyCard/LoyaltyCard'
 
-// After the nearest visit, the next few as rows; the rest behind «Ещё N записей».
+// After the nearest visit, the next few as rows; the rest behind «N more bookings».
 const LATER_FIRST = 3
 
 interface BookingsPageProps {
@@ -40,7 +40,7 @@ interface BookingsPageProps {
 const PROFILE_TABS = ['bookings', 'favorites', 'settings'] as const
 type ProfileTab = (typeof PROFILE_TABS)[number]
 
-/** Old links to the two tabs the records were split into land on the one «Записи». */
+/** Old links to the two tabs the records were split into land on the one «Bookings». */
 const OLD_TABS: Record<string, ProfileTab> = { upcoming: 'bookings', history: 'bookings' }
 
 export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProps) => {
@@ -90,7 +90,7 @@ export const BookingsPage = ({ initialAccountBookings = null }: BookingsPageProp
 
   const visits = history.filter((booking) => booking.status === 'confirmed').length
   // A guest has no settings: a «?tab=settings» link shows their records instead of an empty
-  // screen under a «‹ Записи · Настройки» bar.
+  // screen under a «‹ Bookings · Settings» bar.
   const isGuest = sessionStatus === 'guest'
   const view = tab === 'settings' && isGuest ? 'bookings' : (tab ?? 'bookings')
   const [next, ...later] = upcoming

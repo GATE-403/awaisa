@@ -44,7 +44,7 @@ export class QuestionsController {
     return this.questions.ask(slug, customer, body.text)
   }
 
-  // Staff answer too: «Как добраться?» is part of the day, not of the business setup.
+  // Staff answer too: «How do I get there?» is part of the day, not of the business setup.
   @Get('manage/:slug/questions')
   @UseGuards(BusinessAccessGuard)
   listForManage(@CurrentBusiness() business: Business): Promise<BusinessQuestion[]> {

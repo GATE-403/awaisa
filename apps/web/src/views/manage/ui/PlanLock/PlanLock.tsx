@@ -25,7 +25,7 @@ const FEATURE_TEXT: Record<PlanFeature, string> = {
   payroll: 'Specialist pay is calculated automatically.',
   team: 'Administrators run the schedule without access to money.',
   deposits: 'Prepayment for online bookings.',
-  fiscal: 'Фискальные чеки за визиты и продажи уходят в налоговую сами.',
+  fiscal: 'Fiscal receipts for visits and sales go to the tax service by themselves.',
 }
 
 // A section the business's plan does not open: one `EmptyState`, the plan that opens it and the
@@ -38,7 +38,7 @@ export const PlanLock = ({ slug, feature }: PlanLockProps) => {
 
   return (
     <EmptyState
-      title={plan ? t('Available on the «{plan}» plan', { plan }) : t('Not available on your plan')}
+      title={plan ? t('Available on the "{plan}" plan', { plan }) : t('Not available on your plan')}
       text={
         isOwner
           ? t(FEATURE_TEXT[feature])

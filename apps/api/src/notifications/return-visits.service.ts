@@ -30,7 +30,7 @@ const SEND_UNTIL_HOUR = 20
 const DUE_WINDOW_DAYS = 7
 
 /**
- * «Пора прийти снова»: a service may set `rebook_days`; that many days after a visit (that was
+ * «Time to come back»: a service may set `rebook_days`; that many days after a visit (that was
  * not a no-show) the client gets one SMS with a link to the same master - unless they already
  * booked that service again, or turned SMS off when booking.
  */
@@ -89,7 +89,7 @@ export class ReturnVisitsService {
       const link = `${web}/${row.business_slug}/book?${params}`
       void this.messages.send(row.customer_phone, {
         text: returnVisitMessage(row.business_name, row.service_name, row.specialist_name, link),
-        link: { label: 'Записаться', url: link },
+        link: { label: 'Book', url: link },
         whatsapp: whatsappReturnVisit(
           row.business_name,
           row.service_name,

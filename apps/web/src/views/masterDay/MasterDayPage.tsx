@@ -55,7 +55,7 @@ const FORBIDDEN = 403
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 const OUTCOMES: { value: Choice; label: string }[] = [
-  { value: 'pending', label: 'Expected' },
+  { value: 'pending', label: 'Waiting' },
   { value: 'arrived', label: 'Arrived' },
   { value: 'no_show', label: 'No-show' },
 ]
@@ -224,7 +224,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
         {day && (
           <>
             {/* The day's facts as one footnote line with bold figures, like the quiet profile
-                (three tiles parted by lines read as a dashboard: «не соответствует философии»). */}
+                (three tiles parted by lines read as a dashboard: "does not fit the philosophy"). */}
             <p className={styles.facts}>
               <b>{live.length}</b>{' '}
               {t.count(live.length, ['booking', 'bookings']).replace(/^\d+\s/, '')}
@@ -332,7 +332,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                         </span>
                         {booking.comment && (
                           <span className={styles.comment}>
-                            <ChatText aria-hidden />«{booking.comment}»
+                            <ChatText aria-hidden />"{booking.comment}"
                           </span>
                         )}
                         {booking.lookPhotoUrl && (

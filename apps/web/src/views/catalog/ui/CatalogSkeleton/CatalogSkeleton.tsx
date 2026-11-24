@@ -12,7 +12,7 @@ import styles from './CatalogSkeleton.module.css'
 
 const CARDS = 8
 
-// The catalog while it streams in, built from the page's own classes: «Для вас» with its frames,
+// The catalog while it streams in, built from the page's own classes: «For you» with its frames,
 // the results' tabs and sorting, then the grid of 3:4 service cards - the same sizes, so the
 // page fills in place instead of jumping.
 export const CatalogSkeleton = () => (
@@ -26,7 +26,7 @@ export const CatalogSkeleton = () => (
         </NextLink>
       }
     />
-    {/* «Часто ищут» - wide screens only, like the real row. */}
+    {/* «Popular searches» - wide screens only, like the real row. */}
     <div className={chipStyles.row} aria-hidden='true'>
       <span className={chipStyles.label}>
         <T>Popular searches</T>
@@ -35,7 +35,7 @@ export const CatalogSkeleton = () => (
         <Block key={chars} className={styles.chip} style={{ '--chars': chars } as CSSProperties} />
       ))}
     </div>
-    <section className={resultStyles.results} aria-label='Загружаем услуги'>
+    <section className={resultStyles.results} aria-label='Loading services'>
       {/* Browsing everything, the results' heading is visually hidden but keeps its row. */}
       <div className={resultStyles.header} />
       <div className={resultStyles.toolbar}>

@@ -59,7 +59,7 @@ const YEAR_PAID_MONTHS = 10
 const PERIODS = [1, 12] as const
 /** The first reminder comes this many days before the end. */
 const REMIND_DAYS_BEFORE = 3
-/** «Тариф закончился» is sent only this long after the end (not for old history). */
+/** «Plan ended» is sent only this long after the end (not for old history). */
 const ENDED_NOTICE_DAYS = 7
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -98,19 +98,32 @@ const periodPrice = (plan: PlanRow, masters: number, months: number) => {
 const smsAllowance = (plan: PlanRow, masters: number) =>
   plan.smsPerMonth === null ? null : plan.smsPerMonth + plan.smsPerMaster * masters
 
-const pluralRu = (count: number, [one, few, many]: [string, string, string]) => {
-  const tens = count % 100
-  const units = count % 10
-  if (tens >= 11 && tens <= 14) return many
-  if (units === 1) return one
-  if (units >= 2 && units <= 4) return few
-  return many
+const plural = (count: number, [one, other]: [string, string]) => (count === 1 ? one : other)
+
+const LIMIT_WORDS: Record<PlanLimit, [string, string]> = {
+  masters: ['specialist', 'specialists'],
+  branches: ['branch', 'branches'],
 }
 
-const LIMIT_WORDS: Record<PlanLimit, [string, string, string]> = {
-  masters: ['мастера', 'мастеров', 'мастеров'],
-  branches: ['филиала', 'филиалов', 'филиалов'],
+/**
+ * The seeded plans' titles and descriptions as people read them. The rows keep the Russian copy
+ * the migration wrote; a plan added later by hand shows its own row's words.
+ */
+const PLAN_COPY: Record<string, { title: string; description: string }> = {
+  start: { title: 'Start', description: 'Your page, online booking and the schedule' },
+  business: {
+    title: 'Business',
+    description: 'Till, stock, analytics, loyalty and mailings',
+  },
+  founders: { title: 'Founder', description: 'Everything, no limits, for the first businesses' },
 }
+
+const withPlanCopy = <T extends { key: string; title: string; description: string }>(
+  plan: T,
+): T => ({ ...plan, ...PLAN_COPY[plan.key] })
+
+/** A plan's title by its key, for rows that carry only the key. */
+const planTitleOf = (key: string, title: string) => PLAN_COPY[key]?.title ?? title
 
 /** The cheapest public plan that has a feature or more room, to name it in a message. */
 const upgradeFor = (plans: PlanRow[], fits: (plan: PlanRow) => boolean) =>
@@ -120,7 +133,7 @@ const upgradeFor = (plans: PlanRow[], fits: (plan: PlanRow) => boolean) =>
 
 const featureLockedMessage = (plans: PlanRow[], feature: PlanFeature) => {
   const upgrade = upgradeFor(plans, (plan) => hasFeature(plan, feature))
-  return upgrade ? `Доступно на тарифе «${upgrade.title}»` : 'Недоступно на вашем тарифе'
+  return upgrade ? `Available on the «${upgrade.title}» plan` : 'Not available on your plan'
 }
 
 const limitOf = (plan: PlanRow, limit: PlanLimit) =>
@@ -135,9 +148,9 @@ const limitProblem = (plans: PlanRow[], plan: PlanRow, limit: PlanLimit, current
     const otherMax = limitOf(other, limit)
     return otherMax === null || otherMax > max
   })
-  const head = `На тарифе «${plan.title}» до ${max} ${pluralRu(max, words)}`
+  const head = `The «${plan.title}» plan allows up to ${max} ${plural(max, words)}`
 
-  return upgrade ? `${head}. Больше на тарифе «${upgrade.title}»` : head
+  return upgrade ? `${head}. More on the «${upgrade.title}» plan` : head
 }
 
 /** Paying N months: from the later of now, the paid end and the trial's end. */
@@ -191,16 +204,18 @@ export {
   limitProblem,
   monthlyPrice,
   PERIODS,
+  PLAN_COPY,
   PLAN_FEATURES,
   type PlanFeature,
   type PlanLimit,
   type PlanRow,
   periodPrice,
-  pluralRu,
+  planTitleOf,
   type ReminderStage,
   reminderDue,
   resolveAccess,
   type SubscriptionRow,
   smsAllowance,
   usageMonth,
+  withPlanCopy,
 }

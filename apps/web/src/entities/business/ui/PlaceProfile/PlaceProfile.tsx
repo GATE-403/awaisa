@@ -42,7 +42,7 @@ interface PlaceLineProps {
 }
 
 // A place's page laid out like a profile in Instagram, one head for the public page and the
-// owner's «Страница»: the cover the window's whole width with square edges, the logo over its
+// owner's «Page»: the cover the window's whole width with square edges, the logo over its
 // edge, on the same line one primary action and the thin glyphs, then a bio set close.
 export const PlaceProfile = ({
   name,

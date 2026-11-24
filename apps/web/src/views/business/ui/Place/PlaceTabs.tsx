@@ -30,9 +30,9 @@ const PANELS: Record<PlaceSection, string> = {
 const sectionOfHash = (hash: string) =>
   (Object.keys(PANELS) as PlaceSection[]).find((section) => `#${PANELS[section]}` === hash)
 
-// The owner's «Страница» tabs as clients see them: «Работы · Услуги · Мастера · Время» with a count
+// The owner's «Page» tabs as clients see them: «Work · Services · Specialists · Time» with a count
 // each and the open tab's one action at the row's end. People come to book a service, so the page
-// opens on «Услуги»; a tab with nothing in it is left out.
+// opens on «Services»; a tab with nothing in it is left out.
 export const PlaceTabs = ({ business, catalog, services, masters, works }: PlaceTabsProps) => {
   const t = useT()
   const today = useToday()

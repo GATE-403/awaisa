@@ -69,7 +69,7 @@ export class SalonBookingsService {
 
   async restoreBySalon(businessId: string, id: string) {
     const booking = await this.bookings.findOneBy({ id, businessId })
-    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (!booking) throw new NotFoundException('Booking not found')
 
     return this.bookingsService.restore(booking)
   }
@@ -92,11 +92,11 @@ export class SalonBookingsService {
     const booking = await bookingViewQuery(this.bookings)
       .where('booking.id = :id AND booking.businessId = :businessId', { id, businessId })
       .getOne()
-    if (!booking) throw new NotFoundException('Запись не найдена')
-    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    if (!booking) throw new NotFoundException('Booking not found')
+    if (booking.status !== 'confirmed') throw new BadRequestException('The booking is cancelled')
     const todayEnd = businessDateTimeToUtc(addDays(toBusinessParts(new Date()).dateKey, 1), 0)
     if (input.outcome && booking.startsAt >= todayEnd) {
-      throw new BadRequestException('Отметить визит можно в его день или позже')
+      throw new BadRequestException('A visit can be marked on its day or later')
     }
     const isArrived = input.outcome === 'arrived'
     const services = visitServices(booking)
@@ -113,7 +113,7 @@ export class SalonBookingsService {
         lines: services.map((service) => ({ serviceId: service.id, price: service.price })),
         due,
       }
-      // Booked to be paid by a subscription: «Пришёл» alone draws the visit from it; one that
+      // Booked to be paid by a subscription: 'Arrived' alone draws the visit from it; one that
       // ran out or expired meanwhile leaves the visit to be paid as usual.
       const planned =
         input.subscriptionId === undefined && booking.subscriptionId && !input.paidAmount
@@ -157,7 +157,7 @@ export class SalonBookingsService {
     )
   }
 
-  // «Все пришли»: every ended visit of the day without an outcome counts as arrived, paid the
+  // 'All arrived': every ended visit of the day without an outcome counts as arrived, paid the
   // price in cash. The ids come back so the toast can undo exactly these.
   async closeDay(businessId: string, date: string) {
     const { dayStart, dayEnd } = businessDayBounds(date)
@@ -179,7 +179,7 @@ export class SalonBookingsService {
     return { ids }
   }
 
-  /** «Вернуть» after «Все пришли»: only this business's visits go back to unmarked. */
+  /** 'Undo' after 'All arrived': only this business's visits go back to unmarked. */
   async reopen(businessId: string, ids: string[]) {
     const result = (await this.bookings.query(
       `UPDATE "bookings" SET "outcome" = NULL, "paid_amount" = NULL, "payment_method" = NULL,
@@ -219,8 +219,8 @@ export class SalonBookingsService {
       where: { id, businessId },
       relations: { service: true },
     })
-    if (!booking) throw new NotFoundException('Запись не найдена')
-    if (booking.status !== 'confirmed') throw new BadRequestException('Запись отменена')
+    if (!booking) throw new NotFoundException('Booking not found')
+    if (booking.status !== 'confirmed') throw new BadRequestException('The booking is cancelled')
 
     const serviceIds = [
       booking.serviceId,
@@ -231,8 +231,8 @@ export class SalonBookingsService {
     if (!offering.some((specialist) => specialist.id === target.specialistId)) {
       throw new BadRequestException(
         serviceIds.length > 1
-          ? 'Этот мастер не делает все услуги визита'
-          : 'Этот мастер не выполняет эту услугу',
+          ? "This specialist doesn't do all of the visit's services"
+          : "This specialist doesn't do this service",
       )
     }
     const startsAt = businessDateTimeToUtc(target.date, parseTime(target.time))
@@ -240,13 +240,14 @@ export class SalonBookingsService {
     const endsAt = new Date(
       startsAt.getTime() + (booking.endsAt.getTime() - booking.startsAt.getTime()),
     )
-    if (startsAt.getTime() < Date.now()) throw new BadRequestException('Нельзя перенести в прошлое')
+    if (startsAt.getTime() < Date.now())
+      throw new BadRequestException("A booking can't be moved into the past")
     const blocked = await this.timeOff
       .createQueryBuilder('timeOff')
       .where('timeOff.specialistId = :specialistId', { specialistId: target.specialistId })
       .andWhere('timeOff.startsAt < :endsAt AND timeOff.endsAt > :startsAt', { startsAt, endsAt })
       .getExists()
-    if (blocked) throw new ConflictException('У мастера закрыто это время')
+    if (blocked) throw new ConflictException('The specialist is unavailable at this time')
     // Staff may not drop a visit into the master's day off or outside their hours.
     const window = await this.businesses.getOpeningWindow(businessId, target.date)
     const offHours = await this.masterSchedule.offHoursBusy(
@@ -255,7 +256,7 @@ export class SalonBookingsService {
       window,
     )
     if (offHours.some((interval) => startsAt < interval.endsAt && interval.startsAt < endsAt)) {
-      throw new ConflictException('Мастер в это время не работает')
+      throw new ConflictException("The specialist doesn't work at this time")
     }
 
     const before = toBusinessParts(booking.startsAt)
@@ -280,7 +281,7 @@ export class SalonBookingsService {
         },
       )
     } catch (error) {
-      if (isOverlapError(error)) throw new ConflictException('Это время у мастера занято')
+      if (isOverlapError(error)) throw new ConflictException('The specialist is busy at this time')
       throw error
     }
 
@@ -297,7 +298,7 @@ export class SalonBookingsService {
 
   async cancelBySalon(businessId: string, id: string) {
     const booking = await this.bookings.findOneBy({ id, businessId })
-    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (!booking) throw new NotFoundException('Booking not found')
 
     const wasConfirmed = booking.status === 'confirmed'
     if (wasConfirmed) await this.bookingsService.markCancelled(id, 'salon')
@@ -309,7 +310,7 @@ export class SalonBookingsService {
     }
   }
 
-  // What an «arrived» mark sets off, the same for one visit and for «Все пришли»: bonuses on the
+  // What an «arrived» mark sets off, the same for one visit and for 'All arrived': bonuses on the
   // money paid, materials written off, the receipt (which never fails the save).
   private async afterArrived(businessId: string, ids: string[]) {
     await this.loyalty.earnForVisits(ids)
@@ -317,7 +318,7 @@ export class SalonBookingsService {
     await this.fiscal.syncVisits(businessId, ids)
   }
 
-  // A visit back to «Ждём» or «Не пришёл»: what it drew on and used comes back, the receipt is
+  // A visit back to 'Expected' or 'No-show': what it drew on and used comes back, the receipt is
   // refunded.
   private async afterUnmarked(businessId: string, ids: string[]) {
     await this.loyalty.revertVisits(ids)

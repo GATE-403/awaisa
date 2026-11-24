@@ -63,7 +63,7 @@ describe('dates', () => {
 
 describe('buildCalendar', () => {
   const calendar = buildCalendar({
-    name: 'Эрлан · Old School',
+    name: 'Erlan · Old School',
     refreshMinutes: 15,
     now: new Date('2026-11-21T06:00:00.000Z'),
     events: [
@@ -71,15 +71,15 @@ describe('buildCalendar', () => {
         uid: 'booking-1@awaisa.kg',
         start: new Date('2026-11-22T09:00:00.000Z'),
         end: new Date('2026-11-22T09:45:00.000Z'),
-        summary: 'Мужская стрижка · Айбек',
-        location: 'Центр, ул. Киевская, 95',
-        description: 'Клиент: Айбек\nМастер: Эрлан',
+        summary: "Men's haircut · Aibek",
+        location: 'Centre, 95 Kievskaya St',
+        description: 'Client: Aibek\nSpecialist: Erlan',
       },
       {
         uid: 'booking-2@awaisa.kg',
         start: new Date('2026-11-23T09:00:00.000Z'),
         end: new Date('2026-11-23T10:00:00.000Z'),
-        summary: 'Борода',
+        summary: 'Beard',
         isCancelled: true,
       },
     ],
@@ -93,7 +93,7 @@ describe('buildCalendar', () => {
   })
 
   it('names the calendar and asks to be refreshed', () => {
-    expect(lines).toContain('X-WR-CALNAME:Эрлан · Old School')
+    expect(lines).toContain('X-WR-CALNAME:Erlan · Old School')
     expect(lines).toContain('REFRESH-INTERVAL;VALUE=DURATION:PT15M')
     expect(lines).toContain('TZID:Asia/Bishkek')
   })
@@ -102,8 +102,8 @@ describe('buildCalendar', () => {
     expect(lines).toContain('UID:booking-1@awaisa.kg')
     expect(lines).toContain('DTSTART;TZID=Asia/Bishkek:20261122T150000')
     expect(lines).toContain('DTEND;TZID=Asia/Bishkek:20261122T154500')
-    expect(lines).toContain('LOCATION:Центр\\, ул. Киевская\\, 95')
-    expect(lines).toContain('DESCRIPTION:Клиент: Айбек\\nМастер: Эрлан')
+    expect(lines).toContain('LOCATION:Centre\\, 95 Kievskaya St')
+    expect(lines).toContain('DESCRIPTION:Client: Aibek\\nSpecialist: Erlan')
     expect(lines).toContain('DTSTAMP:20261121T060000Z')
   })
 

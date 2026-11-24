@@ -10,7 +10,7 @@ import { changeOf, profitOf, roundMoney } from './cash-math.js'
 
 type Row = Record<string, unknown>
 
-// The same rules as «Аналитика»'s revenue: a visit counts unless it was a no-show and earns
+// The same rules as 'Analytics''s revenue: a visit counts unless it was a no-show and earns
 // what was paid, or the price minus its discount when nobody marked the payment.
 const DONE = `b."status" = 'confirmed' AND b."outcome" IS DISTINCT FROM 'no_show'`
 const EARNED = `COALESCE(b."paid_amount", ${visitPrice()} - COALESCE(b."discount_amount", 0))`
@@ -22,7 +22,7 @@ const LOCAL_CERTIFICATE = `(g."paid_at" AT TIME ZONE 'UTC' + interval '6 hours')
 const LOCAL_SUBSCRIPTION = `(c."created_at" AT TIME ZONE 'UTC' + interval '6 hours')::date`
 
 /**
- * «Прибыль»: revenue from services, products and subscriptions sold (a visit paid by a
+ * 'Profit': revenue from services, products and subscriptions sold (a visit paid by a
  * subscription earns 0, so its money is counted once, on the day of the sale), minus the materials visits used, what the
  * sold products cost and the expenses, over a period and the same stretch before.
  */

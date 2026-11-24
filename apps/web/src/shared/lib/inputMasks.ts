@@ -35,22 +35,25 @@ const maskLocalPhoneInput = (value: string) => {
 const phoneProblem = (value: string): string | null => {
   const trimmed = value.trim()
   const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return 'Введите номер телефона'
+  if (!digits) return 'Enter a phone number'
   if (trimmed.startsWith('+') && !digits.startsWith(KG_CODE)) {
-    return 'Пока принимаем только номера Кыргызстана: +996'
+    return 'For now we only take Kyrgyz numbers: +996'
   }
   const local = (digits.startsWith(KG_CODE) ? digits.slice(KG_CODE.length) : digits).replace(
     /^0/,
     '',
   )
   if (local.length < KG_LOCAL_DIGITS) {
-    return `Номер неполный: после +996 нужно ${KG_LOCAL_DIGITS} цифр`
+    return `The number is incomplete: it needs ${KG_LOCAL_DIGITS} digits after +996`
   }
   return null
 }
 
-// Groups thousands while a price is typed: «1500» → «1 500».
-const maskAmountInput = (digits: string) =>
-  digits ? Number(digits).toLocaleString('ru-RU').replace(/\s/g, ' ') : ''
+// Groups thousands while a price is typed: «1500» → «1,500». Spaces and commas typed or pasted
+// in between are dropped first.
+const maskAmountInput = (value: string) => {
+  const digits = value.replace(/\D/g, '')
+  return digits ? Number(digits).toLocaleString('en-GB') : ''
+}
 
 export { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem }

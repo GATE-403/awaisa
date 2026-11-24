@@ -19,9 +19,9 @@ interface TicketProps {
   onCodeClick?: (code: string) => void
   /** Makes the whole ticket a button (e.g. show it full screen). */
   onOpen?: () => void
-  /** A control in the top-right corner instead of the «Электронный талон» label. */
+  /** A control in the top-right corner instead of the «E-ticket» label. */
   headerAction?: ReactNode
-  /** Not booked yet (the form's «Ваша запись»): no number or barcode, «-» for what is still to
+  /** Not booked yet (the form's «Your booking»): no number or barcode, «-» for what is still to
       choose. */
   isDraft?: boolean
 }

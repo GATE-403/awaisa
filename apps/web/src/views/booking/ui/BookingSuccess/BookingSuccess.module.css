@@ -49,8 +49,8 @@
   width: 100%;
   margin-top: var(--space-5);
   border-radius: var(--radius-xl);
-  /* No entrance of its own: printed from a slot, it read as a picture still loading («как будто
-     подгружается как изображение»). It is simply there under «Вы записаны». */
+  /* No entrance of its own: printed from a slot, it read as a picture still loading ("as if it were
+     loading like an image"). It is simply there under "You're booked". */
   transition: scale var(--duration-fast) var(--ease-standard);
 }
 
@@ -58,7 +58,7 @@
   scale: 0.98;
 }
 
-/* «Ещё запись …»: a link-coloured row as wide as the column, 44pt to tap, right before the
+/* "Another booking …": a link-coloured row as wide as the column, 44pt to tap, right before the
    line of actions. */
 .another {
   display: flex;
@@ -142,7 +142,7 @@
   pointer-events: none;
 }
 
-/* The one line of actions: «Мои записи» takes the room, the glyph capsule beside it is as tall
+/* The one line of actions: My bookings takes the room, the glyph capsule beside it is as tall
    (44pt: the glyphs grow from the kit's 36 to 40). */
 .actions {
   display: flex;

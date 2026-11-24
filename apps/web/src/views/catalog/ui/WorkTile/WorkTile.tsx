@@ -28,9 +28,9 @@ interface WorkTileProps {
 type Burst = { id: number; x: number; y: number }
 
 // A master's work set into the services grid as one of its cells: the same shape, radius and
-// scrim as the service cards, told apart by «✦ Образ», the master's face, the likes and «Хочу
-// так», which books that service with that master and hands the photo over as the look wanted.
-// A tap opens «Образы» on this photo; on a touch screen a double tap likes it, as in the deck.
+// scrim as the service cards, told apart by «✦ Look», the master's face, the likes and «I want
+// this look», which books that service with that master and hands the photo over as the look wanted.
+// A tap opens «Looks» on this photo; on a touch screen a double tap likes it, as in the deck.
 export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: WorkTileProps) => {
   const t = useT()
   const router = useRouter()
@@ -55,7 +55,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
     likes.setLiked(item.id, next)
     haptic('selection')
     if (!next) return
-    // A liked work keeps its service in «Избранное», like saving a post (the same as the deck).
+    // A liked work keeps its service in «Favourites», like saving a post (the same as the deck).
     if (item.service && !favorites.isFavorite(item.service.id)) favorites.toggle(item.service.id)
   }
 
@@ -149,7 +149,7 @@ export const WorkTile = ({ item, kind, isBig = false, isPriority = false }: Work
             {author ? `${author} · ${item.business.name}` : item.business.name}
           </span>
         </span>
-        {/* The whole card opens «Образы» through this link (stretched over the card). */}
+        {/* The whole card opens «Looks» through this link (stretched over the card). */}
         <h3 className={styles.name}>
           <NextLink href={feedHref} className={styles.open} onClick={handleOpen}>
             {item.service?.name ?? item.business.name}

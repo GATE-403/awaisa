@@ -28,8 +28,8 @@
   background: var(--card-scrim);
 }
 
-/* «Любой мастер»: a neutral card with a glyph instead of a face. Dark text on a light fill
-   takes no text shadow: the one meant for white words on photos smudged it («грязно»). */
+/* «Any specialist»: a neutral card with a glyph instead of a face. Dark text on a light fill
+   takes no text shadow: the one meant for white words on photos smudged it (it looked dirty). */
 .card[data-any] {
   background: var(--color-fill);
   box-shadow: none;
@@ -93,7 +93,7 @@
 }
 
 .name {
-  /* A long first name or large text: two lines, hyphenated, instead of «Нурсу…». */
+  /* A long first name or large text: two lines, hyphenated, instead of «Nursu…». */
   display: -webkit-box;
   overflow: hidden;
   font-size: var(--text-body);
@@ -115,7 +115,7 @@
 }
 
 .card[data-any] .meta {
-  /* «кто свободен»: quieter than the name; the muted grey on the fill was 3.8:1, so 72% of the
+  /* «whoever is free»: quieter than the name; the muted grey on the fill was 3.8:1, so 72% of the
      label colour (≥ 4.5:1 on the fill). */
   color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
 }

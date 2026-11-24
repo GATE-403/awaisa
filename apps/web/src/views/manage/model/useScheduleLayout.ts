@@ -23,7 +23,7 @@ const subscribe = (onChange: () => void) => {
   }
 }
 
-// «Колонки» or «Лента» for the cabinet's schedule, kept on this device. The server renders the
+// "Columns" or "Timeline" for the cabinet's schedule, kept on this device. The server renders the
 // columns; a saved timeline takes over after hydration.
 export const useScheduleLayout = () => {
   const layout = useSyncExternalStore(subscribe, read, () => 'columns' as CalendarLayout)

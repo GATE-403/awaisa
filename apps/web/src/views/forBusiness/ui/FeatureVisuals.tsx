@@ -38,8 +38,8 @@ const DragVisual = () => (
       <T>Drag it: the client gets an SMS</T>
     </p>
     <div className={styles.dragDemo}>
-      <span className={styles.dragFrom}>12:30 · Данияр</span>
-      <span className={styles.dragTo}>14:30 · Данияр</span>
+      <span className={styles.dragFrom}>12:30 · Daniyar</span>
+      <span className={styles.dragTo}>14:30 · Daniyar</span>
     </div>
   </div>
 )

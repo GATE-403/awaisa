@@ -35,14 +35,14 @@ export class BookingPaymentsService {
   /** The pay page for a booking still waiting for its deposit (to pay again from the ticket). */
   async checkoutUrl(id: string, token: string | null, customer: Customer | null) {
     const booking = await this.bookingsService.findAccessible(id, token, customer)
-    if (!booking) throw new NotFoundException('Запись не найдена')
-    if (booking.paymentStatus !== 'pending') throw new BadRequestException('Оплата не нужна')
+    if (!booking) throw new NotFoundException('Booking not found')
+    if (booking.paymentStatus !== 'pending') throw new BadRequestException('No payment needed')
     const url =
       (await this.payments.checkoutFor(id)) ??
       (await this.moduleRef
         .get(SubscriptionOrdersService, { strict: false })
         .checkoutForBooking(id))
-    if (!url) throw new NotFoundException('Платёж не найден')
+    if (!url) throw new NotFoundException('Payment not found')
 
     return { url }
   }
@@ -69,7 +69,7 @@ export class BookingPaymentsService {
   }
 
   /**
-   * «Купить абонемент и записаться»: the subscription was paid for and issued, so the held booking
+   * 'Buy a pass and book': the subscription was paid for and issued, so the held booking
    * is final and paid by it (no deposit left on it). A hold that already ran out stays released:
    * the client keeps the subscription and books again.
    */

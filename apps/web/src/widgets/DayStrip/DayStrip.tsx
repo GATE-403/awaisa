@@ -14,7 +14,7 @@ interface DayStripProps {
   marks?: ReadonlySet<string>
   /** How full each day is, 0–1 (compact only): a thin bar along the bottom of its chip. */
   loads?: ReadonlyMap<string, number>
-  /** `compact`: one thin line of «чт 19» capsules (the cabinet); default: weekday over number. */
+  /** `compact`: one thin line of "Thu 19" capsules (the cabinet); default: weekday over number. */
   variant?: 'default' | 'compact'
 }
 
@@ -89,7 +89,7 @@ export const DayStrip = ({
                 aria-hidden='true'
               />
             )}
-            {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
+            {/* The full date after the visible "Sat 7", not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
               {`, ${t.dayLong(day.key)}${
                 marks?.has(day.key) ? `, ${t('has unclosed visits')}` : ''

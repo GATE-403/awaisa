@@ -1,4 +1,4 @@
-/* A place's head like a profile in Instagram: the public page and the owner's «Страница». */
+/* A place's head like a profile in Instagram: the public page and the owner's «Page». */
 .head {
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
 }
 
 /* No cover: a band in the place's colour, a quiet pattern of mascots on it instead of an empty
-   wash («вместо пустого фона можно сделать узор из маскотов»). */
+   wash (the owner: a pattern of mascots instead of an empty background). */
 .cover[data-empty] {
   display: grid;
   place-items: center;
@@ -50,7 +50,7 @@
   pointer-events: none;
 }
 
-/* Whatever lies on the empty cover (the cabinet's «Добавить обложку») stays over the pattern. */
+/* Whatever lies on the empty cover (the cabinet's «Add a cover») stays over the pattern. */
 .cover[data-empty] > * {
   position: relative;
 }

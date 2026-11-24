@@ -26,7 +26,7 @@ export class SubscriptionOrdersController {
     return this.orders.listOnline(slug)
   }
 
-  // «Купить»: an order on the signed-in client's number, paid on the pay page.
+  // 'Buy': an order on the signed-in client's number, paid on the pay page.
   @Post('businesses/:slug/subscription-plans/:id/order')
   @UseGuards(AuthGuard)
   @Throttle({ default: { limit: getOrderRateLimit, ttl: 60_000 } })

@@ -211,7 +211,7 @@
   vertical-align: 1px;
 }
 
-/* «Дешевле 70% мест»: why the price is worth it, quiet under the price. */
+/* «Cheaper than 70% of places»: why the price is worth it, quiet under the price. */
 .cheaper {
   overflow: hidden;
   color: rgb(255 255 255 / 0.8);
@@ -264,7 +264,7 @@
   }
 }
 
-/* A small white capsule like a store's «Купить»: the card is one link, this only says what it does. */
+/* A small white capsule like a store's «Buy»: the card is one link, this only says what it does. */
 .book {
   align-self: flex-start;
   margin-top: var(--space-2);

@@ -3,7 +3,7 @@
   flex-direction: column;
 }
 
-/* A banner on a soft mint-to-blue wash (the same as the plan's offer in «Тариф»): no shadow,
+/* A banner on a soft mint-to-blue wash (the same as the plan's offer in "Plan"): no shadow,
    no border; a press fades it. */
 .card {
   position: relative;
@@ -11,12 +11,12 @@
   flex-direction: column;
   gap: var(--space-2);
   /* A band the window's whole width with square edges, its content on the column's edges
-     («сделай компактнее, углы не закругляй», «и на всю ширину как раньше»); the page around
+     ("make it more compact, no rounded corners", "and full width as before"); the page around
      clips the classic scrollbar's sliver, as under the place's cover. */
   margin-inline: calc(50% - 50vw);
   padding: var(--space-3) calc(50vw - 50%);
   /* Mint through cyan to blue, each a soft wash over the surface (indigo to pink read muddy in
-     the dark: «поменяй цвета»). */
+     the dark: "change the colours"). */
   background: linear-gradient(
     100deg,
     color-mix(in srgb, var(--system-mint) 22%, var(--color-surface)) 0%,
@@ -85,7 +85,7 @@
   gap: var(--space-3);
 }
 
-/* «Начать» keeps a 44pt target around its smaller capsule. */
+/* "Start" keeps a 44pt target around its smaller capsule. */
 .start {
   position: relative;
 }
@@ -116,7 +116,7 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* «Начать ›» as the kit's small primary capsule: the step's one action. */
+/* "Start ›" as the kit's small primary capsule: the step's one action. */
 .start {
   display: inline-flex;
   flex-shrink: 0;

@@ -17,15 +17,15 @@ interface WorkPhotoSheetProps {
   onClose: () => void
   onSave: (input: WorkPhotoInput) => Promise<boolean>
   onDelete: () => void
-  /** Several photos just uploaded, tagged in turn: «Фото 1 из 3», «Далее» until the last. */
+  /** Several photos just uploaded, tagged in turn: "Photo 1 of 3", "Next" until the last. */
   step?: { index: number; total: number }
-  /** Puts the photo first in «Работы» (the first five lead the page); absent when it is first. */
+  /** Puts the photo first in "Work" (the first five lead the page); absent when it is first. */
   onMakeFirst?: () => void
 }
 
 const NONE = 'none'
 
-// What the photo shows: with a service (and master) it books exactly that from the «Работы» feed.
+// What the photo shows: with a service (and master) it books exactly that from the "Work" feed.
 export const WorkPhotoSheet = ({
   photo,
   services,
@@ -133,8 +133,8 @@ export const WorkPhotoSheet = ({
                   count: photo.reports,
                 })
               : serviceId === NONE
-                ? t('Set the service: in the «Work» feed the photo gets «Book» for it.')
-                : t('In the «Work» feed the photo shows the price, the next free time and «Book».')}
+                ? t('Set the service: in the "Work" feed the photo gets "Book" for it.')
+                : t('In the "Work" feed the photo shows the price, the next free time and "Book".')}
           </p>
         </section>
         <HoldButton

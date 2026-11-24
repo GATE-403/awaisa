@@ -35,7 +35,7 @@ export class StrategyService {
     return { days, activeBusinesses, channels, repeat }
   }
 
-  // Weeks start on Monday in Bishkek; an outcome marked (one visit or «Все пришли») is the sign.
+  // Weeks start on Monday in Bishkek; an outcome marked (one visit or 'All arrived') is the sign.
   private async activeBusinesses(days: number) {
     const weeks = Math.max(1, Math.ceil(days / 7))
     const rows = (await this.dataSource.query(

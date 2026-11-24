@@ -41,7 +41,7 @@
 }
 
 /* The input and the rotating example share one box between the glyph and the buttons: the example
-   («Найти маникюр рядом») lies over the empty input, keeps its padding and never takes a tap. */
+   ("Find a manicure nearby") lies over the empty input, keeps its padding and never takes a tap. */
 .field {
   position: relative;
   display: flex;
@@ -81,8 +81,8 @@
 }
 
 /* Where results count from, at the field's end: from 768px the place's name in the accent colour
-   after a hairline («│ ➤ Асанбай»); on phones only the arrow, so the example keeps the room. A tap
-   opens «Где вы?». */
+   after a hairline ("│ ➤ Asanbay"); on phones only the arrow, so the example keeps the room. A tap
+   opens Where are you?. */
 .where {
   position: relative;
   display: inline-flex;
@@ -251,7 +251,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* «Очистить» beside «Недавние»: link text, its 44pt reach drawn invisibly around it. */
+/* Clear beside Recent: link text, its 44pt reach drawn invisibly around it. */
 .clear {
   position: relative;
   padding: 0;
@@ -357,7 +357,7 @@
 }
 
 /* Phones: a lighter field; Enter searches, so the blue button is not needed. */
-/* The field and, on phones while open, «Отмена» beside it. */
+/* The field and, on phones while open, Cancel beside it. */
 .search {
   display: flex;
   align-items: center;

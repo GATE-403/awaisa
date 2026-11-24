@@ -14,8 +14,8 @@ interface NextGoalProps {
 
 const RING = 2 * Math.PI * 22
 
-// «Следующая цель» over the medals on one's own profile: the closest medal in a ring that fills
-// to its progress, what is left and the one tap that brings it nearer («сделать интерактивнее»).
+// «Next goal» over the medals on one's own profile: the closest medal in a ring that fills
+// to its progress, what is left and the one tap that brings it nearer (the owner: make it more interactive).
 export const NextGoal = ({ goal }: NextGoalProps) => {
   const t = useT()
   const { achievement } = goal

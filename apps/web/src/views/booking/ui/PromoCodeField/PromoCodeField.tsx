@@ -19,8 +19,8 @@ interface PromoCodeFieldProps {
   onClear: () => void
 }
 
-// A Settings row like the name and number: «Промокод» on the left, the code typed on the right,
-// «Применить» as text once something is typed; applied, the discount and «Убрать».
+// A Settings row like the name and number: Promo code on the left, the code typed on the right,
+// Apply as text once something is typed; applied, the discount and Remove.
 export const PromoCodeField = ({
   className,
   code,

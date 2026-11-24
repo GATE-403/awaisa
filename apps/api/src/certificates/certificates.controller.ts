@@ -21,7 +21,7 @@ export class CertificatesController {
     return this.sales.saleFor(slug)
   }
 
-  // «Оплатить»: the order waits for its payment; the answer is where to pay.
+  // «Pay»: the order waits for its payment; the answer is where to pay.
   @Post('certificate-orders')
   @Throttle({ default: { limit: getOrderRateLimit, ttl: 60_000 } })
   @UseGuards(OptionalAuthGuard)

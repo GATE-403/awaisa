@@ -10,7 +10,7 @@
 }
 
 /* Recharts makes its SVG focusable (arrows move the tooltip). A ring only when it was reached by
-   the keyboard; a click or a tap draws none («убери обводку, если не через Tab»). */
+   the keyboard; a click or a tap draws none ("remove the outline unless it comes from Tab"). */
 /* Its inner layers take focus on a click too (a `g` with tabindex -1). */
 :is(.chart, .sparkline) :focus:not(:focus-visible),
 :is(.chart, .sparkline) :global(.recharts-wrapper) {

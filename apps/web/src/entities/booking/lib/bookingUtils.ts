@@ -11,10 +11,10 @@ type BookingDay = {
   isClosed?: boolean
 }
 
-const priceFormatter = new Intl.NumberFormat('ru-RU')
-const weekdayFormatter = new Intl.DateTimeFormat('ru-RU', { weekday: 'short' })
-const monthFormatter = new Intl.DateTimeFormat('ru-RU', { month: 'short' })
-const longDateFormatter = new Intl.DateTimeFormat('ru-RU', {
+const priceFormatter = new Intl.NumberFormat('en-GB')
+const weekdayFormatter = new Intl.DateTimeFormat('en-GB', { weekday: 'short' })
+const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'short' })
+const longDateFormatter = new Intl.DateTimeFormat('en-GB', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
@@ -47,7 +47,7 @@ const getDateParts = (key: string) => {
   return {
     day: date.getDate(),
     month: monthFormatter.format(date).replace('.', ''),
-    weekday: capitalize(new Intl.DateTimeFormat('ru-RU', { weekday: 'long' }).format(date)),
+    weekday: capitalize(new Intl.DateTimeFormat('en-GB', { weekday: 'long' }).format(date)),
   }
 }
 
@@ -66,7 +66,7 @@ const getDaysAround = (todayKey: string, before: number, after: number): Booking
       weekday: weekdayFormatter.format(date).replace('.', ''),
       dayOfMonth: date.getDate(),
       month: monthFormatter.format(date).replace('.', ''),
-      label: capitalize(`${offset === 0 ? 'сегодня, ' : ''}${longDateFormatter.format(date)}`),
+      label: `${offset === 0 ? 'Today, ' : ''}${longDateFormatter.format(date)}`,
       isToday: offset === 0,
     }
   })

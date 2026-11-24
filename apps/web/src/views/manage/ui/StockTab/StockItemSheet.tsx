@@ -19,7 +19,7 @@ interface StockItemSheetProps {
   services: Service[]
   onClose: () => void
   onSave: (input: StockItemInput) => Promise<boolean>
-  /** `asExpense`: also record what the delivery cost in «Расходы». */
+  /** `asExpense`: also record what the delivery cost in "Expenses". */
   onReceive?: (quantity: number, asExpense: boolean) => Promise<boolean>
   onAdjust?: (quantity: number) => Promise<boolean>
   onDelete?: () => void
@@ -30,7 +30,7 @@ const FORM_ID = 'stock-item-form'
 // Stored as these words; translated only where shown.
 const UNITS = ['pcs', 'ml', 'g', 'pair', 'pack']
 
-// Quantities may be fractional (12,5 мл): keep digits and one decimal separator.
+// Quantities may be fractional (12.5 ml): keep digits and one decimal separator.
 const maskDecimal = (value: string) => {
   const [whole, ...rest] = value
     .replace('.', ',')
@@ -119,7 +119,7 @@ export const StockItemSheet = ({
             <Input
               variant='plain'
               aria-label={t('Name')}
-              placeholder={t('For example, «Hair dye»')}
+              placeholder={t('For example, "Hair dye"')}
               value={name}
               onValueChange={setName}
               autoFocus={!item}
@@ -192,7 +192,7 @@ export const StockItemSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {isForSale
-              ? t('Sold in «Till» and in the visit outcome; the stock goes down by itself.')
+              ? t('Sold in "Till" and in the visit outcome; the stock goes down by itself.')
               : t('Shampoo, wax, oil: sell with a visit or on their own.')}
           </p>
         </section>
@@ -287,11 +287,11 @@ export const StockItemSheet = ({
             </div>
             <p className={sheet.groupFooter}>
               {example && exampleCost > 0
-                ? t('«{name}»: {amount} som of materials per visit.', {
+                ? t('"{name}": {amount} som of materials per visit.', {
                     name: example.name,
                     amount: maskAmountInput(String(exampleCost)),
                   })
-                : t('How much one visit uses: written off when the visit is marked «Arrived».')}
+                : t('How much one visit uses: written off when the visit is marked "Arrived".')}
             </p>
           </section>
         )}

@@ -9,7 +9,7 @@ interface SearchChipsProps {
   services: PopularService[]
 }
 
-// «Часто ищут»: one-tap searches built from what places actually offer.
+// «Popular searches»: one-tap searches built from what places actually offer.
 export const SearchChips = ({ kind, services }: SearchChipsProps) => {
   if (services.length === 0) return null
 

@@ -44,10 +44,10 @@ const DEFAULT_HOURS = { opensMinutes: 10 * 60, closesMinutes: 20 * 60 }
 
 const getSlugProblem = (slug: string) => {
   if (!SLUG_PATTERN.test(slug) || slug.includes('--')) {
-    return 'Адрес: латинские буквы, цифры и дефис, от 3 до 48 символов'
+    return 'Address: Latin letters, digits and hyphens, 3 to 48 characters'
   }
   // Deleted businesses move to `deleted-…` (admin/business-erasure.ts): nobody registers one.
-  if (RESERVED_SLUGS.has(slug) || slug.startsWith('deleted-')) return 'Этот адрес занят'
+  if (RESERVED_SLUGS.has(slug) || slug.startsWith('deleted-')) return 'This address is taken'
 
   return null
 }

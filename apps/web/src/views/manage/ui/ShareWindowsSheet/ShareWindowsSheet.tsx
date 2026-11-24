@@ -22,7 +22,7 @@ interface ShareWindowsSheetProps {
   catalog: Catalog
   /** The business hours that day (masters without their own follow them). */
   dayHours: { opensMinutes: number; closesMinutes: number } | null
-  /** «чт, 19 ноября». */
+  /** "Thu 19 November". */
   dayLabel: string
   /** On today, only what is still ahead. */
   nowMinutes: number | null
@@ -36,7 +36,7 @@ const ANY_SERVICE = 'any'
 type Window = { from: number; to: number; names: string[] }
 
 // The day's free time as a ready message for clients: windows in the order of the day, each with
-// the masters free then (a client asks «when», not «with whom»), for any service or one chosen -
+// the masters free then (a client asks "when", not "with whom"), for any service or one chosen -
 // then only the windows it fits and a link straight to it - and sent in one tap to WhatsApp or
 // Telegram, or copied.
 export const ShareWindowsSheet = ({
@@ -92,10 +92,10 @@ export const ShareWindowsSheet = ({
   const path = `/${slug}/book?${query}`
   const link = typeof window === 'undefined' ? path : `${window.location.origin}${path}`
   const heading = service
-    ? t('Free time for «{service}» · {day}', { service: service.name, day })
+    ? t('Free time for "{service}" · {day}', { service: service.name, day })
     : t('Free time · {day}', { day })
   const body = [heading, ...lines].join('\n')
-  // Shown without the query: «awaisa.kg/kings-barbershop/book».
+  // Shown without the query: "awaisa.kg/kings-barbershop/book".
   const shortLink =
     typeof window === 'undefined' ? `${slug}/book` : `${window.location.host}/${slug}/book`
   const text = `${body}\n\n${t('Book online: {link}', { link })}`

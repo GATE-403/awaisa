@@ -22,9 +22,9 @@ import { Filled } from './Filled'
 
 interface MasterStatsSheetProps {
   master: AnalyticsReport['masters'][number]
-  /** «к прошлой неделе», translated. */
+  /** "vs last week", translated. */
   comparedLabel: string
-  /** «Как на прошлой неделе», translated. */
+  /** "Same as last week", translated. */
   sameLabel: string
   slug: string
   /** The report's period: a payout marked here pays for it. */
@@ -100,7 +100,7 @@ export const MasterStatsSheet = ({
     }
   }
 
-  // Marking a payout is reversible: no confirmation, «Вернуть» in the toast takes it back.
+  // Marking a payout is reversible: no confirmation, "Undo" in the toast takes it back.
   const markPaid = async () => {
     if (!payout) {
       setPayout({ amount: maskAmountInput(String(pay?.due ?? '')), paidOn: period.to, note: '' })
@@ -312,7 +312,7 @@ export const MasterStatsSheet = ({
                 <Input
                   variant='plain'
                   aria-label={t('Payout comment')}
-                  placeholder={t('Comment, e.g. «advance»')}
+                  placeholder={t('Comment, e.g. "advance"')}
                   value={payout.note}
                   maxLength={200}
                   onValueChange={(note) => setPayout({ ...payout, note })}

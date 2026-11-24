@@ -93,8 +93,8 @@
   white-space: nowrap;
 }
 
-/* What waits: a quiet footnote like the next visit, only the glyph in orange («жёлтый жирный
-   цвет забирает много внимания»). Each item is a link over the row's own. */
+/* What waits: a quiet footnote like the next visit, only the glyph in orange ("the bold yellow
+   takes a lot of attention"). Each item is a link over the row's own. */
 .attention {
   display: flex;
   flex-wrap: wrap;
@@ -109,9 +109,9 @@
   height: 13px;
 }
 
-/* «▰▰▱ Запуск 2 из 3 · Добавьте мастеров»: a link over the row's own. Every link in the row reads
-   the same: the quiet footnote colour with a thin underline («иконки и текст одним цветом, если
-   кликабельны - добавь линии»); the link colour under a mouse. */
+/* "▰▰▱ Setup 2 of 3 · Add specialists": a link over the row's own. Every link in the row reads
+   the same: the quiet footnote colour with a thin underline ("icons and text in one colour, and if
+   they can be tapped, add lines"); the link colour under a mouse. */
 .statusLink,
 .attentionLink {
   position: relative;
@@ -251,7 +251,7 @@
   letter-spacing: var(--tracking-caption);
 }
 
-/* A thin track under «сегодня», filled to the day's load; full reads as the accent. */
+/* A thin track under "today", filled to the day's load; full reads as the accent. */
 .load {
   position: relative;
   width: 40px;
@@ -285,7 +285,7 @@
   color: var(--color-tertiary-foreground);
 }
 
-/* «↗» to the public page: with a mouse only, shown on the row under the pointer. */
+/* "↗" to the public page: with a mouse only, shown on the row under the pointer. */
 .page {
   position: relative;
   z-index: 1;

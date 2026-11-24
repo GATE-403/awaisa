@@ -61,7 +61,7 @@ describe('freeGaps', () => {
     expect(gaps).toEqual([span('13:15', '20:00')])
   })
 
-  it('keeps only windows a service fits in («Найти место под услугу»)', () => {
+  it('keeps only windows a service fits in (Find a slot for a service)', () => {
     const gaps = freeGaps({
       day: DAY,
       bookings: [booking('10:45', 60), booking('12:30', 60)],

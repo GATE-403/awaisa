@@ -21,7 +21,7 @@ type Priority = 'near' | 'soon' | 'rating' | 'price'
 type Preferences = {
   gender: 'male' | 'female' | null
   interests: Interest[]
-  /** The most a visit should cost, сом; null = any. */
+  /** The most a visit should cost, in som; null = any. */
   budget: number | null
   /** What matters most, one or several; older answers have none. */
   priorities?: Priority[]
@@ -70,7 +70,7 @@ const subscribe = (onChange: () => void) => {
   }
 }
 
-/** The client's answers to «Подберём для вас», kept on the device; null until answered. */
+/** The client's answers to «Picks for you», kept on the device; null until answered. */
 const usePreferences = () => useSyncExternalStore(subscribe, read, () => null)
 
 export type { Interest, Preferences, Priority }

@@ -16,9 +16,9 @@ interface ReviewItemProps {
   businessName: string
   /** Under the name (the cabinet adds the phone, service and master). */
   meta?: ReactNode
-  /** Beside the owner's reply, or in its place (the cabinet's «Ответить» / «Изменить»). */
+  /** Beside the owner's reply, or in its place (the cabinet's «Reply» / «Edit»). */
   replyAction?: ReactNode
-  /** Under the review's words: what the cabinet can do about it («Написать клиенту», «Решено»). */
+  /** Under the review's words: what the cabinet can do about it («Message client», «Resolved»). */
   actions?: ReactNode
   /** The author's public profile (`/u/<id>`): the name links to it. */
   authorHref?: string
@@ -35,7 +35,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', DATE_OPTIONS)
 
 // One review as a thread, the same on the business page and in the cabinet: the person's face,
 // name and date on one line, stars, the words; the owner's reply hangs under it on a line from
-// the author's face, with the place's own face and an «Ответ» badge.
+// the author's face, with the place's own face and an «Reply» badge.
 export const ReviewItem = ({
   review,
   businessName,

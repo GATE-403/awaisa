@@ -1,4 +1,4 @@
-// Answering a review from the owners' Telegram chat: the buttons under «Новый отзыв», what their
+// Answering a review from the owners' Telegram chat: the buttons under «New review», what their
 // data says, and the bot's lines. Pure, unit-tested.
 
 const QUICK = 'rq'
@@ -20,16 +20,16 @@ const shorten = (text: string, length: number) =>
 
 /**
  * The keyboard under a new review: a button per quick reply (already filled with the client's name),
- * «✍️ Свой ответ», and the cabinet when its address is https (Telegram refuses other links).
+ * «✍️ Write my own», and the cabinet when its address is https (Telegram refuses other links).
  */
 const reviewKeyboard = (reviewId: string, quickReplies: string[], cabinetUrl: string | null) => ({
   inline_keyboard: [
     ...quickReplies.map((text, index) => [
       { text: shorten(text, BUTTON_TEXT_LENGTH), callback_data: `${QUICK}:${reviewId}:${index}` },
     ]),
-    [{ text: '✍️ Свой ответ', callback_data: `${OWN}:${reviewId}` }],
+    [{ text: '✍️ Write my own', callback_data: `${OWN}:${reviewId}` }],
     ...(cabinetUrl?.startsWith('https://')
-      ? [[{ text: 'Открыть в кабинете', url: cabinetUrl }]]
+      ? [[{ text: 'Open in the dashboard', url: cabinetUrl }]]
       : []),
   ],
 })
@@ -46,13 +46,13 @@ const parseReviewCallback = (data: string | undefined): ReviewCallback | null =>
 }
 
 const replyPromptText = (authorName: string, rating: number) =>
-  `✍️ Ответ на отзыв <b>${escapeHtml(authorName)}</b> ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}\nНапишите его ответом на это сообщение: он появится на странице места.`
+  `✍️ Reply to <b>${escapeHtml(authorName)}</b>'s review ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}\nSend it as a reply to this message: it will appear on your page.`
 
-const repliedText = (text: string) => `✅ Ответ опубликован:\n«${escapeHtml(text)}»`
+const repliedText = (text: string) => `✅ Reply published:\n«${escapeHtml(text)}»`
 
-const ALREADY_ANSWERED = 'На этот отзыв уже ответили.'
-const NOT_YOURS = 'Этот отзыв не из вашего бизнеса.'
-const REPLY_PLACEHOLDER = 'Ваш ответ клиенту'
+const ALREADY_ANSWERED = 'This review already has a reply.'
+const NOT_YOURS = 'This review is not for your business.'
+const REPLY_PLACEHOLDER = 'Your reply to the client'
 
 export type { ReviewCallback }
 export {

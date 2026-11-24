@@ -16,7 +16,7 @@ interface VisitSectionProps {
 
 const hoursOf = (t: Translate, hours: WorkingDay[], weekday: number) => {
   const day = findDay(hours, weekday)
-  return day ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}` : t('Closed')
+  return day ? `${formatClock(day.opensMinutes)}-${formatClock(day.closesMinutes)}` : t('Closed')
 }
 
 // 1 January 2024 was a Monday: weekday 0 (Monday, like the API) is its day key.

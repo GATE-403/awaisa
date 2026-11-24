@@ -26,12 +26,12 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: { default: `${PLATFORM.name} - онлайн-запись`, template: `%s · ${PLATFORM.name}` },
+  title: { default: `${PLATFORM.name} - online booking`, template: `%s · ${PLATFORM.name}` },
   description: PLATFORM.tagline,
   metadataBase: new URL(SITE_URL),
   openGraph: {
     ...BASE_OPEN_GRAPH,
-    title: `${PLATFORM.name} - онлайн-запись`,
+    title: `${PLATFORM.name} - online booking`,
     description: PLATFORM.tagline,
   },
   twitter: { card: 'summary_large_image' },
@@ -50,7 +50,7 @@ export const viewport: Viewport = {
 const RootLayout = ({ children, modal }: LayoutProps<'/'>) => (
   // The boot script sets data-theme before hydration, so React must not compare that attribute.
   <html
-    lang='ru'
+    lang='en'
     className={inter.variable}
     // Next turns smooth scrolling off while navigating, so a new page starts at the top at once.
     data-scroll-behavior='smooth'

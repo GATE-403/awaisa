@@ -19,7 +19,7 @@
   overflow: hidden;
   border-radius: var(--radius-xl);
   background: var(--color-surface);
-  /* A ticket reads from its left edge, also inside a centred screen («Вы записаны»). */
+  /* A ticket reads from its left edge, also inside a centred screen («You are booked»). */
   text-align: start;
   mask:
     radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub-height)), transparent 98%, #000)
@@ -156,7 +156,7 @@
 }
 
 /* A narrow ticket (iPhone SE, large text) keeps the place's name whole and drops the
-   «Электронный талон» label beside it; a draft keeps «Черновик», which says what it is. */
+   «E-ticket» label beside it; a draft keeps «Draft», which says what it is. */
 @container ticket (max-width: 360px) {
   .wrap:not([data-draft]) .kind {
     display: none;

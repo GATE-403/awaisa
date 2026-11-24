@@ -104,7 +104,7 @@ const toBusinessView = (business: Business): BusinessView => ({
 const normalizeOptionalPhone = (value: string | undefined) => {
   if (value === undefined || value === '') return value
   const phone = normalizePhone(value)
-  if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
+  if (!phone) throw new BadRequestException('Enter a valid phone number')
 
   return phone
 }
@@ -141,7 +141,7 @@ export class BusinessesService {
           ) ORDER BY h."weekday"), '[]')
           FROM "working_hours" h WHERE h."business_id" = b."id"
         ) AS "hours",
-        -- The same order as the place's own «Работы»: the owner's first, then the newest.
+        -- The same order as the place's own 'Works': the owner's first, then the newest.
         ARRAY(
           SELECT w."url" FROM "work_photos" w
           WHERE w."business_id" = b."id" AND NOT w."is_hidden"
@@ -198,7 +198,7 @@ export class BusinessesService {
             AND (p."starts_on" IS NULL OR p."starts_on" <= (now() AT TIME ZONE 'UTC' + interval '6 hours')::date)
         ) AS "discountPercent",
         -- The share of other places with this service (same kind, same name) that ask more:
-        -- «Дешевле 70% мест» under the price. Null with fewer than four to compare with.
+        -- 'Cheaper than 70% of places' under the price. Null with fewer than four to compare with.
         (SELECT CASE WHEN COUNT(*) >= ${MIN_PRICE_PEERS}
             THEN (100 * COUNT(*) FILTER (WHERE o."price" > s."price") / COUNT(*))::int END
           FROM "services" o
@@ -231,7 +231,7 @@ export class BusinessesService {
     return rows
   }
 
-  /** Services offered by most places, for the catalog's «Популярные услуги» shelf. */
+  /** Services offered by most places, for the catalog's 'Popular services' shelf. */
   async listPopularServices(kind?: string) {
     const rows = (await this.dataSource.query(
       `
@@ -250,7 +250,7 @@ export class BusinessesService {
     return rows
   }
 
-  /** «Похожие места»: the place's kind ranked by distance, menu, price level and rating. */
+  /** 'Similar places': the place's kind ranked by distance, menu, price level and rating. */
   async listSimilar(slug: string, limit = SIMILAR_PLACES): Promise<BusinessCard[]> {
     const business = await this.findBySlug(slug)
     const cards = await this.listCatalog({
@@ -301,7 +301,7 @@ export class BusinessesService {
       where: publishedOnly ? { slug, isPublished: true } : { slug },
       relations: { hours: true },
     })
-    if (!business) throw new NotFoundException('Страница не найдена')
+    if (!business) throw new NotFoundException('Page not found')
 
     return business
   }
@@ -349,9 +349,9 @@ export class BusinessesService {
           businessId: business.id,
           position: (await this.branches.countBy({ businessId: business.id })) + 1,
         })
-    if (!existing) throw new NotFoundException('Филиал не найден')
+    if (!existing) throw new NotFoundException('Branch not found')
     if (id && !input.isActive && (await this.countActiveBranches(business.id, id)) === 0) {
-      throw new BadRequestException('Нужен хотя бы один открытый филиал')
+      throw new BadRequestException('At least one branch must stay open')
     }
 
     const saved = await this.branches.save({
@@ -365,9 +365,9 @@ export class BusinessesService {
 
   async deleteBranch(business: Business, id: string) {
     const branch = await this.branches.findOneBy({ id, businessId: business.id })
-    if (!branch) throw new NotFoundException('Филиал не найден')
+    if (!branch) throw new NotFoundException('Branch not found')
     if ((await this.countActiveBranches(business.id, id)) === 0) {
-      throw new BadRequestException('Нельзя удалить единственный филиал')
+      throw new BadRequestException("You can't delete the only branch")
     }
     // Masters and past bookings keep working: their branch_id becomes null (every branch).
     await this.branches.delete({ id })
@@ -466,7 +466,7 @@ export class BusinessesService {
     if (problem) return { available: false, reason: problem }
     const taken = await this.businesses.existsBy({ slug })
 
-    return taken ? { available: false, reason: 'Этот адрес занят' } : { available: true }
+    return taken ? { available: false, reason: 'This address is taken' } : { available: true }
   }
 
   async create(input: CreateBusinessInput, owner: Customer) {
@@ -504,7 +504,7 @@ export class BusinessesService {
       await manager.save(
         manager.create(Branch, {
           businessId: business.id,
-          name: 'Основной',
+          name: 'Main',
           address: input.address,
           phone,
           latitude: input.latitude ?? null,
@@ -516,7 +516,7 @@ export class BusinessesService {
         manager.create(Category, {
           id: randomUUID(),
           businessId: business.id,
-          name: 'Услуги',
+          name: 'Services',
           position: 1,
         }),
       )

@@ -39,12 +39,12 @@ const DEVICES: [string, string] = ['device', 'devices']
 const BOOKINGS: [string, string] = ['booking', 'bookings']
 
 const formatWeek = (week: string) =>
-  new Date(`${week}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
+  new Date(`${week}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 
 const formatShare = (value: number | null) =>
-  `${(value ?? 0).toLocaleString('ru-RU', { maximumFractionDigits: 1 })}%`
+  `${(value ?? 0).toLocaleString('en-GB', { maximumFractionDigits: 1 })}%`
 
-// A share as a meter on the row's own hairline, as in the cabinet's «Аналитика».
+// A share as a meter on the row's own hairline, as in the cabinet's "Analytics".
 const Meter = ({ share }: { share: number | null }) =>
   share ? (
     <span className={styles.meter} aria-hidden>
@@ -82,9 +82,9 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
       <CabinetBar title={t('Funnels')} />
       <main className={styles.page}>
         <Container className={styles.content}>
-          {/* Laid out like the cabinet's «Аналитика»: the hint and the period on one line (the
+          {/* Laid out like the cabinet's "Analytics": the hint and the period on one line (the
               period floats at the foot on phones), then everything right on the page, no cards
-              («как в табе аналитике в бизнесе»). */}
+              (the owner: "like the business's analytics tab"). */}
           <header className={styles.head}>
             <h1 className={styles.srOnly}>{t('Funnels')}</h1>
             <p className={styles.hint}>{t('Where people drop out and on which devices')}</p>
@@ -112,7 +112,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                 <dl className={styles.stats}>
                   <div className={styles.stat}>
                     <dt className={styles.statLabel}>{t('Run their day in the cabinet')}</dt>
-                    <dd className={styles.statValue}>{thisWeek.toLocaleString('ru-RU')}</dd>
+                    <dd className={styles.statValue}>{thisWeek.toLocaleString('en-GB')}</dd>
                     <dd className={styles.statMeta}>
                       {weeks.length > 1
                         ? t('By week: {counts}, since {date}', {
@@ -123,8 +123,8 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                     </dd>
                   </div>
                   <div className={styles.stat}>
-                    <dt className={styles.statLabel}>{t('Started in «Looks»')}</dt>
-                    <dd className={styles.statValue}>{fromFeed.toLocaleString('ru-RU')}</dd>
+                    <dt className={styles.statLabel}>{t('Started in "Looks"')}</dt>
+                    <dd className={styles.statValue}>{fromFeed.toLocaleString('en-GB')}</dd>
                     <dd className={styles.statMeta}>
                       {online
                         ? `${formatShare(shareOf(fromFeed))} · ${t('Of {bookings} online', {
@@ -172,7 +172,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                   <span className={styles.heroMeta}>
                     {started
                       ? t('{finished} of {started} · {flow}', {
-                          finished: (finished?.sessions ?? 0).toLocaleString('ru-RU'),
+                          finished: (finished?.sessions ?? 0).toLocaleString('en-GB'),
                           started: t.count(started, DEVICES),
                           flow: flowLabel.toLowerCase(),
                         })
@@ -231,7 +231,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                         </span>
                       </span>
                       <span className={styles.rowValue}>
-                        {row.sessions.toLocaleString('ru-RU')}
+                        {row.sessions.toLocaleString('en-GB')}
                         <span className={styles.rowShare}>{formatShare(row.fromStart)}</span>
                       </span>
                       <Meter share={row.fromStart} />
@@ -263,7 +263,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                             )}
                           </span>
                           <span className={styles.rowValue}>
-                            {item.sessions.toLocaleString('ru-RU')}
+                            {item.sessions.toLocaleString('en-GB')}
                             <span className={styles.rowShare}>
                               {t.count(item.count, ['time', 'times'])}
                             </span>
@@ -293,7 +293,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                         <li key={item.channel} className={styles.row}>
                           <span className={styles.rowTitle}>{t(CHANNEL_LABELS[item.channel])}</span>
                           <span className={styles.rowValue}>
-                            {item.bookings.toLocaleString('ru-RU')}
+                            {item.bookings.toLocaleString('en-GB')}
                             <span className={styles.rowShare}>{formatShare(share)}</span>
                           </span>
                           <Meter share={share} />
@@ -326,7 +326,7 @@ export const InsightsPage = ({ initial }: InsightsPageProps) => {
                                 {t(SEGMENT_LABELS[key].values[item.value] ?? item.value)}
                               </span>
                               <span className={styles.rowValue}>
-                                {item.sessions.toLocaleString('ru-RU')}
+                                {item.sessions.toLocaleString('en-GB')}
                                 <span className={styles.rowShare}>{formatShare(share)}</span>
                               </span>
                               <Meter share={share} />

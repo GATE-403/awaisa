@@ -27,14 +27,14 @@ import styles from './BookingInspector.module.css'
 interface BookingInspectorProps {
   slug: string
   booking: AdminBooking
-  /** Resolves true once cancelled (the toast then offers «Вернуть»). */
+  /** Resolves true once cancelled (the toast then offers "Undo"). */
   onCancel: (id: string) => Promise<boolean>
   /** Set once the visit's day has come: staff can mark it. */
   onOutcome?: (id: string, input: OutcomeInput) => Promise<AdminBooking | null>
   onOpenClient: (phone: string) => void
   /** A cancelled visit on a day still ahead: book the same client, service and master again. */
   onBookAgain?: (booking: AdminBooking) => void
-  /** «Добавить товар» in «Итог визита». */
+  /** "Add a product" in "Visit outcome". */
   onSellProducts?: (booking: AdminBooking) => void
   onClose: () => void
 }
@@ -43,7 +43,7 @@ const capitalizeFirst = (text: string) => text.charAt(0).toUpperCase() + text.sl
 
 // A visit as staff need it, like an event inspector in Calendar: who first (face, name, number,
 // what they pay), then what and when in two quiet lines, the ways to reach them as one capsule of
-// glyphs, and the visit's outcome. Cancelling sits in «⋯» - it happens at once and the toast
+// glyphs, and the visit's outcome. Cancelling sits in "⋯" - it happens at once and the toast
 // brings it back.
 export const BookingInspector = ({
   slug,
@@ -126,7 +126,7 @@ export const BookingInspector = ({
             status: t(PAYMENT_STATUS_TEXT[booking.payment.status]).toLowerCase(),
           })}`}
       </p>
-      {booking.comment && <p className={styles.comment}>«{booking.comment}»</p>}
+      {booking.comment && <p className={styles.comment}>"{booking.comment}"</p>}
       {booking.lookPhotoUrl && (
         <span className={styles.look}>
           <LookPhoto url={booking.lookPhotoUrl} clientName={booking.customerName} />

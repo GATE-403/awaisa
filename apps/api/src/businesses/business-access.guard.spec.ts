@@ -62,7 +62,7 @@ describe('BusinessAccessGuard', () => {
   it('keeps out an account that is not on the team', async () => {
     const { guard, context } = setup({ role: null })
 
-    await expect(guard.canActivate(context)).rejects.toThrow('Нет доступа к этому бизнесу')
+    await expect(guard.canActivate(context)).rejects.toThrow('No access to this business')
   })
 
   it('lets staff run the day and hands the business and role on', async () => {
@@ -82,10 +82,10 @@ describe('BusinessAccessGuard', () => {
     })
 
     await expect(onHandler.guard.canActivate(onHandler.context)).rejects.toThrow(
-      new ForbiddenException('Это может только владелец'),
+      new ForbiddenException('Only the owner can do this'),
     )
     await expect(onController.guard.canActivate(onController.context)).rejects.toThrow(
-      'Это может только владелец',
+      'Only the owner can do this',
     )
   })
 

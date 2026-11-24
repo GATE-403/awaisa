@@ -31,9 +31,9 @@ interface BillingTabProps {
 
 type Period = '1' | '12'
 
-const amountFormat = new Intl.NumberFormat('ru-RU')
+const amountFormat = new Intl.NumberFormat('en-GB')
 
-const formatDay = (t: Translate, iso: string) =>
+const formatDay = (iso: string) =>
   new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'long',
@@ -43,16 +43,16 @@ const formatDay = (t: Translate, iso: string) =>
 const formatPrice = (t: Translate, value: number) =>
   t('{amount} som', { amount: amountFormat.format(value) })
 
-/** «Пробный период до 21 декабря», «Оплачен до …», «Бессрочно», «Бесплатно». */
+/** "Trial until 21 December", "Paid until …", "No end date", "Free". */
 const describeStatus = (t: Translate, access: PlanAccess) => {
-  const until = access.endsAt ? formatDay(t, access.endsAt) : ''
+  const until = access.endsAt ? formatDay(access.endsAt) : ''
   const texts: Record<PlanAccess['status'], string> = {
     lifetime: t('for good'),
     active: t('paid until {day}', { day: until }),
     trial: t('trial until {day}', { day: until }),
     free: t('free'),
     expired: access.upgradeTitle
-      ? t('«{plan}» ended {day}', { plan: access.upgradeTitle, day: until })
+      ? t('"{plan}" ended {day}', { plan: access.upgradeTitle, day: until })
       : t('ended {day}', { day: until }),
   }
   return texts[access.status]
@@ -87,7 +87,7 @@ const planPrice = (t: Translate, plan: BillingPlan) =>
     ? t('Free')
     : t('{price} a month', { price: formatPrice(t, plan.monthlyPrice) })
 
-// «Настройки → Тариф»: what the business is on and until when, what it uses of it, paying for
+// "Settings → Plan": what the business is on and until when, what it uses of it, paying for
 // the paid plan (a month or a year) and SMS packs through the same checkout as deposits.
 export const BillingTab = ({ slug }: BillingTabProps) => {
   const toast = useToast()
@@ -201,7 +201,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
 
       {isPayable && paidPlan && price && (
         // An offer, not a form: the plan and its price large on a soft wash of the accent, the
-        // period beside it, one button («совсем плохой дизайн надо переделать»: a full-width
+        // period beside it, one button ("really bad design, needs redoing": a full-width
         // switch over a sentence and a full-width button read as a wall).
         <section className={own.offer} aria-label={t('Pay')}>
           <div className={own.offerHead}>
@@ -248,7 +248,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
           )}
           {access.endsAt && access.status !== 'expired' && (
             <p className={own.offerMeta}>
-              {t('It extends after {day}.', { day: formatDay(t, access.endsAt) })}
+              {t('It extends after {day}.', { day: formatDay(access.endsAt) })}
             </p>
           )}
         </section>
@@ -315,7 +315,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               <li key={order.id} className={sheet.row}>
                 <span className={styles.rowBody}>
                   <span>{order.title}</span>
-                  <span className={styles.rowMeta}>{formatDay(t, order.paidAt)}</span>
+                  <span className={styles.rowMeta}>{formatDay(order.paidAt)}</span>
                 </span>
                 <span className={styles.cellValue}>{formatPrice(t, order.amount)}</span>
               </li>
@@ -340,13 +340,13 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               }
             >
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 1 })}>
-                {t('«{plan}» for a month', { plan: paidPlan.title })}
+                {t('"{plan}" for a month', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 12 })}>
-                {t('«{plan}» for a year', { plan: paidPlan.title })}
+                {t('"{plan}" for a year', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, isLifetime: true })}>
-                {t('«{plan}» for good', { plan: paidPlan.title })}
+                {t('"{plan}" for good', { plan: paidPlan.title })}
               </MenuItem>
             </Menu>
           </div>

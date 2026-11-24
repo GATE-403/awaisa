@@ -14,7 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/feed', label: 'Looks', icon: FanCardsIcon },
   { href: '/map', label: 'Map', icon: MapPin },
   { href: '/business', label: 'Business', icon: Storefront },
-  // The records lead that page («Записи»): «Мой профиль» is the public profile, one of each.
+  // The records lead that page («Bookings»): «My profile» is the public profile, one of each.
   { href: '/bookings', label: 'Bookings', icon: Ticket },
 ]
 
@@ -45,7 +45,7 @@ const APP_SEGMENTS = new Set([
   'insights',
   // Platform admins' reports queue.
   'moderation',
-  // «Что нового».
+  // «What's new».
   'updates',
 ])
 

@@ -164,7 +164,7 @@ export const ShiftSheet = ({
                   variant='plain'
                   aria-label={t('Reason')}
                   placeholder={t(
-                    kind === 'out' ? 'For example, «Water and coffee»' : 'For example, «Change»',
+                    kind === 'out' ? 'For example, "Water and coffee"' : 'For example, "Change"',
                   )}
                   value={reason}
                   onValueChange={setReason}
@@ -192,7 +192,7 @@ export const ShiftSheet = ({
             {mode === 'open' &&
               (branchName
                 ? t(
-                    'Count the cash in the «{branch}» till: the balance is worked out from this amount.',
+                    'Count the cash in the "{branch}" till: the balance is worked out from this amount.',
                     {
                       branch: branchName,
                     },
@@ -201,7 +201,7 @@ export const ShiftSheet = ({
             {mode === 'move' &&
               (kind === 'out'
                 ? t(
-                    'Taking cash out lowers the expected balance. Record business costs in «Expenses».',
+                    'Taking cash out lowers the expected balance. Record business costs in "Expenses".',
                   )
                 : t('For example, change at the start of the day.'))}
             {mode === 'close' &&

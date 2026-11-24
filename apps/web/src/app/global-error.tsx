@@ -21,19 +21,18 @@ const GlobalError = ({ error, retry }: GlobalErrorProps) => {
   }, [error])
 
   return (
-    <html lang='ru'>
+    <html lang='en'>
       <body className={styles.globalBody}>
-        <title>Awaisa - не получилось загрузить</title>
+        <title>Awaisa - couldn't load</title>
         <main className={styles.page}>
           <div className={styles.content}>
             <Mascot className={styles.mascot} />
-            <h1 className={styles.title}>Что-то пошло не так</h1>
+            <h1 className={styles.title}>Something went wrong</h1>
             <p className={styles.text}>
-              Не получилось загрузить страницу. Попробуйте ещё раз через минуту - ваши записи никуда
-              не делись.
+              We couldn't load the page. Try again in a minute - your bookings are safe.
             </p>
             <Button size='lg' onClick={retry}>
-              Повторить
+              Try again
             </Button>
           </div>
         </main>

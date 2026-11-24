@@ -6,7 +6,7 @@ type ShareLinkInput = {
   title: string
   text?: string
   /**
-   * Use the share sheet only on touch screens: desktop sheets lead with «Копировать», so a
+   * Use the share sheet only on touch screens: desktop sheets lead with «Copy», so a
    * mouse gets the link copied straight away.
    */
   isTouchOnly?: boolean
@@ -51,8 +51,8 @@ const shareLink = async ({
 }
 
 /**
- * Phones save a file through the share sheet («Сохранить изображение»). Desktop browsers can
- * share files too, but their sheet offers «Копировать» first, so they get a real download.
+ * Phones save a file through the share sheet («Save image»). Desktop browsers can
+ * share files too, but their sheet offers «Copy» first, so they get a real download.
  * Resolves `cancelled` when the sheet was closed; other failures are thrown.
  */
 const saveFile = async (file: File, title?: string): Promise<'saved' | 'cancelled'> => {

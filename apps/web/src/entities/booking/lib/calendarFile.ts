@@ -24,7 +24,7 @@ const createCalendarFile = (booking: Booking, place: { name: string; address: st
     `DTSTART:${toIcsDate(startsAt)}`,
     `DTEND:${toIcsDate(endsAt)}`,
     `SUMMARY:${escapeText(`${booking.serviceName} - ${place.name}`)}`,
-    `DESCRIPTION:${escapeText(`Мастер: ${booking.specialistName}`)}`,
+    `DESCRIPTION:${escapeText(`Specialist: ${booking.specialistName}`)}`,
     `LOCATION:${escapeText(place.address)}`,
     'BEGIN:VALARM',
     'TRIGGER:-PT2H',

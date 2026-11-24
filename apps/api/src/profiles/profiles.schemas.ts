@@ -10,15 +10,15 @@ const updateProfileStyleSchema = z.object({
     .string()
     .trim()
     .max(16)
-    .refine((value) => value === '' || /^\p{Extended_Pictographic}/u.test(value), 'Выберите эмодзи')
+    .refine((value) => value === '' || /^\p{Extended_Pictographic}/u.test(value), 'Choose an emoji')
     .optional(),
   about: z.string().trim().max(160).optional(),
-  /** `/u/<handle>`: latin letters, digits, «_» and «.», 3–20, starting with a letter or digit. */
+  /** `/u/<handle>`: latin letters, digits, «_» and «.», 3 to 20, starting with a letter or digit. */
   handle: z
     .string()
     .trim()
     .toLowerCase()
-    .regex(/^[a-z0-9][a-z0-9_.]{2,19}$/, 'Адрес: 3–20 латинских букв, цифр, «_» или «.»')
+    .regex(/^[a-z0-9][a-z0-9_.]{2,19}$/, 'Address: 3-20 Latin letters, digits, «_» or «.»')
     .nullable()
     .optional(),
   featuredBadges: z.array(z.string().max(32)).max(3).optional(),

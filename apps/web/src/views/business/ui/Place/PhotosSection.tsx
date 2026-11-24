@@ -10,7 +10,7 @@ interface PhotosSectionProps {
   business: Business
 }
 
-// «Работы»: the owner's grid as clients see it, square photos three a row in the owner's order.
+// «Work»: the owner's grid as clients see it, square photos three a row in the owner's order.
 // A tap opens them full screen, every one of them.
 export const PhotosSection = ({ business }: PhotosSectionProps) => {
   const t = useT()

@@ -11,7 +11,7 @@ import { BOARDS, type BoardView, boardHref } from '../config/boards'
 import styles from '../LeaderboardPage.module.css'
 import { BoardViewSwitch } from './BoardViewSwitch'
 
-const formatScore = (value: number) => value.toLocaleString('ru-RU', { minimumFractionDigits: 1 })
+const formatScore = (value: number) => value.toLocaleString('en-GB', { minimumFractionDigits: 1 })
 
 type Entry = {
   key: string
@@ -110,8 +110,8 @@ export const LeaderboardBoard = ({ kind, view, masters, places }: LeaderboardBoa
                       screen-reader text after them. */}
                 <NextLink href={entry.href} className={styles.row}>
                   <span className={styles.place} data-place={entry.place}>
-                    {/* Read as one word «1-е место»: a hidden «-е место» after the visible
-                          number was read as «1 -е место». */}
+                    {/* The visible number stays hidden from screen readers, which read «place 1» instead:
+                          a suffix glued after the number was read as a separate word. */}
                     <span aria-hidden>{entry.place}</span>
                     <span className={styles.srOnly}>
                       {t('place {place}', { place: entry.place })}

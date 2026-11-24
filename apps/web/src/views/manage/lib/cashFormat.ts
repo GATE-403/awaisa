@@ -27,7 +27,6 @@ const EXPENSE_CATEGORIES: { value: string; label: string }[] = [
   { value: 'other', label: 'Other' },
 ]
 
-// «Карта» is the map elsewhere in the dictionary, so the card has its own key.
 const saleMethodLabel = (method: SalePaymentMethod, t: Translate) =>
   t(SALE_METHODS.find((item) => item.value === method)?.label ?? method)
 
@@ -40,7 +39,7 @@ const expenseCategoryLabel = (category: ExpenseCategory, t: Tr = plain) => {
 const formatCount = (value: number) =>
   Number.isInteger(value)
     ? String(value)
-    : value.toLocaleString('ru-RU', { maximumFractionDigits: 2 })
+    : value.toLocaleString('en-GB', { maximumFractionDigits: 2 })
 
 /**
  * A receipt in a row's meta line: its number once issued, else what is happening to it. `isAlert`

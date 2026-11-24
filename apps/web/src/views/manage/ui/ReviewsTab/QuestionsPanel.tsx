@@ -9,7 +9,6 @@ import { answerQuestion, removeQuestion } from '@/shared/api/clientApi'
 import { refreshBusiness } from '@/shared/api/revalidate'
 import type { BusinessQuestion } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { EmptyState } from '@/shared/ui/EmptyState/EmptyState'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
@@ -122,7 +121,7 @@ export const QuestionsPanel = ({ slug, questions, onChange }: QuestionsPanelProp
         >
           <form id={ANSWER_FORM} className={styles.form} onSubmit={handleAnswer}>
             <p className={styles.quote}>
-              {editing.authorName}: «{editing.text}»
+              {editing.authorName}: "{editing.text}"
             </p>
             <textarea
               aria-label={t('Reply')}

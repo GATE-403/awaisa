@@ -26,22 +26,22 @@ describe('fiscal settings wording', () => {
     expect(defaultSalesTax(false)).toEqual({ services: 3, goods: 2 })
   })
 
-  it('takes a 14-digit ИНН only', () => {
+  it('takes a 14-digit TIN only', () => {
     expect(isInnValid('01234567890123')).toBe(true)
     expect(isInnValid('0123456789012')).toBe(false)
   })
 
   it('reads the taxes as one value each', () => {
-    expect(describeTaxes(SETTINGS)).toEqual({ vat: '12%', salesTax: 'услуги 2% · товары 1%' })
+    expect(describeTaxes(SETTINGS)).toEqual({ vat: '12%', salesTax: 'services 2% · goods 1%' })
     expect(describeTaxes({ ...SETTINGS, isVatPayer: false, salesTaxServices: 2.5 }).vat).toBe(
-      'Не плательщик',
+      'Not a payer',
     )
     expect(describeTaxes({ ...SETTINGS, salesTaxServices: 2.5 }).salesTax).toBe(
-      'услуги 2,5% · товары 1%',
+      'services 2.5% · goods 1%',
     )
   })
 
   it('names the regimes', () => {
-    expect(regimeLabel('single')).toBe('Единый налог')
+    expect(regimeLabel('single')).toBe('Single tax')
   })
 })

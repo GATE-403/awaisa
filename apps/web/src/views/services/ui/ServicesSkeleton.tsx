@@ -7,14 +7,14 @@ import nav from './CategoryNav.module.css'
 
 const CARDS = 6
 
-// The menu while it streams in, on the page's own classes: «Услуги и цены» with the place's name
+// The menu while it streams in, on the page's own classes: «Services and prices» with the place's name
 // still to come, the facts line, the category tabs and one group of 3:4 service cards.
 export const ServicesSkeleton = () => (
   <main
     className={styles.page}
     data-page-skeleton=''
     aria-busy='true'
-    aria-label='Загружаем услуги'
+    aria-label='Loading services'
   >
     <Container className={styles.hero}>
       <p className={styles.title}>

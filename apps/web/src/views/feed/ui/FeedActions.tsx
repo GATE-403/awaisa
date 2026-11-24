@@ -28,7 +28,7 @@ const compact = (t: Translate, count: number) =>
     ? t('{count}k', { count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })
     : `${count}`
 
-// Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Записаться»
+// Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Book»
 // with the first free time, and ♥ with its count.
 export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsProps) => {
   const toast = useToast()

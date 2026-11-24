@@ -38,7 +38,7 @@ describe('linksView', () => {
   it('builds the addresses itself, in a fixed order', () => {
     expect(linksView({ website: 'https://example.kg', instagram: 'nails' })).toEqual([
       { kind: 'instagram', label: 'Instagram', text: '@nails', url: 'https://instagram.com/nails' },
-      { kind: 'website', label: 'Сайт', text: 'example.kg', url: 'https://example.kg' },
+      { kind: 'website', label: 'Website', text: 'example.kg', url: 'https://example.kg' },
     ])
   })
 })

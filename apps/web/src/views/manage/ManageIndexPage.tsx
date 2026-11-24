@@ -31,7 +31,7 @@ import styles from './ManageIndexPage.module.css'
 /** How often the open list reads today's figures again. */
 const REFRESH_MS = 60_000
 
-const AMOUNT = new Intl.NumberFormat('ru-RU')
+const AMOUNT = new Intl.NumberFormat('en-GB')
 
 /** From this many businesses the list gets a search field. */
 const SEARCH_FROM = 7
@@ -101,13 +101,13 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
 
   const own = useMemo(() => (businesses ?? []).filter(isOwnBusiness), [businesses])
   // One list: a platform admin's own businesses lead it, every other one follows (two tabs over
-  // one list were rejected: «зачем делить на мои и общее»). Today's figures count one's own.
+  // one list were rejected: "why split into mine and everyone"). Today's figures count one's own.
   const inScope = own.length > 0 ? own : (businesses ?? [])
   const sorted = sortBusinesses(filterBusinesses(businesses ?? [], query), attention, recent)
   const shown = [...sorted.filter(isOwnBusiness), ...sorted.filter((item) => !isOwnBusiness(item))]
   const isSearchable = (businesses?.length ?? 0) >= SEARCH_FROM
   const summary = today ? todaySummary(inScope, attention, today.dayKey) : null
-  // A quiet day still has its week: «За неделю 14 записей · 230 просмотров».
+  // A quiet day still has its week: "This week 14 bookings · 230 views".
   const week = weekSummary(inScope, attention)
 
   return (
@@ -116,7 +116,7 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
       <CabinetBar title={t('My businesses')} />
       <Container size='md' className={styles.content}>
         {/* The head right on the page: the title and today's line on
-            the left, the search on the same line on the right («можно в одну линию»). */}
+            the left, the search on the same line on the right ("can be one line"). */}
         <header className={styles.head}>
           <div className={styles.headText}>
             <PageTitle size='sm' title={t('My businesses.')} />

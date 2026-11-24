@@ -12,7 +12,7 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* A long «о себе» shows two lines here; the field below holds the whole of it. */
+/* A long «about» shows two lines here; the field below holds the whole of it. */
 .previewAbout {
   display: -webkit-box;
   overflow: hidden;
@@ -35,7 +35,7 @@
   font-size: 15px;
 }
 
-/* The cabinet's sheet look («нужен дизайн из админки»): rows right on the sheet, a thin glyph
+/* The cabinet's sheet look (the owner asked for the dashboard look): rows right on the sheet, a thin glyph
    before each label, the control on the right, hairlines between the rows of a group. */
 .group {
   display: flex;
@@ -161,7 +161,7 @@
   font-size: var(--text-input);
 }
 
-/* «Витрина»'s menu button reads like a plain Select: the value and the up-down caret. */
+/* «Showcase»'s menu button reads like a plain Select: the value and the up-down caret. */
 .menuTrigger {
   display: inline-flex;
   align-items: center;
@@ -191,8 +191,8 @@
   white-space: nowrap;
 }
 
-/* A row with a plain Select or the showcase menu opens from anywhere on it, like Settings («поля
-   полностью должны быть кликабельны»): the trigger's ::before stretches over the row. */
+/* A row with a plain Select or the showcase menu opens from anywhere on it, like Settings (the owner: whole fields
+   should be tappable): the trigger's ::before stretches over the row. */
 .row:has(button[data-variant="plain"], .menuTrigger) {
   cursor: pointer;
 }

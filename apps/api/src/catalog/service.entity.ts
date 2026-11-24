@@ -32,7 +32,7 @@ export class Service {
   @Column({ name: 'rebook_days', type: 'smallint', nullable: true })
   rebookDays: number | null
 
-  /** Asked when booked online (сом); null = no prepayment. */
+  /** Asked when booked online (som); null = no prepayment. */
   @Column({ type: 'int', nullable: true })
   deposit: number | null
 

@@ -16,7 +16,7 @@ interface PlacesMapProps {
   places: PublicProfile['places']
 }
 
-// Where the person has been, as pins on the city (the «Знает город» medal made visible): each
+// Where the person has been, as pins on the city (the «Knows the city» medal made visible): each
 // place in its own colour, the visits as its label; a pin opens the place.
 export const PlacesMap = ({ places }: PlacesMapProps) => {
   const t = useT()

@@ -61,7 +61,7 @@
 }
 
 /* A glyph capsule in the bar is the bar's size, not a toolbar's: at 44pt it crowded the title
-   («кнопки будто слишком большие что упираются под текст»). An invisible 44pt target stays. */
+   (the owner: the buttons looked too big, pressed against the text). An invisible 44pt target stays. */
 .barEnd.barEnd :is(button, a) {
   width: 34px;
   height: 30px;

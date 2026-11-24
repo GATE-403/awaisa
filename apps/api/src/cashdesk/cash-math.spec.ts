@@ -70,8 +70,8 @@ describe('sales', () => {
 
   it('names the products there is not enough of, counting repeated lines together', () => {
     const stock = new Map([
-      ['a', { name: 'Шампунь', quantity: 2 }],
-      ['b', { name: 'Воск', quantity: 5 }],
+      ['a', { name: 'Shampoo', quantity: 2 }],
+      ['b', { name: 'Wax', quantity: 5 }],
     ])
     expect(
       shortages(
@@ -82,7 +82,7 @@ describe('sales', () => {
         ],
         stock,
       ),
-    ).toEqual(['Шампунь'])
+    ).toEqual(['Shampoo'])
   })
 })
 

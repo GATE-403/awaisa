@@ -25,9 +25,9 @@ interface ContactClientSheetProps {
 
 const NO_CODE = ''
 
-// The message goes to the client, so its default words stay Russian whatever the cabinet's language.
+// The default words of the message to the client; the owner may change them before sending.
 const apologyText = (firstName: string, businessName: string) =>
-  `${firstName}, здравствуйте! Это ${businessName}. Спасибо за честный отзыв, и простите, что визит вас огорчил. Расскажите, что пошло не так? Хотим исправить.`
+  `Hello ${firstName}, this is ${businessName}. Thank you for your honest review, and we are sorry the visit let you down. Could you tell us what went wrong? We want to put it right.`
 
 // A poor review is settled with the person, not in public: a written apology ready to send by
 // WhatsApp or SMS (or a call), with one of the place's promo codes when the owner wants to make up
@@ -46,7 +46,7 @@ export const ContactClientSheet = ({
   const [code, setCode] = useState(NO_CODE)
   const chosen = codes.find((item) => item.code === code)
   const message = chosen
-    ? `${text.trim()}\n\nДарим промокод ${chosen.code}: −${chosen.percent}% на следующий визит.`
+    ? `${text.trim()}\n\nHere is a promo code, ${chosen.code}: ${chosen.percent}% off your next visit.`
     : text.trim()
   const digits = review.customerPhone.replace(/\D/g, '')
   const body = encodeURIComponent(message)
@@ -101,7 +101,7 @@ export const ContactClientSheet = ({
             {chosen
               ? t('The promo code is added at the end of the message.')
               : t(
-                  'The messenger opens with this text. Once you agree, mark the review «Resolved».',
+                  'The messenger opens with this text. Once you agree, mark the review "Resolved".',
                 )}
           </p>
         </section>

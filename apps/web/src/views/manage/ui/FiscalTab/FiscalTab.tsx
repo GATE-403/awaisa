@@ -31,11 +31,7 @@ const WHEN_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: '2-digit',
   timeZone: BUSINESS_TIME_ZONE,
 }
-// Browsers have no Kyrgyz month names, so Kyrgyz keeps the Russian ones.
-const whenFormats = {
-  ru: new Intl.DateTimeFormat('ru-RU', WHEN_OPTIONS),
-  en: new Intl.DateTimeFormat('en-GB', WHEN_OPTIONS),
-}
+const whenFormat = new Intl.DateTimeFormat('en-GB', WHEN_OPTIONS)
 
 const DRIVER_NOTE: Record<FiscalSettings['driver'], string> = {
   log: 'Test mode: receipts are numbered here and not sent to the tax service.',
@@ -43,7 +39,7 @@ const DRIVER_NOTE: Record<FiscalSettings['driver'], string> = {
   off: '',
 }
 
-// «Настройки → Касса»: fiscal receipts for products sold and visits paid in money. One switch,
+// "Settings → Till": fiscal receipts for products sold and visits paid in money. One switch,
 // the business's details as Settings rows that open one sheet, and receipts the provider refused.
 export const FiscalTab = ({ slug }: FiscalTabProps) => {
   const toast = useToast()
@@ -96,7 +92,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
         {header}
         <EmptyState
           title={t('Receipts are not connected yet')}
-          text={t('Sales and visits are recorded in «Till» as before, without fiscal receipts.')}
+          text={t('Sales and visits are recorded in "Till" as before, without fiscal receipts.')}
         />
       </section>
     )
@@ -138,7 +134,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
           {settings.isEnabled
             ? [
                 t(
-                  'A receipt is issued by itself after a sale and after «Arrived» paid in money; cancelling a sale issues a refund receipt.',
+                  'A receipt is issued by itself after a sale and after "Arrived" paid in money; cancelling a sale issues a refund receipt.',
                 ),
                 DRIVER_NOTE[settings.driver] ? t(DRIVER_NOTE[settings.driver]) : '',
               ]
@@ -186,7 +182,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
                     <span className={styles.rowTitle}>
                       {t(receipt.kind === 'refund' ? 'Refund' : receipt.saleId ? 'Sale' : 'Visit')}
                       {' · '}
-                      {whenFormats.en.format(new Date(receipt.createdAt))}
+                      {whenFormat.format(new Date(receipt.createdAt))}
                     </span>
                     <span className={styles.rowMeta}>{receipt.error}</span>
                   </span>

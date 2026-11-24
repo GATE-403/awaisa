@@ -11,7 +11,7 @@ const subscribe = (onChange: () => void) => {
   }
 }
 
-// Whether the page has scrolled past its first screen: where «Наверх» starts to be worth a tap.
+// Whether the page has scrolled past its first screen: where «To top» starts to be worth a tap.
 const getSnapshot = () => window.scrollY > window.innerHeight
 
 const getServerSnapshot = () => false

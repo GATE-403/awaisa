@@ -49,7 +49,7 @@ export class TelegramController {
     @CurrentBusiness() business: Business,
     @CurrentCustomer() customer: Customer | null,
   ): Promise<TelegramLink> {
-    if (!this.bot.isAvailable) throw new ForbiddenException('Telegram-бот не настроен')
+    if (!this.bot.isAvailable) throw new ForbiddenException('The Telegram bot is not set up')
     return this.bot.createLink(business.id, customer?.id ?? null)
   }
 

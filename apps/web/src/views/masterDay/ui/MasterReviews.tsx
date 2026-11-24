@@ -19,7 +19,7 @@ const SHOWN = 3
 const REVIEW_WORDS: [string, string] = ['review', 'reviews']
 
 // What clients said about this master, under the day: the average and the latest reviews as the
-// business page's thread, three and the rest behind «Ещё». Only their own reviews; nothing when
+// business page's thread, three and the rest behind "More". Only their own reviews; nothing when
 // there are none yet.
 export const MasterReviews = ({ slug, businessName }: MasterReviewsProps) => {
   const t = useT()

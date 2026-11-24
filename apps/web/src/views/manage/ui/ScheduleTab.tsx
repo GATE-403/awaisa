@@ -88,7 +88,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const { layout, setLayout } = useScheduleLayout()
   const { isWide, setWide } = useScheduleWide()
   const [zoom, setZoom] = useState(1)
-  // A visit picked from «N визитов прошли без отметки»: the calendar scrolls to it and flashes it.
+  // A visit picked from "N visits ended unmarked": the calendar scrolls to it and flashes it.
   const [focusedBookingId, setFocusedBookingId] = useState<string | null>(null)
   const today = useToday()
   const canSeeMoney = useCanSeeMoney()
@@ -110,16 +110,16 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
   const [isClosingTime, setIsClosingTime] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
   const [loads, setLoads] = useState<ReadonlyMap<string, number>>(new Map())
-  // «Найти место»: the service whose gaps light up on the day.
+  // "Find a slot": the service whose gaps light up on the day.
   const [fitServiceId, setFitServiceId] = useState<string | null>(null)
   const [selected, setSelected] = useState<AdminBooking | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
   const [clientPhone, setClientPhone] = useState<string | null>(null)
-  // Selling products: on its own (null) or with a visit, from its «Итог визита».
+  // Selling products: on its own (null) or with a visit, from its "Visit outcome".
   const [sale, setSale] = useState<{ booking: AdminBooking | null } | null>(null)
   const [waitlist, setWaitlist] = useState<ManagedWaitlistEntry[]>([])
   const [isWaitlistOpen, setIsWaitlistOpen] = useState(false)
-  // «✕» on the bar: hidden until the cabinet is opened again.
+  // "✕" on the bar: hidden until the cabinet is opened again.
   const [isCloseBarHidden, setIsCloseBarHidden] = useState(false)
   const date = selectedDay ?? today?.dayKey ?? null
   const days = today ? getDaysAround(today.dayKey, PAST_DAYS, DAYS_SHOWN) : []
@@ -213,7 +213,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     .sort((first, second) => first.time.localeCompare(second.time))
   const dayWaitlist = waitlist.filter((entry) => entry.date === date)
 
-  // Arrived from a «Новая запись» toast or notification: show that day and open the booking once.
+  // Arrived from a "New booking" toast or notification: show that day and open the booking once.
   useEffect(() => {
     if (linkedDate) setSelectedDay(linkedDate)
   }, [linkedDate])
@@ -306,7 +306,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     })
   }
 
-  // «Записать снова» on a cancelled visit: the same client, service, master and time.
+  // "Book again" on a cancelled visit: the same client, service, master and time.
   const handleBookCancelledAgain = (booking: AdminBooking) => {
     setSelected(null)
     setDraft({
@@ -320,7 +320,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
     })
   }
 
-  // «Записать снова» from the client's card: their usual service, its first master, this day.
+  // "Book again" from the client's card: their usual service, its first master, this day.
   const handleBookAgain = (client: { name: string; phone: string; serviceName: string | null }) => {
     const service = catalog.services.find((item) => item.name === client.serviceName) ?? null
     const masterId =
@@ -506,7 +506,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         // While the gaps for a service are lit, one capsule names it and turns the search off.
         <div className={styles.fitBar}>
           <span className={styles.fitText}>
-            {t('Room for «{service}»', { service: fitService.name })} ·{' '}
+            {t('Room for "{service}"', { service: fitService.name })} ·{' '}
             {t.duration(fitService.durationMinutes)}
           </span>
           <Button variant='outline' size='sm' onClick={() => setFitServiceId(null)}>
@@ -551,7 +551,7 @@ export const ScheduleTab = ({ slug, business, catalog, refreshKey }: ScheduleTab
         {schedule && !hasMasters && (
           <EmptyState
             title={t('Add specialists')}
-            text={t('Open «Specialists» and add at least yourself: the schedule will appear here.')}
+            text={t('Open "Specialists" and add at least yourself: the schedule will appear here.')}
           />
         )}
 

@@ -26,7 +26,7 @@ export class MasterService {
     private readonly follows: FollowsService,
   ) {}
 
-  /** Where this phone works as a master (for «Мой день» entry points). */
+  /** Where this phone works as a master (for 'My day' entry points). */
   listPlaces(phone: string): Promise<MasterPlace[]> {
     return this.dataSource.query(
       `SELECT bz."slug", bz."name" AS "businessName", sp."id" AS "specialistId", sp."name", sp."role"
@@ -94,7 +94,7 @@ export class MasterService {
       master: { id: master.id, name: master.name, role: master.role },
       pay,
       hours: window ? clampToWindow(days.get(master.id) ?? null, window) : null,
-      leaveReason: leaves[0] ? leaves[0].reason || 'Отпуск' : null,
+      leaveReason: leaves[0] ? leaves[0].reason || 'Leave' : null,
       bookings: bookings.filter((booking) => booking.specialistId === master.id),
       photos,
       followers,
@@ -110,7 +110,7 @@ export class MasterService {
   ): Promise<AdminBooking> {
     const booking = await this.bookings.findById(bookingId)
     if (!booking || booking.specialistId !== master.id) {
-      throw new ForbiddenException('Это запись другого мастера')
+      throw new ForbiddenException('This booking belongs to another specialist')
     }
 
     return this.salonBookings.setOutcome(businessId, bookingId, body)

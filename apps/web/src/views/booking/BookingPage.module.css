@@ -10,8 +10,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* The browser's own scroll to a tapped field glides too: it jumped 110px at once from «Имя» to
-     «Телефон» with the keyboard up. Scrolls the form makes itself say how they move. */
+  /* The browser's own scroll to a tapped field glides too: it jumped 110px at once from Name to
+     Phone with the keyboard up. Scrolls the form makes itself say how they move. */
   scroll-behavior: smooth;
   /* Keyboard focus is scrolled clear of the sheet's top bar (60pt and its 11pt of step segments)
      and its action bar (WCAG 2.4.11). */
@@ -111,7 +111,7 @@
 
 /* Tablets and wider: a phone-wide side panel docked to the right, the site dimmed beside it,
    like a drawer over a store page. One column, the same action bar as on phones at its foot.
-   Tablets used to get the phone sheet stretched across the screen («выглядит неуклюже»). */
+   Tablets used to get the phone sheet stretched across the screen ("looks clumsy"). */
 @media (min-width: 768px) {
   .page {
     /* The phone layout, phone-wide: the same sheet people know from their phones. */
@@ -285,7 +285,7 @@
   padding-bottom: var(--space-2);
 }
 
-/* «Записываю другого человека»: the group's last row, a label and the kit's switch. */
+/* "Booking for someone else": the group's last row, a label and the kit's switch. */
 .group .switchRow {
   position: relative;
   display: flex;
@@ -355,7 +355,7 @@ button.fieldRow {
   font-size: var(--text-body);
 }
 
-/* «Хочу так»: the look as a small square on the row's right, before «Убрать». */
+/* "I want this": the look as a small square on the row's right, before Remove. */
 .lookThumb {
   justify-self: end;
   width: 40px;
@@ -438,14 +438,14 @@ button.fieldRow {
 .wash {
   /* A soft wash of the place's colour behind the top of the sheet: the booking feels like this
      place's, not a form. It scrolls away with the content. Still: no drift, grain or glide to
-     the master's colour (they cost frames on phones, «убери всю лишнюю анимацию»). */
+     the master's colour (they cost frames on phones, "remove all the extra animation"). */
   position: absolute;
   top: 0;
   right: 0;
   left: 0;
   height: 340px;
-  /* Strongest behind the top bar, nearly gone by the stack's foot line and «Шаг 2 из 4»: blue
-     link text on a strong pink or orange wash fell below AA («читаемость синих кнопок упала»). */
+  /* Strongest behind the top bar, nearly gone by the stack's foot line and "Step 2 of 4": blue
+     link text on a strong pink or orange wash fell below AA ("the blue buttons became hard to read"). */
   background: radial-gradient(
     120% 80% at 50% 0%,
     color-mix(in srgb, var(--place-tint) 34%, transparent),

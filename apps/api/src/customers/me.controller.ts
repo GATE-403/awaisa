@@ -59,13 +59,13 @@ export class MeController {
     return this.customers.rename(customer, body.name)
   }
 
-  /** «Скачать мои данные»: the account's own data as one JSON file. */
+  /** 'Download my data': the account's own data as one JSON file. */
   @Get('export')
   exportData(@CurrentCustomer() customer: Customer): Promise<AccountExport> {
     return this.account.export(customer)
   }
 
-  /** «Удалить аккаунт»: what stays with the businesses and why is in `account-erasure.ts`. */
+  /** 'Delete account': what stays with the businesses and why is in `account-erasure.ts`. */
   @Delete()
   @HttpCode(200)
   async deleteAccount(

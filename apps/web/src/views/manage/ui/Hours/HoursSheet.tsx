@@ -21,7 +21,7 @@ interface HoursSheetProps {
 const FORM_ID = 'hours-sheet'
 const STEPS = [15, 30, 60]
 
-// The week's hours and the slot step, changed where they are shown (the page's «Время»).
+// The week's hours and the slot step, changed where they are shown (the page's "Hours").
 export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursSheetProps) => {
   const t = useT()
   const [days, setDays] = useState(() => toDrafts(hours))

@@ -11,7 +11,7 @@ import { DEFAULT_CENTER, isDarkTheme, TILE_OPTIONS, TILE_URL } from './mapTiles'
 
 interface LocationPickerProps {
   value: Point | null
-  /** `user` when the person moved the map (a drag, «Я здесь»), `target` after a `target` move. */
+  /** `user` when the person moved the map (a drag, «I am here»), `target` after a `target` move. */
   onChange: (point: Point, source: 'user' | 'target') => void
   /** A point to fly to (an address picked from the search); a new object each time it moves. */
   target?: Point | null
@@ -87,11 +87,11 @@ export const LocationPicker = ({ value, onChange, target = null }: LocationPicke
       <section
         ref={containerRef}
         className={styles.map}
-        aria-label='Карта: передвиньте, чтобы метка указала на вход'
+        aria-label='Map: move it so the pin points at the entrance'
       />
       <span className={styles.pin} aria-hidden='true' />
       <button type='button' className={styles.locate} onClick={locate}>
-        <NavigationArrow aria-hidden />Я здесь
+        <NavigationArrow aria-hidden />I am here
       </button>
     </div>
   )

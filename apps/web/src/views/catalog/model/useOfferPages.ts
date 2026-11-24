@@ -18,7 +18,7 @@ interface OfferPagesOptions {
 }
 
 // The services feed page by page: the server renders the first one, the rest load as the list
-// nears its end. A new order («Дешевле») starts over from the first page in that order.
+// nears its end. A new order («Cheapest») starts over from the first page in that order.
 export const useOfferPages = ({ initial, initialSort, sort, kind, query }: OfferPagesOptions) => {
   const [pages, setPages] = useState({ sort: initialSort, items: initial })
   const [hasMore, setHasMore] = useState(initial.length >= PAGE_SIZE)

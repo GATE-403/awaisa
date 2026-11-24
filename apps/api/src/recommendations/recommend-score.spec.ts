@@ -43,7 +43,7 @@ describe('scoreCandidate', () => {
     ).toBeNull()
   })
 
-  it('says «Пора снова» when the usual gap has passed, and holds back a fresh repeat', () => {
+  it('says Due again when the usual gap has passed, and holds back a fresh repeat', () => {
     const due = scoreCandidate(
       candidate(),
       profile({
@@ -56,7 +56,7 @@ describe('scoreCandidate', () => {
         visits: [{ serviceId: 's1', slug: 'barber', serviceName: 'Мужская стрижка', daysAgo: 5 }],
       }),
     )
-    expect(due?.reason).toMatch(/^Пора снова/)
+    expect(due?.reason).toMatch(/^Due again/)
     expect(due?.score ?? 0).toBeGreaterThan(fresh?.score ?? 0)
   })
 
@@ -66,7 +66,7 @@ describe('scoreCandidate', () => {
       profile({ interests: ['nails'] }),
     )
     const haircut = scoreCandidate(candidate(), profile({ interests: ['nails'] }))
-    expect(nails?.reason).toBe('Ваш выбор · ногти')
+    expect(nails?.reason).toBe('Your pick · nails')
     expect(nails?.score ?? 0).toBeGreaterThan(haircut?.score ?? 0)
   })
 
@@ -76,7 +76,7 @@ describe('scoreCandidate', () => {
     expect(cheap?.score ?? 0).toBeGreaterThan(dear?.score ?? 0)
   })
 
-  it('«что важнее» decides between a near place and a better-rated one far away', () => {
+  it('priorities decide between a near place and a better-rated one far away', () => {
     const near = candidate({ serviceId: 'near', distanceKm: 0.5, rating: 4.3 })
     const famous = candidate({ serviceId: 'famous', distanceKm: 9, rating: 4.9, reviews: 200 })
     const score = (item: Candidate, priority: Priority | null) =>
@@ -85,14 +85,14 @@ describe('scoreCandidate', () => {
     expect(score(famous, 'rating')).toBeGreaterThan(score(near, 'rating'))
   })
 
-  it('several «что важнее» count together', () => {
+  it('several priorities count together', () => {
     const near = candidate({ serviceId: 'near', distanceKm: 0.5, freeInDays: 0 })
     const both = scoreCandidate(near, profile({ priorities: ['near', 'soon'] }))?.score ?? 0
     const one = scoreCandidate(near, profile({ priorities: ['near'] }))?.score ?? 0
     expect(both).toBeGreaterThan(one)
   })
 
-  it('«свободно сегодня» and «подешевле» weigh the free time and the price', () => {
+  it('free today and cheaper weigh the free time and the price', () => {
     const today = candidate({ serviceId: 'today', freeInDays: 0, price: 2000 })
     const later = candidate({ serviceId: 'later', freeInDays: null, price: 800 })
     const score = (item: Candidate, priority: Priority | null) =>
@@ -117,6 +117,22 @@ describe('interestsOf', () => {
   it('reads brow colouring as brows, not hair colour', () => {
     expect(interestsOf('Окрашивание бровей')).toEqual(['brows'])
     expect(interestsOf('Окрашивание корней')).toEqual(['coloring'])
+  })
+
+  it('reads English service names too', () => {
+    expect(interestsOf('Gel manicure')).toEqual(['nails'])
+    expect(interestsOf('Beard trim')).toEqual(['beard'])
+    expect(interestsOf('Brow tint')).toEqual(['brows'])
+    expect(interestsOf('Root colour')).toEqual(['coloring'])
+  })
+
+  it('leaves English services for the other gender out', () => {
+    expect(
+      scoreCandidate(candidate({ name: "Men's haircut" }), profile({ gender: 'female' })),
+    ).toBeNull()
+    expect(
+      scoreCandidate(candidate({ name: "Women's haircut" }), profile({ gender: 'male' })),
+    ).toBeNull()
   })
 })
 
@@ -182,12 +198,12 @@ describe('the service being chosen', () => {
     expect(ids[0]).toBe('nails-2')
     expect(ids).not.toContain('nails-1')
     expect(ids).not.toContain('beard')
-    expect(ranked[0]?.reason).toBe('Ваш выбор · ногти')
+    expect(ranked[0]?.reason).toBe('Your pick · nails')
     expect(ids.indexOf('brows')).toBeLessThan(ids.indexOf('kids'))
   })
 })
 
-describe('«С этим часто берут»', () => {
+describe('Often booked with', () => {
   const day = 86_400_000
   const visit = (client: string, serviceName: string, days: number) => ({
     client,
@@ -226,7 +242,7 @@ describe('«С этим часто берут»', () => {
     const plain = scoreCandidate(brows, profile({ focus: { serviceId: 'n1', name: 'Маникюр' } }))
     const lifted = scoreCandidate(brows, withAffinity)
     expect(lifted?.score).toBeGreaterThan(plain?.score ?? 0)
-    expect(lifted?.reasons).toContain('Часто берут с маникюром')
+    expect(lifted?.reasons).toContain('Often booked with manicure')
 
     const ignored = scoreCandidate(brows, { ...withAffinity, seen: { b1: 5 } })
     expect(ignored?.score).toBeLessThan(lifted?.score ?? 0)
@@ -255,7 +271,7 @@ describe('exploration', () => {
     const ranked = rankCandidates([...established, fresh], profile(), { limit: 6 })
     const index = ranked.findIndex((entry) => entry.candidate.serviceId === 'new')
     expect(index).toBe(3)
-    expect(ranked[index]?.reason).toBe('Новое место')
+    expect(ranked[index]?.reason).toBe('New place')
     expect(ranked).toHaveLength(6)
   })
 })
@@ -271,8 +287,8 @@ describe('score-v2', () => {
   it('counts the usual as due a week early, where score-v1 held it back', () => {
     // A 28-day cycle is due from day 24 (85%); at day 18 it is due within a week.
     const almost = profile({ visits: [visit(18)] })
-    expect(scoreCandidate(candidate(), almost, 'score-v1')?.reason).not.toMatch(/^Пора снова/)
-    expect(scoreCandidate(candidate(), almost)?.reason).toMatch(/^Пора снова/)
+    expect(scoreCandidate(candidate(), almost, 'score-v1')?.reason).not.toMatch(/^Due again/)
+    expect(scoreCandidate(candidate(), almost)?.reason).toMatch(/^Due again/)
     // Right after a visit it still steps back.
     const fresh = profile({ visits: [visit(3)] })
     expect(scoreCandidate(candidate(), fresh)?.score ?? 0).toBeLessThan(
@@ -280,14 +296,14 @@ describe('score-v2', () => {
     )
   })
 
-  it('makes a service booked again and again more likely, saying «Ваше обычное»', () => {
+  it('makes a service booked again and again more likely, saying Your usual', () => {
     const once = scoreCandidate(candidate(), profile({ visits: [visit(12)] }))
     const habit = scoreCandidate(
       candidate(),
       profile({ visits: [visit(12), visit(40), visit(70)] }),
     )
     expect(habit?.score ?? 0).toBeGreaterThan(once?.score ?? 0)
-    expect(habit?.reasons).toContain('Ваше обычное')
+    expect(habit?.reasons).toContain('Your usual')
   })
 
   it('keeps the client’s own place above the same name elsewhere', () => {
@@ -320,7 +336,7 @@ describe('score-v2', () => {
     const parent = profile({
       visits: [{ serviceId: 'kids', slug: 'barber', serviceName: 'Детская стрижка', daysAgo: 40 }],
     })
-    expect(scoreCandidate(kids, parent)?.reason).toMatch(/^Пора снова/)
+    expect(scoreCandidate(kids, parent)?.reason).toMatch(/^Due again/)
   })
 })
 

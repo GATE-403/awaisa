@@ -6,7 +6,7 @@ import { KIND_SEO } from '../config/kindSeo'
 
 type CatalogParams = Record<string, string | string[] | undefined>
 
-const HOME_TITLE = `${PLATFORM.name}: онлайн-запись в салоны и к мастерам Бишкека`
+const HOME_TITLE = `${PLATFORM.name}: online booking with Bishkek salons and specialists`
 
 const kindHref = (kind: BusinessKind) => `/?kind=${kind}`
 

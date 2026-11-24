@@ -13,10 +13,10 @@ import { useFavorites } from '../model/useFavorites'
 import { FavoriteButton } from './FavoriteButton'
 import styles from './FavoritesShelf.module.css'
 
-// «Избранное» in the profile: the services hearted anywhere, as the catalog's cards in one row
+// «Favourites» in the profile: the services hearted anywhere, as the catalog's cards in one row
 // (newest first); a heart takes one off. With none yet, one quiet line says how to add them.
 interface FavoritesShelfProps {
-  /** `grid` inside the profile's «Избранное» tab (the tab names it, no heading). */
+  /** `grid` inside the profile's «Favourites» tab (the tab names it, no heading). */
   layout?: 'row' | 'grid'
 }
 

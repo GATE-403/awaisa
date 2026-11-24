@@ -1,5 +1,5 @@
-/* The report lies right on the page: no cards, tiles or fills behind its parts («убрать лишние
-   обёртки фона»). Groups are told apart by their captions and the air between them. */
+/* The report lies right on the page: no cards, tiles or fills behind its parts ("drop the extra
+   background wrappers"). Groups are told apart by their captions and the air between them. */
 .report {
   display: flex;
   flex-direction: column;
@@ -44,7 +44,7 @@
 }
 
 /* Phones: the last group scrolls out from under the floating tools, and the groups sit closer
-   («слишком много свободного места уходит впустую»): 24pt between them instead of 40, rows of
+   ("too much empty space goes to waste"): 24pt between them instead of 40, rows of
    44pt with their detail on one line. */
 @media (max-width: 639px) {
   .page {
@@ -78,7 +78,7 @@
   min-width: 0;
 }
 
-/* --- Выручка --- */
+/* --- Revenue --- */
 
 .revenue {
   display: flex;
@@ -219,7 +219,7 @@
   background: color-mix(in srgb, var(--color-foreground) 24%, transparent);
 }
 
-/* --- Визиты и клиенты: four figures in a row, no tiles --- */
+/* --- Visits and clients: four figures in a row, no tiles --- */
 
 .stats {
   display: grid;
@@ -397,7 +397,7 @@
 }
 
 /* A row that opens something (a client's card, a master's period) is one tap target. No fill under
-   the pointer: it crossed the share lines above and below the row («некрасивый дизайн»). The
+   the pointer: it crossed the share lines above and below the row ("ugly design"). The
    title takes the link colour instead, a chevron at the end says it opens, a press dims it. */
 .clientRow {
   width: 100%;
@@ -474,7 +474,7 @@
 }
 
 /* A share meter lies on the row's bottom hairline: the hairline is its track and the share is
-   drawn over it, so a row ends in one line, not a grey track beside a hairline («двойные линии»).
+   drawn over it, so a row ends in one line, not a grey track beside a hairline ("double lines").
    Never drawn for zero. */
 .meter {
   position: absolute;
@@ -693,7 +693,7 @@ button.heatmapCell:active {
   }
 }
 
-/* --- «Требует внимания»: the whole row one tap target - a thin glyph in its colour (no tinted
+/* --- "Needs attention": the whole row one tap target - a thin glyph in its colour (no tinted
    disc), what it is, the action named at its end --- */
 
 .attentionRow {
@@ -933,7 +933,7 @@ button.heatmapCell:active {
   font-variant-numeric: tabular-nums;
 }
 
-/* A pay row: what it is over how it was counted («2 визита · 40% от 2 500 сом»). */
+/* A pay row: what it is over how it was counted ("2 visits · 40% of 2,500 som"). */
 .payLabel {
   min-width: 0;
   padding-block: var(--space-2);
@@ -945,7 +945,7 @@ button.heatmapCell:active {
   font-variant-numeric: tabular-nums;
 }
 
-/* «Прибыль» below zero reads as a loss in the danger colour, the sign says it too. */
+/* "Profit" below zero reads as a loss in the danger colour, the sign says it too. */
 .factValue[data-negative] {
   color: var(--color-danger-text);
 }

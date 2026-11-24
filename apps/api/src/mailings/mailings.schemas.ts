@@ -10,7 +10,7 @@ const previewQuerySchema = z.object({
 const sendMailingSchema = z.object({
   segment,
   days: z.number().int().min(14).max(365).default(60),
-  text: z.string().trim().min(10, 'Слишком коротко').max(400, 'Не больше 400 символов'),
+  text: z.string().trim().min(10, 'Too short').max(400, '400 characters at most'),
 })
 
 const birthdayGreetingSchema = z.object({

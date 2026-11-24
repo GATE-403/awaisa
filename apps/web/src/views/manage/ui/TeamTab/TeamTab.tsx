@@ -26,7 +26,7 @@ interface TeamTabProps {
   slug: string
 }
 
-// «Сотрудники»: administrators run the day (schedule, clients, reviews) without money or setup.
+// "Team": administrators run the day (schedule, clients, reviews) without money or setup.
 export const TeamTab = ({ slug }: TeamTabProps) => {
   const toast = useToast()
   const t = useT()
@@ -118,7 +118,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       )}
       {!canAdd && (
         <RowNote>
-          {t('Administrators are available on the «{plan}» plan.', {
+          {t('Administrators are available on the "{plan}" plan.', {
             plan: access?.upgradeTitle ?? t('Business'),
           })}{' '}
           <NextLink href={`/manage/${slug}?tab=billing`} className={own.planLink}>
@@ -129,7 +129,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       {canAdd && (
         <form className={sheet.group} onSubmit={add} aria-label={t('Add an administrator')}>
           <SectionCaption className={own.addCaption}>{t('Add an administrator')}</SectionCaption>
-          {/* On phones the number and «Добавить» float at the window's foot, under the thumb. */}
+          {/* On phones the number and "Add" float at the window's foot, under the thumb. */}
           <FloatingToolbar className={own.add}>
             <Input
               type='tel'

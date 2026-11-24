@@ -52,7 +52,7 @@ export const CloseDayBar = ({
         <>
           {visitsHere.length > 0 && onOpen ? (
             // The count opens the list of who it is: time, client, service · master - a tap scrolls
-            // the calendar to that visit's card (with «✓ Пришёл» on it).
+            // the calendar to that visit's card (with "✓ Arrived" on it).
             <Menu
               label={t('{visits} {passed}: show who', { visits: visits(openHere), passed })}
               className={styles.who}

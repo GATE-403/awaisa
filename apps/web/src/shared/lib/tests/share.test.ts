@@ -40,7 +40,7 @@ describe('copyText', () => {
 })
 
 describe('shareLink', () => {
-  const link = { url: 'https://awaisa.kg/u/aibek', title: 'Айбек' }
+  const link = { url: 'https://awaisa.kg/u/aibek', title: 'Aibek' }
 
   it('opens the share sheet where there is one', async () => {
     const share = vi.fn().mockResolvedValue(undefined)
@@ -75,8 +75,8 @@ describe('shareLink', () => {
     expect(share).not.toHaveBeenCalled()
 
     stubScreen(true)
-    expect(await shareLink({ ...link, text: 'Привет', isTouchOnly: true })).toBe('shared')
-    expect(share).toHaveBeenCalledWith({ ...link, text: 'Привет' })
+    expect(await shareLink({ ...link, text: 'Hello', isTouchOnly: true })).toBe('shared')
+    expect(share).toHaveBeenCalledWith({ ...link, text: 'Hello' })
   })
 })
 
@@ -88,8 +88,8 @@ describe('saveFile', () => {
     const share = vi.fn().mockResolvedValue(undefined)
     stubNavigator({ share, canShare: () => true })
 
-    expect(await saveFile(file, 'Мои данные')).toBe('saved')
-    expect(share).toHaveBeenCalledWith({ files: [file], title: 'Мои данные' })
+    expect(await saveFile(file, 'My data')).toBe('saved')
+    expect(share).toHaveBeenCalledWith({ files: [file], title: 'My data' })
 
     share.mockRejectedValueOnce(abort())
     expect(await saveFile(file)).toBe('cancelled')

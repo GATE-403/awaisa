@@ -19,7 +19,7 @@ const REQUIRED_FEATURE = 'requiredFeature'
 type PlanRequest = Request & { business?: { id: string } }
 
 /**
- * Refuses a cabinet route the business's plan does not include (402 «Доступно на тарифе …»).
+ * Refuses a cabinet route the business's plan does not include (402 «Available on the … plan»).
  * Runs after `BusinessAccessGuard`, which puts the business on the request; put
  * `@RequiresFeature` above `@UseGuards(BusinessAccessGuard)` on a controller so it does.
  */
@@ -47,7 +47,7 @@ export class PlanGuard implements CanActivate {
     const [row] = (await this.dataSource.query('SELECT "id" FROM "businesses" WHERE "slug" = $1', [
       String(slug ?? ''),
     ])) as { id: string }[]
-    if (!row) throw new NotFoundException('Бизнес не найден')
+    if (!row) throw new NotFoundException('Business not found')
     return row.id
   }
 }

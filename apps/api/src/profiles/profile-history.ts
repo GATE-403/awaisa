@@ -69,7 +69,7 @@ const activityOf = (visits: HistoryVisit[], now: Date, showsPlaces: boolean): Ac
 
 /**
  * When each achievement was reached: the moment its count first hit the target, replaying visits
- * and reviews in order. Friends carry no dates (null); «Год с нами» is a year after the first visit.
+ * and reviews in order. Friends carry no dates (null); «A year with us» is a year after the first visit.
  */
 const earnedDatesOf = (
   visits: HistoryVisit[],

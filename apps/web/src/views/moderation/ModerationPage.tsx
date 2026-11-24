@@ -21,7 +21,7 @@ interface ModerationPageProps {
 
 type Tab = 'queue' | 'log'
 
-const timeFormatter = new Intl.DateTimeFormat('ru-RU', {
+const timeFormatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'short',
   hour: '2-digit',

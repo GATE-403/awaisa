@@ -19,7 +19,7 @@ interface ReviewPageProps {
   error: string | null
 }
 
-// Opened from the «как прошёл визит?» SMS: the visit, five stars, a comment - nothing else.
+// Opened from the «how was your visit?» SMS: the visit, five stars, a comment - nothing else.
 // The visit arrives rendered from the server; only the rating form is interactive.
 export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProps) => {
   const [rated, setRated] = useState<number | null>(null)
@@ -32,10 +32,10 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
       <Container size='sm' className={styles.content}>
         {error && (
           <div className={styles.card}>
-            <h1 className={styles.title}>Ссылка не открылась</h1>
+            <h1 className={styles.title}>The link did not open</h1>
             <p className={styles.text}>{error}</p>
             <NextLink href='/bookings' className={styles.link}>
-              Мои записи ›
+              My bookings ›
             </NextLink>
           </div>
         )}
@@ -55,13 +55,15 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                 <p
                   className={styles.doneStars}
                   role='img'
-                  aria-label={`Ваша оценка: ${stars} из 5`}
+                  aria-label={`Your rating: ${stars} out of 5`}
                 >
                   {[1, 2, 3, 4, 5].map((value) => (
                     <Star key={value} weight={value <= stars ? 'fill' : 'regular'} aria-hidden />
                   ))}
                 </p>
-                <p className={styles.doneTitle}>Спасибо! Отзыв помогает другим выбрать мастера.</p>
+                <p className={styles.doneTitle}>
+                  Thank you! Your review helps others choose a specialist.
+                </p>
                 {/* Liked the master → book them again in one tap; didn't → the same service,
                     another master. */}
                 {stars >= 4 ? (
@@ -72,7 +74,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                       />
                     }
                   >
-                    Записаться снова к {visit.specialistName.trim().split(/\s+/)[0]}
+                    Book {visit.specialistName.trim().split(/\s+/)[0]} again
                   </ButtonLink>
                 ) : (
                   <ButtonLink
@@ -81,7 +83,7 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
                       <NextLink href={`/${visit.business.slug}/book?service=${visit.serviceId}`} />
                     }
                   >
-                    Выбрать другого мастера
+                    Choose another specialist
                   </ButtonLink>
                 )}
               </div>
@@ -96,8 +98,8 @@ export const ReviewPage = ({ bookingId, signature, data, error }: ReviewPageProp
             ) : (
               <p className={styles.text}>
                 {visit.status === 'cancelled'
-                  ? 'Эта запись отменена - оценивать нечего.'
-                  : 'Оценить можно после визита.'}
+                  ? 'This booking was cancelled: there is nothing to rate.'
+                  : 'You can rate it after the visit.'}
               </p>
             )}
           </div>

@@ -16,11 +16,11 @@ const blockState = (
   if (booking.outcome === 'arrived') return { tone: 'success', label: 'Arrived' }
   if (booking.outcome === 'no_show') return { tone: 'danger', label: 'No-show' }
   if (isPast || (nowMinutes !== null && to <= nowMinutes)) {
-    return { tone: 'warning', label: 'Unmarked' }
+    return { tone: 'warning', label: 'Not marked' }
   }
   if (nowMinutes !== null && from <= nowMinutes) return { tone: 'accent', label: 'Now' }
 
-  return { tone: 'plain', label: 'Expected' }
+  return { tone: 'plain', label: 'Waiting' }
 }
 
 export type { BlockTone }

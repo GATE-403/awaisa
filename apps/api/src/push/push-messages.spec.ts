@@ -5,9 +5,9 @@ const booking: PushBooking = {
   id: 'b1',
   date: '2026-11-26',
   time: '14:30',
-  serviceName: 'Мужская стрижка',
-  specialistName: 'Эрлан',
-  customerName: 'Айбек Токтогулов',
+  serviceName: "Men's haircut",
+  specialistName: 'Erlan',
+  customerName: 'Aibek Toktogulov',
   business: { slug: 'old-school', name: 'Old School' },
 }
 
@@ -17,8 +17,8 @@ const TODAY = '2026-11-21'
 describe('bookingPushMessage', () => {
   it('says what, when and who for a master, opening their day', () => {
     expect(bookingPushMessage('created', booking, 'master', TODAY)).toEqual({
-      title: 'Новая запись',
-      body: 'Чт 14:30 · Мужская стрижка · Айбек',
+      title: 'New booking',
+      body: "Thu 14:30 · Men's haircut · Aibek",
       url: '/master/old-school?date=2026-11-26',
       tag: 'b1',
     })
@@ -27,7 +27,7 @@ describe('bookingPushMessage', () => {
   it('adds the master and the place for the business and opens the booking in the schedule', () => {
     const message = bookingPushMessage('created', booking, 'member', TODAY)
 
-    expect(message.body).toBe('Чт 14:30 · Мужская стрижка · Айбек\nЭрлан · Old School')
+    expect(message.body).toBe("Thu 14:30 · Men's haircut · Aibek\nErlan · Old School")
     expect(message.url).toBe('/manage/old-school?tab=schedule&date=2026-11-26&booking=b1')
   })
 
@@ -39,7 +39,7 @@ describe('bookingPushMessage', () => {
       TODAY,
     )
 
-    expect(message.body).toBe('Чт 3 дек. 14:30 · Мужская стрижка · Айбек')
+    expect(message.body).toBe("Thu 3 Dec 14:30 · Men's haircut · Aibek")
   })
 
   it('tells a move with the old time and a cancellation by its title', () => {
@@ -49,11 +49,11 @@ describe('bookingPushMessage', () => {
       'master',
       TODAY,
     )
-    expect(moved.title).toBe('Клиент перенёс запись')
-    expect(moved.body).toBe('Чт 14:30 · Мужская стрижка · Айбек\nБыло: Ср 10:00')
+    expect(moved.title).toBe('Client moved a booking')
+    expect(moved.body).toBe("Thu 14:30 · Men's haircut · Aibek\nWas: Wed 10:00")
 
     expect(bookingPushMessage('cancelled', booking, 'master', TODAY).title).toBe(
-      'Клиент отменил запись',
+      'Client cancelled a booking',
     )
   })
 

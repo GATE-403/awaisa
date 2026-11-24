@@ -26,7 +26,7 @@ interface ServicePickerProps {
   photos?: Record<string, string>
   coverUrl?: string | null
   businessName: string
-  /** «Сегодня с 15:30» for a service, when one could come soon. */
+  /** "Today from 15:30" for a service, when one could come soon. */
   soonLabel: (serviceId: string) => string | null
 }
 

@@ -8,7 +8,7 @@ const loyaltySettingsSchema = z.object({
 })
 
 const planSchema = z.object({
-  title: z.string().trim().min(1, 'Назовите абонемент').max(80),
+  title: z.string().trim().min(1, 'Name the pass').max(80),
   serviceId: z.string().trim().min(1).max(64).nullable().default(null),
   visits: z.number().int().min(1).max(100),
   price: z.number().int().min(0).max(10_000_000),
@@ -18,7 +18,7 @@ const planSchema = z.object({
 })
 
 const certificateSchema = z.object({
-  amount: z.number().int().min(100, 'От 100 сом').max(1_000_000),
+  amount: z.number().int().min(100, 'From 100 som').max(1_000_000),
   recipient: z.string().trim().max(120).default(''),
   phone: z.string().trim().max(32).default(''),
   expiresOn: DATE.nullable().default(null),

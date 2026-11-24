@@ -69,7 +69,7 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   ].filter((action) => action !== null)
 
   return (
-    // Across from the logo, like the owner's «Редактировать»: one primary capsule and the quiet
+    // Across from the logo, like the owner's «Edit»: one primary capsule and the quiet
     // actions as thin glyphs in one capsule of the same height.
     <>
       <ButtonLink

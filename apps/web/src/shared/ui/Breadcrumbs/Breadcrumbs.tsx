@@ -13,13 +13,13 @@ interface BreadcrumbsProps {
   className?: string
 }
 
-// Where this page sits, one quiet footnote line («Каталог › Рейтинг»): the way back on pages
+// Where this page sits, one quiet footnote line («Catalogue › Top»): the way back on pages
 // that have no business bar or tab, plus the same trail as schema.org markup for search.
 export const Breadcrumbs = ({ items, align = 'start', className }: BreadcrumbsProps) => (
   <>
     <nav
       className={className ? `${styles.crumbs} ${className}` : styles.crumbs}
-      aria-label='Вы здесь'
+      aria-label='You are here'
       data-align={align}
     >
       <ol className={styles.list}>

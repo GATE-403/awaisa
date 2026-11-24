@@ -9,11 +9,11 @@ const DEMO_BOOKING: Booking = {
   price: 900,
   durationMinutes: 45,
   specialistId: 'demo',
-  specialistName: 'Тимур',
+  specialistName: 'Timur',
   date: '2026-11-20',
   time: '14:30',
   startsAt: '2026-11-20T08:30:00.000Z',
-  customerName: 'Данияр',
+  customerName: 'Daniyar',
   business: {
     slug: 'demo',
     name: 'Barber Pro',
@@ -32,25 +32,25 @@ const STATS = [
 
 const DEMO_SCHEDULE = [
   {
-    master: 'Тимур',
+    master: 'Timur',
     tint: 'var(--system-blue)',
     blocks: [
-      { top: 0, height: 72, time: '10:00', title: 'Haircut', client: 'Азамат' },
-      { top: 120, height: 96, time: '12:30', title: 'Haircut and beard', client: 'Данияр' },
+      { top: 0, height: 72, time: '10:00', title: 'Haircut', client: 'Azamat' },
+      { top: 120, height: 96, time: '12:30', title: 'Haircut and beard', client: 'Daniyar' },
     ],
   },
   {
-    master: 'Айгерим',
+    master: 'Aigerim',
     tint: 'var(--system-pink)',
     blocks: [
-      { top: 40, height: 120, time: '10:30', title: 'Colouring', client: 'Алина' },
-      { top: 190, height: 56, time: '14:00', title: 'Styling', client: 'Мээрим' },
+      { top: 40, height: 120, time: '10:30', title: 'Colouring', client: 'Alina' },
+      { top: 190, height: 56, time: '14:00', title: 'Styling', client: 'Meerim' },
     ],
   },
   {
-    master: 'Нурай',
+    master: 'Nurai',
     tint: 'var(--system-purple)',
-    blocks: [{ top: 80, height: 100, time: '11:00', title: 'Manicure', client: 'Сабина' }],
+    blocks: [{ top: 80, height: 100, time: '11:00', title: 'Manicure', client: 'Sabina' }],
   },
 ]
 

@@ -7,7 +7,7 @@
 }
 
 /* The head: the title and today's line on the left, the search on the same line on the right
-   («можно в одну линию»). */
+   ("can be one line"). */
 .head {
   position: relative;
   display: flex;
@@ -15,7 +15,7 @@
   justify-content: space-between;
   gap: var(--space-4);
   /* Right on the page, no colour behind it: a glow, a pattern of mascots and a live mascot were
-     all rejected here («убери цвета», «убери маскота»). */
+     all rejected here ("remove the colours", "remove the mascot"). */
   padding-top: var(--space-8);
 }
 
@@ -54,7 +54,7 @@
   border-radius: var(--radius-2xl);
 }
 
-/* Rows right on the page with hairlines, like the cabinet's sections («убери лишние обёртки»). */
+/* Rows right on the page with hairlines, like the cabinet's sections ("drop the extra wrappers"). */
 .list {
   margin: 0;
   padding: 0;
@@ -100,13 +100,13 @@
   height: 20px;
 }
 
-/* The tabs (a platform admin's «Мои · Все») and the search on one line with a mouse. */
+/* The tabs (a platform admin's "Mine · All") and the search on one line with a mouse. */
 .search {
   width: min(100%, 280px);
   margin-left: auto;
 }
 
-/* Phones: the search floats across the window's foot (16pt in), as in «Настройки». */
+/* Phones: the search floats across the window's foot (16pt in), as in "Settings". */
 @media (max-width: 639px) {
   .search.search {
     right: var(--space-4);
@@ -125,7 +125,7 @@
   }
 }
 
-/* «Сегодня 23 визита · 31 200 сом · ближайший в 14:30, Борода»: one footnote line under the title,
+/* "Today 23 visits · 31,200 som · next at 14:30, Boroda": one footnote line under the title,
    the figures bold in the label colour. */
 .summary {
   margin: 0;
@@ -139,7 +139,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Motion («до сих пор не хватает динамики»): the rows rise in one after another on the page's
+/* Motion ("still not enough motion"): the rows rise in one after another on the page's
    first draw, 40ms apart; transform and opacity only, nothing under reduced motion. */
 @keyframes rise-in {
   from {

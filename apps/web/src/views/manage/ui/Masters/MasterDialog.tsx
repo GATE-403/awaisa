@@ -24,7 +24,7 @@ interface MasterDialogProps {
   onPhotoChange?: (file: File | null) => Promise<boolean>
   /** Only for saved masters: opens their week and days away. */
   onOpenSchedule?: () => void
-  /** Only for saved masters, owners only: opens «Зарплата» (the row reads the scheme from `slug`). */
+  /** Only for saved masters, owners only: opens "Pay" (the row reads the scheme from `slug`). */
   onOpenPay?: () => void
   slug?: string
 }
@@ -164,7 +164,7 @@ export const MasterDialog = ({
             <Input
               variant='plain'
               aria-label={t('Role')}
-              placeholder={t('Role, for example «Stylist»')}
+              placeholder={t('Role, for example "Stylist"')}
               value={role}
               onValueChange={setRole}
             />

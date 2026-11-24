@@ -31,7 +31,7 @@ const KIND_LABEL: Record<Promotion['kind'], string> = {
   promo_code: 'Promo code',
 }
 
-// «Акции»: discounts the business runs - by hours, for first visits, by promo code.
+// "Promotions": discounts the business runs - by hours, for first visits, by promo code.
 export const PromotionsTab = ({ slug, catalog }: PromotionsTabProps) => {
   const t = useT()
   const toast = useToast()

@@ -74,7 +74,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
   return (
     <NextFreeProvider slugs={slugs}>
       {isBrowsing && businesses.length > 0 && (
-        <JsonLd data={placesJsonLd(kindLabel ?? 'Места для записи', businesses)} />
+        <JsonLd data={placesJsonLd(kindLabel ?? 'Places to book', businesses)} />
       )}
       <div className={styles.contained}>
         {/* Picked for this client (or, with nothing known, popular and free soon) leads the page. */}
@@ -96,7 +96,7 @@ const CatalogContent = async ({ searchParams }: CatalogPageProps) => {
           key={`${kind ?? ''}|${query}`}
           kind={kind}
           query={query || undefined}
-          title={query ? `«${shown}»` : (kindLabel ?? 'Where to book')}
+          title={query ? `“${shown}”` : (kindLabel ?? 'Where to book')}
           searchedFor={resolved?.corrected ? query : undefined}
           businesses={businesses.map(toPlaceCard)}
           offers={offers}

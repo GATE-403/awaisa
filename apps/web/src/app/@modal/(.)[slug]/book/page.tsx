@@ -12,7 +12,7 @@ import {
 
 const BookingOverPage = async ({ slug }: { slug: string }) => {
   // Over a page, a failed read (the API down, a removed place) must not replace the whole screen
-  // with «Не нашли» and leave the slot stuck: a small sheet says so and closes back. Next's own
+  // with "Not found" and leave the slot stuck: a small sheet says so and closes back. Next's own
   // signals (prerender aborts, postpones) are not failures and go through untouched.
   let data: Awaited<ReturnType<typeof findBusiness>> = null
   let servicePhotos: Record<string, string> = {}
@@ -33,11 +33,11 @@ const BookingOverPage = async ({ slug }: { slug: string }) => {
   )
 }
 
-// «Записаться» tapped on a page opens the booking over that page (an intercepted route): the page
+// "Book" tapped on a page opens the booking over that page (an intercepted route): the page
 // stays behind the panel, dimmed, and closing goes back to it. A link from outside (or a reload)
 // opens the full /<slug>/book route instead.
 // Next 16 in dev can hand the intercepted segment over with its interception markers glued on
-// («(.)(.)old-school»); the slug is what follows them.
+// ("(.)(.)old-school"); the slug is what follows them.
 const toSlug = (param: string) => decodeURIComponent(param).replace(/^(\(\.{1,3}\))+/, '')
 
 // One sheet from the tap to the finished form: `BookingSheet` sits outside the Suspense that waits

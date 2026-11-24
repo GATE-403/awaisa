@@ -11,7 +11,7 @@ import { ReportReasons } from './ReportReasons'
 interface ReportMenuProps {
   targetType: ReportTargetType
   targetId: string
-  /** Read by screen readers and shown as the tooltip: «Пожаловаться на отзыв». */
+  /** Read by screen readers and shown as the tooltip: «Report review». */
   label: string
   className?: string
   onReported?: () => void

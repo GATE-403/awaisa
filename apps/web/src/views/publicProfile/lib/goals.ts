@@ -2,7 +2,7 @@ import type { PublicProfile } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
 import { pluralize } from '@/shared/lib/plural'
 
-// «Следующая цель» on one's own profile: which medal is closest, what is left and where to go
+// «Next goal» on one's own profile: which medal is closest, what is left and where to go
 // for it (pure, unit-tested in `tests/goals.test.ts`).
 
 type Achievement = PublicProfile['achievements'][number]
@@ -10,7 +10,7 @@ type Place = PublicProfile['places'][number]
 
 type Goal = {
   achievement: Achievement
-  /** «Ещё 1 визит в Тепло». */
+  /** «1 visit more at Teplo». */
   hint: string
   /** Where the next step is; null when there is nothing to tap (a friend joining, a year). */
   action: { label: string; href: string } | null
@@ -32,7 +32,7 @@ const pickNextGoal = (items: Achievement[]) =>
       return left(first) - left(second)
     })[0] ?? null
 
-/** What is left and where to go for it; `t` translates (Russian without it, for tests). */
+/** What is left and where to go for it; `t` translates (plain English without it, for tests). */
 const describeGoal = (achievement: Achievement, places: Place[], t?: Translate): Goal => {
   const say = (text: string, vars?: Record<string, string | number>) =>
     t ? t(text, vars) : text.replace(/\{(\w+)\}/g, (_, key: string) => String(vars?.[key] ?? ''))

@@ -8,10 +8,10 @@ const deposit = (status: BookingPayment['status']) =>
 
 describe('describeDeposit', () => {
   it('says the deposit and what happened to it, one wording everywhere', () => {
-    expect(describeDeposit(deposit('pending'))).toBe('Предоплата 1\u00a0500\u00a0сом ждёт оплаты')
-    expect(describeDeposit(deposit('paid'))).toBe('Предоплата 1\u00a0500\u00a0сом внесена')
-    expect(describeDeposit(deposit('refunded'))).toBe('Предоплата 1\u00a0500\u00a0сом возвращена')
-    expect(describeDeposit(deposit('kept'))).toBe('Предоплата 1\u00a0500\u00a0сом удержана')
-    expect(describeDeposit(deposit('expired'))).toBe('Предоплата 1\u00a0500\u00a0сом не оплачена')
+    expect(describeDeposit(deposit('pending'))).toBe('Deposit 1,500\u00a0som awaiting payment')
+    expect(describeDeposit(deposit('paid'))).toBe('Deposit 1,500\u00a0som paid')
+    expect(describeDeposit(deposit('refunded'))).toBe('Deposit 1,500\u00a0som refunded')
+    expect(describeDeposit(deposit('kept'))).toBe('Deposit 1,500\u00a0som kept')
+    expect(describeDeposit(deposit('expired'))).toBe('Deposit 1,500\u00a0som not paid')
   })
 })

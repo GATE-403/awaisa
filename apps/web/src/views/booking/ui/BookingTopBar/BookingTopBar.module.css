@@ -20,7 +20,7 @@
    and its hairline come in over the first 24px of scroll (the sheet's own scroll timeline, only
    colour and shadow change). Without scroll timelines it stays material. */
 /* The backdrop filter goes too: even with a clear fill its saturate and blur tinted the light
-   under the bar and drew a line at its foot («линия сильно заметна»). Same functions as
+   under the bar and drew a line at its foot ("the line is very visible"). Same functions as
    `--blur-material`, so it interpolates. */
 @keyframes material-in {
   from {

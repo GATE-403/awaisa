@@ -15,7 +15,7 @@ interface PlacePickerSheetProps {
   onPicked?: (place: MyPlace) => void
 }
 
-// «Где вы?» - the browser's location in one tap, or a district by name for those who do not
+// «Where are you?» - the browser's location in one tap, or a district by name for those who do not
 // share it (or do not know how). The choice stays on the device for the map, branches and picks.
 export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) => {
   const t = useT()

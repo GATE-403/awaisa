@@ -7,25 +7,25 @@ describe('choiceLine', () => {
   })
 
   it('names the service, then the master, then when', () => {
-    expect(choiceLine({ services: ['Укладка'], master: null, when: null })).toBe('Укладка')
-    expect(choiceLine({ services: ['Укладка'], master: 'Мээрим', when: null })).toBe(
-      'Укладка · Мээрим',
+    expect(choiceLine({ services: ['Styling'], master: null, when: null })).toBe('Styling')
+    expect(choiceLine({ services: ['Styling'], master: 'Meerim', when: null })).toBe(
+      'Styling · Meerim',
     )
     expect(
-      choiceLine({ services: ['Укладка'], master: 'Любой мастер', when: 'пн, 23 нояб., 10:00' }),
-    ).toBe('Укладка · Любой мастер · пн, 23 нояб., 10:00')
+      choiceLine({ services: ['Styling'], master: 'Any specialist', when: 'Mon 23 Nov, 10:00' }),
+    ).toBe('Styling · Any specialist · Mon 23 Nov, 10:00')
   })
 
   it('counts added services instead of naming them all', () => {
     expect(
       choiceLine({
-        services: ['Мужская стрижка', 'Оформление бороды'],
-        master: 'Эрлан',
+        services: ["Men's haircut", 'Beard trim'],
+        master: 'Erlan',
         when: null,
       }),
-    ).toBe('Мужская стрижка +1 · Эрлан')
+    ).toBe("Men's haircut +1 · Erlan")
     expect(
-      choiceLine({ services: ['Маникюр', 'Педикюр', 'Покрытие'], master: null, when: null }),
-    ).toBe('Маникюр +2')
+      choiceLine({ services: ['Manicure', 'Pedicure', 'Gel polish'], master: null, when: null }),
+    ).toBe('Manicure +2')
   })
 })

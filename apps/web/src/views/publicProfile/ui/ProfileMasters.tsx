@@ -14,8 +14,8 @@ interface ProfileMastersProps {
 }
 
 // The masters as the place page shows them, 3:4 picture cards three a row (`MasterCard`), the
-// one visited most first; each says how often and how long ago («4 визита · 3 нед. назад») and
-// books that master. A big lead row with faces under it was «плохой выбор и нет удобства».
+// one visited most first; each says how often and how long ago («4 visits · 3 wk ago») and
+// books that master. A big lead row with faces under it was rejected as a poor choice and awkward.
 export const ProfileMasters = ({ masters }: ProfileMastersProps) => {
   const t = useT()
   const today = useToday()

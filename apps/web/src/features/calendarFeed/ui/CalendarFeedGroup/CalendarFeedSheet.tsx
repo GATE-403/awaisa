@@ -35,7 +35,7 @@ interface CalendarFeedSheetProps {
 
 const ALL = 'all'
 
-const readTime = new Intl.DateTimeFormat('ru-RU', {
+const readTime = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'long',
   hour: '2-digit',
@@ -43,7 +43,7 @@ const readTime = new Intl.DateTimeFormat('ru-RU', {
   timeZone: BUSINESS_TIME_ZONE,
 })
 
-// «Календарь на телефоне»: subscribe once and the visits stay in the phone's own calendar. The
+// «Calendar on your phone»: subscribe once and the visits stay in the phone's own calendar. The
 // address is secret and shown only when made, so a device without it asks for a new one.
 export const CalendarFeedSheet = ({
   scope,

@@ -54,7 +54,7 @@
   }
 }
 
-/* A thin glyph in one quiet colour, no tile («не даём фон иконкам, не добавляем цвета»);
+/* A thin glyph in one quiet colour, no tile (the owner: no background or colour on icons);
    WhatsApp keeps its own round mark, the one colour brands are allowed. */
 .glyph {
   display: inline-grid;

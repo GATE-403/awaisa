@@ -39,7 +39,7 @@ interface ProfileContentProps {
 
 type ProfileSection = 'medals' | 'masters' | 'places' | 'reviews'
 
-// Each tab's panel is also an anchor that opens it («Оценить» leads to `#profile-reviews`).
+// Each tab's panel is also an anchor that opens it («Rate» leads to `#profile-reviews`).
 const PANELS: Record<ProfileSection, string> = {
   medals: 'profile-medals',
   masters: 'profile-masters',
@@ -70,7 +70,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   const nextAchievement = profile.isOwn ? pickNextGoal(profile.achievements) : null
   const goal = nextAchievement ? describeGoal(nextAchievement, profile.places, t) : null
   const [tab, setTab] = useState<ProfileSection>('medals')
-  // «Оценить» and old links lead to a section by its anchor: it opens that tab.
+  // «Rate» and old links lead to a section by its anchor: it opens that tab.
   useEffect(() => {
     const open = () => {
       const found = (Object.keys(PANELS) as ProfileSection[]).find(
@@ -152,8 +152,8 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
             panel: (
               <div className={`${styles.tabPanel} ${styles.placesPanel}`}>
                 {/* The places first, as one plain line that scrolls sideways (no capsules), then
-                    the map the whole width with square edges («карту на всю ширину … капсулы
-                    вынеси вверх … списком в одну линию»). */}
+                    the map the whole width with square edges (the owner: the map full width,
+                    the places above it in one line). */}
                 <ul className={styles.placesLine} data-edge-fade=''>
                   {profile.places.map((place) => (
                     <li key={place.slug}>
@@ -186,7 +186,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
                 {profile.stats.average !== null && (
                   <p className={styles.average}>
                     <Star weight='fill' aria-hidden className={styles.star} />
-                    {profile.stats.average.toLocaleString('ru-RU')}
+                    {profile.stats.average.toLocaleString('en-GB')}
                   </p>
                 )}
                 {/* The latest visit waiting for stars, rated right here; the rest by the count. */}
@@ -234,7 +234,7 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
   return (
     <>
       <div className={styles.top}>
-        {/* Laid out like a profile in Telegram («очень много чего … как в телеграм»): the face,
+        {/* Laid out like a profile in Telegram (the owner: like Telegram): the face,
           the name and one quiet line; three action tiles; the data as one group of rows; the
           rest behind tabs instead of one long page. */}
         <header>
@@ -283,8 +283,8 @@ export const ProfileContent = ({ profile }: ProfileContentProps) => {
           </ProfileHead>
         </header>
 
-        {/* The actions in the corner as one capsule of thin glyphs («вынеси их в угол … сделай
-            капсульными кнопками»): in the sheet's bar when the profile is a sheet, else at the
+        {/* The actions in the corner as one capsule of thin glyphs (the owner: move them to the
+            corner as capsule buttons): in the sheet's bar when the profile is a sheet, else at the
             head row's end. */}
         {actionsSlot && createPortal(actions, actionsSlot)}
 

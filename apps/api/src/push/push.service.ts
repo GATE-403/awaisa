@@ -154,7 +154,7 @@ export class PushService {
   }
 
   // Members of the business, then the master by their sign-in phone; someone who is both hears
-  // once, as a member (the cabinet shows more than «Мой день»).
+  // once, as a member (the cabinet shows more than «My day»).
   private recipients(businessId: string, specialistId: string) {
     return this.dataSource.query(
       `SELECT DISTINCT ON (s."endpoint") s."id", s."kind", s."endpoint", s."p256dh", s."auth", r."audience"

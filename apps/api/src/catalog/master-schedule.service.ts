@@ -57,7 +57,7 @@ export class MasterScheduleService {
   async setHours(businessId: string, specialistId: string, input: HoursInput) {
     await this.owned(businessId, specialistId)
     const weekdays = new Set(input.days.map((day) => day.weekday))
-    if (weekdays.size !== input.days.length) throw new BadRequestException('Дни повторяются')
+    if (weekdays.size !== input.days.length) throw new BadRequestException('Days repeat')
     await this.dataSource.transaction(async (manager) => {
       await manager.update(Specialist, { id: specialistId }, { hasOwnHours: input.hasOwnHours })
       await manager.delete(SpecialistHours, { specialistId })
@@ -202,7 +202,7 @@ export class MasterScheduleService {
 
   private async owned(businessId: string, specialistId: string) {
     const specialist = await this.specialists.findOneBy({ id: specialistId, businessId })
-    if (!specialist) throw new NotFoundException('Мастер не найден')
+    if (!specialist) throw new NotFoundException('Specialist not found')
     return specialist
   }
 }

@@ -16,7 +16,7 @@ interface SubscriptionSheetProps {
   onClose: () => void
 }
 
-// The purchase: what the plan gives as Settings rows, «Купить N сом» in the bar. It is bought on
+// The purchase: what the plan gives as Settings rows, «Buy for N som» in the bar. It is bought on
 // the client's own number, so a guest signs in by SMS first and comes back to this section.
 export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheetProps) => {
   const session = useSession()
@@ -44,14 +44,14 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
 
   return (
     <Sheet
-      title='Pass'
+      title='Membership'
       onClose={onClose}
       action={{
         label: isSignedIn
           ? isPaying
-            ? 'Оплачиваем…'
-            : `Купить ${formatPrice(plan.price)}`
-          : 'Войти и купить',
+            ? 'Paying…'
+            : `Buy for ${formatPrice(plan.price)}`
+          : 'Sign in to buy',
         disabled: isPaying,
         onClick: () => void handleBuy(),
       }}
@@ -60,34 +60,34 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
         <section className={sheet.group} aria-label={plan.title}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Название</span>
+              <span className={sheet.rowLabel}>Name</span>
               <span className={sheet.rowControl}>{plan.title}</span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Услуга</span>
+              <span className={sheet.rowLabel}>Service</span>
               <span className={sheet.rowControl}>{plan.serviceName ?? 'Any'}</span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Визитов</span>
+              <span className={sheet.rowLabel}>Visits</span>
               <span className={sheet.rowControl}>{plan.visits}</span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Действует</span>
+              <span className={sheet.rowLabel}>Valid for</span>
               <span className={sheet.rowControl}>
-                {pluralize(plan.validDays, ['day', 'days'])} с оплаты
+                {pluralize(plan.validDays, ['day', 'days'])} from payment
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>Цена</span>
+              <span className={sheet.rowLabel}>Price</span>
               <span className={sheet.rowControl}>{formatPrice(plan.price)}</span>
             </div>
           </div>
           <p className={sheet.groupFooter}>
             {saving > 0 && plan.fullPrice !== null
-              ? `По отдельности ${formatPrice(plan.fullPrice)}, вы экономите ${formatPrice(saving)}. `
+              ? `Separately ${formatPrice(plan.fullPrice)}, you save ${formatPrice(saving)}. `
               : ''}
-            Оплата картой. Абонемент появится в профиле сразу после оплаты, визиты спишутся, когда
-            вы придёте.
+            Paid by card. The membership shows in your profile right after payment, and visits are
+            used when you come in.
           </p>
           {error && (
             <p className={sheet.groupFooter} role='alert'>

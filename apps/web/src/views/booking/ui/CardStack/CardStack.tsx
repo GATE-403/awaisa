@@ -28,7 +28,7 @@ interface StackCardProps {
 interface CardStackProps {
   cards: StackCardProps[]
   onEdit?: (id: string) => void
-  /** «Начать заново», offered under the open stack (a half-made booking is let go of here). */
+  /** Start over, offered under the open stack (a half-made booking is let go of here). */
   onStartOver?: () => void
   /** One more service for the visit, offered in passing at the end of the stack's foot line. */
   offer?: { name: string; price: string; onAdd: () => void }
@@ -145,7 +145,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
     if (!start || start.isSideways === null) return
     swallowClick.current = true
     // A drag released off where it began makes no click: the swallower must not eat the next
-    // real tap (after pulling the stack open, the first «Изменить» did nothing).
+    // real tap (after pulling the stack open, the first Change did nothing).
     window.setTimeout(() => {
       swallowClick.current = false
     }, 0)
@@ -199,7 +199,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
             <h2 id={`step-${card.id}-title`} className={styles.srOnly}>
               {card.title}
             </h2>
-            {/* Behind the front card only a strip peeks out: it names the step («Мастер · …»), and
+            {/* Behind the front card only a strip peeks out: it names the step ("Specialist · …"), and
                 the whole card fades in as the stack is pulled open. */}
             <span className={styles.peek} aria-hidden>
               <span className={styles.peekLabel}>{card.title}</span>
@@ -254,7 +254,7 @@ export const CardStack = ({ cards, onEdit, onStartOver, offer }: CardStackProps)
       {(offer || (isOpen && (onStartOver || (isFanned && count > 1)))) && (
         <div className={styles.foot}>
           {/* The offered service leads the line from the page's left edge, the same edge as the
-              step's heading below: alone on the right it hung off the edge («обрыв»). The
+              step's heading below: alone on the right it hung off the edge ("cut off"). The
               stack's own controls sit on the right. */}
           {offer && !(isFanned && count > 1) && (
             // Like a side dish offered under the main one: one line, no block of its own.

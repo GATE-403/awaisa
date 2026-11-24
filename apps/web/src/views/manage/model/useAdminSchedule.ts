@@ -80,7 +80,7 @@ export const useAdminSchedule = (slug: string, date: string | null, refreshKey =
     reload()
   }
 
-  // Cancelling is immediate and reversible: the toast offers «Вернуть» before the client is texted.
+  // Cancelling is immediate and reversible: the toast offers "Undo" before the client is texted.
   const cancelBooking = async (id: string) => {
     try {
       await cancelBookingAsSalon(slug, id)

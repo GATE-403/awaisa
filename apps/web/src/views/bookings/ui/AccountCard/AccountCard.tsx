@@ -30,9 +30,9 @@ interface AccountCardProps {
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
 // The account as one row above the records: the face (a tap changes the photo), the name and one
-// line of facts - the rest of the row opens «Мой профиль» - and a gear for the settings at its
-// end. The records lead the page; the account no longer pushes them down («профиль должен быть
-// самой удобной частью»). The cabinet lives in the tab bar; masters keep «Мой день» here.
+// line of facts - the rest of the row opens «My profile» - and a gear for the settings at its
+// end. The records lead the page; the account no longer pushes them down (the owner: the profile must be
+// the handiest part). The cabinet lives in the tab bar; masters keep «My day» here.
 export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardProps) => {
   const session = useSession()
   const t = useT()
@@ -56,7 +56,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   if (!customer) {
     return (
       // A guest's row like the signed-in account's: the mascot where the face would be, what
-      // these records are and «Войти» at the row's end - not a centred title over the records.
+      // these records are and «Sign in» at the row's end - not a centred title over the records.
       <section className={styles.guest} aria-label={t('Profile')} style={look}>
         <span className={styles.guestFace} aria-hidden>
           <Mascot />
@@ -137,7 +137,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   const level = myProfile.profile?.level.level
   const masterHref = masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master'
   // The same head as the profile itself (`ProfileHead`): the name with the status emoji over
-  // one quiet line «Уровень 4 · 20 визитов · 13 мест» («оставь один дизайн»).
+  // one quiet line «Level 4 · 20 visits · 13 places» (the owner: keep one design).
   const meta = [
     ...(level ? [t('Level {level}', { level })] : []),
     ...stats.map((stat) => `${stat.value} ${stat.label}`),

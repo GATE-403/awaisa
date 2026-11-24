@@ -34,7 +34,7 @@ const subscribe = (listener: () => void) => {
   return () => listeners.delete(listener)
 }
 
-/** The saved place, shared by the map, the booking form's branches and «Для вас». */
+/** The saved place, shared by the map, the booking form's branches and «For you». */
 const useMyPlace = () => useSyncExternalStore(subscribe, read, () => null)
 
 /** Read outside React (geo helpers); null on the server. */

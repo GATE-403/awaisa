@@ -18,7 +18,7 @@ import styles from './TicketViewer.module.css'
 interface TicketViewerProps {
   booking: Booking
   onClose: () => void
-  /** Slot under the ticket, e.g. «Добавить в Wallet» (features don't import features). */
+  /** Slot under the ticket, e.g. «Add to Wallet» (features don't import features). */
   extra?: ReactNode
 }
 
@@ -73,7 +73,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
         <div ref={ticketRef} className={styles.ticket}>
           <Ticket booking={booking} />
         </div>
-        <p className={styles.hint}>{t('Show it at the desk. «Download» saves it as a picture.')}</p>
+        <p className={styles.hint}>{t('Show it at the desk. “Download” saves it as a picture.')}</p>
         {extra}
       </div>
 
@@ -104,7 +104,7 @@ export const TicketViewer = ({ booking, onClose, extra }: TicketViewerProps) => 
               {formatPrice(booking.price - (booking.discount?.amount ?? 0))}
               {booking.discount && (
                 <span className={styles.note}>
-                  {t('with the «{title}» discount −{amount}', {
+                  {t('with the “{title}” discount −{amount}', {
                     title: booking.discount.title,
                     amount: formatPrice(booking.discount.amount),
                   })}

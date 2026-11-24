@@ -38,12 +38,12 @@ interface CabinetBarProps {
    * row, instead of a large title on the page. */
   nav?: ReactNode
   logoUrl?: string | null
-  /** Where «‹» leads, when not back out of the business side (a page opened from the cabinet
+  /** Where “‹” leads, when not back out of the business side (a page opened from the cabinet
    * goes back to that business and tab). */
   back?: { href: string; label: string }
 }
 
-// The cabinet's own window toolbar (macOS 26): «‹» back to where the person came in from (the
+// The cabinet's own window toolbar (macOS 26): “‹” back to where the person came in from (the
 // catalog, the profile…), the business as a switcher to the rest of their business side, tools.
 export const CabinetBar = ({
   slug,
@@ -60,7 +60,7 @@ export const CabinetBar = ({
   const router = useRouter()
   const { customer } = useSession()
   // Read after mount: the page is the same for everyone on the server.
-  // undefined until read, so «‹» never shows one word and then another.
+  // undefined until read, so “‹” never shows one word and then another.
   const [entry, setEntry] = useState<string | null | undefined>(undefined)
   const { hasUnread } = useUpdatesSeen()
   const barRef = useRef<HTMLDivElement>(null)
@@ -150,7 +150,7 @@ export const CabinetBar = ({
               <Megaphone aria-hidden />
             </NextLink>
             {/* On phones the page link and the theme move into the profile menu: four glyphs left
-                the business's name a few letters («даже часть названия не видно»). */}
+                the business's name a few letters ("not even part of the name shows"). */}
             <span className={styles.wideOnly}>
               <ThemeToggle />
             </span>

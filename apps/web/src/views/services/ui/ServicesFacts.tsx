@@ -10,7 +10,7 @@ interface ServicesFactsProps {
   minPrice: number
 }
 
-// «6 услуг · от 900 сом · 3 мастера» with bold figures, in the chosen language.
+// «6 services · from 900 som · 3 specialists» with bold figures.
 export const ServicesFacts = ({ servicesCount, mastersCount, minPrice }: ServicesFactsProps) => {
   const t = useT()
   const wordOf = (count: number, forms: [string, string]) =>

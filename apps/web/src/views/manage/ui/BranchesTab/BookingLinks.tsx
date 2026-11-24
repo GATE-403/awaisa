@@ -16,7 +16,7 @@ interface BookingLinksProps {
   branches: Branch[]
 }
 
-// One link per address for 2ГИС, Instagram or a QR on the door: the client lands on booking with
+// One link per address for 2GIS, Instagram or a QR on the door: the client lands on booking with
 // their branch already chosen.
 export const BookingLinks = ({ slug, branches }: BookingLinksProps) => {
   const toast = useToast()

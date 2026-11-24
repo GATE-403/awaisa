@@ -388,7 +388,7 @@
   padding: var(--space-2) var(--space-4) var(--space-4);
 }
 
-/* The action bar books on every width now (the desktop panel has it too): one «Записаться». */
+/* The action bar books on every width now (the desktop panel has it too): one Book. */
 
 .rowEmpty {
   color: var(--color-link);

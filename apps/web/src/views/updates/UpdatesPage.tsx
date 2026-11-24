@@ -7,13 +7,13 @@ import { BackToCabinet } from './ui/BackToCabinet'
 import { MarkUpdatesSeen } from './ui/MarkUpdatesSeen'
 
 const AUDIENCE_LABELS: Record<UpdateAudience, string | null> = {
-  clients: 'Для клиентов',
+  clients: 'For clients',
   business: 'For business',
   everyone: null,
 }
 
 // Day keys are calendar days: read them at noon UTC so no clock moves them to the day before.
-const dayFormatter = new Intl.DateTimeFormat('ru-RU', {
+const dayFormatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'long',
   timeZone: 'UTC',
@@ -27,7 +27,7 @@ const groupByDay = () => {
   return [...days.entries()]
 }
 
-// «Что нового»: one quiet column like the profile - a caption per day, then each change as a
+// "What's new": one quiet column like the profile - a caption per day, then each change as a
 // title and a line or two, with a link to try it.
 export const UpdatesPage = () => (
   <main className={styles.page}>
@@ -35,7 +35,7 @@ export const UpdatesPage = () => (
     <MarkUpdatesSeen />
     <div className={styles.column}>
       <header className={styles.head}>
-        <PageTitle title='Что нового.' subtitle='Обновления Awaisa.' />
+        <PageTitle title="What's new." subtitle='Awaisa updates.' />
       </header>
       {groupByDay().map(([day, entries]) => (
         <section key={day} className={styles.day} aria-labelledby={`day-${day}`}>

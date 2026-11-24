@@ -16,7 +16,7 @@ import styles from './PageTab.module.css'
 
 interface EditPageSheetProps {
   business: Business
-  /** The week in one line, e.g. «Ежедневно 09:00–21:00». */
+  /** The week in one line, e.g. "Daily 09:00-21:00". */
   hoursText: string
   /** Opens the hours' own sheet in place of this one. */
   onEditHours: () => void
@@ -37,7 +37,7 @@ const CONTACTS: { key: ContactField; label: string; placeholder?: string; type?:
 
 const FORM_ID = 'edit-page'
 
-// «Редактировать», like Instagram's «Edit profile»: everything written about the place in one
+// "Edit", like Instagram's "Edit profile": everything written about the place in one
 // sheet, so the page itself stays what clients see.
 export const EditPageSheet = ({
   business,

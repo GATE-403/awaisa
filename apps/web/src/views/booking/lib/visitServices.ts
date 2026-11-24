@@ -2,7 +2,7 @@ import { ANY_SPECIALIST_ID } from '@/entities/booking'
 import type { Service, Specialist } from '@/shared/api/types'
 import { MAX_VISIT_SERVICES } from '../config/visit'
 
-// A visit of several services done one after another by one master («маникюр и педикюр»).
+// A visit of several services done one after another by one master (a manicure and a pedicure).
 
 type MasterLike = Pick<Specialist, 'id' | 'serviceIds' | 'branchId'>
 
@@ -23,7 +23,7 @@ const getMastersForAll = <Master extends MasterLike>(
       )
 
 /**
- * The visit as one service for everything that shows a service: names joined with « + », the
+ * The visit as one service for everything that shows a service: names joined with “ + ”, the
  * price, length and deposit added up; the first service's id, category and picture.
  */
 const combineServices = (services: Service[]): Service | undefined => {
@@ -54,7 +54,7 @@ const getAddableServices = <Master extends MasterLike>({
   services: Service[]
   masters: Master[]
   chosenIds: string[]
-  /** A master already chosen («любой» or none: anyone who does everything counts). */
+  /** A master already chosen (any or none: anyone who does everything counts). */
   specialistId: string | null
   branchId?: string
 }) => {
@@ -69,11 +69,12 @@ const getAddableServices = <Master extends MasterLike>({
   )
 }
 
-// What a service is, by its head words, to tell the same thing under another name («Классический
-// массаж» and «Массаж спины», «Женская стрижка» and «Детская стрижка»). Words that only describe it
-// are left out: adjectives («классический», «мужская») and what follows «с», «без», «для», «на»
-// («с покрытием»), or «Маникюр с покрытием» and «Педикюр с покрытием» would read as one thing.
-// The roots: words of four letters and more, their first five letters, «ё» read as «е».
+// Service names are stored in Russian, so the words below are matched as data.
+// What a service is, by its head words, to tell the same thing under another name (“Классический
+// массаж” and “Массаж спины”, “Женская стрижка” and “Детская стрижка”). Words that only describe it
+// are left out: adjectives (“классический”, “мужская”) and what follows “с”, “без”, “для”, “на”
+// (“с покрытием”), or “Маникюр с покрытием” and “Педикюр с покрытием” would read as one thing.
+// The roots: words of four letters and more, their first five letters, “ё” read as “е”.
 const DESCRIBING_ENDING = /(ий|ый|ой|ая|яя|ое|ые)$/
 const PREPOSITIONS = new Set(['с', 'со', 'без', 'для', 'на'])
 

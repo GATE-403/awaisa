@@ -14,7 +14,7 @@ interface SubscriptionsSectionProps {
   plans: OnlineSubscriptionPlan[]
 }
 
-// «Абонементы»: the plans the owner sells online, as rows right on the page (what, for how long,
+// «Memberships»: the plans the owner sells online, as rows right on the page (what, for how long,
 // the price and what it saves); a row opens the purchase.
 export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionProps) => {
   const [chosen, setChosen] = useState<OnlineSubscriptionPlan | null>(null)
@@ -24,7 +24,7 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
     <section id='subscriptions' className={styles.section} aria-labelledby='place-subscriptions'>
       <div className={styles.sectionHead}>
         <h2 id='place-subscriptions' className={styles.sectionTitle}>
-          Абонементы
+          Memberships
         </h2>
         <span className={styles.sectionCount}>{plans.length}</span>
       </div>
@@ -40,13 +40,13 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
                     {[
                       pluralize(plan.visits, ['visit', 'visits']),
                       plan.serviceName ?? 'any service',
-                      `${plan.validDays} дн.`,
+                      pluralize(plan.validDays, ['day', 'days']),
                     ].join(' · ')}
                   </span>
                 </span>
                 <span className={own.money}>
                   <span className={own.price}>{formatPrice(plan.price)}</span>
-                  {saving > 0 && <span className={own.saving}>выгода {formatPrice(saving)}</span>}
+                  {saving > 0 && <span className={own.saving}>save {formatPrice(saving)}</span>}
                 </span>
                 <CaretRight className={own.chevron} aria-hidden />
               </button>

@@ -3,7 +3,7 @@
 import { useCallback, useSyncExternalStore } from 'react'
 import { LATEST_UPDATE_ID } from '@/shared/config/updates'
 
-// The newest «Что нового» entry this device has opened; a dot marks the way in until it has.
+// The newest «What's new» entry this device has opened; a dot marks the way in until it has.
 const SEEN_KEY = 'awaisa:updates-seen:v1'
 const listeners = new Set<() => void>()
 

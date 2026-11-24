@@ -140,7 +140,7 @@ const nextAttemptDelayMs = (attempts: number) =>
 /** A provider that keeps refusing stops being asked; the owner can send it again by hand. */
 const hasGivenUp = (attempts: number) => attempts >= MAX_ATTEMPTS
 
-// Kyrgyz ИНН: 14 digits, for people and companies alike.
+// Kyrgyz TIN (ИНН): 14 digits, for people and companies alike.
 const INN_PATTERN = /^\d{14}$/
 
 export type {

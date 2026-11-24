@@ -104,10 +104,10 @@
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   color: var(--color-muted-foreground);
-  /* The kit's caption size: 11px under the glyphs read as fine print beside «Каталог». */
+  /* The kit's caption size: 11px under the glyphs read as fine print beside Catalogue. */
   font-size: var(--text-xs);
   line-height: 14px;
-  /* Regular words under light glyphs («текст и иконки слишком жирные»). */
+  /* Regular words under light glyphs ("text and icons are too bold"). */
   font-weight: var(--font-weight-regular);
   white-space: nowrap;
   transition: color var(--duration-fast) var(--ease-standard);
@@ -178,7 +178,7 @@
   color: inherit;
 }
 
-/* The chosen category in the accent, its words and glyph alike («выдели лучше синим»); on phones
+/* The chosen category in the accent, its words and glyph alike ("better highlight it in blue"); on phones
    on a faint wash of the accent. */
 .category[aria-current="page"] {
   background: color-mix(in srgb, var(--color-primary) 12%, transparent);
@@ -212,7 +212,7 @@
   }
 }
 
-/* From tablets: one row like a marketplace - logo, «Каталог», search, labelled actions. */
+/* From tablets: one row like a marketplace - logo, Catalogue, search, labelled actions. */
 @media (min-width: 768px) {
   .header:not([data-slim]) .home svg + svg {
     display: block;
@@ -326,7 +326,7 @@
   }
 }
 
-/* «Работы» (like Shorts) and the profile are full screen on phones: only the tab bar stays. */
+/* Looks (like Shorts) and the profile are full screen on phones: only the tab bar stays. */
 @media (max-width: 767px) {
   .header[data-phone-hidden] {
     display: none;
@@ -359,8 +359,8 @@
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
 
-/* Tablets: the city link keeps to «Бишкек» and the categories drop their glyphs, so every
-   category fits beside it - on an iPad «Другое» used to hide under the city link. */
+/* Tablets: the city link keeps to Bishkek and the categories drop their glyphs, so every
+   category fits beside it - on an iPad Other used to hide under the city link. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .cityMore {
     display: none;

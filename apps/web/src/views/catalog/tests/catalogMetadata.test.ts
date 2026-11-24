@@ -10,7 +10,9 @@ describe('catalogMetadata', () => {
 
   it('gives each kind its own title and canonical', () => {
     const metadata = catalogMetadata({ kind: 'barber' })
-    expect(metadata.title).toEqual({ absolute: 'Барбершопы Бишкека: цены и онлайн-запись' })
+    expect(metadata.title).toEqual({
+      absolute: 'Barbershops in Bishkek: prices and online booking',
+    })
     expect(metadata.alternates?.canonical).toBe('/?kind=barber')
     expect(metadata.robots).toBeUndefined()
   })
@@ -21,12 +23,12 @@ describe('catalogMetadata', () => {
   })
 
   it('keeps searches out of the index but lets links be followed', () => {
-    const metadata = catalogMetadata({ q: 'стрижка', kind: 'barber' })
+    const metadata = catalogMetadata({ q: 'haircut', kind: 'barber' })
     expect(metadata.robots).toEqual({ index: false, follow: true })
     expect(metadata.alternates?.canonical).toBe('/?kind=barber')
   })
 
-  it('does not index «Другое» or an unknown kind as landings', () => {
+  it('does not index «Other» or an unknown kind as landings', () => {
     expect(catalogMetadata({ kind: 'other' }).robots).toEqual({ index: false, follow: true })
     expect(catalogMetadata({ kind: 'other' }).alternates?.canonical).toBe('/')
     expect(catalogMetadata({ kind: 'nope' }).alternates?.canonical).toBe('/')

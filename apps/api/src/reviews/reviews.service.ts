@@ -71,10 +71,10 @@ const MAX_REVIEW_PHOTOS = 3
 // Buttons under a review in Telegram: a few quick replies keep the message short.
 const TELEGRAM_QUICK_REPLIES = 3
 
-// Shown publicly as «Айгерим С.»: a first name and an initial, never the full name.
+// Shown publicly as «Aigerim S.»: a first name and an initial, never the full name.
 const toAuthorName = (name: string) => {
   const [first = '', last = ''] = name.trim().split(/\s+/)
-  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Клиент'
+  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Client'
 }
 
 const toView = (row: ReviewRow, authorId: string | null = null) => ({
@@ -124,7 +124,7 @@ export class ReviewsService {
       .slice(0, 20)
   }
 
-  /** A reviewer's public page: their «Имя Ф.», face and reviews of published places. */
+  /** A reviewer's public page: their «Name I.», face and reviews of published places. */
   async reviewer(id: string) {
     const rows = (await this.dataSource.query(
       `SELECT r."id", r."rating", r."comment", r."author_name" AS "authorName", r."reply",
@@ -146,7 +146,7 @@ export class ReviewsService {
       [id, this.reviewerSalt()],
     )) as ReviewerRow[]
     const [latest] = rows
-    if (!latest) throw new NotFoundException('Профиль не найден')
+    if (!latest) throw new NotFoundException('Profile not found')
     const total = rows.reduce((sum, row) => sum + Number(row.rating), 0)
 
     return {
@@ -182,10 +182,10 @@ export class ReviewsService {
   async create(bookingId: string, access: Access, input: CreateReviewInput) {
     const booking = await this.authorize(bookingId, access)
     if (!this.canReview(booking)) {
-      throw new ForbiddenException('Оценить можно после визита')
+      throw new ForbiddenException('You can rate it after the visit')
     }
     if (await this.reviews.existsBy({ bookingId })) {
-      throw new ConflictException('Вы уже оценили этот визит')
+      throw new ConflictException('You have already rated this visit')
     }
 
     const review = await this.reviews.save(
@@ -210,7 +210,7 @@ export class ReviewsService {
     // A poor rating asks for a person's answer today: the message links straight to it.
     const answerUrl = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/manage/${view.business.slug}?tab=reviews`
     // Answered from the chat itself: the place's quick replies (filled with this client's name) as
-    // buttons, «Свой ответ», and the cabinet.
+    // buttons, «Write my own», and the cabinet.
     const { quickReplies } = await this.replies.getSettings({ id: booking.businessId })
     const context = {
       authorName: review.authorName,
@@ -236,19 +236,19 @@ export class ReviewsService {
   }
 
   /**
-   * A picture for the visit's review (three at most). It also goes to the place's «Работы»,
+   * A picture for the visit's review (three at most). It also goes to the place's «Work»,
    * tagged with the visit's service and master, while there is room there.
    */
   async addPhoto(bookingId: string, access: Access, file: Buffer) {
     const booking = await this.authorize(bookingId, access)
     const review = await this.reviews.findOneBy({ bookingId })
-    if (!review) throw new NotFoundException('Сначала оцените визит')
+    if (!review) throw new NotFoundException('Rate the visit first')
     const [count] = (await this.dataSource.query(
       'SELECT COUNT(*)::int AS "count" FROM "review_photos" WHERE "review_id" = $1',
       [review.id],
     )) as { count: number }[]
     if ((count?.count ?? 0) >= MAX_REVIEW_PHOTOS) {
-      throw new BadRequestException(`Можно до ${MAX_REVIEW_PHOTOS} фото`)
+      throw new BadRequestException(`Up to ${MAX_REVIEW_PHOTOS} photos`)
     }
     const url = await this.storage.put(
       `${booking.businessId}/${randomUUID()}.webp`,
@@ -258,7 +258,7 @@ export class ReviewsService {
       'INSERT INTO "review_photos" ("review_id", "url") VALUES ($1, $2)',
       [review.id, url],
     )
-    // The client's result joins «Образы» like a visit photo; a place full of the owner's own
+    // The client's result joins «Looks» like a visit photo; a place full of the owner's own
     // pictures keeps them, and the review still shows it.
     const room = await this.workPhotos
       .makeRoomForVisit(booking.businessId)
@@ -301,7 +301,7 @@ export class ReviewsService {
 
   async reply(business: Business, id: string, text: string) {
     const review = await this.reviews.findOneBy({ id, businessId: business.id })
-    if (!review) throw new NotFoundException('Отзыв не найден')
+    if (!review) throw new NotFoundException('Review not found')
     await this.reviews.update(
       { id },
       { reply: text || null, repliedAt: text ? new Date() : null, isAutoReply: false },
@@ -310,10 +310,10 @@ export class ReviewsService {
     return { id, reply: text || null }
   }
 
-  /** «Решено»: the owner has settled a poor review with the client (or takes the mark back). */
+  /** «Resolved»: the owner has settled a poor review with the client (or takes the mark back). */
   async setResolved(business: Business, id: string, isResolved: boolean) {
     const review = await this.reviews.findOneBy({ id, businessId: business.id })
-    if (!review) throw new NotFoundException('Отзыв не найден')
+    if (!review) throw new NotFoundException('Review not found')
     const resolvedAt = isResolved ? new Date() : null
     await this.reviews.update({ id }, { resolvedAt })
 
@@ -350,7 +350,7 @@ export class ReviewsService {
         const link = `${webUrl}/review/${row.id}?s=${this.signature(row.id)}`
         return this.clientMessages.send(row.phone, {
           text: reviewRequestMessage(row.businessName, link),
-          link: { label: 'Оценить', url: link },
+          link: { label: 'Rate', url: link },
           whatsapp: whatsappReviewRequest(row.businessName, link),
           billing: { businessId: row.businessId, isOptional: true },
         })
@@ -401,7 +401,7 @@ export class ReviewsService {
            : ''
        }${
          // The cabinet answers reviews: besides the latest ones it gets older ones still waiting
-         // for a reply, up to the same number again, so «Без ответа» is never cut to a handful.
+         // for a reply, up to the same number again, so «Unanswered» is never cut to a handful.
          isManage
            ? ` AND (r."reply" IS NULL OR r."id" IN (SELECT "id" FROM "reviews"
                WHERE "business_id" = $1 ORDER BY "created_at" DESC LIMIT $2))`
@@ -457,7 +457,7 @@ export class ReviewsService {
     const booking = this.isSigned(bookingId, signature)
       ? await this.bookings.findById(bookingId)
       : await this.bookings.findAccessible(bookingId, token, customer)
-    if (!booking) throw new NotFoundException('Запись не найдена')
+    if (!booking) throw new NotFoundException('Booking not found')
 
     return booking
   }

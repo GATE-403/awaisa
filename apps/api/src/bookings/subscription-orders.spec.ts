@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { coversService, fullPrice, issuedSubscription, shouldIssue } from './subscription-orders.js'
 
-const terms = { title: '5 стрижек', serviceId: 'cut', visits: 5, validDays: 90, amount: 6000 }
+const terms = { title: '5 haircuts', serviceId: 'cut', visits: 5, validDays: 90, amount: 6000 }
 
 describe('shouldIssue', () => {
   it('issues the subscription for an order still waiting for its payment', () => {
@@ -22,7 +22,7 @@ describe('issuedSubscription', () => {
     // 20:30 UTC on 21 Nov is 02:30 on 22 Nov in Bishkek.
     const paidAt = new Date('2026-11-21T20:30:00Z')
     expect(issuedSubscription(terms, paidAt)).toEqual({
-      title: '5 стрижек',
+      title: '5 haircuts',
       serviceId: 'cut',
       visitsTotal: 5,
       visitsLeft: 5,

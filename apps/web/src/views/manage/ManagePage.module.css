@@ -25,7 +25,7 @@
   min-width: 0;
   max-width: 840px;
   /* One centred column: pressed to the left of a wide window, its centred empty states read as
-     off-centre («почему заглушка не по центру»). */
+     off-centre ("why is the placeholder off-centre"). */
   margin-inline: auto;
 }
 
@@ -51,7 +51,7 @@
   }
 }
 
-/* Settings: phones show the list alone, a section with «‹ Настройки» back to it; from 1024px
+/* Settings: phones show the list alone, a section with "‹ Settings" back to it; from 1024px
    the list is a sidebar beside the open section, like macOS System Settings. */
 .layout {
   display: flex;
@@ -124,7 +124,7 @@
   }
 }
 
-/* «На всю ширину»: the schedule's board runs to the window's foot as well as its sides - no page
+/* "Full width": the schedule's board runs to the window's foot as well as its sides - no page
    padding under it (scoped to this page, which leaves the active tree with the route). */
 .page:has([data-schedule-board][data-wide]) {
   padding-bottom: 0;
@@ -160,7 +160,7 @@
 }
 
 /* Phones: the cabinet is dense, like Settings - 8pt under the bar, 16pt between blocks. The 20 and
-   24 of wide screens left a screen's worth of air over a list («много свободного места»). */
+   24 of wide screens left a screen's worth of air over a list ("a lot of empty space"). */
 @media (max-width: 639px) {
   .content {
     gap: var(--space-4);
@@ -173,7 +173,7 @@
   }
 }
 
-/* «Страница»: its cover runs the window's width (100vw), which a classic scrollbar would push a
+/* "Page": its cover runs the window's width (100vw), which a classic scrollbar would push a
    few pixels past the edge; the sliver is clipped, never scrolled to. */
 .page:has([data-page-tab]) {
   overflow-x: clip;
@@ -184,8 +184,8 @@
   margin-top: 0;
 }
 
-/* «Запуск записи» is a banner right under the cabinet bar, no air above it («убери эти лишние
-   отступы»): it takes back the page's top margin. */
+/* "Booking setup" is a banner right under the cabinet bar, no air above it ("remove those extra
+   margins"): it takes back the page's top margin. */
 .content .setup:has(*) {
   margin-top: calc(-1 * var(--space-5));
 }
@@ -194,8 +194,8 @@
   margin-top: calc(-1 * var(--space-3));
 }
 
-/* On «Страница» the banner would sit on the place's coloured cover, two bands clashing; that
-   page names what it lacks itself («+ О себе · + 3 фото работ»), and its tabs are the steps. */
+/* On "Page" the banner would sit on the place's coloured cover, two bands clashing; that
+   page names what it lacks itself ("+ About · + 3 work photos"), and its tabs are the steps. */
 .content:has([data-page-tab]) .setup {
   display: none;
 }

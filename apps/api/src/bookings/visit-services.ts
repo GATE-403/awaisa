@@ -21,12 +21,12 @@ const mastersForAll = <Master extends { id: string }>(perService: Master[][]) =>
 const noMasterMessage = (specialistId: string, isSeveral: boolean) => {
   if (specialistId === ANY_SPECIALIST_ID) {
     return isSeveral
-      ? 'Нет мастера, который делает все выбранные услуги'
-      : 'В этом филиале нет мастеров на эту услугу'
+      ? 'No specialist does all the chosen services'
+      : 'No specialist at this branch does this service'
   }
   return isSeveral
-    ? 'Этот мастер не делает все выбранные услуги'
-    : 'Этот мастер не выполняет выбранную услугу'
+    ? "This specialist doesn't do all the chosen services"
+    : "This specialist doesn't do the chosen service"
 }
 
 export { mastersForAll, noMasterMessage, visitCost, visitLength }

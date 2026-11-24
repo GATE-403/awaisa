@@ -20,7 +20,7 @@ interface CalendarFeedGroupProps {
   listClassName?: string
 }
 
-// «Календарь на телефоне ›» as a Settings row; the sheet does the rest.
+// «Calendar on your phone ›» as a Settings row; the sheet does the rest.
 export const CalendarFeedGroup = ({
   scope,
   masters,

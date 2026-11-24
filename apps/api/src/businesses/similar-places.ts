@@ -2,7 +2,7 @@ import { haversineKm } from '../recommendations/distance.js'
 
 type Pin = { latitude: number; longitude: number }
 
-/** What «похоже» is judged by, for the place being viewed and each candidate of its kind. */
+/** What 'similar' is judged by, for the place being viewed and each candidate of its kind. */
 type PlaceSignals = {
   slug: string
   pins: Pin[]
@@ -21,7 +21,7 @@ const MENU_WEIGHT = 3
 // A similar price level: no gap, full weight; a place three times dearer or cheaper, none.
 const PRICE_WEIGHT = 1.5
 const PRICE_SPAN = Math.log(3)
-// Rating pulled toward the platform's usual 4.3 until there are reviews (the same as «Для вас»).
+// Rating pulled toward the platform's usual 4.3 until there are reviews (the same as 'For you').
 const RATING_WEIGHT = 2
 const RATING_PRIOR = 4.3
 const RATING_PRIOR_REVIEWS = 10

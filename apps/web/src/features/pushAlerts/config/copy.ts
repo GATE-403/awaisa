@@ -2,7 +2,7 @@
 
 // iPhone Safari cannot take pushes: the site has to be on the home screen first (iOS 16.4+).
 const INSTALL_HINT =
-  'On iPhone, notifications only come from the app: «Share» → «Add to Home Screen», then turn them on there.'
+  'On iPhone, notifications only come from the app: “Share” → “Add to Home Screen”, then turn them on there.'
 
 const DENIED_HINT =
   'Notifications are blocked for this site in your browser settings: allow them there.'

@@ -29,14 +29,14 @@ interface AttentionRowProps {
   tone: 'orange' | 'blue' | 'red' | 'gray'
   title: ReactNode
   detail?: string
-  /** What the row does, said at its end: «Отметить», «Позвать». */
+  /** What the row does, said at its end: "Mark", "Invite". */
   actionLabel: string
   href?: string
   onClick?: () => void
 }
 
-// One thing to do, the whole row one tap target: a thin glyph in its colour (no tinted disc: «плохой
-// вариант»), what it is, and the action named at the end with a chevron.
+// One thing to do, the whole row one tap target: a thin glyph in its colour (no tinted disc: "a bad
+// option"), what it is, and the action named at the end with a chevron.
 const AttentionRow = ({
   icon,
   tone,
@@ -263,7 +263,7 @@ interface GoalSheetProps {
 
 const GOAL_FORM = 'analytics-goal'
 
-// The month's revenue goal: one amount, and «Убрать цель» when there is one.
+// The month's revenue goal: one amount, and "Remove goal" when there is one.
 const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
   const t = useT()
   const [value, setValue] = useState(goal ? maskAmountInput(String(goal)) : '')

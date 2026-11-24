@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 const CITY_ITEMS = [
   { value: 'bishkek', label: 'Bishkek' },
-  { value: 'osh', label: 'Ош' },
-  { value: 'karakol', label: 'Каракол' },
+  { value: 'osh', label: 'Osh' },
+  { value: 'karakol', label: 'Karakol' },
 ]
 
 const UiKitPage = () => (
@@ -54,13 +54,13 @@ const UiKitPage = () => (
 
     <section className={styles.section}>
       <h2 className={styles.heading}>Field · Input · Select</h2>
-      <Field label='Email' description='Мы не передаём почту третьим лицам'>
+      <Field label='Email' description='We never share your email'>
         <Input type='email' placeholder='name@example.com' />
       </Field>
-      <Field label='Password' error='Минимум 8 символов'>
+      <Field label='Password' error='At least 8 characters'>
         <Input type='password' defaultValue='123' />
       </Field>
-      <Select items={CITY_ITEMS} placeholder='Выберите город' aria-label='City' />
+      <Select items={CITY_ITEMS} placeholder='Choose a city' aria-label='City' />
     </section>
 
     <section className={styles.section}>
@@ -68,25 +68,25 @@ const UiKitPage = () => (
       <div className={styles.row}>
         <label className={styles.row}>
           <Checkbox defaultChecked />
-          Запомнить меня
+          Remember me
         </label>
         <label className={styles.row}>
           <Checkbox indeterminate />
-          Частично
+          Partly
         </label>
         <label className={styles.row}>
           <Switch defaultChecked />
-          Уведомления
+          Notifications
         </label>
       </div>
       <RadioGroup defaultValue='card' aria-label='Payment method' className={styles.row}>
         <label className={styles.row}>
           <Radio value='card' />
-          Картой
+          By card
         </label>
         <label className={styles.row}>
           <Radio value='cash' />
-          Наличными
+          In cash
         </label>
       </RadioGroup>
     </section>
@@ -94,8 +94,8 @@ const UiKitPage = () => (
     <section className={styles.section}>
       <h2 className={styles.heading}>RadioCard</h2>
       <RadioGroup defaultValue='pro' aria-label='Plan' className={styles.cards}>
-        <RadioCard value='basic' title='Базовый' description='Для знакомства' />
-        <RadioCard value='pro' title='Pro' description='Всё без ограничений' size='lg' />
+        <RadioCard value='basic' title='Basic' description='To get to know it' />
+        <RadioCard value='pro' title='Pro' description='Everything, no limits' size='lg' />
       </RadioGroup>
     </section>
 
@@ -103,13 +103,13 @@ const UiKitPage = () => (
       <h2 className={styles.heading}>Dialog · Skeleton</h2>
       <div className={styles.row}>
         <Dialog>
-          <DialogTrigger render={<Button variant='outline' />}>Открыть диалог</DialogTrigger>
+          <DialogTrigger render={<Button variant='outline' />}>Open dialog</DialogTrigger>
           <DialogContent>
-            <DialogTitle>Удалить проект?</DialogTitle>
-            <DialogDescription>Это действие нельзя отменить.</DialogDescription>
+            <DialogTitle>Delete the project?</DialogTitle>
+            <DialogDescription>This cannot be undone.</DialogDescription>
             <DialogFooter>
-              <DialogClose render={<Button variant='ghost' />}>Отмена</DialogClose>
-              <DialogClose render={<Button variant='danger' />}>Удалить</DialogClose>
+              <DialogClose render={<Button variant='ghost' />}>Cancel</DialogClose>
+              <DialogClose render={<Button variant='danger' />}>Delete</DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>

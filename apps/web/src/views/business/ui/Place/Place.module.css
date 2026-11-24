@@ -10,7 +10,7 @@
 }
 
 .page {
-  /* The owner's «Страница» as clients see it: one 640px column, on phones the page's gutter. */
+  /* The owner's «Page» as clients see it: one 640px column, on phones the page's gutter. */
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -38,7 +38,7 @@
 
 /* ---------- Head ---------- */
 
-/* «SPA и массаж · ул. Ахунбаева, 98»: the quiet line under the name, like a handle. */
+/* «Spa and massage · 98 Akhunbaev St»: the quiet line under the name, like a handle. */
 .handle {
   display: flex;
   gap: var(--space-2);
@@ -84,7 +84,7 @@
   color: var(--color-rating);
 }
 
-/* «Открыто до 21:00»: green while open, like the owner's «Страница». */
+/* «Open until 21:00»: green while open, like the owner's «Page». */
 .status[data-open] {
   color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
@@ -118,7 +118,7 @@
   scroll-margin-top: calc(var(--header-height) + var(--business-bar-height, 0px) + var(--space-4));
 }
 
-/* Title and its count read as one phrase: «Услуги и цены  6». */
+/* Title and its count read as one phrase: «Services and prices  6». */
 .sectionHead {
   display: flex;
   align-items: baseline;
@@ -333,7 +333,7 @@
   text-align: right;
 }
 
-/* «Показать ещё»: the last shown review fades into the page and the button floats on the fade. */
+/* «Show more»: the last shown review fades into the page and the button floats on the fade. */
 /* The thread line: from the author's face down to the reply's. */
 .reviewStars {
   display: inline-flex;
@@ -450,7 +450,7 @@ details[open] > .info .infoChevron {
   rotate: 90deg;
 }
 
-/* A thin glyph in one quiet colour, no tile («не даём фон иконкам, не добавляем цвета»). */
+/* A thin glyph in one quiet colour, no tile (the owner: no backgrounds or extra colours on icons). */
 .glyph {
   display: inline-grid;
   place-items: center;
@@ -507,7 +507,7 @@ details[open] > .info .infoChevron {
   border-top: 0.5px solid var(--color-border);
 }
 
-/* ---------- «Ближайшее окно»: the same floating pill as «Продолжить запись» ---------- */
+/* ---------- «Next free time»: the same floating pill as «Continue booking» ---------- */
 
 /* One slim capsule over the tab bar in the place's colour (darkened for white text), the whole of
    it a link: the time over the service, a round white arrow. It tucks away while the page scrolls
@@ -669,7 +669,7 @@ details[open] > .info .infoChevron {
 
 /* ---------- Promotions under the place card ---------- */
 
-/* Open promotions: a row of small red capsules under the bio, like the owner's «Страница». */
+/* Open promotions: a row of small red capsules under the bio, like the owner's «Page». */
 .promotions {
   display: flex;
   flex-wrap: wrap;
@@ -692,7 +692,7 @@ details[open] > .info .infoChevron {
   white-space: nowrap;
 }
 
-/* «Похожие места»: a band of its own under the place - a lighter layer edge to edge with a
+/* «Similar places»: a band of its own under the place - a lighter layer edge to edge with a
    hairline on top - holding the catalog's place cards in one row that scrolls sideways. */
 .similar {
   padding: var(--space-8) 0 var(--space-10);
@@ -766,8 +766,8 @@ details[open] > .info .infoChevron {
   right: 0;
 }
 
-/* Phones keep three glyphs beside «Записаться» (share goes), narrower ones two (directions too),
-   so the logo, «Записаться» and the glyphs fit one line; the contacts below keep them all. */
+/* Phones keep three glyphs beside «Book» (share goes), narrower ones two (directions too),
+   so the logo, «Book» and the glyphs fit one line; the contacts below keep them all. */
 @media (max-width: 429px) {
   .contactGlyph:nth-child(n + 4) {
     display: none;

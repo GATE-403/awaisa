@@ -89,7 +89,7 @@ export class PromotionsService {
       const code = (error as QueryFailedError & { driverError?: { code?: string } }).driverError
         ?.code
       if (error instanceof QueryFailedError && code === '23505') {
-        throw new ConflictException('Такой промокод уже есть')
+        throw new ConflictException('This promo code already exists')
       }
       throw error
     }
@@ -106,7 +106,7 @@ export class PromotionsService {
       'SELECT "id" FROM "businesses" WHERE "slug" = $1 AND "is_published"',
       [slug],
     )) as { id: string }[]
-    if (!business) throw new NotFoundException('Бизнес не найден')
+    if (!business) throw new NotFoundException('Business not found')
 
     return this.publicFor(business.id)
   }
@@ -129,11 +129,11 @@ export class PromotionsService {
       toRule,
     )
     if (rules.length === 0) {
-      if (normalizeCode(request.code)) throw new BadRequestException('Такого промокода нет')
+      if (normalizeCode(request.code)) throw new BadRequestException('No such promo code')
       return null
     }
     if (normalizeCode(request.code) && !isKnownCode(rules, request.code)) {
-      throw new BadRequestException('Такого промокода нет')
+      throw new BadRequestException('No such promo code')
     }
 
     return bestDiscount(rules, {
@@ -163,7 +163,7 @@ export class PromotionsService {
     accountPhone: string | null,
   ) {
     const service = await this.services.findOneBy({ id: query.serviceId, isActive: true })
-    if (!service) throw new NotFoundException('Услуга не найдена')
+    if (!service) throw new NotFoundException('Service not found')
     const extraIds = query.extraServiceIds ?? []
     const found =
       extraIds.length > 0
@@ -214,7 +214,7 @@ export class PromotionsService {
 
   private async findOwned(businessId: string, id: string) {
     const promotion = await this.promotions.findOneBy({ id, businessId })
-    if (!promotion) throw new NotFoundException('Акция не найдена')
+    if (!promotion) throw new NotFoundException('Promotion not found')
     return promotion
   }
 }

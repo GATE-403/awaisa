@@ -39,7 +39,7 @@ type WaitlistView = {
   business: { name: string; slug: string }
 }
 
-// «Сообщить, когда освободится»: a client waits for a full day; when a time opens up (a client
+// «Let me know when a time opens up»: a client waits for a full day; when a time opens up (a client
 // cancels, the salon frees time, a visit moves) they get one SMS with a link to that time.
 @Injectable()
 export class WaitlistService {
@@ -58,7 +58,7 @@ export class WaitlistService {
 
   async join(input: JoinWaitlistInput, customer: Customer | null) {
     const phone = customer?.phone ?? normalizePhone(input.phone)
-    if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
+    if (!phone) throw new BadRequestException('Enter a valid phone number')
 
     // Same rules as booking (date range, published page, the master does the service); a day with
     // free time does not need a waitlist - the client books it instead.
@@ -71,7 +71,7 @@ export class WaitlistService {
       branchId: input.branchId,
     })
     if (slots.some((slot) => slot.isAvailable)) {
-      throw new ConflictException('В этот день есть свободное время - выберите его')
+      throw new ConflictException('There is free time on this day: pick it')
     }
 
     const service = await this.catalog.getActiveService(input.serviceId)
@@ -147,7 +147,7 @@ export class WaitlistService {
   async leaveForCustomer(id: string, customer: Customer) {
     const entry = await this.entries.findOneBy({ id })
     if (!entry || (entry.customerId !== customer.id && entry.customerPhone !== customer.phone)) {
-      throw new NotFoundException('Не найдено')
+      throw new NotFoundException('Not found')
     }
     if (entry.status === 'waiting') {
       entry.status = 'cancelled'
@@ -192,7 +192,7 @@ export class WaitlistService {
 
   async removeForBusiness(businessId: string, id: string) {
     const entry = await this.entries.findOneBy({ id, businessId })
-    if (!entry) throw new NotFoundException('Не найдено')
+    if (!entry) throw new NotFoundException('Not found')
     entry.status = 'cancelled'
     await this.entries.save(entry)
   }
@@ -266,7 +266,7 @@ export class WaitlistService {
       const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/${view.business.slug}/book?${params}`
       void this.clientMessages.send(entry.customerPhone, {
         text: waitlistFreedMessage(view.business.name, view.service.name, entry.date, time, link),
-        link: { label: 'Записаться', url: link },
+        link: { label: 'Book', url: link },
         whatsapp: whatsappWaitlistFreed(
           view.business.name,
           view.service.name,
@@ -294,7 +294,7 @@ export class WaitlistService {
     const expected = Buffer.from(entry?.tokenHash ?? '', 'hex')
     const actual = Buffer.from(hashToken(token), 'hex')
     if (!entry || expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
-      throw new NotFoundException('Не найдено')
+      throw new NotFoundException('Not found')
     }
 
     return entry

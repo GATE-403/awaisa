@@ -7,7 +7,7 @@ const toUtc = (dayKey: string) => {
   return Date.UTC(year, month - 1, day)
 }
 
-/** How long ago a visit was, short: «сегодня», «5 дн. назад», «3 нед. назад», «4 мес. назад». */
+/** How long ago a visit was, short: «today», «5 d ago», «3 wk ago», «4 mo ago». */
 export const agoLabel = (visitDayKey: string, todayKey: string, t: Translate) => {
   const days = Math.max(0, Math.round((toUtc(todayKey) - toUtc(visitDayKey)) / DAY_MS))
   if (days === 0) return t('today')

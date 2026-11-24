@@ -2,10 +2,10 @@ import type { MasterPay, MasterPayScheme } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
 import { pluralize } from '@/shared/lib/plural'
 
-const money = new Intl.NumberFormat('ru-RU')
-const som = (value: number) => `${money.format(value)} сом`
+const money = new Intl.NumberFormat('en-GB')
+const som = (value: number) => `${money.format(value)} som`
 
-// Russian when a caller passes no `t` (`useT()`'s), so older callers keep working.
+// Plain words when a caller passes no `t` (`useT()`'s), so older callers keep working.
 const fill = (text: string, vars?: Record<string, string | number>) =>
   text.replace(/\{(\w+)\}/g, (match, key: string) => String(vars?.[key] ?? match))
 
@@ -15,7 +15,7 @@ const sayer = (t?: Translate) => ({
     t ? t.count(count, forms) : pluralize(count, forms),
 })
 
-/** One line for the «Зарплата» row: «40% · 2 ставки · 5% с товаров · оклад 30 000 в месяц · минимум 20 000». */
+/** One line for the "Pay" row: "40% · 2 rates · 5% of products · salary 30,000 a month · minimum 20,000". */
 const describePayScheme = (scheme: MasterPayScheme, t?: Translate) => {
   const { say, count } = sayer(t)
   const parts = [
@@ -36,7 +36,7 @@ const describePayScheme = (scheme: MasterPayScheme, t?: Translate) => {
   return parts.length === 0 ? say('Not set') : parts.join(' · ')
 }
 
-/** The master's percent when it alone decided the pay («к выплате 1 000 сом · 40%»). */
+/** The master's percent when it alone decided the pay ("1,000 som due · 40%"). */
 const plainPercent = (pay: MasterPay, percent: number | null) =>
   percent !== null &&
   pay.salary === 0 &&
@@ -46,7 +46,7 @@ const plainPercent = (pay: MasterPay, percent: number | null) =>
     ? percent
     : null
 
-/** How a service line was counted: «40%», «300 сом × 2», «без ставки». */
+/** How a service line was counted: "40%", "300 som × 2", "no rate". */
 const describeRate = (line: MasterPay['lines'][number], t?: Translate) => {
   const { say } = sayer(t)
   const amount = (value: number) => say('{amount} som', { amount: money.format(value) })

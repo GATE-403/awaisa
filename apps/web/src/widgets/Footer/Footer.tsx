@@ -38,7 +38,7 @@ const COLUMNS = [
 export const Footer = () => (
   <footer data-site-footer className={styles.footer}>
     <Container className={styles.inner}>
-      <nav className={styles.columns} aria-label='Карта сайта'>
+      <nav className={styles.columns} aria-label='Site map'>
         {COLUMNS.map((column) => (
           <FooterColumn key={column.title} className={styles.column}>
             <summary className={styles.columnTitle}>

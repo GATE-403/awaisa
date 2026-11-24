@@ -38,7 +38,7 @@ export class FeedController {
     private readonly uploads: MediaUploadsService,
   ) {}
 
-  /** «Работы»: a vertical feed of finished work, each photo one tap from booking it. */
+  /** 'Works': a vertical feed of finished work, each photo one tap from booking it. */
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('feed')
   feed(@Query({ schema: feedQuerySchema }) query: FeedQuery): Promise<FeedPage> {

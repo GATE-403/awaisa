@@ -4,23 +4,27 @@ import { absoluteUrl } from '@/shared/lib/seo/siteUrl'
 // Without it /llms.txt fell through to the business-slug page and Lighthouse read that HTML
 // as a broken file.
 const LINKS = [
-  ['Catalogue', '/', 'услуги и места Бишкека со свободным временем на сегодня и завтра'],
-  ['Looks', '/feed', 'фото работ мастеров с ценой и записью к тому же мастеру'],
-  ['Map', '/map', 'места на карте, ближайшие первыми'],
-  ['Rating', '/top', 'лучшие мастера и места по отзывам клиентов'],
-  ['For business', '/business', 'как салону или мастеру открыть свою страницу записи'],
-  ["What's new", '/updates', 'изменения сервиса для клиентов и для бизнеса'],
-  ['Карта сайта', '/sitemap.xml', 'все места и их услуги'],
+  ['Catalogue', '/', 'services and places in Bishkek with free times today and tomorrow'],
+  [
+    'Looks',
+    '/feed',
+    "photos of specialists' work with the price and booking with the same specialist",
+  ],
+  ['Map', '/map', 'places on a map, nearest first'],
+  ['Rating', '/top', 'the best specialists and places by client reviews'],
+  ['For business', '/business', 'how a salon or a specialist opens its own booking page'],
+  ["What's new", '/updates', 'what changed for clients and for businesses'],
+  ['Sitemap', '/sitemap.xml', 'every place and its services'],
 ] as const
 
 const body = [
   '# Awaisa',
   '',
-  '> Онлайн-запись к мастерам в Бишкеке: найдите услугу, выберите мастера и время, без звонков.',
+  '> Online booking with specialists in Bishkek: find a service, pick a specialist and a time, no calls.',
   '',
-  'У каждого места своя страница по адресу /<slug> с услугами, ценами, мастерами и отзывами; запись на /<slug>/book.',
+  'Every place has its own page at /<slug> with services, prices, specialists and reviews; booking is at /<slug>/book.',
   '',
-  '## Страницы',
+  '## Pages',
   '',
   ...LINKS.map(([title, path, note]) => `- [${title}](${absoluteUrl(path)}): ${note}`),
   '',

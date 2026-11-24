@@ -8,7 +8,7 @@ const fiscalSettingsSchema = z
     isEnabled: z.boolean(),
     inn: z.preprocess(
       (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
-      z.string().trim().regex(INN_PATTERN, 'ИНН: 14 цифр').nullish(),
+      z.string().trim().regex(INN_PATTERN, 'TIN: 14 digits').nullish(),
     ),
     taxRegime: z.enum(['general', 'single', 'patent']),
     isVatPayer: z.boolean(),
@@ -19,15 +19,15 @@ const fiscalSettingsSchema = z
     password: z.string().max(200).nullish(),
   })
   .refine((value) => !value.isEnabled || Boolean(value.inn), {
-    message: 'Укажите ИНН, чтобы выдавать чеки',
+    message: 'Enter your TIN to issue receipts',
     path: ['inn'],
   })
 
-// A visit's receipts, or every receipt the provider kept refusing («Не прошли»).
+// A visit's receipts, or every receipt the provider kept refusing («Failed»).
 const receiptsQuerySchema = z
   .object({ bookingId: z.uuid().optional(), status: z.literal('failed').optional() })
   .refine((query) => Boolean(query.bookingId) !== Boolean(query.status), {
-    message: 'Укажите запись или status=failed',
+    message: 'Give a booking or status=failed',
   })
 
 type FiscalSettingsBody = z.infer<typeof fiscalSettingsSchema>

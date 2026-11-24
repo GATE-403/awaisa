@@ -16,7 +16,7 @@ interface ShareProfileProps {
 }
 
 // The share sheet on phones, the link copied elsewhere. On one's own profile it is an invitation:
-// a friend who books through it counts toward «Привёл друга».
+// a friend who books through it counts toward «Brought a friend».
 export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
   const t = useT()
   const toast = useToast()

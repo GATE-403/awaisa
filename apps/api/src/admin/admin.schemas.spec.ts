@@ -73,7 +73,7 @@ describe('cabinet request schemas', () => {
     expect(outcomeSchema.safeParse({ outcome: 'arrived', bonusAmount: 0 }).success).toBe(false)
   })
 
-  it('«Вернуть» after «Все пришли» names the visits it reopens', () => {
+  it('Undo after All arrived names the visits it reopens', () => {
     expect(reopenSchema.safeParse({ ids: [] }).success).toBe(false)
     expect(reopenSchema.safeParse({ ids: ['not-a-uuid'] }).success).toBe(false)
     expect(reopenSchema.safeParse({ ids: ['6f1c2a4e-1b2c-4d3e-8f9a-0b1c2d3e4f5a'] }).success).toBe(

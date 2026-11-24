@@ -16,13 +16,13 @@ interface ProfileReviewsProps {
 }
 
 const FIRST = 3
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'long',
   timeZone: BUSINESS_TIME_ZONE,
 })
 
-// Three reviews as a thread on the page, the rest behind «Ещё N» on a fade.
+// Three reviews as a thread on the page, the rest behind «N more» on a fade.
 export const ProfileReviews = ({ reviews, authorName }: ProfileReviewsProps) => {
   const t = useT()
   const [isAll, setIsAll] = useState(false)

@@ -29,7 +29,7 @@ const KEYS = new Set(['Enter', ' '])
 
 // A destructive action that asks to be held, not confirmed in a dialog: a soft red capsule fills
 // from the left while it is pressed and acts when full; let go early and it drains back. A quick
-// tap only says «Удерживайте». Works with a mouse, a finger and Space / Enter held down.
+// tap only says «Hold». Works with a mouse, a finger and Space / Enter held down.
 export const HoldButton = ({
   children,
   onConfirm,

@@ -31,14 +31,14 @@ interface VisitOutcomeSectionProps {
   isCompact?: boolean
   /** The segmented control's size (compact defaults to the small one). */
   controlSize?: 'sm' | 'md'
-  /** «Товары · Добавить»: sell products with this visit (paid together with it). */
+  /** "Products · Add": sell products with this visit (paid together with it). */
   onSellProducts?: () => void
 }
 
 type OutcomeChoice = 'pending' | 'arrived' | 'no_show'
 
 const OUTCOMES: { value: OutcomeChoice; label: string }[] = [
-  { value: 'pending', label: 'Expected' },
+  { value: 'pending', label: 'Waiting' },
   { value: 'arrived', label: 'Arrived' },
   { value: 'no_show', label: 'No-show' },
 ]
@@ -54,11 +54,11 @@ const RECEIPT_RECHECKS = 3
 
 const METHODS: { value: PaymentMethod; label: string }[] = [
   { value: 'cash', label: 'Cash' },
-  { value: 'card', label: 'Map' },
+  { value: 'card', label: 'Card' },
   { value: 'transfer', label: 'Transfer' },
 ]
 
-// Staff close the visit in two taps: «Пришёл» fills the price and cash; the amount and the way
+// Staff close the visit in two taps: "Arrived" fills the price and cash; the amount and the way
 // of paying can be corrected right there. Each change is saved at once.
 export const VisitOutcomeSection = ({
   slug,
@@ -134,7 +134,6 @@ export const VisitOutcomeSection = ({
   }, [isArrived, onSellProducts, slug, booking.id])
 
   const outcomes = OUTCOMES.map((item) => ({ ...item, label: t(item.label) }))
-  // «Карта» is the map elsewhere in the app: the payment card has its own key.
   const methods = METHODS.map((item) => ({
     ...item,
     label: t(item.label),

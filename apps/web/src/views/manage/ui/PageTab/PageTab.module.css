@@ -90,7 +90,7 @@
   box-shadow: var(--focus-ring);
 }
 
-/* Phones: «Редактировать», the glyphs beside it and the tab's action float in one capsule at the
+/* Phones: "Edit", the glyphs beside it and the tab's action float in one capsule at the
    window's foot; a mouse never sees it. */
 @media (min-width: 640px) {
   .page .phoneTools {
@@ -122,7 +122,7 @@
   }
 }
 
-/* The edit sheet: the bio as a borderless note, «Часы» as a row that opens its settings. */
+/* The edit sheet: the bio as a borderless note, "Hours" as a row that opens its settings. */
 .sheetText {
   width: 100%;
   min-height: 3lh;
@@ -172,7 +172,7 @@
   }
 }
 
-/* «За 7 дней: 18 записей · 120 просмотров ›»: one footnote line of bold figures, to «Аналитика». */
+/* "Last 7 days: 18 bookings · 120 views ›": one footnote line of bold figures, to "Analytics". */
 .insights {
   position: relative;
   display: inline-flex;
@@ -215,7 +215,7 @@
 }
 
 /* Under the bio: the week's facts on their own line, then one row of small capsules: what the
-   page lacks first, then the running promotions and «+ Акция». */
+   page lacks first, then the running promotions and "+ Promotion". */
 .pageFooter {
   display: flex;
   flex-wrap: wrap;
@@ -236,7 +236,7 @@
   order: -1;
 }
 
-/* Running promotions as the clients see them, a row of small capsules, «+ Акция» last. */
+/* Running promotions as the clients see them, a row of small capsules, "+ Promotion" last. */
 .promotions {
   display: flex;
   flex-wrap: wrap;
@@ -270,7 +270,7 @@
   font-weight: var(--font-weight-medium);
 }
 
-/* Only the «+» carries the accent: a row of bold blue words read loud («не сочетаемо»). */
+/* Only the "+" carries the accent: a row of bold blue words read loud ("doesn't go together"). */
 .promotion[data-add] svg {
   color: var(--color-link);
 }
@@ -285,7 +285,7 @@
   box-shadow: var(--focus-ring);
 }
 
-/* «Услуги» by category: a caption over each group's cards, «+ Категория» under them. */
+/* "Services" by category: a caption over each group's cards, "+ Category" under them. */
 .serviceGroups {
   display: flex;
   flex-direction: column;
@@ -349,7 +349,7 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* «Услуги»: the catalog's cards as the clients see them, two a row, three from 640px. */
+/* "Services": the catalog's cards as the clients see them, two a row, three from 640px. */
 .services {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -365,7 +365,7 @@
   }
 }
 
-/* «Поделиться»: the QR on its white plate (black on white whatever the theme: cameras read it
+/* "Share": the QR on its white plate (black on white whatever the theme: cameras read it
    so), its caption, then the download and send capsules. */
 .qr {
   display: flex;
@@ -398,8 +398,8 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* One line: the wide accent «Скопировать ссылку» and the glyph capsule, one height (40, 44 on
-   phones), like «Поделиться свободными окнами». */
+/* One line: the wide accent "Copy link" and the glyph capsule, one height (40, 44 on
+   phones), like "Share free slots". */
 .shareActions {
   display: flex;
   align-items: center;

@@ -37,7 +37,7 @@ const findInvalidDay = (days: DayDraft[]) =>
   days.findIndex((day) => day.isOpen && day.from >= day.to)
 
 // The week as Settings rows: the day on the left, its hours as plain pop-up values and the switch
-// on the right, like iOS. One editor for «График» in the settings and the page's «Время» sheet.
+// on the right, like iOS. One editor for "Hours" in the settings and the page's "Hours" sheet.
 export const WeekHoursRows = ({ days, onChange }: WeekHoursRowsProps) => {
   const t = useT()
   const invalidDay = findInvalidDay(days)

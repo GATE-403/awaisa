@@ -18,8 +18,8 @@ interface NameDialogProps {
 
 const FORM_ID = 'name-form'
 
-// The name is edited in a form sheet like everything else in the settings: «Отмена · Ваше имя ·
-// Сохранить» over one Settings row. A sheet also meets the phone's keyboard itself (the Android
+// The name is edited in a form sheet like everything else in the settings: «Cancel · Your name ·
+// Save» over one Settings row. A sheet also meets the phone's keyboard itself (the Android
 // app keeps the WebView whole), where the centred dialog it was made the app resize the page.
 export const NameDialog = ({ name: initialName, onClose, onSaved }: NameDialogProps) => {
   const t = useT()

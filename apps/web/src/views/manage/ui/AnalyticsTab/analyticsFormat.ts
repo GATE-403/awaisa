@@ -3,24 +3,24 @@ import type { Translate } from '@/shared/i18n'
 
 type Bucket = { key: string; label: string; title: string; revenue: number; visits: number }
 
-const numberFormatter = new Intl.NumberFormat('ru-RU')
-const compactFormatter = new Intl.NumberFormat('ru-RU', {
+const numberFormatter = new Intl.NumberFormat('en-GB')
+const compactFormatter = new Intl.NumberFormat('en-GB', {
   notation: 'compact',
   maximumFractionDigits: 1,
 })
 
 const toDate = (key: string) => new Date(`${key}T00:00:00Z`)
 
-const dateFormat = (t: Translate, options: Intl.DateTimeFormatOptions) =>
+const dateFormat = (options: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat('en-GB', { ...options, timeZone: 'UTC' })
 
-// Axis ticks: in full under 10 000, compact above (10 тыс.).
+// Axis ticks: in full under 10,000, compact above (10k).
 const formatTick = (value: number) =>
   value < 10_000 ? numberFormatter.format(value) : compactFormatter.format(value)
 
 const analyticsFormat = (t: Translate) => {
-  const dayFormatter = dateFormat(t, { day: 'numeric', month: 'short' })
-  const monthLongFormatter = dateFormat(t, { month: 'long', year: 'numeric' })
+  const dayFormatter = dateFormat({ day: 'numeric', month: 'short' })
+  const monthLongFormatter = dateFormat({ month: 'long', year: 'numeric' })
 
   const formatMoney = (value: number) =>
     t('{amount} som', { amount: numberFormatter.format(value) })

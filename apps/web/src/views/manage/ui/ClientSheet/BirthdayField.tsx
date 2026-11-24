@@ -43,11 +43,11 @@ const parse = (value: string) => {
   return { year: year || NO_YEAR, month: Number(month) || null, day: Number(day) || null }
 }
 
-/** «14 March». */
+/** "14 March". */
 const formatDayMonth = (day: number, month: number, t: Translate) =>
   `${day} ${t(MONTH_NAMES[month - 1] ?? '')}`
 
-/** «November 2026». */
+/** "November 2026". */
 const formatMonthYear = (month: number, year: number, t: Translate) =>
   `${t(MONTH_NAMES[month - 1] ?? '')} ${year}`
 
@@ -65,7 +65,7 @@ const getBishkekDate = (iso: string) => {
   return { day: part('day'), month: part('month'), year: part('year') }
 }
 
-/** «21 ноября» · «21-ноябрь» · «21 November» for a moment (an ISO timestamp). */
+/** "21 November" for a moment (an ISO timestamp). */
 const formatMomentDay = (iso: string, t: Translate) => {
   const { day, month } = getBishkekDate(iso)
   return formatDayMonth(day, month, t)

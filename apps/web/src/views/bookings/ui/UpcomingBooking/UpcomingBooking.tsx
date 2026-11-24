@@ -44,7 +44,7 @@ interface UpcomingBookingProps {
 
 // Upcoming visits as passes, not full tickets: the ticket with every detail opens on tap. The
 // nearest visit is large with its everyday actions in plain sight (route, call, move); later ones
-// are one quiet row each, their actions in «⋯» («профиль должен быть самой удобной частью»).
+// are one quiet row each, their actions in «⋯» (the owner: the profile must be the handiest part).
 export const UpcomingBooking = ({
   booking,
   countdown,

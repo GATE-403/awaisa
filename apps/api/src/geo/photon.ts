@@ -21,7 +21,7 @@ const KYRGYZSTAN_BBOX = '69.2,39.1,80.3,43.3'
 const BISHKEK = { latitude: 42.8746, longitude: 74.5698 }
 
 // «Bishkek Park, проспект Чуй, 155» for a mall, «Киевская улица, 77» for a house: what the owner
-// would type into «Адрес», and the district and city as the line under it.
+// would type into 'Address', and the district and city as the line under it.
 const toPlace = (feature: PhotonFeature): GeoPlace | null => {
   const [longitude, latitude] = feature.geometry?.coordinates ?? []
   const props = feature.properties ?? {}

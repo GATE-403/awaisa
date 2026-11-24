@@ -8,8 +8,8 @@ import {
 } from './expo-push.js'
 
 const message = {
-  title: 'Новая запись',
-  body: 'Чт 14:30 · Мужская стрижка · Айбек',
+  title: 'New booking',
+  body: "Thu 14:30 · Men's haircut · Aibek",
   url: '/master/old-school?date=2026-11-26',
   tag: 'b1',
 }
@@ -28,8 +28,8 @@ describe('toExpoMessage', () => {
   it('carries the same text and the link to open, one per booking', () => {
     expect(toExpoMessage('ExponentPushToken[aaaaaaaaaa]', message, 3600)).toEqual({
       to: 'ExponentPushToken[aaaaaaaaaa]',
-      title: 'Новая запись',
-      body: 'Чт 14:30 · Мужская стрижка · Айбек',
+      title: 'New booking',
+      body: "Thu 14:30 · Men's haircut · Aibek",
       data: { url: '/master/old-school?date=2026-11-26' },
       sound: 'default',
       priority: 'high',

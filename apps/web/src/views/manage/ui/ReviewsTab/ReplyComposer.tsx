@@ -17,7 +17,7 @@ interface ReplyComposerProps {
   onCancel?: () => void
   /** The owner's quick replies, offered under the field while it is focused. */
   quickReplies?: string[]
-  /** Who and what the review is about, for `{имя}`, `{мастер}`, `{услуга}` in quick replies. */
+  /** Who and what the review is about, for `{name}`, `{specialist}`, `{service}` in quick replies. */
   context: ReplyContext
   /** Once sent, the next review's field takes the caret, so a backlog is answered in a row. */
   isNextFocused?: boolean
@@ -25,7 +25,7 @@ interface ReplyComposerProps {
 
 // The reply typed right in the thread, like the number on the sign-in screen: a bare field with
 // no box or fill, always there under a review waiting for an answer, so the owner just types
-// («можно вписать текст в инпут … а не открывать, потом писать»). A round send button appears
+// ("let me type into the field … instead of opening it, then writing"). A round send button appears
 // once there is something to send; ⌘/Ctrl + Enter sends. Emptying a published reply removes it.
 export const ReplyComposer = ({
   initial = '',
@@ -45,7 +45,7 @@ export const ReplyComposer = ({
   const isEditing = Boolean(onCancel)
   const canSend = isEditing ? text.trim() !== initial.trim() : text.trim().length > 0
 
-  // Opened by «Изменить»: the person asked to type, so the caret goes after the published words
+  // Opened by "Change": the person asked to type, so the caret goes after the published words
   // (autoFocus left it at the start).
   useEffect(() => {
     const field = fieldRef.current
@@ -169,7 +169,7 @@ export const ReplyComposer = ({
           </button>
         )}
       </div>
-      {/* Quick replies while the field is focused and still empty: compact rows with an «insert»
+      {/* Quick replies while the field is focused and still empty: compact rows with an "insert"
           glyph and hairlines, lit in the accent under the pointer, so they read as choices without
           a panel around them; the full words in the tooltip; ↑ ↓ move, Enter or a tap fills. */}
       {isFocused && !text.trim() && quickReplies.length > 0 && (

@@ -4,7 +4,7 @@ import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import { BookingInspector } from '@/views/manage/ui/BookingInspector/BookingInspector'
 
 interface BookingDetailsDialogProps {
-  /** The business, for the client's loyalty in «Итог визита». */
+  /** The business, for the client's loyalty in "Visit outcome". */
   slug: string
   booking: AdminBooking
   onClose: () => void
@@ -13,7 +13,7 @@ interface BookingDetailsDialogProps {
   onOutcome?: (id: string, input: OutcomeInput) => Promise<AdminBooking | null>
   onOpenClient: (phone: string) => void
   onBookAgain?: (booking: AdminBooking) => void
-  /** «Добавить товар» in «Итог визита»: sell products with this visit. */
+  /** "Add a product" in "Visit outcome": sell products with this visit. */
   onSellProducts?: (booking: AdminBooking) => void
 }
 

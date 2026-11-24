@@ -21,7 +21,7 @@ type ClientMessage = {
   whatsapp?: WhatsappMessage
   /**
    * The business whose month of SMS this counts against. Optional messages (reminders, review
-   * requests, «Пора снова», the waitlist) are not sent by SMS past the plan's SMS and packs.
+   * requests, «Time to come back», the waitlist) are not sent by SMS past the plan's SMS and packs.
    */
   billing?: { businessId: string; isOptional: boolean }
 }
@@ -46,7 +46,7 @@ export class ClientMessagesService {
     private readonly plans: BillingService,
   ) {}
 
-  /** The «Напоминать в Telegram» link for a booking, or null without a bot. */
+  /** The «Remind me in Telegram» link for a booking, or null without a bot. */
   linkUrl(bookingId: string) {
     const bot = this.config.get('TELEGRAM_BOT_USERNAME', { infer: true })
     if (!bot) return null
@@ -74,7 +74,7 @@ export class ClientMessagesService {
     )
     await this.sendTelegram(
       chatId,
-      'Готово: напоминания о визитах будут приходить сюда, а не по SMS. Отключить - /stop.',
+      'Done: visit reminders will come here instead of by SMS. To turn this off, send /stop.',
     )
     return true
   }

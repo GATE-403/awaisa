@@ -101,7 +101,7 @@ export class PaymentsService {
 
   private handlerFor(payment: Payment) {
     const handler = this.orders.get(payment.kind)
-    if (!handler || !payment.orderId) throw new NotFoundException('Платёж не найден')
+    if (!handler || !payment.orderId) throw new NotFoundException('Payment not found')
     return handler
   }
 
@@ -135,7 +135,7 @@ export class PaymentsService {
       pg_success_url: back,
       pg_failure_url: back,
       pg_user_phone: details.phone.replace(/\D/g, ''),
-      pg_language: 'ru',
+      pg_language: 'en',
       ...(this.config.get('FREEDOMPAY_TESTING_MODE', { infer: true })
         ? { pg_testing_mode: '1' }
         : {}),
@@ -144,7 +144,7 @@ export class PaymentsService {
       this.logger.error(`Freedom Pay init failed: ${response.pg_error_description ?? 'no answer'}`)
       payment.status = 'failed'
       await this.payments.save(payment)
-      throw new ServiceUnavailableException('Оплата сейчас недоступна - попробуйте позже')
+      throw new ServiceUnavailableException('Payment is unavailable right now, try again later')
     }
     payment.providerRef = response.pg_payment_id ?? null
     payment.checkoutUrl = response.pg_redirect_url
@@ -165,17 +165,17 @@ export class PaymentsService {
 
   async findSigned(id: string, signature: string) {
     if (!isPaymentSignature(id, signature, this.secret())) {
-      throw new NotFoundException('Платёж не найден')
+      throw new NotFoundException('Payment not found')
     }
     const payment = await this.payments.findOneBy({ id })
-    if (!payment) throw new NotFoundException('Платёж не найден')
+    if (!payment) throw new NotFoundException('Payment not found')
 
     return payment
   }
 
   /** The test acquirer «charges» the card: only with PAYMENT_DRIVER=test. */
   async completeTest(id: string, signature: string) {
-    if (this.driver !== 'test') throw new NotFoundException('Платёж не найден')
+    if (this.driver !== 'test') throw new NotFoundException('Payment not found')
     const payment = await this.findSigned(id, signature)
 
     return this.markSucceeded(payment)
@@ -233,7 +233,7 @@ export class PaymentsService {
     const { isNew } = await this.sync(payment)
 
     return {
-      reply: freedomPayReply(RESULT_SCRIPT, 'ok', 'Принято', secret),
+      reply: freedomPayReply(RESULT_SCRIPT, 'ok', 'Accepted', secret),
       paid: isNew ? payment : null,
     }
   }

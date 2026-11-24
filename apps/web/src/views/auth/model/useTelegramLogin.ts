@@ -21,7 +21,7 @@ const newToken = () => {
 }
 
 /**
- * «Войти через Telegram»: the page's own token is registered ahead, so the bot link is a plain
+ * «Sign in with Telegram»: the page's own token is registered ahead, so the bot link is a plain
  * `<a href>` (it opens the Telegram app at once, in the WebView too, and is never blocked as a
  * pop-up); after the tap the page asks every 2 s - and on coming back - whether the number was
  * shared, then hands the customer to `onSignedIn`.

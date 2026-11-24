@@ -14,7 +14,7 @@ import { trackFormError, trackStep } from '@/shared/lib/telemetry'
 const SLUG_CHECK_DELAY_MS = 350
 const MIN_SLUG_LENGTH = 3
 
-// The API's own rule (`business-rules.ts` `getSlugProblem`): checked here before «Далее», so a
+// The API's own rule (`business-rules.ts` `getSlugProblem`): checked here before "Next", so a
 // two-letter or malformed link never reaches the last step and fails there.
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,46}[a-z0-9])$/
 
@@ -63,7 +63,7 @@ export const useCreateBusinessForm = () => {
     }
   })
   const slugFormatProblem = getSlugFormatProblem(slug)
-  // A taken link says so at once; a short or malformed one only after «Далее» (not while typing).
+  // A taken link says so at once; a short or malformed one only after "Next" (not while typing).
   const getSlugError = () => {
     if (currentCheck && !currentCheck.available) return currentCheck.reason
     if (hasTriedSubmit && slugFormatProblem) return t(slugFormatProblem)
@@ -116,7 +116,7 @@ export const useCreateBusinessForm = () => {
   }
 
   const goBack = () => {
-    // A kind with no starter menu skipped «Что в меню?» on the way forward, so back skips it too.
+    // A kind with no starter menu skipped "What's on the menu?" on the way forward, so back skips it too.
     if (step === 'contacts' && templates.length === 0) {
       setStep('kind')
       return
@@ -126,14 +126,14 @@ export const useCreateBusinessForm = () => {
   }
 
   // The kind is one tap, like the first pick in booking: it moves on at once - to the starter
-  // menu, or straight to contacts when the kind has none («Другое»).
+  // menu, or straight to contacts when the kind has none ("Other").
   const pickKind = (value: BusinessKind) => {
     setKind(value)
     setHasPickedKind(true)
     setStep(SERVICE_TEMPLATES[value].length > 0 ? 'services' : 'contacts')
   }
 
-  // One question per screen, like Setup Assistant: «Далее» validates only the current step.
+  // One question per screen, like Setup Assistant: "Next" validates only the current step.
   const next = () => {
     if (step === 'name') {
       setHasTriedSubmit(true)
@@ -142,7 +142,7 @@ export const useCreateBusinessForm = () => {
         setStep('kind')
         return
       }
-      // Not checked yet (typed fast, «Далее» at once): ask now, move on only when it is free.
+      // Not checked yet (typed fast, "Next" at once): ask now, move on only when it is free.
       void checkSlug(slug)
         .then((result) => {
           setSlugCheck({ ...result, slug })
@@ -177,7 +177,7 @@ export const useCreateBusinessForm = () => {
   }
 
   // Visited routes stay mounted (hidden): once the page is left, it starts over, or coming back to
-  // «Создать страницу» replayed the launch of the page just made and sent the owner to it again.
+  // "Create page" replayed the launch of the page just made and sent the owner to it again.
   const reset = () => {
     setName('')
     setSlug(null)

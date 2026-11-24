@@ -10,7 +10,7 @@ type FeedScope = { kind: 'master' | 'business'; slug: string }
 
 type SavedFeed = { url: string; createdAt: string }
 
-/** `webcal://` makes iOS, macOS and Android calendar apps offer «Подписаться». */
+/** `webcal://` makes iOS, macOS and Android calendar apps offer «Subscribe». */
 const toWebcal = (url: string) => url.replace(/^https?:\/\//, 'webcal://')
 
 /** Google Calendar's «Add by URL», already filled in. */

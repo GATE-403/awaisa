@@ -15,7 +15,7 @@ interface StoryButtonProps {
 type Story = { file: File; url: string }
 
 // A 9:16 card for Instagram or Telegram stories. It opens as a preview first: the result is
-// visible, and «Поделиться» / «Скачать» are pressed by the person themselves - Safari refuses a
+// visible, and «Share» / «Download» are pressed by the person themselves - Safari refuses a
 // share sheet that a finished download (not a tap) tries to open.
 export const StoryButton = ({ address }: StoryButtonProps) => {
   const t = useT()
@@ -78,8 +78,8 @@ export const StoryButton = ({ address }: StoryButtonProps) => {
         disabled={isBusy}
       />
       {story && (
-        // The picture alone; saving it is one glyph in the sheet's bar («кнопку скачать можно
-        // было бы сделать иконкой справа сверху»): the share sheet on a phone, a download with
+        // The picture alone; saving it is one glyph in the sheet's bar (the owner: download could
+        // be an icon at the top right): the share sheet on a phone, a download with
         // a mouse.
         <Sheet
           title={t('For stories')}

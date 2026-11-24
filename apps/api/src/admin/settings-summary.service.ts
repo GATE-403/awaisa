@@ -6,8 +6,8 @@ import type { Business } from '../businesses/business.entity.js'
 import { toBusinessParts } from '../common/business-time.js'
 
 /**
- * What each settings row says on its right, like iOS Settings («Акции · 1 действует», «Склад ·
- * 2 заканчиваются»), read in one query. Branches, hours, services and masters the cabinet already
+ * What each settings row says on its right, like iOS Settings ('Promotions · 1 running', 'Stock ·
+ * 2 running low'), read in one query. Branches, hours, services and masters the cabinet already
  * has from the business and its catalog.
  */
 @Injectable()

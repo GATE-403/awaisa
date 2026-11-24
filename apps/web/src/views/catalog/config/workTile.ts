@@ -4,7 +4,7 @@ const BIG_TILE_IMAGE = {
   widths: [360, 480, 640, 840, 1280],
 }
 
-// How long a tap on a work waits for a second one (a like) before it opens «Образы»: the deck's.
+// How long a tap on a work waits for a second one (a like) before it opens «Looks»: the deck's.
 const DOUBLE_TAP_MS = 300
 
 export { BIG_TILE_IMAGE, DOUBLE_TAP_MS }

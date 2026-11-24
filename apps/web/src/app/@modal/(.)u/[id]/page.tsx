@@ -3,7 +3,7 @@ import { getProfileOnServer } from '@/shared/api/sessionApi'
 import { BookingLayer } from '@/views/booking'
 import { ProfileSheet, ProfileSheetBody, ProfileSkeleton } from '@/views/publicProfile'
 
-// Next 16 in dev can hand the intercepted segment over with its markers glued on («(.)lom»).
+// Next 16 in dev can hand the intercepted segment over with its markers glued on ("(.)lom").
 const toId = (param: string) => decodeURIComponent(param).replace(/^(\(\.{1,3}\))+/, '')
 
 const ProfileOverPage = async ({ id }: { id: string }) => {

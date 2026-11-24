@@ -6,7 +6,7 @@ import { PUBLIC_ID_PATTERN, publicIdSql, saltOf } from '../common/public-id.js'
 import type { Env } from '../config/env.js'
 
 /**
- * «Пригласить друга»: a profile link carries `?ref=<handle or public id>`; the friend's first
+ * «Invite a friend»: a profile link carries `?ref=<handle or public id>`; the friend's first
  * booking records who brought them. A friend counts once they have actually come (a past visit
  * that was not a no-show), see `ProfilesService`.
  */

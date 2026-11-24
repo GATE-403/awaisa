@@ -11,7 +11,6 @@ import { getErrorMessage } from '@/shared/api/apiError'
 import { getClient, updateClient } from '@/shared/api/clientApi'
 import type { ClientCard } from '@/shared/api/types'
 import { type Translate, useT } from '@/shared/i18n'
-import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
 import { ContactRows } from '@/shared/ui/ContactRows/ContactRows'
 import { MoreFade } from '@/shared/ui/MoreFade/MoreFade'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -44,7 +43,7 @@ const sinceLabel = (iso: string, t: Translate) => {
 
 const FIRST_VISITS = 4
 const VISIT_WORDS: [string, string] = ['visit', 'visits']
-// «Не пришёл 2 раза»: the «many» form keys the counted word.
+// "No-show twice": the "many" form keys the counted word.
 const TIMES_WORDS: [string, string] = ['time', 'times']
 
 const visitStatus = (item: ClientCard['history'][number], t: Translate) => {
@@ -239,7 +238,7 @@ export const ClientSheet = ({ slug, phone, onClose, onSaved, onBook }: ClientShe
                             <span className={styles.visitRating}>
                               <Star weight='fill' aria-hidden />
                               {item.rating}
-                              {item.reviewComment && ` · «${item.reviewComment}»`}
+                              {item.reviewComment && ` · "${item.reviewComment}"`}
                             </span>
                           )}
                         </span>

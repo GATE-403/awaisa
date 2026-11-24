@@ -21,12 +21,12 @@ type ResultsView = 'places' | 'services'
 /** Places are drawn a screenful at a time as the list scrolls. */
 const PLACES_STEP = 24
 
-// Fewer services found than this adds «Похожие услуги» under them.
+// Fewer services found than this adds «Similar services» under them.
 const FEW_RESULTS = 4
 
 interface CatalogResultsProps {
   title: string
-  /** The text actually typed when it was read as something else («cnhb;rf» → «стрижка»). */
+  /** The text actually typed when it was read as something else (a typo or the wrong keyboard layout: «hiarcut» → «haircut»). */
   searchedFor?: string
   businesses: PlaceCardData[]
   offers: Offer[]
@@ -76,7 +76,7 @@ export const CatalogResults = ({
     section.addEventListener('click', handleClick)
     return () => section.removeEventListener('click', handleClick)
   }, [query, isEmpty])
-  // The services feed pages from the server; «Ближе по времени» re-sorts what is loaded.
+  // The services feed pages from the server; «Soonest» re-sorts what is loaded.
   const feed = useOfferPages({
     initial: offers,
     initialSort: initialSort === 'price' ? 'price' : 'popular',
@@ -111,7 +111,7 @@ export const CatalogResults = ({
           {searchedFor && (
             // Like a big search engine: say what was searched instead, without making a fuss.
             <p className={styles.searchedFor}>
-              {t('You searched for «{query}»', { query: searchedFor })}
+              {t('You searched for “{query}”', { query: searchedFor })}
             </p>
           )}
         </div>

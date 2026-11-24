@@ -1,4 +1,4 @@
-// «Мои бизнесы»: how full today is in a business and how far it is from taking bookings (pure,
+// 'My businesses': how full today is in a business and how far it is from taking bookings (pure,
 // unit-tested).
 
 /** Booked minutes over the open minutes of every active master, 0–1 to two places; null on a

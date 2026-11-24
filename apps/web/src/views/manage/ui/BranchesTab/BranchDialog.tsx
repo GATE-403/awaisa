@@ -51,7 +51,7 @@ export const BranchDialog = ({
   )
   const [isSaving, setIsSaving] = useState(false)
   // The address and the pin are one thing: a picked address moves the pin, a moved pin fills an
-  // empty address or offers its own («не писать каждый раз отдельно»).
+  // empty address or offers its own ("don't type it separately every time").
   const [places, setPlaces] = useState<GeoPlace[]>([])
   const [target, setTarget] = useState<Point | null>(null)
   const [pinPlace, setPinPlace] = useState<GeoPlace | null>(null)

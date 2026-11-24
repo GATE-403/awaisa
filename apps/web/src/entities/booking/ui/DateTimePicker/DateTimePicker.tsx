@@ -22,13 +22,13 @@ interface DateTimePickerProps {
   onRetry: () => void
   onDayChange: (dayKey: string) => void
   onTimeChange: (time: string) => void
-  /** Offered on a full day, e.g. «Сообщить, когда освободится» (views pass features in). */
+  /** Offered on a full day, e.g. «Tell me when a slot opens» (views pass features in). */
   fullDayAction?: ReactNode
   /** `ruler`: the whole day as a dial of free and taken times (the booking form); `grid`: free times as capsules. */
   view?: 'grid' | 'ruler'
   /** The ruler's free time under the needle, for an action outside the picker. */
   onCenteredTimeChange?: (time: string | null) => void
-  /** The visit's length, shown by the ruler as «до 14:45». */
+  /** The visit's length, shown by the ruler as «until 14:45». */
   durationMinutes?: number
 }
 
@@ -95,16 +95,16 @@ export const DateTimePicker = ({
     rulerSlots.some((slot) => slot.isAvailable)
   const availableCount = slots.filter((slot) => slot.isAvailable).length
   // Without a dial (a full day, an error, no master yet) there is no time under a needle: the
-  // ruler only tells the form while it is on screen, so the bar kept «Выбрать 18:30» from the day
+  // ruler only tells the form while it is on screen, so the bar kept «Choose 18:30» from the day
   // before on a day with nothing free.
   // biome-ignore lint/correctness/useExhaustiveDependencies: only when the dial comes or goes
   useEffect(() => {
     if (!isRulerShown) onCenteredTimeChange?.(null)
   }, [isRulerShown])
-  // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
+  // «Today» and «Tomorrow» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
-  // With large text «Сегодня» no longer fits its card and lost the word to «Сего…»: once it
+  // With large text «Tomorrow» no longer fits its card and lost the word to «Tomor…»: once it
   // overflows, both say it short, like the weekdays beside them.
   const [isShortRelative, setIsShortRelative] = useState(false)
   const measureRelative = (node: HTMLElement | null) => {
@@ -146,7 +146,7 @@ export const DateTimePicker = ({
           <span className={styles.dayNumber}>{day.dayOfMonth}</span>
           <span className={styles.month}>{t.monthShort(day.key)}</span>
           {/* The whole date is read after what the card shows, not instead of it: the name keeps
-              the visible words, so voice control finds «Сегодня» (WCAG 2.5.3). */}
+              the visible words, so voice control finds «Today» (WCAG 2.5.3). */}
           <span className={styles.srOnly}>
             {`, ${
               day.isClosed ? t('{day}, closed', { day: t.dayLong(day.key) }) : t.dayLong(day.key)
@@ -160,7 +160,7 @@ export const DateTimePicker = ({
   return (
     <div className={styles.picker} data-view={view}>
       {/* The days lead the step in both views, right under its question: under the dial they
-          ended below the booking bar on short screens («так и не смог исправить»), whatever the
+          ended below the booking bar on short screens (the owner could not get past it), whatever the
           sheet's scroll. */}
       {dayRow}
 

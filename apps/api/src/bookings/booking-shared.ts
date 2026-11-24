@@ -33,11 +33,11 @@ type BookingView = {
     dueAt: string | null
   } | null
   review: { rating: number; comment: string; reply: string | null } | null
-  /** The salon marked «Не пришёл»: such a visit is never asked to be rated. */
+  /** The salon marked 'No-show': such a visit is never asked to be rated. */
   isNoShow: boolean
-  /** Paid by the client's subscription, drawn when the salon marks «Пришёл». */
+  /** Paid by the client's subscription, drawn when the salon marks 'Arrived'. */
   isBySubscription: boolean
-  /** «Хочу так»: the work photo the client wants to look like. */
+  /** 'I want this look': the work photo the client wants to look like. */
   lookPhotoUrl: string | null
   business: {
     slug: string

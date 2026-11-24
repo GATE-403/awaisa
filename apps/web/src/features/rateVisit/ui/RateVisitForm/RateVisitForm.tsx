@@ -23,7 +23,7 @@ interface RateVisitFormProps {
   bookingId: string
   access: ReviewAccess
   specialistName: string
-  /** The stars already tapped outside the sheet («Как прошло?»). */
+  /** The stars already tapped outside the sheet («How did it go?»). */
   initialRating?: number
   /** The booking link for this service (no master): the thank-you toast offers it again. */
   rebookHref?: string
@@ -190,7 +190,7 @@ export const RateVisitForm = ({
         <>
           <p className={styles.question}>{t('Show the result')}</p>
           <p className={styles.hint}>
-            {t('The photo goes to the master’s «Looks» marked «Client’s photo»')}
+            {t('The photo goes to the specialist’s “Looks” marked “Client’s photo”')}
           </p>
           {photoField}
         </>

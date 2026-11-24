@@ -34,7 +34,7 @@ const KINDS: { value: PromotionKind; label: string }[] = [
 ]
 
 const DEFAULT_TITLE: Record<PromotionKind, string> = {
-  happy_hours: 'Утренние часы',
+  happy_hours: 'Morning hours',
   first_visit: 'First visit',
   promo_code: 'Promo code',
 }

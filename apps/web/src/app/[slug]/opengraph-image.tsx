@@ -5,7 +5,7 @@ import { OG_IMAGE_SIZE } from '@/shared/lib/seo/businessMetadata'
 import { getDisplayRating } from '@/shared/lib/seo/displayRating'
 import { BusinessOgCard } from '@/shared/lib/seo/OgCard'
 
-export const alt = 'Онлайн-запись в Awaisa'
+export const alt = 'Online booking on Awaisa'
 export const size = OG_IMAGE_SIZE
 export const contentType = 'image/png'
 

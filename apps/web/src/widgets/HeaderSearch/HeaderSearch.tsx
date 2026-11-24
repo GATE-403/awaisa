@@ -30,7 +30,7 @@ import styles from './HeaderSearch.module.css'
 
 const QUICK_SEARCHES = ["Men's haircut", 'Manicure', 'Colouring', 'Massage', 'Brows']
 
-// What the empty field suggests, one at a time: real searches, so the field reads as «ask me»
+// What the empty field suggests, one at a time: real searches, so the field reads as “ask me”
 // rather than a blank box. They change every few seconds (the words only; still with reduced motion).
 const HINTS = [
   'manicure nearby',
@@ -49,7 +49,7 @@ const MAX_SERVICES = 4
 
 type ServiceSuggestion = { name: string; minPrice: number; places: number }
 
-// What people type is mostly a service («стрижка»), so services lead: one row per service name
+// What people type is mostly a service ("haircut"), so services lead: one row per service name
 // with its lowest price and how many places do it, before the places themselves.
 const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
   const byName = new Map<string, ServiceSuggestion & { slugs: Set<string> }>()
@@ -76,7 +76,7 @@ const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
 }
 
 interface HeaderSearchFieldProps {
-  /** What the catalog searched for (`?q=` on «/»), shown in the field. */
+  /** What the catalog searched for (`?q=` on “/”), shown in the field. */
   urlQuery: string
 }
 
@@ -237,7 +237,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
           )}
           {!isOpen && pathname !== '/map' && (
             // Where results are counted from: the saved place, or a question until there is one.
-            // Not on /map, whose list has its own «Где вы?» beside the places it sorts.
+            // Not on /map, whose list has its own Where are you? beside the places it sorts.
             <button
               type='button'
               className={styles.where}
@@ -258,7 +258,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
             <MagnifyingGlass aria-hidden />
           </button>
         </form>
-        {/* Phones, like iOS search: «Отмена» beside the field while the suggestions are open. */}
+        {/* Phones, like iOS search: Cancel beside the field while the suggestions are open. */}
         {isOpen && (
           <button type='button' className={styles.cancel} onClick={cancel}>
             {t('Cancel')}
@@ -359,7 +359,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 <li>
                   <button type='button' className={styles.all} onClick={() => search(trimmed)}>
                     <ArrowRight aria-hidden />
-                    {t('All services and places for «{query}»', { query: trimmed })}
+                    {t('All services and places for “{query}”', { query: trimmed })}
                   </button>
                 </li>
               </ul>

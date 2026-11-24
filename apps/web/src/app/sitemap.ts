@@ -13,7 +13,7 @@ const STATIC_PAGES: MetadataRoute.Sitemap = [
   { url: absoluteUrl('/updates'), changeFrequency: 'weekly', priority: 0.3 },
 ]
 
-// Each kind is a landing of its own: «барбершоп Бишкек» is what people search for.
+// Each kind is a landing of its own: "barbershop Bishkek" is what people search for.
 const KIND_PAGES: MetadataRoute.Sitemap = INDEXED_KINDS.map((kind) => ({
   url: absoluteUrl(kindHref(kind)),
   changeFrequency: 'daily',

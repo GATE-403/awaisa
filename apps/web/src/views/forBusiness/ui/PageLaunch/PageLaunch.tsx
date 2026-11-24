@@ -19,9 +19,9 @@ const LEAVE_QUICKLY = 900
 /** Where the tile sits in the scene: the wave starts from it. */
 const ORIGIN = { x: 0.5, y: 0.42 }
 
-// The page going live is a moment of its own, like signing in or «Вы записаны»: the screen sinks
+// The page going live is a moment of its own, like signing in or "You're booked": the screen sinks
 // into a dark scene, the place's tile lights up, a wave of light in the place's colour and the
-// spectrum runs out from it, then the name rises with a glint over «Страница готова».
+// spectrum runs out from it, then the name rises with a glint over "Your page is ready".
 export const PageLaunch = ({ name, slug, onDone }: PageLaunchProps) => {
   const t = useT()
   const onDoneRef = useRef(onDone)

@@ -1,9 +1,9 @@
 type ChoiceParts = {
   /** The visit's services in order (the first names the visit). */
   services: string[]
-  /** The master's line: their first name, «Любой мастер», or nothing yet. */
+  /** The master's line: their first name, Any specialist, or nothing yet. */
   master: string | null
-  /** «пн, 23 нояб., 10:00», once day and time are picked. */
+  /** "Mon 23 Nov, 10:00", once day and time are picked. */
   when: string | null
 }
 

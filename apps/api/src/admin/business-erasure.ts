@@ -25,6 +25,6 @@ const bookingsToCancel = (bookings: UpcomingBooking[], now: Date) =>
 /** The owner typed the page's address (case and spaces forgiven, nothing else). */
 const confirmsDeletion = (typed: string, slug: string) => typed.trim().toLowerCase() === slug
 
-const CONFIRM_MESSAGE = 'Введите адрес страницы, чтобы удалить бизнес'
+const CONFIRM_MESSAGE = 'Type the page address to delete the business'
 
 export { ARCHIVED_SLUG_PREFIX, archivedSlug, bookingsToCancel, CONFIRM_MESSAGE, confirmsDeletion }

@@ -20,7 +20,7 @@ const FORM_ID = 'certificate-amounts-form'
 
 type Draft = { key: number; value: string }
 
-// The amounts clients pick from on the place's page («Подарочный сертификат»).
+// The amounts clients pick from on the place's page ("Gift certificate").
 export const CertificateAmountsSheet = ({
   amounts,
   onClose,

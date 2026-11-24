@@ -29,8 +29,8 @@ const PHONE_DIGITS = 12
 
 const isWholePhone = (value: string) => value.replace(/\D/g, '').length === PHONE_DIGITS
 
-// The order: amount, who it is for, who it is from and a few words. «Оплатить» opens the
-// checkout; the certificate is issued only once the payment is confirmed.
+// The order: amount, who it is for, who it is from and a few words. «Pay» opens the
+// checkout; the gift card is issued only once the payment is confirmed.
 export const GiftCertificateSheet = ({
   business,
   amounts,
@@ -53,15 +53,15 @@ export const GiftCertificateSheet = ({
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!buyerName.trim()) {
-      setError('Напишите, от кого сертификат')
+      setError('Say who the gift card is from')
       return
     }
     if (!isSignedIn && !isWholePhone(buyerPhone)) {
-      setError('Проверьте ваш номер: на него придёт код')
+      setError('Check your number: the code will be sent to it')
       return
     }
     if (recipientPhone && !isWholePhone(recipientPhone)) {
-      setError('Проверьте номер получателя или оставьте его пустым')
+      setError('Check the recipient’s number or leave it empty')
       return
     }
     setIsPaying(true)
@@ -85,10 +85,10 @@ export const GiftCertificateSheet = ({
 
   return (
     <Sheet
-      title='Certificate'
+      title='Gift card'
       onClose={onClose}
       action={{
-        label: isPaying ? 'Секунду…' : 'Pay',
+        label: isPaying ? 'One moment…' : 'Pay',
         form: FORM_ID,
         disabled: isPaying,
       }}
@@ -97,7 +97,7 @@ export const GiftCertificateSheet = ({
         <section className={sheet.group} aria-label='Amount'>
           {items.length <= SEGMENTS_MAX ? (
             <SegmentedControl
-              label='Сумма сертификата'
+              label='Gift card amount'
               value={String(amount)}
               items={items}
               onChange={(value) => setAmount(Number(value))}
@@ -105,11 +105,11 @@ export const GiftCertificateSheet = ({
           ) : (
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>Сумма</span>
+                <span className={sheet.rowLabel}>Amount</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label='Сумма сертификата'
+                    aria-label='Gift card amount'
                     items={items}
                     value={String(amount)}
                     onValueChange={(value) => value && setAmount(Number(value))}
@@ -121,15 +121,15 @@ export const GiftCertificateSheet = ({
         </section>
 
         <section className={sheet.group} aria-label='To'>
-          <SectionCaption>Кому</SectionCaption>
+          <SectionCaption>To</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Имя</span>
+              <span className={sheet.rowLabel}>Name</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label='Имя получателя'
-                  placeholder='Айгуль'
+                  aria-label='Recipient’s name'
+                  placeholder='Aigul'
                   autoComplete='off'
                   value={recipientName}
                   onValueChange={setRecipientName}
@@ -137,7 +137,7 @@ export const GiftCertificateSheet = ({
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Телефон</span>
+              <span className={sheet.rowLabel}>Phone</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
@@ -153,9 +153,9 @@ export const GiftCertificateSheet = ({
             </label>
             <label className={styles.messageRow}>
               <textarea
-                aria-label='Поздравление'
+                aria-label='Message'
                 className={styles.message}
-                placeholder='Поздравление'
+                placeholder='A few words'
                 maxLength={300}
                 rows={2}
                 value={message}
@@ -163,14 +163,16 @@ export const GiftCertificateSheet = ({
               />
             </label>
           </div>
-          <p className={sheet.groupFooter}>С номером код и поздравление придут получателю.</p>
+          <p className={sheet.groupFooter}>
+            With a number, the code and your words go to the recipient.
+          </p>
         </section>
 
-        <section className={sheet.group} aria-label='От кого'>
-          <SectionCaption>От кого</SectionCaption>
+        <section className={sheet.group} aria-label='From'>
+          <SectionCaption>From</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>Имя</span>
+              <span className={sheet.rowLabel}>Name</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
@@ -184,13 +186,13 @@ export const GiftCertificateSheet = ({
             </label>
             {!isSignedIn && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>Телефон</span>
+                <span className={sheet.rowLabel}>Phone</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     type='tel'
                     inputMode='tel'
-                    aria-label='Ваш телефон'
+                    aria-label='Your phone'
                     placeholder='+996 555 123 456'
                     autoComplete='tel'
                     value={buyerPhone}
@@ -201,7 +203,7 @@ export const GiftCertificateSheet = ({
             )}
           </div>
           <p className={sheet.groupFooter}>
-            Код придёт вам после оплаты. Сертификат без срока, его можно тратить частями.
+            You get the code after paying. The gift card never expires and can be spent in parts.
           </p>
         </section>
 

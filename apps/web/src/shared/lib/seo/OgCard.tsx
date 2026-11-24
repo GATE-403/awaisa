@@ -19,7 +19,7 @@ const Star = ({ size }: { size: number }) => (
 const Footer = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 30 }}>
     <span style={{ color: theme.foreground }}>{PLATFORM.name}</span>
-    <span style={{ color: theme.mutedForeground }}>Онлайн-запись без звонков</span>
+    <span style={{ color: theme.mutedForeground }}>Online booking, no calls</span>
   </div>
 )
 

@@ -39,7 +39,7 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
               <Input
                 variant='plain'
                 aria-label={t('Name')}
-                placeholder={t('For example, «Nails»')}
+                placeholder={t('For example, "Nails"')}
                 value={name}
                 onValueChange={setName}
                 autoFocus
