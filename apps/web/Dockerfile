@@ -26,6 +26,9 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_MAP_ATTRIBUTION=$NEXT_PUBLIC_MAP_ATTRIBUTION \
     NEXT_PUBLIC_MAP_ATTRIBUTION_DARK=$NEXT_PUBLIC_MAP_ATTRIBUTION_DARK
 ENV NEXT_TELEMETRY_DISABLED=1
+# The installation's country and city (region.json), inlined into the bundle by next.config.ts;
+# without one the example is used and the build warns.
+COPY region.example.json region.jso[n] ./
 RUN pnpm turbo run build --filter=web
 
 FROM node:24-alpine AS runner

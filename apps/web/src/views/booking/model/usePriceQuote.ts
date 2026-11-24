@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '@/shared/api/apiError'
 import { getPriceQuote } from '@/shared/api/clientApi'
 import type { PriceQuote } from '@/shared/api/types'
+import { NATIONAL_PHONE_DIGITS } from '@/shared/config/region'
 
 const BAD_REQUEST = 400
-const MIN_PHONE_DIGITS = 9
 
 type QuoteRequest = {
   serviceId: string | null
@@ -33,7 +33,7 @@ export const usePriceQuote = ({
   const [quote, setQuote] = useState<PriceQuote | null>(null)
   const [codeError, setCodeError] = useState<string | null>(null)
   const digits = phone.replace(/\D/g, '')
-  const phoneParam = digits.length >= MIN_PHONE_DIGITS ? phone : ''
+  const phoneParam = digits.length >= NATIONAL_PHONE_DIGITS ? phone : ''
 
   useEffect(() => {
     if (!serviceId || !date || !time) {

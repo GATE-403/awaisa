@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@awaisa/contracts": "workspace:*",
+    "@awaisa/region": "workspace:*",
     "@aws-sdk/client-s3": "^3.1164.0",
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.1.1",

@@ -1,7 +1,8 @@
+import { REGION } from '@/shared/config/region'
 import type { Theme } from '@/shared/lib/theme'
 
-// Bishkek: the default view before any business or location is known.
-const DEFAULT_CENTER = { latitude: 42.8746, longitude: 74.5698 }
+// The region's city: the default view before any business or location is known.
+const DEFAULT_CENTER = REGION.city.center
 const DEFAULT_ZOOM = 12
 
 // OpenStreetMap tiles need no key but are meant for light use; production sets a keyed provider

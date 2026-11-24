@@ -2,7 +2,7 @@ import type { BookingChannel, StrategyReport } from '@awaisa/contracts'
 import { Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
-import { BUSINESS_UTC_OFFSET_MINUTES } from '../common/business-time.js'
+import { businessUtcOffsetMinutes } from '../common/business-time.js'
 import { toNumber } from '../common/sql.js'
 
 // A client counts as returning when they book online again within this many days.
@@ -53,7 +53,7 @@ export class StrategyService {
          ON b."outcome_at" + make_interval(mins => $2) >= w."week"
         AND b."outcome_at" + make_interval(mins => $2) < w."week" + interval '1 week'
        GROUP BY w."week" ORDER BY w."week"`,
-      [weeks, BUSINESS_UTC_OFFSET_MINUTES],
+      [weeks, businessUtcOffsetMinutes()],
     )) as { week: string; count: number }[]
     return rows.map((row) => ({ week: row.week, count: toNumber(row.count) }))
   }

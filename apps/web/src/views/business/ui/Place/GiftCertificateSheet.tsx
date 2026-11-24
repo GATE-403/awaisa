@@ -8,6 +8,7 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { orderCertificate } from '@/shared/api/clientApi'
 import type { Business } from '@/shared/api/types'
+import { PHONE_PLACEHOLDER, WHOLE_PHONE_DIGITS } from '@/shared/config/region'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
 import { SegmentedControl } from '@/shared/ui/SegmentedControl/SegmentedControl'
@@ -25,9 +26,8 @@ interface GiftCertificateSheetProps {
 const FORM_ID = 'gift-certificate-form'
 /** More amounts than fit a segmented control go into the kit's list. */
 const SEGMENTS_MAX = 4
-const PHONE_DIGITS = 12
 
-const isWholePhone = (value: string) => value.replace(/\D/g, '').length === PHONE_DIGITS
+const isWholePhone = (value: string) => value.replace(/\D/g, '').length === WHOLE_PHONE_DIGITS
 
 // The order: amount, who it is for, who it is from and a few words. «Оплатить» opens the
 // checkout; the certificate is issued only once the payment is confirmed.
@@ -191,7 +191,7 @@ export const GiftCertificateSheet = ({
                     type='tel'
                     inputMode='tel'
                     aria-label='Ваш телефон'
-                    placeholder='+996 555 123 456'
+                    placeholder={PHONE_PLACEHOLDER}
                     autoComplete='tel'
                     value={buyerPhone}
                     onValueChange={(value) => setBuyerPhone(maskPhoneInput(value))}

@@ -1,13 +1,13 @@
+import { currentRegion } from '../common/region.js'
 import type { ReminderStage } from './plan-rules.js'
 
-const dayFormat = new Intl.DateTimeFormat('ru-RU', {
-  day: 'numeric',
-  month: 'long',
-  timeZone: 'Asia/Bishkek',
-})
-
-/** «21 декабря». */
-const formatDay = (date: Date) => dayFormat.format(date)
+/** «21 декабря», on the region's clock. */
+const formatDay = (date: Date) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: currentRegion().timeZone,
+  }).format(date)
 
 const monthsText = (months: number) =>
   months === 12 ? '1 год' : months === 1 ? '1 месяц' : `${months} мес.`

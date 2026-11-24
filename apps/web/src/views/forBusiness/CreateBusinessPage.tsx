@@ -12,6 +12,7 @@ import { BusinessTile, pickTint } from '@/entities/business'
 import { useRequireSession } from '@/entities/session'
 import { KIND_ICONS, KIND_TINTS } from '@/shared/config/kindStyles'
 import { BUSINESS_KINDS } from '@/shared/config/platform'
+import { WHOLE_PHONE_DIGITS } from '@/shared/config/region'
 import { SERVICE_TEMPLATES } from '@/shared/config/serviceTemplates'
 import { useT } from '@/shared/i18n'
 import { maskAmountInput, maskPhoneInput } from '@/shared/lib/inputMasks'
@@ -23,7 +24,6 @@ import styles from './CreateBusinessPage.module.css'
 
 /** The tile's colour follows the name once typing pauses: a colour per keystroke flickered. */
 const TINT_DELAY_MS = 400
-const PHONE_DIGITS = 12
 
 const STEP_TITLES = {
   name: { title: 'Как называется?', subtitle: ' Так вас найдут в каталоге.' },
@@ -53,7 +53,7 @@ export const CreateBusinessPage = () => {
     contacts:
       ((form.city.trim() ? 1 : 0) +
         (form.address.trim() ? 1 : 0) +
-        (form.phone.replace(/\D/g, '').length >= PHONE_DIGITS ? 1 : 0)) /
+        (form.phone.replace(/\D/g, '').length >= WHOLE_PHONE_DIGITS ? 1 : 0)) /
       3,
   }
   const fills = (['name', 'kind', 'services', 'contacts'] as const).map((step, index) => {

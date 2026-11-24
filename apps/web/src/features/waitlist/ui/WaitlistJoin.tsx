@@ -10,6 +10,7 @@ import { readContact, saveContact } from '@/entities/booking'
 import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { joinWaitlist } from '@/shared/api/clientApi'
+import { NATIONAL_PHONE_DIGITS, PHONE_PLACEHOLDER } from '@/shared/config/region'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -85,7 +86,7 @@ export const WaitlistJoin = ({
       trackFormError('waitlist_name')
       return
     }
-    if (!accountPhone && phone.replace(/\D/g, '').length < 9) {
+    if (!accountPhone && phone.replace(/\D/g, '').length < NATIONAL_PHONE_DIGITS) {
       setFieldError({ field: 'phone', message: 'Укажите номер - на него придёт SMS' })
       trackFormError('waitlist_phone')
       return
@@ -169,7 +170,7 @@ export const WaitlistJoin = ({
                   autoComplete='tel'
                   value={phone}
                   onValueChange={(value) => setPhone(maskPhoneInput(value))}
-                  placeholder='+996 555 123 456'
+                  placeholder={PHONE_PLACEHOLDER}
                 />
               </Field>
             )}

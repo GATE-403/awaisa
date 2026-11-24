@@ -21,6 +21,8 @@ ENV NODE_ENV=production
 COPY --from=builder --chown=node:node /app/deploy/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/deploy/package.json ./package.json
 COPY --from=builder --chown=node:node /app/apps/api/dist ./dist
+# The installation's country and city: the API refuses to start in production without region.json.
+COPY --chown=node:node region.example.json region.jso[n] ./
 USER node
 EXPOSE 4000
 CMD ["node", "dist/main.js"]

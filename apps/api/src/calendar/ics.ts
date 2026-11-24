@@ -1,7 +1,9 @@
+import { utcOffsetMinutes } from '@awaisa/region'
+import { currentRegion } from '../common/region.js'
+
 // A minimal iCalendar (RFC 5545) writer for the subscribed calendar feeds: pure, so the escaping
 // and the line folding are unit-tested.
 
-const TIME_ZONE = 'Asia/Bishkek'
 const LINE_OCTETS = 75
 const CRLF = '\r\n'
 
@@ -68,23 +70,38 @@ const formatUtc = (date: Date) =>
     date.getUTCHours(),
   )}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`
 
-const BISHKEK_OFFSET_MS = 6 * 60 * 60_000
-
-/** 20261121T153000 on Bishkek's clock (UTC+6 all year, no daylight saving). */
+/** 20261121T153000 on the region's clock at that moment (summer time included). */
 const formatLocal = (date: Date) =>
-  formatUtc(new Date(date.getTime() + BISHKEK_OFFSET_MS)).slice(0, -1)
+  formatUtc(new Date(date.getTime() + utcOffsetMinutes(currentRegion(), date) * 60_000)).slice(
+    0,
+    -1,
+  )
 
-const TIME_ZONE_LINES = [
-  'BEGIN:VTIMEZONE',
-  `TZID:${TIME_ZONE}`,
-  'BEGIN:STANDARD',
-  'DTSTART:19700101T000000',
-  'TZOFFSETFROM:+0600',
-  'TZOFFSETTO:+0600',
-  'TZNAME:+06',
-  'END:STANDARD',
-  'END:VTIMEZONE',
-]
+/** «+0600» and «+06» for a fixed offset in minutes. */
+const offsetText = (minutes: number) => {
+  const sign = minutes < 0 ? '-' : '+'
+  const hours = pad(Math.floor(Math.abs(minutes) / 60))
+  return { full: `${sign}${hours}${pad(Math.abs(minutes) % 60)}`, short: `${sign}${hours}` }
+}
+
+const timeZoneLines = () => {
+  // One STANDARD block at today's offset: right for zones without summer time (Bishkek); calendar
+  // apps resolve the TZID by its name anyway.
+  const region = currentRegion()
+  const { timeZone } = region
+  const offset = offsetText(utcOffsetMinutes(region))
+  return [
+    'BEGIN:VTIMEZONE',
+    `TZID:${timeZone}`,
+    'BEGIN:STANDARD',
+    'DTSTART:19700101T000000',
+    `TZOFFSETFROM:${offset.full}`,
+    `TZOFFSETTO:${offset.full}`,
+    `TZNAME:${offset.short}`,
+    'END:STANDARD',
+    'END:VTIMEZONE',
+  ]
+}
 
 const eventLines = (event: IcsEvent, now: Date) => {
   const status = event.isCancelled ? 'CANCELLED' : event.isTentative ? 'TENTATIVE' : 'CONFIRMED'
@@ -92,8 +109,8 @@ const eventLines = (event: IcsEvent, now: Date) => {
     'BEGIN:VEVENT',
     `UID:${event.uid}`,
     `DTSTAMP:${formatUtc(now)}`,
-    `DTSTART;TZID=${TIME_ZONE}:${formatLocal(event.start)}`,
-    `DTEND;TZID=${TIME_ZONE}:${formatLocal(event.end)}`,
+    `DTSTART;TZID=${currentRegion().timeZone}:${formatLocal(event.start)}`,
+    `DTEND;TZID=${currentRegion().timeZone}:${formatLocal(event.end)}`,
     `SUMMARY:${escapeText(event.summary)}`,
     ...(event.location ? [`LOCATION:${escapeText(event.location)}`] : []),
     ...(event.description ? [`DESCRIPTION:${escapeText(event.description)}`] : []),
@@ -114,15 +131,15 @@ const buildCalendar = (calendar: IcsCalendar) => {
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     `X-WR-CALNAME:${escapeText(calendar.name)}`,
-    `X-WR-TIMEZONE:${TIME_ZONE}`,
+    `X-WR-TIMEZONE:${currentRegion().timeZone}`,
     `REFRESH-INTERVAL;VALUE=DURATION:PT${calendar.refreshMinutes}M`,
     `X-PUBLISHED-TTL:PT${calendar.refreshMinutes}M`,
-    ...TIME_ZONE_LINES,
+    ...timeZoneLines(),
     ...calendar.events.flatMap((event) => eventLines(event, calendar.now)),
     'END:VCALENDAR',
   ]
   return `${lines.map(foldLine).join(CRLF)}${CRLF}`
 }
 
-export { buildCalendar, escapeText, foldLine, formatLocal, formatUtc, TIME_ZONE }
+export { buildCalendar, escapeText, foldLine, formatLocal, formatUtc }
 export type { IcsCalendar, IcsEvent }
