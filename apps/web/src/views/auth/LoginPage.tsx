@@ -146,7 +146,9 @@ export const LoginPage = () => {
                   href={telegram.href}
                   target='_blank'
                   rel='noreferrer'
-                  variant={telegram.isCodeAvailable ? 'secondary' : 'primary'}
+                  // Alone it is the main action, in white: the accent blue under Telegram's own blue
+                  // mark clashed («синяя кнопка и иконка телеграма не сочетаются»).
+                  variant={telegram.isCodeAvailable ? 'secondary' : 'contrast'}
                   size='lg'
                   fullWidth
                   onClick={telegram.start}

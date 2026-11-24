@@ -12,14 +12,25 @@
   border: none;
 }
 
-.cell {
-  height: 56px;
+/* Square cells, the same in every browser. The cell is the kit's `Input`, whose `.input` makes a
+   capsule: one class against one class left the winner to the order the CSS modules happened to
+   load in, so some browsers drew ovals. Two classes always win. */
+.root .cell {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  max-height: 56px;
   padding: 0;
   border-radius: var(--radius-md);
   font-size: var(--text-title2);
   font-weight: var(--font-weight-semibold);
   font-variant-numeric: tabular-nums;
   text-align: center;
+}
+
+/* A crisp accent edge, no soft ring around it: the halo read as a smudge on the dark scene. */
+.root .cell:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
 }
 
 .root[data-invalid] .cell {

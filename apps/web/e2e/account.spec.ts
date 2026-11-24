@@ -134,6 +134,8 @@ test.describe('Account: sign in with a code in Telegram', () => {
 
     const bot = page.getByRole('link', { name: 'Войти через Telegram' })
     await expect(bot).toBeVisible()
+    // Alone it is white: the accent blue clashed with Telegram's own blue mark.
+    await expect(bot).toHaveAttribute('data-variant', 'contrast')
     await expect(bot).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=login_/)
     await expect(page.getByLabel('Номер телефона')).toHaveCount(0)
     await expect(page.getByRole('button', { name: /Получить код/ })).toHaveCount(0)
@@ -152,6 +154,11 @@ test.describe('Account: sign in with a code in Telegram', () => {
     await page.goto('/login')
     await page.getByLabel('Номер телефона').fill(randomClientPhone())
     await page.getByRole('button', { name: 'Получить код' }).click()
+    // Square cells in every browser: the kit's capsule `.input` must not win over `.cell`.
+    const cell = page.getByLabel('Код подтверждения')
+    const box = await cell.boundingBox()
+    expect(box && Math.round(box.width)).toBe(box && Math.round(box.height))
+    await expect(cell).toHaveCSS('border-radius', '12px')
     await page.getByLabel('Код подтверждения').fill('000000')
 
     await expect(page.getByText('Неверный код, осталось попыток: 4')).toBeVisible()

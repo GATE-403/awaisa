@@ -179,8 +179,10 @@
   position: absolute;
   inset: -10% -45%;
   z-index: -1;
+  /* `closest-side`: the patch fades out before the box ends, so no straight edge shows over the
+     light (centred a little low, it used to stop short of transparent at the box's foot). */
   background: radial-gradient(
-    50% 50% at 50% 52%,
+    closest-side at 50% 50%,
     rgb(8 9 15 / 0.82) 0%,
     rgb(8 9 15 / 0.7) 40%,
     transparent 100%
