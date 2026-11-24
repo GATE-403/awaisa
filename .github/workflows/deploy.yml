@@ -1,0 +1,137 @@
+name: Images and deploy
+
+# Every push to main builds the api and web images once and pushes them to GHCR, tagged with the
+# commit (and `main`). main only takes pull requests with green CI, so these images are tested.
+# Then, when the server is configured (vars.DEPLOY_HOST), the same images are rolled out there by
+# scripts/deploy.sh: no build on the server. A pull request touching the images only builds them,
+# to catch a broken Dockerfile before it reaches main. Rolling back is a manual run with the tag
+# of an earlier commit.
+#
+# Settings (repository → Settings → Secrets and variables → Actions):
+#   variables: DEPLOY_HOST, DEPLOY_USER, DEPLOY_PATH (the folder with .env on the server),
+#              DEPLOY_URL (https://… checked after a rollout, optional),
+#              NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_MAP_TILES_URL(_DARK), NEXT_PUBLIC_MAP_ATTRIBUTION(_DARK)
+#   secrets:   DEPLOY_SSH_KEY (a private key the server accepts for DEPLOY_USER),
+#              DEPLOY_KNOWN_HOSTS (`ssh-keyscan <host>` output, checked instead of trusting on first use)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'apps/api/Dockerfile'
+      - 'apps/web/Dockerfile'
+      - '.dockerignore'
+      - 'docker-compose.yml'
+      - 'scripts/deploy.sh'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Deploy this existing image tag (a commit SHA) instead of building, e.g. to roll back'
+        required: false
+        default: ''
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/awaisa
+
+jobs:
+  images:
+    name: Image (${{ matrix.app }})
+    if: github.event_name != 'workflow_dispatch' || inputs.tag == ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        app: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.app }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.app }}:main
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          # Only the web image reads these; Next inlines NEXT_PUBLIC_* at build time.
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.NEXT_PUBLIC_SITE_URL || 'https://awaisa.kg' }}
+            NEXT_PUBLIC_MAP_TILES_URL=${{ vars.NEXT_PUBLIC_MAP_TILES_URL }}
+            NEXT_PUBLIC_MAP_TILES_URL_DARK=${{ vars.NEXT_PUBLIC_MAP_TILES_URL_DARK }}
+            NEXT_PUBLIC_MAP_ATTRIBUTION=${{ vars.NEXT_PUBLIC_MAP_ATTRIBUTION }}
+            NEXT_PUBLIC_MAP_ATTRIBUTION_DARK=${{ vars.NEXT_PUBLIC_MAP_ATTRIBUTION_DARK }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+
+  deploy:
+    name: Deploy
+    needs: images
+    # Runs after a build on main, or alone for a manual rollback; skipped until a server is set.
+    if: >-
+      always() && vars.DEPLOY_HOST != '' && github.ref == 'refs/heads/main' &&
+      (needs.images.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.tag != ''))
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.DEPLOY_URL }}
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read
+    env:
+      TAG: ${{ inputs.tag || github.sha }}
+      TARGET: ${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: SSH key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          printf 'Host deploy\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  StrictHostKeyChecking yes\n' \
+            "${{ vars.DEPLOY_HOST }}" "${{ vars.DEPLOY_USER }}" > ~/.ssh/config
+      - name: Copy compose file and scripts
+        run: |
+          ssh deploy "mkdir -p '${{ vars.DEPLOY_PATH }}/scripts'"
+          scp docker-compose.yml deploy:'${{ vars.DEPLOY_PATH }}/docker-compose.yml'
+          scp scripts/*.sh deploy:'${{ vars.DEPLOY_PATH }}/scripts/'
+      - name: Roll out ${{ env.TAG }}
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | ssh deploy \
+            "cd '${{ vars.DEPLOY_PATH }}' && GHCR_USER='${{ github.actor }}' IMAGE_PREFIX='${{ env.IMAGE_PREFIX }}' sh scripts/deploy.sh '$TAG'"
+      - name: Check the site
+        if: vars.DEPLOY_URL != ''
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS --max-time 10 "${{ vars.DEPLOY_URL }}/api/health"; then exit 0; fi
+            sleep 10
+          done
+          exit 1

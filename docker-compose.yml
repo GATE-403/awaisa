@@ -101,9 +101,12 @@ services:
       timeout: 3s
       retries: 10
 
+  # The app's images: built here by `--build`, or pulled from GHCR by scripts/deploy.sh, which sets
+  # API_IMAGE / WEB_IMAGE to ghcr.io/glassmakers/awaisa-api|web and IMAGE_TAG to the commit.
+
   # Applies migrations once per deploy; api and worker start only after it succeeds.
   migrate:
-    image: awaisa-api
+    image: ${API_IMAGE:-awaisa-api}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -116,7 +119,7 @@ services:
 
   # HTTP only (PROCESS_ROLE=api): scale it freely, e.g. `docker compose up --scale api=3`.
   api:
-    image: awaisa-api
+    image: ${API_IMAGE:-awaisa-api}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     profiles: [app]
     environment:
@@ -141,7 +144,7 @@ services:
 
   # Cron jobs and the Telegram long-poll. Exactly one replica.
   worker:
-    image: awaisa-api
+    image: ${API_IMAGE:-awaisa-api}:${IMAGE_TAG:-latest}
     restart: unless-stopped
     profiles: [app]
     command: ["node", "dist/worker.js"]
@@ -182,6 +185,7 @@ services:
         condition: service_healthy
 
   web:
+    image: ${WEB_IMAGE:-awaisa-web}:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: apps/web/Dockerfile

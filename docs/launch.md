@@ -49,10 +49,15 @@
 
 ## 4. Сборка и запуск
 
-- [ ] В `.env` на сервере: `NEXT_PUBLIC_SITE_URL=https://awaisa.kg` и ключи тайлов карты (MapTiler или 2GIS), если они есть. Они попадают в образ веба при сборке.
+- [ ] Образы собирает CI (`.github/workflows/deploy.yml`): каждый пуш в `main` кладёт `ghcr.io/glassmakers/awaisa-api` и `awaisa-web` с тегом коммита. На сервере ничего не собирается.
+- [ ] Переменные репозитория (Settings → Secrets and variables → Actions → Variables): `NEXT_PUBLIC_SITE_URL` и ключи тайлов карты (MapTiler или 2GIS), если они есть. Они попадают в образ веба при сборке, поэтому после их смены нужен новый пуш в `main`.
+- [ ] Сервер: Docker с compose, пользователь для деплоя, папка с `.env` (`DEPLOY_PATH`). В неё workflow сам копирует `docker-compose.yml` и `scripts/`.
+- [ ] Переменные `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PATH`, `DEPLOY_URL` и секреты `DEPLOY_SSH_KEY` (приватный ключ, публичный в `~/.ssh/authorized_keys` пользователя), `DEPLOY_KNOWN_HOSTS` (вывод `ssh-keyscan <host>`). Пока `DEPLOY_HOST` пуст, workflow только собирает образы.
+- [ ] Окружение `production` в настройках репозитория: при желании ручное подтверждение каждого деплоя (Required reviewers).
 - [ ] Reverse proxy с TLS (Caddy проще всего): `awaisa.kg` на `web:3000`. За Cloudflare задать `TRUST_PROXY` (раздел 0). API наружу не открывать, веб ходит в него по `/api` (rewrite на `API_URL`).
 - [ ] Порты Postgres и Redis в compose привязаны к `127.0.0.1`, наружу не открыты: так и оставить.
-- [ ] `docker compose --profile app up -d --build`: сначала `migrate`, потом `api` и `worker`.
+- [ ] Выкатка: `scripts/deploy.sh <тег>` (его запускает workflow после пуша в `main`): скачивает образы, сначала `migrate`, потом `api` и `worker`, ждёт `/health`, записывает тег в `.image-tag`. Откат: Actions → «Images and deploy» → Run workflow с тегом прошлого коммита.
+- [ ] Без CI (первый запуск, отладка) можно собрать на сервере: `docker compose --profile app up -d --build`.
 - [ ] `worker` строго в одном экземпляре: в нём все cron-задачи и Telegram long-poll. `api` можно масштабировать.
 - [ ] Telegram: либо long-poll (по умолчанию, один процесс), либо `TELEGRAM_WEBHOOK_URL=https://awaisa.kg/api/telegram/webhook` + `TELEGRAM_WEBHOOK_SECRET`.
 - [ ] **Никогда** не запускать `pnpm db:seed` на проде: демо-данные только для разработки.
