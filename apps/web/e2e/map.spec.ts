@@ -31,7 +31,7 @@ test.describe('Map: places nearby', () => {
     await context.grantPermissions(['geolocation'])
     await context.setGeolocation({ latitude: 42.87, longitude: 74.6 })
     await openMap(page)
-    await page.getByRole('button', { name: 'Where are you?' }).click()
+    await page.getByRole('button', { name: 'Where are you?', exact: true }).click()
     await page
       .getByRole('dialog', { name: 'Where are you?' })
       .getByRole('button', { name: 'Detect automatically' })
@@ -52,7 +52,7 @@ test.describe('Map: places nearby', () => {
   }) => {
     await openMap(page)
     await expect(page.getByText(/Tell us where you are/)).toBeVisible()
-    await page.getByRole('button', { name: 'Where are you?' }).click()
+    await page.getByRole('button', { name: 'Where are you?', exact: true }).click()
     await page
       .getByRole('dialog', { name: 'Where are you?' })
       .getByRole('button', { name: 'Asanbay' })
