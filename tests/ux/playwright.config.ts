@@ -24,7 +24,7 @@ export default defineConfig({
   outputDir: './test-results',
   use: {
     baseURL: BASE_URL,
-    locale: 'ru-RU',
+    locale: 'en-GB',
     timezoneId: 'Asia/Bishkek',
     trace: 'retain-on-failure',
   },

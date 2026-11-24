@@ -57,5 +57,44 @@ test.describe('Languages', () => {
     await expect(page).toHaveURL(/\/ky\/top\?kind=barber$/)
     await expect(page.locator('html')).toHaveAttribute('lang', 'ky-KG')
     await expect(page.getByRole('combobox', { name: 'Тил' })).toBeVisible()
+
+    // The pick is remembered: a bare address now opens in Kyrgyz, whatever the browser reads.
+    await page.goto('/map')
+    await expect(page).toHaveURL(/\/ky\/map$/)
+
+    // And English, once picked, stays English.
+    await page.goto('/top?kind=barber')
+    await page.getByRole('combobox', { name: 'Тил' }).click()
+    await page.getByRole('option', { name: 'English' }).click()
+    await expect(page).toHaveURL(/\/top\?kind=barber$/)
+    await page.goto('/map')
+    await expect(page).toHaveURL(/\/map$/)
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en-GB')
+  })
+
+  test('a first visit opens in the browser’s language', async ({ browser, request }) => {
+    const russian = await browser.newContext({ locale: 'ru-RU' })
+    const page = await russian.newPage()
+    await page.goto('/map?kind=barber')
+    await expect(page).toHaveURL(/\/ru\/map\?kind=barber$/)
+    await expect(page.locator('html')).toHaveAttribute('lang', 'ru-RU')
+    await russian.close()
+
+    // A language we do not have, or none at all (a crawler), stays on the English address.
+    for (const language of ['de-DE,fr;q=0.8', '']) {
+      const response = await request.get('/map', {
+        headers: { accept: 'text/html', 'accept-language': language },
+        maxRedirects: 0,
+      })
+      expect(response.status(), language).toBe(200)
+    }
+    // The app router's own requests for a page's data are never sent elsewhere.
+    // (Next checks their `_rsc` against its own headers and may send one to a fresh `_rsc`, on
+    // the same address: never to another language.)
+    const data = await request.get('/map?_rsc=e2e', {
+      headers: { accept: 'text/x-component', rsc: '1', 'accept-language': 'ru' },
+      maxRedirects: 0,
+    })
+    expect(data.headers().location ?? '').not.toMatch(/^\/(ru|ky)\b/)
   })
 })
