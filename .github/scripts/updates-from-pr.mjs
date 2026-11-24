@@ -29,7 +29,9 @@ const LINK = /\s*\[([^\]]+)\]\((\/[^)\s]*)\)\s*$/
 
 const section = (body) => {
   const lines = body.replace(/\r/g, '').split('\n')
-  const start = lines.findIndex((line) => /^#{2,3}\s*(What's new|Что нового)\s*$/i.test(line.trim()))
+  const start = lines.findIndex((line) =>
+    /^#{2,3}\s*(What's new|Что нового)\s*$/i.test(line.trim()),
+  )
   if (start === -1) return []
   const rest = lines.slice(start + 1)
   const end = rest.findIndex((line) => /^#{1,3}\s/.test(line.trim()))
