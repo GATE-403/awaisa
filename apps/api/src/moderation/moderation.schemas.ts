@@ -25,12 +25,6 @@ const reportSchema = z
   })
   .refine(isValidTarget, { message: 'Неизвестно, на что жалоба', path: ['targetId'] })
 
-/** The feed's own route keeps working: the photo is in the path, the reason defaults to «Другое». */
-const photoReportSchema = z.object({
-  reason: z.enum(REASONS).default('other'),
-  session: z.string().trim().min(8).max(64).optional(),
-})
-
 const decisionSchema = z
   .object({ ...target, action: z.enum(ACTIONS) })
   .refine(isValidTarget, { message: 'Неизвестно, что решать', path: ['targetId'] })
@@ -38,9 +32,8 @@ const decisionSchema = z
 const logQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50) })
 
 type ReportBody = ReportInput
-type PhotoReportBody = z.infer<typeof photoReportSchema>
 type DecisionBody = ModerationDecisionInput
 type LogQuery = z.infer<typeof logQuerySchema>
 
-export type { DecisionBody, LogQuery, PhotoReportBody, ReportBody }
-export { decisionSchema, logQuerySchema, photoReportSchema, reportSchema }
+export type { DecisionBody, LogQuery, ReportBody }
+export { decisionSchema, logQuerySchema, reportSchema }

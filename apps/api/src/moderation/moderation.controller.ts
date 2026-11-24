@@ -5,8 +5,6 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  Param,
-  ParseUUIDPipe,
   Post,
   Query,
   UseGuards,
@@ -18,8 +16,6 @@ import {
   decisionSchema,
   type LogQuery,
   logQuerySchema,
-  type PhotoReportBody,
-  photoReportSchema,
   type ReportBody,
   reportSchema,
 } from './moderation.schemas.js'
@@ -39,18 +35,6 @@ export class ModerationController {
     @CurrentCustomer() customer: Customer | null,
   ) {
     await this.moderation.report(body, customer)
-  }
-
-  // The feed's own route from before reports had reasons.
-  @Post('feed/:id/report')
-  @HttpCode(204)
-  @UseGuards(OptionalAuthGuard)
-  async reportPhoto(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body({ schema: photoReportSchema }) body: PhotoReportBody,
-    @CurrentCustomer() customer: Customer | null,
-  ) {
-    await this.moderation.report({ targetType: 'photo', targetId: id, ...body }, customer)
   }
 
   @Get('moderation/queue')

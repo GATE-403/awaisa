@@ -95,8 +95,6 @@ import type {
   MasterSuggestion,
   ModerationDecision,
   ModerationDecisionInput,
-  ModerationLog,
-  ModerationQueue,
   MoneyReport,
   MovedBooking,
   MyLoyalty,
@@ -121,7 +119,6 @@ import type {
   Recommendation,
   ReportInput,
   ReviewAccess,
-  ReviewerProfile,
   ReviewPhotos,
   ReviewReply,
   ReviewReplySettings,
@@ -151,7 +148,6 @@ import type {
   UnclosedDays,
   UpdateBusinessInput,
   UploadedPhoto,
-  VisitReview,
   WaitlistEntry,
   WalletConfig,
   WalletLinks,
@@ -245,9 +241,6 @@ const updateMyProfileSettings = (
 
 const getProfile = (id: string, signal?: AbortSignal) =>
   request<PublicProfile>(`/profiles/${encodeURIComponent(id)}`, { signal })
-
-const getReviewer = (id: string, signal?: AbortSignal) =>
-  request<ReviewerProfile>(`/reviewers/${encodeURIComponent(id)}`, { signal })
 
 // A place's reviews on the client (the booking form asks for those of the chosen service).
 const listPlaceReviews = (
@@ -407,9 +400,6 @@ const addReviewPhoto = (id: string, access: ReviewAccess, file: File) => {
     body,
   })
 }
-
-const getVisitReview = (id: string, access: ReviewAccess, signal?: AbortSignal) =>
-  request<VisitReview>(`/bookings/${id}/review`, { headers: accessHeaders(access), signal })
 
 const createReview = (
   id: string,
@@ -607,12 +597,6 @@ const setWorkingHours = (slug: string, days: WorkingDay[]) =>
 const createCategory = (slug: string, name: string) =>
   post<Category>(`${manage(slug)}/categories`, { name })
 
-const renameCategory = (slug: string, id: string, name: string) =>
-  send<void>('PATCH', `${manage(slug)}/categories/${id}`, { name })
-
-const deleteCategory = (slug: string, id: string) =>
-  send<void>('DELETE', `${manage(slug)}/categories/${id}`)
-
 const createService = (slug: string, input: ServiceInput) =>
   post<CreatedId>(`${manage(slug)}/services`, input)
 
@@ -761,12 +745,7 @@ const getRecommendations = (
 /** A viewer's report: a work photo, a review or a profile, with its reason. */
 const reportContent = (input: ReportInput) => post<void>('/reports', input)
 
-// Platform admins: what was reported, what to do with it and what was decided.
-const getModerationQueue = (signal?: AbortSignal) =>
-  request<ModerationQueue>('/moderation/queue', { signal })
-
-const getModerationLog = (signal?: AbortSignal) =>
-  request<ModerationLog>('/moderation/decisions?limit=50', { signal })
+// Platform admins decide on reports (the queue and the journal are read on the server).
 
 const decideModeration = (input: ModerationDecisionInput) =>
   post<ModerationDecision>('/moderation/decisions', input)
@@ -1053,8 +1032,6 @@ export {
   getFunnelReport,
   getFunnelSegments,
   getStrategyReport,
-  getModerationLog,
-  getModerationQueue,
   decideModeration,
   getFunnelSignals,
   listOffersByIds,
@@ -1153,7 +1130,6 @@ export {
   createSpecialist,
   createStaffBooking,
   createTimeOff,
-  deleteCategory,
   deleteTimeOff,
   getAdminSchedule,
   getAnalytics,
@@ -1185,7 +1161,6 @@ export {
   getClients,
   getClient,
   updateClient,
-  getVisitReview,
   addReviewPhoto,
   answerQuestion,
   askQuestion,
@@ -1210,7 +1185,6 @@ export {
   getAvailability,
   getMyProfileSettings,
   getProfile,
-  getReviewer,
   updateMyProfileSettings,
   listPlaceReviews,
   getBooking,
@@ -1230,7 +1204,6 @@ export {
   removeLogo,
   removePhoto,
   removeSpecialistPhoto,
-  renameCategory,
   restoreBooking,
   restoreBookingAsSalon,
   restoreMyBooking,
