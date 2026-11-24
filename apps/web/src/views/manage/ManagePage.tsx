@@ -208,7 +208,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                 {data && !lockedFeature && tab === 'stock' && (
                   <StockTab slug={slug} catalog={data.catalog} />
                 )}
-                {tab === 'fiscal' && <FiscalTab slug={slug} />}
+                {!lockedFeature && tab === 'fiscal' && <FiscalTab slug={slug} />}
                 {data && tab === 'team' && <TeamTab slug={slug} />}
                 {data && tab === 'billing' && <BillingTab slug={slug} />}
                 {data && tab === 'page' && (

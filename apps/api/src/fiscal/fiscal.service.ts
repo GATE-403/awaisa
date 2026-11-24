@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, type EntityManager } from 'typeorm'
+import { BillingService } from '../billing/billing.service.js'
 import type { Env } from '../config/env.js'
 import type { FiscalSettingsBody } from './fiscal.schemas.js'
 import {
@@ -66,6 +67,7 @@ export class FiscalService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly config: ConfigService<Env, true>,
+    private readonly billing: BillingService,
   ) {
     const name = config.get('FISCAL_DRIVER', { infer: true })
     this.driver =
@@ -364,7 +366,12 @@ export class FiscalService {
       ),
     )
     const settings = await this.loadSettings(manager, source.businessId)
-    const isIssuing = Boolean(this.driver) && settings.isEnabled
+    // Receipts are a paid-plan feature: back on the free plan nothing new is issued, while
+    // receipts already issued are still refunded or corrected.
+    const isIssuing =
+      Boolean(this.driver) &&
+      settings.isEnabled &&
+      (await this.billing.hasFeature(source.businessId, 'fiscal'))
     if (!active && !isIssuing) return []
     const document = wanted ? buildReceipt(wanted.items, wanted.method, settings) : null
     const plan = planReceipts(

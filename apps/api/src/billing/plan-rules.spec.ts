@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   extendUntil,
   featureLockedMessage,
+  hasFeature,
   limitProblem,
   monthlyPrice,
   type PlanRow,
@@ -39,7 +40,7 @@ const business: PlanRow = {
   maxBranches: 3,
   smsPerMonth: 0,
   smsPerMaster: 300,
-  features: ['cashdesk', 'analytics'],
+  features: ['cashdesk', 'analytics', 'fiscal'],
   trialDays: 30,
   position: 2,
 }
@@ -141,6 +142,9 @@ describe('limits', () => {
   it('names the cheapest public plan with a locked feature', () => {
     expect(featureLockedMessage(plans, 'cashdesk')).toBe('Доступно на тарифе «Бизнес»')
     expect(featureLockedMessage(plans, 'mailings')).toBe('Недоступно на вашем тарифе')
+    expect(featureLockedMessage(plans, 'fiscal')).toBe('Доступно на тарифе «Бизнес»')
+    expect(hasFeature(start, 'fiscal')).toBe(false)
+    expect(hasFeature(founders, 'fiscal')).toBe(true)
   })
 })
 

@@ -25,6 +25,7 @@ const FEATURE_TEXT: Record<PlanFeature, string> = {
   payroll: 'Зарплата мастеров считается сама.',
   team: 'Администраторы ведут расписание без доступа к деньгам.',
   deposits: 'Предоплата при онлайн-записи.',
+  fiscal: 'Фискальные чеки за визиты и продажи уходят в налоговую сами.',
 }
 
 // A section the business's plan does not open: one `EmptyState`, the plan that opens it and the
