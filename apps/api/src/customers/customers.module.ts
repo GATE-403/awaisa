@@ -8,6 +8,7 @@ import { MediaModule } from '../media/media.module.js'
 import { WaitlistModule } from '../waitlist/waitlist.module.js'
 import { AccountService } from './account.service.js'
 import { Customer } from './customer.entity.js'
+import { CustomersService } from './customers.service.js'
 import { MeController } from './me.controller.js'
 import { SessionController } from './session.controller.js'
 
@@ -22,6 +23,6 @@ import { SessionController } from './session.controller.js'
     WaitlistModule,
   ],
   controllers: [MeController, SessionController],
-  providers: [AccountService],
+  providers: [AccountService, CustomersService],
 })
 export class CustomersModule {}

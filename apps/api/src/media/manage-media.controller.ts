@@ -1,13 +1,10 @@
-import { randomUUID } from 'node:crypto'
 import type { CoverUpload, LogoUpload, SpecialistPhotoUpload, WorkPhoto } from '@awaisa/contracts'
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -18,17 +15,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { Business } from '../businesses/business.entity.js'
+import type { Business } from '../businesses/business.entity.js'
 import {
   BusinessAccessGuard,
   CurrentBusiness,
   OwnerOnly,
 } from '../businesses/business-access.guard.js'
-import { Specialist } from '../catalog/specialist.entity.js'
-import { type ImageKind, processImage } from './images.js'
-import { StorageService } from './storage.service.js'
+import { MediaUploadsService } from './media-uploads.service.js'
 import {
   type ReorderWorkPhotosInput,
   reorderWorkPhotosSchema,
@@ -51,69 +44,53 @@ const imageUpload = FileInterceptor('file', {
 @OwnerOnly()
 export class ManageMediaController {
   constructor(
-    @InjectRepository(Business) private readonly businesses: Repository<Business>,
-    @InjectRepository(Specialist) private readonly specialists: Repository<Specialist>,
-    private readonly storage: StorageService,
+    private readonly uploads: MediaUploadsService,
     private readonly workPhotos: WorkPhotosService,
   ) {}
 
   @Post('cover')
   @UseInterceptors(imageUpload)
-  async setCover(
+  setCover(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
   ): Promise<CoverUpload> {
-    const url = await this.save(business, file, 'cover')
-    if (business.coverUrl) await this.storage.remove(business.coverUrl)
-    await this.businesses.update({ id: business.id }, { coverUrl: url })
-
-    return { coverUrl: url }
+    return this.uploads.setCover(business, file)
   }
 
   @Delete('cover')
   @HttpCode(204)
-  async removeCover(@CurrentBusiness() business: Business) {
-    if (business.coverUrl) await this.storage.remove(business.coverUrl)
-    await this.businesses.update({ id: business.id }, { coverUrl: null })
+  removeCover(@CurrentBusiness() business: Business): Promise<void> {
+    return this.uploads.removeCover(business)
   }
 
   // The logo: square, shown round wherever the place appears (catalog, page, bar, booking).
   @Post('logo')
   @UseInterceptors(imageUpload)
-  async setLogo(
+  setLogo(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
   ): Promise<LogoUpload> {
-    const url = await this.save(business, file, 'logo')
-    if (business.logoUrl) await this.storage.remove(business.logoUrl)
-    await this.businesses.update({ id: business.id }, { logoUrl: url })
-
-    return { logoUrl: url }
+    return this.uploads.setLogo(business, file)
   }
 
   @Delete('logo')
   @HttpCode(204)
-  async removeLogo(@CurrentBusiness() business: Business) {
-    if (business.logoUrl) await this.storage.remove(business.logoUrl)
-    await this.businesses.update({ id: business.id }, { logoUrl: null })
+  removeLogo(@CurrentBusiness() business: Business): Promise<void> {
+    return this.uploads.removeLogo(business)
   }
 
   /** A photo of a work, optionally tagged with the service and master (multipart fields). */
   @Post('photos')
   @UseInterceptors(imageUpload)
-  async addPhoto(
+  addPhoto(
     @CurrentBusiness() business: Business,
     @UploadedFile() file: UploadedImage | undefined,
     @Body() body: { serviceId?: string; specialistId?: string },
   ): Promise<WorkPhoto[]> {
-    await this.workPhotos.assertRoom(business.id)
-    const url = await this.save(business, file, 'photo')
-    await this.workPhotos.add(business.id, url, {
+    return this.uploads.addWorkPhoto(business, file, {
       serviceId: body?.serviceId || null,
       specialistId: body?.specialistId || null,
     })
-
-    return this.workPhotos.listForBusiness(business.id)
   }
 
   @Get('work-photos')
@@ -141,51 +118,29 @@ export class ManageMediaController {
   }
 
   @Delete('work-photos/:id')
-  async removePhoto(
+  removePhoto(
     @CurrentBusiness() business: Business,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<WorkPhoto[]> {
-    const url = await this.workPhotos.remove(business.id, id)
-    if (url) await this.storage.remove(url)
-    return this.workPhotos.listForBusiness(business.id)
+    return this.uploads.removeWorkPhoto(business.id, id)
   }
 
   @Post('specialists/:id/photo')
   @UseInterceptors(imageUpload)
-  async setSpecialistPhoto(
+  setSpecialistPhoto(
     @CurrentBusiness() business: Business,
     @Param('id') id: string,
     @UploadedFile() file: UploadedImage | undefined,
   ): Promise<SpecialistPhotoUpload> {
-    const specialist = await this.findSpecialist(business, id)
-    const url = await this.save(business, file, 'avatar')
-    if (specialist.photoUrl) await this.storage.remove(specialist.photoUrl)
-    await this.specialists.update({ id }, { photoUrl: url })
-
-    return { photoUrl: url }
+    return this.uploads.setSpecialistPhoto(business, id, file)
   }
 
   @Delete('specialists/:id/photo')
   @HttpCode(204)
-  async removeSpecialistPhoto(@CurrentBusiness() business: Business, @Param('id') id: string) {
-    const specialist = await this.findSpecialist(business, id)
-    if (specialist.photoUrl) await this.storage.remove(specialist.photoUrl)
-    await this.specialists.update({ id }, { photoUrl: null })
-  }
-
-  private async save(business: Business, file: UploadedImage | undefined, kind: ImageKind) {
-    if (!file) throw new BadRequestException('Выберите фото')
-
-    return this.storage.put(
-      `${business.id}/${randomUUID()}.webp`,
-      await processImage(file.buffer, kind),
-    )
-  }
-
-  private async findSpecialist(business: Business, id: string) {
-    const specialist = await this.specialists.findOneBy({ id, businessId: business.id })
-    if (!specialist) throw new NotFoundException('Мастер не найден')
-
-    return specialist
+  removeSpecialistPhoto(
+    @CurrentBusiness() business: Business,
+    @Param('id') id: string,
+  ): Promise<void> {
+    return this.uploads.removeSpecialistPhoto(business, id)
   }
 }

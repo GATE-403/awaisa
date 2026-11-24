@@ -13,6 +13,7 @@ import { BusinessesService } from './businesses.service.js'
 import { ManageController } from './manage.controller.js'
 import { MapController } from './map.controller.js'
 import { MembersController } from './members.controller.js'
+import { MembersService } from './members.service.js'
 import { WorkingHours } from './working-hours.entity.js'
 
 @Module({
@@ -23,7 +24,7 @@ import { WorkingHours } from './working-hours.entity.js'
     NotificationsModule,
   ],
   controllers: [BusinessesController, ManageController, MapController, MembersController],
-  providers: [BusinessesService, BusinessAccessGuard],
+  providers: [BusinessesService, BusinessAccessGuard, MembersService],
   exports: [BusinessesService, BusinessAccessGuard],
 })
 export class BusinessesModule {}
