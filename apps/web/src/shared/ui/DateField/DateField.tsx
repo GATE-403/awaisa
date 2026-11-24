@@ -10,7 +10,7 @@ interface DateFieldProps {
   onChange: (value: string) => void
   /** Read to screen readers and shown nowhere else (the row says it). */
   label: string
-  /** What an empty field says: «Без срока», «Выберите». */
+  /** What an empty field says: «No end date», «Choose». */
   placeholder?: string
   min?: string
   max?: string
@@ -19,7 +19,7 @@ interface DateFieldProps {
   id?: string
 }
 
-const formatter = new Intl.DateTimeFormat('ru-RU', {
+const formatter = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
   month: 'long',
   year: 'numeric',
@@ -28,18 +28,18 @@ const formatter = new Intl.DateTimeFormat('ru-RU', {
 // A day key is a local date: read it as one, never through a time zone.
 const toWords = (value: string) => {
   const [year = 0, month = 1, day = 1] = value.split('-').map(Number)
-  // «31 декабря 2026», without the «г.» the formatter adds.
-  return formatter.format(new Date(year, month - 1, day)).replace(/\s*г\.$/, '')
+  // «31 December 2026».
+  return formatter.format(new Date(year, month - 1, day))
 }
 
-// A date in a Settings row as words («25 декабря 2026», «Без срока»), the system's own date
+// A date in a Settings row as words («25 December 2026», «No end date»), the system's own date
 // picker under it: the browser's «dd/mm/yyyy» segments and its calendar glyph never show
-// («проблемы компонент даты»). A tap anywhere on it opens the picker.
+// (the owner: the date component had problems). A tap anywhere on it opens the picker.
 export const DateField = ({
   value,
   onChange,
   label,
-  placeholder = 'Выберите',
+  placeholder = 'Choose',
   min,
   max,
   isClearable = false,
@@ -73,7 +73,7 @@ export const DateField = ({
         <button
           type='button'
           className={styles.clear}
-          aria-label={`${label}: убрать дату`}
+          aria-label={`${label}: remove the date`}
           onClick={() => onChange('')}
         >
           <X aria-hidden />

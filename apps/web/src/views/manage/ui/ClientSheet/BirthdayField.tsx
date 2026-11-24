@@ -17,33 +17,19 @@ interface BirthdayFieldProps {
 // leap year nobody is born in, so 29 February still fits and greetings only read month and day.
 const NO_YEAR = '1904'
 
-const MONTHS = [
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
-]
 const MONTH_NAMES = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const pad = (value: number) => String(value).padStart(2, '0')
@@ -57,18 +43,13 @@ const parse = (value: string) => {
   return { year: year || NO_YEAR, month: Number(month) || null, day: Number(day) || null }
 }
 
-/** «14 марта» · «14-март» · «14 March»: Russian takes the genitive, the others the name. */
-const formatDayMonth = (day: number, month: number, t: Translate) => {
-  if (t.language === 'ru') return `${day} ${MONTHS[month - 1]}`
-  const name = t(MONTH_NAMES[month - 1] ?? '')
-  return t.language === 'ky' ? `${day}-${name.toLowerCase()}` : `${day} ${name}`
-}
+/** "14 March". */
+const formatDayMonth = (day: number, month: number, t: Translate) =>
+  `${day} ${t(MONTH_NAMES[month - 1] ?? '')}`
 
-/** «ноябрь 2026» in the client's language (Russian keeps its own words at the call). */
-const formatMonthYear = (month: number, year: number, t: Translate) => {
-  const name = t(MONTH_NAMES[month - 1] ?? '')
-  return `${t.language === 'ky' ? name.toLowerCase() : name} ${year}`
-}
+/** "November 2026". */
+const formatMonthYear = (month: number, year: number, t: Translate) =>
+  `${t(MONTH_NAMES[month - 1] ?? '')} ${year}`
 
 const bishkekParts = new Intl.DateTimeFormat('en-GB', {
   day: 'numeric',
@@ -84,7 +65,7 @@ const getBishkekDate = (iso: string) => {
   return { day: part('day'), month: part('month'), year: part('year') }
 }
 
-/** «21 ноября» · «21-ноябрь» · «21 November» for a moment (an ISO timestamp). */
+/** "21 November" for a moment (an ISO timestamp). */
 const formatMomentDay = (iso: string, t: Translate) => {
   const { day, month } = getBishkekDate(iso)
   return formatDayMonth(day, month, t)
@@ -108,7 +89,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
   }))
   const monthItems = MONTH_NAMES.map((label, index) => ({ value: index + 1, label: t(label) }))
   const yearItems = [
-    { value: NO_YEAR, label: t('Год не важен') },
+    { value: NO_YEAR, label: t('Year not needed') },
     ...Array.from({ length: 90 }, (_, index) => {
       const year = String(thisYear - 10 - index)
       return { value: year, label: year }
@@ -126,7 +107,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
   return (
     <>
       <div className={sheet.row}>
-        <span className={sheet.rowLabel}>{t('День рождения')}</span>
+        <span className={sheet.rowLabel}>{t('Birthday')}</span>
         <span className={styles.birthdayValue}>
           {label && !isEditing && <span>{label}</span>}
           <button
@@ -135,7 +116,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
             aria-expanded={isEditing}
             onClick={() => setIsEditing((current) => !current)}
           >
-            {isEditing ? t('Готово') : label ? t('Изменить') : t('Добавить')}
+            {isEditing ? t('Done') : label ? t('Change') : t('Add')}
           </button>
         </span>
       </div>
@@ -143,31 +124,31 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
         <div className={styles.birthdayPickers}>
           <span>
             <Select
-              aria-label={t('День')}
+              aria-label={t('Day')}
               className={styles.picker}
               items={dayItems}
               value={parsed.day}
-              placeholder={t('День')}
+              placeholder={t('Day')}
               onValueChange={(day) => day && update({ day })}
             />
           </span>
           <span>
             <Select
-              aria-label={t('Месяц')}
+              aria-label={t('Month')}
               className={styles.picker}
               items={monthItems}
               value={parsed.month}
-              placeholder={t('Месяц')}
+              placeholder={t('Month')}
               onValueChange={(month) => month && update({ month })}
             />
           </span>
           <span>
             <Select
-              aria-label={t('Год')}
+              aria-label={t('Year')}
               className={styles.picker}
               items={yearItems}
               value={value ? parsed.year : null}
-              placeholder={t('Год')}
+              placeholder={t('Year')}
               onValueChange={(year) => year && update({ year })}
             />
           </span>
@@ -181,7 +162,7 @@ const BirthdayField = ({ value, onChange }: BirthdayFieldProps) => {
                 setIsEditing(false)
               }}
             >
-              {t('Убрать')}
+              {t('Remove')}
             </button>
           )}
         </div>

@@ -3,7 +3,7 @@ import { weekdayOf } from '../common/business-time.js'
 
 type BookingEvent = 'created' | 'moved' | 'cancelled'
 
-// Who the notice is for: the business's people open the cabinet, a master opens «Мой день».
+// Who the notice is for: the business's people open the cabinet, a master opens «My day».
 type Audience = 'member' | 'master'
 
 type PushBooking = {
@@ -18,32 +18,19 @@ type PushBooking = {
   previous?: string
 }
 
-const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const MONTHS = [
-  'янв.',
-  'февр.',
-  'мар.',
-  'апр.',
-  'мая',
-  'июн.',
-  'июл.',
-  'авг.',
-  'сент.',
-  'окт.',
-  'нояб.',
-  'дек.',
-]
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const TITLES: Record<BookingEvent, string> = {
-  created: 'Новая запись',
-  moved: 'Клиент перенёс запись',
-  cancelled: 'Клиент отменил запись',
+  created: 'New booking',
+  moved: 'Client moved a booking',
+  cancelled: 'Client cancelled a booking',
 }
 
 const DAY_MS = 86_400_000
 
-// A week ahead the weekday is enough («Чт 14:30»); further away it needs the date too.
+// A week ahead the weekday is enough («Thu 14:30»); further away it needs the date too.
 const NEAR_DAYS = 6
 
 const dayDistance = (dateKey: string, today: string) =>
@@ -68,7 +55,7 @@ const linkFor = (booking: PushBooking, audience: Audience) => {
 }
 
 /**
- * «Новая запись · Чт 14:30 · Мужская стрижка · Айбек»: the title, then the facts that decide the
+ * «New booking · Thu 14:30 · Men's haircut · Aibek»: the title, then the facts that decide the
  * tap. The business's people also see whose visit it is and where (an owner may have several
  * places); a master sees only their own, so their name would be noise. The tag is the booking id,
  * the same as the open cabinet's own notice, so one booking never shows twice.
@@ -87,7 +74,7 @@ const bookingPushMessage = (
   const lines = [facts.join(' · ')]
   if (event === 'moved' && booking.previous) {
     const [date = '', time = ''] = booking.previous.split(' ')
-    lines.push(`Было: ${formatWhen(date, time, today)}`)
+    lines.push(`Was: ${formatWhen(date, time, today)}`)
   }
   if (audience === 'member') {
     lines.push(`${booking.specialistName} · ${booking.business.name}`)

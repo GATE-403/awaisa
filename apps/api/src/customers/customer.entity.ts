@@ -45,7 +45,7 @@ export class Customer {
   @Column({ name: 'featured_badges', type: 'text', array: true, default: '{}' })
   featuredBadges: string[]
 
-  /** «Мой мастер»: a master the client has been to. */
+  /** 'My specialist': a master the client has been to. */
   @Column({ name: 'favorite_master_id', type: 'varchar', length: 64, nullable: true })
   favoriteMasterId: string | null
 

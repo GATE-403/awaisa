@@ -20,7 +20,7 @@ type Row = Record<string, unknown>
 
 const iso = (value: unknown) => (value ? new Date(value as string).toISOString() : null)
 
-// «Скачать мои данные» and «Удалить аккаунт» (the law on personal data): what the platform keeps
+// 'Download my data' and 'Delete account' (the law on personal data): what the platform keeps
 // about a client, and taking it away. What stays and why is in `account-erasure.ts`.
 @Injectable()
 export class AccountService {

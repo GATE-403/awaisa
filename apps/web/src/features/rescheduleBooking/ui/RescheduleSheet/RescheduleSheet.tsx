@@ -26,7 +26,7 @@ interface RescheduleSheetProps {
 const DAYS_SHOWN = 14
 
 // Same master, same service, another time - chosen with the very picker of the booking form
-// (day cards with «Сегодня / Завтра», «Выберите время · N свободных», free times only).
+// (day cards with «Today / Tomorrow», «Choose a time · N free», free times only).
 export const RescheduleSheet = ({ booking, token, onMoved, onClose }: RescheduleSheetProps) => {
   const t = useT()
   const toast = useToast()
@@ -52,7 +52,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
       const moved = await moveMyBooking(booking.id, token, { date, time })
       haptic('success')
       toast.show({
-        title: t('Перенесено: {day}, {time}', { day: t.dayLong(moved.date), time: moved.time }),
+        title: t('Moved: {day}, {time}', { day: t.dayLong(moved.date), time: moved.time }),
         type: 'success',
       })
       trackStep('reschedule_done', booking.business.slug)
@@ -61,7 +61,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
     } catch (moveError) {
       haptic('error')
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(moveError),
         type: 'error',
       })
@@ -73,7 +73,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
   }
 
   return (
-    <Sheet title={t('Перенести запись')} onClose={onClose}>
+    <Sheet title={t('Reschedule')} onClose={onClose}>
       {/* Before and after side by side, so the change reads at a glance. */}
       <div className={styles.change}>
         <p className={styles.service}>
@@ -81,13 +81,13 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
         </p>
         <div className={styles.compare}>
           <span className={styles.was}>
-            <span className={styles.caption}>{t('Сейчас')}</span>
+            <span className={styles.caption}>{t('Now')}</span>
             <span className={styles.wasTime}>{booking.time}</span>
             <span className={styles.date}>{t.dayShort(booking.date)}</span>
           </span>
           <ArrowRight aria-hidden className={styles.arrow} />
           <span className={styles.will} data-empty={!time || undefined}>
-            <span className={styles.caption}>{t('Станет')}</span>
+            <span className={styles.caption}>{t('New')}</span>
             <span className={styles.willTime}>{time ?? '-:-'}</span>
             <span className={styles.date}>{t.dayShort(date)}</span>
           </span>
@@ -111,7 +111,7 @@ export const RescheduleSheet = ({ booking, token, onMoved, onClose }: Reschedule
       />
 
       <Button size='lg' onClick={handleMove} disabled={!time || isMoving} className={styles.submit}>
-        {time ? t('Перенести на {time}', { time }) : t('Выберите время')}
+        {time ? t('Move to {time}', { time }) : t('Choose a time')}
       </Button>
     </Sheet>
   )

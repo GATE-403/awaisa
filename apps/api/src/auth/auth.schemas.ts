@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-const PHONE_SCHEMA = z.string().trim().min(1, 'Укажите номер телефона').max(32)
+const PHONE_SCHEMA = z.string().trim().min(1, 'Enter a phone number').max(32)
 
 const requestCodeSchema = z.object({
   phone: PHONE_SCHEMA,
@@ -11,7 +11,7 @@ const verifyCodeSchema = z.object({
   code: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, 'Код состоит из 6 цифр'),
+    .regex(/^\d{6}$/, 'The code is 6 digits'),
 })
 
 // The page's random sign-in token for the bot (checked again by `isLoginToken`).

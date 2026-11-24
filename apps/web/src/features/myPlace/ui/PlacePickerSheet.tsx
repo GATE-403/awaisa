@@ -15,7 +15,7 @@ interface PlacePickerSheetProps {
   onPicked?: (place: MyPlace) => void
 }
 
-// «Где вы?» - the browser's location in one tap, or a district by name for those who do not
+// «Where are you?» - the browser's location in one tap, or a district by name for those who do not
 // share it (or do not know how). The choice stays on the device for the map, branches and picks.
 export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) => {
   const t = useT()
@@ -36,14 +36,14 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
     setState('locating')
     navigator.geolocation.getCurrentPosition(
       ({ coords }) =>
-        pick({ label: 'Моё место', lat: coords.latitude, lng: coords.longitude, source: 'gps' }),
+        pick({ label: 'My location', lat: coords.latitude, lng: coords.longitude, source: 'gps' }),
       () => setState('denied'),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
     )
   }
 
   return (
-    <Sheet title={t('Где вы?')} cancelLabel={t('Закрыть')} onClose={onClose}>
+    <Sheet title={t('Where are you?')} cancelLabel={t('Close')} onClose={onClose}>
       <div className={sheet.group}>
         <div className={sheet.list}>
           <button
@@ -53,18 +53,18 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
             disabled={state === 'locating'}
           >
             <NavigationArrow aria-hidden className={styles.locateIcon} />
-            <span>{state === 'locating' ? t('Определяем…') : t('Определить автоматически')}</span>
+            <span>{state === 'locating' ? t('Locating…') : t('Detect automatically')}</span>
           </button>
         </div>
         <p className={sheet.groupFooter}>
           {state === 'denied'
-            ? t('Телефон не дал узнать место - выберите район ниже.')
-            : t('Телефон спросит разрешение. Можно и без него - выберите район.')}
+            ? t('The phone did not share your location. Choose a district below.')
+            : t('Your phone will ask for permission. Or skip it and choose a district.')}
         </p>
       </div>
 
       <div className={sheet.group}>
-        <SectionCaption>{t('Район Бишкека')}</SectionCaption>
+        <SectionCaption>{t('Bishkek district')}</SectionCaption>
         <div className={sheet.list}>
           {CITY_AREAS.map((area) => {
             const isChosen = current?.source === 'area' && current.label === area.label
@@ -95,7 +95,7 @@ export const PlacePickerSheet = ({ onClose, onPicked }: PlacePickerSheetProps) =
                 onClose()
               }}
             >
-              {t('Не учитывать место')}
+              {t('Ignore my location')}
             </button>
           </div>
         </div>

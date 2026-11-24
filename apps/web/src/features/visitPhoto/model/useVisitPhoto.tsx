@@ -13,8 +13,8 @@ interface UseVisitPhotoOptions {
 
 /**
  * The camera for a visit's work photo: one hidden input for the whole page, opened for any
- * visit (`pick`), also from a toast's action right after «Пришёл». The photo knows its visit,
- * so its service and master come from it and it books exactly that from «Образы».
+ * visit (`pick`), also from a toast's action right after «Arrived». The photo knows its visit,
+ * so its service and master come from it and it books exactly that from «Looks».
  */
 const useVisitPhoto = ({ upload, onDone }: UseVisitPhotoOptions) => {
   const toast = useToast()
@@ -37,10 +37,10 @@ const useVisitPhoto = ({ upload, onDone }: UseVisitPhotoOptions) => {
     try {
       await upload(bookingId, file)
       haptic('success')
-      toast.show({ title: t('Фото в «Образах»'), type: 'success' })
+      toast.show({ title: t('Photo is in “Looks”'), type: 'success' })
       onDone?.(bookingId)
     } catch (error) {
-      toast.show({ title: t('Не загрузилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not loaded'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setUploadingId(null)
     }
@@ -53,7 +53,7 @@ const useVisitPhoto = ({ upload, onDone }: UseVisitPhotoOptions) => {
       accept='image/*'
       capture='environment'
       hidden
-      aria-label='Фото работы'
+      aria-label='Work photo'
       onChange={(event) => void handleFile(event)}
     />
   )

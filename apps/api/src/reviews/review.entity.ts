@@ -40,7 +40,7 @@ export class Review {
   @Column({ name: 'resolved_at', type: 'timestamptz', nullable: true })
   resolvedAt: Date | null
 
-  /** The author deleted their account: shown as «Клиент», with no face or profile. */
+  /** The author deleted their account: shown as «Client», with no face or profile. */
   @Column({ name: 'anonymized_at', type: 'timestamptz', nullable: true })
   anonymizedAt: Date | null
 

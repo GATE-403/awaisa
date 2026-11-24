@@ -21,7 +21,7 @@ interface MasterCardProps {
   icon?: ReactNode
   title?: string
   /** The line under the name; a master's own card says ★ rating · role unless this is given
-   * (a profile's masters say «4 визита · 3 нед. назад»). */
+   * (a profile's masters say «4 visits · 3 wk ago»). */
   meta?: ReactNode
   /** The picture's width in CSS px, for the sized `srcSet`. */
   imageWidth?: number
@@ -30,7 +30,7 @@ interface MasterCardProps {
 }
 
 // A master as a 3:4 picture card - the photo, or the white mascot on their own colour - with
-// the first name and ★ rating · role on a scrim. One card for the business page («Мастера») and
+// the first name and ★ rating · role on a scrim. One card for the business page («Specialists») and
 // the booking form's master step, so the face picked there is the one seen here.
 export const MasterCard = ({
   specialist,

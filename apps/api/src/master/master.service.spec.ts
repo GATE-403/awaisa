@@ -42,7 +42,7 @@ describe('MasterService.setOutcome', () => {
       const { service, salonBookings } = setup(booking)
 
       await expect(service.setOutcome('biz-1', master, 'booking-1', body)).rejects.toThrow(
-        'Это запись другого мастера',
+        'This booking belongs to another specialist',
       )
       expect(salonBookings.setOutcome).not.toHaveBeenCalled()
     }

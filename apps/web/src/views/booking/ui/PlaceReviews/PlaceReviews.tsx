@@ -19,7 +19,7 @@ interface PlaceReviewsProps {
 type Loaded = { key: string; summary: ReviewSummary; isForService: boolean }
 
 // While choosing, what people said decides it: reviews of this very service under the form as a
-// thread - three, the last fading with «Ещё N отзывов» on it, which opens a few more right here
+// thread - three, the last fading with "N more reviews" on it, which opens a few more right here
 // (never a sheet over the booking, never a list that runs on and on).
 const SHOWN = 3
 const OPENED = 8
@@ -52,15 +52,15 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
     <section className={styles.reviews} aria-labelledby='booking-reviews'>
       <div className={styles.head}>
         <h2 id='booking-reviews' className={styles.title}>
-          {t('Отзывы')}
+          {t('Reviews')}
           {isForService && service && <span className={styles.about}> · {service.name}</span>}
         </h2>
       </div>
       <p className={styles.score}>
         <Star weight='fill' aria-hidden className={styles.star} />
-        <strong>{summary.average.toLocaleString('ru-RU')}</strong>
+        <strong>{summary.average.toLocaleString('en-GB')}</strong>
         {' · '}
-        {t.count(summary.count, ['отзыв', 'отзыва', 'отзывов'])}
+        {t.count(summary.count, ['review', 'reviews'])}
       </p>
       <MoreFade
         hiddenCount={Math.min(summary.items.length, OPENED) - SHOWN}
@@ -68,7 +68,7 @@ export const PlaceReviews = ({ slug, businessName, service }: PlaceReviewsProps)
         isLessFloating={false}
         onToggle={() => setIsOpen((current) => !current)}
         label={t
-          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['отзыв', 'отзыва', 'отзывов'])
+          .count(Math.min(summary.items.length, OPENED) - SHOWN, ['review', 'reviews'])
           .split(' ')
           .slice(1)
           .join(' ')}

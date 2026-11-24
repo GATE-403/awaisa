@@ -11,7 +11,7 @@ import type { MyLoyalty } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import styles from './LoyaltyCard.module.css'
 
-// «Бонусы и абонементы»: what the signed-in client has to spend, per place.
+// «Bonuses and memberships»: what the signed-in client has to spend, per place.
 export const LoyaltyCard = () => {
   const t = useT()
   const session = useSession()
@@ -32,7 +32,7 @@ export const LoyaltyCard = () => {
   return (
     <section className={styles.section} aria-labelledby='loyalty-title'>
       <h2 id='loyalty-title' className={styles.title}>
-        {t('Бонусы и абонементы')}
+        {t('Bonuses and memberships')}
       </h2>
       <ul className={styles.list}>
         {places.map((place) => (
@@ -44,10 +44,9 @@ export const LoyaltyCard = () => {
                 <span className={styles.meta}>
                   {[
                     ...place.subscriptions.map(
-                      (item) =>
-                        `${item.title}: ${t.count(item.visitsLeft, ['визит', 'визита', 'визитов'])}`,
+                      (item) => `${item.title}: ${t.count(item.visitsLeft, ['visit', 'visits'])}`,
                     ),
-                  ].join(' · ') || t('Потратьте на следующем визите')}
+                  ].join(' · ') || t('Spend on your next visit')}
                 </span>
               </span>
               {place.bonusBalance > 0 && (

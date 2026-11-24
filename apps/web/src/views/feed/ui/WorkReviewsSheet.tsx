@@ -36,14 +36,14 @@ export const WorkReviewsSheet = ({ item, onClose }: WorkReviewsSheetProps) => {
 
   return (
     <Sheet
-      title={specialist ? `${t('Отзывы')} · ${specialist.name.split(' ')[0]}` : t('Отзывы')}
-      cancelLabel={t('Готово')}
+      title={specialist ? `${t('Reviews')} · ${specialist.name.split(' ')[0]}` : t('Reviews')}
+      cancelLabel={t('Done')}
       onClose={onClose}
     >
       {!summary && <Skeleton className={styles.reviewsSkeleton} />}
       {summary && summary.count === 0 && (
         <p className={styles.reviewsEmpty}>
-          {t('Об этой услуге ещё не писали - станьте первым после визита.')}
+          {t('No one has written about this service yet: be the first after your visit.')}
         </p>
       )}
       {summary && summary.count > 0 && (

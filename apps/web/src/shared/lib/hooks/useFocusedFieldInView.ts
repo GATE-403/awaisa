@@ -17,7 +17,7 @@ const keyboard = {
 }
 
 // A fixed layer that scrolls inside itself (the booking sheet): a phone's keyboard slides over it
-// without resizing the page, and a field focused by the form («Записываю другого человека», the
+// without resizing the page, and a field focused by the form («Booking for someone else», the
 // name after a time is picked) stayed under the keyboard. When a text field in the layer takes
 // focus, once the keyboard is up (the visual viewport has settled), the layer is scrolled just
 // enough to set the field above the keyboard and below the layer's top bar. Both
@@ -44,8 +44,8 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       innerHeight < tallest - 120
     // While it is up the sheet keeps only its bottom bar's real height clear (`data-keyboard`,
     // BookingPage.module.css), not the bar's tall fade: with the fade's 144px a field in plain
-    // view counted as hidden and the WebView jumped it to the middle (115px from «Имя» to
-    // «Телефон»).
+    // view counted as hidden and the WebView jumped it to the middle (115px from «Name» to
+    // «Phone»).
     const handleResize = () => {
       tallest = Math.max(tallest, innerHeight)
       layer.toggleAttribute('data-keyboard', isKeyboardUp())
@@ -67,7 +67,7 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
       const below = box.bottom - visibleBottom
       const above = visibleTop - box.top
       // Instant while the viewport moves (stacked smooth scrolls overshot); a glide when the
-      // keyboard is already up and only the field changed (a jump of 110px from «Имя» to «Телефон»).
+      // keyboard is already up and only the field changed (a jump of 110px from «Name» to «Phone»).
       if (below > 0) layer.scrollBy({ top: Math.min(below, -above), behavior })
       else if (above > 0) layer.scrollBy({ top: -above, behavior })
     }
@@ -75,7 +75,7 @@ export const useFocusedFieldInView = (ref: RefObject<HTMLElement | null>, { gap 
     // As the keyboard starts to slide in, the sheet glides so the field ends above where the
     // keyboard (and, where the window shrinks, the bottom bar over it) will be: when the window is
     // then resized, the field is already in view and the WebView does not jump it to the middle
-    // (163px at once on a Samsung A55, «при нажатии на инпуты происходит скролл»).
+    // (163px at once on a Samsung A55: tapping a field scrolled the sheet).
     let startHeight = 0
     const glideAhead = () => {
       if (!field) return

@@ -8,7 +8,7 @@ interface RowNoteProps {
 }
 
 // A footnote that belongs to the row or list just above it: a small ↳ leads it, so it reads as
-// said about that row, not as a new block (the quick replies' glyph in «Отзывы»).
+// said about that row, not as a new block (the quick replies' glyph in «Reviews»).
 export const RowNote = ({ children, className }: RowNoteProps) => (
   <p className={className ? `${styles.note} ${className}` : styles.note}>
     <ArrowBendDownRight className={styles.glyph} aria-hidden />

@@ -30,30 +30,30 @@ type OrderCopy = {
 
 // What a paid or expired order says and where it leads, per order kind.
 const GIFT_COPY: OrderCopy = {
-  doneTitle: 'Оплачено. Сертификат готов',
+  doneTitle: 'Paid. Your certificate is ready',
   doneHref: (slug) => `/${slug}`,
-  doneLabel: 'На страницу места',
-  expiredText: 'Деньги не списаны. Оформите сертификат снова.',
+  doneLabel: "To the place's page",
+  expiredText: 'No money was taken. Order the certificate again.',
   retryHref: (slug) => `/${slug}#gift`,
-  retryLabel: 'К сертификатам',
+  retryLabel: 'To certificates',
 }
 
 const ORDER_COPY: Partial<Record<string, OrderCopy>> = {
   subscription: {
-    doneTitle: 'Оплачено. Абонемент ваш',
+    doneTitle: 'Paid. The pass is yours',
     doneHref: () => '/bookings',
-    doneLabel: 'Мои абонементы и записи',
-    expiredText: 'Деньги не списаны. Оформите абонемент снова.',
+    doneLabel: 'My passes and bookings',
+    expiredText: 'No money was taken. Order the pass again.',
     retryHref: (slug) => `/${slug}#subscriptions`,
-    retryLabel: 'К абонементам',
+    retryLabel: 'To passes',
   },
   billing: {
-    doneTitle: 'Оплачено',
+    doneTitle: 'Paid',
     doneHref: (slug) => `/manage/${slug}?tab=billing`,
-    doneLabel: 'Вернуться в кабинет',
-    expiredText: 'Деньги не списаны. Оплатите снова в «Тарифе».',
+    doneLabel: 'Back to the dashboard',
+    expiredText: 'No money was taken. Pay again in “Plan”.',
     retryHref: (slug) => `/manage/${slug}?tab=billing`,
-    retryLabel: 'К тарифу',
+    retryLabel: 'To the plan',
   },
 }
 
@@ -79,7 +79,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
     if (payment) trackStep('checkout_open', businessOf(payment).slug)
   }, [])
 
-  // Back from Freedom Pay's page: ask how the payment went before showing «pay» again.
+  // Back from Freedom Pay's page: ask how the payment went before showing "pay" again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: once per visit
   useEffect(() => {
     if (!payment || payment.driver !== 'freedompay' || payment.status !== 'pending') return
@@ -107,10 +107,10 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
               data-tone='danger'
               aria-hidden
             />
-            <h1 className={styles.title}>Ссылка не открылась</h1>
-            <p className={styles.text}>Проверьте ссылку или откройте запись в профиле.</p>
+            <h1 className={styles.title}>The link didn't open</h1>
+            <p className={styles.text}>Check the link or open the booking in your profile.</p>
             <NextLink href='/bookings' className={styles.link}>
-              Мои записи ›
+              My bookings ›
             </NextLink>
           </div>
         </Container>
@@ -171,12 +171,12 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
           </div>
 
           <div className={styles.amount}>
-            <p className={styles.amountLabel}>{booking ? 'Предоплата' : 'К оплате'}</p>
+            <p className={styles.amountLabel}>{booking ? 'Deposit' : 'To pay'}</p>
             <p className={styles.amountValue}>{formatPrice(payment.amount)}</p>
             {booking ? (
               <p className={styles.amountNote}>
-                Остальное: {formatPrice(Math.max(booking.price - payment.amount, 0))} в салоне.
-                Вернём, если отмените за сутки.
+                The rest, {formatPrice(Math.max(booking.price - payment.amount, 0))}, at the salon.
+                Refunded if you cancel a day ahead.
               </p>
             ) : (
               order?.details && <p className={styles.amountNote}>{order.details}</p>
@@ -209,9 +209,9 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='success'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Оплачено - вы записаны</p>
+              <p className={styles.stateTitle}>Paid - you're booked</p>
               <ButtonLink render={<NextLink href='/bookings' />} size='lg' fullWidth>
-                Мои записи
+                My bookings
               </ButtonLink>
             </div>
           ) : isExpired && order ? (
@@ -222,7 +222,7 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='danger'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Время на оплату вышло</p>
+              <p className={styles.stateTitle}>Time to pay has run out</p>
               <p className={styles.text}>{copy.expiredText}</p>
               <ButtonLink
                 render={<NextLink href={copy.retryHref(business.slug)} />}
@@ -240,16 +240,18 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                 data-tone='danger'
                 aria-hidden
               />
-              <p className={styles.stateTitle}>Время на оплату вышло</p>
-              <p className={styles.text}>Запись снята, время освободилось. Выберите его снова.</p>
+              <p className={styles.stateTitle}>Time to pay has run out</p>
+              <p className={styles.text}>
+                The booking was released and the time is free again. Choose it again.
+              </p>
               <ButtonLink render={<NextLink href={`/${business.slug}/book`} />} size='lg' fullWidth>
-                Записаться снова
+                Book again
               </ButtonLink>
             </div>
           ) : (
             <div className={styles.state}>
               {payment.driver === 'test' && (
-                <p className={styles.testBadge}>Тестовый режим - деньги не списываются</p>
+                <p className={styles.testBadge}>Test mode - no money is taken</p>
               )}
               {payment.driver === 'freedompay' && payment.checkoutUrl ? (
                 <ButtonLink
@@ -264,26 +266,26 @@ export const PayPage = ({ payment, signature }: PayPageProps) => {
                   }
                 >
                   <LockSimple aria-hidden />
-                  {isChecking ? 'Проверяем оплату…' : `Оплатить ${formatPrice(payment.amount)}`}
+                  {isChecking ? 'Checking the payment…' : `Pay ${formatPrice(payment.amount)}`}
                 </ButtonLink>
               ) : (
                 <Button size='lg' fullWidth onClick={handlePay} disabled={isPaying}>
                   <LockSimple aria-hidden />
-                  {isPaying ? 'Оплачиваем…' : `Оплатить ${formatPrice(payment.amount)}`}
+                  {isPaying ? 'Paying…' : `Pay ${formatPrice(payment.amount)}`}
                 </Button>
               )}
               {payment.driver === 'freedompay' && (
-                <p className={styles.text}>Оплата картой через Freedom Pay.</p>
+                <p className={styles.text}>Card payment through Freedom Pay.</p>
               )}
               {dueAt && (
                 <p className={styles.text}>
-                  {booking ? 'Время держим до ' : 'Оплатите до '}
-                  {new Date(dueAt).toLocaleTimeString('ru-RU', {
+                  {booking ? 'We hold the time until ' : 'Pay by '}
+                  {new Date(dueAt).toLocaleTimeString('en-GB', {
                     hour: '2-digit',
                     minute: '2-digit',
                     timeZone: 'Asia/Bishkek',
                   })}
-                  {booking ? ', потом оно освободится.' : '.'}
+                  {booking ? ', then it is released.' : '.'}
                 </p>
               )}
               {error && (

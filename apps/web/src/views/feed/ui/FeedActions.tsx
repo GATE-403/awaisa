@@ -25,10 +25,10 @@ const ANY = 'any'
 
 const compact = (t: Translate, count: number) =>
   count >= 1000
-    ? t('{count} тыс.', { count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })
+    ? t('{count}k', { count: (count / 1000).toFixed(1).replace('.', ',').replace(',0', '') })
     : `${count}`
 
-// Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Записаться»
+// Under the hand, for the card in play: «⋯» (reviews, share, report), the one wide «Book»
 // with the first free time, and ♥ with its count.
 export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsProps) => {
   const toast = useToast()
@@ -56,28 +56,28 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
     const title = service ? `${service.name} - ${business.name}` : business.name
     // The share sheet was closed: nothing to do.
     const result = await shareLink({ title, url })
-    if (result === 'copied') toast.show({ title: t('Ссылка скопирована'), type: 'success' })
+    if (result === 'copied') toast.show({ title: t('Link copied'), type: 'success' })
   }
 
   const report = useReport('photo', item.id, onReported)
 
   return (
     <div className={styles.actions}>
-      <Menu label={t('Ещё')} className={styles.roundButton} trigger={<DotsThree aria-hidden />}>
+      <Menu label={t('More')} className={styles.roundButton} trigger={<DotsThree aria-hidden />}>
         {service && (
           <MenuItem icon={<ChatCircle aria-hidden />} onClick={() => setIsReviewsOpen(true)}>
-            {`${t('Отзывы')}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
+            {`${t('Reviews')}${item.reviewsCount ? ` · ${compact(t, item.reviewsCount)}` : ''}`}
           </MenuItem>
         )}
         <MenuItem icon={<ShareFat aria-hidden />} onClick={() => void share()}>
-          {t('Поделиться')}
+          {t('Share')}
         </MenuItem>
-        <MenuSubmenu label={t('Пожаловаться')} variant='danger' icon={<Flag aria-hidden />}>
+        <MenuSubmenu label={t('Report')} variant='danger' icon={<Flag aria-hidden />}>
           <ReportReasons onPick={(reason) => void report(reason)} />
         </MenuSubmenu>
       </Menu>
       <ButtonLink render={<NextLink href={bookHref} />} size='lg' className={styles.book}>
-        {service ? t('Записаться') : t('Выбрать услугу')}
+        {service ? t('Book') : t('Choose a service')}
         {/* The second line is always there (its time arrives a moment later), so the button never
             jumps from one line to two when a card comes in. */}
         {service && (
@@ -91,7 +91,7 @@ export const FeedActions = ({ item, isLiked, onLike, onReported }: FeedActionsPr
         type='button'
         className={styles.roundButton}
         aria-pressed={isLiked}
-        aria-label={t('Нравится: {count}', { count: likes })}
+        aria-label={t('Likes: {count}', { count: likes })}
         data-liked={isLiked || undefined}
         onClick={() => onLike(!isLiked)}
       >

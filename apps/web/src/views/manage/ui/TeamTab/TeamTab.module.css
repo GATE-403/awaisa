@@ -44,7 +44,7 @@
 }
 
 /* Phones: the add row floats across the window's foot (16pt in): the number field takes the
-   width, «Добавить» beside it, both 44pt; the caption and the note stay off the page. */
+   width, "Add" beside it, both 44pt; the caption and the note stay off the page. */
 @media (max-width: 639px) {
   .add.add {
     right: var(--space-4);
@@ -65,7 +65,7 @@
   }
 
   /* Inside the floating capsule the field is a fill, like the search field: the kit's hairline
-     ring drew a second border inside the capsule's own («два бордера»). Focus still shows the ring. */
+     ring drew a second border inside the capsule's own ("two borders"). Focus still shows the ring. */
   .add.add input {
     background: var(--color-fill);
     box-shadow: none;

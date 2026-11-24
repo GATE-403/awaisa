@@ -31,64 +31,63 @@ interface BillingTabProps {
 
 type Period = '1' | '12'
 
-const LOCALES: Record<Translate['language'], string> = { ru: 'ru-RU', ky: 'ky-KG', en: 'en-GB' }
-const amountFormat = new Intl.NumberFormat('ru-RU')
+const amountFormat = new Intl.NumberFormat('en-GB')
 
-const formatDay = (t: Translate, iso: string) =>
-  new Intl.DateTimeFormat(LOCALES[t.language], {
+const formatDay = (iso: string) =>
+  new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'long',
     timeZone: BUSINESS_TIME_ZONE,
   }).format(new Date(iso))
 
 const formatPrice = (t: Translate, value: number) =>
-  t('{amount} сом', { amount: amountFormat.format(value) })
+  t('{amount} som', { amount: amountFormat.format(value) })
 
-/** «Пробный период до 21 декабря», «Оплачен до …», «Бессрочно», «Бесплатно». */
+/** "Trial until 21 December", "Paid until …", "No end date", "Free". */
 const describeStatus = (t: Translate, access: PlanAccess) => {
-  const until = access.endsAt ? formatDay(t, access.endsAt) : ''
+  const until = access.endsAt ? formatDay(access.endsAt) : ''
   const texts: Record<PlanAccess['status'], string> = {
-    lifetime: t('бессрочно'),
-    active: t('оплачен до {day}', { day: until }),
-    trial: t('пробный период до {day}', { day: until }),
-    free: t('бесплатно'),
+    lifetime: t('for good'),
+    active: t('paid until {day}', { day: until }),
+    trial: t('trial until {day}', { day: until }),
+    free: t('free'),
     expired: access.upgradeTitle
-      ? t('«{plan}» закончился {day}', { plan: access.upgradeTitle, day: until })
-      : t('закончился {day}', { day: until }),
+      ? t('“{plan}” ended {day}', { plan: access.upgradeTitle, day: until })
+      : t('ended {day}', { day: until }),
   }
   return texts[access.status]
 }
 
 const of = (t: Translate, used: number, limit: number | null) =>
-  limit === null ? String(used) : t('{used} из {limit}', { used, limit })
+  limit === null ? String(used) : t('{used} of {limit}', { used, limit })
 
 /** One line of what a plan gives: masters, branches and SMS. */
 const describePlan = (t: Translate, plan: BillingPlan) => {
   const masters =
     plan.maxMasters === null
-      ? t('мастера без ограничений')
-      : t('до {masters}', {
-          masters: t.count(plan.maxMasters, ['мастера', 'мастеров', 'мастеров']),
+      ? t('unlimited specialists')
+      : t('up to {masters}', {
+          masters: t.count(plan.maxMasters, ['specialist', 'specialists']),
         })
   const branches =
     plan.maxBranches === null
-      ? t('филиалы без ограничений')
-      : t.count(plan.maxBranches, ['филиал', 'филиала', 'филиалов'])
+      ? t('unlimited branches')
+      : t.count(plan.maxBranches, ['branch', 'branches'])
   const sms =
     plan.smsPerMonth === null
-      ? t('SMS без ограничений')
+      ? t('unlimited SMS')
       : plan.smsPerMaster > 0
-        ? t('{count} SMS на мастера', { count: plan.smsPerMaster })
-        : t('{count} SMS в месяц', { count: plan.smsPerMonth })
+        ? t('{count} SMS per specialist', { count: plan.smsPerMaster })
+        : t('{count} SMS a month', { count: plan.smsPerMonth })
   return `${masters} · ${branches} · ${sms}`
 }
 
 const planPrice = (t: Translate, plan: BillingPlan) =>
   plan.monthlyPrice === 0
-    ? t('Бесплатно')
-    : t('{price} в месяц', { price: formatPrice(t, plan.monthlyPrice) })
+    ? t('Free')
+    : t('{price} a month', { price: formatPrice(t, plan.monthlyPrice) })
 
-// «Настройки → Тариф»: what the business is on and until when, what it uses of it, paying for
+// "Settings → Plan": what the business is on and until when, what it uses of it, paying for
 // the paid plan (a month or a year) and SMS packs through the same checkout as deposits.
 export const BillingTab = ({ slug }: BillingTabProps) => {
   const toast = useToast()
@@ -106,7 +105,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
       .catch((error: unknown) => {
         if (controller.signal.aborted) return
         toast.show({
-          title: t('Не получилось'),
+          title: t('Something went wrong'),
           description: getErrorMessage(error),
           type: 'error',
         })
@@ -127,7 +126,11 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
       const { url } = await checkoutBilling(slug, input)
       window.location.assign(url)
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
       setIsPaying(false)
     }
   }
@@ -135,16 +138,20 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
   const extend = async (input: BillingExtendInput) => {
     try {
       setBilling(await extendBilling(slug, input))
-      toast.show({ title: t('Тариф продлён'), type: 'success' })
+      toast.show({ title: t('Plan extended'), type: 'success' })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
   return (
-    <section className={styles.section} aria-label={t('Тариф')}>
+    <section className={styles.section} aria-label={t('Plan')}>
       <SectionHeader
-        title={t('Тариф')}
+        title={t('Plan')}
         description={
           <span className={own.status}>
             <strong>{access.title}</strong> · {describeStatus(t, access)}
@@ -152,11 +159,11 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
         }
       />
 
-      <section className={sheet.group} aria-label={t('Сейчас')}>
-        <SectionCaption>{t('Сейчас')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('Now')}>
+        <SectionCaption>{t('Now')}</SectionCaption>
         <div className={styles.list}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Мастера')}</span>
+            <span className={sheet.rowLabel}>{t('Specialists')}</span>
             <span className={styles.cellValue}>
               {of(
                 t,
@@ -166,7 +173,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
             </span>
           </div>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Филиалы')}</span>
+            <span className={sheet.rowLabel}>{t('Branches')}</span>
             <span className={styles.cellValue}>
               {of(
                 t,
@@ -176,17 +183,17 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
             </span>
           </div>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('SMS в этом месяце')}</span>
+            <span className={sheet.rowLabel}>{t('SMS this month')}</span>
             <span className={styles.cellValue}>{of(t, usage.smsSent, usage.smsAllowance)}</span>
           </div>
         </div>
         {usage.smsExtra > 0 && (
-          <RowNote>{t('Ещё {count} SMS из пакетов', { count: usage.smsExtra })}</RowNote>
+          <RowNote>{t('{count} more SMS from packs', { count: usage.smsExtra })}</RowNote>
         )}
         {access.status === 'expired' && (
           <RowNote>
             {t(
-              'Записи, расписание и страница работают. Касса, аналитика, лояльность и рассылки откроются после оплаты.',
+              'Bookings, the schedule and the page work. The cash desk, analytics, loyalty and mailings open after payment.',
             )}
           </RowNote>
         )}
@@ -194,34 +201,34 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
 
       {isPayable && paidPlan && price && (
         // An offer, not a form: the plan and its price large on a soft wash of the accent, the
-        // period beside it, one button («совсем плохой дизайн надо переделать»: a full-width
+        // period beside it, one button ("really bad design, needs redoing": a full-width
         // switch over a sentence and a full-width button read as a wall).
-        <section className={own.offer} aria-label={t('Оплатить')}>
+        <section className={own.offer} aria-label={t('Pay')}>
           <div className={own.offerHead}>
             <div className={own.offerTitle}>
               <h3 className={own.planName}>{paidPlan.title}</h3>
               <p className={own.offerMeta}>
-                {t('{masters} включено, ещё {extra} за каждого', {
-                  masters: t.count(paidPlan.includedMasters, ['мастер', 'мастера', 'мастеров']),
+                {t('{masters} included, {extra} for each more', {
+                  masters: t.count(paidPlan.includedMasters, ['specialist', 'specialists']),
                   extra: formatPrice(t, paidPlan.extraMasterPrice),
                 })}
               </p>
             </div>
             <SegmentedControl<Period>
-              label={t('Срок')}
+              label={t('Term')}
               size='sm'
               value={period}
               onChange={setPeriod}
               items={[
-                { value: '1', label: t('Месяц') },
-                { value: '12', label: t('Год') },
+                { value: '1', label: t('Month') },
+                { value: '12', label: t('Year') },
               ]}
             />
           </div>
           <p className={own.price}>
             <span className={own.amount}>{formatPrice(t, price.amount)}</span>
-            <span className={own.per}>{period === '12' ? t('в год') : t('в месяц')}</span>
-            {period === '12' && <span className={own.gift}>{t('2 месяца в подарок')}</span>}
+            <span className={own.per}>{period === '12' ? t('a year') : t('a month')}</span>
+            {period === '12' && <span className={own.gift}>{t('2 months free')}</span>}
           </p>
           {billing.isPaymentAvailable ? (
             <Button
@@ -232,23 +239,23 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
                 void pay({ kind: 'plan', planKey: paidPlan.key, months: Number(period) })
               }
             >
-              {t('Оплатить {amount}', { amount: formatPrice(t, price.amount) })}
+              {t('Pay {amount}', { amount: formatPrice(t, price.amount) })}
             </Button>
           ) : (
             <p className={own.offerMeta}>
-              {t('Онлайн-оплата пока недоступна: напишите нам, продлим вручную.')}
+              {t('Online payment is not available yet: write to us and we will extend it by hand.')}
             </p>
           )}
           {access.endsAt && access.status !== 'expired' && (
             <p className={own.offerMeta}>
-              {t('Продлится после {day}.', { day: formatDay(t, access.endsAt) })}
+              {t('It extends after {day}.', { day: formatDay(access.endsAt) })}
             </p>
           )}
         </section>
       )}
 
-      <section className={sheet.group} aria-label={t('Тарифы')}>
-        <SectionCaption>{t('Тарифы')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('Plans')}>
+        <SectionCaption>{t('Plans')}</SectionCaption>
         <ul className={styles.list}>
           {billing.plans.map((plan) => (
             <li key={plan.key} className={own.plan}>
@@ -257,7 +264,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
                   {plan.title}
                   {plan.trialDays > 0 && (
                     <span className={styles.badge}>
-                      {t('{count} дней бесплатно', { count: plan.trialDays })}
+                      {t('{count} days free', { count: plan.trialDays })}
                     </span>
                   )}
                 </span>
@@ -266,7 +273,7 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               </span>
               <span className={styles.cellValue}>{planPrice(t, plan)}</span>
               {plan.key === access.planKey ? (
-                <Check className={own.check} aria-label={t('Ваш тариф')} />
+                <Check className={own.check} aria-label={t('Your plan')} />
               ) : (
                 <span className={own.check} />
               )}
@@ -276,8 +283,8 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
       </section>
 
       {billing.isPaymentAvailable && billing.smsPacks.length > 0 && (
-        <section className={sheet.group} aria-label={t('Пакеты SMS')}>
-          <SectionCaption>{t('Пакеты SMS')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('SMS packs')}>
+          <SectionCaption>{t('SMS packs')}</SectionCaption>
           <ul className={styles.list}>
             {billing.smsPacks.map((pack) => (
               <li key={pack.key}>
@@ -296,19 +303,19 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
               </li>
             ))}
           </ul>
-          <RowNote>{t('Тратятся, когда SMS месяца закончились, и не сгорают.')}</RowNote>
+          <RowNote>{t('Used once the month’s SMS run out, and never expire.')}</RowNote>
         </section>
       )}
 
       {billing.orders.length > 0 && (
-        <section className={sheet.group} aria-label={t('Оплаты')}>
-          <SectionCaption>{t('Оплаты')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Payments')}>
+          <SectionCaption>{t('Payments')}</SectionCaption>
           <ul className={styles.list}>
             {billing.orders.map((order) => (
               <li key={order.id} className={sheet.row}>
                 <span className={styles.rowBody}>
                   <span>{order.title}</span>
-                  <span className={styles.rowMeta}>{formatDay(t, order.paidAt)}</span>
+                  <span className={styles.rowMeta}>{formatDay(order.paidAt)}</span>
                 </span>
                 <span className={styles.cellValue}>{formatPrice(t, order.amount)}</span>
               </li>
@@ -318,28 +325,28 @@ export const BillingTab = ({ slug }: BillingTabProps) => {
       )}
 
       {isPlatformAdmin && paidPlan && (
-        <section className={sheet.group} aria-label={t('Для Awaisa')}>
-          <SectionCaption>{t('Для Awaisa')}</SectionCaption>
+        <section className={sheet.group} aria-label={t('For Awaisa')}>
+          <SectionCaption>{t('For Awaisa')}</SectionCaption>
           <div className={styles.list}>
             <Menu
-              label={t('Продлить вручную')}
+              label={t('Extend by hand')}
               align='start'
               className={`${sheet.row} ${own.menuRow}`}
               trigger={
                 <>
-                  <span>{t('Продлить вручную')}</span>
+                  <span>{t('Extend by hand')}</span>
                   <CaretRight className={styles.chevron} aria-hidden />
                 </>
               }
             >
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 1 })}>
-                {t('«{plan}» на месяц', { plan: paidPlan.title })}
+                {t('“{plan}” for a month', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, months: 12 })}>
-                {t('«{plan}» на год', { plan: paidPlan.title })}
+                {t('“{plan}” for a year', { plan: paidPlan.title })}
               </MenuItem>
               <MenuItem onClick={() => void extend({ planKey: paidPlan.key, isLifetime: true })}>
-                {t('«{plan}» бессрочно', { plan: paidPlan.title })}
+                {t('“{plan}” for good', { plan: paidPlan.title })}
               </MenuItem>
             </Menu>
           </div>

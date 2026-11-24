@@ -7,7 +7,7 @@ import styles from './ReviewItem.module.css'
 
 interface ReviewPhotosProps {
   photos: string[]
-  /** «Айгерим С.» - names each picture for screen readers. */
+  /** «Aigerim S.» - names each picture for screen readers. */
   authorName: string
 }
 
@@ -26,7 +26,7 @@ export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
             <button
               type='button'
               className={styles.photo}
-              aria-label={t('Фото {index} из {total}', { index: index + 1, total: photos.length })}
+              aria-label={t('Photo {index} of {total}', { index: index + 1, total: photos.length })}
               onClick={() => setOpenIndex(index)}
             >
               {/* biome-ignore lint/performance/noImgElement: uploads are already 1400px WebP */}
@@ -39,7 +39,7 @@ export const ReviewPhotos = ({ photos, authorName }: ReviewPhotosProps) => {
         <PhotoViewer
           photos={photos}
           startIndex={openIndex}
-          label={t('Фото из отзыва - {name}', { name: authorName })}
+          label={t('Review photo: {name}', { name: authorName })}
           onClose={() => setOpenIndex(null)}
         />
       )}

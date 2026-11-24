@@ -27,7 +27,7 @@ import { MasterService } from './master.service.js'
 export class MasterController {
   constructor(private readonly master: MasterService) {}
 
-  /** Where the signed-in customer works as a master (for «Мой день» entry points). */
+  /** Where the signed-in customer works as a master (for 'My day' entry points). */
   @Get('me/master')
   @UseGuards(AuthGuard)
   listPlaces(@CurrentCustomer() customer: Customer): Promise<MasterPlace[]> {

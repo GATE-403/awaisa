@@ -36,7 +36,7 @@ export class MasterGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<MasterRequest>()
     request.customer ??= await this.auth.findCustomerBySession(readSessionToken(request))
     const customer = request.customer
-    if (!customer) throw new UnauthorizedException('Войдите по номеру телефона')
+    if (!customer) throw new UnauthorizedException('Sign in with your phone number')
 
     const business = await this.businesses.findBySlug(String(request.params.slug), {
       publishedOnly: false,
@@ -46,7 +46,7 @@ export class MasterGuard implements CanActivate {
       phone: customer.phone,
       isActive: true,
     })
-    if (!master) throw new ForbiddenException('Этот номер не привязан к мастеру')
+    if (!master) throw new ForbiddenException('This number is not linked to a specialist')
 
     request.business = business
     request.master = master

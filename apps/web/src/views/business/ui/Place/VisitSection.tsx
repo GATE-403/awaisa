@@ -16,7 +16,7 @@ interface VisitSectionProps {
 
 const hoursOf = (t: Translate, hours: WorkingDay[], weekday: number) => {
   const day = findDay(hours, weekday)
-  return day ? `${formatClock(day.opensMinutes)}–${formatClock(day.closesMinutes)}` : t('Выходной')
+  return day ? `${formatClock(day.opensMinutes)}-${formatClock(day.closesMinutes)}` : t('Closed')
 }
 
 // 1 January 2024 was a Monday: weekday 0 (Monday, like the API) is its day key.
@@ -43,7 +43,7 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
     <section
       id='visit'
       className={`${styles.card} ${styles.visit}`}
-      aria-label={t('Как нас найти')}
+      aria-label={t('How to find us')}
     >
       {/* The map leads, edge to edge at the card's top, like a place card in Maps. */}
       {pinned && (
@@ -66,7 +66,7 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
                 <MapPin />
               </span>
               <span className={styles.infoText}>
-                <span className={styles.infoLabel}>{isSeveral ? branch.name : t('Адрес')}</span>
+                <span className={styles.infoLabel}>{isSeveral ? branch.name : t('Address')}</span>
                 <span className={styles.infoValue}>{address}</span>
               </span>
               {isSeveral ? (
@@ -74,12 +74,12 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
                   href={`/${business.slug}/book?branch=${branch.id}`}
                   className={styles.infoAction}
                 >
-                  {t('Записаться')}
+                  {t('Book')}
                 </NextLink>
               ) : (
                 route && (
                   <a href={route} target='_blank' rel='noreferrer' className={styles.infoAction}>
-                    {t('Маршрут')}
+                    {t('Directions')}
                   </a>
                 )
               )}
@@ -90,10 +90,10 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
                   <Phone />
                 </span>
                 <span className={styles.infoText}>
-                  <span className={styles.infoLabel}>{t('Телефон')}</span>
+                  <span className={styles.infoLabel}>{t('Phone')}</span>
                   <span className={styles.infoValue}>{formatPhone(phone)}</span>
                 </span>
-                <span className={styles.infoAction}>{t('Позвонить')}</span>
+                <span className={styles.infoAction}>{t('Call')}</span>
               </a>
             )}
           </div>
@@ -106,11 +106,11 @@ export const VisitSection = ({ business }: VisitSectionProps) => {
             <Clock />
           </span>
           <span className={styles.infoText}>
-            <span className={styles.infoLabel}>{t('Часы')}</span>
+            <span className={styles.infoLabel}>{t('Hours')}</span>
             <span className={styles.infoValue}>
               {todayWeekday === null
                 ? ' '
-                : t('Сегодня {hours}', {
+                : t('Today {hours}', {
                     hours: hoursOf(t, business.hours, todayWeekday).toLowerCase(),
                   })}
             </span>

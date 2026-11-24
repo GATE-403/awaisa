@@ -66,7 +66,7 @@ export class ModerationController {
 
   private assertAdmin(customer: Customer) {
     if (!this.moderation.isAdmin(customer)) {
-      throw new ForbiddenException('Только для администраторов платформы')
+      throw new ForbiddenException('Platform admins only')
     }
   }
 }

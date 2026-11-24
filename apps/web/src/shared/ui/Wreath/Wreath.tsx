@@ -6,9 +6,9 @@ type Rank = 1 | 2 | 3
 
 // Gold, silver and bronze, each as a light-to-deep gradient so the leaves read as metal.
 const METAL: Record<Rank, { light: string; deep: string; label: string }> = {
-  1: { light: '#ffe08a', deep: '#c8921a', label: 'Первое место' },
-  2: { light: '#f1f3f6', deep: '#9aa1ab', label: 'Второе место' },
-  3: { light: '#f3b98a', deep: '#a0582a', label: 'Третье место' },
+  1: { light: '#ffe08a', deep: '#c8921a', label: 'First place' },
+  2: { light: '#f1f3f6', deep: '#9aa1ab', label: 'Second place' },
+  3: { light: '#f3b98a', deep: '#a0582a', label: 'Third place' },
 }
 
 const LEAVES = 9
@@ -46,7 +46,7 @@ export const Wreath = ({ rank, children, hasNumber = true, className }: WreathPr
     <span
       className={className ? `${styles.wrap} ${className}` : styles.wrap}
       style={{ '--metal-deep': metal.deep } as CSSProperties}
-      title={`${metal.label} на Awaisa`}
+      title={`${metal.label} on Awaisa`}
     >
       {children}
       <svg className={styles.laurel} viewBox='0 0 100 100' aria-hidden='true'>

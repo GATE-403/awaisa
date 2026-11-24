@@ -10,7 +10,7 @@ const OG_IMAGE_SIZE = { width: 1200, height: 630 }
 const BASE_OPEN_GRAPH = {
   type: 'website',
   siteName: PLATFORM.name,
-  locale: 'ru_RU',
+  locale: 'en_GB',
 } as const
 
 // The site's generated share image (`app/opengraph-image.tsx`), for pages that set their own
@@ -31,7 +31,7 @@ const truncate = (text: string, limit: number) => {
 const describeBusiness = (business: Business) =>
   truncate(
     business.description ||
-      `${getKindLabel(business.kind)} · ${business.address}. Цены, мастера и онлайн-запись без звонков.`,
+      `${getKindLabel(business.kind)} · ${business.address}. Prices, specialists and online booking, no calls.`,
     DESCRIPTION_LIMIT,
   )
 

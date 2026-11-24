@@ -54,32 +54,32 @@ test.describe('Cabinet client base', () => {
     expect(imported.ok()).toBe(true)
 
     await page.goto(`/manage/${business.slug}?tab=clients`)
-    const tabs = page.getByRole('tablist', { name: 'Группы клиентов' })
+    const tabs = page.getByRole('tablist', { name: 'Client groups' })
     const tab = (name: string) => tabs.getByRole('tab', { name: new RegExp(`^${name}`) })
-    await expect(tab('Все')).toContainText('4')
-    await expect(tab('Новые')).toContainText('1')
-    await expect(tab('Постоянные')).toContainText('1')
-    await expect(tab('День рождения')).toContainText('1')
+    await expect(tab('All')).toContainText('4')
+    await expect(tab('New')).toContainText('1')
+    await expect(tab('Regulars')).toContainText('1')
+    await expect(tab('Birthday')).toContainText('1')
     // Empty groups are left out.
-    await expect(tab('С неявками')).toHaveCount(0)
-    await expect(tab('Скоро придут')).toHaveCount(0)
+    await expect(tab('With no-shows')).toHaveCount(0)
+    await expect(tab('Coming soon')).toHaveCount(0)
 
     const names = () => page.locator('main [class*="nameText"]').allTextContents()
     // Latest visit first, those who never came after.
     await expect.poll(names).toEqual(['E2E Постоянный', 'E2E Новый', 'E2E Именинник', 'E2E Импорт'])
 
-    await tab('День рождения').click()
-    await expect(tab('День рождения')).toHaveAttribute('aria-selected', 'true')
+    await tab('Birthday').click()
+    await expect(tab('Birthday')).toHaveAttribute('aria-selected', 'true')
     await expect.poll(names).toEqual(['E2E Именинник'])
-    await expect(page.getByText('День рождения в ближайшую неделю.')).toBeVisible()
+    await expect(page.getByText('Birthday within the coming week.')).toBeVisible()
 
-    await tab('Постоянные').click()
+    await tab('Regulars').click()
     await expect.poll(names).toEqual(['E2E Постоянный'])
-    await expect(page.getByRole('button', { name: /^E2E Постоянный/ })).toContainText('3 визита')
+    await expect(page.getByRole('button', { name: /^E2E Постоянный/ })).toContainText('3 visits')
 
-    await tab('Все').click()
-    await page.getByRole('combobox', { name: 'Сортировка' }).click()
-    await page.getByRole('option', { name: 'По тратам' }).click()
+    await tab('All').click()
+    await page.getByRole('combobox', { name: 'Sort' }).click()
+    await page.getByRole('option', { name: 'By spend' }).click()
     // The other orders are pure rules: apps/api/src/clients/client-segments.spec.ts.
     await expect.poll(names).toEqual(['E2E Новый', 'E2E Постоянный', 'E2E Именинник', 'E2E Импорт'])
   })
@@ -103,21 +103,23 @@ test.describe('Cabinet client base', () => {
 
     await page.goto(`/manage/${business.slug}?tab=clients`)
     await page.getByRole('button', { name: new RegExp(name) }).click()
-    const sheet = page.getByRole('dialog', { name: 'Клиент' })
-    await sheet.getByRole('button', { name: 'Добавить', expanded: false }).click()
+    const sheet = page.getByRole('dialog', { name: 'Client' })
+    await sheet.getByRole('button', { name: 'Add', expanded: false }).click()
     if (year) {
-      await sheet.getByRole('combobox', { name: 'Год' }).click()
+      await sheet.getByRole('combobox', { name: 'Year' }).click()
       await page.getByRole('option', { name: year, exact: true }).click()
     }
-    await sheet.getByRole('combobox', { name: 'День' }).click()
+    await sheet.getByRole('combobox', { name: 'Day', exact: true }).click()
     await page.getByRole('option', { name: '15', exact: true }).click()
-    await sheet.getByRole('combobox', { name: 'Месяц' }).click()
-    await page.getByRole('option', { name: 'Март' }).click()
-    await expect(sheet.getByRole('combobox', { name: 'Год' })).toContainText(year ?? 'Год не важен')
-    await sheet.getByRole('button', { name: 'Готово', expanded: true }).click()
-    await expect(sheet).toContainText(year ? `15 марта ${year}` : '15 марта')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByText('Карточка сохранена')).toBeVisible()
+    await sheet.getByRole('combobox', { name: 'Month' }).click()
+    await page.getByRole('option', { name: 'March' }).click()
+    await expect(sheet.getByRole('combobox', { name: 'Year' })).toContainText(
+      year ?? 'Year not needed',
+    )
+    await sheet.getByRole('button', { name: 'Done', expanded: true }).click()
+    await expect(sheet).toContainText(year ? `15 March ${year}` : '15 March')
+    await sheet.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByText('Card saved')).toBeVisible()
 
     const card = await (
       await page.request.get(`/api/manage/${business.slug}/clients/${encodeURIComponent(phone)}`)
@@ -131,7 +133,7 @@ test.describe('Cabinet client base', () => {
     test.setTimeout(90_000)
     const business = await createOwnBusiness(page)
     expect(await pickBirthday(page, business, 'E2E С годом', '1990')).toBe('1990-03-15')
-    // «Год не важен» keeps it on 1904, a leap year no client is born in.
+    // “Year not needed” keeps it on 1904, a leap year no client is born in.
     expect(await pickBirthday(page, business, 'E2E Без года', null)).toBe('1904-03-15')
   })
 })

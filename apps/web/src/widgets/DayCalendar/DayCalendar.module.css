@@ -404,7 +404,7 @@
   }
 }
 
-/* «Лента»: masters as rows on the left, the hours across the top, visits as bars along their row
+/* Timeline: masters as rows on the left, the hours across the top, visits as bars along their row
    - the same blocks as the columns, only the axis turned. Names stay pinned on the left and the
    hours on top while the day scrolls sideways. */
 .grid[data-layout="timeline"] {
@@ -545,7 +545,7 @@
   max-width: 100%;
 }
 
-/* «Лента» without a names column: no table - the masters are on their cards (a small face), in
+/* Timeline without a names column: no table - the masters are on their cards (a small face), in
    the corner stack and on an empty lane; lanes part by a little space, not by lines. */
 .grid[data-layout="timeline"] :is(.corner, .columnHead) {
   display: none;
@@ -580,7 +580,7 @@
   display: none;
 }
 
-/* «Now», one red line with its time in a capsule - on the hours for the columns, on top of the
+/* “Now”, one red line with its time in a capsule - on the hours for the columns, on top of the
    timeline's single line through every lane. No dots: the capsule says what the line is. */
 .nowLabel {
   position: absolute;
@@ -618,7 +618,7 @@
   translate: -50% 0;
 }
 
-/* «Сейчас 13:41 →» when the day is scrolled away from now; a tap glides back. */
+/* "Now 13:41 →" when the day is scrolled away from now; a tap glides back. */
 .toNow {
   position: absolute;
   z-index: 8;
@@ -702,7 +702,7 @@
   border-bottom: 0.5px solid var(--color-border);
 }
 
-/* An empty lane: the master and «свободен весь день», and on a day still ahead one tap books. */
+/* An empty lane: the master and "free all day", and on a day still ahead one tap books. */
 .laneEmpty {
   position: sticky;
   left: var(--space-3);
@@ -770,7 +770,7 @@
 }
 
 /* Whose lane: a faint wash of the master's colour, and their face, name and role on the lane's
-   first line, above its cards (empty lanes say it with their «Записать» capsule instead). */
+   first line, above its cards (empty lanes say it with their Book capsule instead). */
 .grid[data-layout="timeline"] .column {
   display: flex;
   flex-direction: column;
@@ -890,7 +890,7 @@
   font-size: var(--text-body);
 }
 
-/* The masters' track (variant «В»): the kit's segmented look - a capsule of fill, a raised white
+/* The masters' track (variant C): the kit's segmented look - a capsule of fill, a raised white
    pill under the chosen one - with each face ringed by how full its day is. */
 .track {
   display: inline-flex;
@@ -1046,9 +1046,9 @@
   white-space: nowrap;
 }
 
-/* Cards with body (the owner's choice: «сочно и тактильно»): each state is a soft, saturated
+/* Cards with body (the owner's choice: "juicy and tactile"): each state is a soft, saturated
    button - its colour from the top a shade lighter to the foot, a lit top edge and a shadow in
-   its own colour - the visit under way solid blue with white text. «Ждём» stays a white card. */
+   its own colour - the visit under way solid blue with white text. Waiting stays a white card. */
 .booking {
   --card-base: #fff;
   --lit: rgb(255 255 255 / 0.7);
@@ -1231,7 +1231,7 @@
   box-shadow: none;
 }
 
-/* The slot preview reads on one line: «Эрлан · 12:30». */
+/* The slot preview reads on one line: "Erlan · 12:30". */
 .grid[data-layout="timeline"] .ghost {
   font-size: var(--text-xs);
   white-space: nowrap;
@@ -1249,7 +1249,7 @@
 }
 
 /* The slot preview on the timeline is a card to come, the same shape as the visits: a light card
-   ringed in the master's colour, its time, «+ Новая запись» and whose - wide enough to read. */
+   ringed in the master's colour, its time, "+ New booking" and whose - wide enough to read. */
 .grid[data-layout="timeline"] .ghost {
   display: flex;
   flex-direction: column;
@@ -1389,7 +1389,7 @@
   color: inherit;
 }
 
-/* Readable events (the owner: «не читаемый текст»): the ink is a deep shade of the master's
+/* Readable events (the owner: "unreadable text"): the ink is a deep shade of the master's
    colour, secondary lines the same ink a step lighter (no transparency), and an ended visit fades
    only its fill - its words stay readable. Contrast ≥ 4.5:1 on the 20% fill. */
 :root .grid .booking:not([data-tone="accent"]) {
@@ -1424,7 +1424,7 @@
   display: none;
 }
 
-/* Lanes no taller than they need (the owner: «слишком большие блоки и маленькие карточки»), and a
+/* Lanes no taller than they need (the owner: "blocks too big and cards too small"), and a
    card fills its lane under the master's line - the phone or comment at its foot. */
 .grid[data-layout="timeline"] {
   grid-template-rows: 0 minmax(142px, 192px);
@@ -1442,7 +1442,7 @@
 }
 
 /* Card layout fixes: the footer spans the card (its hairline too), a long phone ends in an
-   ellipsis, and a narrow card shows only when it starts («11:30», never «11:…»). */
+   ellipsis, and a narrow card shows only when it starts (“11:30”, never “11:…”). */
 .grid[data-layout="timeline"] .booking > .blockFooter {
   position: static;
   align-self: stretch;
@@ -1522,7 +1522,7 @@
   white-space: nowrap;
 }
 
-/* Visits out of view: a quiet capsule at the lane's edge, «‹ 2 записи» / «3 записи ›»; a tap
+/* Visits out of view: a quiet capsule at the lane's edge, "‹ 2 bookings" / "3 bookings ›"; a tap
    glides there. */
 .edgeRail {
   position: absolute;
@@ -1588,7 +1588,7 @@
   }
 }
 
-/* «Сейчас ↓» sits above the floating «Все пришли» bar, never under it. */
+/* "Now ↓" sits above the floating All arrived bar, never under it. */
 .toNow[data-layout="columns"][data-side="after"] {
   bottom: calc(var(--space-3) + 72px);
 }
@@ -1602,7 +1602,7 @@
 }
 
 /* Hover answers on the floating pieces too: the empty lane's capsule rises a little and its
-   «Записать» darkens like the kit's primary button; a face in the masters' track gets the fill
+   Book darkens like the kit's primary button; a face in the masters' track gets the fill
    of a segment about to be chosen and its ring grows. */
 .laneEmpty[data-action] {
   transition:
@@ -1916,7 +1916,7 @@
 }
 
 @media (max-width: 639px) {
-  /* Phones keep only the fact: «Нурсултан · свободен с 15:00». */
+  /* Phones keep only the fact: "Nursultan · free from 15:00". */
   .laneRoleName {
     display: none;
   }
@@ -1990,7 +1990,7 @@
 
 /* --- One ink per card ---
    Orange and red words on a blue or violet card clashed: the state word takes the card's own
-   ink, and its colour lives only in its glyph (see «State glyphs» below). */
+   ink, and its colour lives only in its glyph (see “State glyphs” below). */
 :root .grid .booking:is([data-tone="warning"], [data-tone="danger"]) .blockState {
   display: inline-flex;
   align-items: center;
@@ -2013,7 +2013,7 @@
 
 /* Phones: the track keeps to faces, so every master stays one tap away - a chosen face opening
    into its name pushed the others out of reach. The chosen one rides the raised knob; its name and
-   «свободен с …» already lead its lane. */
+   "free from …" already lead its lane. */
 @media (max-width: 639px) {
   .viewBar .trackMaster[aria-pressed="true"] .trackLabel {
     grid-template-columns: 0fr;
@@ -2067,8 +2067,8 @@
   }
 }
 
-/* «Пришёл» lands: the card's fill eases into its new tone and the check pops in - one after
-   another down the day when «Все пришли» marked many (45ms apart, eight at most waiting). */
+/* Arrived lands: the card's fill eases into its new tone and the check pops in - one after
+   another down the day when All arrived marked many (45ms apart, eight at most waiting). */
 @media (prefers-reduced-motion: no-preference) {
   .grid .booking[data-just-marked] {
     animation: mark-fill 420ms var(--ease-standard) backwards;
@@ -2127,7 +2127,7 @@
   }
 }
 
-/* --- «Найти место» ---
+/* --- Find a slot ---
    Where the chosen service fits: dashed accent blocks over the free stretches, the visits stepping
    back while the search is on. A tap books that master from the gap's start. */
 .fitSlot {
@@ -2597,7 +2597,7 @@
 }
 
 /* --- An ended visit nobody marked asks its question ---
-   «Не отмечен» with a dashed circle, and both answers as capsules at the card's foot where the
+   Not marked with a dashed circle, and both answers as capsules at the card's foot where the
    phone was - always shown, so what happened is never a guess. */
 .markBar {
   position: absolute;
@@ -2685,7 +2685,7 @@
   margin-top: 6px;
 }
 
-/* The time of «now» is small white text: on the system red it read 3.6:1, the strong red keeps
+/* The time of “now” is small white text: on the system red it read 3.6:1, the strong red keeps
    it at AA (the line itself stays the system red). */
 .grid .nowLabel {
   background: var(--color-danger-strong);
@@ -2703,8 +2703,8 @@
 }
 
 /* --- Small cards keep their answers ---
-   The answers take the card's width (less its padding) and measure it: where «Пришёл» and
-   «Не пришёл» do not fit, they become two round glyphs (named in tooltips) instead of spilling
+   The answers take the card's width (less its padding) and measure it: where Arrived and
+   No-show do not fit, they become two round glyphs (named in tooltips) instead of spilling
    past the card. The bar itself lets clicks through to the card, and it sits on its card's layer,
    so the pinned hours row passes over both. */
 :root .markBar {
@@ -2749,7 +2749,7 @@
   }
 }
 
-/* «Сейчас ←/→» on the timeline rides the pinned hours row, at its side - in the middle of the
+/* "Now ←/→" on the timeline rides the pinned hours row, at its side - in the middle of the
    lanes it sat over the lane tags and the edge tabs. */
 :root .toNow[data-layout="timeline"] {
   top: 2px;
@@ -2757,8 +2757,8 @@
   translate: none;
 }
 
-/* Phones: the empty lane says «свободен», not «свободен весь день», so the capsule with its
-   «Записать» fits the board instead of running past its edge. */
+/* Phones: the empty lane says "free", not "free all day", so the capsule with its
+   Book fits the board instead of running past its edge. */
 @media (max-width: 639px) {
   .laneNoteLong {
     display: none;

@@ -29,7 +29,7 @@ export class AuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext) {
     const customer = await resolveCustomer(context.switchToHttp().getRequest(), this.auth)
-    if (!customer) throw new UnauthorizedException('Войдите по номеру телефона')
+    if (!customer) throw new UnauthorizedException('Sign in with your phone number')
 
     return true
   }

@@ -241,7 +241,7 @@
 }
 
 /* An odd last choice takes the whole row (by type: a fieldset's legend is a child too, which
-   once stretched «Здоровье» and left «Тату» alone). */
+   once stretched «Health» and left «Tattoo» alone). */
 .interestCell:last-of-type:nth-of-type(odd) {
   grid-column: 1 / -1;
 }
@@ -302,8 +302,8 @@
   }
 }
 
-/* «Подберём для вас» as steps, like the business setup: a bar of segments, the question, the
-   answers as rows right on the sheet, «Назад» and a content-width capsule at the foot. */
+/* «Picks for you» as steps, like the business setup: a bar of segments, the question, the
+   answers as rows right on the sheet, «Back» and a content-width capsule at the foot. */
 .steps {
   display: flex;
   flex-direction: column;

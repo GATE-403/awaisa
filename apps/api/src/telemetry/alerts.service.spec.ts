@@ -53,7 +53,7 @@ describe('AlertsService', () => {
     await service.checkRedis()
     delete process.env.REDIS_URL
 
-    expect(sendAlert.mock.calls[0]?.[0]).toContain('Redis недоступен')
+    expect(sendAlert.mock.calls[0]?.[0]).toContain('Redis unavailable')
   })
 })
 
@@ -66,9 +66,9 @@ describe('errorsAlertText', () => {
     }))
     const text = errorsAlertText(groups, 5)
 
-    expect(text).toContain('Ошибки за 5 мин: 28')
+    expect(text).toContain('Errors in 5 min: 28')
     expect(text).toContain('&lt;b&gt;error 0&lt;/b&gt;')
     expect(text).not.toContain('error 5')
-    expect(text).toContain('…и ещё 2 видов')
+    expect(text).toContain('…and 2 more kinds')
   })
 })

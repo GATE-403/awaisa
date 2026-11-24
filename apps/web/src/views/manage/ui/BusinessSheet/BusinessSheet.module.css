@@ -1,4 +1,4 @@
-/* The sheet's two parts lie right on it, no inset fill («убери лишнюю обёртку»). */
+/* The sheet's two parts lie right on it, no inset fill ("drop the extra wrapper"). */
 .group {
   display: flex;
   flex-direction: column;

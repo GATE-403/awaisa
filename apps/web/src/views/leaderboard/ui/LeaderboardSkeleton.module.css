@@ -1,4 +1,4 @@
-/* «Мастера · Места»: the segmented control's 46pt capsule. */
+/* «Specialists · Places»: the segmented control's 46pt capsule. */
 .switch {
   width: min(100%, 320px);
   height: 46px;
@@ -18,7 +18,7 @@
   border-radius: var(--radius-full);
 }
 
-/* The trail «Каталог › Рейтинг»: one footnote line with 44pt targets. */
+/* The trail «Catalogue › Leaderboard»: one footnote line with 44pt targets. */
 .crumbs {
   display: flex;
   justify-content: center;

@@ -1,4 +1,4 @@
-/* «Время»: today's status, then the week as Settings rows right on the page, hairlines between
+/* «Hours»: today's status, then the week as Settings rows right on the page, hairlines between
    them, the days on the left and the hours on the right. */
 .weekHours {
   display: flex;
@@ -49,7 +49,7 @@
   min-width: 0;
 }
 
-/* «Сегодня» after today's days, a quiet footnote in the link colour. */
+/* «Today» after today's days, a quiet footnote in the link colour. */
 .today {
   color: var(--color-link);
   font-size: var(--text-footnote);

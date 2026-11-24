@@ -13,8 +13,8 @@ import {
 
 const fillContacts = async (page: import('@playwright/test').Page) => {
   const { contacts } = bookingSteps(page)
-  await contacts.getByLabel('Имя').fill('E2E Тест')
-  await contacts.getByLabel('Телефон').fill('+996 555 000 111')
+  await contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
+  await contacts.getByLabel('Phone').fill('+996 555 000 111')
 }
 
 test.describe('UX: guidance and feedback', () => {
@@ -26,12 +26,12 @@ test.describe('UX: guidance and feedback', () => {
     const action = primaryAction(page)
 
     await expect(action).toBeEnabled()
-    // The action names the next thing to do instead of a bare «Далее».
-    await expect(action).toHaveText('Выбрать услугу')
+    // The action names the next thing to do instead of a bare «Next».
+    await expect(action).toHaveText('Choose a service')
     // Already on that step, the press still answers: its choices shake (it looked like nothing
     // happened). The shake is short, so the moment it starts is caught, not looked for after.
     // It lasts the whole shake: any other animation ending inside the step used to take the mark
-    // off at once, so nothing moved («кнопка активна, но ничего не делает»).
+    // off at once, so nothing moved (the owner: the button is active but does nothing).
     await steps.service.evaluate((step) => {
       const state = window as unknown as { nudgeMs?: number }
       let start = 0
@@ -46,13 +46,13 @@ test.describe('UX: guidance and feedback', () => {
       .poll(() => page.evaluate(() => (window as unknown as { nudgeMs?: number }).nudgeMs ?? 0))
       .toBeGreaterThan(300)
 
-    // On the masters the action does something real: it takes «Любой, кто свободен» and the
-    // time comes next («Выбрать мастера» only pointed at the cards already on screen).
+    // On the masters the action does something real: it takes «Anyone free» and the
+    // time comes next («Choose a specialist» only pointed at the cards already on screen).
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
-    await expect(action).toHaveText('Любой мастер')
+    await expect(action).toHaveText('Any specialist')
     await action.click()
-    await expect(steps.specialist).toContainText('Любой мастер')
-    await expect(action).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
+    await expect(steps.specialist).toContainText('Any specialist')
+    await expect(action).toHaveText(/^Choose (a time|\d{2}:\d{2})$/)
   })
 
   test('the main action stays on screen at every step on phones', async ({ page, isMobile }) => {
@@ -66,43 +66,46 @@ test.describe('UX: guidance and feedback', () => {
     await expect.poll(() => isInViewport(action)).toBe(true)
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
     expect(await isInViewport(action)).toBe(true)
-    await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    await steps.specialist.getByRole('radio', { name: /Any specialist/ }).click()
     expect(await isInViewport(action)).toBe(true)
     await pickFirstFreeSlot(page)
     expect(await isInViewport(action)).toBe(true)
-    await page.getByLabel('Телефон').focus()
+    await page.getByLabel('Phone').focus()
     expect(await isInViewport(action)).toBe(true)
   })
 
   test('no validation errors before the first submit attempt', async ({ page }) => {
     await page.goto('/awaisa-studio/book?service=styling')
     const { contacts, specialist } = bookingSteps(page)
-    await specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    await specialist.getByRole('radio', { name: /Any specialist/ }).click()
     await pickFirstFreeSlot(page)
 
-    await contacts.getByLabel('Имя').fill('А')
-    await contacts.getByLabel('Имя').fill('')
-    await contacts.getByLabel('Телефон').fill('12')
+    await contacts.getByLabel('Name', { exact: true }).fill('A')
+    await contacts.getByLabel('Name', { exact: true }).fill('')
+    await contacts.getByLabel('Phone').fill('12')
 
-    await expect(page.getByText('Укажите имя')).toHaveCount(0)
-    await expect(page.getByText('Укажите номер')).toHaveCount(0)
+    await expect(page.getByText('Enter a name')).toHaveCount(0)
+    await expect(page.getByText('Enter a number so we can confirm the booking')).toHaveCount(0)
   })
 
   test('contact errors are inline, human and keep what was typed', async ({ page }) => {
     await page.goto('/awaisa-studio/book?service=styling')
     const steps = bookingSteps(page)
-    await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    await steps.specialist.getByRole('radio', { name: /Any specialist/ }).click()
     await pickFirstFreeSlot(page)
-    await steps.contacts.getByLabel('Телефон').fill('555')
+    await steps.contacts.getByLabel('Phone').fill('555')
 
     await primaryAction(page).click()
 
-    await expect(steps.contacts.getByText('Укажите имя')).toBeVisible()
+    await expect(steps.contacts.getByText('Enter a name')).toBeVisible()
     await expect(
-      steps.contacts.getByText('Укажите номер, чтобы мы подтвердили запись'),
+      steps.contacts.getByText('Enter a number so we can confirm the booking'),
     ).toBeVisible()
-    await expect(steps.contacts.getByLabel('Телефон')).toHaveValue('+996 555')
-    await expect(steps.contacts.getByLabel('Имя')).toHaveAttribute('aria-invalid', 'true')
+    await expect(steps.contacts.getByLabel('Phone')).toHaveValue('+996 555')
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    )
     await expect(steps.contacts).toBeInViewport()
   })
 
@@ -112,7 +115,7 @@ test.describe('UX: guidance and feedback', () => {
     await mockCreateBooking(page, (route) => conflict(route))
     await page.goto('/awaisa-studio/book?service=styling')
     const steps = bookingSteps(page)
-    await steps.specialist.getByRole('radio', { name: /Любой мастер/ }).click()
+    await steps.specialist.getByRole('radio', { name: /Any specialist/ }).click()
     const time = await pickFirstFreeSlot(page)
     await fillContacts(page)
 
@@ -121,14 +124,14 @@ test.describe('UX: guidance and feedback', () => {
     await slotsReload
 
     await expect(
-      page.getByText('Это время только что заняли').filter({ visible: true }).first(),
+      page.getByText('Someone just took this time').filter({ visible: true }).first(),
     ).toBeVisible()
     await expect(steps.datetime).toBeInViewport()
     await expect(steps.datetime.getByRole('button', { name: time, pressed: true })).toHaveCount(0)
-    await expect(primaryAction(page)).toHaveText(/^Выбрать (время|\d{2}:\d{2})$/)
+    await expect(primaryAction(page)).toHaveText(/^Choose (a time|\d{2}:\d{2})$/)
     // Contacts wait under the time: a new time brings them back as typed.
     await pickFirstFreeSlot(page)
-    await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Тест')
+    await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveValue('E2E Тест')
   })
 
   test("a failed request for the services' free times is tried again", async ({ page }) => {
@@ -136,7 +139,7 @@ test.describe('UX: guidance and feedback', () => {
     await page.route('**/api/businesses/*/next-free-services**', (route) => {
       if (failures > 0) {
         failures -= 1
-        return route.fulfill({ status: 503, json: { message: 'Сервис временно недоступен' } })
+        return route.fulfill({ status: 503, json: { message: 'Service temporarily unavailable' } })
       }
       return route.fallback()
     })
@@ -144,7 +147,7 @@ test.describe('UX: guidance and feedback', () => {
 
     await expect(
       bookingSteps(page)
-        .service.getByText(/^(Сегодня|Завтра) с \d{2}:\d{2}/)
+        .service.getByText(/^(Today|Tomorrow) from \d{2}:\d{2}/)
         .first(),
     ).toBeVisible()
     expect(failures).toBe(0)
@@ -161,16 +164,18 @@ test.describe('UX: guidance and feedback', () => {
     })
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     const action = primaryAction(page)
-    await expect(action).toHaveText('Выбрать 12:00')
+    await expect(action).toHaveText('Choose 12:00')
 
     // Another day, full: the bar no longer offers the first day's 12:00.
-    const days = page.getByRole('group', { name: 'День' }).getByRole('button', { disabled: false })
+    const days = page
+      .getByRole('group', { name: 'Day', exact: true })
+      .getByRole('button', { disabled: false })
     await days.nth(1).click()
-    await expect(page.getByText('На этот день всё занято')).toBeVisible()
-    await expect(action).toHaveText('Выбрать время')
+    await expect(page.getByText('This day is fully booked')).toBeVisible()
+    await expect(action).toHaveText('Choose a time')
   })
 
   test('slot loading failure offers a retry instead of a dead end', async ({ page }) => {
@@ -181,18 +186,18 @@ test.describe('UX: guidance and feedback', () => {
     await page.route('**/api/availability**', (route) => {
       if (failures > 0) {
         failures -= 1
-        return route.fulfill({ status: 503, json: { message: 'Сервис временно недоступен' } })
+        return route.fulfill({ status: 503, json: { message: 'Service temporarily unavailable' } })
       }
       return route.fallback()
     })
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
 
-    await expect(page.getByText('Сервис временно недоступен')).toBeVisible()
-    await page.getByRole('button', { name: 'Повторить' }).click()
+    await expect(page.getByText('Service temporarily unavailable')).toBeVisible()
+    await page.getByRole('button', { name: 'Retry' }).click()
     await expect(
-      page.getByRole('group', { name: 'Время' }).or(page.getByText('На этот день всё занято')),
+      page.getByRole('group', { name: 'Time' }).or(page.getByText('This day is fully booked')),
     ).toBeVisible()
   })
 
@@ -219,11 +224,11 @@ test.describe('UX: guidance and feedback', () => {
     await steps.specialist.getByRole('radio', { name: /Айгерим/ }).click()
     await pickFirstFreeSlot(page)
 
-    // Another service instead: tick it, untick the first one, «Готово».
+    // Another service instead: tick it, untick the first one, «Done».
     await editStep(page, 'service')
     await steps.service.getByRole('checkbox', { name: /Укладка/ }).click()
     await steps.service.getByRole('checkbox', { name: /Женская стрижка/ }).click()
-    await page.getByRole('button', { name: 'Готово' }).filter({ visible: true }).click()
+    await page.getByRole('button', { name: 'Done' }).filter({ visible: true }).click()
 
     await expect(steps.service).toContainText('Укладка')
     await expect(steps.service).not.toContainText('Женская стрижка')
@@ -236,21 +241,21 @@ test.describe('UX: guidance and feedback', () => {
     await mockCreateBooking(page, succeed)
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     await pickFirstFreeSlot(page)
     await fillContacts(page)
     await submitBooking(page)
 
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'В календарь' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'To calendar' })).toBeVisible()
     // The sheet, not the place's page dimmed under it (a direct link opens both).
     const screen = page.locator('[data-booking-screen]')
-    await expect(screen.getByRole('link', { name: 'Маршрут' })).toBeVisible()
-    await expect(screen.getByRole('link', { name: 'Мои записи' })).toBeVisible()
+    await expect(screen.getByRole('link', { name: 'Directions' })).toBeVisible()
+    await expect(screen.getByRole('link', { name: 'My bookings' })).toBeVisible()
 
-    // «Вам может понравиться» offers the next thing to look at, not the visit just booked.
-    const shelf = screen.getByRole('region', { name: 'Вам может понравиться' })
+    // «You may like» offers the next thing to look at, not the visit just booked.
+    const shelf = screen.getByRole('region', { name: 'You may like' })
     await shelf.scrollIntoViewIfNeeded()
     const picks = shelf.getByRole('listitem').getByRole('link')
     await expect(picks.first()).toHaveAttribute('href', /\/book\?service=/)
@@ -259,7 +264,7 @@ test.describe('UX: guidance and feedback', () => {
     )) {
       expect(href).not.toMatch(/\/awaisa-studio\/book\?service=styling$/)
     }
-    await expect(screen.getByRole('link', { name: 'Все места и услуги ›' })).toHaveAttribute(
+    await expect(screen.getByRole('link', { name: 'All places and services ›' })).toHaveAttribute(
       'href',
       '/',
     )
@@ -318,20 +323,20 @@ test.describe('UX: layout and ergonomics', () => {
       page.evaluate(() => (window as unknown as { __posted: string[] }).__posted.join('\n'))
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     await pickFirstFreeSlot(page)
     // The sheet asks the app to leave the WebView whole.
     await expect.poll(posted).toContain('"mode":"overlay"')
 
-    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    const toggle = page.getByRole('switch', { name: 'Booking for someone else' })
     await toggle.waitFor()
     await toggle.evaluate((element) => {
       element.scrollIntoView({ block: 'end' })
       document.querySelector('[data-booking-screen]')?.scrollBy({ top: -90 })
     })
     await toggle.click()
-    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Имя' })
+    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Name' })
     await expect(name).toBeFocused()
 
     // The app reports its keyboard: the sheet makes room and sets the field above it.
@@ -357,13 +362,13 @@ test.describe('UX: layout and ergonomics', () => {
     await expect(sheet).not.toHaveAttribute('data-keyboard')
 
     // Closed, the sheet gives the app its usual resizing back.
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await expect.poll(posted).toContain('"mode":"resize"')
   })
 
   test('a field the form focuses is set above the phone keyboard', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'The on-screen keyboard is a phone matter')
-    // A saved contact offers «Записываю другого человека», which moves the caret to «Имя».
+    // A saved contact offers «Booking for someone else», which moves the caret to «Name».
     await page.addInitScript(() =>
       localStorage.setItem(
         'awaisa:contact:v1',
@@ -372,14 +377,14 @@ test.describe('UX: layout and ergonomics', () => {
     )
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     await pickFirstFreeSlot(page)
-    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    const toggle = page.getByRole('switch', { name: 'Booking for someone else' })
     await toggle.waitFor()
 
     // The keyboard slides over the fixed sheet and only shrinks the visual viewport: play that
-    // with the switch low on the screen, where «Имя» above it ends up under the keyboard.
+    // with the switch low on the screen, where «Name» above it ends up under the keyboard.
     const result = await toggle.evaluate(async (switchElement) => {
       const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
       const sheet = document.querySelector<HTMLElement>('[data-booking-screen]')
@@ -424,10 +429,10 @@ test.describe('UX: layout and ergonomics', () => {
     )
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     await pickFirstFreeSlot(page)
-    const toggle = page.getByRole('switch', { name: 'Записываю другого человека' })
+    const toggle = page.getByRole('switch', { name: 'Booking for someone else' })
     await toggle.waitFor()
     await toggle.evaluate((switchElement) => {
       switchElement.scrollIntoView({ block: 'end' })
@@ -437,7 +442,7 @@ test.describe('UX: layout and ergonomics', () => {
     const size = page.viewportSize()
     await page.setViewportSize({ width: size?.width ?? 412, height: (size?.height ?? 839) - 300 })
 
-    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Имя' })
+    const name = bookingSteps(page).contacts.getByRole('textbox', { name: 'Name' })
     await expect(name).toBeFocused()
     await expect
       .poll(async () => {
@@ -457,12 +462,12 @@ test.describe('UX: layout and ergonomics', () => {
     await steps.service.getByRole('radio', { name: /Укладка/ }).waitFor()
 
     // The page under the sheet stays as it is: it used to shrink back, a layer the size of the
-    // page that cost frames on phones («убери всю лишнюю анимацию»).
+    // page that cost frames on phones (the owner: remove all the extra animation).
     await page.waitForTimeout(600)
     expect(await page.locator('html').getAttribute('data-booking-sheet')).toBeNull()
 
     // The step segments say how far along, as a progress bar.
-    const progress = page.getByRole('progressbar', { name: 'Шаги записи' })
+    const progress = page.getByRole('progressbar', { name: 'Booking steps' })
     await expect(progress).toHaveAttribute('aria-valuenow', '0')
 
     await steps.service.getByRole('radio', { name: /Укладка/ }).click()
@@ -482,20 +487,18 @@ test.describe('UX: layout and ergonomics', () => {
         .map((animation) => (animation as CSSAnimation).animationName ?? 'transition'),
     )
     expect(moving.filter((name) => name !== 'transition')).toEqual([])
-    await expect(page.locator('[data-booking-bar] [class*="barPrice"]')).toHaveText(
-      /^[\d\s]+\sсом$/,
-    )
+    await expect(page.locator('[data-booking-bar] [class*="barPrice"]')).toHaveText(/^[\d,]+\ssom$/)
   })
 
   test('booking controls are at least 44×44 on phones', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Touch targets matter on touch screens')
     await page.goto('/awaisa-studio/book?service=styling')
     await bookingSteps(page)
-      .specialist.getByRole('radio', { name: /Любой мастер/ })
+      .specialist.getByRole('radio', { name: /Any specialist/ })
       .click()
     await page
-      .getByRole('group', { name: 'Время' })
-      .or(page.getByText('На этот день всё занято'))
+      .getByRole('group', { name: 'Time' })
+      .or(page.getByText('This day is fully booked'))
       .waitFor()
 
     expect(await findSmallTapTargets(page)).toEqual([])
@@ -510,27 +513,27 @@ test.describe('UX: layout and ergonomics', () => {
     await page.keyboard.press('Space')
     await expect(bookingSteps(page).service).toContainText('Женская стрижка')
 
-    await page.getByRole('radio', { name: /Любой мастер/ }).focus()
+    await page.getByRole('radio', { name: /Any specialist/ }).focus()
     await page.keyboard.press('Space')
     const freeSlot = page
-      .getByRole('group', { name: 'Время' })
+      .getByRole('group', { name: 'Time' })
       .getByRole('button', { disabled: false })
       .first()
-    await freeSlot.or(page.getByText('На этот день всё занято')).waitFor()
+    await freeSlot.or(page.getByText('This day is fully booked')).waitFor()
     test.skip((await freeSlot.count()) === 0, 'No free slots today')
     await freeSlot.focus()
     await page.keyboard.press('Enter')
 
-    await page.getByLabel('Имя').focus()
+    await page.getByLabel('Name', { exact: true }).focus()
     await page.keyboard.type('E2E Тест')
     await page.keyboard.press('Tab')
     await page.keyboard.type('+996555000111')
     // Everything filled: one press books.
-    await expect(primaryAction(page)).toHaveText('Записаться')
+    await expect(primaryAction(page)).toHaveText('Book')
     await primaryAction(page).focus()
     await page.keyboard.press('Enter')
 
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
   })
 
   // Next keeps visited routes in the DOM (hidden): the booking sheet's scroll lock must not
@@ -545,7 +548,7 @@ test.describe('UX: layout and ergonomics', () => {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.style.overflow))
       .toBe('hidden')
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await page.waitForURL(/awaisa-studio$/)
     await expect
       .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).overflow))

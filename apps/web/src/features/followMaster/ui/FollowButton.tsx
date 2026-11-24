@@ -21,7 +21,7 @@ interface FollowButtonProps {
   variant?: 'glyph' | 'capsule' | 'groupItem'
 }
 
-// «Следить»: freed time with the master, a move to another place. Guests sign in first and
+// «Follow»: freed time with the master, a move to another place. Guests sign in first and
 // come back to the same page.
 export const FollowButton = ({ specialistId, name, variant = 'capsule' }: FollowButtonProps) => {
   const t = useT()
@@ -46,21 +46,23 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
         await follows.follow(specialistId)
         haptic('success')
         toast.show({
-          title: t('Вы следите за мастером {name}', { name }),
-          description: t('Напишем, когда у мастера освободится время'),
+          title: t('You follow {name}', { name }),
+          description: t('We will write when the specialist has free time'),
           type: 'success',
         })
       }
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsBusy(false)
     }
   }
 
-  const label = isOn
-    ? t('Не следить за мастером {name}', { name })
-    : t('Следить за мастером {name}', { name })
+  const label = isOn ? t('Unfollow {name}', { name }) : t('Follow {name}', { name })
 
   if (variant === 'groupItem') {
     return (
@@ -99,7 +101,7 @@ export const FollowButton = ({ specialistId, name, variant = 'capsule' }: Follow
       onClick={(event) => void handleClick(event)}
     >
       {isOn ? <BellRinging weight='fill' aria-hidden /> : <Bell aria-hidden />}
-      {isOn ? t('Вы следите') : t('Следить за мастером')}
+      {isOn ? t('Following') : t('Follow the specialist')}
     </Button>
   )
 }

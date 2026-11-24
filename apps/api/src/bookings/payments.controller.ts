@@ -29,7 +29,7 @@ import { PaymentsService } from './payments.service.js'
 const TOKEN_HEADER = 'x-booking-token'
 
 const requireSignature = (value: string | undefined) => {
-  if (!value || value.length > 64) throw new BadRequestException('Нет подписи')
+  if (!value || value.length > 64) throw new BadRequestException('Missing signature')
   return value
 }
 
@@ -141,7 +141,7 @@ export class PaymentsController {
     return reply
   }
 
-  // «Оплатить» on a ticket that still waits for its deposit: the current checkout link.
+  // 'Pay' on a ticket that still waits for its deposit: the current checkout link.
   @Get('bookings/:id/checkout')
   @UseGuards(OptionalAuthGuard)
   checkout(
@@ -152,7 +152,7 @@ export class PaymentsController {
     return this.bookingPayments.checkoutUrl(id, token ?? null, customer)
   }
 
-  // «Напоминать в Telegram» on the success screen and the ticket: the bot link for this booking.
+  // 'Remind me in Telegram' on the success screen and the ticket: the bot link for this booking.
   @Get('bookings/:id/telegram')
   @UseGuards(OptionalAuthGuard)
   telegram(

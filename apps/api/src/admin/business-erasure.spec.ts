@@ -20,8 +20,8 @@ describe('archivedSlug', () => {
   })
 
   it('is an address nobody can register', () => {
-    expect(getSlugProblem(archivedSlug(id, now))).toBe('Этот адрес занят')
-    expect(getSlugProblem('deleted-shop')).toBe('Этот адрес занят')
+    expect(getSlugProblem(archivedSlug(id, now))).toBe('This address is taken')
+    expect(getSlugProblem('deleted-shop')).toBe('This address is taken')
   })
 
   it('never repeats for the same business deleted twice', () => {

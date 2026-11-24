@@ -42,7 +42,7 @@ const getBookingRateLimit = () => validateEnv(process.env).BOOKING_RATE_LIMIT_PE
 
 const parseToken = (value: string | undefined) => {
   const result = bookingTokenSchema.safeParse(value)
-  if (!result.success) throw new NotFoundException('Запись не найдена')
+  if (!result.success) throw new NotFoundException('Booking not found')
 
   return result.data
 }

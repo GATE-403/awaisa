@@ -3,8 +3,8 @@ import { formatPhone, randomClientPhone } from './account'
 import { createOwnBusiness, createVisit, type OwnBusiness } from './business'
 
 const SERVICES = [
-  { name: 'Стрижка', durationMinutes: 60, price: 1000 },
-  { name: 'Борода', durationMinutes: 30, price: 600 },
+  { name: 'Haircut', durationMinutes: 60, price: 1000 },
+  { name: 'Beard', durationMinutes: 30, price: 600 },
 ]
 
 // The masters split the menu: Азамат only cuts hair, Бекзат only does beards.
@@ -17,7 +17,7 @@ const splitMenu = async (page: Page, business: OwnBusiness) => {
     [bekzat, beard],
   ] as const) {
     const saved = await page.request.put(`/api/manage/${business.slug}/specialists/${master.id}`, {
-      data: { name: master.name, role: 'Мастер', serviceIds: [service.id] },
+      data: { name: master.name, role: 'Specialist', serviceIds: [service.id] },
     })
     expect(saved.ok()).toBe(true)
   }
@@ -27,11 +27,11 @@ const splitMenu = async (page: Page, business: OwnBusiness) => {
 const openClientFromClients = async (page: Page, business: OwnBusiness, name: string) => {
   await page.goto(`/manage/${business.slug}?tab=clients`)
   await page.getByRole('button', { name: new RegExp(name) }).click()
-  return page.getByRole('dialog', { name: 'Клиент', exact: true })
+  return page.getByRole('dialog', { name: 'Client', exact: true })
 }
 
 test.describe('Client card: what it leads to', () => {
-  test('from the schedule «Записать снова» prefills the usual service, its master and the client; the history folds past four', async ({
+  test('from the schedule “Book again” prefills the usual service, its master and the client; the history folds past four', async ({
     page,
   }) => {
     test.setTimeout(90_000)
@@ -63,25 +63,25 @@ test.describe('Client card: what it leads to', () => {
       .locator('[data-schedule-board]')
       .getByRole('button', { name: new RegExp(`, ${name}, `) })
       .click()
-    await page.getByRole('button', { name: new RegExp(`^${name}\\s*: карточка клиента$`) }).click()
+    await page.getByRole('button', { name: new RegExp(`^${name}\\s*: client card$`) }).click()
 
-    const card = page.getByRole('dialog', { name: 'Клиент', exact: true })
-    await expect(card).toContainText('Обычно: Борода')
-    const history = card.getByRole('region', { name: 'История' })
+    const card = page.getByRole('dialog', { name: 'Client', exact: true })
+    await expect(card).toContainText('Usually: Beard')
+    const history = card.getByRole('region', { name: 'History' })
     await expect(history.getByRole('listitem')).toHaveCount(4)
-    await history.getByRole('button', { name: 'Ещё 1 визит' }).click()
+    await history.getByRole('button', { name: '1 more visit' }).click()
     await expect(history.getByRole('listitem')).toHaveCount(5)
     // Newest first: the haircut ahead, then the paid beard with its money and how it was paid.
-    await expect(history.getByRole('listitem').first()).toContainText('Стрижка')
-    await expect(history.getByRole('listitem').nth(1)).toContainText('Борода')
-    await expect(history.getByRole('listitem').nth(1)).toContainText(/1\s500\s*сом, карта/)
+    await expect(history.getByRole('listitem').first()).toContainText('Haircut')
+    await expect(history.getByRole('listitem').nth(1)).toContainText('Beard')
+    await expect(history.getByRole('listitem').nth(1)).toContainText(/1,500\s*som, card/)
     await expect(history.getByRole('listitem').last()).toContainText(`${azamat.name}`)
 
-    await card.getByRole('button', { name: 'Записать снова' }).click()
-    const booking = page.getByRole('dialog', { name: 'Новая запись', exact: true })
-    await expect(booking.getByRole('combobox', { name: 'Мастер' })).toContainText(bekzat.name)
-    await expect(booking.getByRole('combobox', { name: 'Услуга' })).toContainText('Борода')
-    await expect(booking.getByPlaceholder('Как зовут')).toHaveValue(name)
+    await card.getByRole('button', { name: 'Book again' }).click()
+    const booking = page.getByRole('dialog', { name: 'New booking', exact: true })
+    await expect(booking.getByRole('combobox', { name: 'Specialist' })).toContainText(bekzat.name)
+    await expect(booking.getByRole('combobox', { name: 'Service' })).toContainText('Beard')
+    await expect(booking.getByPlaceholder('Name')).toHaveValue(name)
     await expect(booking.getByPlaceholder('+996 555 123 456')).toHaveValue(formatPhone(phone))
   })
 
@@ -102,11 +102,11 @@ test.describe('Client card: what it leads to', () => {
     expect(plan.ok()).toBe(true)
 
     const card = await openClientFromClients(page, business, 'E2E Абонементщик')
-    const loyalty = card.getByRole('region', { name: 'Лояльность' })
-    await loyalty.getByRole('combobox', { name: 'Продать абонемент' }).click()
-    await page.getByRole('option', { name: /^E2E Пять стрижек · 4\s000\s*сом$/ }).click()
-    await expect(page.getByText('Абонемент оформлен')).toBeVisible()
-    await expect(loyalty).toContainText(/E2E Пять стрижек\s*5 визитов · до/)
+    const loyalty = card.getByRole('region', { name: 'Loyalty' })
+    await loyalty.getByRole('combobox', { name: 'Sell a subscription' }).click()
+    await page.getByRole('option', { name: /^E2E Пять стрижек · 4,000\s*som$/ }).click()
+    await expect(page.getByText('Subscription sold')).toBeVisible()
+    await expect(loyalty).toContainText(/E2E Пять стрижек\s*5 visits · until/)
 
     const bought = await (
       await page.request.get(
@@ -118,7 +118,7 @@ test.describe('Client card: what it leads to', () => {
     ])
   })
 
-  test('«Позвать» under «Давно не были» opens the mailing on that group', async ({ page }) => {
+  test('“Invite” under “Lapsed” opens the mailing on that group', async ({ page }) => {
     const business = await createOwnBusiness(page)
     // Three months ago, SMS left on: lapsed and reachable.
     await createVisit({
@@ -141,15 +141,15 @@ test.describe('Client card: what it leads to', () => {
 
     await page.goto(`/manage/${business.slug}?tab=clients`)
     await page
-      .getByRole('tablist', { name: 'Группы клиентов' })
-      .getByRole('tab', { name: /^Давно не были/ })
+      .getByRole('tablist', { name: 'Client groups' })
+      .getByRole('tab', { name: /^Lapsed/ })
       .click()
-    await page.getByRole('button', { name: 'Позвать 1 клиента' }).click()
+    await page.getByRole('button', { name: 'Invite 1 client' }).click()
 
-    const mailing = page.getByRole('dialog', { name: 'Рассылка', exact: true })
-    await expect(mailing.getByRole('radio', { name: 'Давно не были' })).toBeChecked()
-    await expect(mailing.getByRole('region', { name: 'Кому' })).toContainText('1 клиент')
-    await expect(mailing.getByRole('region', { name: 'Кому' })).toContainText('E2E')
-    await expect(mailing.getByRole('region', { name: 'Кому' })).not.toContainText('и другие')
+    const mailing = page.getByRole('dialog', { name: 'Mailing', exact: true })
+    await expect(mailing.getByRole('radio', { name: 'Lapsed' })).toBeChecked()
+    await expect(mailing.getByRole('region', { name: 'To' })).toContainText('1 client')
+    await expect(mailing.getByRole('region', { name: 'To' })).toContainText('E2E')
+    await expect(mailing.getByRole('region', { name: 'To' })).not.toContainText('and others')
   })
 })

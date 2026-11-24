@@ -9,7 +9,7 @@ type FollowsState = { status: 'idle' | 'loading' | 'ready'; items: FollowedMaste
 
 const IDLE: FollowsState = { status: 'idle', items: [] }
 
-// One copy for the page: every follow button and «Мои мастера» read the same list.
+// One copy for the page: every follow button and «My specialists» read the same list.
 let state = IDLE
 const listeners = new Set<() => void>()
 

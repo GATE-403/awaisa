@@ -6,7 +6,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { CreateBusinessPage } from '@/views/forBusiness'
 
 export const metadata: Metadata = {
-  title: 'Новая страница бизнеса',
+  title: 'New business page',
   robots: { index: false },
 }
 

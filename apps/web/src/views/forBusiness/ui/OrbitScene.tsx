@@ -6,14 +6,14 @@ import { Mascot } from '@/shared/ui/Mascot/Mascot'
 import styles from './OrbitScene.module.css'
 
 const CHIPS = [
-  { text: '10:30 · свободно', tone: 'free' },
-  { text: '★ 4.9 · 128 отзывов', tone: 'rating' },
-  { text: 'Новая запись · Данияр', tone: 'accent' },
-  { text: 'Напоминание отправлено', tone: 'plain' },
-  { text: 'Стрижка · 900 сом', tone: 'plain' },
-  { text: 'Тимур · барбер', tone: 'plain' },
-  { text: 'Сегодня с 15:00', tone: 'free' },
-  { text: 'Талон в Wallet', tone: 'accent' },
+  { text: '10:30 · free', tone: 'free' },
+  { text: '★ 4.9 · 128 reviews', tone: 'rating' },
+  { text: 'New booking · Daniyar', tone: 'accent' },
+  { text: 'Reminder sent', tone: 'plain' },
+  { text: 'Haircut · 900 som', tone: 'plain' },
+  { text: 'Timur · barber', tone: 'plain' },
+  { text: 'Today from 15:00', tone: 'free' },
+  { text: 'Pass in Wallet', tone: 'accent' },
 ]
 
 const RAYS = 96

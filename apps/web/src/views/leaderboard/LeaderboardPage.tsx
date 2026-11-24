@@ -22,8 +22,8 @@ export const LeaderboardPage = ({ kind, view, masters, places }: LeaderboardPage
         align='center'
         className={styles.crumbs}
         items={[
-          { label: 'Каталог', href: '/' },
-          { label: 'Рейтинг', href: `/top?kind=${kind}${view === 'places' ? '&view=places' : ''}` },
+          { label: 'Catalogue', href: '/' },
+          { label: 'Rating', href: `/top?kind=${kind}${view === 'places' ? '&view=places' : ''}` },
         ]}
       />
       <LeaderboardBoard kind={kind} view={view} masters={masters} places={places} />

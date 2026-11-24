@@ -7,18 +7,18 @@ type BookingMessageInput = {
 }
 
 const MONTHS = [
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const formatDate = (dateKey: string) => {
@@ -28,24 +28,24 @@ const formatDate = (dateKey: string) => {
 
 // `link` opens the visit without signing in (common/visit-link.ts): move or cancel from there.
 const confirmationMessage = (booking: BookingMessageInput, link: string) =>
-  `${booking.business.name}: вы записаны - ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Перенести или отменить: ${link}`
+  `${booking.business.name}: you're booked - ${booking.serviceName}, ${formatDate(booking.date)} at ${booking.time} with ${booking.specialistName}. Change or cancel: ${link}`
 
 const reminderMessage = (booking: BookingMessageInput, isToday = true, link?: string) =>
-  `${booking.business.name}: напоминаем - ${isToday ? 'сегодня' : 'завтра'} в ${booking.time} ${booking.serviceName}, мастер ${booking.specialistName}. Ждём вас!${link ? ` Перенести: ${link}` : ''}`
+  `${booking.business.name}: a reminder - ${booking.serviceName} ${isToday ? 'today' : 'tomorrow'} at ${booking.time} with ${booking.specialistName}. See you soon!${link ? ` Change: ${link}` : ''}`
 
 const salonCancellationMessage = (booking: BookingMessageInput, webUrl: string) =>
-  `${booking.business.name}: к сожалению, запись на ${formatDate(booking.date)} в ${booking.time} отменена. Выберите другое время: ${webUrl}/${booking.business.slug}/book`
+  `${booking.business.name}: sorry, your booking on ${formatDate(booking.date)} at ${booking.time} has been cancelled. Pick another time: ${webUrl}/${booking.business.slug}/book`
 
 const rescheduleMessage = (booking: BookingMessageInput, link: string) =>
-  `${booking.business.name}: запись перенесена - ${booking.serviceName}, ${formatDate(booking.date)} в ${booking.time}, мастер ${booking.specialistName}. Подробнее: ${link}`
+  `${booking.business.name}: your booking has moved - ${booking.serviceName}, ${formatDate(booking.date)} at ${booking.time} with ${booking.specialistName}. Details: ${link}`
 
 // Asked once, two hours after the visit; the link opens the rating without signing in.
 const reviewRequestMessage = (businessName: string, link: string) =>
-  `${businessName}: как прошёл визит? Оцените мастера - это 10 секунд: ${link}`
+  `${businessName}: how was your visit? Rate your specialist, it takes 10 seconds: ${link}`
 
 // The owner gave a master their number: tell the master where their day lives.
 const masterInviteMessage = (businessName: string, link: string) =>
-  `${businessName}: вам открыт «Мой день» - ваши записи и клиенты. Войдите по этому номеру: ${link}`
+  `${businessName}: “My day” is open to you - your bookings and clients. Sign in with this number: ${link}`
 
 // The waitlist: a time opened up on the day the client wanted; the link opens it in the form.
 const waitlistFreedMessage = (
@@ -55,20 +55,20 @@ const waitlistFreedMessage = (
   time: string,
   link: string,
 ) =>
-  `${businessName}: освободилось время - ${serviceName}, ${formatDate(date)} в ${time}. Успейте записаться: ${link}`
+  `${businessName}: a time has opened up - ${serviceName}, ${formatDate(date)} at ${time}. Book before it goes: ${link}`
 
-// «Пора прийти снова»: one nudge N days after the visit, with a link to the same master.
+// «Time to come back»: one nudge N days after the visit, with a link to the same master.
 const returnVisitMessage = (
   businessName: string,
   serviceName: string,
   masterName: string,
   link: string,
 ) =>
-  `${businessName}: пора снова на «${serviceName}»? ${masterName.split(' ')[0]} ждёт вас - запишитесь: ${link}`
+  `${businessName}: time for another “${serviceName}”? ${masterName.split(' ')[0]} is ready for you - book: ${link}`
 
 // The owner added this number as an administrator: where the cabinet is.
 const adminInviteMessage = (businessName: string, link: string) =>
-  `${businessName}: вас добавили администратором - расписание и клиенты. Войдите по этому номеру: ${link}`
+  `${businessName}: you've been added as an administrator - the schedule and clients. Sign in with this number: ${link}`
 
 export type { BookingMessageInput }
 export {

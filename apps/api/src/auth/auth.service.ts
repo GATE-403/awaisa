@@ -26,7 +26,7 @@ const DAY_MS = 24 * 60 * MINUTE_MS
 
 const parsePhone = (value: string) => {
   const phone = normalizePhone(value)
-  if (!phone) throw new BadRequestException('Укажите корректный номер телефона')
+  if (!phone) throw new BadRequestException('Enter a valid phone number')
 
   return phone
 }
@@ -57,12 +57,12 @@ export class AuthService {
     if (!this.sms.canSendTo(phone)) {
       const codes = this.config.get('SMS_ALLOWED_COUNTRY_CODES', { infer: true })
       throw new BadRequestException(
-        `Вход пока доступен только по номерам ${codes.map((code) => `+${code}`).join(', ')}`,
+        `Sign-in is only available for numbers starting ${codes.map((code) => `+${code}`).join(', ')}`,
       )
     }
     if (!this.isCodeAvailable) {
       throw new ServiceUnavailableException(
-        'Код в Telegram сейчас не отправить. Войдите через Telegram-бота',
+        "We can't send a code to Telegram right now. Sign in with the Telegram bot",
       )
     }
     const now = Date.now()
@@ -77,15 +77,12 @@ export class AuthService {
       : 0
     if (waitSeconds > 0) {
       throw new HttpException(
-        `Новый код можно запросить через ${waitSeconds} с`,
+        `You can request a new code in ${waitSeconds} s`,
         HttpStatus.TOO_MANY_REQUESTS,
       )
     }
     if (!testCode && recent.length >= OTP.maxPerDay) {
-      throw new HttpException(
-        'Слишком много попыток. Попробуйте завтра',
-        HttpStatus.TOO_MANY_REQUESTS,
-      )
+      throw new HttpException('Too many attempts. Try again tomorrow', HttpStatus.TOO_MANY_REQUESTS)
     }
 
     const code = testCode ?? String(randomInt(0, 1_000_000)).padStart(6, '0')
@@ -96,7 +93,7 @@ export class AuthService {
       providerRequestId = await this.telegram.sendCode(phone, code, OTP.ttlMinutes * 60)
       if (!providerRequestId) {
         throw new BadRequestException(
-          'Не получилось отправить код в Telegram на этот номер. Проверьте номер или войдите через Telegram-бота',
+          'Could not send a code to Telegram for this number. Check the number or sign in with the Telegram bot',
         )
       }
     }
@@ -120,7 +117,7 @@ export class AuthService {
       where: { phone, consumedAt: IsNull(), expiresAt: MoreThan(new Date()) },
       order: { createdAt: 'DESC' },
     })
-    if (!otp) throw new BadRequestException('Код устарел - запросите новый')
+    if (!otp) throw new BadRequestException('The code has expired, request a new one')
     // The attempt is taken before the code is compared, in one statement: parallel guesses
     // cannot all read «0 attempts» and try far more than five codes.
     const taken = await this.codes
@@ -131,14 +128,15 @@ export class AuthService {
       .returning(['attempts'])
       .execute()
     const attempts = (taken.raw as { attempts: number }[])[0]?.attempts
-    if (attempts === undefined) throw new BadRequestException('Код устарел - запросите новый')
+    if (attempts === undefined)
+      throw new BadRequestException('The code has expired, request a new one')
 
     const expected = Buffer.from(otp.codeHash, 'hex')
     const actual = Buffer.from(this.hashCode(phone, code), 'hex')
     if (!timingSafeEqual(expected, actual)) {
       const left = OTP.maxAttempts - attempts
       throw new BadRequestException(
-        left > 0 ? `Неверный код, осталось попыток: ${left}` : 'Код устарел - запросите новый',
+        left > 0 ? `Wrong code, attempts left: ${left}` : 'The code has expired, request a new one',
       )
     }
 
@@ -154,7 +152,8 @@ export class AuthService {
       'SELECT 1 FROM "moderated_people" WHERE "phone" = $1 AND "blocked_at" IS NOT NULL',
       [phone],
     )) as unknown[]
-    if (blocked.length > 0) throw new ForbiddenException('Этот номер заблокирован модератором')
+    if (blocked.length > 0)
+      throw new ForbiddenException('This number has been blocked by a moderator')
     await this.customers.upsert(
       { phone },
       { conflictPaths: ['phone'], skipUpdateIfNoValuesChanged: true },

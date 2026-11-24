@@ -26,7 +26,7 @@ interface ServicePickerProps {
   photos?: Record<string, string>
   coverUrl?: string | null
   businessName: string
-  /** «Сегодня с 15:30» for a service, when one could come soon. */
+  /** "Today from 15:30" for a service, when one could come soon. */
   soonLabel: (serviceId: string) => string | null
 }
 
@@ -59,7 +59,7 @@ export const ServicePicker = ({
     <div className={styles.picker}>
       {shownCategories.length > 1 && (
         <div className={styles.chips} data-edge-fade=''>
-          {[{ id: null, name: t('Все') }, ...shownCategories].map((category) => (
+          {[{ id: null, name: t('All') }, ...shownCategories].map((category) => (
             <button
               key={category.id ?? 'all'}
               type='button'
@@ -77,8 +77,8 @@ export const ServicePicker = ({
         // Checkboxes when the visit is changed from its ticket, radios when its first service is
         // picked (one tap, and the form moves on).
         {...(isMultiple
-          ? { role: 'group' as const, 'aria-label': t('Услуги визита') }
-          : { role: 'radiogroup' as const, 'aria-label': t('Услуга') })}
+          ? { role: 'group' as const, 'aria-label': t('Services of the visit') }
+          : { role: 'radiogroup' as const, 'aria-label': t('Service') })}
       >
         {shown.map((service) => {
           const picture = photos?.[service.id] ?? coverUrl ?? null

@@ -30,9 +30,9 @@ interface AccountCardProps {
 const ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif'
 
 // The account as one row above the records: the face (a tap changes the photo), the name and one
-// line of facts - the rest of the row opens «Мой профиль» - and a gear for the settings at its
-// end. The records lead the page; the account no longer pushes them down («профиль должен быть
-// самой удобной частью»). The cabinet lives in the tab bar; masters keep «Мой день» here.
+// line of facts - the rest of the row opens «My profile» - and a gear for the settings at its
+// end. The records lead the page; the account no longer pushes them down (the owner: the profile must be
+// the handiest part). The cabinet lives in the tab bar; masters keep «My day» here.
 export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardProps) => {
   const session = useSession()
   const t = useT()
@@ -44,11 +44,11 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   const customer = session.customer
   const places = new Set(bookings.map((booking) => booking.business.slug)).size
   // Bold number, quiet word.
-  const countWord = (count: number, forms: [string, string, string]) =>
+  const countWord = (count: number, forms: [string, string]) =>
     t.count(count, forms).replace(/^\d+ /, '')
   const stats = [
-    visits > 0 && { value: visits, label: countWord(visits, ['визит', 'визита', 'визитов']) },
-    places > 0 && { value: places, label: countWord(places, ['место', 'места', 'мест']) },
+    visits > 0 && { value: visits, label: countWord(visits, ['visit', 'visits']) },
+    places > 0 && { value: places, label: countWord(places, ['place', 'places']) },
   ].filter((stat): stat is { value: number; label: string } => Boolean(stat))
 
   if (session.status === 'loading') return <div className={styles.placeholder} />
@@ -56,25 +56,25 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   if (!customer) {
     return (
       // A guest's row like the signed-in account's: the mascot where the face would be, what
-      // these records are and «Войти» at the row's end - not a centred title over the records.
-      <section className={styles.guest} aria-label={t('Профиль')} style={look}>
+      // these records are and «Sign in» at the row's end - not a centred title over the records.
+      <section className={styles.guest} aria-label={t('Profile')} style={look}>
         <span className={styles.guestFace} aria-hidden>
           <Mascot />
         </span>
         <span className={styles.guestText}>
-          <h1 className={styles.guestTitle}>{t('Ваши записи')}</h1>
+          <h1 className={styles.guestTitle}>{t('Your bookings')}</h1>
           <span className={styles.guestNote}>
-            {t('Только на этом телефоне - войдите, будут везде')}
+            {t('On this phone only: sign in to have them everywhere')}
           </span>
         </span>
         <ButtonLink size='sm' render={<NextLink href='/login?next=/bookings' />}>
-          {t('Войти')}
+          {t('Sign in')}
         </ButtonLink>
       </section>
     )
   }
 
-  const displayName = customer.name || t('Без имени')
+  const displayName = customer.name || t('No name')
   const masterOf = customer.masterOf ?? []
 
   const setAvatar = async (file: File | null) => {
@@ -89,7 +89,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
       }
     } catch (error) {
       toast.show({
-        title: t('Фото не сохранилось'),
+        title: t('Photo not saved'),
         description: getErrorMessage(error),
         type: 'error',
       })
@@ -137,9 +137,9 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   const level = myProfile.profile?.level.level
   const masterHref = masterOf.length === 1 ? `/master/${masterOf[0]?.slug}` : '/master'
   // The same head as the profile itself (`ProfileHead`): the name with the status emoji over
-  // one quiet line «Уровень 4 · 20 визитов · 13 мест» («оставь один дизайн»).
+  // one quiet line «Level 4 · 20 visits · 13 places» (the owner: keep one design).
   const meta = [
-    ...(level ? [t('Уровень {level}', { level })] : []),
+    ...(level ? [t('Level {level}', { level })] : []),
     ...stats.map((stat) => `${stat.value} ${stat.label}`),
   ].join(' · ')
   const identity = (
@@ -160,7 +160,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
   )
 
   return (
-    <section className={styles.header} aria-label={t('Профиль')}>
+    <section className={styles.header} aria-label={t('Profile')}>
       {/* Like the Apple Account row at the top of Settings: the face (a tap changes the photo),
           then the name, number and one line of facts; the rest of the row opens the profile. */}
       <div className={`${settings.list} ${styles.plain}`}>
@@ -168,16 +168,16 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
           className={styles.account}
           face={
             customer.avatarUrl ? (
-              <Menu label={t('Фото профиля')} className={styles.faceButton} trigger={face}>
+              <Menu label={t('Profile photo')} className={styles.faceButton} trigger={face}>
                 <MenuItem icon={<Camera aria-hidden />} onClick={() => fileInput.current?.click()}>
-                  {t('Выбрать фото')}
+                  {t('Choose a photo')}
                 </MenuItem>
                 <MenuItem
                   variant='danger'
                   icon={<Trash aria-hidden />}
                   onClick={() => void setAvatar(null)}
                 >
-                  {t('Удалить фото')}
+                  {t('Delete photo')}
                 </MenuItem>
               </Menu>
             ) : (
@@ -185,7 +185,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
                 type='button'
                 className={styles.faceButton}
                 onClick={() => fileInput.current?.click()}
-                aria-label={t('Добавить фото профиля')}
+                aria-label={t('Add a profile photo')}
               >
                 {face}
               </button>
@@ -197,8 +197,8 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
                 type='button'
                 className={styles.gear}
                 onClick={onOpenSettings}
-                aria-label={t('Настройки')}
-                title={t('Настройки')}
+                aria-label={t('Settings')}
+                title={t('Settings')}
               >
                 <GearSix aria-hidden />
               </button>
@@ -208,7 +208,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
           {profileHref ? (
             <NextLink href={profileHref} className={styles.accountLink}>
               {identity}
-              <span className={styles.srOnly}>{t('Мой профиль')}</span>
+              <span className={styles.srOnly}>{t('My profile')}</span>
             </NextLink>
           ) : (
             <div className={styles.accountLink}>{identity}</div>
@@ -220,7 +220,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
         type='file'
         accept={ACCEPT}
         hidden
-        aria-label={t('Файл фото профиля')}
+        aria-label={t('Profile photo file')}
         onChange={handleFile}
       />
 
@@ -232,7 +232,7 @@ export const AccountCard = ({ bookings, visits, onOpenSettings }: AccountCardPro
               <span className={settings.glyph} aria-hidden>
                 <CalendarCheck />
               </span>
-              <span className={settings.label}>{t('Мой день')}</span>
+              <span className={settings.label}>{t('My day')}</span>
               {masterOf.length === 1 && <span className={settings.value}>{masterOf[0]?.name}</span>}
               <CaretRight className={settings.chevron} aria-hidden />
             </NextLink>

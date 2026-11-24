@@ -14,9 +14,9 @@ import styles from './OfferCard.module.css'
 
 interface OfferCardProps {
   offer: Offer
-  /** «Хит» marks the one most booked service of a place, so it keeps meaning in a feed. */
+  /** «Hit» marks the one most booked service of a place, so it keeps meaning in a feed. */
   isHit?: boolean
-  /** Slot for a feature such as «в избранное» (FSD: entities don't import features). */
+  /** Slot for a feature such as «add to favourites» (FSD: entities don't import features). */
   action?: ReactNode
   /** On the place's own page: a link straight to a known free time, its label and that time. */
   href?: string
@@ -26,13 +26,13 @@ interface OfferCardProps {
   isPlaceHidden?: boolean
   /** One of the first cards on screen: its picture loads at once, not lazily. */
   isPriority?: boolean
-  /** What the capsule at the foot says a tap does: «Записаться», or «Изменить» in the cabinet. */
+  /** What the capsule at the foot says a tap does: «Book», or «Edit» in the cabinet. */
   actionLabel?: string
   /** In the cabinet: the card is a button that opens the service's sheet, not a link. */
   onSelect?: () => void
 }
 
-// A service card: the service, where (the place's name), the price and when - and «Записаться» on
+// A service card: the service, where (the place's name), the price and when - and «Book» on
 // it, so it is never taken for a place card (those show a logo, rating and the number of services).
 export const OfferCard = ({
   offer,
@@ -43,7 +43,7 @@ export const OfferCard = ({
   slotText,
   isPlaceHidden = false,
   isPriority = false,
-  actionLabel = 'Записаться',
+  actionLabel = 'Book',
   onSelect,
 }: OfferCardProps) => {
   const t = useT()
@@ -53,9 +53,9 @@ export const OfferCard = ({
   const when =
     slot && today
       ? slot.date === today.dayKey
-        ? 'Сегодня'
+        ? 'Today'
         : slot.date === addDayKey(today.dayKey, 1)
-          ? 'Завтра'
+          ? 'Tomorrow'
           : null
       : null
   const cheaperShare = cheaperThan(offer.cheaperThanPercent)
@@ -98,7 +98,7 @@ export const OfferCard = ({
           <span className={styles.discountBadge}>−{offer.discountPercent}%</span>
         ) : null}
         {isHit && (
-          <span className={styles.badge} role='img' aria-label={t('Хит')} title={t('Хит')}>
+          <span className={styles.badge} role='img' aria-label={t('Hit')} title={t('Hit')}>
             <Fire weight='fill' aria-hidden />
           </span>
         )}
@@ -137,21 +137,21 @@ export const OfferCard = ({
         <div className={styles.footer}>
           <p className={styles.price}>{formatPrice(offer.price)}</p>
           {/* Less on the picture: the length is in the booking form, and only a time today is
-              worth a line here («Завтра» and «Нет окон рядом» said little and crowded it). */}
-          {(slotText || (slot && when === 'Сегодня')) && (
+              worth a line here («Tomorrow» and «No times soon» said little and crowded it). */}
+          {(slotText || (slot && when === 'Today')) && (
             <span className={styles.slot} data-state={slotText ? 'soon' : 'today'}>
-              {slotText ?? t('Сегодня с {time}', { time: slot?.time ?? '' })}
+              {slotText ?? t('Today from {time}', { time: slot?.time ?? '' })}
             </span>
           )}
           {cheaperShare !== null && (
             <span className={styles.cheaper}>
-              {t('Дешевле {percent}% мест', { percent: cheaperShare })}
+              {t('Cheaper than {percent}% of places', { percent: cheaperShare })}
             </span>
           )}
         </div>
         {/* What a tap does, said on the card: a service books, a place card opens the place.
-            One capsule of one look on every card: a time on it broke the row («кнопки не
-            вписываются в дизайн»), so the time keeps its own line above. */}
+            One capsule of one look on every card: a time on it broke the row (the owner: the buttons
+            did not fit the design), so the time keeps its own line above. */}
         <span className={styles.book} aria-hidden>
           {t(actionLabel)}
         </span>

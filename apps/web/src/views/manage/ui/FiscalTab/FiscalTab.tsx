@@ -31,19 +31,15 @@ const WHEN_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: '2-digit',
   timeZone: BUSINESS_TIME_ZONE,
 }
-// Browsers have no Kyrgyz month names, so Kyrgyz keeps the Russian ones.
-const whenFormats = {
-  ru: new Intl.DateTimeFormat('ru-RU', WHEN_OPTIONS),
-  en: new Intl.DateTimeFormat('en-GB', WHEN_OPTIONS),
-}
+const whenFormat = new Intl.DateTimeFormat('en-GB', WHEN_OPTIONS)
 
 const DRIVER_NOTE: Record<FiscalSettings['driver'], string> = {
-  log: 'Тестовый режим: чеки нумеруются здесь и не уходят в ГНС.',
-  ekassa: 'Чеки уходят в вашу кассу eKassa, а через неё в ГНС.',
+  log: 'Test mode: receipts are numbered here and not sent to the tax service.',
+  ekassa: 'Receipts go to your eKassa till and through it to the tax service.',
   off: '',
 }
 
-// «Настройки → Касса»: fiscal receipts for products sold and visits paid in money. One switch,
+// "Settings → Till": fiscal receipts for products sold and visits paid in money. One switch,
 // the business's details as Settings rows that open one sheet, and receipts the provider refused.
 export const FiscalTab = ({ slug }: FiscalTabProps) => {
   const toast = useToast()
@@ -77,7 +73,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
       toast.show({ title, type: 'success' })
       return true
     } catch (error) {
-      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -86,17 +82,17 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
 
   const header = (
     <SectionHeader
-      title={t('Касса')}
-      description={t('Фискальные чеки на товары и оплату визитов.')}
+      title={t('Till')}
+      description={t('Fiscal receipts for products and paid visits.')}
     />
   )
   if (settings.driver === 'off') {
     return (
-      <section className={styles.section} aria-label={t('Касса')}>
+      <section className={styles.section} aria-label={t('Till')}>
         {header}
         <EmptyState
-          title={t('Чеки пока не подключены')}
-          text={t('Продажи и визиты записываются в «Кассе» как раньше, без фискальных чеков.')}
+          title={t('Receipts are not connected yet')}
+          text={t('Sales and visits are recorded in “Till” as before, without fiscal receipts.')}
         />
       </section>
     )
@@ -109,28 +105,28 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
       setEditing('enable')
       return
     }
-    void save({ ...current, isEnabled: checked }, t(checked ? 'Чеки включены' : 'Чеки выключены'))
+    void save({ ...current, isEnabled: checked }, t(checked ? 'Receipts on' : 'Receipts off'))
   }
 
   const rows = [
-    { label: t('ИНН'), value: settings.inn ?? t('Указать') },
-    { label: t('Режим'), value: regimeLabel(settings.taxRegime, t) },
-    { label: t('НДС'), value: taxes.vat },
-    { label: t('НсП'), value: taxes.salesTax },
+    { label: t('TIN'), value: settings.inn ?? t('Add') },
+    { label: t('Regime'), value: regimeLabel(settings.taxRegime, t) },
+    { label: t('VAT'), value: taxes.vat },
+    { label: t('Sales tax'), value: taxes.salesTax },
     ...(settings.driver === 'ekassa'
-      ? [{ label: 'eKassa', value: settings.login ?? t('Подключить') }]
+      ? [{ label: 'eKassa', value: settings.login ?? t('Connect') }]
       : []),
   ]
 
   return (
-    <section className={styles.section} aria-label={t('Касса')}>
+    <section className={styles.section} aria-label={t('Till')}>
       {header}
 
-      <section className={sheet.group} aria-label={t('Чеки')}>
-        <SectionCaption>{t('Чеки')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('Receipts')}>
+        <SectionCaption>{t('Receipts')}</SectionCaption>
         <div className={styles.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Выдавать чеки')}</span>
+            <span className={sheet.rowLabel}>{t('Issue receipts')}</span>
             <Switch checked={settings.isEnabled} onCheckedChange={toggle} />
           </label>
         </div>
@@ -138,20 +134,20 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
           {settings.isEnabled
             ? [
                 t(
-                  'Чек выходит сам после продажи и после «Пришёл» с оплатой деньгами; отмена продажи даёт чек возврата.',
+                  'A receipt is issued by itself after a sale and after “Arrived” paid in money; cancelling a sale issues a refund receipt.',
                 ),
                 DRIVER_NOTE[settings.driver] ? t(DRIVER_NOTE[settings.driver]) : '',
               ]
                 .filter(Boolean)
                 .join(' ')
             : t(
-                'Включите, чтобы продажи и оплаченные визиты получали фискальный чек со ссылкой и QR для клиента.',
+                'Turn on so sales and paid visits get a fiscal receipt with a link and QR code for the client.',
               )}
         </RowNote>
       </section>
 
-      <section className={sheet.group} aria-label={t('Реквизиты')}>
-        <SectionCaption>{t('Реквизиты')}</SectionCaption>
+      <section className={sheet.group} aria-label={t('Details')}>
+        <SectionCaption>{t('Details')}</SectionCaption>
         <ul className={styles.list}>
           {rows.map((row) => (
             <li key={row.label}>
@@ -172,8 +168,8 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
       </section>
 
       {failed.length > 0 && (
-        <section className={sheet.group} aria-label={t('Не прошли')}>
-          <SectionCaption>{t('Не прошли · {count}', { count: failed.length })}</SectionCaption>
+        <section className={sheet.group} aria-label={t('Failed')}>
+          <SectionCaption>{t('Failed · {count}', { count: failed.length })}</SectionCaption>
           <ul className={styles.list}>
             {failed.map((receipt) => (
               <li key={receipt.id}>
@@ -184,17 +180,9 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
                 >
                   <span className={styles.rowBody}>
                     <span className={styles.rowTitle}>
-                      {t(
-                        receipt.kind === 'refund'
-                          ? 'Возврат'
-                          : receipt.saleId
-                            ? 'Продажа'
-                            : 'Визит',
-                      )}
+                      {t(receipt.kind === 'refund' ? 'Refund' : receipt.saleId ? 'Sale' : 'Visit')}
                       {' · '}
-                      {whenFormats[t.language === 'en' ? 'en' : 'ru'].format(
-                        new Date(receipt.createdAt),
-                      )}
+                      {whenFormat.format(new Date(receipt.createdAt))}
                     </span>
                     <span className={styles.rowMeta}>{receipt.error}</span>
                   </span>
@@ -205,7 +193,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
             ))}
           </ul>
           <RowNote>
-            {t('Касса не приняла их 20 раз подряд. Откройте чек и отправьте снова.')}
+            {t('The till refused them 20 times in a row. Open the receipt and send it again.')}
           </RowNote>
         </section>
       )}
@@ -215,7 +203,7 @@ export const FiscalTab = ({ slug }: FiscalTabProps) => {
           settings={settings}
           isEnabling={editing === 'enable'}
           onClose={() => setEditing(null)}
-          onSave={(input) => save(input, t(editing === 'enable' ? 'Чеки включены' : 'Сохранено'))}
+          onSave={(input) => save(input, t(editing === 'enable' ? 'Receipts on' : 'Saved'))}
         />
       )}
 

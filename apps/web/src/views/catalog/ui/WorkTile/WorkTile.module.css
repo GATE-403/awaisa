@@ -47,8 +47,8 @@
   object-fit: cover;
 }
 
-/* «✦ ОБРАЗ» where service cards keep the fire mark: a caption on the picture, not a capsule (a
-   white one read as a button beside «Хочу так»). A client's own photo says so after a dot. */
+/* «✦ LOOK» where service cards keep the fire mark: a caption on the picture, not a capsule (a
+   white one read as a button beside «I want this look»). A client's own photo says so after a dot. */
 .marks {
   position: absolute;
   top: var(--space-3);
@@ -241,7 +241,7 @@
   font-size: var(--text-title3);
 }
 
-/* The card opens «Образы» through the service's name, stretched over the whole card. */
+/* The card opens «Looks» through the service's name, stretched over the whole card. */
 .open {
   color: #fff;
   outline: none;
@@ -254,7 +254,7 @@
   z-index: 1;
 }
 
-/* «Хочу так»: the offer cards' white capsule, here booking this look with this master. */
+/* «I want this look»: the offer cards' white capsule, here booking this look with this master. */
 .want {
   position: relative;
   z-index: 2;

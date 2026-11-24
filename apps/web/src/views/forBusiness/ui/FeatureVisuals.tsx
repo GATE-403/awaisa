@@ -6,7 +6,7 @@ import { DEMO_SLOTS } from '@/views/forBusiness/forBusinessContent'
 const SlotsVisual = () => (
   <div className={styles.visual} aria-hidden='true'>
     <p className={styles.visualLabel}>
-      <T>Чт, 20 ноября · свободно</T>
+      <T>Thu, 20 November · free</T>
     </p>
     <div className={styles.slots}>
       {DEMO_SLOTS.map((slot, index) => (
@@ -21,13 +21,13 @@ const SlotsVisual = () => (
 const ReminderVisual = () => (
   <div className={styles.visual} aria-hidden='true'>
     <p className={styles.visualLabel}>
-      <T>Сообщения · сегодня 12:30</T>
+      <T>Messages · today 12:30</T>
     </p>
     <p className={styles.bubble}>
-      <T>Barber Pro: напоминаем - сегодня в 14:30 мужская стрижка, мастер Тимур. Ждём вас!</T>
+      <T>Barber Pro: a reminder, men’s haircut today at 14:30 with Timur. See you soon!</T>
     </p>
     <p className={styles.bubbleMeta}>
-      <T>Доставлено</T>
+      <T>Delivered</T>
     </p>
   </div>
 )
@@ -35,11 +35,11 @@ const ReminderVisual = () => (
 const DragVisual = () => (
   <div className={styles.visual} aria-hidden='true'>
     <p className={styles.visualLabel}>
-      <T>Перетащите - клиент получит SMS</T>
+      <T>Drag it: the client gets an SMS</T>
     </p>
     <div className={styles.dragDemo}>
-      <span className={styles.dragFrom}>12:30 · Данияр</span>
-      <span className={styles.dragTo}>14:30 · Данияр</span>
+      <span className={styles.dragFrom}>12:30 · Daniyar</span>
+      <span className={styles.dragTo}>14:30 · Daniyar</span>
     </div>
   </div>
 )

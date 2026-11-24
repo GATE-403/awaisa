@@ -42,10 +42,10 @@ const RESERVED_HANDLES = new Set([
   'manage',
 ])
 
-// Shown publicly as «Айгерим С.», like reviews: a first name and an initial.
+// Shown publicly as «Aigerim S.», like reviews: a first name and an initial.
 const publicName = (name: string) => {
   const [first = '', last = ''] = name.trim().split(/\s+/)
-  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Клиент'
+  return last ? `${first} ${last.charAt(0).toUpperCase()}.` : first || 'Client'
 }
 
 /**
@@ -89,16 +89,16 @@ export class ProfilesService {
     const cleaned = input.links ? normalizeLinks(input.links) : null
     if (cleaned && cleaned.invalid.length > 0) {
       throw new BadRequestException(
-        `Не получилось прочитать: ${cleaned.invalid.map((kind) => LINK_LABELS[kind]).join(', ')}`,
+        `Could not read: ${cleaned.invalid.map((kind) => LINK_LABELS[kind]).join(', ')}`,
       )
     }
     if (input.handle) {
-      if (RESERVED_HANDLES.has(input.handle)) throw new ConflictException('Этот адрес занят')
+      if (RESERVED_HANDLES.has(input.handle)) throw new ConflictException('This address is taken')
       const [taken] = (await this.dataSource.query(
         'SELECT 1 FROM "customers" WHERE lower("handle") = $1 AND "id" <> $2',
         [input.handle, customer.id],
       )) as unknown[]
-      if (taken) throw new ConflictException('Этот адрес занят')
+      if (taken) throw new ConflictException('This address is taken')
     }
     await this.dataSource.query(
       `UPDATE "customers" SET
@@ -158,14 +158,14 @@ export class ProfilesService {
     const person = await this.findPerson(idOrHandle)
     const id = this.idOf(person.phone)
     const isOwn = viewer?.phone === person.phone
-    if (!person.isPublic && !isOwn) throw new NotFoundException('Профиль скрыт')
+    if (!person.isPublic && !isOwn) throw new NotFoundException('This profile is hidden')
     // Hidden by a moderator: gone for everyone else; blocked: gone for the person too.
     const [moderated] = await this.query(
       'SELECT "hidden_at" AS "hiddenAt", "blocked_at" AS "blockedAt" FROM "moderated_people" WHERE "phone" = $1',
       [person.phone],
     )
     if (moderated?.blockedAt || (moderated?.hiddenAt && !isOwn)) {
-      throw new NotFoundException('Профиль скрыт')
+      throw new NotFoundException('This profile is hidden')
     }
 
     // Only the owner sees how many recent visits still wait for their stars.
@@ -390,12 +390,12 @@ export class ProfilesService {
    */
   async avatarPng(idOrHandle: string, width: number) {
     const profile = await this.profile(idOrHandle, null)
-    if (!profile.avatarUrl) throw new NotFoundException('Нет фото')
+    if (!profile.avatarUrl) throw new NotFoundException('No photo')
     const source = await this.storage.read(profile.avatarUrl)
     return sharp(source).resize({ width, withoutEnlargement: true }).png().toBuffer()
   }
 
-  /** Ended visits of the last two weeks without a review - the «Как прошло?» card asks the same. */
+  /** Ended visits of the last two weeks without a review - the «How did it go?» card asks the same. */
   private async awaitingReview(phone: string) {
     const [row] = await this.query(
       `SELECT COUNT(*)::int AS "count" FROM "bookings" b
@@ -439,7 +439,7 @@ export class ProfilesService {
         createdAt: new Date(customer.created_at as string),
       }
     }
-    if (!isPublicId) throw new NotFoundException('Профиль не найден')
+    if (!isPublicId) throw new NotFoundException('Profile not found')
     const [guest] = await this.query(
       `SELECT b."customer_phone" AS "phone", b."customer_name" AS "name"
        FROM "reviews" r JOIN "bookings" b ON b."id" = r."booking_id"
@@ -447,7 +447,7 @@ export class ProfilesService {
        ORDER BY r."created_at" DESC LIMIT 1`,
       [id, salt],
     )
-    if (!guest) throw new NotFoundException('Профиль не найден')
+    if (!guest) throw new NotFoundException('Profile not found')
     return {
       phone: String(guest.phone),
       name: String(guest.name ?? ''),

@@ -2,14 +2,14 @@ import type { BusinessKind, FeedItem } from '@/shared/api/types'
 
 type WorkLinkItem = Pick<FeedItem, 'id' | 'business' | 'service' | 'specialist'>
 
-/** «Образы» opened on this work, within the catalog's kind. */
+/** «Looks» opened on this work, within the catalog's kind. */
 const workFeedHref = (item: Pick<FeedItem, 'id'>, kind: BusinessKind | undefined) => {
   const params = new URLSearchParams({ start: item.id })
   if (kind) params.set('kind', kind)
   return `/feed?${params}`
 }
 
-/** «Хочу так»: this service with this master, the photo going along as the look wanted. */
+/** «I want this look»: this service with this master, the photo going along as the look wanted. */
 const workLookHref = (item: WorkLinkItem) => {
   const params = new URLSearchParams()
   if (item.service) params.set('service', item.service.id)

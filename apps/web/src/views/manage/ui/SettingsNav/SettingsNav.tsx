@@ -47,7 +47,7 @@ type SearchEntry = {
   tab: ManageTab
   label: string
   tone: SettingsTone
-  /** Where it lives when not in the settings list («на Странице»). */
+  /** Where it lives when not in the settings list ("on the Page"). */
   place?: string
   words: string
 }
@@ -68,38 +68,38 @@ const ICONS: Partial<Record<ManageTab, Icon>> = {
 
 // Words people look for a setting by, beside its name.
 const KEYWORDS: Partial<Record<ManageTab, string>> = {
-  branches: 'адрес филиал карта метка ссылка запись телефон',
-  notifications: 'telegram телеграм бот уведомления новые записи отзывы',
-  team: 'сотрудники администратор доступ команда',
-  promotions: 'скидка промокод акция счастливые часы первый визит',
-  loyalty: 'бонусы абонемент сертификат кэшбэк',
-  stock: 'склад материалы расход остаток приход',
-  fiscal: 'чеки ккм фискальный инн ндс нсп налог ekassa гнс',
-  billing: 'тариф оплата подписка смс пакет пробный период',
+  branches: 'address branch location map pin link booking phone',
+  notifications: 'telegram bot notifications alerts new bookings reviews',
+  team: 'staff administrator access team employees',
+  promotions: 'discount promo code offer happy hours first visit',
+  loyalty: 'bonuses pass subscription certificate gift cashback',
+  stock: 'stock inventory materials supplies usage balance delivery',
+  fiscal: 'receipts till fiscal tin vat sales tax ekassa',
+  billing: 'plan payment subscription sms pack trial',
 }
 
-// What lives on «Страница» now, still found by the search.
+// What lives on "Page" now, still found by the search.
 const PAGE_ENTRIES: SearchEntry[] = [
   {
     tab: 'services',
-    label: 'Услуги',
+    label: 'Services',
     tone: 'blue',
-    place: 'на Странице',
-    words: 'услуги цены категории длительность предоплата',
+    place: 'on the Page',
+    words: 'services prices categories duration length deposit prepayment',
   },
   {
     tab: 'masters',
-    label: 'Мастера',
+    label: 'Specialists',
     tone: 'orange',
-    place: 'на Странице',
-    words: 'мастера график отпуск процент зарплата',
+    place: 'on the Page',
+    words: 'specialists masters staff schedule leave holiday percent pay salary',
   },
   {
     tab: 'hours',
-    label: 'Часы работы',
+    label: 'Opening hours',
     tone: 'orange',
-    place: 'на Странице',
-    words: 'часы график выходной шаг записи слоты',
+    place: 'on the Page',
+    words: 'hours schedule day off slot step',
   },
 ]
 
@@ -112,12 +112,12 @@ const SETTINGS_ENTRIES: SearchEntry[] = SETTINGS_GROUPS.flatMap((group) =>
   })),
 )
 
-const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е')
+const normalize = (text: string) => text.toLowerCase()
 
 // macOS System Settings on wide screens (a search field over a quiet sidebar, the open row on a
 // fill), on phones rows right on the page with hairlines and the search floating at the foot;
 // each row leads with a thin glyph in its colour, no tile. Each row says
-// on its right what is inside («2», «1 действует», «Бонусы 5%», «2 заканчиваются» in red), so the
+// on its right what is inside ("2", "1 running", "Bonuses 5%", "2 running low" in red), so the
 // state of the business reads without opening anything.
 export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsNavProps) => {
   const t = useT()
@@ -157,57 +157,57 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
     ...(access && {
       billing: {
         text:
-          access.status === 'trial' ? t('{plan} · пробный', { plan: access.title }) : access.title,
+          access.status === 'trial' ? t('{plan} · trial', { plan: access.title }) : access.title,
         isAlert: access.status === 'expired',
       },
     }),
     ...(summary && {
-      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : t('Выкл.') },
+      notifications: { text: summary.telegramChats > 0 ? 'Telegram' : t('Off') },
       ...(summary.team > 0 && { team: { text: String(summary.team) } }),
       promotions: {
         text:
           summary.activePromotions > 0
-            ? t(summary.activePromotions === 1 ? '{count} действует' : '{count} действуют', {
+            ? t(summary.activePromotions === 1 ? '{count} running' : '{count} running', {
                 count: summary.activePromotions,
               })
-            : t('Нет'),
+            : t('No'),
       },
       loyalty: {
         text:
           summary.bonusPercent !== null
-            ? t('Бонусы {percent}%', { percent: summary.bonusPercent })
+            ? t('Bonuses {percent}%', { percent: summary.bonusPercent })
             : summary.plans > 0
-              ? t.count(summary.plans, ['абонемент', 'абонемента', 'абонементов'])
-              : t('Выкл.'),
+              ? t.count(summary.plans, ['pass', 'passes'])
+              : t('Off'),
       },
       stock:
         summary.lowStock > 0
           ? {
-              text: t(summary.lowStock === 1 ? '{count} заканчивается' : '{count} заканчиваются', {
+              text: t(summary.lowStock === 1 ? '{count} running low' : '{count} running low', {
                 count: summary.lowStock,
               }),
               isAlert: true,
             }
-          : { text: summary.stockItems > 0 ? String(summary.stockItems) : t('Пусто') },
+          : { text: summary.stockItems > 0 ? String(summary.stockItems) : t('Empty') },
       fiscal:
         summary.failedReceipts > 0
           ? {
-              text: t(summary.failedReceipts === 1 ? '{count} не прошёл' : '{count} не прошли', {
+              text: t(summary.failedReceipts === 1 ? '{count} failed' : '{count} failed', {
                 count: summary.failedReceipts,
               }),
               isAlert: true,
             }
-          : { text: summary.isFiscalOn ? t('Чеки') : t('Выкл.') },
+          : { text: summary.isFiscalOn ? t('Receipts') : t('Off') },
     }),
   }
 
-  // By the start of words, each typed word somewhere («або» finds «абонемент», not «работы»);
-  // the name is searched as shown too, so the search works in every language.
+  // By the start of words, each typed word somewhere ("pro" finds "promo code", not "improve");
+  // the name is searched as shown too.
   const typed = needle.split(/\s+/).filter(Boolean)
   const results = needle
     ? [...SETTINGS_ENTRIES, ...PAGE_ENTRIES].filter((entry) => {
         const words = normalize(`${t(entry.label)} ${entry.label} ${entry.words}`).split(
-          /[\s«»().,-]+/,
+          /[\s"().,-]+/,
         )
         return typed.every((part) => words.some((word) => word.startsWith(part)))
       })
@@ -243,27 +243,23 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
   }
 
   return (
-    <nav aria-label={t('Настройки')} className={styles.nav}>
+    <nav aria-label={t('Settings')} className={styles.nav}>
       {/* With a mouse over the list; on phones it floats at the window's foot, under the thumb. */}
       <FloatingToolbar className={styles.search}>
         <SearchField
           value={query}
           onChange={search}
-          placeholder={t('Поиск')}
-          label={t('Поиск по настройкам')}
+          placeholder={t('Search')}
+          label={t('Search settings')}
         />
       </FloatingToolbar>
       {results ? (
         results.length > 0 ? (
-          <ul className={styles.list} aria-label={t('Найдено')}>
+          <ul className={styles.list} aria-label={t('Found')}>
             {results.map(row)}
           </ul>
         ) : (
-          <EmptyState
-            variant='inline'
-            title={t('Ничего не нашли')}
-            text={t('Попробуйте другое слово.')}
-          />
+          <EmptyState variant='inline' title={t('Nothing found')} text={t('Try another word.')} />
         )
       ) : (
         SETTINGS_GROUPS.map((group) => (
@@ -277,7 +273,7 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
               )}
               {/* Hiding and deleting the business: a row of its own that opens its sheet, so the
                   red action is never in plain view. */}
-              {group.label === 'Бизнес' && (
+              {group.label === 'Business' && (
                 <li>
                   <button
                     type='button'
@@ -288,10 +284,10 @@ export const SettingsNav = ({ slug, current, business, catalog, run }: SettingsN
                       <Storefront />
                     </span>
                     <span className={styles.label}>
-                      <span className={styles.labelText}>{t('Скрыть или удалить')}</span>
+                      <span className={styles.labelText}>{t('Hide or delete')}</span>
                     </span>
                     {/* Only the state that asks for attention: an open page says nothing. */}
-                    {!isPublished && <span className={styles.value}>{t('Скрыта')}</span>}
+                    {!isPublished && <span className={styles.value}>{t('Hidden')}</span>}
                     <CaretRight className={styles.chevron} aria-hidden />
                   </button>
                 </li>

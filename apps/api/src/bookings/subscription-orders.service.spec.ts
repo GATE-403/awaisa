@@ -12,7 +12,7 @@ const order = (status: string, bookingId: string | null = null) => ({
   business_id: 'biz-1',
   plan_id: 'plan-1',
   phone: '+996555111222',
-  title: '5 стрижек',
+  title: '5 haircuts',
   service_id: 'cut',
   visits: 5,
   valid_days: 90,
@@ -68,7 +68,7 @@ describe('SubscriptionOrdersService.onPaid', () => {
       'biz-1',
       'plan-1',
       '+996555111222',
-      '5 стрижек',
+      '5 haircuts',
       'cut',
       5,
       5,
@@ -108,7 +108,7 @@ describe('SubscriptionOrdersService.onPaid', () => {
       {
         id: 'plan-1',
         business_id: 'biz-1',
-        title: '5 стрижек',
+        title: '5 haircuts',
         service_id: 'cut',
         visits: 5,
         valid_days: 90,
@@ -120,19 +120,19 @@ describe('SubscriptionOrdersService.onPaid', () => {
 
     expect(placed.checkoutUrl).toBe('/pay/pay-1?s=sig')
     expect(payments.createOrderCheckout).toHaveBeenCalledWith('subscription', 'order-1', 6000, {
-      description: 'Абонемент «5 стрижек», Studio',
+      description: 'Pass “5 haircuts”, Studio',
       phone: '+996555111222',
     })
     expect(query.mock.calls.some(([sql]) => sql.includes('"client_subscriptions"'))).toBe(false)
   })
 
-  it('registers itself as the «subscription» kind of payments', () => {
+  it('registers itself as the “subscription” kind of payments', () => {
     const { service, payments } = setup(() => [])
     service.onModuleInit()
     expect(payments.registerOrder).toHaveBeenCalledWith('subscription', expect.any(Object))
   })
 
-  it('still issues a paid order after the plan lost «loyalty»: the money came', async () => {
+  it('still issues a paid order after the plan lost “loyalty”: the money came', async () => {
     const { service, billing } = setup(issuedRows('pending'), { hasLoyalty: false })
 
     expect(await service.onPaid('order-1')).toEqual({ subscriptionId: 'sub-1', bookingId: null })
@@ -140,15 +140,15 @@ describe('SubscriptionOrdersService.onPaid', () => {
   })
 })
 
-describe('SubscriptionOrdersService: online sale needs the «loyalty» plan feature', () => {
+describe('SubscriptionOrdersService: online sale needs the “loyalty” plan feature', () => {
   const plans = (sql: string) => {
     if (sql.includes('FROM "businesses" WHERE "slug"')) return [{ id: 'biz-1' }]
     if (sql.includes('FROM "subscription_plans"'))
-      return [{ id: 'plan-1', business_id: 'biz-1', title: '5 стрижек', price: 6000 }]
+      return [{ id: 'plan-1', business_id: 'biz-1', title: '5 haircuts', price: 6000 }]
     return []
   }
 
-  it('shows and sells online plans while the plan has «loyalty»', async () => {
+  it('shows and sells online plans while the plan has “loyalty”', async () => {
     const { service, billing } = setup(plans)
 
     expect(await service.listOnline('studio')).toHaveLength(1)
@@ -161,7 +161,7 @@ describe('SubscriptionOrdersService: online sale needs the «loyalty» plan feat
 
     expect(await service.listOnline('studio')).toEqual([])
     await expect(service.findOnlinePlan('biz-1', 'plan-1')).rejects.toThrow(
-      'Абонемент не продаётся онлайн',
+      'This pass is not sold online',
     )
   })
 })

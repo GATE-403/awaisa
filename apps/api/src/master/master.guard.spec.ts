@@ -38,7 +38,7 @@ describe('MasterGuard', () => {
     const { guard, context } = setup(PHONE, null)
 
     await expect(guard.canActivate(context)).rejects.toThrow(
-      new ForbiddenException('Этот номер не привязан к мастеру'),
+      new ForbiddenException('This number is not linked to a specialist'),
     )
   })
 

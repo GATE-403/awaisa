@@ -15,7 +15,7 @@ describe('toManageTab', () => {
     expect(toManageTab('settings')).toBe('settings')
   })
 
-  it('lands old links on «Страница»: profile, services, masters and hours moved there', () => {
+  it('lands old links on “Page”: profile, services, masters and hours moved there', () => {
     for (const old of ['profile', 'services', 'masters', 'hours']) {
       expect(toManageTab(old), old).toBe('page')
     }
@@ -60,7 +60,7 @@ describe('tabFeature', () => {
     expect(tabFeature('billing')).toBeNull()
   })
 
-  it('opens «Тариф» from the link in the reminders', () => {
+  it('opens “Plan” from the link in the reminders', () => {
     expect(toManageTab('billing')).toBe('billing')
   })
 })

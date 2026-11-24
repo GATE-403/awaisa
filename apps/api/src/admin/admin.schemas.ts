@@ -1,11 +1,9 @@
 import { z } from 'zod'
 import { createBookingSchema } from '../bookings/bookings.schemas.js'
 
-const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Дата должна быть в формате YYYY-MM-DD')
+const DATE_SCHEMA = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD')
 
-const TIME_SCHEMA = z
-  .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/, 'Время должно быть в формате HH:MM')
+const TIME_SCHEMA = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$|^24:00$/, 'Time must be HH:MM')
 
 const scheduleQuerySchema = z.object({ date: DATE_SCHEMA })
 
@@ -23,18 +21,18 @@ const createTimeOffSchema = z
     reason: z.string().trim().max(160).default(''),
   })
   .refine((value) => value.from < value.to, {
-    message: 'Конец должен быть позже начала',
+    message: 'The end must be after the start',
     path: ['to'],
   })
 
 // A booking made by staff for a client: the phone is the client's, so it is required.
 const staffBookingSchema = createBookingSchema.extend({
-  phone: z.string().trim().min(1, 'Укажите телефон клиента').max(32),
+  phone: z.string().trim().min(1, "Enter the client's phone number").max(32),
 })
 
 const moveBookingSchema = z.object({
   date: DATE_SCHEMA,
-  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Время должно быть в формате HH:MM'),
+  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM'),
   specialistId: z.string().trim().min(1).max(64),
 })
 
@@ -67,7 +65,7 @@ const analyticsQuerySchema = z.object({
   days: z.coerce
     .number()
     .int()
-    .refine((value) => [7, 30, 90, 365].includes(value), 'Период: 7, 30, 90 или 365 дней')
+    .refine((value) => [7, 30, 90, 365].includes(value), 'Period: 7, 30, 90 or 365 days')
     .default(30),
 })
 

@@ -48,8 +48,8 @@ const MAX_AUTO_DAY_SKIPS = 6
 
 // The sheet is a stack of done cards over one open card: after each choice it goes back to its
 // top, where the new card has just landed and the next question waits right under it. The time
-// step is the tallest: on a short phone its days ended under the booking bar («приходится чуть
-// скролить»), so the sheet stops just low enough to show them, never past the step's own caption.
+// step is the tallest: on a short phone its days ended under the booking bar ("you have to scroll
+// a bit"), so the sheet stops just low enough to show them, never past the step's own caption.
 const scrollToStep = (stepId: BookingStepId, _force = false) => {
   requestAnimationFrame(() => {
     const screen = document.querySelector<HTMLElement>('[data-booking-screen]')
@@ -116,7 +116,7 @@ const getStepScrollTop = (screen: HTMLElement, stepId: BookingStepId) => {
 }
 
 // The main action pressed while a step is still open: the sheet's top is that step already, so
-// scrolling there alone did nothing visible («ничего не происходит»). Its choices give a short
+// scrolling there alone did nothing visible ("nothing happens"). Its choices give a short
 // shake instead (`data-nudge` on the step, BookingStep.module.css), and the phone a tap of haptics.
 const nudgeStep = (stepId: BookingStepId) => {
   requestAnimationFrame(() => {
@@ -138,7 +138,7 @@ const nudgeStep = (stepId: BookingStepId) => {
   haptic('warning')
 }
 
-// Once a time is picked, the cursor waits in «Имя»: a list-like row is not obviously a field to
+// Once a time is picked, the cursor waits in Name: a list-like row is not obviously a field to
 // someone new to forms. After the scroll settles; never steals focus from a field in use.
 const focusNameSoon = () => {
   window.setTimeout(() => {
@@ -158,9 +158,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const session = useSession()
   const presetSpecialist = findSpecialist(catalog, searchParams.get('specialist'))
   const presetService = findService(catalog, searchParams.get('service'))
-  // «Хочу так» on a work: the photo goes with the booking as the look the client wants.
+  // "I want this" on a work: the photo goes with the booking as the look the client wants.
   const look = useLookPhoto(business.slug, searchParams.get('look'))
-  // A time shown on a card («Сегодня, 14:30») opens the form on that time, not on a blank day.
+  // A time shown on a card ("Today, 14:30") opens the form on that time, not on a blank day.
   const presetDate = /^\d{4}-\d{2}-\d{2}$/.test(searchParams.get('date') ?? '')
     ? searchParams.get('date')
     : null
@@ -168,7 +168,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     presetDate && /^\d{2}:\d{2}$/.test(searchParams.get('time') ?? '')
       ? searchParams.get('time')
       : null
-  // «Ещё запись» after a booking: the same day, nothing before the first visit ends (`?after=`).
+  // Another booking after a booking: the same day, nothing before the first visit ends (`?after=`).
   const presetAfter =
     presetDate && /^\d{2}:\d{2}$/.test(searchParams.get('after') ?? '')
       ? searchParams.get('after')
@@ -236,7 +236,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       ]
     : []
   const chosenServiceIds = chosenServices.map((item) => item.id)
-  // The whole visit as one service: «Маникюр + Педикюр», the price and length added up.
+  // The whole visit as one service: "Manicure + Pedicure", the price and length added up.
   const service = combineServices(chosenServices)
   // A service is offered at a branch when someone there does it (a master of that branch or one
   // who works at every branch).
@@ -259,7 +259,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     specialistId: chosenSpecialistId,
     branchId,
   })
-  // What can join the visit in «Изменить» on the service ticket: any master who does it all
+  // What can join the visit in Change on the service ticket: any master who does it all
   // counts, the chosen one gives way if needed (the form says so).
   const combinableServices = getAddableServices({
     services,
@@ -269,7 +269,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     branchId,
   })
   // One master for the service: nothing to choose, so the step is filled in.
-  // «Any master» from a link means that very master when the service has only one.
+  // “Any master” from a link means that very master when the service has only one.
   const specialistId =
     specialists.length === 1 &&
     (chosenSpecialistId === null || chosenSpecialistId === ANY_SPECIALIST_ID)
@@ -290,7 +290,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     branchId,
     chosenServiceIds.slice(1),
   )
-  // Times before the visit just booked ends are not offered for «Ещё запись»: shown as taken, so
+  // Times before the visit just booked ends are not offered for another booking: shown as taken, so
   // the ruler keeps its look.
   const offeredAvailability =
     notBefore && dayKey === notBefore.date
@@ -324,9 +324,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   const phoneDigits = phone.replace(/\D/g, '')
   const isPhoneValid = accountPhone !== null || phoneDigits.length >= NATIONAL_PHONE_DIGITS
   const errors = {
-    name: hasTriedSubmit && !name.trim() ? 'Укажите имя' : undefined,
+    name: hasTriedSubmit && !name.trim() ? 'Enter a name' : undefined,
     phone:
-      hasTriedSubmit && !isPhoneValid ? 'Укажите номер, чтобы мы подтвердили запись' : undefined,
+      hasTriedSubmit && !isPhoneValid ? 'Enter a number so we can confirm the booking' : undefined,
   }
   const firstIncompleteStep: BookingStepId | null = !service
     ? 'service'
@@ -395,8 +395,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setTime(null)
       toast.show({
         title: presetService
-          ? `${presetTime} уже заняли - выберите другое время`
-          : `В ${presetTime} эта услуга не помещается. Выберите другое время`,
+          ? `${presetTime} has just been taken, choose another time`
+          : `This service does not fit at ${presetTime}. Choose another time`,
         type: 'info',
       })
     }
@@ -417,7 +417,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setIsBranchTimeChecked(true)
     if (!time || availability.error) return
     if (!availability.slots.some((slot) => slot.isAvailable && slot.time === time)) {
-      toast.show({ title: `В этом филиале ${time} занято - выберите другое время`, type: 'info' })
+      toast.show({ title: `${time} is taken at this branch, choose another time`, type: 'info' })
       setTime(null)
     }
   }, [isBranchTimeChecked, availability, time, toast])
@@ -500,9 +500,9 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     setEditingStep(step)
   }
 
-  // «Начать заново»: the choices go (service, master, time, comment, code) and so does the draft
+  // Start over: the choices go (service, master, time, comment, code) and so does the draft
   // and the link's preset; the name and phone stay - they are the same person.
-  // «Ещё запись в <place>» on the success screen: another visit at the same place, often to another
+  // "Another booking at <place>" on the success screen: another visit at the same place, often to another
   // master, without starting from the catalog. The name and number stay, the day is the visit's,
   // and times before it ends are not offered. The address says so too, so a reload keeps it.
   const bookAnother = () => {
@@ -575,7 +575,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
   // The visit gains a service done right after the others; a master who does not do it lets go.
   const addService = (id: string, { isStepKept = false } = {}) => {
     const nextIds = [...chosenServiceIds, id]
-    // No master yet, «любой», or one who does the new service too: the master stays.
+    // No master yet, any, or one who does the new service too: the master stays.
     const keepsSpecialist =
       !chosenSpecialistId ||
       chosenSpecialistId === ANY_SPECIALIST_ID ||
@@ -585,7 +585,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
     const added = catalog.services.find((item) => item.id === id)
     setExtraServiceIds(nextIds.slice(1))
     setSubmitError(null)
-    // Ticked in the open picker, the picker stays: more can be ticked before «Готово».
+    // Ticked in the open picker, the picker stays: more can be ticked before Done.
     if (!isStepKept) setEditingStep(null)
     if (keepsSpecialist) {
       // Same master: the time stays while the longer visit still fits it (checked below).
@@ -742,8 +742,8 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setCreatedBooking(booking)
       haptic('success')
       // No toast: the success screen is the confirmation, and a toast on top of it covered its
-      // «Вы записаны» exactly when a first-time client looks for it.
-      // The sheet scrolls inside itself: bring its top («Вы записаны») into view. Never the window:
+      // "You're booked" exactly when a first-time client looks for it.
+      // The sheet scrolls inside itself: bring its top ("You're booked") into view. Never the window:
       // the sheet lies over the page it was opened from, and scrolling the window threw the
       // catalog under it back to its top.
       requestAnimationFrame(() =>
@@ -753,7 +753,7 @@ export const useBookingForm = (business: Business, catalog: Catalog) => {
       setSubmitError(getErrorMessage(error))
       haptic('error')
       toast.show({
-        title: 'Не получилось записаться',
+        title: 'Could not book',
         description: getErrorMessage(error),
         type: 'error',
       })

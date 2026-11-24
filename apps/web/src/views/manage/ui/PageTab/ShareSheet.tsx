@@ -25,7 +25,7 @@ type QrMatrix = { size: number; dark: boolean[] }
 /** The printed QR's side in px: sharp on a counter card or a sticker. */
 const QR_PNG_SIZE = 1024
 
-// «Поделиться»: the page's QR for the counter (downloaded as a PNG to print), its link for an
+// "Share": the page's QR for the counter (downloaded as a PNG to print), its link for an
 // Instagram bio, and with several branches a booking link per branch (the client lands with that
 // branch chosen). On a phone the system share sheet is one tap away too.
 export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheetProps) => {
@@ -57,7 +57,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
   const copy = async (url: string, title: string) => {
     const isCopied = await copyText(url)
     if (isCopied) toast.show({ title, type: 'success' })
-    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
+    else toast.show({ title: t('Could not copy'), type: 'error' })
   }
 
   const download = async () => {
@@ -71,7 +71,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
 
   const share = async () => {
     const result = await shareLink({ title: businessName, url: pageUrl })
-    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
+    if (result === 'failed') toast.show({ title: t('Could not share'), type: 'error' })
   }
 
   // One path of unit squares: crisp at any size, no image to load.
@@ -84,7 +84,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
     : ''
 
   return (
-    <Sheet title={t('Поделиться')} onClose={onClose} cancelLabel={t('Закрыть')}>
+    <Sheet title={t('Share')} onClose={onClose} cancelLabel={t('Close')}>
       <div className={sheet.form}>
         <figure className={styles.qr}>
           {qr ? (
@@ -92,7 +92,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
               viewBox={`-2 -2 ${qr.size + 4} ${qr.size + 4}`}
               className={styles.qrCode}
               role='img'
-              aria-label={t('QR-код страницы {name}', { name: businessName })}
+              aria-label={t('QR code of the {name} page', { name: businessName })}
               shapeRendering='crispEdges'
             >
               <rect x={-2} y={-2} width={qr.size + 4} height={qr.size + 4} fill='#fff' />
@@ -103,7 +103,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
           )}
           <figcaption className={styles.qrCaption}>
             <span className={styles.qrUrl}>{pageUrl.replace(/^https?:\/\//, '')}</span>
-            {t('Наведите камеру, чтобы открыть страницу. Распечатайте для стойки или витрины.')}
+            {t('Point the camera to open the page. Print it for the counter or the window.')}
           </figcaption>
         </figure>
         {/* One line: the link copied as the main action, the QR and the system share as glyphs. */}
@@ -112,30 +112,26 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
             type='button'
             size='sm'
             className={styles.shareCopy}
-            onClick={() => void copy(pageUrl, t('Ссылка на страницу скопирована'))}
+            onClick={() => void copy(pageUrl, t('Page link copied'))}
           >
             <Copy aria-hidden />
-            {t('Скопировать ссылку')}
+            {t('Copy link')}
           </Button>
-          <GlyphGroup label={t('Ещё')}>
+          <GlyphGroup label={t('More')}>
             <GlyphButton
               icon={<DownloadSimple />}
-              label={t('Скачать QR')}
+              label={t('Download QR')}
               onClick={() => void download()}
             />
             {canShare && (
-              <GlyphButton
-                icon={<ShareNetwork />}
-                label={t('Отправить')}
-                onClick={() => void share()}
-              />
+              <GlyphButton icon={<ShareNetwork />} label={t('Send')} onClick={() => void share()} />
             )}
           </GlyphGroup>
         </div>
 
         {activeBranches.length > 1 && (
-          <section className={sheet.group} aria-label={t('Ссылки на запись')}>
-            <SectionCaption>{t('Запись по филиалам')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('Booking links')}>
+            <SectionCaption>{t('Booking by branch')}</SectionCaption>
             <div className={sheet.list}>
               {activeBranches.map((branch) => (
                 <button
@@ -145,13 +141,13 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
                   onClick={() =>
                     void copy(
                       `${pageUrl}/book?branch=${branch.id}`,
-                      t('Ссылка на запись в «{name}» скопирована', { name: branch.name }),
+                      t('Booking link for “{name}” copied', { name: branch.name }),
                     )
                   }
                 >
                   <span className={sheet.rowLabel}>{branch.name}</span>
                   <span className={styles.sheetValue}>
-                    {t('Скопировать')}
+                    {t('Copy')}
                     <Copy aria-hidden />
                   </span>
                 </button>
@@ -159,7 +155,7 @@ export const ShareSheet = ({ slug, businessName, branches, onClose }: ShareSheet
             </div>
             <p className={sheet.groupFooter}>
               {t(
-                'Клиент попадёт в запись сразу с этим филиалом. Ссылку на страницу поставьте в шапку Instagram и в 2ГИС.',
+                'The client lands in booking with this branch chosen. Put the page link in your Instagram bio and on 2GIS.',
               )}
             </p>
           </section>

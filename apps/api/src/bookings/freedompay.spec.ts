@@ -38,7 +38,7 @@ describe('Freedom Pay signature', () => {
   })
 
   it('signs its reply to the result URL', () => {
-    const reply = parseFreedomPayXml(freedomPayReply('result', 'ok', 'Оплачено', 'S'))
+    const reply = parseFreedomPayXml(freedomPayReply('result', 'ok', 'Paid', 'S'))
     expect(reply.pg_status).toBe('ok')
     expect(isFreedomPaySignature('result', reply, 'S')).toBe(true)
   })

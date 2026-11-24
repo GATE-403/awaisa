@@ -21,13 +21,12 @@ const ErrorPage = ({ error, retry }: ErrorPageProps) => {
     <main className={styles.page}>
       <Container size='md' className={styles.content}>
         <LiveMascot className={styles.mascot} />
-        <h1 className={styles.title}>Что-то пошло не так</h1>
+        <h1 className={styles.title}>Something went wrong</h1>
         <p className={styles.text}>
-          Не получилось загрузить страницу. Попробуйте ещё раз через минуту - ваши записи никуда не
-          делись.
+          We couldn't load the page. Try again in a minute - your bookings are safe.
         </p>
         <Button size='lg' onClick={retry}>
-          Повторить
+          Try again
         </Button>
       </Container>
     </main>

@@ -16,12 +16,12 @@ describe('describeItem', () => {
           business: { slug: 'old-school', name: 'Old School' },
         },
       }),
-    ).toBe('Фото работы · Old School · 3 жалобы')
+    ).toBe('Work photo · Old School · 3 reports')
   })
 
   it('leaves out a place a profile does not have', () => {
     expect(describeItem({ targetType: 'profile', reports: 1, preview: null })).toBe(
-      'Профиль · 1 жалоба',
+      'Profile · 1 report',
     )
   })
 })
@@ -33,6 +33,6 @@ describe('describeReasons', () => {
         { reason: 'spam', count: 2 },
         { reason: 'offensive', count: 1 },
       ]),
-    ).toBe('Спам или реклама 2 · Оскорбления 1')
+    ).toBe('Spam or advertising 2 · Insults 1')
   })
 })

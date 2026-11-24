@@ -91,7 +91,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             type='button'
             className={styles.turn}
             data-side='start'
-            aria-label={t('Предыдущее фото: {name}', { name })}
+            aria-label={t('Previous photo: {name}', { name })}
             hidden={index === 0}
             onClick={() => turn(-1)}
           >
@@ -101,7 +101,7 @@ export const CardGallery = ({ pictures, href, name }: CardGalleryProps) => {
             type='button'
             className={styles.turn}
             data-side='end'
-            aria-label={t('Следующее фото: {name}', { name })}
+            aria-label={t('Next photo: {name}', { name })}
             hidden={index === pictures.length - 1}
             onClick={() => turn(1)}
           >

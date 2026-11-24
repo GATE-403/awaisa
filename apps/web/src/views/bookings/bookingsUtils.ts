@@ -21,10 +21,10 @@ const getCountdown = (booking: Booking, today: Today | null, t: Translate) => {
   if (!today) return booking.time
   const days = daysBetween(today.dayKey, booking.date)
   // The card shows the time already; the countdown only says which day.
-  if (days === 0) return t('Сегодня')
-  if (days === 1) return t('Завтра')
+  if (days === 0) return t('Today')
+  if (days === 1) return t('Tomorrow')
 
-  return t('Через {days}', { days: t.count(days, ['день', 'дня', 'дней']) })
+  return t('In {days}', { days: t.count(days, ['day', 'days']) })
 }
 
 export type { Today }

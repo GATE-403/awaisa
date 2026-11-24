@@ -44,7 +44,7 @@ export class PromotionsController {
     return this.promotions.quote(query, customer?.phone ?? null)
   }
 
-  // The business page's «Акции» line: what is on now, without codes.
+  // The business page's 'Promotions' line: what is on now, without codes.
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('businesses/:slug/promotions')
   listPublic(@Param('slug') slug: string): Promise<PublicPromotion[]> {

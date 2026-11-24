@@ -41,12 +41,12 @@ type Draft = {
 }
 
 const SALARY_ITEMS: { value: SalaryKind | 'none'; label: string }[] = [
-  { value: 'none', label: 'Нет' },
-  { value: 'month', label: 'В месяц' },
-  { value: 'day', label: 'За рабочий день' },
+  { value: 'none', label: 'No' },
+  { value: 'month', label: 'Per month' },
+  { value: 'day', label: 'Per working day' },
 ]
 
-const UNIT: Record<PayRateKind, string> = { percent: '%', fixed: 'сом' }
+const UNIT: Record<PayRateKind, string> = { percent: '%', fixed: 'som' }
 
 const digits = (value: string) => value.replace(/\D/g, '')
 const toNumber = (value: string) => (digits(value) === '' ? null : Number(digits(value)))
@@ -69,7 +69,7 @@ const toScheme = (draft: Draft): MasterPayScheme => {
   const salary = toNumber(draft.salary)
   return {
     percent: toNumber(draft.percent),
-    // A rate left empty means «как у мастера».
+    // A rate left empty means "same as the specialist's".
     rates: draft.rates.flatMap((rate) => {
       const value = toNumber(rate.value)
       return value === null ? [] : [{ serviceId: rate.serviceId, kind: rate.kind, value }]
@@ -116,7 +116,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           toast.show({
-            title: t('Не получилось'),
+            title: t('Something went wrong'),
             description: getErrorMessage(error),
             type: 'error',
           })
@@ -166,10 +166,14 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
     setIsSaving(true)
     try {
       await setMasterPay(slug, master.id, toScheme(draft))
-      toast.show({ title: t('Зарплата {name} сохранена', { name: master.name }), type: 'success' })
+      toast.show({ title: t('Pay for {name} saved', { name: master.name }), type: 'success' })
       onClose()
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsSaving(false)
     }
@@ -177,10 +181,10 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
 
   return (
     <Sheet
-      title={t('Зарплата')}
+      title={t('Pay')}
       onClose={onClose}
       action={{
-        label: isDirty ? t('Сохранить') : t('Готово'),
+        label: isDirty ? t('Save') : t('Done'),
         onClick: handleDone,
         disabled: isSaving,
       }}
@@ -189,16 +193,16 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
       {draft && (
         <div className={sheet.form}>
           <section className={sheet.group} aria-labelledby='pay-services'>
-            <SectionCaption id='pay-services'>{t('С услуг')}</SectionCaption>
+            <SectionCaption id='pay-services'>{t('From services')}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Процент мастера')}</span>
+                <span className={sheet.rowLabel}>{t('Specialist’s percent')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Процент мастера')}
-                    placeholder={t('Не задан')}
+                    aria-label={t('Specialist’s percent')}
+                    placeholder={t('Not set')}
                     value={draft.percent}
                     onValueChange={(value) => update({ percent: digits(value).slice(0, 3) })}
                   />
@@ -206,7 +210,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                 </span>
               </label>
               {draft.rates.map((rate) => {
-                const name = serviceName.get(rate.serviceId) ?? t('Услуга')
+                const name = serviceName.get(rate.serviceId) ?? t('Service')
                 return (
                   <div key={rate.serviceId} className={sheet.row}>
                     <span className={styles.rateName}>{name}</span>
@@ -214,7 +218,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                       <Input
                         variant='plain'
                         inputMode='numeric'
-                        aria-label={t('{name}: ставка', { name })}
+                        aria-label={t('{name}: rate', { name })}
                         placeholder={draft.percent === '' ? '0' : draft.percent}
                         value={rate.value}
                         onValueChange={(value) =>
@@ -227,7 +231,7 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                         }
                       />
                       <Menu
-                        label={t('{unit}, {name}: процент или сумма за визит', {
+                        label={t('{unit}, {name}: percent or amount per visit', {
                           unit: t(UNIT[rate.kind]),
                           name,
                         })}
@@ -243,17 +247,17 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
                           icon={rate.kind === 'percent' ? <Check aria-hidden /> : undefined}
                           onClick={() => updateRate(rate.serviceId, { kind: 'percent', value: '' })}
                         >
-                          {t('Процент от оплаты')}
+                          {t('Percent of payment')}
                         </MenuItem>
                         <MenuItem
                           icon={rate.kind === 'fixed' ? <Check aria-hidden /> : undefined}
                           onClick={() => updateRate(rate.serviceId, { kind: 'fixed', value: '' })}
                         >
-                          {t('Сумма за визит')}
+                          {t('Amount per visit')}
                         </MenuItem>
                         <MenuSeparator />
                         <MenuItem variant='danger' onClick={() => removeRate(rate.serviceId)}>
-                          {t('Убрать ставку')}
+                          {t('Remove rate')}
                         </MenuItem>
                       </Menu>
                     </span>
@@ -262,13 +266,13 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               })}
               {free.length > 0 && (
                 <Menu
-                  label={t('Другая ставка для услуги')}
+                  label={t('Another rate for a service')}
                   align='start'
                   className={`${sheet.row} ${styles.addRate}`}
                   trigger={
                     <>
                       <Plus aria-hidden className={styles.addGlyph} />
-                      {t('Другая ставка для услуги')}
+                      {t('Another rate for a service')}
                     </>
                   }
                 >
@@ -282,24 +286,24 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
             </div>
             <p className={sheet.groupFooter}>
               {percentError || rateError
-                ? t('Процент не может быть больше 100.')
+                ? t('The percent cannot be more than 100.')
                 : t(
-                    'Процент считается от оплаченного деньгами, как в «Аналитике»: скидки, сертификаты, абонементы и бонусы его уменьшают. Без отметки об оплате: от цены со скидкой.',
+                    'The percent is of what was paid in money, as in “Analytics”: discounts, certificates, passes and bonuses lower it. Without a payment mark: of the discounted price.',
                   )}
             </p>
           </section>
 
           <section className={sheet.group} aria-labelledby='pay-products'>
-            <SectionCaption id='pay-products'>{t('С товаров')}</SectionCaption>
+            <SectionCaption id='pay-products'>{t('From products')}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Процент с продаж')}</span>
+                <span className={sheet.rowLabel}>{t('Percent of sales')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Процент с продаж')}
-                    placeholder={t('Нет')}
+                    aria-label={t('Percent of sales')}
+                    placeholder={t('No')}
                     value={draft.productsPercent}
                     onValueChange={(value) =>
                       update({ productsPercent: digits(value).slice(0, 3) })
@@ -311,22 +315,22 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
             </div>
             <p className={sheet.groupFooter}>
               {productsError
-                ? t('Процент не может быть больше 100.')
+                ? t('The percent cannot be more than 100.')
                 : t(
-                    'От суммы товаров, которые мастер продал в «Кассе» (поле «Продал»). Отменённые продажи не считаются.',
+                    'Of the products the specialist sold in “Till” (the “Sold by” field). Cancelled sales do not count.',
                   )}
             </p>
           </section>
 
           <section className={sheet.group} aria-labelledby='pay-salary'>
-            <SectionCaption id='pay-salary'>{t('Оклад и минимум')}</SectionCaption>
+            <SectionCaption id='pay-salary'>{t('Salary and minimum')}</SectionCaption>
             <div className={sheet.list}>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Оклад')}</span>
+                <span className={sheet.rowLabel}>{t('Salary')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Оклад')}
+                    aria-label={t('Salary')}
                     items={SALARY_ITEMS.map((item) => ({ ...item, label: t(item.label) }))}
                     value={draft.salaryKind}
                     onValueChange={(value) =>
@@ -337,42 +341,42 @@ export const MasterPaySheet = ({ slug, master, services, onClose }: MasterPayShe
               </div>
               {draft.salaryKind !== 'none' && (
                 <label className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Сумма')}</span>
+                  <span className={sheet.rowLabel}>{t('Amount')}</span>
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
                       inputMode='numeric'
-                      aria-label={t('Сумма оклада')}
+                      aria-label={t('Salary amount')}
                       placeholder='0'
                       value={draft.salary}
                       onValueChange={(value) => update({ salary: maskAmountInput(digits(value)) })}
                     />
-                    <span className={sheet.suffix}>{t('сом')}</span>
+                    <span className={sheet.suffix}>{t('som')}</span>
                   </span>
                 </label>
               )}
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Минимум в месяц')}</span>
+                <span className={sheet.rowLabel}>{t('Minimum per month')}</span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
                     inputMode='numeric'
-                    aria-label={t('Минимум в месяц')}
-                    placeholder={t('Нет')}
+                    aria-label={t('Minimum per month')}
+                    placeholder={t('No')}
                     value={draft.minimum}
                     onValueChange={(value) => update({ minimum: maskAmountInput(digits(value)) })}
                   />
-                  {draft.minimum !== '' && <span className={sheet.suffix}>{t('сом')}</span>}
+                  {draft.minimum !== '' && <span className={sheet.suffix}>{t('som')}</span>}
                 </span>
               </label>
             </div>
             <p className={sheet.groupFooter}>
               {draft.salaryKind === 'day'
-                ? `${t('Рабочие дни берутся из графика мастера: выходные и отпуск не оплачиваются.')} `
+                ? `${t('Working days come from the specialist’s schedule: days off and leave are not paid.')} `
                 : draft.salaryKind === 'month'
-                  ? `${t('За неполный месяц считается его часть по дням.')} `
+                  ? `${t('A partial month is counted by its days.')} `
                   : ''}
-              {t('Если за месяц заработано меньше минимума, выплачивается минимум.')}
+              {t('If less than the minimum is earned in a month, the minimum is paid.')}
             </p>
           </section>
         </div>

@@ -15,7 +15,7 @@ const extendSchema = z
     months: z.number().int().min(1).max(36).optional(),
     isLifetime: z.boolean().optional(),
   })
-  .refine((body) => body.isLifetime || body.months, { message: 'Укажите срок' })
+  .refine((body) => body.isLifetime || body.months, { message: 'Choose a period' })
 
 type CheckoutInput = z.infer<typeof checkoutSchema>
 type ExtendInput = z.infer<typeof extendSchema>

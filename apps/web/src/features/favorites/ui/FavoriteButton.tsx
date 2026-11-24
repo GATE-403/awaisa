@@ -23,8 +23,8 @@ export const FavoriteButton = ({ id, label }: FavoriteButtonProps) => {
       aria-pressed={isOn}
       aria-label={
         isOn
-          ? t('Убрать из избранного: {name}', { name: label })
-          : t('В избранное: {name}', { name: label })
+          ? t('Remove from favourites: {name}', { name: label })
+          : t('Add to favourites: {name}', { name: label })
       }
       onClick={(event) => {
         event.preventDefault()

@@ -28,8 +28,8 @@ const pickWallet = (config: { apple: boolean; google: boolean }): WalletKind | n
 }
 
 const LABELS: Record<WalletKind, string> = {
-  apple: 'Добавить в Apple Wallet',
-  google: 'Сохранить в Google Wallet',
+  apple: 'Add to Apple Wallet',
+  google: 'Save to Google Wallet',
 }
 
 // A real pass, not a picture of one: Wallet brings it to the lock screen before the visit.
@@ -61,7 +61,11 @@ export const WalletButton = ({ bookingId }: WalletButtonProps) => {
       const url = links[kind]
       if (url) window.location.assign(url)
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsOpening(false)
     }

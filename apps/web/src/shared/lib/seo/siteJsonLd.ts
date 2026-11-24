@@ -11,7 +11,7 @@ const siteJsonLd = () => ({
       url: absoluteUrl('/'),
       name: PLATFORM.name,
       description: PLATFORM.tagline,
-      inLanguage: 'ru',
+      inLanguage: 'en',
       publisher: { '@id': `${SITE_URL}/#organization` },
     },
     {

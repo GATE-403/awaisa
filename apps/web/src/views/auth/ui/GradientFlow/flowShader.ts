@@ -4,7 +4,7 @@
 // toward the bottom left, like the owner's reference photo. A fainter second band echoes it. Fine
 // film grain over all.
 //
-// It moves like light through a prism someone turns in their hand («добавь анимацию»):
+// It moves like light through a prism someone turns in their hand (the owner: add motion):
 // - on open the band sweeps in from the right and settles, brightening (`INTRO` seconds);
 // - soft waves of light run along it, like glints through moving glass;
 // - the spectrum breathes: the colours spread apart, then close back toward white;
@@ -14,7 +14,7 @@
 // - signed in, the beam flares wide and bright and sweeps across the screen (`f` 0 → 1): the
 //   sign-in's one burst of light.
 //
-// Light is added onto a near-black base, so it never mixes into grey («грязный цвет»).
+// Light is added onto a near-black base, so it never mixes into grey (the owner: a dirty colour).
 
 const FLOW_FRAGMENT = `precision highp float;
 uniform vec2 r;

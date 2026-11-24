@@ -21,14 +21,14 @@ test.describe('Promotions', () => {
     try {
       // The owner adds a promo code from the cabinet sheet.
       await page.goto(`/manage/${SLUG}?tab=promotions`)
-      await page.getByRole('button', { name: 'Новая акция' }).first().click()
-      const sheet = page.getByRole('dialog', { name: 'Новая акция' })
-      await sheet.getByText('Промокод', { exact: true }).click()
-      await sheet.getByLabel('Название акции').fill('E2E Промокод')
-      await sheet.getByLabel('Скидка, %').fill('30')
-      await sheet.getByRole('textbox', { name: 'Промокод' }).fill('e2eosen')
-      await sheet.getByRole('button', { name: 'Сохранить' }).click()
-      await expect(page.getByText('Акция сохранена')).toBeVisible()
+      await page.getByRole('button', { name: 'New promotion' }).first().click()
+      const sheet = page.getByRole('dialog', { name: 'New promotion' })
+      await sheet.getByText('Promo code', { exact: true }).click()
+      await sheet.getByLabel('Promotion name').fill('E2E Промокод')
+      await sheet.getByLabel('Discount, %').fill('30')
+      await sheet.getByRole('textbox', { name: 'Promo code' }).fill('e2eosen')
+      await sheet.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByText('Promotion saved')).toBeVisible()
       await expect(page.getByRole('button', { name: /E2E Промокод.*E2EOSEN/ })).toBeVisible()
 
       // And «happy hours» all day through the API, so any time gets them.
@@ -107,9 +107,7 @@ test.describe('Promotions', () => {
       await page.goto(
         `/${SLUG}/book?service=${service.id}&specialist=${master.id}&date=${date}&time=${time}`,
       )
-      await expect(page.getByRole('button', { name: 'Показать, что выбрано' })).toContainText(
-        '−20%',
-      )
+      await expect(page.getByRole('button', { name: 'Show what is chosen' })).toContainText('−20%')
 
       // The catalog marks services with an open promotion.
       await page.goto(`/?q=${encodeURIComponent(service.name)}`)

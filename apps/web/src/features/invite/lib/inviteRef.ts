@@ -2,7 +2,7 @@
 
 import { readJson, writeJson } from '@/shared/lib/storage'
 
-// «Пригласить друга»: a `?ref=<handle or id>` from a friend's link is kept on this device for
+// «Invite a friend»: a `?ref=<handle or id>` from a friend's link is kept on this device for
 // 30 days and sent with the first booking, so the friend who shared it gets the credit.
 const KEY = 'awaisa:ref:v1'
 const TTL_MS = 30 * 86_400_000

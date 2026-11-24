@@ -8,64 +8,16 @@ import { BusinessTile, pickTint } from '@/entities/business'
 import { useSession } from '@/entities/session'
 import { getRecommendations } from '@/shared/api/clientApi'
 import type { Recommendation } from '@/shared/api/types'
-import { type Translate, useT } from '@/shared/i18n'
+import { useT } from '@/shared/i18n'
 import { knownPosition } from '@/shared/lib/geo'
 import { sizedImage } from '@/shared/lib/imageSizes'
 import { StoryRow, StoryTile } from '@/shared/ui/StoryTile/StoryTile'
 import { usePreferences } from '../lib/preferences'
+import { DUE_REASON, shortReason, storyNote } from '../lib/reasons'
 import { deviceSession, readRecent, type Surface, track, trackPickClick } from '../lib/signals'
 import styles from './ForYou.module.css'
 import { ForYouShelfPlaceholder } from './ForYouShelfPlaceholder'
 import { PreferencesSheet } from './PreferencesSheet'
-
-// The capsule on a 144px card holds about 17 characters: past that only the reason's lead is
-// shown («Ваш выбор · стрижки» → «Ваш выбор»), never a word cut by an ellipsis.
-// Reasons with no « · » get a short form of their own: «Похоже на просмотренное» was cut to
-// «Похоже на просмотре…».
-const SHORT_LEADS: [RegExp, string][] = [
-  [/^Похоже на просмотренное/, 'Похожее'],
-  [/^Как в ваших визитах/, 'Как обычно'],
-  [/^Часто берут/, 'Берут вместе'],
-]
-
-const shortReason = (reason: string) => {
-  if (reason.length <= 17) return reason
-  const lead = reason.split(' · ')[0] ?? reason
-  return SHORT_LEADS.find(([pattern]) => pattern.test(lead))?.[1] ?? lead
-}
-
-// Under a 76pt story tile there is room for about 12 characters: the reason in its shortest words.
-const storyNote = (reason: string) => {
-  const lead = reason.split(' · ')[0] ?? reason
-  if (lead.startsWith('Часто выбирают')) return 'Популярное'
-  if (lead.startsWith('Часто берут')) return 'Берут вместе'
-  // Reasons that ran past a story's width, said in a word or two («Похоже на прос…»).
-  if (lead === 'Похоже на просмотренное') return 'Похожее'
-  if (lead === 'Как в ваших визитах') return 'Как обычно'
-  if (lead === 'Вы были здесь') return 'Были здесь'
-  return lead.replace(/^(Сегодня|Завтра) с /, '$1 ').replace(/^Рейтинг /, '★ ')
-}
-
-// Reasons come from the API in Russian; the short ones the cards show are read here per language.
-// Shortened first (above), so a card's length rules stay the Russian ones.
-const REASON_PATTERNS: [RegExp, string, string][] = [
-  [/^Пора снова · (\d+) нед\.$/, 'Пора снова · {weeks} нед.', 'weeks'],
-  [/^Рядом · ([\d,]+) км$/, 'Рядом · {km} км', 'km'],
-  [/^Рядом · (\d+) м$/, 'Рядом · {meters} м', 'meters'],
-  [/^Сегодня с (.+)$/, 'Сегодня с {time}', 'time'],
-  [/^Завтра с (.+)$/, 'Завтра с {time}', 'time'],
-  [/^Сегодня (\d.*)$/, 'Сегодня {time}', 'time'],
-  [/^Завтра (\d.*)$/, 'Завтра {time}', 'time'],
-  [/^Рейтинг (.+)$/, 'Рейтинг {rating}', 'rating'],
-]
-
-const translateReason = (t: Translate, reason: string) => {
-  for (const [pattern, key, name] of REASON_PATTERNS) {
-    const match = reason.match(pattern)
-    if (match) return t(key, { [name]: match[1] ?? '' })
-  }
-  return t(reason)
-}
 
 // What every event about a card carries: the answer it came from, so the list can be rebuilt.
 const pickOf = (item: Recommendation) => ({
@@ -75,11 +27,8 @@ const pickOf = (item: Recommendation) => ({
   algorithm: item.algorithm,
 })
 
-// «Для вас»: services picked for this client - their answers, their visits («Пора снова»), where
+// «For you»: services picked for this client - their answers, their visits («Due again»), where
 // they are and who is free soon. Each card says why it is here.
-// The reason the score gives a service due again (`recommend-score.ts`).
-const DUE_REASON = 'Пора снова'
-
 interface ForYouShelfProps {
   /** The shelf's heading. */
   title?: string
@@ -93,20 +42,20 @@ interface ForYouShelfProps {
   isForEveryone?: boolean
   /** Inside a column (the success screen): the track keeps to it instead of bleeding to the edge. */
   isInline?: boolean
-  /** «Настроить» beside the title - only in the profile, where the answers live. */
+  /** «Adjust» beside the title - only in the profile, where the answers live. */
   isTunable?: boolean
   /** Where the shelf stands, for what it learns from taps (`catalog`, `booking`, …). */
   surface?: Surface
-  /** A link on the right of the head (the catalog's «Рейтинг ›»), so it costs no row of its own. */
+  /** A link on the right of the head (the catalog's «Top ›»), so it costs no row of its own. */
   headAction?: ReactNode
   /** `stories`: small square tiles like a stories row (the catalog's top); `cards` (default) the shelf. */
   variant?: 'cards' | 'stories'
-  /** Only services due again («Пора снова»); with none the shelf is not drawn. */
+  /** Only services due again («Due again»); with none the shelf is not drawn. */
   isOnlyDue?: boolean
 }
 
 export const ForYouShelf = ({
-  title = 'Для вас',
+  title = 'For you',
   seedVisit,
   excludeServiceId,
   likeServiceId,
@@ -207,7 +156,7 @@ export const ForYouShelf = ({
     <PreferencesSheet initial={preferences} onClose={() => setIsAsking(false)} />
   )
 
-  // Nothing is due without visits: no questionnaire row in place of «Пора снова».
+  // Nothing is due without visits: no questionnaire row in place of «Due again».
   if (isOnlyDue && !hasSignals) return null
 
   // Nothing known yet: one quiet line instead of a shelf.
@@ -217,8 +166,10 @@ export const ForYouShelf = ({
         <button type='button' className={styles.prompt} onClick={() => setIsAsking(true)}>
           <Sparkle aria-hidden className={styles.promptIcon} />
           <span className={styles.promptText}>
-            <span className={styles.promptTitle}>{t('Подберём для вас')}</span>
-            <span className={styles.promptMeta}>{t('3 вопроса - и подборка услуг рядом')}</span>
+            <span className={styles.promptTitle}>{t('Picks for you')}</span>
+            <span className={styles.promptMeta}>
+              {t('3 questions, then services picked near you')}
+            </span>
           </span>
         </button>
         {sheet}
@@ -238,7 +189,7 @@ export const ForYouShelf = ({
         {isTunable && (
           <button type='button' className={styles.tune} onClick={() => setIsAsking(true)}>
             <Sliders aria-hidden />
-            {t('Настроить')}
+            {t('Adjust')}
           </button>
         )}
         {headAction}
@@ -254,7 +205,7 @@ export const ForYouShelf = ({
               imageUrl={item.coverUrl}
               fallback={<BusinessTile name={item.businessName} logoUrl={item.logoUrl} size='lg' />}
               tint={pickTint(item.businessName)}
-              note={translateReason(t, storyNote(item.reason))}
+              note={t(storyNote(item.reason))}
               isEager={position < 5}
               onOpen={() => trackPickClick({ ...pickOf(item), surface, position })}
             />
@@ -284,9 +235,7 @@ export const ForYouShelf = ({
                     decoding='async'
                   />
                 )}
-                <span className={styles.reason}>
-                  {translateReason(t, shortReason(item.reason))}
-                </span>
+                <span className={styles.reason}>{t(shortReason(item.reason))}</span>
                 <span className={styles.caption}>
                   <span className={styles.name}>{item.name}</span>
                   <span className={styles.meta}>

@@ -7,9 +7,9 @@ interface StoryTileProps {
   href: string
   label: string
   /**
-   * Read after the visible label and note, for screen readers only («Тенгри SPA, 2 600 сом»).
+   * Read after the visible label and note, for screen readers only («Tengri SPA, 2,600 som»).
    * Not an aria-label: the name must contain what is written on the tile (WCAG 2.5.3), so
-   * «нажми Чистка лица» in voice control finds it.
+   * «tap Facial cleansing» in voice control finds it.
    */
   details?: string
   imageUrl?: string | null
@@ -21,7 +21,7 @@ interface StoryTileProps {
   badge?: ReactNode
   /** A short capsule over the picture. */
   chip?: string
-  /** A quiet second line under the label («Пора снова», «Рядом · 1,2 км»). */
+  /** A quiet second line under the label («Due again», «Nearby · 1.2 km»). */
   note?: string
   /** `new` - an accent ring (something not seen yet), `seen` - a grey one, `none` - no ring. */
   ring?: 'new' | 'seen' | 'none'

@@ -68,7 +68,7 @@ export class AvailabilityService {
 
   /**
    * Each active service of a place with its first free time (any master) today or tomorrow, so
-   * the booking form's list can say «Сегодня с 15:30» before a service is picked.
+   * the booking form's list can say 'Today from 15:30' before a service is picked.
    */
   async findNextFreeByService(slug: string, branchId?: string) {
     const rows = (await this.bookings.manager.query(
@@ -97,19 +97,19 @@ export class AvailabilityService {
   ) {
     const today = toBusinessParts(now).dateKey
     if (date < today || date > addDays(today, BOOKING_DAYS_AHEAD - 1)) {
-      throw new BadRequestException(`Запись доступна на ${BOOKING_DAYS_AHEAD} дней вперёд`)
+      throw new BadRequestException(`Bookings are open ${BOOKING_DAYS_AHEAD} days ahead`)
     }
 
     const service = await this.catalogService.getActiveService(serviceId)
     if (staffBusinessId !== null && service.businessId !== staffBusinessId) {
-      throw new NotFoundException('Услуга не найдена')
+      throw new NotFoundException('Service not found')
     }
     const extras = await this.resolveExtras(service, extraServiceIds)
     const services = [service, ...extras]
     const business = await this.businesses.findById(service.businessId)
     // Staff can book clients in before the page is published.
     if (!business.isPublished && staffBusinessId === null) {
-      throw new BadRequestException('Запись временно недоступна')
+      throw new BadRequestException('Booking is unavailable right now')
     }
     const offerings = await this.catalogService.getSpecialistsForServices(
       services.map((item) => item.id),
@@ -145,17 +145,17 @@ export class AvailabilityService {
     if (extraServiceIds.length === 0) return []
     const ids = [...new Set(extraServiceIds)]
     if (ids.length !== extraServiceIds.length || ids.includes(service.id)) {
-      throw new BadRequestException('Каждую услугу можно выбрать один раз')
+      throw new BadRequestException('Each service can be chosen once')
     }
     if (ids.length > MAX_EXTRA_SERVICES) {
-      throw new BadRequestException(`За один визит можно до ${MAX_EXTRA_SERVICES + 1} услуг`)
+      throw new BadRequestException(`Up to ${MAX_EXTRA_SERVICES + 1} services in one visit`)
     }
     const found = await this.catalogService.getActiveServices(ids)
     const byId = new Map(found.map((item) => [item.id, item]))
     return ids.map((id) => {
       const extra = byId.get(id)
       if (!extra || extra.businessId !== service.businessId) {
-        throw new NotFoundException('Услуга не найдена')
+        throw new NotFoundException('Service not found')
       }
       return extra
     })
@@ -164,7 +164,7 @@ export class AvailabilityService {
   /**
    * The first free time today or tomorrow, with any master, for each request - the same answer
    * as `getAvailability` day by day, but with a fixed number of queries however many requests
-   * there are (it used to be about eight per place per day: catalog cards and «Для вас» ask for
+   * there are (it used to be about eight per place per day: catalog cards and 'For you' ask for
    * dozens of places at once). A service without masters, or of an unpublished place, gets null.
    */
   private async firstFreeTimes(requests: { serviceId: string; branchId?: string }[]) {

@@ -7,11 +7,11 @@ const finishBooking = async (page: Page) => {
   const steps = bookingSteps(page)
   const service = steps.service.getByRole('radio').first()
   if (await service.isVisible()) await service.click()
-  const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+  const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
   if (await anyMaster.isVisible()) await anyMaster.click()
   await pickFirstFreeSlot(page)
-  await steps.contacts.getByLabel('Имя').fill('E2E Тест')
-  await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+  await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
+  await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
   const request = page.waitForRequest(
     (sent) => sent.method() === 'POST' && new URL(sent.url()).pathname === '/api/bookings',
   )
@@ -21,7 +21,7 @@ const finishBooking = async (page: Page) => {
 
 // The admins' funnels page: one flow at a time, cut by kind of device, with signals and devices.
 test.describe('Insights', () => {
-  test('a platform admin reads a flow for one kind of device; others get «not found»', async ({
+  test('a platform admin reads a flow for one kind of device; others get “not found”', async ({
     page,
   }, testInfo) => {
     // A login on a huge-text phone, so the cut has something to show.
@@ -51,25 +51,28 @@ test.describe('Insights', () => {
     })
     expect(sent.status()).toBe(202)
 
-    // The page streams (PPR): the refusal is the «not found» page, not a status code.
+    // The page streams (PPR): the refusal is the “not found” page, not a status code.
     await signInViaApi(page, randomClientPhone())
     await page.goto('/insights')
-    await expect(page.getByRole('heading', { name: /Не нашли/ })).toBeVisible()
-    await expect(page.getByText('Открыли каталог')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /Not found/ })).toBeVisible()
+    await expect(page.getByText('Opened the catalogue')).toHaveCount(0)
 
     await page.context().clearCookies()
     await signInViaApi(page, adminPhone(testInfo))
     await page.goto('/insights')
-    await expect(page.getByRole('heading', { name: /Воронки/ })).toBeVisible()
-    await expect(page.getByText('Открыли каталог')).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Funnels/ })).toBeVisible()
+    await expect(page.getByText('Opened the catalogue')).toBeVisible()
 
-    await page.getByRole('tablist', { name: 'Сценарий' }).getByRole('tab', { name: 'Вход' }).click()
-    await page.getByRole('combobox', { name: 'Шрифт в браузере' }).click()
-    await page.getByRole('option', { name: 'Очень крупный' }).click()
-    const steps = page.getByRole('region', { name: /Дошли до конца/ })
-    await expect(steps.getByText('Открыли вход')).toBeVisible()
-    await expect(steps.getByText('Получили код')).toBeVisible()
-    await expect(page.getByText('Телефон', { exact: true }).first()).toBeVisible()
+    await page
+      .getByRole('tablist', { name: 'Scenario' })
+      .getByRole('tab', { name: 'Sign-in' })
+      .click()
+    await page.getByRole('combobox', { name: 'Browser font size' }).click()
+    await page.getByRole('option', { name: 'Very large' }).click()
+    const steps = page.getByRole('region', { name: /Reached the end/ })
+    await expect(steps.getByText('Opened sign-in')).toBeVisible()
+    await expect(steps.getByText('Got a code')).toBeVisible()
+    await expect(page.getByText('Phone', { exact: true }).first()).toBeVisible()
     await testInfo.attach('insights', {
       body: await page.screenshot({ fullPage: true }),
       contentType: 'image/png',
@@ -89,7 +92,7 @@ test.describe('Insights', () => {
 
     const fromCatalog = await browser.newPage()
     await fromCatalog.goto('/')
-    // A service card of the grid itself; «Для вас» above it is a channel of its own.
+    // A service card of the grid itself; “For you” above it is a channel of its own.
     await fromCatalog
       .locator('section[aria-labelledby="results-title"] a[href*="/book?service="]')
       .first()
@@ -107,10 +110,10 @@ test.describe('Insights', () => {
     expect(report.activeBusinesses).toHaveLength(1)
 
     await page.goto('/insights')
-    const channels = page.getByRole('region', { name: /Откуда записи/ })
-    await expect(channels.getByText('Ссылка салона')).toBeVisible()
-    await expect(channels.getByText('Каталог')).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Стратегия' })).toContainText('Записались снова')
+    const channels = page.getByRole('region', { name: /Where bookings come from/ })
+    await expect(channels.getByText('Salon’s link')).toBeVisible()
+    await expect(channels.getByText('Catalogue')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Strategy' })).toContainText('Booked again')
 
     await page.context().clearCookies()
     await signInViaApi(page, randomClientPhone())

@@ -3,9 +3,9 @@ import styles from './BookingStep.module.css'
 
 interface BookingStepProps {
   id: string
-  /** The step as a question: «Что делаем?», «Когда удобно?». */
+  /** The step as a question: "What are we doing?", "When suits you?". */
   title: string
-  /** A quiet line over the question: how far along («Шаг 2 из 4»). */
+  /** A quiet line over the question: how far along ("Step 2 of 4"). */
   eyebrow?: string
   children: ReactNode
 }

@@ -8,40 +8,46 @@ import {
 import { fillReplyTemplate, MAX_QUICK_REPLIES, SAMPLE_REVIEW } from '../lib/replyTemplate'
 
 const CASES: { template: string; context: Parameters<typeof fillReplyTemplate>[1] }[] = [
-  { template: 'Спасибо, {имя}! Ждём вас снова', context: SAMPLE_REVIEW },
+  { template: 'Thank you, {name}! See you again', context: SAMPLE_REVIEW },
   {
-    template: 'Передадим мастеру {Мастер}, {услуга} удалась',
-    context: { authorName: 'Тимур', specialistName: 'Эрлан Асанов', serviceName: ' Борода ' },
+    template: "We'll tell {Specialist}, glad the {service} went well",
+    context: { authorName: 'Timur', specialistName: 'Erlan Asanov', serviceName: ' Beard ' },
   },
   {
-    template: 'Спасибо, {имя} !  Ждём  у {мастер}',
+    template: 'Thank you, {name} !  See you  with {specialist}',
     context: { authorName: '', specialistName: '', serviceName: '' },
   },
   {
     template: '{ИМЯ}, {услуга}?',
-    context: { authorName: '  Асель  Т.', specialistName: 'М', serviceName: 'МАНИКЮР' },
+    context: { authorName: '  Asel  T.', specialistName: 'M', serviceName: 'MANICURE' },
   },
 ]
 
 describe('fillReplyTemplate', () => {
   it('puts in the first names and the service in lower case', () => {
-    expect(fillReplyTemplate('Спасибо, {имя}! {мастер} рад. {услуга}', SAMPLE_REVIEW)).toBe(
-      'Спасибо, Асель! Мээрим рад. маникюр',
+    expect(
+      fillReplyTemplate('Thank you, {name}! {specialist} is glad. {service}', SAMPLE_REVIEW),
+    ).toBe('Thank you, Asel! Meerim is glad. manicure')
+  })
+
+  it('still fills the Russian keys of templates saved earlier', () => {
+    expect(fillReplyTemplate('Thank you, {имя}! {мастер}, {услуга}', SAMPLE_REVIEW)).toBe(
+      'Thank you, Asel! Meerim, manicure',
     )
   })
 
   it('reads well when a value is unknown', () => {
     expect(
-      fillReplyTemplate('Спасибо, {имя}! Передадим {мастер}, {услуга}', {
+      fillReplyTemplate('Thank you, {name}! We will tell {specialist} about {service}', {
         authorName: ' ',
         specialistName: '',
         serviceName: '',
       }),
-    ).toBe('Спасибо, гость! Передадим мастера, услуга')
+    ).toBe('Thank you, there! We will tell your specialist about the service')
   })
 
   it('tidies the spaces the pill editor leaves', () => {
-    expect(fillReplyTemplate('  Спасибо,   {имя} !  ', SAMPLE_REVIEW)).toBe('Спасибо, Асель!')
+    expect(fillReplyTemplate('  Thank you,   {name} !  ', SAMPLE_REVIEW)).toBe('Thank you, Asel!')
   })
 
   it('gives the same words as the server for every template', () => {

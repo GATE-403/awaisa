@@ -5,7 +5,7 @@ import { useT } from '@/shared/i18n'
 import styles from './SignInTransition.module.css'
 
 interface SignInTransitionProps {
-  /** The person's first name for the greeting; empty → «Вы вошли» alone. */
+  /** The person's first name for the greeting; empty → «You're signed in» alone. */
   name: string
   /** Called once the wave has passed: navigate to where the person was going. */
   onDone: () => void
@@ -38,15 +38,15 @@ export const SignInTransition = ({ name, onDone }: SignInTransitionProps) => {
   return (
     <output className={styles.overlay} aria-live='polite'>
       {/* No light of its own: the sign-in's prism beam flares and sweeps behind this blur
-          (`GradientFlow flare`); a second wave on top read as another effect («не сочетается»). */}
+          (`GradientFlow flare`); a second wave on top read as another effect (the owner: it did not go together). */}
       <span className={styles.greeting}>
         {firstName ? (
           <>
-            <span className={styles.hello}>{t('Привет, {name}', { name: firstName })}</span>
-            <span className={styles.note}>{t('Вы вошли')}</span>
+            <span className={styles.hello}>{t('Hi, {name}', { name: firstName })}</span>
+            <span className={styles.note}>{t('You are signed in')}</span>
           </>
         ) : (
-          <span className={styles.hello}>{t('Вы вошли')}</span>
+          <span className={styles.hello}>{t('You are signed in')}</span>
         )}
       </span>
     </output>

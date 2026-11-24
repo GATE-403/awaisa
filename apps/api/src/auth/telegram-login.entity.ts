@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 
 type TelegramLoginStatus = 'pending' | 'confirmed' | 'used'
 
-// One «Войти через Telegram» attempt: the page's token (hashed), the chat that opened it, and
+// One 'Sign in with Telegram' attempt: the page's token (hashed), the chat that opened it, and
 // the number the person shared there.
 @Entity({ name: 'telegram_logins' })
 export class TelegramLogin {

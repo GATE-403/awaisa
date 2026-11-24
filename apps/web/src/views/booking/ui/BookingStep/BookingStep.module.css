@@ -8,8 +8,8 @@
   scroll-margin-top: var(--space-4);
 }
 
-/* «Шаг 2 из 4» as the app's quiet uppercase caption (like «Часто выбирают»), not in the link
-   colour: blue, it read as a button («выглядит как кнопка»). */
+/* "Step 2 of 4" as the app's quiet uppercase caption (like Popular), not in the link
+   colour: blue, it read as a button ("looks like a button"). */
 .eyebrow {
   margin: 0 0 calc(-1 * var(--space-3));
   color: var(--color-muted-foreground);
@@ -37,7 +37,7 @@
 }
 
 /* The main action pressed while this step is still open: its choices give a short shake, so the
-   press visibly answers «choose here» (the button itself is never disabled). Only `translate`. */
+   press visibly answers “choose here” (the button itself is never disabled). Only `translate`. */
 .step[data-nudge] .body {
   animation: nudge 420ms var(--ease-standard);
 }

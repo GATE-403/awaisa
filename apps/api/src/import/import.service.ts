@@ -36,7 +36,7 @@ export class ImportService {
       const row = index + 1
       const phone = normalizePhone(client.phone)
       if (!phone) {
-        skipped.push({ row, reason: client.phone ? 'неверный телефон' : 'нет телефона' })
+        skipped.push({ row, reason: client.phone ? 'invalid phone' : 'no phone' })
         continue
       }
       const birthday = client.birthday ? parseDate(client.birthday) : null
@@ -88,24 +88,24 @@ export class ImportService {
       const service = matchByName(knownServices, booking.service)
       const master = matchByName(knownMasters, booking.master)
       const reason = !date
-        ? 'не прочитана дата'
+        ? 'unreadable date'
         : !time
-          ? 'не прочитано время'
+          ? 'unreadable time'
           : !phone
-            ? 'нет телефона'
+            ? 'no phone'
             : !service
-              ? `нет услуги «${booking.service || '-'}»`
+              ? `no service “${booking.service || '-'}”`
               : !master
-                ? `нет мастера «${booking.master || '-'}»`
+                ? `no specialist “${booking.master || '-'}”`
                 : null
       if (reason || !date || !time || !phone || !service || !master) {
-        skipped.push({ row, reason: reason ?? 'не прочитана строка' })
+        skipped.push({ row, reason: reason ?? 'unreadable row' })
         continue
       }
       const [hours, minutes] = time.split(':').map(Number)
       const startsAt = businessDateTimeToUtc(date, hours * 60 + minutes)
       if (startsAt.getTime() <= now) {
-        skipped.push({ row, reason: 'визит уже прошёл' })
+        skipped.push({ row, reason: 'the visit is in the past' })
         continue
       }
       const endsAt = new Date(startsAt.getTime() + Number(service.duration) * 60_000)
@@ -125,7 +125,7 @@ export class ImportService {
             master.id,
             startsAt,
             endsAt,
-            (booking.name || 'Клиент').slice(0, 120),
+            (booking.name || 'Client').slice(0, 120),
             phone,
             booking.comment.slice(0, 500),
             createHash('sha256').update(randomBytes(24)).digest('hex'),
@@ -136,7 +136,7 @@ export class ImportService {
           ],
         )
         if (created.length === 0) {
-          skipped.push({ row, reason: 'уже импортирована' })
+          skipped.push({ row, reason: 'already imported' })
           continue
         }
         imported += 1
@@ -144,7 +144,7 @@ export class ImportService {
         if ((error as { code?: string }).code !== '23P01') throw error
         skipped.push({
           row,
-          reason: `у мастера уже есть запись ${date.split('-').reverse().join('.')} в ${time}`,
+          reason: `the specialist already has a booking on ${date.split('-').reverse().join('.')} at ${time}`,
         })
       }
     }

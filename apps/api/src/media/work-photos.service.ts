@@ -16,8 +16,8 @@ const BY_PLACE = 'w."position" ASC NULLS FIRST, w."created_at" DESC'
 const text = (value: unknown) => (value === null || value === undefined ? null : String(value))
 
 /**
- * Photos of finished work. Each may name the service and the master, so the «Работы» feed can
- * book exactly that from the photo; the business page shows the visible ones as «Работы».
+ * Photos of finished work. Each may name the service and the master, so the 'Works' feed can
+ * book exactly that from the photo; the business page shows the visible ones as 'Works'.
  */
 @Injectable()
 export class WorkPhotosService {
@@ -53,7 +53,7 @@ export class WorkPhotosService {
       [businessId],
     )
     if (Number(row?.count) >= MAX_PHOTOS) {
-      throw new BadRequestException(`Можно до ${MAX_PHOTOS} фото работ - удалите старые`)
+      throw new BadRequestException(`Up to ${MAX_PHOTOS} work photos, delete some old ones`)
     }
   }
 
@@ -106,7 +106,9 @@ export class WorkPhotosService {
       [id, businessId],
     )
     if (current?.isModerated && !input.isHidden) {
-      throw new BadRequestException('Фото скрыто модератором Awaisa, показать его снова нельзя')
+      throw new BadRequestException(
+        'This photo was hidden by an Awaisa moderator and cannot be shown again',
+      )
     }
     const rows = await this.query(
       `UPDATE "work_photos" SET "service_id" = $3, "specialist_id" = $4, "is_hidden" = $5,
@@ -115,7 +117,7 @@ export class WorkPhotosService {
        WHERE "id" = $1 AND "business_id" = $2 RETURNING "id"`,
       [id, businessId, input.serviceId, input.specialistId, input.isHidden],
     )
-    if (returnedRows(rows).length === 0) throw new NotFoundException('Фото не найдено')
+    if (returnedRows(rows).length === 0) throw new NotFoundException('Photo not found')
     if (!input.isHidden) {
       // Shown again by the owner: the reports so far are settled for the moderators too.
       await this.query(
@@ -138,7 +140,7 @@ export class WorkPhotosService {
 
   /**
    * Removes the row and returns its URL for the storage - or null when a client's review still
-   * shows the same file (review photos are added to «Работы» without a copy).
+   * shows the same file (review photos are added to 'Works' without a copy).
    */
   async remove(businessId: string, id: string) {
     const rows = await this.query(
@@ -146,7 +148,7 @@ export class WorkPhotosService {
       [id, businessId],
     )
     const [row] = returnedRows(rows)
-    if (!row) throw new NotFoundException('Фото не найдено')
+    if (!row) throw new NotFoundException('Photo not found')
     // Nothing left to moderate: its reports leave the queue.
     await this.query(
       `UPDATE "reports" SET "resolved_at" = now()
@@ -188,7 +190,7 @@ export class WorkPhotosService {
           [id, session],
         )
     const [row] = returnedRows(rows)
-    if (!row) throw new NotFoundException('Фото не найдено')
+    if (!row) throw new NotFoundException('Photo not found')
     return { likes: Number(row.likes) }
   }
 
@@ -287,14 +289,14 @@ export class WorkPhotosService {
         'SELECT 1 FROM "services" WHERE "id" = $1 AND "business_id" = $2',
         [serviceId, businessId],
       )
-      if (!service) throw new BadRequestException('Услуга не найдена')
+      if (!service) throw new BadRequestException('Service not found')
     }
     if (specialistId) {
       const [master] = await this.query(
         'SELECT 1 FROM "specialists" WHERE "id" = $1 AND "business_id" = $2',
         [specialistId, businessId],
       )
-      if (!master) throw new BadRequestException('Мастер не найден')
+      if (!master) throw new BadRequestException('Specialist not found')
     }
   }
 

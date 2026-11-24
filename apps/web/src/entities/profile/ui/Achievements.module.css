@@ -24,7 +24,7 @@
   flex: 0 0 92px;
 }
 
-/* The whole name on a trophy, in two lines at most («Первый ви…» read as broken). */
+/* The whole name on a trophy, in two lines at most («First vi…» read as broken). */
 .shelf .title {
   display: -webkit-box;
   overflow: hidden;
@@ -43,8 +43,8 @@
   font-size: 30px;
 }
 
-/* Phones: smaller coins with more air between them, so the shelf breathes («свободного
-   пространства нет и все что можно запихано»). */
+/* Phones: smaller coins with more air between them, so the shelf breathes (the owner: no free
+   space, everything crammed in). */
 @media (max-width: 639px) {
   .shelf {
     gap: var(--space-3);
@@ -248,7 +248,7 @@ button.press:active .medal {
   scale: 0.92;
 }
 
-/* Motion («сделать живее»): the medals come in one after another, an earned one catches the
+/* Motion (the owner: make it livelier): the medals come in one after another, an earned one catches the
    light like a coin under the mouse; nothing moves under reduced motion. */
 @keyframes medal-in {
   from {

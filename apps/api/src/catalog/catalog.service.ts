@@ -123,7 +123,7 @@ export class CatalogService {
 
   async getActiveService(id: string) {
     const service = await this.services.findOneBy({ id, isActive: true })
-    if (!service) throw new NotFoundException('Услуга не найдена')
+    if (!service) throw new NotFoundException('Service not found')
 
     return service
   }
@@ -182,20 +182,20 @@ export class CatalogService {
   }
 
   async updateCategory(businessId: string, id: string, input: CategoryInput) {
-    await this.findOwned(this.categories, businessId, id, 'Категория не найдена')
+    await this.findOwned(this.categories, businessId, id, 'Category not found')
     await this.categories.update({ id, businessId }, { name: input.name })
   }
 
   async deleteCategory(businessId: string, id: string) {
-    await this.findOwned(this.categories, businessId, id, 'Категория не найдена')
+    await this.findOwned(this.categories, businessId, id, 'Category not found')
     if (await this.services.existsBy({ categoryId: id })) {
-      throw new ConflictException('Сначала перенесите или удалите услуги из этой категории')
+      throw new ConflictException("Move or delete this category's services first")
     }
     await this.categories.delete({ id, businessId })
   }
 
   async createService(businessId: string, input: ServiceInput) {
-    await this.findOwned(this.categories, businessId, input.categoryId, 'Категория не найдена')
+    await this.findOwned(this.categories, businessId, input.categoryId, 'Category not found')
     const position = (await this.services.countBy({ businessId })) + 1
     const service = await this.services.save(
       this.services.create({ id: randomUUID(), businessId, position, ...input }),
@@ -214,19 +214,19 @@ export class CatalogService {
   }
 
   async updateService(businessId: string, id: string, input: ServiceInput) {
-    await this.findOwned(this.services, businessId, id, 'Услуга не найдена')
-    await this.findOwned(this.categories, businessId, input.categoryId, 'Категория не найдена')
+    await this.findOwned(this.services, businessId, id, 'Service not found')
+    await this.findOwned(this.categories, businessId, input.categoryId, 'Category not found')
     await this.services.update({ id, businessId }, input)
   }
 
   async saveSpecialist(businessId: string, input: SpecialistInput, id?: string) {
     const services = await this.services.findBy({ businessId, id: In(input.serviceIds) })
     if (services.length !== new Set(input.serviceIds).size) {
-      throw new BadRequestException('Услуга не найдена')
+      throw new BadRequestException('Service not found')
     }
 
     const existing = id
-      ? await this.findOwned(this.specialists, businessId, id, 'Мастер не найден')
+      ? await this.findOwned(this.specialists, businessId, id, 'Specialist not found')
       : this.specialists.create({
           id: randomUUID(),
           businessId,
@@ -235,14 +235,14 @@ export class CatalogService {
         })
 
     if (input.phone && !normalizePhone(input.phone)) {
-      throw new BadRequestException('Проверьте номер мастера')
+      throw new BadRequestException("Check the specialist's number")
     }
     if (input.branchId) {
       const [branch] = (await this.specialists.manager.query(
         'SELECT 1 FROM "branches" WHERE "id" = $1 AND "business_id" = $2',
         [input.branchId, businessId],
       )) as unknown[]
-      if (!branch) throw new BadRequestException('Филиал не найден')
+      if (!branch) throw new BadRequestException('Branch not found')
     }
 
     const previousPhone = existing.phone ?? null
@@ -260,7 +260,7 @@ export class CatalogService {
       services,
     })
 
-    // A number given now (or changed) means the master has not heard about «Мой день» yet.
+    // A number given now (or changed) means the master has not heard about 'My day' yet.
     return { ...saved, isNewLogin: Boolean(saved.phone) && saved.phone !== previousPhone }
   }
 

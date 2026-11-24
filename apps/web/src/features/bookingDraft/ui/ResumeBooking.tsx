@@ -9,6 +9,7 @@ import {
   isCabinetPath,
   isStandalonePath,
 } from '@/shared/config/navigation'
+import { useT } from '@/shared/i18n'
 import { useTuckOnScroll } from '@/shared/lib/hooks/useTuckOnScroll'
 import { clearDraft, DRAFT_STEPS, draftHref } from '../lib/bookingDraft'
 import { useBookingDraft } from '../model/useBookingDraft'
@@ -18,8 +19,9 @@ import styles from './ResumeBooking.module.css'
 export const ResumeBooking = () => {
   const pathname = usePathname()
   const draft = useBookingDraft()
+  const t = useT()
   const isTucked = useTuckOnScroll()
-  // On another place's page that place's «Ближайшее окно» takes the spot: one pill at a time.
+  // On another place's page that place's «Next free time» takes the spot: one pill at a time.
   const pageSlug = getBusinessSlug(pathname)
 
   const stepsDone = Math.min(Math.max(draft?.stepsDone ?? 1, 1), DRAFT_STEPS)
@@ -39,14 +41,19 @@ export const ResumeBooking = () => {
   return (
     <aside
       className={styles.resume}
-      aria-label='Незаконченная запись'
+      aria-label={t('Unfinished booking')}
       data-resume-booking=''
       data-tucked={isTucked || undefined}
     >
       <NextLink
         href={draftHref(draft)}
         className={styles.link}
-        aria-label={`Продолжить запись: ${draft.serviceName}, ${draft.businessName}. Готово ${stepsDone} из ${DRAFT_STEPS} шагов`}
+        aria-label={t('Continue booking: {service}, {place}. {done} of {total} steps done', {
+          service: draft.serviceName,
+          place: draft.businessName,
+          done: stepsDone,
+          total: DRAFT_STEPS,
+        })}
       >
         {/* How far the booking got, like a download ring, with a calendar glyph in the
             capsule's own colour (a tinted monogram vanished on the inverted fill). */}
@@ -67,11 +74,12 @@ export const ResumeBooking = () => {
         <span className={styles.text}>
           <span className={styles.title}>{draft.serviceName}</span>
           <span className={styles.meta}>
-            Готово {stepsDone} из {DRAFT_STEPS} · {draft.businessName}
+            {t('{done} of {total} done', { done: stepsDone, total: DRAFT_STEPS })} ·{' '}
+            {draft.businessName}
           </span>
         </span>
         <span className={styles.go} aria-hidden>
-          <span className={styles.goLabel}>Продолжить</span>
+          <span className={styles.goLabel}>{t('Continue')}</span>
           <ArrowRight />
         </span>
       </NextLink>
@@ -79,7 +87,7 @@ export const ResumeBooking = () => {
         type='button'
         className={styles.dismiss}
         onClick={clearDraft}
-        aria-label='Не продолжать'
+        aria-label={t('Do not continue')}
       >
         <X aria-hidden />
       </button>

@@ -112,7 +112,7 @@
   padding: 0;
 }
 
-/* In the reply row: «Изменить» to the right of the place's name. */
+/* In the reply row: "Change" to the right of the place's name. */
 .thread .replyEdit {
   margin: 0 0 0 auto;
 }
@@ -243,7 +243,7 @@
   overflow-wrap: anywhere;
 }
 
-/* «★ 4,2 · 138 отзывов» at the end of the tabs' line: the figure bold, the words muted. */
+/* "★ 4.2 · 138 reviews" at the end of the tabs' line: the figure bold, the words muted. */
 .rating {
   display: inline-flex;
   align-items: center;
@@ -274,9 +274,9 @@
   min-width: 0;
 }
 
-/* Quick replies under the focused field: no panel («фон можно убрать»), compact footnote rows
-   with an «insert» glyph and hairlines, the row under the pointer or keyboard lit in the accent:
-   enough to read as choices («не понятно что их можно нажать»). */
+/* Quick replies under the focused field: no panel ("the background can go"), compact footnote rows
+   with an "insert" glyph and hairlines, the row under the pointer or keyboard lit in the accent:
+   enough to read as choices ("it's not clear they can be tapped"). */
 .suggestions {
   display: flex;
   flex-direction: column;
@@ -383,7 +383,7 @@
   }
 }
 
-/* «Автоответ» beside a reply the job sent, before «Изменить». */
+/* "Auto-reply" beside a reply the job sent, before "Change". */
 .autoMark {
   margin-left: auto;
   color: var(--color-muted-foreground);
@@ -404,7 +404,7 @@
 }
 
 /* The row being typed in is lit like a selected Settings row (for a click and for Tab alike:
-   an editable field is always «focus-visible», so a ring would show on every click); a mouse over
+   an editable field is always "focus-visible", so a ring would show on every click); a mouse over
    a row shows it is editable. */
 .quickRow:focus-within {
   background: var(--color-fill);
@@ -453,7 +453,7 @@ button.quickAdd {
   height: 16px;
 }
 
-/* «Ответить всем» in the header's glyph capsule: how many quiet good ratings wait, as a small
+/* "Reply to all" in the header's glyph capsule: how many quiet good ratings wait, as a small
    accent count on the glyph's corner, like a badge on a toolbar button. */
 .glyphCount {
   position: absolute;
@@ -531,7 +531,7 @@ button.quickAdd {
   color: var(--color-success);
 }
 
-/* «Написать клиенту»: the apology as plain text in its group. */
+/* "Write to the client": the apology as plain text in its group. */
 .message {
   display: block;
   width: 100%;
@@ -599,7 +599,7 @@ button.quickAdd {
 }
 
 /* Phones: the header is the tabs alone, scrolling sideways; the glyphs float at the foot (in a
-   FloatingToolbar, in the corner: the middle is «Ещё N отзывов»'s) and the rating stays on wider screens (and on the place's page), so the header is one line, not three. */
+   FloatingToolbar, in the corner: the middle is "N more reviews"'s) and the rating stays on wider screens (and on the place's page), so the header is one line, not three. */
 @media (max-width: 639px) {
   .toolbar > header {
     flex-wrap: nowrap;

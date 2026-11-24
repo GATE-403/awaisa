@@ -3,7 +3,7 @@ import { readMyPlace } from './myPlace'
 type Point = { lat: number; lng: number }
 
 // Ask the browser for a position only when the visitor already allowed it: never a prompt. Else
-// the place they picked by hand («Асанбай» on the map), when there is one.
+// the place they picked by hand («Asanbay» on the map), when there is one.
 const knownPosition = async (): Promise<Point | null> => {
   const picked = readMyPlace()
   const fallback = picked ? { lat: picked.lat, lng: picked.lng } : null
@@ -34,12 +34,12 @@ const distanceKm = (from: Point, to: Point) => {
   return 6371 * 2 * Math.asin(Math.sqrt(a))
 }
 
-// «350 м», «1,2 км», «12 км» - precision drops with distance, as in Maps.
+// «350 m», «1.2 km», «12 km» - precision drops with distance, as in Maps.
 const formatDistance = (km: number) => {
-  if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} м`
-  if (km < 10) return `${km.toFixed(1).replace('.', ',')} км`
+  if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} m`
+  if (km < 10) return `${km.toFixed(1)} km`
 
-  return `${Math.round(km)} км`
+  return `${Math.round(km)} km`
 }
 
 export type { Point }

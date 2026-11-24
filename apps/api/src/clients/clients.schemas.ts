@@ -6,7 +6,7 @@ const clientsQuerySchema = z.object({
     .enum(['all', 'upcoming', 'new', 'regular', 'lapsed', 'noShows', 'birthday'])
     .default('all'),
   sort: z.enum(['recent', 'spent', 'visits', 'name']).default('recent'),
-  // The rows asked for: the list loads 200 at a time as «Ещё N клиентов» reaches them.
+  // The rows asked for: the list loads 200 at a time as 'N more clients' reaches them.
   limit: z.coerce.number().int().min(1).max(5000).default(200),
 })
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { linksView, normalizeLinks } from './profile-links.js'
 
 describe('normalizeLinks', () => {
-  it('keeps the handle from «@name», a bare name or a pasted link', () => {
+  it('keeps the handle from “@name”, a bare name or a pasted link', () => {
     expect(
       normalizeLinks({
         instagram: 'https://www.instagram.com/aigerim.nails/?hl=ru',
@@ -38,7 +38,7 @@ describe('linksView', () => {
   it('builds the addresses itself, in a fixed order', () => {
     expect(linksView({ website: 'https://example.kg', instagram: 'nails' })).toEqual([
       { kind: 'instagram', label: 'Instagram', text: '@nails', url: 'https://instagram.com/nails' },
-      { kind: 'website', label: 'Сайт', text: 'example.kg', url: 'https://example.kg' },
+      { kind: 'website', label: 'Website', text: 'example.kg', url: 'https://example.kg' },
     ])
   })
 })

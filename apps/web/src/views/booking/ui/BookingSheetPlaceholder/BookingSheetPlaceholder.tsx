@@ -17,7 +17,7 @@ import styles from './BookingSheetPlaceholder.module.css'
 type OpenStep = 'service' | 'specialist' | 'datetime'
 
 // What a link has already chosen decides where the form opens: a catalog card names the service
-// (the form opens on the masters), «Снова» the master too (on the time).
+// (the form opens on the masters), Again the master too (on the time).
 const getOpenStep = (query: URLSearchParams): OpenStep => {
   if (!query.get('service')) return 'service'
   if (!query.get('specialist')) return 'specialist'
@@ -28,7 +28,7 @@ const STEP_INDEX: Record<OpenStep, number> = { service: 0, specialist: 1, dateti
 
 // What the sheet holds while the form is on its way (the slot's Suspense fallback, inside
 // `BookingSheet`, which stays): the form's own shapes from its own classes (the stack of done
-// steps as ticket cards, its foot line («Начать заново», the offered service), the open step (the service pictures, the masters or the
+// steps as ticket cards, its foot line (Start over, the offered service), the open step (the service pictures, the masters or the
 // time) and the bar with the total and the action), so the form lands on what was already there.
 // The open step follows the link: the service pictures swapped for the masters read as a flicker.
 export const BookingSheetPlaceholder = () => {
@@ -45,7 +45,7 @@ export const BookingSheetPlaceholder = () => {
           <button
             type='button'
             className={barStyles.close}
-            aria-label={t('Закрыть запись')}
+            aria-label={t('Close booking')}
             onClick={() => router.back()}
           >
             <X aria-hidden />
@@ -53,7 +53,7 @@ export const BookingSheetPlaceholder = () => {
           <span className={barStyles.title}>
             <Block className={styles.tile} />
             <span className={barStyles.text}>
-              <span className={barStyles.heading}>{t('Запись')}</span>
+              <span className={barStyles.heading}>{t('Booking')}</span>
             </span>
           </span>
           <span className={barStyles.spacer} aria-hidden />
@@ -85,7 +85,7 @@ export const BookingSheetPlaceholder = () => {
             </div>
           )}
           {doneCount > 0 && (
-            // The stack's foot line: «Начать заново» on the left, the offered service on the right.
+            // The stack's foot line: Start over on the left, the offered service on the right.
             <div className={styles.foot}>
               <span className={styles.footLine}>
                 <TextLine chars={14} />

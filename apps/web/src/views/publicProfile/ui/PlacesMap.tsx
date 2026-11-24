@@ -16,7 +16,7 @@ interface PlacesMapProps {
   places: PublicProfile['places']
 }
 
-// Where the person has been, as pins on the city (the «Знает город» medal made visible): each
+// Where the person has been, as pins on the city (the «Knows the city» medal made visible): each
 // place in its own colour, the visits as its label; a pin opens the place.
 export const PlacesMap = ({ places }: PlacesMapProps) => {
   const t = useT()
@@ -29,7 +29,7 @@ export const PlacesMap = ({ places }: PlacesMapProps) => {
             latitude: place.latitude,
             longitude: place.longitude,
             label: String(place.visits),
-            title: `${place.name}: ${t.count(place.visits, ['визит', 'визита', 'визитов'])}`,
+            title: `${place.name}: ${t.count(place.visits, ['visit', 'visits'])}`,
             tint: pickTint(place.name),
           },
         ]
@@ -42,7 +42,7 @@ export const PlacesMap = ({ places }: PlacesMapProps) => {
       <MapView
         markers={markers}
         fitKey={markers.map((marker) => marker.id).join()}
-        label={t('Места на карте')}
+        label={t('Places on the map')}
         className={styles.map}
         isStatic
         onSelect={(slug) => router.push(`/${slug}`)}

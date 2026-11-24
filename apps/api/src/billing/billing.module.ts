@@ -7,7 +7,7 @@ import { TelegramModule } from '../telegram/telegram.module.js'
 import { BillingController } from './billing.controller.js'
 import { BillingOrdersService } from './billing-orders.service.js'
 
-// Paying for plans: the «Тариф» endpoints, plan orders through `payments`, end reminders.
+// Paying for plans: the «Plan» endpoints, plan orders through `payments`, end reminders.
 @Module({
   imports: [AuthModule, BusinessesModule, BookingsModule, NotificationsModule, TelegramModule],
   controllers: [BillingController],

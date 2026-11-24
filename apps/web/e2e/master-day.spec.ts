@@ -9,8 +9,8 @@ const TINY_PNG = Buffer.from(
   'base64',
 )
 
-test.describe('«Мой день» for a master', () => {
-  test('a master marks their own visit «Пришёл», reads their reviews and never sees a colleague’s', async ({
+test.describe('“My day” for a master', () => {
+  test('a master marks their own visit “Arrived”, reads their reviews and never sees a colleague’s', async ({
     page,
     browser,
   }) => {
@@ -24,7 +24,7 @@ test.describe('«Мой день» for a master', () => {
         await page.request.put(`/api/manage/${business.slug}/specialists/${azamat.id}`, {
           data: {
             name: azamat.name,
-            role: 'Мастер',
+            role: 'Specialist',
             serviceIds: azamat.serviceIds,
             phone: masterPhone,
           },
@@ -63,10 +63,10 @@ test.describe('«Мой день» for a master', () => {
       expect(places).toContainEqual(
         expect.objectContaining({ slug: business.slug, specialistId: azamat.id }),
       )
-      // One place: «/master» opens its day straight away.
+      // One place: “/master” opens its day straight away.
       await master.goto('/master')
       await expect(master).toHaveURL(new RegExp(`/master/${business.slug}$`))
-      await expect(master.getByRole('heading', { name: /Мой день/ })).toBeVisible()
+      await expect(master.getByRole('heading', { name: /My day/ })).toBeVisible()
       await expect(master.getByText(`Азамат · ${business.name}`)).toBeVisible()
 
       await master.locator(`[data-day="${own.date}"]`).click()
@@ -76,14 +76,14 @@ test.describe('«Мой день» for a master', () => {
       )
       const agenda = master.getByRole('listitem').filter({ hasText: 'E2E Клиент Азамата' })
       await expect(agenda).toContainText(own.time)
-      await expect(agenda).toContainText('Стрижка')
+      await expect(agenda).toContainText('Haircut')
       // The colleague's visit on the same day is not here.
       await expect(master.getByText('E2E Клиент Бекзата')).toHaveCount(0)
 
-      const outcome = agenda.getByRole('group', { name: `Итог визита ${own.time}` })
-      await expect(outcome.getByRole('radio', { name: 'Ждём', exact: true })).toBeChecked()
-      await outcome.getByText('Пришёл', { exact: true }).click()
-      await expect(outcome.getByRole('radio', { name: 'Пришёл', exact: true })).toBeChecked()
+      const outcome = agenda.getByRole('group', { name: `Visit outcome ${own.time}` })
+      await expect(outcome.getByRole('radio', { name: 'Waiting', exact: true })).toBeChecked()
+      await outcome.getByText('Arrived', { exact: true }).click()
+      await expect(outcome.getByRole('radio', { name: 'Arrived', exact: true })).toBeChecked()
       // Saved, not only drawn: the owner's schedule reads it back.
       await expect
         .poll(async () => {
@@ -101,22 +101,22 @@ test.describe('«Мой день» for a master', () => {
       )
       expect(foreign.status()).toBe(403)
 
-      const reviews = master.getByRole('region', { name: 'Ваши отзывы' })
+      const reviews = master.getByRole('region', { name: 'Your reviews' })
       await expect(reviews).toContainText('E2E Лучший барбер')
-      await expect(reviews).toContainText('5,0 · 1 отзыв')
+      await expect(reviews).toContainText('5,0 · 1 review')
     } finally {
       await masterContext.close()
     }
   })
 
-  test('a number that is not a master here gets «Нет доступа»', async ({ page, browser }) => {
+  test('a number that is not a master here gets “No access”', async ({ page, browser }) => {
     const business = await createOwnBusiness(page)
     const strangerContext = await browser.newContext()
     const stranger = await strangerContext.newPage()
     try {
       await signInViaApi(stranger, randomClientPhone(), 'E2E Чужой')
       await stranger.goto(`/master/${business.slug}`)
-      await expect(stranger.getByRole('heading', { name: /Нет доступа/ })).toBeVisible()
+      await expect(stranger.getByRole('heading', { name: /No access/ })).toBeVisible()
       expect((await stranger.request.get(`/api/master/${business.slug}/reviews`)).status()).toBe(
         403,
       )
@@ -129,7 +129,7 @@ test.describe('«Мой день» for a master', () => {
   })
 })
 
-test.describe('«Мой день»: the master’s share and photos of their work', () => {
+test.describe('“My day”: the master’s share and photos of their work', () => {
   test('the day shows the master’s percent of its money; an arrived visit takes a work photo tagged with it', async ({
     page,
     browser,
@@ -137,13 +137,13 @@ test.describe('«Мой день»: the master’s share and photos of their wor
     test.setTimeout(90_000)
     const business = await createOwnBusiness(page, {
       services: [
-        { name: 'Стрижка', durationMinutes: 60, price: 1000 },
-        { name: 'Борода', durationMinutes: 30, price: 600 },
+        { name: 'Haircut', durationMinutes: 60, price: 1000 },
+        { name: 'Beard', durationMinutes: 30, price: 600 },
       ],
       masters: ['Азамат', 'Бекзат'],
     })
     const [azamat] = business.masters
-    const beard = business.services.find((service) => service.name === 'Борода')
+    const beard = business.services.find((service) => service.name === 'Beard')
     if (!azamat || !beard) throw new Error('A master and the beard service expected')
     const masterPhone = randomClientPhone()
     expect(
@@ -151,7 +151,7 @@ test.describe('«Мой день»: the master’s share and photos of their wor
         await page.request.put(`/api/manage/${business.slug}/specialists/${azamat.id}`, {
           data: {
             name: azamat.name,
-            role: 'Мастер',
+            role: 'Specialist',
             serviceIds: azamat.serviceIds,
             phone: masterPhone,
             commissionPercent: 40,
@@ -167,7 +167,7 @@ test.describe('«Мой день»: the master’s share and photos of their wor
         name,
         daysBack: 1,
       })
-    // Yesterday: a beard paid 1 500, a haircut still at its 1 000, a no-show that earns nothing.
+    // Yesterday: a beard paid 1,500, a haircut still at its 1,000, a no-show that earns nothing.
     const paid = await visit(beard.id, 'E2E Борода')
     const waiting = await visit(business.service.id, 'E2E Стрижка')
     const missed = await visit(business.service.id, 'E2E Неявка')
@@ -183,30 +183,30 @@ test.describe('«Мой день»: the master’s share and photos of their wor
       await signInViaApi(master, masterPhone, 'E2E Мастер')
       await master.goto(`/master/${business.slug}`)
       await master.locator(`[data-day="${paid.date}"]`).click()
-      // 40% of 1 500 + 1 000; the no-show is not money.
-      await expect(master.getByText('ваши 40%')).toBeVisible()
-      await expect(master.getByText(/^1\s000\s*сом$/)).toBeVisible()
+      // 40% of 1,500 + 1,000; the no-show is not money.
+      await expect(master.getByText('your 40%')).toBeVisible()
+      await expect(master.getByText(/^1,000\s*som$/)).toBeVisible()
 
       // Only the arrived visit offers a photo.
       const arrived = master.getByRole('listitem').filter({ hasText: 'E2E Борода' })
       const haircut = master.getByRole('listitem').filter({ hasText: 'E2E Стрижка' })
-      await expect(haircut.getByRole('button', { name: 'Фото работы' })).toHaveCount(0)
-      await expect(master.getByText(/Фото работ за неделю: 0 из 1 визита/)).toBeVisible()
+      await expect(haircut.getByRole('button', { name: 'Work photo' })).toHaveCount(0)
+      await expect(master.getByText(/Work photos this week: 0 of 1 visit/)).toBeVisible()
 
-      // «Пришёл» offers the camera at once: two taps from the mark to the photo.
-      await haircut.getByText('Пришёл', { exact: true }).click()
+      // “Arrived” offers the camera at once: two taps from the mark to the photo.
+      await haircut.getByText('Arrived', { exact: true }).click()
       const offered = master.waitForEvent('filechooser')
-      await master.getByRole('button', { name: 'Сфотографировать' }).click()
+      await master.getByRole('button', { name: 'Take a photo' }).click()
       await (await offered).setFiles({ name: 'work.png', mimeType: 'image/png', buffer: TINY_PNG })
-      await expect(master.getByText('Фото в «Образах»')).toBeVisible()
-      await expect(haircut.getByRole('button', { name: 'Ещё фото работы' })).toBeVisible()
-      await expect(master.getByText(/Фото работ за неделю: 1 из 2 визитов/)).toBeVisible()
+      await expect(master.getByText('Photo is in “Looks”')).toBeVisible()
+      await expect(haircut.getByRole('button', { name: 'Another work photo' })).toBeVisible()
+      await expect(master.getByText(/Work photos this week: 1 of 2 visits/)).toBeVisible()
 
       const chooser = master.waitForEvent('filechooser')
-      await arrived.getByRole('button', { name: 'Фото работы' }).click()
+      await arrived.getByRole('button', { name: 'Work photo' }).click()
       await (await chooser).setFiles({ name: 'work.png', mimeType: 'image/png', buffer: TINY_PNG })
-      await expect(arrived.getByRole('button', { name: 'Ещё фото работы' })).toBeVisible()
-      await expect(master.getByText(/Фото работ за неделю: 2 из 2 визитов/)).toBeVisible()
+      await expect(arrived.getByRole('button', { name: 'Another work photo' })).toBeVisible()
+      await expect(master.getByText(/Work photos this week: 2 of 2 visits/)).toBeVisible()
     } finally {
       await masterContext.close()
     }
@@ -223,7 +223,7 @@ test.describe('«Мой день»: the master’s share and photos of their wor
     expect(photos).toContainEqual(
       expect.objectContaining({
         serviceId: beard.id,
-        serviceName: 'Борода',
+        serviceName: 'Beard',
         specialistId: azamat.id,
         isHidden: false,
       }),
@@ -241,7 +241,7 @@ test.describe('«Мой день»: the master’s share and photos of their wor
         await page.request.put(`/api/manage/${business.slug}/specialists/${business.master.id}`, {
           data: {
             name: business.master.name,
-            role: 'Мастер',
+            role: 'Specialist',
             serviceIds: business.master.serviceIds,
             phone: masterPhone,
           },
@@ -261,9 +261,9 @@ test.describe('«Мой день»: the master’s share and photos of their wor
       await signInViaApi(master, masterPhone, 'E2E Мастер')
       await master.goto(`/master/${business.slug}`)
       await master.locator(`[data-day="${visit.date}"]`).click()
-      await expect(master.getByText('за день', { exact: true })).toBeVisible()
-      await expect(master.getByText(/^1\s000\s*сом$/)).toBeVisible()
-      await expect(master.getByText(/^ваши \d+%$/)).toHaveCount(0)
+      await expect(master.getByText('for the day', { exact: true })).toBeVisible()
+      await expect(master.getByText(/^1,000\s*som$/)).toBeVisible()
+      await expect(master.getByText(/^your \d+%$/)).toHaveCount(0)
     } finally {
       await masterContext.close()
     }

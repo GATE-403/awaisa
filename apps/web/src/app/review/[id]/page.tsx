@@ -5,7 +5,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ReviewPage } from '@/views/review'
 
 export const metadata: Metadata = {
-  title: 'Оценить визит',
+  title: 'Rate your visit',
   robots: { index: false },
 }
 

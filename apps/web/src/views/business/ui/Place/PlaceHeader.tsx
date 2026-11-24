@@ -26,8 +26,8 @@ interface PlaceHeaderProps {
   promotions: PublicPromotion[]
 }
 
-// The owner's «Страница» as clients see it, laid out like a profile in Instagram: the cover, the
-// logo on its edge with «Записаться» and the thin glyphs across from it, then a bio set close
+// The owner's «Page» as clients see it, laid out like a profile in Instagram: the cover, the
+// logo on its edge with «Book» and the thin glyphs across from it, then a bio set close
 // (name, kind · street, the rating, whether it is open, the description) and open promotions.
 export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHeaderProps) => {
   const rated = catalog.specialists.filter((specialist) => specialist.rating !== null)
@@ -75,7 +75,7 @@ export const PlaceHeader = ({ business, catalog, reviews, promotions }: PlaceHea
               <Star weight='fill' aria-hidden className={styles.factStar} />
               <strong>{rating.toFixed(1)}</strong>
               {' · '}
-              <Counted count={reviews.count} forms={['отзыв', 'отзыва', 'отзывов']} />
+              <Counted count={reviews.count} forms={['review', 'reviews']} />
             </a>
           ) : (
             <span className={styles.stat}>

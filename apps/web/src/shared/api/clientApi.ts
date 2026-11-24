@@ -280,7 +280,7 @@ const getServicesNextFree = (slug: string, branchId?: string, signal?: AbortSign
   })
 }
 
-// «Нравится» in «Работы»: one per photo and device session; answers the photo's count.
+// «Like» in «Looks»: one per photo and device session; answers the photo's count.
 const likeFeedItem = (id: string, session: string, isLiked: boolean) =>
   request<FeedLikes>(`/feed/${id}/${isLiked ? 'like' : 'unlike'}`, {
     method: 'POST',
@@ -660,7 +660,7 @@ const getWorkPhotos = (slug: string, signal?: AbortSignal) =>
 const updateWorkPhoto = (slug: string, id: string, input: WorkPhotoInput) =>
   send<WorkPhoto[]>('PATCH', `${manage(slug)}/work-photos/${id}`, input)
 
-// «Работы» in the owner's order: every photo's id, first to last.
+// «Work» in the owner's order: every photo's id, first to last.
 const reorderWorkPhotos = (slug: string, ids: string[]) =>
   send<WorkPhoto[]>('PUT', `${manage(slug)}/work-photos/order`, { ids })
 
@@ -820,7 +820,7 @@ const getCheckoutUrl = (id: string, token: string | null) =>
     headers: token ? { [TOKEN_HEADER]: token } : {},
   })
 
-// «Напоминать в Telegram»: the bot link for this booking's number (null without a bot).
+// «Remind in Telegram»: the bot link for this booking's number (null without a bot).
 const getTelegramLink = (id: string, token: string | null) =>
   request<BookingTelegramLink>(`/bookings/${id}/telegram`, {
     headers: token ? { [TOKEN_HEADER]: token } : {},
@@ -880,7 +880,7 @@ const issueCertificate = (
 const setCertificateSale = (slug: string, input: CertificateSaleSettings) =>
   send<CertificateSaleSettings>('PUT', `${manage(slug)}/loyalty/certificate-sale`, input)
 
-// «Подарочный сертификат» on the place's page: the order waits for its payment on /pay.
+// «Gift card» on the place's page: the order waits for its payment on /pay.
 const orderCertificate = (slug: string, input: CertificateOrderInput) =>
   post<CertificateOrderCreated>(`/businesses/${encodeURIComponent(slug)}/certificate-orders`, input)
 
@@ -904,7 +904,7 @@ const receiveStock = (slug: string, id: string, input: StockReceiveInput) =>
 const adjustStock = (slug: string, id: string, quantity: number) =>
   post<StockItem[]>(`${manage(slug)}/stock/${id}/adjust`, { quantity })
 
-// «Касса»: shifts of a branch's till, sales of products, expenses and the profit.
+// «Till»: shifts of a branch's till, sales of products, expenses and the profit.
 const getCashDesk = (slug: string, signal?: AbortSignal) =>
   request<CashDesk>(`${manage(slug)}/cash`, { signal })
 

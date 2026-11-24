@@ -58,7 +58,7 @@
   font-size: var(--text-footnote);
 }
 
-/* The stack's foot line, as tall as its links: «Начать заново» left, the offered service right. */
+/* The stack's foot line, as tall as its links: Start over left, the offered service right. */
 .foot {
   display: flex;
   justify-content: space-between;

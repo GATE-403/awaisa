@@ -12,8 +12,8 @@ const covers = (planServiceId: string | null, serviceId: string | null) =>
   serviceId !== null && (planServiceId === null || planServiceId === serviceId)
 
 /**
- * «Оплата» in the booking form: the signed-in client's subscriptions here that cover the chosen
- * service, and the place's plans sold online for it («Купить абонемент и записаться»).
+ * Payment in the booking form: the signed-in client's subscriptions here that cover the chosen
+ * service, and the place's plans sold online for it (buy a subscription and book).
  */
 export const useSubscriptionPayment = (slug: string, serviceId: string | null) => {
   const session = useSession()
@@ -50,7 +50,7 @@ export const useSubscriptionPayment = (slug: string, serviceId: string | null) =
     subscriptions: ownFitting,
     plans: plansFitting,
     isSignedIn,
-    // A choice that no longer fits the service reads as «в салоне».
+    // A choice that no longer fits the service reads as at the salon.
     choice: subscription || plan ? choice : ('salon' as PaymentChoice),
     setChoice,
     subscription,

@@ -6,9 +6,9 @@ import type { Theme } from '@/shared/lib/theme'
 import styles from './ThemeSwitcher.module.css'
 
 const OPTIONS: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'Авто' },
-  { value: 'light', label: 'Светлая' },
-  { value: 'dark', label: 'Тёмная' },
+  { value: 'system', label: 'Auto' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
 ]
 
 export const ThemeSwitcher = () => {
@@ -16,7 +16,7 @@ export const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme()
 
   return (
-    <fieldset aria-label={t('Тема оформления')} className={styles.switcher}>
+    <fieldset aria-label={t('Theme')} className={styles.switcher}>
       {OPTIONS.map(({ value, label }) => (
         <button
           key={value}

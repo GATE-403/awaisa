@@ -28,7 +28,7 @@ interface StockTabProps {
   catalog: Catalog
 }
 
-// «Склад»: consumables with what one visit of each service uses. A visit marked «Пришёл»
+// "Stock": consumables with what one visit of each service uses. A visit marked "Arrived"
 // writes its materials off; analytics subtracts their cost from revenue.
 export const StockTab = ({ slug, catalog }: StockTabProps) => {
   const toast = useToast()
@@ -53,7 +53,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
       toast.show({ title, description, type: 'success' })
       return true
     } catch (error) {
-      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
       return false
     }
   }
@@ -63,29 +63,31 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
   const current = editing && editing !== 'new' ? items.find((item) => item.id === editing.id) : null
 
   return (
-    <section className={styles.section} aria-label={t('Склад')}>
+    <section className={styles.section} aria-label={t('Stock')}>
       <SectionHeader
-        title={t('Склад')}
-        description={t('Расходники списываются, когда визит отмечен «Пришёл», товары при продаже.')}
+        title={t('Stock')}
+        description={t(
+          'Consumables are written off when a visit is marked “Arrived”, products when sold.',
+        )}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
             <Plus aria-hidden />
-            {t('Позиция')}
+            {t('Item')}
           </Button>
         }
       />
 
       {items.length === 0 ? (
         <EmptyState
-          title={t('Добавьте первый расходник')}
+          title={t('Add your first consumable')}
           text={t(
-            'Краска, шампунь, перчатки: укажите цену за единицу и сколько уходит на услугу - аналитика покажет себестоимость.',
+            'Dye, shampoo, gloves: set the price per unit and how much a service uses, and analytics will show the cost.',
           )}
-          action={<Button onClick={() => setEditing('new')}>{t('Добавить позицию')}</Button>}
+          action={<Button onClick={() => setEditing('new')}>{t('Add item')}</Button>}
         />
       ) : (
-        <section className={sheet.group} aria-label={t('Позиции')}>
+        <section className={sheet.group} aria-label={t('Items')}>
           <ul className={styles.list}>
             {items.map((item) => (
               <li key={item.id}>
@@ -99,14 +101,14 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
                     <span className={styles.rowMeta}>
                       {[
                         item.isForSale && item.salePrice !== null
-                          ? t('продажа {price}', { price: formatPrice(item.salePrice) })
-                          : t('{price} за {unit}', {
+                          ? t('sale {price}', { price: formatPrice(item.salePrice) })
+                          : t('{price} per {unit}', {
                               price: formatPrice(item.unitCost),
                               unit: t(item.unit),
                             }),
                         item.materials.length > 0
-                          ? t('в {count} усл.', { count: item.materials.length })
-                          : t(item.isForSale ? 'товар' : 'не привязана к услугам'),
+                          ? t('services: {count}', { count: item.materials.length })
+                          : t(item.isForSale ? 'product' : 'not linked to services'),
                       ].join(' · ')}
                     </span>
                   </span>
@@ -121,9 +123,9 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
           <RowNote>
             {[
               low.length > 0
-                ? t('Заканчивается: {names}.', { names: low.map((item) => item.name).join(', ') })
+                ? t('Running low: {names}.', { names: low.map((item) => item.name).join(', ') })
                 : '',
-              t('На складе на {amount}.', { amount: formatPrice(Math.round(value ?? 0)) }),
+              t('Stock worth {amount}.', { amount: formatPrice(Math.round(value ?? 0)) }),
             ]
               .filter(Boolean)
               .join(' ')}
@@ -140,7 +142,7 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
           onSave={(input) =>
             run(
               () => saveStockItem(slug, input, editing === 'new' ? undefined : editing.id),
-              t('Сохранено'),
+              t('Saved'),
             )
           }
           onReceive={
@@ -153,20 +155,20 @@ export const StockTab = ({ slug, catalog }: StockTabProps) => {
                         quantity,
                         expense: asExpense ? { branchId: null } : null,
                       }),
-                    t('Приход записан'),
-                    asExpense ? t('Сумма закупки в «Расходах».') : undefined,
+                    t('Delivery recorded'),
+                    asExpense ? t('The purchase cost is in “Expenses”.') : undefined,
                   )
           }
           onAdjust={
             editing === 'new'
               ? undefined
               : (quantity) =>
-                  run(() => adjustStock(slug, editing.id, quantity), t('Остаток исправлен'))
+                  run(() => adjustStock(slug, editing.id, quantity), t('Stock corrected'))
           }
           onDelete={
             editing === 'new'
               ? undefined
-              : () => void run(() => deleteStockItem(slug, editing.id), t('Позиция удалена'))
+              : () => void run(() => deleteStockItem(slug, editing.id), t('Item deleted'))
           }
         />
       )}

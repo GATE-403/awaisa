@@ -14,7 +14,7 @@ interface DayStripProps {
   marks?: ReadonlySet<string>
   /** How full each day is, 0–1 (compact only): a thin bar along the bottom of its chip. */
   loads?: ReadonlyMap<string, number>
-  /** `compact`: one thin line of «чт 19» capsules (the cabinet); default: weekday over number. */
+  /** `compact`: one thin line of "Thu 19" capsules (the cabinet); default: weekday over number. */
   variant?: 'default' | 'compact'
 }
 
@@ -51,18 +51,28 @@ export const DayStrip = ({
     // Glide from the second placement on: the first one (the page opening) lands in place.
     if (knob.hasAttribute('data-placed')) knob.setAttribute('data-ready', '')
     knob.setAttribute('data-placed', '')
-    knob.style.setProperty('--x', `${selected.offsetLeft}px`)
-    knob.style.setProperty('--w', `${selected.offsetWidth}px`)
-    knob.style.setProperty('--h', `${selected.offsetHeight}px`)
-    knob.style.setProperty('--y', `${selected.offsetTop}px`)
+    const place = () => {
+      knob.style.setProperty('--x', `${selected.offsetLeft}px`)
+      knob.style.setProperty('--w', `${selected.offsetWidth}px`)
+      knob.style.setProperty('--h', `${selected.offsetHeight}px`)
+      knob.style.setProperty('--y', `${selected.offsetTop}px`)
+    }
+    place()
     // Not `data-today`: that names the day buttons, and a knob carrying it matched them too.
     knob.toggleAttribute('data-on-today', selected.hasAttribute('data-today'))
+    // Chips change width after the first layout (the web font arrives, a load bar or mark is
+    // added): measured once, the knob stayed where the chip used to be.
+    const row = daysRef.current
+    if (!row || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(place)
+    for (const chip of row.querySelectorAll('[data-day]')) observer.observe(chip)
+    return () => observer.disconnect()
   }, [value, days])
 
   return (
     <div className={styles.strip} data-variant={variant}>
       <fieldset
-        aria-label={t('День')}
+        aria-label={t('Day')}
         className={styles.days}
         ref={daysRef}
         data-edge-fade={variant === 'compact' || undefined}
@@ -89,13 +99,13 @@ export const DayStrip = ({
                 aria-hidden='true'
               />
             )}
-            {/* The full date after the visible «Сб 7», not instead of it (WCAG 2.5.3). */}
+            {/* The full date after the visible "Sat 7", not instead of it (WCAG 2.5.3). */}
             <span className={styles.srOnly}>
-              {`, ${t.language === 'ru' ? day.label : t.dayLong(day.key)}${
-                marks?.has(day.key) ? `, ${t('есть незакрытые визиты')}` : ''
+              {`, ${t.dayLong(day.key)}${
+                marks?.has(day.key) ? `, ${t('has unclosed visits')}` : ''
               }${
                 loads?.has(day.key)
-                  ? `, ${t('занято на {percent}%', {
+                  ? `, ${t('{percent}% booked', {
                       percent: Math.round(Math.min(1, loads.get(day.key) ?? 0) * 100),
                     })}`
                   : ''
@@ -118,7 +128,7 @@ export const DayStrip = ({
           }}
           disabled={variant === 'default' && value === today.key}
         >
-          {t('Сегодня')}
+          {t('Today')}
         </button>
       )}
     </div>

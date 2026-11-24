@@ -86,23 +86,23 @@ test.describe('Fiscal receipts', () => {
     }
 
     try {
-      // «Настройки → Касса»: the switch asks for the ИНН first, then turns receipts on.
+      // “Settings → Till”: the switch asks for the TIN first, then turns receipts on.
       await page.goto(`/manage/${SLUG}?tab=fiscal`)
-      await expect(page.getByText('Тестовый режим', { exact: false })).toHaveCount(0)
-      await page.getByRole('switch', { name: 'Выдавать чеки' }).click()
-      const sheet = page.getByRole('dialog', { name: 'Касса' })
-      await expect(sheet.getByRole('button', { name: 'Включить' })).toBeDisabled()
-      await sheet.getByLabel('ИНН').fill('1234')
-      await expect(sheet.getByText('ИНН: 14 цифр.')).toBeVisible()
-      await sheet.getByLabel('ИНН').fill(INN)
-      await sheet.getByRole('switch', { name: 'Плательщик НДС' }).click()
-      await expect(sheet.getByLabel('НсП на услуги, %')).toHaveValue('2')
-      await expect(sheet.getByLabel('НсП на товары, %')).toHaveValue('1')
-      await sheet.getByRole('button', { name: 'Включить' }).click()
-      await expect(page.getByText('Чеки включены')).toBeVisible()
-      await expect(page.getByRole('switch', { name: 'Выдавать чеки' })).toBeChecked()
-      await expect(page.getByText(/Тестовый режим: чеки нумеруются здесь/)).toBeVisible()
-      await expect(page.getByRole('button', { name: new RegExp(`ИНН\\s*${INN}`) })).toBeVisible()
+      await expect(page.getByText('Test mode', { exact: false })).toHaveCount(0)
+      await page.getByRole('switch', { name: 'Issue receipts' }).click()
+      const sheet = page.getByRole('dialog', { name: 'Till' })
+      await expect(sheet.getByRole('button', { name: 'Turn on' })).toBeDisabled()
+      await sheet.getByLabel('TIN').fill('1234')
+      await expect(sheet.getByText('TIN: 14 digits.')).toBeVisible()
+      await sheet.getByLabel('TIN').fill(INN)
+      await sheet.getByRole('switch', { name: 'VAT payer' }).click()
+      await expect(sheet.getByLabel('Sales tax on services, %')).toHaveValue('2')
+      await expect(sheet.getByLabel('Sales tax on goods, %')).toHaveValue('1')
+      await sheet.getByRole('button', { name: 'Turn on' }).click()
+      await expect(page.getByText('Receipts on')).toBeVisible()
+      await expect(page.getByRole('switch', { name: 'Issue receipts' })).toBeChecked()
+      await expect(page.getByText(/Test mode: receipts are numbered here/)).toBeVisible()
+      await expect(page.getByRole('button', { name: new RegExp(`TIN\\s*${INN}`) })).toBeVisible()
       const settings = (await (await page.request.get(`${manage}/fiscal`)).json()) as Settings
       expect(settings).toMatchObject({
         driver: 'log',
@@ -115,7 +115,7 @@ test.describe('Fiscal receipts', () => {
 
       // A product sold by card: the receipt is cashless, with VAT and the goods' sales tax.
       const created = await page.request.post(`${manage}/stock`, {
-        data: { name: PRODUCT, unit: 'шт', unitCost: 300, isForSale: true, salePrice: 1130 },
+        data: { name: PRODUCT, unit: 'pcs', unitCost: 300, isForSale: true, salePrice: 1130 },
       })
       expect(created.ok(), await created.text()).toBe(true)
       // The answer is the whole stock list.
@@ -140,7 +140,7 @@ test.describe('Fiscal receipts', () => {
         isTest: true,
       })
       expect(receipt.fiscalNumber).toMatch(/^T-[0-9A-F]{10}$/)
-      // 1130 = 1000 × (1 + 12% + 1%): VAT 120, НсП 10.
+      // 1130 = 1000 × (1 + 12% + 1%): VAT 120, sales tax 10.
       expect(receipt.lines).toEqual([
         expect.objectContaining({
           name: PRODUCT,
@@ -151,31 +151,31 @@ test.describe('Fiscal receipts', () => {
         }),
       ])
 
-      // In «Касса → Продажи» the row names the receipt and «⋯ → Чек» opens it with a QR.
+      // In “Till → Sales” the row names the receipt and “⋯ → Receipt” opens it with a QR.
       await page.goto(`/manage/${SLUG}?tab=cash`)
-      await page.getByRole('tab', { name: /Продажи/ }).click()
+      await page.getByRole('tab', { name: /Sales/ }).click()
       const row = page.getByRole('listitem').filter({ hasText: PRODUCT })
-      await expect(row.getByText(`чек №${receipt.fiscalNumber}`)).toBeVisible()
-      await row.getByRole('button', { name: 'Действия с продажей' }).click()
-      await page.getByRole('menuitem', { name: 'Чек', exact: true }).click()
-      const receiptSheet = page.getByRole('dialog', { name: 'Чек' })
-      const paper = receiptSheet.getByRole('article', { name: 'Кассовый чек' })
-      await expect(paper.getByText(`ИНН ${INN}`)).toBeVisible()
+      await expect(row.getByText(`receipt No. ${receipt.fiscalNumber}`)).toBeVisible()
+      await row.getByRole('button', { name: 'Sale actions' }).click()
+      await page.getByRole('menuitem', { name: 'Receipt', exact: true }).click()
+      const receiptSheet = page.getByRole('dialog', { name: 'Receipt' })
+      const paper = receiptSheet.getByRole('article', { name: 'Till receipt' })
+      await expect(paper.getByText(`Tax ID ${INN}`)).toBeVisible()
       await expect(paper.getByText(receipt.fiscalNumber as string)).toBeVisible()
-      await expect(paper.getByRole('img', { name: 'QR-код чека' })).toBeVisible()
-      await expect(receiptSheet.getByRole('button', { name: 'Скопировать ссылку' })).toBeVisible()
-      await receiptSheet.getByRole('button', { name: 'Закрыть' }).click()
+      await expect(paper.getByRole('img', { name: 'Receipt QR code' })).toBeVisible()
+      await expect(receiptSheet.getByRole('button', { name: 'Copy link' })).toBeVisible()
+      await receiptSheet.getByRole('button', { name: 'Close', exact: true }).click()
 
       // The client's link opens the receipt without signing in; a wrong signature does not.
       const link = new URL(receipt.viewUrl)
       const guest = await page.context().browser()?.newPage()
       if (!guest) throw new Error('No browser')
       await guest.goto(`${link.pathname}${link.search}`)
-      await expect(guest.getByRole('heading', { name: 'Кассовый чек' })).toBeVisible()
-      await expect(guest.getByText('в т. ч. НДС 12%')).toBeVisible()
+      await expect(guest.getByRole('heading', { name: 'Receipt', exact: true })).toBeVisible()
+      await expect(guest.getByText('incl. VAT 12%')).toBeVisible()
       await expect(guest.getByText(receipt.fiscalNumber as string)).toBeVisible()
       await guest.goto(`${link.pathname}?s=wrong`)
-      await expect(guest.getByText('Чек не открылся')).toBeVisible()
+      await expect(guest.getByText("The receipt didn't open")).toBeVisible()
       await guest.close()
       expect((await page.request.get(`/api/fiscal/receipts/${receipt.id}?s=wrong`)).status()).toBe(
         404,
@@ -187,7 +187,7 @@ test.describe('Fiscal receipts', () => {
       expect(refund).toMatchObject({ kind: 'refund', total: 1130 })
       expect(refund.id).not.toBe(receipt.id)
 
-      // A visit paid in cash gets a service receipt; marking it «Ждём» again refunds it.
+      // A visit paid in cash gets a service receipt; marking it “Waiting” again refunds it.
       const visit = await createPastVisit('E2E Чек Клиент', randomClientPhone(), 1)
       const marked = await page.request.patch(`${manage}/bookings/${visit.booking.id}/outcome`, {
         data: { outcome: 'arrived', paymentMethod: 'cash' },
@@ -204,10 +204,10 @@ test.describe('Fiscal receipts', () => {
       expect(visitReceipt).toMatchObject({ kind: 'sale', total: paid, payment: 'cash' })
       expect(visitReceipt.lines[0]).toMatchObject({ kind: 'service', salesTaxRate: 2 })
 
-      // The inspector's «Итог визита» shows it as a row.
+      // The inspector's “Visit outcome” shows it as a row.
       await page.goto(`/manage/${SLUG}?tab=schedule&date=${visit.date}&booking=${visit.booking.id}`)
       await expect(
-        page.getByRole('button', { name: new RegExp(`Чек\\s*№${visitReceipt.fiscalNumber}`) }),
+        page.getByRole('button', { name: new RegExp(`Receipt\\s*№${visitReceipt.fiscalNumber}`) }),
       ).toBeVisible()
 
       await page.request.patch(`${manage}/bookings/${visit.booking.id}/outcome`, {

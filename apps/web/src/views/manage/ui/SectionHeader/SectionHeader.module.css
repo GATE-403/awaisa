@@ -44,7 +44,7 @@
 }
 
 /* Phones: the section's actions float across the window's foot (16pt in), each a full-height
-   capsule sharing the width, like the page's «+ Добавить». */
+   capsule sharing the width, like the page's "+ Add". */
 @media (max-width: 639px) {
   .floating.floating {
     right: var(--space-4);
@@ -61,7 +61,7 @@
   }
 }
 
-/* A capsule of glyphs keeps its own width beside the wide action (as on «Страница»). */
+/* A capsule of glyphs keeps its own width beside the wide action (as on "Page"). */
 @media (max-width: 639px) {
   .floating.floating > [role="group"] {
     flex: 0 0 auto;

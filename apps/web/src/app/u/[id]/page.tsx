@@ -2,14 +2,15 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { getProfileOnServer } from '@/shared/api/sessionApi'
+import { pluralize } from '@/shared/lib/plural'
 import { ProfilePage, ProfileSkeleton } from '@/views/publicProfile'
 
 export const generateMetadata = async ({ params }: PageProps<'/u/[id]'>): Promise<Metadata> => {
   const profile = await getProfileOnServer((await params).id)
-  if (!profile) return { title: 'Профиль', robots: { index: false } }
+  if (!profile) return { title: 'Profile', robots: { index: false } }
   return {
-    title: `${profile.name} - профиль`,
-    description: `${profile.name} в Awaisa: уровень ${profile.level.level}, ${profile.badges.length} значков`,
+    title: `${profile.name} - profile`,
+    description: `${profile.name} on Awaisa: level ${profile.level.level}, ${pluralize(profile.badges.length, ['badge', 'badges'])}`,
     robots: { index: false },
   }
 }

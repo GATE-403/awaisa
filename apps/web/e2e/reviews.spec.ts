@@ -9,7 +9,7 @@ const _WEBHOOK_SECRET = 'e2e-webhook-secret'
 
 const SLUG = 'awaisa-studio'
 
-// The same link the «как прошёл визит?» SMS carries.
+// The same link the “how was your visit?” SMS carries.
 const reviewLink = (bookingId: string) => {
   const signature = createHmac('sha256', process.env.AUTH_SECRET || DEV_AUTH_SECRET)
     .update(`review:${bookingId}`)
@@ -57,15 +57,15 @@ test.describe('Reviews after a visit', () => {
     await page.goto(reviewLink(booking.id))
     await expect(page.getByRole('heading', { name: 'Awaisa Studio' })).toBeVisible()
     // Sending without stars explains what is missing instead of a disabled button.
-    await page.getByRole('button', { name: 'Отправить отзыв' }).click()
-    await expect(page.getByRole('alert').filter({ hasText: 'Поставьте оценку' })).toBeVisible()
+    await page.getByRole('button', { name: 'Send review' }).click()
+    await expect(page.getByRole('alert').filter({ hasText: 'Give a rating' })).toBeVisible()
 
-    await page.getByLabel(/^5 из 5/).check({ force: true })
-    await expect(page.getByText('Отлично')).toBeVisible()
+    await page.getByLabel(/^5 of 5/).check({ force: true })
+    await expect(page.getByText('Excellent')).toBeVisible()
     const comment = `E2E отзыв ${testInfo.project.name} ${Date.now()}`
-    await page.getByLabel(/Расскажите подробнее/).fill(comment)
-    await page.getByRole('button', { name: 'Отправить отзыв' }).click()
-    await expect(page.getByText('Спасибо! Отзыв помогает')).toBeVisible()
+    await page.getByLabel(/Tell us more/).fill(comment)
+    await page.getByRole('button', { name: 'Send review' }).click()
+    await expect(page.getByText('Thank you! Your review helps')).toBeVisible()
 
     // One review per visit.
     const again = await page.request.post(`/api/bookings/${booking.id}/review`, {
@@ -75,16 +75,16 @@ test.describe('Reviews after a visit', () => {
     expect(again.status()).toBe(409)
 
     await page.goto(`/${SLUG}`)
-    const reviews = page.getByRole('region', { name: 'Отзывы' })
+    const reviews = page.getByRole('region', { name: 'Reviews' })
     await expect(reviews).toContainText(comment)
 
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto(`/manage/${SLUG}?tab=reviews`)
     const item = page.getByRole('listitem').filter({ hasText: comment })
     // The reply is typed right under the review and sent with the round button.
-    await item.getByLabel('Ответ на отзыв').fill('Спасибо, ждём снова!')
-    await item.getByRole('button', { name: 'Отправить ответ' }).click()
-    await expect(page.getByText('Ответ опубликован')).toBeVisible()
+    await item.getByLabel('Reply to the review').fill('Спасибо, ждём снова!')
+    await item.getByRole('button', { name: 'Send reply' }).click()
+    await expect(page.getByText('Reply published')).toBeVisible()
     await expect(item).toContainText('Спасибо, ждём снова!')
   })
 
@@ -99,7 +99,7 @@ test.describe('Reviews after a visit', () => {
 })
 
 test.describe('Rating in one tap', () => {
-  test('«Как прошло?» opens the review with the stars tapped; photos go with it', async ({
+  test('“How was it?” opens the review with the stars tapped; photos go with it', async ({
     page,
   }) => {
     test.setTimeout(90_000)
@@ -113,21 +113,21 @@ test.describe('Rating in one tap', () => {
     expect(own.awaitingReview).toBeGreaterThanOrEqual(1)
 
     await page.goto('/bookings')
-    const card = page.getByRole('region', { name: 'Как прошло?' })
+    const card = page.getByRole('region', { name: 'How was it?' })
     await expect(card).toBeVisible()
-    await card.getByRole('button', { name: '4 из 5' }).click()
+    await card.getByRole('button', { name: '4 of 5' }).click()
     const sheet = page.getByRole('dialog')
-    await expect(sheet.getByText('Хорошо')).toBeVisible()
-    await sheet.getByLabel('Фото к отзыву').setInputFiles({
+    await expect(sheet.getByText('Good')).toBeVisible()
+    await sheet.getByLabel('Review photo').setInputFiles({
       name: 'work.png',
       mimeType: 'image/png',
       buffer: PIXEL,
     })
-    await expect(sheet.getByRole('img', { name: 'Фото 1' })).toBeVisible()
+    await expect(sheet.getByRole('img', { name: 'Photo 1' })).toBeVisible()
     const comment = `E2E фото ${Date.now()}`
-    await sheet.getByLabel(/Расскажите подробнее/).fill(comment)
-    await sheet.getByRole('button', { name: 'Отправить отзыв' }).click()
-    await expect(page.getByText('Спасибо за отзыв')).toBeVisible()
+    await sheet.getByLabel(/Tell us more/).fill(comment)
+    await sheet.getByRole('button', { name: 'Send review' }).click()
+    await expect(page.getByText('Thanks for the review')).toBeVisible()
     await expect(card).toHaveCount(0)
 
     const review = await (await page.request.get(`/api/bookings/${booking.id}/review`)).json()
@@ -139,7 +139,7 @@ test.describe('Rating in one tap', () => {
       (item: { comment: string; photos: string[] }) => item.comment === comment,
     )
     expect(mine?.photos).toHaveLength(1)
-    // In «Образы» it is marked as the client's own.
+    // In “Looks” it is marked as the client's own.
     const feed = await (await page.request.get(`/api/feed?business=${SLUG}`)).json()
     const shared = feed.items.find((item: { url: string }) => item.url === mine.photos[0])
     expect(shared?.isFromClient).toBe(true)

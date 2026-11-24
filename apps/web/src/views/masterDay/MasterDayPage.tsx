@@ -37,31 +37,31 @@ type Choice = 'pending' | VisitOutcome
 
 const DAYS_SHOWN = 14
 const MONTHS = [
-  'январь',
-  'февраль',
-  'март',
-  'апрель',
-  'май',
-  'июнь',
-  'июль',
-  'август',
-  'сентябрь',
-  'октябрь',
-  'ноябрь',
-  'декабрь',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 const PAST_DAYS = 7
 const FORBIDDEN = 403
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 const OUTCOMES: { value: Choice; label: string }[] = [
-  { value: 'pending', label: 'Ждём' },
-  { value: 'arrived', label: 'Пришёл' },
-  { value: 'no_show', label: 'Не пришёл' },
+  { value: 'pending', label: 'Waiting' },
+  { value: 'arrived', label: 'Arrived' },
+  { value: 'no_show', label: 'No-show' },
 ]
 
 const minutesUntil = (from: number, to: number, t: Translate) =>
-  t('через {time}', { time: t.duration(to - from) })
+  t('in {time}', { time: t.duration(to - from) })
 
 // The master's own day, phone first: who comes when, how to reach them, and closing each visit.
 // Nothing about other masters or the business settings.
@@ -150,9 +150,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
       // The result is still in front of the master: the camera is one tap away.
       if (choice === 'arrived' && !day?.photos.bookingIds.includes(booking.id)) {
         toast.show({
-          title: t('Отмечено: пришёл'),
+          title: t('Marked: arrived'),
           type: 'success',
-          action: { label: t('Сфотографировать'), onClick: () => visitPhoto.pick(booking.id) },
+          action: { label: t('Take a photo'), onClick: () => visitPhoto.pick(booking.id) },
         })
       }
       // The week's photo count follows the mark: an arrived visit of the last seven days counts.
@@ -170,7 +170,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
       )
     } catch (outcomeError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(outcomeError),
         type: 'error',
       })
@@ -183,13 +183,13 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
         <Container size='sm' className={styles.content}>
           <PageTitle
             size='sm'
-            title={t('Нет доступа.')}
+            title={t('No access.')}
             subtitle={t(
-              'Этот номер не привязан к мастеру. Попросите владельца указать его в карточке мастера.',
+              'This number is not linked to a specialist. Ask the owner to add it to the specialist card.',
             )}
           />
           <NextLink href='/bookings' className={styles.link}>
-            {t('В профиль')} ›
+            {t('To profile')} ›
           </NextLink>
         </Container>
       </main>
@@ -201,18 +201,18 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
     : day.leaveReason
       ? day.leaveReason
       : day.hours
-        ? t('Вы работаете {from}–{to}', {
+        ? t('You work {from}–{to}', {
             from: formatClock(day.hours.opensMinutes),
             to: formatClock(day.hours.closesMinutes),
           })
-        : t('Выходной')
+        : t('Closed')
 
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
         <PageTitle
           size='sm'
-          title={t('Мой день.')}
+          title={t('My day.')}
           subtitle={day ? `${day.master.name} · ${day.business.name}` : ' '}
         />
 
@@ -224,18 +224,18 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
         {day && (
           <>
             {/* The day's facts as one footnote line with bold figures, like the quiet profile
-                (three tiles parted by lines read as a dashboard: «не соответствует философии»). */}
+                (three tiles parted by lines read as a dashboard: "does not fit the philosophy"). */}
             <p className={styles.facts}>
               <b>{live.length}</b>{' '}
-              {t.count(live.length, ['запись', 'записи', 'записей']).replace(/^\d+\s/, '')}
+              {t.count(live.length, ['booking', 'bookings']).replace(/^\d+\s/, '')}
               {' · '}
               <b>{formatPrice(day.pay === null ? total : day.pay.day)}</b>{' '}
               <span>
                 {day.pay === null
-                  ? t('за день')
+                  ? t('for the day')
                   : day.pay.percent === null
-                    ? t('заработали')
-                    : t('ваши {percent}%', { percent: day.pay.percent })}
+                    ? t('earned')
+                    : t('your {percent}%', { percent: day.pay.percent })}
               </span>
               {hoursLine && (
                 <>
@@ -247,9 +247,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 <>
                   {' · '}
                   <b>{day.followers}</b>{' '}
-                  {t
-                    .count(day.followers, ['подписчик', 'подписчика', 'подписчиков'])
-                    .replace(/^\d+ /, '')}
+                  {t.count(day.followers, ['follower', 'followers']).replace(/^\d+ /, '')}
                 </>
               )}
             </p>
@@ -257,7 +255,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
             {/* The month only when it says more than the day (on the month's first working day they match). */}
             {day.pay !== null && day.pay.month !== day.pay.day && (
               <RowNote className={styles.monthPay}>
-                {t('За {month} заработано', {
+                {t('Earned in {month}', {
                   month: t(MONTHS[Number(day.pay.monthFrom.slice(5, 7)) - 1] ?? ''),
                 })}{' '}
                 <b>{formatPrice(day.pay.month)}</b>
@@ -266,9 +264,9 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
 
             {day.photos.weekVisits > 0 && (
               <RowNote className={styles.monthPay}>
-                {t('Фото работ за неделю: {done} из {visits}', {
+                {t('Work photos this week: {done} of {visits}', {
                   done: day.photos.weekWithPhoto,
-                  visits: t.count(day.photos.weekVisits, ['визита', 'визитов', 'визитов']),
+                  visits: t.count(day.photos.weekVisits, ['visit', 'visits']),
                 })}
               </RowNote>
             )}
@@ -277,8 +275,8 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
               <div className={styles.now} aria-live='polite'>
                 {current && (
                   <p>
-                    <strong>{t('Сейчас')}:</strong>{' '}
-                    {t('{name}, {service} до {time}', {
+                    <strong>{t('Now')}:</strong>{' '}
+                    {t('{name}, {service} until {time}', {
                       name: current.customerName,
                       service: current.serviceName,
                       time: addMinutes(current.time, current.durationMinutes),
@@ -287,8 +285,8 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                 )}
                 {next && now !== null && (
                   <p>
-                    <strong>{t('Следующий')}:</strong>{' '}
-                    {t('{name} в {time}, {wait}', {
+                    <strong>{t('Next')}:</strong>{' '}
+                    {t('{name} at {time}, {wait}', {
                       name: next.customerName,
                       time: next.time,
                       wait: minutesUntil(now, parseClock(next.time), t),
@@ -300,11 +298,11 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
 
             {day.bookings.length === 0 ? (
               <EmptyState
-                title={day.hours ? t('Записей пока нет') : (hoursLine ?? undefined)}
+                title={day.hours ? t('No bookings yet') : (hoursLine ?? undefined)}
                 text={
                   day.hours
-                    ? t('Новые записи появятся здесь сами.')
-                    : t('В этот день записи к вам не открыты.')
+                    ? t('New bookings will appear here.')
+                    : t('Bookings with you are not open this day.')
                 }
               />
             ) : (
@@ -327,14 +325,14 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                       <span className={styles.body}>
                         <span className={styles.service}>
                           {booking.serviceName}
-                          {isCancelled && <span className={styles.badge}>{t('Отменена')}</span>}
+                          {isCancelled && <span className={styles.badge}>{t('Cancelled')}</span>}
                         </span>
                         <span className={styles.client}>
                           {booking.customerName} · {formatPhone(booking.customerPhone)}
                         </span>
                         {booking.comment && (
                           <span className={styles.comment}>
-                            <ChatText aria-hidden />«{booking.comment}»
+                            <ChatText aria-hidden />"{booking.comment}"
                           </span>
                         )}
                         {booking.lookPhotoUrl && (
@@ -352,7 +350,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                         <a
                           href={`tel:${booking.customerPhone}`}
                           className={styles.call}
-                          aria-label={t('Позвонить: {name}', { name: booking.customerName })}
+                          aria-label={t('Call {name}', { name: booking.customerName })}
                         >
                           <Phone aria-hidden />
                         </a>
@@ -360,7 +358,7 @@ export const MasterDayPage = ({ slug }: MasterDayPageProps) => {
                       {canMark && !isCancelled && (
                         <span className={styles.outcome}>
                           <SegmentedControl
-                            label={t('Итог визита {time}', { time: booking.time })}
+                            label={t('Visit outcome {time}', { time: booking.time })}
                             value={booking.outcome ?? 'pending'}
                             items={OUTCOMES.map((item) => ({ ...item, label: t(item.label) }))}
                             onChange={(choice) => void handleOutcome(booking, choice)}

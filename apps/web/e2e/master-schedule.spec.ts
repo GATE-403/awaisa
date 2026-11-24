@@ -77,18 +77,18 @@ test.describe('Master schedules', () => {
       await page.request.delete(`${manage}/leaves/${leave.id}`)
       expect((await slotsOn(date)).length).toBeGreaterThan(0)
 
-      // The cabinet sheet: switch off «Как у салона» and save.
+      // The cabinet sheet: switch off “Same as the salon” and save.
       await page.goto(`/manage/${SLUG}?tab=masters`)
       await page
         .getByRole('button', { name: new RegExp(master.name) })
         .first()
         .click()
-      await page.getByRole('button', { name: 'График и отпуск' }).click()
+      await page.getByRole('button', { name: 'Schedule and leave' }).click()
       const sheet = page.getByRole('dialog', { name: master.name })
       await sheet.getByRole('switch').first().click()
-      await expect(sheet.getByText('Понедельник')).toBeVisible()
-      await sheet.getByRole('button', { name: 'Сохранить' }).click()
-      await expect(page.getByText(`График ${master.name} сохранён`)).toBeVisible()
+      await expect(sheet.getByText('Monday')).toBeVisible()
+      await sheet.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByText(`Schedule for ${master.name} saved`)).toBeVisible()
       expect((await (await page.request.get(`${manage}/schedule`)).json()).hasOwnHours).toBe(true)
     } finally {
       await page.request.put(`${manage}/hours`, { data: { hasOwnHours: false, days: [] } })

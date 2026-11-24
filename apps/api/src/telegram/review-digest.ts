@@ -10,7 +10,7 @@ type ReviewWeek = {
   previousAverage: number | null
   /** The master with the best average this week (at least two reviews), if any. */
   bestMaster: { name: string; average: number; count: number } | null
-  /** Ratings of 3 ★ and below with no reply and not marked «Решено». */
+  /** Ratings of 3 ★ and below with no reply and not marked «Resolved». */
   poorOpen: number
   /** Every review still without a reply. */
   unanswered: number
@@ -20,17 +20,11 @@ type ReviewWeek = {
 const escapeHtml = (value: string) =>
   value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 
-const plural = (count: number, [one, few, many]: [string, string, string]) => {
-  const mod10 = count % 10
-  const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
-}
+const plural = (count: number, [one, other]: [string, string]) => (count === 1 ? one : other)
 
-const REVIEWS: [string, string, string] = ['отзыв', 'отзыва', 'отзывов']
+const REVIEWS: [string, string] = ['review', 'reviews']
 
-const rating = (value: number) => value.toFixed(1).replace('.', ',')
+const rating = (value: number) => value.toFixed(1)
 
 // A change smaller than this reads as noise, not a trend.
 const NOTICEABLE_CHANGE = 0.05
@@ -38,39 +32,39 @@ const NOTICEABLE_CHANGE = 0.05
 const changeText = (average: number, previous: number | null) => {
   if (previous === null) return ''
   const change = average - previous
-  if (Math.abs(change) < NOTICEABLE_CHANGE) return ' (как на прошлой неделе)'
+  if (Math.abs(change) < NOTICEABLE_CHANGE) return ' (same as last week)'
   const sign = change > 0 ? '▲ +' : '▼ −'
-  return ` (${sign}${rating(Math.abs(change))} к прошлой неделе)`
+  return ` (${sign}${rating(Math.abs(change))} on last week)`
 }
 
 /** The week's summary, or null when there is nothing to say (no reviews and nothing waiting). */
 const reviewDigestText = (week: ReviewWeek) => {
   if (week.count === 0 && week.unanswered === 0) return null
 
-  const lines = [`📊 <b>Отзывы за неделю · ${escapeHtml(week.business)}</b>`]
+  const lines = [`📊 <b>Reviews this week · ${escapeHtml(week.business)}</b>`]
   if (week.count > 0 && week.average !== null) {
     lines.push(
-      `${week.count} ${plural(week.count, REVIEWS)}, средняя ★ ${rating(week.average)}${changeText(week.average, week.previousAverage)}`,
+      `${week.count} ${plural(week.count, REVIEWS)}, average ★ ${rating(week.average)}${changeText(week.average, week.previousAverage)}`,
     )
   } else {
-    lines.push('Новых отзывов не было')
+    lines.push('No new reviews')
   }
   if (week.bestMaster) {
     const master = week.bestMaster
     lines.push(
-      `Лучший мастер: ${escapeHtml(master.name)}, ★ ${rating(master.average)} (${master.count} ${plural(master.count, REVIEWS)})`,
+      `Top specialist: ${escapeHtml(master.name)}, ★ ${rating(master.average)} (${master.count} ${plural(master.count, REVIEWS)})`,
     )
   }
   if (week.poorOpen > 0) {
     lines.push(
-      `⚠️ Ждут вашего ответа: ${week.poorOpen} ${plural(week.poorOpen, ['плохой отзыв', 'плохих отзыва', 'плохих отзывов'])}`,
+      `⚠️ Waiting for your reply: ${week.poorOpen} ${plural(week.poorOpen, ['poor review', 'poor reviews'])}`,
     )
   }
   if (week.unanswered > 0) {
-    lines.push(`Без ответа всего: ${week.unanswered}`)
+    lines.push(`Unanswered in total: ${week.unanswered}`)
   }
   if (week.unanswered > 0 || week.poorOpen > 0) {
-    lines.push(`<a href="${escapeHtml(week.cabinetUrl)}">Ответить в кабинете</a>`)
+    lines.push(`<a href="${escapeHtml(week.cabinetUrl)}">Reply in the dashboard</a>`)
   }
 
   return lines.join('\n')

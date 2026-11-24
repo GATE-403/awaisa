@@ -10,7 +10,7 @@ interface PhotosSectionProps {
   business: Business
 }
 
-// «Работы»: the owner's grid as clients see it, square photos three a row in the owner's order.
+// «Work»: the owner's grid as clients see it, square photos three a row in the owner's order.
 // A tap opens them full screen, every one of them.
 export const PhotosSection = ({ business }: PhotosSectionProps) => {
   const t = useT()
@@ -23,7 +23,7 @@ export const PhotosSection = ({ business }: PhotosSectionProps) => {
           <PhotoGridTile
             key={url}
             src={url}
-            label={t('Открыть фото {index} из {total}', {
+            label={t('Open photo {index} of {total}', {
               index: index + 1,
               total: business.photos.length,
             })}

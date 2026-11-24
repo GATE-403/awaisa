@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
 // Design defects a person sees at a glance, checked in the page like the a11y scan. Each rule is
-// one the owner had to point out by hand (docs/design/patterns.md, «Тесты на дизайн»), so a screen
+// one the owner had to point out by hand (docs/design/patterns.md, “Тесты на дизайн”), so a screen
 // that repeats it fails the run instead of reaching the owner again.
 
 type DesignFinding = { rule: DesignRule; target: string; detail: string }
@@ -19,7 +19,7 @@ type DesignRule =
   | 'contextless-link'
   /** A glyph on a coloured tile in a row: the old Settings look, glyphs are bare and quiet now. */
   | 'glyph-tile'
-  /** A menu of one item: a second «are you sure» tap dressed as a menu. */
+  /** A menu of one item: a second “are you sure” tap dressed as a menu. */
   | 'single-item-menu'
   /** Two actions side by side under a centred head, of different widths: the gap leaves the axis. */
   | 'off-axis-pair'
@@ -27,15 +27,15 @@ type DesignRule =
   | 'overlap'
 
 const RULE_TITLES: Record<DesignRule, string> = {
-  'sticks-out': 'вылезает за свой фон',
-  'stat-tiles': 'цифры в плитках с вертикальными разделителями',
-  'narrow-action': 'кнопка уже групп над ней',
-  'action-after-primary': 'действия после главной кнопки листа',
-  'contextless-link': 'кнопка уводит в общий раздел без контекста',
-  'glyph-tile': 'иконка на цветной плитке',
-  'single-item-menu': 'меню из одного пункта вместо действия',
-  'off-axis-pair': 'пара кнопок не на общей оси',
-  overlap: 'элементы капсулы налезают друг на друга',
+  'sticks-out': 'sticks out of its background',
+  'stat-tiles': 'figures in tiles with vertical dividers',
+  'narrow-action': 'button narrower than the groups above it',
+  'action-after-primary': 'actions after the sheet’s main button',
+  'contextless-link': 'button leads to a whole section without context',
+  'glyph-tile': 'glyph on a coloured tile',
+  'single-item-menu': 'menu of one item instead of an action',
+  'off-axis-pair': 'pair of buttons off the common axis',
+  overlap: 'capsule controls overlap each other',
 }
 
 const findDesignDefects = (page: Page, scope?: string) =>
@@ -62,7 +62,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
         element.getAttribute('aria-label') ??
         (element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 50)
       const className = (element.getAttribute('class') ?? '').split(/\s+/)[0] ?? ''
-      return `${element.tagName.toLowerCase()}${className ? `.${className.replace(/_[A-Za-z0-9-]+$/, '')}` : ''} «${label}»`
+      return `${element.tagName.toLowerCase()}${className ? `.${className.replace(/_[A-Za-z0-9-]+$/, '')}` : ''} “${label}”`
     }
     const isPainted = (style: CSSStyleDeclaration) => {
       const background = style.backgroundColor
@@ -96,7 +96,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
       if (!isPainted(style) || isScroller(style) || isClipping(style)) continue
       if (box === document.body || box === document.documentElement) continue
       const outer = box.getBoundingClientRect()
-      // A hairline (the timeline's red «now» line) is not a capsule: its time hangs across it.
+      // A hairline (the timeline's red “now” line) is not a capsule: its time hangs across it.
       if (outer.width <= 3 || outer.height <= 3) continue
       for (const child of box.querySelectorAll('*')) {
         if (!isShown(child) || isOutOfFlow(child)) continue
@@ -123,7 +123,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
           out.push({
             rule: 'sticks-out',
             target: name(child),
-            detail: `выходит на ${Math.round(past)}px за ${name(box)}`,
+            detail: `sticks out ${Math.round(past)}px past ${name(box)}`,
           })
           break
         }
@@ -170,7 +170,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
       out.push({
         rule: 'stat-tiles',
         target: name(row),
-        detail: `${cells.length} плитки «число над подписью» с вертикальными линиями`,
+        detail: `${cells.length} “figure over caption” tiles with vertical lines`,
       })
     }
 
@@ -216,7 +216,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
         out.push({
           rule: 'narrow-action',
           target: name(action),
-          detail: `${Math.round(rect.width)}px под группами в ${Math.round(widest)}px`,
+          detail: `${Math.round(rect.width)}px under groups of ${Math.round(widest)}px`,
         })
     }
 
@@ -239,7 +239,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
           out.push({
             rule: 'action-after-primary',
             target: name(main),
-            detail: `после неё ещё ${after.map(name).join(', ')}`,
+            detail: `followed by ${after.map(name).join(', ')}`,
           })
       }
       for (const link of dialog.querySelectorAll('a[href][data-variant]')) {
@@ -254,7 +254,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
           out.push({
             rule: 'contextless-link',
             target: name(link),
-            detail: `ведёт на ${url.search} без того, о ком или о чём лист`,
+            detail: `leads to ${url.search} without who or what the sheet is about`,
           })
       }
     }
@@ -277,7 +277,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
       out.push({
         rule: 'glyph-tile',
         target: name(row),
-        detail: `иконка на плитке ${style.backgroundColor}`,
+        detail: `glyph on a ${style.backgroundColor} tile`,
       })
     }
 
@@ -289,8 +289,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
         out.push({
           rule: 'single-item-menu',
           target: name(items[0]),
-          detail:
-            'единственный пункт меню повторяет кнопку: действие делай сразу (с «Вернуть») или удержанием',
+          detail: 'the only menu item repeats the button: act at once (with “Undo”) or by holding',
         })
     }
 
@@ -317,13 +316,13 @@ const findDesignDefects = (page: Page, scope?: string) =>
         out.push({
           rule: 'off-axis-pair',
           target: name(row),
-          detail: `ширины ${widths.map(Math.round).join(' и ')}px: просвет между ними уходит с оси на ${Math.round(spread / 2)}px`,
+          detail: `widths ${widths.map(Math.round).join(' and ')}px: the gap between them leaves the axis by ${Math.round(spread / 2)}px`,
         })
     }
 
     // 9. Controls of one capsule or toolbar lie side by side, never over each other. A segmented
     //    control's knob counts too: it sits exactly over its own segment and touches no other
-    //    control (it once spilled with its segment onto the schedule's «На всю ширину» glyph on a
+    //    control (it once spilled with its segment onto the schedule's “Full width” glyph on a
     //    375pt phone). Checked per holder, so a floating bar over the page or a calendar's
     //    stacked visits are not compared with what lies under them.
     const holders = [...root.querySelectorAll('*')].filter((holder) => {
@@ -397,8 +396,8 @@ const findDesignDefects = (page: Page, scope?: string) =>
               rule: 'overlap',
               target: name(knob.parentElement ?? knob),
               detail: isOwn
-                ? `бегунок не совпадает с выбранным сегментом на ${Math.round(drift)}px`
-                : `бегунок заходит на ${Math.round(depth)}px на сегмент ${name(segment)}`,
+                ? `the knob is off the chosen segment by ${Math.round(drift)}px`
+                : `the knob runs ${Math.round(depth)}px onto segment ${name(segment)}`,
             })
             continue
           }
@@ -408,7 +407,7 @@ const findDesignDefects = (page: Page, scope?: string) =>
             rule: 'overlap',
             target: name(knob ? (knob.parentElement ?? knob) : first),
             detail:
-              `${knob ? 'бегунок' : ''} налезает на ${Math.round(depth)}px на ${name(knob ? segment : second)} в ${name(holder)}`.trim(),
+              `${knob ? 'the knob' : ''} overlaps ${name(knob ? segment : second)} by ${Math.round(depth)}px in ${name(holder)}`.trim(),
           })
         }
       }

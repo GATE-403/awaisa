@@ -56,8 +56,8 @@ const toIso = (value: unknown) =>
  * Fiscal receipts for the counter: a product sale, the money paid at a visit and their refunds.
  * Receipts go into a queue and are sent after the sale or the visit is saved, so a provider
  * that is down never fails the sale: the queue retries (1, 2, 4 … minutes) and the owner can
- * send one again by hand. Which provider is FISCAL_DRIVER; each business brings its own ИНН
- * and its own login at that provider («Настройки → Касса»).
+ * send one again by hand. Which provider is FISCAL_DRIVER; each business brings its own TIN
+ * and its own login at that provider («Settings → Till»).
  */
 @Injectable()
 export class FiscalService {
@@ -126,7 +126,7 @@ export class FiscalService {
     return this.getSettings(businessId)
   }
 
-  /** Whether the cabinet's settings row should say «Включены». */
+  /** Whether the cabinet's settings row should say «On». */
   async isOn(businessId: string) {
     if (!this.driver) return false
     return (await this.loadSettings(this.dataSource.manager, businessId)).isEnabled
@@ -270,7 +270,7 @@ export class FiscalService {
   /** The client's own link (`/receipt/<id>?s=`), no sign-in. */
   async publicReceipt(receiptId: string, signature: string) {
     if (!isReceiptSignature(receiptId, signature, this.authSecret)) {
-      throw new NotFoundException('Чек не найден')
+      throw new NotFoundException('Receipt not found')
     }
     return this.findReceipt(receiptId)
   }
@@ -327,7 +327,7 @@ export class FiscalService {
       const message =
         error instanceof FiscalSendError
           ? error.message
-          : `Касса не ответила: ${error instanceof Error ? error.message : String(error)}`
+          : `The till did not answer: ${error instanceof Error ? error.message : String(error)}`
       const isOver = hasGivenUp(attempts)
       await this.dataSource.query(
         `UPDATE "fiscal_receipts" SET "status" = $2, "last_error" = $3,
@@ -495,7 +495,7 @@ export class FiscalService {
        WHERE r."id" = $1 AND ($2::uuid IS NULL OR r."business_id" = $2)`,
       [receiptId, businessId ?? null],
     )
-    if (!row) throw new NotFoundException('Чек не найден')
+    if (!row) throw new NotFoundException('Receipt not found')
     return this.toReceipt(row)
   }
 

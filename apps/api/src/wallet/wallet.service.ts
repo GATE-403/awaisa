@@ -61,11 +61,11 @@ export class WalletService {
       expected.length === given.length &&
       timingSafeEqual(expected, given) &&
       Number(expires) > Date.now()
-    if (!isValid) throw new NotFoundException('Ссылка устарела - откройте запись ещё раз')
+    if (!isValid) throw new NotFoundException('The link has expired: open the booking again')
   }
 
   async createApplePass(booking: BookingView) {
-    if (!this.isAppleEnabled) throw new NotFoundException('Apple Wallet не настроен')
+    if (!this.isAppleEnabled) throw new NotFoundException('Apple Wallet is not set up')
 
     const pass = new PKPass(
       {
@@ -89,24 +89,24 @@ export class WalletService {
             ).toISOString(),
             voided: booking.status === 'cancelled',
             eventTicket: {
-              primaryFields: [{ key: 'service', label: 'УСЛУГА', value: booking.serviceName }],
+              primaryFields: [{ key: 'service', label: 'SERVICE', value: booking.serviceName }],
               secondaryFields: [
                 {
                   key: 'date',
-                  label: 'КОГДА',
+                  label: 'WHEN',
                   value: booking.startsAt,
                   dateStyle: 'PKDateStyleMedium',
                   timeStyle: 'PKDateStyleShort',
                 },
-                { key: 'master', label: 'МАСТЕР', value: booking.specialistName },
+                { key: 'master', label: 'SPECIALIST', value: booking.specialistName },
               ],
               auxiliaryFields: [
-                { key: 'client', label: 'КЛИЕНТ', value: booking.customerName },
-                { key: 'code', label: 'НОМЕР', value: booking.id.slice(0, 8).toUpperCase() },
+                { key: 'client', label: 'CLIENT', value: booking.customerName },
+                { key: 'code', label: 'NUMBER', value: booking.id.slice(0, 8).toUpperCase() },
               ],
               backFields: [
-                { key: 'address', label: 'Адрес', value: booking.business.address || '-' },
-                { key: 'phone', label: 'Телефон', value: booking.business.phone || '-' },
+                { key: 'address', label: 'Address', value: booking.business.address || '-' },
+                { key: 'phone', label: 'Phone', value: booking.business.phone || '-' },
               ],
             },
             barcodes: [
@@ -151,12 +151,12 @@ export class WalletService {
             classId,
             state: booking.status === 'cancelled' ? 'INACTIVE' : 'ACTIVE',
             hexBackgroundColor: '#0071e3',
-            cardTitle: { defaultValue: { language: 'ru', value: booking.business.name } },
-            header: { defaultValue: { language: 'ru', value: booking.serviceName } },
-            subheader: { defaultValue: { language: 'ru', value: booking.specialistName } },
+            cardTitle: { defaultValue: { language: 'en', value: booking.business.name } },
+            header: { defaultValue: { language: 'en', value: booking.serviceName } },
+            subheader: { defaultValue: { language: 'en', value: booking.specialistName } },
             textModulesData: [
-              { id: 'when', header: 'Когда', body: `${booking.date} ${booking.time}` },
-              { id: 'address', header: 'Адрес', body: booking.business.address || '-' },
+              { id: 'when', header: 'When', body: `${booking.date} ${booking.time}` },
+              { id: 'address', header: 'Address', body: booking.business.address || '-' },
             ],
             barcode: {
               type: 'QR_CODE',

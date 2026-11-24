@@ -1,4 +1,4 @@
-/* Phones: rows right on the page (no cards, «убери лишние обёртки фона»), 44pt, hairlines inset
+/* Phones: rows right on the page (no cards, "drop the extra background wrappers"), 44pt, hairlines inset
    past the glyph; the search floats at the window's foot. */
 .nav {
   display: flex;
@@ -59,8 +59,8 @@
   box-shadow: var(--focus-ring);
 }
 
-/* A thin glyph, all in one quiet colour, no tile behind it («убери фон от иконок», «иконки
-   сделай одного цвета»). */
+/* A thin glyph, all in one quiet colour, no tile behind it ("remove the background behind the icons", "make the
+   icons one colour"). */
 .glyph {
   display: inline-grid;
   flex-shrink: 0;
@@ -200,7 +200,7 @@
   inset-inline: 0;
 }
 
-/* «Скрыть или удалить» opens a sheet: a button dressed as the link rows above. */
+/* "Hide or delete" opens a sheet: a button dressed as the link rows above. */
 .rowButton {
   width: 100%;
   border: none;
@@ -210,7 +210,7 @@
   cursor: pointer;
 }
 
-/* Red like «Выйти» at the foot of the profile's settings: it leads to deleting the business. */
+/* Red like "Sign out" at the foot of the profile's settings: it leads to deleting the business. */
 .danger .glyph,
 .danger .label,
 .danger .label.label {

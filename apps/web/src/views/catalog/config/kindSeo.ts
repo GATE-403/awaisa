@@ -2,33 +2,33 @@ import type { BusinessKind } from '@/shared/api/types'
 
 type KindSeo = { title: string; description: string }
 
-// What people type into a search engine for each kind. «Другое» has no landing of its own: it
+// What people type into a search engine for each kind. «Other» has no landing of its own: it
 // mixes whatever does not fit the rest, so it stays out of the index.
 const KIND_SEO: Partial<Record<BusinessKind, KindSeo>> = {
   beauty: {
-    title: 'Салоны красоты Бишкека: цены и онлайн-запись',
+    title: 'Beauty salons in Bishkek: prices and online booking',
     description:
-      'Стрижки, окрашивание, укладки и макияж в салонах Бишкека: цены, мастера с отзывами и свободное время. Запись онлайн без звонков.',
+      'Haircuts, colouring, styling and make-up in Bishkek salons: prices, reviewed specialists and free times. Book online, no calls.',
   },
   barber: {
-    title: 'Барбершопы Бишкека: цены и онлайн-запись',
+    title: 'Barbershops in Bishkek: prices and online booking',
     description:
-      'Мужские стрижки, борода и бритьё в барбершопах Бишкека: цены, барберы с отзывами и свободное время. Запись онлайн без звонков.',
+      'Men’s haircuts, beard trims and shaves in Bishkek barbershops: prices, reviewed barbers and free times. Book online, no calls.',
   },
   nails: {
-    title: 'Маникюр и педикюр в Бишкеке: цены и онлайн-запись',
+    title: 'Manicure and pedicure in Bishkek: prices and online booking',
     description:
-      'Ногтевые студии Бишкека: маникюр, педикюр и наращивание, цены, мастера с отзывами и свободное время. Запись онлайн без звонков.',
+      'Nail studios in Bishkek: manicure, pedicure and extensions, prices, reviewed specialists and free times. Book online, no calls.',
   },
   spa: {
-    title: 'SPA и массаж в Бишкеке: цены и онлайн-запись',
+    title: 'Spa and massage in Bishkek: prices and online booking',
     description:
-      'Массаж, SPA и уход за телом в Бишкеке: цены, мастера с отзывами и свободное время. Запись онлайн без звонков.',
+      'Massage, spa and body care in Bishkek: prices, reviewed specialists and free times. Book online, no calls.',
   },
   health: {
-    title: 'Стоматология и остеопатия в Бишкеке: онлайн-запись',
+    title: 'Dentistry and osteopathy in Bishkek: online booking',
     description:
-      'Стоматологии, остеопаты и специалисты по здоровью в Бишкеке: цены, отзывы и свободное время. Запись онлайн без звонков.',
+      'Dentists, osteopaths and health specialists in Bishkek: prices, reviews and free times. Book online, no calls.',
   },
 }
 

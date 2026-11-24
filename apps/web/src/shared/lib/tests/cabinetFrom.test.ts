@@ -31,7 +31,7 @@ describe('rememberCabinetFrom', () => {
     expect(readCabinetFrom()).toBe('/map')
   })
 
-  it('never returns to sign-in, the new business form or «Что нового»', () => {
+  it('never returns to sign-in, the new business form or “What’s new”', () => {
     rememberCabinetFrom('/map', '/manage')
     for (const passage of ['/login?next=/manage', '/business/new', '/updates']) {
       rememberCabinetFrom(passage, '/manage/studio')
@@ -54,10 +54,10 @@ describe('rememberCabinetFrom', () => {
 })
 
 describe('getBackLabel', () => {
-  it('names the page «‹» leads to', () => {
-    expect(getBackLabel('/')).toBe('Каталог')
-    expect(getBackLabel('/map?kind=nails')).toBe('Карта')
-    expect(getBackLabel('/bookings')).toBe('Профиль')
-    expect(getBackLabel('/awaisa-studio')).toBe('Назад')
+  it('names the page “‹” leads to', () => {
+    expect(getBackLabel('/')).toBe('Catalogue')
+    expect(getBackLabel('/map?kind=nails')).toBe('Map')
+    expect(getBackLabel('/bookings')).toBe('Profile')
+    expect(getBackLabel('/awaisa-studio')).toBe('Back')
   })
 })

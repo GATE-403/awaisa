@@ -41,7 +41,7 @@ export const ExpenseSheet = ({
   const categories = [
     ...EXPENSE_CATEGORIES.map((item) => ({ ...item, label: t(item.label) })),
     ...customCategories.map((category) => ({ value: category, label: category })),
-    { value: CUSTOM, label: t('Своя статья…') },
+    { value: CUSTOM, label: t('Custom category…') },
   ]
   const [category, setCategory] = useState(expense?.category ?? 'rent')
   const [customCategory, setCustomCategory] = useState('')
@@ -71,18 +71,18 @@ export const ExpenseSheet = ({
 
   return (
     <Sheet
-      title={t(expense ? 'Расход' : 'Новый расход')}
+      title={t(expense ? 'Expense' : 'New expense')}
       onClose={onClose}
-      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Статья')}</span>
+            <span className={sheet.rowLabel}>{t('Category')}</span>
             <span className={sheet.rowControl}>
               <Select
                 variant='plain'
-                aria-label={t('Статья расхода')}
+                aria-label={t('Expense category')}
                 items={categories}
                 value={category}
                 onValueChange={(next) => next && setCategory(next)}
@@ -93,8 +93,8 @@ export const ExpenseSheet = ({
             <div className={`${sheet.row} ${sheet.textRow}`}>
               <Input
                 variant='plain'
-                aria-label={t('Своя статья')}
-                placeholder={t('Например, «Уборка»')}
+                aria-label={t('Custom category')}
+                placeholder={t('For example, “Cleaning”')}
                 autoFocus
                 maxLength={40}
                 value={customCategory}
@@ -103,35 +103,35 @@ export const ExpenseSheet = ({
             </div>
           )}
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Сумма')}</span>
+            <span className={sheet.rowLabel}>{t('Amount')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label={t('Сумма, сом')}
+                aria-label={t('Amount, som')}
                 inputMode='numeric'
                 placeholder='0'
                 autoFocus={!expense && category !== CUSTOM}
                 value={maskAmountInput(amount.replace(/\D/g, ''))}
                 onValueChange={setAmount}
               />
-              <span className={sheet.suffix}>{t('сом')}</span>
+              <span className={sheet.suffix}>{t('som')}</span>
             </span>
           </label>
           <div className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Дата')}</span>
+            <span className={sheet.rowLabel}>{t('Date')}</span>
             <span className={sheet.rowControl}>
-              <DateField label={t('Дата расхода')} value={date} onChange={setDate} max={today} />
+              <DateField label={t('Expense date')} value={date} onChange={setDate} max={today} />
             </span>
           </div>
           {branches.length > 1 && (
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Филиал')}</span>
+              <span className={sheet.rowLabel}>{t('Branch')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Филиал')}
+                  aria-label={t('Branch')}
                   items={[
-                    { value: '', label: t('Весь бизнес') },
+                    { value: '', label: t('Whole business') },
                     ...branches.map((branch) => ({ value: branch.id, label: branch.name })),
                   ]}
                   value={branchId}
@@ -143,8 +143,8 @@ export const ExpenseSheet = ({
           <div className={`${sheet.row} ${sheet.textRow}`}>
             <Input
               variant='plain'
-              aria-label={t('Комментарий')}
-              placeholder={t('Комментарий')}
+              aria-label={t('Comment')}
+              placeholder={t('Comment')}
               maxLength={240}
               value={note}
               onValueChange={setNote}
@@ -152,7 +152,7 @@ export const ExpenseSheet = ({
           </div>
         </div>
         {expense?.isFromStock && (
-          <p className={sheet.groupFooter}>{t('Записан из прихода на склад.')}</p>
+          <p className={sheet.groupFooter}>{t('Recorded from a stock delivery.')}</p>
         )}
 
         {onDelete && (
@@ -162,7 +162,7 @@ export const ExpenseSheet = ({
               onClose()
             }}
           >
-            {t('Удалить расход')}
+            {t('Delete expense')}
           </HoldButton>
         )}
       </form>

@@ -46,7 +46,7 @@ export class BusinessAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<BusinessRequest>()
     request.customer ??= await this.auth.findCustomerBySession(readSessionToken(request))
     const customer = request.customer
-    if (!customer) throw new UnauthorizedException('Войдите по номеру телефона')
+    if (!customer) throw new UnauthorizedException('Sign in with your phone number')
 
     const business = await this.businesses.findBySlug(String(request.params.slug), {
       publishedOnly: false,
@@ -57,13 +57,13 @@ export class BusinessAccessGuard implements CanActivate {
     const role: MemberRole | null = isPlatformAdmin
       ? 'owner'
       : await this.businesses.memberRole(business.id, customer.id)
-    if (!role) throw new ForbiddenException('Нет доступа к этому бизнесу')
+    if (!role) throw new ForbiddenException('No access to this business')
     const isOwnerOnly = this.reflector.getAllAndOverride<boolean>(OWNER_ONLY, [
       context.getHandler(),
       context.getClass(),
     ])
     if (isOwnerOnly && role !== 'owner') {
-      throw new ForbiddenException('Это может только владелец')
+      throw new ForbiddenException('Only the owner can do this')
     }
 
     request.business = business

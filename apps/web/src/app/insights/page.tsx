@@ -7,11 +7,11 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { InsightsPage } from '@/views/insights'
 
 export const metadata: Metadata = {
-  title: 'Воронки',
+  title: 'Funnels',
   robots: { index: false },
 }
 
-// Platform admins only; anyone else gets the ordinary «not found», not a hint that it exists.
+// Platform admins only; anyone else gets the ordinary "not found", not a hint that it exists.
 const InsightsWithSession = async () => {
   const customer = await requireCustomer('/insights')
   if (!customer.isAdmin) notFound()

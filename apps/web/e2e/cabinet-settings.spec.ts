@@ -4,7 +4,7 @@ import { createOwnBusiness, createVisit } from './business'
 
 type Branch = { id: string; name: string; isActive: boolean }
 
-// A held «Удалить …» acts after a second: a quick tap only says «Удерживайте».
+// A held «Delete …» acts after a second: a quick tap only asks to hold it.
 const HOLD = { delay: 1300 }
 
 const settingsRow = (page: Page, name: RegExp) =>
@@ -12,7 +12,7 @@ const settingsRow = (page: Page, name: RegExp) =>
 
 const readJson = async (page: Page, path: string) => (await page.request.get(path)).json()
 
-test.describe('Cabinet «Настройки»', () => {
+test.describe('Cabinet “Settings”', () => {
   test('each row says what is inside, read from what the business has', async ({
     page,
     browser,
@@ -31,10 +31,10 @@ test.describe('Cabinet «Настройки»', () => {
       }),
       // A new item has nothing in stock: under its minimum it is running out.
       page.request.post(`${manage}/stock`, {
-        data: { name: 'E2E Краска', unit: 'мл', unitCost: 5, minQuantity: 100 },
+        data: { name: 'E2E Краска', unit: 'ml', unitCost: 5, minQuantity: 100 },
       }),
       page.request.post(`${manage}/stock`, {
-        data: { name: 'E2E Перчатки', unit: 'шт', unitCost: 10 },
+        data: { name: 'E2E Перчатки', unit: 'pcs', unitCost: 10 },
       }),
       page.request.put(`${manage}/loyalty/settings`, { data: { bonusPercent: 7 } }),
     ])
@@ -53,15 +53,15 @@ test.describe('Cabinet «Настройки»', () => {
     })
 
     await page.goto(`/manage/${business.slug}?tab=settings`)
-    const nav = page.getByRole('navigation', { name: 'Настройки' })
+    const nav = page.getByRole('navigation', { name: 'Settings' })
     const row = (name: string) => nav.getByRole('link', { name: new RegExp(`^${name}`) })
-    await expect(row('Склад')).toContainText('1 заканчивается')
-    await expect(row('Акции')).toContainText('1 действует')
-    await expect(row('Лояльность')).toContainText('Бонусы 7%')
-    await expect(row('Сотрудники')).toContainText('2')
-    await expect(row('Уведомления')).toContainText('Выкл.')
-    await expect(row('Филиалы')).toContainText('1')
-    await expect(row('Касса')).toContainText('Выкл.')
+    await expect(row('Stock')).toContainText('1 running low')
+    await expect(row('Promotions')).toContainText('1 running')
+    await expect(row('Loyalty')).toContainText('Bonuses 7%')
+    await expect(row('Team')).toContainText('2')
+    await expect(row('Notifications')).toContainText('Off')
+    await expect(row('Branches')).toContainText('1')
+    await expect(row('Till')).toContainText('Off')
 
     // An administrator runs the day, not the settings.
     const staffContext = await browser.newContext()
@@ -74,62 +74,65 @@ test.describe('Cabinet «Настройки»', () => {
     }
   })
 
-  test('the root opens «Филиалы» beside the list with a mouse, the list alone on phones', async ({
+  test('the root opens “Branches” beside the list with a mouse, the list alone on phones', async ({
     page,
     isMobile,
   }) => {
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=settings`)
-    const nav = page.getByRole('navigation', { name: 'Настройки' })
-    const branches = page.getByRole('region', { name: 'Филиалы' })
-    await expect(nav.getByRole('link', { name: /^Склад/ })).toBeVisible()
+    const nav = page.getByRole('navigation', { name: 'Settings' })
+    const branches = page.getByRole('region', { name: 'Branches' })
+    await expect(nav.getByRole('link', { name: /^Stock/ })).toBeVisible()
 
     if (isMobile) {
       await expect(branches).toBeHidden()
-      await nav.getByRole('link', { name: /^Филиалы/ }).click()
+      await nav.getByRole('link', { name: /^Branches/ }).click()
       await expect(page).toHaveURL(/tab=branches/)
       await expect(branches).toBeVisible()
-      await page.getByRole('link', { name: 'Назад к настройкам' }).click()
+      await page.getByRole('link', { name: 'Back to settings' }).click()
       await expect(page).toHaveURL(/tab=settings/)
       await expect(branches).toBeHidden()
       return
     }
 
     await expect(branches).toBeVisible()
-    await expect(nav.getByRole('link', { name: /^Филиалы/ })).toHaveAttribute(
+    await expect(nav.getByRole('link', { name: /^Branches/ })).toHaveAttribute(
       'aria-current',
       'page',
     )
-    await nav.getByRole('link', { name: /^Склад/ }).click()
+    await nav.getByRole('link', { name: /^Stock/ }).click()
     await expect(page).toHaveURL(/tab=stock/)
-    await expect(nav.getByRole('link', { name: /^Склад/ })).toHaveAttribute('aria-current', 'page')
+    await expect(nav.getByRole('link', { name: /^Stock/ })).toHaveAttribute('aria-current', 'page')
     await expect(branches).toHaveCount(0)
   })
 
-  test('the search finds sections by their words, also those on «Страница»', async ({ page }) => {
+  test('the search finds sections by their words, also those on “Page”', async ({ page }) => {
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=settings`)
-    const nav = page.getByRole('navigation', { name: 'Настройки' })
-    const search = nav.getByLabel('Поиск по настройкам')
-    const found = nav.getByRole('list', { name: 'Найдено' }).getByRole('link')
+    const nav = page.getByRole('navigation', { name: 'Settings' })
+    const search = nav.getByLabel('Search settings')
+    const found = nav.getByRole('list', { name: 'Found' }).getByRole('link')
 
-    await search.fill('склад')
+    await search.fill('stock')
     await expect(found).toHaveCount(1)
-    await expect(found.first()).toContainText('Склад')
+    await expect(found.first()).toContainText('Stock')
 
-    // A word that is not in the name: a promo code is a promotion.
-    await search.fill('промокод')
+    // A word that is not in the name: a discount is a promotion.
+    await search.fill('discount')
     await expect(found).toHaveCount(1)
-    await expect(found.first()).toContainText('Акции')
+    await expect(found.first()).toContainText('Promotions')
 
-    await search.fill('нечтотакое')
-    await expect(nav.getByText('Ничего не нашли')).toBeVisible()
+    await search.fill('nosuchthing')
+    await expect(nav.getByText('Nothing found')).toBeVisible()
 
-    await search.fill('услуги')
-    await expect(found.first()).toContainText('на Странице')
-    await found.filter({ hasText: /^Услуги/ }).click()
+    await search.fill('services')
+    await expect(found.first()).toContainText('on the Page')
+    await found.filter({ hasText: /^Services/ }).click()
     await expect(page).toHaveURL(/tab=services/)
-    await expect(page.getByRole('tab', { name: /Услуги/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('tab', { name: /Services/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
   })
 
   test('in the Android app the search at the foot rides up on the keyboard itself', async ({
@@ -158,9 +161,7 @@ test.describe('Cabinet «Настройки»', () => {
       }, height)
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=settings`)
-    const search = page
-      .getByRole('navigation', { name: 'Настройки' })
-      .getByLabel('Поиск по настройкам')
+    const search = page.getByRole('navigation', { name: 'Settings' }).getByLabel('Search settings')
     // Nothing is asked of the app until the field takes focus.
     await expect(search).toBeVisible()
     expect(await posted()).not.toContain('keyboardMode')
@@ -169,7 +170,7 @@ test.describe('Cabinet «Настройки»', () => {
     await expect.poll(posted).toContain('"mode":"overlay"')
     // It rises at the focus, before the keyboard is reported: a field still under the keyboard
     // when the WebView shrinks its visual viewport makes it pan the whole page.
-    const bar = page.locator('[data-align]:has([aria-label="Поиск по настройкам"])')
+    const bar = page.locator('[data-align]:has([aria-label="Search settings"])')
     await expect(bar).toHaveAttribute('data-keyboard', '')
     await keyboard(300)
     const keyboardTop = await page.evaluate(() => window.innerHeight - 300)
@@ -215,11 +216,11 @@ test.describe('Cabinet «Настройки»', () => {
 
     await page.goto(`/manage/${business.slug}?tab=promotions`)
     await settingsRow(page, /E2E Клавиатура/).click()
-    const sheet = page.getByRole('dialog', { name: 'Акция', exact: true })
+    const sheet = page.getByRole('dialog', { name: 'Promotion', exact: true })
     // Open, the sheet leaves the WebView whole.
     await expect.poll(posted).toContain('"mode":"overlay"')
 
-    const field = sheet.getByLabel('Скидка, %')
+    const field = sheet.getByLabel('Discount, %')
     await field.focus()
     const keyboardTop = await page.evaluate(() => {
       const height = 360
@@ -236,7 +237,7 @@ test.describe('Cabinet «Настройки»', () => {
       .toBe(true)
 
     // Closed, the app resizes the WebView again.
-    await sheet.getByRole('button', { name: 'Отмена' }).click()
+    await sheet.getByRole('button', { name: 'Cancel' }).click()
     await expect(sheet).toHaveCount(0)
     await expect.poll(posted).toContain('"mode":"resize"')
   })
@@ -253,21 +254,21 @@ test.describe('Cabinet «Настройки»', () => {
 
     const deleted = await page.request.delete(`${manage}/branches/${only.id}`)
     expect(deleted.status()).toBe(400)
-    expect((await deleted.json()).message).toBe('Нельзя удалить единственный филиал')
+    expect((await deleted.json()).message).toBe("You can't delete the only branch")
     const closed = await page.request.put(`${manage}/branches/${only.id}`, {
       data: { name: only.name, isActive: false },
     })
     expect(closed.status()).toBe(400)
-    expect((await closed.json()).message).toBe('Нужен хотя бы один открытый филиал')
+    expect((await closed.json()).message).toBe('At least one branch must stay open')
     expect(await branches()).toEqual([expect.objectContaining({ id: only.id, isActive: true })])
 
     await page.goto(`/manage/${business.slug}?tab=branches`)
-    const list = page.getByRole('region', { name: 'Филиалы' })
+    const list = page.getByRole('region', { name: 'Branches' })
     await list.getByRole('button', { name: new RegExp(`^${only.name}`) }).click()
     const sheet = page.getByRole('dialog')
-    await expect(sheet.getByRole('switch', { name: 'Принимает клиентов' })).toBeChecked()
-    await expect(sheet.getByRole('button', { name: 'Удалить филиал' })).toHaveCount(0)
-    await sheet.getByRole('button', { name: 'Отмена' }).click()
+    await expect(sheet.getByRole('switch', { name: 'Accepts clients' })).toBeChecked()
+    await expect(sheet.getByRole('button', { name: 'Delete branch' })).toHaveCount(0)
+    await sheet.getByRole('button', { name: 'Cancel' }).click()
     await expect(sheet).toHaveCount(0)
 
     expect(
@@ -275,8 +276,8 @@ test.describe('Cabinet «Настройки»', () => {
     ).toBe(true)
     await page.reload()
     await list.getByRole('button', { name: /^E2E Второй/ }).click()
-    await sheet.getByRole('button', { name: 'Удалить филиал' }).click({ delay: 1300 })
-    await expect(page.getByText('Филиал удалён')).toBeVisible()
+    await sheet.getByRole('button', { name: 'Delete branch' }).click({ delay: 1300 })
+    await expect(page.getByText('Branch deleted')).toBeVisible()
     await expect.poll(async () => (await branches()).map((branch) => branch.id)).toEqual([only.id])
     await expect(list.getByRole('button', { name: /^E2E Второй/ })).toHaveCount(0)
   })
@@ -300,15 +301,15 @@ test.describe('Settings: change and remove what was made', () => {
 
     await page.goto(`/manage/${business.slug}?tab=promotions`)
     await settingsRow(page, /E2E Будни/).click()
-    const sheet = page.getByRole('dialog', { name: 'Акция', exact: true })
-    await sheet.getByLabel('Скидка, %').fill('25')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Promotion', exact: true })
+    await sheet.getByLabel('Discount, %').fill('25')
+    await sheet.getByRole('button', { name: 'Save' }).click()
     await expect(sheet).toHaveCount(0)
     await expect(settingsRow(page, /E2E Будни/)).toContainText('−25%')
     await expect.poll(async () => (await list())[0]?.percent).toBe(25)
 
     await settingsRow(page, /E2E Будни/).click()
-    await sheet.getByRole('button', { name: 'Удалить акцию' }).click(HOLD)
+    await sheet.getByRole('button', { name: 'Delete promotion' }).click(HOLD)
     await expect(sheet).toHaveCount(0)
     await expect(page.getByRole('main').getByText('E2E Будни')).toHaveCount(0)
     await expect.poll(list).toEqual([])
@@ -331,15 +332,15 @@ test.describe('Settings: change and remove what was made', () => {
 
     await page.goto(`/manage/${business.slug}?tab=loyalty`)
     await settingsRow(page, /E2E Пять стрижек/).click()
-    const sheet = page.getByRole('dialog', { name: 'Абонемент', exact: true })
-    await sheet.getByLabel('Визитов').fill('6')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Pass', exact: true })
+    await sheet.getByLabel('Visits').fill('6')
+    await sheet.getByRole('button', { name: 'Save' }).click()
     await expect(sheet).toHaveCount(0)
-    await expect(settingsRow(page, /E2E Пять стрижек/)).toContainText('6 визитов')
+    await expect(settingsRow(page, /E2E Пять стрижек/)).toContainText('6 visits')
     await expect.poll(async () => (await plans())[0]?.visits).toBe(6)
 
     await settingsRow(page, /E2E Пять стрижек/).click()
-    await sheet.getByRole('button', { name: 'Удалить абонемент' }).click(HOLD)
+    await sheet.getByRole('button', { name: 'Delete pass' }).click(HOLD)
     await expect(sheet).toHaveCount(0)
     await expect(page.getByRole('main').getByText('E2E Пять стрижек')).toHaveCount(0)
     await expect.poll(plans).toEqual([])
@@ -350,7 +351,7 @@ test.describe('Settings: change and remove what was made', () => {
     expect(
       (
         await page.request.post(`/api/manage/${business.slug}/stock`, {
-          data: { name: 'E2E Шампунь', unit: 'мл', unitCost: 2 },
+          data: { name: 'E2E Шампунь', unit: 'ml', unitCost: 2 },
         })
       ).ok(),
     ).toBe(true)
@@ -362,18 +363,18 @@ test.describe('Settings: change and remove what was made', () => {
 
     await page.goto(`/manage/${business.slug}?tab=stock`)
     await settingsRow(page, /E2E Шампунь/).click()
-    const sheet = page.getByRole('dialog', { name: 'Расходник', exact: true })
-    await sheet.getByLabel('Название').fill('E2E Шампунь мятный')
-    await sheet.getByLabel('Цена за единицу, сом').fill('3')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
+    const sheet = page.getByRole('dialog', { name: 'Consumable', exact: true })
+    await sheet.getByLabel('Name', { exact: true }).fill('E2E Шампунь мятный')
+    await sheet.getByLabel('Price per unit, som').fill('3')
+    await sheet.getByRole('button', { name: 'Save' }).click()
     await expect(sheet).toHaveCount(0)
-    await expect(settingsRow(page, /E2E Шампунь мятный/)).toContainText(/3\s*сом за мл/)
+    await expect(settingsRow(page, /E2E Шампунь мятный/)).toContainText(/3\s*som per ml/)
     await expect
       .poll(items)
       .toEqual([expect.objectContaining({ name: 'E2E Шампунь мятный', unitCost: 3 })])
 
     await settingsRow(page, /E2E Шампунь мятный/).click()
-    await sheet.getByRole('button', { name: 'Удалить позицию' }).click(HOLD)
+    await sheet.getByRole('button', { name: 'Delete item' }).click(HOLD)
     await expect(sheet).toHaveCount(0)
     await expect.poll(items).toEqual([])
   })
@@ -389,18 +390,18 @@ test.describe('Settings: change and remove what was made', () => {
       smsConfirmation: true,
     })
     const sent = await page.request.post(`/api/manage/${business.slug}/mailings`, {
-      data: { segment: 'all', text: 'E2E Ждём вас снова, {имя}! {ссылка}' },
+      data: { segment: 'all', text: 'E2E See you again, {name}! {link}' },
     })
     expect(sent.ok()).toBe(true)
 
     await page.goto(`/manage/${business.slug}?tab=clients`)
     await page
-      .getByRole('button', { name: 'Рассылка', exact: true })
+      .getByRole('button', { name: 'Mailing', exact: true })
       .filter({ visible: true })
       .click()
-    const sheet = page.getByRole('dialog', { name: 'Рассылка', exact: true })
-    const history = sheet.getByRole('region', { name: 'Отправленные' })
-    await expect(history).toContainText(/^Отправленные\s*Все · \d+ \S+\s*1 клиент$/)
+    const sheet = page.getByRole('dialog', { name: 'Mailing', exact: true })
+    const history = sheet.getByRole('region', { name: 'Sent' })
+    await expect(history).toContainText(/^Sent\s*All · \d+ \S+\s*1 client$/)
   })
 
   test('the owner cannot close their own access; an administrator can be closed', async ({
@@ -425,17 +426,17 @@ test.describe('Settings: change and remove what was made', () => {
 
     const own = await page.request.delete(`/api/manage/${business.slug}/members/${owner.id}`)
     expect(own.status()).toBe(400)
-    expect(await own.text()).toContain('Себя удалить нельзя')
+    expect(await own.text()).toContain("You can't remove yourself")
 
     await page.goto(`/manage/${business.slug}?tab=team`)
-    const team = page.getByRole('region', { name: 'Сотрудники' })
+    const team = page.getByRole('region', { name: 'Team' })
     await expect(team.getByRole('listitem')).toHaveCount(2)
-    await expect(team.getByRole('button', { name: /^Закрыть доступ:/ })).toHaveCount(1)
-    await expect(team.getByRole('listitem').filter({ hasText: 'Владелец' })).not.toContainText(
-      'Закрыть доступ',
+    await expect(team.getByRole('button', { name: /^Remove access:/ })).toHaveCount(1)
+    await expect(team.getByRole('listitem').filter({ hasText: 'Owner' })).not.toContainText(
+      'Remove access',
     )
     await expect(
-      team.getByRole('listitem').filter({ hasText: 'Владелец' }).getByRole('button'),
+      team.getByRole('listitem').filter({ hasText: 'Owner' }).getByRole('button'),
     ).toHaveCount(0)
   })
 

@@ -19,7 +19,7 @@
   max-width: 50%;
 }
 
-/* «%» or «сом» opens the kit menu: the unit reads as the value's own suffix with a ⌃⌄ hint. */
+/* "%" or "som" opens the kit menu: the unit reads as the value's own suffix with a ⌃⌄ hint. */
 .unit {
   position: relative;
   display: inline-flex;
@@ -62,7 +62,7 @@
   height: 16px;
 }
 
-/* The scheme in one line on the master's «Зарплата» row. */
+/* The scheme in one line on the master's "Pay" row. */
 .summary {
   min-width: 0;
   overflow: hidden;

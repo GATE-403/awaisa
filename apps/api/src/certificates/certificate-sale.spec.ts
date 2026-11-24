@@ -11,10 +11,10 @@ const order = {
   business: 'Awaisa Studio',
   amount: 3000,
   code: 'ABCD2345',
-  buyerName: 'Нурлан',
-  recipientName: 'Айгуль',
+  buyerName: 'Nurlan',
+  recipientName: 'Aigul',
   hasRecipientPhone: true,
-  message: 'С днём рождения!',
+  message: 'Happy birthday!',
   link: 'https://awaisa.kg/awaisa-studio/book',
 }
 
@@ -40,25 +40,25 @@ describe('messages', () => {
   it('gives the buyer the code and says the recipient got it too', () => {
     const text = buyerMessage(order)
     expect(text).toContain('ABCD2345')
-    expect(text).toContain('3 000 сом')
-    expect(text).toContain('для Айгуль')
-    expect(text).toContain('отправили его и получателю')
+    expect(text).toContain('3,000 som')
+    expect(text).toContain('for Aigul')
+    expect(text).toContain('sent it to the recipient too')
     expect(text).toContain(order.link)
   })
 
   it('asks the buyer to hand the code over when the recipient has no number', () => {
-    expect(buyerMessage({ ...order, hasRecipientPhone: false })).toContain('Передайте код')
+    expect(buyerMessage({ ...order, hasRecipientPhone: false })).toContain('Pass the code on')
   })
 
   it('tells the recipient who it is from, the words and the code', () => {
     const text = recipientMessage(order)
-    expect(text).toMatch(/^Айгуль, Нурлан дарит вам сертификат на 3 000 сом в Awaisa Studio/)
-    expect(text).toContain('«С днём рождения!»')
-    expect(text).toContain('Код ABCD2345')
+    expect(text).toMatch(/^Aigul, Nurlan has given you a 3,000 som gift card for Awaisa Studio/)
+    expect(text).toContain('“Happy birthday!”')
+    expect(text).toContain('Code ABCD2345')
   })
 
-  it('reads on /pay as «Для … · от …»', () => {
-    expect(orderDetails('Айгуль', 'Нурлан')).toBe('Для Айгуль · от Нурлан')
-    expect(orderDetails('', 'Нурлан')).toBe('от Нурлан')
+  it('reads on /pay as “For … · from …”', () => {
+    expect(orderDetails('Aigul', 'Nurlan')).toBe('For Aigul · from Nurlan')
+    expect(orderDetails('', 'Nurlan')).toBe('from Nurlan')
   })
 })

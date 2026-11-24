@@ -15,11 +15,11 @@ const paidOrder = {
   id: 'order-1',
   business_id: 'biz-1',
   amount: 3000,
-  buyer_name: 'Нурлан',
+  buyer_name: 'Nurlan',
   buyer_phone: BUYER,
-  recipient_name: 'Айгуль',
+  recipient_name: 'Aigul',
   recipient_phone: RECIPIENT,
-  message: 'С днём рождения!',
+  message: 'Happy birthday!',
 }
 
 type Answer = (sql: string, params: unknown[]) => unknown[]
@@ -68,7 +68,7 @@ describe('CertificateSalesService.onPaid', () => {
 
     expect(loyalty.issueCertificate).toHaveBeenCalledWith(
       'biz-1',
-      { amount: 3000, recipient: 'Айгуль', phone: RECIPIENT, expiresOn: null },
+      { amount: 3000, recipient: 'Aigul', phone: RECIPIENT, expiresOn: null },
       expect.objectContaining({ query }),
     )
     expect(query).toHaveBeenCalledWith(expect.stringContaining('"certificate_id" = $2'), [
@@ -83,8 +83,8 @@ describe('CertificateSalesService.onPaid', () => {
     expect(clientMessages.send).toHaveBeenCalledWith(
       RECIPIENT,
       expect.objectContaining({
-        text: expect.stringContaining('Нурлан дарит вам'),
-        link: { label: 'Записаться', url: 'https://awaisa.kg/awaisa-studio/book' },
+        text: expect.stringContaining('Nurlan has given you'),
+        link: { label: 'Book', url: 'https://awaisa.kg/awaisa-studio/book' },
       }),
     )
   })
@@ -112,13 +112,13 @@ describe('CertificateSalesService.onPaid', () => {
 
     expect(loyalty.issueCertificate).toHaveBeenCalledWith(
       'biz-1',
-      expect.objectContaining({ recipient: 'Нурлан', phone: BUYER }),
+      expect.objectContaining({ recipient: 'Nurlan', phone: BUYER }),
       expect.anything(),
     )
     expect(clientMessages.send).toHaveBeenCalledTimes(1)
     expect(clientMessages.send).toHaveBeenCalledWith(
       BUYER,
-      expect.objectContaining({ text: expect.stringContaining('Передайте код') }),
+      expect.objectContaining({ text: expect.stringContaining('Pass the code on') }),
     )
   })
 
@@ -158,9 +158,9 @@ describe('CertificateSalesService.createOrder', () => {
   const business = { id: 'biz-1', name: 'Awaisa Studio', amounts: [1000, 3000] }
   const input = {
     amount: 3000,
-    buyerName: 'Нурлан',
+    buyerName: 'Nurlan',
     buyerPhone: '0555 111 222',
-    recipientName: 'Айгуль',
+    recipientName: 'Aigul',
     recipientPhone: '0700 333 444',
     message: '',
   }
@@ -191,7 +191,7 @@ describe('CertificateSalesService.createOrder', () => {
 
     await expect(
       service.createOrder('awaisa-studio', { ...input, amount: 2000 }, null),
-    ).rejects.toThrow('Выберите сумму')
+    ).rejects.toThrow('Pick one of the amounts')
   })
 
   it('sells nothing on a plan without loyalty', async () => {
@@ -199,13 +199,13 @@ describe('CertificateSalesService.createOrder', () => {
       hasLoyalty: false,
     })
 
-    await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('не продаются')
+    await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('not sold here')
     await expect(service.saleFor('awaisa-studio')).resolves.toEqual({ amounts: [] })
   })
 
   it('sells nothing while payments are off', async () => {
     const { service } = setup(() => [business], { isAvailable: false })
 
-    await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('не продаются')
+    await expect(service.createOrder('awaisa-studio', input, null)).rejects.toThrow('not sold here')
   })
 })

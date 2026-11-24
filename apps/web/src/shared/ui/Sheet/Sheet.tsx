@@ -28,7 +28,7 @@ interface SheetProps {
   children: ReactNode
 }
 
-// iOS form sheet: «Отмена» on the left, the title in the middle, the confirming action on the right.
+// iOS form sheet: «Cancel» on the left, the title in the middle, the confirming action on the right.
 // Pull the top bar down to dismiss it, like an iOS sheet. A field that takes the caret is set above
 // the phone's keyboard; in the Android app the sheet takes the keyboard itself (`overlay`), so the
 // page under it is not laid out again while the keyboard slides in.
@@ -36,7 +36,7 @@ export const Sheet = ({
   title,
   onClose,
   action,
-  cancelLabel = 'Отмена',
+  cancelLabel = 'Cancel',
   onCancel,
   barEnd,
   children,

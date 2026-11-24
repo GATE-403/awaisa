@@ -1,5 +1,5 @@
 // A transparent score instead of a black box: each part adds a little and the strongest part
-// becomes the card's reason («Пора снова», «Вы любите маникюр», «Рядом · 1,2 км»).
+// becomes the card's reason ('Due again · 5 wk', 'Your pick · nails', 'Nearby · 1.2 km').
 
 /** Every version still served (interleaving compares two of them online). */
 const ALGORITHMS = ['score-v1', 'score-v2'] as const
@@ -27,14 +27,14 @@ type Interest =
 
 type Gender = 'male' | 'female'
 
-/** What matters most when choosing («Что важнее при выборе», one or several): each counts twice. */
+/** What matters most when choosing ('What matters most', one or several): each counts twice. */
 const PRIORITIES = ['near', 'soon', 'rating', 'price'] as const
 type Priority = (typeof PRIORITIES)[number]
 
 type Profile = {
   interests: Interest[]
   gender: Gender | null
-  /** The most a visit should cost, сом; null = any. */
+  /** The most a visit should cost, som; null = any. */
   budget: number | null
   /** What matters most when choosing (one or several); empty = nothing in particular. */
   priorities?: Priority[]
@@ -71,35 +71,87 @@ type Candidate = {
   rebookDays: number | null
   /** A place without a track record yet: a few shelf spots go to such places. */
   isNewPlace?: boolean
-  /** The place's kind (barber, beauty, …): a barbershop's «Стрижка машинкой» is a men's cut. */
+  /** The place's kind (barber, beauty, …): a barbershop's «Стрижка машинкой» (clipper cut) is a men's cut. */
   placeKind?: string
 }
 
 const INTEREST_WORDS: Record<Interest, string[]> = {
-  haircut: ['стриж', 'укладк', 'причес', 'фейд'],
-  beard: ['бород', 'брить', 'усы'],
-  coloring: ['окраш', 'тонир', 'мелир', 'балаяж', 'шатуш', 'блонд', 'корн'],
-  nails: ['маникюр', 'педикюр', 'ногт', 'гель'],
-  brows: ['бров', 'ресниц', 'ламин'],
-  massage: ['массаж', 'spa', 'спа', 'обёрт', 'оберт', 'стоун'],
-  face: ['лиц', 'чистк', 'пилинг', 'косметолог', 'макияж', 'уход'],
-  tattoo: ['тату', 'пирсинг', 'эскиз'],
-  health: ['консульт', 'кинезио', 'физио', 'мануал', 'реабил', 'осмотр'],
-  waxing: ['шугар', 'депиляц', 'эпиляц', 'воск'],
+  haircut: [
+    'стриж',
+    'укладк',
+    'причес',
+    'фейд',
+    'haircut',
+    'hair cut',
+    'styling',
+    'fade',
+    'blow-dry',
+  ],
+  beard: ['бород', 'брить', 'усы', 'beard', 'shave', 'moustache'],
+  coloring: [
+    'окраш',
+    'тонир',
+    'мелир',
+    'балаяж',
+    'шатуш',
+    'блонд',
+    'корн',
+    'colour',
+    'color',
+    'toning',
+    'highlight',
+    'balayage',
+    'blonde',
+    'roots',
+  ],
+  nails: ['маникюр', 'педикюр', 'ногт', 'гель', 'manicure', 'pedicure', 'nail', 'gel'],
+  brows: ['бров', 'ресниц', 'ламин', 'brow', 'lash', 'lamination'],
+  massage: ['массаж', 'spa', 'спа', 'обёрт', 'оберт', 'стоун', 'massage', 'wrap', 'stone'],
+  face: [
+    'лиц',
+    'чистк',
+    'пилинг',
+    'косметолог',
+    'макияж',
+    'уход',
+    'facial',
+    'face',
+    'peel',
+    'cosmetolog',
+    'make-up',
+    'makeup',
+    'skincare',
+  ],
+  tattoo: ['тату', 'пирсинг', 'эскиз', 'tattoo', 'piercing'],
+  health: [
+    'консульт',
+    'кинезио',
+    'физио',
+    'мануал',
+    'реабил',
+    'осмотр',
+    'consult',
+    'kinesio',
+    'physio',
+    'osteopath',
+    'rehab',
+    'check-up',
+  ],
+  waxing: ['шугар', 'депиляц', 'эпиляц', 'воск', 'sugaring', 'depil', 'epil', 'wax'],
 }
 
 /** The reason on a card for a stated interest: short enough for the card's capsule. */
 const INTEREST_LABEL: Record<Interest, string> = {
-  haircut: 'Ваш выбор · стрижки',
-  beard: 'Ваш выбор · борода',
-  coloring: 'Ваш выбор · цвет',
-  nails: 'Ваш выбор · ногти',
-  brows: 'Ваш выбор · брови',
-  massage: 'Ваш выбор · массаж',
-  face: 'Ваш выбор · лицо',
-  tattoo: 'Ваш выбор · тату',
-  health: 'Ваш выбор · здоровье',
-  waxing: 'Ваш выбор · депиляция',
+  haircut: 'Your pick · haircuts',
+  beard: 'Your pick · beard',
+  coloring: 'Your pick · colour',
+  nails: 'Your pick · nails',
+  brows: 'Your pick · brows',
+  massage: 'Your pick · massage',
+  face: 'Your pick · face',
+  tattoo: 'Your pick · tattoo',
+  health: 'Your pick · health',
+  waxing: 'Your pick · waxing',
 }
 
 const normalize = (value: string) => value.toLowerCase().replace(/ё/g, 'е')
@@ -109,38 +161,43 @@ const interestsOf = (serviceName: string) => {
   const found = (Object.keys(INTEREST_WORDS) as Interest[]).filter((interest) =>
     INTEREST_WORDS[interest].some((word) => name.includes(normalize(word))),
   )
-  // «Окрашивание бровей» is brows, not hair colouring.
+  // «Окрашивание бровей» (brow tint) is brows, not hair colouring.
   return found.includes('brows') ? found.filter((interest) => interest !== 'coloring') : found
 }
 
-/** Services clearly for the other gender are left out («Мужская стрижка» for «женщина»). */
+/** Services clearly for the other gender are left out (a men's cut for a woman). */
 const fitsGender = (serviceName: string, gender: Gender | null) => {
   if (!gender) return true
   const name = normalize(serviceName)
-  if (gender === 'female') return !/(мужск|бород|брить|усы)/.test(name)
-  return !/(женск|маникюр с дизайном|наращ)/.test(name)
+  if (gender === 'female') return !MALE_WORDS.test(name)
+  return !/(женск|маникюр с дизайном|наращ|women|ladies|nail art|extension)/.test(name)
 }
 
-/** «Часто берут с маникюром»: the kind in the instrumental case. */
+/** 'Often booked with manicure': the kind in lower case. */
 const INTEREST_WITH: Record<Interest, string> = {
-  haircut: 'со стрижкой',
-  beard: 'с бородой',
-  coloring: 'с окрашиванием',
-  nails: 'с маникюром',
-  brows: 'с бровями',
-  massage: 'с массажем',
-  face: 'с уходом за лицом',
-  tattoo: 'с тату',
-  health: 'с консультацией',
-  waxing: 'с депиляцией',
+  haircut: 'haircut',
+  beard: 'beard trim',
+  coloring: 'colouring',
+  nails: 'manicure',
+  brows: 'brows',
+  massage: 'massage',
+  face: 'facial',
+  tattoo: 'tattoo',
+  health: 'consultation',
+  waxing: 'waxing',
 }
 
-/** Who a service is for, when its name says so: «Маникюр» leans female, «Борода» male. */
+// Men's services by name, Russian (owners name them so) and English.
+const MALE_WORDS = /(мужск|бород|брить|усы|\bmen\b|beard|shav|moustache)/
+const FEMALE_WORDS =
+  /(женск|маникюр|педикюр|бров|ресниц|наращ|депиляц|шугаринг|макияж|women|ladies|manicure|pedicure|brow|lash|extension|depil|sugaring|make-up|makeup)/
+const KIDS_WORDS = /(детск|kids|child)/
+
+/** Who a service is for, when its name says so: a manicure leans female, a beard trim male. */
 const genderOf = (serviceName: string): Gender | null => {
   const name = normalize(serviceName)
-  if (/(мужск|бород|брить|усы)/.test(name)) return 'male'
-  if (/(женск|маникюр|педикюр|бров|ресниц|наращ|депиляц|шугаринг|макияж)/.test(name))
-    return 'female'
+  if (MALE_WORDS.test(name)) return 'male'
+  if (FEMALE_WORDS.test(name)) return 'female'
   return null
 }
 
@@ -153,8 +210,7 @@ const trustedRating = (rating: number | null, reviews: number) =>
     ? PRIOR_RATING
     : (rating * reviews + PRIOR_RATING * PRIOR_WEIGHT) / (reviews + PRIOR_WEIGHT)
 
-const formatKm = (km: number) =>
-  km < 1 ? `${Math.round(km * 1000)} м` : `${km.toFixed(1).replace('.', ',')} км`
+const formatKm = (km: number) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`)
 
 type Scored = { score: number; reason: string; reasons: string[] }
 
@@ -171,12 +227,13 @@ const scoreCandidate = (
   // Without a stated gender, the service being chosen tells who it is for.
   const gender = profile.gender ?? (focus ? genderOf(focus.name) : null)
   if (!fitsGender(candidate.name, gender)) return null
-  // A barbershop's «Стрижка машинкой» says nothing about men in its name, but it is a men's cut.
+  // A barbershop's clipper cut says nothing about men in its name, but it is a men's cut.
   if (
     isV2 &&
     gender === 'female' &&
     candidate.placeKind === 'barber' &&
-    !/(женск|детск)/.test(normalize(candidate.name))
+    !/(женск|women|ladies)/.test(normalize(candidate.name)) &&
+    !KIDS_WORDS.test(normalize(candidate.name))
   ) {
     return null
   }
@@ -185,7 +242,7 @@ const scoreCandidate = (
     isV2 &&
     gender === 'male' &&
     (genderOf(candidate.name) === 'female' ||
-      /(причес|локон|образ)/.test(normalize(candidate.name)))
+      /(причес|локон|образ|updo|curls|bridal)/.test(normalize(candidate.name)))
   ) {
     return null
   }
@@ -194,9 +251,9 @@ const scoreCandidate = (
   const interests = interestsOf(candidate.name)
 
   // Kids' services only for someone who has booked for a child or is choosing one now.
-  if (isV2 && /детск/.test(normalize(candidate.name))) {
+  if (isV2 && KIDS_WORDS.test(normalize(candidate.name))) {
     const forKids = [...profile.visits.map((visit) => visit.serviceName), focus?.name ?? ''].some(
-      (name) => /детск/.test(normalize(name)),
+      (name) => KIDS_WORDS.test(normalize(name)),
     )
     if (!forKids) parts.push({ value: -4, reason: '' })
   }
@@ -215,10 +272,10 @@ const scoreCandidate = (
   // Looked at in this session: the same kind again, a little.
   const recentKinds = new Set((profile.recent ?? []).flatMap((item) => interestsOf(item.name)))
   if (!focus && interests.some((interest) => recentKinds.has(interest))) {
-    parts.push({ value: 1.5, reason: 'Похоже на просмотренное' })
+    parts.push({ value: 1.5, reason: 'Similar' })
   }
 
-  // «С этим часто берут» (Amazon's item-to-item, by kind): what clients book after what this one
+  // 'Often booked with' (Amazon's item-to-item, by kind): what clients book after what this one
   // is choosing or had lately - brows after a manicure, a beard trim after a haircut.
   const sources = new Set([
     ...(focus ? interestsOf(focus.name) : []),
@@ -242,7 +299,7 @@ const scoreCandidate = (
   if (bestSource && bestLift >= 1.3) {
     parts.push({
       value: Math.min(3.5, 1 + (bestLift - 1) * 1.5),
-      reason: `Часто берут ${INTEREST_WITH[bestSource]}`,
+      reason: `Often booked with ${INTEREST_WITH[bestSource]}`,
     })
   }
 
@@ -257,7 +314,7 @@ const scoreCandidate = (
   if (lastSame) {
     const cycle = candidate.rebookDays ?? 28
     const weeks = Math.round(lastSame.daysAgo / 7)
-    const dueAgain = { value: 5, reason: `Пора снова · ${weeks > 1 ? `${weeks} нед.` : 'неделя'}` }
+    const dueAgain = { value: 5, reason: `Due again · ${Math.max(weeks, 1)} wk` }
     if (!isV2) {
       parts.push(lastSame.daysAgo >= cycle * 0.85 ? dueAgain : { value: -2, reason: '' })
     } else {
@@ -267,11 +324,11 @@ const scoreCandidate = (
       if (lastSame.daysAgo + HABIT_LOOKAHEAD_DAYS >= cycle * 0.85) parts.push(dueAgain)
       else if (lastSame.daysAgo < HABIT_LOOKAHEAD_DAYS) parts.push({ value: -2, reason: '' })
       else parts.push({ value: 1, reason: '' })
-      if (times > 1) parts.push({ value: Math.min(times - 1, 3), reason: 'Ваше обычное' })
+      if (times > 1) parts.push({ value: Math.min(times - 1, 3), reason: 'Your usual' })
     }
   } else if (!focus && profile.visits.some((visit) => visit.slug === candidate.slug)) {
     // While choosing, the choice speaks for now: past places and kinds do not pull picks away.
-    parts.push({ value: 1.5, reason: 'Вы были здесь' })
+    parts.push({ value: 1.5, reason: 'Been here' })
   }
 
   const liked = interests.find((interest) => profile.interests.includes(interest))
@@ -281,7 +338,7 @@ const scoreCandidate = (
   // What they actually booked before counts like a stated interest.
   const visitedKinds = new Set(profile.visits.flatMap((visit) => interestsOf(visit.serviceName)))
   if (!focus && !liked && interests.some((interest) => visitedKinds.has(interest))) {
-    parts.push({ value: 1.5, reason: 'Как в ваших визитах' })
+    parts.push({ value: 1.5, reason: 'As usual' })
   }
 
   if (profile.budget !== null) {
@@ -289,7 +346,7 @@ const scoreCandidate = (
     else if (candidate.price > profile.budget * 1.3) parts.push({ value: -2.5, reason: '' })
   }
 
-  // Each of the client's «что важнее» counts its part twice; the others stay as they are.
+  // Each of the client's priorities counts its part twice; the others stay as they are.
   const priorities = profile.priorities ?? []
   const weight = (key: Priority) => (priorities.includes(key) ? 2 : 1)
 
@@ -297,14 +354,14 @@ const scoreCandidate = (
     const near = 1 - Math.min(candidate.distanceKm, 10) / 10
     parts.push({
       value: near * 2.5 * weight('near'),
-      reason: near > 0.6 ? `Рядом · ${formatKm(candidate.distanceKm)}` : '',
+      reason: near > 0.6 ? `Nearby · ${formatKm(candidate.distanceKm)}` : '',
     })
   }
 
   if (candidate.freeInDays === 0) {
-    parts.push({ value: 1.5 * weight('soon'), reason: `Сегодня с ${candidate.freeTime}` })
+    parts.push({ value: 1.5 * weight('soon'), reason: `Today from ${candidate.freeTime}` })
   } else if (candidate.freeInDays === 1) {
-    parts.push({ value: 0.8 * weight('soon'), reason: `Завтра с ${candidate.freeTime}` })
+    parts.push({ value: 0.8 * weight('soon'), reason: `Tomorrow from ${candidate.freeTime}` })
   } else {
     parts.push({ value: -1 * weight('soon'), reason: '' })
   }
@@ -312,16 +369,16 @@ const scoreCandidate = (
   const rating = trustedRating(candidate.rating, candidate.reviews)
   parts.push({
     value: (rating - 4) * 2 * weight('rating'),
-    reason: rating >= 4.6 ? `Рейтинг ${rating.toFixed(1).replace('.', ',')}` : '',
+    reason: rating >= 4.6 ? `Rating ${rating.toFixed(1)}` : '',
   })
 
-  // «Подешевле»: the cheaper, the more it adds (nothing from 5 000 сом up).
+  // 'Cheaper': the cheaper, the more it adds (nothing from 5,000 som up).
   if (priorities.includes('price')) {
     parts.push({ value: 2 * (1 - Math.min(candidate.price, 5000) / 5000), reason: '' })
   }
   parts.push({
     value: Math.log1p(candidate.bookings30d) * 0.4,
-    reason: candidate.bookings30d >= 20 ? 'Часто выбирают' : '',
+    reason: candidate.bookings30d >= 20 ? 'Popular' : '',
   })
   if (candidate.discountPercent) {
     parts.push({ value: 0.6, reason: `−${candidate.discountPercent}%` })
@@ -333,7 +390,7 @@ const scoreCandidate = (
     .filter((part) => part.reason && part.value > 0)
     .sort((first, second) => second.value - first.value)
     .map((part) => part.reason)
-  return { score, reason: reasons[0] ?? 'Популярно', reasons }
+  return { score, reason: reasons[0] ?? 'Popular', reasons }
 }
 
 /** Best first, at most `perPlace` from one place and one of each service name, so the shelf
@@ -356,7 +413,7 @@ const rankCandidates = <T extends Candidate>(
   const names = new Set<string>()
   const result: ({ candidate: T } & Scored)[] = []
   // score-v2: one card per name is the client's own place for a service they had there - a
-  // better-rated «Стрижка» across town used to push their own salon's off the shelf.
+  // better-rated haircut across town used to push their own salon's off the shelf.
   const ownPlaces = new Map<string, Set<string>>()
   if (version !== 'score-v1') {
     const offered = new Set(scored.map((entry) => entry.candidate.serviceId))
@@ -390,13 +447,13 @@ const rankCandidates = <T extends Candidate>(
         (perSlug.get(entry.candidate.slug) ?? 0) < perPlace,
     )
     if (fresh && result.length > exploreAt) {
-      fresh.reasons = ['Новое место', ...fresh.reasons]
+      fresh.reasons = ['New place', ...fresh.reasons]
       result.splice(exploreAt, 0, fresh)
       if (result.length > limit) result.pop()
     }
   }
   // Variety on the shelf: a card says the same as its neighbour or an already common reason only
-  // when it has nothing else true to say («Часто выбирают» three times in a row tells nothing).
+  // when it has nothing else true to say ('Popular' three times in a row tells nothing).
   const used = new Map<string, number>()
   let previous = ''
   for (const entry of result) {

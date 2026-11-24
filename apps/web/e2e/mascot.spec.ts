@@ -24,7 +24,7 @@ test.describe('Live mascot', () => {
   }) => {
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=clients`)
-    await expect(page.getByText('Клиентов пока нет')).toBeVisible()
+    await expect(page.getByText('No clients yet')).toBeVisible()
 
     const mascot = await readMascot(page)
     expect(mascot.hop).not.toBe('none')
@@ -38,7 +38,7 @@ test.describe('Live mascot', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const business = await createOwnBusiness(page)
     await page.goto(`/manage/${business.slug}?tab=clients`)
-    await expect(page.getByText('Клиентов пока нет')).toBeVisible()
+    await expect(page.getByText('No clients yet')).toBeVisible()
 
     expect(await readMascot(page)).toMatchObject({ hop: 'none', blink: 'none', glance: 'none' })
   })

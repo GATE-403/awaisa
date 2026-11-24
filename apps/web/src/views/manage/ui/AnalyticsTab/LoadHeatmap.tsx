@@ -15,7 +15,7 @@ interface LoadHeatmapProps {
 
 type Cell = { weekday: number; hour: number }
 
-const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const STEPS = 4
 
 const span = (hour: number) => `${hour}:00–${hour + 1}:00`
@@ -28,7 +28,7 @@ const ARROWS: Record<string, [number, number]> = {
 }
 
 // Weekday × hour: one hue, light → dark (sequential), and something to explore rather than a
-// picture («больше интерактивности, а не как декор»): pointing at an hour, tapping it or moving
+// picture ("more interactive, not decoration"): pointing at an hour, tapping it or moving
 // with the arrows reads it out in the line above (the busiest hour stays beside it to compare),
 // rings the cell and lights its day and hour. With nothing picked the line names the peak, so the
 // headline never depends on reading a colour.
@@ -54,7 +54,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
       weekday: 0,
       hour: columns[0] ?? opens,
     }
-  const visitsLabel = (count: number) => t.count(count, ['визит', 'визита', 'визитов'])
+  const visitsLabel = (count: number) => t.count(count, ['visit', 'visits'])
   const weekdayOf = (index: number) => t(WEEKDAYS[index] ?? '')
   const isPeak = (cell: Cell) => peak?.weekday === cell.weekday && peak.hour === cell.hour
 
@@ -73,7 +73,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
 
   if (!peak) {
     return (
-      <p className={styles.cardHint}>{t('Визитов пока нет, карта заполнится по мере записей')}</p>
+      <p className={styles.cardHint}>{t('No visits yet, the map fills in as bookings come')}</p>
     )
   }
 
@@ -86,7 +86,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
             {!isPeak(active) && (
               <span className={styles.hintMuted}>
                 {' · '}
-                {t('пик {day} {hour}:00, {visits}', {
+                {t('peak {day} {hour}:00, {visits}', {
                   day: weekdayOf(peak.weekday),
                   hour: peak.hour,
                   visits: visitsLabel(peak.visits),
@@ -96,12 +96,12 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           </>
         ) : (
           <>
-            {t('Пик: {day}, {hours} · {visits}', {
+            {t('Peak: {day}, {hours} · {visits}', {
               day: weekdayOf(peak.weekday),
               hours: span(peak.hour),
               visits: visitsLabel(peak.visits),
             })}
-            <span className={styles.hintMuted}> · {t('наведите на час')}</span>
+            <span className={styles.hintMuted}> · {t('point at an hour')}</span>
           </>
         )}
       </p>
@@ -112,7 +112,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           className={styles.heatmapAction}
           onClick={() => onMakePromotion(picked)}
         >
-          {t('Скидка на {day} {hours}, чтобы заполнить час', {
+          {t('Discount on {day} {hours} to fill the hour', {
             day: weekdayOf(picked.weekday),
             hours: span(picked.hour),
           })}
@@ -126,7 +126,7 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
           style={{ '--heatmap-columns': columns.length } as React.CSSProperties}
           onMouseLeave={() => setHovered(null)}
         >
-          <caption className={styles.srOnly}>{t('Визиты по дням недели и часам')}</caption>
+          <caption className={styles.srOnly}>{t('Visits by weekday and hour')}</caption>
           <thead>
             <tr>
               <td />
@@ -189,11 +189,11 @@ export const LoadHeatmap = ({ cells, hours, onMakePromotion }: LoadHeatmapProps)
         </table>
       </div>
       <div className={styles.scale} aria-hidden='true'>
-        <span>{t('Меньше')}</span>
+        <span>{t('Fewer')}</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <span key={level} className={styles.heatmapCell} data-level={level} />
         ))}
-        <span>{t('Больше')}</span>
+        <span>{t('More')}</span>
       </div>
     </div>
   )

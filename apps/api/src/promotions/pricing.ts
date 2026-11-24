@@ -74,7 +74,7 @@ const bestDiscount = (rules: PromotionRule[], input: PricingInput): Discount | n
   return best
 }
 
-/** Whether a code names one of the business's active promo codes at all (for «не подходит»). */
+/** Whether a code names one of the business's active promo codes at all (for 'does not apply'). */
 const isKnownCode = (rules: PromotionRule[], code: string | null) => {
   const normalized = normalizeCode(code)
   return rules.some(

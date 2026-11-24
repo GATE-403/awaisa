@@ -159,7 +159,7 @@ const listQuestions = async (slug: string): Promise<QuestionList> => {
   return data
 }
 
-// What a search was read as («cnhb;rf» → «стрижка»), for «Показаны результаты для …».
+// What a search was read as («cnhb;rf» → «стрижка»), for «Showing results for …».
 const resolveSearch = async (query: string): Promise<SearchCorrection> => {
   'use cache'
   cacheTag(BUSINESSES_TAG)
@@ -200,7 +200,7 @@ const listPlacesLeaderboard = async (kind: BusinessKind): Promise<LeaderboardPla
   return data
 }
 
-// «Похожие места» of a place, ranked by the API (distance, menu, price level, rating); the page
+// «Similar places» of a place, ranked by the API (distance, menu, price level, rating); the page
 // renders without them.
 const listSimilarPlaces = async (slug: string): Promise<BusinessCard[]> => {
   'use cache'
@@ -279,7 +279,7 @@ const listPromotions = async (slug: string): Promise<PublicPromotion[]> => {
   return data
 }
 
-// «Подарочный сертификат» on the business page: the amounts on sale, none when it sells none.
+// «Gift card» on the business page: the amounts on sale, none when it sells none.
 const getCertificateSale = async (slug: string): Promise<CertificateSale> => {
   'use cache'
   cacheTag(businessTag(slug))
@@ -293,7 +293,7 @@ const getCertificateSale = async (slug: string): Promise<CertificateSale> => {
   return data
 }
 
-// The first page of «Работы»; the feed loads the rest on the client as it scrolls.
+// The first page of «Looks»; the feed loads the rest on the client as it scrolls.
 const listFeed = async (
   kind: BusinessKind | undefined,
   business: string | undefined,

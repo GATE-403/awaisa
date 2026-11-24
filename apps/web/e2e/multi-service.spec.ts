@@ -7,11 +7,11 @@ import { API_URL, bookingSteps, editStep, pickFirstFreeSlot, submitBooking } fro
 const setUpNails = async (page: Page) => {
   const business = await createOwnBusiness(page, {
     services: [
-      { name: 'Маникюр', durationMinutes: 60, price: 1200 },
-      { name: 'Педикюр', durationMinutes: 90, price: 1500 },
-      { name: 'Брови', durationMinutes: 30, price: 800 },
+      { name: 'Manicure', durationMinutes: 60, price: 1200 },
+      { name: 'Pedicure', durationMinutes: 90, price: 1500 },
+      { name: 'Brows', durationMinutes: 30, price: 800 },
     ],
-    masters: ['Айда', 'Бермет'],
+    masters: ['Aida', 'Bermet'],
   })
   const byName = (name: string) => {
     const found = business.services.find((service) => service.name === name)
@@ -20,19 +20,19 @@ const setUpNails = async (page: Page) => {
   }
   const [aida, bermet] = business.masters
   if (!aida || !bermet) throw new Error('Two masters expected')
-  // Бермет does no pedicure: a visit of manicure and pedicure is Айда's alone.
+  // Bermet does no pedicure: a visit of manicure and pedicure is Aida's alone.
   const updated = await page.request.put(`/api/manage/${business.slug}/specialists/${bermet.id}`, {
     data: {
       name: bermet.name,
-      role: 'Мастер',
-      serviceIds: [byName('Маникюр').id, byName('Брови').id],
+      role: 'Specialist',
+      serviceIds: [byName('Manicure').id, byName('Brows').id],
     },
   })
   expect(updated.ok()).toBe(true)
   return {
     business,
-    manicure: byName('Маникюр'),
-    pedicure: byName('Педикюр'),
+    manicure: byName('Manicure'),
+    pedicure: byName('Pedicure'),
     aida,
     bermet,
   }
@@ -68,33 +68,33 @@ test.describe('A visit of several services', () => {
     try {
       await guest.goto(`/${business.slug}/book`)
       const steps = bookingSteps(guest)
-      await steps.service.getByRole('radio', { name: /^Маникюр/ }).click()
+      await steps.service.getByRole('radio', { name: /^Manicure/ }).click()
 
       // The visit can grow in passing: one service is offered under its ticket, a tap adds it.
-      await guest.getByRole('button', { name: /^\+ Педикюр/ }).click()
-      // Once per visit: nothing more is offered after it (Брови could still join, Айда aside).
+      await guest.getByRole('button', { name: /^\+ Pedicure/ }).click()
+      // Once per visit: nothing more is offered after it (Brows could still join, Aida aside).
       // The ticket keeps the first service's name and marks the added one under it.
-      await expect(steps.service).toContainText('+ Педикюр')
+      await expect(steps.service).toContainText('+ Pedicure')
       await expect(guest.getByRole('button', { name: /^\+ / })).toHaveCount(0)
 
-      // Only Айда does both, so the master is chosen; the card says the whole visit.
-      await expect(steps.service).toContainText('Маникюр')
-      await expect(steps.service).toContainText('+ Педикюр')
-      await expect(steps.service).toContainText('2 ч 30 мин')
-      await expect(steps.specialist).toContainText('Айда')
+      // Only Aida does both, so the master is chosen; the card says the whole visit.
+      await expect(steps.service).toContainText('Manicure')
+      await expect(steps.service).toContainText('+ Pedicure')
+      await expect(steps.service).toContainText('2 h 30 min')
+      await expect(steps.specialist).toContainText('Aida')
       const time = await pickFirstFreeSlot(guest)
 
-      await steps.contacts.getByLabel('Имя').fill('E2E Две услуги')
-      await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+      await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Two services')
+      await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await submitBooking(guest)
-      await expect(guest.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+      await expect(guest.getByRole('heading', { name: 'You are booked' })).toBeVisible()
 
       const stored = await guest.evaluate(() =>
         JSON.parse(window.localStorage.getItem('awaisa:bookings:v2') ?? '[]'),
       )
       const booking = stored[0]?.snapshot
       expect(booking).toMatchObject({
-        serviceName: 'Маникюр + Педикюр',
+        serviceName: 'Manicure + Pedicure',
         price: 2700,
         durationMinutes: 150,
         time,
@@ -105,14 +105,14 @@ test.describe('A visit of several services', () => {
       const visits = day.bookings.filter((item) => item.id === booking.id)
       expect(visits).toEqual([
         expect.objectContaining({
-          serviceName: 'Маникюр + Педикюр',
+          serviceName: 'Manicure + Pedicure',
           price: 2700,
           durationMinutes: 150,
         }),
       ])
       await page.goto(`/manage/${business.slug}?tab=schedule&date=${booking.date}`)
       await expect(
-        page.locator('[data-schedule-board]').getByText('Маникюр + Педикюр'),
+        page.locator('[data-schedule-board]').getByText('Manicure + Pedicure'),
       ).toHaveCount(1)
     } finally {
       await guestContext.close()
@@ -130,36 +130,36 @@ test.describe('A visit of several services', () => {
     const guest = await guestContext.newPage()
     try {
       const steps = bookingSteps(guest)
-      const offer = guest.getByRole('button', { name: /^\+ Педикюр/ })
+      const offer = guest.getByRole('button', { name: /^\+ Pedicure/ })
 
       // 10:00 has the morning free after it: the visit grows to 2 h 30 min and keeps its time.
       await guest.goto(
         `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
       )
       await offer.click()
-      await expect(steps.service).toContainText('+ Педикюр')
-      await expect(steps.datetime).toContainText('10:00–12:30')
-      await expect(guest.getByText(/визит теперь не помещается/)).toHaveCount(0)
+      await expect(steps.service).toContainText('+ Pedicure')
+      await expect(steps.datetime).toContainText(/10:00.12:30/)
+      await expect(guest.getByText(/visit no longer fits/)).toHaveCount(0)
 
-      // «Изменить» on the service opens the visit's own list: several can be ticked, the added
-      // one is ticked too, and Брови can join (Айда does all three).
+      // «Change» on the service opens the visit's own list: several can be ticked, the added
+      // one is ticked too, and Brows can join (Aida does all three).
       await editStep(guest, 'service')
-      const visit = steps.service.getByRole('group', { name: 'Услуги визита' })
-      await expect(visit.getByRole('checkbox', { name: /^Маникюр/ })).toBeChecked()
-      const pedicure = visit.getByRole('checkbox', { name: /^Педикюр/ })
+      const visit = steps.service.getByRole('group', { name: 'Services of the visit' })
+      await expect(visit.getByRole('checkbox', { name: /^Manicure/ })).toBeChecked()
+      const pedicure = visit.getByRole('checkbox', { name: /^Pedicure/ })
       await expect(pedicure).toBeChecked()
-      const brows = visit.getByRole('checkbox', { name: /^Брови/ })
+      const brows = visit.getByRole('checkbox', { name: /^Brows/ })
       await expect(brows).not.toBeChecked()
-      // A third one is ticked the same way, and the list stays open for more until «Готово».
+      // A third one is ticked the same way, and the list stays open for more until «Done».
       await brows.click()
       await expect(brows).toBeChecked()
       await pedicure.click()
       await expect(pedicure).not.toBeChecked()
-      await guest.getByRole('button', { name: 'Готово' }).filter({ visible: true }).click()
+      await guest.getByRole('button', { name: 'Done' }).filter({ visible: true }).click()
       // Manicure and brows: 1 h 30 min from the same 10:00, which still fits.
-      await expect(steps.service).toContainText('+ Брови')
-      await expect(steps.service).not.toContainText('+ Педикюр')
-      await expect(steps.datetime).toContainText('10:00–11:30')
+      await expect(steps.service).toContainText('+ Brows')
+      await expect(steps.service).not.toContainText('+ Pedicure')
+      await expect(steps.datetime).toContainText(/10:00.11:30/)
 
       // 19:00 is the last hour before closing at 20:00: the time goes, and the form says why.
       await guest.goto(
@@ -167,15 +167,15 @@ test.describe('A visit of several services', () => {
       )
       await offer.click()
       await expect(
-        guest.getByText('В 19:00 визит теперь не помещается, выберите время'),
+        guest.getByText('The visit no longer fits at 19:00, choose a time'),
       ).toBeVisible()
-      await expect(guest.getByRole('heading', { name: 'Когда удобно?' })).toBeVisible()
+      await expect(guest.getByRole('heading', { name: 'When suits you?' })).toBeVisible()
     } finally {
       await guestContext.close()
     }
   })
 
-  test('another master is another booking: «Ещё запись» opens the same place after the visit', async ({
+  test('another master is another booking: “Another booking” opens the same place after the visit', async ({
     page,
     browser,
   }) => {
@@ -189,27 +189,29 @@ test.describe('A visit of several services', () => {
       await guest.goto(
         `/${business.slug}/book?service=${manicure.id}&specialist=${aida.id}&date=${date}&time=10:00`,
       )
-      await steps.contacts.getByLabel('Имя').fill('E2E Ещё запись')
-      await steps.contacts.getByLabel('Телефон').fill(randomClientPhone().replace('+996', ''))
+      await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Another booking')
+      await steps.contacts.getByLabel('Phone').fill(randomClientPhone().replace('+996', ''))
       await submitBooking(guest)
-      await expect(guest.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+      await expect(guest.getByRole('heading', { name: 'You are booked' })).toBeVisible()
 
       // One quiet row: the same place, after the manicure ends at 11:00.
-      await guest.getByRole('button', { name: /^Ещё запись в .+ · после 11:00/ }).click()
+      await guest.getByRole('button', { name: /^Another booking at .+ · after 11:00/ }).click()
       await expect(guest).toHaveURL(new RegExp(`date=${date}.*after=11%3A00|after=11:00`))
-      await expect(steps.service.getByRole('radio', { name: /^Брови/ })).toBeVisible()
-      await steps.service.getByRole('radio', { name: /^Брови/ }).click()
-      await steps.specialist.getByRole('radio', { name: /Бермет/ }).click()
+      await expect(steps.service.getByRole('radio', { name: /^Brows/ })).toBeVisible()
+      await steps.service.getByRole('radio', { name: /^Brows/ }).click()
+      await steps.specialist.getByRole('radio', { name: /Bermet/ }).click()
       // The ruler offers nothing before the first visit ends; the action names the time it takes.
       const action = guest
-        .getByRole('button', { name: /^Выбрать \d{2}:\d{2}$/ })
+        .getByRole('button', { name: /^Choose \d{2}:\d{2}$/ })
         .filter({ visible: true })
       await expect(action).toBeVisible()
-      const offered = ((await action.textContent()) ?? '').replace('Выбрать ', '')
+      const offered = ((await action.textContent()) ?? '').replace('Choose ', '')
       expect(offered >= '11:00').toBe(true)
       await action.click()
       // The name and number are already known: the form is ready to book.
-      await expect(steps.contacts.getByLabel('Имя')).toHaveValue('E2E Ещё запись')
+      await expect(steps.contacts.getByLabel('Name', { exact: true })).toHaveValue(
+        'E2E Another booking',
+      )
     } finally {
       await guestContext.close()
     }
@@ -223,12 +225,14 @@ test.describe('A visit of several services', () => {
     const { manicure, pedicure, aida, bermet } = await setUpNails(page)
     const visit = `serviceId=${manicure.id}&extraServiceIds=${pedicure.id}`
 
-    // Бермет does no pedicure; «any master» is Айда.
+    // Bermet does no pedicure; «any master» is Aida.
     const refused = await fetch(
       `${API_URL}/availability?${visit}&specialistId=${bermet.id}&date=${bishkekDay(1)}`,
     )
     expect(refused.status).toBe(400)
-    expect((await refused.json()).message).toBe('Этот мастер не делает все выбранные услуги')
+    expect((await refused.json()).message).toBe(
+      "This specialist doesn't do all the chosen services",
+    )
     const { date, time } = await firstFreeTime(`${visit}&specialistId=any`)
 
     const quote = await (
@@ -245,7 +249,7 @@ test.describe('A visit of several services', () => {
         specialistId: 'any',
         date,
         time,
-        name: 'E2E Две услуги',
+        name: 'E2E Two services',
         phone: randomClientPhone(),
         smsConfirmation: false,
       }),
@@ -254,7 +258,7 @@ test.describe('A visit of several services', () => {
     const booking = await created.json()
     expect(booking).toMatchObject({
       specialistId: aida.id,
-      serviceName: 'Маникюр + Педикюр',
+      serviceName: 'Manicure + Pedicure',
       price: 2700,
       durationMinutes: 150,
       services: [
@@ -276,7 +280,7 @@ test.describe('A visit of several services', () => {
         specialistId: 'any',
         date,
         time,
-        name: 'E2E Две услуги',
+        name: 'E2E Two services',
         phone: randomClientPhone(),
       }),
     })

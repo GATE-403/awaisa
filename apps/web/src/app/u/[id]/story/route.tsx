@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
 import { BUSINESS_TIME_ZONE } from '@/shared/lib/businessTime'
-import { pluralize } from '@/shared/lib/plural'
+import { pluralize, pluralWord } from '@/shared/lib/plural'
 import { OgMascot } from '@/shared/lib/seo/OgMascot'
 import { loadProfilePhoto } from '@/shared/lib/seo/profilePhoto'
 import { SITE_URL } from '@/shared/lib/seo/siteUrl'
@@ -81,13 +81,11 @@ const formatSince = (iso: string | null) => {
   const date = new Date(iso)
   return Number.isNaN(date.getTime())
     ? null
-    : new Intl.DateTimeFormat('ru-RU', {
+    : new Intl.DateTimeFormat('en-GB', {
         month: 'short',
         year: 'numeric',
         timeZone: BUSINESS_TIME_ZONE,
-      })
-        .format(date)
-        .replace(' г.', '')
+      }).format(date)
 }
 
 // A 9:16 story card (1080 × 1920) in a quiet, light frame: chips with the level and the date on
@@ -122,15 +120,15 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
   const facts = [
     {
       value: profile.stats.visits,
-      label: pluralize(profile.stats.visits, ['визит', 'визита', 'визитов']).replace(/^\d+ /, ''),
+      label: pluralize(profile.stats.visits, ['visit', 'visits']).replace(/^\d+ /, ''),
     },
     {
       value: profile.stats.places,
-      label: pluralize(profile.stats.places, ['место', 'места', 'мест']).replace(/^\d+ /, ''),
+      label: pluralize(profile.stats.places, ['place', 'places']).replace(/^\d+ /, ''),
     },
     {
       value: earned.length,
-      label: pluralize(earned.length, ['медаль', 'медали', 'медалей']).replace(/^\d+ /, ''),
+      label: pluralWord(earned.length, ['medal', 'medals']),
     },
   ]
   const fonts = await loadFonts()
@@ -155,9 +153,9 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
     >
       <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
         <div style={chip}>
-          {`${earned.length > 0 ? (ACHIEVEMENT_EMOJI[earned[0]?.id ?? ''] ?? '✨') : '✨'} Уровень ${profile.level.level}`}
+          {`${earned.length > 0 ? (ACHIEVEMENT_EMOJI[earned[0]?.id ?? ''] ?? '✨') : '✨'} Level ${profile.level.level}`}
         </div>
-        {since && <div style={chip}>{`с ${since}`}</div>}
+        {since && <div style={chip}>{`since ${since}`}</div>}
       </div>
 
       <div
@@ -337,7 +335,7 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
               {handle}
             </div>
             <div style={{ display: 'flex', fontSize: 28, color: 'rgba(255,255,255,0.8)' }}>
-              {`Уровень ${profile.level.level} в Awaisa`}
+              {`Level ${profile.level.level} on Awaisa`}
             </div>
           </div>
           {/* A link sticker's look: a white capsule, the glyph and the word in one line. */}
@@ -358,7 +356,7 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
             }}
           >
             <div style={{ display: 'flex', fontSize: 40, lineHeight: 1 }}>+</div>
-            <div style={{ display: 'flex', color: '#1d1d1f' }}>Профиль</div>
+            <div style={{ display: 'flex', color: '#1d1d1f' }}>Profile</div>
           </div>
         </div>
       </div>
@@ -366,8 +364,8 @@ export const GET = async (_request: Request, { params }: { params: Promise<{ id:
       <div style={{ display: 'flex', flex: 1 }} />
       <div style={{ display: 'flex', fontSize: 34, color: '#6e6e73' }}>
         {profile.favoriteMaster
-          ? `Мой мастер - ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`
-          : 'Записывайся к мастерам через Awaisa'}
+          ? `My specialist - ${profile.favoriteMaster.name.split(' ')[0]} · ${profile.favoriteMaster.businessName}`
+          : 'Book your specialists on Awaisa'}
       </div>
       <div
         style={{

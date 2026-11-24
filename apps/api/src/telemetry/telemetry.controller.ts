@@ -109,7 +109,7 @@ export class TelemetryController {
 
   private assertAdmin(customer: Customer) {
     if (!this.config.get('ADMIN_PHONES', { infer: true }).includes(customer.phone)) {
-      throw new ForbiddenException('Только для администраторов платформы')
+      throw new ForbiddenException('Platform admins only')
     }
   }
 }

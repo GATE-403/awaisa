@@ -27,7 +27,7 @@ const processImage = async (input: Buffer, kind: ImageKind) => {
       .webp({ quality: 80 })
       .toBuffer()
   } catch {
-    throw new BadRequestException('Не получилось прочитать изображение - попробуйте JPG или PNG')
+    throw new BadRequestException('Could not read the image, try JPG or PNG')
   }
 }
 

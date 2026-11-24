@@ -52,7 +52,7 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
               scroll: false,
             })
           toast.show({
-            title: 'Новая запись',
+            title: 'New booking',
             description: describe(booking),
             type: 'info',
             onOpen: open,
@@ -62,7 +62,7 @@ export const useNewBookingAlerts = (slug: string, isEnabled: boolean) => {
           // A push has already shown this booking (the same tag): one notice is enough.
           const isShown = canNotify && (await isAlreadyNotified(booking.id).catch(() => false))
           if (canNotify && !isShown) {
-            const notification = new Notification('Новая запись', {
+            const notification = new Notification('New booking', {
               body: describe(booking),
               tag: booking.id,
             })

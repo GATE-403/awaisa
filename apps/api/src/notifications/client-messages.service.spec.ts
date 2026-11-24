@@ -11,13 +11,13 @@ const PHONE = '+996555123456'
 const LINK = 'https://awaisa.kg/v/1?s=sig'
 
 const message = {
-  text: `Awaisa Studio: вы записаны. Перенести или отменить: ${LINK}`,
-  link: { label: 'Перенести или отменить', url: LINK },
+  text: `Awaisa Studio: you're booked. Change or cancel: ${LINK}`,
+  link: { label: 'Change or cancel', url: LINK },
   whatsapp: whatsappConfirmation(
     {
       business: { name: 'Awaisa Studio', slug: 'awaisa-studio' },
-      serviceName: 'Стрижка',
-      specialistName: 'Эрлан',
+      serviceName: 'Haircut',
+      specialistName: 'Erlan',
       date: '2026-11-24',
       time: '15:30',
     },

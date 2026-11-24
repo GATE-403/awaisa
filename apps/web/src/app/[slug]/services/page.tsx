@@ -13,8 +13,8 @@ export const generateMetadata = async ({
   return buildBusinessMetadata({
     business,
     path: `/${business.slug}/services`,
-    title: `Услуги и цены - ${business.name} · ${PLATFORM.name}`,
-    description: `Услуги и цены ${business.name}: ${describeBusiness(business)}`,
+    title: `Services and prices - ${business.name} · ${PLATFORM.name}`,
+    description: `Services and prices at ${business.name}: ${describeBusiness(business)}`,
     fallbackImage: `/${business.slug}/opengraph-image`,
   })
 }

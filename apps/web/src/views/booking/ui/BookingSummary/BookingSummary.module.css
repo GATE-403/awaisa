@@ -12,7 +12,7 @@
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
   /* The same inset around the button before and after everything is chosen: at 8 here and 6 on
-     the ready bar the button jumped in size between the two («почему размеры разные»). */
+     the ready bar the button jumped in size between the two ("why are the sizes different"). */
   --bar-inset: 6px;
 
   padding: var(--bar-inset) var(--bar-inset) var(--bar-inset) var(--space-5);
@@ -20,7 +20,7 @@
      becomes a rounded rect instead of a stretched pill. */
   /* Concentric with the 52pt capsule button (half its height plus the inset), as on the ready
      bar: at the md height's 22 + 6 the bar's corner was tighter than the button's
-     («радиусы не сочетаются»). */
+     ("the radii do not match"). */
   border-radius: calc(var(--control-height-lg) / 2 + var(--bar-inset));
   background: var(--color-material);
   backdrop-filter: var(--blur-material);
@@ -43,7 +43,7 @@
   border-radius: var(--radius-full);
 }
 
-/* A small basis keeps the total and a long action («Выбрать мастера») on one line on phones;
+/* A small basis keeps the total and a long action ("Choose a specialist") on one line on phones;
    only large system text, where they truly do not fit, drops the button under the total. */
 .barInfo {
   /* Holds its screen-reader-only text, which would otherwise stretch the page sideways. */
@@ -69,8 +69,8 @@
 }
 
 /* No width of its own (`width: 0`) and the column's whole width at least: WebKit sizes a button's
-   flex column by its text, so in the iOS app the line «Мужская стрижка · Любой мастер» ran on
-   under «Выбрать 13:00» instead of ending in its ellipsis. */
+   flex column by its text, so in the iOS app the line "Men's haircut · Any specialist" ran on
+   under "Choose 13:00" instead of ending in its ellipsis. */
 .barHint {
   width: 0;
   min-width: 100%;
@@ -336,15 +336,15 @@
   white-space: nowrap;
 }
 
-/* Ready to book: the same capsule as before, with a capsule button («как во втором варианте»: a
+/* Ready to book: the same capsule as before, with a capsule button ("like the second option": a
    rounded rect bar and button read as square). The leaf is concentric with the capsule like the
    button, half its height on the same 6 inset: the owner chose that over a rounded square
-   («сделать концентричным»), the red month band keeps it a calendar. */
+   ("make it concentric"), the red month band keeps it a calendar. */
 .bar[data-ready] {
   --leaf-radius: calc(var(--control-height-lg) / 2);
 
   /* The leaf on the same 6 inset as the button: at 10 the gap on the left read as too wide
-     («слишком большой отступ»). */
+     ("the gap is too big"). */
   padding: var(--bar-inset);
   border-radius: var(--radius-full);
 }
@@ -352,7 +352,7 @@
 .barInfo[data-ready] {
   flex-direction: row;
   /* The leaf stays on the inset: centred in the room the button leaves, it drifted right on
-     phones wider than 375pt (a Samsung A55 at 412, «опять этот отступ»). */
+     phones wider than 375pt (a Samsung A55 at 412, "that gap again"). */
   justify-content: flex-start;
   align-items: center;
   gap: 10px;
@@ -368,7 +368,7 @@
 }
 
 /* Booking: the capsule folds into a circle as tall as itself with a spinner in it, not a
-   greyed-out «Записываем…». */
+   greyed-out "Booking…". */
 .bar[data-ready] .barButton[data-busy] {
   max-width: var(--control-height-lg);
   padding-inline: 0;

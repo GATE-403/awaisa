@@ -48,9 +48,7 @@ export const VisitYear = ({ months }: VisitYearProps) => {
           <>
             <strong>{monthLabel(shown)}</strong>
             {' · '}
-            {shown.visits > 0
-              ? t.count(shown.visits, ['визит', 'визита', 'визитов'])
-              : t('без визитов')}
+            {shown.visits > 0 ? t.count(shown.visits, ['visit', 'visits']) : t('no visits')}
             {shown.items.length > 0 &&
               ` · ${shown.items
                 .map((item) =>
@@ -66,15 +64,15 @@ export const VisitYear = ({ months }: VisitYearProps) => {
           </>
         ) : (
           <>
-            {t('За год')} <strong>{t.count(total, ['визит', 'визита', 'визитов'])}</strong>
-            {busiest && ` · ${t('чаще всего в {month}', { month: monthLabel(busiest) })}`}
+            {t('This year')} <strong>{t.count(total, ['visit', 'visits'])}</strong>
+            {busiest && ` · ${t('most in {month}', { month: monthLabel(busiest) })}`}
           </>
         )}
       </p>
       <fieldset
         className={styles.yearGrid}
         style={{ '--rows': Math.min(peak, 6) } as CSSProperties}
-        aria-label={t('Визиты по месяцам')}
+        aria-label={t('Visits by month')}
         onMouseLeave={() => setPicked(null)}
       >
         {months.map((month, index) => (
@@ -87,7 +85,7 @@ export const VisitYear = ({ months }: VisitYearProps) => {
             className={styles.yearMonth}
             tabIndex={index === focusIndex ? 0 : -1}
             aria-pressed={picked === index}
-            aria-label={`${monthLabel(month)}: ${t.count(month.visits, ['визит', 'визита', 'визитов'])}`}
+            aria-label={`${monthLabel(month)}: ${t.count(month.visits, ['visit', 'visits'])}`}
             data-picked={picked === index || undefined}
             style={{ '--i': index, '--fill': month.visits / peak } as CSSProperties}
             onMouseEnter={() => setPicked(index)}

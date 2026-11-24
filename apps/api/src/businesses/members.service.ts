@@ -38,7 +38,7 @@ export class MembersService {
 
   async add(business: Business, rawPhone: string): Promise<TeamMember[]> {
     const phone = normalizePhone(rawPhone)
-    if (!phone) throw new BadRequestException('Проверьте номер телефона')
+    if (!phone) throw new BadRequestException('Check the phone number')
     // The number may never have signed in: it gets an account now, named when it first does.
     const [customer] = (await this.dataSource.query(
       `INSERT INTO "customers" ("phone") VALUES ($1)
@@ -58,7 +58,7 @@ export class MembersService {
   }
 
   async remove(businessId: string, customerId: string, meId: string): Promise<void> {
-    if (customerId === meId) throw new BadRequestException('Себя удалить нельзя')
+    if (customerId === meId) throw new BadRequestException("You can't remove yourself")
     // Only administrators leave this way; the owner stays.
     await this.dataSource.query(
       `DELETE FROM "business_members" WHERE "business_id" = $1 AND "customer_id" = $2 AND "role" = 'staff'`,

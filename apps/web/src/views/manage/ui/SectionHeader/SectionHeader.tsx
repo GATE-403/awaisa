@@ -4,7 +4,7 @@ import styles from './SectionHeader.module.css'
 
 interface SectionHeaderProps {
   title: string
-  /** The hint line; may carry inline status links (e.g. «Не закрыто: 2 визита ›»). */
+  /** The hint line; may carry inline status links (e.g. "Not closed: 2 visits ›"). */
   description?: ReactNode
   actions?: ReactNode
   /** Phones: the actions float at the window's foot across its width, one tap under the thumb. */

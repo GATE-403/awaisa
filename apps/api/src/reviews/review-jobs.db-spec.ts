@@ -22,7 +22,7 @@ const insertReview = async (
   const [row] = (await db.query(
     `INSERT INTO "reviews" ("business_id", "booking_id", "specialist_id", "service_id", "rating",
        "author_name", "created_at")
-     VALUES ($1, $2, $3, $4, $5, 'Айбек', now() - make_interval(hours => $6)) RETURNING "id"`,
+     VALUES ($1, $2, $3, $4, $5, 'Aibek', now() - make_interval(hours => $6)) RETURNING "id"`,
     [catalog.businessId, bookingId, catalog.specialistId, catalog.serviceId, rating, hoursAgo],
   )) as { id: string }[]
   return row.id
@@ -81,7 +81,7 @@ describe('review jobs', () => {
     await db.query(
       `INSERT INTO "review_reply_settings" ("business_id", "auto_enabled", "auto_min_rating",
          "auto_template", "auto_since")
-       VALUES ($1, true, 4, 'Спасибо, {имя}!', now() - interval '5 hours')`,
+       VALUES ($1, true, 4, 'Thank you, {name}!', now() - interval '5 hours')`,
       [catalog.businessId],
     )
     const good = await insertReview(
@@ -123,7 +123,7 @@ describe('review jobs', () => {
       is_auto_reply: boolean
     }[]
     const byId = new Map(rows.map((row) => [row.id, row]))
-    expect(byId.get(good)).toMatchObject({ reply: 'Спасибо, Айбек!', is_auto_reply: true })
+    expect(byId.get(good)).toMatchObject({ reply: 'Thank you, Aibek!', is_auto_reply: true })
     expect(byId.get(fresh)?.reply).toBeNull()
     expect(byId.get(poor)?.reply).toBeNull()
     expect(byId.get(before)?.reply).toBeNull()

@@ -42,23 +42,23 @@ import { NameDialog } from '../NameDialog'
 import styles from './AccountSettings.module.css'
 
 const THEMES: { value: Theme; label: string }[] = [
-  { value: 'system', label: 'Как в системе' },
-  { value: 'light', label: 'Светлое' },
-  { value: 'dark', label: 'Тёмное' },
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
 ]
 
 // The account's settings right on the profile, at its foot like iOS Settings - no sheet to open:
 // name and number, the theme, the business side, one's data, signing out and deleting the account.
-// What «что важнее» reads as in the settings' summary line.
+// What «what matters most» reads as in the settings' summary line.
 const PRIORITY_WORDS: Record<NonNullable<Preferences['priorities']>[number], string> = {
-  near: 'Рядом',
-  soon: 'Свободно сегодня',
-  rating: 'Высокий рейтинг',
-  price: 'Подешевле',
+  near: 'Nearby',
+  soon: 'Free today',
+  rating: 'Top rated',
+  price: 'Cheaper',
 }
 
 interface AccountSettingsProps {
-  /** Inside the «Настройки» tab the tab names it. */
+  /** Inside the «Settings» tab the tab names it. */
   isTitleHidden?: boolean
 }
 
@@ -83,7 +83,11 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         if (master.notifyWorks !== isOn) await follows.follow(master.id, isOn)
       }
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
   const toast = useToast()
@@ -101,13 +105,13 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
 
   if (!customer) return null
 
-  // «Женщине · маникюр, брови · до 2 500»: what the picks go by, at a glance.
+  // «Woman · manicure, brows · up to 2,500»: what the picks go by, at a glance.
   const tasteSummary = preferences
     ? [
         preferences.gender === 'female'
-          ? t('Женщине')
+          ? t('Woman')
           : preferences.gender === 'male'
-            ? t('Мужчине')
+            ? t('Man')
             : null,
         preferences.interests
           .slice(0, 2)
@@ -117,15 +121,15 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           .filter(Boolean)
           .join(', ') || null,
         preferences.budget
-          ? t('до {amount}', { amount: preferences.budget.toLocaleString('ru-RU') })
+          ? t('up to {amount}', { amount: preferences.budget.toLocaleString('en-GB') })
           : null,
         (preferences.priorities ?? [])
           .map((value) => t(PRIORITY_WORDS[value]).toLowerCase())
           .join(', ') || null,
       ]
         .filter(Boolean)
-        .join(' · ') || t('Без предпочтений')
-    : t('Не настроено')
+        .join(' · ') || t('No preferences')
+    : t('Not set')
 
   const handleSignOut = async () => {
     await session.signOut()
@@ -144,9 +148,9 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       const file = new File([blob], `awaisa-${data.exportedAt.slice(0, 10)}.json`, {
         type: 'application/json',
       })
-      await saveFile(file, 'Мои данные Awaisa')
+      await saveFile(file, 'My Awaisa data')
     } catch (error) {
-      toast.show({ title: 'Не скачалось', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: 'Download failed', description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsExporting(false)
     }
@@ -158,11 +162,11 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       const { slugs } = await deleteMyAccount()
       await Promise.all(slugs.map((slug) => refreshBusiness(slug))).catch(() => undefined)
       session.setCustomer(null)
-      toast.show({ title: 'Аккаунт удалён', type: 'success' })
+      toast.show({ title: 'Account deleted', type: 'success' })
       router.replace('/')
     } catch (error) {
       setIsDeleting(false)
-      toast.show({ title: 'Не удалили', description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: 'Not deleted', description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -174,7 +178,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
     >
       {!isTitleHidden && (
         <h2 id='settings-title' className={styles.title}>
-          {t('Настройки')}
+          {t('Settings')}
         </h2>
       )}
 
@@ -183,25 +187,25 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <User />
           </span>
-          <span className={styles.label}>{t('Имя')}</span>
-          <span className={styles.value}>{customer.name || t('Указать')}</span>
+          <span className={styles.label}>{t('Name')}</span>
+          <span className={styles.value}>{customer.name || t('Add')}</span>
           <CaretRight className={styles.chevron} aria-hidden />
         </button>
         <div className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <Phone />
           </span>
-          <span className={styles.label}>{t('Телефон')}</span>
+          <span className={styles.label}>{t('Phone')}</span>
           <span className={styles.value}>{formatPhone(customer.phone)}</span>
         </div>
         <div className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <CircleHalf />
           </span>
-          <span className={styles.label}>{t('Оформление')}</span>
+          <span className={styles.label}>{t('Appearance')}</span>
           <Select
             variant='plain'
-            aria-label={t('Оформление')}
+            aria-label={t('Appearance')}
             items={THEMES.map((item) => ({ ...item, label: t(item.label) }))}
             value={theme}
             onValueChange={(value) => value && setTheme(value as Theme)}
@@ -209,24 +213,26 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
         </div>
       </div>
 
-      <SectionCaption className={styles.caption}>{t('Подборка')}</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Picks')}</SectionCaption>
       <div className={styles.list}>
         <button type='button' className={styles.row} onClick={() => setIsTuning(true)}>
           <span className={styles.glyph} aria-hidden>
             <Sparkle />
           </span>
-          <span className={styles.label}>{t('Для вас')}</span>
+          <span className={styles.label}>{t('For you')}</span>
           <span className={styles.value}>{tasteSummary}</span>
           <CaretRight className={styles.chevron} aria-hidden />
         </button>
       </div>
       <p className={styles.footnote}>
-        {t('Для кого, что интересно и бюджет: по ним подбираем услуги в каталоге и после записи.')}
+        {t(
+          'Who it is for, your interests and budget: we pick services by them in the catalogue and after booking.',
+        )}
       </p>
 
       {follows.items.length > 0 && (
         <>
-          <SectionCaption className={styles.caption}>{t('Мои мастера')}</SectionCaption>
+          <SectionCaption className={styles.caption}>{t('My masters')}</SectionCaption>
           <div className={styles.list}>
             {follows.items.map((master) => (
               <div key={master.id} className={styles.row}>
@@ -248,7 +254,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
                   className={styles.unfollow}
                   onClick={() => void follows.unfollow(master.id)}
                 >
-                  {t('Не следить')}
+                  {t('Unfollow')}
                   <span className={styles.srOnly}>{` ${master.name}`}</span>
                 </button>
               </div>
@@ -257,7 +263,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
               <span className={styles.glyph} aria-hidden>
                 <Images />
               </span>
-              <span className={styles.label}>{t('Новые работы')}</span>
+              <span className={styles.label}>{t('New works')}</span>
               <Switch
                 checked={follows.items.every((master) => master.notifyWorks)}
                 onCheckedChange={(checked) => void followWorks(checked)}
@@ -266,24 +272,24 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           </div>
           <p className={styles.footnote}>
             {t(
-              'Напишем, когда у мастера освободится время или он сменит место. Не чаще раза в неделю.',
+              'We will write when a master has free time or moves to another place. At most once a week.',
             )}
           </p>
         </>
       )}
 
-      <SectionCaption className={styles.caption}>{t('Бизнес')}</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Business')}</SectionCaption>
       <div className={styles.list}>
         {places.length > 0 && (
           <NextLink href='/master' className={styles.row}>
             <span className={styles.glyph} aria-hidden>
               <CalendarCheck />
             </span>
-            <span className={styles.label}>{t('Мой день')}</span>
+            <span className={styles.label}>{t('My day')}</span>
             <span className={styles.value}>
               {places.length === 1
                 ? places[0]?.businessName
-                : t('{count} места', { count: places.length })}
+                : t('{count} places', { count: places.length })}
             </span>
             <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
@@ -292,14 +298,14 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <Storefront />
           </span>
-          <span className={styles.label}>{t('Мои бизнесы')}</span>
+          <span className={styles.label}>{t('My businesses')}</span>
           <CaretRight className={styles.chevron} aria-hidden />
         </NextLink>
         <NextLink href='/business/new' className={styles.row}>
           <span className={styles.glyph} aria-hidden>
             <PlusCircle />
           </span>
-          <span className={styles.label}>{t('Подключить бизнес')}</span>
+          <span className={styles.label}>{t('Add your business')}</span>
           <CaretRight className={styles.chevron} aria-hidden />
         </NextLink>
         {/* Platform admins: where people drop out of each scenario, on which devices. */}
@@ -308,7 +314,7 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <span className={styles.glyph} aria-hidden>
               <ChartBar />
             </span>
-            <span className={styles.label}>{t('Воронки')}</span>
+            <span className={styles.label}>{t('Funnels')}</span>
             <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
@@ -318,13 +324,13 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
             <span className={styles.glyph} aria-hidden>
               <Flag />
             </span>
-            <span className={styles.label}>Модерация</span>
+            <span className={styles.label}>{t('Moderation')}</span>
             <CaretRight className={styles.chevron} aria-hidden />
           </NextLink>
         )}
       </div>
 
-      <SectionCaption className={styles.caption}>Ваши данные</SectionCaption>
+      <SectionCaption className={styles.caption}>{t('Your data')}</SectionCaption>
       <div className={styles.list}>
         <button
           type='button'
@@ -335,12 +341,12 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <DownloadSimple />
           </span>
-          <span className={styles.label}>Скачать мои данные</span>
-          <span className={styles.value}>{isExporting ? 'Готовим…' : 'JSON'}</span>
+          <span className={styles.label}>{t('Download my data')}</span>
+          <span className={styles.value}>{isExporting ? 'Preparing…' : 'JSON'}</span>
         </button>
-        {/* Signing out is a row of this group in red, not a lone word under it («выйти стоит в
-            углу как не свой»). It signs out at once: a menu of one «Выйти из аккаунта» was a
-            second tap asking the same thing («доп подтверждение сделано плохо»). */}
+        {/* Signing out is a row of this group in red, not a lone word under it (the owner: off in a
+            corner it looked out of place). It signs out at once: a menu of one «Sign out of account»
+            was a second tap asking the same thing (the owner: the extra confirmation was bad). */}
         <button
           type='button'
           className={`${styles.row} ${styles.signOutRow}`}
@@ -349,12 +355,12 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           <span className={styles.glyph} aria-hidden>
             <SignOut />
           </span>
-          <span className={styles.label}>{t('Выйти')}</span>
+          <span className={styles.label}>{t('Sign out')}</span>
         </button>
       </div>
       <p className={styles.footnote}>
-        Профиль, записи, отзывы, бонусы, уведомления и избранное одним файлом.{' '}
-        {t('Записи, сделанные на этом телефоне, останутся на нём и после выхода.')}
+        {t('Your profile, bookings, reviews, bonuses, notifications and favourites in one file.')}{' '}
+        {t('Bookings made on this phone stay on it after you sign out.')}
       </p>
 
       {/* Deleting is held, not confirmed in a dialog (HoldButton), and says what happens. */}
@@ -364,11 +370,12 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
           disabled={isDeleting}
           onConfirm={() => void handleDelete()}
         >
-          Удалить аккаунт
+          {t('Delete account')}
         </HoldButton>
         <p className={styles.footnote}>
-          Удалим профиль, фото, вход и уведомления, будущие записи отменим. Прошлые визиты останутся
-          в учёте мест, а ваши отзывы будут подписаны «Клиент».
+          {t(
+            'We delete your profile, photo, sign-in and notifications and cancel upcoming bookings. Past visits stay in the places’ records, and your reviews will be signed “Client”.',
+          )}
         </p>
       </div>
 

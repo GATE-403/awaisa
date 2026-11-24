@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { randomClientPhone, signInViaApi } from './account'
 import { createOwnBusiness, createVisit } from './business'
 
-const money = (value: number) => `${new Intl.NumberFormat('ru-RU').format(value)} сом`
+const money = (value: number) => `${new Intl.NumberFormat('en-GB').format(value)} som`
 
 test.describe('Master pay', () => {
   test.skip(({ isMobile }) => isMobile, 'The cabinet sheets are checked on desktop')
@@ -14,17 +14,17 @@ test.describe('Master pay', () => {
     test.setTimeout(120_000)
     const business = await createOwnBusiness(page, {
       services: [
-        { name: 'Стрижка', durationMinutes: 60, price: 1000 },
-        { name: 'Борода', durationMinutes: 30, price: 500 },
+        { name: 'Haircut', durationMinutes: 60, price: 1000 },
+        { name: 'Beard', durationMinutes: 30, price: 500 },
       ],
-      masters: ['Азамат', 'Бекзат'],
+      masters: ['Azamat', 'Bekzat'],
     })
     const [azamat, bekzat] = business.masters
     const [cut, beard] = business.services
     if (!azamat || !bekzat || !cut || !beard) throw new Error('Two masters and services expected')
     const manage = `/api/manage/${business.slug}`
 
-    // Азамат: a cut yesterday (1 000 at the price), a beard the day before (500); Бекзат: a cut.
+    // Azamat: a cut yesterday (1,000 at the price), a beard the day before (500); Bekzat: a cut.
     const cutVisit = await createVisit({
       slug: business.slug,
       serviceId: cut.id,
@@ -44,24 +44,24 @@ test.describe('Master pay', () => {
       daysBack: 1,
     })
 
-    // The owner sets Азамат's pay in the master sheet: 40%, 300 сом a beard, 100 000 a month.
+    // The owner sets Azamat's pay in the master sheet: 40%, 300 som a beard, 100,000 a month.
     await page.goto(`/manage/${business.slug}?tab=masters`)
     await page
-      .getByRole('button', { name: /Азамат/ })
+      .getByRole('button', { name: /Azamat/ })
       .first()
       .click()
-    await page.getByRole('button', { name: /^Зарплата/ }).click()
-    const sheet = page.getByRole('dialog', { name: 'Зарплата' })
-    await sheet.getByLabel('Процент мастера').fill('40')
-    await sheet.getByRole('button', { name: 'Другая ставка для услуги' }).click()
-    await page.getByRole('menuitem', { name: 'Борода' }).click()
-    await sheet.getByRole('button', { name: /Борода: процент или сумма/ }).click()
-    await page.getByRole('menuitem', { name: 'Сумма за визит' }).click()
-    await sheet.getByLabel('Борода: ставка').fill('300')
-    await sheet.getByLabel('Минимум в месяц').fill('100000')
-    await expect(sheet).toContainText('скидки, сертификаты, абонементы и бонусы его уменьшают')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByText('Зарплата Азамат сохранена')).toBeVisible()
+    await page.getByRole('button', { name: /^Pay\b/ }).click()
+    const sheet = page.getByRole('dialog', { name: 'Pay' })
+    await sheet.getByLabel('Specialist’s percent').fill('40')
+    await sheet.getByRole('button', { name: 'Another rate for a service' }).click()
+    await page.getByRole('menuitem', { name: 'Beard' }).click()
+    await sheet.getByRole('button', { name: /Beard: percent or amount/ }).click()
+    await page.getByRole('menuitem', { name: 'Amount per visit' }).click()
+    await sheet.getByLabel('Beard: rate').fill('300')
+    await sheet.getByLabel('Minimum per month').fill('100000')
+    await expect(sheet).toContainText('discounts, certificates, passes and bonuses lower it')
+    await sheet.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByText('Pay for Azamat saved')).toBeVisible()
     expect(await (await page.request.get(`${manage}/specialists/${azamat.id}/pay`)).json()).toEqual(
       {
         percent: 40,
@@ -82,22 +82,22 @@ test.describe('Master pay', () => {
     expect(report.masters.find((item: { id: string }) => item.id === bekzat.id).pay).toBeNull()
 
     await page.goto(`/manage/${business.slug}?tab=analytics`)
-    const masters = page.getByRole('region', { name: 'Мастера за период' })
-    const azamatRow = masters.getByRole('button', { name: /Азамат/ })
-    await expect(azamatRow).toContainText(`к выплате ${money(row.pay.total)}`)
+    const masters = page.getByRole('region', { name: 'Specialists for the period' })
+    const azamatRow = masters.getByRole('button', { name: /Azamat/ })
+    await expect(azamatRow).toContainText(`due ${money(row.pay.total)}`)
     await azamatRow.click()
-    const stats = page.getByRole('dialog', { name: 'Азамат' })
-    await expect(stats).toContainText('300 сом × 1')
-    await expect(stats).toContainText(`40% от ${money(1000)}`)
-    await expect(stats).toContainText('меньше минимума')
+    const stats = page.getByRole('dialog', { name: 'Azamat' })
+    await expect(stats).toContainText('300 som × 1')
+    await expect(stats).toContainText(`40% of ${money(1000)}`)
+    await expect(stats).toContainText('under the minimum')
 
     // Marked paid in part, then undone.
-    await stats.getByRole('button', { name: /^Отметить выплату/ }).click()
-    await stats.getByLabel('Сумма выплаты').fill('20000')
-    await stats.getByLabel('Комментарий к выплате').fill('аванс')
-    await stats.getByRole('button', { name: /^Выплатить 20.000 сом$/ }).click()
-    await expect(page.getByText('Выплата отмечена')).toBeVisible()
-    await expect(stats.getByRole('heading', { name: 'Выплаты' })).toBeVisible()
+    await stats.getByRole('button', { name: /^Mark payout of/ }).click()
+    await stats.getByLabel('Payout amount').fill('20000')
+    await stats.getByLabel('Payout comment').fill('advance')
+    await stats.getByRole('button', { name: /^Pay 20.000 som$/ }).click()
+    await expect(page.getByText('Payout marked')).toBeVisible()
+    await expect(stats.getByRole('heading', { name: 'Payouts' })).toBeVisible()
     await expect(stats).toContainText(money(row.pay.total - 20_000))
     const paid = await (await page.request.get(`${manage}/analytics?days=30`)).json()
     expect(paid.masters.find((item: { id: string }) => item.id === azamat.id).pay).toMatchObject({
@@ -105,9 +105,9 @@ test.describe('Master pay', () => {
       due: row.pay.total - 20_000,
     })
 
-    await stats.getByRole('button', { name: `Отменить выплату ${money(20_000)}` }).click()
-    await expect(page.getByText('Выплата отменена')).toBeVisible()
-    await expect(stats.getByRole('heading', { name: 'Выплаты' })).toHaveCount(0)
+    await stats.getByRole('button', { name: `Cancel payout of ${money(20_000)}` }).click()
+    await expect(page.getByText('Payout cancelled')).toBeVisible()
+    await expect(stats.getByRole('heading', { name: 'Payouts' })).toHaveCount(0)
     const undone = await (await page.request.get(`${manage}/analytics?days=30`)).json()
     expect(undone.masters.find((item: { id: string }) => item.id === azamat.id).pay).toMatchObject({
       paid: 0,
@@ -115,14 +115,14 @@ test.describe('Master pay', () => {
       payouts: [],
     })
 
-    // Азамат signs in for «Мой день»: his own pay only, nothing of the others.
+    // Azamat signs in for «My day»: his own pay only, nothing of the others.
     const masterPhone = randomClientPhone()
     expect(
       (
         await page.request.put(`${manage}/specialists/${azamat.id}`, {
           data: {
-            name: 'Азамат',
-            role: 'Мастер',
+            name: 'Azamat',
+            role: 'Specialist',
             serviceIds: azamat.serviceIds,
             phone: masterPhone,
           },
@@ -132,7 +132,7 @@ test.describe('Master pay', () => {
     const masterContext = await browser.newContext()
     const masterPage = await masterContext.newPage()
     try {
-      await signInViaApi(masterPage, masterPhone, 'E2E Азамат')
+      await signInViaApi(masterPage, masterPhone, 'E2E Azamat')
       const day = await (
         await masterPage.request.get(`/api/master/${business.slug}/day?date=${cutVisit.date}`)
       ).json()
@@ -145,7 +145,7 @@ test.describe('Master pay', () => {
       ).toBe(403)
 
       await masterPage.goto(`/master/${business.slug}`)
-      await expect(masterPage.getByText(/^За [а-я]+ заработано/)).toBeVisible()
+      await expect(masterPage.getByText(/^Earned in [A-Za-z]+/)).toBeVisible()
     } finally {
       await masterContext.close()
     }
@@ -158,7 +158,7 @@ test.describe('Master pay', () => {
     const staffContext = await browser.newContext()
     const staff = await staffContext.newPage()
     try {
-      await signInViaApi(staff, staffPhone, 'E2E Администратор места')
+      await signInViaApi(staff, staffPhone, 'E2E Place Admin')
       const cabinet = await (await staff.request.get(manage)).json()
       expect(cabinet.role).toBe('staff')
       expect(cabinet.catalog.specialists[0]).not.toHaveProperty('commissionPercent')
@@ -186,8 +186,8 @@ test.describe('Master pay', () => {
   }) => {
     test.setTimeout(120_000)
     const business = await createOwnBusiness(page, {
-      services: [{ name: 'Стрижка', durationMinutes: 60, price: 1000 }],
-      masters: ['Азамат'],
+      services: [{ name: 'Haircut', durationMinutes: 60, price: 1000 }],
+      masters: ['Azamat'],
     })
     const [azamat] = business.masters
     if (!azamat) throw new Error('A master expected')
@@ -203,11 +203,11 @@ test.describe('Master pay', () => {
     // A shampoo for sale, three on the shelf.
     const created = await (
       await page.request.post(`${manage}/stock`, {
-        data: { name: 'E2E Шампунь', unit: 'шт', unitCost: 400, isForSale: true, salePrice: 1000 },
+        data: { name: 'E2E Shampoo', unit: 'pcs', unitCost: 400, isForSale: true, salePrice: 1000 },
       })
     ).json()
     const itemId = (created as { id: string; name: string }[]).find(
-      (item) => item.name === 'E2E Шампунь',
+      (item) => item.name === 'E2E Shampoo',
     )?.id
     if (!itemId) throw new Error('The shampoo expected in the stock')
     expect(
@@ -216,20 +216,20 @@ test.describe('Master pay', () => {
       ).ok(),
     ).toBe(true)
 
-    // The owner gives Азамат 10% of the products in the pay sheet.
+    // The owner gives Azamat 10% of the products in the pay sheet.
     await page.goto(`/manage/${business.slug}?tab=masters`)
     await page
-      .getByRole('button', { name: /Азамат/ })
+      .getByRole('button', { name: /Azamat/ })
       .first()
       .click()
-    await page.getByRole('button', { name: /^Зарплата/ }).click()
-    const sheet = page.getByRole('dialog', { name: 'Зарплата' })
-    await sheet.getByLabel('Процент с продаж').fill('10')
-    await expect(sheet).toContainText('которые мастер продал в «Кассе»')
-    await sheet.getByRole('button', { name: 'Сохранить' }).click()
-    await expect(page.getByText('Зарплата Азамат сохранена')).toBeVisible()
+    await page.getByRole('button', { name: /^Pay\b/ }).click()
+    const sheet = page.getByRole('dialog', { name: 'Pay' })
+    await sheet.getByLabel('Percent of sales').fill('10')
+    await expect(sheet).toContainText('the specialist sold in “Till”')
+    await sheet.getByRole('button', { name: 'Save' }).click()
+    await expect(page.getByText('Pay for Azamat saved')).toBeVisible()
 
-    // Two sold by Азамат, one more sold and undone.
+    // Two sold by Azamat, one more sold and undone.
     const sell = (quantity: number) =>
       page.request.post(`${manage}/sales`, {
         data: { sellerId: azamat.id, paymentMethod: 'cash', items: [{ itemId, quantity }] },
@@ -244,11 +244,9 @@ test.describe('Master pay', () => {
 
     await page.goto(`/manage/${business.slug}?tab=analytics`)
     await page
-      .getByRole('region', { name: 'Мастера за период' })
-      .getByRole('button', { name: /Азамат/ })
+      .getByRole('region', { name: 'Specialists for the period' })
+      .getByRole('button', { name: /Azamat/ })
       .click()
-    await expect(page.getByRole('dialog', { name: 'Азамат' })).toContainText(
-      `продал на ${money(2000)}`,
-    )
+    await expect(page.getByRole('dialog', { name: 'Azamat' })).toContainText(`sold ${money(2000)}`)
   })
 })

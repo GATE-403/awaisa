@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { ForBusinessPage } from '@/views/forBusiness'
 
 export const metadata: Metadata = {
-  title: 'Онлайн-запись для бизнеса',
+  title: 'Online booking for businesses',
   description:
-    'Страница записи для салона или мастера за пять минут: услуги, мастера, график и напоминания.',
+    'A booking page for a salon or a specialist in five minutes: services, specialists, hours and reminders.',
 }
 
 const ForBusinessRoute = () => <ForBusinessPage />

@@ -44,7 +44,7 @@ interface UpcomingBookingProps {
 
 // Upcoming visits as passes, not full tickets: the ticket with every detail opens on tap. The
 // nearest visit is large with its everyday actions in plain sight (route, call, move); later ones
-// are one quiet row each, their actions in «⋯» («профиль должен быть самой удобной частью»).
+// are one quiet row each, their actions in «⋯» (the owner: the profile must be the handiest part).
 export const UpcomingBooking = ({
   booking,
   countdown,
@@ -78,7 +78,7 @@ export const UpcomingBooking = ({
       window.location.assign(url)
     } catch (payError) {
       toast.show({
-        title: t('Не получилось'),
+        title: t('Something went wrong'),
         description: getErrorMessage(payError),
         type: 'error',
       })
@@ -92,7 +92,7 @@ export const UpcomingBooking = ({
         className={styles.card}
         data-status={booking.status}
         data-variant={variant}
-        aria-label={t('Запись {code}', { code })}
+        aria-label={t('Booking {code}', { code })}
       >
         <button
           type='button'
@@ -101,7 +101,7 @@ export const UpcomingBooking = ({
             setIsTicketOpen(true)
             trackStep('ticket_open', booking.business.slug)
           }}
-          aria-label={t('Показать талон')}
+          aria-label={t('Show the ticket')}
         />
         <span className={styles.leaf} aria-hidden='true'>
           <span className={styles.leafMonth}>{month}</span>
@@ -112,9 +112,9 @@ export const UpcomingBooking = ({
             {booking.time}
             <span className={styles.countdown} data-pending={isAwaitingPayment || undefined}>
               {booking.status === 'cancelled'
-                ? t('Отменена')
+                ? t('Cancelled')
                 : isAwaitingPayment
-                  ? t('Ждёт оплаты')
+                  ? t('Awaiting payment')
                   : countdown}
             </span>
           </span>
@@ -123,16 +123,16 @@ export const UpcomingBooking = ({
             {booking.specialistName} · {booking.business.name}
           </span>
         </span>
-        <Menu label={t('Ещё')} className={styles.more} trigger={<DotsThree aria-hidden />}>
+        <Menu label={t('More')} className={styles.more} trigger={<DotsThree aria-hidden />}>
           {/* A later visit keeps all its actions here; the nearest one shows the everyday ones. */}
           {isRow && isConfirmed && !isAwaitingPayment && (
             <MenuItem icon={<ArrowsClockwise aria-hidden />} onClick={startMoving}>
-              {t('Перенести')}
+              {t('Reschedule')}
             </MenuItem>
           )}
           {isRow && booking.business.mapUrl && (
             <MenuItem icon={<MapPin aria-hidden />} onClick={openMap}>
-              {t('Маршрут')}
+              {t('Directions')}
             </MenuItem>
           )}
           {isConfirmed && !isAwaitingPayment && (
@@ -140,7 +140,7 @@ export const UpcomingBooking = ({
               icon={<CalendarPlus aria-hidden />}
               onClick={() => downloadCalendarFile(booking, booking.business)}
             >
-              {t('В календарь')}
+              {t('To calendar')}
             </MenuItem>
           )}
           {isConfirmed && (
@@ -150,7 +150,7 @@ export const UpcomingBooking = ({
               disabled={isCancelling}
               onClick={onCancel}
             >
-              {isCancelling ? t('Отменяем…') : t('Отменить запись')}
+              {isCancelling ? t('Cancelling…') : t('Cancel booking')}
             </MenuItem>
           )}
         </Menu>
@@ -160,25 +160,25 @@ export const UpcomingBooking = ({
             {isAwaitingPayment ? (
               <button type='button' className={styles.link} onClick={() => void handlePay()}>
                 <CreditCard aria-hidden />
-                {t('Оплатить {amount}', { amount: formatPrice(booking.payment?.amount ?? 0) })}
+                {t('Pay {amount}', { amount: formatPrice(booking.payment?.amount ?? 0) })}
               </button>
             ) : (
               <>
                 {booking.business.mapUrl && (
                   <button type='button' className={styles.link} onClick={openMap}>
                     <MapPin aria-hidden />
-                    {t('Маршрут')}
+                    {t('Directions')}
                   </button>
                 )}
                 {phone && (
                   <a className={styles.link} href={`tel:${phone}`}>
                     <Phone aria-hidden />
-                    {t('Позвонить')}
+                    {t('Call')}
                   </a>
                 )}
                 <button type='button' className={styles.link} onClick={startMoving}>
                   <ArrowsClockwise aria-hidden />
-                  {t('Перенести')}
+                  {t('Reschedule')}
                 </button>
               </>
             )}

@@ -30,7 +30,7 @@ const createLogDriver = (log: (message: string) => void): FiscalDriver => ({
       Number.parseInt(createHash('sha256').update(request.receiptId).digest('hex').slice(0, 8), 16),
     ).padStart(10, '0')
     log(
-      `[not sent, log driver] ${request.kind} receipt ${fiscalNumber}: ${request.document.total} сом ` +
+      `[not sent, log driver] ${request.kind} receipt ${fiscalNumber}: ${request.document.total} som ` +
         `(${request.document.payment}), ${request.document.lines.length} lines` +
         (request.original ? `, refund of ${request.original.fiscalNumber}` : ''),
     )
@@ -39,7 +39,7 @@ const createLogDriver = (log: (message: string) => void): FiscalDriver => ({
 })
 
 /**
- * eKassa (Telemedia Group): each business has its own cloud register on its own ИНН and signs
+ * eKassa (Telemedia Group): each business has its own cloud register on its own TIN (ИНН) and signs
  * in with its login and password. eKassa gives its REST API description only on request, so the
  * calls are not written yet: every receipt waits in the queue with this error until they are,
  * and nothing is lost.
@@ -47,10 +47,10 @@ const createLogDriver = (log: (message: string) => void): FiscalDriver => ({
 const createEkassaDriver = (apiUrl: string): FiscalDriver => ({
   name: 'ekassa',
   issue: async (request) => {
-    if (!request.credentials) throw new FiscalSendError('Укажите логин и пароль eKassa')
-    if (!request.inn) throw new FiscalSendError('Укажите ИНН')
+    if (!request.credentials) throw new FiscalSendError('Enter your eKassa login and password')
+    if (!request.inn) throw new FiscalSendError('Enter your TIN')
     throw new FiscalSendError(
-      `Отправка в eKassa (${apiUrl}) ещё не подключена: ждём описание их API`,
+      `Sending to eKassa (${apiUrl}) is not connected yet: we are waiting for their API description`,
     )
   },
 })

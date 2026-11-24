@@ -26,7 +26,7 @@ import {
 } from './billing.schemas.js'
 import { BillingOrdersService } from './billing-orders.service.js'
 
-// «Настройки → Тариф»: the owner's plan, usage and paying; platform admins extend by hand.
+// «Settings → Plan»: the owner's plan, usage and paying; platform admins extend by hand.
 @Controller('manage/:slug/billing')
 @UseGuards(BusinessAccessGuard)
 @OwnerOnly()
@@ -61,7 +61,7 @@ export class BillingController {
     const isPlatformAdmin = this.config
       .get('ADMIN_PHONES', { infer: true })
       .includes(customer.phone)
-    if (!isPlatformAdmin) throw new ForbiddenException('Продлить вручную может только Awaisa')
+    if (!isPlatformAdmin) throw new ForbiddenException('Only Awaisa can extend a plan by hand')
     return this.orders.extend(business, body)
   }
 }

@@ -13,19 +13,19 @@ const firstWord = (text: string) => text.trim().split(/\s+/)[0] ?? ''
 
 const fillReplyTemplate = (template: string, context: ReplyContext) =>
   template
-    .replace(/\{имя\}/giu, firstWord(context.authorName) || 'гость')
-    .replace(/\{мастер\}/giu, firstWord(context.specialistName) || 'мастера')
-    .replace(/\{услуга\}/giu, context.serviceName.trim().toLowerCase() || 'услуга')
+    .replace(/\{(?:name|имя)\}/giu, firstWord(context.authorName) || 'there')
+    .replace(/\{(?:specialist|мастер)\}/giu, firstWord(context.specialistName) || 'your specialist')
+    .replace(/\{(?:service|услуга)\}/giu, context.serviceName.trim().toLowerCase() || 'the service')
     .replace(/[ \t]{2,}/g, ' ')
-    // The pill editor may leave a space before punctuation («Спасибо, Асель !»).
+    // The pill editor may leave a space before punctuation ("Thank you, Asel !").
     .replace(/[ \t]+([!?.,:;])/g, '$1')
     .trim()
 
 // What the settings' preview fills a template with.
 const SAMPLE_REVIEW: ReplyContext = {
-  authorName: 'Асель Т.',
-  specialistName: 'Мээрим Сатыбалдиева',
-  serviceName: 'Маникюр',
+  authorName: 'Asel T.',
+  specialistName: 'Meerim Satybaldieva',
+  serviceName: 'Manicure',
 }
 
 export type { ReplyContext }

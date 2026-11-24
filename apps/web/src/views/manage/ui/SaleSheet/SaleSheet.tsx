@@ -47,7 +47,7 @@ const NO_SELLER = 'none'
 const toQuantity = (value: string) => Number(value.replace(',', '.') || 0)
 
 // Selling products from the shelf: how many of each, who sold, how it was paid. Products go
-// off the stock at once; the toast offers «Вернуть», which puts them back.
+// off the stock at once; the toast offers "Undo", which puts them back.
 export const SaleSheet = ({
   slug,
   specialists,
@@ -87,9 +87,9 @@ export const SaleSheet = ({
   const undo = async (sale: Sale) => {
     try {
       onChange?.(await cancelSale(slug, sale.id))
-      toast.show({ title: t('Продажа отменена'), type: 'success' })
+      toast.show({ title: t('Sale cancelled'), type: 'success' })
     } catch (error) {
-      toast.show({ title: t('Не отменилась'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not cancelled'), description: getErrorMessage(error), type: 'error' })
     }
   }
 
@@ -109,21 +109,21 @@ export const SaleSheet = ({
       })
       onChange?.(sale)
       toast.show({
-        title: t('Продано на {amount}', { amount: formatPrice(sale.total) }),
+        title: t('Sold for {amount}', { amount: formatPrice(sale.total) }),
         description: sale.items.map((item) => item.name).join(', '),
         type: 'success',
-        action: { label: t('Вернуть'), onClick: () => void undo(sale) },
+        action: { label: t('Undo'), onClick: () => void undo(sale) },
       })
       onClose()
     } catch (error) {
-      toast.show({ title: t('Не продалось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Sale failed'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSaving(false)
     }
   }
 
   const sellers = [
-    { value: NO_SELLER, label: t('Не указан') },
+    { value: NO_SELLER, label: t('Not specified') },
     ...specialists
       .filter((specialist) => specialist.isActive !== false)
       .map((specialist) => ({ value: specialist.id, label: specialist.name })),
@@ -131,10 +131,10 @@ export const SaleSheet = ({
 
   return (
     <Sheet
-      title={t(booking ? 'Товары к визиту' : 'Продажа')}
+      title={t(booking ? 'Products for the visit' : 'Sale')}
       onClose={onClose}
       action={{
-        label: t('Продать'),
+        label: t('Sell'),
         form: FORM_ID,
         disabled: lines.length === 0 || Boolean(overdrawn) || isSaving,
       }}
@@ -142,27 +142,27 @@ export const SaleSheet = ({
       {products && products.length === 0 ? (
         <EmptyState
           variant='inline'
-          title={t('Нет товаров для продажи')}
-          text={t('Отметьте позицию на складе «Продаётся клиентам» и укажите цену.')}
+          title={t('No products for sale')}
+          text={t('Mark a stock item “Sold to clients” and set its price.')}
           action={
             isOwner ? (
               <ButtonLink href={`/manage/${slug}?tab=stock`} size='sm' variant='secondary'>
-                {t('Открыть склад')}
+                {t('Open stock')}
               </ButtonLink>
             ) : undefined
           }
         />
       ) : (
         <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-          <section className={sheet.group} aria-label={t('Товары')}>
-            <SectionCaption>{t('Товары')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('Products')}>
+            <SectionCaption>{t('Products')}</SectionCaption>
             <div className={sheet.list}>
               {(products ?? []).map((product) => (
                 <label key={product.id} className={sheet.row}>
                   <span>
                     {product.name}
                     <span className={sheet.rowHint}>
-                      {t('{price} · осталось {count} {unit}', {
+                      {t('{price} · {count} {unit} left', {
                         price: formatPrice(product.salePrice ?? 0),
                         count: formatCount(product.quantity),
                         unit: t(product.unit),
@@ -172,7 +172,7 @@ export const SaleSheet = ({
                   <span className={sheet.rowControl}>
                     <Input
                       variant='plain'
-                      aria-label={t('Сколько: {name}', { name: product.name })}
+                      aria-label={t('How many: {name}', { name: product.name })}
                       inputMode='decimal'
                       placeholder='0'
                       value={quantities[product.id] ?? ''}
@@ -190,37 +190,35 @@ export const SaleSheet = ({
             </div>
             <p className={sheet.groupFooter}>
               {overdrawn
-                ? t('На складе только {count} {unit}: {name}.', {
+                ? t('Only {count} {unit} in stock: {name}.', {
                     count: formatCount(overdrawn.product.quantity),
                     unit: t(overdrawn.product.unit),
                     name: overdrawn.product.name,
                   })
                 : total > 0
                   ? t(
-                      booking
-                        ? 'Итого {amount} сом, оплата вместе с визитом.'
-                        : 'Итого {amount} сом.',
+                      booking ? 'Total {amount} som, paid with the visit.' : 'Total {amount} som.',
                       {
                         amount: maskAmountInput(String(Math.round(total))),
                       },
                     )
-                  : t('Укажите, сколько продано.')}
+                  : t('Enter how many were sold.')}
             </p>
           </section>
 
-          <section className={sheet.group} aria-label={t('Оплата')}>
+          <section className={sheet.group} aria-label={t('Payment')}>
             <div className={sheet.list}>
               {!booking && (
                 <>
                   <label className={sheet.row}>
-                    <span className={sheet.rowLabel}>{t('Клиент')}</span>
+                    <span className={sheet.rowLabel}>{t('Client')}</span>
                     <span className={sheet.rowControl}>
                       <Input
                         variant='plain'
-                        aria-label={t('Телефон клиента')}
+                        aria-label={t('Client phone')}
                         type='tel'
                         inputMode='tel'
-                        placeholder={t('Необязательно')}
+                        placeholder={t('Optional')}
                         value={phone}
                         onValueChange={(value) => setPhone(maskPhoneInput(value))}
                       />
@@ -228,12 +226,12 @@ export const SaleSheet = ({
                   </label>
                   {phone !== '' && (
                     <label className={sheet.row}>
-                      <span className={sheet.rowLabel}>{t('Имя')}</span>
+                      <span className={sheet.rowLabel}>{t('Name')}</span>
                       <span className={sheet.rowControl}>
                         <Input
                           variant='plain'
-                          aria-label={t('Имя клиента')}
-                          placeholder={t('Необязательно')}
+                          aria-label={t('Client name')}
+                          placeholder={t('Optional')}
                           value={name}
                           onValueChange={setName}
                         />
@@ -243,11 +241,11 @@ export const SaleSheet = ({
                 </>
               )}
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Продал')}</span>
+                <span className={sheet.rowLabel}>{t('Sold by')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Кто продал')}
+                    aria-label={t('Who sold it')}
                     items={sellers}
                     value={sellerId}
                     onValueChange={(value) => value && setSellerId(value)}
@@ -255,11 +253,11 @@ export const SaleSheet = ({
                 </span>
               </div>
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Способ')}</span>
+                <span className={sheet.rowLabel}>{t('Method')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Способ оплаты')}
+                    aria-label={t('Payment method')}
                     items={SALE_METHODS.map((item) => ({
                       ...item,
                       label: saleMethodLabel(item.value, t),
@@ -271,11 +269,11 @@ export const SaleSheet = ({
               </div>
               {!booking && branches.length > 1 && (
                 <div className={sheet.row}>
-                  <span className={sheet.rowLabel}>{t('Филиал')}</span>
+                  <span className={sheet.rowLabel}>{t('Branch')}</span>
                   <span className={sheet.rowControl}>
                     <Select
                       variant='plain'
-                      aria-label={t('Филиал')}
+                      aria-label={t('Branch')}
                       items={branches.map((item) => ({ value: item.id, label: item.name }))}
                       value={branch}
                       onValueChange={(value) => value && setBranch(value)}

@@ -18,8 +18,8 @@ interface NameDialogProps {
 
 const FORM_ID = 'name-form'
 
-// The name is edited in a form sheet like everything else in the settings: «Отмена · Ваше имя ·
-// Сохранить» over one Settings row. A sheet also meets the phone's keyboard itself (the Android
+// The name is edited in a form sheet like everything else in the settings: «Cancel · Your name ·
+// Save» over one Settings row. A sheet also meets the phone's keyboard itself (the Android
 // app keeps the WebView whole), where the centred dialog it was made the app resize the page.
 export const NameDialog = ({ name: initialName, onClose, onSaved }: NameDialogProps) => {
   const t = useT()
@@ -34,28 +34,28 @@ export const NameDialog = ({ name: initialName, onClose, onSaved }: NameDialogPr
     setIsSaving(true)
     try {
       onSaved(await updateMe(name.trim()))
-      toast.show({ title: t('Имя сохранено'), type: 'success' })
+      toast.show({ title: t('Name saved'), type: 'success' })
       onClose()
     } catch (error) {
-      toast.show({ title: t('Не сохранилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not saved'), description: getErrorMessage(error), type: 'error' })
       setIsSaving(false)
     }
   }
 
   return (
     <Sheet
-      title={t('Ваше имя')}
+      title={t('Your name')}
       onClose={onClose}
-      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t('Save'), form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} className={sheet.group} onSubmit={handleSubmit}>
         <div className={sheet.list}>
           <label className={sheet.row}>
-            <span className={sheet.rowLabel}>{t('Имя')}</span>
+            <span className={sheet.rowLabel}>{t('Name')}</span>
             <span className={sheet.rowControl}>
               <Input
                 variant='plain'
-                aria-label={t('Имя')}
+                aria-label={t('Name')}
                 value={name}
                 onValueChange={setName}
                 autoComplete='name'
@@ -64,7 +64,7 @@ export const NameDialog = ({ name: initialName, onClose, onSaved }: NameDialogPr
             </span>
           </label>
         </div>
-        <p className={sheet.groupFooter}>{t('Его увидит мастер в расписании')}</p>
+        <p className={sheet.groupFooter}>{t('The specialist sees it in the schedule')}</p>
       </form>
     </Sheet>
   )

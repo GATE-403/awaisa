@@ -14,7 +14,7 @@ interface ReceiptPageProps {
 export const ReceiptPage = ({ receipt }: ReceiptPageProps) => (
   <main className={styles.page}>
     <Container size='sm' className={styles.content}>
-      <h1 className={styles.title}>Кассовый чек</h1>
+      <h1 className={styles.title}>Receipt</h1>
       {receipt ? (
         <>
           <ReceiptPaper receipt={receipt} />
@@ -27,14 +27,14 @@ export const ReceiptPage = ({ receipt }: ReceiptPageProps) => (
               rel='noreferrer'
               className={styles.check}
             >
-              Проверить в ГНС
+              Check with the tax service
             </ButtonLink>
           )}
         </>
       ) : (
         <EmptyState
-          title='Чек не открылся'
-          text='Проверьте ссылку или попросите её в салоне ещё раз.'
+          title="The receipt didn't open"
+          text='Check the link or ask the salon for it again.'
         />
       )}
     </Container>

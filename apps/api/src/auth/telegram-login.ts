@@ -1,4 +1,4 @@
-// «Войти через Telegram»: the page makes a random token and opens the bot with
+// 'Sign in with Telegram': the page makes a random token and opens the bot with
 // `/start login_<token>`; the bot asks for the person's own number and ties it to the token;
 // the page then trades the token for a session. Telegram allows 64 characters of
 // `[A-Za-z0-9_-]` after /start, so the token is at most 58.

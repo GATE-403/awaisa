@@ -45,12 +45,12 @@ export const MasterPlacesPage = ({ initialPlaces = null }: MasterPlacesPageProps
   return (
     <main className={styles.page}>
       <Container size='sm' className={styles.content}>
-        <PageTitle size='sm' title={t('Мой день.')} subtitle={t('Где вы работаете мастером.')} />
+        <PageTitle size='sm' title={t('My day.')} subtitle={t('Where you work as a specialist.')} />
         {!places && <Skeleton className={styles.skeleton} />}
         {places?.length === 0 && (
           <EmptyState
-            title={t('Этот номер не привязан к мастеру')}
-            text={t('Попросите владельца указать его в карточке мастера: Кабинет → Мастера.')}
+            title={t('This number is not linked to a specialist')}
+            text={t('Ask the owner to add it to the specialist card: Dashboard → Specialists.')}
           />
         )}
         {places && places.length > 0 && (

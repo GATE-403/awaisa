@@ -21,10 +21,10 @@ const booking = {
   id: 'b1',
   date: '2026-11-26',
   time: '14:30',
-  serviceName: 'Мужская стрижка',
+  serviceName: "Men's haircut",
   specialistId: 'timur',
-  specialistName: 'Тимур',
-  customerName: 'Айбек',
+  specialistName: 'Timur',
+  customerName: 'Aibek',
   business: { slug: 'old-school', name: 'Old School' },
 }
 
@@ -170,7 +170,7 @@ describe('PushService in the app', () => {
     ])
     expect(messages[0].data.url).toBe('/manage/old-school?tab=schedule&date=2026-11-26&booking=b1')
     expect(messages[1].data.url).toBe('/master/old-school?date=2026-11-26')
-    expect(messages[0].title).toBe('Новая запись')
+    expect(messages[0].title).toBe('New booking')
     expect(repository.delete).toHaveBeenCalledWith(expect.objectContaining({ kind: 'expo' }))
     const ticketInsert = dataSource.query.mock.calls.find(([sql]) =>
       String(sql).includes('INSERT INTO "push_tickets"'),

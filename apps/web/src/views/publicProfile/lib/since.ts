@@ -7,13 +7,13 @@ const toUtc = (dayKey: string) => {
   return Date.UTC(year, month - 1, day)
 }
 
-/** How long ago a visit was, short: «сегодня», «5 дн. назад», «3 нед. назад», «4 мес. назад». */
+/** How long ago a visit was, short: «today», «5 d ago», «3 wk ago», «4 mo ago». */
 export const agoLabel = (visitDayKey: string, todayKey: string, t: Translate) => {
   const days = Math.max(0, Math.round((toUtc(todayKey) - toUtc(visitDayKey)) / DAY_MS))
-  if (days === 0) return t('сегодня')
-  if (days === 1) return t('вчера')
-  if (days < 14) return t('{count} дн. назад', { count: days })
-  if (days < 60) return t('{count} нед. назад', { count: Math.floor(days / 7) })
-  if (days < 365) return t('{count} мес. назад', { count: Math.floor(days / 30) })
-  return t('{count} г. назад', { count: Math.floor(days / 365) })
+  if (days === 0) return t('today')
+  if (days === 1) return t('yesterday')
+  if (days < 14) return t('{count} d ago', { count: days })
+  if (days < 60) return t('{count} wk ago', { count: Math.floor(days / 7) })
+  if (days < 365) return t('{count} mo ago', { count: Math.floor(days / 30) })
+  return t('{count} yr ago', { count: Math.floor(days / 365) })
 }

@@ -41,7 +41,7 @@ const share = (item: Achievement) => item.progress.current / item.progress.targe
 
 // A collection, not a list of grey discs: the medals earned stand in one row like trophies on a
 // shelf, each with the month it came; the goals fold into one line naming the two closest and
-// open in place («просто список разных достижений … не интересно»).
+// open in place (the owner: a plain list of achievements is dull).
 export const Achievements = ({ items, onSelect }: AchievementsProps) => {
   const t = useT()
   const [isOpen, setIsOpen] = useState(false)
@@ -84,7 +84,7 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
           {isGoal ? (
             <>
               <span className={styles.description}>
-                {t('{current} из {total}', {
+                {t('{current} of {total}', {
                   current: item.progress.current,
                   total: item.progress.target,
                 })}
@@ -104,7 +104,7 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
             )
           )}
           <span className={styles.srOnly}>
-            {item.earned ? t('Получено') : t('Цель: {goal}', { goal: t(item.description) })}
+            {item.earned ? t('Earned') : t('Goal: {goal}', { goal: t(item.description) })}
           </span>
         </Tag>
       </li>
@@ -114,7 +114,7 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
   return (
     <div className={styles.collection}>
       {earned.length > 0 && (
-        <ul className={styles.shelf} data-edge-fade aria-label={t('Получено')}>
+        <ul className={styles.shelf} data-edge-fade aria-label={t('Earned')}>
           {earned.map((item, index) => renderMedal(item, index, false))}
         </ul>
       )}
@@ -126,20 +126,20 @@ export const Achievements = ({ items, onSelect }: AchievementsProps) => {
           onClick={() => setIsOpen((value) => !value)}
         >
           {isOpen ? (
-            t('Свернуть цели')
+            t('Hide goals')
           ) : (
             // One text box: as flex items the bold count and the rest broke into columns.
             <span>
-              <strong>{t.count(goals.length, ['цель', 'цели', 'целей'])}</strong>
+              <strong>{t.count(goals.length, ['goal', 'goals'])}</strong>
               {' · '}
-              {t('ближе всего: {names}', { names: closest })}
+              {t('closest: {names}', { names: closest })}
             </span>
           )}
           <CaretDown className={styles.moreCaret} data-open={isOpen || undefined} aria-hidden />
         </button>
       )}
       {goals.length > 0 && areGoalsShown && (
-        <ul className={styles.grid} aria-label={t('Цели')}>
+        <ul className={styles.grid} aria-label={t('Goals')}>
           {goals.map((item, index) => renderMedal(item, index, true))}
         </ul>
       )}

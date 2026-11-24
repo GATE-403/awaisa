@@ -84,7 +84,7 @@ export class InventoryService {
         input.isForSale ? input.salePrice : null,
       ],
     )
-    if (returnedRows(rows).length === 0) throw new NotFoundException('Позиция не найдена')
+    if (returnedRows(rows).length === 0) throw new NotFoundException('Item not found')
     await this.setMaterials(businessId, id, input.materials)
     return this.list(businessId)
   }
@@ -98,7 +98,7 @@ export class InventoryService {
 
   /**
    * A delivery: the quantity grows, the unit cost may change. With `expense` what it cost is
-   * also recorded as an expense («Закупка материалов») in the same step.
+   * also recorded as an expense ('Materials') in the same step.
    */
   async receive(
     businessId: string,
@@ -114,7 +114,7 @@ export class InventoryService {
       [id, businessId, quantity, unitCost ?? null],
     )
     const [item] = returnedRows(rows)
-    if (!item) throw new NotFoundException('Позиция не найдена')
+    if (!item) throw new NotFoundException('Item not found')
     const cost = quantity * toNumber(item.unit_cost)
     const [movement] = await this.query(
       `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind", "cost")
@@ -142,7 +142,7 @@ export class InventoryService {
       [id, businessId, quantity],
     )
     const [moved] = returnedRows(rows)
-    if (!moved) throw new NotFoundException('Позиция не найдена')
+    if (!moved) throw new NotFoundException('Item not found')
     if (toNumber(moved.delta) !== 0) {
       await this.query(
         `INSERT INTO "stock_movements" ("business_id", "item_id", "delta", "kind") VALUES ($1, $2, $3, 'adjust')`,

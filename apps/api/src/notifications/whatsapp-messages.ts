@@ -8,32 +8,32 @@ import type { BookingMessageInput } from './messages.js'
  */
 const WHATSAPP_TEMPLATES = {
   booking_confirmation: {
-    body: 'Вы записаны в {{1}}: {{2}}, {{3}} в {{4}}, мастер {{5}}. Ждём вас!',
-    button: 'Перенести или отменить',
+    body: 'You are booked at {{1}}: {{2}}, {{3}} at {{4}} with {{5}}. See you soon!',
+    button: 'Change or cancel',
   },
   booking_reminder: {
-    body: 'Напоминаем: {{1}} в {{2}} у вас {{3}} в {{4}}, мастер {{5}}. Ждём вас!',
-    button: 'Перенести или отменить',
+    body: 'A reminder: {{1}} at {{2}} you have {{3}} at {{4}} with {{5}}. See you soon!',
+    button: 'Change or cancel',
   },
   booking_rescheduled: {
-    body: 'Запись в {{1}} перенесена: {{2}}, {{3}} в {{4}}, мастер {{5}}. Подробности по кнопке ниже.',
-    button: 'Открыть запись',
+    body: 'Your booking at {{1}} has moved: {{2}}, {{3}} at {{4}} with {{5}}. Details are behind the button below.',
+    button: 'Open booking',
   },
   booking_cancelled: {
-    body: 'К сожалению, запись в {{1}} на {{2}} в {{3}} отменена. Выберите другое время по кнопке ниже.',
-    button: 'Выбрать время',
+    body: 'Sorry, your booking at {{1}} on {{2}} at {{3}} has been cancelled. Pick another time with the button below.',
+    button: 'Pick a time',
   },
   waitlist_freed: {
-    body: 'В {{1}} освободилось время: {{2}}, {{3}} в {{4}}. Успейте записаться по кнопке ниже.',
-    button: 'Записаться',
+    body: 'A time has opened up at {{1}}: {{2}}, {{3}} at {{4}}. Book with the button below before it goes.',
+    button: 'Book',
   },
   review_request: {
-    body: 'Как прошёл визит в {{1}}? Оцените мастера, это займёт 10 секунд.',
-    button: 'Оценить',
+    body: 'How was your visit to {{1}}? Rate your specialist, it takes 10 seconds.',
+    button: 'Rate',
   },
   return_visit: {
-    body: 'Пора снова на «{{1}}» в {{2}}? {{3}} ждёт вас, записаться можно по кнопке ниже.',
-    button: 'Записаться',
+    body: 'Time for another “{{1}}” at {{2}}? {{3}} is ready for you, book with the button below.',
+    button: 'Book',
   },
 } as const
 
@@ -67,18 +67,18 @@ type WhatsappPayload = {
 }
 
 const MONTHS = [
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const formatDate = (dateKey: string) => {
@@ -112,7 +112,7 @@ const whatsappReminder = (
 ): WhatsappMessage => ({
   template: 'booking_reminder',
   params: [
-    isToday ? 'сегодня' : 'завтра',
+    isToday ? 'today' : 'tomorrow',
     booking.time,
     booking.serviceName,
     booking.business.name,

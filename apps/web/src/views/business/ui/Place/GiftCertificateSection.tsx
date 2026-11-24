@@ -12,7 +12,7 @@ interface GiftCertificateSectionProps {
   amounts: number[]
 }
 
-// «Подарочный сертификат»: the amounts the owner put on sale; a tap opens the order on that one.
+// «Gift card»: the amounts the owner put on sale; a tap opens the order on that one.
 export const GiftCertificateSection = ({ business, amounts }: GiftCertificateSectionProps) => {
   const [chosen, setChosen] = useState<number | null>(null)
 
@@ -20,11 +20,11 @@ export const GiftCertificateSection = ({ business, amounts }: GiftCertificateSec
     <section id='gift' className={styles.section} aria-labelledby='place-gift'>
       <div>
         <h2 id='place-gift' className={styles.title}>
-          Подарочный сертификат
+          Gift card
         </h2>
-        <p className={styles.text}>Код придёт по SMS сразу после оплаты картой.</p>
+        <p className={styles.text}>The code comes by SMS right after you pay by card.</p>
       </div>
-      <ul className={styles.amounts} aria-label='Суммы сертификата'>
+      <ul className={styles.amounts} aria-label='Gift card amounts'>
         {amounts.map((amount) => (
           <li key={amount}>
             <Button variant='secondary' size='sm' onClick={() => setChosen(amount)}>

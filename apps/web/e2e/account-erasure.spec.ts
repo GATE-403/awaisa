@@ -20,7 +20,7 @@ test.describe('Account data: export and deletion', () => {
     )
   })
 
-  test('the export holds one’s own visit; deleting ends the session and the review says «Клиент»', async ({
+  test('the export holds one’s own visit; deleting ends the session and the review says “Client”', async ({
     page,
   }, testInfo) => {
     test.setTimeout(90_000)
@@ -51,7 +51,7 @@ test.describe('Account data: export and deletion', () => {
     expect(JSON.stringify(data)).not.toMatch(/token|hash|p256dh|endpoint/i)
 
     await page.goto('/bookings?tab=settings')
-    const download = page.getByRole('button', { name: /Скачать мои данные/ })
+    const download = page.getByRole('button', { name: /Download my data/ })
     await expect(download).toBeVisible()
     if (testInfo.project.name === 'desktop') {
       const [file] = await Promise.all([page.waitForEvent('download'), download.click()])
@@ -59,8 +59,8 @@ test.describe('Account data: export and deletion', () => {
     }
 
     // Held, not confirmed in a dialog.
-    await page.getByRole('button', { name: /Удалить аккаунт/ }).click({ delay: 1300 })
-    await expect(page.getByText('Аккаунт удалён')).toBeVisible()
+    await page.getByRole('button', { name: /Delete account/ }).click({ delay: 1300 })
+    await expect(page.getByText('Account deleted')).toBeVisible()
     await expect(page).toHaveURL(/\/$/)
 
     expect((await page.request.get('/api/me')).status()).toBe(401)
@@ -70,7 +70,7 @@ test.describe('Account data: export and deletion', () => {
       await page.request.get(`${API_URL}/businesses/${SLUG}/reviews?limit=50`)
     ).json()) as { items: ReviewItem[] }
     const own = summary.items.find((item) => item.comment === comment)
-    expect(own).toMatchObject({ authorName: 'Клиент', authorId: null })
+    expect(own).toMatchObject({ authorName: 'Client', authorId: null })
 
     // The visit stays in the place's books, no longer tied to an account.
     const kept = await withDb((client) =>
@@ -84,7 +84,7 @@ test.describe('Account data: export and deletion', () => {
     const business = await createOwnBusiness(page)
     const response = await page.request.delete('/api/me')
     expect(response.status()).toBe(409)
-    expect((await response.json()).message).toContain(`единственный владелец «${business.name}»`)
+    expect((await response.json()).message).toContain(`the only owner of “${business.name}”`)
     expect((await page.request.get('/api/me')).ok()).toBe(true)
   })
 })

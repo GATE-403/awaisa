@@ -62,18 +62,22 @@ describe('phoneProblem', () => {
   })
 
   it('names what is wrong', () => {
-    expect(phoneProblem(' ')).toBe('Введите номер телефона')
-    expect(phoneProblem('+7 999 1234567')).toBe('Пока принимаем только номера с кодом +996')
-    expect(phoneProblem('+996 555 12')).toBe('Номер неполный: после +996 нужно 9 цифр')
+    expect(phoneProblem(' ')).toBe('Enter a phone number')
+    expect(phoneProblem('+7 999 1234567')).toBe('For now we only take numbers with the code +996')
+    expect(phoneProblem('+996 555 12')).toBe(
+      'The number is incomplete: it needs 9 digits after +996',
+    )
   })
 })
 
 describe('maskAmountInput', () => {
-  it('groups thousands with a non-breaking space', () => {
-    expect(maskAmountInput('1500')).toBe('1\u00a0500')
-    expect(maskAmountInput('1250000')).toBe('1\u00a0250\u00a0000')
+  it('groups thousands with commas and ignores typed separators', () => {
+    expect(maskAmountInput('1500')).toBe('1,500')
+    expect(maskAmountInput('1250000')).toBe('1,250,000')
     expect(maskAmountInput('900')).toBe('900')
     expect(maskAmountInput('')).toBe('')
+    expect(maskAmountInput('1 500')).toBe('1,500')
+    expect(maskAmountInput('12,5000')).toBe('125,000')
   })
 })
 
@@ -82,8 +86,12 @@ describe('another region', () => {
     expect(maskPhoneInput('8 701 123 45 67', ALMATY)).toBe('+7 701 123 45 67')
     expect(maskLocalPhoneInput('7011234567', ALMATY)).toBe('+7 701 123 45 67')
     expect(phoneProblem('+7 701 123 45 67', ALMATY)).toBeNull()
-    expect(phoneProblem('+996 555 123 456', ALMATY)).toBe('Пока принимаем только номера с кодом +7')
-    expect(phoneProblem('+7 701 12', ALMATY)).toBe('Номер неполный: после +7 нужно 10 цифр')
+    expect(phoneProblem('+996 555 123 456', ALMATY)).toBe(
+      'For now we only take numbers with the code +7',
+    )
+    expect(phoneProblem('+7 701 12', ALMATY)).toBe(
+      'The number is incomplete: it needs 10 digits after +7',
+    )
   })
 })
 

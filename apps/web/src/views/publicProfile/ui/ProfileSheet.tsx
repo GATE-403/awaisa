@@ -16,12 +16,12 @@ interface ProfileSheetProps {
   children: ReactNode
 }
 
-// A profile tapped inside the app opens as a sheet over the page, like a booking («просто
-// модалку как с записями»): the page stays under it and closing goes back to it. A link from
+// A profile tapped inside the app opens as a sheet over the page, like a booking (the owner: just
+// a modal, as with bookings): the page stays under it and closing goes back to it. A link from
 // outside, a reload or a shared address opens the full `/u/<id>` page. Like `BookingModalGate`, it
 // shows only while the address is its own: the `@modal` slot keeps its last page on other
-// navigations. «Изменить» turns this same sheet into the editor («могла там же внутри
-// поменяться»): «Отмена» goes back to the profile, «Готово» saves and goes back.
+// navigations. «Edit» turns this same sheet into the editor (the owner: it could change
+// right there inside): «Cancel» goes back to the profile, «Done» saves and goes back.
 export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
   const pathname = usePathname()
   const router = useRouter()
@@ -41,15 +41,15 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
 
   return (
     <Sheet
-      title={t('Профиль')}
-      cancelLabel={isEditing ? 'Отмена' : 'Закрыть'}
+      title={t('Profile')}
+      cancelLabel={isEditing ? 'Cancel' : 'Close'}
       onCancel={isEditing ? () => setIsEditing(false) : undefined}
       onClose={() => router.back()}
       barEnd={isEditing ? undefined : <span ref={setActionsSlot} />}
       action={
         isEditing
           ? {
-              label: isSaving ? t('Сохраняем…') : t('Готово'),
+              label: isSaving ? t('Saving…') : t('Done'),
               form: EDIT_FORM_ID,
               disabled: isSaving || !settings,
             }
@@ -63,7 +63,7 @@ export const ProfileSheet = ({ id, children }: ProfileSheetProps) => {
             formId={EDIT_FORM_ID}
             settings={settings}
             profile={myProfile.profile}
-            name={customer.name || t('Вы')}
+            name={customer.name || t('You')}
             avatarUrl={customer.avatarUrl ?? null}
             onSave={async (input) => {
               await myProfile.save(input)

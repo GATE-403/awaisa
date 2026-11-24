@@ -257,8 +257,8 @@
   }
 }
 
-/* Cabinet sections lie right on the page, no cards around groups («убери лишние обёртки фона»,
-   like «Аналитика»): rows sit on the page with hairlines running the column's width, captions,
+/* Cabinet sections lie right on the page, no cards around groups ("drop the extra background wrappers",
+   like "Analytics"): rows sit on the page with hairlines running the column's width, captions,
    footers and rows on one left edge. Sheets keep their grouped look (this is for `.section`). */
 .section .list {
   overflow: visible;
@@ -287,7 +287,7 @@
 }
 
 /* Rows on the page take no fill under the pointer or a press (a fill cut flush at the text's edges
-   «выглядит плохо по краям»): the title takes the link colour, a press dims the row a little. */
+   "looks bad at the edges"): the title takes the link colour, a press dims the row a little. */
 .section .list :is(.serviceRow, .masterRow, .settingRow),
 .section .list :is(.serviceRow, .masterRow, .settingRow):is(:hover, :active) {
   background: none;

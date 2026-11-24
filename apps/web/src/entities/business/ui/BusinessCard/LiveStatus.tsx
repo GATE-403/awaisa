@@ -22,25 +22,25 @@ export const LiveStatus = ({ slug }: LiveStatusProps) => {
   const slot = nextFree?.[slug]
   const when =
     slot?.date === today.dayKey
-      ? 'сегодня'
+      ? 'today'
       : slot?.date === addDayKey(today.dayKey, 1)
-        ? 'завтра'
+        ? 'tomorrow'
         : null
 
   if (!slot || !when) {
     return (
       <span className={styles.live}>
-        {nextFree !== undefined && <span className={styles.busy}>{t('Ближайшие дни заняты')}</span>}
+        {nextFree !== undefined && <span className={styles.busy}>{t('Fully booked for now')}</span>}
       </span>
     )
   }
 
   const times = slot.times?.length ? slot.times : [slot.time]
-  const dayWord = when === 'сегодня' ? t('Сегодня') : t('Завтра')
+  const dayWord = when === 'today' ? t('Today') : t('Tomorrow')
 
   return (
     <span className={styles.live}>
-      <span className={styles.free} data-today={when === 'сегодня' || undefined}>
+      <span className={styles.free} data-today={when === 'today' || undefined}>
         {dayWord}
       </span>
       {times.map((time) => (
@@ -52,7 +52,7 @@ export const LiveStatus = ({ slug }: LiveStatusProps) => {
           {time}
           <span className={styles.srOnly}>
             {' '}
-            {t('записаться на {day}', { day: dayWord.toLowerCase() })}
+            {t('book for {day}', { day: dayWord.toLowerCase() })}
           </span>
         </NextLink>
       ))}

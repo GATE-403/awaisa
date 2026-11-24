@@ -8,8 +8,8 @@ interface MastersSectionProps {
   specialists: Specialist[]
 }
 
-// «Мастера»: the booking form's picture cards three a row (four from 640px), as on the owner's
-// «Страница»; each books that master, the bell in its corner follows them.
+// «Specialists»: the booking form's picture cards three a row (four from 640px), as on the owner's
+// «Page»; each books that master, the bell in its corner follows them.
 export const MastersSection = ({ business, specialists }: MastersSectionProps) => (
   <MasterGrid>
     {specialists.map((specialist) => (

@@ -10,18 +10,18 @@ type BookingLine = {
 }
 
 const MONTHS = [
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 // Telegram HTML mode: only these three characters need escaping.
@@ -37,18 +37,18 @@ const stars = (rating: number) => '★'.repeat(rating) + '☆'.repeat(5 - rating
 
 const newBookingText = (business: string, date: string, booking: BookingLine) =>
   [
-    `🗓 <b>Новая запись</b> · ${escapeHtml(business)}`,
+    `🗓 <b>New booking</b> · ${escapeHtml(business)}`,
     `${formatDate(date)}, <b>${booking.time}</b> - ${escapeHtml(booking.serviceName)}`,
-    `Мастер: ${escapeHtml(booking.specialistName)}`,
-    `Клиент: ${escapeHtml(booking.customerName)}${booking.customerPhone ? `, ${booking.customerPhone}` : ''}`,
+    `Specialist: ${escapeHtml(booking.specialistName)}`,
+    `Client: ${escapeHtml(booking.customerName)}${booking.customerPhone ? `, ${booking.customerPhone}` : ''}`,
   ].join('\n')
 
 const cancelledText = (business: string, date: string, booking: BookingLine) =>
   [
-    `✖️ <b>Клиент отменил запись</b> · ${escapeHtml(business)}`,
+    `✖️ <b>Client cancelled a booking</b> · ${escapeHtml(business)}`,
     `${formatDate(date)}, ${booking.time} - ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
-    `Клиент: ${escapeHtml(booking.customerName)}`,
-    'Время снова свободно для записи.',
+    `Client: ${escapeHtml(booking.customerName)}`,
+    'The time is free to book again.',
   ].join('\n')
 
 const movedByClientText = (
@@ -58,10 +58,10 @@ const movedByClientText = (
 ) => {
   const [previousDate = '', previousTime = ''] = booking.previous.split(' ')
   return [
-    `🔁 <b>Клиент перенёс запись</b> · ${escapeHtml(business)}`,
-    `Было: ${formatDate(previousDate)}, ${previousTime}`,
-    `Стало: ${formatDate(date)}, <b>${booking.time}</b> - ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
-    `Клиент: ${escapeHtml(booking.customerName)}`,
+    `🔁 <b>Client moved a booking</b> · ${escapeHtml(business)}`,
+    `Was: ${formatDate(previousDate)}, ${previousTime}`,
+    `Now: ${formatDate(date)}, <b>${booking.time}</b> - ${escapeHtml(booking.serviceName)}, ${escapeHtml(booking.specialistName)}`,
+    `Client: ${escapeHtml(booking.customerName)}`,
   ].join('\n')
 }
 
@@ -74,11 +74,11 @@ const reviewText = (
   answerUrl?: string,
 ) =>
   [
-    `${stars(review.rating)} <b>Новый отзыв</b> · ${escapeHtml(business)}`,
-    `${escapeHtml(review.authorName)} о мастере ${escapeHtml(review.specialistName)}`,
-    review.comment ? `«${escapeHtml(review.comment)}»` : '',
+    `${stars(review.rating)} <b>New review</b> · ${escapeHtml(business)}`,
+    `${escapeHtml(review.authorName)} about ${escapeHtml(review.specialistName)}`,
+    review.comment ? `“${escapeHtml(review.comment)}”` : '',
     answerUrl && review.rating <= ANSWER_IN_PERSON_UP_TO
-      ? `<b>Ответьте клиенту сегодня:</b> <a href="${escapeHtml(answerUrl)}">открыть отзывы</a>`
+      ? `<b>Reply to the client today:</b> <a href="${escapeHtml(answerUrl)}">open reviews</a>`
       : '',
   ]
     .filter(Boolean)
@@ -86,9 +86,9 @@ const reviewText = (
 
 const questionText = (business: string, authorName: string, text: string) =>
   [
-    `❓ <b>Новый вопрос</b> · ${escapeHtml(business)}`,
-    `${escapeHtml(authorName)}: «${escapeHtml(text)}»`,
-    'Ответьте в кабинете: Отзывы → Вопросы.',
+    `❓ <b>New question</b> · ${escapeHtml(business)}`,
+    `${escapeHtml(authorName)}: “${escapeHtml(text)}”`,
+    'Answer in the dashboard: Reviews → Questions.',
   ].join('\n')
 
 /** A moderator took a work photo off the place's page: the owner hears why it is gone. */
@@ -99,30 +99,24 @@ const photoModeratedText = (
   cabinetUrl: string,
 ) =>
   [
-    `🚫 <b>Фото работы ${action === 'hide' ? 'скрыто' : 'удалено'} модератором</b> · ${escapeHtml(business)}`,
-    serviceName ? `Услуга: ${escapeHtml(serviceName)}.` : null,
-    'На него пожаловались клиенты, модератор Awaisa проверил жалобы.',
+    `🚫 <b>A moderator ${action === 'hide' ? 'hid' : 'deleted'} a work photo</b> · ${escapeHtml(business)}`,
+    serviceName ? `Service: ${escapeHtml(serviceName)}.` : null,
+    'Clients reported it and an Awaisa moderator checked the reports.',
     action === 'hide'
-      ? 'Клиенты его не видят, показать снова из кабинета нельзя.'
-      : 'Фото больше нет на странице.',
-    `Остальные работы: <a href="${escapeHtml(cabinetUrl)}">кабинет</a>.`,
+      ? 'Clients no longer see it, and it cannot be shown again from the dashboard.'
+      : 'The photo is no longer on your page.',
+    `Your other work: <a href="${escapeHtml(cabinetUrl)}">dashboard</a>.`,
   ]
     .filter(Boolean)
     .join('\n')
 
-const dayText = (business: string, date: string, bookings: BookingLine[], title = 'Сегодня') => {
+const dayText = (business: string, date: string, bookings: BookingLine[], title = 'Today') => {
   if (bookings.length === 0) {
-    return `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)}\nЗаписей нет.`
+    return `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)}\nNo bookings.`
   }
 
   return [
-    `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)} - ${bookings.length} ${
-      bookings.length % 10 === 1 && bookings.length % 100 !== 11
-        ? 'запись'
-        : [2, 3, 4].includes(bookings.length % 10) && ![12, 13, 14].includes(bookings.length % 100)
-          ? 'записи'
-          : 'записей'
-    }`,
+    `☀️ <b>${title}, ${formatDate(date)}</b> · ${escapeHtml(business)} - ${bookings.length} ${bookings.length === 1 ? 'booking' : 'bookings'}`,
     ...bookings.map(
       (booking) =>
         `<b>${booking.time}</b> ${escapeHtml(booking.serviceName)} - ${escapeHtml(booking.customerName)} · ${escapeHtml(booking.specialistName)}`,
@@ -131,29 +125,29 @@ const dayText = (business: string, date: string, bookings: BookingLine[], title 
 }
 
 const linkedText = (business: string) =>
-  `✅ Готово! Сюда будут приходить новые записи, отмены и отзывы «${escapeHtml(business)}», а каждое утро - расписание на день.\n\n/today - записи на сегодня\n/stop - отключить уведомления`
+  `✅ Done! New bookings, cancellations and reviews for “${escapeHtml(business)}” will come here, and every morning the day's schedule.\n\n/today - today's bookings\n/stop - turn notifications off`
 
 const unclosedText = (count: number) =>
-  `📋 Сегодня не отмечено визитов: <b>${count}</b>. Откройте расписание и отметьте, кто пришёл - так выручка будет точной.`
+  `📋 Visits not marked today: <b>${count}</b>. Open the schedule and mark who came, so your revenue is accurate.`
 
 const HELP_TEXT =
-  'Это бот Awaisa для владельцев. Подключите его в кабинете: Профиль → Уведомления в Telegram.\n\n/today - записи на сегодня\n/stop - отключить уведомления'
+  "This is the Awaisa bot for business owners. Connect it in the dashboard: Settings → Notifications.\n\n/today - today's bookings\n/stop - turn notifications off"
 
-// «Войти через Telegram»: the bot asks for the person's own number with one button.
+// «Sign in with Telegram»: the bot asks for the person's own number with one button.
 const LOGIN_ASK_CONTACT =
-  'Вход в <b>Awaisa</b>. Нажмите «Поделиться номером» внизу - так мы узнаем ваш номер и войдём в ваш профиль с записями.'
-const LOGIN_SHARE_BUTTON = '📱 Поделиться номером'
+  'Signing in to <b>Awaisa</b>. Tap “Share my number” below, so we know your number and can open your profile with your bookings.'
+const LOGIN_SHARE_BUTTON = '📱 Share my number'
 const LOGIN_DONE =
-  'Готово - вы вошли. Вернитесь на сайт или в приложение. Напоминания о визитах теперь будут приходить сюда.'
-const LOGIN_EXPIRED = 'Ссылка для входа устарела. Нажмите «Войти через Telegram» на сайте ещё раз.'
+  'Done, you are signed in. Go back to the site or the app. Visit reminders will now come here.'
+const LOGIN_EXPIRED = 'The sign-in link has expired. Tap “Sign in with Telegram” on the site again.'
 // A chat that already shared its number signs in at once, with a way to use another one.
 const loginKnownText = (phone: string) => {
   const shown = formatPhone(phone)
-  return `Готово - вы вошли с номером <b>${escapeHtml(shown)}</b>. Вернитесь на сайт или в приложение.\n\nДругой номер? Отправьте /stop и войдите ещё раз.`
+  return `Done, you are signed in with <b>${escapeHtml(shown)}</b>. Go back to the site or the app.\n\nAnother number? Send /stop and sign in again.`
 }
-const LOGIN_NOT_OWN = 'Нужен ваш собственный номер - нажмите кнопку «Поделиться номером» внизу.'
+const LOGIN_NOT_OWN = 'We need your own number: tap “Share my number” below.'
 const loginRefusedText = () => {
-  return `Пока принимаем только номера с кодом +${currentRegion().phone.callingCode}.`
+  return `For now we only accept numbers with the code +${currentRegion().phone.callingCode}.`
 }
 
 export type { BookingLine }

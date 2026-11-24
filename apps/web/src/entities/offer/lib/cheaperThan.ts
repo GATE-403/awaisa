@@ -1,7 +1,7 @@
 import { CHEAPER_THAN_MIN } from '../config/offerCard'
 
 /**
- * «Дешевле 70% мест» under a price: the share of other places with this service that ask more,
+ * «Cheaper than 70% of places» under a price: the share of other places with this service that ask more,
  * shown only when it is clearly on the low side and in whole tens (73 reads as 70, not as a
  * figure to check). null hides the line.
  */

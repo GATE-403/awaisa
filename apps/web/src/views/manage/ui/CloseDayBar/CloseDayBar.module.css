@@ -135,7 +135,7 @@
   color: var(--color-muted-foreground);
 }
 
-/* On phones the bar keeps to the screen: «6 визитов без отметки» and the button, never cut. */
+/* On phones the bar keeps to the screen: "6 visits unmarked" and the button, never cut. */
 .short {
   display: none;
 }
@@ -174,7 +174,7 @@
   color: var(--system-orange);
 }
 
-/* Inside the board, one slim row over the day like «Сейчас» - no floating capsule over the
+/* Inside the board, one slim row over the day like "Now" - no floating capsule over the
    window's foot, so the day keeps its whole height (the room kept for it was wasted). */
 .bar {
   position: static;
@@ -206,8 +206,8 @@
   }
 }
 
-/* In the status row it is one capsule in orange - what asks for action - «◌ 4 без отметки ⌄»,
-   then «✓ Все пришли» and a small ✕. */
+/* In the status row it is one capsule in orange - what asks for action - "◌ 4 unmarked ⌄",
+   then "✓ All arrived" and a small ✕. */
 .bar {
   gap: 2px;
   min-height: 36px;
@@ -254,7 +254,7 @@
 }
 
 /* (doubled: the schedule's status row strips its children's padding, which put the glyph of
-   «Ещё N визитов в другие дни» right on the capsule's rounded start, cut off) */
+   "N more visits on other days" right on the capsule's rounded start, cut off) */
 .bar.bar {
   padding: 0 2px 0 var(--space-3);
 }
@@ -281,14 +281,14 @@
   }
 }
 
-/* Phones: «◌ 5 визитов ⌄ · ✓ Все пришли» - the orange glyph already says «без отметки». */
+/* Phones: "◌ 5 visits ⌄ · ✓ All arrived" - the orange glyph already says "unmarked". */
 @media (max-width: 479px) {
   .short {
     display: none;
   }
 }
 
-/* «33 визита в другие дни» on phones (no «Ещё»), so «Показать» stays inside the row. */
+/* "33 visits on other days" on phones (no "More"), so "Show" stays inside the row. */
 @media (max-width: 479px) {
   .elsewhereLong {
     display: none;

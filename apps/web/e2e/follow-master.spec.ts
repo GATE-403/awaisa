@@ -3,7 +3,7 @@ import { randomClientPhone, signInViaApi } from './account'
 import { createOwnBusiness, createVisit } from './business'
 import { withDb } from './visits'
 
-// Clients follow their master: the bell on the place page, «Мои мастера» in the profile, and one
+// Clients follow their master: the bell on the place page, “My masters” in the profile, and one
 // message when time with the master frees up.
 test.describe('Following a master', () => {
   test('a client follows from the place page and lets go in the profile', async ({
@@ -14,22 +14,23 @@ test.describe('Following a master', () => {
     await signInViaApi(page, randomClientPhone(), 'E2E Подписчик')
     await page.goto('/lumiere-salon#masters')
     const masters = page.locator('#masters')
-    const bell = masters.getByRole('button', { name: /^Следить за мастером/ }).first()
+    const bell = masters.getByRole('button', { name: /^Follow / }).first()
     const label = (await bell.getAttribute('aria-label')) ?? ''
-    const name = label.replace('Следить за мастером ', '')
+    const name = label.replace('Follow ', '')
     await bell.click()
-    await expect(page.getByText(`Вы следите за мастером ${name}`)).toBeVisible()
-    await expect(
-      masters.getByRole('button', { name: `Не следить за мастером ${name}` }),
-    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByText(`You follow ${name}`)).toBeVisible()
+    await expect(masters.getByRole('button', { name: `Unfollow ${name}` })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
     const follows = await (await page.request.get('/api/me/follows')).json()
     expect(follows).toHaveLength(1)
 
     await page.goto('/bookings?tab=settings')
-    await expect(page.getByText('Мои мастера')).toBeVisible()
-    await expect(page.getByRole('switch', { name: 'Новые работы' })).not.toBeChecked()
-    await page.getByRole('button', { name: new RegExp(`^Не следить ${follows[0].name}`) }).click()
-    await expect(page.getByText('Мои мастера')).toHaveCount(0)
+    await expect(page.getByText('My masters')).toBeVisible()
+    await expect(page.getByRole('switch', { name: 'New works' })).not.toBeChecked()
+    await page.getByRole('button', { name: new RegExp(`^Unfollow ${follows[0].name}`) }).click()
+    await expect(page.getByText('My masters')).toHaveCount(0)
     expect(await (await page.request.get('/api/me/follows')).json()).toEqual([])
   })
 
@@ -49,7 +50,7 @@ test.describe('Following a master', () => {
         await page.request.put(`/api/manage/${business.slug}/specialists/${master.id}`, {
           data: {
             name: master.name,
-            role: 'Мастер',
+            role: 'Specialist',
             serviceIds: master.serviceIds,
             phone: masterPhone,
           },

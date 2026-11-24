@@ -5,35 +5,37 @@ import { type ClipboardEvent, type KeyboardEvent, useEffect, useRef } from 'reac
 import { useT } from '@/shared/i18n'
 import styles from './TemplateField.module.css'
 
-type TemplateToken = { key: string; label: string }
+/** `aliases`: older keys of the same placeholder, read as its pill and saved back as `key`. */
+type TemplateToken = { key: string; aliases?: readonly string[]; label: string }
 
 interface TemplateFieldProps {
-  /** The template as stored: plain text with `{key}` placeholders (`{имя}`, `{ссылка}` …). */
+  /** The template as stored: plain text with `{key}` placeholders (`{name}`, `{link}` …). */
   value: string
   onChange: (value: string) => void
   label: string
   /** The placeholders this template takes, shown as pills and offered as buttons under it. */
   tokens: readonly TemplateToken[]
   placeholder?: string
-  /** How it will read («Например: …»); with it the field is a Settings row of its own. */
+  /** How it will read ("For example: …"); with it the field is a Settings row of its own. */
   preview?: string
 }
 
 const escapeHtml = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
-// Stored text → the field's HTML: placeholders become pills nobody has to decode («что за {имя}»).
+// Stored text → the field's HTML: placeholders become pills nobody has to decode ("what is {name}").
 const toHtml = (value: string, tokens: readonly TemplateToken[]) =>
   escapeHtml(value)
     .replace(/\{([^{}\s]+)\}/gu, (_, name: string) => {
-      const token = tokens.find((item) => item.key === name.toLowerCase())
+      const key = name.toLowerCase()
+      const token = tokens.find((item) => item.key === key || item.aliases?.includes(key))
       return token
         ? `<span class="${styles.pill}" contenteditable="false" data-token="${token.key}">${token.label}</span>`
         : `{${name}}`
     })
     .replace(/\n/g, '<br>')
 
-// The field's DOM → stored text: pills back to `{имя}`, line breaks to `\n`.
+// The field's DOM → stored text: pills back to `{name}`, line breaks to `\n`.
 const fromNode = (node: Node): string => {
   if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
   if (!(node instanceof HTMLElement)) return ''
@@ -49,7 +51,7 @@ const fromField = (field: HTMLElement) =>
 // One editor for every message template in the cabinet (review replies, mailings): typed like
 // ordinary text, the placeholders as pills inserted from the buttons under it (at the caret) and
 // removed whole with Backspace. It grows with the text; Enter makes a new line. Stored as plain
-// text with `{имя}` and the rest, which the API fills in. With a `preview` it is a Settings row
+// text with `{name}` and the rest, which the API fills in. With a `preview` it is a Settings row
 // that shows how the message will read.
 export const TemplateField = ({
   value,
@@ -63,18 +65,15 @@ export const TemplateField = ({
   const fieldRef = useRef<HTMLDivElement>(null)
   // The last text this field reported, so a re-render from its own typing never resets the caret.
   const reported = useRef<string | null>(null)
-  // The language the pills were drawn in: another one redraws them with its labels.
-  const drawnIn = useRef<string | null>(null)
   const labelled = tokens.map((token) => ({ ...token, label: t(token.label) }))
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `labelled` is new each render; the language decides it
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `labelled` is new each render
   useEffect(() => {
     const field = fieldRef.current
-    if (!field || (value === reported.current && drawnIn.current === t.language)) return
+    if (!field || value === reported.current) return
     field.innerHTML = toHtml(value, labelled)
     reported.current = value
-    drawnIn.current = t.language
-  }, [value, tokens, t])
+  }, [value, tokens])
 
   const report = () => {
     const field = fieldRef.current
@@ -108,7 +107,7 @@ export const TemplateField = ({
     const range = selection?.rangeCount ? selection.getRangeAt(0) : null
     if (range && field.contains(range.commonAncestorContainer)) {
       range.deleteContents()
-      // A word right before the caret gets a space, so the pill never sticks to it («лучше,Имя»).
+      // A word right before the caret gets a space, so the pill never sticks to it ("better,Name").
       const before = range.startContainer.textContent?.slice(0, range.startOffset) ?? ''
       if (before && !/\s$/.test(before)) range.insertNode(document.createTextNode(' '))
       range.collapse(false)

@@ -9,7 +9,7 @@ import styles from './TimeRuler.module.css'
 interface TimeRulerProps {
   slots: TimeSlot[]
   time: string | null
-  /** The visit's length, for «до 14:45» under the time. */
+  /** The visit's length, for «until 14:45» under the time. */
   durationMinutes: number
   onPick: (time: string) => void
   /** The free time under the needle (null on a taken one): the booking bar offers to take it. */
@@ -31,7 +31,7 @@ const toTime = (minutes: number) =>
 
 // The day as a ruler, like a dial: free times stand tall, taken ones lie low, so the shape of the
 // day - a busy morning, a free evening - reads before any number. Scrolling moves the day under
-// the needle and the big time follows it; a tap on a free tick (or «Выбрать») takes that time.
+// the needle and the big time follows it; a tap on a free tick (or «Choose») takes that time.
 export const TimeRuler = ({
   slots,
   time,
@@ -153,10 +153,10 @@ export const TimeRuler = ({
           {!current
             ? ''
             : isFree
-              ? t('до {time} · свободно', {
+              ? t('until {time} · free', {
                   time: toTime(toMinutes(current.time) + durationMinutes),
                 })
-              : t('Занято - прокрутите дальше')}
+              : t('Taken - scroll on')}
         </span>
       </div>
 
@@ -164,7 +164,7 @@ export const TimeRuler = ({
         <fieldset
           ref={trackRef}
           className={styles.track}
-          aria-label={t('Время')}
+          aria-label={t('Time')}
           onPointerDown={() => {
             setHasMoved(true)
             isHolding.current = true
@@ -224,17 +224,17 @@ export const TimeRuler = ({
           for free, a low one for taken - with counts. Two lines made the step taller than
           short phones. */}
       {!hasMoved ? (
-        <p className={styles.hint}>{t('Листайте шкалу или нажмите на время')}</p>
+        <p className={styles.hint}>{t('Scroll the dial or tap a time')}</p>
       ) : (
         <p className={styles.legend}>
           <span className={styles.legendItem}>
             <span className={styles.swatch} data-free='' aria-hidden />
-            {t.count(freeCount, ['свободное окно', 'свободных окна', 'свободных окон'])}
+            {t.count(freeCount, ['free slot', 'free slots'])}
           </span>
           {takenCount > 0 && (
             <span className={styles.legendItem}>
               <span className={styles.swatch} aria-hidden />
-              {t('{count} занято', { count: takenCount })}
+              {t('{count} taken', { count: takenCount })}
             </span>
           )}
         </p>

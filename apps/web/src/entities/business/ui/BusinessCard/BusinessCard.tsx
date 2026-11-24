@@ -94,7 +94,7 @@ export const BusinessCard = ({ business }: BusinessCardProps) => {
         </span>
         <span className={styles.footer}>
           {business.rating ? (
-            <span className={styles.rating}>★ {business.rating.toLocaleString('ru-RU')}</span>
+            <span className={styles.rating}>★ {business.rating.toLocaleString('en-GB')}</span>
           ) : null}
           <ServicesCount count={business.servicesCount} className={styles.services} />
           <span className={styles.address}>{business.address}</span>

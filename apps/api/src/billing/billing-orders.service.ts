@@ -25,7 +25,14 @@ import { SmsService } from '../notifications/sms.service.js'
 import { TelegramBotService } from '../telegram/telegram-bot.service.js'
 import { BillingService, toAccessView, toPlanView } from './billing.service.js'
 import { formatDay, orderTitle, reminderText } from './billing-messages.js'
-import { extendUntil, PERIODS, periodPrice, reminderDue, resolveAccess } from './plan-rules.js'
+import {
+  extendUntil,
+  PERIODS,
+  periodPrice,
+  planTitleOf,
+  reminderDue,
+  resolveAccess,
+} from './plan-rules.js'
 
 /** `payments.kind` of plan and SMS pack orders. */
 const PAYMENT_KIND = 'billing'
@@ -50,7 +57,7 @@ const ORDER_COLUMNS = `"id", "business_id" AS "businessId", "kind", "plan_key" A
 
 /**
  * Paying for the plan and SMS packs through the same acquirer as deposits (`payments`, kind
- * 'billing'), the «Тариф» overview, platform admins' manual extension and the owners' reminders.
+ * 'billing'), the «Plan» overview, platform admins' manual extension and the owners' reminders.
  */
 @Injectable()
 export class BillingOrdersService implements OnModuleInit {
@@ -108,7 +115,9 @@ export class BillingOrdersService implements OnModuleInit {
 
   async checkout(business: Business, customer: Customer, input: BillingCheckoutInput) {
     if (!this.payments.isAvailable) {
-      throw new BadRequestException('Оплата сейчас недоступна: напишите нам, продлим вручную')
+      throw new BadRequestException(
+        'Payment is unavailable right now: write to us and we will extend it by hand',
+      )
     }
     const order = await this.createOrder(business, customer, input)
     const { url } = await this.payments.createOrderCheckout(PAYMENT_KIND, order.id, order.amount, {
@@ -190,7 +199,7 @@ export class BillingOrdersService implements OnModuleInit {
   private async createOrder(business: Business, customer: Customer, input: BillingCheckoutInput) {
     if (input.kind === 'sms') {
       const pack = (await this.smsPacks()).find((row) => row.key === input.packKey)
-      if (!pack) throw new NotFoundException('Пакет не найден')
+      if (!pack) throw new NotFoundException('Pack not found')
       const order = await this.insertOrder(business.id, customer.id, {
         kind: 'sms',
         planKey: null,
@@ -203,7 +212,7 @@ export class BillingOrdersService implements OnModuleInit {
     const plan = await this.billing.plan(input.planKey)
     const isPeriod = (PERIODS as readonly number[]).includes(input.months)
     if (!plan.isPublic || plan.monthlyPrice <= 0 || !isPeriod) {
-      throw new BadRequestException('Этот тариф так не оплатить')
+      throw new BadRequestException('This plan cannot be paid for this way')
     }
     const masters = await this.billing.countMasters(business.id)
     const order = await this.insertOrder(business.id, customer.id, {
@@ -246,7 +255,7 @@ export class BillingOrdersService implements OnModuleInit {
       `SELECT ${ORDER_COLUMNS} FROM "plan_orders" WHERE "id" = $1`,
       [id],
     )) as OrderRow[]
-    if (!row) throw new NotFoundException('Заказ не найден')
+    if (!row) throw new NotFoundException('Order not found')
     return row
   }
 
@@ -266,10 +275,10 @@ export class BillingOrdersService implements OnModuleInit {
         : extendUntil(subscription, new Date(), order.months ?? 1)
     const doneText =
       order.kind === 'sms'
-        ? `Добавили ${order.smsCount ?? 0} SMS`
+        ? `${order.smsCount ?? 0} SMS added`
         : paidUntil
-          ? `Тариф «${planTitle ?? ''}» оплачен до ${formatDay(paidUntil)}`
-          : 'Тариф оплачен'
+          ? `The “${planTitle ?? ''}” plan is paid until ${formatDay(paidUntil)}`
+          : 'Plan paid'
 
     return {
       kind: PAYMENT_KIND,
@@ -312,18 +321,22 @@ export class BillingOrdersService implements OnModuleInit {
   private async paidOrders(businessId: string): Promise<BillingOrderView[]> {
     const rows = (await this.dataSource.query(
       `SELECT o."id", o."kind", o."months", o."sms_count" AS "smsCount", o."amount",
-         o."paid_at" AS "paidAt", p."title" AS "planTitle"
+         o."paid_at" AS "paidAt", o."plan_key" AS "planKey", p."title" AS "planTitle"
        FROM "plan_orders" o LEFT JOIN "plans" p ON p."key" = o."plan_key"
        WHERE o."business_id" = $1 AND o."status" = 'paid'
        ORDER BY o."paid_at" DESC LIMIT 12`,
       [businessId],
     )) as (Pick<OrderRow, 'id' | 'kind' | 'months' | 'smsCount' | 'amount'> & {
       paidAt: Date
+      planKey: string | null
       planTitle: string | null
     })[]
     return rows.map((row) => ({
       id: row.id,
-      title: orderTitle(row),
+      title: orderTitle({
+        ...row,
+        planTitle: row.planKey && row.planTitle ? planTitleOf(row.planKey, row.planTitle) : null,
+      }),
       amount: row.amount,
       paidAt: row.paidAt.toISOString(),
     }))

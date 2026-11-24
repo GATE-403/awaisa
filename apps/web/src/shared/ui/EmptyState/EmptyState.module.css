@@ -1,5 +1,5 @@
-/* One look for every empty place: right on whatever it stands on (no card, «пустые заглушки … сделать
-   дизайн для них»), centred, the mascot in a quiet tone over a title3 and muted body text. */
+/* One look for every empty place: right on whatever it stands on (no card: the owner asked for a design
+   for empty placeholders), centred, the mascot in a quiet tone over a title3 and muted body text. */
 .root {
   display: flex;
   flex-direction: column;

@@ -15,7 +15,7 @@ const SCRIPT = `(()=>{const r=document.documentElement;if(navigator.webdriver){r
 const MARKUP = `<div class="${styles.splash}" aria-hidden="true">
 <div class="${styles.stage}"><svg class="${styles.mascot}" viewBox="0 0 30 32" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="${MASCOT_PATH}"/></svg><span class="${styles.shadow}"></span></div>
 <svg class="${styles.wordmark}" viewBox="0 0 32 6" fill="currentColor"><path d="${WORDMARK_PATH}"/></svg>
-<p class="${styles.text}">Запись к мастерам - без звонков</p>
+<p class="${styles.text}">Book specialists, no calls</p>
 </div><script>${SCRIPT}</script>`
 
 // The first screen of a visit (a new tab, or the app's launch): the mascot hopping over its

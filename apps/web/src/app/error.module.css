@@ -2,7 +2,7 @@
   display: flex;
   flex: 1;
   align-items: center;
-  /* A business page's skeleton (a screen tall) stands here first: a shorter «Не нашли» pulled
+  /* A business page's skeleton (a screen tall) stands here first: a shorter "Not found" pulled
      the footer up into view (Lighthouse layout shift 0.47 on phones). */
   min-height: 100svh;
   padding: var(--space-16) 0;

@@ -59,7 +59,7 @@ export const useManagedBusiness = (
       return true
     } catch (actionError) {
       toast.show({
-        title: t('Не сохранилось'),
+        title: t('Not saved'),
         description: getErrorMessage(actionError),
         type: 'error',
       })

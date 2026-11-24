@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test.describe('Catalog: endless scroll and similar places', () => {
   test('the services feed loads the next page near its end', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('tab', { name: /Услуги/ }).click()
+    await page.getByRole('tab', { name: /Services/ }).click()
     const cards = page.locator('main article')
     await expect(cards.first()).toBeVisible()
     const first = await cards.count()
@@ -30,15 +30,15 @@ test.describe('Catalog: endless scroll and similar places', () => {
     expect(prices).toEqual([...prices].sort((a, b) => a - b))
   })
 
-  test('a place shows «Похожие места» of its kind', async ({ page }) => {
+  test('a place shows “Similar places” of its kind', async ({ page }) => {
     await page.goto('/kings-barbershop')
-    const similar = page.getByRole('region', { name: 'Похожие места' })
+    const similar = page.getByRole('region', { name: 'Similar places' })
     await similar.scrollIntoViewIfNeeded()
     await expect(similar.getByRole('link').first()).toBeVisible()
     await expect(similar.getByRole('link', { name: /Kings Barbershop/ })).toHaveCount(0)
   })
 
-  test('hearted services show in the profile under «Избранное»', async ({ page, request }) => {
+  test('hearted services show in the profile under “Favourites”', async ({ page, request }) => {
     const offers: { id: string; name: string }[] = await (
       await request.get('/api/businesses/offers?limit=2')
     ).json()
@@ -48,8 +48,8 @@ test.describe('Catalog: endless scroll and similar places', () => {
     )
     await page.goto('/bookings')
     // The profile's own tab.
-    await page.getByRole('tab', { name: /Избранное/ }).click()
-    const shelf = page.getByRole('region', { name: 'Избранное' })
+    await page.getByRole('tab', { name: /Favourites/ }).click()
+    const shelf = page.getByRole('region', { name: 'Favourites' })
     await expect(shelf.getByRole('article')).toHaveCount(2)
     // The heart takes one off at once.
     await shelf
@@ -67,8 +67,8 @@ test.describe('Search forgives how people type', () => {
   }) => {
     // A typo is read as the site's own word, and the page says what was searched instead.
     await page.goto(`/?q=${encodeURIComponent('стришка')}`)
-    await expect(page.getByRole('heading', { name: '«стрижка»' })).toBeVisible()
-    await expect(page.getByText('Вы искали «стришка»')).toBeVisible()
+    await expect(page.getByRole('heading', { name: '“стрижка”' })).toBeVisible()
+    await expect(page.getByText('You searched for “стришка”')).toBeVisible()
     await expect(page.locator('main article').first()).toContainText(/стрижка/i)
 
     const names = async (q: string) =>

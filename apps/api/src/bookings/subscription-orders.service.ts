@@ -38,16 +38,16 @@ type PlacedOrder = { id: string; amount: number; title: string; businessName: st
 const visitsWord = (count: number) => {
   const mod10 = count % 10
   const mod100 = count % 100
-  if (mod10 === 1 && mod100 !== 11) return `${count} визит`
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} визита`
-  return `${count} визитов`
+  if (mod10 === 1 && mod100 !== 11) return `${count} visit`
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} visits`
+  return `${count} visits`
 }
 
 /**
  * Subscriptions bought online: an order keeps the plan's terms while the client pays, and only a
  * confirmed payment turns it into the client's subscription (`client_subscriptions`, dated by the
  * payment). Unpaid orders expire with the payment hold; one paid after that is still issued.
- * «Купить абонемент и записаться»: the order names the held booking, confirmed once it is issued.
+ * 'Buy a pass and book': the order names the held booking, confirmed once it is issued.
  */
 @Injectable()
 export class SubscriptionOrdersService implements OnModuleInit {
@@ -83,7 +83,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
       'SELECT "id" FROM "businesses" WHERE "slug" = $1 AND "is_published"',
       [slug],
     )
-    if (!business) throw new NotFoundException('Бизнес не найден')
+    if (!business) throw new NotFoundException('Business not found')
     if (!(await this.isSaleOpen(String(business.id)))) return []
     const rows = await this.query(
       `SELECT p."id", p."title", p."service_id" AS "serviceId", s."name" AS "serviceName",
@@ -118,7 +118,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
       [planId, businessId],
     )
     const isOpen = plan ? await this.isSaleOpen(businessId) : false
-    if (!plan || !isOpen) throw new NotFoundException('Абонемент не продаётся онлайн')
+    if (!plan || !isOpen) throw new NotFoundException('This pass is not sold online')
     return plan
   }
 
@@ -129,7 +129,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
     bookingId: string | null = null,
   ): Promise<PlacedOrder & { checkoutUrl: string }> {
     if (!this.payments.isAvailable) {
-      throw new ServiceUnavailableException('Оплата сейчас недоступна, попробуйте позже')
+      throw new ServiceUnavailableException('Payment is unavailable right now, try again later')
     }
     const dueAt = new Date(Date.now() + PAYMENT_HOLD_MINUTES * 60_000)
     const [order] = await this.query(
@@ -158,7 +158,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
     }
     const checkout = await this.payments
       .createOrderCheckout(KIND, placed.id, placed.amount, {
-        description: `Абонемент «${placed.title}», ${placed.businessName}`,
+        description: `Pass “${placed.title}”, ${placed.businessName}`,
         phone: buyer.phone,
       })
       .catch(async (error: unknown) => {
@@ -180,20 +180,20 @@ export class SubscriptionOrdersService implements OnModuleInit {
        WHERE o."id" = $1`,
       [id],
     )
-    if (!row) throw new NotFoundException('Заказ не найден')
+    if (!row) throw new NotFoundException('Order not found')
     const status = row.status as OrderStatus
     const isBooked = row.bookingId !== null
 
     return {
       kind: KIND,
-      title: `Абонемент «${String(row.title)}»`,
-      details: `${visitsWord(toNumber(row.visits))} на ${toNumber(row.validDays)} дн.${isBooked ? ' · этот визит первый' : ''}`,
+      title: `Pass “${String(row.title)}”`,
+      details: `${visitsWord(toNumber(row.visits))} for ${toNumber(row.validDays)} days${isBooked ? ' · this visit is the first' : ''}`,
       business: { name: String(row.name), slug: String(row.slug) },
       dueAt: status === 'pending' ? (row.dueAt as Date).toISOString() : null,
       status,
       doneText: isBooked
-        ? 'Вы записаны, визит по абонементу. Он в профиле, в «Бонусы и абонементы».'
-        : 'Он в профиле, в «Бонусы и абонементы».',
+        ? "You're booked, and the visit is on the pass. Find it in your profile under Bonuses and passes."
+        : 'Find it in your profile under Bonuses and passes.',
     }
   }
 
@@ -291,7 +291,7 @@ export class SubscriptionOrdersService implements OnModuleInit {
   /** A plan bought with a booking must cover the booked service. */
   assertCovers(plan: Row, serviceId: string) {
     if (!coversService(plan.service_id === null ? null : String(plan.service_id), serviceId)) {
-      throw new BadRequestException('Этот абонемент на другую услугу')
+      throw new BadRequestException('This pass is for another service')
     }
   }
 

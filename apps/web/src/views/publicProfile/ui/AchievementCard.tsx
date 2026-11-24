@@ -20,7 +20,7 @@ interface AchievementCardProps {
 }
 
 // A medal pressed: its card beside it - the medal large, the whole name (the grid cut it to
-// «Постоянный го…»), what it is for, the progress and, on one's own profile, where to go next.
+// «Regular cust…»), what it is for, the progress and, on one's own profile, where to go next.
 export const AchievementCard = ({
   achievement,
   anchor,
@@ -54,12 +54,12 @@ export const AchievementCard = ({
           <p className={styles.medalCardTitle}>{achievementTitle(achievement.title, t)}</p>
           <p className={styles.medalCardText}>{t(achievement.description)}</p>
           {achievement.earned ? (
-            <p className={styles.medalCardDone}>{t('Получено')}</p>
+            <p className={styles.medalCardDone}>{t('Earned')}</p>
           ) : (
             <>
               <span className={styles.medalCardTrack} aria-hidden />
               <p className={styles.medalCardText}>
-                {achievement.progress.current} {t('из')} {achievement.progress.target}
+                {achievement.progress.current} {t('of')} {achievement.progress.target}
                 {isOwn && goal ? ` · ${goal.hint}` : ''}
               </p>
               {isOwn && goal?.action && (

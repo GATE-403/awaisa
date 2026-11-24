@@ -47,7 +47,7 @@ export class PayrollService {
 
   async getScheme(businessId: string, specialistId: string): Promise<MasterPayScheme> {
     const [row] = await this.schemeRows(businessId, [specialistId])
-    if (!row) throw new NotFoundException('Мастер не найден')
+    if (!row) throw new NotFoundException('Specialist not found')
     const rates = await this.rateRows([specialistId])
     return this.toScheme(row, rates)
   }
@@ -62,7 +62,7 @@ export class PayrollService {
         'SELECT 1 FROM "specialists" WHERE "id" = $1 AND "business_id" = $2 FOR UPDATE',
         [specialistId, businessId],
       )
-      if (!master) throw new NotFoundException('Мастер не найден')
+      if (!master) throw new NotFoundException('Specialist not found')
       await this.checkServices(manager, businessId, input)
       await manager.query(
         `UPDATE "specialists" SET "commission_percent" = $2, "salary_kind" = $3,
@@ -187,7 +187,7 @@ export class PayrollService {
     return result
   }
 
-  /** «Мой день»: the day's own work, and the month of that day so far. */
+  /** 'My day': the day's own work, and the month of that day so far. */
   async forMasterDay(
     businessId: string,
     specialistId: string,
@@ -228,7 +228,7 @@ export class PayrollService {
       'SELECT 1 FROM "specialists" WHERE "id" = $1 AND "business_id" = $2',
       [input.specialistId, businessId],
     )
-    if (!master) throw new NotFoundException('Мастер не найден')
+    if (!master) throw new NotFoundException('Specialist not found')
     const [row] = await this.query(
       `INSERT INTO "master_payouts"
            ("business_id", "specialist_id", "period_from", "period_to", "amount", "paid_on", "note")
@@ -253,7 +253,7 @@ export class PayrollService {
       'DELETE FROM "master_payouts" WHERE "id" = $1 AND "business_id" = $2',
       [id, businessId],
     )) as [unknown, number]
-    if (count === 0) throw new NotFoundException('Выплата не найдена')
+    if (count === 0) throw new NotFoundException('Payout not found')
   }
 
   private async payouts(businessId: string, from: string, to: string, ids: string[]) {
@@ -276,7 +276,7 @@ export class PayrollService {
       'SELECT "id" FROM "services" WHERE "business_id" = $1 AND "id" = ANY($2)',
       [businessId, ids],
     )) as unknown[]
-    if (rows.length !== ids.length) throw new BadRequestException('Услуга не найдена')
+    if (rows.length !== ids.length) throw new BadRequestException('Service not found')
   }
 
   private async schemeRows(businessId: string, ids?: string[]): Promise<SchemeRow[]> {

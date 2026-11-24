@@ -5,7 +5,7 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ReceiptPage } from '@/views/receipt'
 
 export const metadata: Metadata = {
-  title: 'Кассовый чек',
+  title: 'Receipt',
   robots: { index: false },
 }
 

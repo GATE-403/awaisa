@@ -30,7 +30,7 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
         href={href}
         className={styles.row}
         onClick={onSelect}
-        aria-label={`${t('Записаться снова: {service}, {name}', { service: booking.serviceName, name: firstName })}${slot ? `, ${t('{day} с {time}', { day: dayLabel.toLowerCase(), time: slot.time })}` : ''}`}
+        aria-label={`${t('Book again: {service}, {name}', { service: booking.serviceName, name: firstName })}${slot ? `, ${t('{day} from {time}', { day: dayLabel.toLowerCase(), time: slot.time })}` : ''}`}
       >
         <PersonAvatar name={booking.specialistName} size='sm' />
         <span className={styles.text}>
@@ -39,13 +39,13 @@ const VisitRow = ({ booking, onSelect }: { booking: Booking; onSelect?: () => vo
             {firstName} · {booking.business.name}
           </span>
         </span>
-        <span className={styles.slot}>{slot ? `${dayLabel} ${slot.time}` : t('Записаться')}</span>
+        <span className={styles.slot}>{slot ? `${dayLabel} ${slot.time}` : t('Book')}</span>
       </NextLink>
     </li>
   )
 }
 
-// «Снова к мастеру» where people start looking - the search panel, like recent searches:
+// «Again with your specialist» where people start looking - the search panel, like recent searches:
 // one tap books the same service with the same master at their next free time.
 export const RecentVisits = ({ onSelect }: RecentVisitsProps) => {
   const t = useT()
@@ -53,8 +53,8 @@ export const RecentVisits = ({ onSelect }: RecentVisitsProps) => {
   if (visits.length === 0) return null
 
   return (
-    <section aria-label={t('Снова к мастеру')}>
-      <p className={styles.heading}>{t('Снова к мастеру')}</p>
+    <section aria-label={t('Book again')}>
+      <p className={styles.heading}>{t('Book again')}</p>
       <ul className={styles.list}>
         {visits.map((booking) => (
           <VisitRow key={booking.id} booking={booking} onSelect={onSelect} />

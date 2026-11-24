@@ -20,9 +20,9 @@ export const NotificationsTab = ({ slug, specialists }: NotificationsTabProps) =
   return (
     <section className={forms.section}>
       <SectionHeader
-        title={t('Уведомления')}
+        title={t('Notifications')}
         description={t(
-          'Новые записи, переносы и отмены: на телефоне и в Telegram, сразу как они случаются.',
+          'New bookings, moves and cancellations: on your phone and in Telegram, as they happen.',
         )}
       />
       <PushAlertsGroup audience='business' listClassName={forms.list} />
@@ -35,7 +35,9 @@ export const NotificationsTab = ({ slug, specialists }: NotificationsTabProps) =
       <TelegramSection
         slug={slug}
         fallback={
-          <p className={forms.groupEmpty}>{t('Telegram-бот ещё не подключён к платформе.')}</p>
+          <p className={forms.groupEmpty}>
+            {t('The Telegram bot is not connected to the platform yet.')}
+          </p>
         }
       />
       <ClientChannelNote />

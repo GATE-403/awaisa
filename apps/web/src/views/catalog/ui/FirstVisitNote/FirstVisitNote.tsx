@@ -16,8 +16,7 @@ export const FirstVisitNote = () => {
 
   return (
     <p className={styles.note}>
-      <strong>{t('Запись к мастерам онлайн.')}</strong>{' '}
-      {t('Найдите услугу, выберите время - без звонков.')}
+      <strong>{t('Book specialists online.')}</strong> {t('Find a service, pick a time: no calls.')}
     </p>
   )
 }

@@ -8,7 +8,7 @@ const settings: Partial<Env> = {
   WHATSAPP_TOKEN: 'token',
   WHATSAPP_PHONE_NUMBER_ID: '1234',
   WHATSAPP_API_VERSION: 'v23.0',
-  WHATSAPP_LANGUAGE: 'ru',
+  WHATSAPP_LANGUAGE: 'en',
   PUBLIC_WEB_URL: 'https://awaisa.kg',
 }
 
@@ -20,8 +20,8 @@ const createService = (overrides: Partial<Env> = {}) =>
 const message = whatsappReminder(
   {
     business: { name: 'Awaisa Studio', slug: 'awaisa-studio' },
-    serviceName: 'Стрижка',
-    specialistName: 'Эрлан',
+    serviceName: 'Haircut',
+    specialistName: 'Erlan',
     date: '2026-11-24',
     time: '15:30',
   },

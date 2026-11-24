@@ -103,12 +103,12 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
       haptic('warning')
       trackStep('cancel', cancelled.business.slug)
       toast.show({
-        title: t('Запись отменена'),
-        description: t('Время освободилось для других'),
+        title: t('Booking cancelled'),
+        description: t('The time is free for others now'),
         type: 'success',
         timeout: UNDO_TIMEOUT_MS,
         action: {
-          label: t('Вернуть'),
+          label: t('Undo'),
           onClick: () => {
             trackToastAction('undo_cancel')
             void restore(id)
@@ -117,7 +117,7 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
       })
     } catch (cancelError) {
       toast.show({
-        title: t('Не удалось отменить'),
+        title: t('Could not cancel'),
         description: getErrorMessage(cancelError),
         type: 'error',
       })
@@ -138,10 +138,10 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
         (current) => current?.map((item) => (item.id === id ? restored : item)) ?? null,
       )
       trackStep('cancel_undone', restored.business.slug)
-      toast.show({ title: t('Запись возвращена'), type: 'success' })
+      toast.show({ title: t('Booking restored'), type: 'success' })
     } catch (restoreError) {
       toast.show({
-        title: t('Не удалось вернуть'),
+        title: t('Could not restore'),
         description: getErrorMessage(restoreError),
         type: 'error',
       })
@@ -158,15 +158,15 @@ export const useMyBookings = (initial: Booking[] | null = null) => {
 
   const forget = (id: string) => {
     forgetBooking(id)
-    toast.show({ title: t('Убрано из списка') })
+    toast.show({ title: t('Removed from the list') })
   }
 
   const copyCode = async (code: string) => {
     try {
       await navigator.clipboard.writeText(code)
-      toast.show({ title: t('Номер скопирован'), description: code, type: 'success' })
+      toast.show({ title: t('Number copied'), description: code, type: 'success' })
     } catch {
-      toast.show({ title: t('Не удалось скопировать'), type: 'error' })
+      toast.show({ title: t('Could not copy'), type: 'error' })
     }
   }
 

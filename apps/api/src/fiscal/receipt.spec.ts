@@ -15,11 +15,11 @@ const NOT_VAT_PAYER = { isVatPayer: false, vatRate: 12, salesTaxServices: 3, sal
 describe('buildReceipt', () => {
   it('takes VAT and the sales tax out of the price over one base', () => {
     const receipt = buildReceipt(
-      [{ name: 'Стрижка', kind: 'service', quantity: 1, price: 1140 }],
+      [{ name: 'Haircut', kind: 'service', quantity: 1, price: 1140 }],
       'cash',
       VAT_PAYER,
     )
-    // 1140 = 1000 × 1.14: VAT 120, НсП 20.
+    // 1140 = 1000 × 1.14: VAT 120, sales tax 20.
     expect(receipt.lines[0]).toMatchObject({
       sum: 1140,
       vatRate: 12,
@@ -38,8 +38,8 @@ describe('buildReceipt', () => {
   it('uses the goods rate for products and no VAT for a business that does not pay it', () => {
     const receipt = buildReceipt(
       [
-        { name: 'Шампунь', kind: 'goods', quantity: 2, price: 510 },
-        { name: 'Маска', kind: 'goods', quantity: 1, price: 0 },
+        { name: 'Shampoo', kind: 'goods', quantity: 2, price: 510 },
+        { name: 'Mask', kind: 'goods', quantity: 1, price: 0 },
       ],
       'card',
       NOT_VAT_PAYER,
@@ -56,7 +56,7 @@ describe('buildReceipt', () => {
 
   it('rounds to tyiyns', () => {
     const receipt = buildReceipt(
-      [{ name: 'Укладка', kind: 'service', quantity: 1, price: 999 }],
+      [{ name: 'Styling', kind: 'service', quantity: 1, price: 999 }],
       'transfer',
       VAT_PAYER,
     )
@@ -78,12 +78,12 @@ describe('visitReceiptItems', () => {
     outcome: 'arrived' as const,
     paidAmount: 1500,
     paymentMethod: 'card',
-    serviceName: 'Маникюр',
+    serviceName: 'Manicure',
   }
 
   it('turns the money paid into one service line', () => {
     expect(visitReceiptItems(visit)).toEqual({
-      items: [{ name: 'Маникюр', kind: 'service', quantity: 1, price: 1500 }],
+      items: [{ name: 'Manicure', kind: 'service', quantity: 1, price: 1500 }],
       method: 'card',
     })
   })
@@ -99,7 +99,7 @@ describe('visitReceiptItems', () => {
 
 describe('planReceipts', () => {
   const wanted = buildReceipt(
-    [{ name: 'Маникюр', kind: 'service', quantity: 1, price: 1500 }],
+    [{ name: 'Manicure', kind: 'service', quantity: 1, price: 1500 }],
     'cash',
     VAT_PAYER,
   )

@@ -4,7 +4,7 @@ const NOW = new Date('2026-11-21T08:00:00Z')
 const TODAY = '2026-11-21'
 
 const client = (patch: Partial<SegmentedClient>): SegmentedClient => ({
-  name: 'Клиент',
+  name: 'Client',
   visits: 0,
   noShows: 0,
   spent: 0,
@@ -42,7 +42,7 @@ describe('client segments', () => {
     })
   })
 
-  it('keeps those with something booked out of «давно не были»', () => {
+  it('keeps those with something booked out of lapsed', () => {
     const old = client({
       name: 'Ербол',
       visits: 4,

@@ -16,10 +16,10 @@ interface QuickSlotsInput {
 
 const MAX_SLOTS = 3
 const MAX_DAYS = 3
-// Two times a day at most, so «Сегодня» and «Завтра» both show when there is room.
+// Two times a day at most, so Today and Tomorrow both show when there is room.
 const MAX_PER_DAY = 2
 
-/** The nearest free times for one service and master (or «any»), across the next open days. */
+/** The nearest free times for one service and master (or “any”), across the next open days. */
 export const useQuickSlots = ({
   serviceId,
   specialistId,

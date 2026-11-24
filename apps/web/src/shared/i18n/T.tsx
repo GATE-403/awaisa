@@ -1,14 +1,9 @@
-'use client'
-
-import { useT } from './useT'
+import { t } from './useT'
 
 interface TProps {
   children: string
   vars?: Record<string, string | number>
 }
 
-/** Translated text for server components, which cannot call `useT()`: `<T>Отзывы</T>`. */
-export const T = ({ children, vars }: TProps) => {
-  const t = useT()
-  return t(children, vars)
-}
+/** User-facing text in server components, marked like `t()`: `<T>Reviews</T>`. */
+export const T = ({ children, vars }: TProps) => t(children, vars)

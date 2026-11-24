@@ -79,7 +79,7 @@ export class PublicReceiptsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('s') signature: string | undefined,
   ): Promise<FiscalReceipt> {
-    if (!signature) throw new NotFoundException('Чек не найден')
+    if (!signature) throw new NotFoundException('Receipt not found')
     return this.fiscal.publicReceipt(id, signature)
   }
 }

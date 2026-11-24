@@ -31,7 +31,7 @@
 
 /* The day as a title over its numbers; day states follow as small tinted capsules. */
 .dayTitle {
-  /* One line with the day's numbers: «Чт, 19 ноября  6 записей · 6 100 сом». */
+  /* One line with the day's numbers: "Thu 19 November  6 bookings · 6,100 som". */
   display: inline;
   margin-right: var(--space-2);
   color: var(--color-foreground);
@@ -77,7 +77,7 @@
   box-shadow: var(--focus-ring);
 }
 
-/* The toolbar: the view switch, «Перерыв» and «Новая запись» in one row. On phones it takes the
+/* The toolbar: the view switch, "Break" and "New booking" in one row. On phones it takes the
    whole line - the switch stretches, the two actions become round glyph buttons (their names
    stay for screen readers) - instead of wrapping into a heap of capsules. */
 .toolbar {
@@ -134,7 +134,7 @@
 
   /* Narrow phones (375pt and less) have no room for every glyph at 44pt: the day's glyphs give
      up to 8pt each (never under 36, their 44pt target kept by the hit area), the view switch and
-     «+» keep their size. */
+     "+" keep their size. */
   .toolbar.toolbar > [role="group"] {
     flex-shrink: 1;
     min-width: 0;
@@ -164,7 +164,7 @@
   font-weight: var(--font-weight-bold);
 }
 
-/* «Найти место»: the service being placed, and the way out. */
+/* "Find a slot": the service being placed, and the way out. */
 .fitBar {
   display: flex;
   align-items: center;
@@ -192,8 +192,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* «На всю ширину»: the board leaves the cabinet's column and runs edge to edge of the window
-   (the page's scrollbar left out), square at its sides; «Обычный вид» brings it back. */
+/* "Full width": the board leaves the cabinet's column and runs edge to edge of the window
+   (the page's scrollbar left out), square at its sides; "Normal view" brings it back. */
 .panel[data-wide] {
   position: relative;
   left: 50%;
@@ -208,7 +208,7 @@
   display: contents;
 }
 
-/* The day's status row: «Сейчас», «Далее» and the unmarked visits as capsules on one line. */
+/* The day's status row: "Now", "Next" and the unmarked visits as capsules on one line. */
 .dayStatus {
   display: flex;
   flex-wrap: wrap;
@@ -235,7 +235,7 @@
   box-shadow: none;
 }
 
-/* Phones: «Сейчас», «Далее» and the visits to mark share one line that scrolls sideways - two
+/* Phones: "Now", "Next" and the visits to mark share one line that scrolls sideways - two
    wrapped rows of capsules took a fifth of the screen over the day. What asks for action (the
    orange capsule) leads. */
 @media (max-width: 639px) {
@@ -268,13 +268,13 @@
     flex: 0 0 auto;
   }
 
-  .dayStatus > section[aria-label="Неотмеченные визиты"] {
+  .dayStatus > section[aria-label="Unmarked visits"] {
     order: -1;
   }
 }
 
 /* Phones: the toolbar floats over the window's foot in the tab bar's material - the view switch,
-   the day's tools and «+» in one glass capsule - so the day takes the line it used to fill. The
+   the day's tools and "+" in one glass capsule - so the day takes the line it used to fill. The
    day ends above it (`bottomInset`, measured). */
 @media (max-width: 639px) {
   .toolbar.toolbar {

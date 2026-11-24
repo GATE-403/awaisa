@@ -1,9 +1,9 @@
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
-import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { pluralize } from '@/shared/lib/plural'
 import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 
-// «Мои бизнесы»: what waits in a business, the order of the list and its search (pure,
+// "My businesses": what waits in a business, the order of the list and its search (pure,
 // unit-tested in `tests/businessList.test.ts`).
 
 type AttentionItem = {
@@ -18,37 +18,27 @@ const RECENT_LIMIT = 20
 /** One short line per thing that waits, most urgent first; nothing for zero. */
 const attentionItems = (attention: BusinessAttention | undefined, t?: Translate) => {
   if (!attention) return []
-  const count = (value: number, forms: [string, string, string]) =>
+  const count = (value: number, forms: [string, string]) =>
     t ? t.count(value, forms) : pluralize(value, forms)
   const items: AttentionItem[] = []
   if (attention.unmarkedVisits > 0) {
     items.push({
       key: 'unmarkedVisits',
-      text: `${count(attention.unmarkedVisits, ['визит', 'визита', 'визитов'])} ${t ? t('без отметки') : 'без отметки'}`,
+      text: `${count(attention.unmarkedVisits, ['visit', 'visits'])} ${t ? t('unmarked') : 'unmarked'}`,
       tab: 'schedule',
     })
   }
   if (attention.unansweredReviews > 0) {
     items.push({
       key: 'unansweredReviews',
-      text: `${count(attention.unansweredReviews, ['отзыв', 'отзыва', 'отзывов'])} ${t ? t('без ответа') : 'без ответа'}`,
+      text: `${count(attention.unansweredReviews, ['review', 'reviews'])} ${t ? t('unanswered') : 'unanswered'}`,
       tab: 'reviews',
     })
   }
   if (attention.failedReceipts > 0) {
     items.push({
       key: 'failedReceipts',
-      // «1 чек не прошёл», «2 чека не прошли»: the verb follows the number too.
-      text: `${count(attention.failedReceipts, ['чек', 'чека', 'чеков'])} ${
-        pluralWord(attention.failedReceipts, ['не прошёл', 'не прошли', 'не прошли']) ===
-        'не прошёл'
-          ? t
-            ? t('не прошёл')
-            : 'не прошёл'
-          : t
-            ? t('не прошли')
-            : 'не прошли'
-      }`,
+      text: `${count(attention.failedReceipts, ['receipt', 'receipts'])} failed`,
       tab: 'fiscal',
     })
   }
@@ -86,7 +76,7 @@ const sortBusinesses = (
 
 const normalize = (text: string) => text.toLowerCase().replaceAll('ё', 'е').trim()
 
-/** By name or address, any part of it («барбер» finds «Kings Barbershop» only by its name). */
+/** By name or address, any part of it ("barb" finds "Kings Barbershop" only by its name). */
 const filterBusinesses = (businesses: BusinessLink[], query: string) => {
   const needle = normalize(query)
   if (!needle) return businesses
@@ -113,7 +103,7 @@ type TodaySummary = {
   next: { time: string; name: string } | null
 }
 
-/** «Сегодня 23 визита · 31 200 сом · ближайший в 14:30, Борода» over every business. */
+/** "Today 23 visits · 31,200 som · next at 14:30, Boroda" over every business. */
 const todaySummary = (
   businesses: BusinessLink[],
   attention: Map<string, BusinessAttention>,
@@ -139,9 +129,9 @@ type StatusLine =
   | { kind: 'share' }
 
 const SETUP_TEXTS: Record<'services' | 'masters' | 'hours', string> = {
-  services: 'Добавьте услуги',
-  masters: 'Добавьте мастеров',
-  hours: 'Проверьте график',
+  services: 'Add services',
+  masters: 'Add specialists',
+  hours: 'Check the opening hours',
 }
 
 /**
@@ -168,7 +158,7 @@ const statusLine = (
     }
   }
   if (!isQuiet) return null
-  // A hidden page has nothing to share: its «Скрыта» beside the name says enough.
+  // A hidden page has nothing to share: its "Hidden" beside the name says enough.
   if (week.views + week.bookings === 0) return isPublished ? { kind: 'share' } : null
   const [now, before] =
     week.bookings + week.previousBookings > 0
@@ -182,7 +172,7 @@ const statusLine = (
   }
 }
 
-/** «За неделю 14 записей · 230 просмотров» on a quiet day, over every business in view. */
+/** "This week 14 bookings · 230 views" on a quiet day, over every business in view. */
 const weekSummary = (businesses: BusinessLink[], attention: Map<string, BusinessAttention>) =>
   businesses.reduce(
     (sum, business) => {

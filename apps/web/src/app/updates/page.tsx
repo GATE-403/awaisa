@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { UpdatesPage } from '@/views/updates'
 
 export const metadata: Metadata = {
-  title: 'Что нового',
-  description: 'Обновления Awaisa: что изменилось для клиентов и для бизнеса.',
+  title: "What's new",
+  description: 'Awaisa updates: what changed for clients and for businesses.',
 }
 
 const UpdatesRoute = () => <UpdatesPage />

@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { VisitLinkPage } from '@/views/visitLink'
 
 export const metadata: Metadata = {
-  title: 'Ваша запись',
+  title: 'Your booking',
   robots: { index: false },
 }
 

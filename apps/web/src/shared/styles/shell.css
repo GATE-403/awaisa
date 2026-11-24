@@ -1,8 +1,8 @@
 :root {
   /* One height for every Settings-style row (account settings, the cabinet, sheets): 44pt read
-     cramped («44px мало как минимум должно быть 48 или 50»). */
+     cramped (the owner: 44px is too little, 48 or 50 at least). */
   --row-height: 52px;
-  /* Text over pictures (offer, place, master, «Для вас», work and service cards): one scrim,
+  /* Text over pictures (offer, place, master, «For you», work and service cards): one scrim,
      clear over the top third and nearly black at the foot, eased so it never shows a band, and
      a soft shadow under the letters - light photos used to swallow white text. */
   --card-scrim: linear-gradient(
@@ -13,8 +13,8 @@
     rgb(0 0 0 / 0.84) 80%,
     rgb(0 0 0 / 0.92)
   );
-  /* Picture cards (services, places, masters, «Образы» and its deck): one radius, strict but
-     not square («что если углы карточек сделать без скругления?» → 4–6). */
+  /* Picture cards (services, places, masters, «Looks» and its deck): one radius, strict but
+     not square (the owner tried square card corners → 4-6). */
   --radius-card: 12px;
   --card-text-shadow: 0 1px 2px rgb(0 0 0 / 0.55), 0 0 14px rgb(0 0 0 / 0.3);
 
@@ -29,7 +29,7 @@
     env(safe-area-inset-bottom)
   );
   --business-bar-height: 48px;
-  /* Room for the floating «Продолжить запись» pill while it is on screen. */
+  /* Room for the floating «Continue booking» pill while it is on screen. */
   --resume-space: 0px;
   /* Room a page leaves at its foot for a section's FloatingToolbar on phones. */
   --floating-toolbar-space: calc(72px + env(safe-area-inset-bottom));
@@ -81,7 +81,7 @@ html {
   scroll-padding-top: calc(var(--header-height) + var(--business-bar-height) + var(--space-4));
 }
 
-/* A client page opened from the cabinet («Что нового» from its megaphone) keeps the cabinet's
+/* A client page opened from the cabinet («What's new» from its megaphone) keeps the cabinet's
    chrome: the page draws `CabinetBar` and sets this flag, so the site's own header, tab bar and
    footer step aside. */
 :root[data-cabinet-chrome] :is([data-site-header], [data-site-tabbar], [data-site-footer]) {

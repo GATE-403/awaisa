@@ -37,7 +37,7 @@
   background: var(--color-fill);
 }
 
-/* A command row in the photo's sheet («Поставить первой»): text in the link colour. */
+/* A command row in the photo's sheet ("Put first"): text in the link colour. */
 .rowAction {
   width: 100%;
   border: none;

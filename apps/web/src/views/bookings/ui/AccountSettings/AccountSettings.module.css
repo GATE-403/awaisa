@@ -64,7 +64,7 @@ div.row,
   white-space: nowrap;
 }
 
-/* A long value ends in an ellipsis; the label keeps its one line («Для» over «вас» read broken). */
+/* A long value ends in an ellipsis; the label keeps its one line («For» over «you» read broken). */
 .value {
   flex: 0 1 auto;
   min-width: 0;
@@ -81,19 +81,19 @@ div.row,
   color: var(--color-tertiary-foreground);
 }
 
-/* «Выйти» on the page itself: the glyph lines up with the rows' glyphs above (16pt in). */
+/* «Sign out» on the page itself: the glyph lines up with the rows' glyphs above (16pt in). */
 .deleteAccount {
   margin-top: var(--space-8);
 }
 
-/* «Выйти» is a row of the group like the others, only red: the glyph and the word. */
+/* «Sign out» is a row of the group like the others, only red: the glyph and the word. */
 .signOutRow .glyph,
 .signOutRow .label {
   color: var(--color-danger-text);
 }
 
-/* A thin glyph per row, all in one quiet colour, no tile («не даём фон иконкам, не добавляем
-   цвета»), like the cabinet's settings; the hairlines start after it. */
+/* A thin glyph per row, all in one quiet colour, no tile (the owner: no backgrounds or extra
+   colours on icons), like the cabinet's settings; the hairlines start after it. */
 .glyph {
   display: inline-grid;
   flex-shrink: 0;
@@ -121,7 +121,7 @@ div.row,
   margin-top: var(--space-3);
 }
 
-/* A followed master: the row books them; «Не следить» at its end lets go in one tap. */
+/* A followed master: the row books them; «Unfollow» at its end lets go in one tap. */
 .followLink {
   display: flex;
   flex: 1;
@@ -162,7 +162,7 @@ div.row,
   white-space: nowrap;
 }
 
-/* Like the cabinet's «Настройки» («нужно настройки сделать как в админке»): the groups lie right
+/* Like the cabinet's «Settings» (the owner: settings like the dashboard's): the groups lie right
    on the page - no card, no fill - hairlines between rows from the label on, one left edge for
    captions, rows and footnotes; a row under the mouse takes the link colour, no hover fill. */
 .list.list {

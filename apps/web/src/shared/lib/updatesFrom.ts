@@ -1,4 +1,4 @@
-// Where «Что нового» was opened from in the cabinet, so the page can lead back to that business
+// Where «What's new» was opened from in the cabinet, so the page can lead back to that business
 // and tab (it has the client header, which has no way back there). Kept for the tab only.
 const KEY = 'awaisa:updates-from:v1'
 

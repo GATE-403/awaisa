@@ -22,16 +22,16 @@ export const ServicesPage = async ({ slug }: ServicesPageProps) => {
     <main className={styles.page}>
       <JsonLd
         data={breadcrumbJsonLd([
-          { label: 'Каталог', href: '/' },
+          { label: 'Catalogue', href: '/' },
           { label: business.name, href: `/${business.slug}` },
-          { label: 'Услуги и цены', href: `/${business.slug}/services` },
+          { label: 'Services and prices', href: `/${business.slug}/services` },
         ])}
       />
       <Container className={styles.hero}>
         <h1 className={styles.title}>
-          <T>Услуги и цены</T>
+          <T>Services and prices</T>
           <span className={styles.titleMuted}>
-            <T vars={{ name: business.name }}>{' в {name}'}</T>
+            <T vars={{ name: business.name }}>{' at {name}'}</T>
           </span>
         </h1>
         {/* The facts that decide, bold numbers in one quiet line - like the place's head. */}

@@ -27,7 +27,7 @@ interface TeamTabProps {
   slug: string
 }
 
-// «Сотрудники»: administrators run the day (schedule, clients, reviews) without money or setup.
+// "Team": administrators run the day (schedule, clients, reviews) without money or setup.
 export const TeamTab = ({ slug }: TeamTabProps) => {
   const toast = useToast()
   const t = useT()
@@ -52,12 +52,16 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       setTeam(await addTeamMember(slug, phone))
       setPhone('')
       toast.show({
-        title: t('Администратор добавлен'),
-        description: t('Ему придёт SMS со ссылкой'),
+        title: t('Administrator added'),
+        description: t("They'll get an SMS with a link"),
         type: 'success',
       })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsAdding(false)
     }
@@ -67,17 +71,23 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
     try {
       await removeTeamMember(slug, member.id)
       setTeam((current) => current?.filter((item) => item.id !== member.id) ?? null)
-      toast.show({ title: t('Доступ закрыт'), type: 'success' })
+      toast.show({ title: t('Access removed'), type: 'success' })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
   return (
-    <section className={styles.section} aria-label={t('Сотрудники')}>
+    <section className={styles.section} aria-label={t('Team')}>
       <SectionHeader
-        title={t('Сотрудники')}
-        description={t('Администратор видит расписание, клиентов и отзывы - без денег и настроек.')}
+        title={t('Team')}
+        description={t(
+          'An administrator sees the schedule, clients and reviews, without money or settings.',
+        )}
       />
       {team && (
         <ul className={styles.list}>
@@ -87,7 +97,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>{member.name || formatPhone(member.phone)}</span>
                 <span className={styles.rowMeta}>
-                  {member.role === 'owner' ? t('Владелец') : t('Администратор')}
+                  {member.role === 'owner' ? t('Owner') : t('Administrator')}
                   {member.name ? ` · ${formatPhone(member.phone)}` : ''}
                 </span>
               </span>
@@ -95,7 +105,7 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
                 <button
                   type='button'
                   className={own.remove}
-                  aria-label={t('Закрыть доступ: {name}', {
+                  aria-label={t('Remove access: {name}', {
                     name: member.name || formatPhone(member.phone),
                   })}
                   onClick={() => void remove(member)}
@@ -109,33 +119,33 @@ export const TeamTab = ({ slug }: TeamTabProps) => {
       )}
       {!canAdd && (
         <RowNote>
-          {t('Администраторы доступны на тарифе «{plan}».', {
-            plan: access?.upgradeTitle ?? t('Бизнес'),
+          {t('Administrators are available on the “{plan}” plan.', {
+            plan: access?.upgradeTitle ?? t('Business'),
           })}{' '}
           <NextLink href={`/manage/${slug}?tab=billing`} className={own.planLink}>
-            {t('Открыть тариф')} ›
+            {t('Open the plan')} ›
           </NextLink>
         </RowNote>
       )}
       {canAdd && (
-        <form className={sheet.group} onSubmit={add} aria-label={t('Добавить администратора')}>
-          <SectionCaption className={own.addCaption}>{t('Добавить администратора')}</SectionCaption>
-          {/* On phones the number and «Добавить» float at the window's foot, under the thumb. */}
+        <form className={sheet.group} onSubmit={add} aria-label={t('Add an administrator')}>
+          <SectionCaption className={own.addCaption}>{t('Add an administrator')}</SectionCaption>
+          {/* On phones the number and "Add" float at the window's foot, under the thumb. */}
           <FloatingToolbar className={own.add}>
             <Input
               type='tel'
               inputMode='tel'
-              aria-label={t('Телефон администратора')}
+              aria-label={t("Administrator's phone")}
               placeholder={PHONE_PLACEHOLDER}
               value={phone}
               onValueChange={(value) => setPhone(maskPhoneInput(value))}
             />
             <Button type='submit' disabled={phone.replace(/\D/g, '').length < 9 || isAdding}>
-              {t('Добавить')}
+              {t('Add')}
             </Button>
           </FloatingToolbar>
           <RowNote className={own.addNote}>
-            {t('Он войдёт по SMS на этот номер и сразу увидит кабинет.')}
+            {t('They sign in by SMS to this number and see the dashboard straight away.')}
           </RowNote>
         </form>
       )}

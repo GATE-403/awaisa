@@ -42,7 +42,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
   const fullPrice = service ? service.price * Number(visits || 0) : null
   const validity = VALIDITY_DAYS.map((days) => ({
     value: days,
-    label: days === YEAR_DAYS ? t('Год') : t('{days} дней', { days }),
+    label: days === YEAR_DAYS ? t('Year') : t('{days} days', { days }),
   }))
 
   useEffect(() => {
@@ -72,33 +72,33 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
 
   return (
     <Sheet
-      title={t(plan ? 'Абонемент' : 'Новый абонемент')}
+      title={t(plan ? 'Pass' : 'New pass')}
       onClose={onClose}
-      action={{ label: t('Сохранить'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Save'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Абонемент')}>
+        <section className={sheet.group} aria-label={t('Pass')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Название')}</span>
+              <span className={sheet.rowLabel}>{t('Name')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Название абонемента')}
-                  placeholder={t('5 стрижек за 4')}
+                  aria-label={t('Pass name')}
+                  placeholder={t('5 haircuts for 4')}
                   value={title}
                   onValueChange={setTitle}
                 />
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Услуга')}</span>
+              <span className={sheet.rowLabel}>{t('Service')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Услуга абонемента')}
+                  aria-label={t('Pass service')}
                   items={[
-                    { value: 'any', label: t('Любая') },
+                    { value: 'any', label: t('Any') },
                     ...services.map((item) => ({ value: item.id, label: item.name })),
                   ]}
                   value={serviceId}
@@ -107,11 +107,11 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Визитов')}</span>
+              <span className={sheet.rowLabel}>{t('Visits')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Визитов')}
+                  aria-label={t('Visits')}
                   inputMode='numeric'
                   value={visits}
                   onValueChange={(value) => setVisits(value.replace(/\D/g, '').slice(0, 3))}
@@ -119,25 +119,25 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </label>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Цена')}</span>
+              <span className={sheet.rowLabel}>{t('Price')}</span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Цена абонемента, сом')}
+                  aria-label={t('Pass price, som')}
                   inputMode='numeric'
                   placeholder='0'
                   value={maskAmountInput(price)}
                   onValueChange={(value) => setPrice(value.replace(/\D/g, ''))}
                 />
-                <span className={sheet.suffix}>{t('сом')}</span>
+                <span className={sheet.suffix}>{t('som')}</span>
               </span>
             </label>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Действует')}</span>
+              <span className={sheet.rowLabel}>{t('Valid for')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Срок действия')}
+                  aria-label={t('Validity')}
                   items={validity}
                   value={validDays}
                   onValueChange={(value) => value && setValidDays(value)}
@@ -145,32 +145,29 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Продаётся')}</span>
+              <span className={sheet.rowLabel}>{t('On sale')}</span>
               <Switch checked={isActive} onCheckedChange={setIsActive} />
             </label>
             {canPayOnline && isActive && (
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Продавать онлайн')}</span>
+                <span className={sheet.rowLabel}>{t('Sell online')}</span>
                 <Switch checked={isOnline} onCheckedChange={setIsOnline} />
               </label>
             )}
           </div>
           {fullPrice !== null && price !== '' && Number(price) < fullPrice && (
             <p className={sheet.groupFooter}>
-              {t(
-                'По отдельности {visits} визитов стоят {full} сом - клиент экономит {saving} сом.',
-                {
-                  visits: Number(visits),
-                  full: fullPrice.toLocaleString('ru-RU'),
-                  saving: (fullPrice - Number(price)).toLocaleString('ru-RU'),
-                },
-              )}
+              {t('Separately, {visits} visits cost {full} som: the client saves {saving} som.', {
+                visits: Number(visits),
+                full: fullPrice.toLocaleString('en-GB'),
+                saving: (fullPrice - Number(price)).toLocaleString('en-GB'),
+              })}
             </p>
           )}
           {canPayOnline && isActive && isOnline && (
             <p className={sheet.groupFooter}>
               {t(
-                'Клиенты купят его на странице места и при записи, оплатив картой. Абонемент появится у клиента после оплаты.',
+                'Clients buy it on the place’s page and when booking, paying by card. The pass is theirs once paid.',
               )}
             </p>
           )}
@@ -182,7 +179,7 @@ export const PlanSheet = ({ plan, services, onClose, onSave, onDelete }: PlanShe
               onClose()
             }}
           >
-            {t('Удалить абонемент')}
+            {t('Delete pass')}
           </HoldButton>
         )}
       </form>

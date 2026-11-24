@@ -102,7 +102,7 @@
   gap: var(--space-3);
 }
 
-/* Phones: kinds and «Рядом со мной» stay pinned at the top of the sheet while places scroll under. */
+/* Phones: kinds and «Near me» stay pinned at the top of the sheet while places scroll under. */
 @media (max-width: 899px) {
   .panel > .header {
     position: sticky;
@@ -376,8 +376,8 @@
   display: none;
 }
 
-/* Phones, list on the whole screen: a floating «Карта» capsule above the tab bar (and above the
-   «Продолжить запись» pill when it is there) brings the map back. */
+/* Phones, list on the whole screen: a floating «Map» capsule above the tab bar (and above the
+   «Continue booking» pill when it is there) brings the map back. */
 .showMap {
   position: fixed;
   bottom: calc(var(--tabbar-space, 0px) + var(--resume-space, 0px) + var(--space-3));

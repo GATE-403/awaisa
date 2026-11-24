@@ -18,7 +18,7 @@ interface OffersFeedProps {
   sort: FeedSort
   /** The masters' work, set into the grid one cell at a time (`WorkTile`). */
   works?: FeedItem[]
-  /** The chosen kind, so a work opens «Работы» of the same kind. */
+  /** The chosen kind, so a work opens «Looks» of the same kind. */
   kind?: BusinessKind
   /** More pages wait on the server: the end of the list asks for the next one. */
   hasMore?: boolean
@@ -27,9 +27,9 @@ interface OffersFeedProps {
 }
 
 const FEED_SORTS: { value: FeedSort; label: string }[] = [
-  { value: 'popular', label: 'Популярные' },
-  { value: 'soon', label: 'Ближе по времени' },
-  { value: 'price', label: 'Дешевле' },
+  { value: 'popular', label: 'Popular' },
+  { value: 'soon', label: 'Soonest' },
+  { value: 'price', label: 'Cheapest' },
 ]
 
 const NO_SLOT = '9999-12-31 99:99'
@@ -72,7 +72,7 @@ export const OffersFeed = ({
           })
         : offers
 
-  // One «Хит» per place: its most booked service (offers arrive popular-first per place).
+  // One «Hit» per place: its most booked service (offers arrive popular-first per place).
   const hits = new Set<string>()
   const seenPlaces = new Set<string>()
   for (const offer of offers) {
@@ -120,7 +120,7 @@ export const OffersFeed = ({
           ))}
       </ul>
       {hasMore && <div ref={end} className={styles.sentinel} aria-hidden />}
-      {isLoading && <output className={styles.loadingNote}>{t('Загружаем ещё…')}</output>}
+      {isLoading && <output className={styles.loadingNote}>{t('Loading more…')}</output>}
     </div>
   )
 }

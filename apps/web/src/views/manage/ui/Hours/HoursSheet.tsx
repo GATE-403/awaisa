@@ -21,7 +21,7 @@ interface HoursSheetProps {
 const FORM_ID = 'hours-sheet'
 const STEPS = [15, 30, 60]
 
-// The week's hours and the slot step, changed where they are shown (the page's «Время»).
+// The week's hours and the slot step, changed where they are shown (the page's "Hours").
 export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursSheetProps) => {
   const t = useT()
   const [days, setDays] = useState(() => toDrafts(hours))
@@ -43,36 +43,36 @@ export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursShee
     const isSaved = await run(async () => {
       await setWorkingHours(slug, toHours(days))
       if (step !== slotMinutes) await updateBusiness(slug, { slotMinutes: step })
-    }, 'Часы сохранены')
+    }, 'Hours saved')
     setIsSaving(false)
     if (isSaved) onClose()
   }
 
   return (
     <Sheet
-      title={t('Часы работы')}
+      title={t('Opening hours')}
       onClose={onClose}
-      action={{ label: t('Готово'), form: FORM_ID, disabled: !canSave }}
+      action={{ label: t('Done'), form: FORM_ID, disabled: !canSave }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Часы работы')}>
+        <section className={sheet.group} aria-label={t('Opening hours')}>
           <WeekHoursRows days={days} onChange={updateDay} />
           <p className={sheet.groupFooter}>
-            {t('Клиенты видят только время внутри этих часов и без чужих записей.')}
+            {t('Clients only see times within these hours that are not already booked.')}
           </p>
         </section>
 
-        <section className={sheet.group} aria-label={t('Запись')}>
+        <section className={sheet.group} aria-label={t('Booking')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Шаг записи')}</span>
+              <span className={sheet.rowLabel}>{t('Booking interval')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Шаг записи')}
+                  aria-label={t('Booking interval')}
                   items={STEPS.map((value) => ({
                     value,
-                    label: t('{minutes} мин', { minutes: value }),
+                    label: t('{minutes} min', { minutes: value }),
                   }))}
                   value={step}
                   onValueChange={(value) => value && setStep(value)}
@@ -80,7 +80,7 @@ export const HoursSheet = ({ slug, hours, slotMinutes, run, onClose }: HoursShee
               </span>
             </div>
           </div>
-          <p className={sheet.groupFooter}>{t('Как часто начинаются окна: 10:00, 10:30…')}</p>
+          <p className={sheet.groupFooter}>{t('How often slots start: 10:00, 10:30…')}</p>
         </section>
       </form>
     </Sheet>

@@ -98,7 +98,7 @@ export class AdminService {
     }
   }
 
-  // Visits that have ended without «пришёл / не пришёл» in the last 30 days, per day: without
+  // Visits that have ended without 'arrived / no-show' in the last 30 days, per day: without
   // them the money in analytics is a guess.
   async listUnclosed(business: Business) {
     const rows = (await this.timeOff.manager.query(
@@ -200,7 +200,7 @@ export class AdminService {
 
   async addTimeOff(business: Business, input: CreateTimeOffInput) {
     if (!(await this.catalog.specialistBelongsTo(input.specialistId, business.id))) {
-      throw new BadRequestException('Мастер не найден')
+      throw new BadRequestException('Specialist not found')
     }
 
     const startsAt = businessDateTimeToUtc(input.date, parseTime(input.from))
@@ -225,7 +225,7 @@ export class AdminService {
   async removeTimeOff(business: Business, id: string) {
     const timeOff = await this.timeOff.findOneBy({ id })
     if (!timeOff || !(await this.catalog.specialistBelongsTo(timeOff.specialistId, business.id))) {
-      throw new NotFoundException('Перерыв не найден')
+      throw new NotFoundException('Break not found')
     }
     await this.timeOff.delete({ id })
   }

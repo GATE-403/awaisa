@@ -36,13 +36,13 @@ export const CloseDayBar = ({
   const t = useT()
   if (openHere === 0 && openElsewhere === 0) return null
   const isListed = openHere > 0 && visitsHere.length > 0 && Boolean(onOpen)
-  const visits = (count: number) => t.count(count, ['визит', 'визита', 'визитов'])
-  const passed = openHere === 1 ? t('прошёл без отметки') : t('прошли без отметки')
+  const visits = (count: number) => t.count(count, ['visit', 'visits'])
+  const passed = openHere === 1 ? t('passed unmarked') : t('passed unmarked')
 
   return (
     <section
       className={styles.bar}
-      aria-label={t('Неотмеченные визиты')}
+      aria-label={t('Unmarked visits')}
       data-glyph-inside={isListed || undefined}
     >
       {/* The glyph rides inside the list's trigger when there is one, so its press fill follows
@@ -52,9 +52,9 @@ export const CloseDayBar = ({
         <>
           {visitsHere.length > 0 && onOpen ? (
             // The count opens the list of who it is: time, client, service · master - a tap scrolls
-            // the calendar to that visit's card (with «✓ Пришёл» on it).
+            // the calendar to that visit's card (with "✓ Arrived" on it).
             <Menu
-              label={t('{visits} {passed} - показать кто', { visits: visits(openHere), passed })}
+              label={t('{visits} {passed}: show who', { visits: visits(openHere), passed })}
               className={styles.who}
               trigger={
                 <>
@@ -62,7 +62,7 @@ export const CloseDayBar = ({
                   <span className={styles.text}>
                     <strong>{visits(openHere)}</strong>{' '}
                     <span className={styles.long}>{passed}</span>
-                    <span className={styles.short}>{t('без отметки')}</span>
+                    <span className={styles.short}>{t('unmarked')}</span>
                   </span>
                   <CaretDown aria-hidden className={styles.caret} />
                 </>
@@ -73,26 +73,26 @@ export const CloseDayBar = ({
           ) : (
             <span className={styles.text}>
               <strong>{visits(openHere)}</strong> <span className={styles.long}>{passed}</span>
-              <span className={styles.short}>{t('без отметки')}</span>
+              <span className={styles.short}>{t('unmarked')}</span>
             </span>
           )}
           <Button size='sm' variant='contrast' onClick={onCloseDay}>
             <Check aria-hidden />
-            {t('Все пришли')}
+            {t('Everyone came')}
           </Button>
         </>
       ) : (
         <>
           <span className={styles.text}>
-            <span className={styles.elsewhereLong}>{t('Ещё')} </span>
-            <strong>{visits(openElsewhere)}</strong> {t('в другие дни')}
+            <span className={styles.elsewhereLong}>{t('More')} </span>
+            <strong>{visits(openElsewhere)}</strong> {t('on other days')}
           </span>
           <Button size='sm' variant='secondary' onClick={onShowOther}>
-            {t('Показать')}
+            {t('Show')}
           </Button>
         </>
       )}
-      <button type='button' className={styles.close} onClick={onDismiss} aria-label={t('Скрыть')}>
+      <button type='button' className={styles.close} onClick={onDismiss} aria-label={t('Hide')}>
         <X aria-hidden />
       </button>
     </section>

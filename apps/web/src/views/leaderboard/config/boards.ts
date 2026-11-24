@@ -4,17 +4,17 @@ type BoardView = 'masters' | 'places'
 
 // What each board is called, in the order of the tabs.
 const BOARDS: { kind: BusinessKind; tab: string; masters: string; places: string }[] = [
-  { kind: 'barber', tab: 'Барберы', masters: 'Лучшие барберы', places: 'Лучшие барбершопы' },
-  { kind: 'beauty', tab: 'Стилисты', masters: 'Лучшие стилисты', places: 'Лучшие салоны' },
+  { kind: 'barber', tab: 'Barbers', masters: 'Top barbers', places: 'Top barbershops' },
+  { kind: 'beauty', tab: 'Stylists', masters: 'Top stylists', places: 'Top salons' },
   {
     kind: 'nails',
-    tab: 'Ногти',
-    masters: 'Лучшие мастера маникюра',
-    places: 'Лучшие ногтевые студии',
+    tab: 'Nails',
+    masters: 'Top manicurists',
+    places: 'Top nail studios',
   },
-  { kind: 'spa', tab: 'Массаж', masters: 'Лучшие массажисты', places: 'Лучшие SPA' },
-  { kind: 'health', tab: 'Здоровье', masters: 'Лучшие специалисты', places: 'Лучшие клиники' },
-  { kind: 'other', tab: 'Тату', masters: 'Лучшие тату-мастера', places: 'Лучшие тату-студии' },
+  { kind: 'spa', tab: 'Massage', masters: 'Top massage therapists', places: 'Top SPAs' },
+  { kind: 'health', tab: 'Health', masters: 'Top specialists', places: 'Top clinics' },
+  { kind: 'other', tab: 'Tattoo', masters: 'Top tattoo artists', places: 'Top tattoo studios' },
 ]
 
 const DEFAULT_BOARD_KIND: BusinessKind = 'barber'

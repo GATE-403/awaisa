@@ -2,7 +2,7 @@ import { bestDiscount, isKnownCode, type PromotionRule } from './pricing.js'
 
 const rule = (overrides: Partial<PromotionRule>): PromotionRule => ({
   id: 'p',
-  title: 'Акция',
+  title: 'Promotion',
   kind: 'happy_hours',
   percent: 20,
   code: null,

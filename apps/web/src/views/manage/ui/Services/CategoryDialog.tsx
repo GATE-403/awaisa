@@ -28,18 +28,18 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
 
   return (
     <Sheet
-      title={t('Новая категория')}
+      title={t('New category')}
       onClose={onClose}
-      action={{ label: t('Добавить'), form: FORM_ID, disabled: !name.trim() || isSaving }}
+      action={{ label: t('Add'), form: FORM_ID, disabled: !name.trim() || isSaving }}
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Категория')}>
+        <section className={sheet.group} aria-label={t('Category')}>
           <div className={sheet.list}>
             <div className={`${sheet.row} ${sheet.textRow}`}>
               <Input
                 variant='plain'
-                aria-label={t('Название')}
-                placeholder={t('Например, «Ногти»')}
+                aria-label={t('Name')}
+                placeholder={t('For example, “Nails”')}
                 value={name}
                 onValueChange={setName}
                 autoFocus
@@ -47,7 +47,7 @@ export const CategoryDialog = ({ onClose, onSave }: CategoryDialogProps) => {
             </div>
           </div>
           <p className={sheet.groupFooter}>
-            {t('Категории группируют услуги на странице бизнеса.')}
+            {t('Categories group services on the business page.')}
           </p>
         </section>
       </form>

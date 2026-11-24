@@ -7,8 +7,8 @@ import {
 
 const booking = {
   business: { name: 'Awaisa Studio', slug: 'awaisa-studio' },
-  serviceName: 'Женская стрижка',
-  specialistName: 'Айгерим Садыкова',
+  serviceName: "Women's haircut",
+  specialistName: 'Aigerim Sadykova',
   date: '2026-11-12',
   time: '14:30',
 }
@@ -16,31 +16,31 @@ const booking = {
 describe('SMS messages', () => {
   it('confirmation has the date, time, master and a cancel link', () => {
     expect(confirmationMessage(booking, 'https://awaisa.kg/v/1?s=x')).toBe(
-      'Awaisa Studio: вы записаны - Женская стрижка, 12 ноября в 14:30, мастер Айгерим Садыкова. Перенести или отменить: https://awaisa.kg/v/1?s=x',
+      "Awaisa Studio: you're booked - Women's haircut, 12 November at 14:30 with Aigerim Sadykova. Change or cancel: https://awaisa.kg/v/1?s=x",
     )
   })
 
-  it('reminder fits in two SMS segments', () => {
-    expect(reminderMessage(booking).length).toBeLessThanOrEqual(134)
+  it('reminder fits in one SMS segment', () => {
+    expect(reminderMessage(booking).length).toBeLessThanOrEqual(160)
   })
 
   it('waitlist SMS names the freed time and links to it', () => {
     expect(
       waitlistFreedMessage(
         'Awaisa Studio',
-        'Женская стрижка',
+        "Women's haircut",
         '2026-11-12',
         '15:30',
         'https://a.kg/x',
       ),
     ).toBe(
-      'Awaisa Studio: освободилось время - Женская стрижка, 12 ноября в 15:30. Успейте записаться: https://a.kg/x',
+      "Awaisa Studio: a time has opened up - Women's haircut, 12 November at 15:30. Book before it goes: https://a.kg/x",
     )
   })
 
   it('return-visit SMS names the service and the master by first name', () => {
-    expect(returnVisitMessage('Kings', 'Мужская стрижка', 'Эрлан Сыдыков', 'https://a.kg/b')).toBe(
-      'Kings: пора снова на «Мужская стрижка»? Эрлан ждёт вас - запишитесь: https://a.kg/b',
+    expect(returnVisitMessage('Kings', "Men's haircut", 'Erlan Sydykov', 'https://a.kg/b')).toBe(
+      "Kings: time for another “Men's haircut”? Erlan is ready for you - book: https://a.kg/b",
     )
   })
 })

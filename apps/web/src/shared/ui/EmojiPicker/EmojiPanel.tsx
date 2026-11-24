@@ -8,23 +8,23 @@ interface EmojiPanelProps {
   onPick: (emoji: string) => void
 }
 
-// The picker itself (Frimousse: unstyled parts, styled here with tokens). Russian names and
+// The picker itself (Frimousse: unstyled parts, styled here with tokens). English names and
 // search; the emoji data comes from our own `/emoji-data` path, never a CDN in the browser.
 export const EmojiPanel = ({ onPick }: EmojiPanelProps) => (
   <EmojiPicker.Root
     className={styles.picker}
-    locale='ru'
+    locale='en'
     columns={EMOJI_COLUMNS}
     emojibaseUrl={EMOJI_DATA_URL}
     onEmojiSelect={({ emoji }) => onPick(emoji)}
   >
     <div className={styles.top}>
-      <EmojiPicker.Search className={styles.search} placeholder='Найти эмодзи' autoFocus />
-      <EmojiPicker.SkinToneSelector className={styles.skinTone} aria-label='Тон кожи' />
+      <EmojiPicker.Search className={styles.search} placeholder='Search emoji' autoFocus />
+      <EmojiPicker.SkinToneSelector className={styles.skinTone} aria-label='Skin tone' />
     </div>
     <EmojiPicker.Viewport className={styles.viewport}>
-      <EmojiPicker.Loading className={styles.note}>Загружаем…</EmojiPicker.Loading>
-      <EmojiPicker.Empty className={styles.note}>Ничего не нашли</EmojiPicker.Empty>
+      <EmojiPicker.Loading className={styles.note}>Loading…</EmojiPicker.Loading>
+      <EmojiPicker.Empty className={styles.note}>Nothing found</EmojiPicker.Empty>
       <EmojiPicker.List
         className={styles.list}
         components={{

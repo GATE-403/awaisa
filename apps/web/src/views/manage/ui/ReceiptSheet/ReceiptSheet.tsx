@@ -19,7 +19,7 @@ interface ReceiptSheetProps {
   slug: string
   receipt: FiscalReceipt
   onClose: () => void
-  /** After «Отправить снова», so the list shows the new state. */
+  /** After "Send again", so the list shows the new state. */
   onChange?: (receipt: FiscalReceipt) => void
 }
 
@@ -36,16 +36,16 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
 
   const copy = async () => {
     const isCopied = await copyText(link)
-    if (isCopied) toast.show({ title: t('Ссылка на чек скопирована'), type: 'success' })
-    else toast.show({ title: t('Не получилось скопировать'), type: 'error' })
+    if (isCopied) toast.show({ title: t('Receipt link copied'), type: 'success' })
+    else toast.show({ title: t('Could not copy'), type: 'error' })
   }
 
   const share = async () => {
     const result = await shareLink({
-      title: t('Чек {name}', { name: receipt.businessName }),
+      title: t('Receipt from {name}', { name: receipt.businessName }),
       url: link,
     })
-    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
+    if (result === 'failed') toast.show({ title: t('Could not share'), type: 'error' })
   }
 
   const retry = async () => {
@@ -55,11 +55,11 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
       setReceipt(next)
       onChange?.(next)
       toast.show({
-        title: t(next.status === 'issued' ? 'Чек выдан' : 'Чек снова в очереди'),
+        title: t(next.status === 'issued' ? 'Receipt issued' : 'Receipt queued again'),
         type: next.status === 'issued' ? 'success' : 'info',
       })
     } catch (error) {
-      toast.show({ title: t('Не отправилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({ title: t('Not sent'), description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsSending(false)
     }
@@ -67,9 +67,9 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
 
   return (
     <Sheet
-      title={t(receipt.kind === 'refund' ? 'Чек возврата' : 'Чек')}
+      title={t(receipt.kind === 'refund' ? 'Refund receipt' : 'Receipt')}
       onClose={onClose}
-      cancelLabel={t('Закрыть')}
+      cancelLabel={t('Close')}
     >
       <div className={sheet.form}>
         <ReceiptPaper receipt={receipt} surface='sheet' />
@@ -77,18 +77,18 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
           <div className={styles.actions}>
             <Button type='button' size='sm' className={styles.main} onClick={() => void copy()}>
               <Copy aria-hidden />
-              {t('Скопировать ссылку')}
+              {t('Copy link')}
             </Button>
-            <GlyphGroup label={t('Ещё')}>
+            <GlyphGroup label={t('More')}>
               <GlyphButton
                 icon={<ArrowSquareOut />}
-                label={t('Открыть чек')}
+                label={t('Open receipt')}
                 onClick={() => window.open(link, '_blank', 'noopener')}
               />
               {canShare && (
                 <GlyphButton
                   icon={<ShareNetwork />}
-                  label={t('Отправить')}
+                  label={t('Send')}
                   onClick={() => void share()}
                 />
               )}
@@ -105,7 +105,7 @@ export const ReceiptSheet = ({ slug, receipt: initial, onClose, onChange }: Rece
               onClick={() => void retry()}
             >
               <ArrowClockwise aria-hidden />
-              {t('Отправить снова')}
+              {t('Send again')}
             </Button>
           </div>
         )}

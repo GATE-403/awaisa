@@ -13,10 +13,10 @@ import { useFavorites } from '../model/useFavorites'
 import { FavoriteButton } from './FavoriteButton'
 import styles from './FavoritesShelf.module.css'
 
-// «Избранное» in the profile: the services hearted anywhere, as the catalog's cards in one row
+// «Favourites» in the profile: the services hearted anywhere, as the catalog's cards in one row
 // (newest first); a heart takes one off. With none yet, one quiet line says how to add them.
 interface FavoritesShelfProps {
-  /** `grid` inside the profile's «Избранное» tab (the tab names it, no heading). */
+  /** `grid` inside the profile's «Favourites» tab (the tab names it, no heading). */
   layout?: 'row' | 'grid'
 }
 
@@ -48,18 +48,18 @@ export const FavoritesShelf = ({ layout = 'row' }: FavoritesShelfProps) => {
     <section className={styles.shelf} aria-labelledby='favorites-title'>
       <div className={styles.head} data-hidden={layout === 'grid' || undefined}>
         <h2 id='favorites-title' className={styles.title}>
-          {t('Избранное')}
+          {t('Favourites')}
         </h2>
         {shown.length > 0 && <span className={styles.count}>{shown.length}</span>}
       </div>
       {offers !== null && shown.length === 0 ? (
         <EmptyState
           icon={<Heart className={styles.heart} />}
-          title={t('Сохраняйте услуги')}
+          title={t('Save services')}
           text={
             <>
-              {t('Нажмите ♡ на услуге в')} <NextLink href='/'>{t('каталоге')}</NextLink>
-              {t(' - она появится здесь.')}
+              {t('Tap ♡ on a service in the')} <NextLink href='/'>{t('catalogue')}</NextLink>
+              {t(' and it will appear here.')}
             </>
           }
         />

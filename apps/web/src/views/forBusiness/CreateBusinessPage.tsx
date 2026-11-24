@@ -26,10 +26,16 @@ import styles from './CreateBusinessPage.module.css'
 const TINT_DELAY_MS = 400
 
 const STEP_TITLES = {
-  name: { title: 'Как называется?', subtitle: ' Так вас найдут в каталоге.' },
-  kind: { title: 'Чем занимаетесь?', subtitle: ' Подставим услуги для вашего меню.' },
-  services: { title: 'Что в меню?', subtitle: ' Уберите лишнее и поправьте цены.' },
-  contacts: { title: 'Где вас найти?', subtitle: ' Остальное настроите в кабинете.' },
+  name: { title: 'What’s it called?', subtitle: ' This is how people find you in the catalogue.' },
+  kind: { title: 'What do you do?', subtitle: ' We’ll fill in services for your menu.' },
+  services: {
+    title: 'What’s on the menu?',
+    subtitle: ' Remove what you don’t need and fix the prices.',
+  },
+  contacts: {
+    title: 'Where can clients find you?',
+    subtitle: ' Set up the rest in the dashboard.',
+  },
 }
 
 export const CreateBusinessPage = () => {
@@ -85,13 +91,13 @@ export const CreateBusinessPage = () => {
         {/* A screen of its own, like sign-in: ✕ back to the business landing, beside it how far
             along (done steps lit, the open one filling up as its fields are filled in). */}
         <div className={styles.topBar}>
-          <NextLink href='/business' className={styles.close} aria-label={t('Закрыть')}>
+          <NextLink href='/business' className={styles.close} aria-label={t('Close')}>
             <X aria-hidden />
           </NextLink>
           <div
             className={styles.progress}
             role='progressbar'
-            aria-label={t('Готово {done} из {total}', {
+            aria-label={t('{done} of {total} done', {
               done: form.stepNumber - 1,
               total: form.stepCount,
             })}
@@ -116,7 +122,7 @@ export const CreateBusinessPage = () => {
           <BusinessTile name={tintName || 'awaisa'} size='md' />
           <span className={styles.previewText}>
             <span className={styles.previewName} data-empty={!form.name.trim() || undefined}>
-              {form.name.trim() || t('Ваша страница')}
+              {form.name.trim() || t('Your page')}
             </span>
             <span className={styles.previewFacts}>
               {previewFacts.map((fact) => (
@@ -140,25 +146,27 @@ export const CreateBusinessPage = () => {
               {form.step === 'name' && (
                 // Settings rows right on the page: the label on the left, the value typed on the right.
                 <div className={styles.rows}>
-                  <Field label={t('Название')} error={form.errors.name} className={styles.fieldRow}>
+                  <Field label={t('Name')} error={form.errors.name} className={styles.fieldRow}>
                     <Input
                       variant='plain'
                       value={form.name}
                       onValueChange={form.setName}
-                      placeholder={t('Например, Barber Pro')}
+                      placeholder={t('For example, Barber Pro')}
                       autoComplete='organization'
                       enterKeyHint='next'
                       autoFocus
                     />
                   </Field>
                   <Field
-                    label={t('Ссылка')}
+                    label={t('Link')}
                     error={form.errors.slug}
-                    // «Адрес» read as the street: the link is said to be what clients get.
+                    // "Address" read as the street: the link is said to be what clients get.
                     description={
                       form.isSlugAvailable
-                        ? t('Свободна: awaisa.kg/{slug} - её получат клиенты', { slug: form.slug })
-                        : t('Латиница, цифры и дефис')
+                        ? t('Available: awaisa.kg/{slug}, the link clients get', {
+                            slug: form.slug,
+                          })
+                        : t('Latin letters, numbers and hyphens')
                     }
                     className={styles.fieldRow}
                   >
@@ -184,7 +192,7 @@ export const CreateBusinessPage = () => {
               {form.step === 'kind' && (
                 // One tap picks the kind and moves on, like the first pick in booking: rows on
                 // the page, the glyph bare in its colour, a check on the one chosen before.
-                <ul className={styles.kinds} aria-label={t('Чем занимаетесь')}>
+                <ul className={styles.kinds} aria-label={t('What you do')}>
                   {BUSINESS_KINDS.map((kind) => {
                     const Glyph = KIND_ICONS[kind.value]
                     const examples = SERVICE_TEMPLATES[kind.value]
@@ -207,7 +215,9 @@ export const CreateBusinessPage = () => {
                           <span className={styles.kindBody}>
                             <span className={styles.kindTitle}>{t(kind.label)}</span>
                             <span className={styles.kindNote}>
-                              {examples.length > 0 ? examples.join(', ') : t('Своё меню услуг')}
+                              {examples.length > 0
+                                ? examples.join(', ')
+                                : t('Your own service menu')}
                             </span>
                           </span>
                           {isChosen ? (
@@ -224,7 +234,7 @@ export const CreateBusinessPage = () => {
 
               {form.step === 'services' &&
                 (form.templates.length > 0 ? (
-                  <section className={styles.group} aria-label={t('Услуги')}>
+                  <section className={styles.group} aria-label={t('Services')}>
                     <ul className={styles.list}>
                       {form.templates.map((template) => (
                         <li key={template.name} className={styles.serviceRow}>
@@ -248,7 +258,7 @@ export const CreateBusinessPage = () => {
                             <Input
                               variant='plain'
                               inputMode='numeric'
-                              aria-label={t('Цена: {name}, сом', { name: template.name })}
+                              aria-label={t('Price: {name}, som', { name: template.name })}
                               value={maskAmountInput(template.price)}
                               onValueChange={(value) =>
                                 form.editTemplate(template.name, {
@@ -258,24 +268,24 @@ export const CreateBusinessPage = () => {
                               }
                               disabled={!template.isChecked}
                             />
-                            <span className={styles.suffix}>{t('сом')}</span>
+                            <span className={styles.suffix}>{t('som')}</span>
                           </span>
                         </li>
                       ))}
                     </ul>
                     <p className={styles.groupFooter}>
-                      {t('Цены и длительность можно поменять в кабинете в любой момент.')}
+                      {t('You can change prices and durations in the dashboard any time.')}
                     </p>
                   </section>
                 ) : (
                   <p className={styles.groupFooter}>
-                    {t('Услуги добавите в кабинете - название, длительность и цену.')}
+                    {t('Add services in the dashboard: name, duration and price.')}
                   </p>
                 ))}
 
               {form.step === 'contacts' && (
                 <div className={styles.rows}>
-                  <Field label={t('Город')} className={styles.fieldRow}>
+                  <Field label={t('City')} className={styles.fieldRow}>
                     <Input
                       variant='plain'
                       value={form.city}
@@ -285,19 +295,19 @@ export const CreateBusinessPage = () => {
                       autoFocus
                     />
                   </Field>
-                  <Field label={t('Адрес')} className={styles.fieldRow}>
+                  <Field label={t('Address')} className={styles.fieldRow}>
                     <Input
                       variant='plain'
                       value={form.address}
                       onValueChange={form.setAddress}
-                      placeholder={t('Необязательно')}
+                      placeholder={t('Optional')}
                       autoComplete='street-address'
                       enterKeyHint='next'
                     />
                   </Field>
                   <Field
-                    label={t('Телефон')}
-                    description={t('Покажем на странице и в WhatsApp-кнопке')}
+                    label={t('Phone')}
+                    description={t('Shown on the page and the WhatsApp button')}
                     className={styles.fieldRow}
                   >
                     <Input
@@ -314,17 +324,17 @@ export const CreateBusinessPage = () => {
               )}
             </div>
 
-            {/* A content-width capsule at the column's end with «Назад» before it: a full-width
-                bar took all the attention from the form («кнопка забирает всё внимание»). */}
+            {/* A content-width capsule at the column's end with "Back" before it: a full-width
+                bar took all the attention from the form ("the button takes all the attention"). */}
             <div className={styles.actions}>
               {form.stepNumber > 1 && (
                 <Button type='button' variant='ghost' onClick={form.goBack} className={styles.back}>
-                  {t('Назад')}
+                  {t('Back')}
                 </Button>
               )}
               {form.step !== 'kind' && (
                 <Button type='submit' disabled={form.isSubmitting} className={styles.next}>
-                  {isLast ? t(form.isSubmitting ? 'Создаём…' : 'Создать страницу') : t('Далее')}
+                  {isLast ? t(form.isSubmitting ? 'Creating…' : 'Create a page') : t('Next')}
                 </Button>
               )}
             </div>

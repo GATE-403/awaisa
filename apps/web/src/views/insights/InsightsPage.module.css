@@ -1,4 +1,4 @@
-/* Laid out like the cabinet's «Аналитика» («как в табе аналитике в бизнесе»): the report lies
+/* Laid out like the cabinet's "Analytics" (the owner: "like the business's analytics tab"): the report lies
    right on the page, no cards or fills; groups are told apart by captions and air. */
 .page {
   padding: 0 0 var(--section-gap);
@@ -72,7 +72,7 @@
   text-transform: none;
 }
 
-/* --- Стратегия: three figures in a row, like «Визиты и клиенты» --- */
+/* --- Strategy: three figures in a row, like "Visits and clients" --- */
 
 .stats {
   display: grid;
@@ -290,7 +290,7 @@
   background: var(--color-primary);
 }
 
-/* Two groups side by side from 1024px, as in «Аналитика». */
+/* Two groups side by side from 1024px, as in "Analytics". */
 .pairs {
   display: grid;
   gap: var(--space-10);

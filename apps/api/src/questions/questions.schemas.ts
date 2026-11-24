@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const askSchema = z.object({
-  text: z.string().trim().min(3, 'Напишите вопрос').max(500),
+  text: z.string().trim().min(3, 'Write your question').max(500),
 })
 
 const answerSchema = z.object({

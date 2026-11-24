@@ -1,4 +1,4 @@
-// Where a booking was opened over (the catalog, «Образы», a profile…), kept for this tab, so a
+// Where a booking was opened over (the catalogue, Looks, a profile…), kept for this tab, so a
 // reload of /<slug>/book can put the sheet back over that page instead of the place's own one.
 const STORAGE_KEY = 'awaisa:booking-origin:v1'
 
@@ -54,7 +54,7 @@ const shouldReturnToOrigin = (
 
 // Set on <html> while a reload goes back to the page under the booking: the place's page the full
 // route draws under the sheet stays hidden, so it does not flash before the catalog comes back.
-// Its value says where to: «catalog» (then the catalog's skeleton stands in for it) or «page».
+// Its value says where to: “catalog” (then the catalog's skeleton stands in for it) or “page”.
 const RETURNING_ATTRIBUTE = 'data-booking-returning'
 
 // Runs while the browser parses the route's HTML, before the place's page streams in: scripts and

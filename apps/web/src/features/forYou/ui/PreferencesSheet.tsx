@@ -41,36 +41,36 @@ type Gender = Preferences['gender']
 const STEPS: Step[] = ['gender', 'interests', 'budget', 'priority', 'place']
 
 const TITLES: Record<Step, { title: string; note: string }> = {
-  gender: { title: 'Для кого подбираем?', note: 'Покажем услуги, которые вам подходят.' },
-  interests: { title: 'Что вам интересно?', note: 'Можно несколько: с них начнём подборку.' },
-  budget: { title: 'Сколько на визит?', note: 'Дороже почти не покажем.' },
-  priority: { title: 'Что важнее при выборе?', note: 'Это поднимем в подборке выше всего.' },
-  place: { title: 'Где вам удобно?', note: 'Сначала покажем места рядом.' },
+  gender: { title: 'Who are we picking for?', note: 'We will show services that suit you.' },
+  interests: { title: 'What are you into?', note: 'Pick a few: the picks start with them.' },
+  budget: { title: 'How much per visit?', note: 'We will rarely show pricier ones.' },
+  priority: { title: 'What matters most?', note: 'We will put this first in your picks.' },
+  place: { title: 'Where suits you?', note: 'We will show places nearby first.' },
 }
 
 const GENDERS: { value: Gender; label: string; glyph: ReactNode }[] = [
-  { value: 'female', label: 'Женщине', glyph: <GenderFemale /> },
-  { value: 'male', label: 'Мужчине', glyph: <GenderMale /> },
-  { value: null, label: 'Не важно', glyph: <Users /> },
+  { value: 'female', label: 'Woman', glyph: <GenderFemale /> },
+  { value: 'male', label: 'Man', glyph: <GenderMale /> },
+  { value: null, label: 'Any', glyph: <Users /> },
 ]
 
 const BUDGETS: { value: number | null; label: string }[] = [
-  { value: 1000, label: 'До 1 000 сом' },
-  { value: 2500, label: 'До 2 500 сом' },
-  { value: 5000, label: 'До 5 000 сом' },
-  { value: null, label: 'Не важно' },
+  { value: 1000, label: 'Up to 1 000 som' },
+  { value: 2500, label: 'Up to 2 500 som' },
+  { value: 5000, label: 'Up to 5 000 som' },
+  { value: null, label: 'Any' },
 ]
 
 const PRIORITIES: { value: Priority; label: string; note: string; glyph: ReactNode }[] = [
-  { value: 'near', label: 'Рядом', note: 'Сначала ближайшие места', glyph: <MapPin /> },
+  { value: 'near', label: 'Nearby', note: 'Nearest places first', glyph: <MapPin /> },
   {
     value: 'soon',
-    label: 'Свободно сегодня',
-    note: 'Чтобы записаться без ожидания',
+    label: 'Free today',
+    note: 'To book without waiting',
     glyph: <Clock />,
   },
-  { value: 'rating', label: 'Высокий рейтинг', note: 'Места с лучшими отзывами', glyph: <Star /> },
-  { value: 'price', label: 'Подешевле', note: 'Сначала недорогие услуги', glyph: <Coins /> },
+  { value: 'rating', label: 'Top rated', note: 'Places with the best reviews', glyph: <Star /> },
+  { value: 'price', label: 'Cheaper', note: 'Affordable services first', glyph: <Coins /> },
 ]
 
 interface ChoiceProps {
@@ -111,10 +111,10 @@ const Choice = ({ label, note, glyph, isChosen, isBusy, isMulti, onPick }: Choic
   </li>
 )
 
-// «Подберём для вас» as steps, like the business setup: one question a screen, a bar of segments
-// for how far along, one tap answers and moves on (several interests or priorities take «Далее»); the answers so far
-// ride above the question as capsules back to their step («хотел бы увидеть что я выбрал до»). The answers
-// stay on the device and shape «Для вас»; the place is the device's own «Где вы?».
+// «Picks for you» as steps, like the business setup: one question a screen, a bar of segments
+// for how far along, one tap answers and moves on (several interests or priorities take «Next»); the answers so far
+// ride above the question as capsules back to their step (the owner wanted to see what was chosen before). The answers
+// stay on the device and shape «For you»; the place is the device's own «Where are you?».
 export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) => {
   const t = useT()
   const toast = useToast()
@@ -140,8 +140,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
       priorities,
     })
     toast.show({
-      title: t('Подборка обновлена'),
-      description: t('Смотрите «Для вас» в профиле'),
+      title: t('Picks updated'),
+      description: t('See “For you” in your profile'),
       type: 'success',
     })
     onClose()
@@ -165,21 +165,21 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
     .filter((label): label is string => Boolean(label))
     .map((label) => t(label))
   const answers: { step: Step; text: string }[] = [
-    { step: 'gender' as const, text: gender ? t(genderLabel ?? '') : t('Для всех') },
+    { step: 'gender' as const, text: gender ? t(genderLabel ?? '') : t('For everyone') },
     {
       step: 'interests' as const,
       text:
         interestLabels.length > 2
           ? `${interestLabels.slice(0, 2).join(', ')} +${interestLabels.length - 2}`
-          : interestLabels.join(', ') || t('Всё интересно'),
+          : interestLabels.join(', ') || t('Everything'),
     },
-    { step: 'budget' as const, text: budget ? t(budgetLabel ?? '') : t('Любой бюджет') },
+    { step: 'budget' as const, text: budget ? t(budgetLabel ?? '') : t('Any budget') },
     {
       step: 'priority' as const,
       text:
         PRIORITIES.filter((item) => priorities.includes(item.value))
           .map((item) => t(item.label))
-          .join(', ') || t('Всё понемногу'),
+          .join(', ') || t('A bit of everything'),
     },
   ].filter((answer) => STEPS.indexOf(answer.step) < stepIndex)
 
@@ -191,7 +191,12 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
     setLocating('busy')
     navigator.geolocation.getCurrentPosition(
       ({ coords }) =>
-        finish({ label: 'Моё место', lat: coords.latitude, lng: coords.longitude, source: 'gps' }),
+        finish({
+          label: 'My location',
+          lat: coords.latitude,
+          lng: coords.longitude,
+          source: 'gps',
+        }),
       () => setLocating('denied'),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 },
     )
@@ -199,8 +204,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
   return (
     <Sheet
-      title={t('Подберём для вас')}
-      cancelLabel={stepIndex > 0 ? t('Назад') : t('Отмена')}
+      title={t('Picks for you')}
+      cancelLabel={stepIndex > 0 ? t('Back') : t('Cancel')}
       onCancel={stepIndex > 0 ? () => setStepIndex((index) => index - 1) : undefined}
       onClose={onClose}
     >
@@ -208,7 +213,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         <div
           className={styles.stepBar}
           role='progressbar'
-          aria-label={t('Вопрос {done} из {total}', {
+          aria-label={t('Question {done} of {total}', {
             done: stepIndex + 1,
             total: STEPS.length,
           })}
@@ -226,14 +231,14 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         </div>
 
         {answers.length > 0 && (
-          <ul className={styles.answers} aria-label={t('Ваши ответы')}>
+          <ul className={styles.answers} aria-label={t('Your answers')}>
             {answers.map((answer) => (
               <li key={answer.step}>
                 <button
                   type='button'
                   className={styles.answer}
                   onClick={() => setStepIndex(STEPS.indexOf(answer.step))}
-                  aria-label={t('Изменить: {answer}', { answer: answer.text })}
+                  aria-label={t('Change: {answer}', { answer: answer.text })}
                 >
                   {answer.text}
                 </button>
@@ -249,7 +254,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           </div>
 
           {step === 'gender' && (
-            <ul className={styles.choices} aria-label={t('Для кого')}>
+            <ul className={styles.choices} aria-label={t('For whom')}>
               {GENDERS.map((item) => (
                 <Choice
                   key={item.label}
@@ -267,7 +272,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
           {step === 'interests' && (
             <fieldset className={styles.interestGrid}>
-              <legend className={styles.srOnly}>{t('Что интересно')}</legend>
+              <legend className={styles.srOnly}>{t('Interests')}</legend>
               {shown.map((item) => (
                 <label key={item.value} className={styles.interestCell}>
                   {t(item.label)}
@@ -283,7 +288,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           )}
 
           {step === 'budget' && (
-            <ul className={styles.choices} aria-label={t('Бюджет за визит')}>
+            <ul className={styles.choices} aria-label={t('Budget per visit')}>
               {BUDGETS.map((item) => (
                 <Choice
                   key={item.label}
@@ -299,7 +304,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
           )}
 
           {step === 'priority' && (
-            <ul className={styles.choices} aria-label={t('Что важнее при выборе?')}>
+            <ul className={styles.choices} aria-label={t('What matters most?')}>
               {PRIORITIES.map((item) => (
                 <Choice
                   key={item.value}
@@ -313,8 +318,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
               ))}
               {/* Nothing in particular: clears the ticks and moves on. */}
               <Choice
-                label={t('Всё понемногу')}
-                note={t('Ничего не выделять')}
+                label={t('A bit of everything')}
+                note={t('Nothing in particular')}
                 glyph={<Shuffle />}
                 isChosen={initial !== null && priorities.length === 0}
                 onPick={() => {
@@ -327,13 +332,13 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
           {step === 'place' && (
             <>
-              <ul className={styles.choices} aria-label={t('Где вам удобно?')}>
+              <ul className={styles.choices} aria-label={t('Where suits you?')}>
                 <Choice
-                  label={locating === 'busy' ? t('Определяем…') : t('Определить автоматически')}
+                  label={locating === 'busy' ? t('Locating…') : t('Detect automatically')}
                   note={
                     locating === 'denied'
-                      ? t('Не получилось: выберите район ниже')
-                      : t('По геолокации телефона')
+                      ? t('That did not work: pick a district below')
+                      : t('By your phone location')
                   }
                   glyph={<NavigationArrow />}
                   isChosen={myPlace?.source === 'gps'}
@@ -341,8 +346,8 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
                   onPick={locate}
                 />
               </ul>
-              <SectionCaption isInset={false}>{t('Или выберите район')}</SectionCaption>
-              <ul className={styles.choices} aria-label={t('Район Бишкека')}>
+              <SectionCaption isInset={false}>{t('Or pick a district')}</SectionCaption>
+              <ul className={styles.choices} aria-label={t('District')}>
                 {CITY_AREAS.map((area) => (
                   <Choice
                     key={area.label}
@@ -354,7 +359,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
                   />
                 ))}
                 <Choice
-                  label={t('Не учитывать место')}
+                  label={t('Ignore my location')}
                   isChosen={initial !== null && !myPlace}
                   onPick={() => finish(null)}
                 />
@@ -365,7 +370,7 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
 
         <p className={styles.stepFooter}>
           {t(
-            'Ответы остаются на этом телефоне и вместе с вашими визитами решают, что попадёт в «Для вас».',
+            'Your answers stay on this phone and, with your visits, decide what goes into “For you”.',
           )}
         </p>
 
@@ -374,16 +379,14 @@ export const PreferencesSheet = ({ initial, onClose }: PreferencesSheetProps) =>
         {(step === 'interests' || step === 'priority') && (
           <div className={styles.stepActions}>
             <Button onClick={next}>
-              {(step === 'interests' ? interests : priorities).length > 0
-                ? t('Далее')
-                : t('Пропустить')}
+              {(step === 'interests' ? interests : priorities).length > 0 ? t('Next') : t('Skip')}
             </Button>
           </div>
         )}
         {step === 'place' && myPlace && (
           <div className={styles.stepActions}>
             <Button onClick={() => finish()}>
-              {t('Оставить «{place}»', { place: myPlace.label })}
+              {t('Keep “{place}”', { place: myPlace.label })}
             </Button>
           </div>
         )}

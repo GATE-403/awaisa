@@ -5,44 +5,44 @@ import { createPastVisit, withDb } from './visits'
 type Recommendation = { id: string; name: string; reason: string; slug: string }
 
 test.describe('Recommendations', () => {
-  test('a client answers the questions step by step and gets «Для вас» with reasons', async ({
+  test('a client answers the questions step by step and gets “For you” with reasons', async ({
     page,
   }) => {
-    // The questions live in the account's «Настройки → Подборка».
+    // The questions live in the account's “Settings → Picks”.
     await signInViaApi(page, randomClientPhone(), 'E2E Подборка')
     await page.goto('/bookings?tab=settings')
-    await page.getByRole('button', { name: /^Для вас/ }).click()
-    const sheet = page.getByRole('dialog', { name: 'Подберём для вас' })
+    await page.getByRole('button', { name: /^For you/ }).click()
+    const sheet = page.getByRole('dialog', { name: 'Picks for you' })
     // One question a step, like the business setup; a one-answer step moves on by itself.
     // The sheet slides up on phones: tap the rows once it has settled.
-    await expect(sheet.getByRole('heading', { name: 'Для кого подбираем?' })).toBeInViewport()
-    await expect(sheet.getByRole('progressbar')).toHaveAccessibleName('Вопрос 1 из 5')
-    await sheet.getByRole('button', { name: 'Женщине' }).click()
-    await expect(sheet.getByRole('heading', { name: 'Что вам интересно?' })).toBeVisible()
-    // Women are not offered «Борода».
-    await expect(sheet.getByRole('checkbox', { name: 'Борода' })).toHaveCount(0)
-    await sheet.getByText('Маникюр', { exact: true }).click()
-    await expect(sheet.getByRole('checkbox', { name: 'Маникюр' })).toBeChecked()
-    await sheet.getByRole('button', { name: 'Далее' }).click()
-    await sheet.getByRole('button', { name: 'До 2 500 сом' }).click()
-    await expect(sheet.getByRole('heading', { name: 'Что важнее при выборе?' })).toBeVisible()
-    // «Назад» returns to the step before with its answer kept.
-    await sheet.getByRole('button', { name: 'Назад' }).click()
-    await expect(sheet.getByRole('heading', { name: 'Сколько на визит?' })).toBeVisible()
-    await sheet.getByRole('button', { name: 'До 2 500 сом' }).click()
+    await expect(sheet.getByRole('heading', { name: 'Who are we picking for?' })).toBeInViewport()
+    await expect(sheet.getByRole('progressbar')).toHaveAccessibleName('Question 1 of 5')
+    await sheet.getByRole('button', { name: 'Woman' }).click()
+    await expect(sheet.getByRole('heading', { name: 'What are you into?' })).toBeVisible()
+    // Women are not offered “Beard”.
+    await expect(sheet.getByRole('checkbox', { name: 'Beard' })).toHaveCount(0)
+    await sheet.getByText('Manicure', { exact: true }).click()
+    await expect(sheet.getByRole('checkbox', { name: 'Manicure' })).toBeChecked()
+    await sheet.getByRole('button', { name: 'Next' }).click()
+    await sheet.getByRole('button', { name: 'Up to 2 500 som' }).click()
+    await expect(sheet.getByRole('heading', { name: 'What matters most?' })).toBeVisible()
+    // “Back” returns to the step before with its answer kept.
+    await sheet.getByRole('button', { name: 'Back' }).click()
+    await expect(sheet.getByRole('heading', { name: 'How much per visit?' })).toBeVisible()
+    await sheet.getByRole('button', { name: 'Up to 2 500 som' }).click()
     // The answers so far ride above the question; one leads back to its step.
-    const answers = sheet.getByRole('list', { name: 'Ваши ответы' })
-    await expect(answers.getByRole('button')).toHaveText(['Женщине', 'Маникюр', 'До 2 500 сом'])
-    // Several things may matter at once: they tick, «Далее» moves on.
-    await sheet.getByRole('button', { name: /Свободно сегодня/ }).click()
-    await sheet.getByRole('button', { name: /Высокий рейтинг/ }).click()
-    await expect(sheet.getByRole('button', { name: /Высокий рейтинг/ })).toHaveAttribute(
+    const answers = sheet.getByRole('list', { name: 'Your answers' })
+    await expect(answers.getByRole('button')).toHaveText(['Woman', 'Manicure', 'Up to 2 500 som'])
+    // Several things may matter at once: they tick, “Next” moves on.
+    await sheet.getByRole('button', { name: /Free today/ }).click()
+    await sheet.getByRole('button', { name: /Top rated/ }).click()
+    await expect(sheet.getByRole('button', { name: /Top rated/ })).toHaveAttribute(
       'aria-pressed',
       'true',
     )
-    await sheet.getByRole('button', { name: 'Далее' }).click()
-    await sheet.getByRole('button', { name: 'Не учитывать место' }).click()
-    await expect(page.getByText('Подборка обновлена')).toBeVisible()
+    await sheet.getByRole('button', { name: 'Next' }).click()
+    await sheet.getByRole('button', { name: 'Ignore my location' }).click()
+    await expect(page.getByText('Picks updated')).toBeVisible()
     const saved = await page.evaluate(() => localStorage.getItem('awaisa:preferences:v1'))
     expect(JSON.parse(saved ?? '{}')).toMatchObject({
       gender: 'female',
@@ -51,23 +51,23 @@ test.describe('Recommendations', () => {
       priorities: ['soon', 'rating'],
     })
 
-    // The catalog's «Для вас» asks with the answers: nails first, nothing for men.
+    // The catalog's “For you” asks with the answers: nails first, nothing for men.
     const answered = page.waitForResponse((response) =>
       decodeURIComponent(response.url()).includes('priority=soon,rating'),
     )
     await page.goto('/')
     const picks: Recommendation[] = await (await answered).json()
-    expect(picks[0]?.reason).toMatch(/Ваш выбор · ногти/)
-    expect(picks.filter((pick) => /Мужская/.test(pick.name))).toEqual([])
+    expect(picks[0]?.reason).toMatch(/Your pick · nails/)
+    expect(picks.filter((pick) => /Мужск/.test(pick.name))).toEqual([])
   })
 
   test('the catalog opens with picks, even for a new guest, and learns what was shown and tapped', async ({
     page,
   }) => {
     await page.goto('/')
-    const shelf = page.getByRole('region', { name: 'Для вас' })
+    const shelf = page.getByRole('region', { name: 'For you' })
     await shelf.scrollIntoViewIfNeeded()
-    // The head carries «Рейтинг ›»; the picks are the list's links.
+    // The head carries “Rating ›”; the picks are the list's links.
     const first = shelf.getByRole('listitem').getByRole('link').first()
     await expect(first).toHaveAttribute('href', /\/book\?service=/)
 
@@ -120,7 +120,7 @@ test.describe('Recommendations', () => {
     ).json()
     expect(items.some((item) => item.id === manicure.id)).toBe(false)
     expect(items.some((item) => /бород|мужск/i.test(item.name))).toBe(false)
-    expect(items[0]?.reason).toMatch(/ногти|маникюр/)
+    expect(items[0]?.reason).toMatch(/nails|manicure/i)
 
     const bad = await request.post('/api/recommendations/events', {
       data: { session: 'x', events: [] },
@@ -128,7 +128,7 @@ test.describe('Recommendations', () => {
     expect(bad.status()).toBe(400)
   })
 
-  test('a visit as long ago as people come back puts that service first: «Пора снова»', async ({
+  test('a visit as long ago as people come back puts that service first: “Due again”', async ({
     request,
     isMobile,
   }) => {
@@ -140,7 +140,7 @@ test.describe('Recommendations', () => {
       await request.get(`/api/recommendations?visits=${service.id}~${fiveWeeksAgo}`)
     ).json()
     expect(items[0]).toMatchObject({ id: service.id, slug: 'awaisa-studio' })
-    expect(items[0]?.reason).toMatch(/^Пора снова/)
+    expect(items[0]?.reason).toMatch(/^Due again/)
     // At most two cards per place.
     const perPlace = new Map<string, number>()
     for (const item of items) perPlace.set(item.slug, (perPlace.get(item.slug) ?? 0) + 1)
@@ -157,24 +157,24 @@ test.describe('Recommendations', () => {
   })
 })
 
-test.describe('Recommendations beyond «Для вас»', () => {
-  test('a search that finds little ends in «Похожие услуги»; the profile’s history shows what is due', async ({
+test.describe('Recommendations beyond “For you”', () => {
+  test('a search that finds little ends in “Similar services”; the profile’s history shows what is due', async ({
     page,
     isMobile,
   }, testInfo) => {
     test.skip(isMobile, 'Runs once: it books')
     test.setTimeout(90_000)
     await page.goto('/?q=zzqqxx')
-    await expect(page.getByRole('region', { name: 'Похожие услуги' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Similar services' })).toBeVisible()
 
     // A visit five weeks back: with the usual four-week gap it is due again.
     const phone = randomClientPhone()
     await signInViaApi(page, phone, 'E2E Пора Снова')
     await createPastVisit('E2E Пора Снова', phone, 0, 35)
     await page.goto('/bookings?tab=history')
-    const due = page.getByRole('region', { name: 'Пора снова' })
+    const due = page.getByRole('region', { name: 'Due again' })
     await expect(due).toBeVisible()
-    await expect(due.getByText(/^Пора снова/).first()).toBeVisible()
+    await expect(due.getByText(/^Due again/).first()).toBeVisible()
 
     // What each shelf on the page brings is read per surface.
     await page.context().clearCookies()

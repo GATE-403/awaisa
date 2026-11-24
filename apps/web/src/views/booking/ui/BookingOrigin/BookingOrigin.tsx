@@ -14,8 +14,8 @@ import {
 } from '../../lib/bookingOrigin'
 import { noteSheetAlreadyUp } from '../../lib/sheetHandoff'
 
-// Root layout: notes the page a booking is opened over. One listener for every way in («Записаться»
-// on a card, «Для вас», «Снова к мастеру», «Продолжить запись»…) instead of a hook in each link.
+// Root layout: notes the page a booking is opened over. One listener for every way in (Book
+// on a card, For you, Book this specialist again, Continue booking…) instead of a hook in each link.
 export const BookingOriginTracker = () => {
   useEffect(() => {
     const remember = (event: MouseEvent) => {
@@ -74,7 +74,7 @@ export const BookingReturnOnReload = () => {
       window.setTimeout(stopReturning, 10_000)
     }
     // A task later on both ends: this effect runs before the app router's own (children first),
-    // which is where Next starts listening for «back»; and once back, Next handles the step in its
+    // which is where Next starts listening for “back”; and once back, Next handles the step in its
     // own listener first, so the booking opens after it, not under it. Run at once, a step back
     // could slip past Next under load and the place's sheet stayed beside the new one.
     const goBack = window.setTimeout(() => {

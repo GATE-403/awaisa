@@ -40,7 +40,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
       <MapView
         markers={markers}
         fitKey={business.slug}
-        label={t('{name} на карте', { name: business.name })}
+        label={t('{name} on the map', { name: business.name })}
         className={styles.map}
         isStatic
         onSelect={(id) =>
@@ -48,7 +48,7 @@ export const BranchesMap = ({ business }: BranchesMapProps) => {
         }
       />
       <NextLink href='/map' className={styles.mapLink}>
-        {t('Открыть на карте')}
+        {t('Open on the map')}
       </NextLink>
     </div>
   )

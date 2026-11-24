@@ -67,7 +67,7 @@ describe('masterDayLoad', () => {
     expect(masterDayLoad(DAY, visits, null, 30).freeFrom).toBe(at('12:15'))
   })
 
-  it('says «занят до конца дня» when no slot fits before closing', () => {
+  it('says busy until closing when no slot fits before closing', () => {
     expect(masterDayLoad(DAY, [booking('10:00', 600)], null, 30)).toEqual({
       share: 1,
       freeFrom: null,

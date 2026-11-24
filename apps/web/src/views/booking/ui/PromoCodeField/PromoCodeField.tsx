@@ -19,8 +19,8 @@ interface PromoCodeFieldProps {
   onClear: () => void
 }
 
-// A Settings row like the name and number: «Промокод» on the left, the code typed on the right,
-// «Применить» as text once something is typed; applied, the discount and «Убрать».
+// A Settings row like the name and number: Promo code on the left, the code typed on the right,
+// Apply as text once something is typed; applied, the discount and Remove.
 export const PromoCodeField = ({
   className,
   code,
@@ -38,16 +38,16 @@ export const PromoCodeField = ({
   if (isApplied && code) {
     return (
       <div className={className} data-action=''>
-        <span className={styles.label}>{t('Промокод')}</span>
+        <span className={styles.label}>{t('Promo code')}</span>
         <span className={styles.applied}>
           <CheckCircle weight='fill' aria-hidden />
           {code}
           <span className={styles.note}>
             {isWaitingForTime
-              ? t('проверим со временем')
+              ? t('checked with the time')
               : percent
                 ? `−${percent}%`
-                : t('не на это время')}
+                : t('not for this time')}
           </span>
         </span>
         <button
@@ -58,7 +58,7 @@ export const PromoCodeField = ({
             onClear()
           }}
         >
-          {t('Убрать')}
+          {t('Remove')}
         </button>
       </div>
     )
@@ -67,11 +67,11 @@ export const PromoCodeField = ({
   return (
     <>
       <div className={className} data-action=''>
-        <span className={styles.label}>{t('Промокод')}</span>
+        <span className={styles.label}>{t('Promo code')}</span>
         <Input
           variant='plain'
-          aria-label={t('Промокод')}
-          placeholder={t('Ввести')}
+          aria-label={t('Promo code')}
+          placeholder={t('Enter')}
           autoCapitalize='characters'
           value={draft}
           onValueChange={(value) => setDraft(value.toUpperCase().replace(/\s/g, ''))}
@@ -81,7 +81,7 @@ export const PromoCodeField = ({
         />
         {draft ? (
           <button type='button' className={styles.action} onClick={() => onApply(draft)}>
-            {t('Применить')}
+            {t('Apply')}
           </button>
         ) : (
           <span />

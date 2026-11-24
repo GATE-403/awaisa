@@ -17,15 +17,15 @@ interface WorkPhotoSheetProps {
   onClose: () => void
   onSave: (input: WorkPhotoInput) => Promise<boolean>
   onDelete: () => void
-  /** Several photos just uploaded, tagged in turn: «Фото 1 из 3», «Далее» until the last. */
+  /** Several photos just uploaded, tagged in turn: "Photo 1 of 3", "Next" until the last. */
   step?: { index: number; total: number }
-  /** Puts the photo first in «Работы» (the first five lead the page); absent when it is first. */
+  /** Puts the photo first in "Work" (the first five lead the page); absent when it is first. */
   onMakeFirst?: () => void
 }
 
 const NONE = 'none'
 
-// What the photo shows: with a service (and master) it books exactly that from the «Работы» feed.
+// What the photo shows: with a service (and master) it books exactly that from the "Work" feed.
 export const WorkPhotoSheet = ({
   photo,
   services,
@@ -61,29 +61,29 @@ export const WorkPhotoSheet = ({
     <Sheet
       title={
         step
-          ? t('Фото {index} из {total}', { index: step.index, total: step.total })
-          : t('Фото работы')
+          ? t('Photo {index} of {total}', { index: step.index, total: step.total })
+          : t('Work photo')
       }
       onClose={onClose}
       action={{
-        label: isLastStep ? t('Готово') : t('Далее'),
+        label: isLastStep ? t('Done') : t('Next'),
         onClick: () => void save(),
         disabled: isSaving,
       }}
     >
       <div className={sheet.form}>
         {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
-        <img src={photo.url} alt={t('Фото работы')} className={styles.preview} />
-        <section className={sheet.group} aria-label={t('Что на фото')}>
+        <img src={photo.url} alt={t('Work photo')} className={styles.preview} />
+        <section className={sheet.group} aria-label={t('What is in the photo')}>
           <div className={sheet.list}>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Услуга')}</span>
+              <span className={sheet.rowLabel}>{t('Service')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Услуга на фото')}
+                  aria-label={t('Service in the photo')}
                   items={[
-                    { value: NONE, label: t('Не указана') },
+                    { value: NONE, label: t('Not set') },
                     ...services.map((service) => ({ value: service.id, label: service.name })),
                   ]}
                   value={serviceId}
@@ -99,13 +99,13 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <div className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Мастер')}</span>
+              <span className={sheet.rowLabel}>{t('Specialist')}</span>
               <span className={sheet.rowControl}>
                 <Select
                   variant='plain'
-                  aria-label={t('Мастер на фото')}
+                  aria-label={t('Specialist in the photo')}
                   items={[
-                    { value: NONE, label: t('Любой') },
+                    { value: NONE, label: t('Any') },
                     ...masters.map((master) => ({ value: master.id, label: master.name })),
                   ]}
                   value={specialistId}
@@ -114,7 +114,7 @@ export const WorkPhotoSheet = ({
               </span>
             </div>
             <label className={sheet.row}>
-              <span className={sheet.rowLabel}>{t('Показывать клиентам')}</span>
+              <span className={sheet.rowLabel}>{t('Show to clients')}</span>
               <Switch checked={isShown} onCheckedChange={setIsShown} />
             </label>
             {onMakeFirst && (
@@ -123,18 +123,18 @@ export const WorkPhotoSheet = ({
                 className={`${sheet.row} ${styles.rowAction}`}
                 onClick={onMakeFirst}
               >
-                {t('Поставить первой')}
+                {t('Put first')}
               </button>
             )}
           </div>
           <p className={sheet.groupFooter}>
             {photo.reports > 0 && photo.isHidden
-              ? t('Скрыто после жалоб ({count}). Включите, если с фото всё в порядке.', {
+              ? t('Hidden after reports ({count}). Turn it on if the photo is fine.', {
                   count: photo.reports,
                 })
               : serviceId === NONE
-                ? t('Укажите услугу - в ленте «Работы» под фото появится «Записаться» на неё.')
-                : t('В ленте «Работы» под фото будет цена, ближайшее время и «Записаться».')}
+                ? t('Set the service: in the “Work” feed the photo gets “Book” for it.')
+                : t('In the “Work” feed the photo shows the price, the next free time and “Book”.')}
           </p>
         </section>
         <HoldButton
@@ -143,7 +143,7 @@ export const WorkPhotoSheet = ({
             onClose()
           }}
         >
-          {t('Удалить фото')}
+          {t('Delete photo')}
         </HoldButton>
       </div>
     </Sheet>

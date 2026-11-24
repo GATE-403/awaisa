@@ -76,7 +76,7 @@ type Env = {
   /** Addresses and map points for branches: Photon (OpenStreetMap) or off. */
   GEOCODER: 'photon' | 'off'
   PHOTON_URL: string
-  /** Team-draft interleaving of «Для вас» with another scorer; null = off (docs/recsys/experiments.md). */
+  /** Team-draft interleaving of 'For you' with another scorer; null = off (docs/recsys/experiments.md). */
   RECS_INTERLEAVE: { algorithm: Algorithm; percent: number } | null
 }
 
@@ -171,7 +171,7 @@ const parseTrustProxy = (value: unknown): string | number => {
   const invalid = parts.find((part) => !isValid(part))
   if (invalid !== undefined) {
     throw new Error(
-      `TRUST_PROXY must be a hop count or ${TRUST_PROXY_NAMES.join(', ')} and IP/CIDR ranges (got «${invalid}»)`,
+      `TRUST_PROXY must be a hop count or ${TRUST_PROXY_NAMES.join(', ')} and IP/CIDR ranges (got “${invalid}”)`,
     )
   }
   return parts.join(', ')
@@ -236,7 +236,7 @@ const parseWhatsapp = (config: Record<string, unknown>, nodeEnv: Env['NODE_ENV']
     WHATSAPP_TOKEN: optionalString(config.WHATSAPP_TOKEN),
     WHATSAPP_PHONE_NUMBER_ID: optionalString(config.WHATSAPP_PHONE_NUMBER_ID),
     WHATSAPP_API_VERSION: optionalString(config.WHATSAPP_API_VERSION) ?? 'v23.0',
-    WHATSAPP_LANGUAGE: optionalString(config.WHATSAPP_LANGUAGE) ?? 'ru',
+    WHATSAPP_LANGUAGE: optionalString(config.WHATSAPP_LANGUAGE) ?? 'en',
     WHATSAPP_VERIFY_TOKEN: optionalString(config.WHATSAPP_VERIFY_TOKEN),
     WHATSAPP_APP_SECRET: optionalString(config.WHATSAPP_APP_SECRET),
   }

@@ -1,4 +1,4 @@
-/* The one filter chip of the app (business menu, services page, «Часто ищут»): a capsule on the
+/* The one filter chip of the app (business menu, services page, «Popular searches»): a capsule on the
    system fill, chosen = inverted, an optional count badge that inverts with it. */
 .chip {
   display: inline-flex;

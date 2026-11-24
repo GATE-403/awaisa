@@ -227,7 +227,7 @@
 
 /* Five and a half rows that scroll on their own, like the kit Select's list: the edge fades while
    there is more that way and a thin scrollbar shows, a hairline parts it from the actions under
-   it. A half row cut off alone did not say what scrolls («не понятно, что скролится»). */
+   it. A half row cut off alone did not say what scrolls ("not clear what scrolls"). */
 .switcherList {
   max-height: calc(44px * 5.5);
   overflow-y: auto;
@@ -314,7 +314,7 @@
   }
 
   /* The name keeps its room beside the sections: the tabs scroll sideways, the name only ends in
-     an ellipsis past 13rem («даже часть названия не видно»: it shrank to one letter). */
+     an ellipsis past 13rem ("not even part of the name shows": it shrank to one letter). */
   .business {
     flex: 0 0 auto;
   }

@@ -10,7 +10,7 @@ type ManageTab =
   | 'promotions'
   | 'loyalty'
   | 'stock'
-  /** «Касса» in settings: fiscal receipts (the main «Касса» tab is `cash`). */
+  /** "Till" in settings: fiscal receipts (the main "Till" tab is `cash`). */
   | 'fiscal'
   | 'team'
   | 'masters'
@@ -29,25 +29,25 @@ type SettingsTone = 'blue' | 'green' | 'orange' | 'red' | 'gray'
 type SettingsItem = TabItem & { tone: SettingsTone }
 
 // Setting the business up, grouped like macOS System Settings: the place and its people, the
-// sales. Services, masters and hours live on «Страница», where clients see them (old links to
+// sales. Services, masters and hours live on "Page", where clients see them (old links to
 // them land there, `toManageTab`); the settings search still finds them.
 const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
   {
-    label: 'Бизнес',
+    label: 'Business',
     items: [
-      { value: 'branches', label: 'Филиалы', tone: 'green' },
-      { value: 'notifications', label: 'Уведомления', tone: 'red' },
-      { value: 'team', label: 'Сотрудники', tone: 'gray' },
-      { value: 'billing', label: 'Тариф', tone: 'blue' },
+      { value: 'branches', label: 'Branches', tone: 'green' },
+      { value: 'notifications', label: 'Notifications', tone: 'red' },
+      { value: 'team', label: 'Team', tone: 'gray' },
+      { value: 'billing', label: 'Plan', tone: 'blue' },
     ],
   },
   {
-    label: 'Продажи',
+    label: 'Sales',
     items: [
-      { value: 'promotions', label: 'Акции', tone: 'red' },
-      { value: 'loyalty', label: 'Лояльность', tone: 'green' },
-      { value: 'stock', label: 'Склад', tone: 'blue' },
-      { value: 'fiscal', label: 'Касса', tone: 'gray' },
+      { value: 'promotions', label: 'Promotions', tone: 'red' },
+      { value: 'loyalty', label: 'Loyalty', tone: 'green' },
+      { value: 'stock', label: 'Stock', tone: 'blue' },
+      { value: 'fiscal', label: 'Till', tone: 'gray' },
     ],
   },
 ]
@@ -55,30 +55,30 @@ const SETTINGS_GROUPS: { label: string; items: SettingsItem[] }[] = [
 const SETTINGS_TABS: TabItem[] = SETTINGS_GROUPS.flatMap((group) => group.items)
 
 const MAIN_TABS: TabItem[] = [
-  { value: 'schedule', label: 'Расписание' },
-  { value: 'clients', label: 'Клиенты' },
-  { value: 'analytics', label: 'Аналитика' },
+  { value: 'schedule', label: 'Schedule' },
+  { value: 'clients', label: 'Clients' },
+  { value: 'analytics', label: 'Analytics' },
   // The counter is daily work (shifts, sales), so it sits beside the schedule, not in settings.
-  { value: 'cash', label: 'Касса' },
-  { value: 'reviews', label: 'Отзывы' },
+  { value: 'cash', label: 'Till' },
+  { value: 'reviews', label: 'Reviews' },
   // The public page itself, edited in place: the business's profile, not a settings row.
-  { value: 'page', label: 'Страница' },
+  { value: 'page', label: 'Page' },
 ]
 
 const ALL_TABS: TabItem[] = [
   ...MAIN_TABS,
   ...SETTINGS_TABS,
-  { value: 'settings', label: 'Настройки' },
+  { value: 'settings', label: 'Settings' },
 ]
 
-/** Sections that moved to «Страница» (its tab of the same name opens): old links land there. */
+/** Sections that moved to "Page" (its tab of the same name opens): old links land there. */
 const PAGE_SECTIONS: Partial<Record<string, 'services' | 'masters' | 'hours'>> = {
   services: 'services',
   masters: 'masters',
   hours: 'hours',
 }
 
-// «Настройки → Профиль» became the «Страница» tab, and so did services, masters and hours.
+// "Settings → Profile" became the "Page" tab, and so did services, masters and hours.
 const toManageTab = (value: string | null): ManageTab => {
   if (value === 'profile' || (value && PAGE_SECTIONS[value])) return 'page'
   return ALL_TABS.find((tab) => tab.value === value)?.value ?? 'schedule'
@@ -87,14 +87,14 @@ const toManageTab = (value: string | null): ManageTab => {
 const isSettingsTab = (tab: ManageTab) =>
   tab === 'settings' || SETTINGS_TABS.some((item) => item.value === tab)
 
-// What an administrator («staff») may open: the day's work, not money or setup. The counter
+// What an administrator ("staff") may open: the day's work, not money or setup. The counter
 // is the day's work too (shifts and sales); its expenses stay the owner's.
 const STAFF_TABS: ManageTab[] = ['schedule', 'clients', 'cash', 'reviews']
 
 const isTabAllowed = (tab: ManageTab, role: 'owner' | 'staff') =>
   role === 'owner' || STAFF_TABS.includes(tab)
 
-// Sections the free plan does not open: they show «Доступно на тарифе …» instead.
+// Sections the free plan does not open: they show "Available on the … plan" instead.
 const TAB_FEATURES: Partial<Record<ManageTab, PlanFeature>> = {
   analytics: 'analytics',
   cash: 'cashdesk',

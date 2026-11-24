@@ -17,23 +17,23 @@ test.describe('New booking in the cabinet', () => {
     expect(client?.name).toBeTruthy()
 
     await page.goto(`/manage/${SLUG}?tab=schedule`)
-    await page.getByRole('button', { name: 'Новая запись', exact: true }).click()
-    const sheet = page.getByRole('dialog', { name: 'Новая запись' }).last()
-    await sheet.getByPlaceholder('Как зовут').fill(client.name.slice(0, 3))
+    await page.getByRole('button', { name: 'New booking', exact: true }).click()
+    const sheet = page.getByRole('dialog', { name: 'New booking' }).last()
+    await sheet.getByPlaceholder('Name').fill(client.name.slice(0, 3))
 
-    const suggestions = sheet.getByRole('list', { name: 'Были у вас' })
+    const suggestions = sheet.getByRole('list', { name: 'Were here before' })
     await suggestions
       .getByRole('button', { name: new RegExp(client.name) })
       .first()
       .click()
-    await expect(sheet.getByPlaceholder('Как зовут')).toHaveValue(client.name)
-    await expect(sheet.getByRole('textbox', { name: 'Телефон' })).toHaveValue(
+    await expect(sheet.getByPlaceholder('Name')).toHaveValue(client.name)
+    await expect(sheet.getByRole('textbox', { name: 'Phone' })).toHaveValue(
       new RegExp(client.phone.slice(-3)),
     )
     await expect(suggestions).toHaveCount(0)
 
     // The comment takes several lines instead of running off its row.
-    const comment = sheet.getByRole('textbox', { name: 'Комментарий' })
+    const comment = sheet.getByRole('textbox', { name: 'Comment' })
     await comment.fill('Короче по бокам, длину сверху оставить. Придёт на 10 минут раньше.')
     expect(await comment.evaluate((element) => element.tagName)).toBe('TEXTAREA')
   })

@@ -54,7 +54,7 @@
   translate: -50% 0;
 }
 
-/* Open: «Скрыть» floats at the bottom of the screen while the list is in view, so folding a
+/* Open: «Hide» floats at the bottom of the screen while the list is in view, so folding a
    long list never means scrolling to its end; past the list it settles under it. */
 .less {
   position: sticky;

@@ -22,7 +22,7 @@ interface PhotosSectionProps {
   run: (action: () => Promise<unknown>, successTitle: string) => Promise<boolean>
   /** Every change of the list: the page counts the photos and pictures its services with them. */
   onPhotosChange?: (photos: WorkPhoto[]) => void
-  /** The file input's id: the page's own «Добавить» opens it. */
+  /** The file input's id: the page's own "Add" opens it. */
   inputId: string
 }
 
@@ -36,10 +36,10 @@ const moveTo = (ids: string[], id: string, index: number) => {
   return rest
 }
 
-// «Работы» like a profile's grid in Instagram: square photos three a row, nearly touching; the page
-// adds to it from its own «Добавить». Several photos go up at once and are tagged one after another
-// («Фото 1 из 3»): each names its service and master, so the feed books exactly that. The first five
-// lead the public page, so the order is the owner's: dragged with a mouse, «Поставить первой» in a
+// "Work" like a profile's grid in Instagram: square photos three a row, nearly touching; the page
+// adds to it from its own "Add". Several photos go up at once and are tagged one after another
+// ("Photo 1 of 3"): each names its service and master, so the feed books exactly that. The first five
+// lead the public page, so the order is the owner's: dragged with a mouse, "Put first" in a
 // photo's sheet on a phone.
 export const PhotosSection = ({
   slug,
@@ -95,9 +95,7 @@ export const PhotosSection = ({
           setPhotos(next)
         }
       },
-      files.length > 1
-        ? t('Добавлено фото: {count}', { count: files.length })
-        : t('Фото добавлено'),
+      files.length > 1 ? t('Photos added: {count}', { count: files.length }) : t('Photo added'),
     )
     setIsBusy(false)
     // Right away: what is on each, like tagging photos after taking them.
@@ -118,7 +116,7 @@ export const PhotosSection = ({
   }
 
   const saveOrder = (ids: string[]) =>
-    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), t('Порядок сохранён'))
+    run(async () => setPhotos(await reorderWorkPhotos(slug, ids)), t('Order saved'))
 
   const handleDragOver = (event: DragEvent, overId: string) => {
     if (!draggedId || draggedId === overId) return
@@ -136,17 +134,17 @@ export const PhotosSection = ({
   }
 
   return (
-    <section className={styles.group} aria-label={t('Работы')}>
+    <section className={styles.group} aria-label={t('Work')}>
       <PhotoGrid isBusy={isBusy}>
         {shown.map((photo, index) => (
           <PhotoGridTile
             key={photo.id}
             src={photo.url}
             label={t(
-              photo.isHidden ? 'Фото {index}: {service}, скрыто' : 'Фото {index}: {service}',
+              photo.isHidden ? 'Photo {index}: {service}, hidden' : 'Photo {index}: {service}',
               {
                 index: index + 1,
-                service: photo.serviceName ?? t('услуга не указана'),
+                service: photo.serviceName ?? t('no service set'),
               },
             )}
             onOpen={() => setOpenId(photo.id)}
@@ -174,12 +172,12 @@ export const PhotosSection = ({
       {photos.length === 0 && (
         <EmptyState
           variant='inline'
-          title={t('Покажите свои работы')}
-          text={t('Клиенты записываются с фото: добавьте до 30 штук, можно сразу несколько.')}
+          title={t('Show your work')}
+          text={t('Clients book from photos: add up to 30, several at once if you like.')}
         />
       )}
       {photos.length > 1 && (
-        <p className={styles.hint}>{t('Первые пять фото видны на странице первыми.')}</p>
+        <p className={styles.hint}>{t('The first five photos lead the page.')}</p>
       )}
       <input
         id={inputId}
@@ -188,7 +186,7 @@ export const PhotosSection = ({
         multiple
         hidden
         onChange={handlePhotos}
-        aria-label={t('Файл фото')}
+        aria-label={t('Photo file')}
       />
       {open && (
         <WorkPhotoSheet
@@ -199,7 +197,7 @@ export const PhotosSection = ({
           step={queue.length > 1 ? { index: queueIndex + 1, total: queue.length } : undefined}
           onClose={closeSheet}
           onSave={(input) =>
-            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), t('Сохранено'))
+            run(async () => setPhotos(await updateWorkPhoto(slug, open.id, input)), t('Saved'))
           }
           onMakeFirst={
             photos[0]?.id === open.id
@@ -214,7 +212,7 @@ export const PhotosSection = ({
                   )
           }
           onDelete={() =>
-            void run(async () => setPhotos(await removePhoto(slug, open.id)), t('Фото удалено'))
+            void run(async () => setPhotos(await removePhoto(slug, open.id)), t('Photo deleted'))
           }
         />
       )}

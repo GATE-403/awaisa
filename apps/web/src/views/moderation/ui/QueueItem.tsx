@@ -21,7 +21,7 @@ interface QueueItemProps {
 export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
   const t = useT()
   const { preview } = item
-  const title = preview?.title ?? t('Уже удалено')
+  const title = preview?.title ?? t('Already deleted')
 
   return (
     <li className={styles.item} aria-busy={isPending}>
@@ -56,35 +56,35 @@ export const QueueItem = ({ item, isPending, onDecide }: QueueItemProps) => {
         <p className={styles.meta}>{describeReasons(item.reasons, t)}</p>
         {(item.isHidden || item.isKept) && (
           <p className={styles.state} data-state={item.isHidden ? 'hidden' : 'kept'}>
-            {t(item.isHidden ? 'Скрыто, пока вы не решите' : 'Уже оставляли: само не скроется')}
+            {t(item.isHidden ? 'Hidden until you decide' : 'Kept before: won’t hide on its own')}
           </p>
         )}
       </div>
-      <GlyphGroup label={t('Решение: {title}', { title })}>
+      <GlyphGroup label={t('Decision: {title}', { title })}>
         <GlyphButton
           icon={<Check aria-hidden />}
-          label={t('Оставить')}
+          label={t('Keep')}
           disabled={isPending}
           onClick={() => onDecide('keep')}
         />
         {preview && (
           <GlyphButton
             icon={<EyeSlash aria-hidden />}
-            label={t('Скрыть')}
+            label={t('Hide')}
             disabled={isPending || item.isHidden}
             onClick={() => onDecide('hide')}
           />
         )}
         <GlyphButton
           icon={<Trash aria-hidden />}
-          label={t('Удалить')}
+          label={t('Delete')}
           disabled={isPending}
           onClick={() => onDecide('delete')}
         />
         {item.targetType === 'profile' && preview && (
           <GlyphButton
             icon={<Prohibit aria-hidden />}
-            label={t('Заблокировать автора')}
+            label={t('Block the author')}
             disabled={isPending}
             onClick={() => onDecide('block')}
           />

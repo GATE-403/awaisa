@@ -12,7 +12,7 @@
   overflow-y: auto;
   overscroll-behavior-y: auto;
   /* No scrollbar: it took room from the figures at the rows' right edge (they no longer lined up
-     with the blocks around) and the fades and «Ещё N» already say there is more. */
+     with the blocks around) and the fades and «N more» already say there is more. */
   scrollbar-width: none;
   /* It comes to rest on a row's edge, never half a row with an orphaned hairline above it. */
   scroll-snap-type: y proximity;
@@ -27,7 +27,7 @@
 }
 
 /* The last row snaps to the bottom edge: snapping it to the top left the list a few pixels short
-   of its end, so its last row never showed whole and «Ещё 1» stayed. */
+   of its end, so its last row never showed whole and «1 more» stayed. */
 .area[data-scrolls] :where(li:last-child) {
   scroll-snap-align: end;
 }
@@ -97,7 +97,7 @@
   mask-image: linear-gradient(to bottom, #000 calc(100% - 32px), transparent);
 }
 
-/* «Свернуть» under the opened list: a quiet text capsule, centred. */
+/* «Show less» under the opened list: a quiet text capsule, centred. */
 .less {
   display: flex;
   align-items: center;
@@ -121,7 +121,7 @@
   color: var(--color-muted-foreground);
 }
 
-/* «Ещё 14 клиентов ⌄» on the fade: the same elevated capsule as MoreFade's, a little smaller so
+/* «14 more clients ⌄» on the fade: the same elevated capsule as MoreFade's, a little smaller so
    it sits on the cut row without hiding the rows above. The box itself stays the keyboard's way
    to scroll (arrows, Page Down), so the capsule takes no Tab stop of its own. */
 .wrap {

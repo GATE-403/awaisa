@@ -19,7 +19,7 @@ type Setup = {
 
 const setUp = async (page: Page): Promise<Setup> => {
   const business = await createOwnBusiness(page, {
-    services: [{ name: 'Стрижка', durationMinutes: 60, price: PRICE }],
+    services: [{ name: 'Haircut', durationMinutes: 60, price: PRICE }],
   })
   const manage = `/api/manage/${business.slug}`
   const settings = await page.request.put(`${manage}/loyalty/settings`, {
@@ -29,7 +29,7 @@ const setUp = async (page: Page): Promise<Setup> => {
   const created = await page.request.post(`${manage}/stock`, {
     data: {
       name: 'E2E Краска',
-      unit: 'шт',
+      unit: 'pcs',
       unitCost: 50,
       materials: [{ serviceId: business.service.id, amount: USE_PER_VISIT }],
     },
@@ -128,7 +128,7 @@ test.describe('Loyalty and stock come back when a visit is undone', () => {
     expect(await stockLeft(page, setup)).toBe(STOCK - USE_PER_VISIT)
   })
 
-  test('a subscription pays a visit whole and earns nothing; back to «Ждём» gives the visit back', async ({
+  test('a subscription pays a visit whole and earns nothing; back to “Waiting” gives the visit back', async ({
     page,
     isMobile,
   }) => {
@@ -170,7 +170,7 @@ test.describe('Loyalty and stock come back when a visit is undone', () => {
     expect(await stockLeft(page, setup)).toBe(STOCK)
   })
 
-  test('«Все пришли» earns bonuses and writes the product off once; «Вернуть» takes both back', async ({
+  test('“All arrived” earns bonuses and writes the product off once; “Undo” takes both back', async ({
     page,
     isMobile,
   }) => {

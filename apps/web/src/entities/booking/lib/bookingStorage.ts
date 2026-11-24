@@ -16,7 +16,7 @@ const readRaw = () => readText(STORAGE_KEY)
 const LEGACY_BUSINESS: Booking['business'] = {
   slug: 'awaisa-studio',
   name: 'Awaisa Studio',
-  address: 'ул. Токтогула, 125',
+  address: '125 Toktogul St',
   phone: '',
   mapUrl: '',
 }

@@ -9,7 +9,7 @@ import styles from './EmojiPicker.module.css'
 // The picker's code and data load only once someone opens it.
 const EmojiPanel = dynamic(() => import('./EmojiPanel').then((module) => module.EmojiPanel), {
   ssr: false,
-  loading: () => <p className={styles.note}>Загружаем…</p>,
+  loading: () => <p className={styles.note}>Loading…</p>,
 })
 
 interface EmojiButtonProps {
@@ -32,13 +32,13 @@ export const EmojiButton = ({ onPick }: EmojiButtonProps) => {
         // Keeps the field's caret where it was, so the emoji lands there.
         onPointerDown={(event) => event.preventDefault()}
         onClick={() => setIsOpen((open) => !open)}
-        aria-label='Эмодзи'
+        aria-label='Emoji'
         aria-expanded={isOpen}
-        title='Эмодзи'
+        title='Emoji'
       >
         <Smiley aria-hidden />
       </button>
-      <Popover open={isOpen} onOpenChange={setIsOpen} anchor={anchor} label='Эмодзи' side='top'>
+      <Popover open={isOpen} onOpenChange={setIsOpen} anchor={anchor} label='Emoji' side='top'>
         {isOpen && (
           <EmojiPanel
             onPick={(emoji) => {

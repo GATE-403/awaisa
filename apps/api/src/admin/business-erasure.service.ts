@@ -9,7 +9,7 @@ import { archivedSlug, bookingsToCancel } from './business-erasure.js'
 
 type Row = Record<string, unknown>
 
-// «Удалить бизнес»: what stays (the books) and what goes is in `business-erasure.ts`.
+// 'Delete business': what stays (the books) and what goes is in `business-erasure.ts`.
 @Injectable()
 export class BusinessErasureService {
   constructor(
@@ -43,14 +43,14 @@ export class BusinessErasureService {
          WHERE "id" = $1`,
         [business.id, archivedSlug(business.id, new Date())],
       )
-      // Masters lose «Мой день» and the boards, services leave every list and job.
+      // Masters lose 'My day' and the boards, services leave every list and job.
       await manager.query('UPDATE "specialists" SET "is_active" = false WHERE "business_id" = $1', [
         business.id,
       ])
       await manager.query('UPDATE "services" SET "is_active" = false WHERE "business_id" = $1', [
         business.id,
       ])
-      // A visit that just ended gets no «Как прошло?» from a place that is gone.
+      // A visit that just ended gets no 'How did it go?' from a place that is gone.
       await manager.query(
         `UPDATE "bookings" SET "review_requested_at" = now()
          WHERE "business_id" = $1 AND "review_requested_at" IS NULL`,

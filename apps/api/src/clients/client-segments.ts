@@ -1,5 +1,5 @@
 // The client base cut into the groups an owner acts on, and its orders. Pure, unit-tested; the
-// «давно не были» and birthday rules are the mailing's own, so a segment's count is who a mailing
+// 'lapsed' and birthday rules are the mailing's own, so a segment's count is who a mailing
 // to it reaches (less those who turned SMS off).
 
 type ClientSegment = 'all' | 'upcoming' | 'new' | 'regular' | 'lapsed' | 'noShows' | 'birthday'
@@ -27,7 +27,7 @@ const SEGMENTS: ClientSegment[] = [
   'birthday',
 ]
 
-/** No visit for this many days and nothing booked: the mailing's «Давно не были» default. */
+/** No visit for this many days and nothing booked: the mailing's 'Lapsed' default. */
 const LAPSED_DAYS = 60
 /** Three visits and more make a regular. */
 const REGULAR_VISITS = 3

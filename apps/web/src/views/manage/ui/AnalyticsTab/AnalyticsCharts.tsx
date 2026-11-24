@@ -55,9 +55,7 @@ const RevenueTooltip = ({ active, payload, t }: RevenueTooltipProps) => {
     <div className={styles.tooltip}>
       <span className={styles.tooltipTitle}>{row.title}</span>
       <span className={styles.tooltipValue}>{formatMoney(row.revenue)}</span>
-      <span className={styles.tooltipMeta}>
-        {t.count(row.visits, ['визит', 'визита', 'визитов'])}
-      </span>
+      <span className={styles.tooltipMeta}>{t.count(row.visits, ['visit', 'visits'])}</span>
       <span className={styles.tooltipCompare}>
         <i data-series='previous' aria-hidden='true' />
         {row.previousTitle}: {formatMoney(row.previous)}
@@ -103,7 +101,7 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.chart}>
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart
-            title={t('Выручка по периодам')}
+            title={t('Revenue by period')}
             data={rows}
             barGap={2}
             barCategoryGap='18%'
@@ -178,24 +176,24 @@ const RevenueChart = ({ buckets, previous, onBucketClick }: RevenueChartProps) =
       <div className={styles.legend} aria-hidden='true'>
         <span>
           <i data-series='current' />
-          {t('Этот период')}
+          {t('This period')}
         </span>
         <span>
           <i data-series='previous' />
-          {t('Прошлый')}
+          {t('Previous')}
         </span>
       </div>
       {/* A table keeps its content's width whatever it is told, so a block hides it: the table
           itself stretched the page sideways on phones. */}
       <div className={styles.srOnly}>
         <table>
-          <caption>{t('Выручка по периодам и тот же отрезок в прошлом периоде')}</caption>
+          <caption>{t('Revenue by period and the same stretch of the previous period')}</caption>
           <thead>
             <tr>
-              <th scope='col'>{t('Период')}</th>
-              <th scope='col'>{t('Выручка')}</th>
-              <th scope='col'>{t('Визиты')}</th>
-              <th scope='col'>{t('Прошлый период')}</th>
+              <th scope='col'>{t('Period')}</th>
+              <th scope='col'>{t('Revenue')}</th>
+              <th scope='col'>{t('Visits')}</th>
+              <th scope='col'>{t('Previous period')}</th>
             </tr>
           </thead>
           <tbody>

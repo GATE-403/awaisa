@@ -6,7 +6,7 @@ import { useT } from '@/shared/i18n'
 import { useMyWaitlist } from '../model/useMyWaitlist'
 import styles from './WaitlistList.module.css'
 
-// «Жду окна» in the profile: what the client waits for, and the time once one opened up.
+// «Waiting for a slot» in the profile: what the client waits for, and the time once one opened up.
 export const WaitlistList = () => {
   const t = useT()
   const { entries, leave } = useMyWaitlist()
@@ -15,7 +15,7 @@ export const WaitlistList = () => {
   return (
     <section className={styles.section} aria-labelledby='waitlist-title'>
       <h2 id='waitlist-title' className={styles.title}>
-        {t('Жду окна')}
+        {t('Waiting for a slot')}
       </h2>
       <ul className={styles.list}>
         {entries.map((entry) => {
@@ -31,7 +31,7 @@ export const WaitlistList = () => {
             <li
               key={entry.id}
               className={styles.row}
-              aria-label={t('Жду окна: {service}', { service: entry.service.name })}
+              aria-label={t('Waiting for a slot: {service}', { service: entry.service.name })}
             >
               <span className={styles.glyph} data-free={isFree || undefined} aria-hidden>
                 <BellRinging />
@@ -44,16 +44,16 @@ export const WaitlistList = () => {
                 </span>
                 {isFree ? (
                   <NextLink href={`/${entry.business.slug}/book?${params}`} className={styles.free}>
-                    {t('Освободилось {time} - записаться ›', { time: entry.notifiedTime ?? '' })}
+                    {t('{time} is free: book ›', { time: entry.notifiedTime ?? '' })}
                   </NextLink>
                 ) : (
-                  <span className={styles.waiting}>{t('Сообщим по SMS, если освободится')}</span>
+                  <span className={styles.waiting}>{t('We will text you if a slot opens')}</span>
                 )}
               </span>
               <button
                 type='button'
                 className={styles.leave}
-                aria-label={t('Больше не ждать')}
+                aria-label={t('Stop waiting')}
                 onClick={() => void leave(entry.id)}
               >
                 <X aria-hidden />

@@ -18,9 +18,7 @@ const restingBox = async (page: Page) => {
       ),
     ),
   )
-  const box = await activeCard(page)
-    .getByRole('img', { name: /^Работа/ })
-    .boundingBox()
+  const box = await activeCard(page).getByRole('img', { name: /^Work/ }).boundingBox()
   if (!box) throw new Error('No card in play')
   return box
 }
@@ -40,7 +38,7 @@ const drag = async (page: Page, dx: number, dy: number, steps = 8) => {
 
 const openDeck = async (page: Page) => {
   await page.goto('/feed')
-  await expect(page.getByRole('feed', { name: 'Образы' })).toBeVisible()
+  await expect(page.getByRole('feed', { name: 'Looks' })).toBeVisible()
   await expectPosition(page, 1)
 }
 
@@ -52,7 +50,7 @@ const TINY_PNG =
 
 type WorkPhoto = { id: string; serviceId: string | null; isHidden: boolean }
 
-test.describe('«Образы»: the deck', () => {
+test.describe('“Looks”: the deck', () => {
   test('a swipe either way deals the next card, a pull up brings the last one back', async ({
     page,
   }) => {
@@ -60,7 +58,7 @@ test.describe('«Образы»: the deck', () => {
     // The photo tells cards apart: one place may have several works in a row.
     const photoOf = () => activeCard(page).locator('img').first().getAttribute('src')
     const first = await photoOf()
-    await expect(page.getByText('Потяните вверх - вернуть прошлую')).toHaveCount(0)
+    await expect(page.getByText('Pull up to bring back the last one')).toHaveCount(0)
 
     // A short, slow move is not a swipe: the card settles back.
     await drag(page, -12, 0, 12)
@@ -70,7 +68,7 @@ test.describe('«Образы»: the deck', () => {
     await expectPosition(page, 2)
     expect(await photoOf()).not.toBe(first)
     // Once a card has gone the hint says how to get it back.
-    await expect(page.getByText('Потяните вверх - вернуть прошлую')).toBeVisible()
+    await expect(page.getByText('Pull up to bring back the last one')).toBeVisible()
 
     await drag(page, 140, 0)
     await expectPosition(page, 3)
@@ -89,8 +87,8 @@ test.describe('«Образы»: the deck', () => {
   test('keys and the side buttons turn it', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Keys and the ‹ › buttons are for a mouse and keyboard')
     await openDeck(page)
-    const previous = page.getByRole('button', { name: 'Предыдущая работа' })
-    const next = page.getByRole('button', { name: 'Следующая работа' })
+    const previous = page.getByRole('button', { name: 'Previous work' })
+    const next = page.getByRole('button', { name: 'Next work' })
     await expect(previous).toBeDisabled()
 
     await page.keyboard.press('ArrowRight')
@@ -132,7 +130,7 @@ test.describe('«Образы»: the deck', () => {
     }
   })
 
-  test('«⋯» shares the work in play and a report takes it out of the deck', async ({ page }) => {
+  test('“⋯” shares the work in play and a report takes it out of the deck', async ({ page }) => {
     // The system share sheet is replaced by a recorder; the report never reaches the shared data.
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'share', {
@@ -156,19 +154,19 @@ test.describe('«Образы»: the deck', () => {
     const feed = await (await page.request.get('/api/feed')).json()
     const second = feed.items[1]?.id as string
 
-    await page.getByRole('button', { name: 'Ещё' }).click()
-    await page.getByRole('menuitem', { name: 'Поделиться' }).click()
+    await page.getByRole('button', { name: 'More' }).click()
+    await page.getByRole('menuitem', { name: 'Share' }).click()
     await expect
       .poll(() => page.evaluate(() => (window as unknown as { shared?: ShareData }).shared?.url))
       .toMatch(new RegExp(`/feed\\?start=${second}$`))
 
     const photo = activeCard(page).locator('img').first()
     const reported = await photo.getAttribute('src')
-    await page.getByRole('button', { name: 'Ещё' }).click()
-    // A report asks why: «Пожаловаться» opens the reasons.
-    await page.getByRole('menuitem', { name: 'Пожаловаться' }).click()
-    await page.getByRole('menuitem', { name: 'Спам или реклама' }).click()
-    await expect(page.getByText('Спасибо, жалобу проверит модератор')).toBeVisible()
+    await page.getByRole('button', { name: 'More' }).click()
+    // A report asks why: “Report” opens the reasons.
+    await page.getByRole('menuitem', { name: 'Report' }).click()
+    await page.getByRole('menuitem', { name: 'Spam or advertising' }).click()
+    await expect(page.getByText('Thanks, a moderator will review the report')).toBeVisible()
     expect(reports).toHaveLength(1)
     expect(reports[0]).toMatchObject({ targetType: 'photo', targetId: second, reason: 'spam' })
     // The next card takes its place at once.
@@ -177,7 +175,7 @@ test.describe('«Образы»: the deck', () => {
   })
 })
 
-test.describe('«Образы» feed', () => {
+test.describe('“Looks” feed', () => {
   test('a tagged work photo books that service with that master; reports hide it', async ({
     page,
     browser,
@@ -202,18 +200,18 @@ test.describe('«Образы» feed', () => {
         page.waitForResponse((response) => response.url().includes('/work-photos')),
         page.goto(`/manage/${SLUG}?tab=page`),
       ])
-      await page.getByLabel('Файл фото').setInputFiles({
+      await page.getByLabel('Photo file').setInputFiles({
         name: 'work.png',
         mimeType: 'image/png',
         buffer: Buffer.from(TINY_PNG, 'base64'),
       })
-      const sheet = page.getByRole('dialog', { name: 'Фото работы' })
+      const sheet = page.getByRole('dialog', { name: 'Work photo' })
       await expect(sheet).toBeVisible()
-      await sheet.getByRole('combobox', { name: 'Услуга на фото' }).click()
+      await sheet.getByRole('combobox', { name: 'Service in the photo' }).click()
       await page.getByRole('option', { name: service.name, exact: true }).click()
-      await sheet.getByRole('combobox', { name: 'Мастер на фото' }).click()
+      await sheet.getByRole('combobox', { name: 'Specialist in the photo' }).click()
       await page.getByRole('option', { name: master.name, exact: true }).click()
-      await sheet.getByRole('button', { name: 'Готово' }).click()
+      await sheet.getByRole('button', { name: 'Done' }).click()
       await expect(sheet).toBeHidden()
 
       const after: WorkPhoto[] = await (await page.request.get(`${manage}/work-photos`)).json()
@@ -221,25 +219,26 @@ test.describe('«Образы» feed', () => {
       expect(added).toMatchObject({ serviceId: service.id, isHidden: false })
       photoId = added?.id ?? null
 
-      // A guest opens the feed on it: the service, its price and «Записаться» on it.
+      // A guest opens the feed on it: the service, its price and “Book” on it.
       const guest = await browser.newPage()
       await guest.goto(`/feed?start=${photoId}`)
       const card = guest.getByRole('article').first()
       await expect(card.getByRole('heading', { name: service.name })).toBeVisible()
       // The master is the card's author: their face books them.
-      await expect(
-        card.getByRole('link', { name: `Записаться к мастеру ${master.name}` }),
-      ).toHaveAttribute('href', `/${SLUG}/book?specialist=${master.id}`)
+      await expect(card.getByRole('link', { name: `Book with ${master.name}` })).toHaveAttribute(
+        'href',
+        `/${SLUG}/book?specialist=${master.id}`,
+      )
 
-      // «Нравится» (under the hand) counts once per device and goes back; a double tap on the
+      // The like (under the hand) counts once per device and goes back; a double tap on the
       // photo likes it.
-      const like = guest.getByRole('button', { name: /^Нравится/ })
+      const like = guest.getByRole('button', { name: /^Likes/ })
       await like.click()
       await expect(like).toHaveAttribute('aria-pressed', 'true')
-      await expect(like).toHaveAccessibleName('Нравится: 1')
+      await expect(like).toHaveAccessibleName('Likes: 1')
       await like.click()
       await expect(like).toHaveAttribute('aria-pressed', 'false')
-      const photo = card.getByRole('img', { name: `Работа: ${service.name}` })
+      const photo = card.getByRole('img', { name: `Work: ${service.name}` })
       await photo.dblclick()
       await expect(like).toHaveAttribute('aria-pressed', 'true')
       await expect
@@ -250,14 +249,14 @@ test.describe('«Образы» feed', () => {
         .toBeGreaterThanOrEqual(0)
 
       // Reviews of this service with this master open over the feed.
-      await guest.getByRole('button', { name: 'Ещё' }).click()
-      await guest.getByRole('menuitem', { name: /^Отзывы/ }).click()
-      const reviews = guest.getByRole('dialog', { name: /^Отзывы/ })
+      await guest.getByRole('button', { name: 'More' }).click()
+      await guest.getByRole('menuitem', { name: /^Reviews/ }).click()
+      const reviews = guest.getByRole('dialog', { name: /^Reviews/ })
       await expect(reviews).toBeVisible()
-      await reviews.getByRole('button', { name: 'Готово' }).click()
+      await reviews.getByRole('button', { name: 'Done' }).click()
       await expect(reviews).toBeHidden()
 
-      const book = guest.getByRole('link', { name: /^Записаться( ·|$)/ })
+      const book = guest.getByRole('link', { name: /^Book( ·|$)/ })
       await expect(book).toHaveAttribute(
         'href',
         new RegExp(`^/${SLUG}/book\\?service=${service.id}&specialist=${master.id}`),
@@ -293,7 +292,7 @@ test.describe('«Образы» feed', () => {
     page,
   }) => {
     await page.goto('/feed?kind=health')
-    await expect(page.getByRole('feed', { name: 'Образы' })).toBeVisible()
-    await expect(page.getByRole('navigation', { name: 'Категории работ' })).toHaveCount(0)
+    await expect(page.getByRole('feed', { name: 'Looks' })).toBeVisible()
+    await expect(page.getByRole('navigation', { name: 'Work categories' })).toHaveCount(0)
   })
 })

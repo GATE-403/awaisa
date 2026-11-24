@@ -17,11 +17,12 @@ import {
   type SubscriptionRow,
   smsAllowance,
   usageMonth,
+  withPlanCopy,
 } from './plan-rules.js'
 
 type StoredSubscription = SubscriptionRow & { smsExtra: number; lastReminder: string | null }
 
-/** 402 with a message the cabinet shows as it is («Доступно на тарифе «Бизнес»»). */
+/** 402 with a message the cabinet shows as it is («Available on the «Business» plan»). */
 class PlanRequiredException extends HttpException {
   constructor(message: string) {
     super({ statusCode: HttpStatus.PAYMENT_REQUIRED, message, code: 'plan_required' }, 402)
@@ -54,8 +55,9 @@ export class BillingService {
     const rows = (await this.dataSource.query(
       `SELECT ${PLAN_COLUMNS} FROM "plans" ORDER BY "position"`,
     )) as PlanRow[]
-    this.plansCache = { rows, at: Date.now() }
-    return rows
+    const shown = rows.map(withPlanCopy)
+    this.plansCache = { rows: shown, at: Date.now() }
+    return shown
   }
 
   forgetPlans() {
@@ -65,7 +67,7 @@ export class BillingService {
   async plan(key: string) {
     const plans = await this.plans()
     const plan = plans.find((row) => row.key === key)
-    if (!plan) throw new NotFoundException('Тариф не найден')
+    if (!plan) throw new NotFoundException('Plan not found')
     return plan
   }
 
@@ -86,7 +88,7 @@ export class BillingService {
     const plan =
       plans.find((row) => row.key === access.planKey) ??
       plans.find((row) => row.key === FREE_PLAN_KEY)
-    if (!plan) throw new Error('No free plan in «plans»')
+    if (!plan) throw new Error('No free plan in “plans”')
 
     return { access, plan, plans, subscription }
   }

@@ -51,7 +51,7 @@ test.describe('SEO', () => {
   }) => {
     test.skip(isMobile, 'Server output, the same on every device')
     await page.goto('/?kind=barber&sort=price')
-    await expect(page).toHaveTitle('Барбершопы Бишкека: цены и онлайн-запись')
+    await expect(page).toHaveTitle('Barbershops in Bishkek: prices and online booking')
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/\?kind=barber$/)
     await expect(page.locator('meta[name="robots"]')).toHaveCount(0)
     const lists = await page.locator('script[type="application/ld+json"]').allTextContents()
@@ -71,7 +71,7 @@ test.describe('SEO', () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
 
     await page.goto('/top?kind=nails&view=places')
-    await expect(page).toHaveTitle(/Лучшие ногтевые студии Бишкека/)
+    await expect(page).toHaveTitle(/Top nail studios in Bishkek/)
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
       /\/top\?view=places&kind=nails$/,
@@ -95,7 +95,7 @@ test.describe('Cached place pages', () => {
 
     // The cached HTML is the whole page: the header's search is there before any script runs.
     const html = await (await request.get(`/${SLUG}`)).text()
-    expect(html).toContain('Поиск салонов и мастеров')
+    expect(html).toContain('Search salons and specialists')
   })
 
   test('the booking is drawn per request, with the form in its HTML', async ({

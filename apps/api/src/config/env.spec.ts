@@ -32,7 +32,7 @@ describe('TRUST_PROXY', () => {
       validateEnv({ ...base, TRUST_PROXY: 'loopback,173.245.48.0/20, 2400:cb00::/32' }).TRUST_PROXY,
     ).toBe('loopback, 173.245.48.0/20, 2400:cb00::/32')
     // `true` would trust any hop: a client could then name any IP and dodge rate limits.
-    expect(() => validateEnv({ ...base, TRUST_PROXY: 'true' })).toThrow('«true»')
+    expect(() => validateEnv({ ...base, TRUST_PROXY: 'true' })).toThrow('“true”')
   })
 })
 

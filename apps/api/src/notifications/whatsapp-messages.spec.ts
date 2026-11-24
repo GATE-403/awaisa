@@ -13,13 +13,13 @@ const LINK = `${WEB}/v/7f1c?s=abc_DEF-12`
 
 const booking = {
   business: { name: 'Awaisa Studio', slug: 'awaisa-studio' },
-  serviceName: 'Мужская стрижка',
-  specialistName: 'Эрлан Асанов',
+  serviceName: "Men's haircut",
+  specialistName: 'Erlan Asanov',
   date: '2026-11-24',
   time: '15:30',
 }
 
-const options = { to: '+996555123456', language: 'ru', webUrl: WEB }
+const options = { to: '+996555123456', language: 'en', webUrl: WEB }
 
 describe('whatsapp messages', () => {
   it('builds a template payload with body parameters and the link after the site as the button', () => {
@@ -29,16 +29,16 @@ describe('whatsapp messages', () => {
       type: 'template',
       template: {
         name: 'booking_confirmation',
-        language: { code: 'ru' },
+        language: { code: 'en' },
         components: [
           {
             type: 'body',
             parameters: [
               { type: 'text', text: 'Awaisa Studio' },
-              { type: 'text', text: 'Мужская стрижка' },
-              { type: 'text', text: '24 ноября' },
+              { type: 'text', text: "Men's haircut" },
+              { type: 'text', text: '24 November' },
               { type: 'text', text: '15:30' },
-              { type: 'text', text: 'Эрлан Асанов' },
+              { type: 'text', text: 'Erlan Asanov' },
             ],
           },
           {
@@ -64,7 +64,7 @@ describe('whatsapp messages', () => {
   it('cleans parameters Meta would refuse', () => {
     const payload = toWhatsappPayload(
       whatsappConfirmation(
-        { ...booking, serviceName: 'Стрижка\n   и    борода', specialistName: ' ' },
+        { ...booking, serviceName: 'Haircut\n   and    beard', specialistName: ' ' },
         LINK,
       ),
       options,
@@ -72,8 +72,8 @@ describe('whatsapp messages', () => {
     const body = payload?.template.components[0]
     expect(body?.parameters.map((parameter) => parameter.text)).toEqual([
       'Awaisa Studio',
-      'Стрижка и борода',
-      '24 ноября',
+      'Haircut and beard',
+      '24 November',
       '15:30',
       '-',
     ])
@@ -84,7 +84,7 @@ describe('whatsapp messages', () => {
       whatsappConfirmation(booking, LINK),
       whatsappReminder(booking, false, LINK),
       whatsappSalonCancellation(booking, WEB),
-      whatsappReturnVisit('Awaisa Studio', 'Стрижка', 'Эрлан Асанов', `${WEB}/awaisa-studio/book`),
+      whatsappReturnVisit('Awaisa Studio', 'Haircut', 'Erlan Asanov', `${WEB}/awaisa-studio/book`),
     ]
     for (const message of messages) {
       const count = WHATSAPP_TEMPLATES[message.template].body.match(/\{\{\d+\}\}/g)?.length
@@ -95,14 +95,14 @@ describe('whatsapp messages', () => {
 
   it('renders the reminder and the cancellation as the client reads them', () => {
     expect(renderWhatsapp(whatsappReminder(booking, true, LINK))).toBe(
-      `Напоминаем: сегодня в 15:30 у вас Мужская стрижка в Awaisa Studio, мастер Эрлан Асанов. Ждём вас! [Перенести или отменить: ${LINK}]`,
+      `A reminder: today at 15:30 you have Men's haircut at Awaisa Studio with Erlan Asanov. See you soon! [Change or cancel: ${LINK}]`,
     )
     expect(renderWhatsapp(whatsappSalonCancellation(booking, WEB))).toBe(
-      `К сожалению, запись в Awaisa Studio на 24 ноября в 15:30 отменена. Выберите другое время по кнопке ниже. [Выбрать время: ${WEB}/awaisa-studio/book]`,
+      `Sorry, your booking at Awaisa Studio on 24 November at 15:30 has been cancelled. Pick another time with the button below. [Pick a time: ${WEB}/awaisa-studio/book]`,
     )
     expect(
-      renderWhatsapp(whatsappReturnVisit('Awaisa Studio', 'Стрижка', 'Эрлан Асанов', `${WEB}/x`)),
-    ).toContain('Эрлан ждёт вас')
+      renderWhatsapp(whatsappReturnVisit('Awaisa Studio', 'Haircut', 'Erlan Asanov', `${WEB}/x`)),
+    ).toContain('Erlan is ready for you')
   })
 
   it('never starts or ends a template body with a parameter (Meta rejects those)', () => {

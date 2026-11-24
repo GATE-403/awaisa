@@ -4,19 +4,19 @@ import { REGION } from '@/shared/config/region'
 
 const PLATFORM = {
   name: 'Awaisa',
-  tagline: 'Онлайн-запись в салоны и к мастерам Бишкека - без звонков.',
+  tagline: 'Online booking with salons and specialists: no calls.',
   // Every business of the installation books in its region's time (its offset when the page is
   // built or opened).
   utcOffsetMinutes: utcOffsetMinutes(REGION),
 }
 
 const BUSINESS_KINDS: { value: BusinessKind; label: string }[] = [
-  { value: 'beauty', label: 'Салоны красоты' },
-  { value: 'barber', label: 'Барбершопы' },
-  { value: 'nails', label: 'Ногтевые студии' },
-  { value: 'spa', label: 'SPA и массаж' },
-  { value: 'health', label: 'Здоровье' },
-  { value: 'other', label: 'Другое' },
+  { value: 'beauty', label: 'Beauty salons' },
+  { value: 'barber', label: 'Barbershops' },
+  { value: 'nails', label: 'Nail studios' },
+  { value: 'spa', label: 'SPA and massage' },
+  { value: 'health', label: 'Health' },
+  { value: 'other', label: 'Other' },
 ]
 
 const getKindLabel = (kind: BusinessKind) =>

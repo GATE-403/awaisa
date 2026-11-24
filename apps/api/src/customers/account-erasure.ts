@@ -1,10 +1,10 @@
 // What deleting an account keeps and what it takes away (pure, unit-tested).
 //
 // Reviews stay with the places (their rating and replies are the places' too) but lose the
-// person: the name becomes «Клиент», no face, no public id and no wreath. Bookings stay with the
+// person: the name becomes 'Client', no face, no public id and no wreath. Bookings stay with the
 // businesses (their books) but are no longer the account's. Visits still ahead are cancelled.
 
-const ANONYMOUS_AUTHOR = 'Клиент'
+const ANONYMOUS_AUTHOR = 'Client'
 
 type ReviewAuthor = {
   authorName: string
@@ -35,8 +35,8 @@ const soleOwnedBusinesses = (memberships: Membership[]) =>
 
 const soleOwnerMessage = (names: string[]) =>
   names.length === 1
-    ? `Вы единственный владелец «${names[0]}». Сначала передайте бизнес другому владельцу, затем удалите аккаунт.`
-    : `Вы единственный владелец ${names.map((name) => `«${name}»`).join(', ')}. Сначала передайте бизнесы другим владельцам, затем удалите аккаунт.`
+    ? `You are the only owner of “${names[0]}”. Hand the business over to another owner first, then delete your account.`
+    : `You are the only owner of ${names.map((name) => `“${name}”`).join(', ')}. Hand the businesses over to other owners first, then delete your account.`
 
 type UpcomingBooking = { id: string; status: string; startsAt: Date }
 

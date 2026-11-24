@@ -38,7 +38,7 @@ const MATERIALS = `(SELECT COALESCE(SUM(m."cost"), 0) FROM "stock_movements" m
 // Local business time (fixed UTC+6, see business-time.ts) for grouping by day and hour.
 const LOCAL = `("b"."starts_at" AT TIME ZONE 'UTC' + interval '6 hours')`
 
-// «Давно не были»: the same segment and days as the mailing sheet opens with, so the count here
+// 'Lapsed': the same segment and days as the mailing sheet opens with, so the count here
 // is the count the mailing will reach.
 const LAPSED_DAYS = 60
 // A client «comes back» when they book again within six weeks (barbers and nails run on 3–5).
@@ -49,18 +49,18 @@ const LATE_CANCEL_HOURS = 24
 const LATE = `b."status" = 'cancelled' AND b."cancelled_by" = 'client'
   AND b."cancelled_at" > b."starts_at" - make_interval(hours => ${LATE_CANCEL_HOURS})`
 const MONTHS = [
-  'январь',
-  'февраль',
-  'март',
-  'апрель',
-  'май',
-  'июнь',
-  'июль',
-  'август',
-  'сентябрь',
-  'октябрь',
-  'ноябрь',
-  'декабрь',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ]
 
 const change = (current: number, previous: number) =>
@@ -221,7 +221,7 @@ export class AnalyticsService {
             ? 0
             : Math.round((current.noShows / (current.visits + current.noShows)) * 100),
         payments: current.payments,
-        // What the visits used from the stock (written off when marked «Пришёл»).
+        // What the visits used from the stock (written off when marked 'Arrived').
         materialsCost: current.materialsCost,
         margin: current.revenue - current.materialsCost,
         upcomingVisits: toNumber(upcoming[0]?.visits),
@@ -621,7 +621,7 @@ export class AnalyticsService {
   }
 
   /**
-   * «За неделю» on the owner's page: devices that opened it (the `business` funnel step) and
+   * 'This week' on the owner's page: devices that opened it (the `business` funnel step) and
    * online bookings made, over `days` and the same stretch before.
    */
   async pageStats(business: Business, days: number): Promise<PageStats> {

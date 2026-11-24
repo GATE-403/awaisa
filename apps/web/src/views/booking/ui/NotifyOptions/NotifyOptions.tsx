@@ -16,10 +16,10 @@ interface NotifyOptionsProps {
 }
 
 const REMINDERS: { value: string; label: string }[] = [
-  { value: '60', label: 'За 1 час' },
-  { value: '120', label: 'За 2 часа' },
-  { value: '1440', label: 'За день' },
-  { value: 'off', label: 'Не напоминать' },
+  { value: '60', label: '1 hour before' },
+  { value: '120', label: '2 hours before' },
+  { value: '1440', label: 'A day before' },
+  { value: 'off', label: 'No reminder' },
 ]
 
 // The client decides what reaches their phone and when - asked once, as Settings rows.
@@ -37,37 +37,37 @@ export const NotifyOptions = ({
     <details className={styles.group}>
       <summary className={styles.summary}>
         <span>
-          {smsConfirmation ? t('SMS-подтверждение') : t('Без SMS')}
+          {smsConfirmation ? t('SMS confirmation') : t('No SMS')}
           {' · '}
           {reminderMinutes === null
-            ? t('без напоминания')
-            : t('напомним {when}', {
+            ? t('no reminder')
+            : t('reminder {when}', {
                 when:
                   reminders
                     .find((item) => item.value === String(reminderMinutes))
                     ?.label.toLowerCase() ?? '',
               })}
         </span>
-        <span className={styles.change}>{t('Изменить')}</span>
+        <span className={styles.change}>{t('Change')}</span>
       </summary>
       <div className={styles.list}>
         <label className={styles.row}>
           <span className={styles.labelText}>
-            <span className={styles.label}>{t('SMS с подтверждением')}</span>
+            <span className={styles.label}>{t('Confirmation SMS')}</span>
             {/* Inside the row, not a footnote under the group: it says where that SMS goes. */}
             {phone && (
               <span className={styles.sublabel}>
-                {t('на {phone}', { phone: formatPhone(phone) })}
+                {t('to {phone}', { phone: formatPhone(phone) })}
               </span>
             )}
           </span>
           <Switch checked={smsConfirmation} onCheckedChange={onSmsConfirmationChange} />
         </label>
         <div className={styles.row}>
-          <span className={styles.label}>{t('Напомнить о визите')}</span>
+          <span className={styles.label}>{t('Remind me')}</span>
           <Select
             variant='plain'
-            aria-label={t('Когда напомнить')}
+            aria-label={t('When to remind')}
             items={reminders}
             value={reminderMinutes === null ? 'off' : String(reminderMinutes)}
             onValueChange={(value) =>

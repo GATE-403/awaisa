@@ -22,17 +22,17 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
   const base = `/${business.slug}`
   const isBooking = pathname === `${base}/book`
   useRootFlag(isBooking ? null : 'business-bar')
-  // The overview has its own big «Записаться», so the bar does not repeat it.
+  // The overview has its own big Book, so the bar does not repeat it.
   const status = today ? getOpeningStatus(business.hours, today.dayKey, today.minutes, t) : null
   const sections = [
-    { href: base, label: t('Обзор'), isActive: pathname === base },
+    { href: base, label: t('Overview'), isActive: pathname === base },
     {
       href: `${base}/services`,
-      label: t('Услуги и цены'),
+      label: t('Services and prices'),
       isActive: pathname === `${base}/services`,
     },
-    { href: `${base}#masters`, label: t('Мастера'), isActive: false },
-    { href: `${base}#visit`, label: t('Контакты'), isActive: false },
+    { href: `${base}#masters`, label: t('Specialists'), isActive: false },
+    { href: `${base}#visit`, label: t('Contacts'), isActive: false },
   ]
 
   // The booking form is its own focused screen with its own bar.
@@ -42,12 +42,12 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
     <nav
       className={styles.bar}
       data-business-bar=''
-      aria-label={t('Страница бизнеса {name}', { name: business.name })}
+      aria-label={t('{name} business page', { name: business.name })}
     >
       <div className={styles.inner}>
         <div className={styles.identity}>
           <NextLink href='/' className={styles.crumb}>
-            {t('Каталог')}
+            {t('Catalogue')}
           </NextLink>
           <CaretRight className={styles.separator} aria-hidden />
           <NextLink
@@ -79,7 +79,7 @@ export const BusinessBar = ({ business }: BusinessBarProps) => {
         </ul>
         {!isBooking && pathname !== base && (
           <NextLink href={`${base}/book`} className={styles.cta}>
-            {t('Записаться')}
+            {t('Book')}
           </NextLink>
         )}
       </div>

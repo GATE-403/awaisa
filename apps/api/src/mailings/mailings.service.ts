@@ -29,7 +29,7 @@ const daysUntilBirthday = (birthday: string, today: string) => {
 
 /**
  * SMS mailings to the client base. Only clients who kept SMS on in their latest booking get
- * them. Segments: «Давно не были» (no visit for N days and nothing booked), birthdays in the
+ * them. Segments: «Haven't been for a while» (no visit for N days and nothing booked), birthdays in the
  * coming week, everyone. The same segment goes out at most once a day.
  */
 @Injectable()
@@ -57,13 +57,14 @@ export class MailingsService {
          AND "created_at" > now() - interval '20 hours' LIMIT 1`,
       [business.id, segment],
     )
-    if (recent) throw new ConflictException('Эта рассылка уже уходила сегодня - повторите завтра')
+    if (recent)
+      throw new ConflictException('This mailing already went out today: try again tomorrow')
     const recipients = (await this.recipients(business.id, segment, days)).slice(0, MAX_RECIPIENTS)
     // A mailing goes whole or not at all: past the month's SMS and packs it is refused.
     const left = await this.billing.smsLeft(business.id)
     if (left !== null && recipients.length > left) {
       throw new PlanRequiredException(
-        `В этом месяце осталось ${left} SMS, а рассылка на ${recipients.length}. Пакет SMS можно купить в «Тарифе»`,
+        `You have ${left} SMS left this month, and the mailing is for ${recipients.length}. You can buy an SMS pack in “Plan”`,
       )
     }
     const link = `${this.config.get('PUBLIC_WEB_URL', { infer: true })}/${business.slug}/book`
@@ -76,7 +77,7 @@ export class MailingsService {
       await this.billing.takeSms(business.id, { isOptional: false })
       void this.sms.sendSafely(recipient.phone, renderMailing(text, recipient.name, link))
     }
-    this.logger.log(`Mailing «${segment}» for ${business.slug}: ${recipients.length}`)
+    this.logger.log(`Mailing “${segment}” for ${business.slug}: ${recipients.length}`)
 
     return { recipients: recipients.length }
   }

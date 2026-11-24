@@ -31,15 +31,18 @@ export const WaitlistSheet = ({
 
   return (
     <Sheet
-      title={t('Ждут окна')}
+      title={t('Waiting for a slot')}
       cancelLabel={null}
-      action={{ label: t('Готово'), onClick: onClose }}
+      action={{ label: t('Done'), onClick: onClose }}
       onClose={onClose}
     >
       <p className={styles.lead}>
-        {t('{day}. Освободится время - клиенты получат SMS сами; можно и записать их сразу.', {
-          day: dayLabel,
-        })}
+        {t(
+          '{day}. When time frees up, clients get an SMS on their own; you can also book them now.',
+          {
+            day: dayLabel,
+          },
+        )}
       </p>
       <ul className={styles.list}>
         {entries.map((entry) => (
@@ -48,13 +51,13 @@ export const WaitlistSheet = ({
             <div className={styles.text}>
               <p className={styles.name}>{entry.customerName}</p>
               <p className={styles.meta}>
-                {entry.service.name} · {entry.specialist?.name ?? t('любой мастер')}
+                {entry.service.name} · {entry.specialist?.name ?? t('any specialist')}
               </p>
               <p className={styles.status} data-notified={entry.status === 'notified' || undefined}>
                 {entry.status === 'notified'
-                  ? t('SMS отправлено: свободно {time}', { time: entry.notifiedTime ?? '' })
-                  : t('Ждёт с {date}', {
-                      date: new Date(entry.createdAt).toLocaleDateString('ru-RU', {
+                  ? t('SMS sent: {time} is free', { time: entry.notifiedTime ?? '' })
+                  : t('Waiting since {date}', {
+                      date: new Date(entry.createdAt).toLocaleDateString('en-GB', {
                         day: 'numeric',
                         month: 'short',
                         timeZone: BUSINESS_TIME_ZONE,
@@ -63,8 +66,7 @@ export const WaitlistSheet = ({
               </p>
               <div className={styles.actions}>
                 <Button size='sm' onClick={() => onBook(entry)}>
-                  {/* «Записать» is «record» elsewhere in the cabinet: booking a client has its own key. */}
-                  {t.language === 'ru' ? 'Записать' : t('Записать (клиента)')}
+                  {t('Book')}
                 </Button>
                 <a href={`tel:${entry.customerPhone}`} className={styles.call}>
                   <Phone aria-hidden />
@@ -75,7 +77,7 @@ export const WaitlistSheet = ({
             <button
               type='button'
               className={styles.remove}
-              aria-label={t('Убрать {name} из листа ожидания', { name: entry.customerName })}
+              aria-label={t('Remove {name} from the waiting list', { name: entry.customerName })}
               onClick={() => onRemove(entry)}
             >
               <X aria-hidden />

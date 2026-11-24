@@ -5,8 +5,8 @@ const visit = (iso: string, slug = 'old-school', overrides: Partial<HistoryVisit
   at: new Date(iso),
   slug,
   businessName: slug,
-  serviceName: 'Стрижка',
-  masterName: 'Эрлан',
+  serviceName: 'Haircut',
+  masterName: 'Erlan',
   kinds: ['haircut'],
   isEarly: false,
   ...overrides,
@@ -75,7 +75,7 @@ describe('earnedDatesOf', () => {
     })
   })
 
-  it('dates «regular» by the fifth visit to one place and «year» a year after the first', () => {
+  it('dates “regular” by the fifth visit to one place and “year” a year after the first', () => {
     const visits = [
       ...Array.from({ length: 4 }, (_, index) => visit(`2025-0${index + 1}-01T06:00:00Z`, 'a')),
       visit('2025-06-01T06:00:00Z', 'b'),

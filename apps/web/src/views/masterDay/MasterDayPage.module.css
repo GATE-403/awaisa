@@ -213,7 +213,7 @@ li + li > .place {
   color: var(--color-tertiary-foreground);
 }
 
-/* «Ваши отзывы» under the day: a caption with the average, then the business page's thread. */
+/* "Your reviews" under the day: a caption with the average, then the business page's thread. */
 .reviews {
   display: flex;
   flex-direction: column;
@@ -257,7 +257,7 @@ li + li > .place {
   font-weight: var(--font-weight-semibold);
 }
 
-/* «На этом устройстве»: on the page's own left edge, like «Ваши отзывы» above it. */
+/* "On this device": on the page's own left edge, like "Your reviews" above it. */
 .alerts {
   display: grid;
   gap: var(--space-6);

@@ -1,4 +1,4 @@
-// What «Продавать онлайн» starts with: the owner changes them in «Суммы».
+// What "Sell online" starts with: the owner changes them in "Amounts".
 const DEFAULT_CERTIFICATE_AMOUNTS = [1000, 3000, 5000]
 
 /** The API keeps at most six amounts. */

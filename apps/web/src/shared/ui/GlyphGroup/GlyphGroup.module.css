@@ -29,7 +29,7 @@
     scale var(--duration-normal) var(--ease-spring);
 }
 
-/* A glyph that comes and goes (`isHidden`: «Наверх» past the first screen) folds to nothing and
+/* A glyph that comes and goes (`isHidden`: «To top» past the first screen) folds to nothing and
    unfolds again: the capsule grows by its width while the glyph fades and pops in, so a new
    action arrives instead of jumping in. Doubled class: over any context's own width rule. */
 .group.group.group :is(button, a)[data-hidden] {

@@ -43,18 +43,21 @@ const phoneProblem = (value: string, region: Region = REGION): string | null => 
   const { callingCode, nationalDigits } = region.phone
   const trimmed = value.trim()
   const digits = trimmed.replace(/\D/g, '')
-  if (!digits) return 'Введите номер телефона'
+  if (!digits) return 'Enter a phone number'
   if (trimmed.startsWith('+') && !digits.startsWith(callingCode)) {
-    return `Пока принимаем только номера с кодом +${callingCode}`
+    return `For now we only take numbers with the code +${callingCode}`
   }
   if (localPart(digits, region).length < nationalDigits) {
-    return `Номер неполный: после +${callingCode} нужно ${nationalDigits} цифр`
+    return `The number is incomplete: it needs ${nationalDigits} digits after +${callingCode}`
   }
   return null
 }
 
-// Groups thousands while a price is typed: «1500» → «1 500».
-const maskAmountInput = (digits: string) =>
-  digits ? Number(digits).toLocaleString(REGION.locale.numbers).replace(/\s/g, ' ') : ''
+// Groups thousands while a price is typed: «1500» → «1,500». Spaces and commas typed or pasted
+// in between are dropped first.
+const maskAmountInput = (value: string) => {
+  const digits = value.replace(/\D/g, '')
+  return digits ? Number(digits).toLocaleString(REGION.locale.numbers).replace(/\s/g, ' ') : ''
+}
 
 export { maskAmountInput, maskLocalPhoneInput, maskPhoneInput, phoneProblem }

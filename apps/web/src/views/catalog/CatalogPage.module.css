@@ -64,7 +64,7 @@
 
 /* The leaderboards as one quiet row with a gold trophy, like a shortcut in Settings. */
 .topLink {
-  /* A quiet line, not a field-like capsule: it should not compete with «Для вас» above it. */
+  /* A quiet line, not a field-like capsule: it should not compete with «For you» above it. */
   display: inline-flex;
   align-self: flex-start;
   align-items: center;

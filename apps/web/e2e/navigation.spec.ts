@@ -5,8 +5,8 @@ import { bookingSteps, primaryAction, submitBooking } from './helpers'
 
 const SLUG = 'lumiere-salon'
 
-// The place's own page: its tabs «Работы · Услуги · Мастера · Время».
-const placeTabs = (page: Page) => page.getByRole('tablist', { name: 'Разделы места' })
+// The place's own page: its tabs “Work · Services · Specialists · Time”.
+const placeTabs = (page: Page) => page.getByRole('tablist', { name: 'Place sections' })
 
 // A soft navigation keeps the page's JavaScript; a reload would lose this mark.
 const markPage = (page: Page) =>
@@ -19,7 +19,7 @@ const isSamePage = (page: Page) =>
 
 // The newest sheet: while a reload brings the booking back over the catalog, the old one may
 // still be on screen for a frame beside it.
-const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Запись', level: 1 }).last()
+const bookingSheet = (page: Page) => page.getByRole('heading', { name: 'Booking', level: 1 }).last()
 
 // A service card a few rows down (the third row of four columns), scrolled to the middle of the screen. Looking for «any card
 // wholly on screen» after a fixed scroll found none on CI (other card heights) and clicked nothing.
@@ -38,19 +38,19 @@ test.describe('Moving around the app', () => {
   test('the tab bar leads to every section and marks the one open', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'The tab bar is the phone’s navigation')
     await page.goto('/')
-    const tabs = page.getByRole('navigation', { name: 'Нижнее меню' })
-    await expect(tabs.getByRole('link', { name: 'Каталог' })).toHaveAttribute(
+    const tabs = page.getByRole('navigation', { name: 'Bottom menu' })
+    await expect(tabs.getByRole('link', { name: 'Catalogue' })).toHaveAttribute(
       'aria-current',
       'page',
     )
     await markPage(page)
 
     for (const [label, path] of [
-      ['Образы', '/feed'],
-      ['Карта', '/map'],
-      ['Бизнес', '/business'],
-      ['Записи', '/bookings'],
-      ['Каталог', '/'],
+      ['Looks', '/feed'],
+      ['Map', '/map'],
+      ['Business', '/business'],
+      ['Bookings', '/bookings'],
+      ['Catalogue', '/'],
     ] as const) {
       await tabs.getByRole('link', { name: label }).click()
       await expect(page).toHaveURL((url) => url.pathname === path)
@@ -70,18 +70,18 @@ test.describe('Moving around the app', () => {
   test('the header leads to every section on a wide screen', async ({ page, isMobile }) => {
     test.skip(isMobile, 'Phones use the tab bar')
     await page.goto('/')
-    const header = page.getByRole('navigation', { name: 'Основное меню' })
+    const header = page.getByRole('navigation', { name: 'Main menu' })
     await markPage(page)
     for (const [label, path] of [
-      ['Образы', '/feed'],
-      ['Карта', '/map'],
-      ['Рейтинг', '/top'],
-      ['Бизнес', '/business'],
+      ['Looks', '/feed'],
+      ['Map', '/map'],
+      ['Rating', '/top'],
+      ['Business', '/business'],
     ] as const) {
       await header.getByRole('link', { name: label }).click()
       await expect(page).toHaveURL((url) => url.pathname === path)
     }
-    await page.getByRole('link', { name: 'На главную' }).click()
+    await page.getByRole('link', { name: 'Home' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/')
     expect(await isSamePage(page)).toBe(true)
   })
@@ -100,7 +100,7 @@ test.describe('Moving around the app', () => {
     await expect(placeTabs(page)).toBeAttached()
     expect(await isSamePage(page)).toBe(true)
 
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await expect(page).toHaveURL(new RegExp(`/${SLUG}$`))
     await expect(bookingSheet(page)).toHaveCount(0)
     expect(await isSamePage(page)).toBe(true)
@@ -124,7 +124,7 @@ test.describe('Moving around the app', () => {
     await expect(page).toHaveURL(/\/[^/]+\/book\?service=/)
     await expect(bookingSheet(page)).toBeVisible()
 
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/')
     await expect(bookingSheet(page)).toHaveCount(0)
     expect(await isSamePage(page)).toBe(true)
@@ -135,7 +135,7 @@ test.describe('Moving around the app', () => {
   }) => {
     await page.goto('/?kind=barber')
     const header = page.locator('[data-site-header]')
-    const chosenKind = header.getByRole('link', { name: 'Барбершопы' })
+    const chosenKind = header.getByRole('link', { name: 'Barbershops' })
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
     const card = await bookingCardInMiddle(page)
     const before = await page.evaluate(() => window.scrollY)
@@ -167,7 +167,7 @@ test.describe('Moving around the app', () => {
     await expect(chosenKind).toHaveAttribute('aria-current', 'page')
     await expect(placeTabs(page)).toBeHidden()
 
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '?kind=barber')
     await expect(bookingSheet(page)).toHaveCount(0)
   })
@@ -192,19 +192,19 @@ test.describe('Moving around the app', () => {
     await page.waitForTimeout(700)
     const before = await topOnScreen()
 
-    // Through the main action, which does something real on each step: «Любой мастер» on the
+    // Through the main action, which does something real on each step: “Any specialist” on the
     // masters (only when there are several to choose from), then the free time under the ruler.
     // A free time is stubbed: walking the real days clicked day cards under the fixed bar on CI.
     const action = primaryAction(page)
-    await expect(action).toHaveText(/^(Любой мастер|Выбрать \d{2}:\d{2}|Выбрать время)$/)
-    if ((await action.textContent()) === 'Любой мастер') await action.click()
-    await expect(action).toHaveText(/^Выбрать \d{2}:\d{2}$/)
+    await expect(action).toHaveText(/^(Any specialist|Choose \d{2}:\d{2}|Choose a time)$/)
+    if ((await action.textContent()) === 'Any specialist') await action.click()
+    await expect(action).toHaveText(/^Choose \d{2}:\d{2}$/)
     await action.click()
     const steps = bookingSteps(page)
-    await steps.contacts.getByLabel('Имя').fill('E2E Тест')
-    await steps.contacts.getByLabel('Телефон').fill('+996 555 000 111')
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
+    await steps.contacts.getByLabel('Phone').fill('+996 555 000 111')
     await submitBooking(page)
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
     // The success screen used to scroll the window, and the catalog under the sheet jumped up.
     await page.waitForTimeout(800)
     expect(Math.abs((await topOnScreen()) - before)).toBeLessThanOrEqual(2)
@@ -278,27 +278,27 @@ test.describe('Moving around the app', () => {
     await page.goto(`/${SLUG}/book`)
     await expect(bookingSheet(page)).toBeVisible()
     await expect(placeTabs(page)).toBeAttached()
-    await page.getByRole('link', { name: 'Закрыть запись' }).click()
+    await page.getByRole('link', { name: 'Close booking' }).click()
     await expect(page).toHaveURL(new RegExp(`/${SLUG}$`))
     await expect(placeTabs(page)).toBeVisible()
     await expect(bookingSheet(page)).toHaveCount(0)
   })
 
-  test('the cabinet’s «‹» leads back to where the business side was entered from', async ({
+  test('the cabinet’s “‹” leads back to where the business side was entered from', async ({
     page,
     isMobile,
   }, testInfo) => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto('/map')
     const entry = isMobile
-      ? page.getByRole('navigation', { name: 'Нижнее меню' }).getByRole('link', { name: 'Кабинет' })
-      : page
-          .getByRole('navigation', { name: 'Основное меню' })
-          .getByRole('link', { name: 'Кабинет' })
+      ? page
+          .getByRole('navigation', { name: 'Bottom menu' })
+          .getByRole('link', { name: 'Dashboard' })
+      : page.getByRole('navigation', { name: 'Main menu' }).getByRole('link', { name: 'Dashboard' })
     await entry.click()
     await expect(page).toHaveURL(/\/manage/)
 
-    const back = page.getByRole('link', { name: /^(Назад: )?Карта$/ })
+    const back = page.getByRole('link', { name: /^(Back: )?Map$/ })
     await expect(back).toHaveAttribute('href', '/map')
     await back.click()
     await expect(page).toHaveURL((url) => url.pathname === '/map')
@@ -311,19 +311,19 @@ test.describe('Leaving sign-in', () => {
     page,
   }) => {
     await page.goto('/login?next=%2Fmanage')
-    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/')
   })
 
   test('✕ on sign-in for the setup leads to the business landing', async ({ page }) => {
     await page.goto('/login?next=%2Fbusiness%2Fnew')
-    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/business')
   })
 
   test('✕ on sign-in for a page guests can open goes back to it', async ({ page }) => {
     await page.goto('/login?next=%2Fbookings')
-    await page.getByRole('link', { name: 'Закрыть' }).click()
+    await page.getByRole('link', { name: 'Close', exact: true }).click()
     await expect(page).toHaveURL((url) => url.pathname === '/bookings')
   })
 })

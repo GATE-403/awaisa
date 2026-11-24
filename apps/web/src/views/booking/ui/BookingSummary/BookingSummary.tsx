@@ -26,41 +26,41 @@ interface BookingSummaryProps {
   quote?: PriceQuote | null
   /** Opens a step from the summary, so a choice is changed where it was made. */
   onStepOpen?: (step: BookingStepId) => void
-  /** Overrides the button's words once everything is filled («Проверить запись»). */
+  /** Overrides the button's words once everything is filled ("Check booking"). */
   submitLabel?: string
   /** The card's head: the place's cover (or its tint) with its name, like a ticket's header. */
   place?: { name: string; coverUrl: string | null }
-  /** Where to come (the chosen branch's address): said beside «Записаться», where it is read. */
+  /** Where to come (the chosen branch's address): said beside Book, where it is read. */
   address?: string | null
-  /** The «Ваша запись» sheet shows this ticket (the cards of the stack) over the money rows. */
+  /** The Your booking sheet shows this ticket (the cards of the stack) over the money rows. */
   ticket?: ReactNode
   /**
    * Paid by a subscription: its own (`total` null: nothing to pay, the label is said instead)
    * or one bought with the visit (`total` is its price, paid now). No discount or deposit then.
    */
   paidWith?: { label: string; total: number | null } | null
-  /** What is chosen so far («Укладка · Мээрим»), said in the bar while steps remain. */
+  /** What is chosen so far ("Styling · Meerim"), said in the bar while steps remain. */
   choice?: string
-  /** The master as the ready bar names them: a first name or «Любой мастер». */
+  /** The master as the ready bar names them: a first name or Any specialist. */
   masterShort?: string | null
   /** Several branches: the ready bar names the chosen one (with one, nothing to tell apart). */
   branchName?: string | null
 }
 
-// The button names the next thing to do (a bare «Далее» left people unsure that a time was still
+// The button names the next thing to do (a bare Next left people unsure that a time was still
 // to be picked); the line over it says how far along they are.
 const NEXT_STEP_ACTIONS: Record<BookingStepId, string> = {
-  service: 'Выбрать услугу',
-  specialist: 'Выбрать мастера',
-  datetime: 'Выбрать время',
-  contacts: 'Ввести контакты',
+  service: 'Choose a service',
+  specialist: 'Choose a specialist',
+  datetime: 'Choose a time',
+  contacts: 'Enter contacts',
 }
 
 const NEXT_STEP_HINTS: Record<BookingStepId, string> = {
-  service: 'Выберите услугу',
-  specialist: 'Выберите мастера',
-  datetime: 'Выберите время',
-  contacts: 'Оставьте контакты',
+  service: 'Choose a service',
+  specialist: 'Choose a specialist',
+  datetime: 'Choose a time',
+  contacts: 'Leave your contacts',
 }
 
 const getButtonLabel = (
@@ -68,10 +68,10 @@ const getButtonLabel = (
   isSubmitting: boolean,
   t: Translate,
 ) => {
-  if (isSubmitting) return t('Записываем…')
+  if (isSubmitting) return t('Booking…')
   if (firstIncompleteStep) return t(NEXT_STEP_ACTIONS[firstIncompleteStep])
 
-  return t('Записаться')
+  return t('Book')
 }
 
 export const BookingSummary = ({
@@ -102,48 +102,48 @@ export const BookingSummary = ({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const whenLabel = dayKey && time ? `${t.dayLong(dayKey)}, ${time}` : null
   const details = [
-    { label: t('Услуга'), value: service?.name },
-    { label: t('Мастер'), value: specialistLabel },
-    { label: t('Когда'), value: whenLabel },
-    { label: t('Длительность'), value: service ? t.duration(service.durationMinutes) : null },
+    { label: t('Service'), value: service?.name },
+    { label: t('Specialist'), value: specialistLabel },
+    { label: t('When'), value: whenLabel },
+    { label: t('Duration'), value: service ? t.duration(service.durationMinutes) : null },
     ...(discount
       ? [
           {
-            label: t('Скидка «{title}»', { title: discount.title }),
+            label: t('Discount “{title}”', { title: discount.title }),
             value: `−${formatPrice(discount.amount)}`,
           },
         ]
       : []),
-    { label: t('Итого'), value: total !== null ? formatPrice(total) : (paidWith?.label ?? null) },
-    ...(paidWith ? [{ label: t('Оплата'), value: paidWith.label }] : []),
+    { label: t('Total'), value: total !== null ? formatPrice(total) : (paidWith?.label ?? null) },
+    ...(paidWith ? [{ label: t('Payment'), value: paidWith.label }] : []),
     ...(deposit
       ? [
           {
-            label: t('Предоплата'),
-            value: t('{amount} картой при записи', { amount: formatPrice(deposit) }),
+            label: t('Deposit'),
+            value: t('{amount} by card when booking', { amount: formatPrice(deposit) }),
           },
         ]
       : []),
   ]
   // With the ticket shown, only what it does not say: the discount and a deposit (its stub
   // already carries the price to pay).
-  const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t('Итого')) : details
+  const sheetRows = ticket ? details.slice(4).filter((item) => item.label !== t('Total')) : details
   const buttonLabel =
     (!isSubmitting && submitLabel) || getButtonLabel(firstIncompleteStep, isSubmitting, t)
   // Ready to book: when and where in one line - a place with two addresses must not be a surprise.
   const shortWhen = dayKey && time ? `${t.dayShort(dayKey)}, ${time}` : null
-  // While steps remain the line says what is chosen so far, not «Шаг 2 из 4»: the step's own
+  // While steps remain the line says what is chosen so far, not "Step 2 of 4": the step's own
   // caption above its question already counts, and two counters read as clutter.
   const hint = firstIncompleteStep ? (
-    choice || place?.name || t('Онлайн-запись')
+    choice || place?.name || t('Online booking')
   ) : deposit ? (
-    t('{when} · предоплата {amount}', {
+    t('{when} · deposit {amount}', {
       when: whenLabel ?? '',
       amount: formatPrice(deposit),
     })
   ) : address ? (
     // Two unbreakable parts: the line breaks between the time and the address, never inside
-    // the address (a lone «7» of «мкр. Асанбай, 7» hung on the second line).
+    // the address (a lone "7" of "Asanbay mic., 7" hung on the second line).
     <>
       <span className={styles.barHintPart}>{`${shortWhen} ·`}</span>{' '}
       <span className={styles.barHintPart}>{address}</span>
@@ -156,7 +156,7 @@ export const BookingSummary = ({
   // then the time and the total over one quiet line, the master and where or how long.
   const isReady = !firstIncompleteStep && Boolean(dayKey && time)
   const readyLine = deposit
-    ? [masterShort, t('предоплата {amount}', { amount: formatPrice(deposit) })]
+    ? [masterShort, t('deposit {amount}', { amount: formatPrice(deposit) })]
         .filter(Boolean)
         .join(' · ')
     : [masterShort, branchName ?? (service ? t.duration(service.durationMinutes) : null)]
@@ -166,7 +166,7 @@ export const BookingSummary = ({
   if (variant === 'bar' && isReady && dayKey && time) {
     return (
       <div className={styles.bar} data-ready=''>
-        {/* The leaf, the time and the total open everything chosen («Ваша запись»): ⌃ says so. */}
+        {/* The leaf, the time and the total open everything chosen (Your booking): ⌃ says so. */}
         <button
           type='button'
           className={styles.barInfo}
@@ -199,9 +199,9 @@ export const BookingSummary = ({
               )}
             </span>
           </span>
-          <span className={styles.srOnly}>{`, ${t('Показать, что выбрано')}`}</span>
+          <span className={styles.srOnly}>{`, ${t('Show what is chosen')}`}</span>
         </button>
-        {/* While it books the button folds into a round spinner; «Вы записаны» then opens with
+        {/* While it books the button folds into a round spinner; "You're booked" then opens with
             its own check. The words stay for screen readers. */}
         <Button
           size='lg'
@@ -215,8 +215,8 @@ export const BookingSummary = ({
         </Button>
         {isDetailsOpen && (
           <Sheet
-            title={t('Ваша запись')}
-            cancelLabel={t('Готово')}
+            title={t('Your booking')}
+            cancelLabel={t('Done')}
             onClose={() => setIsDetailsOpen(false)}
           >
             {ticket && <div className={styles.ticket}>{ticket}</div>}
@@ -246,7 +246,7 @@ export const BookingSummary = ({
             {discount && service && (
               <s className={styles.barOldPrice}>{formatPrice(service.price)}</s>
             )}
-            {total !== null ? formatPrice(total) : (paidWith?.label ?? t('Онлайн-запись'))}
+            {total !== null ? formatPrice(total) : (paidWith?.label ?? t('Online booking'))}
             {discount && <span className={styles.barDiscount}>−{discount.percent}%</span>}
           </span>
           <span
@@ -258,15 +258,15 @@ export const BookingSummary = ({
             {errorMessage ?? hint}
           </span>
           {/* After the visible total, not instead of it: the name keeps what is written (2.5.3). */}
-          <span className={styles.srOnly}>{`, ${t('Показать, что выбрано')}`}</span>
+          <span className={styles.srOnly}>{`, ${t('Show what is chosen')}`}</span>
         </button>
         <Button size='lg' className={styles.barButton} onClick={onSubmit} disabled={isSubmitting}>
           {buttonLabel}
         </Button>
         {isDetailsOpen && (
           <Sheet
-            title={t('Ваша запись')}
-            cancelLabel={t('Готово')}
+            title={t('Your booking')}
+            cancelLabel={t('Done')}
             onClose={() => setIsDetailsOpen(false)}
           >
             {ticket && <div className={styles.ticket}>{ticket}</div>}
@@ -289,12 +289,12 @@ export const BookingSummary = ({
   const rows: { step: BookingStepId; label: string; value: string | null; extra?: string }[] = [
     {
       step: 'service',
-      label: t('Услуга'),
+      label: t('Service'),
       value: service?.name ?? null,
       extra: service ? t.duration(service.durationMinutes) : undefined,
     },
-    { step: 'specialist', label: t('Мастер'), value: specialistLabel || null },
-    { step: 'datetime', label: t('Когда'), value: whenLabel },
+    { step: 'specialist', label: t('Specialist'), value: specialistLabel || null },
+    { step: 'datetime', label: t('When'), value: whenLabel },
   ]
 
   return (
@@ -315,7 +315,7 @@ export const BookingSummary = ({
           </span>
         </div>
       )}
-      <h2 className={styles.cardTitle}>{t('Ваша запись')}</h2>
+      <h2 className={styles.cardTitle}>{t('Your booking')}</h2>
       <ul className={styles.rows}>
         {rows.map((row) => {
           const isNext = firstIncompleteStep === row.step
@@ -356,7 +356,7 @@ export const BookingSummary = ({
         </div>
       )}
       <div className={styles.total}>
-        <span>{t('Итого')}</span>
+        <span>{t('Total')}</span>
         <span>
           {discount && service && <s className={styles.oldPrice}>{formatPrice(service.price)}</s>}
           {total !== null ? formatPrice(total) : (paidWith?.label ?? '-')}
@@ -367,7 +367,7 @@ export const BookingSummary = ({
       {deposit ? (
         <p className={styles.deposit}>
           {t(
-            'Предоплата {amount} - картой сразу после записи, остальное в салоне. Вернём при отмене за сутки.',
+            'Deposit {amount} - by card right after booking, the rest at the salon. Refunded if you cancel a day ahead.',
             { amount: formatPrice(deposit) },
           )}
         </p>

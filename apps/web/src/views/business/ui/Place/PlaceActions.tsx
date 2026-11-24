@@ -49,27 +49,27 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
   const handleShare = async () => {
     // A sheet that failed or was closed says nothing.
     const result = await shareLink({ title: business.name, url: window.location.href })
-    if (result === 'copied') toast.show({ title: t('Ссылка скопирована'), type: 'success' })
+    if (result === 'copied') toast.show({ title: t('Link copied'), type: 'success' })
   }
 
   const actions: Action[] = [
-    business.phone ? { label: t('Позвонить'), icon: Phone, href: `tel:${business.phone}` } : null,
+    business.phone ? { label: t('Call'), icon: Phone, href: `tel:${business.phone}` } : null,
     business.whatsapp
       ? {
-          label: t('Написать'),
+          label: t('Message'),
           icon: ChatCircleText,
           href: toWhatsappHref(business.whatsapp),
           isExternal: true,
         }
       : null,
     directions
-      ? { label: t('Маршрут'), icon: NavigationArrow, href: directions, isExternal: true }
+      ? { label: t('Directions'), icon: NavigationArrow, href: directions, isExternal: true }
       : null,
-    { label: t('Поделиться'), icon: ShareNetwork, onClick: handleShare },
+    { label: t('Share'), icon: ShareNetwork, onClick: handleShare },
   ].filter((action) => action !== null)
 
   return (
-    // Across from the logo, like the owner's «Редактировать»: one primary capsule and the quiet
+    // Across from the logo, like the owner's «Edit»: one primary capsule and the quiet
     // actions as thin glyphs in one capsule of the same height.
     <>
       <ButtonLink
@@ -79,9 +79,9 @@ export const PlaceActions = ({ business }: PlaceActionsProps) => {
         // just below looked like the button did nothing.
         render={<NextLink href={`/${business.slug}/book`} />}
       >
-        {t('Записаться')}
+        {t('Book')}
       </ButtonLink>
-      <GlyphGroup label={t('Связаться')}>
+      <GlyphGroup label={t('Contact')}>
         {actions.map(({ label, icon: ActionIcon, href, onClick, isExternal }) =>
           href ? (
             <a

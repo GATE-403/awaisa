@@ -10,12 +10,12 @@ import {
 const review = {
   id: 'r1',
   rating: 5,
-  comment: 'Отлично',
+  comment: 'Great',
   authorName: 'Айгерим С.',
   authorId: '0123456789abcdef0123',
   authorAvatarUrl: '/api/media/customers/a.webp',
   authorRank: 2,
-  reply: 'Спасибо!',
+  reply: 'Thanks!',
 }
 
 describe('anonymizeReview', () => {
@@ -43,20 +43,20 @@ describe('soleOwnedBusinesses', () => {
   it('names only businesses where the account is the one owner', () => {
     expect(
       soleOwnedBusinesses([
-        { businessName: 'Барбершоп', role: 'owner', owners: 1 },
-        { businessName: 'Салон', role: 'owner', owners: 2 },
-        { businessName: 'Студия', role: 'staff', owners: 1 },
+        { businessName: 'Barbershop', role: 'owner', owners: 1 },
+        { businessName: 'Salon', role: 'owner', owners: 2 },
+        { businessName: 'Studio', role: 'staff', owners: 1 },
       ]),
-    ).toEqual(['Барбершоп'])
+    ).toEqual(['Barbershop'])
   })
 
   it('lets staff and clients go', () => {
-    expect(soleOwnedBusinesses([{ businessName: 'Студия', role: 'staff', owners: 1 }])).toEqual([])
+    expect(soleOwnedBusinesses([{ businessName: 'Studio', role: 'staff', owners: 1 }])).toEqual([])
   })
 
   it('explains what to do first', () => {
-    expect(soleOwnerMessage(['Барбершоп'])).toContain('единственный владелец «Барбершоп»')
-    expect(soleOwnerMessage(['А', 'Б'])).toContain('«А», «Б»')
+    expect(soleOwnerMessage(['Barbershop'])).toContain('only owner of “Barbershop”')
+    expect(soleOwnerMessage(['A', 'B'])).toContain('“A”, “B”')
   })
 })
 

@@ -23,20 +23,22 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
 
   const handleSave = (input: BranchInput) =>
     editing && editing !== 'new'
-      ? run(() => updateBranch(slug, editing.id, input), 'Филиал сохранён')
-      : run(() => createBranch(slug, input), 'Филиал добавлен')
+      ? run(() => updateBranch(slug, editing.id, input), 'Branch saved')
+      : run(() => createBranch(slug, input), 'Branch added')
 
-  const handleDelete = (id: string) => run(() => deleteBranch(slug, id), 'Филиал удалён')
+  const handleDelete = (id: string) => run(() => deleteBranch(slug, id), 'Branch deleted')
 
   return (
-    <section className={styles.section} aria-label={t('Филиалы')}>
+    <section className={styles.section} aria-label={t('Branches')}>
       <SectionHeader
-        title={t('Филиалы')}
-        description={t('Каждый адрес - своя метка на карте. Клиент выбирает ближайший при записи.')}
+        title={t('Branches')}
+        description={t(
+          'Each address has its own pin on the map. Clients pick the nearest when booking.',
+        )}
         isFloatingOnPhone
         actions={
           <Button size='sm' onClick={() => setEditing('new')}>
-            {t('Добавить филиал')}
+            {t('Add a branch')}
           </Button>
         }
       />
@@ -51,27 +53,24 @@ export const BranchesTab = ({ slug, branches, run }: BranchesTabProps) => {
               <span className={styles.rowBody}>
                 <span className={styles.rowTitle}>
                   {branch.name}
-                  {branch.isActive === false && <span className={styles.badge}>{t('Закрыт')}</span>}
+                  {branch.isActive === false && <span className={styles.badge}>{t('Closed')}</span>}
                 </span>
                 <span className={styles.rowMeta}>
-                  {[
-                    branch.address || t('Адрес не указан'),
-                    branch.phone && formatPhone(branch.phone),
-                  ]
+                  {[branch.address || t('No address'), branch.phone && formatPhone(branch.phone)]
                     .filter(Boolean)
                     .join(' · ')}
                 </span>
               </span>
-              {branch.latitude === null && (
-                <span className={styles.cellMuted}>{t('Нет метки')}</span>
-              )}
+              {branch.latitude === null && <span className={styles.cellMuted}>{t('No pin')}</span>}
               <CaretRight className={styles.chevron} aria-hidden />
             </button>
           </li>
         ))}
       </ul>
       <RowNote>
-        {t('Без метки филиал не виден на карте. Мастера без филиала принимают во всех.')}
+        {t(
+          "Without a pin a branch isn't on the map. Specialists without a branch work at all of them.",
+        )}
       </RowNote>
 
       <BookingLinks slug={slug} branches={branches} />

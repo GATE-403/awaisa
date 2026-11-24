@@ -26,9 +26,9 @@ describe('a visit of several services', () => {
   })
 
   it('names why nobody fits', () => {
-    expect(noMasterMessage('any', true)).toBe('Нет мастера, который делает все выбранные услуги')
-    expect(noMasterMessage('m1', true)).toBe('Этот мастер не делает все выбранные услуги')
-    expect(noMasterMessage('m1', false)).toBe('Этот мастер не выполняет выбранную услугу')
+    expect(noMasterMessage('any', true)).toBe('No specialist does all the chosen services')
+    expect(noMasterMessage('m1', true)).toBe("This specialist doesn't do all the chosen services")
+    expect(noMasterMessage('m1', false)).toBe("This specialist doesn't do the chosen service")
   })
 
   it('needs room for the whole visit: free time is counted on the total length', () => {

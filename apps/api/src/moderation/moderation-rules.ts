@@ -7,7 +7,7 @@ type AutoHideInput = {
   /** Open reports from different devices or accounts. */
   reporters: number
   isHidden: boolean
-  /** A moderator already chose «Оставить»: reports keep coming to the queue, nothing hides. */
+  /** A moderator already chose 'Keep': reports keep coming to the queue, nothing hides. */
   isKept: boolean
 }
 

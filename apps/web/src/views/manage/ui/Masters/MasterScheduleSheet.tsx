@@ -34,7 +34,7 @@ interface MasterScheduleSheetProps {
 type DayDraft = { isOn: boolean; from: string; to: string }
 
 const TIME_ITEMS = TIME_OPTIONS.map((time) => ({ value: time, label: time }))
-const rangeFormatter = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long' })
+const rangeFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long' })
 
 const toDrafts = (hours: WorkingDay[]): DayDraft[] =>
   WEEKDAYS_FULL.map((_, weekday) => {
@@ -56,7 +56,7 @@ const formatRange = (from: string, to: string) => {
   return from === to ? start : `${start} – ${rangeFormatter.format(new Date(`${to}T00:00:00`))}`
 }
 
-// A master's week («как у салона» or their own days) and days away, in one sheet.
+// A master's week ("same as the salon" or their own days) and days away, in one sheet.
 export const MasterScheduleSheet = ({
   slug,
   master,
@@ -85,7 +85,7 @@ export const MasterScheduleSheet = ({
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           toast.show({
-            title: t('Не получилось'),
+            title: t('Something went wrong'),
             description: getErrorMessage(error),
             type: 'error',
           })
@@ -115,10 +115,14 @@ export const MasterScheduleSheet = ({
     setIsSaving(true)
     try {
       await setMasterHours(slug, master.id, { hasOwnHours, days: hasOwnHours ? toHours(days) : [] })
-      toast.show({ title: t('График {name} сохранён', { name: master.name }), type: 'success' })
+      toast.show({ title: t('Schedule for {name} saved', { name: master.name }), type: 'success' })
       onClose()
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     } finally {
       setIsSaving(false)
     }
@@ -138,17 +142,21 @@ export const MasterScheduleSheet = ({
       })
       setLeave({ startsOn: '', endsOn: '', reason: '' })
       toast.show({
-        title: t('Отпуск добавлен'),
+        title: t('Leave added'),
         description:
           conflictingBookings > 0
-            ? t('На эти дни уже {bookings}: перенесите или отмените', {
-                bookings: t.count(conflictingBookings, ['запись', 'записи', 'записей']),
+            ? t('There are already {bookings} on these days: move or cancel them', {
+                bookings: t.count(conflictingBookings, ['booking', 'bookings']),
               })
-            : t('Новые записи на эти дни не откроются'),
+            : t('No new bookings will open on these days'),
         type: conflictingBookings > 0 ? 'info' : 'success',
       })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
@@ -158,7 +166,11 @@ export const MasterScheduleSheet = ({
       await removeMasterLeave(slug, master.id, id)
       setSchedule({ ...schedule, leaves: schedule.leaves.filter((item) => item.id !== id) })
     } catch (error) {
-      toast.show({ title: t('Не получилось'), description: getErrorMessage(error), type: 'error' })
+      toast.show({
+        title: t('Something went wrong'),
+        description: getErrorMessage(error),
+        type: 'error',
+      })
     }
   }
 
@@ -167,7 +179,7 @@ export const MasterScheduleSheet = ({
       title={master.name}
       onClose={onClose}
       action={{
-        label: isDirty ? t('Сохранить') : t('Готово'),
+        label: isDirty ? t('Save') : t('Done'),
         onClick: handleDone,
         disabled: isSaving,
       }}
@@ -175,11 +187,11 @@ export const MasterScheduleSheet = ({
       {!schedule && <Skeleton className={styles.skeleton} />}
       {schedule && (
         <>
-          <section className={sheet.group} aria-label={t('Часы работы')}>
-            <SectionCaption>{t('Часы работы')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('Opening hours')}>
+            <SectionCaption>{t('Opening hours')}</SectionCaption>
             <div className={sheet.list}>
               <label className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Как у салона')}</span>
+                <span className={sheet.rowLabel}>{t('Same as the salon')}</span>
                 <Switch
                   checked={!hasOwnHours}
                   onCheckedChange={(followsBusiness) => setHasOwnHours(!followsBusiness)}
@@ -191,7 +203,7 @@ export const MasterScheduleSheet = ({
                   return (
                     <div key={WEEKDAYS_FULL[weekday]} className={styles.dayRow}>
                       <Switch
-                        aria-label={t('{day}: работает', { day: dayName })}
+                        aria-label={t('{day}: working', { day: dayName })}
                         checked={day.isOn}
                         onCheckedChange={(isOn) => updateDay(weekday, { isOn })}
                       />
@@ -199,21 +211,21 @@ export const MasterScheduleSheet = ({
                       {day.isOn ? (
                         <span className={styles.range}>
                           <Select
-                            aria-label={t('{day}: с', { day: dayName })}
+                            aria-label={t('{day}: from', { day: dayName })}
                             items={TIME_ITEMS}
                             value={day.from}
                             onValueChange={(value) => value && updateDay(weekday, { from: value })}
                           />
                           –
                           <Select
-                            aria-label={t('{day}: до', { day: dayName })}
+                            aria-label={t('{day}: until', { day: dayName })}
                             items={TIME_ITEMS}
                             value={day.to}
                             onValueChange={(value) => value && updateDay(weekday, { to: value })}
                           />
                         </span>
                       ) : (
-                        <span className={styles.off}>{t('Выходной')}</span>
+                        <span className={styles.off}>{t('Closed')}</span>
                       )}
                     </div>
                   )
@@ -221,17 +233,19 @@ export const MasterScheduleSheet = ({
             </div>
             <p className={sheet.groupFooter}>
               {invalidDay !== -1
-                ? t('{day}: конец должен быть позже начала', {
+                ? t('{day}: the end must be after the start', {
                     day: t(WEEKDAYS_FULL[invalidDay] ?? ''),
                   })
                 : hasOwnHours
-                  ? t('Клиенты видят время мастера только в эти часы и только пока салон открыт.')
-                  : t('Мастер работает все часы салона.')}
+                  ? t(
+                      'Clients see the specialist’s times only in these hours and only while the salon is open.',
+                    )
+                  : t('The specialist works all the salon’s hours.')}
             </p>
           </section>
 
-          <section className={sheet.group} aria-label={t('Отпуск и выходные')}>
-            <SectionCaption>{t('Отпуск и выходные')}</SectionCaption>
+          <section className={sheet.group} aria-label={t('Leave and days off')}>
+            <SectionCaption>{t('Leave and days off')}</SectionCaption>
             <div className={sheet.list}>
               {schedule.leaves.map((item) => (
                 <div key={item.id} className={styles.leave}>
@@ -244,7 +258,7 @@ export const MasterScheduleSheet = ({
                   <button
                     type='button'
                     className={styles.remove}
-                    aria-label={t('Убрать отпуск {dates}', {
+                    aria-label={t('Remove leave {dates}', {
                       dates: formatRange(item.startsOn, item.endsOn),
                     })}
                     onClick={() => handleRemoveLeave(item.id)}
@@ -255,27 +269,27 @@ export const MasterScheduleSheet = ({
               ))}
               <div className={styles.leaveForm}>
                 <label htmlFor={fromId} className={styles.dateField}>
-                  <span>{t('С')}</span>
+                  <span>{t('From')}</span>
                   <DateField
                     id={fromId}
-                    label={t('Отпуск с')}
+                    label={t('Leave from')}
                     value={leave.startsOn}
                     onChange={(startsOn) => setLeave({ ...leave, startsOn })}
                   />
                 </label>
                 <label htmlFor={toId} className={styles.dateField}>
-                  <span>{t('По')}</span>
+                  <span>{t('To')}</span>
                   <DateField
                     id={toId}
-                    label={t('Отпуск по')}
+                    label={t('Leave until')}
                     value={leave.endsOn}
                     min={leave.startsOn || undefined}
                     onChange={(endsOn) => setLeave({ ...leave, endsOn })}
                   />
                 </label>
                 <Input
-                  aria-label={t('Причина')}
-                  placeholder={t('Причина - по желанию')}
+                  aria-label={t('Reason')}
+                  placeholder={t('Reason (optional)')}
                   value={leave.reason}
                   onChange={(event) => setLeave({ ...leave, reason: event.target.value })}
                   className={styles.reason}
@@ -287,12 +301,14 @@ export const MasterScheduleSheet = ({
                   disabled={!leave.startsOn}
                   className={styles.addLeave}
                 >
-                  {t('Добавить отпуск')}
+                  {t('Add leave')}
                 </Button>
               </div>
             </div>
             <p className={sheet.groupFooter}>
-              {t('В эти дни мастер не появится в записи; уже сделанные записи останутся.')}
+              {t(
+                'On these days the specialist is not offered for booking; existing bookings stay.',
+              )}
             </p>
           </section>
         </>

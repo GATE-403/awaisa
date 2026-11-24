@@ -134,6 +134,28 @@ const SYNONYMS: [string, string[]][] = [
   ['макияж', ['макияж']],
   ['визаж', ['макияж']],
   ['наращ', ['наращ']],
+  // English words find Russian-named services and English-named ones alike.
+  ['haircut', ['стриж', 'haircut']],
+  ['hair', ['стриж', 'укладк', 'hair']],
+  ['manicure', ['маникюр', 'manicure']],
+  ['pedicure', ['педикюр', 'pedicure']],
+  ['nail', ['маникюр', 'ногт', 'nail', 'manicure']],
+  ['beard', ['бород', 'beard']],
+  ['shave', ['брить', 'shav']],
+  ['brow', ['бров', 'brow']],
+  ['lash', ['ресниц', 'lash']],
+  ['colour', ['окраш', 'colour', 'color']],
+  ['color', ['окраш', 'colour', 'color']],
+  ['massage', ['массаж', 'massage']],
+  ['tattoo', ['тату', 'tattoo']],
+  ['wax', ['воск', 'депиляц', 'шугаринг', 'wax']],
+  ['sugaring', ['шугаринг', 'sugaring']],
+  ['facial', ['чистк', 'лиц', 'facial']],
+  ['makeup', ['макияж', 'makeup', 'make-up']],
+  ['make-up', ['макияж', 'makeup', 'make-up']],
+  ['dentist', ['стомат', 'dent']],
+  ['teeth', ['зуб', 'стомат', 'dent']],
+  ['tooth', ['зуб', 'стомат', 'dent']],
 ]
 
 const normalize = (value: string) =>

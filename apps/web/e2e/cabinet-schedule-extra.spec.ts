@@ -31,12 +31,12 @@ const placeAt = async (visit: Visit, time: string) => {
 }
 
 const showTimeline = async (page: Page) => {
-  await page.getByRole('group', { name: 'Вид расписания' }).getByTitle('Лента').click()
+  await page.getByRole('group', { name: 'Schedule view' }).getByTitle('Timeline').click()
   await expect(board(page).locator('div[data-layout="timeline"]').first()).toBeVisible()
 }
 
 test.describe('Schedule: more on a visit and the day', () => {
-  test('«⋯» in the inspector: the client card, copying the number, cancelling with «Вернуть»', async ({
+  test('“⋯” in the inspector: the client card, copying the number, cancelling with “Undo”', async ({
     page,
     context,
   }) => {
@@ -48,35 +48,35 @@ test.describe('Schedule: more on a visit and the day', () => {
     const openMenu = async () => {
       await visitCard(page, visit.name).click()
       const inspector = page.getByRole('dialog').filter({ hasText: visit.name })
-      await inspector.getByRole('button', { name: 'Ещё действия' }).click()
+      await inspector.getByRole('button', { name: 'More actions' }).click()
       return page.getByRole('menu')
     }
 
     const menu = await openMenu()
     const digits = visit.phone.replace(/^\+996(\d{3})(\d{3})(\d{3})$/, '+996 $1 $2 $3')
-    await menu.getByRole('menuitem', { name: `Скопировать ${digits}` }).click()
+    await menu.getByRole('menuitem', { name: `Copy ${digits}` }).click()
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(visit.phone)
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog').filter({ hasText: visit.name })).toHaveCount(0)
 
-    await (await openMenu()).getByRole('menuitem', { name: 'Карточка клиента' }).click()
-    const card = page.getByRole('dialog', { name: 'Клиент' })
+    await (await openMenu()).getByRole('menuitem', { name: 'Client card' }).click()
+    const card = page.getByRole('dialog', { name: 'Client' })
     await expect(card).toContainText(visit.name)
     await expect(card).toContainText(digits)
-    await card.getByRole('button', { name: 'Готово' }).click()
+    await card.getByRole('button', { name: 'Done' }).click()
     await expect(card).toHaveCount(0)
 
-    await (await openMenu()).getByRole('menuitem', { name: 'Отменить запись' }).click()
+    await (await openMenu()).getByRole('menuitem', { name: 'Cancel booking' }).click()
     await expect
       .poll(async () => (await readBooking(page, business, visit.date, visit.id))?.status)
       .toBe('cancelled')
-    await page.getByRole('button', { name: 'Вернуть' }).click()
+    await page.getByRole('button', { name: 'Undo' }).click()
     await expect
       .poll(async () => (await readBooking(page, business, visit.date, visit.id))?.status)
       .toBe('confirmed')
   })
 
-  test('a cancelled visit ahead offers «Записать снова» with everything filled in', async ({
+  test('a cancelled visit ahead offers “Book again” with everything filled in', async ({
     page,
   }) => {
     const business = await createOwnBusiness(page)
@@ -88,17 +88,17 @@ test.describe('Schedule: more on a visit and the day', () => {
     await page.goto(`/manage/${business.slug}?tab=schedule&date=${visit.date}`)
     await visitCard(page, visit.name).click()
     const inspector = page.getByRole('dialog').filter({ hasText: visit.name })
-    await expect(inspector).toContainText('Запись отменена')
-    await inspector.getByRole('button', { name: 'Записать снова' }).click()
-    const dialog = page.getByRole('dialog', { name: 'Новая запись' })
-    await expect(dialog.getByRole('combobox', { name: 'Мастер' })).toContainText(
+    await expect(inspector).toContainText('Booking cancelled')
+    await inspector.getByRole('button', { name: 'Book again' }).click()
+    const dialog = page.getByRole('dialog', { name: 'New booking' })
+    await expect(dialog.getByRole('combobox', { name: 'Specialist' })).toContainText(
       business.master.name,
     )
-    await expect(dialog.getByRole('combobox', { name: 'Услуга' })).toContainText(
+    await expect(dialog.getByRole('combobox', { name: 'Service' })).toContainText(
       business.service.name,
     )
-    await expect(dialog.getByRole('combobox', { name: 'Время' })).toContainText(visit.time)
-    await expect(dialog.getByPlaceholder('Как зовут')).toHaveValue(visit.name)
+    await expect(dialog.getByRole('combobox', { name: 'Time' })).toContainText(visit.time)
+    await expect(dialog.getByPlaceholder('Name')).toHaveValue(visit.name)
     await expect(dialog.getByPlaceholder('+996 555 123 456')).toHaveValue(
       visit.phone.replace(/^\+996(\d{3})(\d{3})(\d{3})$/, '+996 $1 $2 $3'),
     )
@@ -112,14 +112,14 @@ test.describe('Schedule: more on a visit and the day', () => {
     const grid = board(page).locator('div[data-layout="timeline"]').first()
     const widthAt100 = (await grid.boundingBox())?.width ?? 0
 
-    await expect(board(page).getByRole('button', { name: 'Уменьшить масштаб' })).toBeDisabled()
-    await board(page).getByRole('button', { name: 'Увеличить масштаб' }).click()
+    await expect(board(page).getByRole('button', { name: 'Zoom out' })).toBeDisabled()
+    await board(page).getByRole('button', { name: 'Zoom in' }).click()
     await expect(board(page).getByText('150%')).toBeVisible()
     await expect
       .poll(async () => (await grid.boundingBox())?.width ?? 0)
       .toBeGreaterThan(widthAt100 * 1.4)
 
-    await board(page).getByRole('button', { name: 'Уменьшить масштаб' }).click()
+    await board(page).getByRole('button', { name: 'Zoom out' }).click()
     await expect(board(page).getByText('100%')).toBeVisible()
     await expect
       .poll(async () => Math.round((await grid.boundingBox())?.width ?? 0))
@@ -142,8 +142,8 @@ test.describe('Schedule: more on a visit and the day', () => {
     await expect(visitCard(page, morning.name)).toBeInViewport()
     await expect(visitCard(page, last.name)).not.toBeInViewport()
 
-    // Two visits beyond the right edge: the nearest one's time and «+1».
-    const tab = board(page).getByRole('button', { name: `${late.time} +1 - 2 записи позже` })
+    // Two visits beyond the right edge: the nearest one's time and “+1”.
+    const tab = board(page).getByRole('button', { name: `${late.time} +1 - 2 bookings later` })
     // The tab sits flush with the view's right edge, so a pixel of it may lie past the edge (CI's
     // Linux scrollbars): a plain click would scroll the day to show it whole, and the visits it
     // points to would come into view and take it away. A person presses what they see: the
@@ -164,7 +164,7 @@ test.describe('Schedule: more on a visit and the day', () => {
     await expect(visitCard(page, last.name)).toHaveAttribute('data-flash', '')
   })
 
-  test('switching to «Лента» on a day ahead opens the timeline at the day’s start', async ({
+  test('switching to “Timeline” on a day ahead opens the timeline at the day’s start', async ({
     page,
   }) => {
     // It used to read the columns' scale as a zoom and open half way through the day, the
@@ -183,7 +183,7 @@ test.describe('Schedule: more on a visit and the day', () => {
     const visit = await book(business, 'E2E Свайп')
     await page.goto(`/manage/${business.slug}?tab=schedule&date=${visit.date}`)
     await expect(visitCard(page, visit.name)).toBeVisible()
-    const strip = page.getByRole('group', { name: 'День' })
+    const strip = page.getByRole('group', { name: 'Day', exact: true })
     const next = await strip
       .locator(`[data-day="${visit.date}"] ~ [data-day]`)
       .first()

@@ -112,7 +112,7 @@ export class ReviewsController {
     @CurrentCustomer() customer: Customer | null,
     @UploadedFile() file: { buffer: Buffer } | undefined,
   ): Promise<ReviewPhotos> {
-    if (!file) throw new BadRequestException('Выберите фото')
+    if (!file) throw new BadRequestException('Choose a photo')
     return this.reviews.addPhoto(
       id,
       { token: token ?? null, signature: signature ?? null, customer },
@@ -133,7 +133,7 @@ export class ReviewsController {
   @Cached({ ttl: 60, tags: ['catalog'], maxAge: 30 })
   @Get('reviewers/:id')
   reviewer(@Param('id') id: string): Promise<ReviewerProfile> {
-    if (!reviewerIdSchema.safeParse(id).success) throw new NotFoundException('Профиль не найден')
+    if (!reviewerIdSchema.safeParse(id).success) throw new NotFoundException('Profile not found')
     return this.reviews.reviewer(id)
   }
 

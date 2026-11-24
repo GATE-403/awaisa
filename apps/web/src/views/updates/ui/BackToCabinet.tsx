@@ -6,7 +6,7 @@ import { getSafeRedirect } from '@/shared/lib/safeRedirect'
 import { forgetUpdatesFrom, readUpdatesFrom } from '@/shared/lib/updatesFrom'
 import { CabinetBar } from '@/widgets/CabinetBar'
 
-// Opened from the cabinet's megaphone, «Что нового» keeps the cabinet's own toolbar - «‹ Кабинет»
+// Opened from the cabinet's megaphone, "What's new" keeps the cabinet's own toolbar - "‹ Dashboard"
 // back to that business and tab, then the tools - instead of the client header, which has no way
 // back there. Read after mount (the page itself is static) and forgotten when the page is left.
 export const BackToCabinet = () => {
@@ -21,5 +21,5 @@ export const BackToCabinet = () => {
 
   if (!from) return null
 
-  return <CabinetBar title='Что нового' back={{ href: from, label: 'Кабинет' }} />
+  return <CabinetBar title="What's new" back={{ href: from, label: 'Dashboard' }} />
 }

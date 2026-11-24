@@ -6,7 +6,7 @@ import styles from './Header.module.css'
 export const HeaderFallback = () => (
   <header className={styles.header}>
     <div className={styles.inner} style={{ minHeight: 'var(--header-height)' }}>
-      <NextLink href='/' className={styles.home} aria-label='На главную'>
+      <NextLink href='/' className={styles.home} aria-label='Home'>
         <Logo />
       </NextLink>
     </div>

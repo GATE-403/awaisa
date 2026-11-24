@@ -21,7 +21,7 @@ type TextTab = {
 interface TextTabsProps {
   label: string
   items: TextTab[]
-  /** `lg` for a page's main switch (the catalog's «Места · Услуги»). */
+  /** `lg` for a page's main switch (the catalog's «Places · Services»). */
   size?: 'md' | 'lg'
 }
 
@@ -33,8 +33,8 @@ export const TextTabs = ({ label, items, size = 'md' }: TextTabsProps) => {
   const activeIndex = items.findIndex((item) => item.isActive)
   const isFirstRef = useRef(true)
 
-  // A row wider than the screen keeps the chosen tab in view («если я на табе, она должна быть
-  // видна всегда»): scrolled sideways only (never the page), at once on open and when the row's
+  // A row wider than the screen keeps the chosen tab in view (the owner: the tab I am on
+  // must always be visible): scrolled sideways only (never the page), at once on open and when the row's
   // width changes (a phone turned, a window narrowed), smoothly when another tab is chosen.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the chosen tab is what moves it
   useEffect(() => {

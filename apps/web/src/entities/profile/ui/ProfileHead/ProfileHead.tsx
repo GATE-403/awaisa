@@ -15,16 +15,16 @@ interface ProfileHeadTextProps {
   name: string
   /** The status emoji, beside the name (a lone emoji on its own line read as noise). */
   emoji?: string
-  /** One quiet line: «Уровень 4 · 17 визитов · 11 мест». */
+  /** One quiet line: «Level 4 · 17 visits · 11 places». */
   meta?: ReactNode
   /** The page's title on the profile itself; a plain line elsewhere. */
   isHeading?: boolean
-  /** Lines under the meta (a note that the profile is hidden, «о себе» in a preview). */
+  /** Lines under the meta (a note that the profile is hidden, «about» in a preview). */
   children?: ReactNode
 }
 
-// A person's head in one look everywhere - the profile, its preview in «Оформление» and the
-// account row on «Записи» («оставь один дизайн и вынеси в компоненты»): the face on the left, the
+// A person's head in one look everywhere - the profile, its preview in «Appearance» and the
+// account row on «Bookings» (the owner: one design, in shared components): the face on the left, the
 // name with the status emoji and one quiet line of facts to its right, like a contact row.
 export const ProfileHead = ({ face, children, end, className }: ProfileHeadProps) => (
   <div className={className ? `${styles.head} ${className}` : styles.head}>

@@ -11,6 +11,7 @@ import { useSession } from '@/entities/session'
 import { getErrorMessage } from '@/shared/api/apiError'
 import { joinWaitlist } from '@/shared/api/clientApi'
 import { NATIONAL_PHONE_DIGITS, PHONE_PLACEHOLDER } from '@/shared/config/region'
+import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { maskPhoneInput } from '@/shared/lib/inputMasks'
 import { haptic } from '@/shared/lib/nativeBridge'
@@ -27,7 +28,7 @@ interface WaitlistJoinProps {
   specialistId: string
   branchId?: string
   date: string
-  /** «Среда, 12 ноября» - shown in the sheet and the toast. */
+  /** «Wednesday 12 November» - shown in the sheet and the toast. */
   dayLabel: string
 }
 
@@ -44,6 +45,7 @@ export const WaitlistJoin = ({
 }: WaitlistJoinProps) => {
   const session = useSession()
   const toast = useToast()
+  const t = useT()
   const stored = useStoredWaitlist()
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
@@ -82,12 +84,12 @@ export const WaitlistJoin = ({
     // Field errors sit under their field and mark it invalid; the alert below the form is for
     // what the server says.
     if (!name.trim()) {
-      setFieldError({ field: 'name', message: 'Укажите имя' })
+      setFieldError({ field: 'name', message: 'Enter a name' })
       trackFormError('waitlist_name')
       return
     }
     if (!accountPhone && phone.replace(/\D/g, '').length < NATIONAL_PHONE_DIGITS) {
-      setFieldError({ field: 'phone', message: 'Укажите номер - на него придёт SMS' })
+      setFieldError({ field: 'phone', message: t('Enter a number: the SMS goes to it') })
       trackFormError('waitlist_phone')
       return
     }
@@ -109,8 +111,8 @@ export const WaitlistJoin = ({
       haptic('success')
       setIsOpen(false)
       toast.show({
-        title: 'Сообщим, если освободится',
-        description: `${dayLabel}: SMS придёт, как только время освободится`,
+        title: t('We will tell you if a slot opens up'),
+        description: t('{day}: an SMS comes as soon as a time opens up', { day: dayLabel }),
         type: 'success',
       })
     } catch (joinError) {
@@ -124,44 +126,48 @@ export const WaitlistJoin = ({
     return (
       <p className={styles.joined} aria-live='polite'>
         <CheckCircle weight='fill' aria-hidden />
-        Ждём окна на этот день - пришлём SMS
+        {t('Waiting for a slot on this day: we will send an SMS')}
       </p>
     )
   }
 
   return (
     <>
-      {/* The empty day's next step: a quiet secondary capsule with a thin glyph, like «Следить
-          за мастером»; the sheet's one primary action stays the booking bar's. */}
+      {/* The empty day's next step: a quiet secondary capsule with a thin glyph, like «Follow
+          specialist»; the sheet's one primary action stays the booking bar's. */}
       <Button variant='secondary' size='sm' onClick={open} className={styles.button}>
         <BellRinging aria-hidden />
-        Сообщить, когда освободится
+        {t('Tell me when a slot opens')}
       </Button>
       {isOpen && (
         <Sheet
-          title='Лист ожидания'
+          title='Waitlist'
           onClose={() => setIsOpen(false)}
           action={{
-            label: isSending ? 'Отправляем…' : 'Готово',
+            label: isSending ? 'Sending…' : 'Done',
             form: FORM_ID,
             disabled: isSending,
           }}
         >
           <form id={FORM_ID} className={styles.form} onSubmit={handleSubmit} noValidate>
             <p className={styles.lead}>
-              {dayLabel}: если кто-то отменит запись, пришлём одно SMS со ссылкой на это время.
+              {t('{day}: if someone cancels, we will send one SMS with a link to that time.', {
+                day: dayLabel,
+              })}
             </p>
             <Field
-              label='Имя'
+              label='Name'
               error={fieldError?.field === 'name' ? fieldError.message : undefined}
             >
               <Input value={name} onValueChange={setName} autoComplete='name' />
             </Field>
             {accountPhone ? (
-              <p className={styles.phone}>SMS придёт на {formatPhone(accountPhone)}</p>
+              <p className={styles.phone}>
+                {t('The SMS goes to {phone}', { phone: formatPhone(accountPhone) })}
+              </p>
             ) : (
               <Field
-                label='Телефон'
+                label='Phone'
                 error={fieldError?.field === 'phone' ? fieldError.message : undefined}
               >
                 <Input

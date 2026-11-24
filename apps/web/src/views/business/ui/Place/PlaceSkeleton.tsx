@@ -6,14 +6,14 @@ import skeleton from './PlaceSkeleton.module.css'
 const CARDS = 4
 
 // A place while it streams in, on the page's own parts: the cover with the mascot, the logo on
-// its edge with «Записаться» and the glyph capsule, the bio, then the tabs and the «Услуги» tab's
+// its edge with «Book» and the glyph capsule, the bio, then the tabs and the «Services» tab's
 // chips and cards. Nothing moves when the place arrives.
 export const PlaceSkeleton = () => (
   <main
     className={styles.shell}
     data-page-skeleton=''
     aria-busy='true'
-    aria-label='Загружаем страницу места'
+    aria-label='Loading the place'
   >
     <div className={styles.page}>
       <PlaceProfile

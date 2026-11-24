@@ -25,9 +25,9 @@ interface ContactClientSheetProps {
 
 const NO_CODE = ''
 
-// The message goes to the client, so its default words stay Russian whatever the cabinet's language.
+// The default words of the message to the client; the owner may change them before sending.
 const apologyText = (firstName: string, businessName: string) =>
-  `${firstName}, здравствуйте! Это ${businessName}. Спасибо за честный отзыв, и простите, что визит вас огорчил. Расскажите, что пошло не так? Хотим исправить.`
+  `Hello ${firstName}, this is ${businessName}. Thank you for your honest review, and we are sorry the visit let you down. Could you tell us what went wrong? We want to put it right.`
 
 // A poor review is settled with the person, not in public: a written apology ready to send by
 // WhatsApp or SMS (or a call), with one of the place's promo codes when the owner wants to make up
@@ -46,7 +46,7 @@ export const ContactClientSheet = ({
   const [code, setCode] = useState(NO_CODE)
   const chosen = codes.find((item) => item.code === code)
   const message = chosen
-    ? `${text.trim()}\n\nДарим промокод ${chosen.code}: −${chosen.percent}% на следующий визит.`
+    ? `${text.trim()}\n\nHere is a promo code, ${chosen.code}: ${chosen.percent}% off your next visit.`
     : text.trim()
   const digits = review.customerPhone.replace(/\D/g, '')
   const body = encodeURIComponent(message)
@@ -64,18 +64,18 @@ export const ContactClientSheet = ({
   }, [slug, canOfferCode])
 
   const codeItems = [
-    { value: NO_CODE, label: t('Без промокода') },
+    { value: NO_CODE, label: t('No promo code') },
     ...codes.map((item) => ({ value: item.code ?? '', label: `${item.code} · −${item.percent}%` })),
   ]
 
   return (
-    <Sheet title={t('Написать клиенту')} onClose={onClose} cancelLabel={t('Закрыть')}>
+    <Sheet title={t('Message the client')} onClose={onClose} cancelLabel={t('Close')}>
       <div className={sheet.form}>
-        <section className={sheet.group} aria-label={t('Сообщение')}>
+        <section className={sheet.group} aria-label={t('Message')}>
           <SectionCaption>{`${review.authorName} · ${formatPhone(review.customerPhone)}`}</SectionCaption>
           <div className={sheet.list}>
             <textarea
-              aria-label={t('Текст сообщения')}
+              aria-label={t('Message text')}
               className={styles.message}
               value={text}
               onChange={(event) => setText(event.target.value)}
@@ -84,11 +84,11 @@ export const ContactClientSheet = ({
             />
             {codes.length > 0 && (
               <div className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Промокод')}</span>
+                <span className={sheet.rowLabel}>{t('Promo code')}</span>
                 <span className={sheet.rowControl}>
                   <Select
                     variant='plain'
-                    aria-label={t('Промокод в подарок')}
+                    aria-label={t('Promo code as a gift')}
                     items={codeItems}
                     value={code}
                     onValueChange={(value) => setCode(value ?? NO_CODE)}
@@ -99,9 +99,9 @@ export const ContactClientSheet = ({
           </div>
           <p className={sheet.groupFooter}>
             {chosen
-              ? t('Промокод добавится в конце сообщения.')
+              ? t('The promo code is added at the end of the message.')
               : t(
-                  'Откроется мессенджер с этим текстом. Когда договоритесь, отметьте отзыв «Решено».',
+                  'The messenger opens with this text. Once you agree, mark the review “Resolved”.',
                 )}
           </p>
         </section>
@@ -114,16 +114,16 @@ export const ContactClientSheet = ({
             className={styles.contactPrimary}
           >
             <WhatsappLogo aria-hidden />
-            {t('Написать в WhatsApp')}
+            {t('Message on WhatsApp')}
           </ButtonLink>
-          <GlyphGroup label={t('Другие способы связи')}>
+          <GlyphGroup label={t('Other ways to reach them')}>
             <a href={`sms:${review.customerPhone}?&body=${body}`} title='SMS' aria-label='SMS'>
               <ChatCircle aria-hidden />
             </a>
             <a
               href={`tel:${review.customerPhone}`}
               title={formatPhone(review.customerPhone)}
-              aria-label={t('Позвонить')}
+              aria-label={t('Call')}
             >
               <Phone aria-hidden />
             </a>

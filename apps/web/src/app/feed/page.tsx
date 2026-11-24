@@ -5,8 +5,9 @@ import { BUSINESS_KINDS } from '@/shared/config/platform'
 import { FeedPage } from '@/views/feed'
 
 export const metadata: Metadata = {
-  title: 'Образы',
-  description: 'Стрижки, маникюр и окрашивание мастеров рядом - и запись на то же в один тап.',
+  title: 'Looks',
+  description:
+    'Haircuts, manicures and colouring by specialists nearby, and booking the same in one tap.',
   // Kinds, a place and a shared photo (`?start=`) are views of this one page.
   alternates: { canonical: '/feed' },
 }

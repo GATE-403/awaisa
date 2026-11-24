@@ -24,7 +24,7 @@ const LABELS: Record<LinkKind, string> = {
   instagram: 'Instagram',
   telegram: 'Telegram',
   tiktok: 'TikTok',
-  website: 'Сайт',
+  website: 'Website',
 }
 
 /** A handle from what was pasted, or null when it cannot be one. Empty → ''. */

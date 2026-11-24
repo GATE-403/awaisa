@@ -17,33 +17,33 @@ const bookingSteps = (page: Page) => ({
   contacts: page.locator('#step-contacts'),
 })
 
-// Done steps lie in a stack; folded, a tap fans it out so each card's «Изменить» can be reached.
+// Done steps lie in a stack; folded, a tap fans it out so each card's «Change» can be reached.
 const editStep = async (page: Page, step: keyof ReturnType<typeof bookingSteps>) => {
-  const reveal = page.getByRole('button', { name: 'Показать выбор' })
+  const reveal = page.getByRole('button', { name: 'Show your choices' })
   if (await reveal.isVisible()) await reveal.click()
-  await bookingSteps(page)[step].getByRole('button', { name: 'Изменить' }).click()
+  await bookingSteps(page)[step].getByRole('button', { name: 'Change', exact: true }).click()
 }
 
 const primaryAction = (page: Page) =>
   page
     .getByRole('button', {
-      name: /^(Выбрать услугу|Выбрать мастера|Любой мастер|Выбрать время|Выбрать \d{2}:\d{2}|Ввести контакты|Записаться|Записываем…)$/,
+      name: /^(Choose a service|Choose a specialist|Any specialist|Choose a time|Choose \d{2}:\d{2}|Enter contacts|Book|Booking…)$/,
     })
     .filter({ visible: true })
 
 // Everything filled: one press books (a quick time picked with one tap shows the check card,
-// which carries its own «Записаться»).
+// which carries its own «Book»).
 const submitBooking = async (page: Page) => {
-  await page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).first().click()
+  await page.getByRole('button', { name: 'Book' }).filter({ visible: true }).first().click()
 }
 
 const pickFirstFreeSlot = async (page: Page) => {
-  // A link with a time (e.g. «Ближайшее окно») already chose it: that is the slot.
+  // A link with a time (e.g. «Next free slot») already chose it: that is the slot.
   const preset = new URL(page.url()).searchParams.get('time')
   if (preset && (await page.locator('#step-datetime').textContent())?.includes(preset))
     return preset
 
-  const days = page.getByRole('group', { name: 'День' }).getByRole('button')
+  const days = page.getByRole('group', { name: 'Day', exact: true }).getByRole('button')
   // A link that already chose the master lands on the time step at once: wait for the days to be
   // drawn before counting them, or a slow runner counts none.
   await days.first().waitFor()
@@ -54,10 +54,8 @@ const pickFirstFreeSlot = async (page: Page) => {
     // A closed day (the place's day off, e.g. today) is disabled: clicking it would wait forever.
     if (await day.isDisabled()) continue
     await day.click()
-    const slots = page
-      .getByRole('group', { name: 'Время' })
-      .getByRole('button', { disabled: false })
-    const emptyHint = page.getByText('На этот день всё занято')
+    const slots = page.getByRole('group', { name: 'Time' }).getByRole('button', { disabled: false })
+    const emptyHint = page.getByText('This day is fully booked')
     await slots.first().or(emptyHint).waitFor()
     if (await slots.count()) {
       const slot = slots.first()
@@ -116,7 +114,7 @@ const cancelViaApi = async (booking: CreatedBooking) => {
   })
 }
 
-// On phones the «Ближайшее окно» pill waits until the head's «Записаться» is off screen and the
+// On phones the next-slot pill waits until the head's «Book» is off screen and the
 // page is not moving down: scroll well past the head, then a little back up, like a reader would.
 const revealNextSlot = async (page: Page) => {
   await page.locator('[data-place-book]').first().waitFor()
@@ -147,7 +145,7 @@ const settledBox = async (locator: Locator) => {
   return box
 }
 
-// The cabinet's «Новая запись» toasts come down over the top of the page (on phones over the day
+// The cabinet's «New booking» toasts come down over the top of the page (on phones over the day
 // strip) and pause while the pointer rests on them; a person swipes one away, a test waits them out
 // with the pointer off them.
 const waitForToastsToLeave = async (page: Page) => {

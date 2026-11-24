@@ -33,33 +33,33 @@ test.describe('Gift certificates online', () => {
       const off = await fetch(`${API_URL}/businesses/${SLUG}/certificate-sale`)
       expect(await off.json()).toEqual({ amounts: [] })
       await page.goto(`/manage/${SLUG}?tab=loyalty`)
-      const group = page.getByRole('region', { name: 'Сертификаты онлайн' })
+      const group = page.getByRole('region', { name: 'Certificates online' })
       await group.getByRole('switch').click()
-      const amountsSheet = page.getByRole('dialog', { name: 'Суммы' })
-      await expect(amountsSheet.getByLabel('Сумма 1, сом')).toHaveValue(/^1\s000$/)
-      await amountsSheet.getByRole('button', { name: 'Готово' }).click()
+      const amountsSheet = page.getByRole('dialog', { name: 'Amounts' })
+      await expect(amountsSheet.getByLabel('Amount 1, som')).toHaveValue('1,000')
+      await amountsSheet.getByRole('button', { name: 'Done' }).click()
       await expect(
-        group.getByRole('button', { name: /Суммы\s+1\s000 · 3\s000 · 5\s000 сом/ }),
+        group.getByRole('button', { name: /Amounts\s+1,000 · 3,000 · 5,000 som/ }),
       ).toBeVisible()
 
       // The guest picks an amount on the place's page and fills who it is for.
       await guestPage.goto(`/${SLUG}`)
-      const block = guestPage.getByRole('region', { name: 'Подарочный сертификат' })
-      await block.getByRole('button', { name: '3 000 сом' }).click()
-      const sheet = guestPage.getByRole('dialog', { name: 'Сертификат' })
-      await expect(sheet.getByRole('radio', { name: '3 000 сом' })).toBeChecked()
-      await sheet.getByLabel('Имя получателя').fill('E2E Айгуль')
-      await sheet.getByLabel('Телефон получателя').fill(randomClientPhone().replace('+996', ''))
-      await sheet.getByLabel('Поздравление').fill('С днём рождения!')
-      await sheet.getByLabel('Ваше имя').fill('E2E Нурлан')
+      const block = guestPage.getByRole('region', { name: 'Gift card' })
+      await block.getByRole('button', { name: /^3,000\ssom$/ }).click()
+      const sheet = guestPage.getByRole('dialog', { name: 'Gift card' })
+      await expect(sheet.getByRole('radio', { name: /^3,000\ssom$/ })).toBeChecked()
+      await sheet.getByLabel('Recipient’s name').fill('E2E Айгуль')
+      await sheet.getByLabel('Recipient’s phone').fill(randomClientPhone().replace('+996', ''))
+      await sheet.getByLabel('Message').fill('С днём рождения!')
+      await sheet.getByLabel('Your name').fill('E2E Нурлан')
       const buyer = randomClientPhone()
-      await sheet.getByLabel('Ваш телефон').fill(buyer.replace('+996', ''))
-      await sheet.getByRole('button', { name: 'Оплатить' }).click()
+      await sheet.getByLabel('Your phone').fill(buyer.replace('+996', ''))
+      await sheet.getByRole('button', { name: 'Pay' }).click()
 
       // Nothing is issued before the payment; the test checkout pays and issues it.
       await expect(guestPage).toHaveURL(/\/pay\/[0-9a-f-]+\?s=/)
-      await expect(guestPage.getByText('Тестовый режим')).toBeVisible({ timeout: 20_000 })
-      await expect(guestPage.getByText('Для E2E Айгуль · от E2E Нурлан')).toBeVisible()
+      await expect(guestPage.getByText('Test mode')).toBeVisible({ timeout: 20_000 })
+      await expect(guestPage.getByText('For E2E Айгуль · from E2E Нурлан')).toBeVisible()
       const pending = await withDb((client) =>
         client.query(
           `SELECT "status", "certificate_id" FROM "certificate_orders" WHERE "buyer_phone" = $1`,
@@ -67,9 +67,11 @@ test.describe('Gift certificates online', () => {
         ),
       )
       expect(pending.rows).toEqual([{ status: 'pending', certificate_id: null }])
-      await guestPage.getByRole('button', { name: 'Оплатить 3 000 сом' }).click()
-      await expect(guestPage.getByText('Оплачено. Сертификат готов')).toBeVisible()
-      await expect(guestPage.getByText('Код сертификата отправили вам и получателю.')).toBeVisible()
+      await guestPage.getByRole('button', { name: /^Pay 3,000\ssom$/ }).click()
+      await expect(guestPage.getByText('Paid. Your certificate is ready')).toBeVisible()
+      await expect(
+        guestPage.getByText('We have sent the gift card code to you and the recipient.'),
+      ).toBeVisible()
 
       const issued = await withDb((client) =>
         client.query(
@@ -82,7 +84,7 @@ test.describe('Gift certificates online', () => {
       expect(issued.rows).toEqual([
         { status: 'paid', amount: 3000, balance: 3000, recipient: 'E2E Айгуль' },
       ])
-      // The owner sees it among the certificates, and «Прибыль» counts it today.
+      // The owner sees it among the certificates, and “Profit” counts it today.
       await page.reload()
       await expect(page.getByText('E2E Айгуль')).toBeVisible()
       const money = await (await page.request.get(`/api/manage/${SLUG}/money?days=7`)).json()
@@ -119,9 +121,9 @@ test.describe('Gift certificates online', () => {
         .toBe('failed')
       expect((await (await fetch(paymentUrl)).json()).order.status).toBe('expired')
       await guestPage.goto(unpaid.checkoutUrl)
-      await expect(guestPage.getByText('Время на оплату вышло')).toBeVisible()
+      await expect(guestPage.getByText('Time to pay has run out')).toBeVisible()
       await expect(
-        guestPage.getByText('Деньги не списаны. Оформите сертификат снова.'),
+        guestPage.getByText('No money was taken. Order the certificate again.'),
       ).toBeVisible()
     } finally {
       await page.request.put(saleUrl, { data: before })

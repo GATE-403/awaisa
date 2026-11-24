@@ -91,8 +91,8 @@ test.describe('Cabinet accessibility: sheets and the dark theme', () => {
     })
 
     await openTab(page, business, `schedule&date=${visit.date}`)
-    await visibleButton(page, 'Новая запись').click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Новая запись' }), 'Новая запись')
+    await visibleButton(page, 'New booking').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'New booking' }), 'New booking')
     await page
       .locator('[data-schedule-board]')
       .getByRole('button', { name: new RegExp(`, ${visit.name}, `) })
@@ -101,33 +101,33 @@ test.describe('Cabinet accessibility: sheets and the dark theme', () => {
 
     await openTab(page, business, 'clients')
     await page.getByRole('button', { name: new RegExp(visit.name) }).click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Клиент' }), 'Клиент')
-    await visibleButton(page, 'Рассылка').click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Рассылка', exact: true }), 'Рассылка')
-    await visibleButton(page, 'Импорт').click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Импорт' }), 'Импорт')
+    await checkOpen(page, page.getByRole('dialog', { name: 'Client' }), 'Client')
+    await visibleButton(page, 'Mailing').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'Mailing', exact: true }), 'Mailing')
+    await visibleButton(page, 'Import').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'Import' }), 'Import')
 
     await openTab(page, business, 'promotions')
-    await page.getByRole('button', { name: 'Новая акция' }).first().click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Новая акция', exact: true }), 'Акция')
-
-    await openTab(page, business, 'page')
-    await visibleButton(page, 'Редактировать').click()
+    await page.getByRole('button', { name: 'New promotion' }).first().click()
     await checkOpen(
       page,
-      page.getByRole('dialog', { name: 'Редактировать', exact: true }),
-      'Страница',
+      page.getByRole('dialog', { name: 'New promotion', exact: true }),
+      'Promotion',
     )
-    await page.getByRole('tab', { name: /Услуги/ }).click()
-    await visibleButton(page, 'Добавить услугу').click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Новая услуга' }), 'Услуга')
-    await page.getByRole('tab', { name: /Мастера/ }).click()
-    await visibleButton(page, 'Добавить мастера').click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Новый мастер' }), 'Мастер')
+
+    await openTab(page, business, 'page')
+    await visibleButton(page, 'Edit').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'Edit', exact: true }), 'Page')
+    await page.getByRole('tab', { name: /Services/ }).click()
+    await visibleButton(page, 'Add a service').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'New service' }), 'Service')
+    await page.getByRole('tab', { name: /Specialists/ }).click()
+    await visibleButton(page, 'Add a specialist').click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'New specialist' }), 'Specialist')
 
     await openTab(page, business, 'reviews')
-    await page.getByRole('button', { name: 'Ответы на отзывы' }).click()
-    await checkOpen(page, page.getByRole('dialog', { name: 'Ответы на отзывы' }), 'Ответы')
+    await page.getByRole('button', { name: 'Review replies' }).click()
+    await checkOpen(page, page.getByRole('dialog', { name: 'Review replies' }), 'Replies')
   })
 
   test('no serious violations on any cabinet tab in the dark theme', async ({ page }) => {

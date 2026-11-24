@@ -70,10 +70,10 @@ export class RemindersService {
           time: formatMinutes(minutes),
         }
 
-        // Telegram when the client linked it (a «Перенести или отменить» button), then WhatsApp, else SMS.
+        // Telegram when the client linked it (a «Change or cancel» button), then WhatsApp, else SMS.
         return this.messages.send(row.customer_phone, {
           text: reminderMessage(booking, isToday, link),
-          link: { label: 'Перенести или отменить', url: link },
+          link: { label: 'Change or cancel', url: link },
           whatsapp: whatsappReminder(booking, isToday, link),
           billing: { businessId: row.business_id, isOptional: true },
         })

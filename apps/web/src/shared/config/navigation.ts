@@ -9,13 +9,13 @@ type NavItem = {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Каталог', icon: Compass },
+  { href: '/', label: 'Catalogue', icon: Compass },
   // Finished work as a vertical feed, each photo one tap from booking it.
-  { href: '/feed', label: 'Образы', icon: FanCardsIcon },
-  { href: '/map', label: 'Карта', icon: MapPin },
-  { href: '/business', label: 'Бизнес', icon: Storefront },
-  // The records lead that page («Записи»): «Мой профиль» is the public profile, one of each.
-  { href: '/bookings', label: 'Записи', icon: Ticket },
+  { href: '/feed', label: 'Looks', icon: FanCardsIcon },
+  { href: '/map', label: 'Map', icon: MapPin },
+  { href: '/business', label: 'Business', icon: Storefront },
+  // The records lead that page («Bookings»): «My profile» is the public profile, one of each.
+  { href: '/bookings', label: 'Bookings', icon: Ticket },
 ]
 
 // First path segments that belong to the app; anything else is a business slug.
@@ -45,7 +45,7 @@ const APP_SEGMENTS = new Set([
   'insights',
   // Platform admins' reports queue.
   'moderation',
-  // «Что нового».
+  // «What's new».
   'updates',
 ])
 

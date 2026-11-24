@@ -18,7 +18,7 @@ interface BookingTopBarProps {
   progress?: { id: string; isDone: boolean; isCurrent: boolean }[]
 }
 
-// Over the page it was opened from, closing is «back» (that page, its scroll, its state); opened
+// Over the page it was opened from, closing is “back” (that page, its scroll, its state); opened
 // by a link from outside, it goes to the place's page.
 const useClose = (isModal: boolean) => {
   const router = useRouter()
@@ -47,7 +47,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <NextLink
           href={`/${business.slug}`}
           className={styles.close}
-          aria-label={t('Закрыть запись')}
+          aria-label={t('Close booking')}
           onClick={close}
         >
           <X aria-hidden />
@@ -56,7 +56,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <NextLink href={`/${business.slug}`} className={styles.title}>
           <BusinessTile name={business.name} logoUrl={business.logoUrl} size='sm' />
           <span className={styles.text}>
-            <h1 className={styles.heading}>{t('Запись')}</h1>
+            <h1 className={styles.heading}>{t('Booking')}</h1>
             <span className={styles.place}>{business.name}</span>
           </span>
         </NextLink>
@@ -68,7 +68,7 @@ export const BookingTopBar = ({ business, isModal = false, progress }: BookingTo
         <div
           className={styles.progress}
           role='progressbar'
-          aria-label={t('Шаги записи')}
+          aria-label={t('Booking steps')}
           aria-valuemin={0}
           aria-valuemax={progress.length}
           aria-valuenow={progress.filter((step) => step.isDone).length}

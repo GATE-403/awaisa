@@ -61,7 +61,7 @@
   color: var(--color-muted-foreground);
 }
 
-/* «⋯» at a row's end: a 44pt target around a small glyph. */
+/* "⋯" at a row's end: a 44pt target around a small glyph. */
 .more {
   position: relative;
   flex-shrink: 0;
@@ -120,7 +120,7 @@
   color: color-mix(in srgb, var(--color-success) 50%, var(--color-foreground));
 }
 
-/* Rows with a time, a body, a figure and «⋯»: one line, the body takes the room left
+/* Rows with a time, a body, a figure and "⋯": one line, the body takes the room left
    (doubled class: over the cabinet's two-column row grid). */
 .row.row {
   display: flex;
@@ -133,7 +133,7 @@
   min-width: 0;
 }
 
-/* A cancelled sale keeps the «⋯» column, so the figures line up on one right edge. */
+/* A cancelled sale keeps the "⋯" column, so the figures line up on one right edge. */
 .moreSpace {
   flex-shrink: 0;
   width: 28px;

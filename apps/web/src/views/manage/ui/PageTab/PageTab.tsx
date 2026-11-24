@@ -92,7 +92,7 @@ const MAX_PHOTOS = 30
 const PHOTO_INPUT_ID = 'page-work-photo'
 
 // The business page laid out like a profile in Instagram: the cover with the logo over its edge, a
-// short bio, «Редактировать · Поделиться» (everything written about the place is edited in one
+// short bio, "Edit · Share" (everything written about the place is edited in one
 // sheet, so the page stays what clients see), then tabs: the work as a grid, the masters, the
 // week's hours. The logo and the cover change from their own buttons.
 export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
@@ -106,7 +106,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const [photos, setPhotos] = useState<WorkPhoto[] | null>(null)
   const photoCount = photos?.length ?? null
   const searchParams = useSearchParams()
-  // Old links to «Услуги», «Мастера» and «График» open that tab of the page.
+  // Old links to "Services", "Specialists" and "Hours" open that tab of the page.
   const [section, setSection] = useState<PageSection>(
     () => PAGE_SECTIONS[searchParams.get('tab') ?? ''] ?? 'works',
   )
@@ -159,7 +159,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     document.getElementById(PHOTO_INPUT_ID)?.click()
   }
 
-  // A link that names a section while the page is open («Запуск записи» → «Добавьте мастеров»)
+  // A link that names a section while the page is open ("Booking setup" → "Add specialists")
   // switches to that tab here too.
   useEffect(() => {
     if (linkedSection) setSection(linkedSection)
@@ -172,13 +172,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
     setBusy(kind)
     await run(
       () => (kind === 'cover' ? uploadCover(slug, file) : uploadLogo(slug, file)),
-      kind === 'cover' ? t('Обложка обновлена') : t('Логотип обновлён'),
+      kind === 'cover' ? t('Cover updated') : t('Logo updated'),
     )
     setBusy(null)
   }
 
   const save = (input: UpdateBusinessInput) =>
-    run(() => updateBusiness(slug, input), t('Страница сохранена'))
+    run(() => updateBusiness(slug, input), t('Page saved'))
 
   const share = () => setIsSharing(true)
 
@@ -186,23 +186,23 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
   const tabActions: Record<PageSection, TabAction | null> = {
     works:
       (photoCount ?? 0) < MAX_PHOTOS
-        ? { label: t('Добавить'), ariaLabel: t('Добавить фото'), icon: plus, onClick: addPhotos }
+        ? { label: t('Add'), ariaLabel: t('Add photo'), icon: plus, onClick: addPhotos }
         : null,
     services: {
-      label: t('Добавить'),
-      ariaLabel: t('Добавить услугу'),
+      label: t('Add'),
+      ariaLabel: t('Add a service'),
       icon: plus,
       onClick: () => setEditingService('new'),
     },
     masters: {
-      label: t('Добавить'),
-      ariaLabel: t('Добавить мастера'),
+      label: t('Add'),
+      ariaLabel: t('Add a specialist'),
       icon: plus,
       onClick: () => setEditingMaster('new'),
     },
     hours: {
-      label: t('Изменить'),
-      ariaLabel: t('Изменить часы'),
+      label: t('Change'),
+      ariaLabel: t('Change hours'),
       icon: <PencilSimple aria-hidden />,
       onClick: () => setIsEditingHours(true),
     },
@@ -211,13 +211,13 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
 
   const saveService = (input: ServiceInput) =>
     editingService && editingService !== 'new'
-      ? run(() => updateService(slug, editingService.id, input), t('Услуга сохранена'))
-      : run(() => createService(slug, input), t('Услуга добавлена'))
+      ? run(() => updateService(slug, editingService.id, input), t('Service saved'))
+      : run(() => createService(slug, input), t('Service added'))
 
   const saveMaster = (input: SpecialistInput) =>
     editingMaster && editingMaster !== 'new'
-      ? run(() => updateSpecialist(slug, editingMaster.id, input), t('Мастер сохранён'))
-      : run(() => createSpecialist(slug, input), t('Мастер добавлен'))
+      ? run(() => updateSpecialist(slug, editingMaster.id, input), t('Specialist saved'))
+      : run(() => createSpecialist(slug, input), t('Specialist added'))
 
   const logo = (
     <PlaceLogo name={business.name} logoUrl={business.logoUrl} isBusy={busy === 'logo'}>
@@ -235,28 +235,28 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         cover={
           <>
             {business.coverUrl && (
-              <PlaceCoverImage src={business.coverUrl} alt={t('Обложка')} fetchPriority='high' />
+              <PlaceCoverImage src={business.coverUrl} alt={t('Cover')} fetchPriority='high' />
             )}
             {business.coverUrl ? (
               <Menu
-                label={t('Обложка')}
+                label={t('Cover')}
                 className={styles.coverButton}
                 trigger={
                   <>
                     <Camera aria-hidden />
-                    {busy === 'cover' ? t('Загружаем…') : t('Обложка')}
+                    {busy === 'cover' ? t('Loading…') : t('Cover')}
                   </>
                 }
               >
                 <MenuItem icon={<Camera aria-hidden />} onClick={() => coverInput.current?.click()}>
-                  {t('Заменить обложку')}
+                  {t('Replace cover')}
                 </MenuItem>
                 <MenuItem
                   variant='danger'
                   icon={<Trash aria-hidden />}
-                  onClick={() => void run(() => removeCover(slug), t('Обложка удалена'))}
+                  onClick={() => void run(() => removeCover(slug), t('Cover deleted'))}
                 >
-                  {t('Удалить обложку')}
+                  {t('Delete cover')}
                 </MenuItem>
               </Menu>
             ) : (
@@ -267,23 +267,23 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 disabled={busy !== null}
               >
                 <Camera aria-hidden />
-                {busy === 'cover' ? t('Загружаем…') : t('Добавить обложку')}
+                {busy === 'cover' ? t('Loading…') : t('Add a cover')}
               </button>
             )}
           </>
         }
         logo={
           business.logoUrl ? (
-            <Menu label={t('Логотип')} className={styles.logoButton} trigger={logo}>
+            <Menu label={t('Logo')} className={styles.logoButton} trigger={logo}>
               <MenuItem icon={<Camera aria-hidden />} onClick={() => logoInput.current?.click()}>
-                {t('Заменить логотип')}
+                {t('Replace logo')}
               </MenuItem>
               <MenuItem
                 variant='danger'
                 icon={<Trash aria-hidden />}
-                onClick={() => void run(() => removeLogo(slug), t('Логотип удалён'))}
+                onClick={() => void run(() => removeLogo(slug), t('Logo deleted'))}
               >
-                {t('Удалить логотип')}
+                {t('Delete logo')}
               </MenuItem>
             </Menu>
           ) : (
@@ -292,27 +292,27 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
               className={styles.logoButton}
               onClick={() => logoInput.current?.click()}
               disabled={busy !== null}
-              aria-label={t('Добавить логотип')}
+              aria-label={t('Add a logo')}
             >
               {logo}
             </button>
           )
         }
-        // Where the public page keeps «Записаться» and its glyphs: one primary «Редактировать»
+        // Where the public page keeps "Book" and its glyphs: one primary "Edit"
         // and the secondary actions as thin glyphs in one capsule.
         actions={
           <>
             <Button type='button' size='sm' onClick={() => setIsEditing(true)}>
-              {t('Редактировать')}
+              {t('Edit')}
             </Button>
-            <GlyphGroup label={t('Страница')}>
-              <GlyphButton icon={<ShareNetwork />} label={t('Поделиться')} onClick={share} />
+            <GlyphGroup label={t('Page')}>
+              <GlyphButton icon={<ShareNetwork />} label={t('Share')} onClick={share} />
               <a
                 href={`/${slug}`}
                 target='_blank'
                 rel='noreferrer'
-                aria-label={t('Как видят клиенты')}
-                title={t('Как видят клиенты')}
+                aria-label={t('As clients see it')}
+                title={t('As clients see it')}
               >
                 <ArrowUpRight aria-hidden />
               </a>
@@ -322,7 +322,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         isActionsHiddenOnPhone
         footer={
           // The week's facts on a line of their own, then one row of capsules: what the page
-          // still lacks and the promotions («поработать над лаконичностью и иерархией»).
+          // still lacks and the promotions ("work on brevity and hierarchy").
           <div className={styles.pageFooter}>
             <PageInsights
               slug={slug}
@@ -342,22 +342,22 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         }
       >
         <PlaceName>{business.name}</PlaceName>
-        {/* One quiet line of facts; only «Скрыта» stands out, in red. */}
+        {/* One quiet line of facts; only "Hidden" stands out, in red. */}
         <PlaceLine>
           {[kindText, business.address, status?.label].filter(Boolean).join(' · ')}
         </PlaceLine>
-        {!business.isPublished && <PlaceLine tone='danger'>{t('Скрыта от клиентов')}</PlaceLine>}
+        {!business.isPublished && <PlaceLine tone='danger'>{t('Hidden from clients')}</PlaceLine>}
         {business.description && <PlaceDescription>{business.description}</PlaceDescription>}
       </PlaceProfile>
 
       <ProfileTabs
-        label={t('Разделы страницы')}
+        label={t('Page sections')}
         value={section}
         onChange={setSection}
         items={[
           {
             value: 'works',
-            label: t('Работы'),
+            label: t('Work'),
             count: photoCount ?? undefined,
             panelId: 'page-panel-works',
             panel: (
@@ -372,7 +372,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           },
           {
             value: 'services',
-            label: t('Услуги'),
+            label: t('Services'),
             count: services.length,
             panelId: 'page-panel-services',
             panel: (
@@ -380,8 +380,8 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                 {serviceGroups.length === 0 ? (
                   <EmptyState
                     variant='inline'
-                    title={t('Добавьте услуги')}
-                    text={t('С ценой и длительностью: по ним клиенты записываются.')}
+                    title={t('Add services')}
+                    text={t('With price and duration: clients book by them.')}
                   />
                 ) : (
                   <div className={styles.serviceGroups}>
@@ -408,15 +408,15 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                                 isHit={service.isPopular}
                                 linkLabel={t(
                                   service.isActive === false
-                                    ? 'Изменить «{name}», скрыта'
-                                    : 'Изменить «{name}»',
+                                    ? 'Change “{name}”, hidden'
+                                    : 'Change “{name}”',
                                   { name: service.name },
                                 )}
-                                actionLabel={t('Изменить')}
+                                actionLabel={t('Change')}
                                 onSelect={() => setEditingService(service)}
                                 action={
                                   service.isActive === false ? (
-                                    <span className={styles.offMark}>{t('Скрыта')}</span>
+                                    <span className={styles.offMark}>{t('Hidden')}</span>
                                   ) : undefined
                                 }
                                 isPlaceHidden
@@ -434,22 +434,22 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                   onClick={() => setIsAddingCategory(true)}
                 >
                   <Plus aria-hidden />
-                  {t('Категория')}
+                  {t('Category')}
                 </button>
               </>
             ),
           },
           {
             value: 'masters',
-            label: t('Мастера'),
+            label: t('Specialists'),
             count: masters.length,
             panelId: 'page-panel-masters',
             panel:
               catalog.specialists.length === 0 ? (
                 <EmptyState
                   variant='inline'
-                  title={t('Добавьте мастеров')}
-                  text={t('Клиенты выбирают мастера по фото при записи.')}
+                  title={t('Add specialists')}
+                  text={t('Clients choose a specialist by photo when booking.')}
                 />
               ) : (
                 <MasterGrid>
@@ -460,7 +460,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                     >
                       <MasterCard specialist={master} onSelect={() => setEditingMaster(master)}>
                         {master.isActive === false && (
-                          <span className={styles.offMark}>{t('Не работает')}</span>
+                          <span className={styles.offMark}>{t('Not working')}</span>
                         )}
                       </MasterCard>
                     </li>
@@ -470,7 +470,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
           },
           {
             value: 'hours',
-            label: t('Время'),
+            label: t('Time'),
             panelId: 'page-panel-hours',
             panel: <WeekHours hours={business.hours} todayWeekday={todayWeekday} status={status} />,
           },
@@ -491,19 +491,19 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       {/* Phones: the page's tools float at the window's foot (the cabinet's rule for a section's
           tools): thin glyphs in one capsule and the open tab's action as a labelled accent button. */}
       <FloatingToolbar align='end' className={styles.phoneTools}>
-        <GlyphGroup label={t('Инструменты страницы')}>
+        <GlyphGroup label={t('Page tools')}>
           <GlyphButton
             icon={<PencilSimple />}
-            label={t('Редактировать')}
+            label={t('Edit')}
             onClick={() => setIsEditing(true)}
           />
-          <GlyphButton icon={<ShareNetwork />} label={t('Поделиться')} onClick={share} />
+          <GlyphButton icon={<ShareNetwork />} label={t('Share')} onClick={share} />
           <a
             href={`/${slug}`}
             target='_blank'
             rel='noreferrer'
-            aria-label={t('Как видят клиенты')}
-            title={t('Как видят клиенты')}
+            aria-label={t('As clients see it')}
+            title={t('As clients see it')}
           >
             <ArrowUpRight aria-hidden />
           </a>
@@ -528,7 +528,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         accept={ACCEPT}
         hidden
         onChange={upload('cover')}
-        aria-label={t('Файл обложки')}
+        aria-label={t('Cover file')}
       />
       <input
         ref={logoInput}
@@ -536,7 +536,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
         accept={ACCEPT}
         hidden
         onChange={upload('logo')}
-        aria-label={t('Файл логотипа')}
+        aria-label={t('Logo file')}
       />
 
       {editingService && (
@@ -565,7 +565,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
                       file
                         ? uploadSpecialistPhoto(slug, editingMaster.id, file)
                         : removeSpecialistPhoto(slug, editingMaster.id),
-                    file ? t('Фото обновлено') : t('Фото удалено'),
+                    file ? t('Photo updated') : t('Photo deleted'),
                   )
           }
           slug={slug}
@@ -590,7 +590,7 @@ export const PageTab = ({ slug, business, catalog, run }: PageTabProps) => {
       {isAddingCategory && (
         <CategoryDialog
           onClose={() => setIsAddingCategory(false)}
-          onSave={(name) => run(() => createCategory(slug, name), t('Категория добавлена'))}
+          onSave={(name) => run(() => createCategory(slug, name), t('Category added'))}
         />
       )}
       {payingMaster && (

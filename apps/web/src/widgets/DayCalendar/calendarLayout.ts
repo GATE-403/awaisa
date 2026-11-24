@@ -73,7 +73,7 @@ const masterDayLoad = (
   }
 }
 
-/** «Колонки»: masters side by side, time running down. «Лента»: masters as rows, time across. */
+/** Columns: masters side by side, time running down. Timeline: masters as rows, time across. */
 type CalendarLayout = 'columns' | 'timeline'
 
 // Across, an hour is 240px: a 45-minute visit (180px) has room for its state, time, client and

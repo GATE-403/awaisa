@@ -23,11 +23,11 @@ const reportSchema = z
     reason: z.enum(REASONS),
     session: z.string().trim().min(8).max(64).optional(),
   })
-  .refine(isValidTarget, { message: 'Неизвестно, на что жалоба', path: ['targetId'] })
+  .refine(isValidTarget, { message: 'Unknown report target', path: ['targetId'] })
 
 const decisionSchema = z
   .object({ ...target, action: z.enum(ACTIONS) })
-  .refine(isValidTarget, { message: 'Неизвестно, что решать', path: ['targetId'] })
+  .refine(isValidTarget, { message: 'Unknown decision target', path: ['targetId'] })
 
 const logQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(200).default(50) })
 

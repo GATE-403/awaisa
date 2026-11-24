@@ -34,7 +34,7 @@ type FeedOptions = {
 
 const UID_DOMAIN = 'awaisa.kg'
 
-const formatSom = (amount: number) => `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} сом`
+const formatSom = (amount: number) => `${String(amount).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} som`
 
 const visitLink = (booking: FeedBooking, options: FeedOptions) => {
   const date = toBusinessParts(booking.startsAt).dateKey
@@ -46,7 +46,7 @@ const visitLink = (booking: FeedBooking, options: FeedOptions) => {
 /** The calendar's copy of a visit: stable UID, the client's name, the branch and its address. */
 const bookingEvent = (booking: FeedBooking, options: FeedOptions): IcsEvent => {
   const isCancelled = booking.status === 'cancelled'
-  const client = booking.customerName.trim() || 'Клиент'
+  const client = booking.customerName.trim() || 'Client'
   const title = [
     booking.serviceName,
     client,
@@ -58,12 +58,12 @@ const bookingEvent = (booking: FeedBooking, options: FeedOptions): IcsEvent => {
   const toPay = booking.price - (booking.discountAmount ?? 0)
   const link = visitLink(booking, options)
   const description = [
-    `Клиент: ${client}${phone ? `, ${phone}` : ''}`,
-    `Мастер: ${booking.specialistName}`,
-    `Стоимость: ${formatSom(toPay)}`,
-    ...(booking.comment.trim() ? [`Комментарий: ${booking.comment.trim()}`] : []),
-    ...(booking.paymentStatus === 'pending' ? ['Ждёт предоплату'] : []),
-    ...(isCancelled ? ['Запись отменена'] : []),
+    `Client: ${client}${phone ? `, ${phone}` : ''}`,
+    `Specialist: ${booking.specialistName}`,
+    `Price: ${formatSom(toPay)}`,
+    ...(booking.comment.trim() ? [`Comment: ${booking.comment.trim()}`] : []),
+    ...(booking.paymentStatus === 'pending' ? ['Awaiting the deposit'] : []),
+    ...(isCancelled ? ['Booking cancelled'] : []),
     link,
   ]
   const location = [booking.branchName, booking.branchAddress]
@@ -75,7 +75,7 @@ const bookingEvent = (booking: FeedBooking, options: FeedOptions): IcsEvent => {
     uid: `booking-${booking.id}@${UID_DOMAIN}`,
     start: booking.startsAt,
     end: booking.endsAt,
-    summary: `${isCancelled ? 'Отменена: ' : ''}${title.join(' · ')}`,
+    summary: `${isCancelled ? 'Cancelled: ' : ''}${title.join(' · ')}`,
     description: description.join('\n'),
     location: location || undefined,
     url: link,

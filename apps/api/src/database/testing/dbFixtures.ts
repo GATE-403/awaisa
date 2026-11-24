@@ -59,7 +59,7 @@ const insertBooking = async (db: DataSource, catalog: Catalog, input: BookingInp
        "customer_name", "customer_phone", "cancel_token_hash", "status", "sms_confirmation",
        "reminder_minutes", "outcome", "payment_status")
      VALUES ($1, $2, $3, now() + make_interval(mins => $4), now() + make_interval(mins => $4 + $5),
-       'Тест', $6, $7, 'confirmed', $8, $9, $10, $11)
+       'Test', $6, $7, 'confirmed', $8, $9, $10, $11)
      RETURNING "id"`,
     [
       catalog.businessId,

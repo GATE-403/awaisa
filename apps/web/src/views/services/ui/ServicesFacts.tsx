@@ -10,17 +10,17 @@ interface ServicesFactsProps {
   minPrice: number
 }
 
-// «6 услуг · от 900 сом · 3 мастера» with bold figures, in the chosen language.
+// «6 services · from 900 som · 3 specialists» with bold figures.
 export const ServicesFacts = ({ servicesCount, mastersCount, minPrice }: ServicesFactsProps) => {
   const t = useT()
-  const wordOf = (count: number, forms: [string, string, string]) =>
+  const wordOf = (count: number, forms: [string, string]) =>
     t.count(count, forms).slice(String(count).length + 1)
-  const [before, after] = t('от {price}').split('{price}')
+  const [before, after] = t('from {price}').split('{price}')
 
   return (
     <p className={styles.facts}>
       <span>
-        <strong>{servicesCount}</strong> {wordOf(servicesCount, ['услуга', 'услуги', 'услуг'])}
+        <strong>{servicesCount}</strong> {wordOf(servicesCount, ['service', 'services'])}
       </span>
       {Number.isFinite(minPrice) && (
         <span>
@@ -30,7 +30,7 @@ export const ServicesFacts = ({ servicesCount, mastersCount, minPrice }: Service
         </span>
       )}
       <span>
-        <strong>{mastersCount}</strong> {wordOf(mastersCount, ['мастер', 'мастера', 'мастеров'])}
+        <strong>{mastersCount}</strong> {wordOf(mastersCount, ['specialist', 'specialists'])}
       </span>
     </p>
   )

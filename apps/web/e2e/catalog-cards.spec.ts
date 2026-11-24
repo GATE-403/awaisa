@@ -17,7 +17,7 @@ type FeedItem = {
   likes?: number
 }
 
-// The three catalog cards each do their own thing: a work books its look («Хочу так»), a place
+// The three catalog cards each do their own thing: a work books its look (“I want this look”), a place
 // leafs through its pictures and books its next free times, a service says how its price compares.
 test.describe('Catalog cards', () => {
   test.afterEach(async ({ page }) => {
@@ -25,16 +25,16 @@ test.describe('Catalog cards', () => {
     await Promise.all(stored.map(cancelViaApi))
   })
 
-  test('«Хочу так» books the work’s service and master with the photo as the look', async ({
+  test('“I want this look” books the work’s service and master with the photo as the look', async ({
     page,
     isMobile,
   }) => {
     test.skip(isMobile, 'one booking is enough; the card itself is checked on phones below')
     await page.goto('/')
-    // A work of a seeded place: other specs add works to their own «E2E …» places, which come first
+    // A work of a seeded place: other specs add works to their own “E2E …” places, which come first
     // in the catalog and may lack a tagged service or master.
     const want = page
-      .getByRole('link', { name: 'Хочу так' })
+      .getByRole('link', { name: 'I want this look' })
       .and(page.locator(':not([href^="/e2e-"])'))
       .first()
     await want.scrollIntoViewIfNeeded()
@@ -45,13 +45,13 @@ test.describe('Catalog cards', () => {
     await want.click()
     await expect(page).toHaveURL(/\/book\?.*look=/)
     const steps = bookingSteps(page)
-    const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+    const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) await anyMaster.click()
     await pickFirstFreeSlot(page)
-    await steps.contacts.getByLabel('Имя').fill('E2E Тест')
-    await steps.contacts.getByLabel('Телефон').fill(randomClientPhone())
+    await steps.contacts.getByLabel('Name', { exact: true }).fill('E2E Тест')
+    await steps.contacts.getByLabel('Phone').fill(randomClientPhone())
     // The look waits beside the note, with a way to drop it.
-    const look = page.getByRole('img', { name: 'Фото, как хочется' })
+    const look = page.getByRole('img', { name: 'Photo of the look you want' })
     await expect(look).toBeVisible()
 
     const booked = page.waitForResponse(
@@ -62,7 +62,7 @@ test.describe('Catalog cards', () => {
     await submitBooking(page)
     const request = (await booked).request().postDataJSON() as { lookPhotoId?: string }
     expect(request.lookPhotoId).toBe(lookId)
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
 
     const [stored] = await readStoredBookings(page)
     const view = await (
@@ -119,15 +119,15 @@ test.describe('Catalog cards', () => {
     await page.goto('/')
     const tile = page
       .locator('[data-card]')
-      .filter({ has: page.getByText('Хочу так') })
+      .filter({ has: page.getByText('I want this look') })
       .first()
     await tile.scrollIntoViewIfNeeded()
-    const heart = tile.getByRole('button', { name: /^Нравится/ })
+    const heart = tile.getByRole('button', { name: /^Likes/ })
     await expect(heart).toHaveAttribute('aria-pressed', 'false')
     const before = Number((await heart.getAttribute('aria-label'))?.match(/\d+/)?.[0] ?? 0)
     await heart.click()
     await expect(heart).toHaveAttribute('aria-pressed', 'true')
-    await expect(heart).toHaveAttribute('aria-label', `Нравится: ${before + 1}`)
+    await expect(heart).toHaveAttribute('aria-label', `Likes: ${before + 1}`)
     // And back, so the shared count stays as the seed left it.
     await heart.click()
     await expect(heart).toHaveAttribute('aria-pressed', 'false')
@@ -135,7 +135,7 @@ test.describe('Catalog cards', () => {
 
   test('a place leafs through its pictures and books its next free time', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('tab', { name: /Места/ }).click()
+    await page.getByRole('tab', { name: /Places/ }).click()
     const card = page
       .locator('[data-card][data-gallery]')
       .filter({ has: page.locator('[data-dot]') })

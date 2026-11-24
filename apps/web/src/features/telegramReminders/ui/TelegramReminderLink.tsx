@@ -13,7 +13,7 @@ interface TelegramReminderLinkProps {
 type Link = { url: string | null; isLinked: boolean }
 
 // Reminders in Telegram instead of SMS: free for the salon, and the message carries a
-// «Перенести или отменить» button. One quiet line; nothing when the bot is not set up.
+// «Reschedule or cancel» button. One quiet line; nothing when the bot is not set up.
 export const TelegramReminderLink = ({ bookingId }: TelegramReminderLinkProps) => {
   const t = useT()
   const [link, setLink] = useState<Link | null>(null)
@@ -27,12 +27,12 @@ export const TelegramReminderLink = ({ bookingId }: TelegramReminderLinkProps) =
 
   if (!link?.url) return null
   if (link.isLinked) {
-    return <p className={styles.line}>{t('Напомним в Telegram')}</p>
+    return <p className={styles.line}>{t('We will remind you in Telegram')}</p>
   }
 
   return (
     <a href={link.url} target='_blank' rel='noreferrer' className={styles.link}>
-      {t('Напоминать в Telegram вместо SMS ›')}
+      {t('Remind me in Telegram instead of SMS ›')}
     </a>
   )
 }

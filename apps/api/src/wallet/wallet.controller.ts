@@ -47,7 +47,7 @@ export class WalletController {
     @Headers(TOKEN_HEADER) token: string | undefined,
   ): Promise<WalletLinks> {
     const parsed = bookingTokenSchema.safeParse(token)
-    if (!parsed.success) throw new NotFoundException('Запись не найдена')
+    if (!parsed.success) throw new NotFoundException('Booking not found')
 
     return this.links(await this.bookings.findByToken(id, parsed.data))
   }

@@ -75,7 +75,7 @@ export const BookingPage = ({
 }: BookingPageProps) => {
   const t = useT()
   const form = useBookingForm(business, catalog)
-  // The service step opened from its ticket («Изменить») is the visit's own list: several services
+  // The service step opened from its ticket (Change) is the visit's own list: several services
   // can be ticked, one master does them one after another. The first pick stays one tap.
   const isEditingServices = form.editingStep === 'service' && form.chosenServices.length > 0
   const visitServices = form.services.filter(
@@ -89,13 +89,13 @@ export const BookingPage = ({
     catalog.services,
   )
   const serviceTimes = useServicesNextFree(business.slug, form.branchId ?? undefined)
-  // «Сегодня с 15:30» on each service row: the choice shows when one could come, not only what.
+  // "Today from 15:30" on each service row: the choice shows when one could come, not only what.
   const soonLabel = (serviceId: string) => {
     const next = serviceTimes?.[serviceId]
     const todayKey = form.today?.dayKey
     if (!next || !todayKey) return null
-    if (next.date === todayKey) return t('Сегодня с {time}', { time: next.time })
-    if (next.date === addDayKey(todayKey, 1)) return t('Завтра с {time}', { time: next.time })
+    if (next.date === todayKey) return t('Today from {time}', { time: next.time })
+    if (next.date === addDayKey(todayKey, 1)) return t('Tomorrow from {time}', { time: next.time })
     return null
   }
   // The deposit's terms reached the screen before the name and number were asked for.
@@ -104,11 +104,11 @@ export const BookingPage = ({
   }
   const [isCommentOpen, setIsCommentOpen] = useState(false)
   const [isReviewRequested, setIsReviewRequested] = useState(false)
-  // The contacts fold into a card too, once the number is whole (or «Готово» is pressed), so the
-  // last step closes like the others and «Всё готово» says what is left: one press.
+  // The contacts fold into a card too, once the number is whole (or Done is pressed), so the
+  // last step closes like the others and "All set" says what is left: one press.
   const [isContactsDone, setIsContactsDone] = useState(false)
   const [isBranchOpen, setIsBranchOpen] = useState(false)
-  // The free time under the ruler's needle: the bar's one action takes it («Выбрать 12:00»).
+  // The free time under the ruler's needle: the bar's one action takes it ("Choose 12:00").
   const [rulerTime, setRulerTime] = useState<string | null>(null)
   const foldTimer = useRef<number | undefined>(undefined)
   const specialistLabel = t(getSpecialistLabel(catalog, form.specialistId))
@@ -146,8 +146,8 @@ export const BookingPage = ({
   useEffect(() => {
     if (bookedServiceId) trackStep('booked', slug)
   }, [bookedServiceId, slug])
-  // Quick times only for a returning client, before anything is chosen: «Как в прошлый раз» with
-  // the last visit's service and master. A generic «Ближайшее время» above the steps was taken
+  // Quick times only for a returning client, before anything is chosen: "Same as last time" with
+  // the last visit's service and master. A generic "Nearest time" above the steps was taken
   // for the date-and-time step itself, so new clients go through the steps.
   const isQuickShownStep =
     form.firstIncompleteStep === 'service' || form.firstIncompleteStep === 'specialist'
@@ -182,7 +182,7 @@ export const BookingPage = ({
   })
   const quickMaster =
     quickSpecialistId === ANY_SPECIALIST_ID
-      ? t('любой мастер')
+      ? t('any specialist')
       : getSpecialistLabel(catalog, quickSpecialistId)
 
   // One open step under a stack of done ones: the step being changed, else the first unfinished,
@@ -220,7 +220,7 @@ export const BookingPage = ({
     )
   }
 
-  // Everything filled: the action books at once - a separate «check» press made people think
+  // Everything filled: the action books at once - a separate “check” press made people think
   // they were done and leave without booking. The check card shows only after a quick time was
   // picked with one tap, so that tap never books by itself.
   const isReviewing = form.firstIncompleteStep === null && isReviewRequested
@@ -239,9 +239,9 @@ export const BookingPage = ({
     document.querySelector('[data-booking-screen]')?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  // «Шаг 2 из 4» over the question: where one is, said where one looks (the bar's line was missed).
+  // "Step 2 of 4" over the question: where one is, said where one looks (the bar's line was missed).
   const stepEyebrow = (step: BookingStepId) =>
-    t('Шаг {step} из {total}', {
+    t('Step {step} of {total}', {
       step: ['service', 'specialist', 'datetime', 'contacts'].indexOf(step) + 1,
       total: 4,
     })
@@ -278,7 +278,7 @@ export const BookingPage = ({
     const distance = form.branchDistances?.[chosenBranch.id]
     chosenCards.push({
       id: 'branch',
-      title: t('Филиал'),
+      title: t('Branch'),
       tone: cardTone(0),
       media: (
         <span className={styles.stackPin}>
@@ -295,7 +295,7 @@ export const BookingPage = ({
     const picture = servicePhotos?.[form.service.id] ?? business.coverUrl
     chosenCards.push({
       id: 'service',
-      title: t('Услуга'),
+      title: t('Service'),
       tone: cardTone(1),
       media: picture ? (
         // biome-ignore lint/performance/noImgElement: hotlinked and API pictures, sized here
@@ -308,7 +308,7 @@ export const BookingPage = ({
         />
       ),
       // The visit's first service names the card; added ones are marked on the line under it
-      // («+ Укладка»): joined into one name, they ended in an ellipsis before «Изменить».
+      // ("+ Styling"): joined into one name, they ended in an ellipsis before Change.
       primary: form.chosenServices[0]?.name ?? form.service.name,
       // The price on the card itself, not only in the bar: it was missed down there.
       secondary: [
@@ -322,7 +322,7 @@ export const BookingPage = ({
   if (form.specialistId) {
     chosenCards.push({
       id: 'specialist',
-      title: t('Мастер'),
+      title: t('Specialist'),
       tone: cardTone(2),
       media: chosenSpecialist ? (
         <PersonAvatar
@@ -336,7 +336,7 @@ export const BookingPage = ({
           <UsersThree />
         </span>
       ),
-      primary: chosenSpecialist ? chosenSpecialist.name : t('Любой мастер'),
+      primary: chosenSpecialist ? chosenSpecialist.name : t('Any specialist'),
       secondary: chosenSpecialist
         ? [
             chosenSpecialist.rating ? `★ ${chosenSpecialist.rating.toFixed(1)}` : null,
@@ -344,13 +344,13 @@ export const BookingPage = ({
           ]
             .filter(Boolean)
             .join(' · ')
-        : t('кто свободен'),
+        : t('whoever is free'),
     })
   }
   if (form.time && form.dayKey && form.service) {
     chosenCards.push({
       id: 'datetime',
-      title: t('Дата и время'),
+      title: t('Date and time'),
       tone: cardTone(3),
       media: (
         <span className={styles.stackLeaf}>
@@ -366,7 +366,7 @@ export const BookingPage = ({
   if (isContactsFolded) {
     chosenCards.push({
       id: 'contacts',
-      title: t('Контакты'),
+      title: t('Contacts'),
       tone: cardTone(4),
       media: <PersonAvatar name={form.name.trim()} size='md' className={styles.stackFace} />,
       primary: form.name.trim(),
@@ -377,19 +377,19 @@ export const BookingPage = ({
     (card) =>
       (card.id !== activeStep || card.id === 'contacts') && !(isBranchOpen && card.id === 'branch'),
   )
-  // «Ваша запись» is the e-ticket the booking turns into, filled in as far as it goes.
+  // "Your booking" is the e-ticket the booking turns into, filled in as far as it goes.
   const draftTicket: Booking = {
     id: 'draft',
     status: 'confirmed',
     serviceId: form.service?.id ?? '',
-    serviceName: form.service?.name ?? t('Услуга не выбрана'),
+    serviceName: form.service?.name ?? t('No service chosen'),
     price: form.service?.price ?? 0,
     discount: form.quote?.discount
       ? { title: form.quote.discount.title, amount: form.quote.discount.amount }
       : null,
     durationMinutes: form.service?.durationMinutes ?? 0,
     specialistId: form.specialistId ?? '',
-    specialistName: chosenSpecialist?.name ?? (form.specialistId ? t('Любой мастер') : ''),
+    specialistName: chosenSpecialist?.name ?? (form.specialistId ? t('Any specialist') : ''),
     date: form.time && form.dayKey ? form.dayKey : '',
     time: form.time ?? '',
     startsAt: '',
@@ -427,19 +427,19 @@ export const BookingPage = ({
     isSubmitting: form.isSubmitting,
     errorMessage: form.submitError,
     // The action always does something real on the open step: it takes the free time under the
-    // ruler's needle, and on the masters it takes «Любой, кто свободен», the usual choice.
-    // «Выбрать мастера» there only pointed at the cards already on screen («это сильно путает»).
+    // ruler's needle, and on the masters it takes "Anyone free", the usual choice.
+    // "Choose a specialist" there only pointed at the cards already on screen ("this is very confusing").
     ...(activeStep === 'datetime' && !isBranchOpen && rulerTime
       ? {
           onSubmit: () => form.selectTime(rulerTime),
-          submitLabel: t('Выбрать {time}', { time: rulerTime }),
+          submitLabel: t('Choose {time}', { time: rulerTime }),
         }
       : isEditingServices && !isBranchOpen
-        ? { onSubmit: form.finishEditing, submitLabel: t('Готово') }
+        ? { onSubmit: form.finishEditing, submitLabel: t('Done') }
         : activeStep === 'specialist' && !isBranchOpen && !form.specialistId
           ? {
               onSubmit: () => form.selectSpecialist(ANY_SPECIALIST_ID),
-              submitLabel: t('Любой мастер'),
+              submitLabel: t('Any specialist'),
             }
           : {
               onSubmit: form.submit,
@@ -453,21 +453,21 @@ export const BookingPage = ({
       null,
     onStepOpen: openStep,
     paidWith: payment.subscription
-      ? { label: t('По абонементу'), total: null }
+      ? { label: t('By subscription'), total: null }
       : payment.plan
         ? {
-            label: t('Абонемент «{title}»', { title: payment.plan.title }),
+            label: t('Subscription “{title}”', { title: payment.plan.title }),
             total: payment.plan.price,
           }
         : null,
-    // «Любой мастер» says nothing by the time the visit is booked: the line keeps its room for
+    // Any specialist says nothing by the time the visit is booked: the line keeps its room for
     // the address.
     masterShort:
       form.specialistId && form.specialistId !== ANY_SPECIALIST_ID
         ? (specialistLabel.split(' ')[0] ?? specialistLabel)
         : null,
-    // With several branches the ready bar names the branch: a whole address ended in «мкр. Аса…»
-    // on a 375pt phone. The address stays on the branch card and in «Ваша запись».
+    // With several branches the ready bar names the branch: a whole address ended in "Asanbay mic…"
+    // on a 375pt phone. The address stays on the branch card and in Your booking.
     branchName: form.branches.length > 1 ? (chosenBranch?.name ?? null) : null,
     choice: choiceLine({
       services: form.chosenServices.length
@@ -477,7 +477,7 @@ export const BookingPage = ({
           : [],
       master: form.specialistId
         ? form.specialistId === ANY_SPECIALIST_ID
-          ? t('Любой мастер')
+          ? t('Any specialist')
           : (specialistLabel.split(' ')[0] ?? specialistLabel)
         : null,
       when: form.dayKey && form.time ? `${t.dayShort(form.dayKey)}, ${form.time}` : null,
@@ -499,32 +499,32 @@ export const BookingPage = ({
   }))
 
   // A note, a code and the SMS options: under the contacts while they are typed, and on their
-  // own under «Всё готово» once the contacts have folded into a card.
+  // own under All set once the contacts have folded into a card.
   const contactExtras = (
     <>
       {/* Optional extras as a second group of the same Settings rows: a note and a
                         code read like the name and number above, not like loose buttons. */}
       <div className={styles.group}>
-        {/* «Хочу так» from a work: the look goes to the master with the booking. */}
+        {/* "I want this" from a work: the look goes to the master with the booking. */}
         {form.lookPhoto && (
           <div className={styles.fieldRow} data-action=''>
-            <span className={styles.extraLabel}>{t('Образец')}</span>
+            <span className={styles.extraLabel}>{t('Reference')}</span>
             {/* biome-ignore lint/performance/noImgElement: already resized WebP from our API */}
             <img
               src={form.lookPhoto.url}
-              alt={t('Фото, как хочется')}
+              alt={t('Photo of the look you want')}
               className={styles.lookThumb}
               decoding='async'
             />
             <button type='button' className={styles.rowAction} onClick={form.removeLookPhoto}>
-              {t('Убрать')}
+              {t('Remove')}
             </button>
           </div>
         )}
         {isCommentOpen || form.comment ? (
           <>
             <div className={styles.fieldRow} data-action=''>
-              <span className={styles.extraLabel}>{t('Комментарий')}</span>
+              <span className={styles.extraLabel}>{t('Comment')}</span>
               <span />
               {/* Folds back and forgets the note: an extra is never a trap. */}
               <button
@@ -535,15 +535,15 @@ export const BookingPage = ({
                   setIsCommentOpen(false)
                 }}
               >
-                {t('Убрать')}
+                {t('Remove')}
               </button>
             </div>
             <textarea
               className={styles.commentArea}
-              aria-label={t('Комментарий')}
+              aria-label={t('Comment')}
               value={form.comment}
               onChange={(event) => form.setComment(event.target.value)}
-              placeholder={t('Например, «нужна парковка»')}
+              placeholder={t('For example, “need parking”')}
               rows={3}
               maxLength={500}
             />
@@ -555,8 +555,8 @@ export const BookingPage = ({
             data-action=''
             onClick={() => setIsCommentOpen(true)}
           >
-            <span className={styles.extraLabel}>{t('Комментарий')}</span>
-            <span className={styles.extraValue}>{t('Добавить')}</span>
+            <span className={styles.extraLabel}>{t('Comment')}</span>
+            <span className={styles.extraValue}>{t('Add')}</span>
             <CaretRight aria-hidden className={styles.extraChevron} />
           </button>
         )}
@@ -606,7 +606,7 @@ export const BookingPage = ({
         <div className={styles.steps}>
           {isQuickShown && quickService && (
             <QuickSlots
-              title={isLastVisitShown ? t('Как в прошлый раз') : t('Ближайшее время')}
+              title={isLastVisitShown ? t('Same as last time') : t('Next free time')}
               subtitle={`${quickService.name}, ${quickMaster}`}
               slots={quick.slots}
               isLoading={quick.isLoading}
@@ -638,7 +638,7 @@ export const BookingPage = ({
               action={
                 <>
                   <Button size='lg' fullWidth onClick={form.submit} disabled={form.isSubmitting}>
-                    {form.isSubmitting ? t('Записываем…') : t('Записаться')}
+                    {form.isSubmitting ? t('Booking…') : t('Book')}
                   </Button>
                   {form.submitError && (
                     <p className={styles.submitError} role='alert'>
@@ -670,11 +670,11 @@ export const BookingPage = ({
               />
 
               {isBranchOpen && (
-                <BookingStep id='branch' title={t('Куда приедете?')}>
+                <BookingStep id='branch' title={t('Which branch?')}>
                   {/* Each branch a row with its full address and how far it is, the chosen
                         one checked; picking one folds it back into its card. */}
                   <fieldset className={`${styles.group} ${styles.branchList}`}>
-                    <legend className={styles.srOnly}>{t('Филиал')}</legend>
+                    <legend className={styles.srOnly}>{t('Branch')}</legend>
                     {form.branches.map((branch) => {
                       const distance = form.branchDistances?.[branch.id]
                       const isChosen = form.branchId === branch.id
@@ -712,7 +712,7 @@ export const BookingPage = ({
                         rel='noreferrer'
                         className={styles.branchRoute}
                       >
-                        {t('Маршрут до «{name}» ›', { name: chosen.name })}
+                        {t('Directions to “{name}” ›', { name: chosen.name })}
                       </a>
                     )
                   })()}
@@ -722,11 +722,11 @@ export const BookingPage = ({
               {form.addNotice && (
                 <RowNote>
                   {form.addNotice.kind === 'master'
-                    ? t('{master} не делает «{service}», выберите мастера', {
+                    ? t('{master} does not do “{service}”, choose a master', {
                         master: form.addNotice.masterName.split(' ')[0] ?? '',
                         service: form.addNotice.serviceName,
                       })
-                    : t('В {time} визит теперь не помещается, выберите время', {
+                    : t('The visit no longer fits at {time}, choose a time', {
                         time: form.addNotice.time,
                       })}
                 </RowNote>
@@ -737,10 +737,10 @@ export const BookingPage = ({
                   id='service'
                   eyebrow={
                     isEditingServices
-                      ? t('Можно несколько · один мастер подряд')
+                      ? t('You can pick several · one master, one after another')
                       : stepEyebrow('service')
                   }
-                  title={t('Что делаем?')}
+                  title={t('What are we doing?')}
                 >
                   <ServicePicker
                     services={isEditingServices ? visitServices : form.services}
@@ -761,7 +761,7 @@ export const BookingPage = ({
                 <BookingStep
                   id='specialist'
                   eyebrow={stepEyebrow('specialist')}
-                  title={t('К кому записаться?')}
+                  title={t('Who would you like?')}
                 >
                   <MasterPicker
                     specialists={form.specialists}
@@ -776,7 +776,7 @@ export const BookingPage = ({
                 <BookingStep
                   id='datetime'
                   eyebrow={stepEyebrow('datetime')}
-                  title={t('Когда удобно?')}
+                  title={t('When suits you?')}
                 >
                   <DateTimePicker
                     view='ruler'
@@ -812,14 +812,14 @@ export const BookingPage = ({
                 <BookingStep
                   id='contacts'
                   eyebrow={stepEyebrow('contacts')}
-                  title={t('Как вас записать?')}
+                  title={t('Whose name is it?')}
                 >
                   <div className={styles.fields}>
                     {/* Said before the name and number are asked for: what is paid now, when it
                           comes back and where to go. The side panel has no summary card for it. */}
                     {form.service?.deposit ? (
                       <p className={styles.terms} ref={trackDepositShown}>
-                        {t('Предоплата {amount} - вернём, если отмените за сутки', {
+                        {t('Deposit {amount}, refunded if you cancel a day ahead', {
                           amount: formatPrice(form.service.deposit),
                         })}
                         {summaryProps.address ? ` · ${summaryProps.address}` : ''}
@@ -828,7 +828,7 @@ export const BookingPage = ({
                     {/* Settings-style rows: the label on the left, the value typed on the right. */}
                     <div className={styles.group}>
                       <Field
-                        label={t('Имя')}
+                        label={t('Name')}
                         error={form.errors.name && t(form.errors.name)}
                         className={styles.fieldRow}
                       >
@@ -848,14 +848,12 @@ export const BookingPage = ({
                             if (phoneInput) phoneInput.focus()
                             else foldContacts()
                           }}
-                          placeholder={t(
-                            form.isForOther ? 'Кого записываете' : 'Как к вам обращаться',
-                          )}
+                          placeholder={t(form.isForOther ? 'Who is coming' : 'Your name')}
                         />
                       </Field>
                       {form.accountPhone ? null : (
                         <Field
-                          label={t('Телефон')}
+                          label={t('Phone')}
                           error={form.errors.phone && t(form.errors.phone)}
                           className={styles.fieldRow}
                         >
@@ -896,7 +894,7 @@ export const BookingPage = ({
                           stays in this account. */}
                       {form.canBookForOther && (
                         <label className={styles.switchRow}>
-                          <span>{t('Записываю другого человека')}</span>
+                          <span>{t('Booking for someone else')}</span>
                           <Switch checked={form.isForOther} onCheckedChange={form.setForOther} />
                         </label>
                       )}
@@ -907,11 +905,9 @@ export const BookingPage = ({
               )}
 
               {!isBranchOpen && isContactsFolded && (
-                <BookingStep id='ready' title={t('Всё готово')}>
+                <BookingStep id='ready' title={t('All set')}>
                   <p className={styles.readyNote}>
-                    {t(
-                      'Проверьте карточки выше и запишитесь. Нажмите на карточку, чтобы изменить.',
-                    )}
+                    {t('Check the cards above and book. Tap a card to change it.')}
                   </p>
                   {contactExtras}
                 </BookingStep>
@@ -922,7 +918,7 @@ export const BookingPage = ({
           {/* Under the form and set well apart from it (a wide gap), so it reads as something to
                 look at, not another step. Nothing here leads away: picks of other places live on
                 the success screen, not in the middle of a booking. */}
-          <aside className={styles.after} aria-label={t('Дополнительно')}>
+          <aside className={styles.after} aria-label={t('More')}>
             <PlaceReviews
               slug={business.slug}
               businessName={business.name}

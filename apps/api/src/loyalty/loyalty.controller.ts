@@ -61,7 +61,7 @@ export class ManageLoyaltyController {
     return { ...settings, plans, certificates, certificateSale }
   }
 
-  // «Продавать сертификаты онлайн» and the amounts on the place's page.
+  // 'Sell gift cards online' and the amounts on the place's page.
   @OwnerOnly()
   @Put('certificate-sale')
   setCertificateSale(

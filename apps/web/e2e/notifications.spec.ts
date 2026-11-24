@@ -125,7 +125,7 @@ const offerNativePush = (page: Page) =>
     route.fulfill({ json: { isAvailable: false, publicKey: null, isNativeAvailable: true } }),
   )
 
-const LINE = 'Подтверждения и напоминания о визитах приходят в WhatsApp, а без него по SMS.'
+const LINE = 'Visit confirmations and reminders go to WhatsApp, or by SMS without it.'
 
 const DEV_AUTH_SECRET = 'dev-only-secret-change-me-in-production-0000'
 
@@ -133,7 +133,7 @@ const WEBHOOK_SECRET = 'e2e-webhook-secret'
 
 const SLUG = 'awaisa-studio'
 
-// The same link the «как прошёл визит?» SMS carries.
+// The same link the “how was your visit?” SMS carries.
 const _reviewLink = (bookingId: string) => {
   const signature = createHmac('sha256', process.env.AUTH_SECRET || DEV_AUTH_SECRET)
     .update(`review:${bookingId}`)
@@ -180,13 +180,13 @@ test.describe('Web Push for the business side', () => {
     expect(await countRows(endpoint)).toBe(0)
   })
 
-  test('the owner turns notices on and off in «Настройки → Уведомления»', async ({ page }) => {
+  test('the owner turns notices on and off in “Settings → Notifications”', async ({ page }) => {
     const endpoint = endpointFor('owner')
     await stubPushService(page, endpoint)
     const business = await createOwnBusiness(page)
 
     await page.goto(`/manage/${business.slug}?tab=notifications`)
-    const toggle = page.getByRole('switch', { name: 'Уведомлять о записях' })
+    const toggle = page.getByRole('switch', { name: 'Notify about bookings' })
     await expect(toggle).not.toBeChecked()
 
     const saving = page.waitForResponse(
@@ -254,7 +254,7 @@ test.describe('App pushes through the native bridge', () => {
     const business = await createOwnBusiness(page)
 
     await page.goto(`/manage/${business.slug}?tab=notifications`)
-    const toggle = page.getByRole('switch', { name: 'Уведомлять о записях' })
+    const toggle = page.getByRole('switch', { name: 'Notify about bookings' })
     await expect(toggle).not.toBeChecked()
 
     const saving = page.waitForResponse(
@@ -291,7 +291,7 @@ test.describe('App pushes through the native bridge', () => {
 
     await page.goto(`/manage/${business.slug}?tab=notifications`)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByRole('switch', { name: 'Уведомлять о записях' })).toHaveCount(0)
+    await expect(page.getByRole('switch', { name: 'Notify about bookings' })).toHaveCount(0)
   })
 })
 
@@ -308,7 +308,7 @@ test.describe('WhatsApp for client messages', () => {
     expect(await config.json()).toEqual({ isWhatsappOn: true })
 
     await page.goto(`/manage/${business.slug}?tab=notifications`)
-    await expect(page.getByRole('heading', { name: 'Клиентам' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'To clients' })).toBeVisible()
     await expect(page.getByText(LINE)).toBeVisible()
   })
 
@@ -321,9 +321,9 @@ test.describe('WhatsApp for client messages', () => {
 
     await page.goto(`/manage/${business.slug}?tab=notifications`)
     await answered
-    await expect(page.getByText(/Новые записи, отмены и отзывы/)).toBeVisible()
+    await expect(page.getByText(/New bookings, cancellations and reviews/)).toBeVisible()
     await expect(page.getByText(LINE)).toHaveCount(0)
-    await expect(page.getByRole('heading', { name: 'Клиентам' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'To clients' })).toHaveCount(0)
   })
 })
 
@@ -332,11 +332,11 @@ test.describe('Telegram for owners', () => {
     await signInViaApi(page, adminPhone(testInfo), 'E2E Администратор')
     await page.goto(`/manage/${SLUG}?tab=notifications`)
 
-    const connect = page.getByRole('link', { name: /Подключить (Telegram|ещё один чат)/ })
+    const connect = page.getByRole('link', { name: /Connect (Telegram|another chat)/ })
     await expect(connect).toHaveAttribute('href', /^https:\/\/t\.me\/awaisa_e2e_bot\?start=/)
     const code = new URL((await connect.getAttribute('href')) ?? '').searchParams.get('start')
 
-    // What Telegram sends when the owner taps «Start» in the bot.
+    // What Telegram sends when the owner taps “Start” in the bot.
     const username = `e2e_owner_${testInfo.project.name}`
     const update = {
       update_id: 1,
@@ -363,10 +363,10 @@ test.describe('Telegram for owners', () => {
     // The nearest block around this chat that has its own button: other chats linked to the
     // business (a developer's own, say) have theirs.
     await row
-      .locator('xpath=ancestor::*[.//button[normalize-space()="Отключить"]][1]')
-      .getByRole('button', { name: 'Отключить' })
+      .locator('xpath=ancestor::*[.//button[normalize-space()="Disconnect"]][1]')
+      .getByRole('button', { name: 'Disconnect' })
       .click()
-    await expect(page.getByText('Уведомления отключены')).toBeVisible()
+    await expect(page.getByText('Notifications turned off')).toBeVisible()
     await expect(row).toHaveCount(0)
   })
 })

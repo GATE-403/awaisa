@@ -14,7 +14,7 @@ interface SimilarPlacesProps {
 
 const SHOWN = 10
 
-// «Похожие места» at the foot of a place: others of the same kind, as the catalog shows them -
+// «Similar places» at the foot of a place: others of the same kind, as the catalog shows them -
 // somewhere to go next when this one is full or far.
 export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
   const t = useT()
@@ -27,16 +27,16 @@ export const SimilarPlaces = ({ business, places }: SimilarPlacesProps) => {
       <div className={styles.similarInner}>
         <div className={styles.sectionHead}>
           <h2 id='place-similar' className={styles.sectionTitle}>
-            {t('Похожие места')}
+            {t('Similar places')}
             <span className={styles.similarMuted}>
               {' '}
               {kind
-                ? t('Ещё {kind} рядом.', { kind: t(kind).toLowerCase() })
-                : t('Ещё места рядом.')}
+                ? t('More {kind} nearby.', { kind: t(kind).toLowerCase() })
+                : t('More places nearby.')}
             </span>
           </h2>
           <NextLink href={`/?kind=${business.kind}`} className={styles.sectionLink}>
-            {t('Смотреть все ›')}
+            {t('See all ›')}
           </NextLink>
         </div>
         <NextFreeProvider slugs={others.map((place) => place.slug)}>

@@ -83,30 +83,30 @@ test.describe('Cash desk', () => {
     }
 
     try {
-      // A product set up in «Склад»: bought at 300, sold at 650; ten arrive and their cost
+      // A product set up in “Stock”: bought at 300, sold at 650; ten arrive and their cost
       // goes to the expenses in the same step.
       await page.goto(`/manage/${SLUG}?tab=stock`)
       await page
-        .getByRole('button', { name: /Позиция|Добавить позицию/ })
+        .getByRole('button', { name: /^(Item|Add item)$/ })
         .first()
         .click()
-      const newItem = page.getByRole('dialog', { name: 'Новый расходник' })
-      await newItem.getByLabel('Название').fill(PRODUCT)
-      await newItem.getByRole('combobox', { name: 'Единица' }).click()
-      await page.getByRole('option', { name: 'шт', exact: true }).click()
-      await newItem.getByLabel('Цена за единицу, сом').fill('300')
-      await newItem.getByRole('switch', { name: 'Продаётся клиентам' }).click()
-      await newItem.getByLabel('Цена продажи, сом').fill('650')
-      await newItem.getByRole('button', { name: 'Сохранить' }).click()
+      const newItem = page.getByRole('dialog', { name: 'New consumable' })
+      await newItem.getByLabel('Name', { exact: true }).fill(PRODUCT)
+      await newItem.getByRole('combobox', { name: 'Unit' }).click()
+      await page.getByRole('option', { name: 'pcs', exact: true }).click()
+      await newItem.getByLabel('Price per unit, som').fill('300')
+      await newItem.getByRole('switch', { name: 'Sold to clients' }).click()
+      await newItem.getByLabel('Sale price, som').fill('650')
+      await newItem.getByRole('button', { name: 'Save' }).click()
       await page.getByRole('button', { name: new RegExp(PRODUCT) }).click()
-      const itemSheet = page.getByRole('dialog', { name: 'Товар' })
-      await itemSheet.getByLabel('Приход').fill('10')
+      const itemSheet = page.getByRole('dialog', { name: 'Product' })
+      await itemSheet.getByLabel('Delivery').fill('10')
       await expect(
-        itemSheet.getByRole('switch', { name: /Записать в расходы · 3 000 сом/ }),
+        itemSheet.getByRole('switch', { name: /Record as expense · 3,000 som/ }),
       ).toBeChecked()
-      await itemSheet.getByRole('button', { name: 'Принять' }).click()
-      await expect(page.getByText('Сумма закупки в «Расходах».')).toBeVisible()
-      await itemSheet.getByRole('button', { name: 'Отмена' }).click()
+      await itemSheet.getByRole('button', { name: 'Receive' }).click()
+      await expect(page.getByText('The purchase cost is in “Expenses”.')).toBeVisible()
+      await itemSheet.getByRole('button', { name: 'Cancel' }).click()
       expect(await product()).toMatchObject({ quantity: 10, isForSale: true, salePrice: 650 })
       expect(await listExpenses()).toContainEqual(
         expect.objectContaining({ category: 'materials', amount: 3000, note: PRODUCT }),
@@ -114,14 +114,14 @@ test.describe('Cash desk', () => {
 
       // The shift opens with the counted cash.
       await page.goto(`/manage/${SLUG}?tab=cash`)
-      await page.getByRole('button', { name: 'Открыть смену' }).last().click()
-      const openSheet = page.getByRole('dialog', { name: 'Открыть смену' })
-      await openSheet.getByLabel('Сумма, сом').fill('5000')
-      await openSheet.getByRole('button', { name: 'Открыть' }).click()
-      await expect(page.getByText('Смена открыта')).toBeVisible()
-      await expect(page.getByText(/Смена с \d\d:\d\d · в кассе/)).toBeVisible()
+      await page.getByRole('button', { name: 'Open shift' }).last().click()
+      const openSheet = page.getByRole('dialog', { name: 'Open shift' })
+      await openSheet.getByLabel('Amount, som').fill('5000')
+      await openSheet.getByRole('button', { name: 'Open' }).click()
+      await expect(page.getByText('Shift opened')).toBeVisible()
+      await expect(page.getByText(/Shift since \d\d:\d\d · in the till/)).toBeVisible()
 
-      // A visit paid in cash, then two bottles sold with it from «Итог визита».
+      // A visit paid in cash, then two bottles sold with it from “Visit outcome”.
       const visit = await createPastVisit('E2E Касса Клиент', randomClientPhone(), 1)
       const marked = await page.request.patch(`${manage}/bookings/${visit.booking.id}/outcome`, {
         data: { outcome: 'arrived', paymentMethod: 'cash' },
@@ -129,43 +129,43 @@ test.describe('Cash desk', () => {
       expect(marked.ok()).toBe(true)
       const visitPaid = Number((await marked.json()).paidAmount)
       await page.goto(`/manage/${SLUG}?tab=schedule&date=${visit.date}&booking=${visit.booking.id}`)
-      await page.getByRole('button', { name: /Товары\s*Добавить/ }).click()
-      const visitSale = page.getByRole('dialog', { name: 'Товары к визиту' })
-      await visitSale.getByLabel(`Сколько: ${PRODUCT}`).fill('2')
-      await expect(visitSale.getByText('Итого 1 300 сом, оплата вместе с визитом.')).toBeVisible()
-      await visitSale.getByRole('button', { name: 'Продать' }).click()
-      await expect(page.getByText('Продано на 1 300 сом')).toBeVisible()
+      await page.getByRole('button', { name: /Products\s*Add/ }).click()
+      const visitSale = page.getByRole('dialog', { name: 'Products for the visit' })
+      await visitSale.getByLabel(`How many: ${PRODUCT}`).fill('2')
+      await expect(visitSale.getByText('Total 1,300 som, paid with the visit.')).toBeVisible()
+      await visitSale.getByRole('button', { name: 'Sell' }).click()
+      await expect(page.getByText(/Sold for 1,300\ssom/)).toBeVisible()
       expect((await product())?.quantity).toBe(8)
 
-      // One bottle sold on its own from «Касса».
+      // One bottle sold on its own from “Till”.
       await page.goto(`/manage/${SLUG}?tab=cash`)
-      await page.getByRole('button', { name: 'Продажа', exact: true }).click()
-      const sale = page.getByRole('dialog', { name: 'Продажа' })
-      await sale.getByLabel(`Сколько: ${PRODUCT}`).fill('1')
-      await sale.getByRole('button', { name: 'Продать' }).click()
-      await expect(page.getByText('Продано на 650 сом')).toBeVisible()
+      await page.getByRole('button', { name: 'Sale', exact: true }).click()
+      const sale = page.getByRole('dialog', { name: 'Sale' })
+      await sale.getByLabel(`How many: ${PRODUCT}`).fill('1')
+      await sale.getByRole('button', { name: 'Sell' }).click()
+      await expect(page.getByText(/Sold for 650\ssom/)).toBeVisible()
       expect((await product())?.quantity).toBe(7)
 
       // An expense under the owner's own category.
-      await page.getByRole('tab', { name: 'Расходы' }).click()
-      await page.getByRole('button', { name: 'Расход', exact: true }).click()
-      const expense = page.getByRole('dialog', { name: 'Новый расход' })
-      await expense.getByRole('combobox', { name: 'Статья расхода' }).click()
-      await page.getByRole('option', { name: 'Своя статья…' }).click()
-      await expense.getByLabel('Своя статья').fill(CATEGORY)
-      await expense.getByLabel('Сумма, сом').fill('1500')
-      await expense.getByLabel('Комментарий').fill('E2E расход')
-      await expense.getByRole('button', { name: 'Сохранить' }).click()
+      await page.getByRole('tab', { name: 'Expenses' }).click()
+      await page.getByRole('button', { name: 'Expense', exact: true }).click()
+      const expense = page.getByRole('dialog', { name: 'New expense' })
+      await expense.getByRole('combobox', { name: 'Expense category' }).click()
+      await page.getByRole('option', { name: 'Custom category…' }).click()
+      await expense.getByLabel('Custom category').fill(CATEGORY)
+      await expense.getByLabel('Amount, som').fill('1500')
+      await expense.getByLabel('Comment').fill('E2E расход')
+      await expense.getByRole('button', { name: 'Save' }).click()
       await expect(page.getByRole('button', { name: new RegExp(CATEGORY) })).toBeVisible()
 
       // 200 taken out of the till for water, with the reason.
-      await page.getByRole('tab', { name: 'Смена', exact: true }).click()
-      await page.getByRole('button', { name: 'Внести или изъять' }).click()
-      const move = page.getByRole('dialog', { name: 'Деньги в кассе' })
-      await move.getByLabel('Сумма, сом').fill('200')
-      await move.getByLabel('Причина').fill('E2E вода')
-      await move.getByRole('button', { name: 'Записать' }).click()
-      await expect(page.getByText('Изъято', { exact: true }).first()).toBeVisible()
+      await page.getByRole('tab', { name: 'Shift', exact: true }).click()
+      await page.getByRole('button', { name: 'Put in or take out' }).click()
+      const move = page.getByRole('dialog', { name: 'Cash in the till' })
+      await move.getByLabel('Amount, som').fill('200')
+      await move.getByLabel('Reason').fill('E2E вода')
+      await move.getByRole('button', { name: 'Record' }).click()
+      await expect(page.getByText('Taken out', { exact: true }).first()).toBeVisible()
       await expect(page.getByText('E2E вода')).toBeVisible()
 
       // The till expects the opening cash, the visit's cash and both sales, minus what was
@@ -173,21 +173,21 @@ test.describe('Cash desk', () => {
       const shift = (await desk()).open.find((item) => item.branchId === branchId)
       expect(shift).toBeTruthy()
       expect(shift?.expectedCash).toBeGreaterThanOrEqual(5000 + visitPaid + 1300 + 650 - 200)
-      await page.getByRole('button', { name: 'Закрыть смену' }).click()
-      const closeSheet = page.getByRole('dialog', { name: 'Закрыть смену' })
-      await expect(closeSheet.getByText('Наличные за товары')).toBeVisible()
-      await expect(closeSheet.getByText('Изъято')).toBeVisible()
+      await page.getByRole('button', { name: 'Close shift' }).click()
+      const closeSheet = page.getByRole('dialog', { name: 'Close shift' })
+      await expect(closeSheet.getByText('Cash for products')).toBeVisible()
+      await expect(closeSheet.getByText('Taken out')).toBeVisible()
       await closeSheet
-        .getByLabel('Пересчитано наличных, сом')
+        .getByLabel('Cash counted, som')
         .fill(String((shift?.expectedCash ?? 0) - 100))
-      await expect(closeSheet.getByText('Недостача 100 сом.')).toBeVisible()
-      await closeSheet.getByLabel('Комментарий').fill('E2E смена')
-      await closeSheet.getByRole('button', { name: 'Закрыть' }).click()
-      await expect(page.getByText('Смена закрыта')).toBeVisible()
+      await expect(closeSheet.getByText(/Short by 100\ssom\./)).toBeVisible()
+      await closeSheet.getByLabel('Comment').fill('E2E смена')
+      await closeSheet.getByRole('button', { name: 'Close', exact: true }).click()
+      await expect(page.getByText('Shift closed')).toBeVisible()
       await expect(closeSheet).toHaveCount(0)
       const closed = (await desk()).closed.find((item) => item.id === shift?.id)
       expect(closed?.difference).toBe(-100)
-      await expect(page.getByText('недостача 100 сом').first()).toBeVisible()
+      await expect(page.getByText(/short by 100\ssom/).first()).toBeVisible()
 
       // The profit: services and products in, materials, products' cost and expenses out.
       const report = await money()
@@ -207,26 +207,26 @@ test.describe('Cash desk', () => {
         2,
       )
       await page.goto(`/manage/${SLUG}?tab=analytics`)
-      await expect(page.getByText('Прибыль', { exact: true })).toBeVisible()
-      await expect(page.getByText('Себестоимость товаров')).toBeVisible()
+      await expect(page.getByText('Profit', { exact: true })).toBeVisible()
+      await expect(page.getByText('Cost of products')).toBeVisible()
 
       // Undo the standalone sale: the bottle goes back on the shelf and out of the profit.
       await page.goto(`/manage/${SLUG}?tab=cash`)
-      await page.getByRole('tab', { name: /^Продажи/ }).click()
-      await page.getByRole('button', { name: 'Действия с продажей' }).first().click()
-      await page.getByRole('menuitem', { name: 'Отменить продажу' }).click()
-      await expect(page.getByText('Продажа отменена')).toBeVisible()
+      await page.getByRole('tab', { name: /^Sales/ }).click()
+      await page.getByRole('button', { name: 'Sale actions' }).first().click()
+      await page.getByRole('menuitem', { name: 'Cancel sale' }).click()
+      await expect(page.getByText('Sale cancelled')).toBeVisible()
       expect((await product())?.quantity).toBe(8)
       expect((await money()).products.find((row) => row.name === PRODUCT)?.quantity).toBe(2)
 
       // The expense is deleted by holding its button; the profit no longer counts it.
-      await page.getByRole('tab', { name: 'Расходы' }).click()
+      await page.getByRole('tab', { name: 'Expenses' }).click()
       await page.getByRole('button', { name: new RegExp(CATEGORY) }).click()
       await page
-        .getByRole('dialog', { name: 'Расход' })
-        .getByRole('button', { name: /Удалить расход/ })
+        .getByRole('dialog', { name: 'Expense' })
+        .getByRole('button', { name: /Delete expense/ })
         .click({ delay: 1300 })
-      await expect(page.getByText('Расход удалён')).toBeVisible()
+      await expect(page.getByText('Expense deleted')).toBeVisible()
       await expect(page.getByRole('button', { name: new RegExp(CATEGORY) })).toHaveCount(0)
       expect(
         (await money()).expensesByCategory.find((row) => row.category === CATEGORY),

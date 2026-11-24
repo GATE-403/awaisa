@@ -21,18 +21,18 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   const wasIncomplete = useRef(false)
   const steps: { label: string; tab: ManageTab; isDone: boolean }[] = [
     {
-      label: t('Добавьте услуги'),
+      label: t('Add services'),
       tab: 'services',
       isDone: catalog.services.some((service) => service.isActive !== false),
     },
     {
-      label: t('Добавьте мастеров'),
+      label: t('Add specialists'),
       tab: 'masters',
       isDone: catalog.specialists.some(
         (master) => master.isActive !== false && master.serviceIds.length > 0,
       ),
     },
-    { label: t('Проверьте график'), tab: 'hours', isDone: business.hours.length > 0 },
+    { label: t('Check the opening hours'), tab: 'hours', isDone: business.hours.length > 0 },
   ]
   const doneCount = steps.filter((step) => step.isDone).length
   const next = steps.find((step) => !step.isDone)
@@ -49,12 +49,12 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
     wasIncomplete.current = false
     const url = `${window.location.origin}/${business.slug}`
     toast.show({
-      title: t('Запись открыта'),
-      description: t('Отправьте клиентам ссылку на вашу страницу'),
+      title: t('Booking is open'),
+      description: t('Send clients the link to your page'),
       type: 'success',
       timeout: 12_000,
       action: {
-        label: t('Скопировать ссылку'),
+        label: t('Copy link'),
         onClick: () => void copyText(url),
       },
     })
@@ -63,8 +63,8 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
   if (!next) return null
 
   // A card on a soft wash of the accent, the one place the cabinet lifts something off the page
-  // («добавь фон градиент но чтобы сочетался, а то совсем незаметный»): the caption with
-  // «2 из 3», a bar of three steps, then the next step and a small «Начать ›». The whole card is
+  // ("add a gradient background that matches, it's barely visible"): the caption with
+  // "2 of 3", a bar of three steps, then the next step and a small "Start ›". The whole card is
   // one link to that step.
   return (
     <section className={styles.setup} aria-labelledby='setup-title'>
@@ -75,10 +75,10 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
       >
         <div className={styles.head}>
           <h2 id='setup-title' className={styles.caption}>
-            {t('Запуск записи')}
+            {t('Opening for bookings')}
           </h2>
           <span className={styles.count}>
-            {t('{done} из {total}', { done: doneCount, total: steps.length })}
+            {t('{done} of {total}', { done: doneCount, total: steps.length })}
           </span>
         </div>
         <span className={styles.steps} aria-hidden='true'>
@@ -95,13 +95,13 @@ export const SetupProgress = ({ business, catalog }: SetupProgressProps) => {
           <span className={styles.text}>
             <span className={styles.title}>{next.label}</span>
             <span className={styles.note}>
-              {t('Ещё {count}, и клиенты смогут записываться', {
+              {t('{count} more, and clients can book', {
                 count: steps.length - doneCount,
               })}
             </span>
           </span>
           <span className={styles.start}>
-            {t('Начать')}
+            {t('Get started')}
             <CaretRight aria-hidden />
           </span>
         </span>

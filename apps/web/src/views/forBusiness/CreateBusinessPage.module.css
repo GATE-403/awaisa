@@ -447,8 +447,8 @@
   field-sizing: content;
 }
 
-/* Phones: the head is one compact block («занимает большую часть пространства, кнопок не
-   видно»): the step count lives in the segments, the title a size down, a smaller tile, tighter
+/* Phones: the head is one compact block ("takes up most of the space, the buttons can't be
+   seen"): the step count lives in the segments, the title a size down, a smaller tile, tighter
    gaps, and the actions stuck to the window's foot over a fade of the page colour. */
 @media (max-width: 639px) {
   .page {
@@ -490,7 +490,7 @@
   }
 }
 
-/* «Назад» is a borderless button: its word sits on the column's edge, its padding hangs outside. */
+/* "Back" is a borderless button: its word sits on the column's edge, its padding hangs outside. */
 .back {
   margin-inline-start: calc(var(--space-4) * -1);
 }

@@ -35,7 +35,7 @@
   }
 }
 
-/* «Подставить адрес» as link text inside the note under the map. */
+/* "Use the address" as link text inside the note under the map. */
 .useAddress {
   position: relative;
   padding: 0;

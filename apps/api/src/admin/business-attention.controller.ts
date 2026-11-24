@@ -14,7 +14,7 @@ export class BusinessAttentionController {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
-  /** «Мои бизнесы»: what waits in each business (loaded after the list, never holding it up). */
+  /** 'My businesses': what waits in each business (loaded after the list, never holding it up). */
   @Get('attention')
   list(@CurrentCustomer() customer: Customer): Promise<BusinessAttention[]> {
     const isPlatformAdmin = this.config

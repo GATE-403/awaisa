@@ -22,13 +22,13 @@ interface DateTimePickerProps {
   onRetry: () => void
   onDayChange: (dayKey: string) => void
   onTimeChange: (time: string) => void
-  /** Offered on a full day, e.g. «Сообщить, когда освободится» (views pass features in). */
+  /** Offered on a full day, e.g. «Tell me when a slot opens» (views pass features in). */
   fullDayAction?: ReactNode
   /** `ruler`: the whole day as a dial of free and taken times (the booking form); `grid`: free times as capsules. */
   view?: 'grid' | 'ruler'
   /** The ruler's free time under the needle, for an action outside the picker. */
   onCenteredTimeChange?: (time: string | null) => void
-  /** The visit's length, shown by the ruler as «до 14:45». */
+  /** The visit's length, shown by the ruler as «until 14:45». */
   durationMinutes?: number
 }
 
@@ -95,34 +95,33 @@ export const DateTimePicker = ({
     rulerSlots.some((slot) => slot.isAvailable)
   const availableCount = slots.filter((slot) => slot.isAvailable).length
   // Without a dial (a full day, an error, no master yet) there is no time under a needle: the
-  // ruler only tells the form while it is on screen, so the bar kept «Выбрать 18:30» from the day
+  // ruler only tells the form while it is on screen, so the bar kept «Choose 18:30» from the day
   // before on a day with nothing free.
   // biome-ignore lint/correctness/useExhaustiveDependencies: only when the dial comes or goes
   useEffect(() => {
     if (!isRulerShown) onCenteredTimeChange?.(null)
   }, [isRulerShown])
-  // «Сегодня» and «Завтра» in place of the weekday: few remember today's date at a glance.
+  // «Today» and «Tomorrow» in place of the weekday: few remember today's date at a glance.
   const todayKey = days.find((day) => day.isToday)?.key ?? null
   const tomorrowKey = todayKey ? addDayKey(todayKey, 1) : null
-  // With large text «Сегодня» no longer fits its card and lost the word to «Сего…»: once it
+  // With large text «Tomorrow» no longer fits its card and lost the word to «Tomor…»: once it
   // overflows, both say it short, like the weekdays beside them.
   const [isShortRelative, setIsShortRelative] = useState(false)
   const measureRelative = (node: HTMLElement | null) => {
     if (node && node.scrollWidth > node.clientWidth + 1) setIsShortRelative(true)
   }
   const relativeDay = (key: string) => {
-    if (key === todayKey) return isShortRelative ? t('Сег.') : t('Сегодня')
-    if (key === tomorrowKey) return isShortRelative ? t('Завт.') : t('Завтра')
+    if (key === todayKey) return isShortRelative ? t('Tod.') : t('Today')
+    if (key === tomorrowKey) return isShortRelative ? t('Tmrw') : t('Tomorrow')
     return null
   }
-  const isRussian = t.language === 'ru'
 
   if (days.length === 0) return <Skeleton className={styles.skeleton} />
 
   const dayRow = (
     <ToggleGroup
       data-day-row=''
-      aria-label={t('День')}
+      aria-label={t('Day')}
       layout='scroll'
       className={styles.days}
       data-edge-fade=''
@@ -142,19 +141,15 @@ export const DateTimePicker = ({
             data-relative={relativeDay(day.key) ? '' : undefined}
             ref={relativeDay(day.key) ? measureRelative : undefined}
           >
-            {relativeDay(day.key) ?? (isRussian ? day.weekday : t.weekdayShort(day.key))}
+            {relativeDay(day.key) ?? t.weekdayShort(day.key)}
           </span>
           <span className={styles.dayNumber}>{day.dayOfMonth}</span>
-          <span className={styles.month}>{isRussian ? day.month : t.monthShort(day.key)}</span>
+          <span className={styles.month}>{t.monthShort(day.key)}</span>
           {/* The whole date is read after what the card shows, not instead of it: the name keeps
-              the visible words, so voice control finds «Сегодня» (WCAG 2.5.3). */}
+              the visible words, so voice control finds «Today» (WCAG 2.5.3). */}
           <span className={styles.srOnly}>
             {`, ${
-              day.isClosed
-                ? t('{day}, выходной', { day: isRussian ? day.label : t.dayLong(day.key) })
-                : isRussian
-                  ? day.label
-                  : t.dayLong(day.key)
+              day.isClosed ? t('{day}, closed', { day: t.dayLong(day.key) }) : t.dayLong(day.key)
             }`}
           </span>
         </Toggle>
@@ -165,11 +160,11 @@ export const DateTimePicker = ({
   return (
     <div className={styles.picker} data-view={view}>
       {/* The days lead the step in both views, right under its question: under the dial they
-          ended below the booking bar on short screens («так и не смог исправить»), whatever the
+          ended below the booking bar on short screens (the owner could not get past it), whatever the
           sheet's scroll. */}
       {dayRow}
 
-      {!isSpecialistSelected && <p className={styles.hint}>{t('Сначала выберите мастера')}</p>}
+      {!isSpecialistSelected && <p className={styles.hint}>{t('Choose a specialist first')}</p>}
       {isSpecialistSelected &&
         isLoading &&
         !isRulerShown &&
@@ -178,7 +173,7 @@ export const DateTimePicker = ({
         <div className={styles.hint}>
           <p>{error}</p>
           <Button variant='link' size='sm' onClick={onRetry}>
-            {t('Повторить')}
+            {t('Retry')}
           </Button>
         </div>
       )}
@@ -186,8 +181,8 @@ export const DateTimePicker = ({
         // The app's one empty place, not a white card with an apology in it.
         <EmptyState
           variant='inline'
-          title={t('На этот день всё занято')}
-          text={t('Выберите другой день')}
+          title={t('This day is fully booked')}
+          text={t('Choose another day')}
           action={fullDayAction}
         />
       )}
@@ -205,15 +200,13 @@ export const DateTimePicker = ({
         // Only free times, under a line that says a time is still to be picked: a grid half
         // made of struck-out times read as «nothing to do here».
         <p className={styles.caption} aria-hidden>
-          {time ? t('Выбрано {time}', { time }) : t('Выберите время')}
-          <span className={styles.captionCount}>
-            {t.count(availableCount, ['свободное', 'свободных', 'свободных'])}
-          </span>
+          {time ? t('Chosen {time}', { time }) : t('Choose a time')}
+          <span className={styles.captionCount}>{t.count(availableCount, ['free', 'free'])}</span>
         </p>
       )}
       {view === 'grid' && isSpecialistSelected && !isLoading && !error && availableCount > 0 && (
         <ToggleGroup
-          aria-label={t('Время')}
+          aria-label={t('Time')}
           layout='grid'
           className={styles.slots}
           value={time ? [time] : []}

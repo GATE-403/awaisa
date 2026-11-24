@@ -57,7 +57,7 @@ describe('badgesOf', () => {
     const regular = badgesOf(stats({ visits: 5, topPlace: { name: 'Kings', visits: 5 } })).find(
       (badge) => badge.id === 'regular',
     )
-    expect(regular?.title).toBe('Свой в Kings')
+    expect(regular?.title).toBe('A regular at Kings')
   })
 })
 
@@ -70,7 +70,7 @@ describe('achievementsOf', () => {
     expect(list.find((item) => item.id === 'first-visit')).toMatchObject({ earned: true })
     expect(list.find((item) => item.id === 'regular')).toMatchObject({
       earned: false,
-      title: 'Постоянный гость',
+      title: 'Regular',
       progress: { current: 3, target: 5 },
     })
     expect(list.find((item) => item.id === 'visits-10')?.progress).toEqual({

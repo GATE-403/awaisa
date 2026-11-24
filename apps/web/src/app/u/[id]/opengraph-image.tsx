@@ -1,9 +1,10 @@
 import { ImageResponse } from 'next/og'
 import { API_URL } from '@/shared/config/api'
+import { pluralize } from '@/shared/lib/plural'
 import { OG_IMAGE_SIZE } from '@/shared/lib/seo/businessMetadata'
 import { loadProfilePhoto } from '@/shared/lib/seo/profilePhoto'
 
-export const alt = 'Профиль в Awaisa'
+export const alt = 'Profile on Awaisa'
 export const size = OG_IMAGE_SIZE
 export const contentType = 'image/png'
 
@@ -76,19 +77,19 @@ const ProfileOgImage = async ({ params }: { params: Promise<{ id: string }> }) =
         )}
       </div>
       <div style={{ display: 'flex', marginTop: 28, fontSize: 64, fontWeight: 700 }}>
-        {profile?.name ?? 'Профиль'}
+        {profile?.name ?? 'Profile'}
       </div>
       <div style={{ display: 'flex', marginTop: 8, fontSize: 30, color: '#a1a1a6' }}>
         {profile
           ? (profile.status && `${profile.statusEmoji} ${profile.status}`.trim()) ||
-            `${profile.stats.visits} визитов · ${profile.stats.places} мест · ${profile.stats.reviews} отзывов`
+            `${pluralize(profile.stats.visits, ['visit', 'visits'])} · ${pluralize(profile.stats.places, ['place', 'places'])} · ${pluralize(profile.stats.reviews, ['review', 'reviews'])}`
           : 'Awaisa'}
       </div>
       {profile && (
         <div
           style={{ display: 'flex', marginTop: 14, fontSize: 30, fontWeight: 700, color: accent }}
         >
-          {`Уровень ${profile.level.level} · ${earned.length} достижений`}
+          {`Level ${profile.level.level} · ${pluralize(earned.length, ['achievement', 'achievements'])}`}
         </div>
       )}
     </div>,

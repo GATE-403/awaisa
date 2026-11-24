@@ -11,8 +11,8 @@ const scheme = (parts: Partial<MasterPayScheme>): MasterPayScheme => ({
   ...parts,
 })
 
-const cut = { serviceId: 'cut', serviceName: 'Стрижка', earned: 1000 }
-const beard = { serviceId: 'beard', serviceName: 'Борода', earned: 500 }
+const cut = { serviceId: 'cut', serviceName: 'Haircut', earned: 1000 }
+const beard = { serviceId: 'beard', serviceName: 'Beard', earned: 500 }
 const november = daysBetween('2026-11-01', '2026-11-30')
 
 describe('calculatePay', () => {
@@ -82,7 +82,7 @@ describe('calculatePay', () => {
     expect(pay.lines).toEqual([
       {
         serviceId: 'cut',
-        name: 'Стрижка',
+        name: 'Haircut',
         visits: 2,
         base: 2000,
         kind: 'percent',
@@ -91,7 +91,7 @@ describe('calculatePay', () => {
       },
       {
         serviceId: 'beard',
-        name: 'Борода',
+        name: 'Beard',
         visits: 2,
         base: 1000,
         kind: 'fixed',

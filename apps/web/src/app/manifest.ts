@@ -1,12 +1,12 @@
 import type { MetadataRoute } from 'next'
 import { PLATFORM } from '@/shared/config/platform'
 
-// Installable from the browser («На экран Домой»): the cabinet then gets pushes on iPhone too.
+// Installable from the browser ("Add to Home Screen"): the cabinet then gets pushes on iPhone too.
 const manifest = (): MetadataRoute.Manifest => ({
   name: PLATFORM.name,
   short_name: PLATFORM.name,
   description: PLATFORM.tagline,
-  lang: 'ru',
+  lang: 'en',
   start_url: '/',
   scope: '/',
   display: 'standalone',

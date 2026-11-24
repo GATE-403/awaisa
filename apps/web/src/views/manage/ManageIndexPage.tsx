@@ -31,7 +31,7 @@ import styles from './ManageIndexPage.module.css'
 /** How often the open list reads today's figures again. */
 const REFRESH_MS = 60_000
 
-const AMOUNT = new Intl.NumberFormat('ru-RU')
+const AMOUNT = new Intl.NumberFormat('en-GB')
 
 /** From this many businesses the list gets a search field. */
 const SEARCH_FROM = 7
@@ -101,40 +101,39 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
 
   const own = useMemo(() => (businesses ?? []).filter(isOwnBusiness), [businesses])
   // One list: a platform admin's own businesses lead it, every other one follows (two tabs over
-  // one list were rejected: «зачем делить на мои и общее»). Today's figures count one's own.
+  // one list were rejected: "why split into mine and everyone"). Today's figures count one's own.
   const inScope = own.length > 0 ? own : (businesses ?? [])
   const sorted = sortBusinesses(filterBusinesses(businesses ?? [], query), attention, recent)
   const shown = [...sorted.filter(isOwnBusiness), ...sorted.filter((item) => !isOwnBusiness(item))]
   const isSearchable = (businesses?.length ?? 0) >= SEARCH_FROM
   const summary = today ? todaySummary(inScope, attention, today.dayKey) : null
-  // A quiet day still has its week: «За неделю 14 записей · 230 просмотров».
+  // A quiet day still has its week: "This week 14 bookings · 230 views".
   const week = weekSummary(inScope, attention)
 
   return (
     <main className={styles.page}>
       {/* The owner's side looks like the cabinet: its own toolbar, not the client's header. */}
-      <CabinetBar title={t('Мои бизнесы')} />
+      <CabinetBar title={t('My businesses')} />
       <Container size='md' className={styles.content}>
         {/* The head right on the page: the title and today's line on
-            the left, the search on the same line on the right («можно в одну линию»). */}
+            the left, the search on the same line on the right ("can be one line"). */}
         <header className={styles.head}>
           <div className={styles.headText}>
-            <PageTitle size='sm' title={t('Мои бизнесы.')} />
+            <PageTitle size='sm' title={t('My businesses.')} />
             {/* Today over every business in view, in one line of bold figures; nothing on a quiet day. */}
             {summary && summary.visits > 0 && (
               <p className={styles.summary}>
-                {t('Сегодня')}{' '}
-                <strong>{t.count(summary.visits, ['визит', 'визита', 'визитов'])}</strong>
+                {t('Today')} <strong>{t.count(summary.visits, ['visit', 'visits'])}</strong>
                 {summary.revenue !== null && summary.revenue > 0 && (
                   <>
                     {' · '}
-                    <strong>{t('{amount} сом', { amount: AMOUNT.format(summary.revenue) })}</strong>
+                    <strong>{t('{amount} som', { amount: AMOUNT.format(summary.revenue) })}</strong>
                   </>
                 )}
                 {summary.next && (
                   <>
                     {' · '}
-                    {t('ближайший в {time}, {name}', {
+                    {t('next at {time}, {name}', {
                       time: summary.next.time,
                       name: summary.next.name,
                     })}
@@ -144,10 +143,9 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
             )}
             {summary && summary.visits === 0 && week.views + week.bookings > 0 && (
               <p className={styles.summary}>
-                {t('За неделю')}{' '}
-                <strong>{t.count(week.bookings, ['запись', 'записи', 'записей'])}</strong>
+                {t('This week')} <strong>{t.count(week.bookings, ['booking', 'bookings'])}</strong>
                 {' · '}
-                <strong>{t.count(week.views, ['просмотр', 'просмотра', 'просмотров'])}</strong>
+                <strong>{t.count(week.views, ['view', 'views'])}</strong>
               </p>
             )}
           </div>
@@ -157,8 +155,8 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
               <SearchField
                 value={query}
                 onChange={setQuery}
-                placeholder={t('Поиск')}
-                label={t('Поиск по бизнесам')}
+                placeholder={t('Search')}
+                label={t('Search businesses')}
               />
             </FloatingToolbar>
           )}
@@ -168,11 +166,13 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
 
         {businesses?.length === 0 && (
           <EmptyState
-            title={t('Создайте первую страницу')}
-            text={t('Создайте страницу бизнеса - это пять минут, и клиенты смогут записываться.')}
+            title={t('Create your first page')}
+            text={t(
+              'Create a business page: it takes five minutes, and clients can start booking.',
+            )}
             action={
               <ButtonLink render={<NextLink href='/business/new' />}>
-                {t('Создать страницу')}
+                {t('Create a page')}
               </ButtonLink>
             }
           />
@@ -201,17 +201,13 @@ export const ManageIndexPage = ({ initialBusinesses = null }: ManageIndexPagePro
                     <span className={styles.addTile} aria-hidden='true'>
                       <Plus />
                     </span>
-                    {t('Новая страница')}
+                    {t('New page')}
                   </NextLink>
                 </li>
               )}
             </ul>
           ) : (
-            <EmptyState
-              variant='inline'
-              title={t('Ничего не нашли')}
-              text={t('Попробуйте другое слово.')}
-            />
+            <EmptyState variant='inline' title={t('Nothing found')} text={t('Try another word.')} />
           ))}
       </Container>
     </main>

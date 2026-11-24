@@ -40,7 +40,7 @@
   color: var(--color-muted-foreground);
 }
 
-/* «Имя клиента», «Ссылка на запись» and the like inside the text: an accent-tinted capsule, removed whole. */
+/* "Client name", "Booking link" and the like inside the text: an accent-tinted capsule, removed whole. */
 .pill {
   display: inline-block;
   margin: 0 1px;
@@ -60,7 +60,7 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   /* Kept in place, only unseen, while the field is not focused: folding it on blur made a sheet
-     shorter under the pointer, so the first tap on «Готово» landed beside it (on phones, on the
+     shorter under the pointer, so the first tap on "Done" landed beside it (on phones, on the
      backdrop). */
   visibility: hidden;
 }
@@ -99,11 +99,11 @@
 }
 
 .templatePreview::before {
-  content: "Например: ";
+  content: "For example: ";
 }
 
 /* The row being typed in is lit like a selected Settings row (for a click and for Tab alike: an
-   editable field is always «focus-visible», so a ring would show on every click); a mouse over a
+   editable field is always "focus-visible", so a ring would show on every click); a mouse over a
    row shows it is editable. */
 .templateRow:focus-within {
   background: var(--color-fill);

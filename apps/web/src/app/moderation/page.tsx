@@ -7,11 +7,11 @@ import { PageSkeleton } from '@/shared/ui/PageSkeleton/PageSkeleton'
 import { ModerationPage } from '@/views/moderation'
 
 export const metadata: Metadata = {
-  title: 'Модерация',
+  title: 'Moderation',
   robots: { index: false },
 }
 
-// Platform admins only; anyone else gets the ordinary «not found», not a hint that it exists.
+// Platform admins only; anyone else gets the ordinary "not found", not a hint that it exists.
 const ModerationWithSession = async () => {
   const customer = await requireCustomer('/moderation')
   if (!customer.isAdmin) notFound()

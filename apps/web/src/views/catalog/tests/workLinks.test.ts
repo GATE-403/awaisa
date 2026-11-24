@@ -4,7 +4,7 @@ import { workFeedHref, workLookHref } from '../lib/workLinks'
 const business = { slug: 'kings', name: 'Kings', kind: 'barber' as const, address: '' }
 
 describe('workLinks', () => {
-  it('opens «Образы» on the work, within the catalog kind', () => {
+  it('opens “Looks” on the work, within the catalog kind', () => {
     expect(workFeedHref({ id: 'p1' }, 'barber')).toBe('/feed?start=p1&kind=barber')
     expect(workFeedHref({ id: 'p1' }, undefined)).toBe('/feed?start=p1')
   })
@@ -13,8 +13,8 @@ describe('workLinks', () => {
     const href = workLookHref({
       id: 'p1',
       business,
-      service: { id: 's1', name: 'Стрижка', price: 900, durationMinutes: 45 },
-      specialist: { id: 'm1', name: 'Нурсултан', photoUrl: null },
+      service: { id: 's1', name: 'Haircut', price: 900, durationMinutes: 45 },
+      specialist: { id: 'm1', name: 'Nursultan', photoUrl: null },
     })
     expect(href).toBe('/kings/book?service=s1&specialist=m1&look=p1')
   })

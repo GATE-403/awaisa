@@ -93,7 +93,7 @@
   font-weight: var(--font-weight-regular);
 }
 
-/* «Сегодня» / «Завтра» read as words, not as a quiet weekday. */
+/* «Today» / «Tomorrow» read as words, not as a quiet weekday. */
 .weekday[data-relative] {
   font-weight: var(--font-weight-semibold);
   opacity: 1;

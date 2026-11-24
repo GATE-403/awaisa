@@ -56,10 +56,10 @@ type Update = {
     /** A reply to one of the bot's messages (the «write your reply» prompt). */
     reply_to_message?: { message_id: number }
     from?: { id?: number; username?: string; first_name?: string }
-    /** «Поделиться номером»: `user_id` is whose number it is (a forwarded contact differs). */
+    /** «Share my number»: `user_id` is whose number it is (a forwarded contact differs). */
     contact?: { phone_number: string; user_id?: number }
   }
-  /** A press on an inline button (a quick reply or «Свой ответ» under a review). */
+  /** A press on an inline button (a quick reply or «Write my own» under a review). */
   callback_query?: {
     id: string
     data?: string
@@ -164,7 +164,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     const chat = await this.chats.findOneBy({ id, businessId })
     if (!chat) return
     await this.chats.delete({ id })
-    void this.send(chat.chatId, 'Уведомления отключены в кабинете.')
+    void this.send(chat.chatId, 'Notifications were turned off in the dashboard.')
   }
 
   /** Sends to every chat linked to the business; never throws, like `sendSafely` for SMS. */
@@ -194,7 +194,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     const chatId = String(message.chat.id)
     const [command = '', argument = ''] = text.split(/\s+/)
 
-    // «Войти через Telegram» on the site: ask for the person's own number.
+    // «Sign in with Telegram» on the site: ask for the person's own number.
     const loginToken = command === '/start' ? readLoginStartParam(argument) : null
     if (loginToken) {
       if (!(await this.telegramLogin.attachChat(loginToken, chatId))) {
@@ -216,21 +216,27 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     if (command === '/start' && argument && this.clientMessages.isClientParam(argument)) {
       const isLinked = await this.clientMessages.link(chatId, argument)
       if (!isLinked)
-        return this.send(chatId, 'Запись не нашли - откройте ссылку из записи ещё раз.')
+        return this.send(
+          chatId,
+          'We could not find the booking: open the link from your booking again.',
+        )
       return
     }
     if (command === '/start' && argument) return this.link(chatId, argument, message.from)
     if (command === '/today') return this.sendToday(chatId)
     // For ALERT_TELEGRAM_CHAT_ID: the platform's own alerts go to whichever chat this is.
-    if (command === '/chatid') return this.send(chatId, `ID этого чата: <code>${chatId}</code>`)
+    if (command === '/chatid') return this.send(chatId, `This chat's ID: <code>${chatId}</code>`)
     if (command === '/stop') {
       await this.telegramLogin.forgetChat(chatId)
       // A client's chat: back to SMS reminders.
       if (await this.clientMessages.unlink(chatId)) {
-        return this.send(chatId, 'Напоминания снова будут приходить по SMS.')
+        return this.send(chatId, 'Reminders will come by SMS again.')
       }
       await this.chats.delete({ chatId })
-      return this.send(chatId, 'Уведомления отключены. Подключить снова можно в кабинете.')
+      return this.send(
+        chatId,
+        'Notifications are off. You can connect them again in the dashboard.',
+      )
     }
 
     return this.send(chatId, HELP_TEXT)
@@ -431,7 +437,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     const text = fillReplyTemplate(template, review)
     if (!(await this.saveReply(review.id, text)))
       return this.answerButton(query.id, ALREADY_ANSWERED)
-    await this.answerButton(query.id, 'Ответ опубликован')
+    await this.answerButton(query.id, 'Reply published')
     // The buttons go, so the same review is not answered twice from an old message.
     if (query.message) {
       await this.call('editMessageReplyMarkup', {
@@ -523,7 +529,7 @@ export class TelegramBotService implements OnApplicationBootstrap, OnApplication
     if (!link || link.expiresAt < new Date()) {
       return this.send(
         chatId,
-        'Ссылка устарела. Откройте кабинет и нажмите «Подключить Telegram» ещё раз.',
+        'The link has expired. Open the dashboard and tap “Connect Telegram” again.',
       )
     }
     await this.codes.delete({ code })

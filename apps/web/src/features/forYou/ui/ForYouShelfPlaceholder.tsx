@@ -13,11 +13,11 @@ interface ForYouShelfPlaceholderProps {
 // The shelf before its picks arrive: the same head and its frames with the mascot (3:4 cards, or
 // the stories row), so the page under it stays put. Also the catalog's loading skeleton.
 export const ForYouShelfPlaceholder = ({
-  title = 'Для вас',
+  title = 'For you',
   headAction,
   variant = 'cards',
 }: ForYouShelfPlaceholderProps) => (
-  // Not a named region: tests and screen readers find the real shelf «Для вас», not this stand-in.
+  // Not a named region: tests and screen readers find the real shelf «For you», not this stand-in.
   <div className={styles.shelf} aria-busy='true'>
     <div className={styles.head}>
       <p className={styles.title}>

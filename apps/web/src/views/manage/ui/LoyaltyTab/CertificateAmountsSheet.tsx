@@ -20,7 +20,7 @@ const FORM_ID = 'certificate-amounts-form'
 
 type Draft = { key: number; value: string }
 
-// The amounts clients pick from on the place's page («Подарочный сертификат»).
+// The amounts clients pick from on the place's page ("Gift certificate").
 export const CertificateAmountsSheet = ({
   amounts,
   onClose,
@@ -50,28 +50,30 @@ export const CertificateAmountsSheet = ({
 
   return (
     <Sheet
-      title={t('Суммы')}
+      title={t('Amounts')}
       onClose={onClose}
-      action={{ label: t('Готово'), form: FORM_ID, disabled: !isValid || isSaving }}
+      action={{ label: t('Done'), form: FORM_ID, disabled: !isValid || isSaving }}
     >
       <form id={FORM_ID} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Суммы сертификатов')}>
+        <section className={sheet.group} aria-label={t('Certificate amounts')}>
           <div className={sheet.groupHeader}>
             <span />
             {drafts.length < CERTIFICATE_AMOUNTS_MAX && (
               <button type='button' className={sheet.groupLink} onClick={handleAdd}>
-                <Plus aria-hidden /> {t('Ещё сумма')}
+                <Plus aria-hidden /> {t('Another amount')}
               </button>
             )}
           </div>
           <div className={sheet.list}>
             {drafts.map((draft, index) => (
               <div key={draft.key} className={sheet.row}>
-                <span className={sheet.rowLabel}>{t('Сумма {number}', { number: index + 1 })}</span>
+                <span className={sheet.rowLabel}>
+                  {t('Amount {number}', { number: index + 1 })}
+                </span>
                 <span className={sheet.rowControl}>
                   <Input
                     variant='plain'
-                    aria-label={t('Сумма {number}, сом', { number: index + 1 })}
+                    aria-label={t('Amount {number}, som', { number: index + 1 })}
                     inputMode='numeric'
                     placeholder='3 000'
                     value={maskAmountInput(draft.value)}
@@ -85,12 +87,12 @@ export const CertificateAmountsSheet = ({
                       )
                     }
                   />
-                  <span className={sheet.suffix}>{t('сом')}</span>
+                  <span className={sheet.suffix}>{t('som')}</span>
                   {drafts.length > 1 && (
                     <button
                       type='button'
                       className={own.remove}
-                      aria-label={t('Убрать сумму {number}', { number: index + 1 })}
+                      aria-label={t('Remove amount {number}', { number: index + 1 })}
                       onClick={() =>
                         setDrafts((current) => current.filter((item) => item.key !== draft.key))
                       }
@@ -103,7 +105,7 @@ export const CertificateAmountsSheet = ({
             ))}
           </div>
           <p className={sheet.groupFooter}>
-            {t('Клиент выбирает одну из сумм на странице места. От 100 сом, до шести сумм.')}
+            {t('The client picks one amount on the place’s page. From 100 som, up to six amounts.')}
           </p>
         </section>
       </form>

@@ -28,17 +28,17 @@ import { trackStep } from '@/shared/lib/telemetry'
 import { CatalogQuery } from '@/shared/ui/CatalogQuery/CatalogQuery'
 import styles from './HeaderSearch.module.css'
 
-const QUICK_SEARCHES = ['Мужская стрижка', 'Маникюр', 'Окрашивание', 'Массаж', 'Брови']
+const QUICK_SEARCHES = ["Men's haircut", 'Manicure', 'Colouring', 'Massage', 'Brows']
 
-// What the empty field suggests, one at a time: real searches, so the field reads as «ask me»
+// What the empty field suggests, one at a time: real searches, so the field reads as “ask me”
 // rather than a blank box. They change every few seconds (the words only; still with reduced motion).
 const HINTS = [
-  'маникюр рядом',
-  'стрижка сегодня',
-  'барбер',
-  'массаж спины',
-  'брови и ресницы',
-  'окрашивание',
+  'manicure nearby',
+  'haircut today',
+  'barber',
+  'back massage',
+  'brows and lashes',
+  'hair colouring',
 ]
 const HINT_MS = 3200
 
@@ -49,7 +49,7 @@ const MAX_SERVICES = 4
 
 type ServiceSuggestion = { name: string; minPrice: number; places: number }
 
-// What people type is mostly a service («стрижка»), so services lead: one row per service name
+// What people type is mostly a service ("haircut"), so services lead: one row per service name
 // with its lowest price and how many places do it, before the places themselves.
 const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
   const byName = new Map<string, ServiceSuggestion & { slugs: Set<string> }>()
@@ -76,7 +76,7 @@ const groupServices = (offers: Offer[]): ServiceSuggestion[] => {
 }
 
 interface HeaderSearchFieldProps {
-  /** What the catalog searched for (`?q=` on «/»), shown in the field. */
+  /** What the catalog searched for (`?q=` on “/”), shown in the field. */
   urlQuery: string
 }
 
@@ -197,7 +197,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
           <span className={styles.field}>
             {!query && (
               <span className={styles.hint} aria-hidden>
-                {t('Найти')}{' '}
+                {t('Find')}{' '}
                 <span key={hintIndex} className={styles.hintWord}>
                   {t(HINTS[hintIndex] ?? '')}
                 </span>
@@ -216,7 +216,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 setIsOpen(true)
                 trackStep('search_open')
               }}
-              aria-label={t('Поиск салонов и мастеров')}
+              aria-label={t('Search salons and specialists')}
               aria-describedby={isOpen ? listId : undefined}
               enterKeyHint='search'
               autoComplete='off'
@@ -226,7 +226,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
             <button
               type='button'
               className={styles.clear}
-              aria-label={t('Очистить поиск')}
+              aria-label={t('Clear search')}
               onClick={() => {
                 setDraft('')
                 setSuggestions([])
@@ -237,29 +237,31 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
           )}
           {!isOpen && pathname !== '/map' && (
             // Where results are counted from: the saved place, or a question until there is one.
-            // Not on /map, whose list has its own «Где вы?» beside the places it sorts.
+            // Not on /map, whose list has its own Where are you? beside the places it sorts.
             <button
               type='button'
               className={styles.where}
               onClick={() => setIsPicking(true)}
               aria-label={
                 myPlace
-                  ? t('Место: {place}. Изменить', { place: t(myPlace.label) })
-                  : t('Указать, где вы')
+                  ? t('Location: {place}. Change', { place: t(myPlace.label) })
+                  : t('Set your location')
               }
             >
               <NavigationArrow aria-hidden />
-              <span className={styles.whereLabel}>{myPlace ? t(myPlace.label) : t('Где вы?')}</span>
+              <span className={styles.whereLabel}>
+                {myPlace ? t(myPlace.label) : t('Where are you?')}
+              </span>
             </button>
           )}
-          <button type='submit' className={styles.submit} aria-label={t('Найти')}>
+          <button type='submit' className={styles.submit} aria-label={t('Find')}>
             <MagnifyingGlass aria-hidden />
           </button>
         </form>
-        {/* Phones, like iOS search: «Отмена» beside the field while the suggestions are open. */}
+        {/* Phones, like iOS search: Cancel beside the field while the suggestions are open. */}
         {isOpen && (
           <button type='button' className={styles.cancel} onClick={cancel}>
-            {t('Отмена')}
+            {t('Cancel')}
           </button>
         )}
       </search>
@@ -268,10 +270,10 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
       {isOpen && (
         <div id={listId} className={styles.panel}>
           {hasQuery ? (
-            <section aria-label={t('Подсказки')}>
+            <section aria-label={t('Suggestions')}>
               {services.length > 0 && (
                 <>
-                  <p className={styles.heading}>{t('Услуги')}</p>
+                  <p className={styles.heading}>{t('Services')}</p>
                   <ul className={styles.list}>
                     {services.map((service) => (
                       <li key={service.name}>
@@ -284,8 +286,8 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                           <span className={styles.placeText}>
                             <span className={styles.placeName}>{service.name}</span>
                             <span className={styles.placeMeta}>
-                              {t('от {price}', { price: formatPrice(service.minPrice) })} ·{' '}
-                              {t.count(service.places, ['место', 'места', 'мест'])}
+                              {t('from {price}', { price: formatPrice(service.minPrice) })} ·{' '}
+                              {t.count(service.places, ['place', 'places'])}
                             </span>
                           </span>
                         </button>
@@ -296,7 +298,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               )}
               {masters.length > 0 && (
                 <>
-                  <p className={styles.heading}>{t('Мастера')}</p>
+                  <p className={styles.heading}>{t('Specialists')}</p>
                   <ul className={styles.list}>
                     {masters.map((master) => (
                       <li key={master.id}>
@@ -328,9 +330,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               )}
               {(suggestions.length > 0 || services.length === 0) && (
                 <p className={styles.heading}>
-                  {suggestions.length > 0
-                    ? t('Места')
-                    : t('Нажмите Enter, чтобы искать по услугам')}
+                  {suggestions.length > 0 ? t('Places') : t('Press Enter to search services')}
                 </p>
               )}
               <ul className={styles.list}>
@@ -359,7 +359,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                 <li>
                   <button type='button' className={styles.all} onClick={() => search(trimmed)}>
                     <ArrowRight aria-hidden />
-                    {t('Все услуги и места по «{query}»', { query: trimmed })}
+                    {t('All services and places for “{query}”', { query: trimmed })}
                   </button>
                 </li>
               </ul>
@@ -368,9 +368,9 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
             <>
               <RecentVisits onSelect={close} />
               {recent.length > 0 && (
-                <section aria-label={t('Недавние')}>
+                <section aria-label={t('Recent')}>
                   <p className={styles.heading}>
-                    {t('Недавние')}
+                    {t('Recent')}
                     <button
                       type='button'
                       className={styles.clear}
@@ -379,7 +379,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                         setRecent([])
                       }}
                     >
-                      {t('Очистить')}
+                      {t('Clear')}
                     </button>
                   </p>
                   <ul className={styles.list}>
@@ -394,8 +394,8 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
                   </ul>
                 </section>
               )}
-              <section aria-label={t('Часто ищут')}>
-                <p className={styles.heading}>{t('Часто ищут')}</p>
+              <section aria-label={t('Popular searches')}>
+                <p className={styles.heading}>{t('Popular searches')}</p>
                 <ul className={styles.list}>
                   {QUICK_SEARCHES.map((item) => (
                     <li key={item}>

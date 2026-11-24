@@ -3,24 +3,24 @@ import { parseReviewCallback, repliedText, reviewKeyboard } from './review-repli
 const ID = '6f1c2d3e-0000-4000-8000-000000000001'
 
 describe('review replies from Telegram', () => {
-  it('puts a button per quick reply, «Свой ответ» and the https cabinet', () => {
+  it('puts a button per quick reply, “Write my own” and the https cabinet', () => {
     const keyboard = reviewKeyboard(
       ID,
-      ['Спасибо, Асель!', 'Х'.repeat(60)],
+      ['Thank you, Asel!', 'X'.repeat(60)],
       'https://awaisa.kg/manage/a',
     )
     expect(keyboard.inline_keyboard).toEqual([
-      [{ text: 'Спасибо, Асель!', callback_data: `rq:${ID}:0` }],
-      [{ text: `${'Х'.repeat(39)}…`, callback_data: `rq:${ID}:1` }],
-      [{ text: '✍️ Свой ответ', callback_data: `rw:${ID}` }],
-      [{ text: 'Открыть в кабинете', url: 'https://awaisa.kg/manage/a' }],
+      [{ text: 'Thank you, Asel!', callback_data: `rq:${ID}:0` }],
+      [{ text: `${'X'.repeat(39)}…`, callback_data: `rq:${ID}:1` }],
+      [{ text: '✍️ Write my own', callback_data: `rw:${ID}` }],
+      [{ text: 'Open in the dashboard', url: 'https://awaisa.kg/manage/a' }],
     ])
   })
 
   it('leaves the cabinet out when its address is not https', () => {
     const keyboard = reviewKeyboard(ID, [], 'http://localhost:3000/manage/a')
     expect(keyboard.inline_keyboard).toEqual([
-      [{ text: '✍️ Свой ответ', callback_data: `rw:${ID}` }],
+      [{ text: '✍️ Write my own', callback_data: `rw:${ID}` }],
     ])
   })
 
@@ -41,6 +41,6 @@ describe('review replies from Telegram', () => {
   })
 
   it('escapes the reply it echoes', () => {
-    expect(repliedText('<b>Спасибо</b>')).toContain('&lt;b&gt;Спасибо&lt;/b&gt;')
+    expect(repliedText('<b>Thanks</b>')).toContain('&lt;b&gt;Thanks&lt;/b&gt;')
   })
 })

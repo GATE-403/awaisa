@@ -91,8 +91,8 @@
 .leafMonth {
   width: 100%;
   flex: none;
-  /* The band is a third of the leaf at every size, the day fills the rest («что с иконкой
-     календаря»: a 9pt band on a 40pt leaf took half of it). */
+  /* The band is a third of the leaf at every size, the day fills the rest (the owner asked what was wrong
+     with the calendar icon: a 9pt band on a 40pt leaf took half of it). */
   height: 30%;
   display: grid;
   place-items: center;
@@ -226,8 +226,8 @@
 }
 
 /* The nearest visit: the page's lead, a little larger than the rows under it - the time in
-   title2, the service at body size in semibold, the actions as footnote links («слишком
-   огромный» with title1 and a 64pt leaf). */
+   title2, the service at body size in semibold, the actions as footnote links (the owner: far
+   too big with title1 and a 64pt leaf). */
 .card[data-variant="next"] {
   padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
 }

@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { LoginPage } from '@/views/auth'
 
 export const metadata: Metadata = {
-  title: 'Вход',
+  title: 'Sign-in',
 }
 
 const LoginRoute = () => (

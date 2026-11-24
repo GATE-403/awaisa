@@ -18,7 +18,7 @@ type CheckResult =
   | { status: 'signedIn'; session: Awaited<ReturnType<AuthService['openSession']>> }
 
 /**
- * «Войти через Telegram» through the owners' bot: the page registers its token, the bot's
+ * 'Sign in with Telegram' through the owners' bot: the page registers its token, the bot's
  * `/start login_<token>` ties a chat to it, the person shares their own number there, and the
  * page trades the token for a session - the same account as signing in by SMS on that number.
  */
@@ -37,8 +37,9 @@ export class TelegramLoginService {
   }
 
   async register(token: string) {
-    if (!this.botUsername) throw new BadRequestException('Вход через Telegram сейчас недоступен')
-    if (!isLoginToken(token)) throw new BadRequestException('Неверная ссылка для входа')
+    if (!this.botUsername)
+      throw new BadRequestException('Telegram sign-in is unavailable right now')
+    if (!isLoginToken(token)) throw new BadRequestException('Invalid sign-in link')
     await this.logins.delete({ expiresAt: LessThan(new Date(Date.now() - 24 * 60 * 60_000)) })
     await this.logins
       .createQueryBuilder()

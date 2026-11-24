@@ -15,8 +15,8 @@ const boardMetadata = (params: BoardParams): Metadata => {
   const { kind, view } = readBoard(params)
   const board = BOARDS.find((item) => item.kind === kind) ?? BOARDS[0]
   const heading = view === 'places' ? board.places : board.masters
-  const title = `${heading} Бишкека: рейтинг по отзывам`
-  const description = `${heading} Бишкека по отзывам клиентов: оценки, число отзывов и запись онлайн без звонков.`
+  const title = `${heading} in Bishkek: ranked by reviews`
+  const description = `${heading} in Bishkek by client reviews: ratings, review counts and online booking with no calls.`
 
   return {
     title: { absolute: title },

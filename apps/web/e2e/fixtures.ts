@@ -12,7 +12,7 @@ const fakeBooking = (input: BookingPayload) => ({
   id: '00000000-0000-4000-8000-000000000001',
   status: 'confirmed',
   serviceId: input.serviceId,
-  serviceName: 'Тестовая услуга',
+  serviceName: 'Test service',
   price: 1500,
   durationMinutes: 60,
   specialistId: input.specialistId === 'any' ? 'aigerim' : input.specialistId,
@@ -51,7 +51,7 @@ const succeed = (route: Route, input: BookingPayload) =>
   route.fulfill({ status: 201, json: fakeBooking(input) })
 
 const conflict = (route: Route) =>
-  route.fulfill({ status: 409, json: { message: 'Это время только что заняли. Выберите другое.' } })
+  route.fulfill({ status: 409, json: { message: 'Someone just took this time, choose another' } })
 
 export type { BookingPayload }
 export { conflict, mockCreateBooking, succeed }

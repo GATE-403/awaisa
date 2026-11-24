@@ -5,7 +5,7 @@ import { createPastVisit, withDb } from './visits'
 const SLUG = 'awaisa-studio'
 
 test.describe('Mailings', () => {
-  test('the owner previews «давно не были», sends once a day, turns birthday greetings on', async ({
+  test('the owner previews “lapsed” clients, sends once a day, turns birthday greetings on', async ({
     page,
     isMobile,
   }, testInfo) => {
@@ -36,28 +36,28 @@ test.describe('Mailings', () => {
       expect(preview.count).toBeGreaterThan(0)
 
       await page.goto(`/manage/${SLUG}?tab=clients`)
-      await page.getByRole('button', { name: 'Рассылка' }).click()
-      const sheet = page.getByRole('dialog', { name: 'Рассылка' })
-      await sheet.getByRole('combobox', { name: 'Не были дольше' }).click()
-      await page.getByRole('option', { name: '90 дней' }).click()
-      await expect(sheet.getByText(/\d+ клиент/)).toBeVisible()
-      await sheet.getByLabel('Текст рассылки').fill('E2E {имя}, давно не виделись: {ссылка}')
-      await sheet.getByRole('button', { name: 'Отправить' }).click()
-      await expect(page.getByText(/^Отправлено: \d+/)).toBeVisible()
+      await page.getByRole('button', { name: 'Mailing' }).click()
+      const sheet = page.getByRole('dialog', { name: 'Mailing' })
+      await sheet.getByRole('combobox', { name: 'Not seen for longer than' }).click()
+      await page.getByRole('option', { name: '90 days' }).click()
+      await expect(sheet.getByText(/\d+ clients?$/)).toBeVisible()
+      await sheet.getByLabel('Mailing text').fill('E2E {name}, long time no see: {link}')
+      await sheet.getByRole('button', { name: 'Send' }).click()
+      await expect(page.getByText(/^Sent to \d+ clients?/)).toBeVisible()
 
       // The same segment cannot go out twice a day.
       const again = await page.request.post(`${manage}/mailings`, {
-        data: { segment: 'lapsed', days: 90, text: 'E2E {имя}, ещё раз' },
+        data: { segment: 'lapsed', days: 90, text: 'E2E {name}, once more' },
       })
       expect(again.status()).toBe(409)
 
       // Birthday greetings switch on and off.
       await page.request.put(`${manage}/mailings/birthday`, {
-        data: { text: 'E2E {имя}, с днём рождения! {ссылка}' },
+        data: { text: 'E2E {name}, happy birthday! {link}' },
       })
       expect(
         (await (await page.request.get(`${manage}/mailings`)).json()).birthdayGreeting,
-      ).toContain('с днём рождения')
+      ).toContain('happy birthday')
     } finally {
       await page.request.put(`${manage}/mailings/birthday`, {
         data: { text: before.birthdayGreeting ?? null },

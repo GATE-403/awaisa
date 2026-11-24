@@ -93,7 +93,7 @@
   margin: 0;
   padding: 0;
   overflow-x: auto;
-  /* The last tab fades out at the edge, so it reads as «there is more». The end padding lets
+  /* The last tab fades out at the edge, so it reads as “there is more”. The end padding lets
      the last tab clear the fade once scrolled to the end. */
   padding-inline-end: var(--space-6);
   list-style: none;
@@ -190,7 +190,7 @@
   inset-inline: min(0px, calc((100% - 44px) / 2));
 }
 
-/* «Каталог» in the trail: a 44pt hit area around the short link, invisible. */
+/* Catalogue in the trail: a 44pt hit area around the short link, invisible. */
 :where(.crumb) {
   position: relative;
 }

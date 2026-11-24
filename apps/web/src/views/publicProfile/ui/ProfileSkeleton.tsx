@@ -8,14 +8,14 @@ import skeleton from './ProfileSkeleton.module.css'
 
 // A profile while it streams in, on the page's own classes: a neutral wash (the colour is the
 // person's, not known yet), the face, name, status, the facts and level lines, two small
-// capsules, then «Достижения» with grey medals.
+// capsules, then «Medals» with grey medals.
 export const ProfileSkeleton = () => (
   <main
     className={styles.page}
     style={{ '--accent': 'var(--color-muted-foreground)' } as CSSProperties}
     data-page-skeleton=''
     aria-busy='true'
-    aria-label='Загружаем профиль'
+    aria-label='Loading the profile'
   >
     <div className={styles.column}>
       <p className={`${styles.crumbs} ${skeleton.crumbs}`}>
@@ -42,7 +42,7 @@ export const ProfileSkeleton = () => (
       </header>
       <section className={styles.section}>
         <SectionCaption as='p' isInset={false}>
-          <T>Достижения</T>
+          <T>Achievements</T>
         </SectionCaption>
         <AchievementsPlaceholder />
       </section>

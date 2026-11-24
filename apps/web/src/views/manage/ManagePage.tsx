@@ -74,15 +74,15 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
         <Container size='sm' className={styles.error}>
           <PageTitle
             size='sm'
-            title={error.status === FORBIDDEN ? t('Нет доступа.') : t('Не получилось.')}
+            title={error.status === FORBIDDEN ? t('No access.') : t('Something went wrong.')}
             subtitle={
               error.status === FORBIDDEN
-                ? t('Этим бизнесом управляет другой аккаунт.')
+                ? t('Another account manages this business.')
                 : error.message
             }
           />
           <NextLink href='/manage' className={styles.link}>
-            {t('Мои бизнесы')} ›
+            {t('My businesses')} ›
           </NextLink>
         </Container>
       </main>
@@ -100,7 +100,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
             isPublished={data?.business.isPublished ?? true}
             nav={
               <TextTabs
-                label={t('Разделы кабинета')}
+                label={t('Dashboard sections')}
                 items={[
                   ...MAIN_TABS.filter(({ value }) => isTabAllowed(value, role)).map(
                     ({ value, label }) => ({
@@ -113,7 +113,7 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                     ? [
                         {
                           href: `/manage/${slug}?tab=settings`,
-                          label: t('Настройки'),
+                          label: t('Settings'),
                           isActive: isSettings,
                         },
                       ]
@@ -150,10 +150,10 @@ export const ManagePage = ({ slug, initialData = null }: ManagePageProps) => {
                       href={`/manage/${slug}?tab=settings`}
                       scroll={false}
                       className={styles.backLink}
-                      aria-label={t('Назад к настройкам')}
+                      aria-label={t('Back to settings')}
                     >
                       <CaretLeft aria-hidden />
-                      {t('Назад')}
+                      {t('Back')}
                     </NextLink>
                     <h2 className={styles.backTitle}>
                       {t(SETTINGS_TABS.find((item) => item.value === tab)?.label ?? '')}

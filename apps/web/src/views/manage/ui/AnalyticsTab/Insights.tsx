@@ -22,21 +22,21 @@ import styles from './AnalyticsTab.module.css'
 import { analyticsFormat } from './analyticsFormat'
 import { Filled } from './Filled'
 
-const visits = (t: Translate, count: number) => t.count(count, ['визит', 'визита', 'визитов'])
+const visits = (t: Translate, count: number) => t.count(count, ['visit', 'visits'])
 
 interface AttentionRowProps {
   icon: ReactNode
   tone: 'orange' | 'blue' | 'red' | 'gray'
   title: ReactNode
   detail?: string
-  /** What the row does, said at its end: «Отметить», «Позвать». */
+  /** What the row does, said at its end: "Mark", "Invite". */
   actionLabel: string
   href?: string
   onClick?: () => void
 }
 
-// One thing to do, the whole row one tap target: a thin glyph in its colour (no tinted disc: «плохой
-// вариант»), what it is, and the action named at the end with a chevron.
+// One thing to do, the whole row one tap target: a thin glyph in its colour (no tinted disc: "a bad
+// option"), what it is, and the action named at the end with a chevron.
 const AttentionRow = ({
   icon,
   tone,
@@ -98,18 +98,20 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-attention'>
       <SectionCaption id='analytics-attention' isInset={false}>
-        {t('Требует внимания')}
+        {t('Needs attention')}
       </SectionCaption>
       <ul className={styles.rows}>
         {unmarked.count > 0 && (
           <AttentionRow
             icon={<CircleDashed />}
             tone='orange'
-            title={t('{visits} без отметки', { visits: visits(t, unmarked.count) })}
+            title={t('{visits} unmarked', { visits: visits(t, unmarked.count) })}
             detail={
-              unmarked.firstDate ? t('с {day}', { day: formatDay(unmarked.firstDate) }) : undefined
+              unmarked.firstDate
+                ? t('since {day}', { day: formatDay(unmarked.firstDate) })
+                : undefined
             }
-            actionLabel={t('Отметить')}
+            actionLabel={t('Mark')}
             href={`?tab=schedule${unmarked.firstDate ? `&date=${unmarked.firstDate}` : ''}`}
           />
         )}
@@ -117,11 +119,11 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
           <AttentionRow
             icon={<UserMinus />}
             tone='red'
-            title={t('{clients} давно не были', {
-              clients: t.count(lapsed.count, ['клиент', 'клиента', 'клиентов']),
+            title={t('{clients} not seen for a while', {
+              clients: t.count(lapsed.count, ['client', 'clients']),
             })}
-            detail={t('больше {days} дней', { days: lapsed.days })}
-            actionLabel={t('Позвать')}
+            detail={t('over {days} days', { days: lapsed.days })}
+            actionLabel={t('Invite back')}
             onClick={onCallBack}
           />
         )}
@@ -129,11 +131,11 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
           <AttentionRow
             icon={<CalendarBlank />}
             tone='blue'
-            title={t('Завтра свободно ≈ {hours}', {
+            title={t('Free tomorrow ≈ {hours}', {
               hours: t.duration(Math.round(freeTomorrow.minutes / 60) * 60),
             })}
-            detail={t('поделитесь окнами')}
-            actionLabel={t('Открыть день')}
+            detail={t('share your free times')}
+            actionLabel={t('Open the day')}
             href={`?tab=schedule&date=${freeTomorrow.date}`}
           />
         )}
@@ -143,13 +145,13 @@ const AttentionList = ({ attention, onCallBack }: AttentionListProps) => {
             tone='gray'
             title={
               restStock > 0
-                ? t('Заканчивается: {names} и ещё {count}', {
+                ? t('Running low: {names} and {count} more', {
                     names: lowStock.names.join(', '),
                     count: restStock,
                   })
-                : t('Заканчивается: {names}', { names: lowStock.names.join(', ') })
+                : t('Running low: {names}', { names: lowStock.names.join(', ') })
             }
-            actionLabel={t('Склад')}
+            actionLabel={t('Stock')}
             href='?tab=stock'
           />
         )}
@@ -172,10 +174,10 @@ const ChangeReasons = ({ totals, masters }: ChangeReasonsProps) => {
   if (totals.revenueChange === null || totals.revenueChange === 0) return null
   const parts: string[] = []
   if (totals.visitsChange !== null) {
-    parts.push(t('визитов {change}', { change: signed(totals.visitsChange) }))
+    parts.push(t('visits {change}', { change: signed(totals.visitsChange) }))
   }
   if (totals.averageCheckChange !== null) {
-    parts.push(t('средний чек {change}', { change: signed(totals.averageCheckChange) }))
+    parts.push(t('average bill {change}', { change: signed(totals.averageCheckChange) }))
   }
   const mover = masters
     .filter((master) => master.previousRevenue > 0)
@@ -188,9 +190,7 @@ const ChangeReasons = ({ totals, masters }: ChangeReasonsProps) => {
     }))
     .sort((left, right) => Math.abs(right.delta) - Math.abs(left.delta))[0]
   if (mover && mover.change !== 0) {
-    parts.push(
-      t('сильнее всех {name} {change}', { name: mover.name, change: signed(mover.change) }),
-    )
+    parts.push(t('most of all {name} {change}', { name: mover.name, change: signed(mover.change) }))
   }
   if (parts.length === 0) return null
 
@@ -210,7 +210,7 @@ const GoalLine = ({ month, onEdit }: GoalLineProps) => {
   if (month.goal === null) {
     return (
       <button type='button' className={styles.goalSet} onClick={onEdit}>
-        {t('Задать цель на {month}', { month: month.label })}
+        {t('Set a goal for {month}', { month: month.label })}
         <CaretRight aria-hidden />
       </button>
     )
@@ -224,7 +224,7 @@ const GoalLine = ({ month, onEdit }: GoalLineProps) => {
       <div className={styles.goalHead}>
         <p className={styles.goalText}>
           <Filled
-            text={t('Цель на {month}: {share} · {revenue} из {goal}', {
+            text={t('Goal for {month}: {share} · {revenue} of {goal}', {
               month: month.label,
               revenue: formatMoney(month.revenue),
               goal: formatMoney(month.goal),
@@ -234,17 +234,17 @@ const GoalLine = ({ month, onEdit }: GoalLineProps) => {
           <span className={styles.muted}>
             {' · '}
             {isReached
-              ? t('цель достигнута')
+              ? t('goal reached')
               : isOnPace
-                ? t('в этом темпе {amount}', { amount: formatMoney(month.projected) })
-                : t('в этом темпе {amount}, не хватит {missing}', {
+                ? t('at this pace {amount}', { amount: formatMoney(month.projected) })
+                : t('at this pace {amount}, {missing} short', {
                     amount: formatMoney(month.projected),
                     missing: formatMoney(month.goal - month.projected),
                   })}
           </span>
         </p>
         <button type='button' className={styles.goalEdit} onClick={onEdit}>
-          {t('Изменить')}
+          {t('Change')}
         </button>
       </div>
       <span className={styles.goalBar} data-on-pace={isOnPace || undefined} aria-hidden='true'>
@@ -263,7 +263,7 @@ interface GoalSheetProps {
 
 const GOAL_FORM = 'analytics-goal'
 
-// The month's revenue goal: one amount, and «Убрать цель» when there is one.
+// The month's revenue goal: one amount, and "Remove goal" when there is one.
 const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
   const t = useT()
   const [value, setValue] = useState(goal ? maskAmountInput(String(goal)) : '')
@@ -290,33 +290,35 @@ const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
 
   return (
     <Sheet
-      title={t('Цель на месяц')}
+      title={t('Monthly goal')}
       onClose={onClose}
-      action={{ label: t('Готово'), form: GOAL_FORM, disabled: !canSave }}
+      action={{ label: t('Done'), form: GOAL_FORM, disabled: !canSave }}
     >
       <form id={GOAL_FORM} className={sheet.form} onSubmit={handleSubmit}>
-        <section className={sheet.group} aria-label={t('Цель')}>
+        <section className={sheet.group} aria-label={t('Goal')}>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
-                {t('Выручка за {month}', { month: monthLabel })}
+                {t('Revenue for {month}', { month: monthLabel })}
               </span>
               <span className={sheet.rowControl}>
                 <Input
                   variant='plain'
-                  aria-label={t('Цель по выручке, сом')}
+                  aria-label={t('Revenue goal, som')}
                   inputMode='numeric'
                   placeholder='400 000'
                   value={value}
                   onValueChange={(next) => setValue(maskAmountInput(next.replace(/\D/g, '')))}
                   autoFocus
                 />
-                <span className={sheet.suffix}>{t('сом')}</span>
+                <span className={sheet.suffix}>{t('som')}</span>
               </span>
             </label>
           </div>
           <p className={sheet.groupFooter}>
-            {t('Аналитика покажет, сколько уже есть и хватит ли текущего темпа до конца месяца.')}
+            {t(
+              'Analytics will show how much you have and whether the current pace will get you there by the end of the month.',
+            )}
           </p>
         </section>
         {goal !== null && (
@@ -327,7 +329,7 @@ const GoalSheet = ({ goal, monthLabel, onSave, onClose }: GoalSheetProps) => {
               onClick={() => void save(null)}
               disabled={isSaving}
             >
-              {t('Убрать цель')}
+              {t('Remove goal')}
             </button>
           </div>
         )}
@@ -352,13 +354,13 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-losses'>
       <SectionCaption id='analytics-losses' isInset={false}>
-        {t('Потери')} <span className={forms.groupCount}>{formatMoney(total)}</span>
+        {t('Losses')} <span className={forms.groupCount}>{formatMoney(total)}</span>
       </SectionCaption>
       <ul className={styles.rows}>
         {losses.noShows.count > 0 && (
           <li className={styles.row}>
             <span className={styles.rowText}>
-              <span className={styles.rowTitle}>{t('Неявки')}</span>
+              <span className={styles.rowTitle}>{t('No-shows')}</span>
               <span className={styles.rowMeta}>{visits(t, losses.noShows.count)}</span>
             </span>
             <span className={styles.rowValue}>{formatMoney(losses.noShows.amount)}</span>
@@ -367,9 +369,9 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
         {losses.lateCancellations.count > 0 && (
           <li className={styles.row}>
             <span className={styles.rowText}>
-              <span className={styles.rowTitle}>{t('Поздние отмены')}</span>
+              <span className={styles.rowTitle}>{t('Late cancellations')}</span>
               <span className={styles.rowMeta}>
-                {t('{visits} отменили меньше чем за сутки', {
+                {t('{visits} cancelled less than a day ahead', {
                   visits: visits(t, losses.lateCancellations.count),
                 })}
               </span>
@@ -387,8 +389,8 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
               <span className={styles.rowText}>
                 <span className={styles.rowTitle}>{client.name || formatPhone(client.phone)}</span>
                 <span className={styles.rowMeta}>
-                  {t('не пришёл {times} за полгода', {
-                    times: t.count(client.count, ['раз', 'раза', 'раз']),
+                  {t('no-show {times} in six months', {
+                    times: t.count(client.count, ['time', 'times']),
                   })}{' '}
                   · {formatPhone(client.phone)}
                 </span>
@@ -400,11 +402,11 @@ const LossesGroup = ({ losses, onOpenClient }: LossesGroupProps) => {
       </ul>
       <p className={styles.footnote}>
         <Filled
-          text={t('Предоплата при записи онлайн защищает от неявок: {link}.')}
+          text={t('A deposit on online bookings protects against no-shows: {link}.')}
           parts={{
             link: (
               <NextLink className={styles.footnoteLink} href='?tab=services'>
-                {t('включите её в услугах')}
+                {t('turn it on in services')}
               </NextLink>
             ),
           }}
@@ -419,9 +421,9 @@ interface SourcesGroupProps {
 }
 
 const SOURCE_PARTS = [
-  { key: 'online', label: 'Онлайн' },
-  { key: 'staff', label: 'Администратор' },
-  { key: 'import', label: 'Импорт' },
+  { key: 'online', label: 'Online' },
+  { key: 'staff', label: 'Administrator' },
+  { key: 'import', label: 'Import' },
 ] as const
 
 // Where the period's visits were booked: online by the clients themselves, by the staff, imported;
@@ -438,7 +440,7 @@ const SourcesGroup = ({ sources }: SourcesGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-sources'>
       <SectionCaption id='analytics-sources' isInset={false}>
-        {t('Откуда записи')}
+        {t('Where bookings come from')}
       </SectionCaption>
       <div className={styles.payments}>
         <span className={styles.paymentsBar} aria-hidden='true'>
@@ -485,13 +487,13 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
   const { formatMoney } = analyticsFormat(t)
   const loyaltyParts = [
     loyalty.bonusSpent > 0 &&
-      t('бонусами оплачено {amount}', { amount: formatMoney(loyalty.bonusSpent) }),
+      t('paid with bonuses {amount}', { amount: formatMoney(loyalty.bonusSpent) }),
     loyalty.certificateSpent > 0 &&
-      t('сертификатами {amount}', { amount: formatMoney(loyalty.certificateSpent) }),
+      t('with certificates {amount}', { amount: formatMoney(loyalty.certificateSpent) }),
     loyalty.subscriptionVisits > 0 &&
-      t('по абонементам {visits}', { visits: visits(t, loyalty.subscriptionVisits) }),
+      t('on passes {visits}', { visits: visits(t, loyalty.subscriptionVisits) }),
     loyalty.subscriptionsSold > 0 &&
-      t('продано абонементов: {count} на {amount}', {
+      t('passes sold: {count} for {amount}', {
         count: loyalty.subscriptionsSold,
         amount: formatMoney(loyalty.subscriptionsRevenue),
       }),
@@ -501,7 +503,7 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
   return (
     <section className={styles.group} aria-labelledby='analytics-promotions'>
       <SectionCaption id='analytics-promotions' isInset={false}>
-        {t('Акции и лояльность')}
+        {t('Promotions and loyalty')}
       </SectionCaption>
       {promotions.length > 0 && (
         <ul className={styles.rows}>
@@ -511,7 +513,7 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
                 <span className={styles.rowTitle}>{promotion.title}</span>
                 <span className={styles.rowMeta}>
                   {visits(t, promotion.visits)} ·{' '}
-                  {t('скидки {amount}', { amount: formatMoney(promotion.discount) })}
+                  {t('discounts {amount}', { amount: formatMoney(promotion.discount) })}
                 </span>
               </span>
               <span className={styles.rowValue}>{formatMoney(promotion.revenue)}</span>
@@ -521,7 +523,7 @@ const PromotionsGroup = ({ promotions, loyalty }: PromotionsGroupProps) => {
       )}
       {loyaltyParts.length > 0 && (
         <p className={styles.footnote}>
-          {t('Лояльность: {parts}.', { parts: loyaltyParts.join(', ') })}
+          {t('Loyalty: {parts}.', { parts: loyaltyParts.join(', ') })}
         </p>
       )}
     </section>

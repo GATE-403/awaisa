@@ -63,7 +63,7 @@ import { AdminService } from './admin.service.js'
 import { AnalyticsService } from './analytics.service.js'
 import { SettingsSummaryService } from './settings-summary.service.js'
 
-/** «За неделю» on the owner's page. */
+/** 'This week' on the owner's page. */
 const PAGE_STATS_DAYS = 7
 
 @Controller('manage/:slug')

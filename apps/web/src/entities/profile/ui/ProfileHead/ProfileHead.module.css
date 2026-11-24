@@ -47,7 +47,7 @@
   line-height: var(--text-footnote-line-height);
 }
 
-/* Phones: a smaller face and gap, so the name keeps the room («в мобилке съедает свободное место»). */
+/* Phones: a smaller face and gap, so the name keeps the room (on phones it ate the free room). */
 @media (max-width: 639px) {
   .head {
     gap: var(--space-3);

@@ -22,7 +22,7 @@ interface SubscriptionPaymentNoteProps {
   plan: OnlineSubscriptionPlan | null
 }
 
-// «Оплата» as a Settings row with a plain Select: at the salon, by one's own subscription here,
+// Payment as a Settings row with a plain Select: at the salon, by one's own subscription here,
 // or buying one with this visit - offered only when one of the last two exists.
 export const SubscriptionPaymentRow = ({
   className,
@@ -34,23 +34,23 @@ export const SubscriptionPaymentRow = ({
 }: SubscriptionPaymentRowProps) => {
   const t = useT()
   const items: { value: PaymentChoice; label: string }[] = [
-    { value: 'salon', label: t('В салоне') },
+    { value: 'salon', label: t('At the salon') },
     ...subscriptions.map((item) => ({
       value: `subscription:${item.id}` as const,
-      label: t('Абонементом · осталось {count}', { count: item.visitsLeft }),
+      label: t('By subscription · {count} left', { count: item.visitsLeft }),
     })),
     ...plans.map((plan) => ({
       value: `plan:${plan.id}` as const,
-      label: t('Новый абонемент · {price}', { price: formatPrice(plan.price) }),
+      label: t('New subscription · {price}', { price: formatPrice(plan.price) }),
     })),
   ]
 
   return (
     <div className={className}>
-      <span className={labelClassName}>{t('Оплата')}</span>
+      <span className={labelClassName}>{t('Payment')}</span>
       <Select
         variant='plain'
-        aria-label={t('Оплата')}
+        aria-label={t('Payment')}
         items={items}
         value={choice}
         onValueChange={(value) => value && onChange(value)}
@@ -65,7 +65,9 @@ export const SubscriptionPaymentNote = ({ subscription, plan }: SubscriptionPaym
   if (subscription) {
     return (
       <RowNote>
-        {t('«{title}»: визит спишется, когда мастер отметит его', { title: subscription.title })}
+        {t('“{title}”: the visit is deducted once the specialist marks it', {
+          title: subscription.title,
+        })}
       </RowNote>
     )
   }
@@ -75,10 +77,10 @@ export const SubscriptionPaymentNote = ({ subscription, plan }: SubscriptionPaym
   return (
     <RowNote>
       {[
-        `«${plan.title}»: ${t.count(plan.visits, ['визит', 'визита', 'визитов'])}`,
-        t('на {days} дн.', { days: plan.validDays }),
-        saving > 0 ? t('экономия {amount}', { amount: formatPrice(saving) }) : null,
-        t('оплата картой сейчас, этот визит первый'),
+        `“${plan.title}”: ${t.count(plan.visits, ['visit', 'visits'])}`,
+        t.count(plan.validDays, ['day', 'days']),
+        saving > 0 ? t('save {amount}', { amount: formatPrice(saving) }) : null,
+        t('paid by card now, this visit is the first'),
       ]
         .filter(Boolean)
         .join(' · ')}

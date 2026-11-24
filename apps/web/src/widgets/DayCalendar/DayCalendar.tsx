@@ -78,15 +78,15 @@ interface DayCalendarProps {
   /** A day gone by: every visit on it has ended. */
   isPast?: boolean
   slotMinutes: number
-  /** «Колонки» (default) or «Лента»: masters as rows with time running across. */
+  /** Columns (default) or Timeline: masters as rows with time running across. */
   layout?: CalendarLayout
   /** The timeline's zoom, 1–4 (ignored by the columns). */
   zoom?: number
   /** Pinch or ctrl + wheel over the timeline asks for a new zoom. */
   onZoomChange?: (zoom: number) => void
-  /** «✓ Пришёл» right on an ended, unmarked visit's card. */
+  /** "✓ Arrived" right on an ended, unmarked visit's card. */
   onMarkArrived?: (booking: AdminBooking) => void
-  /** A visit to bring into view and flash (picked from «N визитов прошли без отметки»). */
+  /** A visit to bring into view and flash (picked from "N visits not marked"). */
   focusedBookingId?: string | null
   /** Room kept under the day for a bar floating at the window's foot, so it never covers the scrollbar. */
   bottomInset?: number
@@ -95,11 +95,11 @@ interface DayCalendarProps {
   footCover?: number
   /** The day shown (`YYYY-MM-DD`): when it changes the lanes slide in from that side. */
   dayKey?: string
-  /** «Найти место»: light up the gaps where a service this long fits (only these masters). */
+  /** Find a slot: light up the gaps where a service this long fits (only these masters). */
   fit?: { minutes: number; specialistIds: string[] | null } | null
-  /** «Не пришёл» from a card's right-click menu. */
+  /** No-show from a card's right-click menu. */
   onMarkNoShow?: (booking: AdminBooking) => void
-  /** «Отменить запись» from a card's right-click menu (undo comes from the toast). */
+  /** Cancel booking from a card's right-click menu (undo comes from the toast). */
   onCancelBooking?: (booking: AdminBooking) => void
   /** A swipe sideways past the day's edge: the next (1) or previous (-1) day. */
   onSwipeDay?: (step: 1 | -1) => void
@@ -170,13 +170,13 @@ const SlotCursor = ({ store, specialistId, render }: SlotCursorProps) => {
 // hourglass; ended unmarked - a dashed circle, a tick still to be put; came - a ticked circle;
 // did not come - a person taken away; cancelled - a struck circle; deposit not paid - a card.
 const STATE_GLYPHS: Record<string, ComponentType<IconProps>> = {
-  Ждём: Clock,
-  Сейчас: HourglassMedium,
-  'Не отмечен': CircleDashed,
-  Пришёл: CheckCircle,
-  'Не пришёл': UserMinus,
-  Отменена: Prohibit,
-  'Ждёт оплату': CreditCard,
+  Waiting: Clock,
+  Now: HourglassMedium,
+  'Not marked': CircleDashed,
+  Arrived: CheckCircle,
+  'No-show': UserMinus,
+  Cancelled: Prohibit,
+  'Awaiting payment': CreditCard,
 }
 
 const StateGlyph = ({ label }: { label: string }) => {
@@ -291,12 +291,12 @@ export const DayCalendar = ({
   >(null)
   // The timeline can show one master alone: a tap on their face in the corner stack.
   const [focusId, setFocusId] = useState<string | null>(null)
-  // Where «now» is while the day is scrolled away from it: before, after, or null when in view.
+  // Where “now” is while the day is scrolled away from it: before, after, or null when in view.
   const [nowSide, setNowSide] = useState<'before' | 'after' | null>(null)
-  // The timeline's visible stretch, for the «‹ 2 записи» / «3 записи ›» hints at the lanes' edges.
+  // The timeline's visible stretch, for the "‹ 2 bookings" / "3 bookings ›" hints at the lanes' edges.
   // The part of the day in view, along its axis (the columns' masters row covers `inset` of it).
   const [view, setView] = useState({ start: 0, size: 0, inset: 0 })
-  // Which way the day moved, kept beside the key (the «previous prop in state» pattern): the lanes
+  // Which way the day moved, kept beside the key (the “previous prop in state” pattern): the lanes
   // slide in from the right for a later day, from the left for an earlier one.
   const [shownDay, setShownDay] = useState<{ key?: string; direction?: 'next' | 'prev' }>({
     key: dayKey,
@@ -307,7 +307,7 @@ export const DayCalendar = ({
       direction: dayKey && shownDay.key ? (dayKey > shownDay.key ? 'next' : 'prev') : undefined,
     })
   }
-  // Visits that have just turned «Пришёл» (one at a time, or the whole day by «Все пришли»), in
+  // Visits that have just turned Arrived (one at a time, or the whole day by All arrived), in
   // the day's order: their cards play the check in a wave. Kept beside the outcomes they came
   // from, so a newly loaded day animates nothing.
   const outcomesKey = bookings.map((booking) => `${booking.id}:${booking.outcome ?? ''}`).join('|')
@@ -381,9 +381,9 @@ export const DayCalendar = ({
   const dayOf = (specialist: DayCalendarProps['specialists'][number]) =>
     specialist.hours === undefined ? hours : specialist.hours
   const headNote = (specialist: DayCalendarProps['specialists'][number]) => {
-    if (specialist.isOnLeave) return specialist.leaveReason || t('Отпуск')
+    if (specialist.isOnLeave) return specialist.leaveReason || t('On leave')
     const day = dayOf(specialist)
-    if (!day) return t('Выходной')
+    if (!day) return t('Closed')
     if (
       hours &&
       day.opensMinutes === hours.opensMinutes &&
@@ -498,7 +498,7 @@ export const DayCalendar = ({
 
   // The day fills the window down to its foot in both views, so the page itself does not scroll
   // for it: measured from where the box starts (which moves when the bars above it change), with
-  // a small margin under it - floating bars («Все пришли») sit over the day's foot.
+  // a small margin under it - floating bars (All arrived) sit over the day's foot.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller) return
@@ -530,7 +530,7 @@ export const DayCalendar = ({
   }, [bottomInset])
 
   // On a short screen (iPhone SE) the day keeps its least height and runs under the floating
-  // «Все пришли» bar: the corner controls (masters, zoom, «Сейчас») rise above the bar by as much
+  // All arrived bar: the corner controls (masters, zoom, Now) rise above the bar by as much
   // as it covers. Written to a CSS variable on scroll - no re-render.
   useEffect(() => {
     const box = frameRef.current
@@ -570,7 +570,7 @@ export const DayCalendar = ({
     }
   }, [bottomInset, footCover])
 
-  // Watch whether «now» is in view, so a «Сейчас» capsule can bring it back.
+  // Watch whether “now” is in view, so a Now capsule can bring it back.
   useEffect(() => {
     const scroller = scrollerRef.current
     if (!scroller || nowOffset === null) {
@@ -672,7 +672,7 @@ export const DayCalendar = ({
 
   // The day scrolls inside its own box; on today it opens with the red line a third of the way
   // in, once per layout - the minute ticks after that must not pull the view back.
-  // Another day (no «now») forgets it, so coming back to today opens at now again; the scroll waits
+  // Another day (no “now”) forgets it, so coming back to today opens at now again; the scroll waits
   // a frame, until the day's width and the box's height are laid out.
   useEffect(() => {
     const scroller = scrollerRef.current
@@ -775,22 +775,20 @@ export const DayCalendar = ({
       const hasStarted = isPast || (nowMinutes !== null && parseClock(booking.time) <= nowMinutes)
       return (
         <>
-          <MenuItem onClick={() => onSelectBooking(booking)}>{t('Открыть запись')}</MenuItem>
+          <MenuItem onClick={() => onSelectBooking(booking)}>{t('Open booking')}</MenuItem>
           <MenuSeparator />
-          <MenuItem onClick={() => window.open(`tel:+${digits}`, '_self')}>
-            {t('Позвонить')}
-          </MenuItem>
+          <MenuItem onClick={() => window.open(`tel:+${digits}`, '_self')}>{t('Call')}</MenuItem>
           <MenuItem onClick={() => window.open(`https://wa.me/${digits}`, '_blank', 'noopener')}>
-            {t('Написать в WhatsApp')}
+            {t('Message on WhatsApp')}
           </MenuItem>
           {isLive && hasStarted && (onMarkArrived || onMarkNoShow) && (
             <>
               <MenuSeparator />
               {onMarkArrived && booking.outcome !== 'arrived' && (
-                <MenuItem onClick={() => onMarkArrived(booking)}>{t('Пришёл')}</MenuItem>
+                <MenuItem onClick={() => onMarkArrived(booking)}>{t('Arrived')}</MenuItem>
               )}
               {onMarkNoShow && booking.outcome !== 'no_show' && (
-                <MenuItem onClick={() => onMarkNoShow(booking)}>{t('Не пришёл')}</MenuItem>
+                <MenuItem onClick={() => onMarkNoShow(booking)}>{t('No-show')}</MenuItem>
               )}
             </>
           )}
@@ -798,7 +796,7 @@ export const DayCalendar = ({
             <>
               <MenuSeparator />
               <MenuItem variant='danger' onClick={() => onCancelBooking(booking)}>
-                {t('Отменить запись')}
+                {t('Cancel booking')}
               </MenuItem>
             </>
           )}
@@ -814,7 +812,7 @@ export const DayCalendar = ({
           onCreateBooking(specialist.id, minutes === null ? null : formatClock(minutes))
         }
       >
-        {t('Новая запись')}
+        {t('New booking')}
         {minutes === null ? '' : ` · ${formatClock(minutes)}`} · {specialist.name.split(' ')[0]}
       </MenuItem>
     )
@@ -889,19 +887,19 @@ export const DayCalendar = ({
         )
       })
       if (current) {
-        return t('с клиентом до {time}', {
+        return t('with a client until {time}', {
           time: formatClock(parseClock(current.time) + current.durationMinutes),
         })
       }
     }
     const { freeFrom } = loadOf(specialist)
-    if (freeFrom === null) return t('занят до конца дня')
-    if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return t('свободен сейчас')
-    return t('свободен с {time}', { time: formatClock(freeFrom) })
+    if (freeFrom === null) return t('busy for the rest of the day')
+    if (nowMinutes !== null && freeFrom <= nowMinutes + slotMinutes) return t('free now')
+    return t('free from {time}', { time: formatClock(freeFrom) })
   }
   const ringStyle = (specialist: DayCalendarProps['specialists'][number]) =>
     ({ '--load': `${Math.round(loadOf(specialist).share * 360)}deg` }) as CSSProperties
-  // «Барбер · свободен с 15:00»: phones keep only the fact.
+  // "Barber · free from 15:00": phones keep only the fact.
   const roleLine = (specialist: DayCalendarProps['specialists'][number]) => {
     const fact = laneFact(specialist)
     return (
@@ -924,12 +922,12 @@ export const DayCalendar = ({
     const Trail = isTimeline ? CaretRight : CaretDown
     const where = isTimeline
       ? side === 'before'
-        ? '{count} раньше'
-        : '{count} позже'
+        ? '{count} earlier'
+        : '{count} later'
       : side === 'before'
-        ? '{count} выше'
-        : '{count} ниже'
-    const count = t(where, { count: t.count(visits.length, ['запись', 'записи', 'записей']) })
+        ? '{count} above'
+        : '{count} below'
+    const count = t(where, { count: t.count(visits.length, ['booking', 'bookings']) })
     const content = (
       <>
         {side === 'before' && <Lead aria-hidden />}
@@ -1015,14 +1013,14 @@ export const DayCalendar = ({
         // and when they are free next - where a new client fits.
         <div className={styles.viewBar}>
           <fieldset className={styles.track}>
-            <legend className={styles.trackLegend}>{t('Мастера')}</legend>
+            <legend className={styles.trackLegend}>{t('Specialists')}</legend>
             <button
               type='button'
               className={styles.trackAll}
               aria-pressed={focusId === null}
               onClick={() => setFocusId(null)}
             >
-              {t('Все')}
+              {t('All')}
             </button>
             {specialists.map((specialist) => {
               const isChosen = focusId === specialist.id
@@ -1035,15 +1033,15 @@ export const DayCalendar = ({
               )
               const note =
                 day === null || specialist.isOnLeave
-                  ? (headNote(specialist) ?? t('Выходной'))
+                  ? (headNote(specialist) ?? t('Closed'))
                   : load.share === 0 && !isPast
-                    ? t('свободен весь день')
-                    : `${t('занят на {percent}%', { percent: Math.round(load.share * 100) })}${
+                    ? t('free all day')
+                    : `${t('{percent}% booked', { percent: Math.round(load.share * 100) })}${
                         isPast
                           ? ''
                           : load.freeFrom === null
-                            ? ` · ${t('до конца дня')}`
-                            : ` · ${t('свободен с {time}', { time: formatClock(load.freeFrom) })}`
+                            ? ` · ${t('for the rest of the day')}`
+                            : ` · ${t('free from {time}', { time: formatClock(load.freeFrom) })}`
                       }`
               return (
                 <button
@@ -1086,7 +1084,7 @@ export const DayCalendar = ({
         <div className={styles.zoomPill}>
           <button
             type='button'
-            aria-label={t('Уменьшить масштаб')}
+            aria-label={t('Zoom out')}
             disabled={zoom <= MIN_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom / 1.5))}
           >
@@ -1095,7 +1093,7 @@ export const DayCalendar = ({
           <span className={styles.zoomValue}>{Math.round(zoom * 100)}%</span>
           <button
             type='button'
-            aria-label={t('Увеличить масштаб')}
+            aria-label={t('Zoom in')}
             disabled={zoom >= MAX_ZOOM}
             onClick={() => onZoomChange(clampZoom(zoom * 1.5))}
           >
@@ -1113,7 +1111,7 @@ export const DayCalendar = ({
         >
           {isTimeline && nowSide === 'before' && <ArrowLeft aria-hidden />}
           {!isTimeline && nowSide === 'before' && <ArrowUp aria-hidden />}
-          {t('Сейчас')} {formatClock(nowMinutes)}
+          {t('Now')} {formatClock(nowMinutes)}
           {isTimeline && nowSide === 'after' && <ArrowRight aria-hidden />}
           {!isTimeline && nowSide === 'after' && <ArrowDown aria-hidden />}
         </button>
@@ -1181,7 +1179,7 @@ export const DayCalendar = ({
               )}
             </div>
 
-            {/* On the timeline «now» is one line through every lane, its time on top. */}
+            {/* On the timeline “now” is one line through every lane, its time on top. */}
             {showNow && nowMinutes !== null && isTimeline && (
               <span className={styles.nowLine} style={along(nowMinutes)} aria-hidden='true'>
                 <span className={styles.nowLabel}>{formatClock(nowMinutes)}</span>
@@ -1209,7 +1207,7 @@ export const DayCalendar = ({
                 <button
                   type='button'
                   className={styles.slotTarget}
-                  aria-label={t('Новая запись к мастеру {name}', { name: specialist.name })}
+                  aria-label={t('New booking with {name}', { name: specialist.name })}
                   // A mouse press must not focus the lane: the new-booking sheet gives focus back on
                   // close, and the whole lane then wore a focus ring.
                   onMouseDown={(event) => event.preventDefault()}
@@ -1246,7 +1244,7 @@ export const DayCalendar = ({
                       <Plus aria-hidden />
                       {formatClock(gap.from)}–{formatClock(gap.to)}
                       <span className={styles.srOnlyText}>
-                        : {t('записать к мастеру {name}', { name: specialist.name })}
+                        : {t('book with {name}', { name: specialist.name })}
                       </span>
                     </button>
                   ))}
@@ -1272,7 +1270,7 @@ export const DayCalendar = ({
                         aria-hidden='true'
                       >
                         {/* A time cursor, not a card: a thin line in the master's colour where the
-                        visit would start, and one small capsule «+ 14:00 · Эрлан» on it. */}
+                        visit would start, and one small capsule "+ 14:00 · Erlan" on it. */}
                         <span className={styles.ghostChip}>
                           <Plus aria-hidden />
                           {formatClock(hovered)}
@@ -1331,8 +1329,8 @@ export const DayCalendar = ({
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       {dayOf(specialist) === null || specialist.isOnLeave
-                        ? (headNote(specialist) ?? t('Выходной'))
-                        : t('без записей')}
+                        ? (headNote(specialist) ?? t('Closed'))
+                        : t('no bookings')}
                     </span>
                   ) : (
                     <button
@@ -1345,13 +1343,12 @@ export const DayCalendar = ({
                       {face(specialist, styles.cardFace)}
                       <span className={styles.laneName}>{specialist.name.split(' ')[0]}</span>
                       <span>
-                        {t('свободен')}
-                        <span className={styles.laneNoteLong}> {t('весь день')}</span>
+                        {t('free')}
+                        <span className={styles.laneNoteLong}> {t('all day')}</span>
                       </span>
                       <span className={styles.laneBook}>
                         <Plus aria-hidden />
-                        {/* «Записать» is «record» elsewhere in the cabinet: booking has its own key. */}
-                        {t.language === 'ru' ? 'Записать' : t('Записать (клиента)')}
+                        {t('Book')}
                       </span>
                     </button>
                   ))}
@@ -1385,11 +1382,11 @@ export const DayCalendar = ({
                       <span className={styles.blockTime}>
                         {item.from}–{item.to}
                       </span>
-                      <span className={styles.blockTitle}>{item.reason || t('Время закрыто')}</span>
+                      <span className={styles.blockTitle}>{item.reason || t('Time blocked')}</span>
                       <button
                         type='button'
                         className={styles.remove}
-                        aria-label={t('Открыть время {from}–{to}', {
+                        aria-label={t('Open {from}–{to} again', {
                           from: item.from,
                           to: item.to,
                         })}
@@ -1459,27 +1456,27 @@ export const DayCalendar = ({
                         }
                       >
                         <legend className={styles.srOnlyText}>
-                          {t('Пришёл ли {name}?', { name: booking.customerName })}
+                          {t('Did {name} come?', { name: booking.customerName })}
                         </legend>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='arrived'
-                          title={t('Пришёл')}
+                          title={t('Arrived')}
                           onClick={() => onMarkArrived(booking)}
                         >
                           <Check aria-hidden />
-                          <span className={styles.markLabel}>{t('Пришёл')}</span>
+                          <span className={styles.markLabel}>{t('Arrived')}</span>
                         </button>
                         <button
                           type='button'
                           className={styles.markButton}
                           data-answer='no-show'
-                          title={t('Не пришёл')}
+                          title={t('No-show')}
                           onClick={() => onMarkNoShow(booking)}
                         >
                           <X aria-hidden />
-                          <span className={styles.markLabel}>{t('Не пришёл')}</span>
+                          <span className={styles.markLabel}>{t('No-show')}</span>
                         </button>
                       </fieldset>
                     )
@@ -1514,7 +1511,7 @@ export const DayCalendar = ({
                           onClick={() => {
                             if (!drag.consumeClick()) onSelectBooking(booking)
                           }}
-                          aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? `, ${t('отменена')}` : ''}${booking.outcome === 'arrived' ? `, ${t('пришёл')}` : booking.outcome === 'no_show' ? `, ${t('не пришёл')}` : ''}`}
+                          aria-label={`${booking.time}–${end}, ${booking.serviceName}, ${booking.customerName}, ${booking.customerPhone}${booking.status === 'cancelled' ? `, ${t('cancelled')}` : ''}${booking.outcome === 'arrived' ? `, ${t('arrived')}` : booking.outcome === 'no_show' ? `, ${t('no-show')}` : ''}`}
                         >
                           {size === 'compact' ? (
                             <span className={styles.blockLine}>
@@ -1548,7 +1545,7 @@ export const DayCalendar = ({
                             {booking.serviceName}
                             {size !== 'compact' &&
                               (progress !== null && nowMinutes !== null
-                                ? ` · ${t('ещё {count} мин', { count: to - nowMinutes })}`
+                                ? ` · ${t('{count} min left', { count: to - nowMinutes })}`
                                 : ` · ${formatPrice(paid)}`)}
                           </span>
                           {/* The visit under way: how much of it has passed, as a thin bar. */}
@@ -1563,7 +1560,7 @@ export const DayCalendar = ({
                               <span className={styles.footerNote}>
                                 {booking.comment ? (
                                   <>
-                                    <ChatText aria-hidden />«{booking.comment}»
+                                    <ChatText aria-hidden />“{booking.comment}”
                                   </>
                                 ) : (
                                   formatPhone(booking.customerPhone)
