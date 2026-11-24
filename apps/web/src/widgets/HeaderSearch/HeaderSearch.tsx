@@ -254,7 +254,7 @@ const HeaderSearchField = ({ urlQuery: catalogQuery }: HeaderSearchFieldProps) =
               aria-label={
                 myPlace
                   ? t`Location: ${ph({ place: myPlaceLabel(myPlace, t) })}. Change`
-                  : t`Set your location`
+                  : t`Where are you? Set your location`
               }
             >
               <NavigationArrow aria-hidden />

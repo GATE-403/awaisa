@@ -8127,10 +8127,6 @@ msgstr "Графикти көрсөтүңүз да, шилтемени Instagram
 msgid "Set the service: in the “Work” feed the photo gets “Book” for it."
 msgstr "Кызматты көрсөтүңүз: «Иштер» лентасында сүрөткө ошол кызматка «Жазылуу» баскычы кошулат."
 
-#: src/widgets/HeaderSearch/HeaderSearch.tsx
-msgid "Set your location"
-msgstr "Кайда экениңизди көрсөтүү"
-
 #: src/views/bookings/BookingsPage.tsx
 #: src/views/bookings/ui/AccountCard/AccountCard.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
@@ -10016,6 +10012,10 @@ msgstr "Кайда"
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
 msgid "Where are you?"
 msgstr "Сиз кайдасыз?"
+
+#: src/widgets/HeaderSearch/HeaderSearch.tsx
+msgid "Where are you? Set your location"
+msgstr "Сиз кайдасыз? Жайгашкан жерди көрсөтүү"
 
 #: src/views/insights/InsightsPage.tsx
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx

@@ -63,9 +63,9 @@ const FILES = {
 const chooseServiceAndMaster = async (ux: UxContext) => {
   const steps = bookingSteps(ux.page)
   await ux.tap(steps.service.getByRole('radio').first())
-  const anyMaster = steps.specialist.getByRole('radio', { name: /Любой мастер/ })
+  const anyMaster = steps.specialist.getByRole('radio', { name: /Any specialist/ })
   await anyMaster
-    .or(steps.datetime.getByRole('group', { name: 'День' }))
+    .or(steps.datetime.getByRole('group', { name: 'Day', exact: true }))
     .first()
     .waitFor()
   if (await anyMaster.isVisible()) await ux.tap(anyMaster)
@@ -83,12 +83,12 @@ const flows: Flow[] = [
       await page.locator('main [data-card]').first().waitFor()
       await ux.step('Каталог: первый экран', [...FILES.catalog, ...FILES.header])
 
-      const search = page.getByRole('searchbox', { name: 'Поиск салонов и мастеров' })
+      const search = page.getByRole('searchbox', { name: 'Search salons and specialists' })
       await ux.tap(search)
       await ux.fill(search, 'стрижка')
       await page
-        .getByRole('region', { name: 'Подсказки' })
-        .or(page.locator('section[aria-label="Подсказки"]'))
+        .getByRole('region', { name: 'Suggestions' })
+        .or(page.locator('section[aria-label="Suggestions"]'))
         .first()
         .waitFor()
         .catch(() => {})
@@ -121,7 +121,7 @@ const flows: Flow[] = [
       await services.scrollIntoViewIfNeeded()
       await ux.step('Услуги и цены', FILES.place)
 
-      const contacts = page.getByRole('heading', { name: /Контакты|Как добраться|Адрес/ }).first()
+      const contacts = page.getByRole('heading', { name: /Contacts|Getting there|Address/ }).first()
       if (await contacts.count()) await contacts.scrollIntoViewIfNeeded()
       await ux.step('Контакты и часы', FILES.place)
 
@@ -155,26 +155,26 @@ const flows: Flow[] = [
 
       ux.countAction()
       await pickFirstFreeSlot(page)
-      const name = steps.contacts.getByLabel('Имя')
+      const name = steps.contacts.getByLabel('Name', { exact: true })
       await name.waitFor()
       await ux.step('Шаг 4: контакты', FILES.contacts)
 
       await ux.fill(name, 'E2E UX Запись')
-      const phone = steps.contacts.getByLabel('Телефон')
+      const phone = steps.contacts.getByLabel('Phone')
       // A mistake first, as people make them: too few digits.
       await ux.uncounted(async () => {
         await ux.fill(phone, '555 12')
         // With a short number the action names the step it waits for («Ввести контакты»).
         await primaryAction(page).first().click()
       })
-      await ux.expectFieldError(phone, /(цифр|номер|телефон)/i)
+      await ux.expectFieldError(phone, /(digits|number|phone)/i)
       await ux.step('Ошибка в номере', FILES.contacts)
 
       await ux.fill(phone, '555 000 111')
       await ux.tap(
-        page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).first(),
+        page.getByRole('button', { name: 'Book', exact: true }).filter({ visible: true }).first(),
       )
-      await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
       await ux.step('Вы записаны', FILES.success)
       ux.complete()
     },
@@ -186,36 +186,36 @@ const flows: Flow[] = [
     run: async (ux) => {
       const { page } = ux
       await ux.goto('/login?next=/bookings')
-      const phone = page.getByLabel('Номер телефона')
+      const phone = page.getByLabel('Phone number')
       await phone.waitFor()
       await ux.step('Номер телефона', FILES.login)
 
       await ux.uncounted(async () => {
         await ux.fill(phone, '555 12')
-        await page.getByRole('button', { name: 'Получить код' }).click()
+        await page.getByRole('button', { name: 'Get a code in Telegram' }).click()
       })
-      await ux.expectFieldError(phone, /Номер неполный/)
+      await ux.expectFieldError(phone, /The number is incomplete/)
       await ux.step('Ошибка: номер неполный', FILES.login)
 
       await ux.fill(phone, randomPhone().replace('+996', ''))
-      await ux.tap(page.getByRole('button', { name: 'Получить код' }))
-      const code = page.getByLabel('Код подтверждения')
+      await ux.tap(page.getByRole('button', { name: 'Get a code in Telegram' }))
+      const code = page.getByLabel('Confirmation code')
       await code.waitFor()
       await ux.step('Код из Telegram', FILES.login)
 
       await ux.uncounted(() => ux.fill(code, '000000'))
-      await ux.expectFieldError(code, /Неверный код/)
+      await ux.expectFieldError(code, /Wrong code/)
       await ux.step('Ошибка: неверный код', FILES.login)
 
       await code.fill('')
       await ux.fill(code, TEST_CODE)
-      const name = page.getByLabel('Имя')
+      const name = page.getByLabel('Name', { exact: true })
       await name.waitFor()
       await ux.step('Как вас зовут', FILES.login)
 
       await ux.fill(name, 'E2E UX Вход')
-      await ux.tap(page.getByRole('button', { name: 'Готово' }))
-      await expect(page.getByRole('region', { name: 'Профиль' })).toBeVisible()
+      await ux.tap(page.getByRole('button', { name: 'Done' }))
+      await expect(page.getByRole('region', { name: 'Profile' })).toBeVisible()
       await ux.step('Профиль', FILES.profile)
       ux.complete()
     },
@@ -233,32 +233,35 @@ const flows: Flow[] = [
       await account.dispose()
 
       await ux.goto('/bookings')
-      const ticket = page.getByRole('article', { name: /^Запись / }).first()
+      const ticket = page.getByRole('article', { name: /^Booking / }).first()
       await ticket.waitFor()
       await ux.step('Профиль: предстоящие', FILES.profile)
 
-      await ux.tap(ticket.getByRole('button', { name: 'Показать талон' }))
-      const sheet = page.getByRole('dialog', { name: 'Талон' })
+      await ux.tap(ticket.getByRole('button', { name: 'Show the ticket' }))
+      const sheet = page.getByRole('dialog', { name: 'Ticket' })
       await sheet.waitFor()
       await ux.step('Талон', FILES.ticket)
-      await ux.tap(sheet.getByRole('button', { name: 'Закрыть' }))
+      await ux.tap(sheet.getByRole('button', { name: 'Close' }))
       await expect(sheet).toBeHidden()
 
-      await ux.tap(page.getByRole('button', { name: 'Перенести', exact: true }).first())
-      const move = page.getByRole('dialog', { name: 'Перенести запись' })
+      await ux.tap(page.getByRole('button', { name: 'Reschedule', exact: true }).first())
+      const move = page.getByRole('dialog', { name: 'Reschedule' })
       await move.waitFor()
-      const time = move.getByRole('group', { name: 'Время' }).getByRole('button').first()
+      const time = move
+        .getByRole('group', { name: 'Time', exact: true })
+        .getByRole('button')
+        .first()
       await time.waitFor()
       await ux.step('Перенос: выбор времени', FILES.reschedule)
       const newTime = ((await time.textContent()) ?? '').trim()
       await ux.tap(time)
-      await ux.tap(move.getByRole('button', { name: `Перенести на ${newTime}` }))
-      await expect(page.getByText(/Перенесено:/)).toBeVisible()
+      await ux.tap(move.getByRole('button', { name: `Move to ${newTime}` }))
+      await expect(page.getByText(/Moved:/)).toBeVisible()
       await ux.step('Перенесено', [...FILES.profile, ...FILES.toast])
 
-      await ux.tap(ticket.getByRole('button', { name: 'Ещё' }))
-      await ux.tap(page.getByRole('menuitem', { name: 'Отменить запись' }))
-      await expect(ticket.getByText('Отменена')).toBeVisible()
+      await ux.tap(ticket.getByRole('button', { name: 'More' }))
+      await ux.tap(page.getByRole('menuitem', { name: 'Cancel booking' }))
+      await expect(ticket.getByText('Cancelled')).toBeVisible()
       await ux.step('Отменено, тост «Вернуть»', [...FILES.profile, ...FILES.toast])
       // Watch the undo toast for as long as a slow reader would need it.
       await page.waitForTimeout(6000)
@@ -298,25 +301,28 @@ const flows: Flow[] = [
           expect((await saveDeposit(DEPOSIT)).ok()).toBe(true)
           await ux.goto(`/${SLUG}/book?service=${service.id}&specialist=${master.id}`)
           const steps = bookingSteps(page)
-          await steps.datetime.getByRole('group', { name: 'День' }).waitFor()
+          await steps.datetime.getByRole('group', { name: 'Day', exact: true }).waitFor()
           await ux.step('Форма: услуга с предоплатой', [...FILES.bookingSheet, ...FILES.time])
 
           ux.countAction()
           await pickFirstFreeSlot(page)
-          await steps.contacts.getByLabel('Имя').waitFor()
+          await steps.contacts.getByLabel('Name', { exact: true }).waitFor()
           await ux.step('Контакты: видно ли сумму предоплаты', FILES.contacts)
-          await ux.fill(steps.contacts.getByLabel('Имя'), 'E2E UX Предоплата')
-          await ux.fill(steps.contacts.getByLabel('Телефон'), randomPhone().replace('+996', ''))
+          await ux.fill(steps.contacts.getByLabel('Name', { exact: true }), 'E2E UX Предоплата')
+          await ux.fill(steps.contacts.getByLabel('Phone'), randomPhone().replace('+996', ''))
           await ux.tap(
-            page.getByRole('button', { name: 'Записаться' }).filter({ visible: true }).first(),
+            page
+              .getByRole('button', { name: 'Book', exact: true })
+              .filter({ visible: true })
+              .first(),
           )
 
           await expect(page).toHaveURL(/\/pay\/[0-9a-f-]+\?s=/)
-          await expect(page.getByText('Тестовый режим')).toBeVisible({ timeout: 30_000 })
+          await expect(page.getByText('Test mode')).toBeVisible({ timeout: 30_000 })
           await ux.step('Касса (тестовый режим)', FILES.pay)
-          await ux.tap(page.getByRole('button', { name: `Оплатить ${DEPOSIT} сом` }))
+          await ux.tap(page.getByRole('button', { name: new RegExp(`^Pay ${DEPOSIT}\\ssom$`) }))
           await expect(page).toHaveURL(/\/bookings/)
-          await expect(page.getByText('Предоплата внесена')).toBeVisible()
+          await expect(page.getByText('Deposit paid')).toBeVisible()
           await ux.step('Оплачено', FILES.profile)
           ux.complete()
         } finally {
@@ -362,27 +368,27 @@ const flows: Flow[] = [
       await ux.goto(
         `/${SLUG}/book?service=${master.serviceIds[0]}&specialist=${master.id}&date=${date}`,
       )
-      const join = page.getByRole('button', { name: 'Сообщить, когда освободится' })
+      const join = page.getByRole('button', { name: 'Tell me when a slot opens' })
       await join.waitFor()
       await ux.step('День занят', [...FILES.time, ...FILES.waitlist])
 
       await ux.tap(join)
-      const sheet = page.getByRole('dialog', { name: 'Лист ожидания' })
+      const sheet = page.getByRole('dialog', { name: 'Waitlist' })
       await sheet.waitFor()
       await ux.step('Лист ожидания: форма', FILES.waitlist)
 
-      await ux.fill(sheet.getByLabel('Имя'), 'E2E UX Ожидание')
-      const phone = sheet.getByLabel('Телефон')
+      await ux.fill(sheet.getByLabel('Name', { exact: true }), 'E2E UX Ожидание')
+      const phone = sheet.getByLabel('Phone')
       await ux.uncounted(async () => {
         await ux.fill(phone, '555 1')
-        await sheet.getByRole('button', { name: 'Готово' }).click()
+        await sheet.getByRole('button', { name: 'Done' }).click()
       })
-      await ux.expectFieldError(phone, /(цифр|номер|телефон)/i)
+      await ux.expectFieldError(phone, /(digits|number|phone)/i)
       await ux.step('Ошибка в номере', FILES.waitlist)
 
       await ux.fill(phone, '555 000 222')
-      await ux.tap(sheet.getByRole('button', { name: 'Готово' }))
-      await expect(page.getByText('Сообщим, если освободится')).toBeVisible()
+      await ux.tap(sheet.getByRole('button', { name: 'Done' }))
+      await expect(page.getByText('We will tell you if a slot opens up')).toBeVisible()
       await ux.step('В листе ожидания', FILES.waitlist)
       ux.complete()
     },
@@ -404,18 +410,18 @@ const flows: Flow[] = [
         })
         try {
           await ux.goto(reviewLink(booking.id))
-          const send = page.getByRole('button', { name: 'Отправить отзыв' })
+          const send = page.getByRole('button', { name: 'Send review' })
           await send.waitFor()
           await ux.step('Как прошёл визит', FILES.review)
 
           await ux.uncounted(() => ux.tap(send))
-          await ux.expectFieldError(page.getByRole('radiogroup').first(), /Поставьте оценку/)
+          await ux.expectFieldError(page.getByRole('radiogroup').first(), /Give a rating/)
           await ux.step('Ошибка: нет оценки', FILES.review)
 
-          await ux.check(page.getByLabel(/^5 из 5/))
-          await ux.fill(page.getByLabel(/Расскажите подробнее/), 'E2E UX: всё понравилось')
+          await ux.check(page.getByLabel(/^5 of 5/))
+          await ux.fill(page.getByLabel(/Tell us more/), 'E2E UX: всё понравилось')
           await ux.tap(send)
-          await expect(page.getByText(/Спасибо/).first()).toBeVisible()
+          await expect(page.getByText(/Thank/).first()).toBeVisible()
           await ux.step('Спасибо за отзыв', FILES.review)
           ux.complete()
         } finally {
@@ -441,55 +447,57 @@ const flows: Flow[] = [
 
       await ux.goto('/business')
       await ux.step('Лендинг для бизнеса', [`${WEB}/views/forBusiness/ForBusinessPage.tsx`])
-      await ux.tap(page.getByRole('link', { name: 'Создать страницу' }).first())
-      const title = page.getByLabel('Название')
+      await ux.tap(page.getByRole('link', { name: 'Create a page' }).first())
+      const title = page.getByLabel('Name', { exact: true })
       await title.waitFor()
       await ux.step('Шаг 1: название и адрес', FILES.register)
 
       await ux.uncounted(() => ux.fill(title, 'Login'))
       // The address is checked against the server after a pause: wait for the answer.
-      await expect(page.getByText('Этот адрес занят')).toBeVisible()
-      await ux.expectFieldError(page.getByLabel('Ссылка'), /занят/)
+      await expect(page.getByText('This address is taken')).toBeVisible()
+      await ux.expectFieldError(page.getByLabel('Link', { exact: true }), /taken/)
       await ux.step('Ошибка: адрес занят', FILES.register)
 
       await ux.fill(title, `E2E UX Барбер ${suffix}`)
-      await expect(page.getByText(/Свободна:/)).toBeVisible()
-      await ux.tap(page.getByRole('button', { name: 'Далее' }))
-      await page.getByRole('button', { name: /^Барбершопы/ }).waitFor()
+      await expect(page.getByText(/Available:/)).toBeVisible()
+      await ux.tap(page.getByRole('button', { name: 'Next' }))
+      await page.getByRole('button', { name: /^Barbershops/ }).waitFor()
       await ux.step('Шаг 2: вид бизнеса', FILES.register)
 
-      await ux.tap(page.getByRole('button', { name: /^Барбершопы/ }))
-      await page.getByRole('checkbox', { name: 'Мужская стрижка' }).waitFor()
+      await ux.tap(page.getByRole('button', { name: /^Barbershops/ }))
+      await page.getByRole('checkbox', { name: "Men's haircut" }).waitFor()
       await ux.step('Шаг 3: услуги', FILES.register)
-      await ux.tap(page.getByRole('button', { name: 'Далее' }))
+      await ux.tap(page.getByRole('button', { name: 'Next' }))
       await ux.step('Шаг 4: контакты', FILES.register)
-      await ux.tap(page.getByRole('button', { name: 'Создать страницу' }))
+      await ux.tap(page.getByRole('button', { name: 'Create a page' }))
 
       // A new business opens on «Страница», which names what it lacks itself (no banner there).
       await expect(page).toHaveURL(/\/manage\/e2e-ux-barber/)
-      await expect(page.getByRole('list', { name: 'Добавьте на страницу' })).toBeVisible()
+      await expect(page.getByRole('list', { name: 'Add to your page' })).toBeVisible()
       await ux.step('Кабинет: страница бизнеса', [
         ...FILES.cabinet,
         `${WEB}/views/manage/ui/PageTab`,
       ])
 
       // Masters live in the page's «Мастера» tab; on phones its action floats at the foot.
-      await ux.tap(page.getByRole('tab', { name: /Мастера/ }))
+      await ux.tap(page.getByRole('tab', { name: /Specialists/ }))
       await ux.tap(
         page
-          .getByRole('button', { name: 'Добавить мастера', exact: true })
+          .getByRole('button', { name: 'Add a specialist', exact: true })
           .filter({ visible: true })
           .first(),
       )
       // Toasts are dialogs too (Base UI): the sheet is the one with the form.
-      const dialog = page.getByRole('dialog').filter({ has: page.getByLabel('Имя') })
-      await dialog.getByLabel('Имя').waitFor()
+      const dialog = page
+        .getByRole('dialog')
+        .filter({ has: page.getByLabel('Name', { exact: true }) })
+      await dialog.getByLabel('Name', { exact: true }).waitFor()
       await ux.step('Новый мастер', [`${WEB}/views/manage/ui/Masters`, `${WEB}/shared/ui/Sheet`])
-      await ux.fill(dialog.getByLabel('Имя'), 'Азамат')
-      await ux.tap(dialog.getByRole('button', { name: 'Сохранить' }))
+      await ux.fill(dialog.getByLabel('Name', { exact: true }), 'Азамат')
+      await ux.tap(dialog.getByRole('button', { name: 'Save' }))
       await expect(dialog).toBeHidden()
 
-      await ux.tap(page.getByRole('link', { name: 'Расписание' }).first())
+      await ux.tap(page.getByRole('link', { name: 'Schedule' }).first())
       await expect(page).toHaveURL(/tab=schedule/)
       await ux.step('Расписание', [
         `${WEB}/views/manage/ui/ScheduleTab.tsx`,

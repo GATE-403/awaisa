@@ -8121,10 +8121,6 @@ msgstr "Set the schedule and share your link on Instagram and 2GIS."
 msgid "Set the service: in the “Work” feed the photo gets “Book” for it."
 msgstr "Set the service: in the “Work” feed the photo gets “Book” for it."
 
-#: src/widgets/HeaderSearch/HeaderSearch.tsx
-msgid "Set your location"
-msgstr "Set your location"
-
 #: src/views/bookings/BookingsPage.tsx
 #: src/views/bookings/ui/AccountCard/AccountCard.tsx
 #: src/views/bookings/ui/AccountSettings/AccountSettings.tsx
@@ -10010,6 +10006,10 @@ msgstr "Where"
 #: src/widgets/HeaderSearch/HeaderSearch.tsx
 msgid "Where are you?"
 msgstr "Where are you?"
+
+#: src/widgets/HeaderSearch/HeaderSearch.tsx
+msgid "Where are you? Set your location"
+msgstr "Where are you? Set your location"
 
 #: src/views/insights/InsightsPage.tsx
 #: src/views/manage/ui/AnalyticsTab/Insights.tsx

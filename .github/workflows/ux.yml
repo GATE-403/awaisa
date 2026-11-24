@@ -26,7 +26,9 @@ jobs:
   ux:
     name: ${{ github.event_name == 'pull_request' && 'UX kit (accessibility)' || 'UX kit (all personas)' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    # A pull request's pass is about 5 minutes when green: 15 is the ceiling, so a broken page fails
+    # in minutes, not in an hour of flows waiting out their timeouts. The nightly run is the whole kit.
+    timeout-minutes: ${{ github.event_name == 'pull_request' && 15 || 50 }}
     services:
       postgres:
         image: postgres:18-alpine

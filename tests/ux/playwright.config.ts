@@ -18,7 +18,12 @@ export default defineConfig({
   fullyParallel: true,
   workers: process.env.UX_WORKERS ? Number(process.env.UX_WORKERS) : 2,
   retries: 0,
-  timeout: 180_000,
+  // A whole flow may take minutes, so a broken page (a label renamed, the wrong language) once let
+  // every flow wait out its timeout: an hour on CI. On CI the run stops after a few failures.
+  maxFailures: process.env.CI ? 3 : 0,
+  // The pull request's accessibility pass runs every flow in seconds when it is green; the
+  // nightly kit has slow phones and zoom, which need longer.
+  timeout: process.env.UX_MODE === 'a11y' ? 90_000 : 180_000,
   expect: { timeout: 15_000 },
   reporter: [['list'], ['./report/ux-reporter.ts', { outputDir: '../../reports/ux' }]],
   outputDir: './test-results',

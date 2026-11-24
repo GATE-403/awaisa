@@ -24,7 +24,7 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
     await ux.goto('/')
     await page.locator('main [data-card]').first().waitFor()
     await ux.step('Каталог', FILES.catalog)
-    await keys.tabTo({ name: /Поиск салонов и мастеров/ }, 'поле поиска')
+    await keys.tabTo({ name: /Search salons and specialists/ }, 'поле поиска')
     await keys.type('стрижка')
     await keys.press('Enter')
     await page.waitForURL(/[?&]q=/)
@@ -49,31 +49,33 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
     await keys.tabTo({ within: '#step-service', role: 'radio' }, 'первая услуга')
     await keys.press('Space')
     await expect(page.locator('#step-specialist, #step-datetime').first()).toBeVisible()
-    const anyMaster = page.locator('#step-specialist').getByRole('radio', { name: /Любой мастер/ })
+    const anyMaster = page
+      .locator('#step-specialist')
+      .getByRole('radio', { name: /Any specialist/ })
     if (await anyMaster.isVisible()) {
       await keys.tabTo({ within: '#step-specialist', role: 'radio' }, 'мастер')
       await keys.press('Space')
     }
     const times = page
-      .getByRole('group', { name: 'Время' })
+      .getByRole('group', { name: 'Time', exact: true })
       .getByRole('button', { disabled: false })
     await times.first().waitFor()
     await ux.step('Запись: время', FILES.time)
     await keys.tabTo(
-      { within: 'fieldset[aria-label="Время"], [role="group"][aria-label="Время"]' },
+      { within: 'fieldset[aria-label="Time"], [role="group"][aria-label="Time"]' },
       'свободное время',
     )
     await keys.press('Enter')
 
-    await page.getByLabel('Имя').waitFor()
-    await keys.tabTo({ name: /^Имя/ }, 'поле «Имя»')
+    await page.getByLabel('Name', { exact: true }).waitFor()
+    await keys.tabTo({ name: /^Name/ }, 'поле «Имя»')
     await keys.type('E2E UX Клавиатура')
-    await keys.tabTo({ name: /^Телефон/ }, 'поле «Телефон»')
+    await keys.tabTo({ name: /^Phone/ }, 'поле «Телефон»')
     await keys.type('555000111')
     await ux.step('Запись: контакты', FILES.contacts)
-    await keys.tabTo({ name: /^Записаться$/ }, 'кнопка «Записаться»')
+    await keys.tabTo({ name: /^Book$/ }, 'кнопка «Записаться»')
     await keys.press('Enter')
-    await expect(page.getByRole('heading', { name: 'Вы записаны' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'You are booked' })).toBeVisible()
     await ux.step('Вы записаны', FILES.success)
     ux.complete()
   })
@@ -83,26 +85,26 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
     const { page } = ux
     const keys = new KeyboardWalker(ux)
     await ux.goto('/login?next=/bookings')
-    await page.getByLabel('Номер телефона').waitFor()
-    await keys.tabTo({ name: /Номер телефона/ }, 'поле номера')
+    await page.getByLabel('Phone number').waitFor()
+    await keys.tabTo({ name: /Phone number/ }, 'поле номера')
     await keys.type(randomPhone().replace('+996', ''))
     await keys.press('Enter')
-    await page.getByLabel('Код подтверждения').waitFor()
+    await page.getByLabel('Confirmation code').waitFor()
     await ux.step('Код', FILES.login)
     // The code field takes the focus by itself, or is the next stop.
     const isOnCode = await page
-      .getByLabel('Код подтверждения')
+      .getByLabel('Confirmation code')
       .evaluate((element) => element === document.activeElement)
-    if (!isOnCode) await keys.tabTo({ name: /Код подтверждения/ }, 'поле кода')
+    if (!isOnCode) await keys.tabTo({ name: /Confirmation code/ }, 'поле кода')
     await keys.type(TEST_CODE)
-    await page.getByLabel('Имя').waitFor()
+    await page.getByLabel('Name', { exact: true }).waitFor()
     const isOnName = await page
-      .getByLabel('Имя')
+      .getByLabel('Name', { exact: true })
       .evaluate((element) => element === document.activeElement)
-    if (!isOnName) await keys.tabTo({ name: /^Имя/ }, 'поле «Имя»')
+    if (!isOnName) await keys.tabTo({ name: /^Name/ }, 'поле «Имя»')
     await keys.type('E2E UX Клавиатура')
     await keys.press('Enter')
-    await expect(page.getByRole('region', { name: 'Профиль' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Profile' })).toBeVisible()
     await ux.step('Профиль', FILES.profile)
     ux.complete()
   })
@@ -121,17 +123,17 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
       })
       try {
         await ux.goto(reviewLink(booking.id))
-        await page.getByRole('button', { name: 'Отправить отзыв' }).waitFor()
+        await page.getByRole('button', { name: 'Send review' }).waitFor()
         await ux.step('Оценка', FILES.review)
-        await keys.tabTo({ role: 'radio', name: /из 5/ }, 'звёзды')
+        await keys.tabTo({ role: 'radio', name: / of 5/ }, 'звёзды')
         // Arrows move along a radio group; the last star is five.
         for (let star = 0; star < 4; star += 1) await keys.press('ArrowRight')
-        await expect(page.getByLabel(/^5 из 5/)).toBeChecked()
-        await keys.tabTo({ name: /Расскажите подробнее/ }, 'поле отзыва')
+        await expect(page.getByLabel(/^5 of 5/)).toBeChecked()
+        await keys.tabTo({ name: /Tell us more/ }, 'поле отзыва')
         await keys.type('E2E UX: с клавиатуры')
-        await keys.tabTo({ name: /^Отправить отзыв$/ }, 'кнопка «Отправить отзыв»')
+        await keys.tabTo({ name: /^Send review$/ }, 'кнопка «Отправить отзыв»')
         await keys.press('Enter')
-        await expect(page.getByText(/Спасибо/).first()).toBeVisible()
+        await expect(page.getByText(/Thank/).first()).toBeVisible()
         await ux.step('Отправлено', FILES.review)
         ux.complete()
       } finally {
@@ -156,31 +158,31 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
     await account.dispose()
 
     await ux.goto('/bookings')
-    const ticket = page.getByRole('article', { name: /^Запись / }).first()
+    const ticket = page.getByRole('article', { name: /^Booking / }).first()
     await ticket.waitFor()
     await ux.step('Профиль', FILES.profile)
-    await keys.tabTo({ name: /^Показать талон$/ }, '«Показать талон»')
+    await keys.tabTo({ name: /^Show the ticket$/ }, '«Показать талон»')
     await keys.press('Enter')
-    const sheet = page.getByRole('dialog', { name: 'Талон' })
+    const sheet = page.getByRole('dialog', { name: 'Ticket' })
     await sheet.waitFor()
     await ux.step('Талон', FILES.ticket)
     await keys.press('Escape')
     await expect(sheet).toBeHidden()
-    await keys.expectFocusBack(/Показать талон/, '«Показать талон»')
+    await keys.expectFocusBack(/Show the ticket/, '«Показать талон»')
 
-    await keys.tabTo({ name: /^Ещё$/ }, 'меню «Ещё»')
+    await keys.tabTo({ name: /^More$/ }, 'меню «Ещё»')
     await keys.press('Enter')
-    const cancel = page.getByRole('menuitem', { name: 'Отменить запись' })
+    const cancel = page.getByRole('menuitem', { name: 'Cancel booking' })
     await cancel.waitFor()
     for (let index = 0; index < 4; index += 1) {
       if (await cancel.evaluate((element) => element === document.activeElement)) break
       await keys.press('ArrowDown')
     }
     await keys.press('Enter')
-    await expect(ticket.getByText('Отменена')).toBeVisible()
+    await expect(ticket.getByText('Cancelled')).toBeVisible()
     await ux.step('Отменено', [...FILES.profile, ...FILES.toast])
     // Can a keyboard user reach «Вернуть» before the toast leaves? F6 jumps to the toasts.
-    const undo = page.getByRole('button', { name: 'Вернуть' })
+    const undo = page.getByRole('button', { name: 'Undo' })
     await keys.press('F6')
     const isOnUndo = await undo
       .evaluate(
@@ -191,7 +193,7 @@ test.describe('Только клавиатура @keyboard @a11y', () => {
       .catch(() => false)
     if (!isOnUndo) {
       try {
-        await keys.tabTo({ name: /^Вернуть$/ }, '«Вернуть» в тосте')
+        await keys.tabTo({ name: /^Undo$/ }, '«Вернуть» в тосте')
       } catch {
         // tabTo already recorded the finding.
       }
