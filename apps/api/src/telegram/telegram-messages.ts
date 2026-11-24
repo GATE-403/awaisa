@@ -1,3 +1,6 @@
+import { formatPhone } from '../common/phone.js'
+import { currentRegion } from '../common/region.js'
+
 type BookingLine = {
   time: string
   serviceName: string
@@ -145,14 +148,13 @@ const LOGIN_DONE =
 const LOGIN_EXPIRED = 'Ссылка для входа устарела. Нажмите «Войти через Telegram» на сайте ещё раз.'
 // A chat that already shared its number signs in at once, with a way to use another one.
 const loginKnownText = (phone: string) => {
-  const digits = phone.replace(/\D/g, '')
-  const shown = digits.startsWith('996')
-    ? `+996 ${digits.slice(3, 6)} ${digits.slice(6, 9)} ${digits.slice(9)}`
-    : phone
+  const shown = formatPhone(phone)
   return `Готово - вы вошли с номером <b>${escapeHtml(shown)}</b>. Вернитесь на сайт или в приложение.\n\nДругой номер? Отправьте /stop и войдите ещё раз.`
 }
 const LOGIN_NOT_OWN = 'Нужен ваш собственный номер - нажмите кнопку «Поделиться номером» внизу.'
-const LOGIN_REFUSED = 'Пока принимаем только номера Кыргызстана (+996).'
+const loginRefusedText = () => {
+  return `Пока принимаем только номера с кодом +${currentRegion().phone.callingCode}.`
+}
 
 export type { BookingLine }
 export {
@@ -164,7 +166,7 @@ export {
   LOGIN_DONE,
   LOGIN_EXPIRED,
   LOGIN_NOT_OWN,
-  LOGIN_REFUSED,
+  loginRefusedText,
   LOGIN_SHARE_BUTTON,
   linkedText,
   loginKnownText,

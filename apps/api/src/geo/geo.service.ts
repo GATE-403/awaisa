@@ -1,8 +1,9 @@
 import type { GeoPlace } from '@awaisa/contracts'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { currentRegion } from '../common/region.js'
 import type { Env } from '../config/env.js'
-import { BISHKEK, KYRGYZSTAN_BBOX, type PhotonFeature, toPlace, toPlaces } from './photon.js'
+import { type PhotonFeature, toPlace, toPlaces } from './photon.js'
 
 const LIMIT = 6
 const TIMEOUT_MS = 4000
@@ -27,12 +28,14 @@ export class GeoService {
 
   async search(query: string): Promise<GeoPlace[]> {
     if (!this.isAvailable) return []
+    const { city, geocoderBox } = currentRegion()
+    // The region's city ranks first; its box, when it has one, bounds the search.
     const params = new URLSearchParams({
       q: query,
       limit: String(LIMIT * 2),
-      lat: String(BISHKEK.latitude),
-      lon: String(BISHKEK.longitude),
-      bbox: KYRGYZSTAN_BBOX,
+      lat: String(city.center.latitude),
+      lon: String(city.center.longitude),
+      ...(geocoderBox ? { bbox: geocoderBox } : {}),
     })
     const features = await this.request(`/api/?${params}`)
     return toPlaces(features).slice(0, LIMIT)
