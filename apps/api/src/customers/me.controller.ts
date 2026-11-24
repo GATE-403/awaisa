@@ -19,24 +19,23 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { InjectRepository } from '@nestjs/typeorm'
 import type { Response } from 'express'
-import { Repository } from 'typeorm'
 import { SESSION_COOKIE } from '../auth/auth.constants.js'
 import { AuthGuard, CurrentCustomer } from '../auth/auth.guard.js'
 import { BookingsService } from '../bookings/bookings.service.js'
 import { BusinessesService } from '../businesses/businesses.service.js'
 import type { Env } from '../config/env.js'
 import { AccountService } from './account.service.js'
-import { Customer } from './customer.entity.js'
+import type { Customer } from './customer.entity.js'
 import { toCustomerView } from './customer-view.js'
 import { type UpdateProfileInput, updateProfileSchema } from './customers.schemas.js'
+import { CustomersService } from './customers.service.js'
 
 @Controller('me')
 @UseGuards(AuthGuard)
 export class MeController {
   constructor(
-    @InjectRepository(Customer) private readonly customers: Repository<Customer>,
+    private readonly customers: CustomersService,
     private readonly bookings: BookingsService,
     private readonly businesses: BusinessesService,
     private readonly config: ConfigService<Env, true>,
@@ -53,16 +52,11 @@ export class MeController {
   }
 
   @Patch()
-  async updateProfile(
+  updateProfile(
     @CurrentCustomer() customer: Customer,
     @Body({ schema: updateProfileSchema }) body: UpdateProfileInput,
   ): Promise<CustomerView> {
-    await this.customers.update({ id: customer.id }, { name: body.name })
-
-    return toCustomerView(
-      { ...customer, name: body.name },
-      this.config.get('ADMIN_PHONES', { infer: true }),
-    )
+    return this.customers.rename(customer, body.name)
   }
 
   /** «Скачать мои данные»: the account's own data as one JSON file. */
