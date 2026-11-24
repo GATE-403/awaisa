@@ -93,7 +93,8 @@ export const LocationPicker = ({ value, onChange, target = null }: LocationPicke
       />
       <span className={styles.pin} aria-hidden='true' />
       <button type='button' className={styles.locate} onClick={locate}>
-        <NavigationArrow aria-hidden />I am here
+        <NavigationArrow aria-hidden />
+        {t`I am here`}
       </button>
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { ph } from '@lingui/core/macro'
+import { ph, plural } from '@lingui/core/macro'
 import { Trans, useLingui } from '@lingui/react/macro'
 import { useState } from 'react'
 import { useSession } from '@/entities/session'
@@ -10,7 +10,6 @@ import type { Business, OnlineSubscriptionPlan } from '@/shared/api/types'
 import { useFormat } from '@/shared/i18n'
 import { localizePath } from '@/shared/i18n/locales'
 import { useLocale } from '@/shared/i18n/navigation'
-import { pluralize } from '@/shared/lib/plural'
 import { Sheet } from '@/shared/ui/Sheet/Sheet'
 import sheet from '@/shared/ui/Sheet/Sheet.module.css'
 
@@ -94,7 +93,7 @@ export const SubscriptionSheet = ({ business, plan, onClose }: SubscriptionSheet
                 <Trans>Valid for</Trans>
               </span>
               <span className={sheet.rowControl}>
-                {pluralize(plan.validDays, ['day', 'days'])} from payment
+                {t`${plural(plan.validDays, { one: '# day', other: '# days' })} from payment`}
               </span>
             </div>
             <div className={sheet.row}>

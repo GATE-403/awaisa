@@ -127,7 +127,7 @@ export const GiftCertificateSheet = ({
         </section>
 
         <section className={sheet.group} aria-label={t`To`}>
-          <SectionCaption>To</SectionCaption>
+          <SectionCaption>{t`To`}</SectionCaption>
           <div className={sheet.list}>
             <label className={sheet.row}>
               <span className={sheet.rowLabel}>
@@ -154,7 +154,7 @@ export const GiftCertificateSheet = ({
                   type='tel'
                   inputMode='tel'
                   aria-label={t`Recipient’s phone`}
-                  placeholder='optional'
+                  placeholder={t`optional`}
                   autoComplete='off'
                   value={recipientPhone}
                   onValueChange={(value) => setRecipientPhone(maskPhoneInput(value))}

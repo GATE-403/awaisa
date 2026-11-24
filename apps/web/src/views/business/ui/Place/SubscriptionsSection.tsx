@@ -1,11 +1,11 @@
 'use client'
 
-import { Trans } from '@lingui/react/macro'
+import { plural } from '@lingui/core/macro'
+import { Trans, useLingui } from '@lingui/react/macro'
 import { CaretRight } from '@phosphor-icons/react/ssr'
 import { useState } from 'react'
 import type { Business, OnlineSubscriptionPlan } from '@/shared/api/types'
 import { useFormat } from '@/shared/i18n'
-import { pluralize } from '@/shared/lib/plural'
 import styles from './Place.module.css'
 import { SubscriptionSheet } from './SubscriptionSheet'
 import own from './Subscriptions.module.css'
@@ -18,6 +18,7 @@ interface SubscriptionsSectionProps {
 // «Memberships»: the plans the owner sells online, as rows right on the page (what, for how long,
 // the price and what it saves); a row opens the purchase.
 export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionProps) => {
+  const { t } = useLingui()
   const format = useFormat()
   const [chosen, setChosen] = useState<OnlineSubscriptionPlan | null>(null)
   if (plans.length === 0) return null
@@ -40,15 +41,17 @@ export const SubscriptionsSection = ({ business, plans }: SubscriptionsSectionPr
                   <span className={own.title}>{plan.title}</span>
                   <span className={own.meta}>
                     {[
-                      pluralize(plan.visits, ['visit', 'visits']),
-                      plan.serviceName ?? 'any service',
-                      pluralize(plan.validDays, ['day', 'days']),
+                      t`${plural(plan.visits, { one: '# visit', other: '# visits' })}`,
+                      plan.serviceName ?? t`any service`,
+                      t`${plural(plan.validDays, { one: '# day', other: '# days' })}`,
                     ].join(' · ')}
                   </span>
                 </span>
                 <span className={own.money}>
                   <span className={own.price}>{format.price(plan.price)}</span>
-                  {saving > 0 && <span className={own.saving}>save {format.price(saving)}</span>}
+                  {saving > 0 && (
+                    <span className={own.saving}>{t`save ${format.price(saving)}`}</span>
+                  )}
                 </span>
                 <CaretRight className={own.chevron} aria-hidden />
               </button>
