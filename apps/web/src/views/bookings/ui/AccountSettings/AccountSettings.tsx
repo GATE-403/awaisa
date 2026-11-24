@@ -34,6 +34,7 @@ import type { MasterPlace } from '@/shared/api/types'
 import { useT } from '@/shared/i18n'
 import { formatPhone } from '@/shared/lib/formatPhone'
 import { useTheme } from '@/shared/lib/hooks/useTheme'
+import { saveFile } from '@/shared/lib/share'
 import type { Theme } from '@/shared/lib/theme'
 import { HoldButton } from '@/shared/ui/HoldButton/HoldButton'
 import { SectionCaption } from '@/shared/ui/SectionCaption/SectionCaption'
@@ -143,22 +144,8 @@ export const AccountSettings = ({ isTitleHidden = false }: AccountSettingsProps)
       const file = new File([blob], `awaisa-${data.exportedAt.slice(0, 10)}.json`, {
         type: 'application/json',
       })
-      const isTouch = window.matchMedia('(pointer: coarse)').matches
-      if (isTouch && navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Мои данные Awaisa' })
-        return
-      }
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = file.name
-      document.body.append(link)
-      link.click()
-      link.remove()
-      // Safari starts the download after this tick: revoking at once can cancel it.
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+      await saveFile(file, 'Мои данные Awaisa')
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
       toast.show({ title: 'Не скачалось', description: getErrorMessage(error), type: 'error' })
     } finally {
       setIsExporting(false)

@@ -1,6 +1,7 @@
 import type { BusinessAttention, BusinessLink } from '@/shared/api/types'
 import type { Translate } from '@/shared/i18n'
 import { pluralize, pluralWord } from '@/shared/lib/plural'
+import { isArray, onlyStrings, readJson, writeJson } from '@/shared/lib/storage'
 
 // «Мои бизнесы»: what waits in a business, the order of the list and its search (pure,
 // unit-tested in `tests/businessList.test.ts`).
@@ -97,20 +98,11 @@ const filterBusinesses = (businesses: BusinessLink[], query: string) => {
 /** A platform admin's own businesses, apart from every other one they can open. */
 const isOwnBusiness = (business: BusinessLink) => business.role !== 'admin'
 
-const readRecent = (): string[] => {
-  try {
-    const value: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]')
-    return Array.isArray(value) ? value.filter((item) => typeof item === 'string') : []
-  } catch {
-    return []
-  }
-}
+const readRecent = (): string[] => onlyStrings(readJson(RECENT_KEY, isArray))
 
 const rememberOpened = (slug: string) => {
-  try {
-    const next = [slug, ...readRecent().filter((item) => item !== slug)].slice(0, RECENT_LIMIT)
-    localStorage.setItem(RECENT_KEY, JSON.stringify(next))
-  } catch {}
+  const next = [slug, ...readRecent().filter((item) => item !== slug)].slice(0, RECENT_LIMIT)
+  writeJson(RECENT_KEY, next)
 }
 
 type TodaySummary = {

@@ -1,3 +1,5 @@
+import { readJson, writeJson } from '@/shared/lib/storage'
+
 // Where a feed's secret address goes: the system calendar (webcal), Google Calendar, and this
 // device's memory: the API keeps only the address's hash, so it cannot show it again.
 
@@ -17,14 +19,10 @@ const toGoogleCalendar = (url: string) =>
 
 const scopeKey = ({ kind, slug }: FeedScope) => `${kind}:${slug}`
 
-const readAll = (): Record<string, SavedFeed> => {
-  try {
-    const saved: unknown = JSON.parse(window.localStorage.getItem(KEY) ?? '{}')
-    return saved && typeof saved === 'object' ? (saved as Record<string, SavedFeed>) : {}
-  } catch {
-    return {}
-  }
-}
+const isRecord = (value: unknown): value is Record<string, SavedFeed> =>
+  typeof value === 'object' && value !== null
+
+const readAll = (): Record<string, SavedFeed> => readJson(KEY, isRecord) ?? {}
 
 /** The address made on this device, while it is still the feed's current one. */
 const readSavedFeed = (scope: FeedScope, createdAt: string | null) => {
@@ -33,12 +31,9 @@ const readSavedFeed = (scope: FeedScope, createdAt: string | null) => {
   return saved?.createdAt === createdAt ? saved.url : null
 }
 
+// Private mode: the address lasts while the sheet is open.
 const saveFeed = (scope: FeedScope, feed: SavedFeed) => {
-  try {
-    window.localStorage.setItem(KEY, JSON.stringify({ ...readAll(), [scopeKey(scope)]: feed }))
-  } catch {
-    // Private mode: the address lasts while the sheet is open.
-  }
+  writeJson(KEY, { ...readAll(), [scopeKey(scope)]: feed })
 }
 
 export type { FeedScope }

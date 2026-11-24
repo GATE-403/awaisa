@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from 'react'
 import type { WaitlistEntry } from '@/shared/api/types'
+import { isArray, parseJson, readText, writeJson } from '@/shared/lib/storage'
 
 // Guests keep their waitlist entries on the device, like their bookings: the token lets them
 // see whether a time opened up and leave the list.
@@ -10,14 +11,6 @@ type StoredWaitlistEntry = { id: string; token: string; snapshot: WaitlistEntry 
 const STORAGE_KEY = 'awaisa:waitlist:v1'
 const CHANGE_EVENT = 'awaisa:waitlist-change'
 const EMPTY: StoredWaitlistEntry[] = []
-
-const readRaw = () => {
-  try {
-    return window.localStorage.getItem(STORAGE_KEY)
-  } catch {
-    return null
-  }
-}
 
 const isStored = (value: unknown): value is StoredWaitlistEntry =>
   typeof value === 'object' &&
@@ -31,24 +24,15 @@ let cached: StoredWaitlistEntry[] = EMPTY
 
 // useSyncExternalStore needs the same array for the same storage value.
 const readStored = () => {
-  const raw = readRaw()
+  const raw = readText(STORAGE_KEY)
   if (raw === cachedRaw) return cached
   cachedRaw = raw
-  try {
-    const value: unknown = raw ? JSON.parse(raw) : []
-    cached = Array.isArray(value) ? value.filter(isStored) : EMPTY
-  } catch {
-    cached = EMPTY
-  }
+  cached = parseJson(raw, isArray)?.filter(isStored) ?? EMPTY
   return cached
 }
 
 const write = (entries: StoredWaitlistEntry[]) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-  } catch {
-    return
-  }
+  if (!writeJson(STORAGE_KEY, entries)) return
   window.dispatchEvent(new Event(CHANGE_EVENT))
 }
 

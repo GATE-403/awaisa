@@ -4,6 +4,7 @@ import { useToast } from '@awaisa/ui/Toast'
 import { LinkSimple } from '@phosphor-icons/react/ssr'
 import { inviteUrl } from '@/features/invite'
 import { useT } from '@/shared/i18n'
+import { shareLink } from '@/shared/lib/share'
 import { GlyphButton } from '@/shared/ui/GlyphGroup/GlyphGroup'
 
 interface ShareProfileProps {
@@ -25,20 +26,14 @@ export const ShareProfile = ({ name, address, isOwn }: ShareProfileProps) => {
     const text = isOwn
       ? t('Записывайся к мастерам через Awaisa — вот мой профиль')
       : t('{name} в Awaisa', { name })
-    try {
-      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
-        await navigator.share({ title: text, text, url })
-        return
-      }
-      await navigator.clipboard.writeText(url)
+    const result = await shareLink({ title: text, text, url, isTouchOnly: true })
+    if (result === 'copied') {
       toast.show({
         title: isOwn ? t('Ссылка-приглашение скопирована') : t('Ссылка на профиль скопирована'),
         type: 'success',
       })
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
-      toast.show({ title: t('Не получилось поделиться'), type: 'error' })
     }
+    if (result === 'failed') toast.show({ title: t('Не получилось поделиться'), type: 'error' })
   }
 
   return (
